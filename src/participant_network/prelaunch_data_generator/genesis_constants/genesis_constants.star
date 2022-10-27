@@ -5,7 +5,7 @@ def new_prefunded_account(address, private_key) :
 #  1) Installing Wagyu: https://github.com/AleoHQ/wagyu
 #  2) Running `wagyu ethereum import-hd -m MNEMONIC_FROM_GENESIS -d PREFUNDED_ACCOUNT_DERIVATION_PATH`
 #  3) Copying the outputted information
-pre_funded_accounts = [
+PRE_FUNDED_ACCOUNTS = [
 	# UTC--2021-12-22T19-14-08.590377700Z--878705ba3f8bc32fcf7f4caa1a35e72af65cf766
 	# m/44'/60'/0'/0/0
 new_prefunded_account(
