@@ -1,4 +1,4 @@
 
 
 def main():
-	print("Hello World!")
+	print("This should work if CI is running correctly")
