@@ -12,11 +12,8 @@ jobs:
   run_startosis:
     executor: ubuntu_vm
     steps:
-      - run: echo "${DOCKER_PASSWORD}" | docker login -u ${DOCKER_USERNAME} --password-stdin
 
       # Set up Kurtosis
-      - attach_workspace:
-          at: "<< pipeline.parameters.workspace-with-cli-binary-and-images-mountpoint >>"
       - run: |
           echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
           sudo apt update
