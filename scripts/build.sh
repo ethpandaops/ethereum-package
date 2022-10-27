@@ -8,21 +8,9 @@ root_dirpath="$(dirname "${script_dirpath}")"
 
 
 # ==================================================================================================
-#                                             Constants
-# ==================================================================================================
-BUILD_SCRIPT_RELATIVE_FILEPATHS=(
-    "golang/scripts/build.sh"
-    "typescript/scripts/build.sh"
-)
-
-
-# ==================================================================================================
 #                                             Main Logic
 # ==================================================================================================
-for build_script_rel_filepath in "${BUILD_SCRIPT_RELATIVE_FILEPATHS[@]}"; do
-    build_script_abs_filepath="${root_dirpath}/${build_script_rel_filepath}"
-    if ! bash "${build_script_abs_filepath}"; then
-        echo "Error: Build script '${build_script_abs_filepath}' failed" >&2
-        exit 1
-    fi
-done
+
+if ! bash "kurtosis" "startosis" "exec" "${root_dirpath}"; then
+    echo "Error: running the startosis script"
+fi
