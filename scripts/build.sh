@@ -11,6 +11,6 @@ root_dirpath="$(dirname "${script_dirpath}")"
 #                                             Main Logic
 # ==================================================================================================
 
-if ! bash "kurtosis" "startosis" "exec" "${root_dirpath}"; then
+if ! "kurtosis" "startosis" "exec" "${root_dirpath}"; then
     echo "Error: running the startosis script"
 fi
