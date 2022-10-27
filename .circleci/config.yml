@@ -1,16 +1,7 @@
 version: 2.1
 
 orbs:
-  npm-publisher: uraway/npm-publisher@0.2.0
   kurtosis-docs-checker: kurtosis-tech/docs-checker@0.2.0
-
-parameters:
-  go-version:
-    type: string
-    default: 1.16
-  node-version:
-    type: string
-    default: 16.13.0
 
 # NOTE: Because CircleCI jobs run on separate machines from each other, we duplicate steps (like checkout) between jobs. This is because doing the "correct" DRY
 #  refactoring of, "one job for checkout, one job for build Docker image, etc." would require a) persisting files between jobs and b) persisting Docker images between
@@ -18,51 +9,29 @@ parameters:
 #  images), so we run everything inside a single job.
 # See also: https://discuss.circleci.com/t/can-docker-images-be-preserved-between-jobs-in-a-workflow-without-a-manual-load-save/23388/12
 jobs:
-  check_golang:
-    docker:
-      - image: "cimg/go:<< pipeline.parameters.go-version>>"
+  run_startosis:
+    executor: ubuntu_vm
     steps:
+      - run: echo "${DOCKER_PASSWORD}" | docker login -u ${DOCKER_USERNAME} --password-stdin
+
+      # Set up Kurtosis
+      - attach_workspace:
+          at: "<< pipeline.parameters.workspace-with-cli-binary-and-images-mountpoint >>"
+      - run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+
       - checkout
 
-      # If the only changes are to the docs, don't run the slow (and expensive) code checks
-      # `git diff --exit-code` returns 0 exit code if no changes, and 1 if changes
-      - run: |
-          if git --no-pager diff --exit-code origin/develop...HEAD -- . ':!docs'; then
-            circleci-agent step halt
-          fi
+      # We don't send metrics to avoid polluting our logs
+      - run: kurtosis config init dont-send-metrics
 
-      # The 'git config' and 'go env' steps are to allow Go to read modules from our private Github repos
-      # The KURTOSISBOT_GITHUB_TOKEN is a secret provided at CI build time
-      - run: |
-          git config --global url."https://${KURTOSISBOT_GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
-          go env -w "GOPRIVATE=github.com/kurtosis-tech/*"
-          golang/scripts/build.sh
+      - run: kurtosis engine restart
 
-  check_typescript:
-    docker:
-      - image: "cimg/node:<< pipeline.parameters.node-version>>"
-    steps:
-      - checkout
+      - run: kurtosis startosis exec .
 
-      # If the only changes are to the docs, don't run the slow (and expensive) code checks
-      # `git diff --exit-code` returns 0 exit code if no changes, and 1 if changes
-      - run: |
-          if git --no-pager diff --exit-code origin/develop...HEAD -- . ':!docs'; then
-            circleci-agent step halt
-          fi
-
-      - run: typescript/scripts/build.sh
-
-  publish_typescript:
-    docker:
-      - image: "cimg/node:<< pipeline.parameters.node-version>>"
-    steps:
-      - checkout
-      - run: typescript/scripts/build.sh
-      - npm-publisher/publish-from-package-version:
-          package-path: typescript
-          publish-token-variable: NPMJS_AUTH_TOKEN
-
+  
 workflows:
   build:
     jobs:
@@ -74,7 +43,7 @@ workflows:
               ignore:
                 - develop
                 - master
-      - check_golang:
+      - run_startosis:
           context:
             # This pulls in KurtosisBot's Github token, so that we can read from our private repos
             - github-user
@@ -83,22 +52,3 @@ workflows:
               ignore:
                 - develop
                 - master
-      - check_typescript:
-          filters:
-            branches:
-              ignore:
-                - develop
-                - master
-      # -- End PR check jobs ---------------------------------------
-
-      # -- Artifact-publishing jobs --------------------------------
-      # TODO UNCOMMENT WHEN READY
-      #- publish_typescript:
-      #    context:
-      #      - npmjs-user
-      #    filters:
-      #      branches:
-      #        ignore: /.*/
-      #      tags:
-      #        only: /^[0-9]+\.[0-9]+\.[0-9]+$/
-      # -- End artifact-publishing jobs ----------------------------
