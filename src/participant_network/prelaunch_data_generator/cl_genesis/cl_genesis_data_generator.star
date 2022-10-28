@@ -61,6 +61,7 @@ def generate_cl_genesis_data(
 	)
 
 	# TODO add a remove_service call that removes the service_id, before the function returns
+	# do that when https://github.com/kurtosis-tech/kurtosis/issues/244 is closed
 
 	all_dirpaths_to_create_on_generator = [
 		CONFIG_DIRPATH_ON_GENERATOR,
