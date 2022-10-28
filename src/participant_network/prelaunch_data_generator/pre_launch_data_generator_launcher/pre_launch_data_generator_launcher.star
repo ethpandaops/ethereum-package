@@ -28,7 +28,7 @@ def get_service_config(
 	files_artifact_mountpoints,
 ):
 	return = struct(
-		# used ports is supposed to be empty
+		# TODO used ports is supposed to be empty
 		used_ports = {},
 		container_image_name = IMAGE,
 		entry_point_args = ENTRYPOINT_ARGS,
