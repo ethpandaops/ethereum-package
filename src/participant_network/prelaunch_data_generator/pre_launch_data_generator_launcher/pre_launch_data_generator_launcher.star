@@ -9,7 +9,7 @@ ENTRYPOINT_ARGS = [
 ]
 
 # Launches a prelaunch data generator IMAGE, for use in various of the genesis generation
-def LaunchPrelaunchDataGenerator(
+def launch_prelaunch_data_generator(
 	files_artifact_mountpoints,
 ):
 
