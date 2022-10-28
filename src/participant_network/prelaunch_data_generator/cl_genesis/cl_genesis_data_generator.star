@@ -80,7 +80,7 @@ def generate_cl_genesis_data(
 		(" && ").join(all_dirpath_creation_commands),
 	]
 
-	exec(service_id, dirCreationCmd)
+	exec(service_id, dirCreationCmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 
 	# Copy files to output
@@ -96,7 +96,7 @@ def generate_cl_genesis_data(
 			filepath_on_generator,
 			OUTPUT_DIRPATH_ON_GENERATOR,
 		]
-		exec(service_id, cmd)
+		exec(service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	# Generate files that need dynamic content
 	content_to_write_to_output_filename = {
@@ -113,7 +113,7 @@ def generate_cl_genesis_data(
 				destFilepath,
 			)
 		]
-		exec(service_id, cmd)
+		exec(service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 		
 
 	cl_genesis_generation_cmd_args = [
@@ -126,7 +126,7 @@ def generate_cl_genesis_data(
 		"--state-output", path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_STATE_FILENAME)
 	]
 
-	exec(service_id, cl_genesis_generation_cmd_args)
+	exec(service_id, cl_genesis_generation_cmd_args, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	cl_genesis_data_artifact_uuid = store_files_on_service(service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
