@@ -60,12 +60,7 @@ def generate_cl_genesis_data(
 		},
 	)
 
-	# defer func() {
-	# 	serviceId = serviceCtx.GetServiceID()
-	# 	if err = enclaveCtx.RemoveService(serviceId, 0); err != nil {
-	# 		logrus.Warnf("Tried to remove prelaunch data generator service '%v', but doing so threw an error:\n%v", serviceId, err)
-	# 	}
-	# }()
+	# TODO add a remove_service call that removes the service_id, before the function returns
 
 	all_dirpaths_to_create_on_generator = [
 		CONFIG_DIRPATH_ON_GENERATOR,
