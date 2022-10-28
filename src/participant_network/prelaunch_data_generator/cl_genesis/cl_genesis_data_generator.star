@@ -52,15 +52,14 @@ def generate_cl_genesis_data(
 	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
 	# TODO Make this the actual data generator
-	service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
-		enclaveCtx,
+	launcher_service_id = launch_prelaunch_data_generator(
 		{
 			genesis_generation_config_artifact_uuid:  CONFIG_DIRPATH_ON_GENERATOR,
 			el_genesis_data.files_artifact_uuid: EL_GENESIS_DIRPATH_ON_GENERATOR,
 		},
 	)
 
-	# TODO add a remove_service call that removes the service_id, before the function returns
+	# TODO add a remove_service call that removes the launcher_service_id, before the function returns
 	# do that when https://github.com/kurtosis-tech/kurtosis/issues/244 is closed
 
 	all_dirpaths_to_create_on_generator = [
@@ -71,7 +70,6 @@ def generate_cl_genesis_data(
 	all_dirpath_creation_commands = []
 	for dirpath_to_create_on_generator in all_dirpaths_to_create_on_generator:
 		all_dirpath_creation_commands.append(
-			all_dirpath_creation_commands,
 			"mkdir -p {0}".format(dirpathToCreateOnGenerator))
 
 	dir_creation_cmd = [
@@ -80,7 +78,7 @@ def generate_cl_genesis_data(
 		(" && ").join(all_dirpath_creation_commands),
 	]
 
-	exec(service_id, dirCreationCmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	exec(launcher_service_id, dir_creation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 
 	# Copy files to output
@@ -96,7 +94,7 @@ def generate_cl_genesis_data(
 			filepath_on_generator,
 			OUTPUT_DIRPATH_ON_GENERATOR,
 		]
-		exec(service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+		exec(launcher_service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	# Generate files that need dynamic content
 	content_to_write_to_output_filename = {
@@ -113,7 +111,7 @@ def generate_cl_genesis_data(
 				destFilepath,
 			)
 		]
-		exec(service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+		exec(launcher_service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 		
 
 	cl_genesis_generation_cmd_args = [
@@ -126,9 +124,9 @@ def generate_cl_genesis_data(
 		"--state-output", path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_STATE_FILENAME)
 	]
 
-	exec(service_id, cl_genesis_generation_cmd_args, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	exec(launcher_service_id, cl_genesis_generation_cmd_args, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	cl_genesis_data_artifact_uuid = store_files_on_service(service_id, OUTPUT_DIRPATH_ON_GENERATOR)
+	cl_genesis_data_artifact_uuid = store_files_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
 	jwt_secret_rel_filepath = path_join(
 		path_base(OUTPUT_DIRPATH_ON_GENERATOR),
