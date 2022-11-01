@@ -12,10 +12,8 @@ def launch_participant_network(network_params):
 		network_params.num_validator_keys_per_node
 	)
 
-	# TODO Remove this later
-	print("CL Validator Key Store Result")
-	for key in dir(keystore_result):
-		print("{0} -> {1}".format(key, getattr(keystore_result, key)))
+	
+	print(json.indent(json.encode(keystore_result)))
 
 	genesis_timestamp = time.now().unix
 
@@ -29,11 +27,7 @@ def launch_participant_network(network_params):
 	)
 
 
-	# TODO Remove this later
-	print("EL Generation Result")
-	for key in dir(el_genesis_data):
-		print("{0} -> {1}".format(key, getattr(el_genesis_data, key)))
-
+	print(json.indent(json.encode(el_genesis_data)))
 
 	print("Generating CL data")
 	genesis_generation_config_yml_template = read_file("github.com/kurtosis-tech/eth2-module/static_files/genesis-generation-config/cl/config.yaml.tmpl")
@@ -52,4 +46,4 @@ def launch_participant_network(network_params):
 
 	)
 
-	print("Success " + str(cl_data))
+	print(json.indent(json.encode(cl_data)))
