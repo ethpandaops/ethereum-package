@@ -14,7 +14,9 @@ def launch_participant_network(network_params):
 
 	print("Success " + keystore_result)
 
-	genesis_timestamp = time.unix()
+	# Use actual time instead
+	genesis_timestamp = 1667320256
+	# genesis_timestamp = time.now().unix
 
 	print("Generating EL data")
 	el_genesis_generation_config_template = read_file("github.com/kurtosis-tech/eth2-module/static_files/genesis-generation-config/el/genesis-config.yaml.tmpl")
