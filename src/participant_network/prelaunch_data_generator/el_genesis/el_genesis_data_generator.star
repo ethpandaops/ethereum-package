@@ -87,7 +87,7 @@ def generate_el_genesis_data(
 		cmd_to_execute = [
 			"bash",
 			"-c",
-			" ".join(all_genesis_generation_cmds)
+			" ".join(cmd)
 		]
 
 		exec(launcher_service_id, cmd_to_execute, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
