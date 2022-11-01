@@ -12,7 +12,10 @@ def launch_participant_network(network_params):
 		network_params.num_validator_keys_per_node
 	)
 
-	print("Success " + str(keystore_result))
+	# TODO Remove this later
+	print("CL Validator Key Store Result")
+	for key in dir(keystore_result):
+		print("{0} -> {1}".format(key, getattr(keystore_result, key)))
 
 	genesis_timestamp = time.now().unix
 
@@ -25,7 +28,11 @@ def launch_participant_network(network_params):
 		network_params.deposit_contract_address
 	)
 
-	print("Success " + str(el_genesis_data))
+
+	# TODO Remove this later
+	print("EL Generation Result")
+	for key in dir(el_genesis_data):
+		print("{0} -> {1}".format(key, getattr(el_genesis_data, key)))
 
 
 	print("Generating CL data")

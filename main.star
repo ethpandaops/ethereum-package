@@ -3,9 +3,8 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant_n
 
 
 def main():
-	print("This should work if CI is running correctly")
 	network_params = new_network_params()
-	print("Launch participant network")
+	print("Launching participant network")
 	launch_participant_network(network_params)
 
 def new_network_params():
