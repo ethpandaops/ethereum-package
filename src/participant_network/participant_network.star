@@ -12,7 +12,7 @@ def launch_participant_network(network_params):
 		network_params.num_validator_keys_per_node
 	)
 
-	pritn("Success " + keystore_result)
+	print("Success " + keystore_result)
 
 	genesis_timestamp = time.unix()
 
