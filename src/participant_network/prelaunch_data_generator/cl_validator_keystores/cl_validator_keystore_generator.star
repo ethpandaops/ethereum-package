@@ -1,7 +1,7 @@
-load("github.com/kurtosis-tech/eth2-merge-startosis-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher", "launch_prelaunch_data_generator")
-load("github.com/kurtosis-tech/eth2-merge-startosis-module/src/shared_utils/shared_utils.star", "path_join", "path_base")
-load("github.com/kurtosis-tech/eth2-merge-startosis-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/keystore_files.star", "new_keystore_files")
-load("github.com/kurtosis-tech/eth2-merge-startosis-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/generate_keystores_result.star", "new_generate_keystores_result")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher", "launch_prelaunch_data_generator")
+load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "path_join", "path_base")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/keystore_files.star", "new_keystore_files")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/generate_keystores_result.star", "new_generate_keystores_result")
 
 
 NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores"
