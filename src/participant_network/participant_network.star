@@ -31,7 +31,7 @@ def launch_participant_network(network_params):
 	print("Generating CL data")
 	genesis_generation_config_yml_template = read_file("github.com/kurtosis-tech/eth2-module/static_files/genesis-generation-config/cl/config.yaml.tmpl")
 	genesis_generation_mnemonics_yml_template = read_file("github.com/kurtosis-tech/eth2-module/static_files/genesis-generation-config/cl/mnemonics.yaml.tmpl")
-	totalNumberOfValidatorKeys = network_params.num_validator_keys_per_node * num_participants
+	total_number_of_validator_keys = network_params.num_validator_keys_per_node * num_participants
 	cl_data = generate_cl_genesis_data(
 		genesis_generation_config_yml_template,
 		genesis_generation_mnemonics_yml_template,
@@ -41,6 +41,7 @@ def launch_participant_network(network_params):
 		network_params.deposit_contract_address,
 		network_params.seconds_per_slot,
 		network_params.preregistered_validator_keys_mnemonic,
+		total_number_of_validator_keys
 
 	)
 

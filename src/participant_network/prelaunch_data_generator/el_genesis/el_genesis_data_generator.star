@@ -82,7 +82,8 @@ def generate_el_genesis_data(
 	for output_filename, generation_cmd in all_genesis_generation_cmds.items():
 		cmd = generation_cmd(genesis_config_filepath_on_generator)
 		output_filepath_on_generator = path_join(OUTPUT_DIRPATH_ON_GENERATOR, output_filename)
-		cmd.append(">", output_filepath_on_generator)
+		cmd.append(">")
+		cmd.append(output_filepath_on_generator)
 		cmd_to_execute = [
 			"bash",
 			"-c",
@@ -106,7 +107,7 @@ def generate_el_genesis_data(
 		)
 	]
 
-	exec(launcher_service_id, jwt_secret_filepath_on_generator, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	exec(launcher_service_id, jwt_secret_generation_cmd_args, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	elGenesisDataArtifactUuid = store_file_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
