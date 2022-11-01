@@ -1,4 +1,5 @@
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher", "launch_prelaunch_data_generator")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star", "launch_prelaunch_data_generator")
+
 load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "path_join", "path_base")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/keystore_files.star", "new_keystore_files")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/generate_keystores_result.star", "new_generate_keystores_result")
@@ -95,13 +96,13 @@ def generate_cl_validator_keystores(
 		"sh",
 		"-c",
 		"echo '{0}' > {1}".format(
-			prysmPassword,
+			PRYSM_PASSWORD,
 			PRYSM_PASSWORD_FILEPATH_ON_GENERATOR,
 		),
 	]
 	exec(service_id, write_prysm_password_file_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	prysm_password_artifact_uuid = store_files_from_service(service_id, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR)
+	prysm_password_artifact_uuid = store_file_from_service(service_id, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR)
 
 	result = new_generate_keystores_result(
 		prysm_password_artifact_uuid,
