@@ -78,7 +78,7 @@ def generate_el_genesis_data(
 	exec(launcher_service_id, dir_creation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	genesis_config_filepath_on_generator = path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_FILENAME)
-	genesis_filename_to_relative_filepath_in_artifact = map[string]string{}
+	genesis_filename_to_relative_filepath_in_artifact = {}
 	for output_filename, generation_cmd in all_genesis_generation_cmds.items():
 		cmd = generation_cmd(genesis_config_filepath_on_generator)
 		output_filepath_on_generator = path_join(OUTPUT_DIRPATH_ON_GENERATOR, output_filename)

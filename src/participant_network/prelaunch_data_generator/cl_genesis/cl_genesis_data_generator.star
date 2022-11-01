@@ -7,7 +7,7 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_dat
 EL_GENESIS_DIRPATH_ON_GENERATOR = "/el-genesis"
 
 CONFIG_DIRPATH_ON_GENERATOR = "/config"
-GENESIS_CONFIG_YML_FILENAME = "config.yaml" // WARNING: Do not change this! It will get copied to the CL genesis data, and the CL clients are hardcoded to look for this filename
+GENESIS_CONFIG_YML_FILENAME = "config.yaml" # WARNING: Do not change this! It will get copied to the CL genesis data, and the CL clients are hardcoded to look for this filename
 MNEMONICS_YML_FILENAME = "mnemonics.yaml"
 OUTPUT_DIRPATH_ON_GENERATOR = "/output"
 TRANCHES_DIRANME = "tranches"
@@ -24,31 +24,31 @@ SUCCESSFUL_EXEC_CMD_EXIT_CODE = 0
 
 
 def generate_cl_genesis_data(
-        genesis_generation_config_yml_template,
-        genesis_generation_mnemonics_yml_template,
-        el_genesis_data,
-        genesis_unix_timestamp,
-        network_id,
-        deposit_contract_address,
-        seconds_per_slot,
-        preregistered_validator_keys_mnemonic,
-        total_num_validator_keys_to_preregister):
+		genesis_generation_config_yml_template,
+		genesis_generation_mnemonics_yml_template,
+		el_genesis_data,
+		genesis_unix_timestamp,
+		network_id,
+		deposit_contract_address,
+		seconds_per_slot,
+		preregistered_validator_keys_mnemonic,
+		total_num_validator_keys_to_preregister):
 
-    template_data = new_cl_genesis_config_template_data{
-        network_id,
-        seconds_per_slot,
-        genesis_unix_timestamp,
-        total_num_validator_keys_to_preregister,
-        preregistered_validator_keys_mnemonic,
-        deposit_contract_address,
-    }
+	template_data = new_cl_genesis_config_template_data(
+		network_id,
+		seconds_per_slot,
+		genesis_unix_timestamp,
+		total_num_validator_keys_to_preregister,
+		preregistered_validator_keys_mnemonic,
+		deposit_contract_address,
+	)
 
 	genesis_generation_mnemonics_template_and_data = new_template_and_data(genesis_generation_mnemonics_yml_template, template_data)
 	genesis_generation_config_template_and_data = new_template_and_data(genesis_generation_config_yml_template, template_data)
 
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[MNEMONICS_YML_FILENAME] = genesis_generation_mnemonics_template_and_data
-	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_YML_FILENAME] = genesisGenerationConfigTemplateAndData
+	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_YML_FILENAME] = genesis_generation_config_template_and_data
 
 	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
@@ -71,7 +71,7 @@ def generate_cl_genesis_data(
 	all_dirpath_creation_commands = []
 	for dirpath_to_create_on_generator in all_dirpaths_to_create_on_generator:
 		all_dirpath_creation_commands.append(
-			"mkdir -p {0}".format(dirpathToCreateOnGenerator))
+			"mkdir -p {0}".format(dirpath_to_create_on_generator))
 
 	dir_creation_cmd = [
 		"bash",
@@ -84,8 +84,8 @@ def generate_cl_genesis_data(
 
 	# Copy files to output
 	all_filepaths_to_copy_to_ouptut_directory = [
-		path_join(config_dirpath_on_generator, GENESIS_CONFIG_YML_FILENAME),
-		path_join(config_dirpath_on_generator, MNEMONICS_YML_FILENAME),
+		path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_YML_FILENAME),
+		path_join(CONFIG_DIRPATH_ON_GENERATOR, MNEMONICS_YML_FILENAME),
 		path_join(EL_GENESIS_DIRPATH_ON_GENERATOR, el_genesis_data.jwt_secret_relative_filepath),
 	]
 
@@ -153,11 +153,11 @@ def generate_cl_genesis_data(
 
 
 def new_cl_genesis_config_template_data(network_id, seconds_per_slot, unix_timestamp, num_validator_keys_to_preregister, preregistered_validator_keys_mnemonic, deposit_contract_address):
-    return {
-        "NetworkId": network_id,
-        "SecondsPerSlot": seconds_per_slot,
-        "UnixTimestamp": unix_timestamp,
-        "NumValidatorKeysToPreregister": num_validator_keys_to_preregister,
-        "PreregisteredValidatorKeysMnemonic": preregistered_validator_keys_mnemonic,
-        "DepositContractAddress": deposit_contract_address,
-    }
+	return {
+		"NetworkId": network_id,
+		"SecondsPerSlot": seconds_per_slot,
+		"UnixTimestamp": unix_timestamp,
+		"NumValidatorKeysToPreregister": num_validator_keys_to_preregister,
+		"PreregisteredValidatorKeysMnemonic": preregistered_validator_keys_mnemonic,
+		"DepositContractAddress": deposit_contract_address,
+	}

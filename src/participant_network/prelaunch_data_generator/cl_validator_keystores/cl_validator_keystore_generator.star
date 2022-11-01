@@ -68,7 +68,7 @@ def generate_cl_validator_keystores(
 		stop_index = stop_index + num_validators_per_node
 
 
-	command_str = " && ".Join(all_sub_command_strs)
+	command_str = " && ".join(all_sub_command_strs)
 
 	exec(service_id, ["sh", "-c", command_str], SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
