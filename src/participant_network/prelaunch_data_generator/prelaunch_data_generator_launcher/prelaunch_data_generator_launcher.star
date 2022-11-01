@@ -15,9 +15,9 @@ def launch_prelaunch_data_generator(
 
 	service_config = get_service_config(files_artifact_mountpoints)
 
-	service_id = "%v%v".format(
+	service_id = "{0}{1}".format(
 		SERVICE_ID_PREFIX,
-		time.now().unix,
+		time.now().unix_nano,
 	)
 
 	add_service(service_id, service_config)
