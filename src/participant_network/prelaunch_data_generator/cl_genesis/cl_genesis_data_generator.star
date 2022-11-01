@@ -127,7 +127,7 @@ def generate_cl_genesis_data(
 
 	exec(launcher_service_id, cl_genesis_generation_cmd_args, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	cl_genesis_data_artifact_uuid = store_files_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
+	cl_genesis_data_artifact_uuid = store_file_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
 	jwt_secret_rel_filepath = path_join(
 		path_base(OUTPUT_DIRPATH_ON_GENERATOR),

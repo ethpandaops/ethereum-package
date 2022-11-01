@@ -74,7 +74,7 @@ def generate_cl_validator_keystores(
 	# Store outputs into files artifacts
 	keystore_files = []
 	for idx, output_dirpath in enumerate(all_output_dirpaths):
-		artifact_uuid = store_files_from_service(service_id, output_dirpath)
+		artifact_uuid = store_file_from_service(service_id, output_dirpath)
 
 		# This is necessary because the way Kurtosis currently implements artifact-storing is
 		base_dirname_in_artifact = path_base(output_dirpath)

@@ -108,7 +108,7 @@ def generate_el_genesis_data(
 
 	exec(launcher_service_id, jwt_secret_filepath_on_generator, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	elGenesisDataArtifactUuid = store_files_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
+	elGenesisDataArtifactUuid = store_file_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
 	result = new_el_genesis_data(
 		elGenesisDataArtifactUuid,
