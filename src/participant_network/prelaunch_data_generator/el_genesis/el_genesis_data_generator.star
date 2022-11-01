@@ -35,7 +35,6 @@ def generate_el_genesis_data(
 		network_id,
 		deposit_contract_address,
 		genesis_unix_timestamp,
-		0 # set terminal difficulty to 0
 	)
 
 	genesis_config_file_template_and_data = new_template_and_data(genesis_generation_config_template, template_data)
@@ -123,10 +122,9 @@ def generate_el_genesis_data(
 	return result
 
 
-def genesis_generation_config_template_data(network_id, deposit_contract_address, unix_timestamp, total_terminal_difficulty):
+def genesis_generation_config_template_data(network_id, deposit_contract_address, unix_timestamp):
 	return {
 		"NetworkId": network_id,
 		"DepositContractAddress": deposit_contract_address,
 		"UnixTimestamp": unix_timestamp,
-		"TotalTerminalDifficulty": total_terminal_difficulty,
 	}

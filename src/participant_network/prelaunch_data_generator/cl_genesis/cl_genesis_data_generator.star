@@ -152,14 +152,11 @@ def generate_cl_genesis_data(
 
 
 
-def new_cl_genesis_config_template_data(network_id, seconds_per_slot, unix_timestamp, total_terminal_difficulty, altair_fork_epoch, merge_fork_epoch, num_validator_keys_to_preregister, preregistered_validator_keys_mnemonic, deposit_contract_address):
+def new_cl_genesis_config_template_data(network_id, seconds_per_slot, unix_timestamp, num_validator_keys_to_preregister, preregistered_validator_keys_mnemonic, deposit_contract_address):
     return {
         "NetworkId": network_id,
         "SecondsPerSlot": seconds_per_slot,
         "UnixTimestamp": unix_timestamp,
-        "TotalTerminalDifficulty": total_terminal_difficulty,
-        "AltairForkEpoch": altair_fork_epoch,
-        "MergeForkEpoch": merge_fork_epoch,
         "NumValidatorKeysToPreregister": num_validator_keys_to_preregister,
         "PreregisteredValidatorKeysMnemonic": preregistered_validator_keys_mnemonic,
         "DepositContractAddress": deposit_contract_address,
