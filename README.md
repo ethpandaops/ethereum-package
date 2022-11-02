@@ -9,11 +9,13 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 - [ ] Module IO (this is blocked on Startosis Args working)
 - [x] forkmon (this is blocked on CL clients running)
 - [x] prometheus (this is blocked on CL clients running)
-- [ ] grafana (this is blocked on prometheus running)
+- [x] grafana (this is blocked on prometheus running)
+- [ ] grafana needs an upload files endpoint in Startosis
 - [ ] testnet_verifier (this is blocked on CL/EL clients running)
 - [ ] transaction_spammer (this is blocked on EL clients running)
 - [ ] participant_network/participant_network
   - [ ] has most data generation things, needs to start EL/CL clients
+  - [ ] needs upload files to be implemented
 - [x] participant_network/participant
   - [x] pure POJO should be quick to implement NO BLOCKERS
 - [x] mev_boost participant_network/mev_boost NO BLOCKERS - removed some attributes that aren't used
