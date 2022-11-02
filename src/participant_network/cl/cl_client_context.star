@@ -5,5 +5,5 @@ def new_cl_client_context(client_name, enr, ip_addr, http_port_num, node_metrics
 		enr = enr,
 		ip_addr = ip_addr,
 		http_port_num = http_port_num,
-		node_metrics_info = node_metrics_info,
+		cl_nodes_metrics_info = cl_node_metrics_info,
 	)
