@@ -5,6 +5,7 @@
 - Added genesis_constants
 - Added a lot of participant_network/pre_launch_data_generator
 - Added a lot of simple objects that just keep data
+- Added monitoring on top of the repo
 
 # 0.0.0
 * Initial commit

@@ -24,7 +24,7 @@ def launch_forkmon(
 		seconds_per_slot,
 		slots_per_epoch
 	):
-	
+
 	all_cl_client_info = []
 	for client in cl_client_contexts:
 		client_info = new_cl_client_info(client.ip_addr, client.http_port_num)
