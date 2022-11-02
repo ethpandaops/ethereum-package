@@ -8,3 +8,6 @@ def path_join(*args):
 def path_base(path):
 	split_path = path.split("/")
 	return split_path[-1]
+
+def new_port_spec(number, protocol):
+	return struct(number = number, protocol = protocol)
