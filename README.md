@@ -16,7 +16,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 - [x] grafana (this is blocked on prometheus running)
 - [ ] grafana needs an upload files endpoint in Startosis
 - [x] testnet_verifier (this is blocked on CL/EL clients running)
-- [ ] transaction_spammer (this is blocked on EL clients running)
+- [x] transaction_spammer (this is blocked on EL clients running)
 - [ ] participant_network/participant_network
   - [ ] has most data generation things, needs to start EL/CL clients
   - [ ] needs upload files to be implemented
