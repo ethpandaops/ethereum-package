@@ -6,4 +6,4 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 
 ### Missing Tasks
 
-[] Setup Releaser
+- [ ] Setup Releaser
