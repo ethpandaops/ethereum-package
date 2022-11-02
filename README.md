@@ -34,8 +34,8 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] el_client_context pure POJO NO BLOCKERS
   - [x] el_client_launcher interface not necessary
   - [ ] el_availability_waiter - facts and waits
-  - [ ] el_rest_client/api_response_objects.go NO BLOCKERS
-  - [ ] el_rest_client/el_rest_client - facts and waits
+  - [x] el_rest_client/api_response_objects.go DESCOPED as facts will do this
+  - [x] el_rest_client/el_rest_client - facts and waits  DESCOPED as facts will do this
 - [ ] participant_network/cl (requires facts and waits)
   - [ ] lighthouse - facts and waits
   - [ ] loadstar - facts and waits
@@ -45,6 +45,6 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] cl_client_context pure POJO NO BLOCKERS
   - [x] cl_client_launcher interface not necessary
   - [ ] cl_availability_waiter - facts and waits
-  - [ ] cl_rest_client/api_response_objects.go NO BLOCKERS
-  - [ ] cl_rest_client/el_rest_client - facts and waits
+  - [x] cl_rest_client/api_response_objects.go DESCOPED as facts will do this
+  - [x] cl_rest_client/el_rest_client - DESCOPED as facts will do this
   - [x] cl_node_metrics_info - pure POJO NO BLOCKERS
