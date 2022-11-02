@@ -6,13 +6,13 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 
 ### CI Missing Tasks
 
-- [ ] Setup Releaser
+- [x] Setup Releaser
 
 ### Parity Missing Tasks
 
 - [ ] Module IO (this is blocked on Startosis Args working)
-- [ ] forkmon (this is blocked on CL clients running)
-- [ ] prometheus (this is blocked on CL clients running)
+- [x] forkmon (this is blocked on CL clients running)
+- [x] prometheus (this is blocked on CL clients running)
 - [ ] grafana (this is blocked on prometheus running)
 - [ ] testnet_verifier (this is blocked on CL/EL clients running)
 - [ ] transaction_spammer (this is blocked on EL clients running)
