@@ -34,6 +34,7 @@ def launch_forkmon(
 	template_data_json = json.encode(template_data)
 
 	template_and_data = new_template_and_data(config_template, template_data_json)
+	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 
 	config_files_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
