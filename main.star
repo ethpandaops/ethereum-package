@@ -3,8 +3,9 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant_n
 
 def main():
 	network_params = new_network_params()
-	print("Launching participant network")
-	launch_participant_network(network_params)
+	num_participants = 2
+	print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, json.indent(json.encode(network_params))))
+	launch_participant_network(num_participants, network_params)
 
 def new_network_params():
 	# this is temporary till we get params working

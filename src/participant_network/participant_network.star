@@ -2,8 +2,7 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_dat
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star", "generate_el_genesis_data")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star", "generate_cl_genesis_data")
 
-def launch_participant_network(network_params):
-	num_participants = 2
+def launch_participant_network(num_participants, network_params):
 
 	print("Generating cl validator key stores")	
 	keystore_result = generate_cl_validator_keystores(
