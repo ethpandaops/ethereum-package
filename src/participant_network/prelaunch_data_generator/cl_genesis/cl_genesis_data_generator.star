@@ -52,16 +52,13 @@ def generate_cl_genesis_data(
 
 	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
-	# TODO Make this the actual data generator
+	# TODO Make this the actual data generator - comment copied from the original module
 	launcher_service_id = launch_prelaunch_data_generator(
 		{
 			genesis_generation_config_artifact_uuid:  CONFIG_DIRPATH_ON_GENERATOR,
 			el_genesis_data.files_artifact_uuid: EL_GENESIS_DIRPATH_ON_GENERATOR,
 		},
 	)
-
-	# TODO add a remove_service call that removes the launcher_service_id, before the function returns
-	# do that when https://github.com/kurtosis-tech/kurtosis/issues/244 is closed
 
 	all_dirpaths_to_create_on_generator = [
 		CONFIG_DIRPATH_ON_GENERATOR,
@@ -148,6 +145,8 @@ def generate_cl_genesis_data(
 		genesis_ssz_rel_filepath,
 	)
 
+	# we cleanup as the data generation is done
+	remove_service(launcher_service_id)
 	return result
 
 
