@@ -1,4 +1,4 @@
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star", "PRE_FUNDED_ACCOUNTS")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genkstants.star", "PRE_FUNDED_ACCOUNTS")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant_network.star", "launch_participant_network")
 
 

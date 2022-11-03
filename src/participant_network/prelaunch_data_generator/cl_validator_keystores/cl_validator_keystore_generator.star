@@ -43,7 +43,6 @@ def generate_cl_validator_keystores(
 	all_output_dirpaths = []
 	all_sub_command_strs = []
 
-	# TODO Parallelize this to increase perf, which will require Docker exec operations not holding the Kurtosis mutex!
 	start_index = 0
 	stop_index = num_validators_per_node
 
