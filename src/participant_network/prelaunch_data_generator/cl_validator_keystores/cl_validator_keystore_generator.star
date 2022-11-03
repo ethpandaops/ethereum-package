@@ -47,9 +47,7 @@ def generate_cl_validator_keystores(
 	stop_index = num_validators_per_node
 
 	for i in range(num_nodes):
-		output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(
-			i,
-		)
+		output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(i)
 
 		generate_keystores_cmd = "{0} keystores --insecure --prysm-pass {1} --out-loc {2} --source-mnemonic \"{3}\" --source-min {4} --source-max {5}".format(
 			KEYSTORES_GENERATION_TOOL_NAME,
