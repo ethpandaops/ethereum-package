@@ -7,7 +7,7 @@ GENESIS_CONFIG_FILENAME    = "genesis-config.yaml"
 
 OUTPUT_DIRPATH_ON_GENERATOR = "/output"
 
-GETH_GENESIS_FILENAME       = "geth.json"
+GETH_GENESIS_FILENAME       = "genesis.json"
 ERIGON_GENESIS_FILENAME     = "erigon.json"
 NETHERMIND_GENESIS_FILENAME = "nethermind.json"
 BESU_GENESIS_FILENAME       = "besu.json"
