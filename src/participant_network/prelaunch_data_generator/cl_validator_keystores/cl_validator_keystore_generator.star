@@ -31,8 +31,8 @@ TEKU_SECRETS_DIRNAME = "teku-secrets"
 def generate_cl_validator_keystores(
 	mnemonic,
 	num_nodes,
-	num_validators_per_node,
-):
+	num_validators_per_node):
+
 	service_id = launch_prelaunch_data_generator(
 		{},
 	)
@@ -43,14 +43,11 @@ def generate_cl_validator_keystores(
 	all_output_dirpaths = []
 	all_sub_command_strs = []
 
-	# TODO Parallelize this to increase perf, which will require Docker exec operations not holding the Kurtosis mutex!
 	start_index = 0
 	stop_index = num_validators_per_node
 
-	for i in range(0, num_nodes):
-		output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(
-			i,
-		)
+	for i in range(num_nodes):
+		output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(i)
 
 		generate_keystores_cmd = "{0} keystores --insecure --prysm-pass {1} --out-loc {2} --source-mnemonic \"{3}\" --source-min {4} --source-max {5}".format(
 			KEYSTORES_GENERATION_TOOL_NAME,

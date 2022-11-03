@@ -7,7 +7,7 @@ GENESIS_CONFIG_FILENAME    = "genesis-config.yaml"
 
 OUTPUT_DIRPATH_ON_GENERATOR = "/output"
 
-GETH_GENESIS_FILENAME       = "geth.json"
+GETH_GENESIS_FILENAME       = "genesis.json"
 ERIGON_GENESIS_FILENAME     = "erigon.json"
 NETHERMIND_GENESIS_FILENAME = "nethermind.json"
 BESU_GENESIS_FILENAME       = "besu.json"
@@ -39,7 +39,7 @@ def generate_el_genesis_data(
 
 	genesis_config_file_template_and_data = new_template_and_data(genesis_generation_config_template, template_data)
 
-	template_and_data_by_rel_dest_filepath ={}
+	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_FILENAME] = genesis_config_file_template_and_data
 
 	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)

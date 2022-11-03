@@ -10,6 +10,3 @@ def new_cl_genesis_data(
 		config_yml_rel_filepath = config_yml_rel_filepath,
 		genesis_ssz_rel_filepath = genesis_ssz_rel_filepath,
 	)
-
-
-	
