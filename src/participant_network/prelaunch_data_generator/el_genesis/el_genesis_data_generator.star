@@ -45,14 +45,12 @@ def generate_el_genesis_data(
 	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
 
-	# TODO Make this the actual data generator
+	# TODO Make this the actual data generator - comment copied from the original module
 	launcher_service_id = launch_prelaunch_data_generator(
 		{
 			genesis_generation_config_artifact_uuid: CONFIG_DIRPATH_ON_GENERATOR,
 		},
 	)
-
-	# TODO defer remove the above generated service
 
 
 	all_dirpaths_to_create_on_generator = [
@@ -119,7 +117,9 @@ def generate_el_genesis_data(
 		genesis_filename_to_relative_filepath_in_artifact[NETHERMIND_GENESIS_FILENAME],
 		genesis_filename_to_relative_filepath_in_artifact[BESU_GENESIS_FILENAME],
 	)
-	
+
+	# we cleanup as the data generation is done
+	remove_service(launcher_service_id)
 	return result
 
 
