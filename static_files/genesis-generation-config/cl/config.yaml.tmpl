@@ -8,8 +8,8 @@ CONFIG_NAME: testnet # needs to exist because of Prysm. Otherwise it conflicts w
 # `2**14` (= 16,384)
 MIN_GENESIS_ACTIVE_VALIDATOR_COUNT: {{ .NumValidatorKeysToPreregister }}
 MIN_GENESIS_TIME: {{ .UnixTimestamp }}
-GENESIS_FORK_VERSION: 0x10005555
-GENESIS_DELAY: 120
+GENESIS_FORK_VERSION: 0x10000038
+GENESIS_DELAY: 300
 
 # Forking
 # ---------------------------------------------------------------
@@ -21,20 +21,23 @@ GENESIS_DELAY: 120
 # are all hardcoded to zero.
 
 # Altair
-ALTAIR_FORK_VERSION: 0x11005555
+ALTAIR_FORK_VERSION: 0x20000038
 ALTAIR_FORK_EPOCH: 0
 # Merge
-BELLATRIX_FORK_VERSION: 0x12005555
+BELLATRIX_FORK_VERSION: 0x30000038
 BELLATRIX_FORK_EPOCH: 0
-
 TERMINAL_TOTAL_DIFFICULTY: 0
 # 0x0000...000 indicates that we use TERMINAL_TOTAL_DIFFICULTY instead of a block has to trigger the merge
-# See also: https://eips.ethereum.org/EIPS/eip-3675
 TERMINAL_BLOCK_HASH: 0x0000000000000000000000000000000000000000000000000000000000000000
 # NOTE: This is commented out because Nimbus warns us that it's an unrecognized parameter
 TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH: 18446744073709551615
+
+# Capella
+CAPELLA_FORK_VERSION: 0x40000038
+CAPELLA_FORK_EPOCH: 18446744073709551615
+
 # Sharding
-SHARDING_FORK_VERSION: 0x13005555
+SHARDING_FORK_VERSION: 0x03001020
 SHARDING_FORK_EPOCH: 18446744073709551615
 
 # Time parameters
@@ -48,7 +51,7 @@ SHARD_COMMITTEE_PERIOD: 256
 # It's very important that SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE is a good amount of time, else
 #  jitter will cause the Beacon nodes to think they're far behind the Eth1 nodes and give up syncing
 SECONDS_PER_ETH1_BLOCK: 10
-ETH1_FOLLOW_DISTANCE: 30
+ETH1_FOLLOW_DISTANCE: 12
 
 
 # Validator cycle
