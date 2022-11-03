@@ -46,7 +46,7 @@ def generate_cl_validator_keystores(
 	start_index = 0
 	stop_index = num_validators_per_node
 
-	for i in range(0, num_nodes):
+	for i in range(num_nodes):
 		output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(
 			i,
 		)
