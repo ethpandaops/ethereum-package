@@ -21,9 +21,9 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 - [x] mev_boost participant_network/mev_boost NO BLOCKERS - removed some attributes that aren't used
   - [x] mev_boost_context pure POJO NO BLOCKERS
   - [x] mev_boost_launcher NO BLOCKERS
-- [ ] participant_network/pre_launch_data_generator (the only missing piece here is remove_service)
+- [x] participant_network/pre_launch_data_generator (the only missing piece here is remove_service)
   - [x] data generation
-  - [ ] remove services post generation
+  - [x] remove services post generation
 - [ ] participant_network/el (requires facts and waits)
   - [ ] besu - facts and waits
   - [ ] erigon - facts and waits
