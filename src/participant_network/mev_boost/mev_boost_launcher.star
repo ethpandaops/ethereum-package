@@ -45,3 +45,4 @@ def get_service_config(mev_boost_launcher, network_id):
 
 def new_mev_boost_launcher(should_check_relay, relay_end_points):
     return struct(should_check_relay=should_check_relay, relay_end_points=relay_end_points)
+
