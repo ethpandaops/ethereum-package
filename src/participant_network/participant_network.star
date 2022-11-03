@@ -2,6 +2,13 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_dat
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star", "generate_el_genesis_data")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star", "generate_cl_genesis_data")
 
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_launcher.star", launch_mevboost="launch", "new_mev_boost_launcher")
+
+
+MEV_BOOST_SERVICE_ID_PREFIX = "mev-boost-"
+MEV_BOOST_SHOULD_RELAY = True
+
 def launch_participant_network(num_participants, network_params):
 
 	print("Generating cl validator key stores")	
@@ -46,3 +53,11 @@ def launch_participant_network(num_participants, network_params):
 	)
 
 	print(json.indent(json.encode(cl_data)))
+
+	print("launching mev boost")
+	# TODO make this launch only for participants that have the participants[i].builderNetworkParams.relayEndpoints defined
+	# At the moment this lies here just to test, and the relay end points is an empty list
+	mev_boost_launcher = new_mev_boost_launcher(MEV_BOOST_SHOULD_RELAY, network_params.mev_boost_relay_endpoints)
+	mev_boost_service_id = MEV_BOOST_SERVICE_ID_PREFIX.format(1)
+	mev_boost_context = launch_mevboost(mev_boost_launcher, mev_boost_service_id, network_params.network_id)
+	print(mev_boost_endpoint(mev_boost_context))
