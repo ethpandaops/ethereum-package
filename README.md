@@ -4,10 +4,6 @@ ETH2-MERGE-STARTOSIS-MODULE
 This is the Startosis version of the popular [eth2-merge-kurtosis-module](https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/)
 
 
-### CI Missing Tasks
-
-- [x] Setup Releaser
-
 ### Parity Missing Tasks
 
 - [ ] Module IO (this is blocked on Startosis Args working)
