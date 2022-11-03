@@ -2,7 +2,8 @@
 
 ### Features
 - Changed the .circlei/config.yml to apply to Startosis
-- Changed main.star to work
+- Added genesis_constants
+- Added a lot of participant_network/pre_launch_data_generator
 
 # 0.0.0
 * Initial commit
