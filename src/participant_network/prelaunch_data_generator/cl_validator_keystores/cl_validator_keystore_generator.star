@@ -31,8 +31,8 @@ TEKU_SECRETS_DIRNAME = "teku-secrets"
 def generate_cl_validator_keystores(
 	mnemonic,
 	num_nodes,
-	num_validators_per_node,
-):
+	num_validators_per_node):
+
 	service_id = launch_prelaunch_data_generator(
 		{},
 	)
