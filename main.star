@@ -23,6 +23,15 @@ default_el_images = {
 	"besu": "hyperledger/besu:develop"
 }
 
+default_cl_images = {
+	"lighthouse": "sigp/lighthouse:latest",
+	"teku":       "consensys/teku:latest",
+	"nimbus":     "parithoshj/nimbus:merge-a845450",
+	"prysm":    "gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest",
+	"lodestar": "chainsafe/lodestar:next",	
+}
+
+
 # TODO check enum values are valid or make sure protobfu does
 def replace_with_defaults(input_args):
 	default_input = default_module_input()
@@ -73,8 +82,32 @@ def replace_with_defaults(input_args):
 
 	for index, participant in enumerate(result["participants"]):
 		# this is really ugly we need some primitive to throw an error
-		if index == 0 and participant["el_client_type"] in ("besu", "nethermind"):
-			fail("besu/nethermind cant be the first participant")		
+		el_client_type = participant["el_client_type"]
+		cl_client_type = participant["cl_client_type"]
+
+		if index == 0 and el_client_type in ("besu", "nethermind"):
+			fail("besu/nethermind cant be the first participant")
+		
+		el_image = participant["el_client_image"]
+		if el_image == "":
+			default_image = default_el_images.get(el_client_type, "")
+			if default_image == "":
+				fail("{0} received an empty image name and we don't have a default for it".format(el_client_type))
+			participant["el_image"] = default_image
+
+		cl_image = participant["cl_client_image"]
+		if cl_image == "":
+			default_image = default_cl_images.get(cl_client_type, "")
+			if default_image == "":
+				fail("{0} received an empty image name and we don't have a default for it".format(cl_client_type))
+			participant["cl_image"] = default_image
+
+		beacon_extra_params = participant.get("beacon_extra_params", [])
+		participant["beacon_extra_params"] = beacon_extra_params
+
+		validator_extra_params = participant.get("validator_extra_params", [])
+		participant["beacon_extra_params"] = validator_extra_params
+
 
 	encoded_json = json.encode(result)
 	print(json.indent(encoded_json))
