@@ -64,7 +64,7 @@ message BuilderNetworkParams {
 
 message Participant {
 	// The type of EL client that should be started
-	ELClientType el_client_Type = 1;
+	ELClientType el_client_type = 1;
 	// The Docker image that should be used for the EL client; leave blank to use the default
 	string el_client_image  = 2;
 	// The log level string that this participant's EL client should log at
