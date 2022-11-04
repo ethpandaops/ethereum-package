@@ -21,6 +21,7 @@ def replace_with_defaults(input_args):
 	result = {}
 	for attr in dir(input_args):
 		value = getattr(input_args, attr)
+		print(attr, value, type(value))
 		if type(value) == "int" and value == 0:
 			result[attr] = default_input[attr]
 		elif type(value) == "string" and value == "":
@@ -33,10 +34,14 @@ def replace_with_defaults(input_args):
 					result["network_params"][attr_] = default_input["network_params"][attr_]
 				elif type(value_) == "string" and value_ == "":
 					result["network_params"][attr_] = default_input["network_params"][attr_]
-				elif attr_ != "descriptor":
+				# if there are some string, int values we assign it
+				elif type(value_) in ("int", "string", "bool"):
 					result["network_params"][attr_] = value_
-		elif attr == "participants" and value == []:
-			result["participant"] = [default_input["participants"][0]]
+				elif type(value) in "proto.EnumValueDescriptor":
+					result[attr] = value.name					
+		# no participants are assigned at all
+		elif attr == "participants" and len(value) == 0:
+			result["participant"] = default_input["participants"]
 		elif attr == "participants":
 			participants = []
 			for participant in participants:
@@ -47,10 +52,17 @@ def replace_with_defaults(input_args):
 						participant[attr_] = getattr(default_input[participants][0], attr_, 0)
 					elif type(attr_) == "str" and value_ == "":
 						participant[attr_] = getattr(default_input[participants][0], attr_, "")
+					elif type(value_) in ("int", "string", "bool"):
+						result["participants"][attr_] = value_
+					elif type(value_) in "proto.EnumValueDescriptor":
+						result[attr_] = value.name
 				participants.append(participant)
 			result["participants"] = participants
-		elif attr != "descriptor":
-			result[attr] = default_input[attr]
+		# if there are some string, int values we assign it
+		elif type(value) in ("int", "string", "bool"):
+			result[attr] = value
+		elif type(value) in "proto.EnumValueDescriptor":
+			result[attr] = value.name
 
 	encoded_json = json.encode(result)
 	print(json.indent(encoded_json))
