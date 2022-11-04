@@ -135,6 +135,7 @@ def replace_with_defaults(input_args):
 
 	encoded_json = json.encode(result)
 	print(json.indent(encoded_json))
+	print(module_io.ModuleInput(result))
 	return result
 
 
@@ -150,8 +151,7 @@ def default_module_input():
 		"wait_for_finalization":      False,
 		"wait_for_verifications":     False,
 		"verifications_epoch_limit":  5,
-		"global_log_level":           "info",
-
+		"global_log_level": "info"
 	}
 
 
