@@ -21,20 +21,20 @@ def replace_with_defaults(input_args):
 	result = {}
 	for attr in dir(input_args):
 		value = getattr(input_args, attr)
-		if type(attr) == "int" and value == 0:
+		if type(value) == "int" and value == 0:
 			result[attr] = default_input[attr]
-		elif type(attr) == "str" and value == "":
+		elif type(value) == "string" and value == "":
 			result[attr] = default_input[attr]
 		elif attr == "network_params":
 			result["network_params"] = {}
 			for attr_ in dir(input_args.network_params):
 				value_ = getattr(input_args.network_params, attr_)
-				if type(attr_) == "int" and value_ == 0:
+				if type(value_) == "int" and value_ == 0:
 					result["network_params"][attr_] = default_input["network_params"][attr_]
-				elif type(attr_) == "str" and value_ == "":
+				elif type(value_) == "string" and value_ == "":
 					result["network_params"][attr_] = default_input["network_params"][attr_]
 				elif attr_ != "descriptor":
-					result["network_params"][attr_] = default_input["network_params"][attr_]
+					result["network_params"][attr_] = value_
 		elif attr == "participants" and value == []:
 			result["participant"] = [default_input["participants"][0]]
 		elif attr == "participants":
