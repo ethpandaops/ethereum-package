@@ -16,12 +16,19 @@ def main(input_args):
 	return output
 
 
+default_el_images = {
+	"geth": "ethereum/client-go:latest",
+	"erigon": "thorax/erigon:devel",
+	"nethermind": "nethermind/nethermind:latest",
+	"besu": "hyperledger/besu:develop"
+}
+
+# TODO check enum values are valid or make sure protobfu does
 def replace_with_defaults(input_args):
 	default_input = default_module_input()
 	result = {}
 	for attr in dir(input_args):
 		value = getattr(input_args, attr)
-		print(attr, value, type(value))
 		if type(value) == "int" and value == 0:
 			result[attr] = default_input[attr]
 		elif type(value) == "string" and value == "":
@@ -41,28 +48,33 @@ def replace_with_defaults(input_args):
 					result[attr] = value.name					
 		# no participants are assigned at all
 		elif attr == "participants" and len(value) == 0:
-			result["participant"] = default_input["participants"]
+			result["participants"] = default_input["participants"]
 		elif attr == "participants":
 			participants = []
-			for participant in participants:
-				participant = {}
+			for participant in input_args.participants:
+				participant_value = {}
 				for attr_ in dir(participant):
-					value_ = getattr(input_args.network_params, attr_)
+					value_ = getattr(participant, attr_)
 					if type(attr_) == "int" and value_ == 0:
-						participant[attr_] = getattr(default_input[participants][0], attr_, 0)
+						participant_value[attr_] = getattr(default_input[participants][0], attr_, 0)
 					elif type(attr_) == "str" and value_ == "":
-						participant[attr_] = getattr(default_input[participants][0], attr_, "")
+						participant_value[attr_] = getattr(default_input[participants][0], attr_, "")
 					elif type(value_) in ("int", "string", "bool"):
 						result["participants"][attr_] = value_
 					elif type(value_) in "proto.EnumValueDescriptor":
-						result[attr_] = value.name
-				participants.append(participant)
+						participant_value[attr_] = value.name
+				participants.append(participant_value)
 			result["participants"] = participants
 		# if there are some string, int values we assign it
 		elif type(value) in ("int", "string", "bool"):
 			result[attr] = value
 		elif type(value) in "proto.EnumValueDescriptor":
 			result[attr] = value.name
+
+	for index, participant in enumerate(result["participants"]):
+		# this is really ugly we need some primitive to throw an error
+		if index == 0 and participant["el_client_type"] in ("besu", "nethermind"):
+			fail("besu/nethermind cant be the first participant")		
 
 	encoded_json = json.encode(result)
 	print(json.indent(encoded_json))
