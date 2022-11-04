@@ -77,7 +77,7 @@ message Participant {
 	repeated string el_extra_params = 4;
 
 	// The type of CL client that should be started
-	CLClientType cl_client_Type = 5;
+	CLClientType cl_client_type = 5;
 	// The Docker image that should be used for the EL client; leave blank to use the default
 	// NOTE: Prysm is different in that it requires two images - a Beacon and a validator
 	//  For Prysm and Prysm only, this field should contain a comma-separated string of "beacon_image,validator_image"	
