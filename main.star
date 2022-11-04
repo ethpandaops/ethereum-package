@@ -93,20 +93,44 @@ def replace_with_defaults(input_args):
 			default_image = default_el_images.get(el_client_type, "")
 			if default_image == "":
 				fail("{0} received an empty image name and we don't have a default for it".format(el_client_type))
-			participant["el_image"] = default_image
+			participant["el_client_image"] = default_image
 
 		cl_image = participant["cl_client_image"]
 		if cl_image == "":
 			default_image = default_cl_images.get(cl_client_type, "")
 			if default_image == "":
 				fail("{0} received an empty image name and we don't have a default for it".format(cl_client_type))
-			participant["cl_image"] = default_image
+			participant["cl_client_image"] = default_image
 
 		beacon_extra_params = participant.get("beacon_extra_params", [])
 		participant["beacon_extra_params"] = beacon_extra_params
 
 		validator_extra_params = participant.get("validator_extra_params", [])
-		participant["beacon_extra_params"] = validator_extra_params
+		participant["validator_extra_params"] = validator_extra_params
+
+	if result["network_params"]["network_id"].strip() == "":
+		fail("network_id is empty or spaces it needs to be of non zero length")
+
+	if result["network_params"]["deposit_contract_address"].strip() == "":
+		fail("deposit_contract_address is empty or spaces it needs to be of non zero length")
+
+	if result["network_params"]["preregistered_validator_keys_mnemonic"].strip() == "":
+		fail("preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length")
+
+	if result["network_params"]["slots_per_epoch"] == 0:
+		fail("slots_per_epoch is 0 needs to be > 0 ")
+
+	if result["network_params"]["seconds_per_slot"] == 0:
+		fail("seconds_per_slot is 0 needs to be > 0 ")
+
+	required_num_validtors = 2 * result["network_params"]["slots_per_epoch"]
+	actual_num_validators = len(result["participants"]) * result["network_params"]["num_validators_per_keynode"]
+	if required_num_validtors < actual_num_validators:
+		fail("required_num_validtors - {0} is greater than actual_num_validators - {1}".format(required_num_validtors, actual_num_validators))
+
+	# Remove if nethermind doesn't break as second node we already test above if its the first node
+	if len(result["participants"]) >= 2 and result["participants"][1]["el_client_type"] == "nethermind":
+		fail("nethermind can't be the first or second node")
 
 
 	encoded_json = json.encode(result)
