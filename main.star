@@ -2,14 +2,10 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant_n
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
 def main(input_args):
-	print(input_args)
-	print(input_args.wait_for_verifications)
-	module_input = default_module_input()
-	print(module_input)
-	network_params = module_input.network_params
+	replace_with_defaults(input_args)
 	num_participants = 2
-	print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, json.indent(json.encode(network_params))))
-	launch_participant_network(num_participants, network_params)
+	# print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, json.indent(json.encode(network_params))))
+	# launch_participant_network(num_participants, network_params)
 	# TODO replace with actual values
 	grafana_info = module_io.GrafanaInfo({
 		"dashboard_path": "dummy_path",
@@ -17,23 +13,65 @@ def main(input_args):
 		"password": "password"
 	})
 	output = module_io.ModuleOutput({"grafana_info": grafana_info})
-	print(output)	
 	return output
+
+
+def replace_with_defaults(input_args):
+	default_input = default_module_input()
+	result = {}
+	for attr in dir(input_args):
+		value = getattr(input_args, attr)
+		if type(attr) == "int" and value == 0:
+			result[attr] = default_input[attr]
+		elif type(attr) == "str" and value == "":
+			result[attr] = default_input[attr]
+		elif attr == "network_params":
+			result["network_params"] = {}
+			for attr_ in dir(input_args.network_params):
+				value_ = getattr(input_args.network_params, attr_)
+				if type(attr_) == "int" and value_ == 0:
+					result["network_params"][attr_] = default_input["network_params"][attr_]
+				elif type(attr_) == "str" and value_ == "":
+					result["network_params"][attr_] = default_input["network_params"][attr_]
+				elif attr_ != "descriptor":
+					result["network_params"][attr_] = default_input["network_params"][attr_]
+		elif attr == "participants" and value == []:
+			result["participant"] = [default_input["participants"][0]]
+		elif attr == "participants":
+			participants = []
+			for participant in participants:
+				participant = {}
+				for attr_ in dir(participant):
+					value_ = getattr(input_args.network_params, attr_)
+					if type(attr_) == "int" and value_ == 0:
+						participant[attr_] = getattr(default_input[participants][0], attr_, 0)
+					elif type(attr_) == "str" and value_ == "":
+						participant[attr_] = getattr(default_input[participants][0], attr_, "")
+				participants.append(participant)
+			result["participants"] = participants
+		elif attr != "descriptor":
+			result[attr] = default_input[attr]
+
+	encoded_json = json.encode(result)
+	print(json.indent(encoded_json))
+	return result
+
+
 
 
 def default_module_input():
 	network_params = default_network_params()
 	participants = default_partitcipants()
-	return module_io.ModuleInput({
+	return {
 		"participants": participants,
 		"network_params": network_params,
-		"launch_additional_services": True,
+		"dont_launch_additional_services": False,
 		"wait_for_finalization":      False,
 		"wait_for_verifications":     False,
 		"verifications_epoch_limit":  5,
 		"global_log_level":           "info",
 
-	})
+	}
 
 
 
@@ -49,13 +87,12 @@ def default_network_params():
 	}
 
 def default_partitcipants():
-	return [
-		{
+	participant = {
 			"el_client_type": "geth",
 			"el_client_image": "",
 			"el_client_log_level": "",
 			"cl_client_type": "lighthouse",
 			"cl_client_image": "",
 			"cl_client_log_level": ""
-		}
-	]
+	}
+	return [participant]

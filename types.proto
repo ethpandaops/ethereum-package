@@ -18,7 +18,7 @@ message ModuleInput {
 	// This is a hack - it's not very elegant - but this is a commonly-requested feature
 	// The longterm solution is making the module trivial to decompose so we don't need flags like this; we're working
 	//  on this at the Kurtosis product level
-	bool launch_additional_services = 3;
+	bool dont_launch_additional_services = 3;
 
 	// If set, the module will block until a finalized epoch has occurred.
 	// If `waitForVerifications` is set to true, this extra wait will be skipped.
@@ -35,9 +35,9 @@ message ModuleInput {
 }
 
 enum GlobalLogLevel {
-	error = 0;
-	warn = 1;
-	info = 2;
+	info = 0;
+	error = 1;
+	warn = 2;
 	debug = 3;
 	trace = 4;
 }
