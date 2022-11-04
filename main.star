@@ -1,11 +1,21 @@
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant_network.star", "launch_participant_network")
 
+module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
-def main():
+def main(input_args):
 	network_params = new_network_params()
 	num_participants = 2
 	print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, json.indent(json.encode(network_params))))
 	launch_participant_network(num_participants, network_params)
+	print(input_args)
+	# TODO replace with actual values
+	grafana_info = module_io.GrafanaInfo({
+		"dashboard_path": "dummy_path",
+		"user": "user",
+		"password": "password"
+	})
+	module_io.ModuleOutput({"grafana_info ": grafana_info})
+	return 
 
 def new_network_params():
 	# this is temporary till we get params working

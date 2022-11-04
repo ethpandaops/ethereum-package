@@ -1,0 +1,130 @@
+syntax = "proto3"
+
+// Module Input
+message ModuleInput {
+	// Parameters controlling the types of clients that compose the network
+	repeated Participant participants = 0;
+	
+	// Parameters controlling the settings of the network itself
+	NetworkParams network_params = 1;
+
+	// True by defaults such that in addition to the Ethereum network:
+	//  - A transaction spammer is launched to fake transactions sent to the network
+	//  - Forkmon will be launched after CL genesis has happened
+	//  - a prometheus will be started, coupled with grafana
+	// If set to false:
+	//  - only Ethereum network (EL and CL nodes) will be launched. Nothing else (no transaction spammer)
+	//  - params for the CL nodes will be ignored (e.g. CL node image, CL node extra params)
+	// This is a hack - it's not very elegant - but this is a commonly-requested feature
+	// The longterm solution is making the module trivial to decompose so we don't need flags like this; we're working
+	//  on this at the Kurtosis product level
+	bool launch_additional_services = 2;
+
+	// If set, the module will block until a finalized epoch has occurred.
+	// If `waitForVerifications` is set to true, this extra wait will be skipped.
+	bool wait_for_finalization = 3;
+
+	// If set to true, the module will block until all verifications have passed
+	bool wait_for_verifications = 4;
+
+	// If set, after the merge, this will be the maximum number of epochs wait for the verifications to succeed.
+	uint64 verifications_epoch_limit = 5;
+
+	// The log level that the started clients should log at
+	GlobalLogLevel global_log_level = 6;
+}
+
+enum GlobalLogLevel {
+	error = 0;
+	warn = 1;
+	info = 2;
+	debug = 3;
+	trace = 4;
+}
+
+enum ELClientType {
+	geth = 0;
+	erigon = 1;
+	nethermind = 2;
+	besu = 3;
+}
+
+enum CLClientType {
+	lighthouse = 0;
+	teku = 1;
+	nimbus = 2;
+	prysm = 3;
+	loadstar = 4;
+}
+
+message BuilderNetworkParams {
+	// A list of endpoints to reach block builder relays
+	repeated string relay_endpoints = 0;
+}
+
+message Participant {
+	// The type of EL client that should be started
+	ELClientType el_client_Type = 0;
+	// The Docker image that should be used for the EL client; leave blank to use the default
+	string el_client_image  = 1;
+	// The log level string that this participant's EL client should log at
+	// If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+	//  global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
+	// If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+	//  over a specific participant's logging	
+	string el_client_log_level = 2;
+	// Optional extra parameters that will be passed to the EL client
+	repeated string el_extra_params = 3;
+
+	// The type of CL client that should be started
+	CLClientType cl_client_Type = 4;
+	// The Docker image that should be used for the EL client; leave blank to use the default
+	// NOTE: Prysm is different in that it requires two images - a Beacon and a validator
+	//  For Prysm and Prysm only, this field should contain a comma-separated string of "beacon_image,validator_image"	
+	string cl_client_image  = 5;
+	// The log level string that this participant's CL client should log at
+	// If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+	//  global `logLevel` = `info` then Nimbus would receive `INFO`, Prysm would receive `info`, etc.)
+	// If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+	//  over a specific participant's logging	
+	string cl_client_log_level = 6;
+	
+	// Extra parameters that will be passed to the Beacon container (if a separate one exists), or to the combined node if
+	// the Beacon and validator are combined
+	repeated string beacon_extra_params = 7;
+
+	// Extra parameters that will be passed to the validator container (if a separate one exists), or to the combined node if
+	// the Beacon and validator are combined
+	repeated string validator_extra_params = 8;
+
+	BuilderNetworkParams builder_network_params = 9;
+}
+
+message NetworkParams {
+	// The network ID of the Eth1 network
+	string network_id = 0;
+	// The address of the staking contract address on the Eth1 chain
+	string deposit_contract_address = 2;
+	// Number of seconds per slot on the Beacon chain
+	uint32 seconds_per_slot = 3;
+	// Number of slots in an epoch on the Beacon chain
+	uint32 slots_per_epoch = 4;
+	// The number of validator keys that each CL validator node should get
+	uint32 num_validators_per_keynode = 5;
+	// This menmonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
+	//  validator keys already preregistered as validators	
+	string preregistered_validator_keys_mnemonic = 6;
+}
+
+
+// Module Output
+message ModuleOutput {
+	GrafanaInfo grafana_info = 1;
+}
+
+message GrafanaInfo {
+	string dashboard_path = 1;
+	string user = 2;
+	string password = 3;
+}
+
