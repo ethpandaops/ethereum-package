@@ -1,5 +1,4 @@
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant_network.star", "launch_participant_network")
-
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
 def main(input_args):

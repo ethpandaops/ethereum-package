@@ -1,12 +1,12 @@
-syntax = "proto3"
+syntax = "proto3";
 
 // Module Input
 message ModuleInput {
 	// Parameters controlling the types of clients that compose the network
-	repeated Participant participants = 0;
+	repeated Participant participants = 1;
 	
 	// Parameters controlling the settings of the network itself
-	NetworkParams network_params = 1;
+	NetworkParams network_params = 2;
 
 	// True by defaults such that in addition to the Ethereum network:
 	//  - A transaction spammer is launched to fake transactions sent to the network
@@ -18,20 +18,20 @@ message ModuleInput {
 	// This is a hack - it's not very elegant - but this is a commonly-requested feature
 	// The longterm solution is making the module trivial to decompose so we don't need flags like this; we're working
 	//  on this at the Kurtosis product level
-	bool launch_additional_services = 2;
+	bool launch_additional_services = 3;
 
 	// If set, the module will block until a finalized epoch has occurred.
 	// If `waitForVerifications` is set to true, this extra wait will be skipped.
-	bool wait_for_finalization = 3;
+	bool wait_for_finalization = 4;
 
 	// If set to true, the module will block until all verifications have passed
-	bool wait_for_verifications = 4;
+	bool wait_for_verifications = 5;
 
 	// If set, after the merge, this will be the maximum number of epochs wait for the verifications to succeed.
-	uint64 verifications_epoch_limit = 5;
+	uint64 verifications_epoch_limit = 6;
 
 	// The log level that the started clients should log at
-	GlobalLogLevel global_log_level = 6;
+	GlobalLogLevel global_log_level = 7;
 }
 
 enum GlobalLogLevel {
@@ -59,50 +59,50 @@ enum CLClientType {
 
 message BuilderNetworkParams {
 	// A list of endpoints to reach block builder relays
-	repeated string relay_endpoints = 0;
+	repeated string relay_endpoints = 1;
 }
 
 message Participant {
 	// The type of EL client that should be started
-	ELClientType el_client_Type = 0;
+	ELClientType el_client_Type = 1;
 	// The Docker image that should be used for the EL client; leave blank to use the default
-	string el_client_image  = 1;
+	string el_client_image  = 2;
 	// The log level string that this participant's EL client should log at
 	// If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
 	//  global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
 	// If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
 	//  over a specific participant's logging	
-	string el_client_log_level = 2;
+	string el_client_log_level = 3;
 	// Optional extra parameters that will be passed to the EL client
-	repeated string el_extra_params = 3;
+	repeated string el_extra_params = 4;
 
 	// The type of CL client that should be started
-	CLClientType cl_client_Type = 4;
+	CLClientType cl_client_Type = 5;
 	// The Docker image that should be used for the EL client; leave blank to use the default
 	// NOTE: Prysm is different in that it requires two images - a Beacon and a validator
 	//  For Prysm and Prysm only, this field should contain a comma-separated string of "beacon_image,validator_image"	
-	string cl_client_image  = 5;
+	string cl_client_image  = 6;
 	// The log level string that this participant's CL client should log at
 	// If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
 	//  global `logLevel` = `info` then Nimbus would receive `INFO`, Prysm would receive `info`, etc.)
 	// If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
 	//  over a specific participant's logging	
-	string cl_client_log_level = 6;
+	string cl_client_log_level = 7;
 	
 	// Extra parameters that will be passed to the Beacon container (if a separate one exists), or to the combined node if
 	// the Beacon and validator are combined
-	repeated string beacon_extra_params = 7;
+	repeated string beacon_extra_params = 8;
 
 	// Extra parameters that will be passed to the validator container (if a separate one exists), or to the combined node if
 	// the Beacon and validator are combined
-	repeated string validator_extra_params = 8;
+	repeated string validator_extra_params = 9;
 
-	BuilderNetworkParams builder_network_params = 9;
+	BuilderNetworkParams builder_network_params = 10;
 }
 
 message NetworkParams {
 	// The network ID of the Eth1 network
-	string network_id = 0;
+	string network_id = 1;
 	// The address of the staking contract address on the Eth1 chain
 	string deposit_contract_address = 2;
 	// Number of seconds per slot on the Beacon chain
