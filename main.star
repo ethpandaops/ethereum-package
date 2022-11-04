@@ -13,8 +13,9 @@ def main(input_args):
 		"user": "user",
 		"password": "password"
 	})
-	module_io.ModuleOutput({"grafana_info ": grafana_info})
-	return 
+	output = module_io.ModuleOutput({"grafana_info": grafana_info})
+	print(output)
+	return output
 
 def new_network_params():
 	# this is temporary till we get params working
