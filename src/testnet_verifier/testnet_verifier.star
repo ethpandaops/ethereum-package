@@ -8,6 +8,7 @@ SYNCHRONOUS_ENTRYPOINT_ARGS = {
 }
 
 
+# this is broken check - https://github.com/ethereum/merge-testnet-verifier/issues/4
 def launch_testnet_verifier(params, el_client_contexts, cl_client_contexts):
 	service_config = get_asynchronous_verification_service_config(params, el_client_contexts, cl_client_contexts)
 	add_service(SERVICE_ID, service_config)
