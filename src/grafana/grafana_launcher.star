@@ -3,8 +3,7 @@ load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", 
 
 SERVICE_ID = "grafana"
 
-# TODO I'm not sure if we should use latest version or ping an specific version instead
-IMAGE_NAME = "grafana/grafana-enterprise:latest"
+IMAGE_NAME = "grafana/grafana-enterprise:9.2.3"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
