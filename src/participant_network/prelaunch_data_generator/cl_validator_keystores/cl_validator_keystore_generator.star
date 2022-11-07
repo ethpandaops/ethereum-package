@@ -32,13 +32,10 @@ def generate_cl_validator_keystores(
 	mnemonic,
 	num_nodes,
 	num_validators_per_node):
-
+	
 	service_id = launch_prelaunch_data_generator(
 		{},
 	)
-
-	# TODO remove the service added above
-
 
 	all_output_dirpaths = []
 	all_sub_command_strs = []
@@ -107,4 +104,6 @@ def generate_cl_validator_keystores(
 		keystore_files,
 	)
 
+	# we cleanup as the data generation is done
+	remove_service(service_id)
 	return result
