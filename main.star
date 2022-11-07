@@ -15,4 +15,5 @@ def new_network_params():
 		network_id = "3151908",
 		deposit_contract_address = "0x4242424242424242424242424242424242424242",
 		seconds_per_slot = 12,
+		mev_boost_relay_endpoints = []
 	)
