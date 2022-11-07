@@ -18,7 +18,7 @@ message ModuleInput {
 	// This is a hack - it's not very elegant - but this is a commonly-requested feature
 	// The longterm solution is making the module trivial to decompose so we don't need flags like this; we're working
 	//  on this at the Kurtosis product level
-	bool dont_launch_additional_services = 3;
+	optional bool launch_additional_services = 3;
 
 	// If set, the module will block until a finalized epoch has occurred.
 	// If `waitForVerifications` is set to true, this extra wait will be skipped.

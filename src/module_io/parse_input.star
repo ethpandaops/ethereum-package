@@ -16,12 +16,26 @@ DEFAULT_CL_IMAGES = {
 BESU_NODE_NAME = "besu"
 NETHERMIND_NODE_NAME = "nethermind"
 
+LAUNCH_ADDITIONAL_ATTR = "launch_additional_services"
+
 def parse_input(input_args):
 	default_input = default_module_input()
 	result = {}
 	for attr in dir(input_args):
 		value = getattr(input_args, attr)
-		if type(value) == "int" and value == 0:
+		print(value, type(value), attr, type(attr))
+		# this is a builtin attribute we don't care about
+		if attr == "descriptor":
+			continue
+		# if there's an optional that exists don't change anything just move on
+		elif attr == LAUNCH_ADDITIONAL_ATTR:
+			if proto.has(input_args, LAUNCH_ADDITIONAL_ATTR):
+				result[attr] = value
+			else:
+				result[attr] = default_input[attr]
+		elif type(value) == "bool" and value == False:
+			result[attr] = default_input[attr]
+		elif type(value) == "int" and value == 0:
 			result[attr] = default_input[attr]
 		elif type(value) == "string" and value == "":
 			result[attr] = default_input[attr]
@@ -128,7 +142,7 @@ def default_module_input():
 	return {
 		"participants": participants,
 		"network_params": network_params,
-		"dont_launch_additional_services": False,
+		LAUNCH_ADDITIONAL_ATTR: True,
 		"wait_for_finalization":      False,
 		"wait_for_verifications":     False,
 		"verifications_epoch_limit":  5,
