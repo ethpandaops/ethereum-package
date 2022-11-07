@@ -16,42 +16,31 @@ DEFAULT_CL_IMAGES = {
 BESU_NODE_NAME = "besu"
 NETHERMIND_NODE_NAME = "nethermind"
 
-LAUNCH_ADDITIONAL_ATTR = "launch_additional_services"
+DESCRIPTOR_ATTR_NAME = "descriptor"
+ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", DESCRIPTOR_ATTR_NAME)
+ENUM_TYPE = "proto.EnumValueDescriptor"
 
 def parse_input(input_args):
 	default_input = default_module_input()
 	result = {}
 	for attr in dir(input_args):
 		value = getattr(input_args, attr)
-		print(value, type(value), attr, type(attr))
-		# this is a builtin attribute we don't care about
-		if attr == "descriptor":
-			continue
-		# if there's an optional that exists don't change anything just move on
-		elif attr == LAUNCH_ADDITIONAL_ATTR:
-			if proto.has(input_args, LAUNCH_ADDITIONAL_ATTR):
-				result[attr] = value
-			else:
-				result[attr] = default_input[attr]
-		elif type(value) == "bool" and value == False:
-			result[attr] = default_input[attr]
-		elif type(value) == "int" and value == 0:
-			result[attr] = default_input[attr]
-		elif type(value) == "string" and value == "":
+		# if its insterted we use the value inserted
+		if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and proto.has(input_args, attr):
+			result[attr] = get_value_or_name(value)
+		# if not we grab the value from the default value dictionary
+		elif attr not in ATTR_TO_BE_SKIPPED_AT_ROOT:
 			result[attr] = default_input[attr]
 		elif attr == "network_params":
 			result["network_params"] = {}
-			for attr_ in dir(input_args.network_params):
-				value_ = getattr(input_args.network_params, attr_)
-				if type(value_) == "int" and value_ == 0:
-					result["network_params"][attr_] = default_input["network_params"][attr_]
-				elif type(value_) == "string" and value_ == "":
-					result["network_params"][attr_] = default_input["network_params"][attr_]
-				# if there are some string, int values we assign it
-				elif type(value_) in ("int", "string", "bool"):
-					result["network_params"][attr_] = value_
-				elif type(value) in "proto.EnumValueDescriptor":
-					result[attr] = value.name					
+			for sub_attr in dir(input_args.network_params):
+				sub_value = getattr(input_args.network_params, sub_attr)
+				# if its insterted we use the value inserted				
+				if sub_attr not in (DESCRIPTOR_ATTR_NAME) and proto.has(input_args.network_params, sub_attr):
+					result["network_params"][sub_attr] = get_value_or_name(sub_value)
+				# if not we grab the value from the default value dictionary					
+				elif sub_attr not in (DESCRIPTOR_ATTR_NAME):
+					result["network_params"][sub_attr] = default_input["network_params"][sub_attr]	
 		# no participants are assigned at all
 		elif attr == "participants" and len(value) == 0:
 			result["participants"] = default_input["participants"]
@@ -59,26 +48,20 @@ def parse_input(input_args):
 			participants = []
 			for participant in input_args.participants:
 				participant_value = {}
-				for attr_ in dir(participant):
-					value_ = getattr(participant, attr_)
-					if type(attr_) == "int" and value_ == 0:
-						participant_value[attr_] = getattr(default_input[participants][0], attr_, 0)
-					elif type(attr_) == "str" and value_ == "":
-						participant_value[attr_] = getattr(default_input[participants][0], attr_, "")
-					elif type(value_) in ("int", "string", "bool"):
-						result["participants"][attr_] = value_
-					elif type(value_) in "proto.EnumValueDescriptor":
-						participant_value[attr_] = value.name
+				for sub_attr in dir(participant):
+					sub_value = getattr(participant, sub_attr)
+					# if its insterted we use the value inserted
+					if sub_attr not in (DESCRIPTOR_ATTR_NAME) and proto.has(participant, sub_attr):
+						participant_value[sub_attr] = get_value_or_name(sub_value)
+					# if not we grab the value from the default value dictionary
+					elif sub_attr not in (DESCRIPTOR_ATTR_NAME):
+						participant_value[attr] = default_input["participants"][0].get(sub_attr, "")
 				participants.append(participant_value)
 			result["participants"] = participants
-		# if there are some string, int values we assign it
-		elif type(value) in ("int", "string", "bool"):
-			result[attr] = value
-		elif type(value) in "proto.EnumValueDescriptor":
-			result[attr] = value.name
 
+
+	# validation of the above defaults
 	for index, participant in enumerate(result["participants"]):
-		# this is really ugly we need some primitive to throw an error
 		el_client_type = participant["el_client_type"]
 		cl_client_type = participant["cl_client_type"]
 
@@ -129,11 +112,14 @@ def parse_input(input_args):
 	if len(result["participants"]) >= 2 and result["participants"][1]["el_client_type"] == NETHERMIND_NODE_NAME:
 		fail("nethermind can't be the first or second node")
 
-
-	encoded_json = json.encode(result)
 	return result
 
 
+
+def get_value_or_name(value):
+	if type(value) == ENUM_TYPE:
+		return value.name
+	return value
 
 
 def default_module_input():
@@ -142,7 +128,7 @@ def default_module_input():
 	return {
 		"participants": participants,
 		"network_params": network_params,
-		LAUNCH_ADDITIONAL_ATTR: True,
+		"launch_additional_services" : True,
 		"wait_for_finalization":      False,
 		"wait_for_verifications":     False,
 		"verifications_epoch_limit":  5,

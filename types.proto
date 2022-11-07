@@ -6,7 +6,7 @@ message ModuleInput {
 	repeated Participant participants = 1;
 	
 	// Parameters controlling the settings of the network itself
-	NetworkParams network_params = 2;
+	optional NetworkParams network_params = 2;
 
 	// True by defaults such that in addition to the Ethereum network:
 	//  - A transaction spammer is launched to fake transactions sent to the network
@@ -22,16 +22,16 @@ message ModuleInput {
 
 	// If set, the module will block until a finalized epoch has occurred.
 	// If `waitForVerifications` is set to true, this extra wait will be skipped.
-	bool wait_for_finalization = 4;
+	optional bool wait_for_finalization = 4;
 
 	// If set to true, the module will block until all verifications have passed
-	bool wait_for_verifications = 5;
+	optional bool wait_for_verifications = 5;
 
 	// If set, after the merge, this will be the maximum number of epochs wait for the verifications to succeed.
-	uint64 verifications_epoch_limit = 6;
+	optional uint64 verifications_epoch_limit = 6;
 
 	// The log level that the started clients should log at
-	GlobalLogLevel global_log_level = 7;
+	optional GlobalLogLevel global_log_level = 7;
 }
 
 enum GlobalLogLevel {
@@ -64,30 +64,30 @@ message BuilderNetworkParams {
 
 message Participant {
 	// The type of EL client that should be started
-	ELClientType el_client_type = 1;
+	optional ELClientType el_client_type = 1;
 	// The Docker image that should be used for the EL client; leave blank to use the default
-	string el_client_image  = 2;
+	optional string el_client_image  = 2;
 	// The log level string that this participant's EL client should log at
 	// If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
 	//  global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
 	// If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
 	//  over a specific participant's logging	
-	string el_client_log_level = 3;
+	optional string el_client_log_level = 3;
 	// Optional extra parameters that will be passed to the EL client
 	repeated string el_extra_params = 4;
 
 	// The type of CL client that should be started
-	CLClientType cl_client_type = 5;
+	optional CLClientType cl_client_type = 5;
 	// The Docker image that should be used for the EL client; leave blank to use the default
 	// NOTE: Prysm is different in that it requires two images - a Beacon and a validator
 	//  For Prysm and Prysm only, this field should contain a comma-separated string of "beacon_image,validator_image"	
-	string cl_client_image  = 6;
+	optional string cl_client_image  = 6;
 	// The log level string that this participant's CL client should log at
 	// If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
 	//  global `logLevel` = `info` then Nimbus would receive `INFO`, Prysm would receive `info`, etc.)
 	// If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
 	//  over a specific participant's logging	
-	string cl_client_log_level = 7;
+	optional string cl_client_log_level = 7;
 	
 	// Extra parameters that will be passed to the Beacon container (if a separate one exists), or to the combined node if
 	// the Beacon and validator are combined
@@ -97,23 +97,23 @@ message Participant {
 	// the Beacon and validator are combined
 	repeated string validator_extra_params = 9;
 
-	BuilderNetworkParams builder_network_params = 10;
+	optional BuilderNetworkParams builder_network_params = 10;
 }
 
 message NetworkParams {
 	// The network ID of the Eth1 network
-	string network_id = 1;
+	optional string network_id = 1;
 	// The address of the staking contract address on the Eth1 chain
-	string deposit_contract_address = 2;
+	optional string deposit_contract_address = 2;
 	// Number of seconds per slot on the Beacon chain
-	uint32 seconds_per_slot = 3;
+	optional uint32 seconds_per_slot = 3;
 	// Number of slots in an epoch on the Beacon chain
-	uint32 slots_per_epoch = 4;
+	optional uint32 slots_per_epoch = 4;
 	// The number of validator keys that each CL validator node should get
-	uint32 num_validators_per_keynode = 5;
+	optional uint32 num_validators_per_keynode = 5;
 	// This menmonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
 	//  validator keys already preregistered as validators	
-	string preregistered_validator_keys_mnemonic = 6;
+	optional string preregistered_validator_keys_mnemonic = 6;
 }
 
 
