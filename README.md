@@ -46,7 +46,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 - [ ] participant_network/cl (requires facts and waits)
   - [ ] lighthouse 
     - [ ] facts and waits
-    - [ ] framework
+    - [x] framework
   - [ ] loadstar
     - [ ] facts and waits
     - [ ] framework

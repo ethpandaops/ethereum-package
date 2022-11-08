@@ -12,5 +12,13 @@ def path_base(path):
 	return split_path[-1]
 
 
+def path_dir(path):
+	split_path = path.split("/")
+	if len(split_path) <= 1:
+		return "."
+	split_path = split_path[:-1]
+	return "/".join(split_path) or "/"
+
+
 def new_port_spec(number, protocol):
 	return struct(number = number, protocol = protocol)
