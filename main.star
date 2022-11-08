@@ -9,11 +9,11 @@ def main(input_args):
 	print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, input_args_with_right_defaults.network_params))
 	launch_participant_network(num_participants, input_args_with_right_defaults.network_params)
 	#TODO replace with actual values
-	grafana_info = module_io.GrafanaInfo({
-		"dashboard_path": "dummy_path",
-		"user": "user",
-		"password": "password"
-	})
+	grafana_info = module_io.GrafanaInfo(
+		dashboard_path = "dummy_path",
+		user = "user",
+		password = "password"
+	)
 	output = module_io.ModuleOutput({"grafana_info": grafana_info})
 	return output
 
