@@ -26,7 +26,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] data generation
   - [x] remove services post generation
 - [ ] participant_network/el (requires facts and waits)
-  - [ ] besu - facts and waits
+  - [ ] besu - facts and waits + private_ip_address_placeholder
   - [ ] erigon - facts and waits
   - [ ] geth - facts and waits
   - [ ] nethermind - facts and waits
