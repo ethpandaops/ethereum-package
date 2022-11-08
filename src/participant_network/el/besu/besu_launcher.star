@@ -125,10 +125,14 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, log
 	if len(extra_params) > 0:
 		launch_node_command.append(extra_params)
 
+	# doing this as the eth2 module does this
+	# TODO potentially remove this and just pass the launch_node_command
+	launch_node_command_str = " ".join(launch_node_command)
+
 	return struct(
 		container_image_name = image,
 		used_ports = USED_PORTS,
-		cmd_args = launch_node_command,
+		cmd_args = [launch_node_command_str],
 		files_artifact_mount_dirpaths = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER
 		},

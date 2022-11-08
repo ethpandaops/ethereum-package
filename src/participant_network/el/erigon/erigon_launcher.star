@@ -81,49 +81,60 @@ def launch(
 	)
 
 
-def get_service_config(network_id, genesis_data, image, existing_el_clients, log_level, extra_params):
+def get_service_config(network_id, genesis_data, image, existing_el_clients, verbosity_level, extra_params):
 	network_id = network_id
 
-	genesis_json_filepath_on_client = path_join(GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER, genesis_data.besu_genesis_json_relative_filepath)
-	jwt_secret_json_filepath_on_client = path_join(GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER, genesis_data.jwt_secret_relative_filepath)
+	genesis_json_filepath_on_client = path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.besu_genesis_json_relative_filepath)
+	jwt_secret_json_filepath_on_client = path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath)
 
-	launch_node_command = [
-		"besu",
-		"--logging=" + log_level,
-		"--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-		"--genesis-file=" + genesis_json_filepath_on_client,
-		"--network-id=" + network_id,
-		"--host-allowlist=*",
-		"--rpc-http-enabled=true",
-		"--rpc-http-host=0.0.0.0",
-		"--rpc-http-port={0}".format(RPC_PORT_NUM),
-		"--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE",
-		"--rpc-http-cors-origins=*",
-		"--rpc-ws-enabled=true",
-		"--rpc-ws-host=0.0.0.0",
-		"--rpc-ws-port={0}".format(WS_PORT_NUM),
-		"--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE",
-		"--p2p-enabled=true",
-		"--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER
-		"--p2p-port={0}".format(DISCOVERY_PORT_NUM),
-		"--engine-rpc-enabled=true",
-		"--engine-jwt-secret={0}".formaT(jwt_secret_json_filepath_on_client),
-		"--engine-host-allowlist=*",
-		"--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
+	init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
+		EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+		genesis_json_filepath_on_client,
+	)
+
+
+	if len(existing_el_clients) == 0:
+		fail("Erigon needs at least one node to exist, which it treats as the bootnode")
+
+	boot_node = existing_el_clients[0]
+
+	launch_node_cmd_args = [
+		"erigon",
+		"--verbosity=" + verbosity_level,
+		"--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+		"--networkid=" + network_id,
+		"--http",
+		"--http.addr=0.0.0.0",
+		"--http.corsdomain=*",
+		# WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
+		#  that users should NOT store private information in these Kurtosis nodes!
+		"--http.api=admin,engine,net,eth",
+		"--ws",
+		"--allow-insecure-unlock",
+		"--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+		"--engine.port={0}".format(ENGINE_RPC_PORT_NUM),
+		"--engine.addr=0.0.0.0",
+		"--authrpc.jwtsecret={0}".format(jwt_secret_json_filepath_on_client),
+		"--nodiscover",
+		"--staticpeers={0}".format(boot_node.enode),
 	]
 
-	if len(existing_el_clients) > 0:
-		launch_node_command.append("--bootnodes={0},{1}".format(boot_node_1.enode, boot_node_2.enode))
-
 	if len(extra_params) > 0:
-		launch_node_command.append(extra_params)
+		launch_node_cmd_args.append(extra_params)
+
+	command_arg = [
+		init_datadir_cmd_str,
+		" ".join(launch_node_cmd_args)
+	]
+
+	command_arg_str = " && ".join(command_arg)
 
 	return struct(
 		container_image_name = image,
 		used_ports = USED_PORTS,
-		cmd_args = launch_node_command,
+		cmd_args = [command_arg_str],
 		files_artifact_mount_dirpaths = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER
+			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
 		},
 		entry_point_args = ENTRYPOINT_ARGS,
 		# TODO add private IP address place holder when add servicde supports it
