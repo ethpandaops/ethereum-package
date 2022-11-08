@@ -6,7 +6,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 
 ### Parity Missing Tasks
 
-- [ ] Module IO (this is blocked on Startosis Args working)
+- [x] Module IO (this is blocked on Startosis Args working)
 - [x] forkmon (this is blocked on CL clients running)
 - [x] prometheus (this is blocked on CL clients running)
 - [x] grafana (this is blocked on prometheus running)

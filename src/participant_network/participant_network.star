@@ -15,7 +15,7 @@ def launch_participant_network(num_participants, network_params):
 	keystore_result = generate_cl_validator_keystores(
 		network_params.preregistered_validator_keys_mnemonic,
 		num_participants,
-		network_params.num_validator_keys_per_node
+		network_params.num_validators_per_keynode
 	)
 
 	
@@ -38,7 +38,7 @@ def launch_participant_network(num_participants, network_params):
 	print("Generating CL data")
 	genesis_generation_config_yml_template = read_file("github.com/kurtosis-tech/eth2-module/static_files/genesis-generation-config/cl/config.yaml.tmpl")
 	genesis_generation_mnemonics_yml_template = read_file("github.com/kurtosis-tech/eth2-module/static_files/genesis-generation-config/cl/mnemonics.yaml.tmpl")
-	total_number_of_validator_keys = network_params.num_validator_keys_per_node * num_participants
+	total_number_of_validator_keys = network_params.num_validators_per_keynode * num_participants
 	cl_data = generate_cl_genesis_data(
 		genesis_generation_config_yml_template,
 		genesis_generation_mnemonics_yml_template,
@@ -57,7 +57,7 @@ def launch_participant_network(num_participants, network_params):
 	print("launching mev boost")
 	# TODO make this launch only for participants that have the participants[i].builderNetworkParams.relayEndpoints defined
 	# At the moment this lies here just to test, and the relay end points is an empty list
-	mev_boost_launcher = new_mev_boost_launcher(MEV_BOOST_SHOULD_RELAY, network_params.mev_boost_relay_endpoints)
+	mev_boost_launcher = new_mev_boost_launcher(MEV_BOOST_SHOULD_RELAY, [])
 	mev_boost_service_id = MEV_BOOST_SERVICE_ID_PREFIX.format(1)
 	mev_boost_context = launch_mevboost(mev_boost_launcher, mev_boost_service_id, network_params.network_id)
 	print(mev_boost_endpoint(mev_boost_context))
