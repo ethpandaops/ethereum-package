@@ -133,6 +133,7 @@ def get_service_config(launcher, image, existing_el_clients, log_level, extra_pa
 		},
 		# TODO add private IP address place holder when add servicde supports it
 		# for now this will work as we use the service config default above
+		# https://github.com/kurtosis-tech/kurtosis/pull/290
 	)
 
 
