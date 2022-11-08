@@ -31,10 +31,10 @@ message ModuleInput {
 	optional uint64 verifications_epoch_limit = 6;
 
 	// The log level that the started clients should log at
-	optional GlobalLogLevel global_log_level = 7;
+	optional GlobalClientLogLevel global_client_log_level = 7;
 }
 
-enum GlobalLogLevel {
+enum GlobalClientLogLevel {
 	info = 0;
 	error = 1;
 	warn = 2;

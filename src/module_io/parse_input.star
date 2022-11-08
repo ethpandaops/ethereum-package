@@ -132,7 +132,7 @@ def default_module_input():
 		"wait_for_finalization":      False,
 		"wait_for_verifications":     False,
 		"verifications_epoch_limit":  5,
-		"global_log_level": "info"
+		"global_client_log_level": "info"
 	}
 
 
