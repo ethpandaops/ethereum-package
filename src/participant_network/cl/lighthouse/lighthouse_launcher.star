@@ -4,6 +4,7 @@ load("github.com/kurtosis-tech/eth2-module/src/cl/cl_client_context.star", "new_
 load("github.com/kurtosis-tech/eth2-module/src/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
 load("github.com/kurtosis-tech/eth2-module/src/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
 
+module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
 LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
 
