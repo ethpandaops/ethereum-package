@@ -37,7 +37,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
     - [x] framework
   - [ ] nethermind
     - [ ] facts and waits + private_ip_address_placeholder
-    - [ ] framework
+    - [x] framework
   - [x] el_client_context pure POJO NO BLOCKERS
   - [x] el_client_launcher interface not necessary
   - [ ] el_availability_waiter - facts and waits
