@@ -63,10 +63,7 @@ VERBOSITY_LEVELS = {
 }
 
 def launch(
-	network_id,
-	el_genesis_data,
-	prefunded_geth_keys_artifact_uuid,
-	prefunded_account_info,
+	launcher,
 	service_id,
 	image,
 	participant_log_level,
@@ -78,7 +75,8 @@ def launch(
 
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, ERIGON_LOG_LEVELS)
 
-	service_config  = get_service_config(network_id, el_genesis_data, prefunded_geth_keys_artifact_uuid, prefunded_account_info, image, network_id, existing_el_clients, log_level, extra_params)
+	service_config = get_service_config(launcher.network_id, launcher.el_genesis_data, launcher.prefunded_geth_keys_artifact_uuid,
+                                    launcher.prefunded_account_info, image, network_id, existing_el_clients, log_level, extra_params)
 
 	service = add_service(service_id, service_config)
 
@@ -191,4 +189,13 @@ def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uu
 		# TODO add private IP address place holder when add servicde supports it
 		# for now this will work as we use the service config default above
 		# https://github.com/kurtosis-tech/kurtosis/pull/290
+	)
+
+
+def new_geth_launcher(network_id, el_genesis_data, prefunded_geth_keys_artifact_uuid, prefunded_account_info):
+	return struct(
+		network_id = network_id,
+		el_genesis_data = el_genesis_data,
+		prefunded_account_info = prefunded_account_info,
+		prefunded_geth_keys_artifact_uuid = prefunded_geth_keys_artifact_uuid,
 	)
