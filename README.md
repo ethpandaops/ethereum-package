@@ -26,10 +26,18 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] data generation
   - [x] remove services post generation
 - [ ] participant_network/el (requires facts and waits)
-  - [ ] besu - facts and waits + private_ip_address_placeholder
-  - [ ] erigon - facts and waits
-  - [ ] geth - facts and waits
-  - [ ] nethermind - facts and waits
+  - [ ] besu
+    - [ ] facts and waits + private_ip_address_placeholder
+    - [x] framework
+  - [ ] erigon
+    - [ ] facts and waits + private_ip_address_placeholder
+    - [x] framework
+  - [ ] geth
+    - [ ] facts and waits + private_ip_address_placeholder
+    - [ ] framework
+  - [ ] nethermind
+    - [ ] facts and waits + private_ip_address_placeholder
+    - [ ] framework
   - [x] el_client_context pure POJO NO BLOCKERS
   - [x] el_client_launcher interface not necessary
   - [ ] el_availability_waiter - facts and waits
