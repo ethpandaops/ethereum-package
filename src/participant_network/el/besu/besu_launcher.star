@@ -123,7 +123,7 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, log
 		launch_node_command.append("--bootnodes={0},{1}".format(boot_node_1.enode, boot_node_2.enode))
 
 	if len(extra_params) > 0:
-		launch_node_command.append(extra_params)
+		launch_node_command.extend(extra_params)
 
 	# doing this as the eth2 module does this
 	# TODO potentially remove this and just pass the launch_node_command
