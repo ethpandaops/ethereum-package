@@ -23,6 +23,8 @@ UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_HTTP_RPC_PORT_ID = "engineHttpRpc"
 ENGINE_WS_RPC_PORT_ID = "engineWsRpc"
 
+# required for wait & fact maybe
+# TODO see if it is otherwise remove
 GET_NODE_INFO_MAX_RETRIES = 20
 GET_NODE_INFO_TIME_BETWEEN_RETRIES = 1 * time.second
 
@@ -30,14 +32,14 @@ PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 # TODO push this into shared_utils
 TCP_PROTOCOL = "TCP"
-UDP_PROTOCOL = "TCP"
+UDP_PROTOCOL = "UDP"
 
 USED_PORTS = {
 	RPC_PORT_ID: new_port_spec(RPC_PORT_NUM, TCP_PROTOCOL),
 	WS_PORT_ID: new_port_spec(WS_PORT_NUM, TCP_PROTOCOL),
 	TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
 	UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
-	ENGINE_HTTP_RPC_PORT_ID: new_port_spec(ENGINE_WS_RPC_PORT_NUM, TCP_PROTOCOL)
+	ENGINE_HTTP_RPC_PORT_ID: new_port_spec(ENGINE_HTTP_RPC_PORT_NUM, TCP_PROTOCOL)
 	ENGINE_WS_RPC_PORT_ID: new_port_spec(ENGINE_WS_RPC_PORT_NUM, TCP_PROTOCOL)
 }
 
@@ -54,7 +56,8 @@ BESU_LOG_LEVELS = {
 
 
 def launch(
-	launcher,
+	network_id,
+	el_genesis_data,
 	service_id,
 	image,
 	participant_log_level,
@@ -64,7 +67,7 @@ def launch(
 	
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, BESU_LOG_LEVELS)
 
-	service_config  = get_service_config(launcher, image, network_id, existing_el_clients, log_level, extra_params)
+	service_config  = get_service_config(network_id, el_genesis_data, image, network_id, existing_el_clients, log_level, extra_params)
 
 	service = add_service(service_id, service_config)
 
@@ -80,9 +83,9 @@ def launch(
 	)
 
 
-def get_service_config(launcher, image, existing_el_clients, log_level, extra_params):
-	network_id = launcher.network_id
-	genesis_data = launcher.el_genesis_data
+def get_service_config(network_id, el_genesis_data, image, existing_el_clients, log_level, extra_params):
+	network_id = network_id
+	genesis_data = el_genesis_data
 
 	if len(existing_el_clients) < 0:
 		fail("Besu node cannot be boot nodes, and due to a bug it requires two nodes to exist beforehand")
@@ -137,9 +140,3 @@ def get_service_config(launcher, image, existing_el_clients, log_level, extra_pa
 		# https://github.com/kurtosis-tech/kurtosis/pull/290
 	)
 
-
-def new_besu_el_client_launcher(el_genesis_data, network_id):
-	return struct(
-		el_genesis_data = el_genesis_data,
-		network_id = network_id,
-	)
