@@ -64,7 +64,7 @@ def launch(
 	global_log_level,
 	existing_el_clients,
 	extra_params):
-	
+
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, BESU_LOG_LEVELS)
 
 	service_config  = get_service_config(network_id, el_genesis_data, image, network_id, existing_el_clients, log_level, extra_params)
@@ -74,6 +74,7 @@ def launch(
 	# TODO add facts & waits
 
 	return new_el_client_context(
+		"besu",
 		"", # besu has no ENR
 		"", # TODO add Enode from wait & fact,
 		service.ip_address,
@@ -83,10 +84,7 @@ def launch(
 	)
 
 
-def get_service_config(network_id, el_genesis_data, image, existing_el_clients, log_level, extra_params):
-	network_id = network_id
-	genesis_data = el_genesis_data
-
+def get_service_config(network_id, genesis_data, image, existing_el_clients, log_level, extra_params):
 	if len(existing_el_clients) < 0:
 		fail("Besu node cannot be boot nodes, and due to a bug it requires two nodes to exist beforehand")
 

@@ -51,3 +51,82 @@ ERIGON_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.debug: "4",
 	module_io.GlobalClientLogLevel.trace: "5",
 }
+
+def launch(
+	network_id,
+	el_genesis_data,
+	service_id,
+	image,
+	participant_log_level,
+	global_log_level,
+	existing_el_clients,
+	extra_params):
+
+	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, ERIGON_LOG_LEVELS)
+
+	service_config  = get_service_config(network_id, el_genesis_data, image, network_id, existing_el_clients, log_level, extra_params)
+
+	service = add_service(service_id, service_config)
+
+	# TODO add facts & waits
+
+	return new_el_client_context(
+		"erigon",
+		"", # TODO fetch ENR from wait & fact
+		"", # TODO add Enode from wait & fact,
+		service.ip_address,
+		RPC_PORT_NUM,
+		WS_PORT_NUM,
+		ENGINE_HTTP_RPC_PORT_NUM
+	)
+
+
+def get_service_config(network_id, genesis_data, image, existing_el_clients, log_level, extra_params):
+	network_id = network_id
+
+	genesis_json_filepath_on_client = path_join(GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER, genesis_data.besu_genesis_json_relative_filepath)
+	jwt_secret_json_filepath_on_client = path_join(GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER, genesis_data.jwt_secret_relative_filepath)
+
+	launch_node_command = [
+		"besu",
+		"--logging=" + log_level,
+		"--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+		"--genesis-file=" + genesis_json_filepath_on_client,
+		"--network-id=" + network_id,
+		"--host-allowlist=*",
+		"--rpc-http-enabled=true",
+		"--rpc-http-host=0.0.0.0",
+		"--rpc-http-port={0}".format(RPC_PORT_NUM),
+		"--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE",
+		"--rpc-http-cors-origins=*",
+		"--rpc-ws-enabled=true",
+		"--rpc-ws-host=0.0.0.0",
+		"--rpc-ws-port={0}".format(WS_PORT_NUM),
+		"--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE",
+		"--p2p-enabled=true",
+		"--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER
+		"--p2p-port={0}".format(DISCOVERY_PORT_NUM),
+		"--engine-rpc-enabled=true",
+		"--engine-jwt-secret={0}".formaT(jwt_secret_json_filepath_on_client),
+		"--engine-host-allowlist=*",
+		"--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
+	]
+
+	if len(existing_el_clients) > 0:
+		launch_node_command.append("--bootnodes={0},{1}".format(boot_node_1.enode, boot_node_2.enode))
+
+	if len(extra_params) > 0:
+		launch_node_command.append(extra_params)
+
+	return struct(
+		container_image_name = image,
+		used_ports = USED_PORTS,
+		cmd_args = launch_node_command,
+		files_artifact_mount_dirpaths = {
+			genesis_data.files_artifact_uuid: GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER
+		},
+		entry_point_args = ENTRYPOINT_ARGS,
+		# TODO add private IP address place holder when add servicde supports it
+		# for now this will work as we use the service config default above
+		# https://github.com/kurtosis-tech/kurtosis/pull/290
+	)
