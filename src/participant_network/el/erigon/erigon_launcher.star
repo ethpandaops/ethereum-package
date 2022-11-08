@@ -64,7 +64,7 @@ def launch(
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, ERIGON_LOG_LEVELS)
 
 	service_config = get_service_config(launcher.network_id, launcher.el_genesis_data,
-                                    image, network_id, existing_el_clients, log_level, extra_params)
+                                    image, existing_el_clients, log_level, extra_params)
 
 	service = add_service(service_id, service_config)
 
@@ -84,7 +84,7 @@ def launch(
 def get_service_config(network_id, genesis_data, image, existing_el_clients, verbosity_level, extra_params):
 	network_id = network_id
 
-	genesis_json_filepath_on_client = path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.besu_genesis_json_relative_filepath)
+	genesis_json_filepath_on_client = path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.erigon_genesis_json_relative_filepath)
 	jwt_secret_json_filepath_on_client = path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath)
 
 	init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(

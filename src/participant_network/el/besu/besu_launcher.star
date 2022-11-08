@@ -67,7 +67,7 @@ def launch(
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, BESU_LOG_LEVELS)
 
 	service_config = get_service_config(launcher.network_id, launcher.el_genesis_data,
-                                    image, network_id, existing_el_clients, log_level, extra_params)
+                                    image, existing_el_clients, log_level, extra_params)
 
 	service = add_service(service_id, service_config)
 
@@ -85,7 +85,7 @@ def launch(
 
 
 def get_service_config(network_id, genesis_data, image, existing_el_clients, log_level, extra_params):
-	if len(existing_el_clients) < 0:
+	if len(existing_el_clients) < 2:
 		fail("Besu node cannot be boot nodes, and due to a bug it requires two nodes to exist beforehand")
 
 	boot_node_1 = existing_el_clients[0]

@@ -76,7 +76,7 @@ def launch(
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, ERIGON_LOG_LEVELS)
 
 	service_config = get_service_config(launcher.network_id, launcher.el_genesis_data, launcher.prefunded_geth_keys_artifact_uuid,
-                                    launcher.prefunded_account_info, image, network_id, existing_el_clients, log_level, extra_params)
+                                    launcher.prefunded_account_info, image, existing_el_clients, log_level, extra_params)
 
 	service = add_service(service_id, service_config)
 
