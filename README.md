@@ -49,7 +49,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
     - [x] framework
   - [ ] loadstar
     - [ ] facts and waits
-    - [ ] framework
+    - [x] framework
   - [ ] nymbus
     - [ ] facts and waits
     - [ ] framework  
