@@ -1,4 +1,5 @@
 load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "new_template_and_data", "path_join")
+load("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star", "GRAFANA_DASHBOARDS_CONFIG_DIRPATH")
 
 
 SERVICE_ID = "grafana"
@@ -19,6 +20,7 @@ CONFIG_DIRPATH_ENV_VAR = "GF_PATHS_PROVISIONING"
 GRAFANA_CONFIG_DIRPATH_ON_SERVICE = "/config"
 GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE = "/dashboards"
 GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE = GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE + "/dashboard.json"
+
 
 USED_PORTS = {
 	HTTP_PORT_ID: new_port_spec(HTTP_PORT_NUMBER_UINT16, HTTP_PORT_PROTOCOL)
@@ -48,8 +50,7 @@ def get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_p
 
 	grafana_config_artifacts_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
-	# TODO return actual UUID after upload_files is implemented
-	grafana_dashboards_artifacts_uuid = ""
+	grafana_dashboards_artifacts_uuid = upload_files(GRAFANA_DASHBOARDS_CONFIG_DIRPATH)
 
 	return grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid
 
