@@ -120,7 +120,7 @@ def launch(
 		extra_validator_params,
 	)
 
-	validtor_service = add_service(validator_node_service_id, validator_service_config)
+	validator_service = add_service(validator_node_service_id, validator_service_config)
 
 	# TODO add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
@@ -130,12 +130,12 @@ def launch(
 	beacon_metrics_port = beacon_service.ports[BEACON_METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
 
-	validator_metrics_port = validtor_service.ports[VALIDATOR_METRICS_PORT_ID]
-	validator_metrics_url = "{00}:{1}".format(validtor_service.ip_address, validator_metrics_port.number)
+	validator_metrics_port = validator_service.ports[VALIDATOR_METRICS_PORT_ID]
+	validator_metrics_url = "{00}:{1}".format(validator_service.ip_address, validator_metrics_port.number)
 
 	beacon_node_metrics_info = new_cl_node_metrics_info(beacon_node_service_id, METRICS_PATH, beacon_metrics_url)
 	validator_node_metrics_info = new_cl_node_metrics_info(validator_node_service_id, METRICS_PATH, validator_metrics_url)
-	nodes_metrics_info = [beacon_node_metrics_info, validatorNodeMetricsInfo]
+	nodes_metrics_info = [beacon_node_metrics_info, validator_node_metrics_info]
 
 	result = new_cl_client_context(
 		"lighthouse",
@@ -211,10 +211,10 @@ def get_beacon_service_config(
 	if boot_cl_client_ctx != None:
 		cmd_args.append("--boot-nodes="+boot_cl_client_ctx.enode)
 
-	if mev_boost_context != nil {
+	if mev_boost_context != None:
 		cmd_args.append("--builder")
 		cmd_args.append(mev_boost_endpoint(mev_boost_context))
-	}
+
 
 	if len(extra_params) > 0 {
 		cmd_args.extend(extra_params)
