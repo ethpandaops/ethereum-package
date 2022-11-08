@@ -44,11 +44,21 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] el_rest_client/api_response_objects.go DESCOPED as facts will do this
   - [x] el_rest_client/el_rest_client - facts and waits  DESCOPED as facts will do this
 - [ ] participant_network/cl (requires facts and waits)
-  - [ ] lighthouse - facts and waits
-  - [ ] loadstar - facts and waits
-  - [ ] nymbus - facts and waits
-  - [ ] prysm - facts and waits
-  - [ ] teku - facts and waits
+  - [ ] lighthouse 
+    - [ ] facts and waits
+    - [ ] framework
+  - [ ] loadstar
+    - [ ] facts and waits
+    - [ ] framework
+  - [ ] nymbus
+    - [ ] facts and waits
+    - [ ] framework  
+  - [ ] prysm
+    - [ ] facts and waits
+    - [ ] framework
+  - [ ] teku
+    - [ ] facts and waits
+    - [ ] framework  
   - [x] cl_client_context pure POJO NO BLOCKERS
   - [x] cl_client_launcher interface not necessary
   - [ ] cl_availability_waiter - facts and waits
