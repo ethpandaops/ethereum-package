@@ -131,6 +131,7 @@ def get_service_config(launcher, image, existing_el_clients, log_level, extra_pa
 		files_artifact_mount_dirpaths = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER
 		},
+		entry_point_args = ENTRYPOINT_ARGS,
 		# TODO add private IP address place holder when add servicde supports it
 		# for now this will work as we use the service config default above
 		# https://github.com/kurtosis-tech/kurtosis/pull/290
