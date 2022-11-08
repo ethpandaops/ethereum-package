@@ -114,7 +114,7 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, log
 		"--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER
 		"--p2p-port={0}".format(DISCOVERY_PORT_NUM),
 		"--engine-rpc-enabled=true",
-		"--engine-jwt-secret={0}".formaT(jwt_secret_json_filepath_on_client),
+		"--engine-jwt-secret={0}".format(jwt_secret_json_filepath_on_client),
 		"--engine-host-allowlist=*",
 		"--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
 	]
