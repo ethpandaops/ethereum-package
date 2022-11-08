@@ -77,7 +77,7 @@ def launch(
 		service.ip_address,
 		RPC_PORT_NUM,
 		WS_PORT_NUM,
-		ENGINE_HTTP_RPC_PORT_NUM
+		ENGINE_RPC_PORT_NUM
 	)
 
 

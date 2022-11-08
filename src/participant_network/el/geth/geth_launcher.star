@@ -83,13 +83,13 @@ def launch(
 	# TODO add facts & waits
 
 	return new_el_client_context(
-		"erigon",
+		"geth",
 		"", # TODO fetch ENR from wait & fact
 		"", # TODO add Enode from wait & fact,
 		service.ip_address,
 		RPC_PORT_NUM,
 		WS_PORT_NUM,
-		ENGINE_HTTP_RPC_PORT_NUM
+		ENGINE_RPC_PORT_NUM
 	)
 
 def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uuid, prefunded_account_info, image, existing_el_clients, verbosity_level, extra_params):
