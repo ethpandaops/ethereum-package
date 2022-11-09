@@ -156,7 +156,7 @@ def get_beacon_service_config(
 	log_level,
 	extra_params):
 
-	el_client_engine_rpc_url_str = "http://%v:%v".format(
+	el_client_engine_rpc_url_str = "http://{0}:{1}".format(
 		el_client_ctx.ip_addr,
 		el_client_ctx.engine_rpc_port_num,
 	)
@@ -204,7 +204,7 @@ def get_beacon_service_config(
 		"--metrics",
 		"--metrics-address=0.0.0.0",
 		"--metrics-allow-origin=*",
-		"--metrics-port=%v".format(BEACON_METRICS_PORT_NUM),
+		"--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
 		# ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
 	]
 
