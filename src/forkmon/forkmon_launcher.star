@@ -52,7 +52,7 @@ def get_service_config(config_files_artifact_uuid):
 		files_artifact_mount_dirpaths = {
 			config_files_artifact_uuid: FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
 		},
-		cmd_args = ["/usr/src/ethereum_consensus_monitor", "--config-path", config_file_path]
+		cmd_args = ["--config-path", config_file_path]
 	)
 
 
