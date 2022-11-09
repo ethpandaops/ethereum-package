@@ -1,6 +1,6 @@
 load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join")
 load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/el/el_client_context.star", "new_el_client_context")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/el_client_context.star", "new_el_client_context")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -42,8 +42,8 @@ USED_PORTS = {
 
 NETHERMIND_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.error: "ERROR",
-	module_io.GlobalClientLogLeve.warn:  "WARN",
-	module_io.GlobalClientLogLeve.info:  "INFO",
+	module_io.GlobalClientLogLevel.warn:  "WARN",
+	module_io.GlobalClientLogLevel.info:  "INFO",
 	module_io.GlobalClientLogLevel.debug: "DEBUG",
 	module_io.GlobalClientLogLevel.trace: "TRACE",
 }

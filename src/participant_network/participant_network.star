@@ -71,7 +71,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 	el_launchers = {
 		# TODO Allow for other types here
-		module_io.ELClientType.geth : {"launcher": new_geth_launcher(el_genesis_data, geth_prefunded_keys_artifact_id, PRE_FUNDED_ACCOUNTS, network_params.network_id), "launch_method": launch_geth}
+		module_io.ELClientType.geth : {"launcher": new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, PRE_FUNDED_ACCOUNTS), "launch_method": launch_geth}
 	}
 
 	all_el_client_contexts = []

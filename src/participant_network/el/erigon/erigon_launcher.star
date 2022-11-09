@@ -1,6 +1,6 @@
 load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join")
 load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/el/el_client_context.star", "new_el_client_context")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/el_client_context.star", "new_el_client_context")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -46,8 +46,8 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 ERIGON_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.error: "1",
-	module_io.GlobalClientLogLeve.warn:  "2",
-	module_io.GlobalClientLogLeve.info:  "3",
+	module_io.GlobalClientLogLevel.warn:  "2",
+	module_io.GlobalClientLogLevel.info:  "3",
 	module_io.GlobalClientLogLevel.debug: "4",
 	module_io.GlobalClientLogLevel.trace: "5",
 }

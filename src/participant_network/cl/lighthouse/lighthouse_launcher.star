@@ -1,8 +1,8 @@
 load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "path_dir")
 load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/cl/cl_client_context.star", "new_cl_client_context")
-load("github.com/kurtosis-tech/eth2-module/src/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
-load("github.com/kurtosis-tech/eth2-module/src/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star", "new_cl_client_context")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -66,8 +66,8 @@ VALIDATOR_USED_PORTS = {
 
 LIGHTHOUSE_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.error: "error",
-	module_io.GlobalClientLogLeve.warn:  "warn",
-	module_io.GlobalClientLogLeve.info:  "info",
+	module_io.GlobalClientLogLevel.warn:  "warn",
+	module_io.GlobalClientLogLevel.info:  "info",
 	module_io.GlobalClientLogLevel.debug: "debug",
 	module_io.GlobalClientLogLevel.trace: "trace",
 }
@@ -149,11 +149,11 @@ def launch(
 
 def get_beacon_service_config(
 	genesis_data,
-	image
+	image,
 	boot_cl_client_ctx,
 	el_client_ctx,
 	mev_boost_context,
-	log_level
+	log_level,
 	extra_params):
 
 	el_client_engine_rpc_url_str = "http://%v:%v".format(
@@ -216,9 +216,8 @@ def get_beacon_service_config(
 		cmd_args.append(mev_boost_endpoint(mev_boost_context))
 
 
-	if len(extra_params) > 0 {
+	if len(extra_params) > 0:
 		cmd_args.extend(extra_params)
-	}
 
 	return struct(
 		container_image_name = image,
@@ -244,7 +243,7 @@ def get_validator_service_config(
 	extra_params):
 
 	# For some reason, Lighthouse takes in the parent directory of the config file (rather than the path to the config file itself)
-	genesis_config_parent_dirpath_on_client = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, path_dir(launcher.genesisData.GetConfigYMLRelativeFilepath()))
+	genesis_config_parent_dirpath_on_client = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, path_dir(genesis_data.config_yml_rel_filepath))
 	validator_keys_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.RawKeysRelativeDirpath)
 	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.RawSecretsRelativeDirpath)
 	
@@ -296,7 +295,7 @@ def get_validator_service_config(
 
 
 
-def new_lighthouses_launcher(cl_genesi_data):
+def new_lighthouse_launcher(cl_genesi_data):
 	return struct(
 		cl_genesi_data = cl_genesi_data,
 	)

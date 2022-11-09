@@ -1,6 +1,6 @@
 load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join")
 load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/el/el_client_context.star", "new_el_client_context")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/el_client_context.star", "new_el_client_context")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -33,7 +33,7 @@ KEYSTORE_DIRPATH_ON_CLIENT_CONTAINER      = EXECUTION_DATA_DIRPATH_ON_CLIENT_CON
 EXPECTED_SECONDS_FOR_GETH_INIT                              = 10
 EXPECTED_SECONDS_PER_KEY_IMPORT                             = 8
 EXPECTED_SECONDS_AFTER_NODE_START_UNTIL_HTTP_SERVER_IS_AVAILABLE = 20
-GET_NODE_INFO_TIME_BETWEEN_RETRIES                           = 1 * time.Second
+GET_NODE_INFO_TIME_BETWEEN_RETRIES                           = 1 * time.second
 
 GETH_ACCOUNT_PASSWORD      = "password"          #  Password that the Geth accounts will be locked with
 GETH_ACCOUNT_PASSWORDS_FILE = "/tmp/password.txt" #  Importing an account to
@@ -56,8 +56,8 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
 	module_io.GlobalClientLogLevel.error: "1",
-	module_io.GlobalClientLogLeve.warn:  "2",
-	module_io.GlobalClientLogLeve.info:  "3",
+	module_io.GlobalClientLogLevel.warn:  "2",
+	module_io.GlobalClientLogLevel.info:  "3",
 	module_io.GlobalClientLogLevel.debug: "4",
 	module_io.GlobalClientLogLevel.trace: "5",
 }
@@ -73,7 +73,7 @@ def launch(
 	extra_params):
 
 
-	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, ERIGON_LOG_LEVELS)
+	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, VERBOSITY_LEVELS)
 
 	service_config = get_service_config(launcher.network_id, launcher.el_genesis_data, launcher.prefunded_geth_keys_artifact_uuid,
                                     launcher.prefunded_account_info, image, existing_el_clients, log_level, extra_params)
@@ -123,7 +123,7 @@ def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uu
 
 	launch_node_cmd_args = [
 		"geth",
-		"--verbosity=" + verbosityLevel,
+		"--verbosity=" + verbosity_level,
 		"--unlock=" + accounts_to_unlock_str,
 		"--password=" + GETH_ACCOUNT_PASSWORDS_FILE,
 		"--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -142,7 +142,7 @@ def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uu
 		"--ws.origins=*",
 		"--allow-insecure-unlock",
 		"--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-		"--verbosity=" + verbosityLevel,
+		"--verbosity=" + verbosity_level,
 		"--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
 		"--authrpc.addr=0.0.0.0",
 		"--authrpc.vhosts=*",
@@ -151,19 +151,17 @@ def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uu
 	]
 
 	bootnode_enode = ""
-	if len(existing_el_clients) > 0 {
+	if len(existing_el_clients) > 0:
 		bootnode_context = existing_el_clients[0]
 		bootnode_enode = bootnode_context.enode
-	}
 
 	launch_node_cmd_args.append(
 		launch_node_cmd_args,
 		'--bootnodes="%s"'.format(bootnode_enode),
 	)
 
-	if len(extraParams) > 0 {
-		launch_node_cmd_args.extend(extraParams)
-	}
+	if len(extra_params) > 0:
+		launch_node_cmd_args.extend(extra_params)
 
 	launch_node_cmd_str = " ".join(launch_node_cmd_args)
 
@@ -174,8 +172,6 @@ def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uu
 		launch_node_cmd_str,
 	]
 	command_str = " && ".join(subcommand_strs)
-
-
 
 	return struct(
 		container_image_name = image,
