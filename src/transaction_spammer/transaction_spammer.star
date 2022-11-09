@@ -19,10 +19,12 @@ def get_service_config(prefunded_addresses, el_client_context):
 	return struct(
 		container_image_name = IMAGE_NAME,
 		cmd_args = [
-			"http://{0}:{1}".fomrat(el_client_context.ip_addr, el_client_context.rpc_port_num),
+			"./tx-fuzz.bin",
+			"http://{0}:{1}".format(el_client_context.ip_addr, el_client_context.rpc_port_num),
 			"spam",
 			comma_separated_private_keys,
 			comma_separated_addresses
-		]
+		],
+		used_ports = {}
 	)
 
