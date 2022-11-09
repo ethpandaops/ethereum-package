@@ -14,7 +14,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 - [x] static_files package
 - [x] testnet_verifier (this is blocked on CL/EL clients running)
 - [x] transaction_spammer (this is blocked on EL clients running)
-- [ ] participant_network/participant_network
+- [ ] participant_network/participant_network DEMO
   - [ ] has most data generation things, needs to start EL/CL clients
   - [x] needs upload files to be implemented
 - [x] participant_network/participant
@@ -32,7 +32,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [ ] erigon
     - [ ] facts and waits + private_ip_address_placeholder
     - [x] framework
-  - [ ] geth
+  - [ ] geth DEMO
     - [ ] facts and waits + private_ip_address_placeholder
     - [x] framework
   - [ ] nethermind
@@ -44,7 +44,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] el_rest_client/api_response_objects.go DESCOPED as facts will do this
   - [x] el_rest_client/el_rest_client - facts and waits  DESCOPED as facts will do this
 - [ ] participant_network/cl (requires facts and waits)
-  - [ ] lighthouse 
+  - [ ] lighthouse DEMO
     - [ ] facts and waits
     - [x] framework
   - [ ] loadstar
