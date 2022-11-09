@@ -5,12 +5,14 @@ load("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star", 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star", "PRE_FUNDED_ACCOUNTS")
 
 load("github.com/kurtosis-tech/eth2-module/src/transaction_spammer/transaction_spammer.star", "launch_transaction_spammer")
+load("github.com/kurtosis-tech/eth2-module/src/forkmon/forkmon_launcher.star", "launch_forkmon")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
 def main(input_args):
 	input_args_with_right_defaults = module_io.ModuleInput(parse_input(input_args))
 	num_participants = len(input_args_with_right_defaults.participants)
+	network_params = input_args_with_right_defaults.network_params
 
 	grafana_datasource_config_template = read_file(GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH)
 	grafana_dashboards_config_template = read_file(GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH)
@@ -18,8 +20,8 @@ def main(input_args):
 
 	print("Read the prometheus, grafana templates")
 
-	print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, input_args_with_right_defaults.network_params))
-	all_participants, cl_gensis_timestamp = launch_participant_network(input_args_with_right_defaults.participants, input_args_with_right_defaults.network_params, input_args_with_right_defaults.global_client_log_level)
+	print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
+	all_participants, cl_gensis_timestamp = launch_participant_network(input_args_with_right_defaults.participants, network_params, input_args_with_right_defaults.global_client_log_level)
 
 	print(all_participants)
 	print(cl_gensis_timestamp)
@@ -40,6 +42,11 @@ def main(input_args):
 
 	# We need a way to do time.sleep
 	# TODO add code that waits for CL genesis
+
+	print("Launching forkmon")
+	forkmon_config_template = read_file(FORKMON_CONFIG_TEMPLATE_FILEPATH)
+	launch_forkmon(forkmon_config_template, all_cl_client_contexts, cl_gensis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
+	print("Succesfully launched forkmon")
 
 
 	grafana_info = module_io.GrafanaInfo(

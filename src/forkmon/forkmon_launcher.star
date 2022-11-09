@@ -5,7 +5,7 @@ SERVICE_ID = "forkmon"
 IMAGE_NAME = "ralexstokes/ethereum_consensus_monitor:latest"
 
 HTTP_PORT_ID     = "http"
-HTTP_PORT_NUMBER = uint16(80)
+HTTP_PORT_NUMBER = 80
 HTTP_PROTOCOL = "TCP"
 
 FORKMON_CONFIG_FILENAME = "forkmon-config.toml"
@@ -51,12 +51,12 @@ def get_service_config(config_files_artifact_uuid):
 		used_ports = USED_PORTS,
 		files_artifact_mount_dirpaths = {
 			config_files_artifact_uuid: FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
-		}
-		cmd_args = ["--config-path", config_file_path]
+		},
+		cmd_args = ["/usr/src/ethereum_consensus_monitor", "--config-path", config_file_path]
 	)
 
 
-def new_config_template_data():
+def new_config_template_data(listen_port_num, cl_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp):
 	return {
 		"ListenPortNum": listen_port_num,
 		"CLClientInfo": cl_client_info,

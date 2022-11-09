@@ -158,7 +158,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 			cl_client_context = launch_method(cl_launcher, cl_service_id, participant.cl_client_image, participant.cl_client_log_level, global_log_level, boot_cl_client_ctx,
               el_client_context, mev_boost_context, new_cl_node_validator_keystores, participant.beacon_extra_params, participant.validator_extra_params)
 
-		all_cl_client_contexts.append(el_client_context)
+		all_cl_client_contexts.append(cl_client_context)
 
 	all_participants = []
 
