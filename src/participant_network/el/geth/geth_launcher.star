@@ -78,8 +78,6 @@ def launch(
 	service_config = get_service_config(launcher.network_id, launcher.el_genesis_data, launcher.prefunded_geth_keys_artifact_uuid,
                                     launcher.prefunded_account_info, image, existing_el_clients, log_level, extra_params)
 
-	print(service_config)
-
 	service = add_service(service_id, service_config)
 
 	# TODO add facts & waits
