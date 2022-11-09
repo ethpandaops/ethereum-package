@@ -30,9 +30,8 @@ CL_GENESIS_DATA_GENERATION_TIME = 2 * time.minute
 # TODO Make this client-specific (currently this is Nimbus)
 CL_NODE_STARTUP_TIME = 45 * time.second
 
+MEV_BOOST_SHOULD_CHECK_RELAY = True
 
-MEV_BOOST_SERVICE_ID_PREFIX = "mev-boost-"
-MEV_BOOST_SHOULD_RELAY = True
 
 CL_CLIENT_CONTEXT_BOOTNODE = None
 
@@ -142,8 +141,8 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 		mev_boost_context = None
 
-		if proto.has(participant, builder_network_params):
-			mev_boost_launcher = new_mev_boost_launcher(MEV_BOOST_SHOULD_RELAY, [])
+		if proto.has(participant, "builder_network_params"):
+			mev_boost_launcher = new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
 			mev_boost_service_id = MEV_BOOST_SERVICE_ID_PREFIX.format(1)
 			mev_boost_context = launch_mevboost(mev_boost_launcher, mev_boost_service_id, network_params.network_id)
 
