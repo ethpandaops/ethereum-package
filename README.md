@@ -15,8 +15,9 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 - [x] testnet_verifier (this is blocked on CL/EL clients running)
 - [x] transaction_spammer (this is blocked on EL clients running)
 - [ ] participant_network/participant_network DEMO
-  - [ ] has most data generation things, needs to start EL/CL clients
+  - [x] has most data generation things, needs to start EL/CL clients
   - [x] needs upload files to be implemented
+  - [ ] need to fill in the dictionary with all el / cl types
 - [x] participant_network/participant
   - [x] pure POJO should be quick to implement NO BLOCKERS
 - [x] mev_boost participant_network/mev_boost NO BLOCKERS - removed some attributes that aren't used
