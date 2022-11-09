@@ -1,6 +1,8 @@
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant_network.star", "launch_participant_network")
 load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "parse_input")
 
+load("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star", "GRAFANA_DASHBOARDS_CONFIG_DIRPATH", "GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH", "GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH", "PROMETHEUS_CONFIG_TEMPLATE_FILEPATH", "FORKMON_CONFIG_TEMPLATE_FILEPATH")
+
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
 def main(input_args):

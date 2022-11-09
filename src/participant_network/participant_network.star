@@ -5,7 +5,7 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_dat
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_launcher.star", launch_mevboost="launch", "new_mev_boost_launcher")
 
-load("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star", "GETH_PREFUNDED_KEYS_DIRPATH")
+load("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star", "GETH_PREFUNDED_KEYS_DIRPATH", "EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH", "CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH", "CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH")
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/geth/geth_launcher.star", launch_geth="launch", "new_geth_launcher")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lighthouse/lighthouse_launcher.star", launch_lighthouse="launch", "new_lighthouse_launcher")
@@ -52,7 +52,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 	print(json.indent(json.encode(cl_validator_data)))
 
 	print("Generating EL data")
-	el_genesis_generation_config_template = read_file("github.com/kurtosis-tech/eth2-module/static_files/genesis-generation-config/el/genesis-config.yaml.tmpl")
+	el_genesis_generation_config_template = read_file(EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
 	el_genesis_data = generate_el_genesis_data(
 		el_genesis_generation_config_template,
 		el_genesis_timestamp,
@@ -97,8 +97,8 @@ def launch_participant_network(participants, network_params, global_log_level):
 	# verify that this works
 	cl_genesis_timestamp = (time.now() + CL_GENESIS_DATA_GENERATION_TIME + num_participants*CL_NODE_STARTUP_TIME).unix
 
-	genesis_generation_config_yml_template = read_file("github.com/kurtosis-tech/eth2-module/static_files/genesis-generation-config/cl/config.yaml.tmpl")
-	genesis_generation_mnemonics_yml_template = read_file("github.com/kurtosis-tech/eth2-module/static_files/genesis-generation-config/cl/mnemonics.yaml.tmpl")
+	genesis_generation_config_yml_template = read_file(CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
+	genesis_generation_mnemonics_yml_template = read_file(CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH)
 	total_number_of_validator_keys = network_params.num_validators_per_keynode * num_participants
 	cl_genesis_data = generate_cl_genesis_data(
 		genesis_generation_config_yml_template,
