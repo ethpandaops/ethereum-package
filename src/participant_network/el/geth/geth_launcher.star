@@ -54,6 +54,9 @@ USED_PORTS = {
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
+ENR_FACT_NAME = "enr-fact"
+ENODE_FACT_NAME = "enode-fact"
+
 VERBOSITY_LEVELS = {
 	module_io.GlobalClientLogLevel.error: "1",
 	module_io.GlobalClientLogLevel.warn:  "2",
@@ -80,12 +83,16 @@ def launch(
 
 	service = add_service(service_id, service_config)
 
-	# TODO add facts & waits
+	define_fact(service_id = service_id, fact_name = ENR_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "/", field_extractor = ".result.enr", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
+	enr = wait(service_id = service_id, fact_name = ENR_FACT_NAME)
+
+	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "/", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
+	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)	
 
 	return new_el_client_context(
 		"geth",
-		"", # TODO fetch ENR from wait & fact
-		"", # TODO add Enode from wait & fact,
+		enr,
+		enode,
 		service.ip_address,
 		RPC_PORT_NUM,
 		WS_PORT_NUM,
