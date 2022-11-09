@@ -21,7 +21,7 @@ USED_PORTS = {
 def launch_prometheus(config_template, cl_client_contexts):
 	all_cl_nodes_metrics_info = []
 	for client in cl_client_contexts:
-		all_cl_nodes_metrics_info.append(client.cl_nodes_metrics_info)
+		all_cl_nodes_metrics_info.extend(client.cl_nodes_metrics_info)
 
 	template_data = new_config_template_data(all_cl_nodes_metrics_info)
 	template_data_json = json.encode(template_data)

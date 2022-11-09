@@ -6,6 +6,7 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_dat
 
 load("github.com/kurtosis-tech/eth2-module/src/transaction_spammer/transaction_spammer.star", "launch_transaction_spammer")
 load("github.com/kurtosis-tech/eth2-module/src/forkmon/forkmon_launcher.star", "launch_forkmon")
+load("github.com/kurtosis-tech/eth2-module/src/prometheus/prometheus_launcher.star", "launch_prometheus")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -47,6 +48,13 @@ def main(input_args):
 	forkmon_config_template = read_file(FORKMON_CONFIG_TEMPLATE_FILEPATH)
 	launch_forkmon(forkmon_config_template, all_cl_client_contexts, cl_gensis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
 	print("Succesfully launched forkmon")
+
+	print("Launching prometheus...")
+	prometheus_private_url = launch_prometheus(
+		prometheus_config_template,
+		all_cl_client_contexts,
+	)
+	print("Successfully launched Prometheus")
 
 
 	grafana_info = module_io.GrafanaInfo(
