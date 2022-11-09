@@ -22,12 +22,3 @@ def path_dir(path):
 
 def new_port_spec(number, protocol):
 	return struct(number = number, protocol = protocol)
-
-
-def wait_for(duration):
-	now = time.now().unix
-	later = now + duration
-	while now < later:
-		now = time.now().unix
-		continue
-	return
