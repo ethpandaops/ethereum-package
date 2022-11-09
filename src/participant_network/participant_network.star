@@ -162,7 +162,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 	all_participants = []
 
-	for index, participant in participants:
+	for index, participant in enumerate(participants):
 		el_client_type = participant.el_client_type
 		cl_client_type = participant.cl_client_type
 

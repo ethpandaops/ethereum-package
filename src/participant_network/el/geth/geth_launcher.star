@@ -115,11 +115,11 @@ def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uu
 		KEYSTORE_DIRPATH_ON_CLIENT_CONTAINER,
 	)
 
-	create_passwords_file_cmd_str = "{ for i in $(seq 1 %v); do echo \"%v\" >> %v; done; }".format(
+	create_passwords_file_cmd_str = '{' + ' for i in $(seq 1 {0}); do echo "{1}" >> {2}; done; '.format(
 		len(prefunded_account_info),
 		GETH_ACCOUNT_PASSWORD,
 		GETH_ACCOUNT_PASSWORDS_FILE,
-	)
+	) + '}'
 
 	launch_node_cmd_args = [
 		"geth",
@@ -156,7 +156,6 @@ def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uu
 		bootnode_enode = bootnode_context.enode
 
 	launch_node_cmd_args.append(
-		launch_node_cmd_args,
 		'--bootnodes="%s"'.format(bootnode_enode),
 	)
 

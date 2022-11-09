@@ -157,13 +157,13 @@ def get_beacon_service_config(
 	extra_params):
 
 	el_client_engine_rpc_url_str = "http://%v:%v".format(
-		el_client_ctx.ip_address,
+		el_client_ctx.ip_addr,
 		el_client_ctx.engine_rpc_port_num,
 	)
 
 	# For some reason, Lighthouse takes in the parent directory of the config file (rather than the path to the config file itself)
 	genesis_config_parent_dirpath_on_client = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, path_dir(genesis_data.config_yml_rel_filepath))
-	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, genesis_data.jwt_secret_relative_filepath)
+	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, genesis_data.jwt_secret_rel_filepath)
 
 	# NOTE: If connecting to the merge devnet remotely we DON'T want the following flags; when they're not set, the node's external IP address is auto-detected
 	#  from the peers it communicates with but when they're set they basically say "override the autodetection and
@@ -244,8 +244,8 @@ def get_validator_service_config(
 
 	# For some reason, Lighthouse takes in the parent directory of the config file (rather than the path to the config file itself)
 	genesis_config_parent_dirpath_on_client = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, path_dir(genesis_data.config_yml_rel_filepath))
-	validator_keys_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.RawKeysRelativeDirpath)
-	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.RawSecretsRelativeDirpath)
+	validator_keys_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_keys_relative_dirpath)
+	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_secrets_relative_dirpath)
 	
 	cmd_args = [
 		"lighthouse",
@@ -295,7 +295,7 @@ def get_validator_service_config(
 
 
 
-def new_lighthouse_launcher(cl_genesi_data):
+def new_lighthouse_launcher(cl_genesis_data):
 	return struct(
-		cl_genesi_data = cl_genesi_data,
+		genesis_data = cl_genesis_data,
 	)
