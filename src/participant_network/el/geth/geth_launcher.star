@@ -186,9 +186,7 @@ def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uu
 			prefunded_geth_keys_artifact_uuid: PREFUNDED_KEYS_MOUNT_DIRPATH
 		},
 		entry_point_args = ENTRYPOINT_ARGS,
-		# TODO add private IP address place holder when add servicde supports it
-		# for now this will work as we use the service config default above
-		# https://github.com/kurtosis-tech/kurtosis/pull/290
+		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 
