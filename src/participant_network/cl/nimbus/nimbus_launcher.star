@@ -43,7 +43,7 @@ TIME_BETWEEN_HEALTHCHECK_RETRIES = 1 * time.second
 
 METRICS_PATH = "/metrics"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_PRIVATE_IP_ADDR_PLACEHOLDER"
+PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 # TODO push this into shared_utils
 TCP_PROTOCOL = "TCP"
@@ -219,7 +219,7 @@ def get_beacon_service_config(
 	return struct(
 		container_image_name = image,
 		used_ports = USED_PORTS,
-		cmd_args = [cmd_args],
+		cmd_args = [cmd_str],
 		entry_point_args = ["sh", "-c"],
 		files_artifact_mount_dirpaths = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENT,
