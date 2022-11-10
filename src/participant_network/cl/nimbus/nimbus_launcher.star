@@ -219,7 +219,7 @@ def get_beacon_service_config(
 	return struct(
 		container_image_name = image,
 		used_ports = USED_PORTS,
-		cmd_args = cmd_args,
+		cmd_args = [cmd_args],
 		entry_point_args = ["sh", "-c"],
 		files_artifact_mount_dirpaths = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENT,
