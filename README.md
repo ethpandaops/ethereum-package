@@ -6,8 +6,8 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 
 ### Parity Missing Tasks
 
-- [ ] main.star
-  - [ ] launch forkmon, prometheus, grafana, testnet_verifier, transaction_spammer
+- [x] main.star
+  - [x] launch forkmon, prometheus, grafana, testnet_verifier, transaction_spammer
 - [x] Module IO (this is blocked on Startosis Args working)
 - [x] forkmon (this is blocked on CL clients running)
 - [x] prometheus (this is blocked on CL clients running)
@@ -35,8 +35,8 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [ ] erigon
     - [ ] facts and waits + private_ip_address_placeholder
     - [x] framework
-  - [ ] geth DEMO
-    - [ ] facts and waits + private_ip_address_placeholder
+  - [x] geth DEMO
+    - [x] facts and waits + private_ip_address_placeholder
     - [x] framework TESTED
   - [ ] nethermind
     - [ ] facts and waits + private_ip_address_placeholder

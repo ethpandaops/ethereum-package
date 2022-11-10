@@ -28,7 +28,7 @@ USED_PORTS = {
 
 
 def launch_grafana(datasource_config_template, dashboard_providers_config_template, prometheus_private_url):	
-	grafana_config_artifacts_uuid, grafana_dashboards_uuid = get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_providers_config_template, prometheus_private_url)
+	grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid = get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_providers_config_template, prometheus_private_url)
 
 	service_config = get_service_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid)
 
@@ -55,9 +55,21 @@ def get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_p
 	return grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid
 
 
+def get_service_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid):
+	return struct(
+		container_image_name = IMAGE_NAME,
+		used_ports = USED_PORTS,
+		env_vars = {CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE},
+		files_artifact_mount_dirpaths = {
+			grafana_config_artifacts_uuid : GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
+			grafana_dashboards_artifacts_uuid: GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
+		}	
+	)
+
+
 def new_datasource_config_template_data(prometheus_url):
 	return {
-		"PromtehusURL": prometheus_url
+		"PrometheusURL": prometheus_url
 	}
 
 

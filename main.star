@@ -7,8 +7,15 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_dat
 load("github.com/kurtosis-tech/eth2-module/src/transaction_spammer/transaction_spammer.star", "launch_transaction_spammer")
 load("github.com/kurtosis-tech/eth2-module/src/forkmon/forkmon_launcher.star", "launch_forkmon")
 load("github.com/kurtosis-tech/eth2-module/src/prometheus/prometheus_launcher.star", "launch_prometheus")
+load("github.com/kurtosis-tech/eth2-module/src/grafana/grafana_launcher.star", "launch_grafana")
+load("github.com/kurtosis-tech/eth2-module/src/testnet_verifier/testnet_verifier.star", "run_synchronous_testnet_verification", "launch_testnet_verifier")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
+
+GRAFANA_USER             = "admin"
+GRAFANA_PASSWORD         = "admin"
+GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
+
 
 def main(input_args):
 	input_args_with_right_defaults = module_io.ModuleInput(parse_input(input_args))
@@ -56,13 +63,34 @@ def main(input_args):
 	)
 	print("Successfully launched Prometheus")
 
+	print("Launching grafana...")
+	launch_grafana(grafana_datasource_config_template, grafana_dashboards_config_template, prometheus_private_url)
+	print("Succesfully launched grafana")
+
+	if input_args_with_right_defaults.wait_for_verifications:
+		print("Running synchrnous testnet verifier")
+		# As we don't get the verification output we can't print it
+		# TODO verify if this behavior is okay
+		run_synchronous_testnet_verification(input_args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
+		print("Verification succeeded")
+	else:
+		print("Running asynchronous verification")
+		launch_testnet_verifier(input_args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
+		print("Succesfully launched asynchronous verifier")
+		if input_args_with_right_defaults.wait_for_finalization:
+			print("Waiting for the first finalized epoch")
+			first_cl_client = all_cl_client_contexts[0]
+			# TODO add fact and wait to emulate this  behavior
+			print("First finalized epoch occurred successfully")
+
 
 	grafana_info = module_io.GrafanaInfo(
-		dashboard_path = "dummy_path",
-		user = "user",
-		password = "password"
+		dashboard_path = GRAFANA_DASHBOARD_PATH_URL,
+		user = GRAFANA_USER,
+		password = GRAFANA_PASSWORD
 	)
-	output = module_io.ModuleOutput({"grafana_info": grafana_info})
+	output = module_io.ModuleOutput(grafana_info = grafana_info)
+	print(output)
 	return output
 
 

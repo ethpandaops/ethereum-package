@@ -2,10 +2,10 @@ IMAGE_NAME = "marioevz/merge-testnet-verifier:latest"
 SERVICE_ID = "testnet-verifier"
 
 # We use Docker exec commands to run the commands we need, so we override the default
-SYNCHRONOUS_ENTRYPOINT_ARGS = {
+SYNCHRONOUS_ENTRYPOINT_ARGS = [
 	"sleep",
 	"999999",
-}
+]
 
 
 # this is broken check - https://github.com/ethereum/merge-testnet-verifier/issues/4
@@ -18,7 +18,7 @@ def run_synchronous_testnet_verification(params, el_client_contexts, cl_client_c
 	service_config = get_synchronous_verification_service_config()
 	add_service(SERVICE_ID, service_config)
 
-	command = get_cmd()
+	command = get_cmd(params, el_client_contexts, cl_client_contexts, True)
 	exec(SERVICE_ID, command)
 
 
@@ -28,7 +28,8 @@ def get_cmd(params, el_client_contexts, cl_client_contexts, add_binary_name):
 	if add_binary_name:
 		command.append("./merge_testnet_verifier")
 
-	command.append("--ttd 0")
+	command.append("--ttd")
+	command.append("0")
 
 	for el_client_context in el_client_contexts:
 		command.append("--client")
@@ -38,16 +39,18 @@ def get_cmd(params, el_client_contexts, cl_client_contexts, add_binary_name):
 		command.append("--client")
 		command.append("{0},http://{1}:{2}".format(cl_client_context.client_name, cl_client_context.ip_addr, cl_client_context.http_port_num))
 
-	command.append("--ttd-epoch-limit 0")
+	command.append("--ttd-epoch-limit")
+	command.append("0")
 	command.append("--verif-epoch-limit")
-	# TODO make this an actual param
-	command.append("{0}".fomrat(param.verifications_epoch_limit))
+	command.append("{0}".format(params.verifications_epoch_limit))
+
+	return command
 
 
 
 
 def get_asynchronous_verification_service_config(params, el_client_contexts, cl_client_contexts):
-	commands = get_cmd(params, el_client_contexts, cl_client_contexts)
+	commands = get_cmd(params, el_client_contexts, cl_client_contexts, False)
 	return struct(
 		container_image_name = IMAGE_NAME,
 		cmd_args = commands,
@@ -59,7 +62,7 @@ def get_asynchronous_verification_service_config(params, el_client_contexts, cl_
 def get_synchronous_verification_service_config():
 	return struct(
 		container_image_name = IMAGE_NAME,
-		entry_point_args = ENTRYPOINT_ARGS,
+		entry_point_args = SYNCHRONOUS_ENTRYPOINT_ARGS,
 		# TODO remove this when used_ports is optional in add_service
 		used_ports = {},
 	)
