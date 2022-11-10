@@ -79,7 +79,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 		module_io.ELClientType.geth : {"launcher": new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, PRE_FUNDED_ACCOUNTS), "launch_method": launch_geth},
 		module_io.ELClientType.besu : {"launcher": new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_besu},
 		module_io.ELClientType.erigon : {"launcher": new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_erigon},
-		module_io.ELClientType.nethermind : {"launcher": new_nethermind_launcher(network_params.network_id, el_genesis_data)},
+		module_io.ELClientType.nethermind : {"launcher": new_nethermind_launcher(el_genesis_data), "launch_method": launch_nethermind},
 	}
 
 	all_el_client_contexts = []

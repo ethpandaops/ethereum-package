@@ -48,6 +48,7 @@ NETHERMIND_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.trace: "TRACE",
 }
 
+ENODE_FACT_NAME = "enode-fact"
 
 
 def launch(
@@ -134,7 +135,7 @@ def get_service_config(genesis_data, image, existing_el_clients, log_level, extr
 	)
 
 
-def new_nethermind_launcher(network_id):
+def new_nethermind_launcher(el_genesis_data):
 	return struct(
 		el_genesis_data = el_genesis_data
 	)
