@@ -43,9 +43,9 @@ BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
 
 # TODO verify this - why do we pass the same used ports to both
 USED_PORTS = {
-	TCP_DISCOVERY_PORT_ID: new_port_spec(TCP_DISCOVERY_PORT_ID, TCP_PROTOCOL),
-	UDP_DISCOVERY_PORT_ID: new_port_spec(UDP_DISCOVERY_PORT_ID, UDP_PROTOCOL),
-	HTTP_PORT_ID:         new_port_spec(HTTP_PORT_ID, TCP_PROTOCOL),
+	TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
+	UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
+	HTTP_PORT_ID:         new_port_spec(HTTP_PORT_NUM, TCP_PROTOCOL),
 	METRICS_PORT_ID:      new_port_spec(METRICS_PORT_NUM, TCP_PROTOCOL),
 	VALIDATOR_METRICS_PORT_ID: new_port_spec(VALIDATOR_METRICS_PORT_NUM, TCP_PROTOCOL)
 }
@@ -80,7 +80,7 @@ def launch(
 
 	# Launch Beacon node
 	beacon_service_config = get_beacon_service_config(
-		launcher.genesis_data,
+		launcher.cl_genesis_data,
 		image,
 		bootnode_context,
 		el_client_context,
@@ -91,11 +91,11 @@ def launch(
 
 	beacon_service = add_service(beacon_node_service_id, beacon_service_config)
 
-	beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
+	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 
 	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
 	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
-	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/health", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
+	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
 	wait(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME)
 
 
@@ -104,7 +104,7 @@ def launch(
 
 	validator_service_config = get_validator_service_config(
 		validator_node_service_id,
-		launcher.genesis_data,
+		launcher.cl_genesis_data,
 		image,
 		log_level,
 		beacon_http_url,
@@ -118,10 +118,10 @@ def launch(
 	# TODO add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
 	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
-	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
+	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
 	beacon_node_enr = wait(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME)
 
-	beacon_metrics_port = beacon_service.ports[BEACON_METRICS_PORT_ID]
+	beacon_metrics_port = beacon_service.ports[METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
 
 	# TODO verify if this is correct - from eth2-merge-kurtosis-module
@@ -142,30 +142,30 @@ def launch(
 
 def get_beacon_service_config(
 	genesis_data,
-	image
+	image,
 	boot_cl_client_ctx,
 	el_client_ctx,
 	mev_boost_context,
-	log_level
+	log_level,
 	extra_params):
 
 	el_client_rpc_url_str = "http://{0}:{1}".format(
-		el_client_ctx.ip_address,
+		el_client_ctx.ip_addr,
 		el_client_ctx.rpc_port_num,
 	)
 
-	el_client_engine_rpc_url_str = "http://{0}:{1}"(
-		el_client_ctx.ip_address,
+	el_client_engine_rpc_url_str = "http://{0}:{1}".format(
+		el_client_ctx.ip_addr,
 		el_client_ctx.engine_rpc_port_num,
 	)
 
 	genesis_config_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
-	genesis_ssz_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.genesis_ssz_filepath)
-	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_relative_filepath)
+	genesis_ssz_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.genesis_ssz_rel_filepath)
+	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_rel_filepath)
 	cmd_args = [
 		"beacon",
-		"--logLevel=" + logLevel,
-		"--port=%v".format(DISCOVERY_PORT_NUM),
+		"--logLevel=" + log_level,
+		"--port={0}".format(DISCOVERY_PORT_NUM),
 		"--discoveryPort={0}".format(DISCOVERY_PORT_NUM),
 		"--dataDir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
 		"--paramsFile=" + genesis_config_filepath,
@@ -179,17 +179,17 @@ def get_beacon_service_config(
 		"--rest=true",
 		"--rest.address=0.0.0.0",
 		"--rest.namespace=*",
-		"--rest.port=%v".format(HTTP_PORT_NUM),
+		"--rest.port={0}".format(HTTP_PORT_NUM),
 		"--enr.ip=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-		"--enr.tcp=%v".format(DISCOVERY_PORT_NUM),
-		"--enr.udp=%v".format(DISCOVERY_PORT_NUM),
+		"--enr.tcp={0}".format(DISCOVERY_PORT_NUM),
+		"--enr.udp={0}".format(DISCOVERY_PORT_NUM),
 		# Set per Pari's recommendation to reduce noise in the logs
 		"--subscribeAllSubnets=true",
-		"--jwt-secret=%v".format(jwt_secret_filepath),
+		"--jwt-secret={0}".format(jwt_secret_filepath),
 		# vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
 		"--metrics",
 		"--metrics.address=0.0.0.0",
-		"--metrics.port=%v".format(METRICS_PORT_NUM),
+		"--metrics.port={0}".format(METRICS_PORT_NUM),
 		# ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
 	]
 
@@ -202,7 +202,7 @@ def get_beacon_service_config(
 		cmd_args.append(mev_boost_endpoint(mev_boost_context))
 	
 
-	if len(extraParams) > 0:
+	if len(extra_params) > 0:
 		cmd_args.extend(extra_params)
 	
 	return struct(
@@ -211,9 +211,6 @@ def get_beacon_service_config(
 		cmd_args = cmd_args,
 		files_artifact_mount_dirpaths = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER
-		},
-		env_vars = {
-			RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD
 		},
 		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
@@ -237,10 +234,10 @@ def get_validator_service_config(
 
 	cmd_args = [
 		"validator",
-		"--logLevel=" + logLevel,
+		"--logLevel=" + log_level,
 		"--dataDir=" + root_dirpath,
 		"--paramsFile=" + genesis_config_filepath,
-		"--server=" + beacon_http_url,
+		"--server=" + beacon_client_http_url,
 		"--keystoresDir=" + validator_keys_dirpath,
 		"--secretsDir=" + validator_secrets_dirpath,
 		# vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
@@ -250,30 +247,27 @@ def get_validator_service_config(
 		# ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
 	]
 
-	if mevBoostContext != None:
+	if mev_boost_context != None:
 		cmd_args.append("--builder")
 		# TODO required to work? - from old module
 		# cmdArgs = append(cmdArgs, "--defaultFeeRecipient <your ethereum address>")
 	
-	if len(cmd_args) > 0:
-		cmd_args.extend(extraParams)
+	if len(extra_params) > 0:
+		cmd_args.extend(extra_params)
 
 	return struct(
 		container_image_name = image,
 		used_ports = USED_PORTS,
 		cmd_args = cmd_args,
 		files_artifact_mount_dirpaths = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER
+			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER
-		},
-		env_vars = {
-			RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD
 		},
 		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 
-def new_lodestar_launcher(cl_genesi_data):
+def new_lodestar_launcher(cl_genesis_data):
 	return struct(
-		cl_genesi_data = cl_genesi_data,
+		cl_genesis_data = cl_genesis_data,
 	)
