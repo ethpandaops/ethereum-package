@@ -31,9 +31,6 @@ def main(input_args):
 	print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
 	all_participants, cl_gensis_timestamp = launch_participant_network(input_args_with_right_defaults.participants, network_params, input_args_with_right_defaults.global_client_log_level)
 
-	print(all_participants)
-	print(cl_gensis_timestamp)
-
 	all_el_client_contexts = []
 	all_cl_client_contexts = []
 	for participant in all_participants:

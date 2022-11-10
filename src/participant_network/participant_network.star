@@ -10,6 +10,7 @@ load("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star", 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/geth/geth_launcher.star", launch_geth="launch", "new_geth_launcher")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/besu/besu_launcher.star", launch_besu="launch", "new_besu_launcher")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/erigon/erigon_launcher.star", launch_erigon="launch", "new_erigon_launcher")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/nethermind/nethermind_launcher.star", launch_nethermind="launch", "new_nethermind_launcher")
 
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lighthouse/lighthouse_launcher.star", launch_lighthouse="launch", "new_lighthouse_launcher")
@@ -78,6 +79,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 		module_io.ELClientType.geth : {"launcher": new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, PRE_FUNDED_ACCOUNTS), "launch_method": launch_geth},
 		module_io.ELClientType.besu : {"launcher": new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_besu},
 		module_io.ELClientType.erigon : {"launcher": new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_erigon},
+		module_io.ELClientType.nethermind : {"launcher": new_nethermind_launcher(network_params.network_id, el_genesis_data)},
 	}
 
 	all_el_client_contexts = []
@@ -165,6 +167,8 @@ def launch_participant_network(participants, network_params, global_log_level):
               el_client_context, mev_boost_context, new_cl_node_validator_keystores, participant.beacon_extra_params, participant.validator_extra_params)
 
 		all_cl_client_contexts.append(cl_client_context)
+
+	print("Succesfully added {0} CL participants".format(num_participants))
 
 	all_participants = []
 

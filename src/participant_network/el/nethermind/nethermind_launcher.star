@@ -65,13 +65,15 @@ def launch(
 
 	service = add_service(service_id, service_config)
 
-	# TODO add facts & waits
+	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
+	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
+	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
 
 	return new_el_client_context(
 		"nethermind",
 		"", # nethermind has no ENR in the eth2-merge-kurtosis-module either
 		# Nethermind node info endpoint doesn't return ENR field https://docs.nethermind.io/nethermind/ethereum-client/json-rpc/admin
-		"", # TODO add Enode from wait & fact,
+		enode,
 		service.ip_address,
 		RPC_PORT_NUM,
 		WS_PORT_NUM,
@@ -128,9 +130,7 @@ def get_service_config(genesis_data, image, existing_el_clients, log_level, extr
 		files_artifact_mount_dirpaths = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
 		},
-		# TODO add private IP address place holder when add servicde supports it
-		# for now this will work as we use the service config default above
-		# https://github.com/kurtosis-tech/kurtosis/pull/290
+		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER,
 	)
 
 
