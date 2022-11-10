@@ -52,6 +52,9 @@ ERIGON_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.trace: "5",
 }
 
+ENR_FACT_NAME = "enr-fact"
+ENODE_FACT_NAME = "enode-fact"
+
 def launch(
 	launcher,
 	service_id,
@@ -68,7 +71,13 @@ def launch(
 
 	service = add_service(service_id, service_config)
 
-	# TODO add facts & waits
+	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
+	define_fact(service_id = service_id, fact_name = ENR_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enr", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
+	enr = wait(service_id = service_id, fact_name = ENR_FACT_NAME)
+
+	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
+	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
+	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
 
 	return new_el_client_context(
 		"erigon",
@@ -92,7 +101,7 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, ver
 		genesis_json_filepath_on_client,
 	)
 
-
+	# TODO remove this based on https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/152
 	if len(existing_el_clients) == 0:
 		fail("Erigon needs at least one node to exist, which it treats as the bootnode")
 
@@ -137,9 +146,7 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, ver
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
 		},
 		entry_point_args = ENTRYPOINT_ARGS,
-		# TODO add private IP address place holder when add servicde supports it
-		# for now this will work as we use the service config default above
-		# https://github.com/kurtosis-tech/kurtosis/pull/290
+		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 

@@ -39,7 +39,7 @@ USED_PORTS = {
 	WS_PORT_ID: new_port_spec(WS_PORT_NUM, TCP_PROTOCOL),
 	TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
 	UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
-	ENGINE_HTTP_RPC_PORT_ID: new_port_spec(ENGINE_HTTP_RPC_PORT_NUM, TCP_PROTOCOL)
+	ENGINE_HTTP_RPC_PORT_ID: new_port_spec(ENGINE_HTTP_RPC_PORT_NUM, TCP_PROTOCOL),
 	ENGINE_WS_RPC_PORT_ID: new_port_spec(ENGINE_WS_RPC_PORT_NUM, TCP_PROTOCOL)
 }
 
@@ -53,7 +53,7 @@ BESU_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.trace: "TRACE",
 }
 
-
+ENODE_FACT_NAME = "enode-fact"
 
 def launch(
 	launcher,
@@ -71,7 +71,9 @@ def launch(
 
 	service = add_service(service_id, service_config)
 
-	# TODO add facts & waits
+	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
+	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
+	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
 
 	return new_el_client_context(
 		"besu",
@@ -111,7 +113,7 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, log
 		"--rpc-ws-port={0}".format(WS_PORT_NUM),
 		"--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE",
 		"--p2p-enabled=true",
-		"--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER
+		"--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
 		"--p2p-port={0}".format(DISCOVERY_PORT_NUM),
 		"--engine-rpc-enabled=true",
 		"--engine-jwt-secret={0}".format(jwt_secret_json_filepath_on_client),
@@ -125,8 +127,6 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, log
 	if len(extra_params) > 0:
 		launch_node_command.extend(extra_params)
 
-	# doing this as the eth2 module does this
-	# TODO potentially remove this and just pass the launch_node_command
 	launch_node_command_str = " ".join(launch_node_command)
 
 	return struct(
@@ -137,9 +137,7 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, log
 			genesis_data.files_artifact_uuid: GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER
 		},
 		entry_point_args = ENTRYPOINT_ARGS,
-		# TODO add private IP address place holder when add servicde supports it
-		# for now this will work as we use the service config default above
-		# https://github.com/kurtosis-tech/kurtosis/pull/290
+		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 

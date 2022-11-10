@@ -55,7 +55,7 @@ def parse_input(input_args):
 						participant_value[sub_attr] = get_value_or_name(sub_value)
 					# if not we grab the value from the default value dictionary
 					elif sub_attr not in (DESCRIPTOR_ATTR_NAME):
-						participant_value[attr] = default_input["participants"][0].get(sub_attr, "")
+						participant_value[sub_attr] = default_input["participants"][0].get(sub_attr, None)
 				participants.append(participant_value)
 			result["participants"] = participants
 
@@ -105,7 +105,7 @@ def parse_input(input_args):
 
 	required_num_validtors = 2 * result["network_params"]["slots_per_epoch"]
 	actual_num_validators = len(result["participants"]) * result["network_params"]["num_validators_per_keynode"]
-	if required_num_validtors < actual_num_validators:
+	if required_num_validtors > actual_num_validators:
 		fail("required_num_validtors - {0} is greater than actual_num_validators - {1}".format(required_num_validtors, actual_num_validators))
 
 	# Remove if nethermind doesn't break as second node we already test above if its the first node
@@ -163,6 +163,10 @@ def default_partitcipants():
 			"el_client_log_level": "",
 			"cl_client_type": "lighthouse",
 			"cl_client_image": "",
-			"cl_client_log_level": ""
+			"cl_client_log_level": "",
+			"beacon_extra_params": [],
+			"el_extra_params": [],
+			"validator_extra_params": [],
+			"builder_network_params": None
 	}
 	return [participant]

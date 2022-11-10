@@ -72,6 +72,9 @@ LIGHTHOUSE_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.trace: "trace",
 }
 
+BEACON_ENR_FACT_NAME = "beacon-enr-fact"
+BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
+
 def launch(
 	launcher,
 	service_id,
@@ -103,9 +106,12 @@ def launch(
 
 	beacon_service = add_service(beacon_node_service_id, beacon_service_config)
 
-	beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
+	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
+	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
+	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/health", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
+	wait(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME)
 
-	# TODO add facts & waits
+	beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
 	# Launch validator node
 	beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, beacon_http_port.number)
@@ -123,9 +129,9 @@ def launch(
 	validator_service = add_service(validator_node_service_id, validator_service_config)
 
 	# TODO add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
-
-	# TODO get node identity using facts and waits
-	beacon_node_enr = ""
+	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
+	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
+	beacon_node_enr = wait(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME)
 
 	beacon_metrics_port = beacon_service.ports[BEACON_METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
@@ -209,7 +215,7 @@ def get_beacon_service_config(
 	]
 
 	if boot_cl_client_ctx != None:
-		cmd_args.append("--boot-nodes="+boot_cl_client_ctx.enode)
+		cmd_args.append("--boot-nodes="+boot_cl_client_ctx.enr)
 
 	if mev_boost_context != None:
 		cmd_args.append("--builder")

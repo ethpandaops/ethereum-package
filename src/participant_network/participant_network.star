@@ -8,6 +8,10 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev
 load("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star", "GETH_PREFUNDED_KEYS_DIRPATH", "EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH", "CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH", "CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH")
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/geth/geth_launcher.star", launch_geth="launch", "new_geth_launcher")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/besu/besu_launcher.star", launch_besu="launch", "new_besu_launcher")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/erigon/erigon_launcher.star", launch_erigon="launch", "new_erigon_launcher")
+
+
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lighthouse/lighthouse_launcher.star", launch_lighthouse="launch", "new_lighthouse_launcher")
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star", "PRE_FUNDED_ACCOUNTS")
@@ -71,7 +75,9 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 	el_launchers = {
 		# TODO Allow for other types here
-		module_io.ELClientType.geth : {"launcher": new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, PRE_FUNDED_ACCOUNTS), "launch_method": launch_geth}
+		module_io.ELClientType.geth : {"launcher": new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, PRE_FUNDED_ACCOUNTS), "launch_method": launch_geth},
+		module_io.ELClientType.besu : {"launcher": new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_besu},
+		module_io.ELClientType.erigon : {"launcher": new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_erigon},
 	}
 
 	all_el_client_contexts = []

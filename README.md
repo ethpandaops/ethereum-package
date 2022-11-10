@@ -30,7 +30,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] remove services post generation
 - [ ] participant_network/el (requires facts and waits)
   - [ ] besu
-    - [ ] facts and waits + private_ip_address_placeholder
+    - [x] facts and waits + private_ip_address_placeholder
     - [x] framework
   - [ ] erigon
     - [ ] facts and waits + private_ip_address_placeholder
@@ -47,8 +47,8 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] el_rest_client/api_response_objects.go DESCOPED as facts will do this
   - [x] el_rest_client/el_rest_client - facts and waits  DESCOPED as facts will do this
 - [ ] participant_network/cl (requires facts and waits)
-  - [ ] lighthouse DEMO
-    - [ ] facts and waits
+  - [x] lighthouse DEMO
+    - [x] facts and waits
     - [x] framework TESTED
   - [ ] loadstar
     - [ ] facts and waits
@@ -68,3 +68,4 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] cl_rest_client/api_response_objects.go DESCOPED as facts will do this
   - [x] cl_rest_client/el_rest_client - DESCOPED as facts will do this
   - [x] cl_node_metrics_info - pure POJO NO BLOCKERS
+  - [ ] get render templates to have the magic strings subsituted with real values
