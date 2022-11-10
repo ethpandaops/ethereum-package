@@ -14,6 +14,7 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/nethermind
 
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lighthouse/lighthouse_launcher.star", launch_lighthouse="launch", "new_lighthouse_launcher")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lodestar/lodestar_launcher.star", launch_lodestar="launch", "new_lodestar_launcher")
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star", "PRE_FUNDED_ACCOUNTS")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant.star", "new_participant")
@@ -75,7 +76,6 @@ def launch_participant_network(participants, network_params, global_log_level):
 	print("Uploaded GETH files succesfully, launching EL participants")
 
 	el_launchers = {
-		# TODO Allow for other types here
 		module_io.ELClientType.geth : {"launcher": new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, PRE_FUNDED_ACCOUNTS), "launch_method": launch_geth},
 		module_io.ELClientType.besu : {"launcher": new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_besu},
 		module_io.ELClientType.erigon : {"launcher": new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_erigon},
@@ -127,7 +127,8 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 	cl_launchers = {
 		# TODO Allow for other types here
-		module_io.CLClientType.lighthouse : {"launcher": new_lighthouse_launcher(cl_genesis_data), "launch_method": launch_lighthouse}
+		module_io.CLClientType.lighthouse : {"launcher": new_lighthouse_launcher(cl_genesis_data), "launch_method": launch_lighthouse},
+		module_io.CLClientType.lodestar: {"launcher": new_lodestar_launcher(cl_genesis_data), "launch_method": launch_lodestar}
 	}
 
 	all_cl_client_contexts = []

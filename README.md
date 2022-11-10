@@ -52,8 +52,8 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] lighthouse DEMO
     - [x] facts and waits
     - [x] framework TESTED
-  - [ ] loadstar
-    - [ ] facts and waits
+  - [ ] lodestar
+    - [x] facts and waits
     - [x] framework
   - [ ] nymbus
     - [ ] facts and waits

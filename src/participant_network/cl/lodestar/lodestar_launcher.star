@@ -38,6 +38,8 @@ PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 TCP_PROTOCOL = "TCP"
 UDP_PROTOCOL = "UDP"
 
+BEACON_ENR_FACT_NAME = "beacon-enr-fact"
+BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
 
 # TODO verify this - why do we pass the same used ports to both
 USED_PORTS = {
@@ -49,7 +51,7 @@ USED_PORTS = {
 }
 
 
-LOADSTAR_LOG_LEVELS = {
+LODESTAR_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.error: "error",
 	module_io.GlobalClientLogLevel.warn:  "warn",
 	module_io.GlobalClientLogLevel.info:  "info",
@@ -74,7 +76,7 @@ def launch(
 	beacon_node_service_id = "{0}-{1}".format(service_id, BEACON_SUFFIX_SERVICE_ID)
 	validator_node_service_id = "{0}-{1}".format(service_id, VALIDATOR_SUFFIX_SERVICE_ID)
 
-	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, LOADSTAR_LOG_LEVELS)
+	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, LODESTAR_LOG_LEVELS)
 
 	# Launch Beacon node
 	beacon_service_config = get_beacon_service_config(
@@ -91,7 +93,11 @@ def launch(
 
 	beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
-	# TODO add facts & waits
+	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
+	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
+	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/health", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
+	wait(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME)
+
 
 	# Launch validator node
 	beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, beacon_http_port.number)
@@ -111,8 +117,9 @@ def launch(
 
 	# TODO add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
-	# TODO get node identity using facts and waits
-	beacon_node_enr = ""
+	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
+	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
+	beacon_node_enr = wait(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME)
 
 	beacon_metrics_port = beacon_service.ports[BEACON_METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
@@ -123,7 +130,7 @@ def launch(
 	nodes_metrics_info = [beacon_node_metrics_info]
 
 	result = new_cl_client_context(
-		"loadstar",
+		"lodestar",
 		beacon_node_enr,
 		beacon_service.ip_address,
 		HTTP_PORT_NUM,
@@ -266,7 +273,7 @@ def get_validator_service_config(
 	)
 
 
-def new_loadstar_launcher(cl_genesi_data):
+def new_lodestar_launcher(cl_genesi_data):
 	return struct(
 		cl_genesi_data = cl_genesi_data,
 	)

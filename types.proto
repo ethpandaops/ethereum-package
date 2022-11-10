@@ -54,7 +54,7 @@ enum CLClientType {
 	teku = 1;
 	nimbus = 2;
 	prysm = 3;
-	loadstar = 4;
+	lodestar = 4;
 }
 
 message BuilderNetworkParams {
