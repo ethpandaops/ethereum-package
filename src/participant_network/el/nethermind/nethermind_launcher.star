@@ -112,7 +112,7 @@ def get_service_config(genesis_data, image, existing_el_clients, log_level, extr
 		"--Merge.Enabled=true",
 		"--Merge.TerminalTotalDifficulty=0", # merge has happened already
 		"--Merge.TerminalBlockNumber=null",
-		"--JsonRpc.JwtSecretFile=%v".format(jwt_secret_json_filepath_on_client),
+		"--JsonRpc.JwtSecretFile={0}".format(jwt_secret_json_filepath_on_client),
 		"--JsonRpc.AdditionalRpcUrls=[\"http://0.0.0.0:{0}|http;ws|net;eth;subscribe;engine;web3;client\"]".format(ENGINE_RPC_PORT_NUM),
 		"--Network.OnlyStaticPeers=true",
 		"--Network.StaticPeers={0},{1}".format(
