@@ -125,7 +125,8 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, log
 		launch_node_command.append("--bootnodes={0},{1}".format(boot_node_1.enode, boot_node_2.enode))
 
 	if len(extra_params) > 0:
-		launch_node_command.extend(extra_params)
+		# we do this as extra_params isn't a normal [] but a proto repeated array
+		launch_node_command.extend([param for param in extra_params])
 
 	launch_node_command_str = " ".join(launch_node_command)
 

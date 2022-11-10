@@ -169,7 +169,9 @@ def get_service_config(network_id, genesis_data, prefunded_geth_keys_artifact_uu
 	)
 
 	if len(extra_params) > 0:
-		launch_node_cmd_args.extend(extra_params)
+		# this is a repeated<proto type>, we convert it into Starlark
+		launch_node_cmd_args.extend([param for param in extra_params])
+
 
 	launch_node_cmd_str = " ".join(launch_node_cmd_args)
 

@@ -203,7 +203,8 @@ def get_beacon_service_config(
 	
 
 	if len(extra_params) > 0:
-		cmd_args.extend(extra_params)
+		# this is a repeated<proto type>, we convert it into Starlark
+		cmd_args.extend([param for param in extra_params])
 	
 	return struct(
 		container_image_name = image,
@@ -253,7 +254,9 @@ def get_validator_service_config(
 		# cmdArgs = append(cmdArgs, "--defaultFeeRecipient <your ethereum address>")
 	
 	if len(extra_params) > 0:
-		cmd_args.extend(extra_params)
+		# this is a repeated<proto type>, we convert it into Starlark
+		cmd_args.extend([param for param in extra_params])
+
 
 	return struct(
 		container_image_name = image,

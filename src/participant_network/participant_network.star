@@ -15,6 +15,7 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/nethermind
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lighthouse/lighthouse_launcher.star", launch_lighthouse="launch", "new_lighthouse_launcher")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lodestar/lodestar_launcher.star", launch_lodestar="launch", "new_lodestar_launcher")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/nimbus/nimbus_launcher.star", launch_nimbus="launch", "new_nimbus_launcher")
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star", "PRE_FUNDED_ACCOUNTS")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant.star", "new_participant")
@@ -88,7 +89,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 		el_client_type = participant.el_client_type
 
 		if el_client_type not in el_launchers:
-			fail("Unsupported launcher '{0}', need one of '{1}'".format(el_client_type, ",".join(el_launchers.keys())))
+			fail("Unsupported launcher '{0}', need one of '{1}'".format(el_client_type, ",".join([el.name for el in el_launchers.keys()])))
 		
 		el_launcher, launch_method = el_launchers[el_client_type]["launcher"], el_launchers[el_client_type]["launch_method"]
 		el_service_id = "{0}{1}".format(EL_CLIENT_SERVICE_ID_PREFIX, index)
@@ -128,7 +129,8 @@ def launch_participant_network(participants, network_params, global_log_level):
 	cl_launchers = {
 		# TODO Allow for other types here
 		module_io.CLClientType.lighthouse : {"launcher": new_lighthouse_launcher(cl_genesis_data), "launch_method": launch_lighthouse},
-		module_io.CLClientType.lodestar: {"launcher": new_lodestar_launcher(cl_genesis_data), "launch_method": launch_lodestar}
+		module_io.CLClientType.lodestar: {"launcher": new_lodestar_launcher(cl_genesis_data), "launch_method": launch_lodestar},
+		module_io.CLClientType.nimbus: {"launcher": new_nimbus_launcher(cl_genesis_data), "launch_method": launch_nimbus}
 	}
 
 	all_cl_client_contexts = []
@@ -139,7 +141,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 		cl_client_type = participant.cl_client_type
 
 		if cl_client_type not in cl_launchers:
-			fail("Unsupported launcher '{0}', need one of '{1}'".format(cl_client_type, ",".join(cl_launchers.keys())))
+			fail("Unsupported launcher '{0}', need one of '{1}'".format(cl_client_type, ",".join([cl.name for cl in cl_launchers.keys()])))
 		
 		cl_launcher, launch_method = cl_launchers[cl_client_type]["launcher"], cl_launchers[cl_client_type]["launch_method"]
 		cl_service_id = "{0}{1}".format(CL_CLIENT_SERVICE_ID_PREFIX, index)

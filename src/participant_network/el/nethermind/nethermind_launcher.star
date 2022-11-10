@@ -122,7 +122,8 @@ def get_service_config(genesis_data, image, existing_el_clients, log_level, extr
 	]
 
 	if len(extra_params) > 0:
-		command_args.extend(extra_params)
+		# we do this as extra_params is a repeated proto aray
+		command_args.extend([param for param in extra_params])
 
 	return struct(
 		container_image_name = image,
