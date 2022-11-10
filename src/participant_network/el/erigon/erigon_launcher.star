@@ -34,12 +34,12 @@ PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 TCP_PROTOCOL = "TCP"
 UDP_PROTOCOL = "UDP"
 
+## Engine port was removed from here
 USED_PORTS = {
 	RPC_PORT_ID: new_port_spec(RPC_PORT_NUM, TCP_PROTOCOL),
 	WS_PORT_ID: new_port_spec(WS_PORT_NUM, TCP_PROTOCOL),
 	TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
 	UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
-	ENGINE_RPC_PORT_ID: new_port_spec(ENGINE_RPC_PORT_NUM, TCP_PROTOCOL)
 }
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
@@ -109,7 +109,7 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, ver
 
 	launch_node_cmd_args = [
 		"erigon",
-		"--verbosity=" + verbosity_level,
+		"--log.console.verbosity=" + verbosity_level,
 		"--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
 		"--networkid=" + network_id,
 		"--http",
@@ -121,9 +121,8 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, ver
 		"--ws",
 		"--allow-insecure-unlock",
 		"--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-		"--engine.port={0}".format(ENGINE_RPC_PORT_NUM),
-		"--engine.addr=0.0.0.0",
 		"--authrpc.jwtsecret={0}".format(jwt_secret_json_filepath_on_client),
+		## TODO engine port was removed from here
 		"--nodiscover",
 		"--staticpeers={0}".format(boot_node.enode),
 	]

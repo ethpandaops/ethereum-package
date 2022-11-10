@@ -32,8 +32,9 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [ ] besu
     - [x] facts and waits + private_ip_address_placeholder
     - [x] framework
-  - [ ] erigon
-    - [ ] facts and waits + private_ip_address_placeholder
+    - [ ] facts could use more waiting
+  - [x] erigon
+    - [x] facts and waits + private_ip_address_placeholder
     - [x] framework
   - [x] geth DEMO
     - [x] facts and waits + private_ip_address_placeholder
