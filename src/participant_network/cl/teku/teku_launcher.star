@@ -72,8 +72,8 @@ TEKU_LOG_LEVELS = {
 }
 
 
-BEACON_ENR_FACT_NAME = "beacon-enr-fact"
-BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
+ENR_FACT_NAME = "enr-fact"
+HEALTH_FACT_NAME = "health-fact"
 
 
 def launch(
@@ -93,37 +93,35 @@ def launch(
 
 	extra_params = [param for param in extra_beacon_params] + [param for param in extra_validator_params]
 	
-	beacon_service_config = get_beacon_service_config(launcher.cl_genesis_data, image, bootnode_context, el_client_context, mev_boost_context, log_level, node_keystore_files, extra_params)
+	service_config = get_service_config(launcher.cl_genesis_data, image, bootnode_context, el_client_context, mev_boost_context, log_level, node_keystore_files, extra_params)
 
-	beacon_service = add_service(service_id, beacon_service_config)
-
-	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
+	teku_service = add_service(service_id, service_config)
 
 	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
-	define_fact(service_id = service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
-	wait(service_id = service_id, fact_name = BEACON_HEALTH_FACT_NAME)
+	define_fact(service_id = service_id, fact_name = HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
+	wait(service_id = service_id, fact_name = HEALTH_FACT_NAME)
 
-	define_fact(service_id = service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
-	beacon_node_enr = wait(service_id = service_id, fact_name = BEACON_ENR_FACT_NAME)
+	define_fact(service_id = service_id, fact_name = ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
+	node_enr = wait(service_id = service_id, fact_name = ENR_FACT_NAME)
 
 
-	beacon_metrics_port = beacon_service.ports[METRICS_PORT_ID]
-	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
+	teku_metrics_port = teku_service.ports[METRICS_PORT_ID]
+	teku_metrics_url = "{0}:{1}".format(teku_service.ip_address, teku_metrics_port.number)
 
-	beacon_node_metrics_info = new_cl_node_metrics_info(service_id, METRICS_PATH, beacon_metrics_url)
-	nodes_metrics_info = [beacon_node_metrics_info]
+	teku_node_metrics_info = new_cl_node_metrics_info(service_id, METRICS_PATH, teku_metrics_url)
+	nodes_metrics_info = [teku_node_metrics_info]
 
 	result = new_cl_client_context(
 		"teku",
-		beacon_node_enr,
-		beacon_service.ip_address,
+		node_enr,
+		teku_service.ip_address,
 		HTTP_PORT_NUM,
 		nodes_metrics_info,
 		service_id
 	)
 	return result
 
-def get_beacon_service_config(
+def get_service_config(
 	genesis_data,
 	image,
 	boot_cl_client_ctx,

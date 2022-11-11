@@ -75,5 +75,5 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] cl_rest_client/api_response_objects.go DESCOPED as facts will do this
   - [x] cl_rest_client/el_rest_client - DESCOPED as facts will do this
   - [x] cl_node_metrics_info - pure POJO NO BLOCKERS
-  - [ ] get render templates to have the magic strings subsituted with real values
+  - [x] get render templates to have the magic strings subsituted with real values
   - [ ] confirm that the 0x30000038 value in `static_files/genesis-generation-config/cl/config.yaml.tmpl` is correct - this makes prysm work

@@ -63,8 +63,8 @@ NIMBUS_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.trace: "TRACE",
 }
 
-BEACON_ENR_FACT_NAME = "beacon-enr-fact"
-BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
+ENR_FACT_NAME = "enr-fact"
+HEALTH_FACT_NAME = "health-fact"
 
 
 def launch(
@@ -84,33 +84,28 @@ def launch(
 
 	extra_params = [param for param in extra_beacon_params] + [param for param in extra_validator_params]
 
-	beacon_service_config = get_beacon_service_config(launcher.cl_genesis_data, image, bootnode_context, el_client_context, mev_boost_context, log_level, node_keystore_files, extra_params)
+	service_config = get_service_config(launcher.cl_genesis_data, image, bootnode_context, el_client_context, mev_boost_context, log_level, node_keystore_files, extra_params)
 
-	beacon_service = add_service(service_id, beacon_service_config)
-
-	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
+	nimbus_service = add_service(service_id, service_config)
 
 	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
-	define_fact(service_id = service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
-	wait(service_id = service_id, fact_name = BEACON_HEALTH_FACT_NAME)
+	define_fact(service_id = service_id, fact_name = HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
+	wait(service_id = service_id, fact_name = HEALTH_FACT_NAME)
 
-	define_fact(service_id = service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
-	beacon_node_enr = wait(service_id = service_id, fact_name = BEACON_ENR_FACT_NAME)
+	define_fact(service_id = service_id, fact_name = ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
+	node_enr = wait(service_id = service_id, fact_name = ENR_FACT_NAME)
 
-	beacon_metrics_port = beacon_service.ports[METRICS_PORT_ID]
-	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
+	metrics_port = nimbus_service.ports[METRICS_PORT_ID]
+	metrics_url = "{0}:{1}".format(nimbus_service.ip_address, metrics_port.number)
 
-	beacon_node_metrics_info = new_cl_node_metrics_info(service_id, METRICS_PATH, beacon_metrics_url)
-	nodes_metrics_info = [beacon_node_metrics_info]
+	nimbus_node_metrics_info = new_cl_node_metrics_info(service_id, METRICS_PATH, metrics_url)
+	nodes_metrics_info = [nimbus_node_metrics_info]
 
-
-	# Launch validator node
-	beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, beacon_http_port.number)
 
 	result = new_cl_client_context(
 		"nimbus",
-		beacon_node_enr,
-		beacon_service.ip_address,
+		node_enr,
+		nimbus_service.ip_address,
 		HTTP_PORT_NUM,
 		nodes_metrics_info,
 		service_id,
@@ -119,7 +114,7 @@ def launch(
 	return result
 
 
-def get_beacon_service_config(
+def get_service_config(
 	genesis_data,
 	image,
 	boot_cl_client_ctx,
