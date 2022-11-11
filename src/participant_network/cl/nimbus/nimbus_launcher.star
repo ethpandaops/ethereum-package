@@ -111,7 +111,7 @@ def launch(
 	beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, beacon_http_port.number)
 
 	result = new_cl_client_context(
-		"nimbu",
+		"nimbus",
 		beacon_node_enr,
 		beacon_service.ip_address,
 		HTTP_PORT_NUM,
