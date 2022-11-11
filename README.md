@@ -8,7 +8,8 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 
 - [x] main.star
   - [x] launch forkmon, prometheus, grafana, testnet_verifier, transaction_spammer
-  - [ ] do a wait for epoch finalization
+  - [x] do a wait for epoch finalization
+  - [ ] assert that finalization epoch > 0
 - [x] Module IO (this is blocked on Startosis Args working)
 - [x] forkmon (this is blocked on CL clients running)
 - [x] prometheus (this is blocked on CL clients running)

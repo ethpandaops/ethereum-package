@@ -135,6 +135,7 @@ def launch(
 		beacon_service.ip_address,
 		HTTP_PORT_NUM,
 		nodes_metrics_info,
+		beacon_node_service_id
 	)
 
 	return result

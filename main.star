@@ -16,6 +16,8 @@ GRAFANA_USER             = "admin"
 GRAFANA_PASSWORD         = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
 
+FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
+HTTP_PORT_ID_FOR_FACT = "http"
 
 def main(input_args):
 	input_args_with_right_defaults = module_io.ModuleInput(parse_input(input_args))
@@ -66,8 +68,6 @@ def main(input_args):
 
 	if input_args_with_right_defaults.wait_for_verifications:
 		print("Running synchrnous testnet verifier")
-		# As we don't get the verification output we can't print it
-		# TODO verify if this behavior is okay
 		run_synchronous_testnet_verification(input_args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
 		print("Verification succeeded")
 	else:
@@ -77,7 +77,10 @@ def main(input_args):
 		if input_args_with_right_defaults.wait_for_finalization:
 			print("Waiting for the first finalized epoch")
 			first_cl_client = all_cl_client_contexts[0]
-			# TODO add fact and wait to emulate this  behavior
+			first_cl_client_id = first_cl_client.beacon_service_id
+			define_fact(service_id = first_cl_client.first_cl_client_id, fact_name = FIRST_NODE_FINALIZATION_FACT, fact_recipe = struct(method= "GET", endpoint = "eth/v1/beacon/states/head/finality_checkpoints", content_type = "application/json", port_id = HTTP_PORT_ID_FOR_FACT, field_extractor = ".data.finalized.epoch"))
+			finalized_epoch = wait(service_id = first_cl_client_id, fact_name = FIRST_NODE_FINALIZATION_FACT)
+			# TODO make an assertion on the finalized_epoch > 0
 			print("First finalized epoch occurred successfully")
 
 
