@@ -29,10 +29,6 @@ BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_HTTP_PORT_NUM      = 4000
 BEACON_METRICS_PORT_NUM   = 5054
 
-# TODO remove if facts & waits doesn't need this
-MAX_NUM_HEALTHCHECK_RETRIES      = 10
-TIME_BETWEEN_HEALTHCHECK_RETRIES = 1 * time.second
-
 #  ---------------------------------- Validator client -------------------------------------
 VALIDATING_REWARDS_ACCOUNT = "0x0000000000000000000000000000000000000000"
 

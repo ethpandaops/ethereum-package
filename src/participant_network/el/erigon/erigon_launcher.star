@@ -22,12 +22,6 @@ UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 
 
-# required for wait & fact maybe
-# TODO see if it is otherwise remove
-EXPECTED_SECONDS_FOR_ERIGON_INIT = 10
-EXPECTED_SECONDS_AFTER_NODE_START_UNTIL_HTTP_SERVER_IS_AVAILABLE = 20
-GET_NODE_INFO_TIME_BETWEEN_RETRIES = 1 * time.second
-
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 # TODO push this into shared_utils

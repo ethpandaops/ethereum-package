@@ -36,10 +36,6 @@ DEFAULT_IMAGE_ENTRYPOINT = "/home/user/nimbus-eth2/build/nimbus_beacon_node"
 VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER    = "$HOME/validator-keys"
 VALIDATOR_SECRETS_DIRPATH_ON_SERVICE_CONTAINER = "$HOME/validator-secrets"
 
-# TODO remove this if time and wait cant use this
-MAX_NUM_HEALTHCHECK_RETRIES      = 60
-TIME_BETWEEN_HEALTHCHECK_RETRIES = 1 * time.second
-
 METRICS_PATH = "/metrics"
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
@@ -199,7 +195,7 @@ def get_service_config(
 		cmd_args.append("--bootstrap-node="+boot_cl_client_ctx.enr)
 
 	if mev_boost_context != None:
-		# TODO add `mev-boost` support once the feature lands on `stable` - from eth2-merge-kurtosis-module
+		# TODO(old) add `mev-boost` support once the feature lands on `stable` - from eth2-merge-kurtosis-module
 		pass
 
 

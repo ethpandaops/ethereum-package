@@ -23,10 +23,6 @@ HTTP_PORT_NUM                    = 4000
 METRICS_PORT_NUM           = 8008
 VALIDATOR_METRICS_PORT_NUM        = 5064
 
-# TODO Remove this if facts & waits doesn't need this
-MAX_NUM_HEALTHCHECK_RETRIES      = 30
-TIME_BETWEEN_HEALTHCHECK_RETRIES = 2 * time.second
-
 BEACON_SUFFIX_SERVICE_ID    = "beacon"
 VALIDATOR_SUFFIX_SERVICE_ID = "validator"
 

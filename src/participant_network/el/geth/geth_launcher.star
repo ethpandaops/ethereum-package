@@ -29,12 +29,6 @@ PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/execution-data"
 KEYSTORE_DIRPATH_ON_CLIENT_CONTAINER      = EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER + "/keystore"
 
-# TODO remove this if facts & waits doesn't need it
-EXPECTED_SECONDS_FOR_GETH_INIT                              = 10
-EXPECTED_SECONDS_PER_KEY_IMPORT                             = 8
-EXPECTED_SECONDS_AFTER_NODE_START_UNTIL_HTTP_SERVER_IS_AVAILABLE = 20
-GET_NODE_INFO_TIME_BETWEEN_RETRIES                           = 1 * time.second
-
 GETH_ACCOUNT_PASSWORD      = "password"          #  Password that the Geth accounts will be locked with
 GETH_ACCOUNT_PASSWORDS_FILE = "/tmp/password.txt" #  Importing an account to
 

@@ -21,11 +21,6 @@ TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 
-# required for wait & fact maybe
-# TODO see if it is otherwise remove
-GET_NODE_INFO_MAX_RETRIES = 30
-GET_NODE_INFO_TIME_BETWEEN_RETRIES = 1 * time.second
-
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 # TODO push this into shared_utils
