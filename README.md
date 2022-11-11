@@ -57,7 +57,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
     - [x] facts and waits
     - [x] framework
     - [ ] needs longer fact & wait
-  - [x] nimbus
+  - [x] nimbus - eth2-merge-kurtosis-module is broken and so is this
     - [x] facts and waits
     - [x] framework
   - [ ] prysm

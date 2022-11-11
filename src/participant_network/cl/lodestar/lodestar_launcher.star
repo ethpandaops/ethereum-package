@@ -199,7 +199,7 @@ def get_beacon_service_config(
 
 	if mev_boost_context != None:
 		cmd_args.append("--builder")
-		cmd_args.append(mev_boost_endpoint(mev_boost_context))
+		cmd_args.append("--builder.urls '{0}'".format(mev_boost_endpoint(mev_boost_context)))
 	
 
 	if len(extra_params) > 0:
