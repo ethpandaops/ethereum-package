@@ -1,4 +1,4 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "path_dir")
+load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "path_dir", "TCP_PROTOCOL", "UDP_PROTOCOL")
 load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star", "new_cl_client_context")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
@@ -29,10 +29,6 @@ VALIDATOR_SUFFIX_SERVICE_ID = "validator"
 METRICS_PATH = "/metrics"
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
-# TODO push this into shared_utils
-TCP_PROTOCOL = "TCP"
-UDP_PROTOCOL = "UDP"
 
 BEACON_ENR_FACT_NAME = "beacon-enr-fact"
 BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
@@ -88,7 +84,7 @@ def launch(
 
 	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 
-	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
+	# TODO check whether its 200, 206 or 503 like golang
 	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
 	wait(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME)
 

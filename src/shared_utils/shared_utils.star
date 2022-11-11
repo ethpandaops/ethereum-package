@@ -1,3 +1,7 @@
+TCP_PROTOCOL = "TCP"
+UDP_PROTOCOL = "UDP"
+
+
 def new_template_and_data(template, template_data_json):
 	return {"template": template, "template_data_json": template_data_json}
 

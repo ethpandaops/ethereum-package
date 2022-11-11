@@ -1,4 +1,4 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join")
+load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "TCP_PROTOCOL", "UDP_PROTOCOL")
 load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/el_client_context.star", "new_el_client_context")
 
@@ -33,10 +33,6 @@ GETH_ACCOUNT_PASSWORD      = "password"          #  Password that the Geth accou
 GETH_ACCOUNT_PASSWORDS_FILE = "/tmp/password.txt" #  Importing an account to
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
-# TODO push this into shared_utils
-TCP_PROTOCOL = "TCP"
-UDP_PROTOCOL = "UDP"
 
 USED_PORTS = {
 	RPC_PORT_ID: new_port_spec(RPC_PORT_NUM, TCP_PROTOCOL),
