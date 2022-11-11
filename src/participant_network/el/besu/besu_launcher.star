@@ -71,14 +71,13 @@ def launch(
 
 	service = add_service(service_id, service_config)
 
-	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
 	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
 	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
 
 	return new_el_client_context(
 		"besu",
 		"", # besu has no ENR
-		"", # TODO add Enode from wait & fact,
+		enode,
 		service.ip_address,
 		RPC_PORT_NUM,
 		WS_PORT_NUM,

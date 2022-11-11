@@ -17,7 +17,7 @@ CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/consensus-data"
 #  into the Teku user's home directory to get around it
 VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
 
-# TODO Get rid of this being hardcoded; should be shared
+# TODO(old) Get rid of this being hardcoded; should be shared
 VALIDATING_REWARDS_ACCOUNT = "0x0000000000000000000000000000000000000000"
 
 # Port IDs
@@ -100,7 +100,6 @@ def launch(
 	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 
 	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
-	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
 	define_fact(service_id = service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
 	wait(service_id = service_id, fact_name = BEACON_HEALTH_FACT_NAME)
 
@@ -111,8 +110,6 @@ def launch(
 	beacon_metrics_port = beacon_service.ports[METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
 
-	# TODO verify if this is correct - from eth2-merge-kurtosis-module
-	# why do we pass the "service_id" that isn't used
 	beacon_node_metrics_info = new_cl_node_metrics_info(service_id, METRICS_PATH, beacon_metrics_url)
 	nodes_metrics_info = [beacon_node_metrics_info]
 

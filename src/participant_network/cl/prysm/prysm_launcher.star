@@ -113,7 +113,6 @@ def launch(
 	beacon_service = add_service(beacon_node_service_id, beacon_service_config)
 
 	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
-	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
 	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
 	wait(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME)
 
@@ -139,8 +138,7 @@ def launch(
 
 	validator_service = add_service(validator_node_service_id, validator_service_config)
 
-	# TODO add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
-	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
+	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
 	beacon_node_enr = wait(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME)
 
@@ -262,7 +260,7 @@ def get_validator_service_config(
 		"--datadir=" + consensus_data_dirpath,
 		"--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM),
 		"--verbosity=" + log_level,
-		# TODO SOMETHING ABOUT JWT
+		# TODO(old) SOMETHING ABOUT JWT
 		# vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
 		"--disable-monitoring=false",
 		"--monitoring-host=0.0.0.0",
@@ -271,7 +269,7 @@ def get_validator_service_config(
 	]
 
 	if mev_boost_context != None:
-		# TODO required to work?
+		# TODO(old) required to work?
 		# cmdArgs = append(cmdArgs, "--suggested-fee-recipient=0x...")
 		cmd_args.append("--enable-builder")
 

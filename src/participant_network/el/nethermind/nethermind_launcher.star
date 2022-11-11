@@ -66,7 +66,6 @@ def launch(
 
 	service = add_service(service_id, service_config)
 
-	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
 	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
 	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
 
@@ -102,7 +101,7 @@ def get_service_config(genesis_data, image, existing_el_clients, log_level, extr
 		"--JsonRpc.Enabled=true",
 		"--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin",
 		"--JsonRpc.Host=0.0.0.0",
-		# TODO Set Eth isMining?
+		# TODO(old) Set Eth isMining?
 		"--JsonRpc.Port={0}".format(RPC_PORT_NUM),
 		"--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
 		"--Network.ExternalIp={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),

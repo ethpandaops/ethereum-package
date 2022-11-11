@@ -41,7 +41,6 @@ UDP_PROTOCOL = "UDP"
 BEACON_ENR_FACT_NAME = "beacon-enr-fact"
 BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
 
-# TODO verify this - why do we pass the same used ports to both
 USED_PORTS = {
 	TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
 	UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
@@ -94,7 +93,6 @@ def launch(
 	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 
 	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
-	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
 	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
 	wait(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME)
 
@@ -115,17 +113,14 @@ def launch(
 
 	validator_service = add_service(validator_node_service_id, validator_service_config)
 
-	# TODO add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
+	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
-	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
 	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
 	beacon_node_enr = wait(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME)
 
 	beacon_metrics_port = beacon_service.ports[METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
 
-	# TODO verify if this is correct - from eth2-merge-kurtosis-module
-	# why do we pass the "service_id" that isn't used
 	beacon_node_metrics_info = new_cl_node_metrics_info(service_id, METRICS_PATH, beacon_metrics_url)
 	nodes_metrics_info = [beacon_node_metrics_info]
 
@@ -251,7 +246,7 @@ def get_validator_service_config(
 
 	if mev_boost_context != None:
 		cmd_args.append("--builder")
-		# TODO required to work? - from old module
+		# TODO(old) required to work? - from old module
 		# cmdArgs = append(cmdArgs, "--defaultFeeRecipient <your ethereum address>")
 	
 	if len(extra_params) > 0:
