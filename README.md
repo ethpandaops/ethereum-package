@@ -30,11 +30,11 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 - [x] participant_network/pre_launch_data_generator (the only missing piece here is remove_service)
   - [x] data generation
   - [x] remove services post generation
-- [ ] participant_network/el (requires facts and waits)
+- [x] participant_network/el (requires facts and waits)
   - [x] besu
     - [x] facts and waits + private_ip_address_placeholder
     - [x] framework
-    - [ ] facts could use more waiting
+    - [x] facts could use more waiting
   - [x] erigon
     - [x] facts and waits + private_ip_address_placeholder
     - [x] framework
@@ -44,20 +44,20 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] nethermind
     - [x] facts and waits + private_ip_address_placeholder
     - [x] framework
-    - [ ] facts could use more waiting
+    - [x] facts could use more waiting
   - [x] el_client_context pure POJO NO BLOCKERS
   - [x] el_client_launcher interface not necessary
   - [x] el_availability_waiter - facts and waits - DESCOPED facts and waits will do this
   - [x] el_rest_client/api_response_objects.go DESCOPED as facts will do this
   - [x] el_rest_client/el_rest_client - facts and waits  DESCOPED as facts will do this
-- [ ] participant_network/cl (requires facts and waits)
+- [x] participant_network/cl (requires facts and waits)
   - [x] lighthouse DEMO
     - [x] facts and waits
     - [x] framework TESTED
   - [x] lodestar
     - [x] facts and waits
     - [x] framework
-    - [ ] needs longer fact & wait
+    - [x] needs longer fact & wait
   - [x] nimbus - eth2-merge-kurtosis-module is broken and so is this
     - [x] facts and waits
     - [x] framework
@@ -67,7 +67,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] teku
     - [x] facts and waits
     - [x] framework
-    - [ ] needs longer facts and waits
+    - [x] needs longer facts and waits
   - [x] cl_client_context pure POJO NO BLOCKERS
   - [x] cl_client_launcher interface not necessary
   - [x] cl_availability_waiter - facts and waits - DESCOPED facts and waits will do this
