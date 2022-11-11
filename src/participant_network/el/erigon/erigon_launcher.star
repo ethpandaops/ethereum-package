@@ -34,7 +34,6 @@ PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 TCP_PROTOCOL = "TCP"
 UDP_PROTOCOL = "UDP"
 
-## Engine port was removed from here
 USED_PORTS = {
 	RPC_PORT_ID: new_port_spec(RPC_PORT_NUM, TCP_PROTOCOL),
 	WS_PORT_ID: new_port_spec(WS_PORT_NUM, TCP_PROTOCOL),
@@ -79,8 +78,8 @@ def launch(
 
 	return new_el_client_context(
 		"erigon",
-		"", # TODO fetch ENR from wait & fact
-		"", # TODO add Enode from wait & fact,
+		enr,
+		enode,
 		service.ip_address,
 		RPC_PORT_NUM,
 		WS_PORT_NUM,
@@ -120,7 +119,6 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, ver
 		"--allow-insecure-unlock",
 		"--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
 		"--authrpc.jwtsecret={0}".format(jwt_secret_json_filepath_on_client),
-		## TODO engine port was removed from here
 		"--nodiscover",
 		"--staticpeers={0}".format(boot_node.enode),
 	]

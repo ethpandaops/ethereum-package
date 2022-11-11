@@ -52,7 +52,7 @@ def generate_cl_genesis_data(
 
 	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
-	# TODO Make this the actual data generator - comment copied from the original module
+	# TODO(old) Make this the actual data generator - comment copied from the original module
 	launcher_service_id = launch_prelaunch_data_generator(
 		{
 			genesis_generation_config_artifact_uuid:  CONFIG_DIRPATH_ON_GENERATOR,

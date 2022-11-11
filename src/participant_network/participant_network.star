@@ -36,7 +36,7 @@ CL_GENESIS_DATA_GENERATION_TIME = 2 * time.minute
 # Each CL node takes about this time to start up and start processing blocks, so when we create the CL
 #  genesis data we need to set the genesis timestamp in the future so that nodes don't miss important slots
 # (e.g. Altair fork)
-# TODO Make this client-specific (currently this is Nimbus)
+# TODO(old) Make this client-specific (currently this is Nimbus)
 CL_NODE_STARTUP_TIME = 45 * time.second
 
 MEV_BOOST_SHOULD_CHECK_RELAY = True
@@ -129,7 +129,6 @@ def launch_participant_network(participants, network_params, global_log_level):
 	print("Launching CL network")
 
 	cl_launchers = {
-		# TODO Allow for other types here
 		module_io.CLClientType.lighthouse : {"launcher": new_lighthouse_launcher(cl_genesis_data), "launch_method": launch_lighthouse},
 		module_io.CLClientType.lodestar: {"launcher": new_lodestar_launcher(cl_genesis_data), "launch_method": launch_lodestar},
 		module_io.CLClientType.nimbus: {"launcher": new_nimbus_launcher(cl_genesis_data), "launch_method": launch_nimbus},

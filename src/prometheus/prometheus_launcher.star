@@ -2,7 +2,7 @@ load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", 
 
 SERVICE_ID = "prometheus"
 
-# TODO I'm not sure if we should use latest version or ping an specific version instead
+# TODO(old) I'm not sure if we should use latest version or ping an specific version instead
 IMAGE_NAME = "prom/prometheus:latest"
 
 HTTP_PORT_ID = "http"

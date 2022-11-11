@@ -146,7 +146,7 @@ def get_service_config(
 		"-m",
 		CONSENSUS_DATA_DIR_PERMS_STR,
 		"&&",
-		# TODO COMMENT THIS OUT?
+		# TODO(old) COMMENT THIS OUT?
 		"cp",
 		"-R",
 		validator_keys_dirpath,
