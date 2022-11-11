@@ -2,7 +2,6 @@ load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", 
 load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star", "new_cl_client_context")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 

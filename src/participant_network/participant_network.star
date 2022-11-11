@@ -16,6 +16,7 @@ load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/nethermind
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lighthouse/lighthouse_launcher.star", launch_lighthouse="launch", "new_lighthouse_launcher")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lodestar/lodestar_launcher.star", launch_lodestar="launch", "new_lodestar_launcher")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/nimbus/nimbus_launcher.star", launch_nimbus="launch", "new_nimbus_launcher")
+load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/prysm/prysm_launcher.star", launch_prysm="launch", "new_prysm_launcher")
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star", "PRE_FUNDED_ACCOUNTS")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant.star", "new_participant")
@@ -130,7 +131,8 @@ def launch_participant_network(participants, network_params, global_log_level):
 		# TODO Allow for other types here
 		module_io.CLClientType.lighthouse : {"launcher": new_lighthouse_launcher(cl_genesis_data), "launch_method": launch_lighthouse},
 		module_io.CLClientType.lodestar: {"launcher": new_lodestar_launcher(cl_genesis_data), "launch_method": launch_lodestar},
-		module_io.CLClientType.nimbus: {"launcher": new_nimbus_launcher(cl_genesis_data), "launch_method": launch_nimbus}
+		module_io.CLClientType.nimbus: {"launcher": new_nimbus_launcher(cl_genesis_data), "launch_method": launch_nimbus},
+		module_io.CLClientType.prysm: {"launcher": new_prysm_launcher(cl_genesis_data, cl_validator_data.prysm_password_relative_filepath, cl_validator_data.prysm_password_artifact_uuid), "launch_method": launch_prysm},
 	}
 
 	all_cl_client_contexts = []
