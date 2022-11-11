@@ -95,7 +95,7 @@ def launch(
 
 	# TODO the Golang code checks whether its 200, 206 or 503, maybe add that
 	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
-	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
+	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
 	wait(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME)
 
 
@@ -118,7 +118,7 @@ def launch(
 	# TODO add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
 	# TODO this fact might start breaking if the endpoint requires a leading slash, currently breaks with a leading slash
-	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
+	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
 	beacon_node_enr = wait(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME)
 
 	beacon_metrics_port = beacon_service.ports[METRICS_PORT_ID]
