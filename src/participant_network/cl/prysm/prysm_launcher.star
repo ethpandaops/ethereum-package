@@ -191,15 +191,13 @@ def get_beacon_service_config(
 		"--p2p-tcp-port={0}".format(DISCOVERY_TCP_PORT_NUM),
 		"--p2p-udp-port={0}".format(DISCOVERY_UDP_PORT_NUM),
 		"--min-sync-peers={0}".format(MIN_PEERS),
-		"--monitoring-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-		"--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM),
 		"--verbosity=" + log_level,
 		# Set per Pari's recommendation to reduce noise
 		"--subscribe-all-subnets=true",
 		"--jwt-secret={0}".format(jwt_secret_filepath),
 		# vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
 		"--disable-monitoring=false",
-		"--monitoring-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+		"--monitoring-host=0.0.0.0",
 		"--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM)
 		# ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
 	]
