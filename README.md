@@ -10,7 +10,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
 - [x] forkmon (this is blocked on CL clients running)
 - [x] prometheus (this is blocked on CL clients running)
 - [x] grafana (this is blocked on prometheus running)
-- [ ] grafana needs an upload files endpoint in Startosis
+- [x] grafana needs an upload files endpoint in Startosis
 - [x] testnet_verifier (this is blocked on CL/EL clients running)
 - [x] transaction_spammer (this is blocked on EL clients running)
 - [ ] participant_network/participant_network
