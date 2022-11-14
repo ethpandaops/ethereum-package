@@ -8,5 +8,8 @@
 - Added monitoring on top of the repo
 - Almost perfect parity with the eth2-merge-kurtosis-module
 
+### Fixes
+- Fixes some bugs with the initial implementation of the monitors
+
 # 0.0.0
 * Initial commit
