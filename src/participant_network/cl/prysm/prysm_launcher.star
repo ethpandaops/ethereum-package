@@ -112,8 +112,8 @@ def launch(
 	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 
 	# Launch validator node
-	beacon_http_endpoint = "http://{0}:{1}".format(beacon_service.ip_address, HTTP_PORT_NUM)
-	beacon_rpc_endpoint = "http://{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
+	beacon_http_endpoint = "{0}:{1}".format(beacon_service.ip_address, HTTP_PORT_NUM)
+	beacon_rpc_endpoint = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
 
 	validator_service_config = get_validator_service_config(
 		launcher.genesis_data,
