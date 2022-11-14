@@ -2,7 +2,7 @@ load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", 
 
 SERVICE_ID = "prometheus"
 
-# TODO I'm not sure if we should use latest version or ping an specific version instead
+# TODO(old) I'm not sure if we should use latest version or ping an specific version instead
 IMAGE_NAME = "prom/prometheus:latest"
 
 HTTP_PORT_ID = "http"
@@ -21,7 +21,7 @@ USED_PORTS = {
 def launch_prometheus(config_template, cl_client_contexts):
 	all_cl_nodes_metrics_info = []
 	for client in cl_client_contexts:
-		all_cl_nodes_metrics_info.append(client.cl_nodes_metrics_info)
+		all_cl_nodes_metrics_info.extend(client.cl_nodes_metrics_info)
 
 	template_data = new_config_template_data(all_cl_nodes_metrics_info)
 	template_data_json = json.encode(template_data)

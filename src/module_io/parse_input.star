@@ -55,7 +55,7 @@ def parse_input(input_args):
 						participant_value[sub_attr] = get_value_or_name(sub_value)
 					# if not we grab the value from the default value dictionary
 					elif sub_attr not in (DESCRIPTOR_ATTR_NAME):
-						participant_value[attr] = default_input["participants"][0].get(sub_attr, "")
+						participant_value[sub_attr] = default_input["participants"][0].get(sub_attr, None)
 				participants.append(participant_value)
 			result["participants"] = participants
 
@@ -105,7 +105,7 @@ def parse_input(input_args):
 
 	required_num_validtors = 2 * result["network_params"]["slots_per_epoch"]
 	actual_num_validators = len(result["participants"]) * result["network_params"]["num_validators_per_keynode"]
-	if required_num_validtors < actual_num_validators:
+	if required_num_validtors > actual_num_validators:
 		fail("required_num_validtors - {0} is greater than actual_num_validators - {1}".format(required_num_validtors, actual_num_validators))
 
 	# Remove if nethermind doesn't break as second node we already test above if its the first node
@@ -114,6 +114,14 @@ def parse_input(input_args):
 
 	return result
 
+
+def get_client_log_level_or_default(participant_log_level, global_log_level, client_log_levels):
+	log_level = participant_log_level
+	if log_level == "":
+		log_level = client_log_levels.get(global_log_level, "")
+		if log_level == "":
+			fail("No participant log level defined, and the client log level has no mapping for global log level '{0}'".format(global_log_level))
+	return log_level
 
 
 def get_value_or_name(value):
@@ -132,7 +140,7 @@ def default_module_input():
 		"wait_for_finalization":      False,
 		"wait_for_verifications":     False,
 		"verifications_epoch_limit":  5,
-		"global_log_level": "info"
+		"global_client_log_level": "info"
 	}
 
 
@@ -155,6 +163,10 @@ def default_partitcipants():
 			"el_client_log_level": "",
 			"cl_client_type": "lighthouse",
 			"cl_client_image": "",
-			"cl_client_log_level": ""
+			"cl_client_log_level": "",
+			"beacon_extra_params": [],
+			"el_extra_params": [],
+			"validator_extra_params": [],
+			"builder_network_params": None
 	}
 	return [participant]

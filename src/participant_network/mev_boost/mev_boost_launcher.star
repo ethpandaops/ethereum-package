@@ -24,9 +24,9 @@ def launch(mev_boost_launcher, service_id, network_id):
 
 
 def get_service_config(mev_boost_launcher, network_id):
-	command = ["/app/mev-boost"]
 	network_name = NETWORK_ID_TO_NAME.get(network_id, "network-{0}".format(network_id))
 
+	command = ["mev-boost"]
 	command.append("-{0}".format(network_name))
 
 	if mev_boost_launcher.should_check_relay:
