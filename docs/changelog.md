@@ -6,6 +6,7 @@
 - Added a lot of participant_network/pre_launch_data_generator
 - Added a lot of simple objects that just keep data
 - Added monitoring on top of the repo
+- Almost perfect parity with the eth2-merge-kurtosis-module
 
 # 0.0.0
 * Initial commit
