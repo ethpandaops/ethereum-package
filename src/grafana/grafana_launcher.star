@@ -63,7 +63,7 @@ def get_service_config(grafana_config_artifacts_uuid, grafana_dashboards_artifac
 		files_artifact_mount_dirpaths = {
 			grafana_config_artifacts_uuid : GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
 			grafana_dashboards_artifacts_uuid: GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
-		}	
+		}
 	)
 
 
