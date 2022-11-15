@@ -62,7 +62,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] nimbus - eth2-merge-kurtosis-module is broken and so is this
     - [x] facts and waits
     - [x] framework
-  - [x] prysm
+  - [x] prysm - doesn't work as genesis_fork version is different, like the old module
     - [x] facts and waits
     - [x] framework
   - [x] teku
@@ -76,5 +76,5 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] cl_rest_client/el_rest_client - DESCOPED as facts will do this
   - [x] cl_node_metrics_info - pure POJO NO BLOCKERS
   - [x] get render templates to have the magic strings subsituted with real values
-  - [ ] confirm that the 0x30000038 value in `static_files/genesis-generation-config/cl/config.yaml.tmpl` is correct - this makes prysm work
+  - [x] confirm that the 0x30000038 value in `static_files/genesis-generation-config/cl/config.yaml.tmpl` is correct - this makes prysm work [DESCOPED]
   - [x] confirm behavior of artifact_uuid post for loop fix
