@@ -10,7 +10,7 @@ This is the Startosis version of the popular [eth2-merge-kurtosis-module](https:
   - [x] launch forkmon, prometheus, grafana, testnet_verifier, transaction_spammer
   - [x] do a wait for epoch finalization
   - [ ] assert that finalization epoch > 0
-  - [ ] wait for CL genesis to occur before adding forkmon
+  - [x] wait for CL genesis to occur before adding forkmon - DESCOPED as I don't see the bug
 - [x] Module IO (this is blocked on Startosis Args working)
 - [x] forkmon (this is blocked on CL clients running)
 - [x] prometheus (this is blocked on CL clients running)
