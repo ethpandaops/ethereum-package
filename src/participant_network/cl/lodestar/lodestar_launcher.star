@@ -70,7 +70,7 @@ def launch(
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, LODESTAR_LOG_LEVELS)
 
 	# Launch Beacon node
-	beacon_service_config = get_beacon_service_config(
+	beacon_config = get_beacon_config(
 		launcher.cl_genesis_data,
 		image,
 		bootnode_context,
@@ -80,7 +80,7 @@ def launch(
 		extra_beacon_params,
 	)
 
-	beacon_service = add_service(beacon_node_service_id, beacon_service_config)
+	beacon_service = add_service(beacon_node_service_id, beacon_config)
 
 	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 
@@ -92,7 +92,7 @@ def launch(
 	# Launch validator node
 	beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, beacon_http_port.number)
 
-	validator_service_config = get_validator_service_config(
+	validator_config = get_validator_config(
 		validator_node_service_id,
 		launcher.cl_genesis_data,
 		image,
@@ -103,7 +103,7 @@ def launch(
 		extra_validator_params,
 	)
 
-	validator_service = add_service(validator_node_service_id, validator_service_config)
+	validator_service = add_service(validator_node_service_id, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
@@ -128,7 +128,7 @@ def launch(
 	return result
 
 
-def get_beacon_service_config(
+def get_beacon_config(
 	genesis_data,
 	image,
 	boot_cl_client_ctx,
@@ -195,17 +195,17 @@ def get_beacon_service_config(
 		cmd_args.extend([param for param in extra_params])
 	
 	return struct(
-		container_image_name = image,
-		used_ports = USED_PORTS,
+		image = image,
+		ports = USED_PORTS,
 		cmd_args = cmd_args,
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER
 		},
 		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 
-def get_validator_service_config(
+def get_validator_config(
 	service_id,
 	genesis_data,
 	image,
@@ -247,10 +247,10 @@ def get_validator_service_config(
 
 
 	return struct(
-		container_image_name = image,
-		used_ports = USED_PORTS,
+		image = image,
+		ports = USED_PORTS,
 		cmd_args = cmd_args,
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER
 		},

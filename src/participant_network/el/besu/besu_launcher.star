@@ -57,10 +57,10 @@ def launch(
 
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, BESU_LOG_LEVELS)
 
-	service_config = get_service_config(launcher.network_id, launcher.el_genesis_data,
+	config = get_config(launcher.network_id, launcher.el_genesis_data,
                                     image, existing_el_clients, log_level, extra_params)
 
-	service = add_service(service_id, service_config)
+	service = add_service(service_id, config)
 
 	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
 	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
@@ -76,7 +76,7 @@ def launch(
 	)
 
 
-def get_service_config(network_id, genesis_data, image, existing_el_clients, log_level, extra_params):
+def get_config(network_id, genesis_data, image, existing_el_clients, log_level, extra_params):
 	if len(existing_el_clients) < 2:
 		fail("Besu node cannot be boot nodes, and due to a bug it requires two nodes to exist beforehand")
 
@@ -121,10 +121,10 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, log
 	launch_node_command_str = " ".join(launch_node_command)
 
 	return struct(
-		container_image_name = image,
-		used_ports = USED_PORTS,
+		image = image,
+		ports = USED_PORTS,
 		cmd_args = [launch_node_command_str],
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER
 		},
 		entry_point_args = ENTRYPOINT_ARGS,

@@ -55,10 +55,10 @@ def launch(
 
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, ERIGON_LOG_LEVELS)
 
-	service_config = get_service_config(launcher.network_id, launcher.el_genesis_data,
+	config = get_config(launcher.network_id, launcher.el_genesis_data,
                                     image, existing_el_clients, log_level, extra_params)
 
-	service = add_service(service_id, service_config)
+	service = add_service(service_id, config)
 
 	define_fact(service_id = service_id, fact_name = ENR_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enr", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
 	enr = wait(service_id = service_id, fact_name = ENR_FACT_NAME)
@@ -77,7 +77,7 @@ def launch(
 	)
 
 
-def get_service_config(network_id, genesis_data, image, existing_el_clients, verbosity_level, extra_params):
+def get_config(network_id, genesis_data, image, existing_el_clients, verbosity_level, extra_params):
 	network_id = network_id
 
 	genesis_json_filepath_on_client = path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.erigon_genesis_json_relative_filepath)
@@ -125,10 +125,10 @@ def get_service_config(network_id, genesis_data, image, existing_el_clients, ver
 	command_arg_str = " && ".join(command_arg)
 
 	return struct(
-		container_image_name = image,
-		used_ports = USED_PORTS,
+		image = image,
+		ports = USED_PORTS,
 		cmd_args = [command_arg_str],
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
 		},
 		entry_point_args = ENTRYPOINT_ARGS,

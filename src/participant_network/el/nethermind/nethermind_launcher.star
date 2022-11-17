@@ -53,9 +53,9 @@ def launch(
 
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, NETHERMIND_LOG_LEVELS)
 
-	service_config = get_service_config(launcher.el_genesis_data, image, existing_el_clients, log_level, extra_params)
+	config = get_config(launcher.el_genesis_data, image, existing_el_clients, log_level, extra_params)
 
-	service = add_service(service_id, service_config)
+	service = add_service(service_id, config)
 
 	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
 	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
@@ -72,7 +72,7 @@ def launch(
 	)
 
 
-def get_service_config(genesis_data, image, existing_el_clients, log_level, extra_params):
+def get_config(genesis_data, image, existing_el_clients, log_level, extra_params):
 	if len(existing_el_clients) < 2:
 		fail("Nethermind node cannot be boot nodes, and due to a bug it requires two nodes to exist beforehand")
 
@@ -116,10 +116,10 @@ def get_service_config(genesis_data, image, existing_el_clients, log_level, extr
 		command_args.extend([param for param in extra_params])
 
 	return struct(
-		container_image_name = image,
-		used_ports = USED_PORTS,
+		image = image,
+		ports = USED_PORTS,
 		cmd_args = command_args,
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
 		},
 		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER,

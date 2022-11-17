@@ -10,13 +10,13 @@ SYNCHRONOUS_ENTRYPOINT_ARGS = [
 
 # this is broken check - https://github.com/ethereum/merge-testnet-verifier/issues/4
 def launch_testnet_verifier(params, el_client_contexts, cl_client_contexts):
-	service_config = get_asynchronous_verification_service_config(params, el_client_contexts, cl_client_contexts)
-	add_service(SERVICE_ID, service_config)
+	config = get_asynchronous_verification_config(params, el_client_contexts, cl_client_contexts)
+	add_service(SERVICE_ID, config)
 
 
 def run_synchronous_testnet_verification(params, el_client_contexts, cl_client_contexts):
-	service_config = get_synchronous_verification_service_config()
-	add_service(SERVICE_ID, service_config)
+	config = get_synchronous_verification_config()
+	add_service(SERVICE_ID, config)
 
 	command = get_cmd(params, el_client_contexts, cl_client_contexts, True)
 	exec(SERVICE_ID, command)
@@ -49,20 +49,20 @@ def get_cmd(params, el_client_contexts, cl_client_contexts, add_binary_name):
 
 
 
-def get_asynchronous_verification_service_config(params, el_client_contexts, cl_client_contexts):
+def get_asynchronous_verification_config(params, el_client_contexts, cl_client_contexts):
 	commands = get_cmd(params, el_client_contexts, cl_client_contexts, False)
 	return struct(
-		container_image_name = IMAGE_NAME,
+		image = IMAGE_NAME,
 		cmd_args = commands,
-		# TODO remove this when used_ports is optional in add_service
-		used_ports = {},
+		# TODO remove this when ports is optional in add_service
+		ports = {},
 	)
 
 
-def get_synchronous_verification_service_config():
+def get_synchronous_verification_config():
 	return struct(
-		container_image_name = IMAGE_NAME,
+		image = IMAGE_NAME,
 		entry_point_args = SYNCHRONOUS_ENTRYPOINT_ARGS,
-		# TODO remove this when used_ports is optional in add_service
-		used_ports = {},
+		# TODO remove this when ports is optional in add_service
+		ports = {},
 	)

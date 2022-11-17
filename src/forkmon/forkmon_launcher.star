@@ -39,17 +39,17 @@ def launch_forkmon(
 
 	config_files_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
-	service_config = get_service_config(config_files_artifact_uuid)
+	config = get_config(config_files_artifact_uuid)
 
-	add_service(SERVICE_ID, service_config)
+	add_service(SERVICE_ID, config)
 
 
-def get_service_config(config_files_artifact_uuid):
+def get_config(config_files_artifact_uuid):
 	config_file_path = path_join(FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, FORKMON_CONFIG_FILENAME)
 	return struct(
-		container_image_name = IMAGE_NAME,
-		used_ports = USED_PORTS,
-		files_artifact_mount_dirpaths = {
+		image = IMAGE_NAME,
+		ports = USED_PORTS,
+		files = {
 			config_files_artifact_uuid: FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
 		},
 		cmd_args = ["--config-path", config_file_path]

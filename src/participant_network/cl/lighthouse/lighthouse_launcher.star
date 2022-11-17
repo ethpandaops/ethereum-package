@@ -86,7 +86,7 @@ def launch(
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, LIGHTHOUSE_LOG_LEVELS)
 
 	# Launch Beacon node
-	beacon_service_config = get_beacon_service_config(
+	beacon_config = get_beacon_config(
 		launcher.genesis_data,
 		image,
 		bootnode_context,
@@ -96,7 +96,7 @@ def launch(
 		extra_beacon_params,
 	)
 
-	beacon_service = add_service(beacon_node_service_id, beacon_service_config)
+	beacon_service = add_service(beacon_node_service_id, beacon_config)
 
 	# TODO check whether its 200, 206 or 503 like golang
 	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
@@ -107,7 +107,7 @@ def launch(
 	# Launch validator node
 	beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, beacon_http_port.number)
 
-	validator_service_config = get_validator_service_config(
+	validator_config = get_validator_config(
 		launcher.genesis_data,
 		image,
 		log_level,
@@ -117,7 +117,7 @@ def launch(
 		extra_validator_params,
 	)
 
-	validator_service = add_service(validator_node_service_id, validator_service_config)
+	validator_service = add_service(validator_node_service_id, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
@@ -144,7 +144,7 @@ def launch(
 
 	return result
 
-def get_beacon_service_config(
+def get_beacon_config(
 	genesis_data,
 	image,
 	boot_cl_client_ctx,
@@ -219,10 +219,10 @@ def get_beacon_service_config(
 
 
 	return struct(
-		container_image_name = image,
-		used_ports = BEACON_USED_PORTS,
+		image = image,
+		ports = BEACON_USED_PORTS,
 		cmd_args = cmd_args,
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
 		},
 		env_vars = {
@@ -232,7 +232,7 @@ def get_beacon_service_config(
 	)
 
 
-def get_validator_service_config(
+def get_validator_config(
 	genesis_data,
 	image,
 	log_level,
@@ -280,10 +280,10 @@ def get_validator_service_config(
 
 
 	return struct(
-		container_image_name = image,
-		used_ports = VALIDATOR_USED_PORTS,
+		image = image,
+		ports = VALIDATOR_USED_PORTS,
 		cmd_args = cmd_args,
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
 		},

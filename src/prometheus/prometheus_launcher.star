@@ -32,8 +32,8 @@ def launch_prometheus(config_template, cl_client_contexts):
 
 	config_files_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
-	service_config = get_service_config(config_files_artifact_uuid)
-	prometheus_service = add_service(SERVICE_ID, service_config)
+	config = get_config(config_files_artifact_uuid)
+	prometheus_service = add_service(SERVICE_ID, config)
 
 	private_ip_address = prometheus_service.ip_address
 	prometheus_service_http_port = prometheus_service.ports[HTTP_PORT_ID].number
@@ -41,12 +41,12 @@ def launch_prometheus(config_template, cl_client_contexts):
 	return "http://{0}:{1}".format(private_ip_address, prometheus_service_http_port)
 
 
-def get_service_config(config_files_artifact_uuid):
+def get_config(config_files_artifact_uuid):
 	config_file_path = path_join(CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS, path_base(CONFIG_FILENAME))
 	return struct(
-		container_image_name = IMAGE_NAME,
-		used_ports = USED_PORTS,
-		files_artifact_mount_dirpaths = {
+		image = IMAGE_NAME,
+		ports = USED_PORTS,
+		files = {
 			config_files_artifact_uuid : CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS
 		},
 		cmd_args = [

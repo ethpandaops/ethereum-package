@@ -16,14 +16,14 @@ NETWORK_ID_TO_NAME = {
 }
 
 def launch(mev_boost_launcher, service_id, network_id):
-	service_config = get_service_config(mev_boost_launcher, network_id)
+	config = get_config(mev_boost_launcher, network_id)
 
-	mev_boost_service = add_service(service_id, service_config)
+	mev_boost_service = add_service(service_id, config)
 
 	return new_mev_boost_context(mev_boost_service.ip_address, FLASHBOTS_MEV_BOOST_PORT)
 
 
-def get_service_config(mev_boost_launcher, network_id):
+def get_config(mev_boost_launcher, network_id):
 	network_name = NETWORK_ID_TO_NAME.get(network_id, "network-{0}".format(network_id))
 
 	command = ["mev-boost"]
@@ -37,8 +37,8 @@ def get_service_config(mev_boost_launcher, network_id):
 		command.append(",".join(mev_boost_launcher.relay_end_points))
 
 	return struct(
-		container_image_name = FLASHBOTS_MEV_BOOST_IMAGE,
-		used_ports = USED_PORTS,
+		image = FLASHBOTS_MEV_BOOST_IMAGE,
+		ports = USED_PORTS,
 		cmd_args = command
 	)
 

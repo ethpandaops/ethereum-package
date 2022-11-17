@@ -85,9 +85,9 @@ def launch(
 
 	extra_params = [param for param in extra_beacon_params] + [param for param in extra_validator_params]
 	
-	service_config = get_service_config(launcher.cl_genesis_data, image, bootnode_context, el_client_context, mev_boost_context, log_level, node_keystore_files, extra_params)
+	config = get_config(launcher.cl_genesis_data, image, bootnode_context, el_client_context, mev_boost_context, log_level, node_keystore_files, extra_params)
 
-	teku_service = add_service(service_id, service_config)
+	teku_service = add_service(service_id, config)
 
 	# TODO check whether its 200, 206 or 503 like golang
 	define_fact(service_id = service_id, fact_name = HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
@@ -113,7 +113,7 @@ def launch(
 	)
 	return result
 
-def get_service_config(
+def get_config(
 	genesis_data,
 	image,
 	boot_cl_client_ctx,
@@ -203,11 +203,11 @@ def get_service_config(
 	cmd_str = " ".join(cmd_args)
 
 	return struct(
-		container_image_name = image,
-		used_ports = USED_PORTS,
+		image = image,
+		ports = USED_PORTS,
 		cmd_args = [cmd_str],
 		entry_point_args = ["sh", "-c"],
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
 		},

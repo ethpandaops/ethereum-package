@@ -93,7 +93,7 @@ def launch(
 
 	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, PRYSM_LOG_LEVELS)
 
-	beacon_service_config = get_beacon_service_config(
+	beacon_config = get_beacon_config(
 		launcher.genesis_data,
 		beacon_image,
 		bootnode_context,
@@ -103,7 +103,7 @@ def launch(
 		extra_beacon_params,
 	)
 
-	beacon_service = add_service(beacon_node_service_id, beacon_service_config)
+	beacon_service = add_service(beacon_node_service_id, beacon_config)
 
 	# TODO check whether its 200, 206 or 503 like golang
 	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
@@ -115,7 +115,7 @@ def launch(
 	beacon_http_endpoint = "{0}:{1}".format(beacon_service.ip_address, HTTP_PORT_NUM)
 	beacon_rpc_endpoint = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
 
-	validator_service_config = get_validator_service_config(
+	validator_config = get_validator_config(
 		launcher.genesis_data,
 		validator_image,
 		validator_node_service_id,
@@ -129,7 +129,7 @@ def launch(
 		launcher.prysm_password_artifact_uuid
 	)
 
-	validator_service = add_service(validator_node_service_id, validator_service_config)
+	validator_service = add_service(validator_node_service_id, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
@@ -158,7 +158,7 @@ def launch(
 	return result
 
 
-def get_beacon_service_config(
+def get_beacon_config(
 		genesis_data,
 		beacon_image,
 		bootnode_context,
@@ -213,17 +213,17 @@ def get_beacon_service_config(
 		cmd_args.extend([param for param in extra_params])
 
 	return struct(
-		container_image_name = beacon_image,
-		used_ports = BEACON_NODE_USED_PORTS,
+		image = beacon_image,
+		ports = BEACON_NODE_USED_PORTS,
 		cmd_args = cmd_args,
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 		},
 		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 
-def get_validator_service_config(
+def get_validator_config(
 		genesis_data,
 		validator_image,
 		service_id,
@@ -271,10 +271,10 @@ def get_validator_service_config(
 
 
 	return struct(
-		container_image_name = validator_image,
-		used_ports = VALIDATOR_NODE_USED_PORTS,
+		image = validator_image,
+		ports = VALIDATOR_NODE_USED_PORTS,
 		cmd_args = cmd_args,
-		files_artifact_mount_dirpaths = {
+		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			node_keystore_files.files_artifact_uuid:             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			prysm_password_artifact_uuid:          PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,			
