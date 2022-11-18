@@ -78,7 +78,7 @@ def main(input_args):
 			print("Waiting for the first finalized epoch")
 			first_cl_client = all_cl_client_contexts[0]
 			first_cl_client_id = first_cl_client.beacon_service_id
-			define_fact(service_id = first_cl_client_id, fact_name = FIRST_NODE_FINALIZATION_FACT, fact_recipe = struct(method= "GET", endpoint = "eth/v1/beacon/states/head/finality_checkpoints", content_type = "application/json", port_id = HTTP_PORT_ID_FOR_FACT, field_extractor = ".data.finalized.epoch"))
+			define_fact(service_id = first_cl_client_id, fact_name = FIRST_NODE_FINALIZATION_FACT, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/beacon/states/head/finality_checkpoints", content_type = "application/json", port_id = HTTP_PORT_ID_FOR_FACT, field_extractor = ".data.finalized.epoch"))
 			finalized_epoch = wait(service_id = first_cl_client_id, fact_name = FIRST_NODE_FINALIZATION_FACT)
 			# TODO make an assertion on the finalized_epoch > 0
 			print("First finalized epoch occurred successfully")
