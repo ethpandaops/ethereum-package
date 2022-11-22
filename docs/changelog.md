@@ -5,6 +5,7 @@
 
 ### Fixes
 - Renamed `num_validators_per_keynode` to `num_validator_keys_per_node`
+- Moved away from `load` infavor of `import_module`
 
 # 0.0.1
 
