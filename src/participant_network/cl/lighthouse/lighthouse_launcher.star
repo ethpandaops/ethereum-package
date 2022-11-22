@@ -1,4 +1,4 @@
-shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
 parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
 cl_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star")
 cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star")
@@ -241,7 +241,7 @@ def get_validator_config(
 	extra_params):
 
 	# For some reason, Lighthouse takes in the parent directory of the config file (rather than the path to the config file itself)
-	genesis_config_parent_dirpath_on_client = shared_utils.path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, path_dir(genesis_data.config_yml_rel_filepath))
+	genesis_config_parent_dirpath_on_client = shared_utils.path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, shared_utils.path_dir(genesis_data.config_yml_rel_filepath))
 	validator_keys_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_keys_relative_dirpath)
 	validator_secrets_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_secrets_relative_dirpath)
 	
