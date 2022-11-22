@@ -1,5 +1,11 @@
 # TBD
 
+### Features
+- Added the docs
+
+### Fixes
+- Renamed `num_validators_per_keynode` to `num_validator_keys_per_node`
+
 # 0.0.1
 
 ### Features
@@ -9,11 +15,9 @@
 - Added a lot of simple objects that just keep data
 - Added monitoring on top of the repo
 - Almost perfect parity with the eth2-merge-kurtosis-module
-- Added the docs
 
 ### Fixes
 - Fixes some bugs with the initial implementation of the monitors
-- Renamed `num_validators_per_keynode` to `num_validator_keys_per_node`
 
 # 0.0.0
 * Initial commit
