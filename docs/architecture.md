@@ -105,4 +105,4 @@ Once the Ethereum network is up and running, verification logic will be run to e
 [static-files]: https://github.com/kurtosis-tech/eth2-module/tree/master/static_files
 [testnet-verifier]: https://github.com/kurtosis-tech/eth2-module/tree/master/src/testnet_verifier
 
-[auxiliary-services]: #auxilary-services
+[auxiliary-services]: #auxiliary-services
