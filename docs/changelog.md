@@ -1,5 +1,11 @@
 # TBD
 
+### Features
+- Added the docs
+
+### Fixes
+- Renamed `num_validators_per_keynode` to `num_validator_keys_per_node`
+
 # 0.0.1
 
 ### Features
