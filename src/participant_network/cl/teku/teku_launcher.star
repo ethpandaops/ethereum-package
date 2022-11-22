@@ -1,8 +1,8 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "path_dir", "TCP_PROTOCOL", "UDP_PROTOCOL")
-load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star", "new_cl_client_context")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
+cl_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star")
+cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star")
+mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -48,10 +48,10 @@ METRICS_PATH = "/metrics"
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
-	TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
-	UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
-	HTTP_PORT_ID:         new_port_spec(HTTP_PORT_NUM, TCP_PROTOCOL),
-	METRICS_PORT_ID:      new_port_spec(METRICS_PORT_NUM, TCP_PROTOCOL),
+	TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL),
+	HTTP_PORT_ID:         shared_utils.new_port_spec(HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	METRICS_PORT_ID:      shared_utils.new_port_spec(METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL),
 }
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
@@ -102,10 +102,10 @@ def launch(
 	teku_metrics_port = teku_service.ports[METRICS_PORT_ID]
 	teku_metrics_url = "{0}:{1}".format(teku_service.ip_address, teku_metrics_port.number)
 
-	teku_node_metrics_info = new_cl_node_metrics_info(service_id, METRICS_PATH, teku_metrics_url)
+	teku_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(service_id, METRICS_PATH, teku_metrics_url)
 	nodes_metrics_info = [teku_node_metrics_info]
 
-	result = new_cl_client_context(
+	return cl_client_context.new_cl_client_context(
 		"teku",
 		node_enr,
 		teku_service.ip_address,
@@ -113,7 +113,7 @@ def launch(
 		nodes_metrics_info,
 		service_id
 	)
-	return result
+
 
 def get_config(
 	genesis_data,
@@ -135,11 +135,11 @@ def get_config(
 		el_client_ctx.engine_rpc_port_num,
 	)
 
-	genesis_config_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
-	genesis_ssz_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.genesis_ssz_rel_filepath)
-	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_rel_filepath)
-	validator_keys_dirpath = path_join(VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.teku_keys_relative_dirpath)
-	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.teku_secrets_relative_dirpath)
+	genesis_config_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
+	genesis_ssz_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.genesis_ssz_rel_filepath)
+	jwt_secret_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_rel_filepath)
+	validator_keys_dirpath = shared_utils.path_join(VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.teku_keys_relative_dirpath)
+	validator_secrets_dirpath = shared_utils.path_join(VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.teku_secrets_relative_dirpath)
 	
 	cmd = [
 		# Needed because the generated keys are owned by root and the Teku image runs as the 'teku' user
@@ -195,7 +195,7 @@ def get_config(
 
 	if mev_boost_context != None:
 		cmd.append("--validators-builder-registration-default-enabled=true")
-		cmd.append("--builder-endpoint='{0}'".format(mev_boost_endpoint(mev_boost_context)))
+		cmd.append("--builder-endpoint='{0}'".format(mev_boost_context_module.mev_boost_endpoint(mev_boost_context)))
 
 
 	if len(extra_params) > 0:
