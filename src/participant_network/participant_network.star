@@ -19,7 +19,7 @@ prysm = import_module("github.com/kurtosis-tech/eth2-module/src/participant_netw
 teku = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/teku/teku_launcher.star")
 
 genesis_constants = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star")
-participant_module = load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant.star")
+participant_module = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/participant.star")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
