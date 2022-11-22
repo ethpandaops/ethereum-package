@@ -83,7 +83,7 @@ def launch(
 	extra_beacon_params,
 	extra_validator_params):
 
-	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, TEKU_LOG_LEVELS)
+	log_level = parse_input.get_client_log_level_or_default(participant_log_level, global_log_level, TEKU_LOG_LEVELS)
 
 	extra_params = [param for param in extra_beacon_params] + [param for param in extra_validator_params]
 	
