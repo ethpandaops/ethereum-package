@@ -1,4 +1,4 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "new_template_and_data", "path_join")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
 
 
 SERVICE_ID = "forkmon"
@@ -13,7 +13,7 @@ FORKMON_CONFIG_FILENAME = "forkmon-config.toml"
 FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 USED_PORTS = {
-	HTTP_PORT_ID: new_port_spec(HTTP_PORT_NUMBER, HTTP_PROTOCOL)
+	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, HTTP_PROTOCOL)
 }
 
 
@@ -33,7 +33,7 @@ def launch_forkmon(
 	template_data = new_config_template_data(HTTP_PORT_NUMBER, all_cl_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp)
 	template_data_json = json.encode(template_data)
 
-	template_and_data = new_template_and_data(config_template, template_data_json)
+	template_and_data = shared_utils.new_template_and_data(config_template, template_data_json)
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 
@@ -45,7 +45,7 @@ def launch_forkmon(
 
 
 def get_config(config_files_artifact_uuid):
-	config_file_path = path_join(FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, FORKMON_CONFIG_FILENAME)
+	config_file_path = shared_utils.path_join(FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, FORKMON_CONFIG_FILENAME)
 	return struct(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,

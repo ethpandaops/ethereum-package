@@ -1,5 +1,5 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "new_template_and_data", "path_join")
-load("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star", "GRAFANA_DASHBOARDS_CONFIG_DIRPATH")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+static_files = import_module("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star")
 
 
 SERVICE_ID = "grafana"
@@ -38,11 +38,11 @@ def launch_grafana(datasource_config_template, dashboard_providers_config_templa
 def get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_providers_config_template, prometheus_private_url):
 	datasource_data = new_datasource_config_template_data(prometheus_private_url)
 	datasource_data_as_json = json.encode(datasource_data)
-	datasource_template_and_data = new_template_and_data(datasource_config_template, datasource_data_as_json)
+	datasource_template_and_data = shared_utils.new_template_and_data(datasource_config_template, datasource_data_as_json)
 
 	dashboard_providers_data = new_dashboard_providers_config_template_data(GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE)
 	dashboard_providers_data_json = json.encode(dashboard_providers_data)
-	dashboard_providers_template_and_data = new_template_and_data(dashboard_providers_config_template, dashboard_providers_data_json)
+	dashboard_providers_template_and_data = shared_utils.new_template_and_data(dashboard_providers_config_template, dashboard_providers_data_json)
 
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[DATASOURCE_CONFIG_REL_FILEPATH] = datasource_template_and_data
@@ -50,7 +50,7 @@ def get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_p
 
 	grafana_config_artifacts_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
-	grafana_dashboards_artifacts_uuid = upload_files(GRAFANA_DASHBOARDS_CONFIG_DIRPATH)
+	grafana_dashboards_artifacts_uuid = upload_files(static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH)
 
 	return grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid
 

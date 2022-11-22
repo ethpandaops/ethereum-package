@@ -56,7 +56,7 @@ def main(input_args):
 	print("Succesfully launched forkmon")
 
 	print("Launching prometheus...")
-	prometheus.prometheus_private_url = launch_prometheus(
+	prometheus_private_url = prometheus.launch_prometheus(
 		prometheus_config_template,
 		all_cl_client_contexts,
 	)
