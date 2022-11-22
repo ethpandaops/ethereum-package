@@ -209,4 +209,4 @@ When you're happy with your changes:
 
 ## Known Bugs
 
-`wait_for_epoch_finalization` - doesn't work as expected, as Starlark doesn't have ways to do assertions on facts just yet. The issue #15 tracks this.
+`wait_for_epoch_finalization` - doesn't work as expected, as Starlark doesn't have ways to do assertions on facts just yet. The [issue](https://github.com/kurtosis-tech/eth2-module/issues/15) tracks this.
