@@ -85,7 +85,7 @@ def main(input_args):
 
 
 	grafana_info = module_io.GrafanaInfo(
-		dashboard_path = static_files.GRAFANA_DASHBOARD_PATH_URL,
+		dashboard_path = GRAFANA_DASHBOARD_PATH_URL,
 		user = GRAFANA_USER,
 		password = GRAFANA_PASSWORD
 	)
