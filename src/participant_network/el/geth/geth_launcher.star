@@ -66,7 +66,7 @@ def launch(
 	extra_params):
 
 
-	log_level = pars_input.get_client_log_level_or_default(participant_log_level, global_log_level, VERBOSITY_LEVELS)
+	log_level = parse_input.get_client_log_level_or_default(participant_log_level, global_log_level, VERBOSITY_LEVELS)
 
 	config = get_config(launcher.network_id, launcher.el_genesis_data, launcher.prefunded_geth_keys_artifact_uuid,
                                     launcher.prefunded_account_info, image, existing_el_clients, log_level, extra_params)
