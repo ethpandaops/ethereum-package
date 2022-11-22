@@ -141,8 +141,8 @@ def launch(
 	validator_metrics_port = validator_service.ports[VALIDATOR_MONITORING_PORT_ID]
 	validator_metrics_url = "{0}:{1}".format(validator_service.ip_address, validator_metrics_port.number)
 
-	beacon_node_metrics_info = new_cl_node_metrics_info(beacon_node_service_id, METRICS_PATH, beacon_metrics_url)
-	validator_node_metrics_info = new_cl_node_metrics_info(validator_node_service_id, METRICS_PATH, validator_metrics_url)
+	beacon_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(beacon_node_service_id, METRICS_PATH, beacon_metrics_url)
+	validator_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(validator_node_service_id, METRICS_PATH, validator_metrics_url)
 	nodes_metrics_info = [beacon_node_metrics_info, validator_node_metrics_info]
 
 
