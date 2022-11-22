@@ -110,7 +110,7 @@ message NetworkParams {
 	// Number of slots in an epoch on the Beacon chain
 	optional uint32 slots_per_epoch = 4;
 	// The number of validator keys that each CL validator node should get
-	optional uint32 num_validators_per_keynode = 5;
+	optional uint32 num_validator_keys_per_node = 5;
 	// This menmonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
 	//  validator keys already preregistered as validators	
 	optional string preregistered_validator_keys_mnemonic = 6;

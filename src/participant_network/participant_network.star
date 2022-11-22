@@ -54,7 +54,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 	cl_validator_data = generate_cl_validator_keystores(
 		network_params.preregistered_validator_keys_mnemonic,
 		num_participants,
-		network_params.num_validators_per_keynode
+		network_params.num_validator_keys_per_node,
 	)
 
 	
@@ -118,7 +118,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 	genesis_generation_config_yml_template = read_file(CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
 	genesis_generation_mnemonics_yml_template = read_file(CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH)
-	total_number_of_validator_keys = network_params.num_validators_per_keynode * num_participants
+	total_number_of_validator_keys = network_params.num_validator_keys_per_node * num_participants
 	cl_genesis_data = generate_cl_genesis_data(
 		genesis_generation_config_yml_template,
 		genesis_generation_mnemonics_yml_template,

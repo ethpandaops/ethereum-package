@@ -104,7 +104,7 @@ def parse_input(input_args):
 		fail("seconds_per_slot is 0 needs to be > 0 ")
 
 	required_num_validtors = 2 * result["network_params"]["slots_per_epoch"]
-	actual_num_validators = len(result["participants"]) * result["network_params"]["num_validators_per_keynode"]
+	actual_num_validators = len(result["participants"]) * result["network_params"]["num_validator_keys_per_node"]
 	if required_num_validtors > actual_num_validators:
 		fail("required_num_validtors - {0} is greater than actual_num_validators - {1}".format(required_num_validtors, actual_num_validators))
 
@@ -149,7 +149,7 @@ def default_network_params():
 	# this is temporary till we get params working
 	return {
 		"preregistered_validator_keys_mnemonic" :  "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
-		"num_validators_per_keynode" : 64,
+		"num_validator_keys_per_node" : 64,
 		"network_id" : "3151908",
 		"deposit_contract_address" : "0x4242424242424242424242424242424242424242",
 		"seconds_per_slot" : 12,
