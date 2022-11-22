@@ -1,8 +1,8 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "path_dir", "TCP_PROTOCOL", "UDP_PROTOCOL")
-load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star", "new_cl_client_context")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
+cl_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star")
+cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star")
+mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -40,15 +40,15 @@ METRICS_PATH = "/metrics"
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 BEACON_NODE_USED_PORTS = {
-	TCP_DISCOVERY_PORT_ID:     new_port_spec(DISCOVERY_TCP_PORT_NUM, TCP_PROTOCOL),
-	UDP_DISCOVERY_PORT_ID:     new_port_spec(DISCOVERY_UDP_PORT_NUM, UDP_PROTOCOL),
-	RPC_PORT_ID:              new_port_spec(RPC_PORT_NUM, TCP_PROTOCOL),
-	HTTP_PORT_ID:             new_port_spec(HTTP_PORT_NUM, TCP_PROTOCOL),
-	BEACON_MONITORING_PORT_ID: new_port_spec(BEACON_MONITORING_PORT_NUM, TCP_PROTOCOL),
+	TCP_DISCOVERY_PORT_ID:     shared_utils.new_port_spec(DISCOVERY_TCP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	UDP_DISCOVERY_PORT_ID:     shared_utils.new_port_spec(DISCOVERY_UDP_PORT_NUM, shared_utils.UDP_PROTOCOL),
+	RPC_PORT_ID:              shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	HTTP_PORT_ID:             shared_utils.new_port_spec(HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	BEACON_MONITORING_PORT_ID: shared_utils.new_port_spec(BEACON_MONITORING_PORT_NUM, shared_utils.TCP_PROTOCOL),
 }
 
 VALIDATOR_NODE_USED_PORTS = {
-	VALIDATOR_MONITORING_PORT_ID: new_port_spec(VALIDATOR_MONITORING_PORT_NUM, TCP_PROTOCOL),
+	VALIDATOR_MONITORING_PORT_ID: shared_utils.new_port_spec(VALIDATOR_MONITORING_PORT_NUM, TCP_PROTOCOL),
 }
 
 PRYSM_LOG_LEVELS = {
@@ -173,9 +173,9 @@ def get_beacon_config(
 		el_client_context.engine_rpc_port_num,
 	)
 
-	genesis_config_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
-	genesis_ssz_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.genesis_ssz_rel_filepath)
-	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_rel_filepath)
+	genesis_config_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
+	genesis_ssz_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.genesis_ssz_rel_filepath)
+	jwt_secret_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_rel_filepath)
 
 
 	cmd = [
@@ -206,7 +206,7 @@ def get_beacon_config(
 		cmd.append("--bootstrap-node="+bootnode_context.enr)
 
 	if mev_boost_context != None:
-		cmd.append(("--http-mev-relay{0}".format(mev_boost_endpoint(mev_boost_context))))
+		cmd.append(("--http-mev-relay{0}".format(mev_boost_context_module.mev_boost_endpoint(mev_boost_context))))
 
 	if len(extra_params) > 0:
 		# we do the for loop as otherwise its a proto repeated array
@@ -237,9 +237,9 @@ def get_validator_config(
 		prysm_password_artifact_uuid
 	):
 
-	consensus_data_dirpath = path_join(CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_id)
-	prysm_keystore_dirpath = path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.prysm_relative_dirpath)
-	prysm_password_filepath = path_join(PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, prysm_password_relative_filepath)
+	consensus_data_dirpath = shared_utils.path_join(CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_id)
+	prysm_keystore_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.prysm_relative_dirpath)
+	prysm_password_filepath = shared_utils.path_join(PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, prysm_password_relative_filepath)
 
 	cmd = [
 		"--accept-terms-of-use=true",#it's mandatory in order to run the node
