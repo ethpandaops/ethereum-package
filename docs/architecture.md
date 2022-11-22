@@ -19,7 +19,7 @@ Overview
 --------
 The module has six main components, in accordance with the above operation:
 
-1. [Execute Function][execute-function]
+1. [Main Function][main-function]
 1. [Module I/O][module-io]
 1. [Static Files][static-files]
 1. [Participant Network][participant-network]
