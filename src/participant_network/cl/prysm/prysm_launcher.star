@@ -91,7 +91,7 @@ def launch(
 	beacon_node_service_id = "{0}-{1}".format(service_id, BEACON_SUFFIX_SERVICE_ID)
 	validator_node_service_id = "{0}-{1}".format(service_id, VALIDATOR_SUFFIX_SERVICE_ID)
 
-	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, PRYSM_LOG_LEVELS)
+	log_level = parse_input.get_client_log_level_or_default(participant_log_level, global_log_level, PRYSM_LOG_LEVELS)
 
 	beacon_config = get_beacon_config(
 		launcher.genesis_data,
