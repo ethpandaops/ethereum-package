@@ -48,7 +48,7 @@ BEACON_NODE_USED_PORTS = {
 }
 
 VALIDATOR_NODE_USED_PORTS = {
-	VALIDATOR_MONITORING_PORT_ID: shared_utils.new_port_spec(VALIDATOR_MONITORING_PORT_NUM, TCP_PROTOCOL),
+	VALIDATOR_MONITORING_PORT_ID: shared_utils.new_port_spec(VALIDATOR_MONITORING_PORT_NUM, shared_utils.TCP_PROTOCOL),
 }
 
 PRYSM_LOG_LEVELS = {
@@ -146,7 +146,7 @@ def launch(
 	nodes_metrics_info = [beacon_node_metrics_info, validator_node_metrics_info]
 
 
-	result = new_cl_client_context(
+	return cl_client_context.new_cl_client_context(
 		"prysm",
 		beacon_node_enr,
 		beacon_service.ip_address,
@@ -154,8 +154,6 @@ def launch(
 		nodes_metrics_info,
 		beacon_node_service_id
 	)
-
-	return result
 
 
 def get_beacon_config(
