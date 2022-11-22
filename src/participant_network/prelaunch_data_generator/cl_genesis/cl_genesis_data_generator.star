@@ -127,15 +127,15 @@ def generate_cl_genesis_data(
 	cl_genesis_data_artifact_uuid = store_file_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
 	jwt_secret_rel_filepath = shared_utils.path_join(
-		path_base(OUTPUT_DIRPATH_ON_GENERATOR),
-		path_base(el_genesis_data.jwt_secret_relative_filepath),
+		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
+		shared_utils.path_base(el_genesis_data.jwt_secret_relative_filepath),
 	)
 	genesis_config_rel_filepath = shared_utils.path_join(
-		path_base(OUTPUT_DIRPATH_ON_GENERATOR),
+		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
 		GENESIS_CONFIG_YML_FILENAME,
 	)
 	genesis_ssz_rel_filepath = shared_utils.path_join(
-		path_base(OUTPUT_DIRPATH_ON_GENERATOR),
+		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
 		GENESIS_STATE_FILENAME,
 	)
 	result = cl_genesis_data.new_cl_genesis_data(
