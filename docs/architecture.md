@@ -23,7 +23,7 @@ The module has six main components, in accordance with the above operation:
 1. [Module I/O][module-io]
 1. [Static Files][static-files]
 1. [Participant Network][participant-network]
-1. Auxiliary Services
+1. [Auxiliary Services][auxilary-services]
 1. [Merge Verification Logic][testnet-verifier]
 
 [Main][main-function]
@@ -104,3 +104,5 @@ Once the Ethereum network is up and running, verification logic will be run to e
 [ethereum-genesis-generator]: https://github.com/skylenet/ethereum-genesis-generator
 [static-files]: https://github.com/kurtosis-tech/eth2-module/tree/master/static_files
 [testnet-verifier]: https://github.com/kurtosis-tech/eth2-module/tree/master/src/testnet_verifier
+
+[auxiliary-services]: #auxilary-services
