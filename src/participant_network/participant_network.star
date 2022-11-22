@@ -6,20 +6,20 @@ mev_boost_launcher_module = ("github.com/kurtosis-tech/eth2-module/src/participa
 
 static_files = import_module("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star")
 
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/geth/geth_launcher.star", launch_geth="launch", "new_geth_launcher")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/besu/besu_launcher.star", launch_besu="launch", "new_besu_launcher")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/erigon/erigon_launcher.star", launch_erigon="launch", "new_erigon_launcher")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/nethermind/nethermind_launcher.star", launch_nethermind="launch", "new_nethermind_launcher")
+geth = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/geth/geth_launcher.star")
+besu = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/besu/besu_launcher.star")
+erigon = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/erigon/erigon_launcher.star")
+nethermind = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/nethermind/nethermind_launcher.star")
 
 
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lighthouse/lighthouse_launcher.star", launch_lighthouse="launch", "new_lighthouse_launcher")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lodestar/lodestar_launcher.star", launch_lodestar="launch", "new_lodestar_launcher")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/nimbus/nimbus_launcher.star", launch_nimbus="launch", "new_nimbus_launcher")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/prysm/prysm_launcher.star", launch_prysm="launch", "new_prysm_launcher")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/teku/teku_launcher.star", launch_teku="launch", "new_teku_launcher")
+lighthouse = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lighthouse/lighthouse_launcher.star")
+lodestar = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lodestar/lodestar_launcher.star")
+nimbus = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/nimbus/nimbus_launcher.star")
+prysm = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/prysm/prysm_launcher.star")
+teku = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/teku/teku_launcher.star")
 
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star", "PRE_FUNDED_ACCOUNTS")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant.star", "new_participant")
+genesis_constants = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star")
+participant_module = load("github.com/kurtosis-tech/eth2-module/src/participant_network/participant.star")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -78,10 +78,10 @@ def launch_participant_network(participants, network_params, global_log_level):
 	print("Uploaded GETH files succesfully, launching EL participants")
 
 	el_launchers = {
-		module_io.ELClientType.geth : {"launcher": new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, PRE_FUNDED_ACCOUNTS), "launch_method": launch_geth},
-		module_io.ELClientType.besu : {"launcher": new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_besu},
-		module_io.ELClientType.erigon : {"launcher": new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": launch_erigon},
-		module_io.ELClientType.nethermind : {"launcher": new_nethermind_launcher(el_genesis_data), "launch_method": launch_nethermind},
+		module_io.ELClientType.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
+		module_io.ELClientType.besu : {"launcher": besu.new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": besu.launch},
+		module_io.ELClientType.erigon : {"launcher": erigon.new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": erigon.launch},
+		module_io.ELClientType.nethermind : {"launcher": nethermind.new_nethermind_launcher(el_genesis_data), "launch_method": nethermind.launch},
 	}
 
 	all_el_client_contexts = []
@@ -136,11 +136,11 @@ def launch_participant_network(participants, network_params, global_log_level):
 	print("Launching CL network")
 
 	cl_launchers = {
-		module_io.CLClientType.lighthouse : {"launcher": new_lighthouse_launcher(cl_genesis_data), "launch_method": launch_lighthouse},
-		module_io.CLClientType.lodestar: {"launcher": new_lodestar_launcher(cl_genesis_data), "launch_method": launch_lodestar},
-		module_io.CLClientType.nimbus: {"launcher": new_nimbus_launcher(cl_genesis_data), "launch_method": launch_nimbus},
-		module_io.CLClientType.prysm: {"launcher": new_prysm_launcher(cl_genesis_data, cl_validator_data.prysm_password_relative_filepath, cl_validator_data.prysm_password_artifact_uuid), "launch_method": launch_prysm},
-		module_io.CLClientType.teku: {"launcher": new_teku_launcher(cl_genesis_data), "launch_method": launch_teku},
+		module_io.CLClientType.lighthouse : {"launcher": lighthouse.new_lighthouse_launcher(cl_genesis_data), "launch_method": lighthouse.launch},
+		module_io.CLClientType.lodestar: {"launcher": lodestar.new_lodestar_launcher(cl_genesis_data), "launch_method": lodestar.launch},
+		module_io.CLClientType.nimbus: {"launcher": nimbus.new_nimbus_launcher(cl_genesis_data), "launch_method": nimbus.launch},
+		module_io.CLClientType.prysm: {"launcher": prysm.new_prysm_launcher(cl_genesis_data, cl_validator_data.prysm_password_relative_filepath, cl_validator_data.prysm_password_artifact_uuid), "launch_method": prysm.launch},
+		module_io.CLClientType.teku: {"launcher": teku.new_teku_launcher(cl_genesis_data), "launch_method": teku.launch},
 	}
 
 	all_cl_client_contexts = []
@@ -215,7 +215,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 		cl_client_context = all_cl_client_contexts[index]
 		mev_boost_context = all_mevboost_contexts[index]
 
-		participant_entry = new_participant(el_client_type, cl_client_type, el_client_context, cl_client_context, mev_boost_context)
+		participant_entry = participant_module.new_participant(el_client_type, cl_client_type, el_client_context, cl_client_context, mev_boost_context)
 
 		all_participants.append(participant_entry)
 
