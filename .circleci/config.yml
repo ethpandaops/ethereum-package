@@ -31,7 +31,7 @@ jobs:
 
       - run: kurtosis engine restart
 
-      - run: kurtosis startosis exec ${PWD}
+      - run: kurtosis exec ${PWD}
 
   
 workflows:

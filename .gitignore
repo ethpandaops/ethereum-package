@@ -84,3 +84,6 @@ yarn-error.log
 
 # Bazel
 /bazel-*
+
+# enclave dumps
+dump/

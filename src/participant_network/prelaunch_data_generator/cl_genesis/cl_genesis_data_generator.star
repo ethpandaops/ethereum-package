@@ -112,7 +112,7 @@ def generate_cl_genesis_data(
 		exec(launcher_service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 		
 
-	cl_genesis_generation_cmd_args = [
+	cl_genesis_generation_cmd = [
 		CL_GENESIS_GENERATION_BINARY_FILEPATH_ON_CONTAINER,
 		"merge",
 		"--config", path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_YML_FILENAME),
@@ -122,7 +122,7 @@ def generate_cl_genesis_data(
 		"--state-output", path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_STATE_FILENAME)
 	]
 
-	exec(launcher_service_id, cl_genesis_generation_cmd_args, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	exec(launcher_service_id, cl_genesis_generation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	cl_genesis_data_artifact_uuid = store_file_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
