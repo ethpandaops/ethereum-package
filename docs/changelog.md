@@ -1,5 +1,7 @@
 # TBD
 
+# 0.0.1
+
 ### Features
 - Changed the .circlei/config.yml to apply to Startosis
 - Added genesis_constants
