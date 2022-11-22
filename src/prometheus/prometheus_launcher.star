@@ -1,4 +1,4 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "new_template_and_data", "path_join", "path_base")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
 
 SERVICE_ID = "prometheus"
 
@@ -14,7 +14,7 @@ CONFIG_FILENAME = "prometheus-config.yml"
 CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS = "/config"
 
 USED_PORTS = {
-	HTTP_PORT_ID: new_port_spec(HTTP_PORT_NUMBER, HTTP_PORT_PROTOCOL)
+	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, HTTP_PORT_PROTOCOL)
 }
 
 
@@ -26,7 +26,7 @@ def launch_prometheus(config_template, cl_client_contexts):
 	template_data = new_config_template_data(all_cl_nodes_metrics_info)
 	template_data_json = json.encode(template_data)
 
-	template_and_data = new_template_and_data(config_template, template_data_json)
+	template_and_data = shared_utils.new_template_and_data(config_template, template_data_json)
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[CONFIG_FILENAME] = template_and_data
 
@@ -42,7 +42,7 @@ def launch_prometheus(config_template, cl_client_contexts):
 
 
 def get_config(config_files_artifact_uuid):
-	config_file_path = path_join(CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS, path_base(CONFIG_FILENAME))
+	config_file_path = shared_utils.path_join(CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS, shared_utils.path_base(CONFIG_FILENAME))
 	return struct(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,

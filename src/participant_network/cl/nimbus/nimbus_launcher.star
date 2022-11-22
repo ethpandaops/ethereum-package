@@ -1,7 +1,7 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "path_dir", "TCP_PROTOCOL", "UDP_PROTOCOL")
-load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star", "new_cl_client_context")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
+cl_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star")
+cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -42,10 +42,10 @@ METRICS_PATH = "/metrics"
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
-    TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
-    UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
-    HTTP_PORT_ID:          new_port_spec(HTTP_PORT_NUM, TCP_PROTOCOL),
-    METRICS_PORT_ID:       new_port_spec(METRICS_PORT_NUM, TCP_PROTOCOL),
+    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL),
+    HTTP_PORT_ID:          shared_utils.new_port_spec(HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    METRICS_PORT_ID:       shared_utils.new_port_spec(METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL),
 }
 
 NIMBUS_LOG_LEVELS = {
@@ -74,7 +74,7 @@ def launch(
 	extra_beacon_params,
 	extra_validator_params):
 
-	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, NIMBUS_LOG_LEVELS)
+	log_level = parse_input.get_client_log_level_or_default(participant_log_level, global_log_level, NIMBUS_LOG_LEVELS)
 
 	extra_params = [param for param in extra_beacon_params] + [param for param in extra_validator_params]
 
@@ -92,11 +92,11 @@ def launch(
 	metrics_port = nimbus_service.ports[METRICS_PORT_ID]
 	metrics_url = "{0}:{1}".format(nimbus_service.ip_address, metrics_port.number)
 
-	nimbus_node_metrics_info = new_cl_node_metrics_info(service_id, METRICS_PATH, metrics_url)
+	nimbus_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(service_id, METRICS_PATH, metrics_url)
 	nodes_metrics_info = [nimbus_node_metrics_info]
 
 
-	result = new_cl_client_context(
+	return cl_client_context.new_cl_client_context(
 		"nimbus",
 		node_enr,
 		nimbus_service.ip_address,
@@ -104,8 +104,6 @@ def launch(
 		nodes_metrics_info,
 		service_id,
 	)
-
-	return result
 
 
 def get_config(
@@ -124,10 +122,10 @@ def get_config(
 	)
 
 	# For some reason, Nimbus takes in the parent directory of the config file (rather than the path to the config file itself)
-	genesis_config_parent_dirpath_on_client = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENT, path_dir(genesis_data.config_yml_rel_filepath))
-	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENT, genesis_data.jwt_secret_rel_filepath)
-	validator_keys_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT, node_keystore_files.nimbus_keys_relative_dirpath)
-	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT, node_keystore_files.raw_secrets_relative_dirpath)
+	genesis_config_parent_dirpath_on_client = shared_utils.path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENT, shared_utils.path_dir(genesis_data.config_yml_rel_filepath))
+	jwt_secret_filepath = shared_utils.path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENT, genesis_data.jwt_secret_rel_filepath)
+	validator_keys_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT, node_keystore_files.nimbus_keys_relative_dirpath)
+	validator_secrets_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT, node_keystore_files.raw_secrets_relative_dirpath)
 
 	# Sources for these flags:
 	#  1) https://github.com/status-im/nimbus-eth2/blob/stable/scripts/launch_local_testnet.sh

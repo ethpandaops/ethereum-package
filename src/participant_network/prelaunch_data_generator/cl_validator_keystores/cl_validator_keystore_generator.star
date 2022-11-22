@@ -1,8 +1,8 @@
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star", "launch_prelaunch_data_generator")
+prelaunch_data_generator_launcher = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star")
 
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "path_join", "path_base")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/keystore_files.star", "new_keystore_files")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/generate_keystores_result.star", "new_generate_keystores_result")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+keystore_files_module = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/keystore_files.star")
+keystores_result = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/generate_keystores_result.star")
 
 
 NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores"
@@ -33,7 +33,7 @@ def generate_cl_validator_keystores(
 	num_nodes,
 	num_validators_per_node):
 	
-	service_id = launch_prelaunch_data_generator(
+	service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
 		{},
 	)
 
@@ -72,15 +72,15 @@ def generate_cl_validator_keystores(
 		artifact_uuid = store_file_from_service(service_id, output_dirpath)
 
 		# This is necessary because the way Kurtosis currently implements artifact-storing is
-		base_dirname_in_artifact = path_base(output_dirpath)
-		to_add = new_keystore_files(
+		base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
+		to_add = keystore_files_module.new_keystore_files(
 			artifact_uuid,
-			path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
-			path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
-			path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),
-			path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
-			path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
-			path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
+			shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
+			shared_utils.path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
+			shared_utils.path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),
+			shared_utils.path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
+			shared_utils.path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
+			shared_utils.path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
 		)
 
 		keystore_files.append(to_add)
@@ -98,9 +98,9 @@ def generate_cl_validator_keystores(
 
 	prysm_password_artifact_uuid = store_file_from_service(service_id, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR)
 
-	result = new_generate_keystores_result(
+	result = keystores_result.new_generate_keystores_result(
 		prysm_password_artifact_uuid,
-		path_base(PRYSM_PASSWORD_FILEPATH_ON_GENERATOR),
+		shared_utils.path_base(PRYSM_PASSWORD_FILEPATH_ON_GENERATOR),
 		keystore_files,
 	)
 

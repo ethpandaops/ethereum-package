@@ -1,6 +1,6 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_template_and_data", "path_join", "path_base")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_genesis/cl_genesis_data.star", "new_cl_genesis_data")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star", "launch_prelaunch_data_generator")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+cl_genesis_data = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_genesis/cl_genesis_data.star")
+prelaunch_data_generator_launcher = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star")
 
 
 # Needed to copy the JWT secret and the EL genesis.json file
@@ -43,8 +43,8 @@ def generate_cl_genesis_data(
 		deposit_contract_address,
 	))
 
-	genesis_generation_mnemonics_template_and_data = new_template_and_data(genesis_generation_mnemonics_yml_template, template_data)
-	genesis_generation_config_template_and_data = new_template_and_data(genesis_generation_config_yml_template, template_data)
+	genesis_generation_mnemonics_template_and_data = shared_utils.new_template_and_data(genesis_generation_mnemonics_yml_template, template_data)
+	genesis_generation_config_template_and_data = shared_utils.new_template_and_data(genesis_generation_config_yml_template, template_data)
 
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[MNEMONICS_YML_FILENAME] = genesis_generation_mnemonics_template_and_data
@@ -53,7 +53,7 @@ def generate_cl_genesis_data(
 	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
-	launcher_service_id = launch_prelaunch_data_generator(
+	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
 		{
 			genesis_generation_config_artifact_uuid:  CONFIG_DIRPATH_ON_GENERATOR,
 			el_genesis_data.files_artifact_uuid: EL_GENESIS_DIRPATH_ON_GENERATOR,
@@ -81,9 +81,9 @@ def generate_cl_genesis_data(
 
 	# Copy files to output
 	all_filepaths_to_copy_to_ouptut_directory = [
-		path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_YML_FILENAME),
-		path_join(CONFIG_DIRPATH_ON_GENERATOR, MNEMONICS_YML_FILENAME),
-		path_join(EL_GENESIS_DIRPATH_ON_GENERATOR, el_genesis_data.jwt_secret_relative_filepath),
+		shared_utils.path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_YML_FILENAME),
+		shared_utils.path_join(CONFIG_DIRPATH_ON_GENERATOR, MNEMONICS_YML_FILENAME),
+		shared_utils.path_join(EL_GENESIS_DIRPATH_ON_GENERATOR, el_genesis_data.jwt_secret_relative_filepath),
 	]
 
 	for filepath_on_generator in all_filepaths_to_copy_to_ouptut_directory:
@@ -100,7 +100,7 @@ def generate_cl_genesis_data(
 		deposit_contract_address: DEPOSIT_CONTRACT_FILENAME,
 	}
 	for content, destFilename in content_to_write_to_output_filename.items():
-		destFilepath = path_join(OUTPUT_DIRPATH_ON_GENERATOR, destFilename)
+		destFilepath = shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, destFilename)
 		cmd = [
 			"sh",
 			"-c",
@@ -115,30 +115,30 @@ def generate_cl_genesis_data(
 	cl_genesis_generation_cmd = [
 		CL_GENESIS_GENERATION_BINARY_FILEPATH_ON_CONTAINER,
 		"merge",
-		"--config", path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_YML_FILENAME),
-		"--mnemonics", path_join(OUTPUT_DIRPATH_ON_GENERATOR, MNEMONICS_YML_FILENAME),
-		"--eth1-config", path_join(EL_GENESIS_DIRPATH_ON_GENERATOR, el_genesis_data.geth_genesis_json_relative_filepath),
-		"--tranches-dir", path_join(OUTPUT_DIRPATH_ON_GENERATOR, TRANCHES_DIRANME),
-		"--state-output", path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_STATE_FILENAME)
+		"--config", shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_YML_FILENAME),
+		"--mnemonics", shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, MNEMONICS_YML_FILENAME),
+		"--eth1-config", shared_utils.path_join(EL_GENESIS_DIRPATH_ON_GENERATOR, el_genesis_data.geth_genesis_json_relative_filepath),
+		"--tranches-dir", shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, TRANCHES_DIRANME),
+		"--state-output", shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_STATE_FILENAME)
 	]
 
 	exec(launcher_service_id, cl_genesis_generation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	cl_genesis_data_artifact_uuid = store_file_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
-	jwt_secret_rel_filepath = path_join(
-		path_base(OUTPUT_DIRPATH_ON_GENERATOR),
-		path_base(el_genesis_data.jwt_secret_relative_filepath),
+	jwt_secret_rel_filepath = shared_utils.path_join(
+		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
+		shared_utils.path_base(el_genesis_data.jwt_secret_relative_filepath),
 	)
-	genesis_config_rel_filepath = path_join(
-		path_base(OUTPUT_DIRPATH_ON_GENERATOR),
+	genesis_config_rel_filepath = shared_utils.path_join(
+		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
 		GENESIS_CONFIG_YML_FILENAME,
 	)
-	genesis_ssz_rel_filepath = path_join(
-		path_base(OUTPUT_DIRPATH_ON_GENERATOR),
+	genesis_ssz_rel_filepath = shared_utils.path_join(
+		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
 		GENESIS_STATE_FILENAME,
 	)
-	result = new_cl_genesis_data(
+	result = cl_genesis_data.new_cl_genesis_data(
 		cl_genesis_data_artifact_uuid,
 		jwt_secret_rel_filepath,
 		genesis_config_rel_filepath,

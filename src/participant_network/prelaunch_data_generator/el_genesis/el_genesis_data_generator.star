@@ -1,6 +1,6 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_template_and_data", "path_join", "path_base")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data.star", "new_el_genesis_data")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star", "launch_prelaunch_data_generator")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+el_genesis = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data.star")
+prelaunch_data_generator_launcher = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star")
 
 CONFIG_DIRPATH_ON_GENERATOR = "/config"
 GENESIS_CONFIG_FILENAME    = "genesis-config.yaml"
@@ -37,7 +37,7 @@ def generate_el_genesis_data(
 		genesis_unix_timestamp,
 	))
 
-	genesis_config_file_template_and_data = new_template_and_data(genesis_generation_config_template, template_data)
+	genesis_config_file_template_and_data = shared_utils.new_template_and_data(genesis_generation_config_template, template_data)
 
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_FILENAME] = genesis_config_file_template_and_data
@@ -46,7 +46,7 @@ def generate_el_genesis_data(
 
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
-	launcher_service_id = launch_prelaunch_data_generator(
+	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
 		{
 			genesis_generation_config_artifact_uuid: CONFIG_DIRPATH_ON_GENERATOR,
 		},
@@ -75,11 +75,11 @@ def generate_el_genesis_data(
 
 	exec(launcher_service_id, dir_creation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	genesis_config_filepath_on_generator = path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_FILENAME)
+	genesis_config_filepath_on_generator = shared_utils.path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_FILENAME)
 	genesis_filename_to_relative_filepath_in_artifact = {}
 	for output_filename, generation_cmd in all_genesis_generation_cmds.items():
 		cmd = generation_cmd(genesis_config_filepath_on_generator)
-		output_filepath_on_generator = path_join(OUTPUT_DIRPATH_ON_GENERATOR, output_filename)
+		output_filepath_on_generator = shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, output_filename)
 		cmd.append(">")
 		cmd.append(output_filepath_on_generator)
 		cmd_to_execute = [
@@ -90,13 +90,13 @@ def generate_el_genesis_data(
 
 		exec(launcher_service_id, cmd_to_execute, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-		genesis_filename_to_relative_filepath_in_artifact[output_filename] = path_join(
-			path_base(OUTPUT_DIRPATH_ON_GENERATOR),
+		genesis_filename_to_relative_filepath_in_artifact[output_filename] = shared_utils.path_join(
+			shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
 			output_filename,
 		)
 
 
-	jwt_secret_filepath_on_generator = path_join(OUTPUT_DIRPATH_ON_GENERATOR, JWT_SECRET_FILENAME)
+	jwt_secret_filepath_on_generator = shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, JWT_SECRET_FILENAME)
 	jwt_secret_generation_cmd = [
 		"bash",
 		"-c",
@@ -109,9 +109,9 @@ def generate_el_genesis_data(
 
 	elGenesisDataArtifactUuid = store_file_from_service(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
-	result = new_el_genesis_data(
+	result = el_genesis.new_el_genesis_data(
 		elGenesisDataArtifactUuid,
-		path_join(path_base(OUTPUT_DIRPATH_ON_GENERATOR), JWT_SECRET_FILENAME),
+		shared_utils.path_join(shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR), JWT_SECRET_FILENAME),
 		genesis_filename_to_relative_filepath_in_artifact[GETH_GENESIS_FILENAME],
 		genesis_filename_to_relative_filepath_in_artifact[ERIGON_GENESIS_FILENAME],
 		genesis_filename_to_relative_filepath_in_artifact[NETHERMIND_GENESIS_FILENAME],

@@ -1,8 +1,8 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "path_dir", "TCP_PROTOCOL", "UDP_PROTOCOL")
-load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star", "new_cl_client_context")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
+cl_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star")
+cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star")
+mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -34,11 +34,11 @@ BEACON_ENR_FACT_NAME = "beacon-enr-fact"
 BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
 
 USED_PORTS = {
-    TCP_DISCOVERY_PORT_ID:     new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
-    UDP_DISCOVERY_PORT_ID:     new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
-    HTTP_PORT_ID:              new_port_spec(HTTP_PORT_NUM, TCP_PROTOCOL),
-    METRICS_PORT_ID:           new_port_spec(METRICS_PORT_NUM, TCP_PROTOCOL),
-    VALIDATOR_METRICS_PORT_ID: new_port_spec(VALIDATOR_METRICS_PORT_NUM, TCP_PROTOCOL)
+    TCP_DISCOVERY_PORT_ID:     shared_utils.new_port_spec(DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    UDP_DISCOVERY_PORT_ID:     shared_utils.new_port_spec(DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL),
+    HTTP_PORT_ID:              shared_utils.new_port_spec(HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    METRICS_PORT_ID:           shared_utils.new_port_spec(METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    VALIDATOR_METRICS_PORT_ID: shared_utils.new_port_spec(VALIDATOR_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL)
 }
 
 
@@ -68,7 +68,7 @@ def launch(
 	beacon_node_service_id = "{0}-{1}".format(service_id, BEACON_SUFFIX_SERVICE_ID)
 	validator_node_service_id = "{0}-{1}".format(service_id, VALIDATOR_SUFFIX_SERVICE_ID)
 
-	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, LODESTAR_LOG_LEVELS)
+	log_level = parse_input.get_client_log_level_or_default(participant_log_level, global_log_level, LODESTAR_LOG_LEVELS)
 
 	# Launch Beacon node
 	beacon_config = get_beacon_config(
@@ -114,10 +114,10 @@ def launch(
 	beacon_metrics_port = beacon_service.ports[METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
 
-	beacon_node_metrics_info = new_cl_node_metrics_info(service_id, METRICS_PATH, beacon_metrics_url)
+	beacon_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(service_id, METRICS_PATH, beacon_metrics_url)
 	nodes_metrics_info = [beacon_node_metrics_info]
 
-	result = new_cl_client_context(
+	return cl_client_context.new_cl_client_context(
 		"lodestar",
 		beacon_node_enr,
 		beacon_service.ip_address,
@@ -125,8 +125,6 @@ def launch(
 		nodes_metrics_info,
 		beacon_node_service_id
 	)
-
-	return result
 
 
 def get_beacon_config(
@@ -148,9 +146,9 @@ def get_beacon_config(
 		el_client_ctx.engine_rpc_port_num,
 	)
 
-	genesis_config_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
-	genesis_ssz_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.genesis_ssz_rel_filepath)
-	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_rel_filepath)
+	genesis_config_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
+	genesis_ssz_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.genesis_ssz_rel_filepath)
+	jwt_secret_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_rel_filepath)
 	cmd = [
 		"beacon",
 		"--logLevel=" + log_level,
@@ -188,7 +186,7 @@ def get_beacon_config(
 
 	if mev_boost_context != None:
 		cmd.append("--builder")
-		cmd.append("--builder.urls '{0}'".format(mev_boost_endpoint(mev_boost_context)))
+		cmd.append("--builder.urls '{0}'".format(mev_boost_context_module.mev_boost_endpoint(mev_boost_context)))
 	
 
 	if len(extra_params) > 0:
@@ -216,11 +214,11 @@ def get_validator_config(
 	mev_boost_context,
 	extra_params):
 
-	root_dirpath = path_join(CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_id)
+	root_dirpath = shared_utils.path_join(CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_id)
 
-	genesis_config_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
-	validator_keys_dirpath = path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.raw_keys_relative_dirpath)
-	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.raw_secrets_relative_dirpath)
+	genesis_config_filepath = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
+	validator_keys_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.raw_keys_relative_dirpath)
+	validator_secrets_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.raw_secrets_relative_dirpath)
 
 	cmd = [
 		"validator",

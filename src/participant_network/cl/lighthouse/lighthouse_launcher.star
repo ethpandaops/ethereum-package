@@ -1,8 +1,8 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "path_dir", "TCP_PROTOCOL", "UDP_PROTOCOL")
-load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star", "new_cl_client_context")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star", "new_cl_node_metrics_info")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
+cl_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star")
+cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star")
+mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -45,15 +45,15 @@ VALIDATOR_SUFFIX_SERVICE_ID = "validator"
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 BEACON_USED_PORTS = {
-	BEACON_TCP_DISCOVERY_PORT_ID: new_port_spec(BEACON_DISCOVERY_PORT_NUM, TCP_PROTOCOL),
-	BEACON_UDP_DISCOVERY_PORT_ID: new_port_spec(BEACON_DISCOVERY_PORT_NUM, UDP_PROTOCOL),
-	BEACON_HTTP_PORT_ID:         new_port_spec(BEACON_HTTP_PORT_NUM, TCP_PROTOCOL),
-	BEACON_METRICS_PORT_ID:      new_port_spec(BEACON_METRICS_PORT_NUM, TCP_PROTOCOL),
+	BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL),
+	BEACON_HTTP_PORT_ID:         shared_utils.new_port_spec(BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	BEACON_METRICS_PORT_ID:      shared_utils.new_port_spec(BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL),
 }
 
 VALIDATOR_USED_PORTS = {
-	VALIDATOR_HTTP_PORT_ID:    new_port_spec(VALIDATOR_HTTP_PORT_NUM, TCP_PROTOCOL),
-	VALIDATOR_METRICS_PORT_ID: new_port_spec(VALIDATOR_METRICS_PORT_NUM, TCP_PROTOCOL),
+	VALIDATOR_HTTP_PORT_ID:    shared_utils.new_port_spec(VALIDATOR_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	VALIDATOR_METRICS_PORT_ID: shared_utils.new_port_spec(VALIDATOR_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL),
 }
 
 LIGHTHOUSE_LOG_LEVELS = {
@@ -83,7 +83,7 @@ def launch(
 	beacon_node_service_id = "{0}-{1}".format(service_id, BEACON_SUFFIX_SERVICE_ID)
 	validator_node_service_id = "{0}-{1}".format(service_id, VALIDATOR_SUFFIX_SERVICE_ID)
 
-	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, LIGHTHOUSE_LOG_LEVELS)
+	log_level = parse_input.get_client_log_level_or_default(participant_log_level, global_log_level, LIGHTHOUSE_LOG_LEVELS)
 
 	# Launch Beacon node
 	beacon_config = get_beacon_config(
@@ -129,11 +129,11 @@ def launch(
 	validator_metrics_port = validator_service.ports[VALIDATOR_METRICS_PORT_ID]
 	validator_metrics_url = "{0}:{1}".format(validator_service.ip_address, validator_metrics_port.number)
 
-	beacon_node_metrics_info = new_cl_node_metrics_info(beacon_node_service_id, METRICS_PATH, beacon_metrics_url)
-	validator_node_metrics_info = new_cl_node_metrics_info(validator_node_service_id, METRICS_PATH, validator_metrics_url)
+	beacon_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(beacon_node_service_id, METRICS_PATH, beacon_metrics_url)
+	validator_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(validator_node_service_id, METRICS_PATH, validator_metrics_url)
 	nodes_metrics_info = [beacon_node_metrics_info, validator_node_metrics_info]
 
-	return new_cl_client_context(
+	return cl_client_context.new_cl_client_context(
 		"lighthouse",
 		beacon_node_enr,
 		beacon_service.ip_address,
@@ -158,8 +158,8 @@ def get_beacon_config(
 	)
 
 	# For some reason, Lighthouse takes in the parent directory of the config file (rather than the path to the config file itself)
-	genesis_config_parent_dirpath_on_client = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, path_dir(genesis_data.config_yml_rel_filepath))
-	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, genesis_data.jwt_secret_rel_filepath)
+	genesis_config_parent_dirpath_on_client = shared_utils.path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, shared_utils.path_dir(genesis_data.config_yml_rel_filepath))
+	jwt_secret_filepath = shared_utils.path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, genesis_data.jwt_secret_rel_filepath)
 
 	# NOTE: If connecting to the merge devnet remotely we DON'T want the following flags; when they're not set, the node's external IP address is auto-detected
 	#  from the peers it communicates with but when they're set they basically say "override the autodetection and
@@ -209,7 +209,7 @@ def get_beacon_config(
 
 	if mev_boost_context != None:
 		cmd.append("--builder")
-		cmd.append(mev_boost_endpoint(mev_boost_context))
+		cmd.append(mev_boost_context_module.mev_boost_endpoint(mev_boost_context))
 
 
 	if len(extra_params) > 0:
@@ -241,9 +241,9 @@ def get_validator_config(
 	extra_params):
 
 	# For some reason, Lighthouse takes in the parent directory of the config file (rather than the path to the config file itself)
-	genesis_config_parent_dirpath_on_client = path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, path_dir(genesis_data.config_yml_rel_filepath))
-	validator_keys_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_keys_relative_dirpath)
-	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_secrets_relative_dirpath)
+	genesis_config_parent_dirpath_on_client = shared_utils.path_join(GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, shared_utils.path_dir(genesis_data.config_yml_rel_filepath))
+	validator_keys_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_keys_relative_dirpath)
+	validator_secrets_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_secrets_relative_dirpath)
 	
 	cmd = [
 		"lighthouse",

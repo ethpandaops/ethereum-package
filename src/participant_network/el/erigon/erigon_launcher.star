@@ -1,6 +1,6 @@
-load("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star", "new_port_spec", "path_join", "TCP_PROTOCOL", "UDP_PROTOCOL")
-load("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star", "get_client_log_level_or_default")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/el_client_context.star", "new_el_client_context")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
+el_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/el_client_context.star")
 
 module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
@@ -25,10 +25,10 @@ ENGINE_RPC_PORT_ID = "engine-rpc"
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
-	RPC_PORT_ID: new_port_spec(RPC_PORT_NUM, TCP_PROTOCOL),
-	WS_PORT_ID: new_port_spec(WS_PORT_NUM, TCP_PROTOCOL),
-	TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
-	UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
+	RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL),
 }
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
@@ -53,7 +53,7 @@ def launch(
 	existing_el_clients,
 	extra_params):
 
-	log_level = get_client_log_level_or_default(participant_log_level, global_log_level, ERIGON_LOG_LEVELS)
+	log_level = parse_input.get_client_log_level_or_default(participant_log_level, global_log_level, ERIGON_LOG_LEVELS)
 
 	config = get_config(launcher.network_id, launcher.el_genesis_data,
                                     image, existing_el_clients, log_level, extra_params)
@@ -66,7 +66,7 @@ def launch(
 	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
 	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
 
-	return new_el_client_context(
+	return el_client_context.new_el_client_context(
 		"erigon",
 		enr,
 		enode,
@@ -80,8 +80,8 @@ def launch(
 def get_config(network_id, genesis_data, image, existing_el_clients, verbosity_level, extra_params):
 	network_id = network_id
 
-	genesis_json_filepath_on_client = path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.erigon_genesis_json_relative_filepath)
-	jwt_secret_json_filepath_on_client = path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath)
+	genesis_json_filepath_on_client = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.erigon_genesis_json_relative_filepath)
+	jwt_secret_json_filepath_on_client = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath)
 
 	init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
 		EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
