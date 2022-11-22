@@ -23,7 +23,7 @@ The module has six main components, in accordance with the above operation:
 1. [Module I/O][module-io]
 1. [Static Files][static-files]
 1. [Participant Network][participant-network]
-1. [Auxiliary Services][auxilary-services]
+1. [Auxiliary Services][auxiliary-services]
 1. [Merge Verification Logic][testnet-verifier]
 
 [Main][main-function]
