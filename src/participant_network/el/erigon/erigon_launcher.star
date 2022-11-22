@@ -132,7 +132,7 @@ def get_config(network_id, genesis_data, image, existing_el_clients, verbosity_l
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
 		},
 		entrypoint = ENTRYPOINT_ARGS,
-		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
+		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 

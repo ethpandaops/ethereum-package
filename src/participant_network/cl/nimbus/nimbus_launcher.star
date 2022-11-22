@@ -209,7 +209,7 @@ def get_config(
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENT,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT
 		},
-		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
+		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 

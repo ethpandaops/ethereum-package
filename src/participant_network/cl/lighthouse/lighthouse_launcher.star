@@ -133,7 +133,7 @@ def launch(
 	validator_node_metrics_info = new_cl_node_metrics_info(validator_node_service_id, METRICS_PATH, validator_metrics_url)
 	nodes_metrics_info = [beacon_node_metrics_info, validator_node_metrics_info]
 
-	result = new_cl_client_context(
+	return new_cl_client_context(
 		"lighthouse",
 		beacon_node_enr,
 		beacon_service.ip_address,
@@ -142,7 +142,6 @@ def launch(
 		beacon_node_service_id,
 	)
 
-	return result
 
 def get_beacon_config(
 	genesis_data,
@@ -228,7 +227,7 @@ def get_beacon_config(
 		env_vars = {
 			RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD
 		},
-		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
+		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 

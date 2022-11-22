@@ -219,7 +219,7 @@ def get_beacon_config(
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 		},
-		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
+		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 
@@ -279,7 +279,7 @@ def get_validator_config(
 			node_keystore_files.files_artifact_uuid:             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			prysm_password_artifact_uuid:          PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,			
 		},
-		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
+		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 

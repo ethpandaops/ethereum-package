@@ -34,12 +34,13 @@ BEACON_ENR_FACT_NAME = "beacon-enr-fact"
 BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
 
 USED_PORTS = {
-	TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
-	UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
-	HTTP_PORT_ID:         new_port_spec(HTTP_PORT_NUM, TCP_PROTOCOL),
-	METRICS_PORT_ID:      new_port_spec(METRICS_PORT_NUM, TCP_PROTOCOL),
-	VALIDATOR_METRICS_PORT_ID: new_port_spec(VALIDATOR_METRICS_PORT_NUM, TCP_PROTOCOL)
+    TCP_DISCOVERY_PORT_ID:     new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
+    UDP_DISCOVERY_PORT_ID:     new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
+    HTTP_PORT_ID:              new_port_spec(HTTP_PORT_NUM, TCP_PROTOCOL),
+    METRICS_PORT_ID:           new_port_spec(METRICS_PORT_NUM, TCP_PROTOCOL),
+    VALIDATOR_METRICS_PORT_ID: new_port_spec(VALIDATOR_METRICS_PORT_NUM, TCP_PROTOCOL)
 }
+
 
 
 LODESTAR_LOG_LEVELS = {
@@ -201,7 +202,7 @@ def get_beacon_config(
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER
 		},
-		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
+		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 
@@ -254,7 +255,7 @@ def get_validator_config(
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER
 		},
-		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
+		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 

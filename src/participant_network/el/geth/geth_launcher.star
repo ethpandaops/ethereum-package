@@ -180,7 +180,7 @@ def get_config(network_id, genesis_data, prefunded_geth_keys_artifact_uuid, pref
 			prefunded_geth_keys_artifact_uuid: PREFUNDED_KEYS_MOUNT_DIRPATH
 		},
 		entrypoint = ENTRYPOINT_ARGS,
-		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
+		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 
 
