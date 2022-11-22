@@ -11,6 +11,7 @@
 
 ### Fixes
 - Fixes some bugs with the initial implementation of the monitors
+- Renamed `num_validators_per_keynode` to `num_validator_keys_per_node`
 
 # 0.0.0
 * Initial commit
