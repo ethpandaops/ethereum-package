@@ -59,6 +59,7 @@ NIMBUS_LOG_LEVELS = {
 ENR_FACT_NAME = "enr-fact"
 HEALTH_FACT_NAME = "health-fact"
 
+ENTRYPOINT_ARGS = ["sh", "-c"]
 
 def launch(
 	launcher,
@@ -205,7 +206,7 @@ def get_config(
 		image = image,
 		ports = USED_PORTS,
 		cmd = [cmd_str],
-		entrypoint = ["sh", "-c"],
+		entrypoint = ENTRYPOINT_ARGS,
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENT,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT

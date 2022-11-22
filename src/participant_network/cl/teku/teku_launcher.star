@@ -54,6 +54,8 @@ USED_PORTS = {
 	METRICS_PORT_ID:      new_port_spec(METRICS_PORT_NUM, TCP_PROTOCOL),
 }
 
+ENTRYPOINT_ARGS = ["sh", "-c"]
+
 
 TEKU_LOG_LEVELS = {
 	module_io.GlobalClientLogLevel.error: "ERROR",
@@ -206,7 +208,7 @@ def get_config(
 		image = image,
 		ports = USED_PORTS,
 		cmd = [cmd_str],
-		entrypoint = ["sh", "-c"],
+		entrypoint = ENTRYPOINT_ARGS,
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
