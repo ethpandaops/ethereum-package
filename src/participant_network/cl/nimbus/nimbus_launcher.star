@@ -12,18 +12,19 @@ VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT = "/validator-keys"
 # Port IDs
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
-HTTP_PORT_ID         = "http"
-METRICS_PORT_ID      = "metrics"
+HTTP_PORT_ID = "http"
+METRICS_PORT_ID = "metrics"
 
 # Port nums
 DISCOVERY_PORT_NUM = 9000
-HTTP_PORT_NUM             = 4000
-METRICS_PORT_NUM          = 8008
+HTTP_PORT_NUM = 4000
+METRICS_PORT_NUM = 8008
 
 # Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
 #  have to to create it
 CONSENSUS_DATA_DIRPATH_IN_SERVICE_CONTAINER = "$HOME/consensus-data"
-CONSENSUS_DATA_DIR_PERMS_STR               = "0700" # Nimbus wants the data dir to have these perms
+# Nimbus wants the data dir to have these perms
+CONSENSUS_DATA_DIR_PERMS_STR = "0700"
 
 # The entrypoint the image normally starts with (we need to override the entrypoint to create the
 #  consensus data directory on the image before it starts)
@@ -33,7 +34,7 @@ DEFAULT_IMAGE_ENTRYPOINT = "/home/user/nimbus-eth2/build/nimbus_beacon_node"
 #  while the Nimbus container does not, we can't just point the Nimbus binary to the paths in the shared dir because
 #  it won't be able to open them. To get around this, we copy the validator keys/secrets to a path inside the Nimbus
 #  container that is owned by the container's user
-VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER    = "$HOME/validator-keys"
+VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "$HOME/validator-keys"
 VALIDATOR_SECRETS_DIRPATH_ON_SERVICE_CONTAINER = "$HOME/validator-secrets"
 
 METRICS_PATH = "/metrics"
@@ -41,18 +42,18 @@ METRICS_PATH = "/metrics"
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
-	TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
-	UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
-	HTTP_PORT_ID:         new_port_spec(HTTP_PORT_NUM, TCP_PROTOCOL),
-	METRICS_PORT_ID:      new_port_spec(METRICS_PORT_NUM, TCP_PROTOCOL),
+    TCP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, TCP_PROTOCOL),
+    UDP_DISCOVERY_PORT_ID: new_port_spec(DISCOVERY_PORT_NUM, UDP_PROTOCOL),
+    HTTP_PORT_ID:          new_port_spec(HTTP_PORT_NUM, TCP_PROTOCOL),
+    METRICS_PORT_ID:       new_port_spec(METRICS_PORT_NUM, TCP_PROTOCOL),
 }
 
 NIMBUS_LOG_LEVELS = {
-	module_io.GlobalClientLogLevel.error: "ERROR",
-	module_io.GlobalClientLogLevel.warn:  "WARN",
-	module_io.GlobalClientLogLevel.info:  "INFO",
-	module_io.GlobalClientLogLevel.debug: "DEBUG",
-	module_io.GlobalClientLogLevel.trace: "TRACE",
+    module_io.GlobalClientLogLevel.error: "ERROR",
+    module_io.GlobalClientLogLevel.warn:  "WARN",
+    module_io.GlobalClientLogLevel.info:  "INFO",
+    module_io.GlobalClientLogLevel.debug: "DEBUG",
+    module_io.GlobalClientLogLevel.trace: "TRACE",
 }
 
 ENR_FACT_NAME = "enr-fact"
