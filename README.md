@@ -198,6 +198,10 @@ When you're happy with your changes:
     - `mieubrisse` (Kurtosis)
 - Once everything works, merge! 
 
+## Known Bugs
+
+`wait_for_epoch_finalization` - doesn't work as expected, as Starlark doesn't have ways to do assertions on facts just yet. The [issue](https://github.com/kurtosis-tech/eth2-module/issues/15) tracks this.
+
 <!------------------------ Only links below here -------------------------------->
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosistech.com/installation.html
@@ -206,7 +210,3 @@ When you're happy with your changes:
 [prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
 [nimbus-issue]: https://github.com/status-im/nimbus-eth2/issues/4193
 [erigon-issue]: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/154
-
-## Known Bugs
-
-`wait_for_epoch_finalization` - doesn't work as expected, as Starlark doesn't have ways to do assertions on facts just yet. The [issue](https://github.com/kurtosis-tech/eth2-module/issues/15) tracks this.
