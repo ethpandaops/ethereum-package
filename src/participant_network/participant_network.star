@@ -1,11 +1,10 @@
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star", "generate_cl_validator_keystores")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star", "generate_el_genesis_data")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star", "generate_cl_genesis_data")
+cl_validator_keystores = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star")
+el_genesis_data_generator = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star")
+cl_genesis_data_generator = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star")
 
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star", "mev_boost_endpoint")
-load("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_launcher.star", launch_mevboost="launch", "new_mev_boost_launcher")
+mev_boost_launcher_module = ("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_launcher.star")
 
-load("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star", "GETH_PREFUNDED_KEYS_DIRPATH", "EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH", "CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH", "CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH")
+static_files = import_module("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star")
 
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/geth/geth_launcher.star", launch_geth="launch", "new_geth_launcher")
 load("github.com/kurtosis-tech/eth2-module/src/participant_network/el/besu/besu_launcher.star", launch_besu="launch", "new_besu_launcher")
@@ -51,7 +50,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 
 	print("Generating cl validator key stores")	
-	cl_validator_data = generate_cl_validator_keystores(
+	cl_validator_data = cl_validator_keystores.generate_cl_validator_keystores(
 		network_params.preregistered_validator_keys_mnemonic,
 		num_participants,
 		network_params.num_validator_keys_per_node,
@@ -61,8 +60,8 @@ def launch_participant_network(participants, network_params, global_log_level):
 	print(json.indent(json.encode(cl_validator_data)))
 
 	print("Generating EL data")
-	el_genesis_generation_config_template = read_file(EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
-	el_genesis_data = generate_el_genesis_data(
+	el_genesis_generation_config_template = read_file(static_files.EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
+	el_genesis_data = el_genesis_data_generator.generate_el_genesis_data(
 		el_genesis_generation_config_template,
 		el_genesis_timestamp,
 		network_params.network_id,
@@ -74,7 +73,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 	print("Uploading GETH prefunded keys")
 
-	geth_prefunded_keys_artifact_id = upload_files(GETH_PREFUNDED_KEYS_DIRPATH)
+	geth_prefunded_keys_artifact_id = upload_files(static_files.GETH_PREFUNDED_KEYS_DIRPATH)
 
 	print("Uploaded GETH files succesfully, launching EL participants")
 
@@ -116,10 +115,10 @@ def launch_participant_network(participants, network_params, global_log_level):
 	# verify that this works
 	cl_genesis_timestamp = (time.now() + CL_GENESIS_DATA_GENERATION_TIME + num_participants*CL_NODE_STARTUP_TIME).unix
 
-	genesis_generation_config_yml_template = read_file(CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
-	genesis_generation_mnemonics_yml_template = read_file(CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH)
+	genesis_generation_config_yml_template = read_file(static_files.CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
+	genesis_generation_mnemonics_yml_template = read_file(static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH)
 	total_number_of_validator_keys = network_params.num_validator_keys_per_node * num_participants
-	cl_genesis_data = generate_cl_genesis_data(
+	cl_genesis_data = cl_genesis_data_generator.generate_cl_genesis_data(
 		genesis_generation_config_yml_template,
 		genesis_generation_mnemonics_yml_template,
 		el_genesis_data,
@@ -164,9 +163,9 @@ def launch_participant_network(participants, network_params, global_log_level):
 		mev_boost_context = None
 
 		if proto.has(participant, "builder_network_params"):
-			mev_boost_launcher = new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
+			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
 			mev_boost_service_id = MEV_BOOST_SERVICE_ID_PREFIX.format(1)
-			mev_boost_context = launch_mevboost(mev_boost_launcher, mev_boost_service_id, network_params.network_id)
+			mev_boost_context = mev_boost_launcher_module.launch_mevboost(mev_boost_launcher, mev_boost_service_id, network_params.network_id)
 
 		all_mevboost_contexts.append(mev_boost_context)
 
