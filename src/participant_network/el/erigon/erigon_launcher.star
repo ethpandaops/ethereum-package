@@ -94,7 +94,7 @@ def get_config(network_id, genesis_data, image, existing_el_clients, verbosity_l
 
 	boot_node = existing_el_clients[0]
 
-	launch_node_cmd_args = [
+	launch_node_cmd = [
 		"erigon",
 		"--log.console.verbosity=" + verbosity_level,
 		"--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -115,11 +115,11 @@ def get_config(network_id, genesis_data, image, existing_el_clients, verbosity_l
 
 	if len(extra_params) > 0:
 		# this is a repeated<proto type>, we convert it into Starlark
-		launch_node_cmd_args.extend([param for param in extra_params])
+		launch_node_cmd.extend([param for param in extra_params])
 
 	command_arg = [
 		init_datadir_cmd_str,
-		" ".join(launch_node_cmd_args)
+		" ".join(launch_node_cmd)
 	]
 
 	command_arg_str = " && ".join(command_arg)
@@ -127,11 +127,11 @@ def get_config(network_id, genesis_data, image, existing_el_clients, verbosity_l
 	return struct(
 		image = image,
 		ports = USED_PORTS,
-		cmd_args = [command_arg_str],
+		cmd = [command_arg_str],
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
 		},
-		entry_point_args = ENTRYPOINT_ARGS,
+		entrypoint = ENTRYPOINT_ARGS,
 		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 

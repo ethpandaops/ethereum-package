@@ -170,7 +170,7 @@ def get_beacon_config(
 	#    "--enr-address=" + externalIpAddress,
 	#    fmt.Sprintf("--enr-udp-port=%v", BEACON_DISCOVERY_PORT_NUM),
 	#    fmt.Sprintf("--enr-tcp-port=%v", beaconDiscoveryPortNum),
-	cmd_args = [
+	cmd = [
 		LIGHTHOUSE_BINARY_COMMAND,
 		"beacon_node",
 		"--debug-level=" + log_level,
@@ -206,22 +206,22 @@ def get_beacon_config(
 	]
 
 	if boot_cl_client_ctx != None:
-		cmd_args.append("--boot-nodes="+boot_cl_client_ctx.enr)
+		cmd.append("--boot-nodes="+boot_cl_client_ctx.enr)
 
 	if mev_boost_context != None:
-		cmd_args.append("--builder")
-		cmd_args.append(mev_boost_endpoint(mev_boost_context))
+		cmd.append("--builder")
+		cmd.append(mev_boost_endpoint(mev_boost_context))
 
 
 	if len(extra_params) > 0:
 		# this is a repeated<proto type>, we convert it into Starlark
-		cmd_args.extend([param for param in extra_params])
+		cmd.extend([param for param in extra_params])
 
 
 	return struct(
 		image = image,
 		ports = BEACON_USED_PORTS,
-		cmd_args = cmd_args,
+		cmd = cmd,
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
 		},
@@ -246,7 +246,7 @@ def get_validator_config(
 	validator_keys_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_keys_relative_dirpath)
 	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS, node_keystore_files.raw_secrets_relative_dirpath)
 	
-	cmd_args = [
+	cmd = [
 		"lighthouse",
 		"validator_client",
 		"--debug-level=" + log_level,
@@ -273,16 +273,16 @@ def get_validator_config(
 	]
 
 	if mev_boost_context != None:
-		cmd_args.append("--builder-proposals")
+		cmd.append("--builder-proposals")
 
 	if len(extra_params):
-		cmd_args.extend([param for param in extra_params])
+		cmd.extend([param for param in extra_params])
 
 
 	return struct(
 		image = image,
 		ports = VALIDATOR_USED_PORTS,
-		cmd_args = cmd_args,
+		cmd = cmd,
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,

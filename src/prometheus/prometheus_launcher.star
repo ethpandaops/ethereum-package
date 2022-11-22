@@ -49,7 +49,7 @@ def get_config(config_files_artifact_uuid):
 		files = {
 			config_files_artifact_uuid : CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS
 		},
-		cmd_args = [
+		cmd = [
 			# You can check all the cli flags starting the container and going to the flags section
 			# in Prometheus admin page "{{prometheusPublicURL}}/flags" section
 			"--config.file=" + config_file_path,

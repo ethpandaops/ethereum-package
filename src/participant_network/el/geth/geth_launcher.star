@@ -118,7 +118,7 @@ def get_config(network_id, genesis_data, prefunded_geth_keys_artifact_uuid, pref
 		GETH_ACCOUNT_PASSWORDS_FILE,
 	) + '}'
 
-	launch_node_cmd_args = [
+	launch_node_cmd = [
 		"geth",
 		"--verbosity=" + verbosity_level,
 		"--unlock=" + accounts_to_unlock_str,
@@ -152,16 +152,16 @@ def get_config(network_id, genesis_data, prefunded_geth_keys_artifact_uuid, pref
 		bootnode_context = existing_el_clients[0]
 		bootnode_enode = bootnode_context.enode
 
-	launch_node_cmd_args.append(
+	launch_node_cmd.append(
 		'--bootnodes="{0}"'.format(bootnode_enode),
 	)
 
 	if len(extra_params) > 0:
 		# this is a repeated<proto type>, we convert it into Starlark
-		launch_node_cmd_args.extend([param for param in extra_params])
+		launch_node_cmd.extend([param for param in extra_params])
 
 
-	launch_node_cmd_str = " ".join(launch_node_cmd_args)
+	launch_node_cmd_str = " ".join(launch_node_cmd)
 
 	subcommand_strs = [
 		init_datadir_cmd_str,
@@ -174,12 +174,12 @@ def get_config(network_id, genesis_data, prefunded_geth_keys_artifact_uuid, pref
 	return struct(
 		image = image,
 		ports = USED_PORTS,
-		cmd_args = [command_str],
+		cmd = [command_str],
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH,
 			prefunded_geth_keys_artifact_uuid: PREFUNDED_KEYS_MOUNT_DIRPATH
 		},
-		entry_point_args = ENTRYPOINT_ARGS,
+		entrypoint = ENTRYPOINT_ARGS,
 		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 

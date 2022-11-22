@@ -139,7 +139,7 @@ def get_config(
 	validator_keys_dirpath = path_join(VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.teku_keys_relative_dirpath)
 	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.teku_secrets_relative_dirpath)
 	
-	cmd_args = [
+	cmd = [
 		# Needed because the generated keys are owned by root and the Teku image runs as the 'teku' user
 		"cp",
 		"-R",
@@ -189,24 +189,24 @@ def get_config(
 	]
 
 	if boot_cl_client_ctx != None:
-		cmd_args.append("--p2p-discovery-bootnodes="+boot_cl_client_ctx.enr)
+		cmd.append("--p2p-discovery-bootnodes="+boot_cl_client_ctx.enr)
 
 	if mev_boost_context != None:
-		cmd_args.append("--validators-builder-registration-default-enabled=true")
-		cmd_args.append("--builder-endpoint='{0}'".format(mev_boost_endpoint(mev_boost_context)))
+		cmd.append("--validators-builder-registration-default-enabled=true")
+		cmd.append("--builder-endpoint='{0}'".format(mev_boost_endpoint(mev_boost_context)))
 
 
 	if len(extra_params) > 0:
 		# we do the list comprehension as the default extra_params is a proto repeated string
-		cmd_args.extend([param for param in extra_params])
+		cmd.extend([param for param in extra_params])
 
-	cmd_str = " ".join(cmd_args)
+	cmd_str = " ".join(cmd)
 
 	return struct(
 		image = image,
 		ports = USED_PORTS,
-		cmd_args = [cmd_str],
-		entry_point_args = ["sh", "-c"],
+		cmd = [cmd_str],
+		entrypoint = ["sh", "-c"],
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER

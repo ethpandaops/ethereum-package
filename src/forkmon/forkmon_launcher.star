@@ -52,7 +52,7 @@ def get_config(config_files_artifact_uuid):
 		files = {
 			config_files_artifact_uuid: FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
 		},
-		cmd_args = ["--config-path", config_file_path]
+		cmd = ["--config-path", config_file_path]
 	)
 
 

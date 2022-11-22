@@ -29,6 +29,6 @@ def get_config(
 		# TODO remove this when ports is optional to pass
 		ports = {},
 		image = IMAGE,
-		entry_point_args = ENTRYPOINT_ARGS,
+		entrypoint = ENTRYPOINT_ARGS,
 		files = files_artifact_mountpoints,
 	)

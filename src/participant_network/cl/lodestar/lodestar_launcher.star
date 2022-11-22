@@ -150,7 +150,7 @@ def get_beacon_config(
 	genesis_config_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.config_yml_rel_filepath)
 	genesis_ssz_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.genesis_ssz_rel_filepath)
 	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_rel_filepath)
-	cmd_args = [
+	cmd = [
 		"beacon",
 		"--logLevel=" + log_level,
 		"--port={0}".format(DISCOVERY_PORT_NUM),
@@ -182,22 +182,22 @@ def get_beacon_config(
 	]
 
 	if boot_cl_client_ctx != None :
-		cmd_args.append("--bootnodes="+boot_cl_client_ctx.enr)
+		cmd.append("--bootnodes="+boot_cl_client_ctx.enr)
 	
 
 	if mev_boost_context != None:
-		cmd_args.append("--builder")
-		cmd_args.append("--builder.urls '{0}'".format(mev_boost_endpoint(mev_boost_context)))
+		cmd.append("--builder")
+		cmd.append("--builder.urls '{0}'".format(mev_boost_endpoint(mev_boost_context)))
 	
 
 	if len(extra_params) > 0:
 		# this is a repeated<proto type>, we convert it into Starlark
-		cmd_args.extend([param for param in extra_params])
+		cmd.extend([param for param in extra_params])
 	
 	return struct(
 		image = image,
 		ports = USED_PORTS,
-		cmd_args = cmd_args,
+		cmd = cmd,
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER
 		},
@@ -221,7 +221,7 @@ def get_validator_config(
 	validator_keys_dirpath = path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.raw_keys_relative_dirpath)
 	validator_secrets_dirpath = path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.raw_secrets_relative_dirpath)
 
-	cmd_args = [
+	cmd = [
 		"validator",
 		"--logLevel=" + log_level,
 		"--dataDir=" + root_dirpath,
@@ -237,19 +237,19 @@ def get_validator_config(
 	]
 
 	if mev_boost_context != None:
-		cmd_args.append("--builder")
+		cmd.append("--builder")
 		# TODO(old) required to work? - from old module
 		# cmdArgs = append(cmdArgs, "--defaultFeeRecipient <your ethereum address>")
 	
 	if len(extra_params) > 0:
 		# this is a repeated<proto type>, we convert it into Starlark
-		cmd_args.extend([param for param in extra_params])
+		cmd.extend([param for param in extra_params])
 
 
 	return struct(
 		image = image,
 		ports = USED_PORTS,
-		cmd_args = cmd_args,
+		cmd = cmd,
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER

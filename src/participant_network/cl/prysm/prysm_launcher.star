@@ -178,7 +178,7 @@ def get_beacon_config(
 	jwt_secret_filepath = path_join(GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, genesis_data.jwt_secret_rel_filepath)
 
 
-	cmd_args = [
+	cmd = [
 		"--accept-terms-of-use=true", #it's mandatory in order to run the node
 		"--datadir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
 		"--chain-config-file=" + genesis_config_filepath,
@@ -203,19 +203,19 @@ def get_beacon_config(
 	]
 
 	if bootnode_context != None:
-		cmd_args.append("--bootstrap-node="+bootnode_context.enr)
+		cmd.append("--bootstrap-node="+bootnode_context.enr)
 
 	if mev_boost_context != None:
-		cmd_args.append(("--http-mev-relay{0}".format(mev_boost_endpoint(mev_boost_context))))
+		cmd.append(("--http-mev-relay{0}".format(mev_boost_endpoint(mev_boost_context))))
 
 	if len(extra_params) > 0:
 		# we do the for loop as otherwise its a proto repeated array
-		cmd_args.extend([param for param in extra_params])
+		cmd.extend([param for param in extra_params])
 
 	return struct(
 		image = beacon_image,
 		ports = BEACON_NODE_USED_PORTS,
-		cmd_args = cmd_args,
+		cmd = cmd,
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 		},
@@ -241,7 +241,7 @@ def get_validator_config(
 	prysm_keystore_dirpath = path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.prysm_relative_dirpath)
 	prysm_password_filepath = path_join(PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, prysm_password_relative_filepath)
 
-	cmd_args = [
+	cmd = [
 		"--accept-terms-of-use=true",#it's mandatory in order to run the node
 		"--prater",                  #it's a tesnet setup, it's mandatory to set a network (https://docs.prylabs.network/docs/install/install-with-script#before-you-begin-pick-your-network-1)
 		"--beacon-rpc-gateway-provider=" + beacon_http_endpoint,
@@ -262,18 +262,18 @@ def get_validator_config(
 	if mev_boost_context != None:
 		# TODO(old) required to work?
 		# cmdArgs = append(cmdArgs, "--suggested-fee-recipient=0x...")
-		cmd_args.append("--enable-builder")
+		cmd.append("--enable-builder")
 
 
 	if len(extra_params) > 0:
 		# we do the for loop as otherwise its a proto repeated array
-		cmd_args.extend([param for param in extra_params])
+		cmd.extend([param for param in extra_params])
 
 
 	return struct(
 		image = validator_image,
 		ports = VALIDATOR_NODE_USED_PORTS,
-		cmd_args = cmd_args,
+		cmd = cmd,
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
 			node_keystore_files.files_artifact_uuid:             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,

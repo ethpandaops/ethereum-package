@@ -132,7 +132,7 @@ def get_config(
 	#  2) https://github.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
 	# WARNING: Do NOT set the --max-peers flag here, as doing so to the exact number of nodes seems to mess things up!
 	# See: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/26
-	cmd_args = [
+	cmd = [
 		"mkdir",
 		CONSENSUS_DATA_DIRPATH_IN_SERVICE_CONTAINER,
 		"-m",
@@ -186,9 +186,9 @@ def get_config(
 	if boot_cl_client_ctx == None:
 		# Copied from https://.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
 		# See explanation there
-		cmd_args.append("--subscribe-all-subnets")
+		cmd.append("--subscribe-all-subnets")
 	else:
-		cmd_args.append("--bootstrap-node="+boot_cl_client_ctx.enr)
+		cmd.append("--bootstrap-node="+boot_cl_client_ctx.enr)
 
 	if mev_boost_context != None:
 		# TODO(old) add `mev-boost` support once the feature lands on `stable` - from eth2-merge-kurtosis-module
@@ -196,15 +196,15 @@ def get_config(
 
 
 	if len(extra_params) > 0:
-		cmd_args.extend([param for param in extra_params])
+		cmd.extend([param for param in extra_params])
 
-	cmd_str = " ".join(cmd_args)
+	cmd_str = " ".join(cmd)
 
 	return struct(
 		image = image,
 		ports = USED_PORTS,
-		cmd_args = [cmd_str],
-		entry_point_args = ["sh", "-c"],
+		cmd = [cmd_str],
+		entrypoint = ["sh", "-c"],
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENT,
 			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT

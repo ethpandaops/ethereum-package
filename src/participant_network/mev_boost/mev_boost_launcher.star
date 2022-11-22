@@ -39,7 +39,7 @@ def get_config(mev_boost_launcher, network_id):
 	return struct(
 		image = FLASHBOTS_MEV_BOOST_IMAGE,
 		ports = USED_PORTS,
-		cmd_args = command
+		cmd = command
 	)
 
 

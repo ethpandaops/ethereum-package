@@ -53,7 +53,7 @@ def get_asynchronous_verification_config(params, el_client_contexts, cl_client_c
 	commands = get_cmd(params, el_client_contexts, cl_client_contexts, False)
 	return struct(
 		image = IMAGE_NAME,
-		cmd_args = commands,
+		cmd = commands,
 		# TODO remove this when ports is optional in add_service
 		ports = {},
 	)
@@ -62,7 +62,7 @@ def get_asynchronous_verification_config(params, el_client_contexts, cl_client_c
 def get_synchronous_verification_config():
 	return struct(
 		image = IMAGE_NAME,
-		entry_point_args = SYNCHRONOUS_ENTRYPOINT_ARGS,
+		entrypoint = SYNCHRONOUS_ENTRYPOINT_ARGS,
 		# TODO remove this when ports is optional in add_service
 		ports = {},
 	)

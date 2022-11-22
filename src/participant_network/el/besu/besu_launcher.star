@@ -123,11 +123,11 @@ def get_config(network_id, genesis_data, image, existing_el_clients, log_level, 
 	return struct(
 		image = image,
 		ports = USED_PORTS,
-		cmd_args = [launch_node_command_str],
+		cmd = [launch_node_command_str],
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER
 		},
-		entry_point_args = ENTRYPOINT_ARGS,
+		entrypoint = ENTRYPOINT_ARGS,
 		privaite_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)
 

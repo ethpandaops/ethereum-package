@@ -18,7 +18,7 @@ def get_config(prefunded_addresses, el_client_context):
 	comma_separated_addresses = ",".join(address_strs)
 	return struct(
 		image = IMAGE_NAME,
-		cmd_args = [
+		cmd = [
 			"http://{0}:{1}".format(el_client_context.ip_addr, el_client_context.rpc_port_num),
 			"spam",
 			comma_separated_private_keys,

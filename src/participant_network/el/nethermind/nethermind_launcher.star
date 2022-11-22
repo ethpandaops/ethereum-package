@@ -118,7 +118,7 @@ def get_config(genesis_data, image, existing_el_clients, log_level, extra_params
 	return struct(
 		image = image,
 		ports = USED_PORTS,
-		cmd_args = command_args,
+		cmd = command_args,
 		files = {
 			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
 		},
