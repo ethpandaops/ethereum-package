@@ -3,7 +3,7 @@ UDP_PROTOCOL = "UDP"
 
 
 def new_template_and_data(template, template_data_json):
-	return {"template": template, "template_data_json": template_data_json}
+	return struct(template = template, data = template_data_json)
 
 
 def path_join(*args):
