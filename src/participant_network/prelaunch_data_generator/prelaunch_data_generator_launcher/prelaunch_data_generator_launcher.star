@@ -26,8 +26,6 @@ def get_config(
 	files_artifact_mountpoints,
 ):
 	return struct(
-		# TODO remove this when ports is optional to pass
-		ports = {},
 		image = IMAGE,
 		entrypoint = ENTRYPOINT_ARGS,
 		files = files_artifact_mountpoints,
