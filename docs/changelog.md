@@ -7,6 +7,7 @@
 - Renamed `num_validators_per_keynode` to `num_validator_keys_per_node`
 - Moved away from `load` infavor of `import_module`
 - Moved away from `store_files_from_service` to `store_service_files`
+- Removed empty `ports` from a few service configs as passing it is now optional
 
 # 0.0.1
 
