@@ -19,8 +19,8 @@ GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
-def main(input_args):
-	input_args_with_right_defaults = package_io.ModuleInput(parse_input.parse_input(input_args))
+def run(input_args):
+	input_args_with_right_defaults = module_io.ModuleInput(parse_input.parse_input(input_args))
 	num_participants = len(input_args_with_right_defaults.participants)
 	network_params = input_args_with_right_defaults.network_params
 
