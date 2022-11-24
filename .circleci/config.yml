@@ -43,7 +43,6 @@ workflows:
           filters:
             branches:
               ignore:
-                - develop
                 - master
       - run_startosis:
           context:
