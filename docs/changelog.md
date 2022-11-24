@@ -13,6 +13,9 @@
 - Adjusted to the new render templates config
 - Moved away from passing json string to struct/dict for render templates
 
+### Changes
+- Move from `main` to `run` in `main.star`
+
 # 0.0.1
 
 ### Features
