@@ -1,27 +1,27 @@
-cl_validator_keystores = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star")
-el_genesis_data_generator = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star")
-cl_genesis_data_generator = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star")
+cl_validator_keystores = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star")
+el_genesis_data_generator = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star")
+cl_genesis_data_generator = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star")
 
-mev_boost_launcher_module = ("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_launcher.star")
+mev_boost_launcher_module = ("github.com/kurtosis-tech/eth2-package/src/participant_network/mev_boost/mev_boost_launcher.star")
 
-static_files = import_module("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star")
+static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
 
-geth = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/geth/geth_launcher.star")
-besu = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/besu/besu_launcher.star")
-erigon = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/erigon/erigon_launcher.star")
-nethermind = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/nethermind/nethermind_launcher.star")
+geth = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/geth/geth_launcher.star")
+besu = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/besu/besu_launcher.star")
+erigon = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/erigon/erigon_launcher.star")
+nethermind = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/nethermind/nethermind_launcher.star")
 
 
-lighthouse = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lighthouse/lighthouse_launcher.star")
-lodestar = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/lodestar/lodestar_launcher.star")
-nimbus = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/nimbus/nimbus_launcher.star")
-prysm = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/prysm/prysm_launcher.star")
-teku = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/teku/teku_launcher.star")
+lighthouse = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/lighthouse/lighthouse_launcher.star")
+lodestar = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/lodestar/lodestar_launcher.star")
+nimbus = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/nimbus/nimbus_launcher.star")
+prysm = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/prysm/prysm_launcher.star")
+teku = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/teku/teku_launcher.star")
 
-genesis_constants = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star")
-participant_module = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/participant.star")
+genesis_constants = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star")
+participant_module = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/participant.star")
 
-package_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
+package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
 
 CL_CLIENT_SERVICE_ID_PREFIX = "cl-client-"
 EL_CLIENT_SERVICE_ID_PREFIX = "el-client-"

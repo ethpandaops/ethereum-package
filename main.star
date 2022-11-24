@@ -1,16 +1,16 @@
-participant_network = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/participant_network.star")
-parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/package_io/parse_input.star")
+participant_network = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/participant_network.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 
-static_files = import_module("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star")
-genesis_constants = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star")
+static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
+genesis_constants = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star")
 
-transaction_spammer = import_module("github.com/kurtosis-tech/eth2-module/src/transaction_spammer/transaction_spammer.star")
-forkmon = import_module("github.com/kurtosis-tech/eth2-module/src/forkmon/forkmon_launcher.star")
-prometheus = import_module("github.com/kurtosis-tech/eth2-module/src/prometheus/prometheus_launcher.star")
-grafana =import_module("github.com/kurtosis-tech/eth2-module/src/grafana/grafana_launcher.star")
-testnet_verifier = import_module("github.com/kurtosis-tech/eth2-module/src/testnet_verifier/testnet_verifier.star")
+transaction_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star")
+forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/forkmon/forkmon_launcher.star")
+prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star")
+grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star")
+testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
 
-package_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
+package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
 
 GRAFANA_USER             = "admin"
 GRAFANA_PASSWORD         = "admin"

@@ -1,5 +1,5 @@
-shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
-static_files = import_module("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
+static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
 
 
 SERVICE_ID = "grafana"

@@ -1,8 +1,8 @@
-shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
-parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/package_io/parse_input.star")
-el_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/el_client_context.star")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
+el_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/el_client_context.star")
 
-package_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
+package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
 
 
 RPC_PORT_NUM       = 8545
