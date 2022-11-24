@@ -1,5 +1,8 @@
 # TBD
 
+### Changes
+- Repalced 'module' with 'package' where relevant
+
 # 0.0.2
 
 ### Features
