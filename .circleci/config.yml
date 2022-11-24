@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  kurtosis-docs-checker: kurtosis-tech/docs-checker@0.2.0
+  kurtosis-docs-checker: kurtosis-tech/docs-checker@0.2.1
 
 executors:
   ubuntu_vm:
@@ -14,7 +14,7 @@ executors:
 #  images), so we run everything inside a single job.
 # See also: https://discuss.circleci.com/t/can-docker-images-be-preserved-between-jobs-in-a-workflow-without-a-manual-load-save/23388/12
 jobs:
-  run_startosis:
+  run_starlark:
     executor: ubuntu_vm
     steps:
 
@@ -43,14 +43,12 @@ workflows:
           filters:
             branches:
               ignore:
-                - develop
                 - master
-      - run_startosis:
+      - run_starlark:
           context:
             # This pulls in KurtosisBot's Github token, so that we can read from our private repos
             - github-user
           filters:
             branches:
               ignore:
-                - develop
                 - master
