@@ -12,6 +12,9 @@
 - Removed empty `ports` from a few service configs as passing it is now optional
 - Adjusted to the new render templates config
 
+### Changes
+- Move from `main` to `run` in `main.star`
+
 # 0.0.1
 
 ### Features
