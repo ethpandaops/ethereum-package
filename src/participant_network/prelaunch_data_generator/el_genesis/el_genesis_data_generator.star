@@ -31,11 +31,11 @@ def generate_el_genesis_data(
 	network_id,
 	deposit_contract_address):
 
-	template_data = json.encode(genesis_generation_config_template_data(
+	template_data = genesis_generation_config_template_data(
 		network_id,
 		deposit_contract_address,
 		genesis_unix_timestamp,
-	))
+	)
 
 	genesis_config_file_template_and_data = shared_utils.new_template_and_data(genesis_generation_config_template, template_data)
 

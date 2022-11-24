@@ -31,9 +31,8 @@ def launch_forkmon(
 		all_cl_client_info.append(client_info)
 
 	template_data = new_config_template_data(HTTP_PORT_NUMBER, all_cl_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp)
-	template_data_json = json.encode(template_data)
 
-	template_and_data = shared_utils.new_template_and_data(config_template, template_data_json)
+	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 

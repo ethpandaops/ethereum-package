@@ -14,6 +14,7 @@
 - Moved away from `store_files_from_service` to `store_service_files`
 - Removed empty `ports` from a few service configs as passing it is now optional
 - Adjusted to the new render templates config
+- Moved away from passing json string to struct/dict for render templates
 
 # 0.0.1
 
