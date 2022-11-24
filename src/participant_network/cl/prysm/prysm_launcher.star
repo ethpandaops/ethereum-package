@@ -1,10 +1,10 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
-parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/package_io/parse_input.star")
 cl_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star")
 cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star")
 mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star")
 
-module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
+package_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
 IMAGE_SEPARATOR_DELIMITER = ","
 EXPECTED_NUM_IMAGES       = 2
@@ -52,11 +52,11 @@ VALIDATOR_NODE_USED_PORTS = {
 }
 
 PRYSM_LOG_LEVELS = {
-	module_io.GlobalClientLogLevel.error: "error",
-	module_io.GlobalClientLogLevel.warn:  "warn",
-	module_io.GlobalClientLogLevel.info:  "info",
-	module_io.GlobalClientLogLevel.debug: "debug",
-	module_io.GlobalClientLogLevel.trace: "trace",
+	package_io.GlobalClientLogLevel.error: "error",
+	package_io.GlobalClientLogLevel.warn:  "warn",
+	package_io.GlobalClientLogLevel.info:  "info",
+	package_io.GlobalClientLogLevel.debug: "debug",
+	package_io.GlobalClientLogLevel.trace: "trace",
 }
 
 BEACON_ENR_FACT_NAME = "beacon-enr-fact"

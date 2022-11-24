@@ -1,5 +1,5 @@
 participant_network = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/participant_network.star")
-parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/package_io/parse_input.star")
 
 static_files = import_module("github.com/kurtosis-tech/eth2-module/src/static_files/static_files.star")
 genesis_constants = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star")
@@ -10,7 +10,7 @@ prometheus = import_module("github.com/kurtosis-tech/eth2-module/src/prometheus/
 grafana =import_module("github.com/kurtosis-tech/eth2-module/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/kurtosis-tech/eth2-module/src/testnet_verifier/testnet_verifier.star")
 
-module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
+package_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
 
 GRAFANA_USER             = "admin"
 GRAFANA_PASSWORD         = "admin"
@@ -20,7 +20,7 @@ FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
 def main(input_args):
-	input_args_with_right_defaults = module_io.ModuleInput(parse_input.parse_input(input_args))
+	input_args_with_right_defaults = package_io.ModuleInput(parse_input.parse_input(input_args))
 	num_participants = len(input_args_with_right_defaults.participants)
 	network_params = input_args_with_right_defaults.network_params
 
@@ -84,12 +84,12 @@ def main(input_args):
 			print("First finalized epoch occurred successfully")
 
 
-	grafana_info = module_io.GrafanaInfo(
+	grafana_info = package_io.GrafanaInfo(
 		dashboard_path = GRAFANA_DASHBOARD_PATH_URL,
 		user = GRAFANA_USER,
 		password = GRAFANA_PASSWORD
 	)
-	output = module_io.ModuleOutput(grafana_info = grafana_info)
+	output = package_io.ModuleOutput(grafana_info = grafana_info)
 	print(output)
 	return output
 
