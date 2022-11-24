@@ -34,14 +34,14 @@ def generate_cl_genesis_data(
 		preregistered_validator_keys_mnemonic,
 		total_num_validator_keys_to_preregister):
 
-	template_data = json.encode(new_cl_genesis_config_template_data(
+	template_data = new_cl_genesis_config_template_data(
 		network_id,
 		seconds_per_slot,
 		genesis_unix_timestamp,
 		total_num_validator_keys_to_preregister,
 		preregistered_validator_keys_mnemonic,
 		deposit_contract_address,
-	))
+	)
 
 	genesis_generation_mnemonics_template_and_data = shared_utils.new_template_and_data(genesis_generation_mnemonics_yml_template, template_data)
 	genesis_generation_config_template_and_data = shared_utils.new_template_and_data(genesis_generation_config_yml_template, template_data)
