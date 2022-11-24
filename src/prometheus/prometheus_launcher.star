@@ -24,9 +24,7 @@ def launch_prometheus(config_template, cl_client_contexts):
 		all_cl_nodes_metrics_info.extend(client.cl_nodes_metrics_info)
 
 	template_data = new_config_template_data(all_cl_nodes_metrics_info)
-	template_data_json = json.encode(template_data)
-
-	template_and_data = shared_utils.new_template_and_data(config_template, template_data_json)
+	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[CONFIG_FILENAME] = template_and_data
 
