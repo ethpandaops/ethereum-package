@@ -37,12 +37,10 @@ def launch_grafana(datasource_config_template, dashboard_providers_config_templa
 
 def get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_providers_config_template, prometheus_private_url):
 	datasource_data = new_datasource_config_template_data(prometheus_private_url)
-	datasource_data_as_json = json.encode(datasource_data)
-	datasource_template_and_data = shared_utils.new_template_and_data(datasource_config_template, datasource_data_as_json)
+	datasource_template_and_data = shared_utils.new_template_and_data(datasource_config_template, datasource_data)
 
 	dashboard_providers_data = new_dashboard_providers_config_template_data(GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE)
-	dashboard_providers_data_json = json.encode(dashboard_providers_data)
-	dashboard_providers_template_and_data = shared_utils.new_template_and_data(dashboard_providers_config_template, dashboard_providers_data_json)
+	dashboard_providers_template_and_data = shared_utils.new_template_and_data(dashboard_providers_config_template, dashboard_providers_data)
 
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[DATASOURCE_CONFIG_REL_FILEPATH] = datasource_template_and_data
