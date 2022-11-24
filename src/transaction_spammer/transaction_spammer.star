@@ -23,7 +23,6 @@ def get_config(prefunded_addresses, el_client_context):
 			"spam",
 			comma_separated_private_keys,
 			comma_separated_addresses
-		],
-		ports = {}
+		]
 	)
 
