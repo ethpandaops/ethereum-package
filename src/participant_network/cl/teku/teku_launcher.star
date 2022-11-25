@@ -1,10 +1,10 @@
-shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
-parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
-cl_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_client_context.star")
-cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/cl/cl_node_metrics_info.star")
-mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/mev_boost/mev_boost_context.star")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
+cl_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_client_context.star")
+cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_node_metrics_info.star")
+mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/mev_boost/mev_boost_context.star")
 
-module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
+package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
 
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
@@ -58,11 +58,11 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 
 TEKU_LOG_LEVELS = {
-	module_io.GlobalClientLogLevel.error: "ERROR",
-	module_io.GlobalClientLogLevel.warn:  "WARN",
-	module_io.GlobalClientLogLevel.info:  "INFO",
-	module_io.GlobalClientLogLevel.debug: "DEBUG",
-	module_io.GlobalClientLogLevel.trace: "TRACE",
+	package_io.GlobalClientLogLevel.error: "ERROR",
+	package_io.GlobalClientLogLevel.warn:  "WARN",
+	package_io.GlobalClientLogLevel.info:  "INFO",
+	package_io.GlobalClientLogLevel.debug: "DEBUG",
+	package_io.GlobalClientLogLevel.trace: "TRACE",
 }
 
 

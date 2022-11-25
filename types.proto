@@ -16,15 +16,15 @@ message ModuleInput {
 	//  - only Ethereum network (EL and CL nodes) will be launched. Nothing else (no transaction spammer)
 	//  - params for the CL nodes will be ignored (e.g. CL node image, CL node extra params)
 	// This is a hack - it's not very elegant - but this is a commonly-requested feature
-	// The longterm solution is making the module trivial to decompose so we don't need flags like this; we're working
+	// The longterm solution is making the package trivial to decompose so we don't need flags like this; we're working
 	//  on this at the Kurtosis product level
 	optional bool launch_additional_services = 3;
 
-	// If set, the module will block until a finalized epoch has occurred.
+	// If set, the package will block until a finalized epoch has occurred.
 	// If `waitForVerifications` is set to true, this extra wait will be skipped.
 	optional bool wait_for_finalization = 4;
 
-	// If set to true, the module will block until all verifications have passed
+	// If set to true, the package will block until all verifications have passed
 	optional bool wait_for_verifications = 5;
 
 	// If set, after the merge, this will be the maximum number of epochs wait for the verifications to succeed.

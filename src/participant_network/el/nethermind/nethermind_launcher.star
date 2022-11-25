@@ -1,8 +1,8 @@
-shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
-parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
-el_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/el_client_context.star")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
+el_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/el_client_context.star")
 
-module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
+package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/execution-data"
@@ -32,11 +32,11 @@ USED_PORTS = {
 }
 
 NETHERMIND_LOG_LEVELS = {
-	module_io.GlobalClientLogLevel.error: "ERROR",
-	module_io.GlobalClientLogLevel.warn:  "WARN",
-	module_io.GlobalClientLogLevel.info:  "INFO",
-	module_io.GlobalClientLogLevel.debug: "DEBUG",
-	module_io.GlobalClientLogLevel.trace: "TRACE",
+	package_io.GlobalClientLogLevel.error: "ERROR",
+	package_io.GlobalClientLogLevel.warn:  "WARN",
+	package_io.GlobalClientLogLevel.info:  "INFO",
+	package_io.GlobalClientLogLevel.debug: "DEBUG",
+	package_io.GlobalClientLogLevel.trace: "TRACE",
 }
 
 ENODE_FACT_NAME = "enode-fact"

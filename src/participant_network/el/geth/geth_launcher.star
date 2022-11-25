@@ -1,8 +1,8 @@
-shared_utils = import_module("github.com/kurtosis-tech/eth2-module/src/shared_utils/shared_utils.star")
-parse_input = import_module("github.com/kurtosis-tech/eth2-module/src/module_io/parse_input.star")
-el_client_context = import_module("github.com/kurtosis-tech/eth2-module/src/participant_network/el/el_client_context.star")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
+el_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/el_client_context.star")
 
-module_io = import_types("github.com/kurtosis-tech/eth2-module/types.proto")
+package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
 
 
 RPC_PORT_NUM       = 8545
@@ -48,11 +48,11 @@ ENR_FACT_NAME = "enr-fact"
 ENODE_FACT_NAME = "enode-fact"
 
 VERBOSITY_LEVELS = {
-	module_io.GlobalClientLogLevel.error: "1",
-	module_io.GlobalClientLogLevel.warn:  "2",
-	module_io.GlobalClientLogLevel.info:  "3",
-	module_io.GlobalClientLogLevel.debug: "4",
-	module_io.GlobalClientLogLevel.trace: "5",
+	package_io.GlobalClientLogLevel.error: "1",
+	package_io.GlobalClientLogLevel.warn:  "2",
+	package_io.GlobalClientLogLevel.info:  "3",
+	package_io.GlobalClientLogLevel.debug: "4",
+	package_io.GlobalClientLogLevel.trace: "5",
 }
 
 def launch(

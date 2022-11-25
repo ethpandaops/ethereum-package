@@ -1,7 +1,7 @@
-Ethereum Module
+Ethereum Package
 =======================
 
-This is a [Kurtosis Starlark module][starlark-docs] that will:
+This is a [Kurtosis Starlark Package][starlark-docs] that will:
 
 1. Generate EL & CL genesis information using [this genesis generator](https://github.com/skylenet/ethereum-genesis-generator)
 1. Spin up a network of mining Eth1 clients
@@ -21,15 +21,15 @@ Quickstart
    ```bash
    docker image ls
    ```
-1. Create a file in your home directory `eth2-module-params.json` with the following contents:
+1. Create a file in your home directory `eth2-package-params.json` with the following contents:
 
    ```yaml
    global_client_log_level: "info"
    ```
 
-1. Execute the module, passing in the params from the file:
+1. Run the package, passing in the params from the file:
    ```bash
-   kurtosis exec --enclave-id eth2 github.com/kurtosis-tech/eth2-module --args "$(cat ~/eth2-module-params.json)"
+   kurtosis run --enclave-id eth2 github.com/kurtosis-tech/eth2-package --args "$(cat ~/eth2-package-params.json)"
    ```
 
 Management
@@ -40,7 +40,7 @@ Kurtosis will create a new enclave to house the services of the Ethereum network
 Configuration
 -------------
 
-To configure the module behaviour, you can modify your `eth2-module-params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults ([from here](https://github.com/kurtosis-tech/eth2-module/blob/master/types.proto) provided:
+To configure the package behaviour, you can modify your `eth2-package-params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults ([from here](https://github.com/kurtosis-tech/eth2-package/blob/master/types.proto) provided:
 
 Note: Following an update starting the network post-merge, `erigon`, `nimbus` and `prysm` clients don't work anymore. Fixes are tracked in the following Github issues:
 - Prysm: [#11508][prysm-issue]
@@ -152,11 +152,11 @@ Note: Following an update starting the network post-merge, `erigon`, `nimbus` an
     //  - params for the CL nodes will be ignored (e.g. CL node image, CL node extra params)
     "launch_additional_services": true,
 
-    //  If set, the module will block until a finalized epoch has occurred.
+    //  If set, the package will block until a finalized epoch has occurred.
     //  If `waitForVerifications` is set to true, this extra wait will be skipped.
     "wait_for_finalization": false,
 
-    //  If set to true, the module will block until all verifications have passed
+    //  If set to true, the package will block until all verifications have passed
     "wait_for_verifications": false,
 
     //  If set, after the merge, this will be the maximum number of epochs wait for the verifications to succeed.
@@ -172,21 +172,21 @@ Note: Following an update starting the network post-merge, `erigon`, `nimbus` an
 
 You can find the latest Kiln compatible docker images here: https://notes.ethereum.org/@launchpad/kiln
 
-Developing On This Module
+Developing On This Package
 -------------------------
 First, install prerequisites:
 1. [Install Kurtosis itself][kurtosis-cli-installation]
 
 Then, run the dev loop:
 1. Make your code changes
-1. Rebuild and re-execute the module by running the following from the root of the repo:
+1. Rebuild and re-run the package by running the following from the root of the repo:
    ```bash
-   kurtosis exec . --args "{}"
+   kurtosis run . --args "{}"
    ```
-   NOTE 1: You can change the value of the `--args` flag to pass in extra configuration to the module per the "Configuration" section above!
+   NOTE 1: You can change the value of the `--args` flag to pass in extra configuration to the package per the "Configuration" section above!
    NOTE 2: The `--args` flag accepts JSON.
 
-To get detailed information about the structure of the module, visit [the architecture docs](./docs/architecture.md).
+To get detailed information about the structure of the package, visit [the architecture docs](./docs/architecture.md).
 
 When you're happy with your changes:
 - Add an entry to `docs/changelog.md` under the `# TBD` header describing your changes (this is required for CI checks to pass!)
@@ -200,7 +200,7 @@ When you're happy with your changes:
 
 ## Known Bugs
 
-`wait_for_epoch_finalization` - doesn't work as expected, as Starlark doesn't have ways to do assertions on facts just yet. The [issue](https://github.com/kurtosis-tech/eth2-module/issues/15) tracks this.
+`wait_for_epoch_finalization` - doesn't work as expected, as Starlark doesn't have ways to do assertions on facts just yet. The [issue](https://github.com/kurtosis-tech/eth2-package/issues/15) tracks this.
 
 <!------------------------ Only links below here -------------------------------->
 [docker-installation]: https://docs.docker.com/get-docker/
