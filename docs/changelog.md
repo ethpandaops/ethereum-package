@@ -3,6 +3,9 @@
 ### Changes
 - Repalced 'module' with 'package' where relevant
 
+### Fixes
+- Fixed a bug in `run` of the `main.star`
+
 # 0.0.2
 
 ### Features
