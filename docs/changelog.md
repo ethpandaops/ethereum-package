@@ -3,6 +3,9 @@
 ### Changes
 - Repalced 'module' with 'package' where relevant
 
+### Fixes
+- Fixed a bug in `run` of `main.star` where we'd refer to `module_io` instead of `package_io`
+
 # 0.0.2
 
 ### Features
