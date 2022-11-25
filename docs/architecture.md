@@ -30,14 +30,14 @@ The module has six main components, in accordance with the above operation:
 ------------------------------------
 The main function is the module's entrypoint, where parameters are received from the user, lower-level calls are made, and a response is returned.
 
-[Package I/O][package-io]
+[Module I/O][module-io]
 -----------------------
-This particular package has many configuration options (see the "Configuration" section in the README for the full list of values). These are passed in as a JSON-serialized string, and arrive to the package's main function via the `input_args` variable. The process of setting defaults, overriding them with the user's desired options, and validating the resulting config object requires some space in the codebase. All this logic happens inside the `package_io` directory, so you'll want to visit this directory if you want to:
+This particular module has many configuration options (see the "Configuration" section in the README for the full list of values). These are passed in as a JSON-serialized string, and arrive to the module's main function via the `input_args` variable. The process of setting defaults, overriding them with the user's desired options, and validating the resulting config object requires some space in the codebase. All this logic happens inside the `module_io` directory, so you'll want to visit this directory if you want to:
 
-- View or change parameters that the package can receive
-- Change the default values of package parameters
-- View or change the validation logic that the package applies to configuration parameters
-- View or change the properties that the package passes back to the user after execution is complete
+- View or change parameters that the module can receive
+- Change the default values of module parameters
+- View or change the validation logic that the module applies to configuration parameters
+- View or change the properties that the module passes back to the user after execution is complete
 
 [Static Files][static-files]
 ----------------------------
@@ -99,7 +99,7 @@ Once the Ethereum network is up and running, verification logic will be run to e
 [enclave-context]: https://docs.kurtosistech.com/kurtosis/core-lib-documentation#enclavecontext
 
 [main-function]: https://github.com/kurtosis-tech/eth2-module/blob/master/main.star#22
-[package-io]: https://github.com/kurtosis-tech/eth2-module/tree/master/src/package_io
+[module-io]: https://github.com/kurtosis-tech/eth2-module/tree/master/src/module_io
 [participant-network]: https://github.com/kurtosis-tech/eth2-module/tree/master/src/participant_network
 [ethereum-genesis-generator]: https://github.com/skylenet/ethereum-genesis-generator
 [static-files]: https://github.com/kurtosis-tech/eth2-module/tree/master/static_files
