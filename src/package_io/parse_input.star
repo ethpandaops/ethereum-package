@@ -16,49 +16,32 @@ DEFAULT_CL_IMAGES = {
 BESU_NODE_NAME = "besu"
 NETHERMIND_NODE_NAME = "nethermind"
 
-DESCRIPTOR_ATTR_NAME = "descriptor"
-ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", DESCRIPTOR_ATTR_NAME)
-ENUM_TYPE = "proto.EnumValueDescriptor"
+ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants")
 
 def parse_input(input_args):
-	default_input = default_module_input()
-	result = {}
+	result = default_module_input()
 	for attr in dir(input_args):
 		value = getattr(input_args, attr)
 		# if its insterted we use the value inserted
-		if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and proto.has(input_args, attr):
-			result[attr] = get_value_or_name(value)
-		# if not we grab the value from the default value dictionary
-		elif attr not in ATTR_TO_BE_SKIPPED_AT_ROOT:
-			result[attr] = default_input[attr]
+		if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and hasattr(input_args, attr):
+			result[attr] = value
 		elif attr == "network_params":
-			result["network_params"] = {}
 			for sub_attr in dir(input_args.network_params):
 				sub_value = getattr(input_args.network_params, sub_attr)
-				# if its insterted we use the value inserted				
-				if sub_attr not in (DESCRIPTOR_ATTR_NAME) and proto.has(input_args.network_params, sub_attr):
-					result["network_params"][sub_attr] = get_value_or_name(sub_value)
-				# if not we grab the value from the default value dictionary					
-				elif sub_attr not in (DESCRIPTOR_ATTR_NAME):
-					result["network_params"][sub_attr] = default_input["network_params"][sub_attr]	
-		# no participants are assigned at all
-		elif attr == "participants" and len(value) == 0:
-			result["participants"] = default_input["participants"]
+				# if its inserted we use the value inserted				
+				if hasattr(input_args.network_params, sub_attr):
+					result["network_params"][sub_attr] = sub_value
 		elif attr == "participants":
 			participants = []
 			for participant in input_args.participants:
-				participant_value = {}
+				new_participant = default_participant()
 				for sub_attr in dir(participant):
 					sub_value = getattr(participant, sub_attr)
-					# if its insterted we use the value inserted
-					if sub_attr not in (DESCRIPTOR_ATTR_NAME) and proto.has(participant, sub_attr):
-						participant_value[sub_attr] = get_value_or_name(sub_value)
-					# if not we grab the value from the default value dictionary
-					elif sub_attr not in (DESCRIPTOR_ATTR_NAME):
-						participant_value[sub_attr] = default_input["participants"][0].get(sub_attr, None)
-				participants.append(participant_value)
+					# if its inserted we use the value inserted
+					if hasattr(participant, sub_attr):
+						new_participant[sub_attr] = sub_value
+				participants.append(new_participant)
 			result["participants"] = participants
-
 
 	# validation of the above defaults
 	for index, participant in enumerate(result["participants"]):
@@ -112,8 +95,33 @@ def parse_input(input_args):
 	if len(result["participants"]) >= 2 and result["participants"][1]["el_client_type"] == NETHERMIND_NODE_NAME:
 		fail("nethermind can't be the first or second node")
 
-	return result
-
+	return struct(
+		participants=[struct(
+			el_client_type=participant["el_client_type"],
+			el_client_image=participant["el_client_image"],
+			el_client_log_level=participant["el_client_log_level"],
+			cl_client_type=participant["cl_client_type"],
+			cl_client_image=participant["cl_client_image"],
+			cl_client_log_level=participant["cl_client_log_level"],
+			beacon_extra_params=participant["beacon_extra_params"],
+			el_extra_params=participant["el_extra_params"],
+			validator_extra_params=participant["validator_extra_params"],
+			builder_network_params=participant["builder_network_params"]
+		) for participant in result["participants"]],
+		network_params=struct(
+			preregistered_validator_keys_mnemonic=result["network_params"]["preregistered_validator_keys_mnemonic"],
+			num_validator_keys_per_node=result["network_params"]["num_validator_keys_per_node"],
+			network_id=result["network_params"]["network_id"],
+			deposit_contract_address=result["network_params"]["deposit_contract_address"],
+			seconds_per_slot=result["network_params"]["seconds_per_slot"],
+			slots_per_epoch=result["network_params"]["slots_per_epoch"],
+		),
+		launch_additional_services=result["launch_additional_services"],
+		wait_for_finalization=result["wait_for_finalization"],
+		wait_for_verifications=result["wait_for_verifications"],
+		verifications_epoch_limit=result["verifications_epoch_limit"],
+		global_client_log_level=result["global_client_log_level"]
+	)
 
 def get_client_log_level_or_default(participant_log_level, global_log_level, client_log_levels):
 	log_level = participant_log_level
@@ -123,50 +131,40 @@ def get_client_log_level_or_default(participant_log_level, global_log_level, cli
 			fail("No participant log level defined, and the client log level has no mapping for global log level '{0}'".format(global_log_level))
 	return log_level
 
-
-def get_value_or_name(value):
-	if type(value) == ENUM_TYPE:
-		return value.name
-	return value
-
-
 def default_module_input():
 	network_params = default_network_params()
-	participants = default_partitcipants()
+	participants = [default_participant()]
 	return {
-		"participants": participants,
-		"network_params": network_params,
+		"participants":                participants,
+		"network_params":              network_params,
 		"launch_additional_services" : True,
-		"wait_for_finalization":      False,
-		"wait_for_verifications":     False,
-		"verifications_epoch_limit":  5,
-		"global_client_log_level": "info"
+		"wait_for_finalization":       False,
+		"wait_for_verifications":      False,
+		"verifications_epoch_limit":   5,
+		"global_client_log_level":     "info"
 	}
-
-
 
 def default_network_params():
 	# this is temporary till we get params working
 	return {
-		"preregistered_validator_keys_mnemonic" :  "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
-		"num_validator_keys_per_node" : 64,
-		"network_id" : "3151908",
-		"deposit_contract_address" : "0x4242424242424242424242424242424242424242",
-		"seconds_per_slot" : 12,
-		"slots_per_epoch" : 32,
+		"preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+		"num_validator_keys_per_node":           64,
+		"network_id":                            "3151908",
+		"deposit_contract_address":              "0x4242424242424242424242424242424242424242",
+		"seconds_per_slot":                      12,
+		"slots_per_epoch":                       32,
 	}
 
-def default_partitcipants():
-	participant = {
-			"el_client_type": "geth",
-			"el_client_image": "",
-			"el_client_log_level": "",
-			"cl_client_type": "lighthouse",
-			"cl_client_image": "",
-			"cl_client_log_level": "",
-			"beacon_extra_params": [],
-			"el_extra_params": [],
+def default_participant():
+	return {
+			"el_client_type":         "geth",
+			"el_client_image":        "",
+			"el_client_log_level":    "",
+			"cl_client_type":         "lighthouse",
+			"cl_client_image":        "",
+			"cl_client_log_level":    "",
+			"beacon_extra_params":    [],
+			"el_extra_params":        [],
 			"validator_extra_params": [],
 			"builder_network_params": None
 	}
-	return [participant]

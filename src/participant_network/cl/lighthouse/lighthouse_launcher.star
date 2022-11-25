@@ -4,7 +4,7 @@ cl_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/par
 cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_node_metrics_info.star")
 mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/mev_boost/mev_boost_context.star")
 
-package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
+package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
 LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
 
@@ -57,11 +57,11 @@ VALIDATOR_USED_PORTS = {
 }
 
 LIGHTHOUSE_LOG_LEVELS = {
-	package_io.GlobalClientLogLevel.error: "error",
-	package_io.GlobalClientLogLevel.warn:  "warn",
-	package_io.GlobalClientLogLevel.info:  "info",
-	package_io.GlobalClientLogLevel.debug: "debug",
-	package_io.GlobalClientLogLevel.trace: "trace",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.warn:  "warn",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.info:  "info",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
 BEACON_ENR_FACT_NAME = "beacon-enr-fact"
