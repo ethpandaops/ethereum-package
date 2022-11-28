@@ -3,7 +3,7 @@ parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_i
 cl_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_client_context.star")
 cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_node_metrics_info.star")
 
-package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
+package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
 GENESIS_DATA_MOUNTPOINT_ON_CLIENT = "/genesis-data"
 
@@ -49,11 +49,11 @@ USED_PORTS = {
 }
 
 NIMBUS_LOG_LEVELS = {
-    package_io.GlobalClientLogLevel.error: "ERROR",
-    package_io.GlobalClientLogLevel.warn:  "WARN",
-    package_io.GlobalClientLogLevel.info:  "INFO",
-    package_io.GlobalClientLogLevel.debug: "DEBUG",
-    package_io.GlobalClientLogLevel.trace: "TRACE",
+    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
+    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn:  "WARN",
+    package_io.GLOBAL_CLIENT_LOG_LEVEL.info:  "INFO",
+    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
+    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
 ENR_FACT_NAME = "enr-fact"

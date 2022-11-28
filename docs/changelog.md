@@ -1,7 +1,9 @@
 # TBD
 
 ### Changes
-- Repalced 'module' with 'package' where relevant
+- Replaced 'module' with 'package' where relevant
+- Removed protobuf types as they are now unsupported in Kurtosis.
+- Renamed `kurtotis.mod` to `kurtosis.yml`
 
 ### Fixes
 - Fixed a bug in `run` of `main.star` where we'd refer to `module_io` instead of `package_io`

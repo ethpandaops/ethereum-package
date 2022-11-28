@@ -2,7 +2,7 @@ cl_validator_keystores = import_module("github.com/kurtosis-tech/eth2-package/sr
 el_genesis_data_generator = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star")
 cl_genesis_data_generator = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star")
 
-mev_boost_launcher_module = ("github.com/kurtosis-tech/eth2-package/src/participant_network/mev_boost/mev_boost_launcher.star")
+mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/mev_boost/mev_boost_launcher.star")
 
 static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
 
@@ -21,7 +21,7 @@ teku = import_module("github.com/kurtosis-tech/eth2-package/src/participant_netw
 genesis_constants = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star")
 participant_module = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/participant.star")
 
-package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
+package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
 CL_CLIENT_SERVICE_ID_PREFIX = "cl-client-"
 EL_CLIENT_SERVICE_ID_PREFIX = "el-client-"
@@ -78,10 +78,10 @@ def launch_participant_network(participants, network_params, global_log_level):
 	print("Uploaded GETH files succesfully, launching EL participants")
 
 	el_launchers = {
-		package_io.ELClientType.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
-		package_io.ELClientType.besu : {"launcher": besu.new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": besu.launch},
-		package_io.ELClientType.erigon : {"launcher": erigon.new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": erigon.launch},
-		package_io.ELClientType.nethermind : {"launcher": nethermind.new_nethermind_launcher(el_genesis_data), "launch_method": nethermind.launch},
+		package_io.EL_CLIENT_TYPE.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
+		package_io.EL_CLIENT_TYPE.besu : {"launcher": besu.new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": besu.launch},
+		package_io.EL_CLIENT_TYPE.erigon : {"launcher": erigon.new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": erigon.launch},
+		package_io.EL_CLIENT_TYPE.nethermind : {"launcher": nethermind.new_nethermind_launcher(el_genesis_data), "launch_method": nethermind.launch},
 	}
 
 	all_el_client_contexts = []
@@ -136,11 +136,11 @@ def launch_participant_network(participants, network_params, global_log_level):
 	print("Launching CL network")
 
 	cl_launchers = {
-		package_io.CLClientType.lighthouse : {"launcher": lighthouse.new_lighthouse_launcher(cl_genesis_data), "launch_method": lighthouse.launch},
-		package_io.CLClientType.lodestar: {"launcher": lodestar.new_lodestar_launcher(cl_genesis_data), "launch_method": lodestar.launch},
-		package_io.CLClientType.nimbus: {"launcher": nimbus.new_nimbus_launcher(cl_genesis_data), "launch_method": nimbus.launch},
-		package_io.CLClientType.prysm: {"launcher": prysm.new_prysm_launcher(cl_genesis_data, cl_validator_data.prysm_password_relative_filepath, cl_validator_data.prysm_password_artifact_uuid), "launch_method": prysm.launch},
-		package_io.CLClientType.teku: {"launcher": teku.new_teku_launcher(cl_genesis_data), "launch_method": teku.launch},
+		package_io.CL_CLIENT_TYPE.lighthouse : {"launcher": lighthouse.new_lighthouse_launcher(cl_genesis_data), "launch_method": lighthouse.launch},
+		package_io.CL_CLIENT_TYPE.lodestar: {"launcher": lodestar.new_lodestar_launcher(cl_genesis_data), "launch_method": lodestar.launch},
+		package_io.CL_CLIENT_TYPE.nimbus: {"launcher": nimbus.new_nimbus_launcher(cl_genesis_data), "launch_method": nimbus.launch},
+		package_io.CL_CLIENT_TYPE.prysm: {"launcher": prysm.new_prysm_launcher(cl_genesis_data, cl_validator_data.prysm_password_relative_filepath, cl_validator_data.prysm_password_artifact_uuid), "launch_method": prysm.launch},
+		package_io.CL_CLIENT_TYPE.teku: {"launcher": teku.new_teku_launcher(cl_genesis_data), "launch_method": teku.launch},
 	}
 
 	all_cl_client_contexts = []
@@ -162,7 +162,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 		mev_boost_context = None
 
-		if proto.has(participant, "builder_network_params"):
+		if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
 			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
 			mev_boost_service_id = MEV_BOOST_SERVICE_ID_PREFIX.format(1)
 			mev_boost_context = mev_boost_launcher_module.launch_mevboost(mev_boost_launcher, mev_boost_service_id, network_params.network_id)

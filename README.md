@@ -40,12 +40,7 @@ Kurtosis will create a new enclave to house the services of the Ethereum network
 Configuration
 -------------
 
-To configure the package behaviour, you can modify your `eth2-package-params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults ([from here](https://github.com/kurtosis-tech/eth2-package/blob/master/types.proto) provided:
-
-Note: Following an update starting the network post-merge, `erigon`, `nimbus` and `prysm` clients don't work anymore. Fixes are tracked in the following Github issues:
-- Prysm: [#11508][prysm-issue]
-- Nimbus: [#4193][nimbus-issue]
-- Erigon: [#154][erigon-issue]
+To configure the package behaviour, you can modify your `eth2-package-params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
 
 <details>
     <summary>Click to show all configuration options</summary>
@@ -170,6 +165,11 @@ Note: Following an update starting the network post-merge, `erigon`, `nimbus` an
 ```
 </details>
 
+Note: Following an update starting the network post-merge, `erigon`, `nimbus` and `prysm` clients don't work anymore. Fixes are tracked in the following Github issues:
+- Prysm: [#11508][prysm-issue]
+- Nimbus: [#4193][nimbus-issue]
+- Erigon: [#154][erigon-issue]
+
 You can find the latest Kiln compatible docker images here: https://notes.ethereum.org/@launchpad/kiln
 
 Developing On This Package
@@ -204,7 +204,7 @@ When you're happy with your changes:
 
 <!------------------------ Only links below here -------------------------------->
 [docker-installation]: https://docs.docker.com/get-docker/
-[kurtosis-cli-installation]: https://docs.kurtosistech.com/installation.html
+[kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [starlark-docs]: https://docs.kurtosis.com/reference/starlark-introduction
 [using-the-cli]: https://docs.kurtosis.com/cli
 [prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
