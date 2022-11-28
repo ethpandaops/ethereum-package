@@ -19,7 +19,7 @@ NETHERMIND_NODE_NAME = "nethermind"
 ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants")
 
 def parse_input(input_args):
-	result = default_module_input()
+	result = default_input_args()
 	for attr in dir(input_args):
 		value = getattr(input_args, attr)
 		# if its insterted we use the value inserted
@@ -131,7 +131,7 @@ def get_client_log_level_or_default(participant_log_level, global_log_level, cli
 			fail("No participant log level defined, and the client log level has no mapping for global log level '{0}'".format(global_log_level))
 	return log_level
 
-def default_module_input():
+def default_input_args():
 	network_params = default_network_params()
 	participants = [default_participant()]
 	return {
