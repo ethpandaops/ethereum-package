@@ -17,11 +17,11 @@ GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
-def run(input_args):
-	input_args_with_right_defaults = parse_input.parse_input(input_args)
+def run(args):
+	args_with_right_defaults = parse_input.parse_input(args)
 
-	num_participants = len(input_args_with_right_defaults.participants)
-	network_params = input_args_with_right_defaults.network_params
+	num_participants = len(args_with_right_defaults.participants)
+	network_params = args_with_right_defaults.network_params
 
 	grafana_datasource_config_template = read_file(static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH)
 	grafana_dashboards_config_template = read_file(static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH)
@@ -30,7 +30,7 @@ def run(input_args):
 	print("Read the prometheus, grafana templates")
 
 	print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
-	all_participants, cl_gensis_timestamp = participant_network.launch_participant_network(input_args_with_right_defaults.participants, network_params, input_args_with_right_defaults.global_client_log_level)
+	all_participants, cl_gensis_timestamp = participant_network.launch_participant_network(args_with_right_defaults.participants, network_params, args_with_right_defaults.global_client_log_level)
 
 	all_el_client_contexts = []
 	all_cl_client_contexts = []
@@ -39,7 +39,7 @@ def run(input_args):
 		all_cl_client_contexts.append(participant.cl_client_context)
 
 
-	if not input_args_with_right_defaults.launch_additional_services:
+	if not args_with_right_defaults.launch_additional_services:
 		return
 
 	print("Launching transaction spammer")
@@ -65,15 +65,15 @@ def run(input_args):
 	grafana.launch_grafana(grafana_datasource_config_template, grafana_dashboards_config_template, prometheus_private_url)
 	print("Succesfully launched grafana")
 
-	if input_args_with_right_defaults.wait_for_verifications:
+	if args_with_right_defaults.wait_for_verifications:
 		print("Running synchrnous testnet verifier")
-		testnet_verifier.run_synchronous_testnet_verification(input_args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
+		testnet_verifier.run_synchronous_testnet_verification(args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
 		print("Verification succeeded")
 	else:
 		print("Running asynchronous verification")
-		testnet_verifier.launch_testnet_verifier(input_args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
+		testnet_verifier.launch_testnet_verifier(args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
 		print("Succesfully launched asynchronous verifier")
-		if input_args_with_right_defaults.wait_for_finalization:
+		if args_with_right_defaults.wait_for_finalization:
 			print("Waiting for the first finalized epoch")
 			first_cl_client = all_cl_client_contexts[0]
 			first_cl_client_id = first_cl_client.beacon_service_id
