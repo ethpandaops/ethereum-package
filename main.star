@@ -10,8 +10,6 @@ prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus
 grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
 
-package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
-
 GRAFANA_USER             = "admin"
 GRAFANA_PASSWORD         = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
@@ -20,7 +18,8 @@ FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
 def run(input_args):
-	input_args_with_right_defaults = package_io.ModuleInput(parse_input.parse_input(input_args))
+	input_args_with_right_defaults = parse_input.parse_input(input_args)
+
 	num_participants = len(input_args_with_right_defaults.participants)
 	network_params = input_args_with_right_defaults.network_params
 
@@ -84,12 +83,12 @@ def run(input_args):
 			print("First finalized epoch occurred successfully")
 
 
-	grafana_info = package_io.GrafanaInfo(
+	grafana_info = struct(
 		dashboard_path = GRAFANA_DASHBOARD_PATH_URL,
 		user = GRAFANA_USER,
 		password = GRAFANA_PASSWORD
 	)
-	output = package_io.ModuleOutput(grafana_info = grafana_info)
+	output = struct(grafana_info = grafana_info)
 	print(output)
 	return output
 

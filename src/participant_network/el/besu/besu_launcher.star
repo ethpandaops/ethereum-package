@@ -2,7 +2,7 @@ shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_u
 parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 el_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/el_client_context.star")
 
-package_io = import_types("github.com/kurtosis-tech/eth2-package/types.proto")
+package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/besu/execution-data"
@@ -37,11 +37,11 @@ USED_PORTS = {
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 BESU_LOG_LEVELS = {
-	package_io.GlobalClientLogLevel.error: "ERROR",
-	package_io.GlobalClientLogLevel.warn:  "WARN",
-	package_io.GlobalClientLogLevel.info:  "INFO",
-	package_io.GlobalClientLogLevel.debug: "DEBUG",
-	package_io.GlobalClientLogLevel.trace: "TRACE",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.warn:  "WARN",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.info:  "INFO",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
+	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
 ENODE_FACT_NAME = "enode-fact"
