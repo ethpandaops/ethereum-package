@@ -3,8 +3,11 @@
 ### Changes
 - Updated `run(input_args)` to `run(args)`
 
-# 0.0.3
+# 0.0.4
+### Changes
+- Removed 'module' key in the 'kurtosis.yml' file
 
+# 0.0.3
 ### Changes
 - Replaced 'module' with 'package' where relevant
 - Removed protobuf types as they are now unsupported in Kurtosis.
