@@ -204,7 +204,7 @@ When you're happy with your changes:
 
 <!------------------------ Only links below here -------------------------------->
 [docker-installation]: https://docs.docker.com/get-docker/
-[kurtosis-cli-installation]: https://docs.kurtosistech.com/installation.html
+[kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [starlark-docs]: https://docs.kurtosis.com/reference/starlark-introduction
 [using-the-cli]: https://docs.kurtosis.com/cli
 [prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
