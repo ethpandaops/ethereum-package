@@ -1,7 +1,8 @@
 # TBD
+### Changes
+- Removed 'module' key in the 'kurtosis.yml' file
 
 # 0.0.3
-
 ### Changes
 - Replaced 'module' with 'package' where relevant
 - Removed protobuf types as they are now unsupported in Kurtosis.
