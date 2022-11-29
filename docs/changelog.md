@@ -1,5 +1,8 @@
 # TBD
 
+### Changes
+- Updated `run(input_args)` to `run(args)`
+
 # 0.0.4
 ### Changes
 - Removed 'module' key in the 'kurtosis.yml' file
