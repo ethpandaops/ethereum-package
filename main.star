@@ -10,7 +10,7 @@ prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus
 grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
 
-GRAFANA_USER             = "admin"
+GRAFANA_USER             = "admin-master"
 GRAFANA_PASSWORD         = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
 
