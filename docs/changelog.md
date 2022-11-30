@@ -1,5 +1,8 @@
 # TBD
 
+### Fixes
+- Updates genesis tool version to allow for nimbus support
+
 ### Changes
 - Updated `run(input_args)` to `run(args)`
 - Removed `print(output)` at the end as it is now printed by the framework

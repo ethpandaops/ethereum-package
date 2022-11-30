@@ -8,9 +8,9 @@ DEFAULT_EL_IMAGES = {
 DEFAULT_CL_IMAGES = {
 	"lighthouse": "sigp/lighthouse:latest",
 	"teku":       "consensys/teku:latest",
-	"nimbus":     "parithoshj/nimbus:merge-a845450",
-	"prysm":    "gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest",
-	"lodestar": "chainsafe/lodestar:next",	
+	"nimbus":     "statusim/nimbus-eth2:multiarch-latest",
+	"prysm":      "gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest",
+	"lodestar":   "chainsafe/lodestar:next",	
 }
 
 BESU_NODE_NAME = "besu"
