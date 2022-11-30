@@ -3,6 +3,8 @@
 ### Changes
 - Updated `run(input_args)` to `run(args)`
 - Removed `print(output)` at the end as it is now printed by the framework
+- Updates nimbus default docker image
+- Updates `genesis-generator` image to include a fix for nimbus post-merge genesis
 
 # 0.0.4
 ### Changes
