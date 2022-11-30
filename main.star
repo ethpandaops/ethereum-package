@@ -89,7 +89,6 @@ def run(args):
 		password = GRAFANA_PASSWORD
 	)
 	output = struct(grafana_info = grafana_info)
-	print(output)
 	return output
 
 

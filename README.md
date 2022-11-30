@@ -205,7 +205,7 @@ When you're happy with your changes:
 <!------------------------ Only links below here -------------------------------->
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
-[starlark-docs]: https://docs.kurtosis.com/reference/starlark-introduction
+[starlark-docs]: https://docs.kurtosis.com/explanations/starlark
 [using-the-cli]: https://docs.kurtosis.com/cli
 [prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
 [nimbus-issue]: https://github.com/status-im/nimbus-eth2/issues/4193
