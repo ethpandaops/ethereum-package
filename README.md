@@ -81,7 +81,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
             //  Defaults by client (note that Prysm is different in that it requires two images - a Beacon and a validator - separated by a comma):
             //  - lighthouse: sigp/lighthouse:latest
             //  - teku: consensys/teku:latest
-            //  - nimbus: parithoshj/nimbus:merge-a845450
+            //  - nimbus: statusim/nimbus-eth2:multiarch-latest
             //  - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest
             //  - lodestar: chainsafe/lodestar:next
             "cl_client_image": "",
@@ -165,9 +165,8 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
 ```
 </details>
 
-Note: Following an update starting the network post-merge, `erigon`, `nimbus` and `prysm` clients don't work anymore. Fixes are tracked in the following Github issues:
+Note: Following an update starting the network post-merge, `erigon`, and `prysm` clients don't work anymore. Fixes are tracked in the following Github issues:
 - Prysm: [#11508][prysm-issue]
-- Nimbus: [#4193][nimbus-issue]
 - Erigon: [#154][erigon-issue]
 
 You can find the latest Kiln compatible docker images here: https://notes.ethereum.org/@launchpad/kiln
@@ -208,5 +207,4 @@ When you're happy with your changes:
 [starlark-docs]: https://docs.kurtosis.com/explanations/starlark
 [using-the-cli]: https://docs.kurtosis.com/cli
 [prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
-[nimbus-issue]: https://github.com/status-im/nimbus-eth2/issues/4193
 [erigon-issue]: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/154
