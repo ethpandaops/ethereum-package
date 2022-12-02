@@ -6,7 +6,7 @@ orbs:
 executors:
   ubuntu_vm:
     machine:
-      image: ubuntu-2204:2022.04.1
+      image: ubuntu-2204:2022.10.2
     resource_class: arm.medium
 
 # NOTE: Because CircleCI jobs run on separate machines from each other, we duplicate steps (like checkout) between jobs. This is because doing the "correct" DRY
