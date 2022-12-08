@@ -57,14 +57,24 @@ def launch(
 
 	service = add_service(service_id, config)
 
-	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
-	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
+	result_recipe = struct(
+		service_id = service_id,
+		method= "POST",
+		endpoint = "",
+		body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}',
+		content_type = "application/json",
+		port_id = RPC_PORT_ID,
+		extract = {
+			"enode": ".result.enode",
+		}
+	)
+	response = request(result_recipe)
 
 	return el_client_context.new_el_client_context(
 		"nethermind",
 		"", # nethermind has no ENR in the eth2-merge-kurtosis-module either
 		# Nethermind node info endpoint doesn't return ENR field https://docs.nethermind.io/nethermind/ethereum-client/json-rpc/admin
-		enode,
+		response["extract.enode"],
 		service.ip_address,
 		RPC_PORT_NUM,
 		WS_PORT_NUM,

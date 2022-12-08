@@ -60,16 +60,24 @@ def launch(
 
 	service = add_service(service_id, config)
 
-	define_fact(service_id = service_id, fact_name = ENR_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enr", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
-	enr = wait(service_id = service_id, fact_name = ENR_FACT_NAME)
-
-	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
-	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
+	result_recipe = struct(
+		service_id = service_id,
+		method= "POST",
+		endpoint = "",
+		body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}',
+		content_type = "application/json",
+		port_id = RPC_PORT_ID,
+		extract = {
+			"enr": ".result.enr",
+			"enode": ".result.enode",
+		}
+	)
+	response = request(service_id = service_id, fact_name = ENR_FACT_NAME)
 
 	return el_client_context.new_el_client_context(
 		"erigon",
-		enr,
-		enode,
+		response["extract.enr"],
+		response["extract.enode"],
 		service.ip_address,
 		RPC_PORT_NUM,
 		WS_PORT_NUM,

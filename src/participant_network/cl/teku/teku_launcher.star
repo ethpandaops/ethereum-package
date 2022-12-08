@@ -2,6 +2,7 @@ shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_u
 parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 cl_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_client_context.star")
 cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_node_metrics_info.star")
+cl_node_health_checker = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_node_health_checker.star")
 mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/mev_boost/mev_boost_context.star")
 
 package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
@@ -91,12 +92,19 @@ def launch(
 
 	teku_service = add_service(service_id, config)
 
-	# TODO check whether its 200, 206 or 503 like golang
-	define_fact(service_id = service_id, fact_name = HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = HTTP_PORT_ID))
-	wait(service_id = service_id, fact_name = HEALTH_FACT_NAME)
+	cl_node_health_checker.wait(service_id, HTTP_PORT_ID)
 
-	define_fact(service_id = service_id, fact_name = ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = HTTP_PORT_ID))
-	node_enr = wait(service_id = service_id, fact_name = ENR_FACT_NAME)
+	node_identity_recipe = struct(
+		service_id = service_id,
+		method= "GET",
+		endpoint = "/eth/v1/node/identity",
+		content_type = "application/json",
+		port_id = BEACON_HTTP_PORT_ID,
+		extract = {
+			"enr": ".data.enr"
+		}
+	)
+	node_enr = request(beacon_node_identity_recipe)["extract.enr"]
 
 
 	teku_metrics_port = teku_service.ports[METRICS_PORT_ID]

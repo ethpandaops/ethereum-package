@@ -99,8 +99,14 @@ def launch(
 	beacon_service = add_service(beacon_node_service_id, beacon_config)
 
 	# TODO check whether its 200, 206 or 503 like golang
-	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
-	wait(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME)
+	health_recipe = struct(
+		service_id = beacon_node_service_id,
+		method= "GET",
+		endpoint = "/eth/v1/node/health",
+		content_type = "application/json",
+		port_id = BEACON_HTTP_PORT_ID,
+	)
+	wait(health_recipe, "code", "IN", [200, 206, 503])
 
 	beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
@@ -120,8 +126,17 @@ def launch(
 	validator_service = add_service(validator_node_service_id, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
-	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
-	beacon_node_enr = wait(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME)
+	beacon_node_identity_recipe = struct(
+		service_id = beacon_node_service_id,
+		method= "GET",
+		endpoint = "/eth/v1/node/identity",
+		content_type = "application/json",
+		port_id = BEACON_HTTP_PORT_ID,
+		extract = {
+			"enr": ".data.enr"
+		}
+	)
+	beacon_node_enr = request(beacon_node_identity_recipe)["extract.enr"]
 
 	beacon_metrics_port = beacon_service.ports[BEACON_METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
