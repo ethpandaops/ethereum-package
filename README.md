@@ -180,10 +180,10 @@ Then, run the dev loop:
 1. Make your code changes
 1. Rebuild and re-run the package by running the following from the root of the repo:
    ```bash
-   kurtosis run . --args "{}"
+   kurtosis run . "{}"
    ```
-   NOTE 1: You can change the value of the `--args` flag to pass in extra configuration to the package per the "Configuration" section above!
-   NOTE 2: The `--args` flag accepts JSON.
+   NOTE 1: You can change the value of the second positional argument flag to pass in extra configuration to the package per the "Configuration" section above!
+   NOTE 2: The second positional argument accepts JSON.
 
 To get detailed information about the structure of the package, visit [the architecture docs](./docs/architecture.md).
 
