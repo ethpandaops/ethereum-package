@@ -1,5 +1,8 @@
 # TBD
 
+### Fixes
+- Fix bug with input parsing of participants
+
 ### Changes
 - Updated `run(input_args)` to `run(args)`
 - Removed `print(output)` at the end as it is now printed by the framework

@@ -35,11 +35,9 @@ def parse_input(input_args):
 			participants = []
 			for participant in input_args.participants:
 				new_participant = default_participant()
-				for sub_attr in dir(participant):
-					sub_value = getattr(participant, sub_attr)
-					# if its inserted we use the value inserted
-					if hasattr(participant, sub_attr):
-						new_participant[sub_attr] = sub_value
+				for sub_attr, sub_value in participant.items():
+					# if the value is set in input we set it in participant
+					new_participant[sub_attr] = sub_value
 				participants.append(new_participant)
 			result["participants"] = participants
 
