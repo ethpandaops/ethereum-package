@@ -55,7 +55,7 @@ def launch(
 
 	service = add_service(service_id, config)
 
-	enode, enr = el_admin_node_info.get_enode_enr_for_node(service_id, RPC_PORT_ID)
+	enode, enr = el_admin_node_info.get_enode_for_node(service_id, RPC_PORT_ID)
 
 	return el_client_context.new_el_client_context(
 		"nethermind",
