@@ -41,9 +41,6 @@ ERIGON_LOG_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "5",
 }
 
-ENR_FACT_NAME = "enr-fact"
-ENODE_FACT_NAME = "enode-fact"
-
 def launch(
 	launcher,
 	service_id,

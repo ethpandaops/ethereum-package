@@ -66,11 +66,6 @@ TEKU_LOG_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
-
-ENR_FACT_NAME = "enr-fact"
-HEALTH_FACT_NAME = "health-fact"
-
-
 def launch(
 	launcher,
 	service_id,

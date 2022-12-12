@@ -60,9 +60,6 @@ PRYSM_LOG_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
-BEACON_ENR_FACT_NAME = "beacon-enr-fact"
-BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
-
 
 def launch(
 	launcher,

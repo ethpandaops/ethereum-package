@@ -44,9 +44,6 @@ USED_PORTS = {
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
-ENR_FACT_NAME = "enr-fact"
-ENODE_FACT_NAME = "enode-fact"
-
 VERBOSITY_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "1",
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.warn:  "2",

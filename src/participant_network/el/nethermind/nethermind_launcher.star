@@ -39,9 +39,6 @@ NETHERMIND_LOG_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
-ENODE_FACT_NAME = "enode-fact"
-
-
 def launch(
 	launcher,
 	service_id,
