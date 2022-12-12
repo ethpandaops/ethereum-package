@@ -2,6 +2,7 @@
 
 ### Changes
 - Updated `run(input_args)` to `run(args)`
+- Refactor code to use `wait` and `request` commands
 - Removed `print(output)` at the end as it is now printed by the framework
 - Updates nimbus default docker image
 - Updates `genesis-generator` image to include a fix for nimbus post-merge genesis
