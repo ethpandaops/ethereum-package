@@ -73,7 +73,7 @@ def launch(
 			"enode": ".result.enode",
 		}
 	)
-	response = request(result_recipe)
+	response = wait(result_recipe, "extract.enode", "!=", "")
 
 	return el_client_context.new_el_client_context(
 		"besu",
