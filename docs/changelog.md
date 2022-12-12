@@ -1,5 +1,8 @@
 # TBD
 
+### Fixes
+- Fix bug with input parsing of participants
+
 ### Changes
 - Updated `run(input_args)` to `run(args)`
 - Refactor code to use `wait` and `request` commands
