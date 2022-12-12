@@ -112,7 +112,7 @@ def launch(
 		method= "GET",
 		endpoint = "/eth/v1/node/identity",
 		content_type = "application/json",
-		port_id = HTTP_PORT_ID
+		port_id = HTTP_PORT_ID,
 		extract = {
 			"enr": ".data.enr"
 		}

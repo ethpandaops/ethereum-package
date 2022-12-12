@@ -73,7 +73,7 @@ def launch(
 			"enode": ".result.enode",
 		}
 	)
-	response = request(service_id = service_id, fact_name = ENR_FACT_NAME)
+	response = request(result_recipe)
 
 	return el_client_context.new_el_client_context(
 		"besu",

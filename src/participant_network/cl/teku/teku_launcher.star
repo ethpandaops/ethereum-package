@@ -99,12 +99,12 @@ def launch(
 		method= "GET",
 		endpoint = "/eth/v1/node/identity",
 		content_type = "application/json",
-		port_id = BEACON_HTTP_PORT_ID,
+		port_id = HTTP_PORT_ID,
 		extract = {
 			"enr": ".data.enr"
 		}
 	)
-	node_enr = request(beacon_node_identity_recipe)["extract.enr"]
+	node_enr = request(node_identity_recipe)["extract.enr"]
 
 
 	teku_metrics_port = teku_service.ports[METRICS_PORT_ID]

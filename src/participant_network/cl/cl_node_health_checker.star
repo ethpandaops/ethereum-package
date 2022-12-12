@@ -5,6 +5,6 @@ def wait(service_id, port_id):
         method= "GET",
         endpoint = "/eth/v1/node/health",
         content_type = "application/json",
-        port_id = HTTP_PORT_ID
+        port_id = port_id
     )
 	return wait(recipe, "code", "IN", [200, 206, 503])
