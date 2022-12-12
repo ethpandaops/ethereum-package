@@ -83,7 +83,7 @@ def launch(
 
 	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 
-	cl_node_health_checker.wait(beacon_node_service_id, HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(beacon_node_service_id, HTTP_PORT_ID)
 
 
 	# Launch validator node

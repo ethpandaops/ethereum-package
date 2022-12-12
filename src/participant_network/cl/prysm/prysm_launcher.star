@@ -103,7 +103,7 @@ def launch(
 
 	beacon_service = add_service(beacon_node_service_id, beacon_config)
 
-	cl_node_health_checker.wait(beacon_node_service_id, HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(beacon_node_service_id, HTTP_PORT_ID)
 
 	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 

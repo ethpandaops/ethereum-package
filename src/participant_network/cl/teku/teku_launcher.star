@@ -87,7 +87,7 @@ def launch(
 
 	teku_service = add_service(service_id, config)
 
-	cl_node_health_checker.wait(service_id, HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(service_id, HTTP_PORT_ID)
 
 	node_identity_recipe = struct(
 		service_id = service_id,

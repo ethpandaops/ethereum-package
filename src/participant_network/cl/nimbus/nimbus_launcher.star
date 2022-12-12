@@ -57,9 +57,6 @@ NIMBUS_LOG_LEVELS = {
     package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
-ENR_FACT_NAME = "enr-fact"
-HEALTH_FACT_NAME = "health-fact"
-
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 def launch(
@@ -83,7 +80,7 @@ def launch(
 
 	nimbus_service = add_service(service_id, config)
 
-	cl_node_health_checker.wait(service_id, HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(service_id, HTTP_PORT_ID)
 
 	cl_node_identity_recipe = struct(
 		service_id = service_id,

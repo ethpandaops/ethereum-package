@@ -1,5 +1,4 @@
-# this is a dictionary as this will get serialzed to JSON
-def wait(service_id, port_id):
+def wait_for_healthy(service_id, port_id):
 	recipe = struct(
         service_id = service_id,
         method= "GET",

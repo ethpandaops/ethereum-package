@@ -3,6 +3,7 @@ parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_i
 cl_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_client_context.star")
 cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_node_metrics_info.star")
 mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/mev_boost/mev_boost_context.star")
+cl_node_health_checker = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_node_health_checker.star")
 
 package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
@@ -64,9 +65,6 @@ LIGHTHOUSE_LOG_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
-BEACON_ENR_FACT_NAME = "beacon-enr-fact"
-BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
-
 def launch(
 	launcher,
 	service_id,
@@ -98,15 +96,7 @@ def launch(
 
 	beacon_service = add_service(beacon_node_service_id, beacon_config)
 
-	# TODO check whether its 200, 206 or 503 like golang
-	health_recipe = struct(
-		service_id = beacon_node_service_id,
-		method= "GET",
-		endpoint = "/eth/v1/node/health",
-		content_type = "application/json",
-		port_id = BEACON_HTTP_PORT_ID,
-	)
-	wait(health_recipe, "code", "IN", [200, 206, 503])
+	cl_node_health_checker.wait_for_healthy(beacon_node_service_id, BEACON_HTTP_PORT_ID)
 
 	beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
