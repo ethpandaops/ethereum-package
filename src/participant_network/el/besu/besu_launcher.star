@@ -1,7 +1,7 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 el_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/el_client_context.star")
-
+el_admin_node_info = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/el_admin_node_info.star")
 package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
@@ -60,23 +60,12 @@ def launch(
 
 	service = add_service(service_id, config)
 
-	result_recipe = struct(
-		service_id = service_id,
-		method= "POST",
-		endpoint = "",
-		body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}',
-		content_type = "application/json",
-		port_id = RPC_PORT_ID,
-		extract = {
-			"enode": ".result.enode",
-		}
-	)
-	response = wait(result_recipe, "extract.enode", "!=", "")
+	enode, enr = el_admin_node_info.get_enode_enr_for_node(service_id, RPC_PORT_ID)
 
 	return el_client_context.new_el_client_context(
 		"besu",
 		"", # besu has no ENR
-		response["extract.enode"],
+		enode,
 		service.ip_address,
 		RPC_PORT_NUM,
 		WS_PORT_NUM,
