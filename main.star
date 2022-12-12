@@ -87,7 +87,7 @@ def run(args):
 					"finalized_epoch": ".data.finalized.epoch"
 				}
 			)
-			wait(epoch_recipe, "finalized_epoch", ">", 0)
+			wait(epoch_recipe, "extract.finalized_epoch", "!=", "0", timeout="40m")
 			print("First finalized epoch occurred successfully")
 
 
