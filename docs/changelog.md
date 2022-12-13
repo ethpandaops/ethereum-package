@@ -2,6 +2,7 @@
 
 ### Fixes
 - Fix bug with input parsing of participants
+- Fix bug with `get_enode_for_node` being assigned to two parameters
 
 ### Changes
 - Updated `run(input_args)` to `run(args)`
