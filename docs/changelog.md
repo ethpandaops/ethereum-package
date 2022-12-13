@@ -1,5 +1,7 @@
 # TBD
 
+# 0.0.5
+
 ### Fixes
 - Fix bug with input parsing of participants
 - Fix bug with `get_enode_for_node` being assigned to two parameters
