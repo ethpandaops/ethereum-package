@@ -1,7 +1,7 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 el_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/el_client_context.star")
-
+el_admin_node_info = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/el/el_admin_node_info.star")
 package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
@@ -44,8 +44,6 @@ BESU_LOG_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
-ENODE_FACT_NAME = "enode-fact"
-
 def launch(
 	launcher,
 	service_id,
@@ -62,8 +60,7 @@ def launch(
 
 	service = add_service(service_id, config)
 
-	define_fact(service_id = service_id, fact_name = ENODE_FACT_NAME, fact_recipe = struct(method= "POST", endpoint = "", field_extractor = ".result.enode", body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}', content_type = "application/json", port_id = RPC_PORT_ID))
-	enode = wait(service_id = service_id, fact_name = ENODE_FACT_NAME)
+	enode, enr = el_admin_node_info.get_enode_for_node(service_id, RPC_PORT_ID)
 
 	return el_client_context.new_el_client_context(
 		"besu",

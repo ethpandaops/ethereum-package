@@ -3,6 +3,7 @@ parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_i
 cl_client_context = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_client_context.star")
 cl_node_metrics = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_node_metrics_info.star")
 mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/mev_boost/mev_boost_context.star")
+cl_node_health_checker = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/cl/cl_node_health_checker.star")
 
 package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
@@ -64,9 +65,6 @@ LIGHTHOUSE_LOG_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
-BEACON_ENR_FACT_NAME = "beacon-enr-fact"
-BEACON_HEALTH_FACT_NAME = "beacon-health-fact"
-
 def launch(
 	launcher,
 	service_id,
@@ -98,9 +96,7 @@ def launch(
 
 	beacon_service = add_service(beacon_node_service_id, beacon_config)
 
-	# TODO check whether its 200, 206 or 503 like golang
-	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/health", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
-	wait(service_id = beacon_node_service_id, fact_name = BEACON_HEALTH_FACT_NAME)
+	cl_node_health_checker.wait_for_healthy(beacon_node_service_id, BEACON_HTTP_PORT_ID)
 
 	beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
@@ -120,8 +116,17 @@ def launch(
 	validator_service = add_service(validator_node_service_id, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
-	define_fact(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME, fact_recipe = struct(method= "GET", endpoint = "/eth/v1/node/identity", field_extractor = ".data.enr", content_type = "application/json", port_id = BEACON_HTTP_PORT_ID))
-	beacon_node_enr = wait(service_id = beacon_node_service_id, fact_name = BEACON_ENR_FACT_NAME)
+	beacon_node_identity_recipe = struct(
+		service_id = beacon_node_service_id,
+		method= "GET",
+		endpoint = "/eth/v1/node/identity",
+		content_type = "application/json",
+		port_id = BEACON_HTTP_PORT_ID,
+		extract = {
+			"enr": ".data.enr"
+		}
+	)
+	beacon_node_enr = request(beacon_node_identity_recipe)["extract.enr"]
 
 	beacon_metrics_port = beacon_service.ports[BEACON_METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
