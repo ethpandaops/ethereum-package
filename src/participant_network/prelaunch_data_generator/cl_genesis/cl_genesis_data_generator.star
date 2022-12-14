@@ -76,7 +76,8 @@ def generate_cl_genesis_data(
 		(" && ").join(all_dirpath_creation_commands),
 	]
 
-	exec(launcher_service_id, dir_creation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	dir_creation_cmd_result = exec(struct(service_id=launcher_service_id, command=dir_creation_cmd))
+	assert(dir_creation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 
 	# Copy files to output
@@ -92,7 +93,8 @@ def generate_cl_genesis_data(
 			filepath_on_generator,
 			OUTPUT_DIRPATH_ON_GENERATOR,
 		]
-		exec(launcher_service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+		cmd_result = exec(struct(service_id=launcher_service_id, command=cmd))
+		assert(cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	# Generate files that need dynamic content
 	content_to_write_to_output_filename = {
@@ -109,7 +111,8 @@ def generate_cl_genesis_data(
 				destFilepath,
 			)
 		]
-		exec(launcher_service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+		cmd_result = exec(struct(service_id=launcher_service_id, command=cmd))
+		assert(cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 		
 
 	cl_genesis_generation_cmd = [
@@ -122,7 +125,8 @@ def generate_cl_genesis_data(
 		"--state-output", shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_STATE_FILENAME)
 	]
 
-	exec(launcher_service_id, cl_genesis_generation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	genesis_generation_result = exec(struct(service_id=launcher_service_id, command=cl_genesis_generation_cmd))
+	assert(genesis_generation_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	cl_genesis_data_artifact_uuid = store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 

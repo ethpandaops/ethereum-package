@@ -19,7 +19,7 @@ def run_synchronous_testnet_verification(params, el_client_contexts, cl_client_c
 	add_service(SERVICE_ID, config)
 
 	command = get_cmd(params, el_client_contexts, cl_client_contexts, True)
-	exec(SERVICE_ID, command)
+	exec(struct(service_id=SERVICE_ID, command=command))
 
 
 def get_cmd(params, el_client_contexts, cl_client_contexts, add_binary_name):

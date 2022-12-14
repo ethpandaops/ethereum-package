@@ -73,7 +73,8 @@ def generate_el_genesis_data(
 	]
 
 
-	exec(launcher_service_id, dir_creation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	dir_creation_cmd_result = exec(struct(service_id=launcher_service_id, command=dir_creation_cmd))
+	assert(dir_creation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	genesis_config_filepath_on_generator = shared_utils.path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_FILENAME)
 	genesis_filename_to_relative_filepath_in_artifact = {}
@@ -88,7 +89,9 @@ def generate_el_genesis_data(
 			" ".join(cmd)
 		]
 
-		exec(launcher_service_id, cmd_to_execute, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+		cmd_to_execute_result = exec(struct(service_id=launcher_service_id, command=cmd_to_execute))
+		assert(cmd_to_execute_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+
 
 		genesis_filename_to_relative_filepath_in_artifact[output_filename] = shared_utils.path_join(
 			shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
@@ -105,7 +108,8 @@ def generate_el_genesis_data(
 		)
 	]
 
-	exec(launcher_service_id, jwt_secret_generation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	jwt_secret_generation_cmd_result = exec(struct(service_id=launcher_service_id, command=jwt_secret_generation_cmd))
+	assert(jwt_secret_generation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	elGenesisDataArtifactUuid = store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
