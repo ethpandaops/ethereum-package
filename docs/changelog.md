@@ -1,5 +1,7 @@
 # TBD
 
+# 0.1.0
+
 ### Breaking changes
 - Updated `struct` to `PortSpec` for declaring port definitions
 
