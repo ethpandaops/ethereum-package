@@ -6,14 +6,13 @@ IMAGE_NAME = "ralexstokes/ethereum_consensus_monitor:latest"
 
 HTTP_PORT_ID     = "http"
 HTTP_PORT_NUMBER = 80
-HTTP_PROTOCOL = "TCP"
 
 FORKMON_CONFIG_FILENAME = "forkmon-config.toml"
 
 FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 USED_PORTS = {
-	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, HTTP_PROTOCOL)
+	HTTP_PORT_ID:shared_utils.new_port_spec(HTTP_PORT_NUMBER, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL)
 }
 
 

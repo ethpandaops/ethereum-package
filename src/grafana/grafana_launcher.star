@@ -1,14 +1,12 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
 
-
 SERVICE_ID = "grafana"
 
 IMAGE_NAME = "grafana/grafana-enterprise:9.2.3"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
-HTTP_PORT_PROTOCOL= "TCP"
 
 DATASOURCE_CONFIG_REL_FILEPATH = "datasources/datasource.yml"
 
@@ -23,7 +21,7 @@ GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE = GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE +
 
 
 USED_PORTS = {
-	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER_UINT16, HTTP_PORT_PROTOCOL)
+	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER_UINT16, shared_utils.TCP_PROTOCOL,  shared_utils.HTTP_APPLICATION_PROTOCOL)
 }
 
 
