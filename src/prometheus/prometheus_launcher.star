@@ -7,16 +7,13 @@ IMAGE_NAME = "prom/prometheus:latest"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 9090
-HTTP_PORT_PROTOCOL = "TCP"
-
 CONFIG_FILENAME = "prometheus-config.yml"
 
 CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS = "/config"
 
 USED_PORTS = {
-	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, HTTP_PORT_PROTOCOL)
+	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL)
 }
-
 
 def launch_prometheus(config_template, cl_client_contexts):
 	all_cl_nodes_metrics_info = []
