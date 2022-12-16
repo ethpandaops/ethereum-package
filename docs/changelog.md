@@ -12,6 +12,9 @@
 ### Breaking changes
 - Updated `struct` to `PortSpec` for declaring port definitions
 
+### Changes
+- Change `exec` syntax
+
 # 0.0.5
 
 ### Fixes

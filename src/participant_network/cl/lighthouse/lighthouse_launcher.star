@@ -227,7 +227,7 @@ def get_beacon_config(
 		ports = BEACON_USED_PORTS,
 		cmd = cmd,
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+			GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: genesis_data.files_artifact_uuid
 		},
 		env_vars = {
 			RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD
@@ -288,8 +288,8 @@ def get_validator_config(
 		ports = VALIDATOR_USED_PORTS,
 		cmd = cmd,
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
+			GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: genesis_data.files_artifact_uuid,
+			VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
 		},
 		env_vars = {
 			RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD
