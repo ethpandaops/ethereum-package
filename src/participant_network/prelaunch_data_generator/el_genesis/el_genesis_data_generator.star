@@ -48,7 +48,7 @@ def generate_el_genesis_data(
 	# TODO(old) Make this the actual data generator - comment copied from the original module
 	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
 		{
-			genesis_generation_config_artifact_uuid: CONFIG_DIRPATH_ON_GENERATOR,
+			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_uuid,
 		},
 	)
 
