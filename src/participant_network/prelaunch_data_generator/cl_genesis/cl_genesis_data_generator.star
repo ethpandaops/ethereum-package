@@ -32,7 +32,10 @@ def generate_cl_genesis_data(
 		deposit_contract_address,
 		seconds_per_slot,
 		preregistered_validator_keys_mnemonic,
-		total_num_validator_keys_to_preregister):
+		total_num_validator_keys_to_preregister,
+	        genesis_delay,
+		capella_fork_epoch
+	):
 
 	template_data = new_cl_genesis_config_template_data(
 		network_id,
@@ -41,6 +44,8 @@ def generate_cl_genesis_data(
 		total_num_validator_keys_to_preregister,
 		preregistered_validator_keys_mnemonic,
 		deposit_contract_address,
+		genesis_delay,
+		capella_fork_epoch
 	)
 
 	genesis_generation_mnemonics_template_and_data = shared_utils.new_template_and_data(genesis_generation_mnemonics_yml_template, template_data)
@@ -151,7 +156,7 @@ def generate_cl_genesis_data(
 
 
 
-def new_cl_genesis_config_template_data(network_id, seconds_per_slot, unix_timestamp, num_validator_keys_to_preregister, preregistered_validator_keys_mnemonic, deposit_contract_address):
+def new_cl_genesis_config_template_data(network_id, seconds_per_slot, unix_timestamp, num_validator_keys_to_preregister, preregistered_validator_keys_mnemonic, deposit_contract_address, genesis_delay, capella_fork_epoch):
 	return {
 		"NetworkId": network_id,
 		"SecondsPerSlot": seconds_per_slot,
@@ -159,4 +164,6 @@ def new_cl_genesis_config_template_data(network_id, seconds_per_slot, unix_times
 		"NumValidatorKeysToPreregister": num_validator_keys_to_preregister,
 		"PreregisteredValidatorKeysMnemonic": preregistered_validator_keys_mnemonic,
 		"DepositContractAddress": deposit_contract_address,
+		"GenesisDelay": genesis_delay,
+		"CapellaForkEpoch": capella_fork_epoch
 	}
