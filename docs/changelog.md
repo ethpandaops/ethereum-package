@@ -1,5 +1,10 @@
 # TBD
 
+### Breaking Change
+- Introduced optional application protocol and renamed protocol to transport_protocol
+
+# 0.1.0
+
 ### Breaking changes
 - Updated `struct` to `PortSpec` for declaring port definitions
 
