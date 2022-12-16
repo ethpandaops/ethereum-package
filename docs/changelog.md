@@ -1,5 +1,7 @@
 # TBD
 
+# 0.2.0
+
 - Adds config variables for `genesis_delay` and `capella_fork_epoch`
 - Updates genesis generator version
 - Fixes genesis timestamp such that the shanghai fork can happen based on timestamps
