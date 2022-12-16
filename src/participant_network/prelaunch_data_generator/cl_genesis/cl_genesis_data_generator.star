@@ -33,8 +33,9 @@ def generate_cl_genesis_data(
 		seconds_per_slot,
 		preregistered_validator_keys_mnemonic,
 		total_num_validator_keys_to_preregister,
-        genesis_delay,
-        capella_fork_epoch):
+	        genesis_delay,
+		capella_fork_epoch
+	):
 
 	template_data = new_cl_genesis_config_template_data(
 		network_id,

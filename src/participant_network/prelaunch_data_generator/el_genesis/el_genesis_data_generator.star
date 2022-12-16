@@ -31,14 +31,15 @@ def generate_el_genesis_data(
 	network_id,
 	deposit_contract_address,
 	genesis_delay,
-	capella_fork_epoch):
+	capella_fork_epoch
+	):
 
 	template_data = genesis_generation_config_template_data(
 		network_id,
 		deposit_contract_address,
 		genesis_unix_timestamp,
 		genesis_delay,
-        capella_fork_epoch
+        	capella_fork_epoch
 	)
 
 	genesis_config_file_template_and_data = shared_utils.new_template_and_data(genesis_generation_config_template, template_data)
