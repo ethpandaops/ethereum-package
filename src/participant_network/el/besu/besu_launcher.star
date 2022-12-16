@@ -122,7 +122,7 @@ def get_config(network_id, genesis_data, image, existing_el_clients, log_level, 
 		ports = USED_PORTS,
 		cmd = [launch_node_command_str],
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER
+			GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER: genesis_data.files_artifact_uuid
 		},
 		entrypoint = ENTRYPOINT_ARGS,
 		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER

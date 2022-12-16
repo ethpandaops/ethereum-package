@@ -42,7 +42,7 @@ def get_config(config_files_artifact_uuid):
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		files = {
-			config_files_artifact_uuid : CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS
+			CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS: config_files_artifact_uuid
 		},
 		cmd = [
 			# You can check all the cli flags starting the container and going to the flags section

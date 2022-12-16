@@ -117,7 +117,7 @@ def get_config(genesis_data, image, existing_el_clients, log_level, extra_params
 		ports = USED_PORTS,
 		cmd = command_args,
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
+			GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid,
 		},
 		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER,
 	)
