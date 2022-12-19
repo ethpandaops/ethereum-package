@@ -45,7 +45,6 @@ CL_CLIENT_CONTEXT_BOOTNODE = None
 
 def launch_participant_network(participants, network_params, global_log_level):
 	num_participants = len(participants)	
-	el_genesis_timestamp = time.now().unix
 
 
 
@@ -59,13 +58,17 @@ def launch_participant_network(participants, network_params, global_log_level):
 	
 	print(json.indent(json.encode(cl_validator_data)))
 
+	# We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
+	final_genesis_timestamp = (time.now() + CL_GENESIS_DATA_GENERATION_TIME + num_participants*CL_NODE_STARTUP_TIME).unix
 	print("Generating EL data")
 	el_genesis_generation_config_template = read_file(static_files.EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
 	el_genesis_data = el_genesis_data_generator.generate_el_genesis_data(
 		el_genesis_generation_config_template,
-		el_genesis_timestamp,
+		final_genesis_timestamp,
 		network_params.network_id,
-		network_params.deposit_contract_address
+		network_params.deposit_contract_address,
+		network_params.genesis_delay,
+		network_params.capella_fork_epoch
 	)
 
 
@@ -112,9 +115,6 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 	print("Generating CL data")
 
-	# verify that this works
-	cl_genesis_timestamp = (time.now() + CL_GENESIS_DATA_GENERATION_TIME + num_participants*CL_NODE_STARTUP_TIME).unix
-
 	genesis_generation_config_yml_template = read_file(static_files.CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
 	genesis_generation_mnemonics_yml_template = read_file(static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH)
 	total_number_of_validator_keys = network_params.num_validator_keys_per_node * num_participants
@@ -122,13 +122,14 @@ def launch_participant_network(participants, network_params, global_log_level):
 		genesis_generation_config_yml_template,
 		genesis_generation_mnemonics_yml_template,
 		el_genesis_data,
-		cl_genesis_timestamp,
+		final_genesis_timestamp,
 		network_params.network_id,
 		network_params.deposit_contract_address,
 		network_params.seconds_per_slot,
 		network_params.preregistered_validator_keys_mnemonic,
-		total_number_of_validator_keys
-
+		total_number_of_validator_keys,
+        network_params.genesis_delay,
+        network_params.capella_fork_epoch
 	)
 
 	print(json.indent(json.encode(cl_genesis_data)))
@@ -220,5 +221,5 @@ def launch_participant_network(participants, network_params, global_log_level):
 		all_participants.append(participant_entry)
 
 
-	return all_participants, cl_genesis_timestamp
+	return all_participants, final_genesis_timestamp
 

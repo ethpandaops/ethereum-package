@@ -48,7 +48,7 @@ def get_config(config_files_artifact_uuid):
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		files = {
-			config_files_artifact_uuid: FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
+			FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_uuid,
 		},
 		cmd = ["--config-path", config_file_path]
 	)

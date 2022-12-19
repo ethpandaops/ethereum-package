@@ -57,8 +57,8 @@ def get_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid)
 		ports = USED_PORTS,
 		env_vars = {CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE},
 		files = {
-			grafana_config_artifacts_uuid : GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
-			grafana_dashboards_artifacts_uuid: GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
+			GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_uuid,
+			GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_uuid
 		}
 	)
 

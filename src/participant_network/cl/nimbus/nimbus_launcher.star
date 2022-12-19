@@ -211,8 +211,8 @@ def get_config(
 		cmd = [cmd_str],
 		entrypoint = ENTRYPOINT_ARGS,
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENT,
-			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT
+			GENESIS_DATA_MOUNTPOINT_ON_CLIENT: genesis_data.files_artifact_uuid,
+			VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT: node_keystore_files.files_artifact_uuid
 		},
 		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)

@@ -170,8 +170,8 @@ def get_config(network_id, genesis_data, prefunded_geth_keys_artifact_uuid, pref
 		ports = USED_PORTS,
 		cmd = [command_str],
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH,
-			prefunded_geth_keys_artifact_uuid: PREFUNDED_KEYS_MOUNT_DIRPATH
+			GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid,
+			PREFUNDED_KEYS_MOUNT_DIRPATH: prefunded_geth_keys_artifact_uuid
 		},
 		entrypoint = ENTRYPOINT_ARGS,
 		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
