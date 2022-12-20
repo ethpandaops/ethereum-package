@@ -25,7 +25,7 @@ def launch_prometheus(plan, config_template, cl_client_contexts):
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	config_files_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
 
 	config = get_config(config_files_artifact_uuid)
 	prometheus_service = plan.add_service(SERVICE_ID, config)

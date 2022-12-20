@@ -36,7 +36,7 @@ def launch_forkmon(
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	config_files_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
 
 	config = get_config(config_files_artifact_uuid)
 

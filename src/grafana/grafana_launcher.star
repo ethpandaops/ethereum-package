@@ -44,7 +44,7 @@ def get_grafana_config_dir_artifact_uuid(plan, datasource_config_template, dashb
 	template_and_data_by_rel_dest_filepath[DATASOURCE_CONFIG_REL_FILEPATH] = datasource_template_and_data
 	template_and_data_by_rel_dest_filepath[DASHBOARD_PROVIDERS_CONFIG_REL_FILEPATH] = dashboard_providers_template_and_data
 
-	grafana_config_artifacts_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	grafana_config_artifacts_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
 
 	grafana_dashboards_artifacts_uuid = plan.upload_files(static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH)
 

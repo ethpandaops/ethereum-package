@@ -47,7 +47,7 @@ def generate_el_genesis_data(
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_FILENAME] = genesis_config_file_template_and_data
 
-	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	genesis_generation_config_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
 
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module

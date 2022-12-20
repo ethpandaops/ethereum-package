@@ -56,7 +56,7 @@ def generate_cl_genesis_data(
 	template_and_data_by_rel_dest_filepath[MNEMONICS_YML_FILENAME] = genesis_generation_mnemonics_template_and_data
 	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_YML_FILENAME] = genesis_generation_config_template_and_data
 
-	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	genesis_generation_config_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
 	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
