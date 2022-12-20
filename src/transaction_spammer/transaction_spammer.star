@@ -1,9 +1,9 @@
 IMAGE_NAME = "kurtosistech/tx-fuzz:0.2.0"
 SERVICE_ID = "transaction-spammer"
 
-def launch_transaction_spammer(prefunded_addresses, el_client_context):
+def launch_transaction_spammer(plan, prefunded_addresses, el_client_context):
 	config = get_config(prefunded_addresses, el_client_context)
-	add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_ID, config)
 
 
 def get_config(prefunded_addresses, el_client_context):

@@ -40,7 +40,6 @@ USED_PORTS = {
 }
 
 
-
 LODESTAR_LOG_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.warn:  "warn",
@@ -51,6 +50,7 @@ LODESTAR_LOG_LEVELS = {
 
 
 def launch(
+	plan,
 	launcher,
 	service_id,
 	image,
@@ -79,11 +79,11 @@ def launch(
 		extra_beacon_params,
 	)
 
-	beacon_service = add_service(beacon_node_service_id, beacon_config)
+	beacon_service = plan.add_service(beacon_node_service_id, beacon_config)
 
 	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 
-	cl_node_health_checker.wait_for_healthy(beacon_node_service_id, HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(plan, beacon_node_service_id, HTTP_PORT_ID)
 
 
 	# Launch validator node
@@ -100,7 +100,7 @@ def launch(
 		extra_validator_params,
 	)
 
-	validator_service = add_service(validator_node_service_id, validator_config)
+	validator_service = plan.add_service(validator_node_service_id, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
@@ -114,7 +114,7 @@ def launch(
 			"enr": ".data.enr"
 		}
 	)
-	beacon_node_enr = request(beacon_node_identity_recipe)["extract.enr"]
+	beacon_node_enr = plan.request(beacon_node_identity_recipe)["extract.enr"]
 
 	beacon_metrics_port = beacon_service.ports[METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)

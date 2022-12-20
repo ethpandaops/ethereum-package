@@ -9,18 +9,18 @@ SYNCHRONOUS_ENTRYPOINT_ARGS = [
 
 
 # this is broken check - https://github.com/ethereum/merge-testnet-verifier/issues/4
-def launch_testnet_verifier(params, el_client_contexts, cl_client_contexts):
+def launch_testnet_verifier(plan, params, el_client_contexts, cl_client_contexts):
 	config = get_asynchronous_verification_config(params, el_client_contexts, cl_client_contexts)
-	add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_ID, config)
 
 
-def run_synchronous_testnet_verification(params, el_client_contexts, cl_client_contexts):
+def run_synchronous_testnet_verification(plan, params, el_client_contexts, cl_client_contexts):
 	config = get_synchronous_verification_config()
-	add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_ID, config)
 
 	command = get_cmd(params, el_client_contexts, cl_client_contexts, True)
-	exec_result = exec(struct(service_id=SERVICE_ID, command=command))
-	assert(exec_result["code"], "==", 0)
+	exec_result = plan.exec(struct(service_id=SERVICE_ID, command=command))
+	plan.assert(exec_result["code"], "==", 0)
 
 
 def get_cmd(params, el_client_contexts, cl_client_contexts, add_binary_name):

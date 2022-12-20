@@ -25,15 +25,15 @@ USED_PORTS = {
 }
 
 
-def launch_grafana(datasource_config_template, dashboard_providers_config_template, prometheus_private_url):	
-	grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid = get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_providers_config_template, prometheus_private_url)
+def launch_grafana(plan, datasource_config_template, dashboard_providers_config_template, prometheus_private_url):	
+	grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid = get_grafana_config_dir_artifact_uuid(plan, datasource_config_template, dashboard_providers_config_template, prometheus_private_url)
 
 	config = get_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid)
 
-	add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_ID, config)
 
 
-def get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_providers_config_template, prometheus_private_url):
+def get_grafana_config_dir_artifact_uuid(plan, datasource_config_template, dashboard_providers_config_template, prometheus_private_url):
 	datasource_data = new_datasource_config_template_data(prometheus_private_url)
 	datasource_template_and_data = shared_utils.new_template_and_data(datasource_config_template, datasource_data)
 
@@ -44,9 +44,9 @@ def get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_p
 	template_and_data_by_rel_dest_filepath[DATASOURCE_CONFIG_REL_FILEPATH] = datasource_template_and_data
 	template_and_data_by_rel_dest_filepath[DASHBOARD_PROVIDERS_CONFIG_REL_FILEPATH] = dashboard_providers_template_and_data
 
-	grafana_config_artifacts_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	grafana_config_artifacts_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
 
-	grafana_dashboards_artifacts_uuid = upload_files(static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH)
+	grafana_dashboards_artifacts_uuid = plan.upload_files(static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH)
 
 	return grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid
 

@@ -40,7 +40,14 @@ workflows:
       # -- PR check jobs ------------------------------------------
       - kurtosis-docs-checker/check-docs:
           should-check-changelog: false
-          markdown-link-check-config-json: "{}"
+          markdown-link-check-config-json: |
+            {
+                "ignorePatterns": [
+                    {
+                        "pattern": "https://github.com/kurtosis-tech/eth2-package"
+                    }
+                ]
+            }
           filters:
             branches:
               ignore:

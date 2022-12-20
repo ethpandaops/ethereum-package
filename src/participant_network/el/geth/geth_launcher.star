@@ -53,7 +53,9 @@ VERBOSITY_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "5",
 }
 
+
 def launch(
+	plan,
 	launcher,
 	service_id,
 	image,
@@ -69,9 +71,9 @@ def launch(
 	config = get_config(launcher.network_id, launcher.el_genesis_data, launcher.prefunded_geth_keys_artifact_uuid,
                                     launcher.prefunded_account_info, image, existing_el_clients, log_level, extra_params)
 
-	service = add_service(service_id, config)
+	service = plan.add_service(service_id, config)
 
-	enode, enr = el_admin_node_info.get_enode_enr_for_node(service_id, RPC_PORT_ID)
+	enode, enr = el_admin_node_info.get_enode_enr_for_node(plan, service_id, RPC_PORT_ID)
 
 	return el_client_context.new_el_client_context(
 		"geth",

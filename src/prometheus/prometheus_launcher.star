@@ -15,7 +15,7 @@ USED_PORTS = {
 	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL)
 }
 
-def launch_prometheus(config_template, cl_client_contexts):
+def launch_prometheus(plan, config_template, cl_client_contexts):
 	all_cl_nodes_metrics_info = []
 	for client in cl_client_contexts:
 		all_cl_nodes_metrics_info.extend(client.cl_nodes_metrics_info)
@@ -25,10 +25,10 @@ def launch_prometheus(config_template, cl_client_contexts):
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	config_files_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
 
 	config = get_config(config_files_artifact_uuid)
-	prometheus_service = add_service(SERVICE_ID, config)
+	prometheus_service = plan.add_service(SERVICE_ID, config)
 
 	private_ip_address = prometheus_service.ip_address
 	prometheus_service_http_port = prometheus_service.ports[HTTP_PORT_ID].number

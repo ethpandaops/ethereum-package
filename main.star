@@ -17,7 +17,7 @@ GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
-def run(args):
+def run(plan, args):
 	args_with_right_defaults = parse_input.parse_input(args)
 
 	num_participants = len(args_with_right_defaults.participants)
@@ -27,10 +27,10 @@ def run(args):
 	grafana_dashboards_config_template = read_file(static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH)
 	prometheus_config_template = read_file(static_files.PROMETHEUS_CONFIG_TEMPLATE_FILEPATH)
 
-	print("Read the prometheus, grafana templates")
+	plan.print("Read the prometheus, grafana templates")
 
-	print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
-	all_participants, cl_gensis_timestamp = participant_network.launch_participant_network(args_with_right_defaults.participants, network_params, args_with_right_defaults.global_client_log_level)
+	plan.print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
+	all_participants, cl_gensis_timestamp = participant_network.launch_participant_network(plan, args_with_right_defaults.participants, network_params, args_with_right_defaults.global_client_log_level)
 
 	all_el_client_contexts = []
 	all_cl_client_contexts = []
@@ -42,39 +42,40 @@ def run(args):
 	if not args_with_right_defaults.launch_additional_services:
 		return
 
-	print("Launching transaction spammer")
-	transaction_spammer.launch_transaction_spammer(genesis_constants.PRE_FUNDED_ACCOUNTS, all_el_client_contexts[0])
-	print("Succesfully launched transaction spammer")
+	plan.print("Launching transaction spammer")
+	transaction_spammer.launch_transaction_spammer(plan, genesis_constants.PRE_FUNDED_ACCOUNTS, all_el_client_contexts[0])
+	plan.print("Succesfully launched transaction spammer")
 
 	# We need a way to do time.sleep
 	# TODO add code that waits for CL genesis
 
-	print("Launching forkmon")
+	plan.print("Launching forkmon")
 	forkmon_config_template = read_file(static_files.FORKMON_CONFIG_TEMPLATE_FILEPATH)
-	forkmon.launch_forkmon(forkmon_config_template, all_cl_client_contexts, cl_gensis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
-	print("Succesfully launched forkmon")
+	forkmon.launch_forkmon(plan, forkmon_config_template, all_cl_client_contexts, cl_gensis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
+	plan.print("Succesfully launched forkmon")
 
-	print("Launching prometheus...")
+	plan.print("Launching prometheus...")
 	prometheus_private_url = prometheus.launch_prometheus(
+		plan,
 		prometheus_config_template,
 		all_cl_client_contexts,
 	)
-	print("Successfully launched Prometheus")
+	plan.print("Successfully launched Prometheus")
 
-	print("Launching grafana...")
-	grafana.launch_grafana(grafana_datasource_config_template, grafana_dashboards_config_template, prometheus_private_url)
-	print("Succesfully launched grafana")
+	plan.print("Launching grafana...")
+	grafana.launch_grafana(plan, grafana_datasource_config_template, grafana_dashboards_config_template, prometheus_private_url)
+	plan.print("Succesfully launched grafana")
 
 	if args_with_right_defaults.wait_for_verifications:
-		print("Running synchrnous testnet verifier")
-		testnet_verifier.run_synchronous_testnet_verification(args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
-		print("Verification succeeded")
+		plan.print("Running synchrnous testnet verifier")
+		testnet_verifier.run_synchronous_testnet_verification(plan, args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
+		plan.print("Verification succeeded")
 	else:
-		print("Running asynchronous verification")
-		testnet_verifier.launch_testnet_verifier(args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
-		print("Succesfully launched asynchronous verifier")
+		plan.print("Running asynchronous verification")
+		testnet_verifier.launch_testnet_verifier(plan, args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
+		plan.print("Succesfully launched asynchronous verifier")
 		if args_with_right_defaults.wait_for_finalization:
-			print("Waiting for the first finalized epoch")
+			plan.print("Waiting for the first finalized epoch")
 			first_cl_client = all_cl_client_contexts[0]
 			first_cl_client_id = first_cl_client.beacon_service_id
 			epoch_recipe = struct(
@@ -87,8 +88,8 @@ def run(args):
 					"finalized_epoch": ".data.finalized.epoch"
 				}
 			)
-			wait(epoch_recipe, "extract.finalized_epoch", "!=", "0", timeout="40m")
-			print("First finalized epoch occurred successfully")
+			plan.wait(epoch_recipe, "extract.finalized_epoch", "!=", "0", timeout="40m")
+			plan.print("First finalized epoch occurred successfully")
 
 
 	grafana_info = struct(

@@ -17,6 +17,7 @@ USED_PORTS = {
 
 
 def launch_forkmon(
+		plan,
 		config_template,
 		cl_client_contexts,
 		genesis_unix_timestamp,
@@ -35,11 +36,11 @@ def launch_forkmon(
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	config_files_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
 
 	config = get_config(config_files_artifact_uuid)
 
-	add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_ID, config)
 
 
 def get_config(config_files_artifact_uuid):

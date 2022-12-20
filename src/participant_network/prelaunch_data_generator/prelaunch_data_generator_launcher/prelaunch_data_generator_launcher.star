@@ -9,7 +9,7 @@ ENTRYPOINT_ARGS = [
 ]
 
 # Launches a prelaunch data generator IMAGE, for use in various of the genesis generation
-def launch_prelaunch_data_generator(files_artifact_mountpoints):
+def launch_prelaunch_data_generator(plan, files_artifact_mountpoints):
 
 	config = get_config(files_artifact_mountpoints)
 
@@ -18,7 +18,7 @@ def launch_prelaunch_data_generator(files_artifact_mountpoints):
 		time.now().unix_nano,
 	)
 
-	add_service(service_id, config)
+	plan.add_service(service_id, config)
 
 	return service_id
 
