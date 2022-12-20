@@ -85,7 +85,7 @@ def launch(
 	
 	config = get_config(launcher.cl_genesis_data, image, bootnode_context, el_client_context, mev_boost_context, log_level, node_keystore_files, extra_params)
 
-	teku_service = add_service(service_id, config)
+	teku_service = plan.add_service(service_id, config)
 
 	cl_node_health_checker.wait_for_healthy(service_id, HTTP_PORT_ID)
 

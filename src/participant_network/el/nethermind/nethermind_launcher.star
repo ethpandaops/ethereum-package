@@ -53,7 +53,7 @@ def launch(
 
 	config = get_config(launcher.el_genesis_data, image, existing_el_clients, log_level, extra_params)
 
-	service = add_service(service_id, config)
+	service = plan.add_service(service_id, config)
 
 	enode = el_admin_node_info.get_enode_for_node(service_id, RPC_PORT_ID)
 

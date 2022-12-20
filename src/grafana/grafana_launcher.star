@@ -30,7 +30,7 @@ def launch_grafana(datasource_config_template, dashboard_providers_config_templa
 
 	config = get_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid)
 
-	add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_ID, config)
 
 
 def get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_providers_config_template, prometheus_private_url):
@@ -46,7 +46,7 @@ def get_grafana_config_dir_artifact_uuid(datasource_config_template, dashboard_p
 
 	grafana_config_artifacts_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
-	grafana_dashboards_artifacts_uuid = upload_files(static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH)
+	grafana_dashboards_artifacts_uuid = plan.upload_files(static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH)
 
 	return grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid
 

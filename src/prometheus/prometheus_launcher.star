@@ -28,7 +28,7 @@ def launch_prometheus(config_template, cl_client_contexts):
 	config_files_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
 
 	config = get_config(config_files_artifact_uuid)
-	prometheus_service = add_service(SERVICE_ID, config)
+	prometheus_service = plan.add_service(SERVICE_ID, config)
 
 	private_ip_address = prometheus_service.ip_address
 	prometheus_service_http_port = prometheus_service.ports[HTTP_PORT_ID].number

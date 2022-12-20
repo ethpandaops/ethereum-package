@@ -18,7 +18,7 @@ NETWORK_ID_TO_NAME = {
 def launch(mev_boost_launcher, service_id, network_id):
 	config = get_config(mev_boost_launcher, network_id)
 
-	mev_boost_service = add_service(service_id, config)
+	mev_boost_service = plan.add_service(service_id, config)
 
 	return mev_boost_context.new_mev_boost_context(mev_boost_service.ip_address, FLASHBOTS_MEV_BOOST_PORT)
 

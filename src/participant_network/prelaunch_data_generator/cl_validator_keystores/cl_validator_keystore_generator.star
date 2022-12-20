@@ -64,8 +64,8 @@ def generate_cl_validator_keystores(
 
 	command_str = " && ".join(all_sub_command_strs)
 
-	command_result = exec(struct(service_id=service_id, command=["sh", "-c", command_str]))
-	assert(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	command_result = plan.exec(struct(service_id=service_id, command=["sh", "-c", command_str]))
+	plan.assert(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	# Store outputs into files artifacts
 	keystore_files = []
@@ -95,8 +95,8 @@ def generate_cl_validator_keystores(
 			PRYSM_PASSWORD_FILEPATH_ON_GENERATOR,
 		),
 	]
-	write_prysm_password_file_cmd_result = exec(struct(service_id=service_id, command=write_prysm_password_file_cmd))
-	assert(write_prysm_password_file_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	write_prysm_password_file_cmd_result = plan.exec(struct(service_id=service_id, command=write_prysm_password_file_cmd))
+	plan.assert(write_prysm_password_file_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	prysm_password_artifact_uuid = store_service_files(service_id, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR)
 
@@ -107,5 +107,5 @@ def generate_cl_validator_keystores(
 	)
 
 	# we cleanup as the data generation is done
-	remove_service(service_id)
+	plan.remove_service(service_id)
 	return result

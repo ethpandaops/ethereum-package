@@ -101,7 +101,7 @@ def launch(
 		extra_beacon_params,
 	)
 
-	beacon_service = add_service(beacon_node_service_id, beacon_config)
+	beacon_service = plan.add_service(beacon_node_service_id, beacon_config)
 
 	cl_node_health_checker.wait_for_healthy(beacon_node_service_id, HTTP_PORT_ID)
 
@@ -125,7 +125,7 @@ def launch(
 		launcher.prysm_password_artifact_uuid
 	)
 
-	validator_service = add_service(validator_node_service_id, validator_config)
+	validator_service = plan.add_service(validator_node_service_id, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 	beacon_node_identity_recipe = struct(

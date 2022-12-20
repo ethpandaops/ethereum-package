@@ -39,7 +39,7 @@ def launch_forkmon(
 
 	config = get_config(config_files_artifact_uuid)
 
-	add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_ID, config)
 
 
 def get_config(config_files_artifact_uuid):

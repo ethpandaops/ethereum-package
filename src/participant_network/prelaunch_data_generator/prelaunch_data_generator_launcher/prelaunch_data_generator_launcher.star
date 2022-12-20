@@ -18,7 +18,7 @@ def launch_prelaunch_data_generator(files_artifact_mountpoints):
 		time.now().unix_nano,
 	)
 
-	add_service(service_id, config)
+	plan.add_service(service_id, config)
 
 	return service_id
 

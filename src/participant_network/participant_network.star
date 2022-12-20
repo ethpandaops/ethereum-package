@@ -48,7 +48,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 
 
-	print("Generating cl validator key stores")	
+	plan.print("Generating cl validator key stores")	
 	cl_validator_data = cl_validator_keystores.generate_cl_validator_keystores(
 		network_params.preregistered_validator_keys_mnemonic,
 		num_participants,
@@ -56,11 +56,11 @@ def launch_participant_network(participants, network_params, global_log_level):
 	)
 
 	
-	print(json.indent(json.encode(cl_validator_data)))
+	plan.print(json.indent(json.encode(cl_validator_data)))
 
 	# We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
 	final_genesis_timestamp = (time.now() + CL_GENESIS_DATA_GENERATION_TIME + num_participants*CL_NODE_STARTUP_TIME).unix
-	print("Generating EL data")
+	plan.print("Generating EL data")
 	el_genesis_generation_config_template = read_file(static_files.EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
 	el_genesis_data = el_genesis_data_generator.generate_el_genesis_data(
 		el_genesis_generation_config_template,
@@ -72,13 +72,13 @@ def launch_participant_network(participants, network_params, global_log_level):
 	)
 
 
-	print(json.indent(json.encode(el_genesis_data)))
+	plan.print(json.indent(json.encode(el_genesis_data)))
 
-	print("Uploading GETH prefunded keys")
+	plan.print("Uploading GETH prefunded keys")
 
-	geth_prefunded_keys_artifact_id = upload_files(static_files.GETH_PREFUNDED_KEYS_DIRPATH)
+	geth_prefunded_keys_artifact_id = plan.upload_files(static_files.GETH_PREFUNDED_KEYS_DIRPATH)
 
-	print("Uploaded GETH files succesfully, launching EL participants")
+	plan.print("Uploaded GETH files succesfully, launching EL participants")
 
 	el_launchers = {
 		package_io.EL_CLIENT_TYPE.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
@@ -110,10 +110,10 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 		all_el_client_contexts.append(el_client_context)
 
-	print("Succesfully added {0} EL participants".format(num_participants))
+	plan.print("Succesfully added {0} EL participants".format(num_participants))
 
 
-	print("Generating CL data")
+	plan.print("Generating CL data")
 
 	genesis_generation_config_yml_template = read_file(static_files.CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
 	genesis_generation_mnemonics_yml_template = read_file(static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH)
@@ -132,9 +132,9 @@ def launch_participant_network(participants, network_params, global_log_level):
         network_params.capella_fork_epoch
 	)
 
-	print(json.indent(json.encode(cl_genesis_data)))
+	plan.print(json.indent(json.encode(cl_genesis_data)))
 
-	print("Launching CL network")
+	plan.print("Launching CL network")
 
 	cl_launchers = {
 		package_io.CL_CLIENT_TYPE.lighthouse : {"launcher": lighthouse.new_lighthouse_launcher(cl_genesis_data), "launch_method": lighthouse.launch},
@@ -204,7 +204,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 		all_cl_client_contexts.append(cl_client_context)
 
-	print("Succesfully added {0} CL participants".format(num_participants))
+	plan.print("Succesfully added {0} CL participants".format(num_participants))
 
 	all_participants = []
 
