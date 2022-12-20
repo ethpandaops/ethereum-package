@@ -24,6 +24,7 @@ SUCCESSFUL_EXEC_CMD_EXIT_CODE = 0
 
 
 def generate_cl_genesis_data(
+		plan,
 		genesis_generation_config_yml_template,
 		genesis_generation_mnemonics_yml_template,
 		el_genesis_data,
@@ -33,7 +34,7 @@ def generate_cl_genesis_data(
 		seconds_per_slot,
 		preregistered_validator_keys_mnemonic,
 		total_num_validator_keys_to_preregister,
-	        genesis_delay,
+		genesis_delay,
 		capella_fork_epoch
 	):
 
@@ -59,6 +60,7 @@ def generate_cl_genesis_data(
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
 	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+		plan,
 		{
 			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_uuid,
 			EL_GENESIS_DIRPATH_ON_GENERATOR: el_genesis_data.files_artifact_uuid,

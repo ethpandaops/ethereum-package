@@ -43,13 +43,12 @@ MEV_BOOST_SHOULD_CHECK_RELAY = True
 
 CL_CLIENT_CONTEXT_BOOTNODE = None
 
-def launch_participant_network(participants, network_params, global_log_level):
-	num_participants = len(participants)	
-
-
+def launch_participant_network(plan, participants, network_params, global_log_level):
+	num_participants = len(participants)
 
 	plan.print("Generating cl validator key stores")	
 	cl_validator_data = cl_validator_keystores.generate_cl_validator_keystores(
+		plan
 		network_params.preregistered_validator_keys_mnemonic,
 		num_participants,
 		network_params.num_validator_keys_per_node,
@@ -63,6 +62,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 	plan.print("Generating EL data")
 	el_genesis_generation_config_template = read_file(static_files.EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
 	el_genesis_data = el_genesis_data_generator.generate_el_genesis_data(
+		plan,
 		el_genesis_generation_config_template,
 		final_genesis_timestamp,
 		network_params.network_id,
@@ -99,6 +99,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 		el_service_id = "{0}{1}".format(EL_CLIENT_SERVICE_ID_PREFIX, index)
 
 		el_client_context = launch_method(
+			plan,
 			el_launcher,
 			el_service_id,
 			participant.el_client_image,
@@ -119,6 +120,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 	genesis_generation_mnemonics_yml_template = read_file(static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH)
 	total_number_of_validator_keys = network_params.num_validator_keys_per_node * num_participants
 	cl_genesis_data = cl_genesis_data_generator.generate_cl_genesis_data(
+		plan,
 		genesis_generation_config_yml_template,
 		genesis_generation_mnemonics_yml_template,
 		el_genesis_data,
@@ -166,7 +168,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 		if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
 			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
 			mev_boost_service_id = MEV_BOOST_SERVICE_ID_PREFIX.format(1)
-			mev_boost_context = mev_boost_launcher_module.launch_mevboost(mev_boost_launcher, mev_boost_service_id, network_params.network_id)
+			mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_id, network_params.network_id)
 
 		all_mevboost_contexts.append(mev_boost_context)
 
@@ -174,6 +176,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 		if index == 0:
 			cl_client_context = launch_method(
+				plan,
 				cl_launcher,
 				cl_service_id,
 				participant.cl_client_image,
@@ -189,6 +192,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 		else:
 			boot_cl_client_ctx = all_cl_client_contexts[0]
 			cl_client_context = launch_method(
+				plan,
 				cl_launcher,
 				cl_service_id,
 				participant.cl_client_image,

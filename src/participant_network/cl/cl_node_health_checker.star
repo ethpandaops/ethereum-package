@@ -1,4 +1,4 @@
-def wait_for_healthy(service_id, port_id):
+def wait_for_healthy(plan, service_id, port_id):
 	recipe = struct(
         service_id = service_id,
         method= "GET",

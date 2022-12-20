@@ -66,6 +66,7 @@ LIGHTHOUSE_LOG_LEVELS = {
 }
 
 def launch(
+	plan,
 	launcher,
 	service_id,
 	image,
@@ -96,7 +97,7 @@ def launch(
 
 	beacon_service = plan.add_service(beacon_node_service_id, beacon_config)
 
-	cl_node_health_checker.wait_for_healthy(beacon_node_service_id, BEACON_HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(plan, beacon_node_service_id, BEACON_HTTP_PORT_ID)
 
 	beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
