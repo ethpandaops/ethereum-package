@@ -99,7 +99,7 @@ def launch(
 			"enr": ".data.enr"
 		}
 	)
-	node_enr = request(node_identity_recipe)["extract.enr"]
+	node_enr = plan.request(node_identity_recipe)["extract.enr"]
 
 
 	teku_metrics_port = teku_service.ports[METRICS_PORT_ID]
