@@ -135,7 +135,7 @@ def generate_cl_genesis_data(
 	genesis_generation_result = plan.exec(struct(service_id=launcher_service_id, command=cl_genesis_generation_cmd))
 	plan.assert(genesis_generation_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	cl_genesis_data_artifact_uuid = store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
+	cl_genesis_data_artifact_uuid = plan.store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
 	jwt_secret_rel_filepath = shared_utils.path_join(
 		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),

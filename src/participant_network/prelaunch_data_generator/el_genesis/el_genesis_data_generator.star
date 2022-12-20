@@ -117,7 +117,7 @@ def generate_el_genesis_data(
 	jwt_secret_generation_cmd_result = plan.exec(struct(service_id=launcher_service_id, command=jwt_secret_generation_cmd))
 	plan.assert(jwt_secret_generation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	elGenesisDataArtifactUuid = store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
+	elGenesisDataArtifactUuid = plan.store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
 
 	result = el_genesis.new_el_genesis_data(
 		elGenesisDataArtifactUuid,
