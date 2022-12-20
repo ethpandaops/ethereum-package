@@ -60,6 +60,7 @@ NIMBUS_LOG_LEVELS = {
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 def launch(
+	plan,
 	launcher,
 	service_id,
 	image,
@@ -80,7 +81,7 @@ def launch(
 
 	nimbus_service = plan.add_service(service_id, config)
 
-	cl_node_health_checker.wait_for_healthy(service_id, HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(plan, service_id, HTTP_PORT_ID)
 
 	cl_node_identity_recipe = struct(
 		service_id = service_id,

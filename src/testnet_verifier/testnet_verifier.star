@@ -9,12 +9,12 @@ SYNCHRONOUS_ENTRYPOINT_ARGS = [
 
 
 # this is broken check - https://github.com/ethereum/merge-testnet-verifier/issues/4
-def launch_testnet_verifier(params, el_client_contexts, cl_client_contexts):
+def launch_testnet_verifier(plan, params, el_client_contexts, cl_client_contexts):
 	config = get_asynchronous_verification_config(params, el_client_contexts, cl_client_contexts)
 	plan.add_service(SERVICE_ID, config)
 
 
-def run_synchronous_testnet_verification(params, el_client_contexts, cl_client_contexts):
+def run_synchronous_testnet_verification(plan, params, el_client_contexts, cl_client_contexts):
 	config = get_synchronous_verification_config()
 	plan.add_service(SERVICE_ID, config)
 

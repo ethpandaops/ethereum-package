@@ -17,6 +17,7 @@ USED_PORTS = {
 
 
 def launch_forkmon(
+		plan,
 		config_template,
 		cl_client_contexts,
 		genesis_unix_timestamp,

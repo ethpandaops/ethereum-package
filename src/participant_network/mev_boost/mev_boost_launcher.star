@@ -15,7 +15,7 @@ NETWORK_ID_TO_NAME = {
 	"3":        "ropsten",
 }
 
-def launch(mev_boost_launcher, service_id, network_id):
+def launch(plan, mev_boost_launcher, service_id, network_id):
 	config = get_config(mev_boost_launcher, network_id)
 
 	mev_boost_service = plan.add_service(service_id, config)
