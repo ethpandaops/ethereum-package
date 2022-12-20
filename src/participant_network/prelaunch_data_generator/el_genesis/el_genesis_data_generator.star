@@ -26,6 +26,7 @@ all_genesis_generation_cmds =  {
 }
 
 def generate_el_genesis_data(
+	plan,
 	genesis_generation_config_template,
 	genesis_unix_timestamp,
 	network_id,
