@@ -119,7 +119,7 @@ def get_config(network_id, genesis_data, image, existing_el_clients, verbosity_l
 
 	command_arg_str = " && ".join(command_arg)
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = [command_arg_str],

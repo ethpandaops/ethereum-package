@@ -52,14 +52,14 @@ def get_cmd(params, el_client_contexts, cl_client_contexts, add_binary_name):
 
 def get_asynchronous_verification_config(params, el_client_contexts, cl_client_contexts):
 	commands = get_cmd(params, el_client_contexts, cl_client_contexts, False)
-	return struct(
+	return ServiceConfig(
 		image = IMAGE_NAME,
 		cmd = commands,
 	)
 
 
 def get_synchronous_verification_config():
-	return struct(
+	return ServiceConfig(
 		image = IMAGE_NAME,
 		entrypoint = SYNCHRONOUS_ENTRYPOINT_ARGS,
 	)

@@ -118,7 +118,7 @@ def get_config(network_id, genesis_data, image, existing_el_clients, log_level, 
 
 	launch_node_command_str = " ".join(launch_node_command)
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = [launch_node_command_str],

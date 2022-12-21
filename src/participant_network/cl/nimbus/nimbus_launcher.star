@@ -206,7 +206,7 @@ def get_config(
 
 	cmd_str = " ".join(cmd)
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = [cmd_str],

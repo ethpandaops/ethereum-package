@@ -16,7 +16,7 @@ def get_config(prefunded_addresses, el_client_context):
 
 	comma_separated_private_keys = ",".join(private_keys_strs)
 	comma_separated_addresses = ",".join(address_strs)
-	return struct(
+	return ServiceConfig(
 		image = IMAGE_NAME,
 		cmd = [
 			"http://{0}:{1}".format(el_client_context.ip_addr, el_client_context.rpc_port_num),

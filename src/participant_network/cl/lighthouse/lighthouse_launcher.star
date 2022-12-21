@@ -223,7 +223,7 @@ def get_beacon_config(
 		cmd.extend([param for param in extra_params])
 
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = BEACON_USED_PORTS,
 		cmd = cmd,
@@ -284,7 +284,7 @@ def get_validator_config(
 		cmd.extend([param for param in extra_params])
 
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = VALIDATOR_USED_PORTS,
 		cmd = cmd,

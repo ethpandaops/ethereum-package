@@ -52,7 +52,7 @@ def get_grafana_config_dir_artifact_uuid(plan, datasource_config_template, dashb
 
 
 def get_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid):
-	return struct(
+	return ServiceConfig(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		env_vars = {CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE},

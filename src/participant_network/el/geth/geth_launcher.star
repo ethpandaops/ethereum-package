@@ -167,7 +167,7 @@ def get_config(network_id, genesis_data, prefunded_geth_keys_artifact_uuid, pref
 	]
 	command_str = " && ".join(subcommand_strs)
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = [command_str],
