@@ -25,7 +25,7 @@ def launch_prelaunch_data_generator(plan, files_artifact_mountpoints):
 def get_config(
 	files_artifact_mountpoints,
 ):
-	return struct(
+	return ServiceConfig(
 		image = IMAGE,
 		entrypoint = ENTRYPOINT_ARGS,
 		files = files_artifact_mountpoints,

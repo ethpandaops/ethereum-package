@@ -216,7 +216,7 @@ def get_beacon_config(
 		# we do the for loop as otherwise its a proto repeated array
 		cmd.extend([param for param in extra_params])
 
-	return struct(
+	return ServiceConfig(
 		image = beacon_image,
 		ports = BEACON_NODE_USED_PORTS,
 		cmd = cmd,
@@ -274,7 +274,7 @@ def get_validator_config(
 		cmd.extend([param for param in extra_params])
 
 
-	return struct(
+	return ServiceConfig(
 		image = validator_image,
 		ports = VALIDATOR_NODE_USED_PORTS,
 		cmd = cmd,

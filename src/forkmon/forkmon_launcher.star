@@ -45,7 +45,7 @@ def launch_forkmon(
 
 def get_config(config_files_artifact_uuid):
 	config_file_path = shared_utils.path_join(FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, FORKMON_CONFIG_FILENAME)
-	return struct(
+	return ServiceConfig(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		files = {

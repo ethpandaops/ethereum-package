@@ -114,7 +114,7 @@ def get_config(genesis_data, image, existing_el_clients, log_level, extra_params
 		# we do this as extra_params is a repeated proto aray
 		command_args.extend([param for param in extra_params])
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = command_args,

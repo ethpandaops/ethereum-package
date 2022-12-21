@@ -38,7 +38,7 @@ def launch_prometheus(plan, config_template, cl_client_contexts):
 
 def get_config(config_files_artifact_uuid):
 	config_file_path = shared_utils.path_join(CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS, shared_utils.path_base(CONFIG_FILENAME))
-	return struct(
+	return ServiceConfig(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		files = {

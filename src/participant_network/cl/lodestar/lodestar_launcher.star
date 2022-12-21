@@ -198,7 +198,7 @@ def get_beacon_config(
 		# this is a repeated<proto type>, we convert it into Starlark
 		cmd.extend([param for param in extra_params])
 	
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = cmd,
@@ -250,7 +250,7 @@ def get_validator_config(
 		cmd.extend([param for param in extra_params])
 
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = cmd,

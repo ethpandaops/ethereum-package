@@ -36,7 +36,7 @@ def get_config(mev_boost_launcher, network_id):
 		command.append("-relays")
 		command.append(",".join(mev_boost_launcher.relay_end_points))
 
-	return struct(
+	return ServiceConfig(
 		image = FLASHBOTS_MEV_BOOST_IMAGE,
 		ports = USED_PORTS,
 		cmd = command
