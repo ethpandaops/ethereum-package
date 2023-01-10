@@ -25,9 +25,9 @@ def launch_prometheus(plan, config_template, cl_client_contexts):
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
+	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "prometheus-config")
 
-	config = get_config(config_files_artifact_uuid)
+	config = get_config(config_files_artifact_name)
 	prometheus_service = plan.add_service(SERVICE_ID, config)
 
 	private_ip_address = prometheus_service.ip_address
@@ -36,13 +36,13 @@ def launch_prometheus(plan, config_template, cl_client_contexts):
 	return "http://{0}:{1}".format(private_ip_address, prometheus_service_http_port)
 
 
-def get_config(config_files_artifact_uuid):
+def get_config(config_files_artifact_name):
 	config_file_path = shared_utils.path_join(CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS, shared_utils.path_base(CONFIG_FILENAME))
 	return ServiceConfig(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		files = {
-			CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS: config_files_artifact_uuid
+			CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS: config_files_artifact_name
 		},
 		cmd = [
 			# You can check all the cli flags starting the container and going to the flags section

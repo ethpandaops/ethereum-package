@@ -76,12 +76,12 @@ def launch_participant_network(plan, participants, network_params, global_log_le
 
 	plan.print("Uploading GETH prefunded keys")
 
-	geth_prefunded_keys_artifact_id = plan.upload_files(static_files.GETH_PREFUNDED_KEYS_DIRPATH)
+	geth_prefunded_keys_artifact_name = plan.upload_files(static_files.GETH_PREFUNDED_KEYS_DIRPATH, name="geth-prefunded-keys")
 
 	plan.print("Uploaded GETH files succesfully, launching EL participants")
 
 	el_launchers = {
-		package_io.EL_CLIENT_TYPE.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
+		package_io.EL_CLIENT_TYPE.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_name, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
 		package_io.EL_CLIENT_TYPE.besu : {"launcher": besu.new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": besu.launch},
 		package_io.EL_CLIENT_TYPE.erigon : {"launcher": erigon.new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": erigon.launch},
 		package_io.EL_CLIENT_TYPE.nethermind : {"launcher": nethermind.new_nethermind_launcher(el_genesis_data), "launch_method": nethermind.launch},
