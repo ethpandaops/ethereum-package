@@ -56,13 +56,13 @@ def generate_cl_genesis_data(
 	template_and_data_by_rel_dest_filepath[MNEMONICS_YML_FILENAME] = genesis_generation_mnemonics_template_and_data
 	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_YML_FILENAME] = genesis_generation_config_template_and_data
 
-	genesis_generation_config_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
+	genesis_generation_config_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "genesis-generation-config-cl")
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
 	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
 		plan,
 		{
-			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_uuid,
+			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_name,
 			EL_GENESIS_DIRPATH_ON_GENERATOR: el_genesis_data.files_artifact_uuid,
 		},
 	)
@@ -135,7 +135,7 @@ def generate_cl_genesis_data(
 	genesis_generation_result = plan.exec(struct(service_id=launcher_service_id, command=cl_genesis_generation_cmd))
 	plan.assert(genesis_generation_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	cl_genesis_data_artifact_uuid = plan.store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
+	cl_genesis_data_artifact_name = plan.store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR, name = "cl-genesis-data")
 
 	jwt_secret_rel_filepath = shared_utils.path_join(
 		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
@@ -150,7 +150,7 @@ def generate_cl_genesis_data(
 		GENESIS_STATE_FILENAME,
 	)
 	result = cl_genesis_data.new_cl_genesis_data(
-		cl_genesis_data_artifact_uuid,
+		cl_genesis_data_artifact_name,
 		jwt_secret_rel_filepath,
 		genesis_config_rel_filepath,
 		genesis_ssz_rel_filepath,

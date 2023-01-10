@@ -36,20 +36,20 @@ def launch_forkmon(
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
+	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "forkmon-config")
 
-	config = get_config(config_files_artifact_uuid)
+	config = get_config(config_files_artifact_name)
 
 	plan.add_service(SERVICE_ID, config)
 
 
-def get_config(config_files_artifact_uuid):
+def get_config(config_files_artifact_name):
 	config_file_path = shared_utils.path_join(FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, FORKMON_CONFIG_FILENAME)
 	return ServiceConfig(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		files = {
-			FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_uuid,
+			FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
 		},
 		cmd = ["--config-path", config_file_path]
 	)

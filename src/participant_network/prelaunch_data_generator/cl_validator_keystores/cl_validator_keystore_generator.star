@@ -72,12 +72,12 @@ def generate_cl_validator_keystores(
 	# Store outputs into files artifacts
 	keystore_files = []
 	for idx, output_dirpath in enumerate(all_output_dirpaths):
-		artifact_uuid = plan.store_service_files(service_id, output_dirpath)
+		artifact_name = plan.store_service_files(service_id, output_dirpath, name = "validator-keystore-" + str(idx))
 
 		# This is necessary because the way Kurtosis currently implements artifact-storing is
 		base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
 		to_add = keystore_files_module.new_keystore_files(
-			artifact_uuid,
+			artifact_name,
 			shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
 			shared_utils.path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
 			shared_utils.path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),
@@ -100,10 +100,10 @@ def generate_cl_validator_keystores(
 	write_prysm_password_file_cmd_result = plan.exec(struct(service_id=service_id, command=write_prysm_password_file_cmd))
 	plan.assert(write_prysm_password_file_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	prysm_password_artifact_uuid = plan.store_service_files(service_id, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR)
+	prysm_password_artifact_name = plan.store_service_files(service_id, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR, name = "prysm-password")
 
 	result = keystores_result.new_generate_keystores_result(
-		prysm_password_artifact_uuid,
+		prysm_password_artifact_name,
 		shared_utils.path_base(PRYSM_PASSWORD_FILEPATH_ON_GENERATOR),
 		keystore_files,
 	)
