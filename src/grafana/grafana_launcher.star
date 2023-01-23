@@ -1,7 +1,7 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
 
-SERVICE_ID = "grafana"
+SERVICE_NAME = "grafana"
 
 IMAGE_NAME = "grafana/grafana-enterprise:9.2.3"
 
@@ -30,7 +30,7 @@ def launch_grafana(plan, datasource_config_template, dashboard_providers_config_
 
 	config = get_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid)
 
-	plan.add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_NAME, config)
 
 
 def get_grafana_config_dir_artifact_uuid(plan, datasource_config_template, dashboard_providers_config_template, prometheus_private_url):

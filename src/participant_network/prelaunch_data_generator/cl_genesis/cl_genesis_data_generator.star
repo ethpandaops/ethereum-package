@@ -59,7 +59,7 @@ def generate_cl_genesis_data(
 	genesis_generation_config_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "genesis-generation-config-cl")
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
-	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+	launcher_service_name = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
 		plan,
 		{
 			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_name,
@@ -83,7 +83,7 @@ def generate_cl_genesis_data(
 		(" && ").join(all_dirpath_creation_commands),
 	]
 
-	dir_creation_cmd_result = plan.exec(struct(service_id=launcher_service_id, command=dir_creation_cmd))
+	dir_creation_cmd_result = plan.exec(struct(service_name=launcher_service_name, command=dir_creation_cmd))
 	plan.assert(dir_creation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 
@@ -100,7 +100,7 @@ def generate_cl_genesis_data(
 			filepath_on_generator,
 			OUTPUT_DIRPATH_ON_GENERATOR,
 		]
-		cmd_result = plan.exec(struct(service_id=launcher_service_id, command=cmd))
+		cmd_result = plan.exec(struct(service_name=launcher_service_name, command=cmd))
 		plan.assert(cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	# Generate files that need dynamic content
@@ -118,7 +118,7 @@ def generate_cl_genesis_data(
 				destFilepath,
 			)
 		]
-		cmd_result = plan.exec(struct(service_id=launcher_service_id, command=cmd))
+		cmd_result = plan.exec(struct(service_name=launcher_service_name, command=cmd))
 		plan.assert(cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 		
 
@@ -132,10 +132,10 @@ def generate_cl_genesis_data(
 		"--state-output", shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_STATE_FILENAME)
 	]
 
-	genesis_generation_result = plan.exec(struct(service_id=launcher_service_id, command=cl_genesis_generation_cmd))
+	genesis_generation_result = plan.exec(struct(service_name=launcher_service_name, command=cl_genesis_generation_cmd))
 	plan.assert(genesis_generation_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	cl_genesis_data_artifact_name = plan.store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR, name = "cl-genesis-data")
+	cl_genesis_data_artifact_name = plan.store_service_files(launcher_service_name, OUTPUT_DIRPATH_ON_GENERATOR, name = "cl-genesis-data")
 
 	jwt_secret_rel_filepath = shared_utils.path_join(
 		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
@@ -157,7 +157,7 @@ def generate_cl_genesis_data(
 	)
 
 	# we cleanup as the data generation is done
-	plan.remove_service(launcher_service_id)
+	plan.remove_service(launcher_service_name)
 	return result
 
 

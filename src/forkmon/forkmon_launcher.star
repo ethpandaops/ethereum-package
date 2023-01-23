@@ -1,7 +1,7 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 
 
-SERVICE_ID = "forkmon"
+SERVICE_NAME = "forkmon"
 IMAGE_NAME = "ralexstokes/ethereum_consensus_monitor:latest"
 
 HTTP_PORT_ID     = "http"
@@ -40,7 +40,7 @@ def launch_forkmon(
 
 	config = get_config(config_files_artifact_name)
 
-	plan.add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_NAME, config)
 
 
 def get_config(config_files_artifact_name):

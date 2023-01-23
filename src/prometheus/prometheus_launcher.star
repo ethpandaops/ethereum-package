@@ -1,6 +1,6 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 
-SERVICE_ID = "prometheus"
+SERVICE_NAME = "prometheus"
 
 # TODO(old) I'm not sure if we should use latest version or ping an specific version instead
 IMAGE_NAME = "prom/prometheus:latest"
@@ -28,7 +28,7 @@ def launch_prometheus(plan, config_template, cl_client_contexts):
 	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "prometheus-config")
 
 	config = get_config(config_files_artifact_name)
-	prometheus_service = plan.add_service(SERVICE_ID, config)
+	prometheus_service = plan.add_service(SERVICE_NAME, config)
 
 	private_ip_address = prometheus_service.ip_address
 	prometheus_service_http_port = prometheus_service.ports[HTTP_PORT_ID].number

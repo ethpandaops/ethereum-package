@@ -31,8 +31,8 @@ HTTP_PORT_NUM                 = 3500
 BEACON_MONITORING_PORT_NUM     = 8080
 VALIDATOR_MONITORING_PORT_NUM  = 8081
 
-BEACON_SUFFIX_SERVICE_ID    = "beacon"
-VALIDATOR_SUFFIX_SERVICE_ID = "validator"
+BEACON_SUFFIX_SERVICE_NAME    = "beacon"
+VALIDATOR_SUFFIX_SERVICE_NAME = "validator"
 
 MIN_PEERS = 1
 
@@ -64,7 +64,7 @@ PRYSM_LOG_LEVELS = {
 def launch(
 	plan,
 	launcher,
-	service_id,
+	service_name,
 	images,
 	participant_log_level,
 	global_log_level,
@@ -87,8 +87,8 @@ def launch(
 		fail("An empty validator image was provided")
 
 
-	beacon_node_service_id = "{0}-{1}".format(service_id, BEACON_SUFFIX_SERVICE_ID)
-	validator_node_service_id = "{0}-{1}".format(service_id, VALIDATOR_SUFFIX_SERVICE_ID)
+	beacon_node_service_name = "{0}-{1}".format(service_name, BEACON_SUFFIX_SERVICE_NAME)
+	validator_node_service_name = "{0}-{1}".format(service_name, VALIDATOR_SUFFIX_SERVICE_NAME)
 
 	log_level = parse_input.get_client_log_level_or_default(participant_log_level, global_log_level, PRYSM_LOG_LEVELS)
 
@@ -102,9 +102,9 @@ def launch(
 		extra_beacon_params,
 	)
 
-	beacon_service = plan.add_service(beacon_node_service_id, beacon_config)
+	beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
 
-	cl_node_health_checker.wait_for_healthy(plan, beacon_node_service_id, HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(plan, beacon_node_service_name, HTTP_PORT_ID)
 
 	beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
 
@@ -115,7 +115,7 @@ def launch(
 	validator_config = get_validator_config(
 		launcher.genesis_data,
 		validator_image,
-		validator_node_service_id,
+		validator_node_service_name,
 		log_level,
 		beacon_rpc_endpoint,
 		beacon_http_endpoint,
@@ -126,11 +126,11 @@ def launch(
 		launcher.prysm_password_artifact_uuid
 	)
 
-	validator_service = plan.add_service(validator_node_service_id, validator_config)
+	validator_service = plan.add_service(validator_node_service_name, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 	beacon_node_identity_recipe = struct(
-		service_id = beacon_node_service_id,
+		service_name = beacon_node_service_name,
 		method= "GET",
 		endpoint = "/eth/v1/node/identity",
 		content_type = "application/json",
@@ -147,8 +147,8 @@ def launch(
 	validator_metrics_port = validator_service.ports[VALIDATOR_MONITORING_PORT_ID]
 	validator_metrics_url = "{0}:{1}".format(validator_service.ip_address, validator_metrics_port.number)
 
-	beacon_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(beacon_node_service_id, METRICS_PATH, beacon_metrics_url)
-	validator_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(validator_node_service_id, METRICS_PATH, validator_metrics_url)
+	beacon_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(beacon_node_service_name, METRICS_PATH, beacon_metrics_url)
+	validator_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(validator_node_service_name, METRICS_PATH, validator_metrics_url)
 	nodes_metrics_info = [beacon_node_metrics_info, validator_node_metrics_info]
 
 
@@ -158,7 +158,7 @@ def launch(
 		beacon_service.ip_address,
 		HTTP_PORT_NUM,
 		nodes_metrics_info,
-		beacon_node_service_id
+		beacon_node_service_name
 	)
 
 
@@ -230,7 +230,7 @@ def get_beacon_config(
 def get_validator_config(
 		genesis_data,
 		validator_image,
-		service_id,
+		service_name,
 		log_level,
 		beacon_rpc_endpoint,
 		beacon_http_endpoint,
@@ -241,7 +241,7 @@ def get_validator_config(
 		prysm_password_artifact_uuid
 	):
 
-	consensus_data_dirpath = shared_utils.path_join(CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_id)
+	consensus_data_dirpath = shared_utils.path_join(CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_name)
 	prysm_keystore_dirpath = shared_utils.path_join(VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, node_keystore_files.prysm_relative_dirpath)
 	prysm_password_filepath = shared_utils.path_join(PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER, prysm_password_relative_filepath)
 

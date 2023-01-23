@@ -1,6 +1,6 @@
-def wait_for_healthy(plan, service_id, port_id):
+def wait_for_healthy(plan, service_name, port_id):
 	recipe = struct(
-        service_id = service_id,
+        service_name = service_name,
         method= "GET",
         endpoint = "/eth/v1/node/health",
         content_type = "application/json",
