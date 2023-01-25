@@ -81,7 +81,6 @@ def run(plan, args):
 			epoch_recipe = GetHttpRequestRecipe(
 				service_name = first_client_beacon_name,
 				endpoint = "/eth/v1/beacon/states/head/finality_checkpoints",
-				content_type = "application/json",
 				port_id = HTTP_PORT_ID_FOR_FACT,
 				extract = {
 					"finalized_epoch": ".data.finalized.epoch"
