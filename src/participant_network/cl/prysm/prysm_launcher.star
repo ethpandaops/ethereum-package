@@ -129,7 +129,7 @@ def launch(
 	validator_service = plan.add_service(validator_node_service_name, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
-	beacon_node_identity_recipe = struct(
+	beacon_node_identity_recipe = GetHttpRequestRecipe(
 		service_name = beacon_node_service_name,
 		method= "GET",
 		endpoint = "/eth/v1/node/identity",

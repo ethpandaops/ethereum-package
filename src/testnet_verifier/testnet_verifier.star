@@ -19,7 +19,7 @@ def run_synchronous_testnet_verification(plan, params, el_client_contexts, cl_cl
 	plan.add_service(SERVICE_NAME, config)
 
 	command = get_cmd(params, el_client_contexts, cl_client_contexts, True)
-	exec_result = plan.exec(struct(service_name=SERVICE_NAME, command=command))
+	exec_result = plan.exec(ExecRecipe(service_name=SERVICE_NAME, command=command))
 	plan.assert(exec_result["code"], "==", 0)
 
 

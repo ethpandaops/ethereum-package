@@ -90,11 +90,9 @@ def launch(
 
 	cl_node_health_checker.wait_for_healthy(plan, service_name, HTTP_PORT_ID)
 
-	node_identity_recipe = struct(
+	node_identity_recipe = GetHttpRequestRecipe(
 		service_name = service_name,
-		method= "GET",
 		endpoint = "/eth/v1/node/identity",
-		content_type = "application/json",
 		port_id = HTTP_PORT_ID,
 		extract = {
 			"enr": ".data.enr"

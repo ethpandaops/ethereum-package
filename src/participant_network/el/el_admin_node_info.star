@@ -1,8 +1,7 @@
 
 def get_enode_enr_for_node(plan, service_name, port_id):
-    recipe = struct(
+    recipe = PostHttpRequestRecipe(
         service_name = service_name,
-        method= "POST",
         endpoint = "",
         body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}',
         content_type = "application/json",
@@ -16,9 +15,8 @@ def get_enode_enr_for_node(plan, service_name, port_id):
     return (response["extract.enode"], response["extract.enr"])
 
 def get_enode_for_node(plan, service_name, port_id):
-    recipe = struct(
+    recipe = PostHttpRequestRecipe(
         service_name = service_name,
-        method= "POST",
         endpoint = "",
         body = '{"method":"admin_nodeInfo","params":[],"id":1,"jsonrpc":"2.0"}',
         content_type = "application/json",
