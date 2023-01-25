@@ -85,9 +85,7 @@ def launch(
 
 	cl_node_identity_recipe = GetHttpRequestRecipe(
 		service_name = service_name,
-		method= "GET",
 		endpoint = "/eth/v1/node/identity",
-		content_type = "application/json",
 		port_id = HTTP_PORT_ID,
 		extract = {
 			"enr": ".data.enr"
