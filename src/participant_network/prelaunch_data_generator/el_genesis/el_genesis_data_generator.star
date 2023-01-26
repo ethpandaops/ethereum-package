@@ -52,7 +52,7 @@ def generate_el_genesis_data(
 
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
-	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+	launcher_service_name = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
 		plan,
 		{
 			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_name,
@@ -80,7 +80,7 @@ def generate_el_genesis_data(
 	]
 
 
-	dir_creation_cmd_result = plan.exec(struct(service_id=launcher_service_id, command=dir_creation_cmd))
+	dir_creation_cmd_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=dir_creation_cmd))
 	plan.assert(dir_creation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	genesis_config_filepath_on_generator = shared_utils.path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_FILENAME)
@@ -96,7 +96,7 @@ def generate_el_genesis_data(
 			" ".join(cmd)
 		]
 
-		cmd_to_execute_result = plan.exec(struct(service_id=launcher_service_id, command=cmd_to_execute))
+		cmd_to_execute_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=cmd_to_execute))
 		plan.assert(cmd_to_execute_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 
@@ -115,10 +115,10 @@ def generate_el_genesis_data(
 		)
 	]
 
-	jwt_secret_generation_cmd_result = plan.exec(struct(service_id=launcher_service_id, command=jwt_secret_generation_cmd))
+	jwt_secret_generation_cmd_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=jwt_secret_generation_cmd))
 	plan.assert(jwt_secret_generation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	el_genesis_data_artifact_name = plan.store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR, name = "el-genesis-data")
+	el_genesis_data_artifact_name = plan.store_service_files(launcher_service_name, OUTPUT_DIRPATH_ON_GENERATOR, name = "el-genesis-data")
 
 	result = el_genesis.new_el_genesis_data(
 		el_genesis_data_artifact_name,
@@ -130,7 +130,7 @@ def generate_el_genesis_data(
 	)
 
 	# we cleanup as the data generation is done
-	plan.remove_service(launcher_service_id)
+	plan.remove_service(launcher_service_name)
 	return result
 
 

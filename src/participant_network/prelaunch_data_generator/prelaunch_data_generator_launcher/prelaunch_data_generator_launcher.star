@@ -1,6 +1,6 @@
 IMAGE = "ethpandaops/ethereum-genesis-generator:1.0.6"
 
-SERVICE_ID_PREFIX = "prelaunch-data-generator-"
+SERVICE_NAME_PREFIX = "prelaunch-data-generator-"
 
 # We use Docker exec commands to run the commands we need, so we override the default
 ENTRYPOINT_ARGS = [
@@ -13,14 +13,14 @@ def launch_prelaunch_data_generator(plan, files_artifact_mountpoints):
 
 	config = get_config(files_artifact_mountpoints)
 
-	service_id = "{0}{1}".format(
-		SERVICE_ID_PREFIX,
+	service_name = "{0}{1}".format(
+		SERVICE_NAME_PREFIX,
 		time.now().unix_nano,
 	)
 
-	plan.add_service(service_id, config)
+	plan.add_service(service_name, config)
 
-	return service_id
+	return service_name
 
 def get_config(
 	files_artifact_mountpoints,

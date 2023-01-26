@@ -44,7 +44,7 @@ NETHERMIND_LOG_LEVELS = {
 def launch(
 	plan,
 	launcher,
-	service_id,
+	service_name,
 	image,
 	participant_log_level,
 	global_log_level,
@@ -55,9 +55,9 @@ def launch(
 
 	config = get_config(launcher.el_genesis_data, image, existing_el_clients, log_level, extra_params)
 
-	service = plan.add_service(service_id, config)
+	service = plan.add_service(service_name, config)
 
-	enode = el_admin_node_info.get_enode_for_node(plan, service_id, RPC_PORT_ID)
+	enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
 	return el_client_context.new_el_client_context(
 		"nethermind",

@@ -77,12 +77,10 @@ def run(plan, args):
 		if args_with_right_defaults.wait_for_finalization:
 			plan.print("Waiting for the first finalized epoch")
 			first_cl_client = all_cl_client_contexts[0]
-			first_cl_client_id = first_cl_client.beacon_service_id
-			epoch_recipe = struct(
-				service_id = first_cl_client_id,
-				method= "GET",
+			first_client_beacon_name = first_cl_client.beacon_service_name
+			epoch_recipe = GetHttpRequestRecipe(
+				service_name = first_client_beacon_name,
 				endpoint = "/eth/v1/beacon/states/head/finality_checkpoints",
-				content_type = "application/json",
 				port_id = HTTP_PORT_ID_FOR_FACT,
 				extract = {
 					"finalized_epoch": ".data.finalized.epoch"
