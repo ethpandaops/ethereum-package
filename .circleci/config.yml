@@ -51,7 +51,7 @@ workflows:
           filters:
             branches:
               ignore:
-                - master
+                - main
       - run_starlark:
           context:
             # This pulls in KurtosisBot's Github token, so that we can read from our private repos
@@ -59,4 +59,4 @@ workflows:
           filters:
             branches:
               ignore:
-                - master
+                - main
