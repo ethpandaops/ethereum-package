@@ -12,7 +12,6 @@ def get_enode_enr_for_node(plan, service_name, port_id):
         }
     )
     response = plan.wait(recipe, "extract.enode", "!=", "", timeout = "15m")
-    response = plan.wait(recipe, "extract.enode", "!=", "")
     return (response["extract.enode"], response["extract.enr"])
 
 def get_enode_for_node(plan, service_name, port_id):
