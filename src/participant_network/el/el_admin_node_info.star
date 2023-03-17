@@ -12,7 +12,7 @@ def get_enode_enr_for_node(service_id, port_id):
 			"enr": ".result.enr",
         }
     )
-    response = wait(recipe, "extract.enode", "!=", "")
+    response = wait(recipe, "extract.enode", "!=", "", timeout = "15m")
     return (response["extract.enode"], response["extract.enr"])
 
 def get_enode_for_node(service_id, port_id):
@@ -27,5 +27,5 @@ def get_enode_for_node(service_id, port_id):
             "enode": ".result.enode",
         }
     )
-    response = wait(recipe, "extract.enode", "!=", "")
+    response = wait(recipe, "extract.enode", "!=", "", timeout = "15m")
     return response["extract.enode"]

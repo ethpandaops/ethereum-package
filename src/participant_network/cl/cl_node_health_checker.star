@@ -6,4 +6,4 @@ def wait_for_healthy(service_id, port_id):
         content_type = "application/json",
         port_id = port_id
     )
-	return wait(recipe, "code", "IN", [200, 206, 503])
+	return wait(recipe, "code", "IN", [200, 206, 503], timeout = "15m")
