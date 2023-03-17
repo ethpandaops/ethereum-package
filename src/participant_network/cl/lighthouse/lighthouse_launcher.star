@@ -40,21 +40,21 @@ VALIDATOR_METRICS_PORT_NUM = 5064
 
 METRICS_PATH = "/metrics"
 
-BEACON_SUFFIX_SERVICE_ID    = "beacon"
-VALIDATOR_SUFFIX_SERVICE_ID = "validator"
+BEACON_SUFFIX_SERVICE_NAME    = "beacon"
+VALIDATOR_SUFFIX_SERVICE_NAME = "validator"
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 BEACON_USED_PORTS = {
 	BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL),
 	BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL),
-	BEACON_HTTP_PORT_ID:         shared_utils.new_port_spec(BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
-	BEACON_METRICS_PORT_ID:      shared_utils.new_port_spec(BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	BEACON_HTTP_PORT_ID:         shared_utils.new_port_spec(BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL),
+	BEACON_METRICS_PORT_ID:      shared_utils.new_port_spec(BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL),
 }
 
 VALIDATOR_USED_PORTS = {
 	VALIDATOR_HTTP_PORT_ID:    shared_utils.new_port_spec(VALIDATOR_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
-	VALIDATOR_METRICS_PORT_ID: shared_utils.new_port_spec(VALIDATOR_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+	VALIDATOR_METRICS_PORT_ID: shared_utils.new_port_spec(VALIDATOR_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL),
 }
 
 LIGHTHOUSE_LOG_LEVELS = {
@@ -66,8 +66,9 @@ LIGHTHOUSE_LOG_LEVELS = {
 }
 
 def launch(
+	plan,
 	launcher,
-	service_id,
+	service_name,
 	image,
 	participant_log_level,
 	global_log_level,
@@ -78,8 +79,8 @@ def launch(
 	extra_beacon_params,
 	extra_validator_params):
 
-	beacon_node_service_id = "{0}-{1}".format(service_id, BEACON_SUFFIX_SERVICE_ID)
-	validator_node_service_id = "{0}-{1}".format(service_id, VALIDATOR_SUFFIX_SERVICE_ID)
+	beacon_node_service_name = "{0}-{1}".format(service_name, BEACON_SUFFIX_SERVICE_NAME)
+	validator_node_service_name = "{0}-{1}".format(service_name, VALIDATOR_SUFFIX_SERVICE_NAME)
 
 	log_level = parse_input.get_client_log_level_or_default(participant_log_level, global_log_level, LIGHTHOUSE_LOG_LEVELS)
 
@@ -94,9 +95,9 @@ def launch(
 		extra_beacon_params,
 	)
 
-	beacon_service = add_service(beacon_node_service_id, beacon_config)
+	beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
 
-	cl_node_health_checker.wait_for_healthy(beacon_node_service_id, BEACON_HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(plan, beacon_node_service_name, BEACON_HTTP_PORT_ID)
 
 	beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
@@ -113,20 +114,18 @@ def launch(
 		extra_validator_params,
 	)
 
-	validator_service = add_service(validator_node_service_id, validator_config)
+	validator_service = plan.add_service(validator_node_service_name, validator_config)
 
 	# TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
-	beacon_node_identity_recipe = struct(
-		service_id = beacon_node_service_id,
-		method= "GET",
+	beacon_node_identity_recipe = GetHttpRequestRecipe(
+		service_name = beacon_node_service_name,
 		endpoint = "/eth/v1/node/identity",
-		content_type = "application/json",
 		port_id = BEACON_HTTP_PORT_ID,
 		extract = {
 			"enr": ".data.enr"
 		}
 	)
-	beacon_node_enr = request(beacon_node_identity_recipe)["extract.enr"]
+	beacon_node_enr = plan.request(beacon_node_identity_recipe)["extract.enr"]
 
 	beacon_metrics_port = beacon_service.ports[BEACON_METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
@@ -134,8 +133,8 @@ def launch(
 	validator_metrics_port = validator_service.ports[VALIDATOR_METRICS_PORT_ID]
 	validator_metrics_url = "{0}:{1}".format(validator_service.ip_address, validator_metrics_port.number)
 
-	beacon_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(beacon_node_service_id, METRICS_PATH, beacon_metrics_url)
-	validator_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(validator_node_service_id, METRICS_PATH, validator_metrics_url)
+	beacon_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(beacon_node_service_name, METRICS_PATH, beacon_metrics_url)
+	validator_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(validator_node_service_name, METRICS_PATH, validator_metrics_url)
 	nodes_metrics_info = [beacon_node_metrics_info, validator_node_metrics_info]
 
 	return cl_client_context.new_cl_client_context(
@@ -144,7 +143,7 @@ def launch(
 		beacon_service.ip_address,
 		BEACON_HTTP_PORT_NUM,
 		nodes_metrics_info,
-		beacon_node_service_id,
+		beacon_node_service_name,
 	)
 
 
@@ -222,12 +221,12 @@ def get_beacon_config(
 		cmd.extend([param for param in extra_params])
 
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = BEACON_USED_PORTS,
 		cmd = cmd,
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+			GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: genesis_data.files_artifact_uuid
 		},
 		env_vars = {
 			RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD
@@ -283,13 +282,13 @@ def get_validator_config(
 		cmd.extend([param for param in extra_params])
 
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = VALIDATOR_USED_PORTS,
 		cmd = cmd,
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
+			GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: genesis_data.files_artifact_uuid,
+			VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
 		},
 		env_vars = {
 			RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD

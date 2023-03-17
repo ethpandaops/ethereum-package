@@ -1,24 +1,21 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 
-SERVICE_ID = "prometheus"
+SERVICE_NAME = "prometheus"
 
 # TODO(old) I'm not sure if we should use latest version or ping an specific version instead
 IMAGE_NAME = "prom/prometheus:latest"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 9090
-HTTP_PORT_PROTOCOL = "TCP"
-
 CONFIG_FILENAME = "prometheus-config.yml"
 
 CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS = "/config"
 
 USED_PORTS = {
-	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, HTTP_PORT_PROTOCOL)
+	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL)
 }
 
-
-def launch_prometheus(config_template, cl_client_contexts):
+def launch_prometheus(plan, config_template, cl_client_contexts):
 	all_cl_nodes_metrics_info = []
 	for client in cl_client_contexts:
 		all_cl_nodes_metrics_info.extend(client.cl_nodes_metrics_info)
@@ -28,10 +25,10 @@ def launch_prometheus(config_template, cl_client_contexts):
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "prometheus-config")
 
-	config = get_config(config_files_artifact_uuid)
-	prometheus_service = add_service(SERVICE_ID, config)
+	config = get_config(config_files_artifact_name)
+	prometheus_service = plan.add_service(SERVICE_NAME, config)
 
 	private_ip_address = prometheus_service.ip_address
 	prometheus_service_http_port = prometheus_service.ports[HTTP_PORT_ID].number
@@ -39,13 +36,13 @@ def launch_prometheus(config_template, cl_client_contexts):
 	return "http://{0}:{1}".format(private_ip_address, prometheus_service_http_port)
 
 
-def get_config(config_files_artifact_uuid):
+def get_config(config_files_artifact_name):
 	config_file_path = shared_utils.path_join(CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS, shared_utils.path_base(CONFIG_FILENAME))
-	return struct(
+	return ServiceConfig(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		files = {
-			config_files_artifact_uuid : CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS
+			CONFIG_DIR_MOUNTPOINT_ON_PROMETHEUS: config_files_artifact_name
 		},
 		cmd = [
 			# You can check all the cli flags starting the container and going to the flags section

@@ -40,9 +40,11 @@ NETHERMIND_LOG_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
+
 def launch(
+	plan,
 	launcher,
-	service_id,
+	service_name,
 	image,
 	participant_log_level,
 	global_log_level,
@@ -53,9 +55,9 @@ def launch(
 
 	config = get_config(launcher.el_genesis_data, image, existing_el_clients, log_level, extra_params)
 
-	service = add_service(service_id, config)
+	service = plan.add_service(service_name, config)
 
-	enode = el_admin_node_info.get_enode_for_node(service_id, RPC_PORT_ID)
+	enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
 	return el_client_context.new_el_client_context(
 		"nethermind",
@@ -112,12 +114,12 @@ def get_config(genesis_data, image, existing_el_clients, log_level, extra_params
 		# we do this as extra_params is a repeated proto aray
 		command_args.extend([param for param in extra_params])
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = command_args,
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH
+			GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid,
 		},
 		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER,
 	)

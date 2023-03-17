@@ -45,8 +45,9 @@ BESU_LOG_LEVELS = {
 }
 
 def launch(
+	plan,
 	launcher,
-	service_id,
+	service_name,
 	image,
 	participant_log_level,
 	global_log_level,
@@ -58,9 +59,9 @@ def launch(
 	config = get_config(launcher.network_id, launcher.el_genesis_data,
                                     image, existing_el_clients, log_level, extra_params)
 
-	service = add_service(service_id, config)
+	service = plan.add_service(service_name, config)
 
-	enode = el_admin_node_info.get_enode_for_node(service_id, RPC_PORT_ID)
+	enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
 	return el_client_context.new_el_client_context(
 		"besu",
@@ -117,12 +118,12 @@ def get_config(network_id, genesis_data, image, existing_el_clients, log_level, 
 
 	launch_node_command_str = " ".join(launch_node_command)
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = [launch_node_command_str],
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER
+			GENESIS_DATA_DIRPATH_ON_CLIENT_CONTAINER: genesis_data.files_artifact_uuid
 		},
 		entrypoint = ENTRYPOINT_ARGS,
 		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER

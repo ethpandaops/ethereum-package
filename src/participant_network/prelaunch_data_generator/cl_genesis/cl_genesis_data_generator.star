@@ -24,6 +24,7 @@ SUCCESSFUL_EXEC_CMD_EXIT_CODE = 0
 
 
 def generate_cl_genesis_data(
+		plan,
 		genesis_generation_config_yml_template,
 		genesis_generation_mnemonics_yml_template,
 		el_genesis_data,
@@ -32,7 +33,10 @@ def generate_cl_genesis_data(
 		deposit_contract_address,
 		seconds_per_slot,
 		preregistered_validator_keys_mnemonic,
-		total_num_validator_keys_to_preregister):
+		total_num_validator_keys_to_preregister,
+		genesis_delay,
+		capella_fork_epoch
+	):
 
 	template_data = new_cl_genesis_config_template_data(
 		network_id,
@@ -41,6 +45,8 @@ def generate_cl_genesis_data(
 		total_num_validator_keys_to_preregister,
 		preregistered_validator_keys_mnemonic,
 		deposit_contract_address,
+		genesis_delay,
+		capella_fork_epoch
 	)
 
 	genesis_generation_mnemonics_template_and_data = shared_utils.new_template_and_data(genesis_generation_mnemonics_yml_template, template_data)
@@ -50,13 +56,14 @@ def generate_cl_genesis_data(
 	template_and_data_by_rel_dest_filepath[MNEMONICS_YML_FILENAME] = genesis_generation_mnemonics_template_and_data
 	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_YML_FILENAME] = genesis_generation_config_template_and_data
 
-	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	genesis_generation_config_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "genesis-generation-config-cl")
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
-	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+	launcher_service_name = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+		plan,
 		{
-			genesis_generation_config_artifact_uuid:  CONFIG_DIRPATH_ON_GENERATOR,
-			el_genesis_data.files_artifact_uuid: EL_GENESIS_DIRPATH_ON_GENERATOR,
+			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_name,
+			EL_GENESIS_DIRPATH_ON_GENERATOR: el_genesis_data.files_artifact_uuid,
 		},
 	)
 
@@ -76,7 +83,8 @@ def generate_cl_genesis_data(
 		(" && ").join(all_dirpath_creation_commands),
 	]
 
-	exec(launcher_service_id, dir_creation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	dir_creation_cmd_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=dir_creation_cmd))
+	plan.assert(dir_creation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 
 	# Copy files to output
@@ -92,7 +100,8 @@ def generate_cl_genesis_data(
 			filepath_on_generator,
 			OUTPUT_DIRPATH_ON_GENERATOR,
 		]
-		exec(launcher_service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+		cmd_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=cmd))
+		plan.assert(cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	# Generate files that need dynamic content
 	content_to_write_to_output_filename = {
@@ -109,7 +118,8 @@ def generate_cl_genesis_data(
 				destFilepath,
 			)
 		]
-		exec(launcher_service_id, cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+		cmd_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=cmd))
+		plan.assert(cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 		
 
 	cl_genesis_generation_cmd = [
@@ -122,9 +132,10 @@ def generate_cl_genesis_data(
 		"--state-output", shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_STATE_FILENAME)
 	]
 
-	exec(launcher_service_id, cl_genesis_generation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	genesis_generation_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=cl_genesis_generation_cmd))
+	plan.assert(genesis_generation_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	cl_genesis_data_artifact_uuid = store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
+	cl_genesis_data_artifact_name = plan.store_service_files(launcher_service_name, OUTPUT_DIRPATH_ON_GENERATOR, name = "cl-genesis-data")
 
 	jwt_secret_rel_filepath = shared_utils.path_join(
 		shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
@@ -139,19 +150,19 @@ def generate_cl_genesis_data(
 		GENESIS_STATE_FILENAME,
 	)
 	result = cl_genesis_data.new_cl_genesis_data(
-		cl_genesis_data_artifact_uuid,
+		cl_genesis_data_artifact_name,
 		jwt_secret_rel_filepath,
 		genesis_config_rel_filepath,
 		genesis_ssz_rel_filepath,
 	)
 
 	# we cleanup as the data generation is done
-	remove_service(launcher_service_id)
+	plan.remove_service(launcher_service_name)
 	return result
 
 
 
-def new_cl_genesis_config_template_data(network_id, seconds_per_slot, unix_timestamp, num_validator_keys_to_preregister, preregistered_validator_keys_mnemonic, deposit_contract_address):
+def new_cl_genesis_config_template_data(network_id, seconds_per_slot, unix_timestamp, num_validator_keys_to_preregister, preregistered_validator_keys_mnemonic, deposit_contract_address, genesis_delay, capella_fork_epoch):
 	return {
 		"NetworkId": network_id,
 		"SecondsPerSlot": seconds_per_slot,
@@ -159,4 +170,6 @@ def new_cl_genesis_config_template_data(network_id, seconds_per_slot, unix_times
 		"NumValidatorKeysToPreregister": num_validator_keys_to_preregister,
 		"PreregisteredValidatorKeysMnemonic": preregistered_validator_keys_mnemonic,
 		"DepositContractAddress": deposit_contract_address,
+		"GenesisDelay": genesis_delay,
+		"CapellaForkEpoch": capella_fork_epoch
 	}

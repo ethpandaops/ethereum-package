@@ -67,8 +67,9 @@ TEKU_LOG_LEVELS = {
 }
 
 def launch(
+	plan,
 	launcher,
-	service_id,
+	service_name,
 	image,
 	participant_log_level,
 	global_log_level,
@@ -85,27 +86,25 @@ def launch(
 	
 	config = get_config(launcher.cl_genesis_data, image, bootnode_context, el_client_context, mev_boost_context, log_level, node_keystore_files, extra_params)
 
-	teku_service = add_service(service_id, config)
+	teku_service = plan.add_service(service_name, config)
 
-	cl_node_health_checker.wait_for_healthy(service_id, HTTP_PORT_ID)
+	cl_node_health_checker.wait_for_healthy(plan, service_name, HTTP_PORT_ID)
 
-	node_identity_recipe = struct(
-		service_id = service_id,
-		method= "GET",
+	node_identity_recipe = GetHttpRequestRecipe(
+		service_name = service_name,
 		endpoint = "/eth/v1/node/identity",
-		content_type = "application/json",
 		port_id = HTTP_PORT_ID,
 		extract = {
 			"enr": ".data.enr"
 		}
 	)
-	node_enr = request(node_identity_recipe)["extract.enr"]
+	node_enr = plan.request(node_identity_recipe)["extract.enr"]
 
 
 	teku_metrics_port = teku_service.ports[METRICS_PORT_ID]
 	teku_metrics_url = "{0}:{1}".format(teku_service.ip_address, teku_metrics_port.number)
 
-	teku_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(service_id, METRICS_PATH, teku_metrics_url)
+	teku_node_metrics_info = cl_node_metrics.new_cl_node_metrics_info(service_name, METRICS_PATH, teku_metrics_url)
 	nodes_metrics_info = [teku_node_metrics_info]
 
 	return cl_client_context.new_cl_client_context(
@@ -114,7 +113,7 @@ def launch(
 		teku_service.ip_address,
 		HTTP_PORT_NUM,
 		nodes_metrics_info,
-		service_id
+		service_name
 	)
 
 
@@ -207,14 +206,14 @@ def get_config(
 
 	cmd_str = " ".join(cmd)
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = [cmd_str],
 		entrypoint = ENTRYPOINT_ARGS,
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-			node_keystore_files.files_artifact_uuid: VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
+			GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: genesis_data.files_artifact_uuid,
+			VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
 		},
 		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER
 	)

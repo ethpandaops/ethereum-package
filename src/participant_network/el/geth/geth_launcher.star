@@ -53,9 +53,11 @@ VERBOSITY_LEVELS = {
 	package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "5",
 }
 
+
 def launch(
+	plan,
 	launcher,
-	service_id,
+	service_name,
 	image,
 	participant_log_level,
 	global_log_level,
@@ -69,9 +71,9 @@ def launch(
 	config = get_config(launcher.network_id, launcher.el_genesis_data, launcher.prefunded_geth_keys_artifact_uuid,
                                     launcher.prefunded_account_info, image, existing_el_clients, log_level, extra_params)
 
-	service = add_service(service_id, config)
+	service = plan.add_service(service_name, config)
 
-	enode, enr = el_admin_node_info.get_enode_enr_for_node(service_id, RPC_PORT_ID)
+	enode, enr = el_admin_node_info.get_enode_enr_for_node(plan, service_name, RPC_PORT_ID)
 
 	return el_client_context.new_el_client_context(
 		"geth",
@@ -165,13 +167,13 @@ def get_config(network_id, genesis_data, prefunded_geth_keys_artifact_uuid, pref
 	]
 	command_str = " && ".join(subcommand_strs)
 
-	return struct(
+	return ServiceConfig(
 		image = image,
 		ports = USED_PORTS,
 		cmd = [command_str],
 		files = {
-			genesis_data.files_artifact_uuid: GENESIS_DATA_MOUNT_DIRPATH,
-			prefunded_geth_keys_artifact_uuid: PREFUNDED_KEYS_MOUNT_DIRPATH
+			GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid,
+			PREFUNDED_KEYS_MOUNT_DIRPATH: prefunded_geth_keys_artifact_uuid
 		},
 		entrypoint = ENTRYPOINT_ARGS,
 		private_ip_address_placeholder = PRIVATE_IP_ADDRESS_PLACEHOLDER

@@ -9,7 +9,7 @@ CONFIG_NAME: testnet # needs to exist because of Prysm. Otherwise it conflicts w
 MIN_GENESIS_ACTIVE_VALIDATOR_COUNT: {{ .NumValidatorKeysToPreregister }}
 MIN_GENESIS_TIME: {{ .UnixTimestamp }}
 GENESIS_FORK_VERSION: 0x10000038
-GENESIS_DELAY: 300
+GENESIS_DELAY: {{ .GenesisDelay }}
 
 # Forking
 # ---------------------------------------------------------------
@@ -34,18 +34,18 @@ TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH: 18446744073709551615
 
 # Capella
 CAPELLA_FORK_VERSION: 0x40000038
-CAPELLA_FORK_EPOCH: 18446744073709551615
+CAPELLA_FORK_EPOCH: {{ .CapellaForkEpoch }}
 
-# Sharding
-SHARDING_FORK_VERSION: 0x03001020
-SHARDING_FORK_EPOCH: 18446744073709551615
+# EIP4844
+EIP4844_FORK_VERSION: 0x50000040
+EIP4844_FORK_EPOCH: 18446744073709551615
 
 # Time parameters
 # ---------------------------------------------------------------
 # 12 seconds
 SECONDS_PER_SLOT: {{ .SecondsPerSlot }}
-# 2**8 (= 256) epochs ~27 hours
-MIN_VALIDATOR_WITHDRAWABILITY_DELAY: 256
+# 5 epochs ~0.5 hours
+MIN_VALIDATOR_WITHDRAWABILITY_DELAY: 5
 # 2**8 (= 256) epochs ~27 hours
 SHARD_COMMITTEE_PERIOD: 256
 # It's very important that SECONDS_PER_ETH1_BLOCK * ETH1_FOLLOW_DISTANCE is a good amount of time, else
@@ -67,6 +67,10 @@ MIN_PER_EPOCH_CHURN_LIMIT: 4
 # 2**16 (= 65,536)
 CHURN_LIMIT_QUOTIENT: 65536
 
+# Fork choice
+# ---------------------------------------------------------------
+# 40%
+PROPOSER_SCORE_BOOST: 40
 
 # Deposit contract
 # ---------------------------------------------------------------

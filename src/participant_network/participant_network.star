@@ -23,9 +23,9 @@ participant_module = import_module("github.com/kurtosis-tech/eth2-package/src/pa
 
 package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
-CL_CLIENT_SERVICE_ID_PREFIX = "cl-client-"
-EL_CLIENT_SERVICE_ID_PREFIX = "el-client-"
-MEV_BOOST_SERVICE_ID_PREFIX = "mev-boost-"
+CL_CLIENT_SERVICE_NAME_PREFIX = "cl-client-"
+EL_CLIENT_SERVICE_NAME_PREFIX = "el-client-"
+MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
 BOOT_PARTICIPANT_INDEX = 0
 
@@ -43,42 +43,45 @@ MEV_BOOST_SHOULD_CHECK_RELAY = True
 
 CL_CLIENT_CONTEXT_BOOTNODE = None
 
-def launch_participant_network(participants, network_params, global_log_level):
-	num_participants = len(participants)	
-	el_genesis_timestamp = time.now().unix
+def launch_participant_network(plan, participants, network_params, global_log_level):
+	num_participants = len(participants)
 
-
-
-	print("Generating cl validator key stores")	
+	plan.print("Generating cl validator key stores")	
 	cl_validator_data = cl_validator_keystores.generate_cl_validator_keystores(
+		plan,
 		network_params.preregistered_validator_keys_mnemonic,
 		num_participants,
 		network_params.num_validator_keys_per_node,
 	)
 
 	
-	print(json.indent(json.encode(cl_validator_data)))
+	plan.print(json.indent(json.encode(cl_validator_data)))
 
-	print("Generating EL data")
+	# We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
+	final_genesis_timestamp = (time.now() + CL_GENESIS_DATA_GENERATION_TIME + num_participants*CL_NODE_STARTUP_TIME).unix
+	plan.print("Generating EL data")
 	el_genesis_generation_config_template = read_file(static_files.EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
 	el_genesis_data = el_genesis_data_generator.generate_el_genesis_data(
+		plan,
 		el_genesis_generation_config_template,
-		el_genesis_timestamp,
+		final_genesis_timestamp,
 		network_params.network_id,
-		network_params.deposit_contract_address
+		network_params.deposit_contract_address,
+		network_params.genesis_delay,
+		network_params.capella_fork_epoch
 	)
 
 
-	print(json.indent(json.encode(el_genesis_data)))
+	plan.print(json.indent(json.encode(el_genesis_data)))
 
-	print("Uploading GETH prefunded keys")
+	plan.print("Uploading GETH prefunded keys")
 
-	geth_prefunded_keys_artifact_id = upload_files(static_files.GETH_PREFUNDED_KEYS_DIRPATH)
+	geth_prefunded_keys_artifact_name = plan.upload_files(static_files.GETH_PREFUNDED_KEYS_DIRPATH, name="geth-prefunded-keys")
 
-	print("Uploaded GETH files succesfully, launching EL participants")
+	plan.print("Uploaded GETH files succesfully, launching EL participants")
 
 	el_launchers = {
-		package_io.EL_CLIENT_TYPE.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
+		package_io.EL_CLIENT_TYPE.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_name, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
 		package_io.EL_CLIENT_TYPE.besu : {"launcher": besu.new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": besu.launch},
 		package_io.EL_CLIENT_TYPE.erigon : {"launcher": erigon.new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": erigon.launch},
 		package_io.EL_CLIENT_TYPE.nethermind : {"launcher": nethermind.new_nethermind_launcher(el_genesis_data), "launch_method": nethermind.launch},
@@ -93,11 +96,12 @@ def launch_participant_network(participants, network_params, global_log_level):
 			fail("Unsupported launcher '{0}', need one of '{1}'".format(el_client_type, ",".join([el.name for el in el_launchers.keys()])))
 		
 		el_launcher, launch_method = el_launchers[el_client_type]["launcher"], el_launchers[el_client_type]["launch_method"]
-		el_service_id = "{0}{1}".format(EL_CLIENT_SERVICE_ID_PREFIX, index)
+		el_service_name = "{0}{1}".format(EL_CLIENT_SERVICE_NAME_PREFIX, index)
 
 		el_client_context = launch_method(
+			plan,
 			el_launcher,
-			el_service_id,
+			el_service_name,
 			participant.el_client_image,
 			participant.el_client_log_level,
 			global_log_level,
@@ -107,33 +111,32 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 		all_el_client_contexts.append(el_client_context)
 
-	print("Succesfully added {0} EL participants".format(num_participants))
+	plan.print("Succesfully added {0} EL participants".format(num_participants))
 
 
-	print("Generating CL data")
-
-	# verify that this works
-	cl_genesis_timestamp = (time.now() + CL_GENESIS_DATA_GENERATION_TIME + num_participants*CL_NODE_STARTUP_TIME).unix
+	plan.print("Generating CL data")
 
 	genesis_generation_config_yml_template = read_file(static_files.CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH)
 	genesis_generation_mnemonics_yml_template = read_file(static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH)
 	total_number_of_validator_keys = network_params.num_validator_keys_per_node * num_participants
 	cl_genesis_data = cl_genesis_data_generator.generate_cl_genesis_data(
+		plan,
 		genesis_generation_config_yml_template,
 		genesis_generation_mnemonics_yml_template,
 		el_genesis_data,
-		cl_genesis_timestamp,
+		final_genesis_timestamp,
 		network_params.network_id,
 		network_params.deposit_contract_address,
 		network_params.seconds_per_slot,
 		network_params.preregistered_validator_keys_mnemonic,
-		total_number_of_validator_keys
-
+		total_number_of_validator_keys,
+        network_params.genesis_delay,
+        network_params.capella_fork_epoch
 	)
 
-	print(json.indent(json.encode(cl_genesis_data)))
+	plan.print(json.indent(json.encode(cl_genesis_data)))
 
-	print("Launching CL network")
+	plan.print("Launching CL network")
 
 	cl_launchers = {
 		package_io.CL_CLIENT_TYPE.lighthouse : {"launcher": lighthouse.new_lighthouse_launcher(cl_genesis_data), "launch_method": lighthouse.launch},
@@ -154,7 +157,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 			fail("Unsupported launcher '{0}', need one of '{1}'".format(cl_client_type, ",".join([cl.name for cl in cl_launchers.keys()])))
 		
 		cl_launcher, launch_method = cl_launchers[cl_client_type]["launcher"], cl_launchers[cl_client_type]["launch_method"]
-		cl_service_id = "{0}{1}".format(CL_CLIENT_SERVICE_ID_PREFIX, index)
+		cl_service_name = "{0}{1}".format(CL_CLIENT_SERVICE_NAME_PREFIX, index)
 
 		new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[index]
 
@@ -164,8 +167,8 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 		if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
 			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
-			mev_boost_service_id = MEV_BOOST_SERVICE_ID_PREFIX.format(1)
-			mev_boost_context = mev_boost_launcher_module.launch_mevboost(mev_boost_launcher, mev_boost_service_id, network_params.network_id)
+			mev_boost_service_name = MEV_BOOST_SERVICE_NAME_PREFIX.format(1)
+			mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
 
 		all_mevboost_contexts.append(mev_boost_context)
 
@@ -173,8 +176,9 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 		if index == 0:
 			cl_client_context = launch_method(
+				plan,
 				cl_launcher,
-				cl_service_id,
+				cl_service_name,
 				participant.cl_client_image,
 				participant.cl_client_log_level,
 				global_log_level,
@@ -188,8 +192,9 @@ def launch_participant_network(participants, network_params, global_log_level):
 		else:
 			boot_cl_client_ctx = all_cl_client_contexts[0]
 			cl_client_context = launch_method(
+				plan,
 				cl_launcher,
-				cl_service_id,
+				cl_service_name,
 				participant.cl_client_image,
 				participant.cl_client_log_level,
 				global_log_level,
@@ -203,7 +208,7 @@ def launch_participant_network(participants, network_params, global_log_level):
 
 		all_cl_client_contexts.append(cl_client_context)
 
-	print("Succesfully added {0} CL participants".format(num_participants))
+	plan.print("Succesfully added {0} CL participants".format(num_participants))
 
 	all_participants = []
 
@@ -220,5 +225,5 @@ def launch_participant_network(participants, network_params, global_log_level):
 		all_participants.append(participant_entry)
 
 
-	return all_participants, cl_genesis_timestamp
+	return all_participants, final_genesis_timestamp
 

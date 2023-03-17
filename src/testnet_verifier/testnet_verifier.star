@@ -1,5 +1,5 @@
 IMAGE_NAME = "marioevz/merge-testnet-verifier:latest"
-SERVICE_ID = "testnet-verifier"
+SERVICE_NAME = "testnet-verifier"
 
 # We use Docker exec commands to run the commands we need, so we override the default
 SYNCHRONOUS_ENTRYPOINT_ARGS = [
@@ -9,17 +9,18 @@ SYNCHRONOUS_ENTRYPOINT_ARGS = [
 
 
 # this is broken check - https://github.com/ethereum/merge-testnet-verifier/issues/4
-def launch_testnet_verifier(params, el_client_contexts, cl_client_contexts):
+def launch_testnet_verifier(plan, params, el_client_contexts, cl_client_contexts):
 	config = get_asynchronous_verification_config(params, el_client_contexts, cl_client_contexts)
-	add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_NAME, config)
 
 
-def run_synchronous_testnet_verification(params, el_client_contexts, cl_client_contexts):
+def run_synchronous_testnet_verification(plan, params, el_client_contexts, cl_client_contexts):
 	config = get_synchronous_verification_config()
-	add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_NAME, config)
 
 	command = get_cmd(params, el_client_contexts, cl_client_contexts, True)
-	exec(SERVICE_ID, command)
+	exec_result = plan.exec(ExecRecipe(service_name=SERVICE_NAME, command=command))
+	plan.assert(exec_result["code"], "==", 0)
 
 
 def get_cmd(params, el_client_contexts, cl_client_contexts, add_binary_name):
@@ -51,14 +52,14 @@ def get_cmd(params, el_client_contexts, cl_client_contexts, add_binary_name):
 
 def get_asynchronous_verification_config(params, el_client_contexts, cl_client_contexts):
 	commands = get_cmd(params, el_client_contexts, cl_client_contexts, False)
-	return struct(
+	return ServiceConfig(
 		image = IMAGE_NAME,
 		cmd = commands,
 	)
 
 
 def get_synchronous_verification_config():
-	return struct(
+	return ServiceConfig(
 		image = IMAGE_NAME,
 		entrypoint = SYNCHRONOUS_ENTRYPOINT_ARGS,
 	)

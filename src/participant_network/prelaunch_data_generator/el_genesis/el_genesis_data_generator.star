@@ -26,15 +26,21 @@ all_genesis_generation_cmds =  {
 }
 
 def generate_el_genesis_data(
+	plan,
 	genesis_generation_config_template,
 	genesis_unix_timestamp,
 	network_id,
-	deposit_contract_address):
+	deposit_contract_address,
+	genesis_delay,
+	capella_fork_epoch
+	):
 
 	template_data = genesis_generation_config_template_data(
 		network_id,
 		deposit_contract_address,
 		genesis_unix_timestamp,
+		genesis_delay,
+        	capella_fork_epoch
 	)
 
 	genesis_config_file_template_and_data = shared_utils.new_template_and_data(genesis_generation_config_template, template_data)
@@ -42,13 +48,14 @@ def generate_el_genesis_data(
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_FILENAME] = genesis_config_file_template_and_data
 
-	genesis_generation_config_artifact_uuid = render_templates(template_and_data_by_rel_dest_filepath)
+	genesis_generation_config_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, name="genesis-generation-config-el")
 
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
-	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+	launcher_service_name = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+		plan,
 		{
-			genesis_generation_config_artifact_uuid: CONFIG_DIRPATH_ON_GENERATOR,
+			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_name,
 		},
 	)
 
@@ -73,7 +80,8 @@ def generate_el_genesis_data(
 	]
 
 
-	exec(launcher_service_id, dir_creation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	dir_creation_cmd_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=dir_creation_cmd))
+	plan.assert(dir_creation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	genesis_config_filepath_on_generator = shared_utils.path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_FILENAME)
 	genesis_filename_to_relative_filepath_in_artifact = {}
@@ -88,7 +96,9 @@ def generate_el_genesis_data(
 			" ".join(cmd)
 		]
 
-		exec(launcher_service_id, cmd_to_execute, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+		cmd_to_execute_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=cmd_to_execute))
+		plan.assert(cmd_to_execute_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+
 
 		genesis_filename_to_relative_filepath_in_artifact[output_filename] = shared_utils.path_join(
 			shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR),
@@ -105,12 +115,13 @@ def generate_el_genesis_data(
 		)
 	]
 
-	exec(launcher_service_id, jwt_secret_generation_cmd, SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+	jwt_secret_generation_cmd_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=jwt_secret_generation_cmd))
+	plan.assert(jwt_secret_generation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	elGenesisDataArtifactUuid = store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
+	el_genesis_data_artifact_name = plan.store_service_files(launcher_service_name, OUTPUT_DIRPATH_ON_GENERATOR, name = "el-genesis-data")
 
 	result = el_genesis.new_el_genesis_data(
-		elGenesisDataArtifactUuid,
+		el_genesis_data_artifact_name,
 		shared_utils.path_join(shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR), JWT_SECRET_FILENAME),
 		genesis_filename_to_relative_filepath_in_artifact[GETH_GENESIS_FILENAME],
 		genesis_filename_to_relative_filepath_in_artifact[ERIGON_GENESIS_FILENAME],
@@ -119,13 +130,15 @@ def generate_el_genesis_data(
 	)
 
 	# we cleanup as the data generation is done
-	remove_service(launcher_service_id)
+	plan.remove_service(launcher_service_name)
 	return result
 
 
-def genesis_generation_config_template_data(network_id, deposit_contract_address, unix_timestamp):
+def genesis_generation_config_template_data(network_id, deposit_contract_address, unix_timestamp, genesis_delay, capella_fork_epoch):
 	return {
 		"NetworkId": network_id,
 		"DepositContractAddress": deposit_contract_address,
 		"UnixTimestamp": unix_timestamp,
+		"GenesisDelay": genesis_delay,
+		"CapellaForkEpoch": capella_fork_epoch
 	}

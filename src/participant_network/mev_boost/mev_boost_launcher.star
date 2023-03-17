@@ -15,10 +15,10 @@ NETWORK_ID_TO_NAME = {
 	"3":        "ropsten",
 }
 
-def launch(mev_boost_launcher, service_id, network_id):
+def launch(plan, mev_boost_launcher, service_name, network_id):
 	config = get_config(mev_boost_launcher, network_id)
 
-	mev_boost_service = add_service(service_id, config)
+	mev_boost_service = plan.add_service(service_name, config)
 
 	return mev_boost_context.new_mev_boost_context(mev_boost_service.ip_address, FLASHBOTS_MEV_BOOST_PORT)
 
@@ -36,7 +36,7 @@ def get_config(mev_boost_launcher, network_id):
 		command.append("-relays")
 		command.append(",".join(mev_boost_launcher.relay_end_points))
 
-	return struct(
+	return ServiceConfig(
 		image = FLASHBOTS_MEV_BOOST_IMAGE,
 		ports = USED_PORTS,
 		cmd = command

@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  kurtosis-docs-checker: kurtosis-tech/docs-checker@0.2.1
+  kurtosis-docs-checker: kurtosis-tech/docs-checker@0.2.3
 
 executors:
   ubuntu_vm:
@@ -39,11 +39,19 @@ workflows:
     jobs:
       # -- PR check jobs ------------------------------------------
       - kurtosis-docs-checker/check-docs:
-          markdown-link-check-config-json: "{}"
+          should-check-changelog: false
+          markdown-link-check-config-json: |
+            {
+                "ignorePatterns": [
+                    {
+                        "pattern": "https://github.com/kurtosis-tech/eth2-package"
+                    }
+                ]
+            }
           filters:
             branches:
               ignore:
-                - master
+                - main
       - run_starlark:
           context:
             # This pulls in KurtosisBot's Github token, so that we can read from our private repos
@@ -51,4 +59,4 @@ workflows:
           filters:
             branches:
               ignore:
-                - master
+                - main
