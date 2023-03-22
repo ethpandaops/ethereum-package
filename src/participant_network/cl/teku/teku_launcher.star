@@ -91,14 +91,13 @@ def launch(
 	cl_node_health_checker.wait_for_healthy(plan, service_name, HTTP_PORT_ID)
 
 	node_identity_recipe = GetHttpRequestRecipe(
-		service_name = service_name,
 		endpoint = "/eth/v1/node/identity",
 		port_id = HTTP_PORT_ID,
 		extract = {
 			"enr": ".data.enr"
 		}
 	)
-	node_enr = plan.request(node_identity_recipe)["extract.enr"]
+	node_enr = plan.request(node_identity_recipe, service_name = service_name)["extract.enr"]
 
 
 	teku_metrics_port = teku_service.ports[METRICS_PORT_ID]
