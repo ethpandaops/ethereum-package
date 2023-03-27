@@ -79,14 +79,13 @@ def run(plan, args):
 			first_cl_client = all_cl_client_contexts[0]
 			first_client_beacon_name = first_cl_client.beacon_service_name
 			epoch_recipe = GetHttpRequestRecipe(
-				service_name = first_client_beacon_name,
 				endpoint = "/eth/v1/beacon/states/head/finality_checkpoints",
 				port_id = HTTP_PORT_ID_FOR_FACT,
 				extract = {
 					"finalized_epoch": ".data.finalized.epoch"
 				}
 			)
-			plan.wait(epoch_recipe, "extract.finalized_epoch", "!=", "0", timeout="40m")
+			plan.wait(epoch_recipe, "extract.finalized_epoch", "!=", "0", timeout="40m", service_name = first_client_beacon_name)
 			plan.print("First finalized epoch occurred successfully")
 
 

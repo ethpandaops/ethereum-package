@@ -80,7 +80,7 @@ def generate_el_genesis_data(
 	]
 
 
-	dir_creation_cmd_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=dir_creation_cmd))
+	dir_creation_cmd_result = plan.exec(ExecRecipe(command=dir_creation_cmd), service_name=launcher_service_name)
 	plan.assert(dir_creation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	genesis_config_filepath_on_generator = shared_utils.path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_FILENAME)
@@ -96,7 +96,7 @@ def generate_el_genesis_data(
 			" ".join(cmd)
 		]
 
-		cmd_to_execute_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=cmd_to_execute))
+		cmd_to_execute_result = plan.exec(ExecRecipe(command=cmd_to_execute), service_name=launcher_service_name)
 		plan.assert(cmd_to_execute_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 
@@ -115,7 +115,7 @@ def generate_el_genesis_data(
 		)
 	]
 
-	jwt_secret_generation_cmd_result = plan.exec(ExecRecipe(service_name=launcher_service_name, command=jwt_secret_generation_cmd))
+	jwt_secret_generation_cmd_result = plan.exec(ExecRecipe(command=jwt_secret_generation_cmd), service_name=launcher_service_name)
 	plan.assert(jwt_secret_generation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	el_genesis_data_artifact_name = plan.store_service_files(launcher_service_name, OUTPUT_DIRPATH_ON_GENERATOR, name = "el-genesis-data")
