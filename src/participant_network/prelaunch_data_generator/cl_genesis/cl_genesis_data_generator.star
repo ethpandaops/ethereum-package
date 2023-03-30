@@ -83,7 +83,7 @@ def generate_cl_genesis_data(
 		(" && ").join(all_dirpath_creation_commands),
 	]
 
-	dir_creation_cmd_result = plan.exec(ExecRecipe(command=dir_creation_cmd), service_name=launcher_service_name)
+	dir_creation_cmd_result = plan.exec(recipe=ExecRecipe(command=dir_creation_cmd), service_name=launcher_service_name)
 	plan.assert(dir_creation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 
@@ -100,7 +100,7 @@ def generate_cl_genesis_data(
 			filepath_on_generator,
 			OUTPUT_DIRPATH_ON_GENERATOR,
 		]
-		cmd_result = plan.exec(ExecRecipe( command=cmd), service_name=launcher_service_name)
+		cmd_result = plan.exec(recipe=ExecRecipe( command=cmd), service_name=launcher_service_name)
 		plan.assert(cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	# Generate files that need dynamic content
@@ -118,7 +118,7 @@ def generate_cl_genesis_data(
 				destFilepath,
 			)
 		]
-		cmd_result = plan.exec(ExecRecipe( command=cmd), service_name=launcher_service_name)
+		cmd_result = plan.exec(recipe=ExecRecipe( command=cmd), service_name=launcher_service_name)
 		plan.assert(cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 		
 
@@ -132,7 +132,7 @@ def generate_cl_genesis_data(
 		"--state-output", shared_utils.path_join(OUTPUT_DIRPATH_ON_GENERATOR, GENESIS_STATE_FILENAME)
 	]
 
-	genesis_generation_result = plan.exec(ExecRecipe(command=cl_genesis_generation_cmd), service_name=launcher_service_name)
+	genesis_generation_result = plan.exec(recipe=ExecRecipe(command=cl_genesis_generation_cmd), service_name=launcher_service_name)
 	plan.assert(genesis_generation_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	cl_genesis_data_artifact_name = plan.store_service_files(launcher_service_name, OUTPUT_DIRPATH_ON_GENERATOR, name = "cl-genesis-data")
