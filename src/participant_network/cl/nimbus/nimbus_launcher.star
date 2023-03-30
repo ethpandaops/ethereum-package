@@ -90,7 +90,7 @@ def launch(
 			"enr": ".data.enr"
 		}
 	)
-	node_enr = plan.request(cl_node_identity_recipe, service_name = service_name)["extract.enr"]
+	node_enr = plan.request(recipe = cl_node_identity_recipe, service_name = service_name)["extract.enr"]
 
 	metrics_port = nimbus_service.ports[METRICS_PORT_ID]
 	metrics_url = "{0}:{1}".format(nimbus_service.ip_address, metrics_port.number)

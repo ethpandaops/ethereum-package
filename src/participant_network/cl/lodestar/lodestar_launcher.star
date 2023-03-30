@@ -111,7 +111,7 @@ def launch(
 			"enr": ".data.enr"
 		}
 	)
-	beacon_node_enr = plan.request(beacon_node_identity_recipe, service_name = beacon_node_service_name)["extract.enr"]
+	beacon_node_enr = plan.request(recipe = beacon_node_identity_recipe, service_name = beacon_node_service_name)["extract.enr"]
 
 	beacon_metrics_port = beacon_service.ports[METRICS_PORT_ID]
 	beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
