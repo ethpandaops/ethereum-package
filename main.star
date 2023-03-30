@@ -85,7 +85,7 @@ def run(plan, args):
 					"finalized_epoch": ".data.finalized.epoch"
 				}
 			)
-			plan.wait(epoch_recipe, "extract.finalized_epoch", "!=", "0", timeout="40m", service_name = first_client_beacon_name)
+			plan.wait(recipe = epoch_recipe, field = "extract.finalized_epoch", assertion = "!=", target_value = "0", timeout = "40m", service_name = first_client_beacon_name)
 			plan.print("First finalized epoch occurred successfully")
 
 
