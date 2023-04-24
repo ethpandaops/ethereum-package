@@ -1,6 +1,6 @@
 Package Architecture
 ===================
-This repo is a Kurtosis package. To get general information on what a Kurtosis package is and how it works, visit [the Starlark documentation](https://docs.kurtosis.com/explanations/starlark).
+This repo is a Kurtosis package. To get general information on what a Kurtosis package is and how it works, visit [the Starlark documentation](https://docs.kurtosis.com/starlark-reference).
 
 The overview of this particular package's operation is as follows:
 
