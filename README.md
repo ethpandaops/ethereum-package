@@ -21,6 +21,21 @@ Quickstart
    ```bash
    docker image ls
    ```
+1. Run the package:
+   ```bash
+   kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package
+   ```
+   
+To remove the enclave running the Ethereum network, run `kurtosis enclave rm -f eth2`.
+   
+You can customize the package's behaviour by passing in a configuration JSON or YAML (see the "Configuration" section below). For example:
+
+```bash
+kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package '{"global_client_log_level": "info"}'
+```
+
+For extra convenience, you can store the parameters in a file:
+
 1. Create a file in your home directory `eth2-package-params.json` with the following contents:
 
    ```yaml
