@@ -29,7 +29,7 @@ Quickstart
 
 1. Run the package, passing in the params from the file:
    ```bash
-   kurtosis run --enclave-id eth2 github.com/kurtosis-tech/eth2-package "$(cat ~/eth2-package-params.json)"
+   kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package "$(cat ~/eth2-package-params.json)"
    ```
 
 Management
@@ -204,7 +204,7 @@ When you're happy with your changes:
 <!------------------------ Only links below here -------------------------------->
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
-[starlark-docs]: https://docs.kurtosis.com/explanations/starlark
+[starlark-docs]: https://docs.kurtosis.com/starlark-reference
 [using-the-cli]: https://docs.kurtosis.com/cli
 [prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
 [erigon-issue]: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/154

@@ -3,6 +3,7 @@
 - Adds config variables for `genesis_delay` and `capella_fork_epoch`
 - Updates genesis generator version
 - Fixes genesis timestamp such that the shanghai fork can happen based on timestamps
+- Update `--enclave-id` flag to `--enclave` in README
 
 ### Breaking Change
 - Introduced optional application protocol and renamed protocol to transport_protocol
