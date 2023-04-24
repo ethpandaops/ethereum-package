@@ -29,7 +29,7 @@ Quickstart
 
 1. Run the package, passing in the params from the file:
    ```bash
-   kurtosis run --enclave-id eth2 github.com/kurtosis-tech/eth2-package "$(cat ~/eth2-package-params.json)"
+   kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package "$(cat ~/eth2-package-params.json)"
    ```
 
 Management
