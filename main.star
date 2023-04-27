@@ -1,14 +1,15 @@
-participant_network = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/participant_network.star")
 parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 
 static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
 genesis_constants = import_module("github.com/kurtosis-tech/eth2-package/src/participant_network/prelaunch_data_generator/genesis_constants/genesis_constants.star")
 
+eth_network_module = import_module("github.com/kurtosis-tech/eth-network-package/main.star")
 transaction_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star")
 forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/forkmon/forkmon_launcher.star")
 prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star")
 grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
+mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_launcher.star")
 
 GRAFANA_USER             = "admin"
 GRAFANA_PASSWORD         = "admin"
@@ -30,14 +31,23 @@ def run(plan, args):
 	plan.print("Read the prometheus, grafana templates")
 
 	plan.print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
-	all_participants, cl_gensis_timestamp = participant_network.launch_participant_network(plan, args_with_right_defaults.participants, network_params, args_with_right_defaults.global_client_log_level)
+	all_participants, cl_genesis_timestamp = eth_network_module.run(plan, args)
 
 	all_el_client_contexts = []
 	all_cl_client_contexts = []
 	for participant in all_participants:
 		all_el_client_contexts.append(participant.el_client_context)
 		all_cl_client_contexts.append(participant.cl_client_context)
-
+	
+	# spin up mev boost contexts
+	all_mevboost_contexts = []	
+	for index, participant in enumerate(args_with_right_defaults.participants):
+			mev_boost_context = None
+			if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
+				mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
+				mev_boost_service_name = MEV_BOOST_SERVICE_NAME_PREFIX.format(1)
+				mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
+			all_mevboost_contexts.append(mev_boost_context)
 
 	if not args_with_right_defaults.launch_additional_services:
 		return
