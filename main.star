@@ -18,6 +18,9 @@ GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
+MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
+MEV_BOOST_SHOULD_CHECK_RELAY = True
+
 def run(plan, args):
 	args_with_right_defaults = parse_input.parse_input(args)
 
@@ -61,7 +64,7 @@ def run(plan, args):
 
 	plan.print("Launching forkmon")
 	forkmon_config_template = read_file(static_files.FORKMON_CONFIG_TEMPLATE_FILEPATH)
-	forkmon.launch_forkmon(plan, forkmon_config_template, all_cl_client_contexts, cl_gensis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
+	forkmon.launch_forkmon(plan, forkmon_config_template, all_cl_client_contexts, cl_genesis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
 	plan.print("Succesfully launched forkmon")
 
 	plan.print("Launching prometheus...")
