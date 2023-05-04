@@ -48,7 +48,6 @@ The participant network is the beating heart at the center of the package. The p
 
 1. Generating EL client config data
 1. Starting the EL clients
-1. Waiting until the EL clients have started producing blocks
 1. Generating CL client config data
 1. Starting the CL clients
 
