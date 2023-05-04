@@ -8,7 +8,6 @@ The overview of this particular package's operation is as follows:
 1. Launch a network of Ethereum participants
     1. Generate execution layer (EL) client config data
     1. Launch EL clients
-    1. Wait for EL clients to start mining, such that all EL clients have a nonzero block number
     1. Generate consensus layer (CL) client config data
     1. Launch CL clients
 1. Launch auxiliary services (Grafana, Forkmon, etc.)
@@ -49,7 +48,7 @@ The participant network is the beating heart at the center of the package. The p
 
 1. Generating EL client config data
 1. Starting the EL clients
-1. Waiting until the EL clients have started mining
+1. Waiting until the EL clients have started producing blocks
 1. Generating CL client config data
 1. Starting the CL clients
 
@@ -61,10 +60,7 @@ All EL clients require both a genesis file and a JWT secret. The exact format of
 The generated output files then get stored in the Kurtosis enclave, ready for use when we start the EL clients. The information about these stored files is tracked in [the `el_genesis_data` struct](https://github.com/kurtosis-tech/eth2-package/blob/main/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data.star).
 
 ### Starting EL clients
-Next, we plug the generated genesis data [into EL client "launchers"](https://github.com/kurtosis-tech/eth2-package/tree/main/src/participant_network/el) to start a mining network of EL nodes. The launchers come with a `launch` function that consumes EL genesis data and produces information about the running EL client node. Running EL node information is represented by [an `el_client_context` struct](https://github.com/kurtosis-tech/eth2-package/blob/main/src/participant_network/el/el_client_context.star). Each EL client type has its own launcher (e.g. [Geth](https://github.com/kurtosis-tech/eth2-package/tree/main/src/participant_network/el/geth), [Besu](https://github.com/kurtosis-tech/eth2-package/tree/main/src/participant_network/el/besu)) because each EL client will require different environment variables and flags to be set when launching the client's container.
-
-### Waiting until EL clients have started mining
-Once we have a network of EL nodes started, we block until all EL clients have a block number > 0 to ensure that they are in fact working. After the nodes have started mining, we're ready to move on to adding the CL client network.
+Next, we plug the generated genesis data [into EL client "launchers"](https://github.com/kurtosis-tech/eth2-package/tree/main/src/participant_network/el) to start a network of EL nodes. The launchers come with a `launch` function that consumes EL genesis data and produces information about the running EL client node. Running EL node information is represented by [an `el_client_context` struct](https://github.com/kurtosis-tech/eth2-package/blob/main/src/participant_network/el/el_client_context.star). Each EL client type has its own launcher (e.g. [Geth](https://github.com/kurtosis-tech/eth2-package/tree/main/src/participant_network/el/geth), [Besu](https://github.com/kurtosis-tech/eth2-package/tree/main/src/participant_network/el/besu)) because each EL client will require different environment variables and flags to be set when launching the client's container.
 
 ### Generating CL client data
 CL clients, like EL clients, also have genesis and config files that they need. We use [the same Docker image with tools for generating genesis data][ethereum-genesis-generator] to create the necessary CL files, we provide the genesis generation config using templates in [the `static_files` directory][static-files], and we store the generated output files in the Kurtosis enclave in the same way as the EL client genesis files. Like with EL nodes, CL genesis data information is tracked in [the `cl_client_context` struct](https://github.com/kurtosis-tech/eth2-package/blob/main/src/participant_network/el/el_client_context.star).
