@@ -21,6 +21,21 @@ Quickstart
    ```bash
    docker image ls
    ```
+1. Run the package:
+   ```bash
+   kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package
+   ```
+   
+To remove the enclave running the Ethereum network, run `kurtosis enclave rm -f eth2`.
+   
+You can customize the package's behaviour by passing in a configuration JSON or YAML (see the "Configuration" section below). For example:
+
+```bash
+kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package '{"global_client_log_level": "info"}'
+```
+
+For extra convenience, you can store the parameters in a file:
+
 1. Create a file in your home directory `eth2-package-params.json` with the following contents:
 
    ```yaml
@@ -29,7 +44,7 @@ Quickstart
 
 1. Run the package, passing in the params from the file:
    ```bash
-   kurtosis run --enclave-id eth2 github.com/kurtosis-tech/eth2-package "$(cat ~/eth2-package-params.json)"
+   kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package "$(cat ~/eth2-package-params.json)"
    ```
 
 Management
@@ -204,7 +219,7 @@ When you're happy with your changes:
 <!------------------------ Only links below here -------------------------------->
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
-[starlark-docs]: https://docs.kurtosis.com/explanations/starlark
+[starlark-docs]: https://docs.kurtosis.com/starlark-reference
 [using-the-cli]: https://docs.kurtosis.com/cli
 [prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
 [erigon-issue]: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/154

@@ -23,9 +23,9 @@ participant_module = import_module("github.com/kurtosis-tech/eth2-package/src/pa
 
 package_io = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/constants.star")
 
-CL_CLIENT_SERVICE_ID_PREFIX = "cl-client-"
-EL_CLIENT_SERVICE_ID_PREFIX = "el-client-"
-MEV_BOOST_SERVICE_ID_PREFIX = "mev-boost-"
+CL_CLIENT_SERVICE_NAME_PREFIX = "cl-client-"
+EL_CLIENT_SERVICE_NAME_PREFIX = "el-client-"
+MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
 BOOT_PARTICIPANT_INDEX = 0
 
@@ -76,12 +76,12 @@ def launch_participant_network(plan, participants, network_params, global_log_le
 
 	plan.print("Uploading GETH prefunded keys")
 
-	geth_prefunded_keys_artifact_id = plan.upload_files(static_files.GETH_PREFUNDED_KEYS_DIRPATH)
+	geth_prefunded_keys_artifact_name = plan.upload_files(static_files.GETH_PREFUNDED_KEYS_DIRPATH, name="geth-prefunded-keys")
 
 	plan.print("Uploaded GETH files succesfully, launching EL participants")
 
 	el_launchers = {
-		package_io.EL_CLIENT_TYPE.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_id, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
+		package_io.EL_CLIENT_TYPE.geth : {"launcher": geth.new_geth_launcher(network_params.network_id, el_genesis_data, geth_prefunded_keys_artifact_name, genesis_constants.PRE_FUNDED_ACCOUNTS), "launch_method": geth.launch},
 		package_io.EL_CLIENT_TYPE.besu : {"launcher": besu.new_besu_launcher(network_params.network_id, el_genesis_data), "launch_method": besu.launch},
 		package_io.EL_CLIENT_TYPE.erigon : {"launcher": erigon.new_erigon_launcher(network_params.network_id, el_genesis_data), "launch_method": erigon.launch},
 		package_io.EL_CLIENT_TYPE.nethermind : {"launcher": nethermind.new_nethermind_launcher(el_genesis_data), "launch_method": nethermind.launch},
@@ -96,12 +96,12 @@ def launch_participant_network(plan, participants, network_params, global_log_le
 			fail("Unsupported launcher '{0}', need one of '{1}'".format(el_client_type, ",".join([el.name for el in el_launchers.keys()])))
 		
 		el_launcher, launch_method = el_launchers[el_client_type]["launcher"], el_launchers[el_client_type]["launch_method"]
-		el_service_id = "{0}{1}".format(EL_CLIENT_SERVICE_ID_PREFIX, index)
+		el_service_name = "{0}{1}".format(EL_CLIENT_SERVICE_NAME_PREFIX, index)
 
 		el_client_context = launch_method(
 			plan,
 			el_launcher,
-			el_service_id,
+			el_service_name,
 			participant.el_client_image,
 			participant.el_client_log_level,
 			global_log_level,
@@ -157,7 +157,7 @@ def launch_participant_network(plan, participants, network_params, global_log_le
 			fail("Unsupported launcher '{0}', need one of '{1}'".format(cl_client_type, ",".join([cl.name for cl in cl_launchers.keys()])))
 		
 		cl_launcher, launch_method = cl_launchers[cl_client_type]["launcher"], cl_launchers[cl_client_type]["launch_method"]
-		cl_service_id = "{0}{1}".format(CL_CLIENT_SERVICE_ID_PREFIX, index)
+		cl_service_name = "{0}{1}".format(CL_CLIENT_SERVICE_NAME_PREFIX, index)
 
 		new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[index]
 
@@ -167,8 +167,8 @@ def launch_participant_network(plan, participants, network_params, global_log_le
 
 		if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
 			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
-			mev_boost_service_id = MEV_BOOST_SERVICE_ID_PREFIX.format(1)
-			mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_id, network_params.network_id)
+			mev_boost_service_name = MEV_BOOST_SERVICE_NAME_PREFIX.format(1)
+			mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
 
 		all_mevboost_contexts.append(mev_boost_context)
 
@@ -178,7 +178,7 @@ def launch_participant_network(plan, participants, network_params, global_log_le
 			cl_client_context = launch_method(
 				plan,
 				cl_launcher,
-				cl_service_id,
+				cl_service_name,
 				participant.cl_client_image,
 				participant.cl_client_log_level,
 				global_log_level,
@@ -194,7 +194,7 @@ def launch_participant_network(plan, participants, network_params, global_log_le
 			cl_client_context = launch_method(
 				plan,
 				cl_launcher,
-				cl_service_id,
+				cl_service_name,
 				participant.cl_client_image,
 				participant.cl_client_log_level,
 				global_log_level,

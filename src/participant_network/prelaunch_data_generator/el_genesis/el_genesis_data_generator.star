@@ -48,14 +48,14 @@ def generate_el_genesis_data(
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[GENESIS_CONFIG_FILENAME] = genesis_config_file_template_and_data
 
-	genesis_generation_config_artifact_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
+	genesis_generation_config_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, name="genesis-generation-config-el")
 
 
 	# TODO(old) Make this the actual data generator - comment copied from the original module
-	launcher_service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+	launcher_service_name = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
 		plan,
 		{
-			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_uuid,
+			CONFIG_DIRPATH_ON_GENERATOR: genesis_generation_config_artifact_name,
 		},
 	)
 
@@ -80,7 +80,7 @@ def generate_el_genesis_data(
 	]
 
 
-	dir_creation_cmd_result = plan.exec(struct(service_id=launcher_service_id, command=dir_creation_cmd))
+	dir_creation_cmd_result = plan.exec(recipe=ExecRecipe(command=dir_creation_cmd), service_name=launcher_service_name)
 	plan.assert(dir_creation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	genesis_config_filepath_on_generator = shared_utils.path_join(CONFIG_DIRPATH_ON_GENERATOR, GENESIS_CONFIG_FILENAME)
@@ -96,7 +96,7 @@ def generate_el_genesis_data(
 			" ".join(cmd)
 		]
 
-		cmd_to_execute_result = plan.exec(struct(service_id=launcher_service_id, command=cmd_to_execute))
+		cmd_to_execute_result = plan.exec(recipe=ExecRecipe(command=cmd_to_execute), service_name=launcher_service_name)
 		plan.assert(cmd_to_execute_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 
@@ -115,13 +115,13 @@ def generate_el_genesis_data(
 		)
 	]
 
-	jwt_secret_generation_cmd_result = plan.exec(struct(service_id=launcher_service_id, command=jwt_secret_generation_cmd))
+	jwt_secret_generation_cmd_result = plan.exec(recipe=ExecRecipe(command=jwt_secret_generation_cmd), service_name=launcher_service_name)
 	plan.assert(jwt_secret_generation_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	elGenesisDataArtifactUuid = plan.store_service_files(launcher_service_id, OUTPUT_DIRPATH_ON_GENERATOR)
+	el_genesis_data_artifact_name = plan.store_service_files(launcher_service_name, OUTPUT_DIRPATH_ON_GENERATOR, name = "el-genesis-data")
 
 	result = el_genesis.new_el_genesis_data(
-		elGenesisDataArtifactUuid,
+		el_genesis_data_artifact_name,
 		shared_utils.path_join(shared_utils.path_base(OUTPUT_DIRPATH_ON_GENERATOR), JWT_SECRET_FILENAME),
 		genesis_filename_to_relative_filepath_in_artifact[GETH_GENESIS_FILENAME],
 		genesis_filename_to_relative_filepath_in_artifact[ERIGON_GENESIS_FILENAME],
@@ -130,7 +130,7 @@ def generate_el_genesis_data(
 	)
 
 	# we cleanup as the data generation is done
-	plan.remove_service(launcher_service_id)
+	plan.remove_service(launcher_service_name)
 	return result
 
 

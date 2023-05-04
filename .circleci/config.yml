@@ -8,6 +8,16 @@ executors:
     machine:
       image: ubuntu-2004:202201-02
 
+parameters:
+  # To enable/disabled the check_latest_version workflow execution which will be triggered by this scheduled pipeline: https://app.circleci.com/settings/project/github/kurtosis-tech/eth2-package/triggers
+  should-enable-check-latest-version-workflow:
+    type: boolean
+    default: false
+  # To enable/disabled the check_code workflow execution which will be triggered by the PR's checkers
+  should-enable-build-workflow:
+    type: boolean
+    default: true
+
 # NOTE: Because CircleCI jobs run on separate machines from each other, we duplicate steps (like checkout) between jobs. This is because doing the "correct" DRY
 #  refactoring of, "one job for checkout, one job for build Docker image, etc." would require a) persisting files between jobs and b) persisting Docker images between
 #  jobs. Both are annoying (saving/loading workspaces require re-downloading the workspace over the network, and there doesn't seem to be a good way to do Docker
@@ -33,9 +43,37 @@ jobs:
 
       - run: kurtosis run ${PWD}
 
+
+  check_latest_version:
+    executor: ubuntu_vm
+    steps:
+
+      # Set up Kurtosis
+      - run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+
+      - checkout
+
+      # We don't send metrics to avoid polluting our logs
+      - run: kurtosis config init dont-send-metrics
+
+      - run: kurtosis engine restart
+
+      - run: kurtosis run --dry-run ${PWD}
+
   
 workflows:
+  check_latest_version:
+    when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
+    jobs:
+      - check_latest_version:
+          context:
+            - slack-secrets
+
   build:
+    when: << pipeline.parameters.should-enable-build-workflow >>
     jobs:
       # -- PR check jobs ------------------------------------------
       - kurtosis-docs-checker/check-docs:
@@ -51,7 +89,7 @@ workflows:
           filters:
             branches:
               ignore:
-                - master
+                - main
       - run_starlark:
           context:
             # This pulls in KurtosisBot's Github token, so that we can read from our private repos
@@ -59,4 +97,4 @@ workflows:
           filters:
             branches:
               ignore:
-                - master
+                - main

@@ -1,7 +1,7 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
 
-SERVICE_ID = "grafana"
+SERVICE_NAME = "grafana"
 
 IMAGE_NAME = "grafana/grafana-enterprise:9.2.3"
 
@@ -30,7 +30,7 @@ def launch_grafana(plan, datasource_config_template, dashboard_providers_config_
 
 	config = get_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid)
 
-	plan.add_service(SERVICE_ID, config)
+	plan.add_service(SERVICE_NAME, config)
 
 
 def get_grafana_config_dir_artifact_uuid(plan, datasource_config_template, dashboard_providers_config_template, prometheus_private_url):
@@ -44,21 +44,21 @@ def get_grafana_config_dir_artifact_uuid(plan, datasource_config_template, dashb
 	template_and_data_by_rel_dest_filepath[DATASOURCE_CONFIG_REL_FILEPATH] = datasource_template_and_data
 	template_and_data_by_rel_dest_filepath[DASHBOARD_PROVIDERS_CONFIG_REL_FILEPATH] = dashboard_providers_template_and_data
 
-	grafana_config_artifacts_uuid = plan.render_templates(template_and_data_by_rel_dest_filepath)
+	grafana_config_artifacts_name = plan.render_templates(template_and_data_by_rel_dest_filepath, name="grafana-config")
 
-	grafana_dashboards_artifacts_uuid = plan.upload_files(static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH)
+	grafana_dashboards_artifacts_name = plan.upload_files(static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH, name="grafana-dashboards")
 
-	return grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid
+	return grafana_config_artifacts_name, grafana_dashboards_artifacts_name
 
 
-def get_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid):
+def get_config(grafana_config_artifacts_name, grafana_dashboards_artifacts_name):
 	return ServiceConfig(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		env_vars = {CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE},
 		files = {
-			GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_uuid,
-			GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_uuid
+			GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
+			GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name
 		}
 	)
 

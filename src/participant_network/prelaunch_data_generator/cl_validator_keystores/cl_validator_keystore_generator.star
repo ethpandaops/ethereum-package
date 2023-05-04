@@ -34,7 +34,7 @@ def generate_cl_validator_keystores(
 	num_nodes,
 	num_validators_per_node):
 	
-	service_id = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+	service_name = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
 		plan,
 		{},
 	)
@@ -66,18 +66,18 @@ def generate_cl_validator_keystores(
 
 	command_str = " && ".join(all_sub_command_strs)
 
-	command_result = plan.exec(struct(service_id=service_id, command=["sh", "-c", command_str]))
+	command_result = plan.exec(recipe=ExecRecipe(command=["sh", "-c", command_str]), service_name=service_name)
 	plan.assert(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
 	# Store outputs into files artifacts
 	keystore_files = []
 	for idx, output_dirpath in enumerate(all_output_dirpaths):
-		artifact_uuid = plan.store_service_files(service_id, output_dirpath)
+		artifact_name = plan.store_service_files(service_name, output_dirpath, name = "validator-keystore-" + str(idx))
 
 		# This is necessary because the way Kurtosis currently implements artifact-storing is
 		base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
 		to_add = keystore_files_module.new_keystore_files(
-			artifact_uuid,
+			artifact_name,
 			shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
 			shared_utils.path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
 			shared_utils.path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),
@@ -97,17 +97,17 @@ def generate_cl_validator_keystores(
 			PRYSM_PASSWORD_FILEPATH_ON_GENERATOR,
 		),
 	]
-	write_prysm_password_file_cmd_result = plan.exec(struct(service_id=service_id, command=write_prysm_password_file_cmd))
+	write_prysm_password_file_cmd_result = plan.exec(recipe=ExecRecipe(command=write_prysm_password_file_cmd), service_name=service_name)
 	plan.assert(write_prysm_password_file_cmd_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
-	prysm_password_artifact_uuid = plan.store_service_files(service_id, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR)
+	prysm_password_artifact_name = plan.store_service_files(service_name, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR, name = "prysm-password")
 
 	result = keystores_result.new_generate_keystores_result(
-		prysm_password_artifact_uuid,
+		prysm_password_artifact_name,
 		shared_utils.path_base(PRYSM_PASSWORD_FILEPATH_ON_GENERATOR),
 		keystore_files,
 	)
 
 	# we cleanup as the data generation is done
-	plan.remove_service(service_id)
+	plan.remove_service(service_name)
 	return result
