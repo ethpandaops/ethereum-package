@@ -82,7 +82,6 @@ def get_config(genesis_data, image, existing_el_clients, log_level, extra_params
 	jwt_secret_json_filepath_on_client = shared_utils.path_join(GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath)
 
 	command_args = [
-		"--config=kiln",
 		"--log=" + log_level,
 		"--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
 		"--Init.ChainSpecPath=" + genesis_json_filepath_on_client,
@@ -91,7 +90,6 @@ def get_config(genesis_data, image, existing_el_clients, log_level, extra_params
 		"--JsonRpc.Enabled=true",
 		"--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin",
 		"--JsonRpc.Host=0.0.0.0",
-		# TODO(old) Set Eth isMining?
 		"--JsonRpc.Port={0}".format(RPC_PORT_NUM),
 		"--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
 		"--Network.ExternalIp={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
