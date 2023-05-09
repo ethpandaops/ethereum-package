@@ -48,7 +48,7 @@ def run(plan, args):
 			mev_boost_context = None
 			if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
 				mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
-				mev_boost_service_name = MEV_BOOST_SERVICE_NAME_PREFIX.format(1)
+				mev_boost_service_name = "{0}{1}".format(MEV_BOOST_SERVICE_NAME_PREFIX, index)
 				mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
 			all_mevboost_contexts.append(mev_boost_context)
 
