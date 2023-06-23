@@ -1,13 +1,14 @@
 MOCK_MEV_IMAGE = "ethpandaops/mock-builder:latest"
 MOCK_MEV_SERVICE_NAME = "mock-mev"
+MOCK_MEV_BUILDER_PORT = 18550
 
 def launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret):
-    plan.add_service(
+    mock_builder = plan.add_service(
         name = MOCK_MEV_SERVICE_NAME,
         config = ServiceConfig(
             image = MOCK_MEV_IMAGE,
             ports = {
-                "rest": PortSpec(number = 18550, transport_protocol="TCP"),
+                "rest": PortSpec(number = MOCK_MEV_BUILDER_PORT, transport_protocol="TCP"),
             },
             cmd = [
                 "--jwt-secret={0}".format(jwt_secret),
@@ -16,3 +17,4 @@ def launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret):
             ]
         )
     )
+    return "http://{0}:{1}".format(mock_builder.ip_address, MOCK_MEV_BUILDER_PORT)

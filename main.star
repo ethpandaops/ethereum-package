@@ -43,20 +43,27 @@ def run(plan, args):
 	for participant in all_participants:
 		all_el_client_contexts.append(participant.el_client_context)
 		all_cl_client_contexts.append(participant.cl_client_context)
-	
-	# spin up mev boost contexts
+
+
+	mev_endpoints = []
+	# passed external relays get priority
+	# perhaps add mev_type External or remove this
+	if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
+		mev_endpoints = participant.builder_network_params.relay_end_points
+	# otherwise dummy relays spinup if chosen
+	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == MOCK_MEV_TYPE:
+		el_uri = "{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].engine_rpc_port_num)
+		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
+		jwt_secret = all_el_client_contexts[0].jwt_secret
+		mev_endpoints.append(mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret))
+
+	# spin up the mev boost contexts if some endpoints for relays have been passed
 	all_mevboost_contexts = []	
-	for index, participant in enumerate(args_with_right_defaults.participants):
-			mev_boost_context = None
-			if args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == MOCK_MEV_TYPE:
-				el_uri = "{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].engine_rpc_port_num)
-				beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
-				jwt_secret = all_el_client_contexts[0].jwt_secret
-				mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
-			if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
-				mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
-				mev_boost_service_name = "{0}{1}".format(MEV_BOOST_SERVICE_NAME_PREFIX, index)
-				mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
+	if mev_endpoints:
+		for index, participant in enumerate(args_with_right_defaults.participants):
+			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
+			mev_boost_service_name = "{0}{1}".format(MEV_BOOST_SERVICE_NAME_PREFIX, index)
+			mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
 			all_mevboost_contexts.append(mev_boost_context)
 
 	if not args_with_right_defaults.launch_additional_services:

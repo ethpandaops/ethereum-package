@@ -39,7 +39,10 @@ def get_config(mev_boost_launcher, network_id):
 	return ServiceConfig(
 		image = FLASHBOTS_MEV_BOOST_IMAGE,
 		ports = USED_PORTS,
-		cmd = command
+		cmd = command,
+		env_vars = {
+			"SKIP_RELAY_SIGNATURE_CHECK": "true"
+		}
 	)
 
 
