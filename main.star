@@ -21,6 +21,7 @@ HTTP_PORT_ID_FOR_FACT = "http"
 
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 MEV_BOOST_SHOULD_CHECK_RELAY = True
+MOCK_MEV_TYPE = "mock"
 
 def run(plan, args):
 	args_with_right_defaults = parse_input.parse_input(args)
@@ -47,7 +48,7 @@ def run(plan, args):
 	all_mevboost_contexts = []	
 	for index, participant in enumerate(args_with_right_defaults.participants):
 			mev_boost_context = None
-			if args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == "mock":
+			if args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == MOCK_MEV_TYPE:
 				el_uri = "{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].engine_rpc_port_num)
 				beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 				jwt_secret = read_file_from_service(plan, "el-client-0", "/genesis/output/jwtsecret")
