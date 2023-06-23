@@ -61,9 +61,9 @@ def run(plan, args):
 	all_mevboost_contexts = []	
 	if mev_endpoints:
 		for index, participant in enumerate(args_with_right_defaults.participants):
-			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
+			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints)
 			mev_boost_service_name = "{0}{1}".format(MEV_BOOST_SERVICE_NAME_PREFIX, index)
-			mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
+			mev_boost_context = mev_boost_launcher_module.launch(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
 			all_mevboost_contexts.append(mev_boost_context)
 
 	if not args_with_right_defaults.launch_additional_services:
@@ -122,5 +122,5 @@ def run(plan, args):
 		password = GRAFANA_PASSWORD
 	)
 	output = struct(grafana_info = grafana_info)
-	
+
 	return output

@@ -1,5 +1,5 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
-mev_boost_context = ("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_context.star")
+mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_context.star")
 
 FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
 FLASHBOTS_MEV_BOOST_PORT = 18550
@@ -20,7 +20,7 @@ def launch(plan, mev_boost_launcher, service_name, network_id):
 
 	mev_boost_service = plan.add_service(service_name, config)
 
-	return mev_boost_context.new_mev_boost_context(mev_boost_service.ip_address, FLASHBOTS_MEV_BOOST_PORT)
+	return mev_boost_context_module.new_mev_boost_context(mev_boost_service.ip_address, FLASHBOTS_MEV_BOOST_PORT)
 
 
 def get_config(mev_boost_launcher, network_id):
