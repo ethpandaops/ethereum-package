@@ -24,10 +24,7 @@ def launch(plan, mev_boost_launcher, service_name, network_id):
 
 
 def get_config(mev_boost_launcher, network_id):
-	network_name = NETWORK_ID_TO_NAME.get(network_id, "network-{0}".format(network_id))
-
 	command = ["mev-boost"]
-	command.append("-{0}".format(network_name))
 
 	if mev_boost_launcher.should_check_relay:
 		command.append("-relay-check")
@@ -40,6 +37,9 @@ def get_config(mev_boost_launcher, network_id):
 		ports = USED_PORTS,
 		cmd = command,
 		env_vars = {
+			# this is hardcoded to the genesis fork verison on the CL client
+			# TODO remove the hardocding
+			"GENESIS_FORK_VERSION": "0x10000038",
 			"BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(FLASHBOTS_MEV_BOOST_PORT),
 			"SKIP_RELAY_SIGNATURE_CHECK": "true",
 			"RELAYS": mev_boost_launcher.relay_end_points[0]
