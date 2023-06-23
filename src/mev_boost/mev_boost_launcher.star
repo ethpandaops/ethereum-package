@@ -30,11 +30,10 @@ def get_config(mev_boost_launcher, network_id):
 	command.append("-{0}".format(network_name))
 
 	if mev_boost_launcher.should_check_relay:
-		command.append("-relay-check")
+		command.append("-relay-check{0}".format(mev_boost_launcher.should_check_relay))
 
 	if len(mev_boost_launcher.relay_end_points) != 0:
-		command.append("-relays")
-		command.append(",".join(mev_boost_launcher.relay_end_points))
+		command.append("-relays={0}".format(",".join(mev_boost_launcher.relay_end_points)))
 
 	return ServiceConfig(
 		image = FLASHBOTS_MEV_BOOST_IMAGE,
