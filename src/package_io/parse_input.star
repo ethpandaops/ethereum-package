@@ -176,3 +176,23 @@ def default_participant():
 			"validator_extra_params": [],
 			"builder_network_params": None
 	}
+
+
+def enrich_mev(parsed_arguments, mev_prefix, mev_port):
+	for index, participant in enumerate(parsed_arguments.participants):
+		mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
+		if pariticpant.cl_client_type == "lighthouse":
+			participant.validator_extra_params.append("--builder-proposals")
+			participant.beacon_extra_params.append("--builder={0}".format(mev_url))
+		if pariticpant.cl_client_type == "lodestar":
+			participant.validator_extra_params.append("--builder")
+			participant.beacon_extra_params.append("--builder", "--builder.urls={0}".format(mev_url))
+		if pariticpant.cl_client_type == "nimbus":
+			participant.validator_extra_params.append("--payload-builder=true")
+			participant.beacon_extra_params.append("--payload-builder=true", "--payload-builder-urs={0}".format(mev_url))
+		if pariticpant.cl_client_type == "teku":
+			participant.beacon_extra_params.append("--validators-builder-registration-default-enabled=true", "--builder-endpoint=".format(mev_url))
+		if pariticpant.cl_client_type == "prysm":
+			participant.validator_extra_params.append("--enable-builder")
+			participant.beacon_extra_params.append("--http-mev-relay={0}".format(mev_url))
+	return parsed_arguments

@@ -26,6 +26,10 @@ MOCK_MEV_TYPE = "mock"
 def run(plan, args):
 	args_with_right_defaults = parse_input.parse_input(args)
 
+	if args_with_right_defaults.mev_type and args_with_right_defaults.mev_type in ("mock", "full"):
+		# TODO pass the port from mev boost launcher
+		args_with_right_defaults = parse_input.enrich_mev(args, MEV_BOOST_SERVICE_NAME_PREFIX, 18550)
+
 	num_participants = len(args_with_right_defaults.participants)
 	network_params = args_with_right_defaults.network_params
 
