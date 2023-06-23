@@ -55,6 +55,7 @@ def run(plan, args):
 		el_uri = "{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].engine_rpc_port_num)
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		jwt_secret = all_el_client_contexts[0].jwt_secret
+		mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
 
 	# spin up the mev boost contexts if some endpoints for relays have been passed
 	all_mevboost_contexts = []	
