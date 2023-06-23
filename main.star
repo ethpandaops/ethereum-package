@@ -50,7 +50,7 @@ def run(plan, args):
 			if args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == "mock":
 				el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].engine_rpc_port_num)
 				beacon_uri = "http://{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
-				jwt_secret = 
+				jwt_secret = read_file_from_service("el-client-0", "/genesis/output/jwtsecret")
 				mock_mev_launcher_module.launch_mock_mev(el_uri, beacon_uri, jwt_secret)
 			if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
 				mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
@@ -117,3 +117,13 @@ def run(plan, args):
 	return output
 
 
+# TODO remove this
+# pass around jwt more neatly maybe in the context
+def read_file_from_service(plan, service_name, filename):
+    output = plan.exec(
+        service_name = service_name,
+        recipe = ExecRecipe(
+            command = ["/bin/sh", "-c", "cat {} | tr -d '\n'".format(filename)]
+        )
+    )
+    return output["output"]
