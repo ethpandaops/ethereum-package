@@ -124,7 +124,8 @@ def parse_input(input_args):
 		wait_for_finalization=result["wait_for_finalization"],
 		wait_for_verifications=result["wait_for_verifications"],
 		verifications_epoch_limit=result["verifications_epoch_limit"],
-		global_client_log_level=result["global_client_log_level"]
+		global_client_log_level=result["global_client_log_level"],
+		mev_type=result["mev_type"]
 	)
 
 def get_client_log_level_or_default(participant_log_level, global_log_level, client_log_levels):
@@ -139,6 +140,7 @@ def default_input_args():
 	network_params = default_network_params()
 	participants = [default_participant()]
 	return {
+		"mev_type": None
 		"participants":                participants,
 		"network_params":              network_params,
 		"launch_additional_services" : True,

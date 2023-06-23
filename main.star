@@ -10,6 +10,7 @@ prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus
 grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
 mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_launcher.star")
+mock_mev_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mock_mev/mock_mev_launcher.star")
 
 GRAFANA_USER             = "admin"
 GRAFANA_PASSWORD         = "admin"
@@ -46,6 +47,11 @@ def run(plan, args):
 	all_mevboost_contexts = []	
 	for index, participant in enumerate(args_with_right_defaults.participants):
 			mev_boost_context = None
+			if args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == "mock":
+				el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].engine_rpc_port_num)
+				beacon_uri = "http://{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
+				jwt_secret = 
+				mock_mev_launcher_module.launch_mock_mev(el_uri, beacon_uri, jwt_secret)
 			if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
 				mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
 				mev_boost_service_name = "{0}{1}".format(MEV_BOOST_SERVICE_NAME_PREFIX, index)
