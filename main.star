@@ -115,4 +115,5 @@ def run(plan, args):
 		password = GRAFANA_PASSWORD
 	)
 	output = struct(grafana_info = grafana_info)
+	
 	return output
