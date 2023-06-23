@@ -32,15 +32,16 @@ def get_config(mev_boost_launcher, network_id):
 	if mev_boost_launcher.should_check_relay:
 		command.append("-relay-check")
 
-	if len(mev_boost_launcher.relay_end_points) != 0:
-		command.append("-relays {0}".format(",".join(mev_boost_launcher.relay_end_points)))
+	for relay_endpoint in mev_boost_launcher.relay_end_points:
+		command.append("-relays {0}".format(relay_endpoint))
 
 	return ServiceConfig(
 		image = FLASHBOTS_MEV_BOOST_IMAGE,
 		ports = USED_PORTS,
 		cmd = command,
 		env_vars = {
-			"SKIP_RELAY_SIGNATURE_CHECK": "true"
+			"SKIP_RELAY_SIGNATURE_CHECK": "true",
+			"RELAYS": mev_boost_launcher.relay_end_points[0]
 		}
 	)
 
