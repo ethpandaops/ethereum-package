@@ -40,6 +40,7 @@ def get_config(mev_boost_launcher, network_id):
 		ports = USED_PORTS,
 		cmd = command,
 		env_vars = {
+			"BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(FLASHBOTS_MEV_BOOST_PORT),
 			"SKIP_RELAY_SIGNATURE_CHECK": "true",
 			"RELAYS": mev_boost_launcher.relay_end_points[0]
 		}
