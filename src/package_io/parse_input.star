@@ -1,16 +1,16 @@
 DEFAULT_EL_IMAGES = {
-	"geth": "ethereum/client-go:latest",
+	"geth": "ethereum/client-go:v1.11.5",
 	"erigon": "thorax/erigon:devel",
-	"nethermind": "nethermind/nethermind:latest",
+	"nethermind": "nethermind/nethermind:1.14.0",
 	"besu": "hyperledger/besu:develop"
 }
 
 DEFAULT_CL_IMAGES = {
-	"lighthouse": "sigp/lighthouse:latest",
-	"teku":       "consensys/teku:latest",
+	"lighthouse": "sigp/lighthouse:v3.5.0",
+	"teku":       "consensys/teku:23.1",
 	"nimbus":     "statusim/nimbus-eth2:multiarch-latest",
-	"prysm":    "gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest",
-	"lodestar": "chainsafe/lodestar:next",	
+	"prysm":    "prysmaticlabs/prysm/beacon-chain:latest,prysmaticlabs/prysm/validator:latest",
+	"lodestar": "chainsafe/lodestar:v1.7.2",
 }
 
 BESU_NODE_NAME = "besu"
