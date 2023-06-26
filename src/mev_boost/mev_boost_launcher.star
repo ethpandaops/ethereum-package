@@ -37,8 +37,8 @@ def get_config(mev_boost_launcher, network_id):
 		ports = USED_PORTS,
 		cmd = command,
 		env_vars = {
-			# this is hardcoded to the genesis fork verison on the CL client
 			# TODO remove the hardocding
+			# This is set to match this file https://github.com/kurtosis-tech/eth-network-package/blob/main/static_files/genesis-generation-config/cl/config.yaml.tmpl#L11
 			"GENESIS_FORK_VERSION": "0x10000038",
 			"BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(parse_input.FLASHBOTS_MEV_BOOST_PORT),
 			"SKIP_RELAY_SIGNATURE_CHECK": "true",
