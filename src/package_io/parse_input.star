@@ -103,7 +103,6 @@ def parse_input(input_args):
 		fail("nethermind can't be the first or second node")
 
 	if result.get("mev_type") in ("mock", "full"):
-		# TODO pass this
 		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT)
 
 	return struct(

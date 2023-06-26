@@ -6,7 +6,7 @@ FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
 FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
 USED_PORTS = {
-	"api": shared_utils.new_port_spec(FLASHBOTS_MEV_BOOST_PORT, FLASHBOTS_MEV_BOOST_PROTOCOL, wait="5s")
+	"api": shared_utils.new_port_spec(parse_input.FLASHBOTS_MEV_BOOST_PORT, FLASHBOTS_MEV_BOOST_PROTOCOL, wait="5s")
 }
 
 NETWORK_ID_TO_NAME = {
