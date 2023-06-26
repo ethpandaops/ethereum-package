@@ -18,6 +18,11 @@ NETHERMIND_NODE_NAME = "nethermind"
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants")
 
+# MEV Params
+FLASHBOTS_MEV_BOOST_PORT = 18550
+MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
+
+
 def parse_input(input_args):
 	result = default_input_args()
 	for attr in input_args:
@@ -99,7 +104,7 @@ def parse_input(input_args):
 
 	if result.get("mev_type") in ("mock", "full"):
 		# TODO pass this
-		result = enrich_mev_extra_params(result, "mev-boost-", 18550)
+		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT)
 
 	return struct(
 		participants=[struct(

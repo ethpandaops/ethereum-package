@@ -19,7 +19,6 @@ GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
-MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 MEV_BOOST_SHOULD_CHECK_RELAY = True
 MOCK_MEV_TYPE = "mock"
 
@@ -63,7 +62,7 @@ def run(plan, args):
 	if mev_endpoints:
 		for index, participant in enumerate(args_with_right_defaults.participants):
 			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints)
-			mev_boost_service_name = "{0}{1}".format(MEV_BOOST_SERVICE_NAME_PREFIX, index)
+			mev_boost_service_name = "{0}{1}".format(parse_input.MEV_BOOST_SERVICE_NAME_PREFIX, index)
 			mev_boost_context = mev_boost_launcher_module.launch(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
 			all_mevboost_contexts.append(mev_boost_context)
 

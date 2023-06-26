@@ -1,8 +1,8 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_context.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 
 FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
-FLASHBOTS_MEV_BOOST_PORT = 18550
 FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
 USED_PORTS = {
@@ -40,7 +40,7 @@ def get_config(mev_boost_launcher, network_id):
 			# this is hardcoded to the genesis fork verison on the CL client
 			# TODO remove the hardocding
 			"GENESIS_FORK_VERSION": "0x10000038",
-			"BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(FLASHBOTS_MEV_BOOST_PORT),
+			"BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(parse_input.FLASHBOTS_MEV_BOOST_PORT),
 			"SKIP_RELAY_SIGNATURE_CHECK": "true",
 			"RELAYS": mev_boost_launcher.relay_end_points[0]
 		}
