@@ -1,4 +1,4 @@
-shared_utils = import_module("github.com/parithosh/eth2-package/src/shared_utils/shared_utils.star")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 
 
 SERVICE_NAME = "forkmon"

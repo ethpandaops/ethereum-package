@@ -1,5 +1,5 @@
-shared_utils = import_module("github.com/parithosh/eth2-package/src/shared_utils/shared_utils.star")
-mev_boost_context = ("github.com/parithosh/eth2-package/src/mev_boost/mev_boost_context.star")
+shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
+mev_boost_context = ("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_context.star")
 
 FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
 FLASHBOTS_MEV_BOOST_PORT = 18550
