@@ -97,6 +97,10 @@ def parse_input(input_args):
 	if len(result["participants"]) >= 2 and result["participants"][1]["el_client_type"] == NETHERMIND_NODE_NAME:
 		fail("nethermind can't be the first or second node")
 
+	if args.get("mev_type") in ("mock", "full"):
+		# TODO pass this
+		result = enrich_mev_extra_params(result, "mev-boost-", 18550)
+
 	return struct(
 		participants=[struct(
 			el_client_type=participant["el_client_type"],
@@ -126,7 +130,7 @@ def parse_input(input_args):
 		verifications_epoch_limit=result["verifications_epoch_limit"],
 		global_client_log_level=result["global_client_log_level"],
 		mev_type=result["mev_type"],
-	)
+	), result
 
 def get_client_log_level_or_default(participant_log_level, global_log_level, client_log_levels):
 	log_level = participant_log_level
@@ -178,21 +182,21 @@ def default_participant():
 	}
 
 
-def enrich_mev(parsed_arguments, mev_prefix, mev_port):
-	for index, participant in enumerate(parsed_arguments.participants):
+def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
+	for index, participant in enumerate(parsed_arguments_dict["participants"]):
 		mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
-		if participant.cl_client_type == "lighthouse":
-			participant.validator_extra_params.append("--builder-proposals")
-			participant.beacon_extra_params.append("--builder={0}".format(mev_url))
-		if participant.cl_client_type == "lodestar":
-			participant.validator_extra_params.append("--builder")
-			participant.beacon_extra_params.append("--builder", "--builder.urls={0}".format(mev_url))
-		if participant.cl_client_type == "nimbus":
-			participant.validator_extra_params.append("--payload-builder=true")
-			participant.beacon_extra_params.append("--payload-builder=true", "--payload-builder-urs={0}".format(mev_url))
-		if participant.cl_client_type == "teku":
-			participant.beacon_extra_params.append("--validators-builder-registration-default-enabled=true", "--builder-endpoint=".format(mev_url))
-		if participant.cl_client_type == "prysm":
-			participant.validator_extra_params.append("--enable-builder")
-			participant.beacon_extra_params.append("--http-mev-relay={0}".format(mev_url))
+		if participant["cl_client_type"] == "lighthouse":
+			participant["validator_extra_params"].append("--builder-proposals")
+			participant["beacon_extra_params"].append("--builder={0}".format(mev_url))
+		if participant["cl_client_type"] == "lodestar":
+			participant["validator_extra_params"].append("--builder")
+			participant["beacon_extra_params"].append("--builder", "--builder.urls={0}".format(mev_url))
+		if participant["cl_client_type"] == "nimbus":
+			participant["validator_extra_params"].append("--payload-builder=true")
+			participant["beacon_extra_params"].append("--payload-builder=true", "--payload-builder-urs={0}".format(mev_url))
+		if participant["cl_client_type"] == "teku":
+			participant["beacon_extra_params"].append("--validators-builder-registration-default-enabled=true", "--builder-endpoint=".format(mev_url))
+		if participant["cl_client_type"] == "prysm":
+			participant["validator_extra_params"].append("--enable-builder")
+			participant["beacon_extra_params"].append("--http-mev-relay={0}".format(mev_url))
 	return parsed_arguments
