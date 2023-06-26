@@ -97,7 +97,7 @@ def parse_input(input_args):
 	if len(result["participants"]) >= 2 and result["participants"][1]["el_client_type"] == NETHERMIND_NODE_NAME:
 		fail("nethermind can't be the first or second node")
 
-	if args.get("mev_type") in ("mock", "full"):
+	if result.get("mev_type") in ("mock", "full"):
 		# TODO pass this
 		result = enrich_mev_extra_params(result, "mev-boost-", 18550)
 
@@ -199,4 +199,4 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 		if participant["cl_client_type"] == "prysm":
 			participant["validator_extra_params"].append("--enable-builder")
 			participant["beacon_extra_params"].append("--http-mev-relay={0}".format(mev_url))
-	return parsed_arguments
+	return parsed_arguments_dict
