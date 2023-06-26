@@ -29,9 +29,6 @@ def get_config(mev_boost_launcher, network_id):
 	if mev_boost_launcher.should_check_relay:
 		command.append("-relay-check")
 
-	for relay_endpoint in mev_boost_launcher.relay_end_points:
-		command.append("-relays {0}".format(relay_endpoint))
-
 	return ServiceConfig(
 		image = FLASHBOTS_MEV_BOOST_IMAGE,
 		ports = USED_PORTS,
