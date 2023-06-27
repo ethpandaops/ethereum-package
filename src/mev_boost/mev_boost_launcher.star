@@ -1,12 +1,12 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
-mev_boost_context = ("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_context.star")
+mev_boost_context_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_context.star")
+parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 
 FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
-FLASHBOTS_MEV_BOOST_PORT = 18550
 FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
 USED_PORTS = {
-	"api": shared_utils.new_port_spec(FLASHBOTS_MEV_BOOST_PORT, FLASHBOTS_MEV_BOOST_PROTOCOL)
+	"api": shared_utils.new_port_spec(parse_input.FLASHBOTS_MEV_BOOST_PORT, FLASHBOTS_MEV_BOOST_PROTOCOL, wait="5s")
 }
 
 NETWORK_ID_TO_NAME = {
@@ -20,26 +20,27 @@ def launch(plan, mev_boost_launcher, service_name, network_id):
 
 	mev_boost_service = plan.add_service(service_name, config)
 
-	return mev_boost_context.new_mev_boost_context(mev_boost_service.ip_address, FLASHBOTS_MEV_BOOST_PORT)
+	return mev_boost_context_module.new_mev_boost_context(mev_boost_service.ip_address, parse_input.FLASHBOTS_MEV_BOOST_PORT)
 
 
 def get_config(mev_boost_launcher, network_id):
-	network_name = NETWORK_ID_TO_NAME.get(network_id, "network-{0}".format(network_id))
-
 	command = ["mev-boost"]
-	command.append("-{0}".format(network_name))
 
 	if mev_boost_launcher.should_check_relay:
 		command.append("-relay-check")
 
-	if len(mev_boost_launcher.relay_end_points) != 0:
-		command.append("-relays")
-		command.append(",".join(mev_boost_launcher.relay_end_points))
-
 	return ServiceConfig(
 		image = FLASHBOTS_MEV_BOOST_IMAGE,
 		ports = USED_PORTS,
-		cmd = command
+		cmd = command,
+		env_vars = {
+			# TODO remove the hardcoding
+			# This is set to match this file https://github.com/kurtosis-tech/eth-network-package/blob/main/static_files/genesis-generation-config/cl/config.yaml.tmpl#L11
+			"GENESIS_FORK_VERSION": "0x10000038",
+			"BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(parse_input.FLASHBOTS_MEV_BOOST_PORT),
+			"SKIP_RELAY_SIGNATURE_CHECK": "true",
+			"RELAYS": mev_boost_launcher.relay_end_points[0]
+		}
 	)
 
 

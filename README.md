@@ -174,7 +174,13 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     //  The global log level that all clients should log at
     //  Valid values are "error", "warn", "info", "debug", and "trace"
     //  This value will be overridden by participant-specific values
-    "global_client_log_level": "info"
+    "global_client_log_level": "info",
+
+    // Supports three valeus
+    // Default: None - no mev boost, mev builder, mev flood or relays are spun up
+    // mock - mock-builder & mev-boost are spun up
+    // full - mev-boost, relays, flooder and builder are all spun up
+    "mev_type": None
 }
 ```
 </details>
