@@ -185,9 +185,6 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
 ```
 </details>
 
-Note: Following an update starting the network post-merge, `erigon`, and `prysm` clients don't work anymore. Fixes are tracked in the following Github issues:
-- Prysm: [#11508][prysm-issue]
-- Erigon: [#154][erigon-issue]
 
 You can find the latest Kiln compatible docker images here: https://notes.ethereum.org/@launchpad/kiln
 
