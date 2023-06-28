@@ -31,6 +31,8 @@ def launch_mev_relay(plan, network_id, beacon_uri):
                 "GENESIS_FORK_VERSION": "0x10000038",
                 "BELLATRIX_FORK_VERSION": "0x30000038",
                 "CAPELLA_FORK_VERSION": "0x40000038",
+                # this is hardocded but can't be TODO fix this
+                "GENESIS_VALIDATORS_ROOT": "0xd61ea484febacfae5298d52a2b581f3e305a51f3112a9241b968dccf019f7b11"
             }
         )
     )
@@ -49,7 +51,7 @@ def launch_mev_relay(plan, network_id, beacon_uri):
                 "BELLATRIX_FORK_VERSION": "0x30000038",
                 "CAPELLA_FORK_VERSION": "0x40000038",
                 # this is hardocded but can't be TODO fix this
-                "GENESIS_VALIDATOR_ROOT": "0xd61ea484febacfae5298d52a2b581f3e305a51f3112a9241b968dccf019f7b11"
+                "GENESIS_VALIDATORS_ROOT": "0xd61ea484febacfae5298d52a2b581f3e305a51f3112a9241b968dccf019f7b11"
             }
         )
     )
@@ -66,6 +68,8 @@ def launch_mev_relay(plan, network_id, beacon_uri):
                 "GENESIS_FORK_VERSION": "0x10000038",
                 "BELLATRIX_FORK_VERSION": "0x30000038",
                 "CAPELLA_FORK_VERSION": "0x40000038",
+                # this is hardocded but can't be TODO fix this
+                "GENESIS_VALIDATORS_ROOT": "0xd61ea484febacfae5298d52a2b581f3e305a51f3112a9241b968dccf019f7b11"
             }
         )
     )
