@@ -26,7 +26,7 @@ def launch_mev_relay(plan, network_id, beacon_uri):
         name = MEV_RELAY_HOUSEKEEPER,
         config = ServiceConfig(
             image = MEV_BOOST_RELAY_IMAGE,
-            cmd = ["housekeeper", "--network", "custom", "--db", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "--redis-uri", "redis:6379", "--beacon-uris", "[{0}]".format(beacon_uri)],
+            cmd = ["housekeeper", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--redis-uri", "redis:6379", "--beacon-uris", "[{0}]".format(beacon_uri)],
             env_vars={
                 "GENESIS_FORK_VERSION": "0x10000038",
                 "BELLATRIX_FORK_VERSION": "0x30000038",
@@ -39,7 +39,7 @@ def launch_mev_relay(plan, network_id, beacon_uri):
         name = MEV_RELAY_ENDPOINT,
         config = ServiceConfig(
             image = MEV_BOOST_RELAY_IMAGE,
-            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:9062", "--redis-uri", "redis:6379", "--beacon-uris", "[{0}]".format(beacon_uri) ],
+            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:9062", "--redis-uri", "redis:6379", "--beacon-uris", "[{0}]".format(beacon_uri) ],
             ports = {
                 "api": PortSpec(number = 9062, transport_protocol= "TCP")
             },
@@ -56,7 +56,7 @@ def launch_mev_relay(plan, network_id, beacon_uri):
         name = MEV_RELAY_WEBSITE,
         config = ServiceConfig(
             image = MEV_BOOST_RELAY_IMAGE,
-            cmd = ["website", "--network", "custom", "--db", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "--listen-addr", "0.0.0.0:9060", "--redis-uri", "redis:6379", "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)],
+            cmd = ["website", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--listen-addr", "0.0.0.0:9060", "--redis-uri", "redis:6379", "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)],
             ports = {
                 "api": PortSpec(number = 9060, transport_protocol= "TCP")
             },
