@@ -61,7 +61,7 @@ def run(plan, args):
 		mev_endpoints.append(endpoint)
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
-		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params["network_id"], beacon_uri)
+		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uri)
 
 
 	# spin up the mev boost contexts if some endpoints for relays have been passed

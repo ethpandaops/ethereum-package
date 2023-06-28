@@ -26,7 +26,7 @@ def launch_mev_relay(plan, network_id, beacon_uri):
         name = MEV_RELAY_HOUSEKEEPER,
         config = ServiceConfig(
             image = MEV_BOOST_RELAY_IMAGE,
-            cmd = ["housekeeper", "--network", network_name, "--db", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "--redis", "redis:6379", "--beacon-uris", "[{0}]".format(beacon_uri)]
+            cmd = ["housekeeper", "--network", network_name, "--db", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "--redis-uri", "redis:6379", "--beacon-uris", "[{0}]".format(beacon_uri)]
         )
     )
 
