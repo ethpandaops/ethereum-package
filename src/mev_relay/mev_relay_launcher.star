@@ -45,7 +45,7 @@ def launch_mev_relay(plan, network_id, beacon_uri):
         name = MEV_RELAY_WEBSITE,
         config = ServiceConfig(
             image = MEV_BOOST_RELAY_IMAGE,
-                cmd = ["website", "--network", network_name, "--db", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "--listen-addr", "0.0.0.0:9060", "--redis-uri", "redis:6379", "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)],
+            cmd = ["website", "--network", network_name, "--db", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "--listen-addr", "0.0.0.0:9060", "--redis-uri", "redis:6379", "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)],
             ports = {
                 "api": PortSpec(number = 9060, transport_protocol= "TCP")
             }

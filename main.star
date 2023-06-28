@@ -59,7 +59,7 @@ def run(plan, args):
 		jwt_secret = all_el_client_contexts[0].jwt_secret
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
 		mev_endpoints.append(endpoint)
-	elif args_with_defaults_dict.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
+	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params["network_id"], beacon_uri)
 
