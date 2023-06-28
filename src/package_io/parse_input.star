@@ -189,6 +189,7 @@ def default_network_params():
 	}
 
 def default_participant():
+	# TODO add support for mev boost image and extra parameters
 	return {
 			"el_client_type":			"geth",
 			"el_client_image":			"",
