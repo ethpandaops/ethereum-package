@@ -61,6 +61,17 @@ def run(plan, args):
 		mev_endpoints.append(endpoint)
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
+		first_cl_client = all_cl_client_contexts[0]
+		first_client_beacon_name = first_cl_client.beacon_service_name
+		epoch_recipe = GetHttpRequestRecipe(
+			endpoint = "/eth/v1/beacon/states/head/finality_checkpoints",
+			port_id = HTTP_PORT_ID_FOR_FACT,
+			extract = {
+				"finalized_epoch": ".data.finalized.epoch"
+			}
+		)
+		plan.wait(recipe = epoch_recipe, field = "extract.finalized_epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
+		plan.print("epoch 2 reached, can begin mev stuff")
 		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uri)
 		mev_endpoints.append(endpoint)
 
