@@ -12,6 +12,7 @@ grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafan
 testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
 mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_launcher.star")
 mock_mev_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mock_mev/mock_mev_launcher.star")
+mev_relay_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_relay/mev_relay_launcher.star")
 
 GRAFANA_USER				= "admin"
 GRAFANA_PASSWORD			= "admin"
@@ -22,6 +23,7 @@ HTTP_PORT_ID_FOR_FACT = "http"
 
 MEV_BOOST_SHOULD_CHECK_RELAY = True
 MOCK_MEV_TYPE = "mock"
+FULL_MEV_TYPE = "full"
 
 def run(plan, args):
 	args_with_right_defaults, args_with_defaults_dict = parse_input.parse_input(args)
@@ -57,6 +59,10 @@ def run(plan, args):
 		jwt_secret = all_el_client_contexts[0].jwt_secret
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
 		mev_endpoints.append(endpoint)
+	elif args_with_defaults_dict.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
+		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
+
+
 
 	# spin up the mev boost contexts if some endpoints for relays have been passed
 	all_mevboost_contexts = []
