@@ -1,22 +1,27 @@
 DEFAULT_EL_IMAGES = {
-	"geth": "ethereum/client-go:latest",
+	"geth": "ethereum/client-go:v1.11.5",
 	"erigon": "thorax/erigon:devel",
-	"nethermind": "nethermind/nethermind:latest",
+	"nethermind": "nethermind/nethermind:1.14.0",
 	"besu": "hyperledger/besu:develop"
 }
 
 DEFAULT_CL_IMAGES = {
-	"lighthouse": "sigp/lighthouse:latest",
-	"teku":       "consensys/teku:latest",
+	"lighthouse": "sigp/lighthouse:v3.5.0",
+	"teku":       "consensys/teku:23.1",
 	"nimbus":     "statusim/nimbus-eth2:multiarch-latest",
-	"prysm":    "gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest",
-	"lodestar": "chainsafe/lodestar:next",	
+	"prysm":    "prysmaticlabs/prysm/beacon-chain:latest,prysmaticlabs/prysm/validator:latest",
+	"lodestar": "chainsafe/lodestar:v1.7.2",
 }
 
 BESU_NODE_NAME = "besu"
 NETHERMIND_NODE_NAME = "nethermind"
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants")
+
+# MEV Params
+FLASHBOTS_MEV_BOOST_PORT = 18550
+MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
+
 
 def parse_input(input_args):
 	result = default_input_args()
@@ -100,6 +105,9 @@ def parse_input(input_args):
 	if len(result["participants"]) >= 2 and result["participants"][1]["el_client_type"] == NETHERMIND_NODE_NAME:
 		fail("nethermind can't be the first or second node")
 
+	if result.get("mev_type") in ("mock", "full"):
+		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT)
+
 	return struct(
 		participants=[struct(
 			el_client_type=participant["el_client_type"],
@@ -128,8 +136,9 @@ def parse_input(input_args):
 		wait_for_finalization=result["wait_for_finalization"],
 		wait_for_verifications=result["wait_for_verifications"],
 		verifications_epoch_limit=result["verifications_epoch_limit"],
-		global_client_log_level=result["global_client_log_level"]
-	)
+		global_client_log_level=result["global_client_log_level"],
+		mev_type=result["mev_type"],
+	), result
 
 def get_client_log_level_or_default(participant_log_level, global_log_level, client_log_levels):
 	log_level = participant_log_level
@@ -143,6 +152,7 @@ def default_input_args():
 	network_params = default_network_params()
 	participants = [default_participant()]
 	return {
+		"mev_type": None,
 		"participants":                participants,
 		"network_params":              network_params,
 		"launch_additional_services" : True,
@@ -179,3 +189,24 @@ def default_participant():
 			"validator_extra_params": [],
 			"builder_network_params": None
 	}
+
+
+# TODO perhaps clean this up into a map
+def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
+	for index, participant in enumerate(parsed_arguments_dict["participants"]):
+		mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
+		if participant["cl_client_type"] == "lighthouse":
+			participant["validator_extra_params"].append("--builder-proposals")
+			participant["beacon_extra_params"].append("--builder={0}".format(mev_url))
+		if participant["cl_client_type"] == "lodestar":
+			participant["validator_extra_params"].append("--builder")
+			participant["beacon_extra_params"].append("--builder", "--builder.urls={0}".format(mev_url))
+		if participant["cl_client_type"] == "nimbus":
+			participant["validator_extra_params"].append("--payload-builder=true")
+			participant["beacon_extra_params"].append("--payload-builder=true", "--payload-builder-urs={0}".format(mev_url))
+		if participant["cl_client_type"] == "teku":
+			participant["beacon_extra_params"].append("--validators-builder-registration-default-enabled=true", "--builder-endpoint=".format(mev_url))
+		if participant["cl_client_type"] == "prysm":
+			participant["validator_extra_params"].append("--enable-builder")
+			participant["beacon_extra_params"].append("--http-mev-relay={0}".format(mev_url))
+	return parsed_arguments_dict

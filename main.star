@@ -10,6 +10,7 @@ prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus
 grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
 mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_launcher.star")
+mock_mev_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mock_mev/mock_mev_launcher.star")
 
 GRAFANA_USER             = "admin"
 GRAFANA_PASSWORD         = "admin"
@@ -18,11 +19,11 @@ GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
-MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 MEV_BOOST_SHOULD_CHECK_RELAY = True
+MOCK_MEV_TYPE = "mock"
 
 def run(plan, args):
-	args_with_right_defaults = parse_input.parse_input(args)
+	args_with_right_defaults, args_with_defaults_dict = parse_input.parse_input(args)
 
 	num_participants = len(args_with_right_defaults.participants)
 	network_params = args_with_right_defaults.network_params
@@ -34,22 +35,35 @@ def run(plan, args):
 	plan.print("Read the prometheus, grafana templates")
 
 	plan.print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
-	all_participants, cl_genesis_timestamp = eth_network_module.run(plan, args)
+	all_participants, cl_genesis_timestamp = eth_network_module.run(plan, args_with_defaults_dict)
 
 	all_el_client_contexts = []
 	all_cl_client_contexts = []
 	for participant in all_participants:
 		all_el_client_contexts.append(participant.el_client_context)
 		all_cl_client_contexts.append(participant.cl_client_context)
-	
-	# spin up mev boost contexts
+
+
+	mev_endpoints = []
+	# passed external relays get priority
+	# perhaps add mev_type External or remove this
+	if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
+		mev_endpoints = participant.builder_network_params.relay_end_points
+	# otherwise dummy relays spinup if chosen
+	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == MOCK_MEV_TYPE:
+		el_uri = "{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].engine_rpc_port_num)
+		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
+		jwt_secret = all_el_client_contexts[0].jwt_secret
+		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
+		mev_endpoints.append(endpoint)
+
+	# spin up the mev boost contexts if some endpoints for relays have been passed
 	all_mevboost_contexts = []	
-	for index, participant in enumerate(args_with_right_defaults.participants):
-			mev_boost_context = None
-			if hasattr(participant, "builder_network_params") and participant.builder_network_params != None:
-				mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, participant.builder_network_params.relay_endpoints)
-				mev_boost_service_name = "{0}{1}".format(MEV_BOOST_SERVICE_NAME_PREFIX, index)
-				mev_boost_context = mev_boost_launcher_module.launch_mevboost(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
+	if mev_endpoints:
+		for index, participant in enumerate(args_with_right_defaults.participants):
+			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints)
+			mev_boost_service_name = "{0}{1}".format(parse_input.MEV_BOOST_SERVICE_NAME_PREFIX, index)
+			mev_boost_context = mev_boost_launcher_module.launch(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id)
 			all_mevboost_contexts.append(mev_boost_context)
 
 	if not args_with_right_defaults.launch_additional_services:
@@ -108,6 +122,5 @@ def run(plan, args):
 		password = GRAFANA_PASSWORD
 	)
 	output = struct(grafana_info = grafana_info)
+
 	return output
-
-
