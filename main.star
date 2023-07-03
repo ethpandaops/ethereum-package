@@ -1,9 +1,9 @@
 parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 
 static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
-genesis_constants = import_module("github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star")
+genesis_constants = import_module("github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star@gyani/prysm-fix")
 
-eth_network_module = import_module("github.com/kurtosis-tech/eth-network-package/main.star")
+eth_network_module = import_module("github.com/kurtosis-tech/eth-network-package/main.star@gyani/prysm-fix")
 transaction_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star")
 cl_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/cl_forkmon/cl_forkmon_launcher.star")
 el_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/el_forkmon/el_forkmon_launcher.star")
@@ -61,7 +61,7 @@ def run(plan, args):
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
 		mev_endpoints.append(endpoint)		
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
-		el_uri = "{0}:{1}".format(all_el_client_contexts[1].ip_addr, all_el_client_contexts[0].rpc_port_num)
+		el_uri = "{0}:{1}".format(all_el_client_contexts[1].ip_addr, 28545)
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		first_cl_client = all_cl_client_contexts[0]
 		first_client_beacon_name = first_cl_client.beacon_service_name
