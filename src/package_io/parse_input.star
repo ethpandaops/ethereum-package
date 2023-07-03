@@ -223,4 +223,22 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 		if participant["cl_client_type"] == "prysm":
 			participant["validator_extra_params"].append("--enable-builder")
 			participant["beacon_extra_params"].append("--http-mev-relay={0}".format(mev_url))
+
+	num_participants = len(parsed_arguments_dict["participants"])
+
+	mev_participant = {
+		"el_client_type": "geth",
+		"el_client_image": "flashbots/builder",
+		"el_client_log_level":    "",
+		"cl_client_type":         "prysm",
+		"cl_client_image":        "prysmaticlabs/prysm-beacon-chain:latest,prysmaticlabs/prysm-validator:latest",
+		"cl_client_log_level":    "",
+		"beacon_extra_params":    ["--http-mev-relay={0}".format(mev_url)],
+		"el_extra_params": ["--builder", "--builder.beacon_endpoints=http://cl-client-{0}-beacon:4000".format(num_participants), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root=0xd61ea484febacfae5298d52a2b581f3e305a51f3112a9241b968dccf019f7b11",  "--builder.listen_addr=0.0.0.0:28545", "--miner.extradata=Illuminate Dmocratize Dstribute", "--miner.algotype=greedy", "--builder.remote_relay_endpoint=http://mev-relay-api:9062"],
+		"validator_extra_params": ["--enable-builder"],
+		"builder_network_params": None
+	}
+
+	parsed_arguments_dict["participants"].append(mev_participant)
+
 	return parsed_arguments_dict
