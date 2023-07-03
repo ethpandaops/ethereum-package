@@ -40,7 +40,8 @@ jobs:
 
       - run: kurtosis engine restart
 
-      - run: kurtosis run ${PWD} '{"mev_type" : "full"}'
+      - run: | 
+          kurtosis run ${PWD} '{"mev_type" : "full"}'
 
   check_latest_version:
     executor: ubuntu_vm
