@@ -59,12 +59,13 @@ def run(plan, args):
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		jwt_secret = all_el_client_contexts[0].jwt_secret
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
-		mev_endpoints.append(endpoint)
-		mev_flood_module.launch_mev_flood(el_uri)
+		mev_endpoints.append(endpoint)		
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
+		el_uri = "{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].engine_rpc_port_num)
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		first_cl_client = all_cl_client_contexts[0]
 		first_client_beacon_name = first_cl_client.beacon_service_name
+		mev_flood_module.launch_mev_flood(el_uri)
 		epoch_recipe = GetHttpRequestRecipe(
 			endpoint = "/eth/v1/beacon/states/head/finality_checkpoints",
 			port_id = HTTP_PORT_ID_FOR_FACT,
