@@ -70,10 +70,10 @@ def run(plan, args):
 			endpoint = "/eth/v1/beacon/blocks/head",
 			port_id = HTTP_PORT_ID_FOR_FACT,
 			extract = {
-				"finalized_epoch": ".data.attestations[0].target.epoch"
+				"epoch": ".data.message.body.attestations[0].data.target.epoch"
 			}
 		)
-		plan.wait(recipe = epoch_recipe, field = "extract.finalized_epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
+		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
 		plan.print("epoch 2 reached, can begin mev stuff")
 		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uri)
 		mev_endpoints.append(endpoint)
