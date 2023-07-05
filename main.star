@@ -164,4 +164,4 @@ def get_genesis_validators_root(plan, validator_service_name):
         )
     )
 
-    plan.print(response["output"])
+    return response["output"]
