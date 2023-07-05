@@ -25,6 +25,7 @@ HTTP_PORT_ID_FOR_FACT = "http"
 MEV_BOOST_SHOULD_CHECK_RELAY = True
 MOCK_MEV_TYPE = "mock"
 FULL_MEV_TYPE = "full"
+PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
 def run(plan, args):
 	args_with_right_defaults, args_with_defaults_dict = parse_input.parse_input(args)
