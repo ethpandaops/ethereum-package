@@ -62,7 +62,7 @@ def run(plan, args):
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
 		mev_endpoints.append(endpoint)		
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
-		validator_root = get_genesis_validators_root(plan, all_el_client_contexts[0].client_name)
+		validator_root = get_genesis_validators_root(plan, all_cl_client_contexts[0].beacon_service_name)
 		el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num)
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		first_cl_client = all_cl_client_contexts[0]
