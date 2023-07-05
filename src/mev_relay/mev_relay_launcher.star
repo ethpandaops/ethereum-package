@@ -15,25 +15,27 @@ NETWORK_ID_TO_NAME = {
 	"3":        "ropsten",
 }
 
-def launch_mev_relay(plan, network_id, beacon_uri):
+def launch_mev_relay(plan, network_id, beacon_uri, validator_root):
     redis = redis_module.run(plan, {})
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(plan, {"password": "postgres", "user": "postgres", "database": "postgres", "name": "postgres"})
 
     network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
 
+    # TODO(maybe) remove hardocded values for the forks
+    env_vars= {
+        "GENESIS_FORK_VERSION": "0x10000038",
+        "BELLATRIX_FORK_VERSION": "0x30000038",
+        "CAPELLA_FORK_VERSION": "0x40000038",
+        "GENESIS_VALIDATORS_ROOT": validator_root
+    }
+
     plan.add_service(
         name = MEV_RELAY_HOUSEKEEPER,
         config = ServiceConfig(
             image = MEV_BOOST_RELAY_IMAGE,
             cmd = ["housekeeper", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--redis-uri", "redis:6379", "--beacon-uris", "http://" + beacon_uri],
-            env_vars={
-                "GENESIS_FORK_VERSION": "0x10000038",
-                "BELLATRIX_FORK_VERSION": "0x30000038",
-                "CAPELLA_FORK_VERSION": "0x40000038",
-                # this is hardocded but can't be TODO fix this
-                "GENESIS_VALIDATORS_ROOT": "0xd61ea484febacfae5298d52a2b581f3e305a51f3112a9241b968dccf019f7b11"
-            }
+            env_vars= env_vars
         )
     )
 
@@ -46,14 +48,7 @@ def launch_mev_relay(plan, network_id, beacon_uri):
             ports = {
                 "api": PortSpec(number = 9062, transport_protocol= "TCP")
             },
-            # TODO remove hardcoding
-            env_vars={
-                "GENESIS_FORK_VERSION": "0x10000038",
-                "BELLATRIX_FORK_VERSION": "0x30000038",
-                "CAPELLA_FORK_VERSION": "0x40000038",
-                # this is hardocded but can't be TODO fix this
-                "GENESIS_VALIDATORS_ROOT": "0xd61ea484febacfae5298d52a2b581f3e305a51f3112a9241b968dccf019f7b11"
-            }
+            env_vars= env_vars
         )
     )
 
@@ -65,13 +60,7 @@ def launch_mev_relay(plan, network_id, beacon_uri):
             ports = {
                 "api": PortSpec(number = 9060, transport_protocol= "TCP")
             },
-            env_vars={
-                "GENESIS_FORK_VERSION": "0x10000038",
-                "BELLATRIX_FORK_VERSION": "0x30000038",
-                "CAPELLA_FORK_VERSION": "0x40000038",
-                # this is hardocded but can't be TODO fix this
-                "GENESIS_VALIDATORS_ROOT": "0xd61ea484febacfae5298d52a2b581f3e305a51f3112a9241b968dccf019f7b11"
-            }
+            env_vars= env_vars
         )
     )
 

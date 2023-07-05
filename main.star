@@ -61,6 +61,7 @@ def run(plan, args):
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
 		mev_endpoints.append(endpoint)		
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
+		validator_root = get_genesis_validators_root(plan, all_el_client_contexts[0].client_name)
 		el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num)
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		first_cl_client = all_cl_client_contexts[0]
@@ -75,7 +76,7 @@ def run(plan, args):
 		)
 		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
 		plan.print("epoch 2 reached, can begin mev stuff")
-		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uri)
+		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uri, validator_root)
 		mev_flood_module.spam_in_background(plan, el_uri)
 		mev_endpoints.append(endpoint)
 
@@ -152,3 +153,14 @@ def run(plan, args):
 	output = struct(grafana_info = grafana_info)
 
 	return output
+
+# TODO Move this logic to eth-network-package
+def get_genesis_validators_root(plan, validator_service_name):
+    response = plan.exec(
+        service_name = validator_service_name,
+        recipe = ExecRecipe(
+            command = ["/bin/sh", "-c", "cat {0} | grep genesis_validators_root | grep -oE '0x[0-9a-fA-F]+'".format(PATH_TO_PARSED_BEACON_STATE)],
+        )
+    )
+
+    plan.print(response["output"])
