@@ -1,4 +1,5 @@
-MEV_FLOOD_IMAGE = "flashbots/mev-flood"
+# TODO replace with official image when private key is passable for user accounts
+MEV_FLOOD_IMAGE = "h4ck3rk3y/mev-flood"
 
 
 def launch_mev_flood(plan, el_uri):

@@ -228,7 +228,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 
 	mev_participant = {
 		"el_client_type": "geth",
-		"el_client_image": "flashbots/builder",
+		# TODO replace with actual when flashbots/builder is published
+		"el_client_image": "h4ck3rk3y/builder",
 		"el_client_log_level":    "",
 		"cl_client_type":         "prysm",
 		"cl_client_image":        "prysmaticlabs/prysm-beacon-chain:latest,prysmaticlabs/prysm-validator:latest",
