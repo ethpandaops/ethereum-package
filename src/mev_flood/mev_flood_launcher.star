@@ -22,6 +22,6 @@ def spam_in_background(plan, el_uri):
     plan.exec(
         service_name = "mev-flood",
         recipe = ExecRecipe(
-            command = ["/bin/sh", "-c", "nohup ./run spam -r {0} -k 0xef5177cd0b6b21c87db5a0bf35d4084a8a57a9d6a064f86d51ac85f2b873a4e2 -l deployment.json  >/dev/null 2>&1 &".format(el_uri)]
+            command = ["/bin/sh", "-c", "nohup ./run spam -r {0} -k 0xef5177cd0b6b21c87db5a0bf35d4084a8a57a9d6a064f86d51ac85f2b873a4e2 -l deployment.json  >main.log 2>&1 &".format(el_uri)]
         )
     )

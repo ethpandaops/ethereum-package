@@ -76,6 +76,7 @@ def run(plan, args):
 		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
 		plan.print("epoch 2 reached, can begin mev stuff")
 		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uri)
+		mev_flood_module.spam_in_background(plan, el_uri)
 		mev_endpoints.append(endpoint)
 
 
