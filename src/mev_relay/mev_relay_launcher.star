@@ -39,7 +39,6 @@ def launch_mev_relay(plan, network_id, beacon_uri, validator_root):
         )
     )
 
-    # TODO make this wait till the slot is 64
     api = plan.add_service(
         name = MEV_RELAY_ENDPOINT,
         config = ServiceConfig(
