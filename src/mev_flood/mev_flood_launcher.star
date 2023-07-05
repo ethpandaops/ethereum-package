@@ -7,7 +7,7 @@ def launch_mev_flood(plan, el_uri):
         name = "mev-flood",
         config = ServiceConfig(
             image = MEV_FLOOD_IMAGE,
-            entrypoint = ["tail", "-f", "/dev/null"]
+            entrypoint = ["/bin/sh", "-c", "touch main.log && tail -F main.log"]
         )
     )
 
