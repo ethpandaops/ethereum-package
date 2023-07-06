@@ -40,10 +40,7 @@ jobs:
 
       - run: kurtosis engine restart
 
-      - run:
-          command: |
-            kurtosis run ${PWD} '{"mev_type" : "full"}'
-          no_output_timeout: 30m
+      - run: kurtosis run ${PWD}
 
   check_latest_version:
     executor: ubuntu_vm
