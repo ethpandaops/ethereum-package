@@ -226,6 +226,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 
 	num_participants = len(parsed_arguments_dict["participants"])
 
+	mev_url = "http://{0}{1}:{2}".format(mev_prefix, num_participants, mev_port)
+
 	mev_participant = {
 		"el_client_type": "geth",
 		# TODO replace with actual when flashbots/builder is published
