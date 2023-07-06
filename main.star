@@ -64,7 +64,8 @@ def run(plan, args):
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
 		validator_root = get_genesis_validators_root(plan, all_cl_client_contexts[0].beacon_service_name)
 		el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num)
-		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
+		beacon_uri = ["http://{0}:{1}".format(context.ip_addr, context.http_port_num) for context in all_cl_client_contexts]
+		beacon_uris = ",".join(beacon_uri)
 		first_cl_client = all_cl_client_contexts[0]
 		first_client_beacon_name = first_cl_client.beacon_service_name
 		mev_flood_module.launch_mev_flood(plan, el_uri)
@@ -77,7 +78,7 @@ def run(plan, args):
 		)
 		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
 		plan.print("epoch 2 reached, can begin mev stuff")
-		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uri, validator_root)
+		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uris, validator_root)
 		mev_flood_module.spam_in_background(plan, el_uri)
 		mev_endpoints.append(endpoint)
 

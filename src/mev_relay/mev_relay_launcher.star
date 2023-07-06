@@ -18,7 +18,7 @@ NETWORK_ID_TO_NAME = {
 	"3":        "ropsten",
 }
 
-def launch_mev_relay(plan, network_id, beacon_uri, validator_root):
+def launch_mev_relay(plan, network_id, beacon_uris, validator_root):
     redis = redis_module.run(plan, {})
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(plan, {"password": "postgres", "user": "postgres", "database": "postgres", "name": "postgres"})
@@ -37,7 +37,7 @@ def launch_mev_relay(plan, network_id, beacon_uri, validator_root):
         name = MEV_RELAY_HOUSEKEEPER,
         config = ServiceConfig(
             image = MEV_BOOST_RELAY_IMAGE,
-            cmd = ["housekeeper", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--redis-uri", "redis:6379", "--beacon-uris", "http://" + beacon_uri],
+            cmd = ["housekeeper", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris],
             env_vars= env_vars
         )
     )
@@ -46,7 +46,7 @@ def launch_mev_relay(plan, network_id, beacon_uri, validator_root):
         name = MEV_RELAY_ENDPOINT,
         config = ServiceConfig(
             image = MEV_BOOST_RELAY_IMAGE,
-            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", "redis:6379", "--beacon-uris", "http://" + beacon_uri],
+            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris],
             ports = {
                 "api": PortSpec(number = MEV_RELAY_ENDPOINT_PORT, transport_protocol= "TCP")
             },
