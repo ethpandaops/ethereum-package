@@ -233,13 +233,12 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 		# TODO replace with actual when flashbots/builder is published
 		"el_client_image": "h4ck3rk3y/builder",
 		"el_client_log_level":    "",
-		# TODO perhaps replace prysm with lighthouse
-		"cl_client_type":         "prysm",
-		"cl_client_image":        "prysmaticlabs/prysm-beacon-chain:latest,prysmaticlabs/prysm-validator:latest",
+		"cl_client_type":         "lighthouse",
+		"cl_client_image":        "sigp/lighthouse:latest",
 		"cl_client_log_level":    "",
-		"beacon_extra_params":    ["--http-mev-relay={0}".format(mev_url)],
+		"beacon_extra_params":    ["--builder={0}".format(mev_url)],
 		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-client-{0}-beacon:4000".format(num_participants), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root=0xd61ea484febacfae5298d52a2b581f3e305a51f3112a9241b968dccf019f7b11",  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy"],
-		"validator_extra_params": ["--enable-builder"],
+		"validator_extra_params": ["--builder-proposals"],
 		"builder_network_params": None
 	}
 
