@@ -125,8 +125,7 @@ def parse_input(input_args):
 			deposit_contract_address=result["network_params"]["deposit_contract_address"],
 			seconds_per_slot=result["network_params"]["seconds_per_slot"],
 			slots_per_epoch=result["network_params"]["slots_per_epoch"],
-			capella_fork_epoch=result["network_params"]["capella_fork_epoch"],
-            deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
+      deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
 			genesis_delay=result["network_params"]["genesis_delay"]
 		),
 		launch_additional_services=result["launch_additional_services"],
@@ -169,7 +168,6 @@ def default_network_params():
 		"seconds_per_slot":                      12,
 		"slots_per_epoch":                       32,
 		"genesis_delay":                         120,
-		"capella_fork_epoch":                    0,
 		"deneb_fork_epoch":                      5
 	}
 
