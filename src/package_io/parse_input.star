@@ -90,9 +90,6 @@ def parse_input(input_args):
 	if result["network_params"]["genesis_delay"] == 0:
 		fail("genesis_delay is 0 needs to be > 0 ")
 
-	if result["network_params"]["capella_fork_epoch"] == 0:
-		fail("capella_fork_epoch is 0 needs to be > 0 ")
-
 	if result["network_params"]["deneb_fork_epoch"] == 0:
 		fail("deneb_fork_epoch is 0 needs to be > 0 ")
 
@@ -172,7 +169,7 @@ def default_network_params():
 		"seconds_per_slot":                      12,
 		"slots_per_epoch":                       32,
 		"genesis_delay":                         120,
-		"capella_fork_epoch":                   2,
+		"capella_fork_epoch":                   0,
 		"deneb_fork_epoch":                     5
 	}
 
