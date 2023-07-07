@@ -176,16 +176,14 @@ def default_network_params():
 	# this is temporary till we get params working
 	return {
 		"preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
-		"num_validator_keys_per_node":	64,
-		"network_id":					"3151908",
-		"deposit_contract_address":		"0x4242424242424242424242424242424242424242",
-		"seconds_per_slot":				12,
-		"slots_per_epoch":				32,
-		"genesis_delay":				120,
-		"capella_fork_epoch":			1,
-		# arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42
-		# this will take 53~ hoours for now
-		"deneb_fork_epoch":				500,
+		"num_validator_keys_per_node":           64,
+		"network_id":                            "3151908",
+		"deposit_contract_address":              "0x4242424242424242424242424242424242424242",
+		"seconds_per_slot":                      12,
+		"slots_per_epoch":                       32,
+		"genesis_delay":                         120,
+		"capella_fork_epoch":                   2,
+		"deneb_fork_epoch":                     500
 	}
 
 def default_participant():
