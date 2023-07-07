@@ -15,6 +15,7 @@ DEFAULT_CL_IMAGES = {
 
 BESU_NODE_NAME = "besu"
 NETHERMIND_NODE_NAME = "nethermind"
+NIMBUS_NODE_NAME = "nimbus"
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants")
 
