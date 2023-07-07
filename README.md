@@ -3,7 +3,7 @@ Ethereum Package
 
 This is a [Kurtosis Starlark Package][starlark-docs] that will:
 
-1. Generate EL & CL genesis information using [this genesis generator](https://github.com/skylenet/ethereum-genesis-generator)
+1. Generate EL & CL genesis information using [this genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator)
 1. Spin up a network of Eth2 Beacon/validator clients
 1. Add [a transaction spammer](https://github.com/kurtosis-tech/tx-fuzz) that will repeatedly send transactions to the network
 1. Launch [a consensus monitor](https://github.com/ralexstokes/ethereum_consensus_monitor) instance attached to the network

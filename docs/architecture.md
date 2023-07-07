@@ -95,7 +95,7 @@ Once the Ethereum network is up and running, verification logic will be run to e
 [main-function]: https://github.com/kurtosis-tech/eth2-package/blob/main/main.star#22
 [package-io]: https://github.com/kurtosis-tech/eth2-package/tree/main/src/package_io
 [participant-network]: https://github.com/kurtosis-tech/eth2-package/tree/main/src/participant_network
-[ethereum-genesis-generator]: https://github.com/skylenet/ethereum-genesis-generator
+[ethereum-genesis-generator]: https://github.com/ethpandaops/ethereum-genesis-generator
 [static-files]: https://github.com/kurtosis-tech/eth2-package/tree/main/static_files
 [testnet-verifier]: https://github.com/kurtosis-tech/eth2-package/tree/main/src/testnet_verifier
 
