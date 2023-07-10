@@ -84,7 +84,7 @@ def run(plan, args):
 
 	plan.print("Launching el forkmon")
 	el_forkmon_config_template = read_file(static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH)
-	el_forkmon.launch_el_forkmon(plan, el_forkmon_config_template, all_cl_client_contexts)
+	el_forkmon.launch_el_forkmon(plan, el_forkmon_config_template, all_el_client_contexts)
 	plan.print("Succesfully launched execution layer forkmon")
 
 	plan.print("Launching prometheus...")
