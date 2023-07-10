@@ -19,18 +19,18 @@ USED_PORTS = {
 def launch_cl-forkmon(
 		plan,
 		config_template,
-		cl_client_contexts,
+		el_client_contexts,
 		genesis_unix_timestamp,
 		seconds_per_slot,
 		slots_per_epoch
 	):
 
-	all_cl_client_info = []
-	for client in cl_client_contexts:
-		client_info = new_cl_client_info(client.ip_addr, client.http_port_num)
-		all_cl_client_info.append(client_info)
+	all_el_client_info = []
+	for client in el_client_contexts:
+		client_info = new_el_client_info(client.ip_addr, client.http_port_num, client.name)
+		all_el_client_info.append(client_info)
 
-	template_data = new_config_template_data(HTTP_PORT_NUMBER, all_cl_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp)
+	template_data = new_config_template_data(HTTP_PORT_NUMBER, all_el_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp)
 
 	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
@@ -51,22 +51,23 @@ def get_config(config_files_artifact_name):
 		files = {
 			FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
 		},
-		cmd = ["--config-path", config_file_path]
+		cmd = [config_file_path]
 	)
 
 
-def new_config_template_data(listen_port_num, cl_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp):
+def new_config_template_data(listen_port_num, el_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp):
 	return {
 		"ListenPortNum": listen_port_num,
-		"CLClientInfo": cl_client_info,
+		"ELClientInfo": el_client_info,
 		"SecondsPerSlot": seconds_per_slot,
 		"SlotsPerEpoch": slots_per_epoch,
 		"GenesisUnixTimestamp": genesis_unix_timestamp,
 	}
 
 
-def new_cl_client_info(ip_addr, port_num):
+def new_el_client_info(ip_addr, port_num, el_client_name):
 	return {
 		"IPAddr": ip_addr,
 		"PortNum": port_num
+		"Name": el_client_name
 	}
