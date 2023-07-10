@@ -1,21 +1,13 @@
-[network]
-name = "pithos"
-etherscan_api_key = "some-etherscan-api-key"
-
-[consensus_chain]
-seconds_per_slot = {{ .SecondsPerSlot }}
-slots_per_epoch = {{ .SlotsPerEpoch }}
-genesis_time = {{ .GenesisUnixTimestamp }}
-
-[weak_subjectivity]
-provider_endpoint = "http://eth2-ws-provider_eth2_ws_server_1:80"
-
-[monitor]
-output_dir = "public"
-port = {{ .ListenPortNum }}
-
-{{ range $clClient := .CLClientInfo }}
-[[monitor.endpoints]]
-consensus = "http://{{ $clClient.IPAddr }}:{{ $clClient.PortNum }}"
-execution = "N/A"   # This doesn't seem to be used
-{{ end }}
+# How often to reload data from the nodes
+reload_interval = "10s"
+# If specified, a http server will serve static content here
+server_address = "0.0.0.0:80"
+# Shown in the document title, if specified
+chain_name="kurtosis-chain"
+# Local or non third party connection require rpc kind
+{{ range $elClient := .ELClientInfo }}
+[[clients]]
+  url  = "http://{{ $elClient.IPAddr }}:{{ $elClient.PortNum }}"
+  name = "{{ $elClient.Name }}"
+  kind = "rpc"
+{{- end }}

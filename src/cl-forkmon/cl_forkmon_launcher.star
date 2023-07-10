@@ -1,13 +1,13 @@
 shared_utils = import_module("github.com/barnabasbusa/eth2-package/src/shared_utils/shared_utils.star")
 
 
-SERVICE_NAME = "forkmon"
-IMAGE_NAME = "skylenet/nodemonitor:darkmode"
+SERVICE_NAME = "cl-forkmon"
+IMAGE_NAME = "ralexstokes/ethereum_consensus_monitor:latest"
 
 HTTP_PORT_ID     = "http"
 HTTP_PORT_NUMBER = 80
 
-FORKMON_CONFIG_FILENAME = "forkmon-config.toml"
+FORKMON_CONFIG_FILENAME = "cl-forkmon-config.toml"
 
 FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
@@ -19,24 +19,24 @@ USED_PORTS = {
 def launch_cl-forkmon(
 		plan,
 		config_template,
-		el_client_contexts,
+		cl_client_contexts,
 		genesis_unix_timestamp,
 		seconds_per_slot,
 		slots_per_epoch
 	):
 
-	all_el_client_info = []
-	for client in el_client_contexts:
-		client_info = new_el_client_info(client.ip_addr, client.http_port_num, client.client_name)
-		all_el_client_info.append(client_info)
+	all_cl_client_info = []
+	for client in cl_client_contexts:
+		client_info = new_cl_client_info(client.ip_addr, client.http_port_num)
+		all_cl_client_info.append(client_info)
 
-	template_data = new_config_template_data(HTTP_PORT_NUMBER, all_el_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp)
+	template_data = new_config_template_data(HTTP_PORT_NUMBER, all_cl_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp)
 
 	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "forkmon-config")
+	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "cl-forkmon-config")
 
 	config = get_config(config_files_artifact_name)
 
@@ -51,23 +51,22 @@ def get_config(config_files_artifact_name):
 		files = {
 			FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
 		},
-		cmd = [config_file_path]
+		cmd = ["--config-path", config_file_path]
 	)
 
 
-def new_config_template_data(listen_port_num, el_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp):
+def new_config_template_data(listen_port_num, cl_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp):
 	return {
 		"ListenPortNum": listen_port_num,
-		"ELClientInfo": el_client_info,
+		"CLClientInfo": cl_client_info,
 		"SecondsPerSlot": seconds_per_slot,
 		"SlotsPerEpoch": slots_per_epoch,
 		"GenesisUnixTimestamp": genesis_unix_timestamp,
 	}
 
 
-def new_el_client_info(ip_addr, port_num, el_client_name):
+def new_cl_client_info(ip_addr, port_num):
 	return {
 		"IPAddr": ip_addr,
-		"PortNum": port_num,
-		"Name": el_client_name
+		"PortNum": port_num
 	}
