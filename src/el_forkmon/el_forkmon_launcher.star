@@ -5,7 +5,7 @@ SERVICE_NAME = "el-forkmon"
 IMAGE_NAME = "skylenet/nodemonitor:darkmode"
 
 HTTP_PORT_ID     = "http"
-HTTP_PORT_NUMBER = 8081
+HTTP_PORT_NUMBER = 8080
 
 EL_FORKMON_CONFIG_FILENAME = "el-forkmon-config.toml"
 
