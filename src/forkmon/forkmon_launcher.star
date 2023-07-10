@@ -27,7 +27,7 @@ def launch_cl-forkmon(
 
 	all_el_client_info = []
 	for client in el_client_contexts:
-		client_info = new_el_client_info(client.ip_addr, client.http_port_num, client.name)
+		client_info = new_el_client_info(client.ip_addr, client.http_port_num, client.client_name)
 		all_el_client_info.append(client_info)
 
 	template_data = new_config_template_data(HTTP_PORT_NUMBER, all_el_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp)
@@ -68,6 +68,6 @@ def new_config_template_data(listen_port_num, el_client_info, seconds_per_slot, 
 def new_el_client_info(ip_addr, port_num, el_client_name):
 	return {
 		"IPAddr": ip_addr,
-		"PortNum": port_num
+		"PortNum": port_num,
 		"Name": el_client_name
 	}
