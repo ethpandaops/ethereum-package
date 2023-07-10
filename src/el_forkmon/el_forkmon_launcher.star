@@ -52,7 +52,7 @@ def get_config(config_files_artifact_name):
 	)
 
 
-def new_config_template_data(listen_port_num, el_client_info, seconds_per_slot, slots_per_epoch, genesis_unix_timestamp):
+def new_config_template_data(listen_port_num, el_client_info):
 	return {
 		"ListenPortNum": listen_port_num,
 		"ELClientInfo": el_client_info,
