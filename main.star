@@ -6,6 +6,7 @@ genesis_constants = import_module("github.com/barnabasbusa/eth-network-package/s
 eth_network_module = import_module("github.com/barnabasbusa/eth-network-package/main.star")
 transaction_spammer = import_module("github.com/barnabasbusa/eth2-package/src/transaction_spammer/transaction_spammer.star")
 forkmon = import_module("github.com/barnabasbusa/eth2-package/src/forkmon/forkmon_launcher.star")
+cl_forkmon = import_module("github.com/barnabasbusa/eth2-package/src/cl-forkmon/cl_forkmon_launcher.star")
 prometheus = import_module("github.com/barnabasbusa/eth2-package/src/prometheus/prometheus_launcher.star")
 grafana =import_module("github.com/barnabasbusa/eth2-package/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/barnabasbusa/eth2-package/src/testnet_verifier/testnet_verifier.star")
@@ -76,9 +77,14 @@ def run(plan, args):
 	# We need a way to do time.sleep
 	# TODO add code that waits for CL genesis
 
+	plan.print("Launching cl forkmon")
+	cl_forkmon_config_template = read_file(static_files.FORKMON_CONFIG_TEMPLATE_FILEPATH)
+	cl_forkmon.launch_cl_forkmon(plan, cl_forkmon_config_template, all_cl_client_contexts, cl_genesis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
+	plan.print("Succesfully launched consensus layer forkmon")
+
 	plan.print("Launching forkmon")
 	forkmon_config_template = read_file(static_files.FORKMON_CONFIG_TEMPLATE_FILEPATH)
-	forkmon.launch_forkmon(plan, forkmon_config_template, all_cl_client_contexts, cl_genesis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
+	forkmon.launch_el_forkmon(plan, forkmon_config_template, all_cl_client_contexts, cl_genesis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
 	plan.print("Succesfully launched forkmon")
 
 	plan.print("Launching prometheus...")
