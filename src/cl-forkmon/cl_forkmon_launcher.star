@@ -16,7 +16,7 @@ USED_PORTS = {
 }
 
 
-def launch_cl-forkmon(
+def launch_cl_forkmon(
 		plan,
 		config_template,
 		cl_client_contexts,
