@@ -1,7 +1,7 @@
 shared_utils = import_module("github.com/barnabasbusa/eth2-package/src/shared_utils/shared_utils.star")
 
 
-SERVICE_NAME = "el_forkmon"
+SERVICE_NAME = "el-forkmon"
 IMAGE_NAME = "skylenet/nodemonitor:darkmode"
 
 HTTP_PORT_ID     = "http"
