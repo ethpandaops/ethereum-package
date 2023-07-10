@@ -5,8 +5,8 @@ genesis_constants = import_module("github.com/barnabasbusa/eth-network-package/s
 
 eth_network_module = import_module("github.com/barnabasbusa/eth-network-package/main.star")
 transaction_spammer = import_module("github.com/barnabasbusa/eth2-package/src/transaction_spammer/transaction_spammer.star")
-el_forkmon = import_module("github.com/barnabasbusa/eth2-package/src/el-forkmon/el_forkmon_launcher.star")
-cl_forkmon = import_module("github.com/barnabasbusa/eth2-package/src/cl-forkmon/cl_forkmon_launcher.star")
+el_forkmon = import_module("github.com/barnabasbusa/eth2-package/src/el_forkmon/el_forkmon_launcher.star")
+cl_forkmon = import_module("github.com/barnabasbusa/eth2-package/src/cl_forkmon/cl_forkmon_launcher.star")
 prometheus = import_module("github.com/barnabasbusa/eth2-package/src/prometheus/prometheus_launcher.star")
 grafana =import_module("github.com/barnabasbusa/eth2-package/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/barnabasbusa/eth2-package/src/testnet_verifier/testnet_verifier.star")
