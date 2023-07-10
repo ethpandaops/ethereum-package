@@ -5,7 +5,7 @@ genesis_constants = import_module("github.com/barnabasbusa/eth-network-package/s
 
 eth_network_module = import_module("github.com/barnabasbusa/eth-network-package/main.star")
 transaction_spammer = import_module("github.com/barnabasbusa/eth2-package/src/transaction_spammer/transaction_spammer.star")
-forkmon = import_module("github.com/barnabasbusa/eth2-package/src/forkmon/forkmon_launcher.star")
+el_forkmon = import_module("github.com/barnabasbusa/eth2-package/src/el-forkmon/el_forkmon_launcher.star")
 cl_forkmon = import_module("github.com/barnabasbusa/eth2-package/src/cl-forkmon/cl_forkmon_launcher.star")
 prometheus = import_module("github.com/barnabasbusa/eth2-package/src/prometheus/prometheus_launcher.star")
 grafana =import_module("github.com/barnabasbusa/eth2-package/src/grafana/grafana_launcher.star")
@@ -83,9 +83,9 @@ def run(plan, args):
 	plan.print("Succesfully launched consensus layer forkmon")
 
 	plan.print("Launching forkmon")
-	forkmon_config_template = read_file(static_files.FORKMON_CONFIG_TEMPLATE_FILEPATH)
-	forkmon.launch_el_forkmon(plan, forkmon_config_template, all_cl_client_contexts, cl_genesis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
-	plan.print("Succesfully launched forkmon")
+	el_forkmon_config_template = read_file(static_files.FORKMON_CONFIG_TEMPLATE_FILEPATH)
+	el_forkmon.launch_el_forkmon(plan, el_forkmon_config_template, all_cl_client_contexts, cl_genesis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
+	plan.print("Succesfully launched execution layer forkmon")
 
 	plan.print("Launching prometheus...")
 	prometheus_private_url = prometheus.launch_prometheus(
