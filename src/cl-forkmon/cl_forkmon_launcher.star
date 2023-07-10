@@ -1,13 +1,13 @@
 shared_utils = import_module("github.com/barnabasbusa/eth2-package/src/shared_utils/shared_utils.star")
 
 
-SERVICE_NAME = "forkmon"
-IMAGE_NAME = "skylenet/nodemonitor:darkmode"
+SERVICE_NAME = "cl-forkmon"
+IMAGE_NAME = "ralexstokes/ethereum_consensus_monitor:latest"
 
 HTTP_PORT_ID     = "http"
 HTTP_PORT_NUMBER = 80
 
-FORKMON_CONFIG_FILENAME = "forkmon-config.toml"
+FORKMON_CONFIG_FILENAME = "cl-forkmon-config.toml"
 
 FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
@@ -36,7 +36,7 @@ def launch_cl-forkmon(
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "forkmon-config")
+	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "cl-forkmon-config")
 
 	config = get_config(config_files_artifact_name)
 

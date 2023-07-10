@@ -1,0 +1,21 @@
+[network]
+name = "pithos"
+etherscan_api_key = "some-etherscan-api-key"
+
+[consensus_chain]
+seconds_per_slot = {{ .SecondsPerSlot }}
+slots_per_epoch = {{ .SlotsPerEpoch }}
+genesis_time = {{ .GenesisUnixTimestamp }}
+
+[weak_subjectivity]
+provider_endpoint = "http://eth2-ws-provider_eth2_ws_server_1:80"
+
+[monitor]
+output_dir = "public"
+port = {{ .ListenPortNum }}
+
+{{ range $clClient := .CLClientInfo }}
+[[monitor.endpoints]]
+consensus = "http://{{ $clClient.IPAddr }}:{{ $clClient.PortNum }}"
+execution = "N/A"   # This doesn't seem to be used
+{{ end }}
