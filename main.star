@@ -82,10 +82,10 @@ def run(plan, args):
 	cl_forkmon.launch_cl_forkmon(plan, cl_forkmon_config_template, all_cl_client_contexts, cl_genesis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
 	plan.print("Succesfully launched consensus layer forkmon")
 
-	plan.print("Launching el forkmon")
-	el_forkmon_config_template = read_file(static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH)
-	el_forkmon.launch_el_forkmon(plan, el_forkmon_config_template, all_el_client_contexts)
-	plan.print("Succesfully launched execution layer forkmon")
+	# plan.print("Launching el forkmon")
+	# el_forkmon_config_template = read_file(static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH)
+	# el_forkmon.launch_el_forkmon(plan, el_forkmon_config_template, all_el_client_contexts)
+	# plan.print("Succesfully launched execution layer forkmon")
 
 	plan.print("Launching prometheus...")
 	prometheus_private_url = prometheus.launch_prometheus(
