@@ -168,7 +168,9 @@ def default_network_params():
 		"seconds_per_slot":                      12,
 		"slots_per_epoch":                       32,
 		"genesis_delay":                         120,
-		"deneb_fork_epoch":                      5
+		# arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42 
+		# this will take 53~ hours for now
+		"deneb_fork_epoch":                      500
 	}
 
 def default_participant():
