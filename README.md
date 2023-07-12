@@ -1,5 +1,4 @@
-Ethereum Package
-=======================
+# Ethereum Package
 
 This is a [Kurtosis Starlark Package][starlark-docs] that will:
 
@@ -11,8 +10,7 @@ This is a [Kurtosis Starlark Package][starlark-docs] that will:
 
 For much more detailed information about how the merge works in Ethereum testnets, see [this document](https://notes.ethereum.org/@ExXcnR0-SJGthjz1dwkA1A/H1MSKgm3F).
 
-Quickstart
-----------
+## Quickstart
 
 1. [Install Docker if you haven't done so already][docker-installation]
 1. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
@@ -24,9 +22,9 @@ Quickstart
    ```bash
    kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package
    ```
-   
+
 To remove the enclave running the Ethereum network, run `kurtosis enclave rm -f eth2`.
-   
+
 You can customize the package's behaviour by passing in a configuration JSON or YAML (see the "Configuration" section below). For example:
 
 ```bash
@@ -46,13 +44,11 @@ For extra convenience, you can store the parameters in a file:
    kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package "$(cat ~/eth2-package-params.json)"
    ```
 
-Management
-----------
+## Management
 
 Kurtosis will create a new enclave to house the services of the Ethereum network. [This page][using-the-cli] contains documentation for managing the created enclave & viewing detailed information about it.
 
-Configuration
--------------
+## Configuration
 
 To configure the package behaviour, you can modify your `eth2-package-params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
 
@@ -60,6 +56,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     <summary>Click to show all configuration options</summary>
 
 <!-- Yes, it's weird that none of this is indented but it's intentional - indenting anything inside this "details" expandable will cause it to render weird" -->
+
 ```json
 {
     //  Specification of the participants in the network
@@ -74,7 +71,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
             //  - geth: ethereum/client-go:latest
             //  - erigon: thorax/erigon:devel
             //  - nethermind: nethermind/nethermind:latest
-            //  - besu: hyperledger/besu:develop            
+            //  - besu: hyperledger/besu:develop
             "el_client_image": "",
 
             //  The log level string that this participant's EL client should log at
@@ -118,7 +115,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
             // A set of parameters the node needs to reach an external block building network
             // If `null` then the builder infrastructure will not be instantiated
             // Example:
-            // 
+            //
             // "relay_endpoints": [
             //   "https://0xdeadbeefcafa@relay.example.com",
             //   "https://0xdeadbeefcafb@relay.example.com",
@@ -151,7 +148,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete"
 
     },
-    
+
     // True by defaults such that in addition to the Ethereum network:
     //  - A transaction spammer is launched to fake transactions sent to the network
     //  - Forkmon will be launched after CL genesis has happened
@@ -183,17 +180,19 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     "mev_type": None
 }
 ```
-</details>
 
+</details>
 
 You can find the latest Kiln compatible docker images here: https://notes.ethereum.org/@launchpad/kiln
 
-Developing On This Package
--------------------------
+## Developing On This Package
+
 First, install prerequisites:
+
 1. [Install Kurtosis itself][kurtosis-cli-installation]
 
 Then, run the dev loop:
+
 1. Make your code changes
 1. Rebuild and re-run the package by running the following from the root of the repo:
    ```bash
@@ -205,20 +204,22 @@ Then, run the dev loop:
 To get detailed information about the structure of the package, visit [the architecture docs](./docs/architecture.md).
 
 When you're happy with your changes:
+
 - Add an entry to `docs/changelog.md` under the `# TBD` header describing your changes (this is required for CI checks to pass!)
 - Create a PR
 - Add one of the maintainers of the repo as a "Review Request":
-    - `parithosh` (Ethereum)
-    - `gbouv` (Kurtosis)
-    - `h4ck3rk3y` (Kurtosis)
-    - `mieubrisse` (Kurtosis)
-- Once everything works, merge! 
+  - `parithosh` (Ethereum)
+  - `gbouv` (Kurtosis)
+  - `h4ck3rk3y` (Kurtosis)
+  - `mieubrisse` (Kurtosis)
+- Once everything works, merge!
 
 ## Known Bugs
 
 `wait_for_epoch_finalization` - doesn't work as expected, as Starlark doesn't have ways to do assertions on facts just yet. The [issue](https://github.com/kurtosis-tech/eth2-package/issues/15) tracks this.
 
 <!------------------------ Only links below here -------------------------------->
+
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [starlark-docs]: https://docs.kurtosis.com/starlark-reference
