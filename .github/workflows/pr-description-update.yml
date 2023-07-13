@@ -46,5 +46,5 @@ jobs:
           base-branch-regex: '[a-z\d-_.\\/]+'
           body-template: |
             ${{ env.CONVENTIONAL_COMMITS }}
-          body-update-action: 'replace'
+          body-update-action: "replace"
           body-uppercase-base-match: false

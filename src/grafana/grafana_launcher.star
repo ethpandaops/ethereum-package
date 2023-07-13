@@ -25,7 +25,7 @@ USED_PORTS = {
 }
 
 
-def launch_grafana(plan, datasource_config_template, dashboard_providers_config_template, prometheus_private_url):	
+def launch_grafana(plan, datasource_config_template, dashboard_providers_config_template, prometheus_private_url):
 	grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid = get_grafana_config_dir_artifact_uuid(plan, datasource_config_template, dashboard_providers_config_template, prometheus_private_url)
 
 	config = get_config(grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid)

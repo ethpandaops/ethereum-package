@@ -10,9 +10,9 @@ USED_PORTS = {
 }
 
 NETWORK_ID_TO_NAME = {
-	"5":        "goerli",
+	"5":		"goerli",
 	"11155111": "sepolia",
-	"3":        "ropsten",
+	"3":		"ropsten",
 }
 
 def launch(plan, mev_boost_launcher, service_name, network_id):
@@ -45,5 +45,5 @@ def get_config(mev_boost_launcher, network_id):
 
 
 def new_mev_boost_launcher(should_check_relay, relay_end_points):
-    return struct(should_check_relay=should_check_relay, relay_end_points=relay_end_points)
+	return struct(should_check_relay=should_check_relay, relay_end_points=relay_end_points)
 
