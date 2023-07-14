@@ -90,6 +90,9 @@ def parse_input(input_args):
 	if result["network_params"]["genesis_delay"] == 0:
 		fail("genesis_delay is 0 needs to be > 0 ")
 
+	if result["network_params"]["capella_fork_epoch"] == 0:
+		fail("capella_fork_epoch is 0 needs to be > 0 ")
+
 	if result["network_params"]["deneb_fork_epoch"] == 0:
 		fail("deneb_fork_epoch is 0 needs to be > 0 ")
 
@@ -125,6 +128,7 @@ def parse_input(input_args):
 			deposit_contract_address=result["network_params"]["deposit_contract_address"],
 			seconds_per_slot=result["network_params"]["seconds_per_slot"],
 			slots_per_epoch=result["network_params"]["slots_per_epoch"],
+			capella_fork_epoch=result["network_params"]["capella_fork_epoch"],
 			deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
 			genesis_delay=result["network_params"]["genesis_delay"]
 		),
@@ -168,6 +172,7 @@ def default_network_params():
 		"seconds_per_slot":				12,
 		"slots_per_epoch":				32,
 		"genesis_delay":				120,
+		"capella_fork_epoch":			1,
 		# arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42
 		# this will take 53~ hoours for now
 		"deneb_fork_epoch":				500,
