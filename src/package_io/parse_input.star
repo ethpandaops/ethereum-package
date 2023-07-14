@@ -15,6 +15,7 @@ DEFAULT_CL_IMAGES = {
 
 BESU_NODE_NAME = "besu"
 NETHERMIND_NODE_NAME = "nethermind"
+NIMBUS_NODE_NAME = "nimbus"
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants")
 
@@ -52,6 +53,9 @@ def parse_input(input_args):
 		if index == 0 and el_client_type in (BESU_NODE_NAME, NETHERMIND_NODE_NAME):
 			fail("besu/nethermind cant be the first participant")
 
+		if cl_client_type in (NIMBUS_NODE_NAME) and (result["network_params"]["seconds_per_slot"] < 12):
+			fail("nimbus can't be run with slot times below 12 seconds")		
+      
 		el_image = participant["el_client_image"]
 		if el_image == "":
 			default_image = DEFAULT_EL_IMAGES.get(el_client_type, "")
