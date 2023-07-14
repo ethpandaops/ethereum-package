@@ -12,9 +12,9 @@ testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/test
 mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_launcher.star")
 mock_mev_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mock_mev/mock_mev_launcher.star")
 
-GRAFANA_USER             = "admin"
-GRAFANA_PASSWORD         = "admin"
-GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
+GRAFANA_USER				= "admin"
+GRAFANA_PASSWORD			= "admin"
+GRAFANA_DASHBOARD_PATH_URL	= "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
 
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
@@ -58,7 +58,7 @@ def run(plan, args):
 		mev_endpoints.append(endpoint)
 
 	# spin up the mev boost contexts if some endpoints for relays have been passed
-	all_mevboost_contexts = []	
+	all_mevboost_contexts = []
 	if mev_endpoints:
 		for index, participant in enumerate(args_with_right_defaults.participants):
 			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints)
