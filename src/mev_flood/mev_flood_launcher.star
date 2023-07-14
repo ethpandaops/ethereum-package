@@ -1,4 +1,4 @@
-MEV_FLOOD_IMAGE = "flashbots/mev-flood:0.0.4"
+MEV_FLOOD_IMAGE = "flashbots/mev-flood"
 ADMIN_KEY = "0xef5177cd0b6b21c87db5a0bf35d4084a8a57a9d6a064f86d51ac85f2b873a4e2"
 USER_KEY = "0x7988b3a148716ff800414935b305436493e1f25237a2a03e5eebc343735e2f31"
 
@@ -22,6 +22,6 @@ def spam_in_background(plan, el_uri):
     plan.exec(
         service_name = "mev-flood",
         recipe = ExecRecipe(
-            command = ["/bin/sh", "-c", "nohup ./run spam -r {0} -k {1} -u {2} -l deployment.json >main.log 2>&1 &".format(el_uri, ADMIN_KEY, USER_KEY)]
+            command = ["/bin/sh", "-c", "nohup ./run spam -r {0} -k {1} -u {2} -l deployment.json >main.log 2>&1 & --secondsPerBundle 15".format(el_uri, ADMIN_KEY, USER_KEY)]
         )
     )
