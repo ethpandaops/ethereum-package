@@ -1,22 +1,22 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 
 
-SERVICE_NAME = "forkmon"
+SERVICE_NAME = "cl-forkmon"
 IMAGE_NAME = "ralexstokes/ethereum_consensus_monitor:latest"
 
 HTTP_PORT_ID		= "http"
 HTTP_PORT_NUMBER 	= 80
 
-FORKMON_CONFIG_FILENAME = "forkmon-config.toml"
+CL_FORKMON_CONFIG_FILENAME = "cl-forkmon-config.toml"
 
-FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
+CL_FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 USED_PORTS = {
 	HTTP_PORT_ID:shared_utils.new_port_spec(HTTP_PORT_NUMBER, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL)
 }
 
 
-def launch_forkmon(
+def launch_cl_forkmon(
 		plan,
 		config_template,
 		cl_client_contexts,
@@ -34,9 +34,9 @@ def launch_forkmon(
 
 	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
-	template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
+	template_and_data_by_rel_dest_filepath[CL_FORKMON_CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "forkmon-config")
+	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "cl-forkmon-config")
 
 	config = get_config(config_files_artifact_name)
 
@@ -44,12 +44,12 @@ def launch_forkmon(
 
 
 def get_config(config_files_artifact_name):
-	config_file_path = shared_utils.path_join(FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, FORKMON_CONFIG_FILENAME)
+	config_file_path = shared_utils.path_join(CL_FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, CL_FORKMON_CONFIG_FILENAME)
 	return ServiceConfig(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
 		files = {
-			FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+			CL_FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
 		},
 		cmd = ["--config-path", config_file_path]
 	)
