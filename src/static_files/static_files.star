@@ -1,9 +1,13 @@
 # The path on the module container where static files are housed
 STATIC_FILES_DIRPATH = "github.com/kurtosis-tech/eth2-package/static_files"
 
-# Forkmon config
-FORKMON_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \
-	"/forkmon-config/config.toml.tmpl"
+# CL Forkmon config
+CL_FORKMON_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \
+	"/cl-forkmon-config/config.toml.tmpl"
+
+# EL Forkmon config
+EL_FORKMON_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \
+    "/el-forkmon-config/config.toml.tmpl"
 
 # Prometheus config
 PROMETHEUS_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \

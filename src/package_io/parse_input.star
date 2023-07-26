@@ -176,7 +176,7 @@ def default_network_params():
 		"seconds_per_slot":				12,
 		"slots_per_epoch":				32,
 		"genesis_delay":				120,
-		"capella_fork_epoch":			2,
+		"capella_fork_epoch":			1,
 		# arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42
 		# this will take 53~ hoours for now
 		"deneb_fork_epoch":				500,

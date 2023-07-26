@@ -1,0 +1,13 @@
+# How often to reload data from the nodes
+reload_interval = "10s"
+# If specified, a http server will serve static content here
+server_address = "0.0.0.0:{{ .ListenPortNum }}"
+# Shown in the document title, if specified
+chain_name="kurtosis-chain"
+# Local or non third party connection require rpc kind
+{{ range $elClient := .ELClientInfo }}
+[[clients]]
+  url  = "http://{{ $elClient.IPAddr }}:{{ $elClient.PortNum }}"
+  name = "{{ $elClient.Name }}"
+  kind = "rpc"
+{{- end }}
