@@ -45,7 +45,7 @@ def parse_input(input_args):
 				participants.append(new_participant)
 			result["participants"] = participants
 
-	total_participant_count = 1
+	total_participant_count = 0
 	# validation of the above defaults
 	for index, participant in enumerate(result["participants"]):
 		el_client_type = participant["el_client_type"]
@@ -102,6 +102,9 @@ def parse_input(input_args):
 
 	if result["network_params"]["deneb_fork_epoch"] == 0:
 		fail("deneb_fork_epoch is 0 needs to be > 0 ")
+
+	if total_participant_count < 1:
+		total_participant_count = 1
 
 	required_num_validators = 2 * result["network_params"]["slots_per_epoch"]
 	actual_num_validators = total_participant_count * result["network_params"]["num_validator_keys_per_node"]
