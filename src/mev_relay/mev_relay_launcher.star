@@ -46,7 +46,8 @@ def launch_mev_relay(plan, network_id, beacon_uris, validator_root):
         name = MEV_RELAY_ENDPOINT,
         config = ServiceConfig(
             image = MEV_BOOST_RELAY_IMAGE,
-            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris],
+            # TODO make this el-2-geth-lighthouse not hardcoded
+            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris, "--blocksim", "http://el-2-geth-lighthouse:8545"],
             ports = {
                 "api": PortSpec(number = MEV_RELAY_ENDPOINT_PORT, transport_protocol= "TCP")
             },
