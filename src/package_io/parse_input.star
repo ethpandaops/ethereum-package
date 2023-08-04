@@ -236,7 +236,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 		"cl_client_log_level":    "",
 		"beacon_extra_params":    ["--builder={0}".format(mev_url)],
 		# TODO make this passable
-		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-client-{0}-beacon:4000".format(num_participants), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root=0xd1ec305b97bf6336571c2348e4a8bf173684b0cdb7e55f7e6554d51f8478b5a3",  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy"],
+		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root=0xd1ec305b97bf6336571c2348e4a8bf173684b0cdb7e55f7e6554d51f8478b5a3",  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy"],
 		"validator_extra_params": ["--builder-proposals"],
 		"builder_network_params": None
 	}
