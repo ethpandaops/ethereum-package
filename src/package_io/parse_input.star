@@ -232,7 +232,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 		"el_client_image": "h4ck3rk3y/builder",
 		"el_client_log_level":    "",
 		"cl_client_type":         "lighthouse",
-		"cl_client_image":        "sigp/lighthouse:latest",
+		"cl_client_image":        "h4ck3rk3y/lighthouse",
 		"cl_client_log_level":    "",
 		"beacon_extra_params":    ["--builder={0}".format(mev_url), "--always-prepare-payload", "--prepare-payload-lookahead", "12000"],
 		# TODO make this passable
