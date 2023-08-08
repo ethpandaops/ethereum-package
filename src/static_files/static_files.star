@@ -13,6 +13,10 @@ EL_FORKMON_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \
 PROMETHEUS_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \
 	"/prometheus-config/prometheus.yml.tmpl"
 
+# Beacon Metrics Gazer config
+BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \
+	"/beacon-metrics-gazer-config/beacon_metrics_gazer-config.yaml.tmpl"
+
 # Grafana config
 GRAFANA_CONFIG_DIRPATH = "/grafana-config"
 GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \
