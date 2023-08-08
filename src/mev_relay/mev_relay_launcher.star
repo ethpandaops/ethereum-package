@@ -3,7 +3,7 @@ postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.
 
 DUMMY_SECRET_KEY = "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
 DUMMY_PUB_KEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
-MEV_BOOST_RELAY_IMAGE = "flashbots/mev-boost-relay"
+MEV_BOOST_RELAY_IMAGE = "h4ck3rk3y/mev-boost-relay"
 
 MEV_RELAY_WEBSITE = "mev-relay-website"
 MEV_RELAY_ENDPOINT = "mev-relay-api"
@@ -30,6 +30,7 @@ def launch_mev_relay(plan, network_id, beacon_uris, validator_root):
         "GENESIS_FORK_VERSION": "0x10000038",
         "BELLATRIX_FORK_VERSION": "0x30000038",
         "CAPELLA_FORK_VERSION": "0x40000038",
+        "DENEB_FORK_VERSION": "0x50000038",
         "GENESIS_VALIDATORS_ROOT": validator_root
     }
 

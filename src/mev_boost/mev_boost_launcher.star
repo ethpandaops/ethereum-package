@@ -36,6 +36,8 @@ def get_config(mev_boost_launcher, network_id):
 		env_vars = {
 			# TODO(maybe) remove the hardcoding
 			# This is set to match this file https://github.com/kurtosis-tech/eth-network-package/blob/main/static_files/genesis-generation-config/cl/config.yaml.tmpl#L11
+			# latest-notes
+			# does this need genesis time to be set as well
 			"GENESIS_FORK_VERSION": "0x10000038",
 			"BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(parse_input.FLASHBOTS_MEV_BOOST_PORT),
 			# maybe this is breaking; this isn't verifyign the bid and not sending it to the validator
