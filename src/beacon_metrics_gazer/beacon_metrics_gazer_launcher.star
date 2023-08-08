@@ -2,14 +2,14 @@ shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_u
 
 
 SERVICE_NAME = "beacon-metrics-gazer"
-IMAGE_NAME = "dapplion/beacon-metrics-gazer:v0.1.3"
+IMAGE_NAME = "bbusa/beacon-metrics-gazer:headers"
 
 HTTP_PORT_ID     = "http"
 HTTP_PORT_NUMBER = 8080
 
-BEACON_METRICS_GAZER_CONFIG_FILENAME = "beacon-metrics-gazer-config.yaml"
+BEACON_METRICS_GAZER_CONFIG_FILENAME = "beacon-metrics-gazer-ranges.yaml"
 
-BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/ranges.yaml"
+BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 USED_PORTS = {
 	HTTP_PORT_ID:shared_utils.new_port_spec(HTTP_PORT_NUMBER, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL)
@@ -24,7 +24,7 @@ def launch_beacon_metrics_gazer(
 
 	all_cl_client_info = []
 	for client in cl_client_contexts:
-		client_info = new_cl_client_info(client.beacon_service_name)
+		client_info = new_cl_client_info(client.beacon_service_name, 64)
 		all_cl_client_info.append(client_info)
 
 	template_data = new_config_template_data(all_cl_client_info)
@@ -57,7 +57,7 @@ def get_config(
 		cmd = [
 			"http://{0}:{1}".format(ip_addr, http_port_num),
 			"--ranges-file",
-			"/ranges.yaml",
+			"/config/{0}".format(BEACON_METRICS_GAZER_CONFIG_FILENAME),
 			"--port",
 			"{0}".format(HTTP_PORT_NUMBER),
 			"--address",
@@ -72,7 +72,8 @@ def new_config_template_data(cl_client_info):
 	}
 
 
-def new_cl_client_info(beacon_service_name):
+def new_cl_client_info(beacon_service_name, num_validator_keys_per_node):
 	return {
 		"beacon_service_name": beacon_service_name,
+		"num_validator_keys_per_node": num_validator_keys_per_node
 	}
