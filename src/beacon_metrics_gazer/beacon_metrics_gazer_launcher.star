@@ -23,16 +23,17 @@ def launch_beacon_metrics_gazer(
 		network_params
 	):
 
-	all_cl_client_info = []
-	for client in cl_client_contexts:
-		client_info = new_cl_client_info(client.beacon_service_name)
-		all_cl_client_info.append(client_info)
+	data = []
+	for index, client in enumerate(cl_client_contexts):
+		start_index = index*network_params.num_validator_keys_per_node
+		end_index = (index+1)*network_params.num_validator_keys_per_node
+		service_name = client.beacon_service_name
+		data.append({"ClientName": service_name, "Range": "{0}-{1}".format(start_index, end_index)})
 
-	template_data = new_config_template_data(all_cl_client_info, network_params.num_validator_keys_per_node)
+	template_data = {"Data": data}
 
-	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
-	template_and_data_by_rel_dest_filepath[BEACON_METRICS_GAZER_CONFIG_FILENAME] = template_and_data
+	template_and_data_by_rel_dest_filepath[BEACON_METRICS_GAZER_CONFIG_FILENAME] = shared_utils.new_template_and_data(config_template, template_data)
 
 	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "beacon-metrics-gazer-config")
 
@@ -65,17 +66,3 @@ def get_config(
 			"0.0.0.0"
 		]
 	)
-
-
-def new_config_template_data(cl_client_info, num_validator_keys_per_node):
-	return {
-		"CLClientInfo": cl_client_info,
-		"num_validator_keys_per_node": num_validator_keys_per_node
-	}
-
-
-def new_cl_client_info(beacon_service_name):
-	return {
-		"beacon_service_name": beacon_service_name,
-
-	}

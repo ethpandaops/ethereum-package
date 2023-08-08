@@ -1,7 +1,3 @@
-{{ $increments := .num_validator_keys_per_node }}
-{{ $startIndex := 0 }}
-
-{{ range $clClient := .CLClientInfo }}
-{{ $clClient }}
-{{ $startIndex }}-{{ $increments }}: {{ $clClient.beacon_service_name }}
+{{ range $data := .Data }}
+{{ $data.Range }}: {{ $data.ClientName }}
 {{ end }}
