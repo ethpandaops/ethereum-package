@@ -20,14 +20,15 @@ def launch_beacon_metrics_gazer(
 		plan,
 		config_template,
 		cl_client_contexts,
+		network_params
 	):
 
 	all_cl_client_info = []
 	for client in cl_client_contexts:
-		client_info = new_cl_client_info(client.beacon_service_name, 64)
+		client_info = new_cl_client_info(client.beacon_service_name)
 		all_cl_client_info.append(client_info)
 
-	template_data = new_config_template_data(all_cl_client_info)
+	template_data = new_config_template_data(all_cl_client_info, network_params.num_validator_keys_per_node)
 
 	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
@@ -66,14 +67,15 @@ def get_config(
 	)
 
 
-def new_config_template_data(cl_client_info):
+def new_config_template_data(cl_client_info, num_validator_keys_per_node):
 	return {
-		"CLClientInfo": cl_client_info
+		"CLClientInfo": cl_client_info,
+		"num_validator_keys_per_node": num_validator_keys_per_node
 	}
 
 
-def new_cl_client_info(beacon_service_name, num_validator_keys_per_node):
+def new_cl_client_info(beacon_service_name):
 	return {
 		"beacon_service_name": beacon_service_name,
-		"num_validator_keys_per_node": num_validator_keys_per_node
+
 	}

@@ -90,7 +90,7 @@ def run(plan, args):
 
 	plan.print("Launching beacon metrics gazer")
 	beacon_metrics_gazer_config_template = read_file(static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH)
-	beacon_metrics_gazer.launch_beacon_metrics_gazer(plan, beacon_metrics_gazer_config_template, all_cl_client_contexts)
+	beacon_metrics_gazer.launch_beacon_metrics_gazer(plan, beacon_metrics_gazer_config_template, all_cl_client_contexts,network_params)
 	plan.print("Succesfully launched beacon metrics gazer")
 
 	plan.print("Launching prometheus...")

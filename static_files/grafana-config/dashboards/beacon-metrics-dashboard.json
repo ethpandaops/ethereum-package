@@ -21,16 +21,18 @@
       }
     ]
   },
+  "description": "",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 3,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
-        "type": "prometheus"
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
       },
       "fieldConfig": {
         "defaults": {
@@ -48,7 +50,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 18,
         "w": 12,
         "x": 0,
         "y": 0
@@ -60,11 +62,13 @@
         "color": {
           "exponent": 0.5,
           "fill": "dark-orange",
+          "max": 1,
+          "min": 0,
           "mode": "scheme",
-          "reverse": false,
+          "reverse": true,
           "scale": "exponential",
-          "scheme": "Oranges",
-          "steps": 64
+          "scheme": "RdYlGn",
+          "steps": 20
         },
         "exemplars": {
           "color": "rgba(255,0,255,0.7)"
@@ -84,7 +88,7 @@
         },
         "yAxis": {
           "axisPlacement": "left",
-          "reverse": false
+          "reverse": true
         }
       },
       "pluginVersion": "9.2.3",
@@ -92,7 +96,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus_ds_1"
+            "uid": "UhcO3vy7z"
           },
           "editorMode": "code",
           "expr": "beacon_network_target_participation",
@@ -125,7 +129,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 18,
         "w": 12,
         "x": 12,
         "y": 0
@@ -137,11 +141,13 @@
         "color": {
           "exponent": 0.5,
           "fill": "dark-orange",
+          "max": 1,
+          "min": 0,
           "mode": "scheme",
-          "reverse": false,
+          "reverse": true,
           "scale": "exponential",
-          "scheme": "Oranges",
-          "steps": 64
+          "scheme": "RdYlGn",
+          "steps": 20
         },
         "exemplars": {
           "color": "rgba(255,0,255,0.7)"
@@ -161,7 +167,7 @@
         },
         "yAxis": {
           "axisPlacement": "left",
-          "reverse": false
+          "reverse": true
         }
       },
       "pluginVersion": "9.2.3",
@@ -169,7 +175,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus_ds_1"
+            "uid": "UhcO3vy7z"
           },
           "editorMode": "code",
           "expr": "beacon_network_source_participation",
@@ -202,10 +208,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 15,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 18
       },
       "id": 3,
       "options": {
@@ -214,14 +220,16 @@
         "color": {
           "exponent": 0.5,
           "fill": "dark-orange",
+          "max": 1,
+          "min": 0,
           "mode": "scheme",
-          "reverse": false,
+          "reverse": true,
           "scale": "exponential",
-          "scheme": "Oranges",
-          "steps": 64
+          "scheme": "RdYlGn",
+          "steps": 20
         },
         "exemplars": {
-          "color": "rgba(255,0,255,0.7)"
+          "color": "yellow"
         },
         "filterValues": {
           "le": 1e-9
@@ -238,7 +246,7 @@
         },
         "yAxis": {
           "axisPlacement": "left",
-          "reverse": false
+          "reverse": true
         }
       },
       "pluginVersion": "9.2.3",
@@ -246,7 +254,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus_ds_1"
+            "uid": "UhcO3vy7z"
           },
           "editorMode": "code",
           "expr": "beacon_network_head_participation",
@@ -279,10 +287,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 15,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 18
       },
       "id": 4,
       "options": {
@@ -292,10 +300,10 @@
           "exponent": 0.5,
           "fill": "dark-orange",
           "mode": "scheme",
-          "reverse": false,
+          "reverse": true,
           "scale": "exponential",
-          "scheme": "Oranges",
-          "steps": 64
+          "scheme": "RdYlGn",
+          "steps": 20
         },
         "exemplars": {
           "color": "rgba(255,0,255,0.7)"
@@ -315,7 +323,7 @@
         },
         "yAxis": {
           "axisPlacement": "left",
-          "reverse": false
+          "reverse": true
         }
       },
       "pluginVersion": "9.2.3",
@@ -323,7 +331,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus_ds_1"
+            "uid": "UhcO3vy7z"
           },
           "editorMode": "code",
           "expr": "beacon_network_inactivity_scores",
@@ -345,13 +353,13 @@
     "list": []
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Participation Rates Dashboards",
-  "uid": "participation_rates_dashboard",
-  "version": 2,
+  "title": "Validator Participation Rates Dashboardssss",
+  "uid": "participation_rates_dashboards",
+  "version": 1,
   "weekStart": ""
 }
