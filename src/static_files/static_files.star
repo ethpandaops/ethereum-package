@@ -15,7 +15,7 @@ PROMETHEUS_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \
 
 # Beacon Metrics Gazer config
 BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + \
-	"/beacon-metrics-gazer-config/config.json.tmpl"
+	"/beacon-metrics-gazer-config/config.yaml.tmpl"
 
 # Grafana config
 GRAFANA_CONFIG_DIRPATH = "/grafana-config"

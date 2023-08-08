@@ -24,22 +24,21 @@ def launch_beacon_metrics_gazer(
 
 	all_cl_client_info = []
 	for client in cl_client_contexts:
-		client_info = new_cl_client_info(client.ip_addr, client.http_port_num, client.beacon_service_name)
+		client_info = new_cl_client_info(client.beacon_service_name)
 		all_cl_client_info.append(client_info)
 
-	template_data = new_config_template_data(HTTP_PORT_NUMBER, all_cl_client_info)
+	template_data = new_config_template_data(all_cl_client_info)
 
 	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[BEACON_METRICS_GAZER_CONFIG_FILENAME] = template_and_data
 
-	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "beacon_metrics_gazer-config")
+	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "beacon-metrics-gazer-config")
 
 	config = get_config(
 		config_files_artifact_name,
 		cl_client_contexts[0].ip_addr,
-		cl_client_contexts[0].http_port_num,
-		cl_client_contexts[0].beacon_service_name)
+		cl_client_contexts[0].http_port_num)
 
 	plan.add_service(SERVICE_NAME, config)
 
@@ -47,8 +46,7 @@ def launch_beacon_metrics_gazer(
 def get_config(
 	config_files_artifact_name,
 	ip_addr,
-	http_port_num,
-	beacon_service_name):
+	http_port_num):
 	config_file_path = shared_utils.path_join(BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE, BEACON_METRICS_GAZER_CONFIG_FILENAME)
 	return ServiceConfig(
 		image = IMAGE_NAME,
@@ -57,10 +55,9 @@ def get_config(
 			BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
 		},
 		cmd = [
-			"/beacon-metrics-gazer",
-			"--http://{0}:{1}".format(ip_addr, http_port_num),
+			"http://{0}:{1}".format(ip_addr, http_port_num),
 			"--ranges-file",
-			"ranges.yaml",
+			"/ranges.yaml",
 			"--port",
 			"{0}".format(HTTP_PORT_NUMBER),
 			"--address",
@@ -69,16 +66,13 @@ def get_config(
 	)
 
 
-def new_config_template_data(listen_port_num, cl_client_info):
+def new_config_template_data(cl_client_info):
 	return {
-		"ListenPortNum": listen_port_num,
-		"CLClientInfo": cl_client_info,
+		"CLClientInfo": cl_client_info
 	}
 
 
-def new_cl_client_info(ip_addr, port_num, service_name):
+def new_cl_client_info(beacon_service_name):
 	return {
-		"IPAddr": ip_addr,
-		"PortNum": port_num,
-		"Name": service_name
+		"beacon_service_name": beacon_service_name,
 	}
