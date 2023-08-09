@@ -1,5 +1,4 @@
-# TODO(now) fix this
-IMAGE_NAME = "h4ck3rk3y/tx-fuzz:latest"
+IMAGE_NAME = "kurtosistech/tx-fuzz:0.2.0"
 SERVICE_NAME = "transaction-spammer"
 
 def launch_transaction_spammer(plan, prefunded_addresses, el_client_context):
