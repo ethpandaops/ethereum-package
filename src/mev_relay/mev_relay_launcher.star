@@ -17,7 +17,7 @@ NETWORK_ID_TO_NAME = {
 	"3":        "ropsten",
 }
 
-def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root):
+def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, builder_uri):
     redis = redis_module.run(plan, {})
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(plan, {"password": "postgres", "user": "postgres", "database": "postgres", "name": "postgres"})
@@ -48,8 +48,7 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root):
         name = MEV_RELAY_ENDPOINT,
         config = ServiceConfig(
             image = image,
-            # TODO make this el-2-geth-lighthouse not hardcoded
-            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris, "--blocksim", "http://el-2-geth-lighthouse:8545"].extend(mev_params.mev_relay_api_extra_args),
+            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris, "--blocksim", builder_uri].extend(mev_params.mev_relay_api_extra_args),
             ports = {
                 "api": PortSpec(number = MEV_RELAY_ENDPOINT_PORT, transport_protocol= "TCP")
             },
