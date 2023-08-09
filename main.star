@@ -32,6 +32,7 @@ def run(plan, args):
 
 	num_participants = len(args_with_right_defaults.participants)
 	network_params = args_with_right_defaults.network_params
+	mev_params = args_with_right_defaults.mev_params
 
 	grafana_datasource_config_template = read_file(static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH)
 	grafana_dashboards_config_template = read_file(static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH)
@@ -67,7 +68,7 @@ def run(plan, args):
 		beacon_uris = beacon_uri
 		first_cl_client = all_cl_client_contexts[0]
 		first_client_beacon_name = first_cl_client.beacon_service_name
-		mev_flood_module.launch_mev_flood(plan, el_uri)
+		mev_flood_module.launch_mev_flood(plan, mev_params.mev_flood_image, el_uri)
 		epoch_recipe = GetHttpRequestRecipe(
 			endpoint = "/eth/v1/beacon/blocks/head",
 			port_id = HTTP_PORT_ID_FOR_FACT,
@@ -77,8 +78,8 @@ def run(plan, args):
 		)
 		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
 		plan.print("epoch 2 reached, can begin mev stuff")
-		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uris, genesis_validators_root)
-		mev_flood_module.spam_in_background(plan, el_uri)
+		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root)
+		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args)
 		mev_endpoints.append(endpoint)
 
 

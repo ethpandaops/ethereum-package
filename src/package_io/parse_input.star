@@ -37,6 +37,10 @@ def parse_input(input_args):
 			for sub_attr in input_args["network_params"]:
 				sub_value = input_args["network_params"][sub_attr]
 				result["network_params"][sub_attr] = sub_value
+		elif attr == "mev_params":
+			for sub_attr in input_args["mev_params"]:
+				sub_value = input_args["mev_params"]["sub_attr"]
+				result["mev_params"][sub_attr] = sub_value
 		elif attr == "participants":
 			participants = []
 			for participant in input_args["participants"]:
@@ -144,6 +148,15 @@ def parse_input(input_args):
 			deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
 			genesis_delay=result["network_params"]["genesis_delay"]
 		),
+		mev_params = struct(
+			mev_relay_image = result["mev_params"]["mev_relay_image"],
+			mev_relay_api_extra_args = result["mev_params"]["mev_relay_api_extra_args"],
+			mev_relay_housekeeper_extra_args = result["mev_params"]["mev_relay_housekeeper_extra_args"],
+			mev_relay_website_extra_args = result["mev_params"]["mev_relay_website_extra_args"],
+			mev_builder_extra_args = result["mev_params"]["mev_builder_extra_args"],
+			mev_flood_image = result["mev_params"]["mev_flood_image"],
+			mev_flood_extra_args = result["mev_params"]["mev_flood_extra_args"]
+		),
 		launch_additional_services=result["launch_additional_services"],
 		wait_for_finalization=result["wait_for_finalization"],
 		wait_for_verifications=result["wait_for_verifications"],
@@ -163,6 +176,7 @@ def get_client_log_level_or_default(participant_log_level, global_log_level, cli
 def default_input_args():
 	network_params = default_network_params()
 	participants = [default_participant()]
+	mev_params = get_default_mev_params()
 	return {
 		"mev_type": None,
 		"participants":					participants,
@@ -171,7 +185,8 @@ def default_input_args():
 		"wait_for_finalization":		False,
 		"wait_for_verifications":		False,
 		"verifications_epoch_limit":	5,
-		"global_client_log_level":		"info"
+		"global_client_log_level":		"info",
+		"mev_params": mev_params
 	}
 
 def default_network_params():
@@ -202,6 +217,18 @@ def default_participant():
 			"validator_extra_params": 	[],
 			"builder_network_params": 	None,
 			"count":					1
+	}
+
+def get_default_mev_params():
+	return {
+		# TODO fix this when Capella Signature verification works - change it to flashbots/
+		"mev_relay_image": "h4ck3rk3y/mev-boost-relay",
+		"mev_relay_api_extra_args": [],
+		"mev_relay_housekeeper_extra_args": [],
+		"mev_relay_website_extra_args": [],
+		"mev_builder_extra_args": [],
+		"mev_flood_image": "flashbots/mev-flood",
+		"mev_flood_extra_args": []
 	}
 
 
@@ -239,7 +266,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 		"cl_client_log_level":    "",
 		"beacon_extra_params":    ["--builder={0}".format(mev_url), "--always-prepare-payload", "--prepare-payload-lookahead", "12000"],
 		# TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
-		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy", "--http.api=admin,engine,net,eth,web3,debug,flashbots"],
+		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy", "--http.api=admin,engine,net,eth,web3,debug,flashbots"].extend(result["mev_params"]["mev_builder_args"]),
 		"validator_extra_params": ["--builder-proposals"],
 		"builder_network_params": None
 	}
