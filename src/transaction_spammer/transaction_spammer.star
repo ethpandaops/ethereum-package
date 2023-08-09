@@ -1,4 +1,4 @@
-# TODO fix this
+# TODO(now) fix this
 IMAGE_NAME = "h4ck3rk3y/tx-fuzz:latest"
 SERVICE_NAME = "transaction-spammer"
 

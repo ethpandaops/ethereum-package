@@ -1,9 +1,9 @@
 parse_input = import_module("github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star")
 
 static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
-genesis_constants = import_module("github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star@gyani/tx-key")
+genesis_constants = import_module("github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star@gyani/mev-customizations")
 
-eth_network_module = import_module("github.com/kurtosis-tech/eth-network-package/main.star@gyani/tx-key")
+eth_network_module = import_module("github.com/kurtosis-tech/eth-network-package/main.star@gyani/mev-customizations")
 transaction_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star")
 cl_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/cl_forkmon/cl_forkmon_launcher.star")
 el_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/el_forkmon/el_forkmon_launcher.star")
@@ -40,7 +40,7 @@ def run(plan, args):
 	plan.print("Read the prometheus, grafana templates")
 
 	plan.print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
-	all_participants, cl_genesis_timestamp = eth_network_module.run(plan, args_with_defaults_dict)
+	all_participants, cl_genesis_timestamp, genesis_validators_root = eth_network_module.run(plan, args_with_defaults_dict)
 
 	all_el_client_contexts = []
 	all_cl_client_contexts = []
@@ -62,8 +62,8 @@ def run(plan, args):
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
 		mev_endpoints.append(endpoint)		
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
-		validator_root = get_genesis_validators_root(plan, all_cl_client_contexts[0].beacon_service_name)
 		el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num)
+		builder_uri = "http://{0}:{1}".format(all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num)
 		beacon_uri = ["http://{0}:{1}".format(context.ip_addr, context.http_port_num) for context in all_cl_client_contexts][-1]
 		beacon_uris = beacon_uri
 		first_cl_client = all_cl_client_contexts[0]
@@ -78,7 +78,7 @@ def run(plan, args):
 		)
 		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
 		plan.print("epoch 2 reached, can begin mev stuff")
-		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uris, validator_root)
+		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri)
 		mev_flood_module.spam_in_background(plan, el_uri)
 		mev_endpoints.append(endpoint)
 
@@ -155,14 +155,3 @@ def run(plan, args):
 	output = struct(grafana_info = grafana_info)
 
 	return output
-
-# TODO Move this logic to eth-network-package
-def get_genesis_validators_root(plan, validator_service_name):
-    response = plan.exec(
-        service_name = validator_service_name,
-        recipe = ExecRecipe(
-            command = ["/bin/sh", "-c", "cat {0} | grep genesis_validators_root | grep -oE '0x[0-9a-fA-F]+'".format(PATH_TO_PARSED_BEACON_STATE)],
-        )
-    )
-
-    return response["output"]
