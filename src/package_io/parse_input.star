@@ -24,6 +24,8 @@ FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
 
+package_io = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star@gyani/mev-customizations")
+
 def parse_input(input_args):
 	result = default_input_args()
 	for attr in input_args:
@@ -187,7 +189,7 @@ def default_network_params():
 	}
 
 def default_participant():
-	# TODO add support for mev boost image and extra parameters
+	# TODO(now) add support for mev boost image and extra parameters
 	return {
 			"el_client_type":			"geth",
 			"el_client_image":			"",
@@ -236,8 +238,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 		"cl_client_image":        "sigp/lighthouse",
 		"cl_client_log_level":    "",
 		"beacon_extra_params":    ["--builder={0}".format(mev_url), "--always-prepare-payload", "--prepare-payload-lookahead", "12000"],
-		# TODO make this passable
-		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root=0xd1ec305b97bf6336571c2348e4a8bf173684b0cdb7e55f7e6554d51f8478b5a3",  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy", "--http.api=admin,engine,net,eth,web3,debug,flashbots"],
+		# TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
+		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy", "--http.api=admin,engine,net,eth,web3,debug,flashbots"],
 		"validator_extra_params": ["--builder-proposals"],
 		"builder_network_params": None
 	}
