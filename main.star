@@ -36,7 +36,7 @@ def run(plan, args):
 	plan.print("Read the prometheus, grafana templates")
 
 	plan.print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
-	all_participants, cl_genesis_timestamp = eth_network_module.run(plan, args_with_defaults_dict)
+	all_participants, cl_genesis_timestamp, _ = eth_network_module.run(plan, args_with_defaults_dict)
 
 	all_el_client_contexts = []
 	all_cl_client_contexts = []
