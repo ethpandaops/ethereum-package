@@ -2,7 +2,7 @@ shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_u
 
 
 SERVICE_NAME = "beacon-metrics-gazer"
-IMAGE_NAME = "bbusa/beacon-metrics-gazer:headers"
+IMAGE_NAME = "dapplion/beacon-metrics-gazer:latest"
 
 HTTP_PORT_ID     = "http"
 HTTP_PORT_NUMBER = 8080
@@ -26,7 +26,7 @@ def launch_beacon_metrics_gazer(
 	data = []
 	for index, client in enumerate(cl_client_contexts):
 		start_index = index*network_params.num_validator_keys_per_node
-		end_index = (index+1)*network_params.num_validator_keys_per_node
+		end_index = ((index+1)*network_params.num_validator_keys_per_node)-1
 		service_name = client.beacon_service_name
 		data.append({"ClientName": service_name, "Range": "{0}-{1}".format(start_index, end_index)})
 
@@ -63,6 +63,7 @@ def get_config(
 			"--port",
 			"{0}".format(HTTP_PORT_NUMBER),
 			"--address",
-			"0.0.0.0"
+			"0.0.0.0",
+			"-v"
 		]
 	)
