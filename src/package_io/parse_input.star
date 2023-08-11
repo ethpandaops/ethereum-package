@@ -55,8 +55,8 @@ def parse_input(input_args):
 			fail("besu/nethermind cant be the first participant")
 
 		if cl_client_type in (NIMBUS_NODE_NAME) and (result["network_params"]["seconds_per_slot"] < 12):
-			fail("nimbus can't be run with slot times below 12 seconds")		
-      
+			fail("nimbus can't be run with slot times below 12 seconds")
+
 		el_image = participant["el_client_image"]
 		if el_image == "":
 			default_image = DEFAULT_EL_IMAGES.get(el_client_type, "")
@@ -169,7 +169,8 @@ def default_input_args():
 		"wait_for_finalization":		False,
 		"wait_for_verifications":		False,
 		"verifications_epoch_limit":	5,
-		"global_client_log_level":		"info"
+		"global_client_log_level":		"info",
+		"snooper_enabled":				False,
 	}
 
 def default_network_params():

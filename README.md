@@ -176,6 +176,9 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     //  This value will be overridden by participant-specific values
     "global_client_log_level": "info",
 
+    // EngineAPI Snooper
+    "snooper_enabled": false,
+
     // Supports three valeus
     // Default: None - no mev boost, mev builder, mev flood or relays are spun up
     // mock - mock-builder & mev-boost are spun up
