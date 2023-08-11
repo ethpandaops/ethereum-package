@@ -55,7 +55,13 @@ def get_config(grafana_config_artifacts_name, grafana_dashboards_artifacts_name)
 	return ServiceConfig(
 		image = IMAGE_NAME,
 		ports = USED_PORTS,
-		env_vars = {CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE},
+		env_vars = {
+			CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
+			"GF_AUTH_ANONYMOUS_ENABLED": "true",
+			"GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
+			"GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
+			"GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
+			},
 		files = {
 			GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
 			GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name
