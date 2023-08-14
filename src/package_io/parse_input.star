@@ -186,7 +186,7 @@ def default_input_args():
 		"wait_for_verifications":		False,
 		"verifications_epoch_limit":	5,
 		"global_client_log_level":		"info",
-		"mev_params": mev_params
+		"mev_params": mev_params,
 		"snooper_enabled":				False,
 	}
 
