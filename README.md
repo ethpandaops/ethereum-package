@@ -150,6 +150,9 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
          //  The deneb for epoch -- arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42 this will take 53~ hours for now
          "deneb_for_epoch": 500,
 
+         // Parallelizes keystore generation so that each node has keystores being generated in their own container
+         // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
+         "parallel_keystore_generation": false,
     },
 
     // True by defaults such that in addition to the Ethereum network:
@@ -175,6 +178,9 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     //  Valid values are "error", "warn", "info", "debug", and "trace"
     //  This value will be overridden by participant-specific values
     "global_client_log_level": "info",
+
+    // EngineAPI Snooper
+    "snooper_enabled": false,
 
     // Supports three valeus
     // Default: None - no mev boost, mev builder, mev flood or relays are spun up

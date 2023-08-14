@@ -7,6 +7,7 @@ eth_network_module = import_module("github.com/kurtosis-tech/eth-network-package
 transaction_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star")
 cl_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/cl_forkmon/cl_forkmon_launcher.star")
 el_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/el_forkmon/el_forkmon_launcher.star")
+beacon_metrics_gazer = import_module("github.com/kurtosis-tech/eth2-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star")
 prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star")
 grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
@@ -112,6 +113,11 @@ def run(plan, args):
  	el_forkmon_config_template = read_file(static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH)
  	el_forkmon.launch_el_forkmon(plan, el_forkmon_config_template, all_el_client_contexts)
  	plan.print("Succesfully launched execution layer forkmon")
+
+	plan.print("Launching beacon metrics gazer")
+	beacon_metrics_gazer_config_template = read_file(static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH)
+	beacon_metrics_gazer.launch_beacon_metrics_gazer(plan, beacon_metrics_gazer_config_template, all_cl_client_contexts,network_params)
+	plan.print("Succesfully launched beacon metrics gazer")
 
 	plan.print("Launching prometheus...")
 	prometheus_private_url = prometheus.launch_prometheus(
