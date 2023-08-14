@@ -150,6 +150,9 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
          //  The deneb for epoch -- arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42 this will take 53~ hours for now
          "deneb_for_epoch": 500,
 
+         // Parallelizes keystore generation so that each node has keystores being generated in their own container
+         // Use against large clusters only
+         "parallel_keystore_generation": false,
     },
 
     // True by defaults such that in addition to the Ethereum network:
