@@ -62,7 +62,7 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, 
             image = image,
             cmd = ["website", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT), "--redis-uri", "redis:6379", "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)] + mev_params.mev_relay_website_extra_args,
             ports = {
-                "api": PortSpec(number = MEV_RELAY_WEBSITE_PORT, transport_protocol= "TCP")
+                "api": PortSpec(number = MEV_RELAY_WEBSITE_PORT, transport_protocol= "TCP", application_protocol="http")
             },
             env_vars= env_vars
         )
