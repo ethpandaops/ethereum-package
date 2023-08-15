@@ -24,6 +24,8 @@ FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
 
+package_io = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
+
 def parse_input(input_args):
 	result = default_input_args()
 	for attr in input_args:
@@ -35,6 +37,10 @@ def parse_input(input_args):
 			for sub_attr in input_args["network_params"]:
 				sub_value = input_args["network_params"][sub_attr]
 				result["network_params"][sub_attr] = sub_value
+		elif attr == "mev_params":
+			for sub_attr in input_args["mev_params"]:
+				sub_value = input_args["mev_params"]["sub_attr"]
+				result["mev_params"][sub_attr] = sub_value
 		elif attr == "participants":
 			participants = []
 			for participant in input_args["participants"]:
@@ -139,6 +145,15 @@ def parse_input(input_args):
 			deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
 			genesis_delay=result["network_params"]["genesis_delay"]
 		),
+		mev_params = struct(
+			mev_relay_image = result["mev_params"]["mev_relay_image"],
+			mev_relay_api_extra_args = result["mev_params"]["mev_relay_api_extra_args"],
+			mev_relay_housekeeper_extra_args = result["mev_params"]["mev_relay_housekeeper_extra_args"],
+			mev_relay_website_extra_args = result["mev_params"]["mev_relay_website_extra_args"],
+			mev_builder_extra_args = result["mev_params"]["mev_builder_extra_args"],
+			mev_flood_image = result["mev_params"]["mev_flood_image"],
+			mev_flood_extra_args = result["mev_params"]["mev_flood_extra_args"]
+		),
 		launch_additional_services=result["launch_additional_services"],
 		wait_for_finalization=result["wait_for_finalization"],
 		wait_for_verifications=result["wait_for_verifications"],
@@ -158,6 +173,7 @@ def get_client_log_level_or_default(participant_log_level, global_log_level, cli
 def default_input_args():
 	network_params = default_network_params()
 	participants = [default_participant()]
+	mev_params = get_default_mev_params()
 	return {
 		"mev_type": None,
 		"participants":					participants,
@@ -167,6 +183,7 @@ def default_input_args():
 		"wait_for_verifications":		False,
 		"verifications_epoch_limit":	5,
 		"global_client_log_level":		"info",
+		"mev_params": mev_params,
 		"snooper_enabled":				False,
 	}
 
@@ -174,19 +191,18 @@ def default_network_params():
 	# this is temporary till we get params working
 	return {
 		"preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
-		"num_validator_keys_per_node":	64,
-		"network_id":					"3151908",
-		"deposit_contract_address":		"0x4242424242424242424242424242424242424242",
-		"seconds_per_slot":				12,
-		"slots_per_epoch":				32,
-		"genesis_delay":				120,
-		"capella_fork_epoch":			1,
-		# arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42
-		# this will take 53~ hoours for now
-		"deneb_fork_epoch":				500,
+		"num_validator_keys_per_node":           64,
+		"network_id":                            "3151908",
+		"deposit_contract_address":              "0x4242424242424242424242424242424242424242",
+		"seconds_per_slot":                      12,
+		"slots_per_epoch":                       32,
+		"genesis_delay":                         120,
+		"capella_fork_epoch":                   1,
+		"deneb_fork_epoch":                     500
 	}
 
 def default_participant():
+	# TODO(now) add support for mev boost image and extra parameters
 	return {
 			"el_client_type":			"geth",
 			"el_client_image":			"",
@@ -199,6 +215,18 @@ def default_participant():
 			"validator_extra_params": 	[],
 			"builder_network_params": 	None,
 			"count":					1
+	}
+
+def get_default_mev_params():
+	return {
+		# TODO fix this when Capella Signature verification works - change it to flashbots/
+		"mev_relay_image": "h4ck3rk3y/mev-boost-relay",
+		"mev_relay_api_extra_args": [],
+		"mev_relay_housekeeper_extra_args": [],
+		"mev_relay_website_extra_args": [],
+		"mev_builder_extra_args": [],
+		"mev_flood_image": "flashbots/mev-flood",
+		"mev_flood_extra_args": []
 	}
 
 
@@ -220,4 +248,27 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 		if participant["cl_client_type"] == "prysm":
 			participant["validator_extra_params"].append("--enable-builder")
 			participant["beacon_extra_params"].append("--http-mev-relay={0}".format(mev_url))
+
+	num_participants = len(parsed_arguments_dict["participants"])
+
+	mev_url = "http://{0}{1}:{2}".format(mev_prefix, num_participants, mev_port)
+
+	mev_participant = {
+		"el_client_type": "geth",
+		# TODO replace with actual when flashbots/builder is published
+		"el_client_image": "h4ck3rk3y/builder",
+		"el_client_log_level":    "",
+		"cl_client_type":         "lighthouse",
+		# THIS overrides the beacon image
+		"cl_client_image":        "sigp/lighthouse",
+		"cl_client_log_level":    "",
+		"beacon_extra_params":    ["--builder={0}".format(mev_url), "--always-prepare-payload", "--prepare-payload-lookahead", "12000"],
+		# TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
+		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy"] + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
+		"validator_extra_params": ["--builder-proposals"],
+		"builder_network_params": None
+	}
+
+	parsed_arguments_dict["participants"].append(mev_participant)
+
 	return parsed_arguments_dict
