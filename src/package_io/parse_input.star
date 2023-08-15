@@ -234,6 +234,12 @@ def get_default_mev_params():
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 	for index, participant in enumerate(parsed_arguments_dict["participants"]):
 		mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
+
+		if participant["validator_extra_params"] == None:
+			participant["validator_extra_params"] = []
+		if participant["beacon_extra_params"] == None:
+			participant["beacon_extra_params"] = []
+
 		if participant["cl_client_type"] == "lighthouse":
 			participant["validator_extra_params"].append("--builder-proposals")
 			participant["beacon_extra_params"].append("--builder={0}".format(mev_url))
