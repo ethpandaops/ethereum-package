@@ -235,22 +235,20 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 	for index, participant in enumerate(parsed_arguments_dict["participants"]):
 		mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
 
-		if participant["validator_extra_params"] == None:
-			participant["validator_extra_params"] = []
-		if participant["beacon_extra_params"] == None:
-			participant["beacon_extra_params"] = []
-
 		if participant["cl_client_type"] == "lighthouse":
 			participant["validator_extra_params"].append("--builder-proposals")
 			participant["beacon_extra_params"].append("--builder={0}".format(mev_url))
 		if participant["cl_client_type"] == "lodestar":
 			participant["validator_extra_params"].append("--builder")
-			participant["beacon_extra_params"].append("--builder", "--builder.urls={0}".format(mev_url))
+			participant["beacon_extra_params"].append("--builder")
+			participant["beacon_extra_params"].append("--builder.urls={0}".format(mev_url))
 		if participant["cl_client_type"] == "nimbus":
 			participant["validator_extra_params"].append("--payload-builder=true")
-			participant["beacon_extra_params"].append("--payload-builder=true", "--payload-builder-urs={0}".format(mev_url))
+			participant["beacon_extra_params"].append("--payload-builder=true")
+			participant["beacon_extra_params"].append("--payload-builder-urs={0}".format(mev_url))
 		if participant["cl_client_type"] == "teku":
-			participant["beacon_extra_params"].append("--validators-builder-registration-default-enabled=true", "--builder-endpoint=".format(mev_url))
+			participant["beacon_extra_params"].append("--validators-builder-registration-default-enabled=true")
+			participant["beacon_extra_params"].append("--builder-endpoint=".format(mev_url))
 		if participant["cl_client_type"] == "prysm":
 			participant["validator_extra_params"].append("--enable-builder")
 			participant["beacon_extra_params"].append("--http-mev-relay={0}".format(mev_url))
