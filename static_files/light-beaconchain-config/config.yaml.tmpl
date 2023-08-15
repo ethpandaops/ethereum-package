@@ -10,7 +10,7 @@ logging:
 chain:
   name: "kurtosis-testnet"
   #genesisTimestamp: 1688126460
-  configPath: "/cl-genesis-data/config.yaml"
+  configPath: "/cl-genesis-data/output/config.yaml"
   displayName: "Kurtosis Testnet"
 
 # HTTP Server configuration
@@ -63,16 +63,7 @@ indexer:
   syncEpochCooldown: 2
 
 
-readerDatabase:
-  host: "127.0.0.1"
-  port: 5432
-  user: ""
-  password: ""
-  name: ""
-
-writerDatabase:
-  host: "127.0.0.1"
-  port: 5432
-  user: ""
-  password: ""
-  name: ""
+database:
+  engine: "sqlite"
+  sqlite:
+    file: ":memory:"
