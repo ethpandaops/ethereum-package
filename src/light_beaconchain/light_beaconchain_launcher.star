@@ -2,7 +2,7 @@ shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_u
 
 
 SERVICE_NAME = "light-beaconchain"
-IMAGE_NAME = "pk910/light-beaconchain-explorer:unstable"
+IMAGE_NAME = "pk910/light-beaconchain-explorer:latest"
 
 HTTP_PORT_ID     = "http"
 HTTP_PORT_NUMBER = 8080
