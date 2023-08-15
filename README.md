@@ -186,7 +186,26 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     // Default: None - no mev boost, mev builder, mev flood or relays are spun up
     // mock - mock-builder & mev-boost are spun up
     // full - mev-boost, relays, flooder and builder are all spun up
-    "mev_type": None
+    "mev_type": None,
+
+    // Parameters if MEV is used
+    "mev_params": {
+      // The image to use for MEV boot relay
+      // This uses the h4ck3rk3y image instead of the flashbots image as that isn't published yet
+		"mev_relay_image": "h4ck3rk3y/mev-boost-relay",
+      // Extra parameters to send to the API
+		"mev_relay_api_extra_args": [],
+      // Extra parameters to send to the housekeeper
+		"mev_relay_housekeeper_extra_args": [],
+      // Extra parameters to send to the website
+		"mev_relay_website_extra_args": [],
+      // Extra parameters to send to the builder
+		"mev_builder_extra_args": [],
+      // Image to use for mev-flood
+		"mev_flood_image": "flashbots/mev-flood",
+      // Extra parameters to send to mev-flood
+		"mev_flood_extra_args": []
+    }
 }
 ```
 
