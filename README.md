@@ -148,11 +148,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
 
          //  The deneb for epoch -- arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42 this will take 53~ hours for now
-         "deneb_for_epoch": 500,
-
-         // Parallelizes keystore generation so that each node has keystores being generated in their own container
-         // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
-         "parallel_keystore_generation": false,
+         "deneb_for_epoch": 500
     },
 
     // True by defaults such that in addition to the Ethereum network:
@@ -181,6 +177,11 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
 
     // EngineAPI Snooper
     "snooper_enabled": false,
+
+    // Parallelizes keystore generation so that each node has keystores being generated in their own container
+    // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
+    "parallel_keystore_generation": false,
+
 
     // Supports three valeus
     // Default: None - no mev boost, mev builder, mev flood or relays are spun up
