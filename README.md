@@ -232,12 +232,12 @@ If you look at the args expansion above you can see what other parameters can be
 
 Running `full` MEV would spin up the following in addition to the network -
 
-1. Builder & CL validator + beacon - A modified GETH client that builds the MEV efficient blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay
-1. mev-relay-api - Services that provide APIs for (a) proposers, (b) block builders, (c) data
-1. mev-relay-website - A website to monitor payloads that have been delivered
-1. mev-relay-housekeeper - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
-1. mev-boost - We start one of this for every EL/Cl pair in the network including the builder that we spin up for MEV
-1. mev-flood - Sends transactions that lead to blockValue being over 0 for payloads to be delivered
+1. `Builder & CL validator + beacon` - A modified GETH client that builds the MEV efficient blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay
+1. `mev-relay-api` - Services that provide APIs for (a) proposers, (b) block builders, (c) data
+1. `mev-relay-website` - A website to monitor payloads that have been delivered
+1. `mev-relay-housekeeper` - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
+1. `mev-boost` - We start one of this for every EL/Cl pair in the network including the builder that we spin up for MEV
+1. `mev-flood` - Sends transactions that lead to blockValue being over 0 for payloads to be delivered
 
 We have written a post describing the above architecture [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package)
 
