@@ -7,6 +7,10 @@ This is a [Kurtosis Starlark Package][starlark-docs] that will:
 1. Add [a transaction spammer](https://github.com/kurtosis-tech/tx-fuzz) that will repeatedly send transactions to the network
 1. Launch [a consensus monitor](https://github.com/ralexstokes/ethereum_consensus_monitor) instance attached to the network
 1. Optionally block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
+1. Optionally spin up a mock MEV environment or all components required for full MEV
+1. Optionally spin up a beacon metrics gazer service
+1. Optionally spin up grafana, prometheus to observe the network
+1. Optionally spin up a testnet verifier
 
 For much more detailed information about how the merge works in Ethereum testnets, see [this document](https://notes.ethereum.org/@ExXcnR0-SJGthjz1dwkA1A/H1MSKgm3F).
 
