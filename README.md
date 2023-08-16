@@ -218,6 +218,34 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
 
 You can find the latest Kiln compatible docker images here: https://notes.ethereum.org/@launchpad/kiln
 
+## MEV
+
+This allows you to spin up MEV related components. There are two types of MEV components this package supports namely `full` and `mock`.
+
+To spin up `full` MEV; you can
+
+```
+kurtosis run github.com/kurtosis-tech/eth2-package '{"mev_type": "full"}'
+```
+
+If you look at the args expansion above you can see what other parameters can be passed for mev under `mev_params`. You can send extra parameters to the individual services or swap the image that they run with.
+
+Running `full` MEV would spin up the following in addition to the network -
+
+1. Builder & CL validator + beacon - A modified GETH client that builds the MEV efficient blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay
+1. mev-relay-api - Services that provide APIs for (a) proposers, (b) block builders, (c) data
+1. mev-relay-website - A website to monitor payloads that have been delivered
+1. mev-relay-housekeeper - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
+1. mev-boost - We start one of this for every EL/Cl pair in the network including the builder that we spin up for MEV
+1. mev-flood - Sends transactions that lead to blockValue being over 0 for payloads to be delivered
+
+We have written a post describing the above architecture [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package)
+
+On the other hand `mock` mev spins up only the following - 
+
+1. `mock-builder` - a server that listens for builder api directives and responds with payloads built using an execution client
+1. `mev-boost` - for every el/cl pair launched
+
 ## Developing On This Package
 
 First, install prerequisites:
