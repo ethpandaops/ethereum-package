@@ -178,9 +178,9 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     // EngineAPI Snooper
     "snooper_enabled": false,
 
-   // Parallelizes keystore generation so that each node has keystores being generated in their own container
-   // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
-   "parallel_keystore_generation": false,
+    // Parallelizes keystore generation so that each node has keystores being generated in their own container
+    // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
+    "parallel_keystore_generation": false,
 
 
     // Supports three valeus
