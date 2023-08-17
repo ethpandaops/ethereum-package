@@ -2,7 +2,7 @@ DEFAULT_EL_IMAGES = {
 	"geth":			"ethereum/client-go:latest",
 	"erigon":		"thorax/erigon:devel",
 	"nethermind":	"nethermind/nethermind:latest",
-	"besu":			"hyperledger/besu:develop"
+	"besu":			"hyperledger/besu:develop",
 	"reth": 		"ghcr.io/paradigmxyz/reth"
 }
 
