@@ -67,7 +67,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     "participants": [
         {
             //  The type of EL client that should be started
-            //  Valid values are "geth", "nethermind", "erigon" and "besu"
+            //  Valid values are "geth", "nethermind", "erigon", "besu" and "reth"
             "el_client_type": "geth",
 
             //  The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -76,6 +76,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
             //  - erigon: thorax/erigon:devel
             //  - nethermind: nethermind/nethermind:latest
             //  - besu: hyperledger/besu:develop
+            //  - reth: ghcr.io/paradigmxyz/reth
             "el_client_image": "",
 
             //  The log level string that this participant's EL client should log at
