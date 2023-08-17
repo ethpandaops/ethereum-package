@@ -1,6 +1,6 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 static_files = import_module("github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star")
-
+# this should work
 SERVICE_NAME = "grafana"
 
 IMAGE_NAME = "grafana/grafana-enterprise:9.2.3"
