@@ -18,7 +18,7 @@ BESU_NODE_NAME = "besu"
 NETHERMIND_NODE_NAME = "nethermind"
 NIMBUS_NODE_NAME = "nimbus"
 
-ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants")
+ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params")
 
 # MEV Params
 FLASHBOTS_MEV_BOOST_PORT = 18550
@@ -40,7 +40,7 @@ def parse_input(input_args):
 				result["network_params"][sub_attr] = sub_value
 		elif attr == "mev_params":
 			for sub_attr in input_args["mev_params"]:
-				sub_value = input_args["mev_params"]["sub_attr"]
+				sub_value = input_args["mev_params"][sub_attr]
 				result["mev_params"][sub_attr] = sub_value
 		elif attr == "participants":
 			participants = []
