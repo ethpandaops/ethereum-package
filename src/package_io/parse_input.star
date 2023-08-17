@@ -18,7 +18,7 @@ BESU_NODE_NAME = "besu"
 NETHERMIND_NODE_NAME = "nethermind"
 NIMBUS_NODE_NAME = "nimbus"
 
-ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants")
+ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params")
 
 # MEV Params
 FLASHBOTS_MEV_BOOST_PORT = 18550
