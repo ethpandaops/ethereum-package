@@ -40,7 +40,7 @@ def parse_input(input_args):
 				result["network_params"][sub_attr] = sub_value
 		elif attr == "mev_params":
 			for sub_attr in input_args["mev_params"]:
-				sub_value = input_args["mev_params"]["sub_attr"]
+				sub_value = input_args["mev_params"][sub_attr]
 				result["mev_params"][sub_attr] = sub_value
 		elif attr == "participants":
 			participants = []
