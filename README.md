@@ -7,6 +7,10 @@ This is a [Kurtosis Starlark Package][starlark-docs] that will:
 1. Add [a transaction spammer](https://github.com/kurtosis-tech/tx-fuzz) that will repeatedly send transactions to the network
 1. Launch [a consensus monitor](https://github.com/ralexstokes/ethereum_consensus_monitor) instance attached to the network
 1. Optionally block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
+1. Optionally spin up a mock MEV environment or all components required for full MEV
+1. Optionally spin up a beacon metrics gazer service
+1. Optionally spin up grafana, prometheus to observe the network
+1. Optionally spin up a testnet verifier
 
 For much more detailed information about how the merge works in Ethereum testnets, see [this document](https://notes.ethereum.org/@ExXcnR0-SJGthjz1dwkA1A/H1MSKgm3F).
 
@@ -63,7 +67,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     "participants": [
         {
             //  The type of EL client that should be started
-            //  Valid values are "geth", "nethermind", "erigon" and "besu"
+            //  Valid values are "geth", "nethermind", "erigon", "besu" and "reth"
             "el_client_type": "geth",
 
             //  The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -72,6 +76,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
             //  - erigon: thorax/erigon:devel
             //  - nethermind: nethermind/nethermind:latest
             //  - besu: hyperledger/besu:develop
+            //  - reth: ghcr.io/paradigmxyz/reth
             "el_client_image": "",
 
             //  The log level string that this participant's EL client should log at
@@ -148,11 +153,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
 
          //  The deneb for epoch -- arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42 this will take 53~ hours for now
-         "deneb_for_epoch": 500,
-
-         // Parallelizes keystore generation so that each node has keystores being generated in their own container
-         // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
-         "parallel_keystore_generation": false,
+         "deneb_for_epoch": 500
     },
 
     // True by defaults such that in addition to the Ethereum network:
@@ -181,6 +182,11 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
 
     // EngineAPI Snooper
     "snooper_enabled": false,
+
+    // Parallelizes keystore generation so that each node has keystores being generated in their own container
+    // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
+    "parallel_keystore_generation": false,
+
 
     // Supports three valeus
     // Default: None - no mev boost, mev builder, mev flood or relays are spun up
@@ -212,6 +218,34 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
 </details>
 
 You can find the latest Kiln compatible docker images here: https://notes.ethereum.org/@launchpad/kiln
+
+## MEV
+
+This allows you to spin up MEV related components. There are two types of MEV components this package supports namely `full` and `mock`.
+
+To spin up `full` MEV; you can
+
+```
+kurtosis run github.com/kurtosis-tech/eth2-package '{"mev_type": "full"}'
+```
+
+If you look at the args expansion above you can see what other parameters can be passed for mev under `mev_params`. You can send extra parameters to the individual services or swap the image that they run with.
+
+Running `full` MEV would spin up the following in addition to the network -
+
+1. `Builder & CL validator + beacon` - A modified GETH client that builds the MEV efficient blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay
+1. `mev-relay-api` - Services that provide APIs for (a) proposers, (b) block builders, (c) data
+1. `mev-relay-website` - A website to monitor payloads that have been delivered
+1. `mev-relay-housekeeper` - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
+1. `mev-boost` - We start one of this for every EL/Cl pair in the network including the builder that we spin up for MEV
+1. `mev-flood` - Sends transactions that lead to blockValue being over 0 for payloads to be delivered
+
+We have written a post describing the above architecture [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package)
+
+On the other hand `mock` mev spins up only the following - 
+
+1. `mock-builder` - a server that listens for builder api directives and responds with payloads built using an execution client
+1. `mev-boost` - for every el/cl pair launched
 
 ## Developing On This Package
 
