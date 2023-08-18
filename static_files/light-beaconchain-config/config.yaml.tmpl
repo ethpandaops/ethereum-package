@@ -9,7 +9,6 @@ logging:
 # Chain network configuration
 chain:
   name: "kurtosis-testnet"
-  #genesisTimestamp: 1688126460
   configPath: "/cl-genesis-data/output/config.yaml"
   displayName: "Kurtosis Testnet"
 
@@ -31,7 +30,7 @@ frontend:
   ethExplorerLink: ""
 
   # file or inventory url to load validator names from
-  validatorNamesYaml: "validator-ranges.yaml"
+  validatorNamesYaml: "/validator-ranges/validator-ranges.yaml"
 
 beaconapi:
   # CL Client RPC
