@@ -125,7 +125,8 @@ jobs:
 
 workflows:
   check_latest_version:
-    when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
+    # TODO rever this to when: << pipeline.parameters.should-enable-check-latest-version-workflow > before PR merge
+    when: << pipeline.parameters.should-enable-build-workflow >>
     jobs:
       - check_latest_version:
           context:
