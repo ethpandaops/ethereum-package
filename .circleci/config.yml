@@ -148,8 +148,7 @@ jobs:
 
 workflows:
   check_latest_version:
-    # TODO rever this to when: << pipeline.parameters.should-enable-check-latest-version-workflow > before PR merge
-    when: << pipeline.parameters.should-enable-build-workflow >>
+    when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
     jobs:
       - check_latest_version:
           context:
@@ -192,7 +191,7 @@ workflows:
             - slack-secrets
 
   build:
-    when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
+    when: << pipeline.parameters.should-enable-build-workflow >>
     jobs:
       # -- PR check jobs ------------------------------------------
       - kurtosis-docs-checker/check-docs:
