@@ -130,6 +130,30 @@ workflows:
       - check_latest_version:
           context:
             - slack-secrets
+      - nightly_test_1:
+          context:
+            - slack-secrets
+      - nightly_test_2:
+          context:
+            - slack-secrets
+      - nightly_test_3:
+          context:
+            - slack-secrets
+      - nightly_test_4:
+          context:
+            - slack-secrets
+      - nightly_test_5:
+          context:
+            - slack-secrets
+      - nightly_test_6:
+          context:
+            - slack-secrets
+      - nightly_test_7:
+          context:
+            - slack-secrets
+      - nightly_test_8:
+          context:
+            - slack-secrets
 
   build:
     when: << pipeline.parameters.should-enable-build-workflow >>
