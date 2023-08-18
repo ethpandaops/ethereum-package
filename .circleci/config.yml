@@ -49,6 +49,70 @@ jobs:
 
       - run: kurtosis run --dry-run ${PWD}
 
+  nightly_test_1:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-1.json)"
+
+  nightly_test_2:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-2.json)"
+
+  nightly_test_3:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-3.json)"
+
+  nightly_test_4:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-4.json)"
+
+  nightly_test_5:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-5.json)"
+
+  nightly_test_6:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-6.json)"
+
+  nightly_test_7:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-7.json)"
+
+  nightly_test_8:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-8.json)"
+
 workflows:
   check_latest_version:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
