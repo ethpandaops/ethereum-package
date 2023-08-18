@@ -154,28 +154,40 @@ workflows:
       - check_latest_version:
           context:
             - slack-secrets
-      - nightly_test_1:
+      - besu-all:
           context:
             - slack-secrets
-      - nightly_test_2:
+      - erigon-all:
           context:
             - slack-secrets
-      - nightly_test_3:
+      - full-interop:
           context:
             - slack-secrets
-      - nightly_test_4:
+      - geth-all:
           context:
             - slack-secrets
-      - nightly_test_5:
+      - lighthouse-all:
           context:
             - slack-secrets
-      - nightly_test_6:
+      - lodestar-all:
           context:
             - slack-secrets
-      - nightly_test_7:
+      - mix:
           context:
             - slack-secrets
-      - nightly_test_8:
+      - nethermind-all:
+          context:
+            - slack-secrets
+      - nimbus-all:
+          context:
+            - slack-secrets
+      - prysm-all:
+          context:
+            - slack-secrets
+      - reth-all:
+          context:
+            - slack-secrets
+      - teku-all:
           context:
             - slack-secrets
 
