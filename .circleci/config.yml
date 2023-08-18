@@ -9,16 +9,13 @@ executors:
       image: ubuntu-2004:202201-02
 
 parameters:
-  # To enable/disable the check_latest_version workflow execution which will be triggered by this scheduled pipeline: https://app.circleci.com/settings/project/github/kurtosis-tech/eth2-package/triggers
   should-enable-check-latest-version-workflow:
     type: boolean
     default: false
-  # To enable/disable the check_code workflow execution which will be triggered by the PR's checkers
   should-enable-build-workflow:
     type: boolean
     default: true
 
-# Install go version 1.19 to run our integration tests on the minimal version we support
 setup_kurtosis: &setup_kurtosis
   - run: |
       echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
@@ -27,30 +24,13 @@ setup_kurtosis: &setup_kurtosis
       kurtosis config init dont-send-metrics
       kurtosis engine restart
 
-# Generate the nightly test jobs dynamically based on JSON files
-generate_nightly_test_jobs: &generate_nightly_test_jobs
-  run: |
-    for file in ./.circleci/tests/*.json; do
-      test_name=$(basename "$file" .json)
-      echo "Creating job for $test_name"
-      cat << EOF >> .circleci/config.yml
-        $test_name:
-          executor: ubuntu_vm
-          resource_class: xlarge
-          steps:
-            - <<: *setup_kurtosis
-            - checkout
-            - run: kurtosis run \${PWD} \"\$(cat $file)\"
-        EOF
-    done
-
 jobs:
   run_starlark:
     executor: ubuntu_vm
     steps:
       - <<: *setup_kurtosis
       - checkout
-      - run: kurtosis run \${PWD}
+      - run: kurtosis run ${PWD}
 
   check_latest_version:
     executor: ubuntu_vm
@@ -58,7 +38,7 @@ jobs:
     steps:
       - <<: *setup_kurtosis
       - checkout
-      - run: kurtosis run --dry-run \${PWD}
+      - run: kurtosis run --dry-run ${PWD}
 
 workflows:
   version: 2
@@ -66,13 +46,17 @@ workflows:
     jobs:
       - run_starlark
 
-      # Conditionally enable check_latest_version workflow
-      - if: << pipeline.parameters.should-enable-check-latest-version-workflow >>
-        run: check_latest_version
+      - if: << parameters.should-enable-check-latest-version-workflow >>
+        job: check_latest_version
 
-      # Generate nightly test jobs
-      - <<: *generate_nightly_test_jobs
-
-      # Conditionally enable check_code workflow
-      - if: << pipeline.parameters.should-enable-build-workflow >>
-        run: nightly_test_*
+      - run:
+          name: Generate Nightly Test Jobs
+          command: |
+            for file in ./.circleci/tests/*.json; do
+              test_name=$(basename "$file" .json)
+              echo "Creating job for $test_name"
+              circleci config process .circleci/config-template.yml \
+                -o .circleci/config-temp.yml \
+                -e TEST_NAME=$test_name TEST_FILE=$file
+              circleci config process .circleci/config-temp.yml >> .circleci/config.yml
+            done
