@@ -18,6 +18,16 @@ parameters:
     type: boolean
     default: true
 
+# Install go version 1.19 to run our integration tests on the minimal version we support
+setup_kurtosis: &setup_kurtosis
+  - run: |
+      echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+      sudo apt update
+      sudo apt install kurtosis-cli
+      kurtosis config init dont-send-metrics
+      kurtosis engine restart
+
+
 # NOTE: Because CircleCI jobs run on separate machines from each other, we duplicate steps (like checkout) between jobs. This is because doing the "correct" DRY
 #  refactoring of, "one job for checkout, one job for build Docker image, etc." would require a) persisting files between jobs and b) persisting Docker images between
 #  jobs. Both are annoying (saving/loading workspaces require re-downloading the workspace over the network, and there doesn't seem to be a good way to do Docker
@@ -27,18 +37,7 @@ jobs:
   run_starlark:
     executor: ubuntu_vm
     steps:
-      # Set up Kurtosis
-      - run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-
-      - checkout
-
-      # We don't send metrics to avoid polluting our logs
-      - run: kurtosis config init dont-send-metrics
-
-      - run: kurtosis engine restart
+      - <<: *setup_kurtosis
 
       - run: kurtosis run ${PWD}
 
@@ -46,18 +45,7 @@ jobs:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
-      # Set up Kurtosis
-      - run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-
-      - checkout
-
-      # We don't send metrics to avoid polluting our logs
-      - run: kurtosis config init dont-send-metrics
-
-      - run: kurtosis engine restart
+      - <<: *setup_kurtosis
 
       - run: kurtosis run --dry-run ${PWD}
 
