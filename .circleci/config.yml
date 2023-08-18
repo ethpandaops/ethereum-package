@@ -192,7 +192,7 @@ workflows:
             - slack-secrets
 
   build:
-    when: << pipeline.parameters.should-enable-build-workflow >>
+    when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
     jobs:
       # -- PR check jobs ------------------------------------------
       - kurtosis-docs-checker/check-docs:
