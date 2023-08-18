@@ -9,11 +9,11 @@ executors:
       image: ubuntu-2004:202201-02
 
 parameters:
-  # To enable/disabled the check_latest_version workflow execution which will be triggered by this scheduled pipeline: https://app.circleci.com/settings/project/github/kurtosis-tech/eth2-package/triggers
+  # To enable/disable the check_latest_version workflow execution which will be triggered by this scheduled pipeline: https://app.circleci.com/settings/project/github/kurtosis-tech/eth2-package/triggers
   should-enable-check-latest-version-workflow:
     type: boolean
     default: false
-  # To enable/disabled the check_code workflow execution which will be triggered by the PR's checkers
+  # To enable/disable the check_code workflow execution which will be triggered by the PR's checkers
   should-enable-build-workflow:
     type: boolean
     default: true
@@ -27,20 +27,30 @@ setup_kurtosis: &setup_kurtosis
       kurtosis config init dont-send-metrics
       kurtosis engine restart
 
+# Generate the nightly test jobs dynamically based on JSON files
+generate_nightly_test_jobs: &generate_nightly_test_jobs
+  run: |
+    for file in ./.circleci/tests/*.json; do
+      test_name=$(basename "$file" .json)
+      echo "Creating job for $test_name"
+      cat << EOF >> .circleci/config.yml
+        $test_name:
+          executor: ubuntu_vm
+          resource_class: xlarge
+          steps:
+            - <<: *setup_kurtosis
+            - checkout
+            - run: kurtosis run \${PWD} \"\$(cat $file)\"
+        EOF
+    done
 
-# NOTE: Because CircleCI jobs run on separate machines from each other, we duplicate steps (like checkout) between jobs. This is because doing the "correct" DRY
-#  refactoring of, "one job for checkout, one job for build Docker image, etc." would require a) persisting files between jobs and b) persisting Docker images between
-#  jobs. Both are annoying (saving/loading workspaces require re-downloading the workspace over the network, and there doesn't seem to be a good way to do Docker
-#  images), so we run everything inside a single job.
-# See also: https://discuss.circleci.com/t/can-docker-images-be-preserved-between-jobs-in-a-workflow-without-a-manual-load-save/23388/12
 jobs:
   run_starlark:
     executor: ubuntu_vm
     steps:
       - <<: *setup_kurtosis
       - checkout
-
-      - run: kurtosis run ${PWD}
+      - run: kurtosis run \${PWD}
 
   check_latest_version:
     executor: ubuntu_vm
@@ -48,137 +58,21 @@ jobs:
     steps:
       - <<: *setup_kurtosis
       - checkout
-
-      - run: kurtosis run --dry-run ${PWD}
-
-  nightly_test_1:
-    executor: ubuntu_vm
-    resource_class: xlarge
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-1.json)"
-
-  nightly_test_2:
-    executor: ubuntu_vm
-    resource_class: xlarge
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-2.json)"
-
-  nightly_test_3:
-    executor: ubuntu_vm
-    resource_class: xlarge
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-3.json)"
-
-  nightly_test_4:
-    executor: ubuntu_vm
-    resource_class: xlarge
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-4.json)"
-
-  nightly_test_5:
-    executor: ubuntu_vm
-    resource_class: xlarge
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-5.json)"
-
-  nightly_test_6:
-    executor: ubuntu_vm
-    resource_class: xlarge
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-6.json)"
-
-  nightly_test_7:
-    executor: ubuntu_vm
-    resource_class: xlarge
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-7.json)"
-
-  nightly_test_8:
-    executor: ubuntu_vm
-    resource_class: xlarge
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-8.json)"
+      - run: kurtosis run --dry-run \${PWD}
 
 workflows:
-  check_latest_version:
-    # TODO rever this to when: << pipeline.parameters.should-enable-check-latest-version-workflow > before PR merge
-    when: << pipeline.parameters.should-enable-build-workflow >>
+  version: 2
+  nightly_tests_workflow:
     jobs:
-      - check_latest_version:
-          context:
-            - slack-secrets
-      - nightly_test_1:
-          context:
-            - slack-secrets
-      - nightly_test_2:
-          context:
-            - slack-secrets
-      - nightly_test_3:
-          context:
-            - slack-secrets
-      - nightly_test_4:
-          context:
-            - slack-secrets
-      - nightly_test_5:
-          context:
-            - slack-secrets
-      - nightly_test_6:
-          context:
-            - slack-secrets
-      - nightly_test_7:
-          context:
-            - slack-secrets
-      - nightly_test_8:
-          context:
-            - slack-secrets
+      - run_starlark
 
-  build:
-    when: << pipeline.parameters.should-enable-build-workflow >>
-    jobs:
-      # -- PR check jobs ------------------------------------------
-      - kurtosis-docs-checker/check-docs:
-          should-check-changelog: false
-          markdown-link-check-config-json: |
-            {
-                "ignorePatterns": [
-                    {
-                        "pattern": "https://github.com/kurtosis-tech/eth2-package"
-                    }
-                ]
-            }
-          filters:
-            branches:
-              ignore:
-                - main
-      - run_starlark:
-          context:
-            # This pulls in KurtosisBot's Github token, so that we can read from our private repos
-            - github-user
-          filters:
-            branches:
-              ignore:
-                - main
+      # Conditionally enable check_latest_version workflow
+      - if: << pipeline.parameters.should-enable-check-latest-version-workflow >>
+        run: check_latest_version
+
+      # Generate nightly test jobs
+      - <<: *generate_nightly_test_jobs
+
+      # Conditionally enable check_code workflow
+      - if: << pipeline.parameters.should-enable-build-workflow >>
+        run: nightly_test_*
