@@ -50,77 +50,101 @@ jobs:
 
       - run: kurtosis run --dry-run ${PWD}
 
-  nightly_test_1:
+  besu-all:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/besu-all.json)"
 
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-1.json)"
-
-  nightly_test_2:
+  erigon-all:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/erigon-all.json)"
 
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-2.json)"
-
-  nightly_test_3:
+  full-interop:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/full-interop.json)"
 
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-3.json)"
-
-  nightly_test_4:
+  geth-all:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/geth-all.json)"
 
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-4.json)"
-
-  nightly_test_5:
+  lighthouse-all:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/lighthouse-all.json)"
 
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-5.json)"
-
-  nightly_test_6:
+  lodestar-all:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/lodestar-all.json)"
 
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-6.json)"
-
-  nightly_test_7:
+  mix:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix.json)"
 
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-7.json)"
-
-  nightly_test_8:
+  nethermind-all:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/nethermind-all.json)"
 
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-8.json)"
+  nimbus-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/nimbus-all.json)"
+
+  prysm-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/prysm-all.json)"
+
+  reth-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/reth-all.json)"
+
+  teku-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/teku-all.json)"
 
 workflows:
   check_latest_version:
@@ -130,28 +154,40 @@ workflows:
       - check_latest_version:
           context:
             - slack-secrets
-      - nightly_test_1:
+      - besu-all:
           context:
             - slack-secrets
-      - nightly_test_2:
+      - erigon-all:
           context:
             - slack-secrets
-      - nightly_test_3:
+      - full-interop:
           context:
             - slack-secrets
-      - nightly_test_4:
+      - geth-all:
           context:
             - slack-secrets
-      - nightly_test_5:
+      - lighthouse-all:
           context:
             - slack-secrets
-      - nightly_test_6:
+      - lodestar-all:
           context:
             - slack-secrets
-      - nightly_test_7:
+      - mix:
           context:
             - slack-secrets
-      - nightly_test_8:
+      - nethermind-all:
+          context:
+            - slack-secrets
+      - nimbus-all:
+          context:
+            - slack-secrets
+      - prysm-all:
+          context:
+            - slack-secrets
+      - reth-all:
+          context:
+            - slack-secrets
+      - teku-all:
           context:
             - slack-secrets
 
