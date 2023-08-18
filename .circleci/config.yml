@@ -9,13 +9,16 @@ executors:
       image: ubuntu-2004:202201-02
 
 parameters:
+  # To enable/disabled the check_latest_version workflow execution which will be triggered by this scheduled pipeline: https://app.circleci.com/settings/project/github/kurtosis-tech/eth2-package/triggers
   should-enable-check-latest-version-workflow:
     type: boolean
     default: false
+  # To enable/disabled the check_code workflow execution which will be triggered by the PR's checkers
   should-enable-build-workflow:
     type: boolean
     default: true
 
+# Install go version 1.19 to run our integration tests on the minimal version we support
 setup_kurtosis: &setup_kurtosis
   - run: |
       echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
@@ -24,39 +27,181 @@ setup_kurtosis: &setup_kurtosis
       kurtosis config init dont-send-metrics
       kurtosis engine restart
 
+
+# NOTE: Because CircleCI jobs run on separate machines from each other, we duplicate steps (like checkout) between jobs. This is because doing the "correct" DRY
+#  refactoring of, "one job for checkout, one job for build Docker image, etc." would require a) persisting files between jobs and b) persisting Docker images between
+#  jobs. Both are annoying (saving/loading workspaces require re-downloading the workspace over the network, and there doesn't seem to be a good way to do Docker
+#  images), so we run everything inside a single job.
+# See also: https://discuss.circleci.com/t/can-docker-images-be-preserved-between-jobs-in-a-workflow-without-a-manual-load-save/23388/12
 jobs:
   run_starlark:
     executor: ubuntu_vm
     steps:
       - <<: *setup_kurtosis
       - checkout
+
       - run: kurtosis run ${PWD}
 
   check_latest_version:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+
+      - run: kurtosis run --dry-run ${PWD}
+
+  besu-all:
     executor: ubuntu_vm
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
-      - run: kurtosis run --dry-run ${PWD}
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/besu-all.json)"
+
+  erigon-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/erigon-all.json)"
+
+  full-interop:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/full-interop.json)"
+
+  geth-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/geth-all.json)"
+
+  lighthouse-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/lighthouse-all.json)"
+
+  lodestar-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/lodestar-all.json)"
+
+  mix:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix.json)"
+
+  nethermind-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/nethermind-all.json)"
+
+  nimbus-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/nimbus-all.json)"
+
+  prysm-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/prysm-all.json)"
+
+  reth-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/reth-all.json)"
+
+  teku-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/teku-all.json)"
 
 workflows:
-  version: 2
-  nightly_tests_workflow:
+  check_latest_version:
+    # TODO rever this to when: << pipeline.parameters.should-enable-check-latest-version-workflow > before PR merge
+    when: << pipeline.parameters.should-enable-build-workflow >>
     jobs:
-      - run_starlark
+      - check_latest_version:
+          context:
+            - slack-secrets
+      - nightly_test_1:
+          context:
+            - slack-secrets
+      - nightly_test_2:
+          context:
+            - slack-secrets
+      - nightly_test_3:
+          context:
+            - slack-secrets
+      - nightly_test_4:
+          context:
+            - slack-secrets
+      - nightly_test_5:
+          context:
+            - slack-secrets
+      - nightly_test_6:
+          context:
+            - slack-secrets
+      - nightly_test_7:
+          context:
+            - slack-secrets
+      - nightly_test_8:
+          context:
+            - slack-secrets
 
-      - if: << parameters.should-enable-check-latest-version-workflow >>
-        job: check_latest_version
-
-      - run:
-          name: Generate Nightly Test Jobs
-          command: |
-            for file in ./.circleci/tests/*.json; do
-              test_name=$(basename "$file" .json)
-              echo "Creating job for $test_name"
-              circleci config process .circleci/config-template.yml \
-                -o .circleci/config-temp.yml \
-                -e TEST_NAME=$test_name TEST_FILE=$file
-              circleci config process .circleci/config-temp.yml >> .circleci/config.yml
-            done
+  build:
+    when: << pipeline.parameters.should-enable-build-workflow >>
+    jobs:
+      # -- PR check jobs ------------------------------------------
+      - kurtosis-docs-checker/check-docs:
+          should-check-changelog: false
+          markdown-link-check-config-json: |
+            {
+                "ignorePatterns": [
+                    {
+                        "pattern": "https://github.com/kurtosis-tech/eth2-package"
+                    }
+                ]
+            }
+          filters:
+            branches:
+              ignore:
+                - main
+      - run_starlark:
+          context:
+            # This pulls in KurtosisBot's Github token, so that we can read from our private repos
+            - github-user
+          filters:
+            branches:
+              ignore:
+                - main
