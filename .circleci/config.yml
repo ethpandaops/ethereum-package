@@ -38,6 +38,7 @@ jobs:
     executor: ubuntu_vm
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run ${PWD}
 
@@ -46,6 +47,7 @@ jobs:
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run --dry-run ${PWD}
 
@@ -54,6 +56,7 @@ jobs:
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-1.json)"
 
@@ -62,6 +65,7 @@ jobs:
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-2.json)"
 
@@ -70,6 +74,7 @@ jobs:
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-3.json)"
 
@@ -78,6 +83,7 @@ jobs:
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-4.json)"
 
@@ -86,6 +92,7 @@ jobs:
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-5.json)"
 
@@ -94,6 +101,7 @@ jobs:
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-6.json)"
 
@@ -102,6 +110,7 @@ jobs:
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-7.json)"
 
@@ -110,6 +119,7 @@ jobs:
     resource_class: xlarge
     steps:
       - <<: *setup_kurtosis
+      - checkout
 
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/test-8.json)"
 
