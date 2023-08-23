@@ -55,6 +55,9 @@ def parse_input(input_args):
 	total_participant_count = 0
 	# validation of the above defaults
 	for index, participant in enumerate(result["participants"]):
+		if participant["count"] == 0:
+		    continue
+
 		el_client_type = participant["el_client_type"]
 		cl_client_type = participant["cl_client_type"]
 
