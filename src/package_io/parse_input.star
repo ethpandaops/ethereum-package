@@ -216,8 +216,7 @@ def default_participant():
 
 def get_default_mev_params():
 	return {
-		# TODO fix this when Capella Signature verification works - change it to flashbots/
-		"mev_relay_image": "h4ck3rk3y/mev-boost-relay",
+		"mev_relay_image": "flashbots/mev-boost-relay",
 		"mev_relay_api_extra_args": [],
 		"mev_relay_housekeeper_extra_args": [],
 		"mev_relay_website_extra_args": [],
