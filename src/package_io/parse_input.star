@@ -10,7 +10,7 @@ DEFAULT_CL_IMAGES = {
 	"lighthouse":	"sigp/lighthouse:latest",
 	"teku":			"consensys/teku:latest",
 	"nimbus":		"statusim/nimbus-eth2:multiarch-latest",
-	"prysm":		"prysmaticlabs/prysm-beacon-chain:latest,prysmaticlabs/prysm-validator:latest",
+	"prysm":		"prysmaticlabs/prysm-beacon-chain:stable,prysmaticlabs/prysm-validator:stable",
 	"lodestar":		"chainsafe/lodestar:latest",
 }
 
