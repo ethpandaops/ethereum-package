@@ -243,7 +243,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 			participant["beacon_extra_params"].append("--payload-builder=true")
 			participant["beacon_extra_params"].append("--payload-builder-uris={0}".format(mev_url))
 		if participant["cl_client_type"] == "teku":
-			participant["beacon_extra_params"].append("--validators-builder-registration-default-enabled=true")
+			participant["validator_extra_params"].append("--validators-builder-registration-default-enabled=true")
 			participant["beacon_extra_params"].append("--builder-endpoint={0}".format(mev_url))
 		if participant["cl_client_type"] == "prysm":
 			participant["validator_extra_params"].append("--enable-builder")
