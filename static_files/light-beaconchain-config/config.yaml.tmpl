@@ -34,8 +34,11 @@ frontend:
 
 beaconapi:
   # CL Client RPC
+  endpoints:
 {{ range $clClient := .CLClientInfo }}
-  endpoint: "http://{{ $clClient.IPAddr }}:{{ $clClient.PortNum }}"
+    - url: "http://{{ $clClient.IPAddr }}:{{ $clClient.PortNum }}"
+      name: "{{ $clClient.Name }}"
+      archive: true
 {{- end }}
   # local cache for page models
   localCacheSize: 100 # 100MB
