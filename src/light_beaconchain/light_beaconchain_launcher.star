@@ -29,10 +29,11 @@ def launch_light_beacon(
 		cl_client_contexts,
 	):
 
-	cl_client_info = []
-	cl_client_info.append(new_cl_client_info(cl_client_contexts[0].ip_addr, cl_client_contexts[0].http_port_num, cl_client_contexts[0].beacon_service_name))
+	all_cl_client_info = []
+	for index, client in enumerate(cl_client_contexts):
+		all_cl_client_info.append(new_cl_client_info(client.ip_addr, client.http_port_num, client.beacon_service_name))
 
-	template_data = new_config_template_data(HTTP_PORT_NUMBER, cl_client_info)
+	template_data = new_config_template_data(HTTP_PORT_NUMBER, all_cl_client_info)
 
 	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
