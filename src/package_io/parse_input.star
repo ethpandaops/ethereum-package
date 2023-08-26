@@ -116,7 +116,10 @@ def parse_input(input_args):
 
 
 	if result.get("mev_type") in ("mock", "full"):
-		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT)
+		seconds_per_slot = result["network_params"]["seconds_per_slot"]
+		slots_per_epoch = result["network_params"]["slots_per_epoch"]
+		algo_type = result["mev_params"]["builder_algo_type"]
+		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT, seconds_per_slot, slots_per_epoch, algo_type)
 
 	return struct(
 		participants=[struct(
@@ -180,7 +183,7 @@ def default_input_args():
 		"wait_for_verifications":		False,
 		"verifications_epoch_limit":	5,
 		"global_client_log_level":		"info",
-		"mev_params": mev_params,
+		"mev_params": 				    mev_params,
 		"snooper_enabled":				False,
 	}
 
@@ -194,8 +197,8 @@ def default_network_params():
 		"seconds_per_slot":                      12,
 		"slots_per_epoch":                       32,
 		"genesis_delay":                         120,
-		"capella_fork_epoch":                   1,
-		"deneb_fork_epoch":                     500
+		"capella_fork_epoch":                    1,
+		"deneb_fork_epoch":                      500
 	}
 
 def default_participant():
@@ -222,12 +225,13 @@ def get_default_mev_params():
 		"mev_relay_website_extra_args": [],
 		"mev_builder_extra_args": [],
 		"mev_flood_image": "flashbots/mev-flood",
-		"mev_flood_extra_args": []
+		"mev_flood_extra_args": [],
+		"builder_algo_type": "greedy"
 	}
 
 
 # TODO perhaps clean this up into a map
-def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
+def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, seconds_per_slot, slots_per_epoch, algo_type):
 	for index, participant in enumerate(parsed_arguments_dict["participants"]):
 		mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
 
@@ -255,8 +259,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 
 	mev_participant = {
 		"el_client_type": "geth",
-		# TODO replace with actual when flashbots/builder is published
-		"el_client_image": "h4ck3rk3y/builder",
+		"el_client_image": "flashbots/builder:sha-ffeb673",
 		"el_client_log_level":    "",
 		"cl_client_type":         "lighthouse",
 		# THIS overrides the beacon image
@@ -264,7 +267,18 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 		"cl_client_log_level":    "",
 		"beacon_extra_params":    ["--builder={0}".format(mev_url), "--always-prepare-payload", "--prepare-payload-lookahead", "12000"],
 		# TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
-		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy"] + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
+		"el_extra_params": [
+			"--builder",  
+			"--builder.remote_relay_endpoint=http://mev-relay-api:9062", 
+			"--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1), 
+			"--builder.bellatrix_fork_version=0x30000038", 
+			"--builder.genesis_fork_version=0x10000038", 
+			"--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER), 
+			"--builder.seconds_in_slot={0}".format(seconds_per_slot),
+			"--builder.slots_in_epoch={0}".format(slots_per_epoch),
+			"--miner.extradata=\"Illuminate Dmocratize Dstribute\"", 
+			"--miner.algotype={0}".format(algo_type)
+		] + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
 		"validator_extra_params": ["--builder-proposals"],
 		"builder_network_params": None
 	}

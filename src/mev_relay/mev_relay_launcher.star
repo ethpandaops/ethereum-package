@@ -17,7 +17,7 @@ NETWORK_ID_TO_NAME = {
 	"3":        "ropsten",
 }
 
-def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, builder_uri):
+def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, builder_uri, seconds_per_slot, slots_per_epoch):
     redis = redis_module.run(plan, {})
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(plan, {"password": "postgres", "user": "postgres", "database": "postgres", "name": "postgres"})
@@ -32,7 +32,9 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, 
         "BELLATRIX_FORK_VERSION": "0x30000038",
         "CAPELLA_FORK_VERSION": "0x40000038",
         "DENEB_FORK_VERSION": "0x50000038",
-        "GENESIS_VALIDATORS_ROOT": validator_root
+        "GENESIS_VALIDATORS_ROOT": validator_root,
+        "SEC_PER_SLOT": str(seconds_per_slot),
+        "SLOTS_PER_EPOCH": str(slots_per_epoch)
     }
 
     plan.add_service(
