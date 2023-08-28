@@ -7,7 +7,7 @@ IMAGE_NAME = "dapplion/beacon-metrics-gazer:latest"
 HTTP_PORT_ID     = "http"
 HTTP_PORT_NUMBER = 8080
 
-BEACON_METRICS_GAZER_CONFIG_FILENAME = "beacon-metrics-gazer-ranges.yaml"
+BEACON_METRICS_GAZER_CONFIG_FILENAME = "validator-ranges.yaml"
 
 BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
@@ -35,7 +35,7 @@ def launch_beacon_metrics_gazer(
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[BEACON_METRICS_GAZER_CONFIG_FILENAME] = shared_utils.new_template_and_data(config_template, template_data)
 
-	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "beacon-metrics-gazer-config")
+	config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "validator-ranges")
 
 	config = get_config(
 		config_files_artifact_name,
@@ -59,7 +59,7 @@ def get_config(
 		cmd = [
 			"http://{0}:{1}".format(ip_addr, http_port_num),
 			"--ranges-file",
-			"/config/{0}".format(BEACON_METRICS_GAZER_CONFIG_FILENAME),
+			config_file_path,
 			"--port",
 			"{0}".format(HTTP_PORT_NUMBER),
 			"--address",

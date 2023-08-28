@@ -1,56 +1,53 @@
 # Ethereum Package
 
-This is a [Kurtosis Starlark Package][starlark-docs] that will:
+This is a [Kurtosis Package][starlark-docs] that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable.
 
-1. Generate EL & CL genesis information using [this genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator)
-1. Spin up a network of Eth2 Beacon/validator clients
-1. Add [a transaction spammer](https://github.com/kurtosis-tech/tx-fuzz) that will repeatedly send transactions to the network
-1. Launch [a consensus monitor](https://github.com/ralexstokes/ethereum_consensus_monitor) instance attached to the network
-1. Optionally block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
+Specifically, this package will:
+1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
+2. Configure & bootstrap a network of Ethereum nodes of *n* size using the genesis data generated above
+3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
+4. Spin up and connect a [testnet verifier](https://github.com/ethereum/merge-testnet-verifier)
+5. Spin up a Grafana and Prometheus instance to observe the network
 
-For much more detailed information about how the merge works in Ethereum testnets, see [this document](https://notes.ethereum.org/@ExXcnR0-SJGthjz1dwkA1A/H1MSKgm3F).
+Optional features (enabled via flags or parameter files at runtime):
+* Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
+* Spin up & configure parameters for the infrastructure behind Flashbot's implementation of PBS using `mev-boost`, in either `full` or `mock` mode. More details [here](./README.md#proposer-builder-separation-pbs-implementation-via-flashbots-mev-boost-protocol).
+* Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
+* Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client. 
+* Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
+* Specify the required parameters for the nodes to reach an external block building network
+* Generate keystores for each node in parallel
 
 ## Quickstart
-
-1. [Install Docker if you haven't done so already][docker-installation]
-1. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
-1. Ensure your Docker engine is running:
+1. [Install Docker & start the Docker Daemon if you haven't done so already][docker-installation]
+2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
+3. Run the package with default configurations from the command line:
    ```bash
-   docker image ls
-   ```
-1. Run the package:
-   ```bash
-   kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package
+   kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package
    ```
 
-To remove the enclave running the Ethereum network, run `kurtosis enclave rm -f eth2`.
-
-You can customize the package's behaviour by passing in a configuration JSON or YAML (see the "Configuration" section below). For example:
-
+#### Run with your own configuration
+Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 ```bash
-kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package '{"global_client_log_level": "info"}'
+kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package "$(cat ~/network_params.json)"
 ```
 
-For extra convenience, you can store the parameters in a file:
+Where `network_params.json` contains the parameters for your network in your home directory.
 
-1. Create a file in your home directory `eth2-package-params.json` with the following contents:
+#### Run in Kubernetes
+Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster. 
 
-   ```yaml
-   global_client_log_level: "info"
-   ```
-
-1. Run the package, passing in the params from the file:
-   ```bash
-   kurtosis run --enclave eth2 github.com/kurtosis-tech/eth2-package "$(cat ~/eth2-package-params.json)"
-   ```
+#### Tear down
+The testnet will reside in an [enclave](https://docs.kurtosis.com/concepts-reference/enclaves/) - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
+```
+kurtosis enclave rm -f my-testnet
+```
 
 ## Management
-
-Kurtosis will create a new enclave to house the services of the Ethereum network. [This page][using-the-cli] contains documentation for managing the created enclave & viewing detailed information about it.
+To interact with the network and adjacent services, you should use the [Kurtosis CLI](https://docs.kurtosis.com/cli) which allows you to manage the enclave that houses your network.
 
 ## Configuration
-
-To configure the package behaviour, you can modify your `eth2-package-params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
+To configure the package behaviour, you can modify your `network_params.json` file. The full JSON schema that can be passed in is as follows with the defaults provided:
 
 <details>
     <summary>Click to show all configuration options</summary>
@@ -63,7 +60,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     "participants": [
         {
             //  The type of EL client that should be started
-            //  Valid values are "geth", "nethermind", "erigon" and "besu"
+            //  Valid values are "geth", "nethermind", "erigon", "besu" and "reth"
             "el_client_type": "geth",
 
             //  The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -72,6 +69,7 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
             //  - erigon: thorax/erigon:devel
             //  - nethermind: nethermind/nethermind:latest
             //  - besu: hyperledger/besu:develop
+            //  - reth: ghcr.io/paradigmxyz/reth
             "el_client_image": "",
 
             //  The log level string that this participant's EL client should log at
@@ -126,9 +124,9 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
         }
     ],
 
-    //  Configuration parameters for the Eth network
+    //  Default configuration parameters for the Eth network
     "network_params": {
-        //  The network ID of the Eth1 network
+        //  The network ID of the network.
         "network_id": "3151908",
 
         //  The address of the staking contract address on the Eth1 chain
@@ -147,12 +145,9 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
         //   validator keys already preregistered as validators
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
 
-         //  The deneb for epoch -- arbitrarily large while we sort out https://github.com/kurtosis-tech/eth-network-package/issues/42 this will take 53~ hours for now
-         "deneb_for_epoch": 500,
-
-         // Parallelizes keystore generation so that each node has keystores being generated in their own container
-         // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
-         "parallel_keystore_generation": false,
+        // The epoch at which the capella and deneb forks are set to occur.
+        "capella_fork_epoch": 2,
+        "deneb_fork_epoch": 4,
     },
 
     // True by defaults such that in addition to the Ethereum network:
@@ -182,17 +177,125 @@ To configure the package behaviour, you can modify your `eth2-package-params.yam
     // EngineAPI Snooper
     "snooper_enabled": false,
 
+    // Parallelizes keystore generation so that each node has keystores being generated in their own container
+    // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
+    "parallel_keystore_generation": false,
+
+
     // Supports three valeus
-    // Default: None - no mev boost, mev builder, mev flood or relays are spun up
-    // mock - mock-builder & mev-boost are spun up
-    // full - mev-boost, relays, flooder and builder are all spun up
-    "mev_type": None
+    // Default: "None" - no mev boost, mev builder, mev flood or relays are spun up
+    // "mock" - mock-builder & mev-boost are spun up
+    // "full" - mev-boost, relays, flooder and builder are all spun up
+    "mev_type": "None",
+
+    // Parameters if MEV is used
+    "mev_params": {
+      // The image to use for MEV boot relay
+      // This uses the h4ck3rk3y image instead of the flashbots image as that isn't published yet
+		"mev_relay_image": "h4ck3rk3y/mev-boost-relay",
+      // Extra parameters to send to the API
+		"mev_relay_api_extra_args": [],
+      // Extra parameters to send to the housekeeper
+		"mev_relay_housekeeper_extra_args": [],
+      // Extra parameters to send to the website
+		"mev_relay_website_extra_args": [],
+      // Extra parameters to send to the builder
+		"mev_builder_extra_args": [],
+      // Image to use for mev-flood
+		"mev_flood_image": "flashbots/mev-flood",
+      // Extra parameters to send to mev-flood
+		"mev_flood_extra_args": []
+    }
 }
 ```
-
 </details>
 
-You can find the latest Kiln compatible docker images here: https://notes.ethereum.org/@launchpad/kiln
+#### Example configurations
+
+<details>
+    <summary>A 5-node Ethereum network with three different CL and EL client combinations and mev-boost infrastructure in "full" mode.</summary>
+
+```json
+{
+  "participants": [
+    {
+      "el_client_type": "geth",
+      "el_client_image": "",
+      "cl_client_type": "lighthouse",
+      "cl_client_image": "",
+      "count": 2
+    },
+    {
+      "el_client_type": "nethermind",
+      "el_client_image": "",
+      "cl_client_type": "teku",
+      "cl_client_image": "",
+      "count": 1
+    },
+    {
+      "el_client_type": "besu",
+      "el_client_image": "",
+      "cl_client_type": "prysm",
+      "cl_client_image": "",
+      "count": 2
+    },
+  ],
+  "mev_type": "full",
+  "launch_additional_services": false
+}
+```
+</details>
+
+<details>
+    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, transaction-spammer, EngineAPI snooper, and a testnet verifier)</summary>
+
+```json
+{
+  "participants": [
+    {
+      "el_client_type": "geth",
+      "el_client_image": "",
+      "cl_client_type": "lighthouse",
+      "cl_client_image": "",
+      "count": 2
+    }
+  ],
+  "launch_additional_services": true,
+  "snooper_enabled": true
+}
+```
+</details>
+
+## Proposer Builder Separation (PBS) emulation
+To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
+```
+kurtosis run github.com/kurtosis-tech/eth2-package '{"mev_type": "full"}'
+```
+
+Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
+1. `Flashbot's block builder & CL validator + beacon` - A modified Geth client that builds blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay.
+2. `mev-relay-api` - Services that provide APIs for (a) proposers, (b) block builders, (c) data
+3. `mev-relay-website` - A website to monitor payloads that have been delivered
+4. `mev-relay-housekeeper` - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
+5. `mev-boost` - open-source middleware instantiated for each EL/Cl pair in the network, including the builder
+6. `mev-flood` - Deploys UniV2 smart contracts, provisions liquidity on UniV2 pairs, & sends a constant stream of UniV2 swap transactions to the network's public mempool.
+
+<details>
+    <summary>Caveats when using "mev_type": "full"</summary>
+
+* The mev-boost-relay service requires Capella at an epoch of non-zero. For the eth2-package, the Capella fork is set to happen after the first epoch to be started up and fully connected to the CL client.
+* Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 2nd epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 2nd epoch.
+* After the 3rd epoch, the mev-relay service will begin to receive execution payloads (eth_sendPayload, which does not contain transaction content) from the mev-builder service (or mock-builder in mock-mev mode).
+* Validators will start to receive validated execution payload headers from the mev-relay service (via mev-boost) after the 4th epoch. The validator selects the most valuable header, signs the payload, and returns the signed header to the relay - effectively proposing the payload of transactions to be included in the soon-to-be-proposed block. Once the relay verifies the block proposer's signature, the relay will respond with the full execution payload body (incl. the transaction contents) for the validator to use when proposing a SignedBeaconBlock to the network.
+</details>
+
+
+This package also supports a `"mev_type": "mock"` mode that will only bring up:
+
+1. `mock-builder` - a server that listens for builder API directives and responds with payloads built using an execution client
+1. `mev-boost` - for every EL/CL pair launched
+
+For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package). 
 
 ## Developing On This Package
 
@@ -214,18 +317,14 @@ To get detailed information about the structure of the package, visit [the archi
 
 When you're happy with your changes:
 
-- Add an entry to `docs/changelog.md` under the `# TBD` header describing your changes (this is required for CI checks to pass!)
-- Create a PR
-- Add one of the maintainers of the repo as a "Review Request":
-  - `parithosh` (Ethereum)
-  - `gbouv` (Kurtosis)
-  - `h4ck3rk3y` (Kurtosis)
-  - `mieubrisse` (Kurtosis)
-- Once everything works, merge!
-
-## Known Bugs
-
-`wait_for_epoch_finalization` - doesn't work as expected, as Starlark doesn't have ways to do assertions on facts just yet. The [issue](https://github.com/kurtosis-tech/eth2-package/issues/15) tracks this.
+1. Add an entry to `docs/changelog.md` under the `# TBD` header describing your changes (this is required for CI checks to pass!)
+1. Create a PR
+1. Add one of the maintainers of the repo as a "Review Request":
+   * `parithosh` (Ethereum Foundation)
+   * `barnabasbusa` (Ethereum Foundation)
+   * `h4ck3rk3y` (Kurtosis)
+   * `mieubrisse` (Kurtosis)
+1. Once everything works, merge!
 
 <!------------------------ Only links below here -------------------------------->
 

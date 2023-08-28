@@ -1,0 +1,71 @@
+
+logging:
+  outputLevel: "info"
+  #outputStderr: false
+
+  #filePath: "explorer.log"
+  #fileLevel: "warn"
+
+# Chain network configuration
+chain:
+  name: "kurtosis-testnet"
+  configPath: "/cl-genesis-data/output/config.yaml"
+  displayName: "Kurtosis Testnet"
+
+# HTTP Server configuration
+server:
+  host: "0.0.0.0" # Address to listen on
+  port: "8080" # Port to listen on
+
+frontend:
+  enabled: true # Enable or disable to web frontend
+  debug: false
+  minimize: false # minimize html templates
+
+  # Name of the site, displayed in the title tag
+  siteName: "Beaconchain Light"
+  siteSubtitle: "Kurtosis Testnet"
+
+  # link to EL Explorer
+  ethExplorerLink: ""
+
+  # file or inventory url to load validator names from
+  validatorNamesYaml: "/validator-ranges/validator-ranges.yaml"
+
+beaconapi:
+  # CL Client RPC
+  endpoints:
+{{ range $clClient := .CLClientInfo }}
+    - url: "http://{{ $clClient.IPAddr }}:{{ $clClient.PortNum }}"
+      name: "{{ $clClient.Name }}"
+      archive: true
+{{- end }}
+  # local cache for page models
+  localCacheSize: 100 # 100MB
+
+  # remote cache for page models
+  redisCacheAddr: ""
+  redisCachePrefix: ""
+
+# indexer keeps track of the latest epochs in memory.
+indexer:
+  # number of epochs to load on startup
+  prepopulateEpochs: 2
+
+  # max number of epochs to keep in memory
+  inMemoryEpochs: 3
+
+  # epoch processing delay (should be >= 2)
+  epochProcessingDelay: 2
+
+  # disable synchronizing and everything that writes to the db (indexer just maintains local cache)
+  disableIndexWriter: false
+
+  # number of seconds to wait between each epoch (don't overload CL client)
+  syncEpochCooldown: 2
+
+
+database:
+  engine: "sqlite"
+  sqlite:
+    file: ":memory:"
