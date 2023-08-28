@@ -19,6 +19,10 @@
     {
       "el_client_type": "reth",
       "cl_client_type": "nimbus"
+    },
+    {
+      "el_client_type": "ethereumjs",
+      "cl_client_type": "nimbus"
     }
   ],
   "network_params": {

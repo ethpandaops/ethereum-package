@@ -99,6 +99,26 @@
      {
         "el_client_type":"besu",
         "cl_client_type":"prysm"
+     },
+     {
+        "el_client_type":"ethereumjs",
+        "cl_client_type":"lighthouse"
+     },
+     {
+        "el_client_type":"ethereumjs",
+        "cl_client_type":"nimbus"
+     },
+     {
+        "el_client_type":"ethereumjs",
+        "cl_client_type":"lodestar"
+     },
+     {
+        "el_client_type":"ethereumjs",
+        "cl_client_type":"teku"
+     },
+     {
+        "el_client_type":"ethereumjs",
+        "cl_client_type":"prysm"
      }
   ],
   "network_params":{
