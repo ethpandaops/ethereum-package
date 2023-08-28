@@ -73,7 +73,7 @@ def run(plan, args):
 		first_client_beacon_name = first_cl_client.beacon_service_name
 		mev_flood_module.launch_mev_flood(plan, mev_params.mev_flood_image, el_uri)
 		epoch_recipe = GetHttpRequestRecipe(
-			endpoint = "/eth/v1/beacon/blocks/head",
+			endpoint = "/eth/v2/beacon/blocks/head",
 			port_id = HTTP_PORT_ID_FOR_FACT,
 			extract = {
 				"epoch": ".data.message.body.attestations[0].data.target.epoch"
