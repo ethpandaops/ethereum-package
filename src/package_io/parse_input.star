@@ -223,7 +223,8 @@ def get_default_mev_params():
 		"mev_relay_website_extra_args": [],
 		"mev_builder_extra_args": [],
 		"mev_flood_image": "flashbots/mev-flood",
-		"mev_flood_extra_args": []
+		"mev_flood_extra_args": [],
+		"mev_flood_seconds_per_bundle": 15,
 	}
 
 

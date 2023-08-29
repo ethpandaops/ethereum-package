@@ -17,11 +17,11 @@ def launch_mev_flood(plan, image, el_uri):
         )
     )
 
-def spam_in_background(plan, el_uri, mev_flood_extra_args):
-    command = ["/bin/sh", "-c", "nohup ./run spam -r {0} -k {1} -u {2} -l deployment.json  --secondsPerBundle 15 >main.log 2>&1 &".format(el_uri, ADMIN_KEY, USER_KEY)]
+def spam_in_background(plan, el_uri, mev_flood_extra_args, seconds_per_bundle):
+    command = ["/bin/sh", "-c", "nohup ./run spam -r {0} -k {1} -u {2} -l deployment.json  --secondsPerBundle {3} >main.log 2>&1 &".format(el_uri, ADMIN_KEY, USER_KEY, seconds_per_bundle)]
     if mev_flood_extra_args:
         joined_extra_args = " ".join(mev_flood_extra_args)
-        command = ["/bin/sh", "-c", "nohup ./run spam -r {0} -k {1} -u {2} -l deployment.json  --secondsPerBundle 15 {3} >main.log 2>&1 &".format(el_uri, ADMIN_KEY, USER_KEY, joined_extra_args)]
+        command = ["/bin/sh", "-c", "nohup ./run spam -r {0} -k {1} -u {2} -l deployment.json  --secondsPerBundle {3} {4} >main.log 2>&1 &".format(el_uri, ADMIN_KEY, USER_KEY, seconds_per_bundle, joined_extra_args)]
     plan.exec(
         service_name = "mev-flood",
         recipe = ExecRecipe(
