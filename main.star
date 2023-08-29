@@ -81,8 +81,8 @@ def run(plan, args):
 		)
 		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
 		plan.print("epoch 2 reached, can begin mev stuff")
-		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri)
-		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args)
+		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri, network_params.seconds_per_slot)
+		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args, mev_params.mev_flood_seconds_per_bundle)
 		mev_endpoints.append(endpoint)
 
 

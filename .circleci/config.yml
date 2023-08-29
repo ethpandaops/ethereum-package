@@ -168,6 +168,9 @@ workflows:
       - erigon-all:
           context:
             - slack-secrets
+      - ethereumjs-all:
+          context:
+            - slack-secrets
       - full-interop:
           context:
             - slack-secrets
