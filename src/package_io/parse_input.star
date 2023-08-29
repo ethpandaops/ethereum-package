@@ -3,7 +3,8 @@ DEFAULT_EL_IMAGES = {
 	"erigon":		"thorax/erigon:devel",
 	"nethermind":	"nethermind/nethermind:latest",
 	"besu":			"hyperledger/besu:develop",
-	"reth": 		"ghcr.io/paradigmxyz/reth"
+	"reth": 		"ghcr.io/paradigmxyz/reth",
+	"ethereumjs": "ethpandaops/ethereumjs:master",
 }
 
 DEFAULT_CL_IMAGES = {
