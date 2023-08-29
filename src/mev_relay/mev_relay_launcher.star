@@ -33,7 +33,7 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, 
         "CAPELLA_FORK_VERSION": "0x40000038",
         "DENEB_FORK_VERSION": "0x50000038",
         "GENESIS_VALIDATORS_ROOT": validator_root,
-        "SEC_PER_SLOT": seconds_per_slot,
+        "SEC_PER_SLOT": str(seconds_per_slot)
     }
 
     plan.add_service(
