@@ -1,4 +1,5 @@
-IMAGE_NAME = "ethpandaops/tx-fuzz:latest"
+# TODO Update this image to ethpandaops one once the pr is merged
+IMAGE_NAME = "bbusa/tx-fuzz:blobspam"
 SERVICE_NAME = "transaction-spammer"
 
 def launch_transaction_spammer(plan, prefunded_addresses, el_client_context):
