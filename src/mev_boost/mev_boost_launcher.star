@@ -34,11 +34,14 @@ def get_config(mev_boost_launcher, network_id):
 		ports = USED_PORTS,
 		cmd = command,
 		env_vars = {
-			# TODO remove the hardcoding
+			# TODO(maybe) remove the hardcoding
 			# This is set to match this file https://github.com/kurtosis-tech/eth-network-package/blob/main/static_files/genesis-generation-config/cl/config.yaml.tmpl#L11
+			# latest-notes
+			# does this need genesis time to be set as well
 			"GENESIS_FORK_VERSION": "0x10000038",
 			"BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(parse_input.FLASHBOTS_MEV_BOOST_PORT),
-			"SKIP_RELAY_SIGNATURE_CHECK": "true",
+			# maybe this is breaking; this isn't verifyign the bid and not sending it to the validator
+			"SKIP_RELAY_SIGNATURE_CHECK": "1",
 			"RELAYS": mev_boost_launcher.relay_end_points[0]
 		}
 	)

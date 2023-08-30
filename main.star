@@ -7,11 +7,15 @@ eth_network_module = import_module("github.com/kurtosis-tech/eth-network-package
 transaction_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star")
 cl_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/cl_forkmon/cl_forkmon_launcher.star")
 el_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/el_forkmon/el_forkmon_launcher.star")
+beacon_metrics_gazer = import_module("github.com/kurtosis-tech/eth2-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star")
+light_beaconchain_explorer = import_module("github.com/kurtosis-tech/eth2-package/src/light_beaconchain/light_beaconchain_launcher.star")
 prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star")
 grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star")
 testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
 mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_launcher.star")
 mock_mev_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mock_mev/mock_mev_launcher.star")
+mev_relay_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_relay/mev_relay_launcher.star")
+mev_flood_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_flood/mev_flood_launcher.star")
 
 GRAFANA_USER				= "admin"
 GRAFANA_PASSWORD			= "admin"
@@ -22,12 +26,15 @@ HTTP_PORT_ID_FOR_FACT = "http"
 
 MEV_BOOST_SHOULD_CHECK_RELAY = True
 MOCK_MEV_TYPE = "mock"
+FULL_MEV_TYPE = "full"
+PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
 def run(plan, args):
 	args_with_right_defaults, args_with_defaults_dict = parse_input.parse_input(args)
 
 	num_participants = len(args_with_right_defaults.participants)
 	network_params = args_with_right_defaults.network_params
+	mev_params = args_with_right_defaults.mev_params
 
 	grafana_datasource_config_template = read_file(static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH)
 	grafana_dashboards_config_template = read_file(static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH)
@@ -36,7 +43,7 @@ def run(plan, args):
 	plan.print("Read the prometheus, grafana templates")
 
 	plan.print("Launching participant network with {0} participants and the following network params {1}".format(num_participants, network_params))
-	all_participants, cl_genesis_timestamp, _ = eth_network_module.run(plan, args_with_defaults_dict)
+	all_participants, cl_genesis_timestamp, genesis_validators_root = eth_network_module.run(plan, args_with_defaults_dict)
 
 	all_el_client_contexts = []
 	all_cl_client_contexts = []
@@ -56,7 +63,28 @@ def run(plan, args):
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		jwt_secret = all_el_client_contexts[0].jwt_secret
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
+		mev_endpoints.append(endpoint)		
+	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
+		el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num)
+		builder_uri = "http://{0}:{1}".format(all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num)
+		beacon_uri = ["http://{0}:{1}".format(context.ip_addr, context.http_port_num) for context in all_cl_client_contexts][-1]
+		beacon_uris = beacon_uri
+		first_cl_client = all_cl_client_contexts[0]
+		first_client_beacon_name = first_cl_client.beacon_service_name
+		mev_flood_module.launch_mev_flood(plan, mev_params.mev_flood_image, el_uri)
+		epoch_recipe = GetHttpRequestRecipe(
+			endpoint = "/eth/v2/beacon/blocks/head",
+			port_id = HTTP_PORT_ID_FOR_FACT,
+			extract = {
+				"epoch": ".data.message.body.attestations[0].data.target.epoch"
+			}
+		)
+		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
+		plan.print("epoch 2 reached, can begin mev stuff")
+		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri, network_params.seconds_per_slot)
+		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args, mev_params.mev_flood_seconds_per_bundle)
 		mev_endpoints.append(endpoint)
+
 
 	# spin up the mev boost contexts if some endpoints for relays have been passed
 	all_mevboost_contexts = []
@@ -86,6 +114,16 @@ def run(plan, args):
  	el_forkmon_config_template = read_file(static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH)
  	el_forkmon.launch_el_forkmon(plan, el_forkmon_config_template, all_el_client_contexts)
  	plan.print("Succesfully launched execution layer forkmon")
+
+	plan.print("Launching beacon metrics gazer")
+	beacon_metrics_gazer_config_template = read_file(static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH)
+	beacon_metrics_gazer.launch_beacon_metrics_gazer(plan, beacon_metrics_gazer_config_template, all_cl_client_contexts,network_params)
+	plan.print("Succesfully launched beacon metrics gazer")
+
+	plan.print("Launching light-beaconchain-explorer")
+	light_beaconchain_explorer_config_template = read_file(static_files.LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH)
+	light_beaconchain_explorer.launch_light_beacon(plan, light_beaconchain_explorer_config_template, all_cl_client_contexts)
+	plan.print("Succesfully light-beaconchain-explorer")
 
 	plan.print("Launching prometheus...")
 	prometheus_private_url = prometheus.launch_prometheus(

@@ -18,6 +18,16 @@ parameters:
     type: boolean
     default: true
 
+# Install go version 1.19 to run our integration tests on the minimal version we support
+setup_kurtosis: &setup_kurtosis
+  - run: |
+      echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+      sudo apt update
+      sudo apt install kurtosis-cli
+      kurtosis config init dont-send-metrics
+      kurtosis engine restart
+
+
 # NOTE: Because CircleCI jobs run on separate machines from each other, we duplicate steps (like checkout) between jobs. This is because doing the "correct" DRY
 #  refactoring of, "one job for checkout, one job for build Docker image, etc." would require a) persisting files between jobs and b) persisting Docker images between
 #  jobs. Both are annoying (saving/loading workspaces require re-downloading the workspace over the network, and there doesn't seem to be a good way to do Docker
@@ -27,44 +37,157 @@ jobs:
   run_starlark:
     executor: ubuntu_vm
     steps:
-      # Set up Kurtosis
-      - run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-
+      - <<: *setup_kurtosis
       - checkout
-
-      # We don't send metrics to avoid polluting our logs
-      - run: kurtosis config init dont-send-metrics
-
-      - run: kurtosis engine restart
 
       - run: kurtosis run ${PWD}
 
   check_latest_version:
     executor: ubuntu_vm
     steps:
-      # Set up Kurtosis
-      - run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-
+      - <<: *setup_kurtosis
       - checkout
 
-      # We don't send metrics to avoid polluting our logs
-      - run: kurtosis config init dont-send-metrics
-
-      - run: kurtosis engine restart
-
       - run: kurtosis run --dry-run ${PWD}
+
+  besu-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/besu-all.json)"
+
+  erigon-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/erigon-all.json)"
+
+  ethereumjs-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/ethereumjs-all.json)"
+
+  geth-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/geth-all.json)"
+
+  lighthouse-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/lighthouse-all.json)"
+
+  lodestar-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/lodestar-all.json)"
+
+  mix:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix.json)"
+
+  nethermind-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/nethermind-all.json)"
+
+  nimbus-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/nimbus-all.json)"
+
+  prysm-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/prysm-all.json)"
+
+  reth-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/reth-all.json)"
+
+  teku-all:
+    executor: ubuntu_vm
+    resource_class: xlarge
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/teku-all.json)"
 
 workflows:
   check_latest_version:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
     jobs:
       - check_latest_version:
+          context:
+            - slack-secrets
+      - besu-all:
+          context:
+            - slack-secrets
+      - erigon-all:
+          context:
+            - slack-secrets
+      - ethereumjs-all:
+          context:
+            - slack-secrets
+      - geth-all:
+          context:
+            - slack-secrets
+      - lighthouse-all:
+          context:
+            - slack-secrets
+      - lodestar-all:
+          context:
+            - slack-secrets
+      - mix:
+          context:
+            - slack-secrets
+      - nethermind-all:
+          context:
+            - slack-secrets
+      - nimbus-all:
+          context:
+            - slack-secrets
+      - prysm-all:
+          context:
+            - slack-secrets
+      - reth-all:
+          context:
+            - slack-secrets
+      - teku-all:
           context:
             - slack-secrets
 
