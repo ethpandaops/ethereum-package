@@ -260,7 +260,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 		mev_participant = {
 			"el_client_type": "geth",
 			# TODO replace with actual when flashbots/builder is published
-			"el_client_image": "h4ck3rk3y/builder",
+			"el_client_image": "ethpandaops/flashbots-builder:main",
 			"el_client_log_level":    "",
 			"cl_client_type":         "lighthouse",
 			# THIS overrides the beacon image
@@ -281,7 +281,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 				"--builder.genesis_fork_version=0x10000038",
 				"--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),
 				"--miner.extradata=\"Illuminate Dmocratize Dstribute\"",
-				"--miner.algotype=greedy"
+				"--builder.algotype=greedy"
 				] + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
 			"validator_extra_params": ["--builder-proposals"],
 			"builder_network_params": None
