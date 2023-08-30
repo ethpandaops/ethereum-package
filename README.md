@@ -13,7 +13,7 @@ Optional features (enabled via flags or parameter files at runtime):
 * Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
 * Spin up & configure parameters for the infrastructure behind Flashbot's implementation of PBS using `mev-boost`, in either `full` or `mock` mode. More details [here](./README.md#proposer-builder-separation-pbs-implementation-via-flashbots-mev-boost-protocol).
 * Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
-* Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client. 
+* Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client.
 * Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
 * Specify the required parameters for the nodes to reach an external block building network
 * Generate keystores for each node in parallel
@@ -35,7 +35,7 @@ kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package "$(cat ~
 Where `network_params.json` contains the parameters for your network in your home directory.
 
 #### Run in Kubernetes
-Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster. 
+Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster.
 
 #### Tear down
 The testnet will reside in an [enclave](https://docs.kurtosis.com/concepts-reference/enclaves/) - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
@@ -295,7 +295,7 @@ This package also supports a `"mev_type": "mock"` mode that will only bring up:
 1. `mock-builder` - a server that listens for builder API directives and responds with payloads built using an execution client
 1. `mev-boost` - for every EL/CL pair launched
 
-For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package). 
+For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package).
 
 ## Developing On This Package
 
@@ -327,6 +327,7 @@ When you're happy with your changes:
 1. Once everything works, merge!
 
 <!------------------------ Only links below here -------------------------------->
+
 
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
