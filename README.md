@@ -317,13 +317,13 @@ To get detailed information about the structure of the package, visit [the archi
 
 When you're happy with your changes:
 
-1. Add an entry to `docs/changelog.md` under the `# TBD` header describing your changes (this is required for CI checks to pass!)
 1. Create a PR
 1. Add one of the maintainers of the repo as a "Review Request":
    * `parithosh` (Ethereum Foundation)
    * `barnabasbusa` (Ethereum Foundation)
    * `h4ck3rk3y` (Kurtosis)
    * `mieubrisse` (Kurtosis)
+   * `leederek` (Kurtosis)
 1. Once everything works, merge!
 
 <!------------------------ Only links below here -------------------------------->

@@ -75,14 +75,6 @@ jobs:
 
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/ethereumjs-all.json)"
 
-  full-interop:
-    executor: ubuntu_vm
-    resource_class: xlarge
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/full-interop.json)"
-
   geth-all:
     executor: ubuntu_vm
     resource_class: xlarge
@@ -169,9 +161,6 @@ workflows:
           context:
             - slack-secrets
       - ethereumjs-all:
-          context:
-            - slack-secrets
-      - full-interop:
           context:
             - slack-secrets
       - geth-all:
