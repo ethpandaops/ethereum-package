@@ -117,7 +117,7 @@ def parse_input(input_args):
 
 
 	if result.get("mev_type") in ("mock", "full"):
-		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT)
+		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT, result.get("mev_type"))
 
 	return struct(
 		participants=[struct(
@@ -235,7 +235,7 @@ def get_default_mev_params():
 
 
 # TODO perhaps clean this up into a map
-def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
+def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
 	for index, participant in enumerate(parsed_arguments_dict["participants"]):
 		mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
 
