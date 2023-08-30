@@ -260,7 +260,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 		mev_participant = {
 			"el_client_type": "geth",
 			# TODO replace with actual when flashbots/builder is published
-			"el_client_image": "flashbots/builder:sha-ffeb673",
+			"el_client_image": "ethpandaops/flashbots-builder:main",
 			"el_client_log_level":    "",
 			"cl_client_type":         "lighthouse",
 			# THIS overrides the beacon image
