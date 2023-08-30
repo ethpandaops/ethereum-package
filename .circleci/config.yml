@@ -77,7 +77,7 @@ jobs:
 
   full-interop:
     executor: ubuntu_vm
-    resource_class: xlarge
+    resource_class: 2xlarge
     steps:
       - <<: *setup_kurtosis
       - checkout
