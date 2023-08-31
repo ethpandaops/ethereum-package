@@ -27,7 +27,7 @@ MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
 package_io = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
 
-def parse_input(input_args):
+def parse_input(plan, input_args):
 	result = default_input_args()
 	for attr in input_args:
 		value = input_args[attr]
