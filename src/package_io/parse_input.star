@@ -27,7 +27,7 @@ MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
 package_io = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
 
-def parse_input(input_args):
+def parse_input(plan, input_args):
 	result = default_input_args()
 	for attr in input_args:
 		value = input_args[attr]
@@ -101,9 +101,6 @@ def parse_input(input_args):
 	if result["network_params"]["genesis_delay"] == 0:
 		fail("genesis_delay is 0 needs to be > 0 ")
 
-	if result["network_params"]["capella_fork_epoch"] == 0:
-		fail("capella_fork_epoch is 0 needs to be > 0 ")
-
 	if result["network_params"]["deneb_fork_epoch"] == 0:
 		fail("deneb_fork_epoch is 0 needs to be > 0 ")
 
@@ -117,6 +114,9 @@ def parse_input(input_args):
 
 
 	if result.get("mev_type") in ("mock", "full"):
+		if result["network_params"]["capella_fork_epoch"] == 0:
+			plan.print("MEV components require a non zero value for the network_params.capella_fork_epoch; setting it to 1 as its 0")
+			result["network_params"]["capella_fork_epoch"] = 1
 		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT, result.get("mev_type"))
 
 	return struct(
@@ -198,8 +198,8 @@ def default_network_params():
 		"seconds_per_slot":                      12,
 		"slots_per_epoch":                       32,
 		"genesis_delay":                         120,
-		"capella_fork_epoch":                   1,
-		"deneb_fork_epoch":                     500
+		"capella_fork_epoch":                    0,
+		"deneb_fork_epoch":                      500
 	}
 
 def default_participant():

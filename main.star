@@ -30,7 +30,7 @@ FULL_MEV_TYPE = "full"
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
 def run(plan, args):
-	args_with_right_defaults, args_with_defaults_dict = parse_input.parse_input(args)
+	args_with_right_defaults, args_with_defaults_dict = parse_input.parse_input(plan, args)
 
 	num_participants = len(args_with_right_defaults.participants)
 	network_params = args_with_right_defaults.network_params
