@@ -27,7 +27,7 @@ MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
 package_io = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
 
-def parse_input(input_args):
+def parse_input(plan, input_args):
 	result = default_input_args()
 	for attr in input_args:
 		value = input_args[attr]
@@ -101,9 +101,6 @@ def parse_input(input_args):
 	if result["network_params"]["genesis_delay"] == 0:
 		fail("genesis_delay is 0 needs to be > 0 ")
 
-	if result["network_params"]["capella_fork_epoch"] == 0:
-		fail("capella_fork_epoch is 0 needs to be > 0 ")
-
 	if result["network_params"]["deneb_fork_epoch"] == 0:
 		fail("deneb_fork_epoch is 0 needs to be > 0 ")
 
@@ -117,7 +114,10 @@ def parse_input(input_args):
 
 
 	if result.get("mev_type") in ("mock", "full"):
-		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT)
+		if result["network_params"]["capella_fork_epoch"] == 0:
+			plan.print("MEV components require a non zero value for the network_params.capella_fork_epoch; setting it to 1 as its 0")
+			result["network_params"]["capella_fork_epoch"] = 1
+		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT, result.get("mev_type"))
 
 	return struct(
 		participants=[struct(
@@ -196,8 +196,8 @@ def default_network_params():
 		"seconds_per_slot":                      12,
 		"slots_per_epoch":                       32,
 		"genesis_delay":                         120,
-		"capella_fork_epoch":                   1,
-		"deneb_fork_epoch":                     500
+		"capella_fork_epoch":                    0,
+		"deneb_fork_epoch":                      500
 	}
 
 def default_participant():
@@ -230,7 +230,7 @@ def get_default_mev_params():
 
 
 # TODO perhaps clean this up into a map
-def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
+def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
 	for index, participant in enumerate(parsed_arguments_dict["participants"]):
 		mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
 
@@ -253,24 +253,40 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port):
 
 	num_participants = len(parsed_arguments_dict["participants"])
 
-	mev_url = "http://{0}{1}:{2}".format(mev_prefix, num_participants, mev_port)
+	if mev_type == "full":
 
-	mev_participant = {
-		"el_client_type": "geth",
-		# TODO replace with actual when flashbots/builder is published
-		"el_client_image": "h4ck3rk3y/builder",
-		"el_client_log_level":    "",
-		"cl_client_type":         "lighthouse",
-		# THIS overrides the beacon image
-		"cl_client_image":        "sigp/lighthouse",
-		"cl_client_log_level":    "",
-		"beacon_extra_params":    ["--builder={0}".format(mev_url), "--always-prepare-payload", "--prepare-payload-lookahead", "12000"],
-		# TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
-		"el_extra_params": ["--builder",  "--builder.remote_relay_endpoint=http://mev-relay-api:9062", "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1), "--builder.bellatrix_fork_version=0x30000038", "--builder.genesis_fork_version=0x10000038", "--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),  "--miner.extradata=\"Illuminate Dmocratize Dstribute\"", "--miner.algotype=greedy"] + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
-		"validator_extra_params": ["--builder-proposals"],
-		"builder_network_params": None
-	}
+		mev_url = "http://{0}{1}:{2}".format(mev_prefix, num_participants, mev_port)
 
-	parsed_arguments_dict["participants"].append(mev_participant)
+		mev_participant = {
+			"el_client_type": "geth",
+			# TODO replace with actual when flashbots/builder is published
+			"el_client_image": "ethpandaops/flashbots-builder:main",
+			"el_client_log_level":    "",
+			"cl_client_type":         "lighthouse",
+			# THIS overrides the beacon image
+			"cl_client_image":        "sigp/lighthouse",
+			"cl_client_log_level":    "",
+			"beacon_extra_params":    [
+				"--builder={0}".format(mev_url),
+				"--always-prepare-payload",
+				"--prepare-payload-lookahead",
+				"12000"
+				],
+			# TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
+			"el_extra_params": [
+				"--builder",
+				"--builder.remote_relay_endpoint=http://mev-relay-api:9062",
+				"--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1),
+				"--builder.bellatrix_fork_version=0x30000038",
+				"--builder.genesis_fork_version=0x10000038",
+				"--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),
+				"--miner.extradata=\"Illuminate Dmocratize Dstribute\"",
+				"--builder.algotype=greedy"
+				] + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
+			"validator_extra_params": ["--builder-proposals"],
+			"builder_network_params": None
+		}
+
+		parsed_arguments_dict["participants"].append(mev_participant)
 
 	return parsed_arguments_dict
