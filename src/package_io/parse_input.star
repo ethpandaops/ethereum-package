@@ -114,6 +114,9 @@ def parse_input(input_args):
 
 
 	if result.get("mev_type") in ("mock", "full"):
+		if result["network_params"]["capella_fork_epoch"] == 0:
+			plan.print("MEV components require a non zero value for the network_params.capella_fork_epoch; setting it to 1 as its 0")
+			result["network_params"]["capella_fork_epoch"] = 1
 		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT, result.get("mev_type"))
 
 	return struct(
