@@ -27,8 +27,6 @@ def get_config(
 	seconds_per_slot,
 	slots_per_epoch,
 	genesis_delay):
-	private_keys_strs = []
-	address_strs = []
 	dencunTime = (deneb_fork_epoch * slots_per_epoch * seconds_per_slot) + genesis_delay
 	return ServiceConfig(
 		image = IMAGE_NAME,
