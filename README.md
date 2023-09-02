@@ -303,7 +303,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
       "count": 2
     },
   ],
-  "mev_type": "full",
+  "mev_type": "mock",
   "launch_additional_services": false
 }
 ```
