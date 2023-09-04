@@ -28,7 +28,7 @@ frontend:
   siteSubtitle: "Showing a local testnet."
   server:
     host: '0.0.0.0' # Address to listen on
-    port: '8080' # Port to listen on
+    port: '{{.FrontendPort}}' # Port to listen on
   readerDatabase:
     name: db
     host: {{.DBHost}}

@@ -120,16 +120,17 @@ def run(plan, args):
 	# beacon_metrics_gazer_config_template = read_file(static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH)
 	# beacon_metrics_gazer.launch_beacon_metrics_gazer(plan, beacon_metrics_gazer_config_template, all_cl_client_contexts,network_params)
 	# plan.print("Succesfully launched beacon metrics gazer")
+
 	if args_with_right_defaults.explorer_version == "full":
-		plan.print("Launching light-beaconchain-explorer")
-		light_beaconchain_explorer_config_template = read_file(static_files.LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH)
-		light_beaconchain_explorer.launch_light_beacon(plan, light_beaconchain_explorer_config_template, all_cl_client_contexts)
-		plan.print("Succesfully light-beaconchain-explorer")
-	else:
 		plan.print("Launching full-beaconchain-explorer")
 		full_beaconchain_explorer_config_template = read_file(static_files.FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH)
 		full_beaconchain_explorer.launch_full_beacon(plan, full_beaconchain_explorer_config_template, all_cl_client_contexts, all_el_client_contexts)
-		plan.print("Succesfully full-beaconchain-explorer")
+		plan.print("Succesfully launched full-beaconchain-explorer")
+	# else:
+		# plan.print("Launching light-beaconchain-explorer")
+		# light_beaconchain_explorer_config_template = read_file(static_files.LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH)
+		# light_beaconchain_explorer.launch_light_beacon(plan, light_beaconchain_explorer_config_template, all_cl_client_contexts)
+		# plan.print("Succesfully launched light-beaconchain-explorer")
 	# plan.print("Launching prometheus...")
 	# prometheus_private_url = prometheus.launch_prometheus(
 	# 	plan,

@@ -1,22 +1,23 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
 
-
-SERVICE_NAME = "full-beaconchain"
-IMAGE_NAME = "gobitfly/eth2-beaconchain-explorer:kurtosi"
+IMAGE_NAME = "gobitfly/eth2-beaconchain-explorer:kurtosis"
 
 POSTGRES_PORT_ID = "postgres"
+POSTGRES_PORT_NUMBER = 5432
 POSTGRES_DB = "db"
 POSTGRES_USER = "postgres"
 POSTGRES_PASSWORD = "pass"
 
 REDIS_PORT_ID = "redis"
+REDIS_PORT_NUMBER = 6379
 
 FRONTEND_PORT_ID     = "http"
 FRONTEND_PORT_NUMBER = 8080
 
 LITTLE_BIGTABLE_PORT_ID = "littlebigtable"
+LITTLE_BIGTABLE_PORT_NUMBER = 9000
 
-FULL_BEACONCHAIN_CONFIG_FILENAME = "full-beaconchain-config.yaml"
+FULL_BEACONCHAIN_CONFIG_FILENAME = "config.yml"
 
 
 USED_PORTS = {
@@ -32,11 +33,11 @@ def launch_full_beacon(
 
 	# Add a Postgres server
     postgres = plan.add_service(
-        name = "postgres",
+        name = "explorer-postgres",
         config = ServiceConfig(
             image = "postgres:15.2-alpine",
             ports = {
-                POSTGRES_PORT_ID: PortSpec(5432, application_protocol = "postgresql"),
+                POSTGRES_PORT_ID: PortSpec(POSTGRES_PORT_NUMBER, application_protocol = "postgresql"),
             },
             env_vars = {
                 "POSTGRES_DB": POSTGRES_DB,
@@ -47,41 +48,41 @@ def launch_full_beacon(
     )
     # Add a redis server
     redis = plan.add_service(
-        name = "redis",
+        name = "explorer-redis",
         config = ServiceConfig(
             image = "redis:7",
             ports = {
-                REDIS_PORT_ID: PortSpec(6379, application_protocol = "tcp"),
+                REDIS_PORT_ID: PortSpec(REDIS_PORT_NUMBER, application_protocol = "tcp"),
             },
         ),
     )
     # Add a little bigtable server
     littlebigtable = plan.add_service(
-        name = "littlebigtable",
+        name = "explorer-littlebigtable",
         config = ServiceConfig(
             image = "gobitfly/little_bigtable:latest",
             ports = {
-                LITTLE_BIGTABLE_PORT_ID: PortSpec(9000, application_protocol = "tcp"),
+                LITTLE_BIGTABLE_PORT_ID: PortSpec(LITTLE_BIGTABLE_PORT_NUMBER, application_protocol = "tcp"),
             },
         ),
     )
 
     el_uri = "http://{0}:{1}".format(el_client_contexts[0].ip_addr, el_client_contexts[0].rpc_port_num)
-    redis_uri = "{0}:{1}".format(redis.ip_address, 6379)
+    redis_uri = "{0}:{1}".format(redis.ip_address, REDIS_PORT_NUMBER)
 
-    template_data = new_config_template_data(cl_client_contexts[0], el_uri, littlebigtable.ip_address, 9000, postgres.ip_address, 5432, redis_uri)
+    template_data = new_config_template_data(cl_client_contexts[0], el_uri, littlebigtable.ip_address, LITTLE_BIGTABLE_PORT_NUMBER, postgres.ip_address, POSTGRES_PORT_NUMBER, redis_uri, FRONTEND_PORT_NUMBER)
 
     template_and_data = shared_utils.new_template_and_data(config_template, template_data)
     template_and_data_by_rel_dest_filepath = {}
     template_and_data_by_rel_dest_filepath[FULL_BEACONCHAIN_CONFIG_FILENAME] = template_and_data
 
-    config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "full-beaconchain-config")
+    config_files_artifact_name = plan.render_templates(template_and_data_by_rel_dest_filepath, "config.yml")
 
     # Initialize the db schema
     initdbschema = plan.add_service(
-        name = "initdbschema",
+        name = "explorer-initdbschema",
         config = ServiceConfig(
-            image = "gobitfly/eth2-beaconchain-explorer:kurtosis",
+            image = IMAGE_NAME,
             files = {
                 "/app/config/": config_files_artifact_name,
             },
@@ -94,6 +95,146 @@ def launch_full_beacon(
                 "-command",
                 "applyDbSchema"
             ],
+        ),
+    )
+    # Initialize the bigtable schema
+    initbigtableschema = plan.add_service(
+        name = "explorer-initbigtableschema",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = {
+                "/app/config/": config_files_artifact_name,
+            },
+            entrypoint = [
+                "./misc"
+            ],
+            cmd = [
+                "-config",
+                "/app/config/config.yml",
+                "-command",
+                "initBigtableSchema"
+            ],
+        ),
+    )
+    # Start the indexer
+    indexer = plan.add_service(
+        name = "explorer-indexer",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = {
+                "/app/config/": config_files_artifact_name,
+            },
+            entrypoint = [
+                "./explorer"
+            ],
+            cmd = [
+                "-config",
+                "/app/config/config.yml",
+            ],
+            env_vars = {
+                "INDEXER_ENABLED": "TRUE",
+            }
+        ),
+    )
+    # Start the eth1indexer
+    eth1indexer = plan.add_service(
+        name = "explorer-eth1indexer",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = {
+                "/app/config/": config_files_artifact_name,
+            },
+            entrypoint = [
+                "./eth1indexer"
+            ],
+            cmd = [
+                "-config",
+                "/app/config/config.yml",
+                "-blocks.concurrency",
+                "1",
+                "-blocks.tracemode",
+                "geth",
+                "-data.concurrency",
+                "1",
+                "-balances.enabled"
+            ],
+        ),
+    )
+
+    rewardsexporter = plan.add_service(
+        name = "explorer-rewardsexporter",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = {
+                "/app/config/": config_files_artifact_name,
+            },
+            entrypoint = [
+                "./rewards-exporter"
+            ],
+            cmd = [
+                "-config",
+                "/app/config/config.yml",
+            ],
+        ),
+    )
+
+    statistics = plan.add_service(
+        name = "explorer-statistics",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = {
+                "/app/config/": config_files_artifact_name,
+            },
+            entrypoint = [
+                "./statistics"
+            ],
+            cmd = [
+                "-config",
+                "/app/config/config.yml",
+                "-charts.enabled",
+                "-graffiti.enabled",
+                "-validators.enabled"
+            ],
+        ),
+    )
+
+    fdu = plan.add_service(
+        name = "explorer-fdu",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = {
+                "/app/config/": config_files_artifact_name,
+            },
+            entrypoint = [
+                "./frontend-data-updater"
+            ],
+            cmd = [
+                "-config",
+                "/app/config/config.yml",
+            ],
+        ),
+    )
+
+    frontend = plan.add_service(
+        name = "explorer-frontend",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = {
+                "/app/config/": config_files_artifact_name,
+            },
+            entrypoint = [
+                "./explorer"
+            ],
+            cmd = [
+                "-config",
+                "/app/config/config.yml",
+            ],
+            env_vars = {
+                "FRONTEND_ENABLED": "TRUE",
+            },
+            ports = {
+                FRONTEND_PORT_ID: PortSpec(FRONTEND_PORT_NUMBER, application_protocol = "http"),
+            },
         ),
     )
 
