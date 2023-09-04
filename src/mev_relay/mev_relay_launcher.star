@@ -1,4 +1,4 @@
-redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star@0503b6d727015d85c498c4602c93e18c7c992445") # TODO when Kurtosis has proper version-pinning, use that!!!
+redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
 DUMMY_SECRET_KEY = "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
@@ -18,7 +18,7 @@ NETWORK_ID_TO_NAME = {
 }
 
 def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, builder_uri, seconds_per_slot):
-    redis = redis_module.run(plan, {})
+    redis = redis_module.run(plan)
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(plan, password = "postgres", user = "postgres", database = "postgres", service_name = "postgres")
 
@@ -36,11 +36,13 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, 
         "SEC_PER_SLOT": str(seconds_per_slot)
     }
 
+    redis_url = "{}:{}".format(redis.hostname, redis.port_number)
+    postgres_url = postgres.url + "?sslmode=disable"
     plan.add_service(
         name = MEV_RELAY_HOUSEKEEPER,
         config = ServiceConfig(
             image = image,
-            cmd = ["housekeeper", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris] + mev_params.mev_relay_housekeeper_extra_args,
+            cmd = ["housekeeper", "--network", "custom", "--db", postgres_url, "--redis-uri", redis_url, "--beacon-uris", beacon_uris] + mev_params.mev_relay_housekeeper_extra_args,
             env_vars= env_vars
         )
     )
@@ -49,7 +51,7 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, 
         name = MEV_RELAY_ENDPOINT,
         config = ServiceConfig(
             image = image,
-            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris, "--blocksim", builder_uri] + mev_params.mev_relay_api_extra_args,
+            cmd = ["api", "--network", "custom", "--db", postgres_url, "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", redis_url, "--beacon-uris", beacon_uris, "--blocksim", builder_uri] + mev_params.mev_relay_api_extra_args,
             ports = {
                 "api": PortSpec(number = MEV_RELAY_ENDPOINT_PORT, transport_protocol= "TCP")
             },
@@ -61,7 +63,7 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, 
         name = MEV_RELAY_WEBSITE,
         config = ServiceConfig(
             image = image,
-            cmd = ["website", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT), "--redis-uri", "redis:6379", "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)] + mev_params.mev_relay_website_extra_args,
+            cmd = ["website", "--network", "custom", "--db", postgres_url, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT), "--redis-uri", redis_url, "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)] + mev_params.mev_relay_website_extra_args,
             ports = {
                 "api": PortSpec(number = MEV_RELAY_WEBSITE_PORT, transport_protocol= "TCP", application_protocol="http")
             },
