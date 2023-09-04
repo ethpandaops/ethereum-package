@@ -1,5 +1,5 @@
 redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star@0503b6d727015d85c498c4602c93e18c7c992445") # TODO when Kurtosis has proper version-pinning, use that!!!
-postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star@83d05e639096fe58109b8574eb74ecd27688fc95")  # TODO When Kurtosis has proper version-pinning, use that!!!
+postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
 DUMMY_SECRET_KEY = "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
 DUMMY_PUB_KEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
@@ -20,7 +20,7 @@ NETWORK_ID_TO_NAME = {
 def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, builder_uri, seconds_per_slot):
     redis = redis_module.run(plan, {})
     # making the password postgres as the relay expects it to be postgres
-    postgres = postgres_module.run(plan, {"password": "postgres", "user": "postgres", "database": "postgres", "name": "postgres"})
+    postgres = postgres_module.run(plan, password = "postgres", user = "postgres", database = "postgres", service_name = "postgres")
 
     network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
 
