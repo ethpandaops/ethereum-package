@@ -51,7 +51,7 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, 
         name = MEV_RELAY_ENDPOINT,
         config = ServiceConfig(
             image = image,
-            cmd = ["api", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris, "--blocksim", builder_uri] + mev_params.mev_relay_api_extra_args,
+            cmd = ["api", "--network", "custom", "--db", postgres_url, "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", redis_url, "--beacon-uris", beacon_uris, "--blocksim", builder_uri] + mev_params.mev_relay_api_extra_args,
             ports = {
                 "api": PortSpec(number = MEV_RELAY_ENDPOINT_PORT, transport_protocol= "TCP")
             },
@@ -63,7 +63,7 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, 
         name = MEV_RELAY_WEBSITE,
         config = ServiceConfig(
             image = image,
-            cmd = ["website", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT), "--redis-uri", "redis:6379", "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)] + mev_params.mev_relay_website_extra_args,
+            cmd = ["website", "--network", "custom", "--db", postgres_url, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT), "--redis-uri", redis_url, "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)] + mev_params.mev_relay_website_extra_args,
             ports = {
                 "api": PortSpec(number = MEV_RELAY_WEBSITE_PORT, transport_protocol= "TCP", application_protocol="http")
             },
