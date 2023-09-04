@@ -1,4 +1,4 @@
-redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
+redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star@0503b6d727015d85c498c4602c93e18c7c992445") # TODO when Kurtosis has proper version-pinning, use that!!!
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
 DUMMY_SECRET_KEY = "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
