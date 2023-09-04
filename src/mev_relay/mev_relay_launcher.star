@@ -1,4 +1,4 @@
-redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star@0503b6d727015d85c498c4602c93e18c7c992445") # TODO when Kurtosis has proper version-pinning, use that!!!
+redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
 DUMMY_SECRET_KEY = "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
@@ -18,7 +18,7 @@ NETWORK_ID_TO_NAME = {
 }
 
 def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, builder_uri, seconds_per_slot):
-    redis = redis_module.run(plan, {})
+    redis = redis_module.run(plan)
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(plan, password = "postgres", user = "postgres", database = "postgres", service_name = "postgres")
 
@@ -36,11 +36,13 @@ def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, 
         "SEC_PER_SLOT": str(seconds_per_slot)
     }
 
+    redis_url = "{}:{}".format(redis.hostname, redis.port_number)
+    postgres_url = postgres.url + "?sslmode=disable"
     plan.add_service(
         name = MEV_RELAY_HOUSEKEEPER,
         config = ServiceConfig(
             image = image,
-            cmd = ["housekeeper", "--network", "custom", "--db", "postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable", "--redis-uri", "redis:6379", "--beacon-uris", beacon_uris] + mev_params.mev_relay_housekeeper_extra_args,
+            cmd = ["housekeeper", "--network", "custom", "--db", postgres_url, "--redis-uri", redis_url, "--beacon-uris", beacon_uris] + mev_params.mev_relay_housekeeper_extra_args,
             env_vars= env_vars
         )
     )
