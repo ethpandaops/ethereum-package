@@ -25,7 +25,7 @@
         "deneb_fork_epoch": 4
     },
     "launch_additional_services": true,
-    "explorer_version": "full",
+    "explorer_version": "light",
     "wait_for_finalization": false,
     "wait_for_verifications": false,
     "verifications_epoch_limit": 5,

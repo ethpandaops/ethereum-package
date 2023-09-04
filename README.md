@@ -181,6 +181,12 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     //  - params for the CL nodes will be ignored (e.g. CL node image, CL node extra params)
     "launch_additional_services": true,
 
+    // Which blockchain explorer should be used
+    // "light" will use the light beaconchain explorer developped by pk910
+    // "full" will use the explorer developped by the beaconcha.in team
+    // defaults to "light"
+    "explorer_version": "light",
+
     //  If set, the package will block until a finalized epoch has occurred.
     //  If `waitForVerifications` is set to true, this extra wait will be skipped.
     "wait_for_finalization": false,

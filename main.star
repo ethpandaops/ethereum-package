@@ -99,78 +99,78 @@ def run(plan, args):
 	if not args_with_right_defaults.launch_additional_services:
 		return
 
-	# plan.print("Launching transaction spammer")
-	# transaction_spammer.launch_transaction_spammer(plan, genesis_constants.PRE_FUNDED_ACCOUNTS, all_el_client_contexts[0])
-	# plan.print("Succesfully launched transaction spammer")
+	plan.print("Launching transaction spammer")
+	transaction_spammer.launch_transaction_spammer(plan, genesis_constants.PRE_FUNDED_ACCOUNTS, all_el_client_contexts[0])
+	plan.print("Succesfully launched transaction spammer")
 
 	# We need a way to do time.sleep
 	# TODO add code that waits for CL genesis
 
-	# plan.print("Launching cl forkmon")
- 	# cl_forkmon_config_template = read_file(static_files.CL_FORKMON_CONFIG_TEMPLATE_FILEPATH)
- 	# cl_forkmon.launch_cl_forkmon(plan, cl_forkmon_config_template, all_cl_client_contexts, cl_genesis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
- 	# plan.print("Succesfully launched consensus layer forkmon")
+	plan.print("Launching cl forkmon")
+ 	cl_forkmon_config_template = read_file(static_files.CL_FORKMON_CONFIG_TEMPLATE_FILEPATH)
+ 	cl_forkmon.launch_cl_forkmon(plan, cl_forkmon_config_template, all_cl_client_contexts, cl_genesis_timestamp, network_params.seconds_per_slot, network_params.slots_per_epoch)
+ 	plan.print("Succesfully launched consensus layer forkmon")
 
- 	# plan.print("Launching el forkmon")
- 	# el_forkmon_config_template = read_file(static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH)
- 	# el_forkmon.launch_el_forkmon(plan, el_forkmon_config_template, all_el_client_contexts)
- 	# plan.print("Succesfully launched execution layer forkmon")
+ 	plan.print("Launching el forkmon")
+ 	el_forkmon_config_template = read_file(static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH)
+ 	el_forkmon.launch_el_forkmon(plan, el_forkmon_config_template, all_el_client_contexts)
+ 	plan.print("Succesfully launched execution layer forkmon")
 
-	# plan.print("Launching beacon metrics gazer")
-	# beacon_metrics_gazer_config_template = read_file(static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH)
-	# beacon_metrics_gazer.launch_beacon_metrics_gazer(plan, beacon_metrics_gazer_config_template, all_cl_client_contexts,network_params)
-	# plan.print("Succesfully launched beacon metrics gazer")
+	plan.print("Launching beacon metrics gazer")
+	beacon_metrics_gazer_config_template = read_file(static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH)
+	beacon_metrics_gazer.launch_beacon_metrics_gazer(plan, beacon_metrics_gazer_config_template, all_cl_client_contexts,network_params)
+	plan.print("Succesfully launched beacon metrics gazer")
 
 	if args_with_right_defaults.explorer_version == "full":
 		plan.print("Launching full-beaconchain-explorer")
 		full_beaconchain_explorer_config_template = read_file(static_files.FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH)
 		full_beaconchain_explorer.launch_full_beacon(plan, full_beaconchain_explorer_config_template, all_cl_client_contexts, all_el_client_contexts)
 		plan.print("Succesfully launched full-beaconchain-explorer")
-	# else:
-		# plan.print("Launching light-beaconchain-explorer")
-		# light_beaconchain_explorer_config_template = read_file(static_files.LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH)
-		# light_beaconchain_explorer.launch_light_beacon(plan, light_beaconchain_explorer_config_template, all_cl_client_contexts)
-		# plan.print("Succesfully launched light-beaconchain-explorer")
-	# plan.print("Launching prometheus...")
-	# prometheus_private_url = prometheus.launch_prometheus(
-	# 	plan,
-	# 	prometheus_config_template,
-	# 	all_cl_client_contexts,
-	# )
-	# plan.print("Successfully launched Prometheus")
+	else:
+		plan.print("Launching light-beaconchain-explorer")
+		light_beaconchain_explorer_config_template = read_file(static_files.LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH)
+		light_beaconchain_explorer.launch_light_beacon(plan, light_beaconchain_explorer_config_template, all_cl_client_contexts)
+		plan.print("Succesfully launched light-beaconchain-explorer")
+	plan.print("Launching prometheus...")
+	prometheus_private_url = prometheus.launch_prometheus(
+		plan,
+		prometheus_config_template,
+		all_cl_client_contexts,
+	)
+	plan.print("Successfully launched Prometheus")
 
-	# plan.print("Launching grafana...")
-	# grafana.launch_grafana(plan, grafana_datasource_config_template, grafana_dashboards_config_template, prometheus_private_url)
-	# plan.print("Succesfully launched grafana")
+	plan.print("Launching grafana...")
+	grafana.launch_grafana(plan, grafana_datasource_config_template, grafana_dashboards_config_template, prometheus_private_url)
+	plan.print("Succesfully launched grafana")
 
-	# if args_with_right_defaults.wait_for_verifications:
-	# 	plan.print("Running synchrnous testnet verifier")
-	# 	testnet_verifier.run_synchronous_testnet_verification(plan, args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
-	# 	plan.print("Verification succeeded")
-	# else:
-	# 	plan.print("Running asynchronous verification")
-	# 	testnet_verifier.launch_testnet_verifier(plan, args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
-	# 	plan.print("Succesfully launched asynchronous verifier")
-	# 	if args_with_right_defaults.wait_for_finalization:
-	# 		plan.print("Waiting for the first finalized epoch")
-	# 		first_cl_client = all_cl_client_contexts[0]
-	# 		first_client_beacon_name = first_cl_client.beacon_service_name
-	# 		epoch_recipe = GetHttpRequestRecipe(
-	# 			endpoint = "/eth/v1/beacon/states/head/finality_checkpoints",
-	# 			port_id = HTTP_PORT_ID_FOR_FACT,
-	# 			extract = {
-	# 				"finalized_epoch": ".data.finalized.epoch"
-	# 			}
-	# 		)
-	# 		plan.wait(recipe = epoch_recipe, field = "extract.finalized_epoch", assertion = "!=", target_value = "0", timeout = "40m", service_name = first_client_beacon_name)
-	# 		plan.print("First finalized epoch occurred successfully")
+	if args_with_right_defaults.wait_for_verifications:
+		plan.print("Running synchrnous testnet verifier")
+		testnet_verifier.run_synchronous_testnet_verification(plan, args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
+		plan.print("Verification succeeded")
+	else:
+		plan.print("Running asynchronous verification")
+		testnet_verifier.launch_testnet_verifier(plan, args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
+		plan.print("Succesfully launched asynchronous verifier")
+		if args_with_right_defaults.wait_for_finalization:
+			plan.print("Waiting for the first finalized epoch")
+			first_cl_client = all_cl_client_contexts[0]
+			first_client_beacon_name = first_cl_client.beacon_service_name
+			epoch_recipe = GetHttpRequestRecipe(
+				endpoint = "/eth/v1/beacon/states/head/finality_checkpoints",
+				port_id = HTTP_PORT_ID_FOR_FACT,
+				extract = {
+					"finalized_epoch": ".data.finalized.epoch"
+				}
+			)
+			plan.wait(recipe = epoch_recipe, field = "extract.finalized_epoch", assertion = "!=", target_value = "0", timeout = "40m", service_name = first_client_beacon_name)
+			plan.print("First finalized epoch occurred successfully")
 
 
-	# grafana_info = struct(
-	# 	dashboard_path = GRAFANA_DASHBOARD_PATH_URL,
-	# 	user = GRAFANA_USER,
-	# 	password = GRAFANA_PASSWORD
-	# )
-	# output = struct(grafana_info = grafana_info)
+	grafana_info = struct(
+		dashboard_path = GRAFANA_DASHBOARD_PATH_URL,
+		user = GRAFANA_USER,
+		password = GRAFANA_PASSWORD
+	)
+	output = struct(grafana_info = grafana_info)
 
-	# return output
+	return output
