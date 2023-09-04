@@ -1,6 +1,6 @@
 # Ethereum Package
 
-This is a [Kurtosis Package][starlark-docs] that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable.
+This is a [Kurtosis Package][starlark-docs] that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
 Specifically, this package will:
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
@@ -34,7 +34,7 @@ kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package "$(cat ~
 
 Where `network_params.json` contains the parameters for your network in your home directory.
 
-#### Run in Kubernetes
+#### Run on Kubernetes
 Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster. 
 
 #### Tear down
@@ -44,7 +44,29 @@ kurtosis enclave rm -f my-testnet
 ```
 
 ## Management
-To interact with the network and adjacent services, you should use the [Kurtosis CLI](https://docs.kurtosis.com/cli) which allows you to manage the enclave that houses your network.
+The [Kurtosis CLI](https://docs.kurtosis.com/cli) can be used to inspect and interact with the network. 
+
+For example, if you need shell access, simply run:
+```
+kurtosis service shell my-testnet $SERVICE_NAME
+```
+
+And if you need the logs for a service, simply run:
+```
+kurtosis service logs my-testnet $SERVICE_NAME
+```
+
+Check out the full list of CLI commands [here](https://docs.kurtosis.com/cli)
+
+## Debugging
+To grab the genesis files for the network, simply run:
+```
+kurtosis files download my-testnet $FILE_NAME $OUTPUT_DIRECTORY
+```
+For example, to retrieve the Execution Layer (EL) genesis data, run:
+```
+kurtosis files download my-testnet el-genesis-data ~/Downloads
+```
 
 ## Configuration
 To configure the package behaviour, you can modify your `network_params.json` file. The full JSON schema that can be passed in is as follows with the defaults provided:
@@ -147,7 +169,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 
         // The epoch at which the capella and deneb forks are set to occur.
         "capella_fork_epoch": 2,
-        "deneb_fork_epoch": 4,
+        "deneb_fork_epoch": 4
     },
 
     // True by defaults such that in addition to the Ethereum network:
@@ -192,7 +214,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "mev_params": {
       // The image to use for MEV boot relay
       // This uses the h4ck3rk3y image instead of the flashbots image as that isn't published yet
-		"mev_relay_image": "h4ck3rk3y/mev-boost-relay",
+		"mev_relay_image": "flashbots/mev-boost-relay",
       // Extra parameters to send to the API
 		"mev_relay_api_extra_args": [],
       // Extra parameters to send to the housekeeper
@@ -211,6 +233,81 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 </details>
 
 #### Example configurations
+
+<details>
+    <summary>Verkle configuration example</summary>
+
+```json
+{
+  "participants": [
+    {
+      "el_client_type": "geth",
+      "el_client_image": "ethpandaops/geth:<VERKLE_IMAGE>",
+      "elExtraParams": ["--override.verkle=<UNIXTIMESTAMP>"],
+      "cl_client_type": "lighthouse",
+      "cl_client_image": "sigp/lighthouse:latest"
+    },
+    {
+      "el_client_type": "geth",
+      "el_client_image": "ethpandaops/geth:<VERKLE_IMAGE>",
+      "elExtraParams": ["--override.verkle=<UNIXTIMESTAMP>"],
+      "cl_client_type": "lighthouse",
+      "cl_client_image": "sigp/lighthouse:latest"
+    },
+    {
+      "el_client_type": "geth",
+      "el_client_image": "ethpandaops/geth:<VERKLE_IMAGE>",
+      "elExtraParams": ["--override.verkle=<UNIXTIMESTAMP>"],
+      "cl_client_type": "lighthouse",
+      "cl_client_image": "sigp/lighthouse:latest"
+    }
+  ],
+  "network_params": {
+    "capella_fork_epoch": 2,
+    "deneb_fork_epoch": 5
+  },
+  "launch_additional_services": false,
+  "wait_for_finalization": false,
+  "wait_for_verifications": false,
+  "global_client_log_level": "info"
+}
+```
+</details>
+
+<details>
+    <summary>A 3-node Ethereum network with "mock" MEV mode.</summary>
+    Useful for testing mev-boost and the client implimentations without adding the complexity of the relay. This can be enabled by a single config command and would deploy the [mock-builder](https://github.com/marioevz/mock-builder), instead of the relay infrastructure.
+
+```json
+{
+  "participants": [
+    {
+      "el_client_type": "geth",
+      "el_client_image": "",
+      "cl_client_type": "lighthouse",
+      "cl_client_image": "",
+      "count": 2
+    },
+    {
+      "el_client_type": "nethermind",
+      "el_client_image": "",
+      "cl_client_type": "teku",
+      "cl_client_image": "",
+      "count": 1
+    },
+    {
+      "el_client_type": "besu",
+      "el_client_image": "",
+      "cl_client_type": "prysm",
+      "cl_client_image": "",
+      "count": 2
+    },
+  ],
+  "mev_type": "mock",
+  "launch_additional_services": false
+}
+```
+</details>
 
 <details>
     <summary>A 5-node Ethereum network with three different CL and EL client combinations and mev-boost infrastructure in "full" mode.</summary>
