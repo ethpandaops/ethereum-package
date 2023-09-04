@@ -156,6 +156,7 @@ def parse_input(plan, input_args):
 			mev_flood_seconds_per_bundle = result["mev_params"]["mev_flood_seconds_per_bundle"]
 		),
 		launch_additional_services=result["launch_additional_services"],
+		explorer_version=result["explorer_version"],
 		wait_for_finalization=result["wait_for_finalization"],
 		wait_for_verifications=result["wait_for_verifications"],
 		verifications_epoch_limit=result["verifications_epoch_limit"],
@@ -180,6 +181,7 @@ def default_input_args():
 		"participants":					participants,
 		"network_params":				network_params,
 		"launch_additional_services": 	True,
+		"explorer_version": 			"light",
 		"wait_for_finalization":		False,
 		"wait_for_verifications":		False,
 		"verifications_epoch_limit":	5,
