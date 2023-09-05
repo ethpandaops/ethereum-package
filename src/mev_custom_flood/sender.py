@@ -3,19 +3,27 @@ from web3.middleware import construct_sign_and_send_raw_middleware
 import os
 import time
 
+logging.basicConfig(filename="/tmp/sender.log",
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
+
 
 def flood():
     # Note: Never commit your key in your code! Use env variables instead:
     sender = os.getenv("SENDER_PRIVATE_KEY", "17fdf89989597e8bcac6cdfcc001b6241c64cece2c358ffc818b72ca70f5e1ce")
     receiver = os.getenv("RECEIVER_PUBLIC_KEY", "0x878705ba3f8Bc32FCf7F4CAa1A35E72AF65CF766")
-    el_uri = os.getenv("EL_RPC_URI", 'http://0.0.0.0:8545')
+    el_uri = os.getenv("EL_RPC_URI", 'http://0.0.0.0:53913')
+
+    logging.info(f"Using sender {sender} receiver {receiver} and el_uri {el_uri}")
 
     w3 = Web3(Web3.HTTPProvider(el_uri))
 
     # Instantiate an Account object from your key:
     sender_account = w3.eth.account.from_key(sender)
 
-    for i in range(0, 100):
+    while True:
         time.sleep(3)
         
         # Add sender_account as auto-signer:
@@ -33,7 +41,7 @@ def flood():
         })
 
         tx = w3.eth.get_transaction(tx_hash)
-        print(tx_hash.hex())
+        logging.info(tx_hash.hex())
         assert tx["from"] == sender_account.address
 
 
