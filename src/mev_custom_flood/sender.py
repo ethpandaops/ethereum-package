@@ -34,10 +34,10 @@ def flood():
         # Transactions from `sender_account` will then be signed, under the hood, in the middleware:
         tx_hash = w3.eth.send_transaction({
             "from": sender_account.address,
-            "value": 0x9184e72a,
+            "value": 0x9184,
             "to": receiver,
             "data": "0xabcd",
-            "gasPrice": "0x9184e72a000",
+            "gasPrice": "0x9184e7",
             "gas": "0x76c0"
         })
 
