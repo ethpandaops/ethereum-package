@@ -2,7 +2,7 @@ PYTHON_IMAGE = "python:3.11-alpine
 CUSTOM_FLOOD_SREVICE_NAME = "mev-custom-flood"
 SENDER_SCRIPT_RELATIVE_PATH = "./sender.py"
 
-def launch():
+def spam_in_background(sender_key, receiver_key):
     sender_script  = plan.upload_files(SENDER_SCRIPT_RELATIVE_PATH)
 
     plan.add_service(

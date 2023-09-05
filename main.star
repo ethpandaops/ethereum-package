@@ -17,6 +17,7 @@ mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package
 mock_mev_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mock_mev/mock_mev_launcher.star")
 mev_relay_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_relay/mev_relay_launcher.star")
 mev_flood_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_flood/mev_flood_launcher.star")
+mev_custom_flood_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_custom_flood/mev_custom_flood_launcher.star")
 
 GRAFANA_USER				= "admin"
 GRAFANA_PASSWORD			= "admin"
@@ -85,6 +86,7 @@ def run(plan, args):
 		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri, network_params.seconds_per_slot)
 		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args, mev_params.mev_flood_seconds_per_bundle, genesis_constants.PRE_FUNDED_ACCOUNTS)
 		mev_endpoints.append(endpoint)
+		mev_custom_flood_module.spam_in_background(genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key, genesis_constants.PRE_FUNDED_ACCOUNTS[0].address)
 
 
 	# spin up the mev boost contexts if some endpoints for relays have been passed
