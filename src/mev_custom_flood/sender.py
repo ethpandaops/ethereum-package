@@ -5,12 +5,12 @@ import time
 
 
 def flood():
-    el_rpc_url = 'http://0.0.0.0:49609'
-    w3 = Web3(Web3.HTTPProvider(el_rpc_url))
-
     # Note: Never commit your key in your code! Use env variables instead:
     sender = os.getenv("SENDER_PRIVATE_KEY", "17fdf89989597e8bcac6cdfcc001b6241c64cece2c358ffc818b72ca70f5e1ce")
     receiver = os.getenv("RECEIVER_PUBLIC_KEY", "0x878705ba3f8Bc32FCf7F4CAa1A35E72AF65CF766")
+    el_uri = os.getenv("EL_RPC_URI", 'http://0.0.0.0:8545')
+
+    w3 = Web3(Web3.HTTPProvider(el_uri))
 
     # Instantiate an Account object from your key:
     sender_account = w3.eth.account.from_key(sender)
