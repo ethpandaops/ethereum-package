@@ -44,12 +44,14 @@ def launch_full_beacon(
                     "POSTGRES_PASSWORD": POSTGRES_PASSWORD,
                 },
             ),
+	        # Add a Redis server
             "explorer-redis": ServiceConfig(
                 image = "redis:7",
                 ports = {
                     REDIS_PORT_ID: PortSpec(REDIS_PORT_NUMBER, application_protocol = "tcp"),
                 },
             ),
+	        # Add a Bigtable Emulator server
             "explorer-littlebigtable": ServiceConfig(
                 image = "gobitfly/little_bigtable:latest",
                 ports = {
