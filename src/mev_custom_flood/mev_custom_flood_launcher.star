@@ -27,6 +27,5 @@ def spam_in_background(plan, sender_key, receiver_key, el_uri):
 
     plan.exec(
         service_name = CUSTOM_FLOOD_SREVICE_NAME,
-        # recipe = ExecRecipe(["/bin/sh", "-c", "nohup python /tmp/sender.py > /dev/null 2>&1 &"])
-        recipe = ExecRecipe(["python", "/tmp/sender.py"])
+        recipe = ExecRecipe(["/bin/sh", "-c", "nohup python /tmp/sender.py > /dev/null 2>&1 &"])
     )
