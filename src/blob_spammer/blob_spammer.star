@@ -7,6 +7,7 @@ def launch_blob_spammer(
 	plan,
 	prefunded_addresses,
 	el_client_context,
+	cl_client_context,
 	deneb_fork_epoch,
 	seconds_per_slot,
 	slots_per_epoch,
@@ -14,6 +15,7 @@ def launch_blob_spammer(
 	config = get_config(
 		prefunded_addresses,
 		el_client_context,
+		cl_client_context,
 		deneb_fork_epoch,
 		seconds_per_slot,
 		slots_per_epoch,
@@ -23,6 +25,7 @@ def launch_blob_spammer(
 def get_config(
 	prefunded_addresses,
 	el_client_context,
+	cl_client_context,
 	deneb_fork_epoch,
 	seconds_per_slot,
 	slots_per_epoch,
@@ -32,10 +35,13 @@ def get_config(
 		image = IMAGE_NAME,
 		entrypoint = ENTRYPOINT_ARGS,
 		cmd = [" && ".join([
-			"echo 'sleeping for {0} seconds, waiting for dencun'".format(dencunTime),
-			"sleep {0}".format(dencunTime),
-			"echo 'sleep is over, starting to send blob transactions'",
-			"/tx-fuzz.bin blobs --rpc=http://{0}:{1} --sk={2}".format(el_client_context.ip_addr, el_client_context.rpc_port_num, prefunded_addresses[1].private_key),
+			'apk update',
+			'apk add curl jq',
+			'current_epoch=$(curl -s http://{0}:{1}/eth/v2/beacon/blocks/head | jq .version)'.format(cl_client_context.ip_addr, cl_client_context.http_port_num),
+			'echo $current_epoch',
+			'while [ $current_epoch != "deneb" ]; do echo waiting for deneb; current_epoch=$(curl -s http://{1}:{2}/eth/v2/beacon/blocks/head | jq .version); sleep {3}; done'.format(seconds_per_slot,cl_client_context.ip_addr, cl_client_context.http_port_num, seconds_per_slot),
+			'echo "sleep is over, starting to send blob transactions"',
+			'/tx-fuzz.bin blobs --rpc=http://{0}:{1} --sk={2}'.format(el_client_context.ip_addr, el_client_context.rpc_port_num, prefunded_addresses[1].private_key),
 		])]
 	)
 

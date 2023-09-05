@@ -108,6 +108,7 @@ def run(plan, args):
 		plan,
 		genesis_constants.PRE_FUNDED_ACCOUNTS,
 		all_el_client_contexts[0],
+		all_cl_client_contexts[0],
 		network_params.deneb_fork_epoch,
 		network_params.seconds_per_slot,
 		network_params.slots_per_epoch,
