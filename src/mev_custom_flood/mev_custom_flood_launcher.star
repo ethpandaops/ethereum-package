@@ -1,9 +1,8 @@
 PYTHON_IMAGE = "python:3.11-alpine"
 CUSTOM_FLOOD_SREVICE_NAME = "mev-custom-flood"
-SENDER_SCRIPT_RELATIVE_PATH = "./sender.py"
 
 def spam_in_background(plan, sender_key, receiver_key):
-    sender_script  = plan.upload_files(SENDER_SCRIPT_RELATIVE_PATH)
+    sender_script  = plan.upload_files("github.com/kurtosis-tech/eth2-package/src/mev_custom_flood/sender.py")
 
     plan.add_service(
         name = CUSTOM_FLOOD_SREVICE_NAME,
@@ -12,7 +11,11 @@ def spam_in_background(plan, sender_key, receiver_key):
             files = {
                 "/tmp": sender_script
             },
-            cmd = ["tail", "-f", "/dev/null"]
+            cmd = ["tail", "-f", "/dev/null"],
+            env_vars = {
+                "SENDER_PRIVATE_KEY": sender_key,
+                "RECEIVER_PUBLIC_KEY": receiver_key,
+            }
         )
     )
 
@@ -23,5 +26,6 @@ def spam_in_background(plan, sender_key, receiver_key):
 
     plan.exec(
         service_name = CUSTOM_FLOOD_SREVICE_NAME,
-        recipe = ExecRecipe(["/bin/sh", "-c", "nohup python /tmp/sender.py > /dev/null 2>&1 &"])
+        # recipe = ExecRecipe(["/bin/sh", "-c", "nohup python /tmp/sender.py > /dev/null 2>&1 &"])
+        recipe = ExecRecipe(["python", "/tmp/sender.py"])
     )
