@@ -1,0 +1,44 @@
+{
+    "participants": [
+        {
+            "el_client_type": "geth",
+            "el_client_image": "ethereum/client-go:latest",
+            "el_client_log_level": "",
+            "el_extra_params": [],
+            "cl_client_type": "lighthouse",
+            "cl_client_image": "sigp/lighthouse:latest",
+            "cl_client_log_level": "",
+            "beacon_extra_params": [],
+            "validator_extra_params": [],
+            "builder_network_params": null,
+            "count": 1
+        }
+    ],
+    "network_params": {
+        "network_id": "3151908",
+        "deposit_contract_address": "0x4242424242424242424242424242424242424242",
+        "seconds_per_slot": 12,
+        "slots_per_epoch": 32,
+        "num_validator_keys_per_node": 64,
+        "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "capella_fork_epoch": 2,
+        "deneb_fork_epoch": 4
+    },
+    "launch_additional_services": true,
+    "wait_for_finalization": false,
+    "wait_for_verifications": false,
+    "verifications_epoch_limit": 5,
+    "global_client_log_level": "info",
+    "snooper_enabled": false,
+    "parallel_keystore_generation": false,
+    "mev_type": "None",
+    "mev_params": {
+		"mev_relay_image": "flashbots/mev-boost-relay",
+		"mev_relay_api_extra_args": [],
+		"mev_relay_housekeeper_extra_args": [],
+		"mev_relay_website_extra_args": [],
+		"mev_builder_extra_args": [],
+		"mev_flood_image": "flashbots/mev-flood",
+		"mev_flood_extra_args": []
+    }
+}

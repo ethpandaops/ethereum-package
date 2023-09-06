@@ -146,6 +146,8 @@ def parse_input(plan, input_args):
 		),
 		mev_params = struct(
 			mev_relay_image = result["mev_params"]["mev_relay_image"],
+			mev_builder_image = result["mev_params"]["mev_builder_image"],
+			mev_boost_image = result["mev_params"]["mev_boost_image"],
 			mev_relay_api_extra_args = result["mev_params"]["mev_relay_api_extra_args"],
 			mev_relay_housekeeper_extra_args = result["mev_params"]["mev_relay_housekeeper_extra_args"],
 			mev_relay_website_extra_args = result["mev_params"]["mev_relay_website_extra_args"],
@@ -221,6 +223,9 @@ def default_participant():
 def get_default_mev_params():
 	return {
 		"mev_relay_image": "flashbots/mev-boost-relay",
+		# TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
+		"mev_builder_image": "ethpandaops/flashbots-builder:main",
+		"mev_boost_image": "flashbots/mev-boost",
 		"mev_relay_api_extra_args": [],
 		"mev_relay_housekeeper_extra_args": [],
 		"mev_relay_website_extra_args": [],
@@ -262,7 +267,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 		mev_participant = {
 			"el_client_type": "geth",
 			# TODO replace with actual when flashbots/builder is published
-			"el_client_image": "ethpandaops/flashbots-builder:main",
+			"el_client_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
 			"el_client_log_level":    "",
 			"cl_client_type":         "lighthouse",
 			# THIS overrides the beacon image
