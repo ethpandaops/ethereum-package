@@ -394,6 +394,21 @@ This package also supports a `"mev_type": "mock"` mode that will only bring up:
 
 For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package). 
 
+## Pre-funded accounts at Genesis
+
+This package builds on top of the [`eth-network-package`](https://github.com/kurtosis-tech/eth-network-package) and comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/eth-network-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
+
+Here's a table of where the keys are used
+
+| Account Index| Component Used In   | Private Key Used | Public Key Used | Comment                    |
+|----------------|---------------------|------------------|-----------------|----------------------------|
+| 0              | transaction_spammer | ✅                |                 | To spam transactions with  |
+| 0              | mev_flood           | ✅                |                 | As the admin_key           |
+| 2              | mev_flood           | ✅                |                 | As the user_key            |
+| 0              | mev_custom_flood    |                  | ✅               | As the receiver of balance |
+| 6              | mev_custom_flood    | ✅                |                 | As the sender of balance   |
+| 1              | blob_spammer        | ✅                |                 | As the sender of blobs     |
+
 ## Developing On This Package
 
 First, install prerequisites:
