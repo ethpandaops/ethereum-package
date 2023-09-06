@@ -153,7 +153,8 @@ def parse_input(plan, input_args):
 			mev_builder_extra_args = result["mev_params"]["mev_builder_extra_args"],
 			mev_flood_image = result["mev_params"]["mev_flood_image"],
 			mev_flood_extra_args = result["mev_params"]["mev_flood_extra_args"],
-			mev_flood_seconds_per_bundle = result["mev_params"]["mev_flood_seconds_per_bundle"]
+			mev_flood_seconds_per_bundle = result["mev_params"]["mev_flood_seconds_per_bundle"],
+			launch_custom_flood = result["mev_params"]["launch_custom_flood"],
 		),
 		launch_additional_services=result["launch_additional_services"],
 		wait_for_finalization=result["wait_for_finalization"],
