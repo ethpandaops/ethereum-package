@@ -5,6 +5,7 @@ genesis_constants = import_module("github.com/kurtosis-tech/eth-network-package/
 
 eth_network_module = import_module("github.com/kurtosis-tech/eth-network-package/main.star")
 transaction_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star")
+blob_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/blob_spammer/blob_spammer.star")
 cl_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/cl_forkmon/cl_forkmon_launcher.star")
 el_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/el_forkmon/el_forkmon_launcher.star")
 beacon_metrics_gazer = import_module("github.com/kurtosis-tech/eth2-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star")
@@ -63,7 +64,7 @@ def run(plan, args):
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		jwt_secret = all_el_client_contexts[0].jwt_secret
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
-		mev_endpoints.append(endpoint)		
+		mev_endpoints.append(endpoint)
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
 		el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num)
 		builder_uri = "http://{0}:{1}".format(all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num)
@@ -101,6 +102,19 @@ def run(plan, args):
 	plan.print("Launching transaction spammer")
 	transaction_spammer.launch_transaction_spammer(plan, genesis_constants.PRE_FUNDED_ACCOUNTS, all_el_client_contexts[0])
 	plan.print("Succesfully launched transaction spammer")
+
+	plan.print("Launching Blob spammer")
+	blob_spammer.launch_blob_spammer(
+		plan,
+		genesis_constants.PRE_FUNDED_ACCOUNTS,
+		all_el_client_contexts[0],
+		all_cl_client_contexts[0],
+		network_params.deneb_fork_epoch,
+		network_params.seconds_per_slot,
+		network_params.slots_per_epoch,
+		network_params.genesis_delay
+		)
+	plan.print("Succesfully launched blob spammer")
 
 	# We need a way to do time.sleep
 	# TODO add code that waits for CL genesis
