@@ -85,9 +85,9 @@ def run(plan, args):
 		plan.print("epoch 2 reached, can begin mev stuff")
 		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri, network_params.seconds_per_slot)
 		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args, mev_params.mev_flood_seconds_per_bundle, genesis_constants.PRE_FUNDED_ACCOUNTS)
+		if args_with_right_defaults.mev_params.launch_custom_flood:
+			mev_custom_flood_module.spam_in_background(plan, genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key, genesis_constants.PRE_FUNDED_ACCOUNTS[0].address, el_uri)
 		mev_endpoints.append(endpoint)
-		mev_custom_flood_module.spam_in_background(plan, genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key, genesis_constants.PRE_FUNDED_ACCOUNTS[0].address, el_uri)
-
 
 	# spin up the mev boost contexts if some endpoints for relays have been passed
 	all_mevboost_contexts = []

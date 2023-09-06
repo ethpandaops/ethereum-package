@@ -231,6 +231,8 @@ def get_default_mev_params():
 		"mev_flood_image": "flashbots/mev-flood",
 		"mev_flood_extra_args": [],
 		"mev_flood_seconds_per_bundle": 15,
+		# this is a simple script that increases the balance of the coinbase address at a cadence
+		"launch_custom_flood": True
 	}
 
 
