@@ -407,6 +407,7 @@ Here's a table of where the keys are used
 | 2              | mev_flood           | ✅                |                 | As the user_key            |
 | 0              | mev_custom_flood    |                  | ✅               | As the receiver of balance |
 | 6              | mev_custom_flood    | ✅                |                 | As the sender of balance   |
+| 1              | blob_spammer        | ✅                |                 | As the sender of blobs     |
 
 ## Developing On This Package
 
