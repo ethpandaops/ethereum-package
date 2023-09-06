@@ -37,11 +37,10 @@ def get_config(
 		cmd = [" && ".join([
 			'apk update',
 			'apk add curl jq',
-			'current_epoch=$(curl -s http://{0}:{1}/eth/v2/beacon/blocks/head | jq .version)'.format(cl_client_context.ip_addr, cl_client_context.http_port_num),
+			'current_epoch=$(curl -s http://{0}:{1}/eth/v2/beacon/blocks/head | jq -r ".version")'.format(cl_client_context.ip_addr, cl_client_context.http_port_num),
 			'echo $current_epoch',
-			'while [ $current_epoch != "deneb" ]; do echo waiting for deneb; current_epoch=$(curl -s http://{1}:{2}/eth/v2/beacon/blocks/head | jq .version); sleep {3}; done'.format(seconds_per_slot,cl_client_context.ip_addr, cl_client_context.http_port_num, seconds_per_slot),
+			'while [ $current_epoch != "deneb" ]; do echo "waiting for deneb, current epoch is $current_epoch"; current_epoch=$(curl -s http://{0}:{1}/eth/v2/beacon/blocks/head | jq -r ".version"); sleep {2}; done'.format(cl_client_context.ip_addr, cl_client_context.http_port_num, seconds_per_slot),
 			'echo "sleep is over, starting to send blob transactions"',
 			'/tx-fuzz.bin blobs --rpc=http://{0}:{1} --sk={2}'.format(el_client_context.ip_addr, el_client_context.rpc_port_num, prefunded_addresses[1].private_key),
 		])]
 	)
-
