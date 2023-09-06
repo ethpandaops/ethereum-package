@@ -104,6 +104,13 @@ def parse_input(plan, input_args):
 	if result["network_params"]["deneb_fork_epoch"] == 0:
 		fail("deneb_fork_epoch is 0 needs to be > 0 ")
 
+	if result["network_params"]["electra_fork_epoch"] != None:
+		# if electra is defined, then deneb needs to be undefined
+		result["network_params"]["deneb_fork_epoch"] = None
+
+	if result["network_params"]["capella_fork_epoch"] > 0 and result["network_params"]["electra_fork_epoch"] != None:
+		fail("electra can only happen with capella genesis not bellatrix")
+
 	if total_participant_count < 1:
 		total_participant_count = 1
 
@@ -200,7 +207,7 @@ def default_network_params():
 		"slots_per_epoch":                       32,
 		"genesis_delay":                         120,
 		"capella_fork_epoch":                    0,
-		"deneb_fork_epoch":                      None,
+		"deneb_fork_epoch":                      500,
 		"electra_fork_epoch":                    None,
 	}
 
