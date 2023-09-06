@@ -9,6 +9,8 @@ import os
 import time
 import logging
 
+VALUE_TO_SEND = 0x9184
+
 logging.basicConfig(filename="/tmp/sender.log",
                     filemode='a',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
@@ -31,21 +33,27 @@ def flood():
 
     while True:
         time.sleep(3)
-        
+
         w3.middleware_onion.add(construct_sign_and_send_raw_middleware(sender_account))
 
-        tx_hash = w3.eth.send_transaction({
+        transaction = {
             "from": sender_account.address,
-            "value": 0x9184,
+            "value": VALUE_TO_SEND,
             "to": receiver,
             "data": "0xabcd",
-            "gasPrice": "0x9184e7",
-            "gas": "0x76c0"
-        })
+            "gasPrice": w3.eth.gas_price,
+        }
+
+        estimated_gas = w3.eth.estimate_gas(transaction)
+
+        transaction["gas"] = estimated_gas
+
+        tx_hash = w3.eth.send_transaction(transaction)
 
         tx = w3.eth.get_transaction(tx_hash)
         logging.info(tx_hash.hex())
         assert tx["from"] == sender_account.address
+
 
 
 if __name__ == "__main__":
