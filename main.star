@@ -5,6 +5,7 @@ genesis_constants = import_module("github.com/kurtosis-tech/eth-network-package/
 
 eth_network_module = import_module("github.com/kurtosis-tech/eth-network-package/main.star")
 transaction_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star")
+blob_spammer = import_module("github.com/kurtosis-tech/eth2-package/src/blob_spammer/blob_spammer.star")
 cl_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/cl_forkmon/cl_forkmon_launcher.star")
 el_forkmon = import_module("github.com/kurtosis-tech/eth2-package/src/el_forkmon/el_forkmon_launcher.star")
 beacon_metrics_gazer = import_module("github.com/kurtosis-tech/eth2-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star")
@@ -16,6 +17,7 @@ mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package
 mock_mev_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mock_mev/mock_mev_launcher.star")
 mev_relay_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_relay/mev_relay_launcher.star")
 mev_flood_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_flood/mev_flood_launcher.star")
+mev_custom_flood_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_custom_flood/mev_custom_flood_launcher.star")
 
 GRAFANA_USER				= "admin"
 GRAFANA_PASSWORD			= "admin"
@@ -63,7 +65,7 @@ def run(plan, args):
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		jwt_secret = all_el_client_contexts[0].jwt_secret
 		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
-		mev_endpoints.append(endpoint)		
+		mev_endpoints.append(endpoint)
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
 		el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num)
 		builder_uri = "http://{0}:{1}".format(all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num)
@@ -83,8 +85,9 @@ def run(plan, args):
 		plan.print("epoch 2 reached, can begin mev stuff")
 		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri, network_params.seconds_per_slot)
 		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args, mev_params.mev_flood_seconds_per_bundle, genesis_constants.PRE_FUNDED_ACCOUNTS)
+		if args_with_right_defaults.mev_params.launch_custom_flood:
+			mev_custom_flood_module.spam_in_background(plan, genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key, genesis_constants.PRE_FUNDED_ACCOUNTS[0].address, el_uri)
 		mev_endpoints.append(endpoint)
-
 
 	# spin up the mev boost contexts if some endpoints for relays have been passed
 	all_mevboost_contexts = []
@@ -101,6 +104,19 @@ def run(plan, args):
 	plan.print("Launching transaction spammer")
 	transaction_spammer.launch_transaction_spammer(plan, genesis_constants.PRE_FUNDED_ACCOUNTS, all_el_client_contexts[0])
 	plan.print("Succesfully launched transaction spammer")
+
+	plan.print("Launching Blob spammer")
+	blob_spammer.launch_blob_spammer(
+		plan,
+		genesis_constants.PRE_FUNDED_ACCOUNTS,
+		all_el_client_contexts[0],
+		all_cl_client_contexts[0],
+		network_params.deneb_fork_epoch,
+		network_params.seconds_per_slot,
+		network_params.slots_per_epoch,
+		network_params.genesis_delay
+		)
+	plan.print("Succesfully launched blob spammer")
 
 	# We need a way to do time.sleep
 	# TODO add code that waits for CL genesis
