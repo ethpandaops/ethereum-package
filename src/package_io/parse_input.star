@@ -2,10 +2,12 @@
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
-package_io = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
+package_io_constants = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
+package_io_parser = import_module("github.com/kurtosis-tech/eth-network-package/package_io/input_parser.star")
+
 
 def parse_input(plan, input_args):
-	result = package_io.parse_input(input_args)
+	result = package_io_parser.parse_input(input_args)
 
 	# add default eth2 input params
 	result["mev_type"] = None
@@ -143,7 +145,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 				"--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(num_participants+1),
 				"--builder.bellatrix_fork_version=0x30000038",
 				"--builder.genesis_fork_version=0x10000038",
-				"--builder.genesis_validators_root={0}".format(package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),
+				"--builder.genesis_validators_root={0}".format(package_io_constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER),
 				"--miner.extradata=\"Illuminate Dmocratize Dstribute\"",
 				"--builder.algotype=greedy"
 				] + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
