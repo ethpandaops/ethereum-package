@@ -21,8 +21,8 @@ NIMBUS_NODE_NAME = "nimbus"
 ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params")
 
 # Placeholder value for the deneb fork epoch if electra is being run
- # TODO: This is a hack, and should be removed once we electra is rebased on deneb
- HIGH_DENEB_VALUE_FORK_VERKLE = 20000
+# TODO: This is a hack, and should be removed once we electra is rebased on deneb
+HIGH_DENEB_VALUE_FORK_VERKLE = 20000
 
 # MEV Params
 FLASHBOTS_MEV_BOOST_PORT = 18550
@@ -109,11 +109,11 @@ def parse_input(plan, input_args):
 		fail("deneb_fork_epoch is 0 needs to be > 0 ")
 
 	if result["network_params"]["electra_fork_epoch"] != None:
- 		# if electra is defined, then deneb needs to be set very high
- 		result["network_params"]["deneb_fork_epoch"] = HIGH_DENEB_VALUE_FORK_VERKLE
+		# if electra is defined, then deneb needs to be set very high
+		result["network_params"]["deneb_fork_epoch"] = HIGH_DENEB_VALUE_FORK_VERKLE
 
- 	if result["network_params"]["capella_fork_epoch"] > 0 and result["network_params"]["electra_fork_epoch"] != None:
- 		fail("electra can only happen with capella genesis not bellatrix")
+	if result["network_params"]["capella_fork_epoch"] > 0 and result["network_params"]["electra_fork_epoch"] != None:
+		fail("electra can only happen with capella genesis not bellatrix")
 
 	if total_participant_count < 1:
 		total_participant_count = 1
