@@ -22,10 +22,6 @@ def parse_input(plan, input_args):
 			for sub_attr in input_args["mev_params"]:
 				sub_value = input_args["mev_params"][sub_attr]
 				result["mev_params"][sub_attr] = sub_value
-		# if its inserted we use the value inserted
-		else:
-			result[attr] = value
-			
 
 	if result.get("mev_type") in ("mock", "full"):
 		if result["network_params"]["capella_fork_epoch"] == 0:
