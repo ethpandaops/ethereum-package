@@ -21,8 +21,8 @@
 		"slots_per_epoch": 32,
 		"num_validator_keys_per_node": 64,
 		"preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
-		"capella_fork_epoch": 1,
-		"deneb_fork_epoch": 4
+		"capella_fork_epoch": 0,
+		"deneb_fork_epoch": 500
 	},
 	"launch_additional_services": true,
 	"wait_for_finalization": false,
@@ -31,7 +31,7 @@
 	"global_client_log_level": "info",
 	"snooper_enabled": false,
 	"parallel_keystore_generation": false,
-	"mev_type": "none",
+	"mev_type": "None",
 	"mev_params": {
 		"mev_relay_image": "flashbots/mev-boost-relay",
 		"mev_relay_api_extra_args": [],
