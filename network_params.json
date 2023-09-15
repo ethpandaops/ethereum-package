@@ -31,7 +31,7 @@
 	"global_client_log_level": "info",
 	"snooper_enabled": false,
 	"parallel_keystore_generation": false,
-	"mev_type": "None",
+	"mev_type": null,
 	"mev_params": {
 		"mev_relay_image": "flashbots/mev-boost-relay",
 		"mev_relay_api_extra_args": [],
