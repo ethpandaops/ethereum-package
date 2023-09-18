@@ -19,7 +19,7 @@ def parse_input(plan, input_args):
 
 	for attr in input_args:
 		value = input_args[attr]
-		# if its insterted we use the value inserted
+		# if its inserted we use the value inserted
 		if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
 			result[attr] = value
 		# custom eth2 attributes config
