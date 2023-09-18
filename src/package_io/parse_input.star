@@ -2,6 +2,8 @@
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
+ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params")
+
 package_io_constants = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
 package_io_parser = import_module("github.com/kurtosis-tech/eth-network-package/package_io/input_parser.star")
 
@@ -17,8 +19,11 @@ def parse_input(plan, input_args):
 
 	for attr in input_args:
 		value = input_args[attr]
+		# if its insterted we use the value inserted
+		if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
+			result[attr] = value
 		# custom eth2 attributes config
-		if attr == "mev_params":
+		elif attr == "mev_params":
 			for sub_attr in input_args["mev_params"]:
 				sub_value = input_args["mev_params"][sub_attr]
 				result["mev_params"][sub_attr] = sub_value
