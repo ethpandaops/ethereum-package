@@ -20,7 +20,7 @@ def run_synchronous_testnet_verification(plan, params, el_client_contexts, cl_cl
 
 	command = get_cmd(params, el_client_contexts, cl_client_contexts, True)
 	exec_result = plan.exec(recipe=ExecRecipe(command=command), service_name=SERVICE_NAME)
-	plan.assert(exec_result["code"], "==", 0)
+	plan.verify(exec_result["code"], "==", 0)
 
 
 def get_cmd(params, el_client_contexts, cl_client_contexts, add_binary_name):
