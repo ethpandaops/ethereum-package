@@ -15,12 +15,18 @@ USED_PORTS = {
 	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL)
 }
 
-def launch_prometheus(plan, config_template, cl_client_contexts):
-	all_cl_nodes_metrics_info = []
-	for client in cl_client_contexts:
-		all_cl_nodes_metrics_info.extend(client.cl_nodes_metrics_info)
-
-	template_data = new_config_template_data(all_cl_nodes_metrics_info)
+def launch_prometheus(
+	plan,
+	config_template,
+	el_client_contexts,
+	cl_client_contexts,
+	additional_metrics_jobs,
+):
+	template_data = new_config_template_data(
+		el_client_contexts,
+		cl_client_contexts,
+		additional_metrics_jobs,
+	)
 	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[CONFIG_FILENAME] = template_and_data
@@ -59,7 +65,70 @@ def get_config(config_files_artifact_name):
 	)
 
 
-def new_config_template_data(cl_nodes_metrics_info):
+def new_config_template_data(
+	el_client_contexts,
+	cl_client_contexts,
+	additional_metrics_jobs,
+):
+	metrics_jobs = []
+	# Adding execution clients metrics jobs
+	for context in el_client_contexts:
+		metrics_jobs.append(new_metrics_job(
+			job_name = context.el_metrics_info["name"],
+			endpoint = context.el_metrics_info["url"],
+			metrics_path = context.el_metrics_info["path"],
+			labels = {
+				"service": context.service_name,
+				"client_type": "execution",
+				"client_name": context.client_name,
+			},
+		))
+	# Adding consensus clients metrics jobs
+	for context in cl_client_contexts:
+		if len(context.cl_metrics_info) >= 1:
+			# Adding beacon node metrics	
+			beacon_metrics_info = context.cl_metrics_info[0]
+			metrics_jobs.append(new_metrics_job(
+				job_name = beacon_metrics_info["name"],
+				endpoint = beacon_metrics_info["url"],
+				metrics_path = beacon_metrics_info["path"],
+				labels = {
+					"service": context.beacon_service_name,
+					"client_type": "beacon",
+					"client_name": context.client_name,
+				},
+			))
+		if len(context.cl_metrics_info) > 1:
+			# Adding validator node metrics
+			validator_metrics_info = context.cl_metrics_info[1]
+			metrics_jobs.append(new_metrics_job(
+				job_name = validator_metrics_info["name"],
+				endpoint = validator_metrics_info["url"],
+				metrics_path = validator_metrics_info["path"],
+				labels = {
+					"service": context.validator_service_name,
+					"client_type": "validator",
+					"client_name": context.client_name,
+				},
+			))
+	# Adding additional metrics jobs
+	for job in additional_metrics_jobs:
+		metrics_jobs.append(job)
 	return {
-		"CLNodesMetricsInfo": cl_nodes_metrics_info
+		"MetricsJobs": metrics_jobs,
+	}
+
+def new_metrics_job(
+	job_name,
+	endpoint,
+	metrics_path,
+	labels,
+	scrape_interval = "",
+):
+	return {
+		"Name": job_name,
+		"Endpoint": endpoint,
+		"MetricsPath": metrics_path,
+		"Labels": labels,
+		"ScrapeInterval": scrape_interval,
 	}

@@ -1,16 +1,15 @@
 global:
-  scrape_interval:     15s # By default, scrape targets every 15 seconds.
-
-# A scrape configuration containing exactly one endpoint to scrape:
-# Here it's Prometheus itself.
+  scrape_interval: 15s
 scrape_configs:
-   {{ range $clNode := .CLNodesMetricsInfo }}
-   - job_name: '{{ $clNode.name }}'
-     metrics_path: {{ $clNode.path }}
-     static_configs:
-       - targets: ['{{ $clNode.url }}']
-   {{ end }}
-   - job_name: 'beacon-metrics-gazer'
-     metrics_path: '/metrics'
-     static_configs:
-      - targets: ['beacon-metrics-gazer:8080']
+  {{- range $job := .MetricsJobs }}
+  - job_name: "{{ $job.Name }}"
+    metrics_path: "{{ $job.MetricsPath }}"
+    {{- if $job.ScrapeInterval }}
+    scrape_interval: {{ $job.ScrapeInterval }}
+    {{- end }}
+    static_configs:
+      - targets: ['{{ $job.Endpoint }}']
+        labels:{{ range $labelName, $labelValue := $job.Labels }}
+          {{ $labelName }}: "{{ $labelValue }}"
+        {{- end }}
+  {{- end }}
