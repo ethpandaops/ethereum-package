@@ -418,7 +418,7 @@ Here's a table of where the keys are used
 
 | Account Index| Component Used In   | Private Key Used | Public Key Used | Comment                    |
 |----------------|---------------------|------------------|-----------------|----------------------------|
-| 0              | transaction_spammer | ✅                |                 | To spam transactions with  |
+| 3              | transaction_spammer | ✅                |                 | To spam transactions with  |
 | 0              | mev_flood           | ✅                |                 | As the admin_key           |
 | 2              | mev_flood           | ✅                |                 | As the user_key            |
 | 0              | mev_custom_flood    |                  | ✅               | As the receiver of balance |
