@@ -31,7 +31,7 @@ MOCK_MEV_TYPE = "mock"
 FULL_MEV_TYPE = "full"
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
-def run(plan, args):
+def run(plan, args = {}):
 	args_with_right_defaults, args_with_defaults_dict = parse_input.parse_input(plan, args)
 
 	num_participants = len(args_with_right_defaults.participants)
@@ -64,7 +64,7 @@ def run(plan, args):
 		el_uri = "{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].engine_rpc_port_num)
 		beacon_uri = "{0}:{1}".format(all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num)
 		jwt_secret = all_el_client_contexts[0].jwt_secret
-		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret)
+		endpoint = mock_mev_launcher_module.launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret, args_with_right_defaults.global_client_log_level)
 		mev_endpoints.append(endpoint)
 	elif args_with_right_defaults.mev_type and args_with_right_defaults.mev_type == FULL_MEV_TYPE:
 		el_uri = "http://{0}:{1}".format(all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num)
@@ -83,7 +83,7 @@ def run(plan, args):
 		)
 		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)
 		plan.print("epoch 2 reached, can begin mev stuff")
-		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri, network_params.seconds_per_slot)
+		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri, network_params.seconds_per_slot, network_params.slots_per_epoch)
 		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args, mev_params.mev_flood_seconds_per_bundle, genesis_constants.PRE_FUNDED_ACCOUNTS)
 		if args_with_right_defaults.mev_params.launch_custom_flood:
 			mev_custom_flood_module.spam_in_background(plan, genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key, genesis_constants.PRE_FUNDED_ACCOUNTS[0].address, el_uri)
@@ -92,7 +92,7 @@ def run(plan, args):
 	# spin up the mev boost contexts if some endpoints for relays have been passed
 	all_mevboost_contexts = []
 	if mev_endpoints:
-		for index, participant in enumerate(args_with_right_defaults.participants):
+		for index, participant in enumerate(all_participants):
 			mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints)
 			mev_boost_service_name = "{0}{1}".format(parse_input.MEV_BOOST_SERVICE_NAME_PREFIX, index)
 			mev_boost_context = mev_boost_launcher_module.launch(plan, mev_boost_launcher, mev_boost_service_name, network_params.network_id, mev_params.mev_boost_image)
