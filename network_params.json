@@ -24,7 +24,7 @@
         "genesis_delay": 120,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 4,
-        "electra_fork_epoch": "None"
+        "electra_fork_epoch": null
     },
     "launch_additional_services": true,
     "wait_for_finalization": false,
