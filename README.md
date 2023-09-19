@@ -236,6 +236,8 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     // Default: "None" - no mev boost, mev builder, mev flood or relays are spun up
     // "mock" - mock-builder & mev-boost are spun up
     // "full" - mev-boost, relays, flooder and builder are all spun up
+    // Users are recommended to set network_params.capella_fork_epoch to non zero when testing MEV
+    // We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
     "mev_type": "None",
 
     // Parameters if MEV is used
@@ -374,6 +376,9 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     },
   ],
   "mev_type": "full",
+  "network_params": {
+    "capella_fork_epoch": 1
+  },
   "launch_additional_services": false
 }
 ```
@@ -420,6 +425,9 @@ Starting your network up with `"mev_type": "full"` will instantiate and connect 
 * Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 2nd epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 2nd epoch.
 * After the 3rd epoch, the mev-relay service will begin to receive execution payloads (eth_sendPayload, which does not contain transaction content) from the mev-builder service (or mock-builder in mock-mev mode).
 * Validators will start to receive validated execution payload headers from the mev-relay service (via mev-boost) after the 4th epoch. The validator selects the most valuable header, signs the payload, and returns the signed header to the relay - effectively proposing the payload of transactions to be included in the soon-to-be-proposed block. Once the relay verifies the block proposer's signature, the relay will respond with the full execution payload body (incl. the transaction contents) for the validator to use when proposing a SignedBeaconBlock to the network.
+
+It is recommended to use non zero value for `capella_fork_epoch` by setting `network_params.capella_fork_epoch` to a non-zero value
+in the arguments passed with `mev_type` set to `full`.
 </details>
 
 
