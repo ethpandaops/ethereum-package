@@ -73,6 +73,8 @@ def new_config_template_data(
 	metrics_jobs = []
 	# Adding execution clients metrics jobs
 	for context in el_client_contexts:
+		if context.el_metrics_info == None:
+			continue
 		metrics_jobs.append(new_metrics_job(
 			job_name = context.el_metrics_info["name"],
 			endpoint = context.el_metrics_info["url"],
@@ -85,8 +87,8 @@ def new_config_template_data(
 		))
 	# Adding consensus clients metrics jobs
 	for context in cl_client_contexts:
-		if len(context.cl_metrics_info) >= 1:
-			# Adding beacon node metrics	
+		if len(context.cl_metrics_info) >= 1 and context.cl_metrics_info[0] != None:
+			# Adding beacon node metrics
 			beacon_metrics_info = context.cl_metrics_info[0]
 			metrics_jobs.append(new_metrics_job(
 				job_name = beacon_metrics_info["name"],
@@ -98,7 +100,7 @@ def new_config_template_data(
 					"client_name": context.client_name,
 				},
 			))
-		if len(context.cl_metrics_info) > 1:
+		if len(context.cl_metrics_info) > 1 and context.cl_metrics_info[1] != None:
 			# Adding validator node metrics
 			validator_metrics_info = context.cl_metrics_info[1]
 			metrics_jobs.append(new_metrics_job(
@@ -113,6 +115,8 @@ def new_config_template_data(
 			))
 	# Adding additional metrics jobs
 	for job in additional_metrics_jobs:
+		if job == None:
+			continue
 		metrics_jobs.append(job)
 	return {
 		"MetricsJobs": metrics_jobs,
