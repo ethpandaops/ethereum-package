@@ -54,9 +54,10 @@ def parse_input(plan, input_args):
 			deposit_contract_address=result["network_params"]["deposit_contract_address"],
 			seconds_per_slot=result["network_params"]["seconds_per_slot"],
 			slots_per_epoch=result["network_params"]["slots_per_epoch"],
+			genesis_delay=result["network_params"]["genesis_delay"],
 			capella_fork_epoch=result["network_params"]["capella_fork_epoch"],
 			deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
-			genesis_delay=result["network_params"]["genesis_delay"]
+			electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
 		),
 		mev_params = struct(
 			mev_relay_image = result["mev_params"]["mev_relay_image"],
