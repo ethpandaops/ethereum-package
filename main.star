@@ -133,7 +133,7 @@ def run(plan, args = {}):
 
 	plan.print("Launching beacon metrics gazer")
 	beacon_metrics_gazer_config_template = read_file(static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH)
-	beacon_metrics_gazer.launch_beacon_metrics_gazer(plan, beacon_metrics_gazer_config_template, all_cl_client_contexts,network_params)
+	beacon_metrics_gazer_prometheus_job = beacon_metrics_gazer.launch_beacon_metrics_gazer(plan, beacon_metrics_gazer_config_template, all_cl_client_contexts,network_params)
 	plan.print("Succesfully launched beacon metrics gazer")
 
 	plan.print("Launching light-beaconchain-explorer")
@@ -142,9 +142,13 @@ def run(plan, args = {}):
 	plan.print("Succesfully light-beaconchain-explorer")
 
 	plan.print("Launching prometheus...")
+	additional_metrics_services = [
+		beacon_metrics_gazer_prom_job,
+	]
 	prometheus_private_url = prometheus.launch_prometheus(
 		plan,
 		prometheus_config_template,
+		all_el_client_contexts,
 		all_cl_client_contexts,
 	)
 	plan.print("Successfully launched Prometheus")

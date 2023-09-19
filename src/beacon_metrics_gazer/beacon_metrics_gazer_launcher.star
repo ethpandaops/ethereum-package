@@ -1,4 +1,5 @@
 shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star")
+prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star")
 
 
 SERVICE_NAME = "beacon-metrics-gazer"
@@ -6,6 +7,8 @@ IMAGE_NAME = "dapplion/beacon-metrics-gazer:latest"
 
 HTTP_PORT_ID     = "http"
 HTTP_PORT_NUMBER = 8080
+
+METRICS_PATH = "/metrics"
 
 BEACON_METRICS_GAZER_CONFIG_FILENAME = "validator-ranges.yaml"
 
@@ -43,6 +46,15 @@ def launch_beacon_metrics_gazer(
 		cl_client_contexts[0].http_port_num)
 
 	plan.add_service(SERVICE_NAME, config)
+
+	return prometheus.new_metrics_job(
+		job_name = SERVICE_NAME,
+		endpoint = "{0}:{1}".format(SERVICE_NAME, HTTP_PORT_ID),
+		metrics_path = METRICS_PATH,
+		labels = {
+			"service": SERVICE_NAME,
+		},
+	)
 
 
 def get_config(
