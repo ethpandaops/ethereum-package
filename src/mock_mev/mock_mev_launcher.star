@@ -1,9 +1,9 @@
 MOCK_MEV_IMAGE = "ethpandaops/mock-builder:latest"
 MOCK_MEV_SERVICE_NAME = "mock-mev"
 MOCK_MEV_BUILDER_PORT = 18550
-DUMMY_PUB_KEY_THAT_ISNT_VERIFIED = "0xae1c2ca7bbd6f415a5aa5bb4079caf0a5c273104be5fb5e40e2b5a2f080b2f5bd945336f2a9e8ba346299cb65b0f84c8"
+DEFAULT_MOCK_MEV_PUB_KEY = "0x95fde78acd5f6886ddaf5d0056610167c513d09c1c0efabbc7cdcc69beea113779c4a81e2d24daafc5387dbf6ac5fe48"
 
-def launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret):
+def launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret, global_client_log_level):
 	mock_builder = plan.add_service(
 		name = MOCK_MEV_SERVICE_NAME,
 		config = ServiceConfig(
@@ -14,8 +14,10 @@ def launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret):
 			cmd = [
 				"--jwt-secret={0}".format(jwt_secret),
 				"--el={0}".format(el_uri),
-				"--cl={0}".format(beacon_uri)
+				"--cl={0}".format(beacon_uri),
+				"--bid-multiplier=5", # TODO: This could be customizable
+				"--log-level={0}".format(global_client_log_level)
 			]
 		)
 	)
-	return "http://{0}@{1}:{2}".format(DUMMY_PUB_KEY_THAT_ISNT_VERIFIED, mock_builder.ip_address, MOCK_MEV_BUILDER_PORT)
+	return "http://{0}@{1}:{2}".format(DEFAULT_MOCK_MEV_PUB_KEY, mock_builder.ip_address, MOCK_MEV_BUILDER_PORT)
