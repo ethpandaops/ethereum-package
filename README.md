@@ -104,6 +104,9 @@ To configure the package behaviour, you can modify your `network_params.json` fi
             //  A list of optional extra params that will be passed to the EL client container for modifying its behaviour
             "el_extra_params": [],
 
+            // A list of optional extra env_vars the el container should spin up with
+            "el_extra_env_vars": {},
+
             //  The type of CL client that should be started
             //  Valid values are "nimbus", "lighthouse", "lodestar", "teku", and "prysm"
             "cl_client_type": "lighthouse",

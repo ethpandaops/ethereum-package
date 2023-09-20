@@ -6,6 +6,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params")
 
 package_io_constants = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
 package_io_parser = import_module("github.com/kurtosis-tech/eth-network-package/package_io/input_parser.star")
+genesis_constants = import_module("github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star")
 
 
 def parse_input(plan, input_args):
@@ -151,6 +152,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 				"--miner.extradata=\"Illuminate Dmocratize Dstribute\"",
 				"--builder.algotype=greedy"
 				] + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
+			"el_extra_env_vars": {"BUILDER_TX_SIGNING_KEY": "0x" + genesis_constants.PRE_FUNDED_ACCOUNTS[0].private_key},
 			"validator_extra_params": ["--builder-proposals"],
 			"builder_network_params": None
 		}
