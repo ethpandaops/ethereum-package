@@ -2,6 +2,14 @@ shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_u
 
 SERVICE_NAME = "prometheus"
 
+EXECUTION_CLIENT_TYPE = "execution"
+BEACON_CLIENT_TYPE = "beacon"
+VALIDATOR_CLIENT_TYPE = "validator"
+
+METRICS_INFO_NAME_KEY = "name"
+METRICS_INFO_URL_KEY = "url"
+METRICS_INFO_PATH_KEY = "path"
+
 # TODO(old) I'm not sure if we should use latest version or ping an specific version instead
 IMAGE_NAME = "prom/prometheus:latest"
 
@@ -76,12 +84,12 @@ def new_config_template_data(
 		if len(context.el_metrics_info) >= 1 and context.el_metrics_info[0] != None:
 			execution_metrics_info = context.el_metrics_info[0]
 			metrics_jobs.append(new_metrics_job(
-				job_name = execution_metrics_info["name"],
-				endpoint = execution_metrics_info["url"],
-				metrics_path = execution_metrics_info["path"],
+				job_name = execution_metrics_info[METRICS_INFO_NAME_KEY],
+				endpoint = execution_metrics_info[METRICS_INFO_URL_KEY],
+				metrics_path = execution_metrics_info[METRICS_INFO_PATH_KEY],
 				labels = {
 					"service": context.service_name,
-					"client_type": "execution",
+					"client_type": EXECUTION_CLIENT_TYPE,
 					"client_name": context.client_name,
 				},
 			))
@@ -91,25 +99,25 @@ def new_config_template_data(
 			# Adding beacon node metrics
 			beacon_metrics_info = context.cl_nodes_metrics_info[0]
 			metrics_jobs.append(new_metrics_job(
-				job_name = beacon_metrics_info["name"],
-				endpoint = beacon_metrics_info["url"],
-				metrics_path = beacon_metrics_info["path"],
+				job_name = beacon_metrics_info[METRICS_INFO_NAME_KEY],
+				endpoint = beacon_metrics_info[METRICS_INFO_URL_KEY],
+				metrics_path = beacon_metrics_info[METRICS_INFO_PATH_KEY],
 				labels = {
 					"service": context.beacon_service_name,
-					"client_type": "beacon",
+					"client_type": BECON_CLIENT_TYPE,
 					"client_name": context.client_name,
 				},
 			))
-		if len(context.cl_nodes_metrics_info) > 1 and context.cl_nodes_metrics_info[1] != None:
+		if len(context.cl_nodes_metrics_info) >= 2 and context.cl_nodes_metrics_info[1] != None:
 			# Adding validator node metrics
 			validator_metrics_info = context.cl_nodes_metrics_info[1]
 			metrics_jobs.append(new_metrics_job(
-				job_name = validator_metrics_info["name"],
-				endpoint = validator_metrics_info["url"],
-				metrics_path = validator_metrics_info["path"],
+				job_name = validator_metrics_info[METRICS_INFO_NAME_KEY],
+				endpoint = validator_metrics_info[METRICS_INFO_URL_KEY],
+				metrics_path = validator_metrics_info[METRICS_INFO_PATH_KEY],
 				labels = {
 					"service": context.validator_service_name,
-					"client_type": "validator",
+					"client_type": VALIDATOR_CLIENT_TYPE,
 					"client_name": context.client_name,
 				},
 			))
@@ -127,7 +135,7 @@ def new_metrics_job(
 	endpoint,
 	metrics_path,
 	labels,
-	scrape_interval = "",
+	scrape_interval = "15s",
 ):
 	return {
 		"Name": job_name,
