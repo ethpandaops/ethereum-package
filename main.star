@@ -143,7 +143,7 @@ def run(plan, args = {}):
 
 	plan.print("Launching prometheus...")
 	additional_metrics_services = [
-		beacon_metrics_gazer_prom_job,
+		beacon_metrics_gazer_prometheus_job,
 	]
 	prometheus_private_url = prometheus.launch_prometheus(
 		plan,
