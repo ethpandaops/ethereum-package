@@ -13,7 +13,7 @@ Optional features (enabled via flags or parameter files at runtime):
 * Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
 * Spin up & configure parameters for the infrastructure behind Flashbot's implementation of PBS using `mev-boost`, in either `full` or `mock` mode. More details [here](./README.md#proposer-builder-separation-pbs-implementation-via-flashbots-mev-boost-protocol).
 * Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
-* Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client. 
+* Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client.
 * Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
 * Specify the required parameters for the nodes to reach an external block building network
 * Generate keystores for each node in parallel
@@ -35,7 +35,7 @@ kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package "$(cat ~
 Where `network_params.json` contains the parameters for your network in your home directory.
 
 #### Run on Kubernetes
-Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster. 
+Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster.
 
 #### Tear down
 The testnet will reside in an [enclave](https://docs.kurtosis.com/concepts-reference/enclaves/) - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
@@ -44,7 +44,7 @@ kurtosis enclave rm -f my-testnet
 ```
 
 ## Management
-The [Kurtosis CLI](https://docs.kurtosis.com/cli) can be used to inspect and interact with the network. 
+The [Kurtosis CLI](https://docs.kurtosis.com/cli) can be used to inspect and interact with the network.
 
 For example, if you need shell access, simply run:
 ```
@@ -104,6 +104,9 @@ To configure the package behaviour, you can modify your `network_params.json` fi
             //  A list of optional extra params that will be passed to the EL client container for modifying its behaviour
             "el_extra_params": [],
 
+            // A list of optional extra env_vars the el container should spin up with
+            "el_extra_env_vars": {},
+
             //  The type of CL client that should be started
             //  Valid values are "nimbus", "lighthouse", "lodestar", "teku", and "prysm"
             "cl_client_type": "lighthouse",
@@ -142,7 +145,32 @@ To configure the package behaviour, you can modify your `network_params.json` fi
             //   "https://0xdeadbeefcafc@relay.example.com",
             //   "https://0xdeadbeefcafd@relay.example.com"
             //  ]
-            "builder_network_params": null
+            "builder_network_params": null,
+
+            // Resource management for el/beacon/validator containers
+            // CPU is milicores
+            // RAM is in MB
+            // Defaults are set per client
+            "el_min_cpu": "",
+            "el_max_cpu": "",
+            "el_min_mem": "",
+            "el_max_mem": "",
+            "bn_min_cpu": "",
+            "bn_max_cpu": "",
+            "bn_min_mem": "",
+            "bn_max_mem": "",
+            "v_min_cpu": "",
+            "v_max_cpu": "",
+            "v_min_mem": "",
+            "v_max_mem": "",
+
+            // Snooper can be enabled with the `snooper_enabled` flag per client or globally
+            // Defaults to false
+            "snooper_enabled": false,
+
+            // Count of nodes to spin up for this participant
+            // Default to 1
+            "count": 1
         }
     ],
 
@@ -166,10 +194,13 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         //  This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
         //   validator keys already preregistered as validators
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        // How long you want the network to wait before starting up
+        "genesis_delay": 120,
 
         // The epoch at which the capella and deneb forks are set to occur.
-        "capella_fork_epoch": 2,
-        "deneb_fork_epoch": 4
+        "capella_fork_epoch": 0,
+        "deneb_fork_epoch": 4,
+        "electra_fork_epoch": null,
     },
 
     // True by defaults such that in addition to the Ethereum network:
@@ -408,7 +439,7 @@ This package also supports a `"mev_type": "mock"` mode that will only bring up:
 1. `mock-builder` - a server that listens for builder API directives and responds with payloads built using an execution client
 1. `mev-boost` - for every EL/CL pair launched
 
-For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package). 
+For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package).
 
 ## Pre-funded accounts at Genesis
 
@@ -418,7 +449,7 @@ Here's a table of where the keys are used
 
 | Account Index| Component Used In   | Private Key Used | Public Key Used | Comment                    |
 |----------------|---------------------|------------------|-----------------|----------------------------|
-| 0              | transaction_spammer | ✅                |                 | To spam transactions with  |
+| 3              | transaction_spammer | ✅                |                 | To spam transactions with  |
 | 0              | mev_flood           | ✅                |                 | As the admin_key           |
 | 2              | mev_flood           | ✅                |                 | As the user_key            |
 | 0              | mev_custom_flood    |                  | ✅               | As the receiver of balance |
