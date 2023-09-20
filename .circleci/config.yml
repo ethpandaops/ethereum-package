@@ -44,7 +44,7 @@ jobs:
 
   run_starlark_arm64:
     executor: ubuntu_vm
-    resource_class: arm64.medium
+    resource_class: arm.medium
     steps:
       - <<: *setup_kurtosis
       - checkout
