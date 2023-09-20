@@ -21,7 +21,7 @@ def launch_prometheus(plan, config_template, cl_client_contexts, el_client_conte
 		all_nodes_metrics_info.extend(client.cl_nodes_metrics_info)
 
 	for client in el_client_contexts:
-		all_nodes_metrics_info.extend(client..el_metrics_info)
+		all_nodes_metrics_info.extend(client.el_metrics_info)
 
 	template_data = new_config_template_data(all_nodes_metrics_info)
 	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
