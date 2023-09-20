@@ -73,18 +73,18 @@ def new_config_template_data(
 	metrics_jobs = []
 	# Adding execution clients metrics jobs
 	for context in el_client_contexts:
-		if context.el_metrics_info == None:
-			continue
-		metrics_jobs.append(new_metrics_job(
-			job_name = context.el_metrics_info["name"],
-			endpoint = context.el_metrics_info["url"],
-			metrics_path = context.el_metrics_info["path"],
-			labels = {
-				"service": context.service_name,
-				"client_type": "execution",
-				"client_name": context.client_name,
-			},
-		))
+		if len(context.el_metrics_info) >= 1 and context.el_metrics_info[0] != None:
+			execution_metrics_info = context.el_metrics_info[0]
+			metrics_jobs.append(new_metrics_job(
+				job_name = execution_metrics_info["name"],
+				endpoint = execution_metrics_info["url"],
+				metrics_path = execution_metrics_info["path"],
+				labels = {
+					"service": context.service_name,
+					"client_type": "execution",
+					"client_name": context.client_name,
+				},
+			))
 	# Adding consensus clients metrics jobs
 	for context in cl_client_contexts:
 		if len(context.cl_metrics_info) >= 1 and context.cl_metrics_info[0] != None:
