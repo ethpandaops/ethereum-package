@@ -146,6 +146,7 @@ def run(plan, args = {}):
 		plan,
 		prometheus_config_template,
 		all_cl_client_contexts,
+		all_el_client_contexts,
 	)
 	plan.print("Successfully launched Prometheus")
 
