@@ -32,9 +32,6 @@ def parse_input(plan, input_args):
 	if result.get("mev_type") in ("mock", "full"):
 		result = enrich_mev_extra_params(result, MEV_BOOST_SERVICE_NAME_PREFIX, FLASHBOTS_MEV_BOOST_PORT, result.get("mev_type"))
 
-	if result.get("mev_type") == "full" and result["network_params"]["capella_fork_epoch"] == 0:
-		fail("capella_fork_epoch needs to be set to a non-zero value when using full MEV, set it using network_params.capella_fork_epoch")
-
 	result["tx_spammer_params"] = get_default_tx_spammer_params()
 
 	return struct(
@@ -86,7 +83,7 @@ def parse_input(plan, input_args):
 
 def get_default_mev_params():
 	return {
-		"mev_relay_image": "flashbots/mev-boost-relay",
+		"mev_relay_image": "flashbots/mev-boost-relay:latest",
 		# TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
 		"mev_builder_image": "ethpandaops/flashbots-builder:main",
 		"mev_boost_image": "flashbots/mev-boost",
