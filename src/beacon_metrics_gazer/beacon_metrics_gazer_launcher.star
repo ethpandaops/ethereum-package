@@ -49,7 +49,7 @@ def launch_beacon_metrics_gazer(
 
 	return prometheus.new_metrics_job(
 		job_name = SERVICE_NAME,
-		endpoint = "http://{0}:{1}".format(beacon_metrics_gazer_service.ip_address, HTTP_PORT_NUMBER),
+		endpoint = "{0}:{1}".format(beacon_metrics_gazer_service.ip_address, HTTP_PORT_NUMBER),
 		metrics_path = METRICS_PATH,
 		labels = {
 			"service": SERVICE_NAME,
