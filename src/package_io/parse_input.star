@@ -6,7 +6,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params")
 
 package_io_constants = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
 package_io_parser = import_module("github.com/kurtosis-tech/eth-network-package/package_io/input_parser.star")
-genesis_constants = import_module("github.com/kurtosis-tech/src/prelaunch_data_generator/genesis_constants/genesis_constants.star")
+genesis_constants = import_module("github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star")
 
 
 def parse_input(plan, input_args):
