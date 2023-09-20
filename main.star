@@ -80,8 +80,7 @@ def run(plan, args = {}):
 						"epoch": ".data.message.body.attestations[0].data.target.epoch"
 				}
 		)
-		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoc
-h), timeout = "20m", service_name = first_client_beacon_name)		
+		plan.wait(recipe = epoch_recipe, field = "extract.epoch", assertion = ">=", target_value = str(network_params.capella_fork_epoch), timeout = "20m", service_name = first_client_beacon_name)		
 		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri, network_params.seconds_per_slot, network_params.slots_per_epoch)
 		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args, mev_params.mev_flood_seconds_per_bundle, genesis_constants.PRE_FUNDED_ACCOUNTS)
 		if args_with_right_defaults.mev_params.launch_custom_flood:
