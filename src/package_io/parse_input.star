@@ -2,7 +2,7 @@
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
-ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params")
+ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params", "tx_spammer_params")
 
 package_io_constants = import_module("github.com/kurtosis-tech/eth-network-package/package_io/constants.star")
 package_io_parser = import_module("github.com/kurtosis-tech/eth-network-package/package_io/input_parser.star")
@@ -34,6 +34,8 @@ def parse_input(plan, input_args):
 
 	if result.get("mev_type") == "full" and result["network_params"]["capella_fork_epoch"] == 0:
 		fail("capella_fork_epoch needs to be set to a non-zero value when using full MEV, set it using network_params.capella_fork_epoch")
+
+	result["tx_spammer_params"] = get_default_tx_spammer_params()
 
 	return struct(
 		participants=[struct(
@@ -73,6 +75,9 @@ def parse_input(plan, input_args):
 			mev_flood_seconds_per_bundle = result["mev_params"]["mev_flood_seconds_per_bundle"],
 			launch_custom_flood = result["mev_params"]["launch_custom_flood"],
 		),
+		tx_spammer_params = struct(
+			tx_spammer_extra_args = result["tx_spammer_params"]["tx_spammer_extra_args"],
+		),
 		launch_additional_services=result["launch_additional_services"],
 		wait_for_finalization=result["wait_for_finalization"],
 		global_client_log_level=result["global_client_log_level"],
@@ -94,6 +99,11 @@ def get_default_mev_params():
 		"mev_flood_seconds_per_bundle": 15,
 		# this is a simple script that increases the balance of the coinbase address at a cadence
 		"launch_custom_flood": False
+	}
+
+def get_default_tx_spammer_params():
+	return {
+		"tx_spammer_extra_args": []
 	}
 
 # TODO perhaps clean this up into a map

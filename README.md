@@ -202,6 +202,12 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "deneb_fork_epoch": 4,
         "electra_fork_epoch": null,
     },
+    
+    // Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
+    "tx_spammer_params": {
+        //  A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
+        "tx_spammer_extra_args": []
+    }
 
     // True by defaults such that in addition to the Ethereum network:
     //  - A transaction spammer is launched to fake transactions sent to the network
