@@ -87,9 +87,9 @@ def new_config_template_data(
 			))
 	# Adding consensus clients metrics jobs
 	for context in cl_client_contexts:
-		if len(context.cl_metrics_info) >= 1 and context.cl_metrics_info[0] != None:
+		if len(context.cl_nodes_metrics_info) >= 1 and context.cl_nodes_metrics_info[0] != None:
 			# Adding beacon node metrics
-			beacon_metrics_info = context.cl_metrics_info[0]
+			beacon_metrics_info = context.cl_nodes_metrics_info[0]
 			metrics_jobs.append(new_metrics_job(
 				job_name = beacon_metrics_info["name"],
 				endpoint = beacon_metrics_info["url"],
@@ -100,9 +100,9 @@ def new_config_template_data(
 					"client_name": context.client_name,
 				},
 			))
-		if len(context.cl_metrics_info) > 1 and context.cl_metrics_info[1] != None:
+		if len(context.cl_nodes_metrics_info) > 1 and context.cl_nodes_metrics_info[1] != None:
 			# Adding validator node metrics
-			validator_metrics_info = context.cl_metrics_info[1]
+			validator_metrics_info = context.cl_nodes_metrics_info[1]
 			metrics_jobs.append(new_metrics_job(
 				job_name = validator_metrics_info["name"],
 				endpoint = validator_metrics_info["url"],
