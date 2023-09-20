@@ -21,8 +21,10 @@
 		"slots_per_epoch": 32,
 		"num_validator_keys_per_node": 64,
 		"preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+		"genesis_delay": 120,
 		"capella_fork_epoch": 0,
-		"deneb_fork_epoch": 500
+		"deneb_fork_epoch": 500,
+		"electra_fork_epoch": null
 	},
 	"launch_additional_services": true,
 	"wait_for_finalization": false,
