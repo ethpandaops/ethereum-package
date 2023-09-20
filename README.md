@@ -171,6 +171,11 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "capella_fork_epoch": 2,
         "deneb_fork_epoch": 4
     },
+    
+    "tx_spammer_params": {
+        //  A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
+        "tx_spammer_extra_args": []
+    }
 
     // True by defaults such that in addition to the Ethereum network:
     //  - A transaction spammer is launched to fake transactions sent to the network
