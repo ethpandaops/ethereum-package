@@ -104,7 +104,7 @@ def new_config_template_data(
 				metrics_path = beacon_metrics_info[METRICS_INFO_PATH_KEY],
 				labels = {
 					"service": context.beacon_service_name,
-					"client_type": BECON_CLIENT_TYPE,
+					"client_type": BEACON_CLIENT_TYPE,
 					"client_name": context.client_name,
 				},
 			))
