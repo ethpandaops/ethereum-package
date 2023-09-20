@@ -45,11 +45,11 @@ def launch_beacon_metrics_gazer(
 		cl_client_contexts[0].ip_addr,
 		cl_client_contexts[0].http_port_num)
 
-	plan.add_service(SERVICE_NAME, config)
+	beacon_metrics_gazer_service = plan.add_service(SERVICE_NAME, config)
 
 	return prometheus.new_metrics_job(
 		job_name = SERVICE_NAME,
-		endpoint = "{0}:{1}".format(SERVICE_NAME, HTTP_PORT_ID),
+		endpoint = "http://{0}:{1}".format(beacon_metrics_gazer_service.ip_address, HTTP_PORT_NUMBER),
 		metrics_path = METRICS_PATH,
 		labels = {
 			"service": SERVICE_NAME,
