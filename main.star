@@ -84,7 +84,7 @@ def run(plan, args = {}):
 		endpoint = mev_relay_launcher_module.launch_mev_relay(plan, mev_params, network_params.network_id, beacon_uris, genesis_validators_root, builder_uri, network_params.seconds_per_slot, network_params.slots_per_epoch)
 		mev_flood_module.spam_in_background(plan, el_uri, mev_params.mev_flood_extra_args, mev_params.mev_flood_seconds_per_bundle, genesis_constants.PRE_FUNDED_ACCOUNTS)
 		if args_with_right_defaults.mev_params.launch_custom_flood:
-			mev_custom_flood_module.spam_in_background(plan, genesis_constants.PRE_FUNDED_ACCOUNTS[1].private_key, genesis_constants.PRE_FUNDED_ACCOUNTS[0].address, el_uri)
+			mev_custom_flood_module.spam_in_background(plan, genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key, genesis_constants.PRE_FUNDED_ACCOUNTS[0].address, el_uri)
 		mev_endpoints.append(endpoint)
 
 	if not args_with_right_defaults.launch_additional_services:
