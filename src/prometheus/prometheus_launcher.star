@@ -15,12 +15,17 @@ USED_PORTS = {
 	HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUMBER, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL)
 }
 
-def launch_prometheus(plan, config_template, cl_client_contexts):
-	all_cl_nodes_metrics_info = []
+def launch_prometheus(plan, config_template, cl_client_contexts, el_client_contexts):
+	all_nodes_metrics_info = []
 	for client in cl_client_contexts:
-		all_cl_nodes_metrics_info.extend(client.cl_nodes_metrics_info)
+		all_nodes_metrics_info.extend(client.cl_nodes_metrics_info)
 
-	template_data = new_config_template_data(all_cl_nodes_metrics_info)
+	for client in el_client_contexts:
+		# etheruemjs doesn't populate metrics just yet
+		if client.el_metrics_info != [None]:
+			all_nodes_metrics_info.extend(client.el_metrics_info)
+
+	template_data = new_config_template_data(all_nodes_metrics_info)
 	template_and_data = shared_utils.new_template_and_data(config_template, template_data)
 	template_and_data_by_rel_dest_filepath = {}
 	template_and_data_by_rel_dest_filepath[CONFIG_FILENAME] = template_and_data
