@@ -2,7 +2,7 @@ shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_u
 
 
 SERVICE_NAME = "cl-forkmon"
-IMAGE_NAME = "ralexstokes/ethereum_consensus_monitor:latest"
+IMAGE_NAME = "ethpandaops/consensus-monitor:main"
 
 HTTP_PORT_ID		= "http"
 HTTP_PORT_NUMBER 	= 80

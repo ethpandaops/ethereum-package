@@ -12,7 +12,6 @@ beacon_metrics_gazer = import_module("github.com/kurtosis-tech/eth2-package/src/
 light_beaconchain_explorer = import_module("github.com/kurtosis-tech/eth2-package/src/light_beaconchain/light_beaconchain_launcher.star")
 prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star")
 grafana =import_module("github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star")
-testnet_verifier = import_module("github.com/kurtosis-tech/eth2-package/src/testnet_verifier/testnet_verifier.star")
 mev_boost_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_launcher.star")
 mock_mev_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mock_mev/mock_mev_launcher.star")
 mev_relay_launcher_module = import_module("github.com/kurtosis-tech/eth2-package/src/mev_relay/mev_relay_launcher.star")
@@ -139,28 +138,19 @@ def run(plan, args = {}):
 	grafana.launch_grafana(plan, grafana_datasource_config_template, grafana_dashboards_config_template, prometheus_private_url)
 	plan.print("Succesfully launched grafana")
 
-	if args_with_right_defaults.wait_for_verifications:
-		plan.print("Running synchrnous testnet verifier")
-		testnet_verifier.run_synchronous_testnet_verification(plan, args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
-		plan.print("Verification succeeded")
-	else:
-		plan.print("Running asynchronous verification")
-		testnet_verifier.launch_testnet_verifier(plan, args_with_right_defaults, all_el_client_contexts, all_cl_client_contexts)
-		plan.print("Succesfully launched asynchronous verifier")
-		if args_with_right_defaults.wait_for_finalization:
-			plan.print("Waiting for the first finalized epoch")
-			first_cl_client = all_cl_client_contexts[0]
-			first_client_beacon_name = first_cl_client.beacon_service_name
-			epoch_recipe = GetHttpRequestRecipe(
-				endpoint = "/eth/v1/beacon/states/head/finality_checkpoints",
-				port_id = HTTP_PORT_ID_FOR_FACT,
-				extract = {
-					"finalized_epoch": ".data.finalized.epoch"
-				}
-			)
-			plan.wait(recipe = epoch_recipe, field = "extract.finalized_epoch", assertion = "!=", target_value = "0", timeout = "40m", service_name = first_client_beacon_name)
-			plan.print("First finalized epoch occurred successfully")
-
+	if args_with_right_defaults.wait_for_finalization:
+		plan.print("Waiting for the first finalized epoch")
+		first_cl_client = all_cl_client_contexts[0]
+		first_client_beacon_name = first_cl_client.beacon_service_name
+		epoch_recipe = GetHttpRequestRecipe(
+			endpoint = "/eth/v1/beacon/states/head/finality_checkpoints",
+			port_id = HTTP_PORT_ID_FOR_FACT,
+			extract = {
+				"finalized_epoch": ".data.finalized.epoch"
+			}
+		)
+		plan.wait(recipe = epoch_recipe, field = "extract.finalized_epoch", assertion = "!=", target_value = "0", timeout = "40m", service_name = first_client_beacon_name)
+		plan.print("First finalized epoch occurred successfully")
 
 	grafana_info = struct(
 		dashboard_path = GRAFANA_DASHBOARD_PATH_URL,

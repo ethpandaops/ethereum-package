@@ -2,7 +2,7 @@ shared_utils = import_module("github.com/kurtosis-tech/eth2-package/src/shared_u
 
 
 SERVICE_NAME = "beacon-metrics-gazer"
-IMAGE_NAME = "dapplion/beacon-metrics-gazer:latest"
+IMAGE_NAME = "ethpandaops/beacon-metrics-gazer:master"
 
 HTTP_PORT_ID     = "http"
 HTTP_PORT_NUMBER = 8080
