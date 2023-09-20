@@ -85,7 +85,7 @@ def parse_input(plan, input_args):
 
 def get_default_mev_params():
 	return {
-		"mev_relay_image": "flashbots/mev-boost-relay:main",
+		"mev_relay_image": "flashbots/mev-boost-relay:latest",
 		# TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
 		"mev_builder_image": "ethpandaops/flashbots-builder:main",
 		"mev_boost_image": "flashbots/mev-boost",
