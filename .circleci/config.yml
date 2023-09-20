@@ -42,6 +42,15 @@ jobs:
 
       - run: kurtosis run ${PWD}
 
+  run_starlark_arm64:
+    executor: ubuntu_vm
+    resource: arm64.medium
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+
+      - run: kurtosis run ${PWD}
+
   check_latest_version:
     executor: ubuntu_vm
     steps:
@@ -217,3 +226,11 @@ workflows:
             branches:
               ignore:
                 - main
+      - run_starlark_arm64:
+          context:
+            # This pulls in KurtosisBot's Github token, so that we can read from our private repos
+            - github-user
+          filters:
+            branches:
+              ignore:
+                - main                
