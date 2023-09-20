@@ -75,8 +75,6 @@ def parse_input(plan, input_args):
 		),
 		launch_additional_services=result["launch_additional_services"],
 		wait_for_finalization=result["wait_for_finalization"],
-		wait_for_verifications=result["wait_for_verifications"],
-		verifications_epoch_limit=result["verifications_epoch_limit"],
 		global_client_log_level=result["global_client_log_level"],
 		mev_type=result["mev_type"],
 	), result

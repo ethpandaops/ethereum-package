@@ -213,14 +213,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "launch_additional_services": true,
 
     //  If set, the package will block until a finalized epoch has occurred.
-    //  If `waitForVerifications` is set to true, this extra wait will be skipped.
     "wait_for_finalization": false,
-
-    //  If set to true, the package will block until all verifications have passed
-    "wait_for_verifications": false,
-
-    //  If set, after the merge, this will be the maximum number of epochs wait for the verifications to succeed.
-    "verifications_epoch_limit": 5,
 
     //  The global log level that all clients should log at
     //  Valid values are "error", "warn", "info", "debug", and "trace"
