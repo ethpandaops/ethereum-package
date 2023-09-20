@@ -203,6 +203,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "electra_fork_epoch": null,
     },
     
+    // Configuration place for [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz)
     "tx_spammer_params": {
         //  A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
         "tx_spammer_extra_args": []
