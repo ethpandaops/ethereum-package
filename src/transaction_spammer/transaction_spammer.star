@@ -1,4 +1,4 @@
-IMAGE_NAME = "ethpandaops/tx-fuzz:latest"
+IMAGE_NAME = "ethpandaops/tx-fuzz:master"
 SERVICE_NAME = "transaction-spammer"
 
 def launch_transaction_spammer(plan, prefunded_addresses, el_client_context):
