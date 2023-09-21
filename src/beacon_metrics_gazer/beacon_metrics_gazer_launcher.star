@@ -1,7 +1,9 @@
 shared_utils = import_module(
     "github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star"
 )
-prometheus = import_module("github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star")
+prometheus = import_module(
+    "github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star"
+)
 
 
 SERVICE_NAME = "beacon-metrics-gazer"
@@ -60,10 +62,12 @@ def launch_beacon_metrics_gazer(
     beacon_metrics_gazer_service = plan.add_service(SERVICE_NAME, config)
 
     return prometheus.new_metrics_job(
-        job_name = SERVICE_NAME,
-        endpoint = "{0}:{1}".format(beacon_metrics_gazer_service.ip_address, HTTP_PORT_NUMBER),
-        metrics_path = METRICS_PATH,
-        labels = {
+        job_name=SERVICE_NAME,
+        endpoint="{0}:{1}".format(
+            beacon_metrics_gazer_service.ip_address, HTTP_PORT_NUMBER
+        ),
+        metrics_path=METRICS_PATH,
+        labels={
             "service": SERVICE_NAME,
         },
     )
