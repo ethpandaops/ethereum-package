@@ -23,7 +23,7 @@ frontend:
   minimize: false # minimize html templates
 
   # Name of the site, displayed in the title tag
-  siteName: "Beaconchain Light"
+  siteName: "Dora the Explorer"
   siteSubtitle: "Kurtosis Testnet"
 
   # link to EL Explorer
@@ -49,14 +49,8 @@ beaconapi:
 
 # indexer keeps track of the latest epochs in memory.
 indexer:
-  # number of epochs to load on startup
-  prepopulateEpochs: 2
-
   # max number of epochs to keep in memory
   inMemoryEpochs: 3
-
-  # epoch processing delay (should be >= 2)
-  epochProcessingDelay: 2
 
   # disable synchronizing and everything that writes to the db (indexer just maintains local cache)
   disableIndexWriter: false

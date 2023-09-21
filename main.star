@@ -27,8 +27,8 @@ el_forkmon = import_module(
 beacon_metrics_gazer = import_module(
     "github.com/kurtosis-tech/eth2-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
 )
-light_beaconchain_explorer = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/light_beaconchain/light_beaconchain_launcher.star"
+dora_the_explorer = import_module(
+    "github.com/kurtosis-tech/eth2-package/src/dora_explorer/dora_explorer_launcher.star"
 )
 prometheus = import_module(
     "github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star"
@@ -277,14 +277,14 @@ def run(plan, args={}):
     )
     plan.print("Succesfully launched beacon metrics gazer")
 
-    plan.print("Launching light-beaconchain-explorer")
-    light_beaconchain_explorer_config_template = read_file(
-        static_files.LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH
+    plan.print("Launching dora-the-explorer")
+    dora_explorer_explorer_config_template = read_file(
+        static_files.DORA_EXPLORER_CONFIG_TEMPLATE_FILEPATH
     )
-    light_beaconchain_explorer.launch_light_beacon(
-        plan, light_beaconchain_explorer_config_template, all_cl_client_contexts
+    dora_the_explorer.launch_dora_explorer(
+        plan, dora_explorer_explorer_config_template, all_cl_client_contexts
     )
-    plan.print("Succesfully light-beaconchain-explorer")
+    plan.print("Succesfully launched dora-the-explorer")
 
     plan.print("Launching prometheus...")
     prometheus_private_url = prometheus.launch_prometheus(
