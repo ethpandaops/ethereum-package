@@ -207,7 +207,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "tx_spammer_params": {
         //  A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
         "tx_spammer_extra_args": []
-    }
+    },
 
     // True by defaults such that in addition to the Ethereum network:
     //  - A transaction spammer is launched to fake transactions sent to the network
@@ -219,14 +219,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "launch_additional_services": true,
 
     //  If set, the package will block until a finalized epoch has occurred.
-    //  If `waitForVerifications` is set to true, this extra wait will be skipped.
     "wait_for_finalization": false,
-
-    //  If set to true, the package will block until all verifications have passed
-    "wait_for_verifications": false,
-
-    //  If set, after the merge, this will be the maximum number of epochs wait for the verifications to succeed.
-    "verifications_epoch_limit": 5,
 
     //  The global log level that all clients should log at
     //  Valid values are "error", "warn", "info", "debug", and "trace"
@@ -430,8 +423,7 @@ Starting your network up with `"mev_type": "full"` will instantiate and connect 
 <details>
     <summary>Caveats when using "mev_type": "full"</summary>
 
-* The mev-boost-relay service requires Capella at an epoch of non-zero. For the eth2-package, the Capella fork is set to happen after the first epoch to be started up and fully connected to the CL client.
-* Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 2nd epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 2nd epoch.
+* Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 1st epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 1st epoch.
 * After the 3rd epoch, the mev-relay service will begin to receive execution payloads (eth_sendPayload, which does not contain transaction content) from the mev-builder service (or mock-builder in mock-mev mode).
 * Validators will start to receive validated execution payload headers from the mev-relay service (via mev-boost) after the 4th epoch. The validator selects the most valuable header, signs the payload, and returns the signed header to the relay - effectively proposing the payload of transactions to be included in the soon-to-be-proposed block. Once the relay verifies the block proposer's signature, the relay will respond with the full execution payload body (incl. the transaction contents) for the validator to use when proposing a SignedBeaconBlock to the network.
 
