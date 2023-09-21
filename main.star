@@ -287,14 +287,14 @@ def run(plan, args={}):
     plan.print("Succesfully light-beaconchain-explorer")
 
     plan.print("Launching prometheus...")
-	additional_metrics_jobs = []
-	additional_metrics_jobs.append(beacon_metrics_gazer_metrics_job)
+    additional_metrics_jobs = []
+    additional_metrics_jobs.append(beacon_metrics_gazer_metrics_job)
     prometheus_private_url = prometheus.launch_prometheus(
         plan,
         prometheus_config_template,
         all_el_client_contexts,
         all_cl_client_contexts,
-		additional_metrics_jobs,
+        additional_metrics_jobs,
     )
     plan.print("Successfully launched Prometheus")
 
