@@ -150,7 +150,6 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             participant["validator_extra_params"].append("--builder-proposals")
             participant["beacon_extra_params"].append("--builder={0}".format(mev_url))
         if participant["cl_client_type"] == "lodestar":
-            participant["validator_extra_params"].append("--builder")
             participant["beacon_extra_params"].append("--builder")
             participant["beacon_extra_params"].append(
                 "--builder.urls={0}".format(mev_url)
