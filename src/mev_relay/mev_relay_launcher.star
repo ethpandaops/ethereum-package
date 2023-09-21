@@ -12,64 +12,128 @@ MEV_RELAY_ENDPOINT_PORT = 9062
 MEV_RELAY_WEBSITE_PORT = 9060
 
 NETWORK_ID_TO_NAME = {
-	"5":        "goerli",
-	"11155111": "sepolia",
-	"3":        "ropsten",
+    "5": "goerli",
+    "11155111": "sepolia",
+    "3": "ropsten",
 }
 
-def launch_mev_relay(plan, mev_params, network_id, beacon_uris, validator_root, builder_uri, seconds_per_slot, slots_per_epoch = 32):
+
+def launch_mev_relay(
+    plan,
+    mev_params,
+    network_id,
+    beacon_uris,
+    validator_root,
+    builder_uri,
+    seconds_per_slot,
+    slots_per_epoch=32,
+):
     redis = redis_module.run(plan)
     # making the password postgres as the relay expects it to be postgres
-    postgres = postgres_module.run(plan, password = "postgres", user = "postgres", database = "postgres", service_name = "postgres")
+    postgres = postgres_module.run(
+        plan,
+        password="postgres",
+        user="postgres",
+        database="postgres",
+        service_name="postgres",
+    )
 
     network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
 
     image = mev_params.mev_relay_image
 
     # TODO(maybe) remove hardocded values for the forks
-    env_vars= {
+    env_vars = {
         "GENESIS_FORK_VERSION": "0x10000038",
         "BELLATRIX_FORK_VERSION": "0x30000038",
         "CAPELLA_FORK_VERSION": "0x40000038",
         "DENEB_FORK_VERSION": "0x50000038",
         "GENESIS_VALIDATORS_ROOT": validator_root,
         "SEC_PER_SLOT": str(seconds_per_slot),
-        "SLOTS_PER_EPOCH": str(slots_per_epoch)
+        "SLOTS_PER_EPOCH": str(slots_per_epoch),
     }
 
     redis_url = "{}:{}".format(redis.hostname, redis.port_number)
     postgres_url = postgres.url + "?sslmode=disable"
     plan.add_service(
-        name = MEV_RELAY_HOUSEKEEPER,
-        config = ServiceConfig(
-            image = image,
-            cmd = ["housekeeper", "--network", "custom", "--db", postgres_url, "--redis-uri", redis_url, "--beacon-uris", beacon_uris] + mev_params.mev_relay_housekeeper_extra_args,
-            env_vars= env_vars
-        )
+        name=MEV_RELAY_HOUSEKEEPER,
+        config=ServiceConfig(
+            image=image,
+            cmd=[
+                "housekeeper",
+                "--network",
+                "custom",
+                "--db",
+                postgres_url,
+                "--redis-uri",
+                redis_url,
+                "--beacon-uris",
+                beacon_uris,
+            ]
+            + mev_params.mev_relay_housekeeper_extra_args,
+            env_vars=env_vars,
+        ),
     )
 
     api = plan.add_service(
-        name = MEV_RELAY_ENDPOINT,
-        config = ServiceConfig(
-            image = image,
-            cmd = ["api", "--network", "custom", "--db", postgres_url, "--secret-key", DUMMY_SECRET_KEY, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT), "--redis-uri", redis_url, "--beacon-uris", beacon_uris, "--blocksim", builder_uri] + mev_params.mev_relay_api_extra_args,
-            ports = {
-                "api": PortSpec(number = MEV_RELAY_ENDPOINT_PORT, transport_protocol= "TCP")
+        name=MEV_RELAY_ENDPOINT,
+        config=ServiceConfig(
+            image=image,
+            cmd=[
+                "api",
+                "--network",
+                "custom",
+                "--db",
+                postgres_url,
+                "--secret-key",
+                DUMMY_SECRET_KEY,
+                "--listen-addr",
+                "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT),
+                "--redis-uri",
+                redis_url,
+                "--beacon-uris",
+                beacon_uris,
+                "--blocksim",
+                builder_uri,
+            ]
+            + mev_params.mev_relay_api_extra_args,
+            ports={
+                "api": PortSpec(
+                    number=MEV_RELAY_ENDPOINT_PORT, transport_protocol="TCP"
+                )
             },
-            env_vars= env_vars
-        )
+            env_vars=env_vars,
+        ),
     )
 
     plan.add_service(
-        name = MEV_RELAY_WEBSITE,
-        config = ServiceConfig(
-            image = image,
-            cmd = ["website", "--network", "custom", "--db", postgres_url, "--listen-addr", "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT), "--redis-uri", redis_url, "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT)] + mev_params.mev_relay_website_extra_args,
-            ports = {
-                "api": PortSpec(number = MEV_RELAY_WEBSITE_PORT, transport_protocol= "TCP", application_protocol="http")
+        name=MEV_RELAY_WEBSITE,
+        config=ServiceConfig(
+            image=image,
+            cmd=[
+                "website",
+                "--network",
+                "custom",
+                "--db",
+                postgres_url,
+                "--listen-addr",
+                "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT),
+                "--redis-uri",
+                redis_url,
+                "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT),
+            ]
+            + mev_params.mev_relay_website_extra_args,
+            ports={
+                "api": PortSpec(
+                    number=MEV_RELAY_WEBSITE_PORT,
+                    transport_protocol="TCP",
+                    application_protocol="http",
+                )
             },
-            env_vars= env_vars
-        )
+            env_vars=env_vars,
+        ),
     )
 
-    return "http://{0}@{1}:{2}".format(DUMMY_PUB_KEY, api.ip_address, MEV_RELAY_ENDPOINT_PORT)
+    return "http://{0}@{1}:{2}".format(
+        DUMMY_PUB_KEY, api.ip_address, MEV_RELAY_ENDPOINT_PORT
+    )
