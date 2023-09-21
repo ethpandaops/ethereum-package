@@ -23,6 +23,13 @@ genesis_constants = import_module(
 def parse_input(plan, input_args):
     result = package_io_parser.parse_input(input_args)
 
+	# we do this as the count has already been accounted for by the `package_io_parser`
+	# and we end up sending the same args to `package_io_parser` again when we do eth_network_package.run()
+	# that we have to do as we want to send in MEV participants
+	# this will all be cleaner post merge
+	for participant in result["participant"]:
+		result["count"] = 1
+
     # add default eth2 input params
     result["mev_type"] = None
     result["mev_params"] = get_default_mev_params()
