@@ -32,7 +32,6 @@ def launch_beacon_metrics_gazer(
 			continue
 		start_index = idx * participant.validator_count
 		stop_index = (idx+1) * participant.validator_count
-        start_index = index * network_params.num_validator_keys_per_node
         service_name = client.beacon_service_name
         data.append(
             {
