@@ -273,6 +273,7 @@ def run(plan, args={}):
                 plan,
                 beacon_metrics_gazer_config_template,
                 all_cl_client_contexts,
+                args_with_right_defaults.participants,
                 network_params,
             )
             plan.print("Succesfully launched beacon metrics gazer")

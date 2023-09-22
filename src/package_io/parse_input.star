@@ -80,6 +80,7 @@ def parse_input(plan, input_args):
                     el_extra_params=participant["el_extra_params"],
                     validator_extra_params=participant["validator_extra_params"],
                     builder_network_params=participant["builder_network_params"],
+                    validator_count=participant["validator_count"],
                 )
                 for participant in result["participants"]
             ],
