@@ -234,7 +234,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             "validator_extra_params": ["--builder-proposals"],
             "builder_network_params": None,
             # setting this to none so that the default gets inserted by eth-network-package
-            "validator_count": None
+            "validator_count": package_io_parser.default_network_params()["num_validator_keys_per_node"]
         }
 
         parsed_arguments_dict["participants"].append(mev_participant)
