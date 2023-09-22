@@ -23,12 +23,16 @@ USED_PORTS = {
 
 
 def launch_beacon_metrics_gazer(
-    plan, config_template, cl_client_contexts, network_params
+    plan, config_template, cl_client_contexts, participants, network_params
 ):
     data = []
     for index, client in enumerate(cl_client_contexts):
+        participant = participants[index]
+        if participant.validator_count == 0:
+			continue
+		start_index = idx * participant.validator_count
+		stop_index = (idx+1) * participant.validator_count
         start_index = index * network_params.num_validator_keys_per_node
-        end_index = ((index + 1) * network_params.num_validator_keys_per_node) - 1
         service_name = client.beacon_service_name
         data.append(
             {
