@@ -33,7 +33,7 @@ def launch_beacon_metrics_gazer(
             continue
         start_index = running_total_validator_count
         running_total_validator_count += participant.validator_count
-        end_index = (start_index + participant.validator_count)
+        end_index = start_index + participant.validator_count
         service_name = client.beacon_service_name
         data.append(
             {
