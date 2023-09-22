@@ -45,7 +45,8 @@ def parse_input(plan, input_args):
 			beacon_extra_params=participant["beacon_extra_params"],
 			el_extra_params=participant["el_extra_params"],
 			validator_extra_params=participant["validator_extra_params"],
-			builder_network_params=participant["builder_network_params"]
+			builder_network_params=participant["builder_network_params"],
+			validator_count=participant["validator_count"],
 		) for participant in result["participants"]],
 		network_params=struct(
 			preregistered_validator_keys_mnemonic=result["network_params"]["preregistered_validator_keys_mnemonic"],
@@ -129,8 +130,6 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 
 	if mev_type == "full":
 
-		mev_url = "http://{0}{1}:{2}".format(mev_prefix, num_participants, mev_port)
-
 		mev_participant = {
 			"el_client_type": "geth",
 			# TODO replace with actual when flashbots/builder is published
@@ -141,7 +140,6 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 			"cl_client_image":        "sigp/lighthouse",
 			"cl_client_log_level":    "",
 			"beacon_extra_params":    [
-				"--builder={0}".format(mev_url),
 				"--always-prepare-payload",
 				"--prepare-payload-lookahead",
 				"12000"
@@ -158,8 +156,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 				"--builder.algotype=greedy"
 				] + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
 			"el_extra_env_vars": {"BUILDER_TX_SIGNING_KEY": "0x" + genesis_constants.PRE_FUNDED_ACCOUNTS[0].private_key},
-			"validator_extra_params": ["--builder-proposals"],
-			"builder_network_params": None
+			"validator_extra_params": [],
+			"builder_network_params": None,
+			"validator_count": 0
 		}
 
 		parsed_arguments_dict["participants"].append(mev_participant)
