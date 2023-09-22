@@ -215,95 +215,97 @@ def run(plan, args={}):
 
     if not args_with_right_defaults.launch_additional_services:
         return
+    for additional_service in args_with_right_defaults.additional_services:
+        if additional_service == "tx_spammer":
+            plan.print("Launching transaction spammer")
+            tx_spammer_params = args_with_right_defaults.tx_spammer_params
+            transaction_spammer.launch_transaction_spammer(
+                plan,
+                genesis_constants.PRE_FUNDED_ACCOUNTS,
+                all_el_client_contexts[0],
+                tx_spammer_params,
+            )
+            plan.print("Succesfully launched transaction spammer")
+        elif additional_service == "blob_spammer":
+            plan.print("Launching Blob spammer")
+            blob_spammer.launch_blob_spammer(
+                plan,
+                genesis_constants.PRE_FUNDED_ACCOUNTS,
+                all_el_client_contexts[0],
+                all_cl_client_contexts[0],
+                network_params.deneb_fork_epoch,
+                network_params.seconds_per_slot,
+                network_params.slots_per_epoch,
+                network_params.genesis_delay,
+            )
+            plan.print("Succesfully launched blob spammer")
+        # We need a way to do time.sleep
+        # TODO add code that waits for CL genesis
+        elif additional_service == "cl_forkmon":
+            plan.print("Launching cl forkmon")
+            cl_forkmon_config_template = read_file(
+                static_files.CL_FORKMON_CONFIG_TEMPLATE_FILEPATH
+            )
+            cl_forkmon.launch_cl_forkmon(
+                plan,
+                cl_forkmon_config_template,
+                all_cl_client_contexts,
+                cl_genesis_timestamp,
+                network_params.seconds_per_slot,
+                network_params.slots_per_epoch,
+            )
+            plan.print("Succesfully launched consensus layer forkmon")
+        elif additional_service == "el_forkmon":
+            plan.print("Launching el forkmon")
+            el_forkmon_config_template = read_file(
+                static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH
+            )
+            el_forkmon.launch_el_forkmon(
+                plan, el_forkmon_config_template, all_el_client_contexts
+            )
+            plan.print("Succesfully launched execution layer forkmon")
+        elif additional_service == "beacon_metrics_gazer":
+            plan.print("Launching beacon metrics gazer")
+            beacon_metrics_gazer_config_template = read_file(
+                static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH
+            )
+            beacon_metrics_gazer.launch_beacon_metrics_gazer(
+                plan,
+                beacon_metrics_gazer_config_template,
+                all_cl_client_contexts,
+                args_with_right_defaults.participants,
+                network_params,
+            )
+            plan.print("Succesfully launched beacon metrics gazer")
+        elif additional_service == "light_beaconchain_explorer":
+            plan.print("Launching light-beaconchain-explorer")
+            light_beaconchain_explorer_config_template = read_file(
+                static_files.LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH
+            )
+            light_beaconchain_explorer.launch_light_beacon(
+                plan, light_beaconchain_explorer_config_template, all_cl_client_contexts
+            )
+            plan.print("Succesfully light-beaconchain-explorer")
+        elif additional_service == "prometheus_grafana":
+            plan.print("Launching prometheus...")
+            prometheus_private_url = prometheus.launch_prometheus(
+                plan,
+                prometheus_config_template,
+                all_cl_client_contexts,
+                all_el_client_contexts,
+            )
+            plan.print("Successfully launched Prometheus")
 
-    plan.print("Launching transaction spammer")
-    tx_spammer_params = args_with_right_defaults.tx_spammer_params
-    transaction_spammer.launch_transaction_spammer(
-        plan,
-        genesis_constants.PRE_FUNDED_ACCOUNTS,
-        all_el_client_contexts[0],
-        tx_spammer_params,
-    )
-    plan.print("Succesfully launched transaction spammer")
-
-    plan.print("Launching Blob spammer")
-    blob_spammer.launch_blob_spammer(
-        plan,
-        genesis_constants.PRE_FUNDED_ACCOUNTS,
-        all_el_client_contexts[0],
-        all_cl_client_contexts[0],
-        network_params.deneb_fork_epoch,
-        network_params.seconds_per_slot,
-        network_params.slots_per_epoch,
-        network_params.genesis_delay,
-    )
-    plan.print("Succesfully launched blob spammer")
-
-    # We need a way to do time.sleep
-    # TODO add code that waits for CL genesis
-
-    plan.print("Launching cl forkmon")
-    cl_forkmon_config_template = read_file(
-        static_files.CL_FORKMON_CONFIG_TEMPLATE_FILEPATH
-    )
-    cl_forkmon.launch_cl_forkmon(
-        plan,
-        cl_forkmon_config_template,
-        all_cl_client_contexts,
-        cl_genesis_timestamp,
-        network_params.seconds_per_slot,
-        network_params.slots_per_epoch,
-    )
-    plan.print("Succesfully launched consensus layer forkmon")
-
-    plan.print("Launching el forkmon")
-    el_forkmon_config_template = read_file(
-        static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH
-    )
-    el_forkmon.launch_el_forkmon(
-        plan, el_forkmon_config_template, all_el_client_contexts
-    )
-    plan.print("Succesfully launched execution layer forkmon")
-
-    plan.print("Launching beacon metrics gazer")
-    beacon_metrics_gazer_config_template = read_file(
-        static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH
-    )
-    beacon_metrics_gazer.launch_beacon_metrics_gazer(
-        plan,
-        beacon_metrics_gazer_config_template,
-        all_cl_client_contexts,
-        args_with_right_defaults.participants,
-        network_params,
-    )
-    plan.print("Succesfully launched beacon metrics gazer")
-
-    plan.print("Launching light-beaconchain-explorer")
-    light_beaconchain_explorer_config_template = read_file(
-        static_files.LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH
-    )
-    light_beaconchain_explorer.launch_light_beacon(
-        plan, light_beaconchain_explorer_config_template, all_cl_client_contexts
-    )
-    plan.print("Succesfully light-beaconchain-explorer")
-
-    plan.print("Launching prometheus...")
-    prometheus_private_url = prometheus.launch_prometheus(
-        plan,
-        prometheus_config_template,
-        all_cl_client_contexts,
-        all_el_client_contexts,
-    )
-    plan.print("Successfully launched Prometheus")
-
-    plan.print("Launching grafana...")
-    grafana.launch_grafana(
-        plan,
-        grafana_datasource_config_template,
-        grafana_dashboards_config_template,
-        prometheus_private_url,
-    )
-    plan.print("Succesfully launched grafana")
+            plan.print("Launching grafana...")
+            grafana.launch_grafana(
+                plan,
+                grafana_datasource_config_template,
+                grafana_dashboards_config_template,
+                prometheus_private_url,
+            )
+            plan.print("Succesfully launched grafana")
+        else:
+            fail("Invalid additional service %s" % (additional_service))
 
     if args_with_right_defaults.wait_for_finalization:
         plan.print("Waiting for the first finalized epoch")

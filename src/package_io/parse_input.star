@@ -1,6 +1,15 @@
 # MEV Params
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
+DEFAULT_ADDITIONAL_SERVICES = [
+    "tx_spammer",
+    "blob_spammer",
+    "cl_forkmon",
+    "el_forkmon",
+    "beacon_metrics_gazer",
+    "light_beaconchain_explorer",
+    "prometheus_grafana",
+]
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
@@ -34,6 +43,7 @@ def parse_input(plan, input_args):
     result["mev_type"] = None
     result["mev_params"] = get_default_mev_params()
     result["launch_additional_services"] = True
+    result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
 
     for attr in input_args:
         value = input_args[attr]
@@ -119,6 +129,7 @@ def parse_input(plan, input_args):
                 ],
             ),
             launch_additional_services=result["launch_additional_services"],
+            additional_services=result["additional_services"],
             wait_for_finalization=result["wait_for_finalization"],
             global_client_log_level=result["global_client_log_level"],
             mev_type=result["mev_type"],
