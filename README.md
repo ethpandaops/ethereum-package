@@ -209,14 +209,25 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "tx_spammer_extra_args": []
     },
 
-    // True by defaults such that in addition to the Ethereum network:
-    //  - A transaction spammer is launched to fake transactions sent to the network
-    //  - Forkmon will be launched after CL genesis has happened
-    //  - A prometheus will be started, coupled with grafana
+    // True by defaults, adds services defined in "additional_services" alongside the Ethereum network
     // If set to false:
     //  - only Ethereum network (EL and CL nodes) will be launched. Nothing else (no transaction spammer)
     //  - params for the CL nodes will be ignored (e.g. CL node image, CL node extra params)
     "launch_additional_services": true,
+
+    // By default includes
+    //  - A transaction spammer is launched to fake transactions sent to the network
+    //  - Forkmon will be launched after CL genesis has happened
+    //  - A prometheus will be started, coupled with grafana
+    "additional_services": [
+      	"tx_spammer",
+        "blob_spammer",
+        "cl_forkmon",
+        "el_forkmon",
+        "beacon_metrics_gazer",
+        "light_beaconchain_explorer",
+        "prometheus_grafana",
+    ],
 
     //  If set, the package will block until a finalized epoch has occurred.
     "wait_for_finalization": false,

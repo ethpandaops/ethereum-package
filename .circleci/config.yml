@@ -42,6 +42,14 @@ jobs:
 
       - run: kurtosis run ${PWD}
 
+  lint:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+
+      - run: kurtosis lint ${PWD}
+
   run_starlark_arm64:
     executor: ubuntu_vm
     resource_class: arm.medium
@@ -156,6 +164,13 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/teku-all.json)"
 
+  mev:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"
+
 workflows:
   check_latest_version:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
@@ -219,18 +234,22 @@ workflows:
               ignore:
                 - main
       - run_starlark:
-          context:
-            # This pulls in KurtosisBot's Github token, so that we can read from our private repos
-            - github-user
           filters:
             branches:
               ignore:
                 - main
       - run_starlark_arm64:
-          context:
-            # This pulls in KurtosisBot's Github token, so that we can read from our private repos
-            - github-user
           filters:
             branches:
               ignore:
                 - main                
+      - lint:
+          filters:
+            branches:
+              ignore:
+                - main                
+      - mev:
+          filters:
+            branches:
+              ignore:
+                - main
