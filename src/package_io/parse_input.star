@@ -1,6 +1,15 @@
 # MEV Params
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
+DEFAULT_ADDITIONAL_SERVICES = [
+    "tx_spammer",
+    "blob_spammer",
+    "cl_forkmon",
+    "el_forkmon",
+    "beacon_metrics_gazer",
+    "light_beaconchain_explorer",
+    "prometheus_grafana",
+]
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
@@ -23,10 +32,18 @@ genesis_constants = import_module(
 def parse_input(plan, input_args):
     result = package_io_parser.parse_input(input_args)
 
+    # we do this as the count has already been accounted for by the `package_io_parser`
+    # and we end up sending the same args to `package_io_parser` again when we do eth_network_package.run()
+    # that we have to do as we want to send in MEV participants
+    # this will all be cleaner post merge
+    for participant in result["participants"]:
+        participant["count"] = 1
+
     # add default eth2 input params
     result["mev_type"] = None
     result["mev_params"] = get_default_mev_params()
     result["launch_additional_services"] = True
+    result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
 
     for attr in input_args:
         value = input_args[attr]
@@ -63,6 +80,7 @@ def parse_input(plan, input_args):
                     el_extra_params=participant["el_extra_params"],
                     validator_extra_params=participant["validator_extra_params"],
                     builder_network_params=participant["builder_network_params"],
+                    validator_count=participant["validator_count"],
                 )
                 for participant in result["participants"]
             ],
@@ -111,6 +129,7 @@ def parse_input(plan, input_args):
                 ],
             ),
             launch_additional_services=result["launch_additional_services"],
+            additional_services=result["additional_services"],
             wait_for_finalization=result["wait_for_finalization"],
             global_client_log_level=result["global_client_log_level"],
             mev_type=result["mev_type"],
@@ -214,6 +233,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             },
             "validator_extra_params": ["--builder-proposals"],
             "builder_network_params": None,
+            "validator_count": package_io_parser.default_network_params()[
+                "num_validator_keys_per_node"
+            ],
         }
 
         parsed_arguments_dict["participants"].append(mev_participant)

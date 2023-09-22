@@ -1,0 +1,9 @@
+{
+    "mev_type": "full",
+    "mev_params": {
+        "launch_custom_flood": true
+    },
+    "network_params": {
+        "seconds_per_slot": 3
+    }
+}
