@@ -234,25 +234,21 @@ workflows:
               ignore:
                 - main
       - run_starlark:
-          context:
           filters:
             branches:
               ignore:
                 - main
       - run_starlark_arm64:
-          context:
           filters:
             branches:
               ignore:
                 - main                
       - lint:
-          context:
           filters:
             branches:
               ignore:
                 - main                
       - mev:
-          context:
           filters:
             branches:
               ignore:
