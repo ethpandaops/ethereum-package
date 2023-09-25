@@ -142,11 +142,7 @@ def run(plan, args={}):
         builder_uri = "http://{0}:{1}".format(
             all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num
         )
-        beacon_uri = [
-            "http://{0}:{1}".format(context.ip_addr, context.http_port_num)
-            for context in all_cl_client_contexts
-        ][-1]
-        beacon_uris = beacon_uri
+        beacon_uris = ','.join(["http://{0}:{1}".format(context.ip_addr, context.http_port_num) for context in all_cl_client_contexts])
         first_cl_client = all_cl_client_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
         mev_flood_module.launch_mev_flood(
