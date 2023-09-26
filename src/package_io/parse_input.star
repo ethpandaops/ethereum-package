@@ -426,37 +426,41 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 
     if mev_type == "full":
         mev_participant = default_participant()
-        mev_participant.update({
-            # TODO replace with actual when flashbots/builder is published
-            "el_client_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
-            "cl_client_image": "sigp/lighthouse",
-            "beacon_extra_params": [
-                "--always-prepare-payload",
-                "--prepare-payload-lookahead",
-                "12000",
-            ],
-            # TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
-            "el_extra_params": [
-                "--builder",
-                "--builder.remote_relay_endpoint=http://mev-relay-api:9062",
-                "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(
-                    num_participants + 1
-                ),
-                "--builder.bellatrix_fork_version=0x30000038",
-                "--builder.genesis_fork_version=0x10000038",
-                "--builder.genesis_validators_root={0}".format(
-                    package_io_constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
-                ),
-                '--miner.extradata="Illuminate Dmocratize Dstribute"',
-                "--builder.algotype=greedy",
-            ]
-            + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
-            "el_extra_env_vars": {
-                "BUILDER_TX_SIGNING_KEY": "0x"
-                + genesis_constants.PRE_FUNDED_ACCOUNTS[0].private_key
-            },
-            "validator_count": 0,
-        })
+        mev_participant.update(
+            {
+                # TODO replace with actual when flashbots/builder is published
+                "el_client_image": parsed_arguments_dict["mev_params"][
+                    "mev_builder_image"
+                ],
+                "cl_client_image": "sigp/lighthouse",
+                "beacon_extra_params": [
+                    "--always-prepare-payload",
+                    "--prepare-payload-lookahead",
+                    "12000",
+                ],
+                # TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
+                "el_extra_params": [
+                    "--builder",
+                    "--builder.remote_relay_endpoint=http://mev-relay-api:9062",
+                    "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(
+                        num_participants + 1
+                    ),
+                    "--builder.bellatrix_fork_version=0x30000038",
+                    "--builder.genesis_fork_version=0x10000038",
+                    "--builder.genesis_validators_root={0}".format(
+                        package_io_constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
+                    ),
+                    '--miner.extradata="Illuminate Dmocratize Dstribute"',
+                    "--builder.algotype=greedy",
+                ]
+                + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
+                "el_extra_env_vars": {
+                    "BUILDER_TX_SIGNING_KEY": "0x"
+                    + genesis_constants.PRE_FUNDED_ACCOUNTS[0].private_key
+                },
+                "validator_count": 0,
+            }
+        )
 
         parsed_arguments_dict["participants"].append(mev_participant)
 
