@@ -425,15 +425,11 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     num_participants = len(parsed_arguments_dict["participants"])
 
     if mev_type == "full":
-        mev_participant = {
-            "el_client_type": "geth",
+        mev_participant = default_participant()
+        mev_participant.update({
             # TODO replace with actual when flashbots/builder is published
             "el_client_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
-            "el_client_log_level": "",
-            "cl_client_type": "lighthouse",
-            # THIS overrides the beacon image
             "cl_client_image": "sigp/lighthouse",
-            "cl_client_log_level": "",
             "beacon_extra_params": [
                 "--always-prepare-payload",
                 "--prepare-payload-lookahead",
@@ -459,10 +455,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "BUILDER_TX_SIGNING_KEY": "0x"
                 + genesis_constants.PRE_FUNDED_ACCOUNTS[0].private_key
             },
-            "validator_extra_params": [],
-            "builder_network_params": None,
             "validator_count": 0,
-        }
+        })
 
         parsed_arguments_dict["participants"].append(mev_participant)
 
