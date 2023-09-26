@@ -22,7 +22,7 @@ package_io_constants = import_module(
     "github.com/kurtosis-tech/eth2-package/package_io/constants.star"
 )
 package_io_parser = import_module(
-    "github.com/kurtosis-tech/eth2-package/package_io/input_parser.star"
+    "github.com/kurtosis-tech/eth2-package/src/package_io/input_parser.star"
 )
 genesis_constants = import_module(
     "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"

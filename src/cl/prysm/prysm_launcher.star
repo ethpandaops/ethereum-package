@@ -2,7 +2,7 @@ shared_utils = import_module(
     "github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star"
 )
 input_parser = import_module(
-    "github.com/kurtosis-tech/eth2-package/package_io/input_parser.star"
+    "github.com/kurtosis-tech/eth2-package/src/package_io/input_parser.star"
 )
 cl_client_context = import_module(
     "github.com/kurtosis-tech/eth2-package/src/cl/cl_client_context.star"
