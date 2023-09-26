@@ -59,7 +59,7 @@ participant_module = import_module(
 )
 
 package_io = import_module(
-    "github.com/kurtosis-tech/eth2-package/package_io/constants.star"
+    "github.com/kurtosis-tech/eth2-package/src/package_io/constants.star"
 )
 
 BOOT_PARTICIPANT_INDEX = 0

@@ -2,7 +2,7 @@ shared_utils = import_module(
     "github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star"
 )
 input_parser = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/package_io/input_parser.star"
+    "github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star"
 )
 el_client_context = import_module(
     "github.com/kurtosis-tech/eth2-package/src/el/el_client_context.star"
@@ -11,7 +11,7 @@ el_admin_node_info = import_module(
     "github.com/kurtosis-tech/eth2-package/src/el/el_admin_node_info.star"
 )
 package_io = import_module(
-    "github.com/kurtosis-tech/eth2-package/package_io/constants.star"
+    "github.com/kurtosis-tech/eth2-package/src/package_io/constants.star"
 )
 snooper_engine_context = import_module(
     "github.com/kurtosis-tech/eth2-package/src/snooper/snooper_engine_context.star"
