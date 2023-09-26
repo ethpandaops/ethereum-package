@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.3.1](https://github.com/kurtosis-tech/eth2-package/compare/0.3.0...0.3.1) (2023-09-26)
+
+
+### Features
+
+* add blobspammer ([f166d71](https://github.com/kurtosis-tech/eth2-package/commit/f166d714ac7f708f533ab3006b051da0859017a3))
+* add blobspammer  ([#165](https://github.com/kurtosis-tech/eth2-package/issues/165)) ([f166d71](https://github.com/kurtosis-tech/eth2-package/commit/f166d714ac7f708f533ab3006b051da0859017a3))
+* add support for electra ([#176](https://github.com/kurtosis-tech/eth2-package/issues/176)) ([fbe6c00](https://github.com/kurtosis-tech/eth2-package/commit/fbe6c004e5a9e47e4e819eddea7d2b424a555634))
+* Add Tx_spamer_params and move MEV to the bottom of main.star ([#208](https://github.com/kurtosis-tech/eth2-package/issues/208)) ([23628b2](https://github.com/kurtosis-tech/eth2-package/commit/23628b27a8d571df1c90c5cbe84455c7382e091c))
+* added a reliable flooder ([#186](https://github.com/kurtosis-tech/eth2-package/issues/186)) ([8146ab7](https://github.com/kurtosis-tech/eth2-package/commit/8146ab7b7d90817ca93a1ed2569a57aa64903231))
+* all_el_metrics ([#195](https://github.com/kurtosis-tech/eth2-package/issues/195)) ([3bbcca7](https://github.com/kurtosis-tech/eth2-package/commit/3bbcca70346d6e1f67bec2023543404df832ffa6))
+* Allow selection of additional services ([#220](https://github.com/kurtosis-tech/eth2-package/issues/220)) ([57b15fe](https://github.com/kurtosis-tech/eth2-package/commit/57b15fe49479e0aaada3379782f4e668b3bfdf71))
+* Make args optional ([#190](https://github.com/kurtosis-tech/eth2-package/issues/190)) ([a3ad030](https://github.com/kurtosis-tech/eth2-package/commit/a3ad030810b2c0d3be02b52d6d6c4ccb17c1e5c0))
+* pass slots per epoch to mev-boost-relay ([#188](https://github.com/kurtosis-tech/eth2-package/issues/188)) ([14acb6f](https://github.com/kurtosis-tech/eth2-package/commit/14acb6f94b9a43508e40ce61cb198f6c59425dc5))
+
+
+### Bug Fixes
+
+* bring back wait for capella fork epoch ([#212](https://github.com/kurtosis-tech/eth2-package/issues/212)) ([c7cce7e](https://github.com/kurtosis-tech/eth2-package/commit/c7cce7ea39c4030ded65400a75b75ca7389fe2cc))
+* bug with participant counts that lead to more than needed participants ([#221](https://github.com/kurtosis-tech/eth2-package/issues/221)) ([7b93f1c](https://github.com/kurtosis-tech/eth2-package/commit/7b93f1ceb2d4f1311efd5fc6691c1ad95623ab83))
+* dont wait for epoch 1 and launch MEV before tx-fuzz ([#210](https://github.com/kurtosis-tech/eth2-package/issues/210)) ([8b883af](https://github.com/kurtosis-tech/eth2-package/commit/8b883aff7811a2f36a36531be1c047d087c0ac93))
+* fail capella fork epoch ([#196](https://github.com/kurtosis-tech/eth2-package/issues/196)) ([ebff2d0](https://github.com/kurtosis-tech/eth2-package/commit/ebff2d0b85a3da08725d88a5c4ce284cf28ef79b))
+* fix mismatch between validator_count & metrics gazer ([#223](https://github.com/kurtosis-tech/eth2-package/issues/223)) ([5dd4f9b](https://github.com/kurtosis-tech/eth2-package/commit/5dd4f9b352a571775684b30fe6fd530512fa943b))
+* Improve MEV setup to use less containers for non_validator nodes ([#224](https://github.com/kurtosis-tech/eth2-package/issues/224)) ([bd176f0](https://github.com/kurtosis-tech/eth2-package/commit/bd176f08941300c98740adc82a0cf0f03694c569))
+* Kevin/postgres package upgrade ([#179](https://github.com/kurtosis-tech/eth2-package/issues/179)) ([1bcc623](https://github.com/kurtosis-tech/eth2-package/commit/1bcc623f6e2a260751869b3b519b759bf510a994))
+* Kevin/unpin redis version ([#182](https://github.com/kurtosis-tech/eth2-package/issues/182)) ([4eb7127](https://github.com/kurtosis-tech/eth2-package/commit/4eb7127816098a4615f061e0203b7e162d4b3a75))
+* lodestar flag ([#217](https://github.com/kurtosis-tech/eth2-package/issues/217)) ([5f1e0f2](https://github.com/kurtosis-tech/eth2-package/commit/5f1e0f2943a006426b638c0699ddd58c47cc57c0))
+* mev should work with the validator count change ([#225](https://github.com/kurtosis-tech/eth2-package/issues/225)) ([37dccce](https://github.com/kurtosis-tech/eth2-package/commit/37dccce1c1a1760b1ecac9264985a844f0db46a6))
+* mev-boost creation by making it depend on actual participant count ([#191](https://github.com/kurtosis-tech/eth2-package/issues/191)) ([7606cff](https://github.com/kurtosis-tech/eth2-package/commit/7606cffafc054153dc4ad43d925dad7cfa4a9984))
+* Mock builder updates ([#193](https://github.com/kurtosis-tech/eth2-package/issues/193)) ([6cc3697](https://github.com/kurtosis-tech/eth2-package/commit/6cc369703f821da788d49c9418e1b4008796ce95))
+* parse input ([#205](https://github.com/kurtosis-tech/eth2-package/issues/205)) ([a787b38](https://github.com/kurtosis-tech/eth2-package/commit/a787b38d8c8e61008244818581bf5d9a3103bd33))
+* pass through env var now for builder_signing_tx_key ([#207](https://github.com/kurtosis-tech/eth2-package/issues/207)) ([a63f2fd](https://github.com/kurtosis-tech/eth2-package/commit/a63f2fd78613607dd4be195eb002fa9af3c6a894))
+* Pin Redis version in prep for package catalog version upgrade ([#180](https://github.com/kurtosis-tech/eth2-package/issues/180)) ([09b235a](https://github.com/kurtosis-tech/eth2-package/commit/09b235a37f62c2fd6f99dd466a9918d7d468831d))
+* remove hardcoding of addresses in MEV flood ([#184](https://github.com/kurtosis-tech/eth2-package/issues/184)) ([21b0975](https://github.com/kurtosis-tech/eth2-package/commit/21b0975f20a955354482092f5f04fcb4a85114b0))
+* replace plan.assert with plan.verify ([#202](https://github.com/kurtosis-tech/eth2-package/issues/202)) ([073135d](https://github.com/kurtosis-tech/eth2-package/commit/073135ddc8ab5fb912b20bae96ec2ec72c3ac2f4))
+* start boost immediately after relay starts running ([#213](https://github.com/kurtosis-tech/eth2-package/issues/213)) ([b6ce1e9](https://github.com/kurtosis-tech/eth2-package/commit/b6ce1e9132ded99c1398353fa4324bbf9fb6e78c))
+* update readme for MEV params ([#189](https://github.com/kurtosis-tech/eth2-package/issues/189)) ([c1bf13e](https://github.com/kurtosis-tech/eth2-package/commit/c1bf13ee737f3437d0aca7cf3bfd9753e2f31d43))
+* use 4th private key (index 3) for tx fuzz like before ([#215](https://github.com/kurtosis-tech/eth2-package/issues/215)) ([1752ed0](https://github.com/kurtosis-tech/eth2-package/commit/1752ed0a9861c0a2f7fb313dbe44a800e419b6bc))
+* use the third address instead of coinbase for tx-fuzz ([#185](https://github.com/kurtosis-tech/eth2-package/issues/185)) ([3b2993c](https://github.com/kurtosis-tech/eth2-package/commit/3b2993c050172dec63c26d9b53c53fc7a77ad079))
+
 ## [0.3.0](https://github.com/kurtosis-tech/eth2-package/compare/0.2.0...0.3.0) (2023-09-03)
 
 
