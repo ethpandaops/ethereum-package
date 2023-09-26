@@ -45,7 +45,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 package_io_constants = import_module(
-    "github.com/kurtosis-tech/eth2-package/package_io/constants.star"
+    "github.com/kurtosis-tech/eth2-package/src/package_io/constants.star"
 )
 
 genesis_constants = import_module(

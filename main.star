@@ -13,7 +13,6 @@ genesis_constants = import_module(
     "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
-eth_network_module = import_module("github.com/kurtosis-tech/eth2-package/main.star")
 transaction_spammer = import_module(
     "github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star"
 )
