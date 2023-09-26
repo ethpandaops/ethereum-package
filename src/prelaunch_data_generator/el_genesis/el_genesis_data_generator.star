@@ -1,5 +1,5 @@
 shared_utils = import_module(
-    "github.com/kurtosis-tech/eth2-package/shared_utils/shared_utils.star"
+    "github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star"
 )
 el_genesis = import_module(
     "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/el_genesis/el_genesis_data.star"

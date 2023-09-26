@@ -3,7 +3,7 @@ prelaunch_data_generator_launcher = import_module(
 )
 
 shared_utils = import_module(
-    "github.com/kurtosis-tech/eth2-package/shared_utils/shared_utils.star"
+    "github.com/kurtosis-tech/eth2-package/src/shared_utils/shared_utils.star"
 )
 keystore_files_module = import_module(
     "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/cl_validator_keystores/keystore_files.star"
