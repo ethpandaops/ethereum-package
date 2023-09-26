@@ -1,21 +1,21 @@
 shared_utils = import_module(
-    "github.com/kurtosis-tech/eth-network-package/shared_utils/shared_utils.star"
+    "github.com/kurtosis-tech/eth2-package/shared_utils/shared_utils.star"
 )
 input_parser = import_module(
-    "github.com/kurtosis-tech/eth-network-package/package_io/input_parser.star"
+    "github.com/kurtosis-tech/eth2-package/package_io/input_parser.star"
 )
 cl_client_context = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/cl/cl_client_context.star"
+    "github.com/kurtosis-tech/eth2-package/src/cl/cl_client_context.star"
 )
 node_metrics = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/node_metrics_info.star"
+    "github.com/kurtosis-tech/eth2-package/src/node_metrics_info.star"
 )
 cl_node_ready_conditions = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/cl/cl_node_ready_conditions.star"
+    "github.com/kurtosis-tech/eth2-package/src/cl/cl_node_ready_conditions.star"
 )
 
 package_io = import_module(
-    "github.com/kurtosis-tech/eth-network-package/package_io/constants.star"
+    "github.com/kurtosis-tech/eth2-package/package_io/constants.star"
 )
 
 GENESIS_DATA_MOUNTPOINT_ON_CLIENT = "/genesis-data"

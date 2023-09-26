@@ -19,13 +19,13 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 package_io_constants = import_module(
-    "github.com/kurtosis-tech/eth-network-package/package_io/constants.star"
+    "github.com/kurtosis-tech/eth2-package/package_io/constants.star"
 )
 package_io_parser = import_module(
-    "github.com/kurtosis-tech/eth-network-package/package_io/input_parser.star"
+    "github.com/kurtosis-tech/eth2-package/package_io/input_parser.star"
 )
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
 

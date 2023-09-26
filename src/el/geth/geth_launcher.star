@@ -1,24 +1,24 @@
 shared_utils = import_module(
-    "github.com/kurtosis-tech/eth-network-package/shared_utils/shared_utils.star"
+    "github.com/kurtosis-tech/eth2-package/shared_utils/shared_utils.star"
 )
 input_parser = import_module(
-    "github.com/kurtosis-tech/eth-network-package/package_io/input_parser.star"
+    "github.com/kurtosis-tech/eth2-package/package_io/input_parser.star"
 )
 el_client_context = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/el/el_client_context.star"
+    "github.com/kurtosis-tech/eth2-package/src/el/el_client_context.star"
 )
 el_admin_node_info = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/el/el_admin_node_info.star"
+    "github.com/kurtosis-tech/eth2-package/src/el/el_admin_node_info.star"
 )
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
 node_metrics = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/node_metrics_info.star"
+    "github.com/kurtosis-tech/eth2-package/src/node_metrics_info.star"
 )
 package_io = import_module(
-    "github.com/kurtosis-tech/eth-network-package/package_io/constants.star"
+    "github.com/kurtosis-tech/eth2-package/package_io/constants.star"
 )
 
 

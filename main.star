@@ -6,11 +6,11 @@ static_files = import_module(
     "github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star"
 )
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
 eth_network_module = import_module(
-    "github.com/kurtosis-tech/eth-network-package/main.star"
+    "github.com/kurtosis-tech/eth2-package/main.star"
 )
 transaction_spammer = import_module(
     "github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star"
