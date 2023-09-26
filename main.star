@@ -3,7 +3,7 @@ parse_input = import_module(
 )
 
 participant_network = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/participant_network.star"
+    "github.com/kurtosis-tech/eth2-package/src/participant_network.star"
 )
 
 static_files = import_module(
