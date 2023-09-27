@@ -453,7 +453,7 @@ For more details, including a guide and architecture of the `mev-boost` infrastr
 
 ## Pre-funded accounts at Genesis
 
-This package builds on top of the [`eth-network-package`](https://github.com/kurtosis-tech/eth-network-package) and comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/eth-network-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
+This package comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
 
 Here's a table of where the keys are used
 
@@ -501,5 +501,3 @@ When you're happy with your changes:
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [starlark-docs]: https://docs.kurtosis.com/starlark-reference
 [using-the-cli]: https://docs.kurtosis.com/cli
-[prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
-[erigon-issue]: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/154
