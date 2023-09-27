@@ -1,65 +1,65 @@
 cl_validator_keystores = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star"
+    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star"
 )
 el_genesis_data_generator = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star"
+    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star"
 )
 cl_genesis_data_generator = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
+    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
 )
 
 static_files = import_module(
-    "github.com/kurtosis-tech/eth2-package/static_files/static_files.star"
+    "github.com/kurtosis-tech/ethereum-package/static_files/static_files.star"
 )
 
 geth = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/el/geth/geth_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/el/geth/geth_launcher.star"
 )
 besu = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/el/besu/besu_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/el/besu/besu_launcher.star"
 )
 erigon = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/el/erigon/erigon_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/el/erigon/erigon_launcher.star"
 )
 nethermind = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/el/nethermind/nethermind_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/el/nethermind/nethermind_launcher.star"
 )
 reth = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/el/reth/reth_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/el/reth/reth_launcher.star"
 )
 ethereumjs = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/el/ethereumjs/ethereumjs_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/el/ethereumjs/ethereumjs_launcher.star"
 )
 
 lighthouse = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/cl/lighthouse/lighthouse_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/cl/lighthouse/lighthouse_launcher.star"
 )
 lodestar = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/cl/lodestar/lodestar_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/cl/lodestar/lodestar_launcher.star"
 )
 nimbus = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/cl/nimbus/nimbus_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/cl/nimbus/nimbus_launcher.star"
 )
 prysm = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/cl/prysm/prysm_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/cl/prysm/prysm_launcher.star"
 )
 teku = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/cl/teku/teku_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/cl/teku/teku_launcher.star"
 )
 
 snooper = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/snooper/snooper_engine_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/snooper/snooper_engine_launcher.star"
 )
 
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 participant_module = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/participant.star"
+    "github.com/kurtosis-tech/ethereum-package/src/participant.star"
 )
 
 package_io = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/package_io/constants.star"
+    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
 )
 
 BOOT_PARTICIPANT_INDEX = 0
