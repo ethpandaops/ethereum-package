@@ -294,6 +294,7 @@ def run(plan, args={}):
                     network_params,
                 )
             )
+            launch_prometheus_grafana = True
             prometheus_additional_metrics_jobs.append(
                 beacon_metrics_gazer_prometheus_metrics_job
             )
