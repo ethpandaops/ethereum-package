@@ -1,4 +1,5 @@
 # Ethereum Package
+![Run of the Ethereum Network Package](run.gif)
 
 This is a [Kurtosis Package][starlark-docs] that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
@@ -23,13 +24,13 @@ Optional features (enabled via flags or parameter files at runtime):
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
    ```bash
-   kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package
+   kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package
    ```
 
 #### Run with your own configuration
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 ```bash
-kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package "$(cat ~/network_params.json)"
+kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.json)"
 ```
 
 Where `network_params.json` contains the parameters for your network in your home directory.
@@ -420,7 +421,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 ## Proposer Builder Separation (PBS) emulation
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
 ```
-kurtosis run github.com/kurtosis-tech/eth2-package '{"mev_type": "full"}'
+kurtosis run github.com/kurtosis-tech/ethereum-package '{"mev_type": "full"}'
 ```
 
 Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:

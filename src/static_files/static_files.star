@@ -1,5 +1,5 @@
 # The path on the module container where static files are housed
-STATIC_FILES_DIRPATH = "github.com/kurtosis-tech/eth2-package/static_files"
+STATIC_FILES_DIRPATH = "github.com/kurtosis-tech/ethereum-package/static_files"
 
 # CL Forkmon config
 CL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (

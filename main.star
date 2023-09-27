@@ -1,55 +1,56 @@
 parse_input = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star"
+    "github.com/kurtosis-tech/ethereum-package/src/package_io/parse_input.star"
+)
+
+participant_network = import_module(
+    "github.com/kurtosis-tech/ethereum-package/src/participant_network.star"
 )
 
 static_files = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star"
+    "github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star"
 )
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
-eth_network_module = import_module(
-    "github.com/kurtosis-tech/eth-network-package/main.star"
-)
 transaction_spammer = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star"
+    "github.com/kurtosis-tech/ethereum-package/src/transaction_spammer/transaction_spammer.star"
 )
 blob_spammer = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/blob_spammer/blob_spammer.star"
+    "github.com/kurtosis-tech/ethereum-package/src/blob_spammer/blob_spammer.star"
 )
 cl_forkmon = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/cl_forkmon/cl_forkmon_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/cl_forkmon/cl_forkmon_launcher.star"
 )
 el_forkmon = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/el_forkmon/el_forkmon_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/el_forkmon/el_forkmon_launcher.star"
 )
 beacon_metrics_gazer = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
 )
 light_beaconchain_explorer = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/light_beaconchain/light_beaconchain_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/light_beaconchain/light_beaconchain_launcher.star"
 )
 prometheus = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/prometheus/prometheus_launcher.star"
 )
 grafana = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/grafana/grafana_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/grafana/grafana_launcher.star"
 )
 mev_boost_launcher_module = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/mev_boost/mev_boost_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/mev_boost/mev_boost_launcher.star"
 )
 mock_mev_launcher_module = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/mock_mev/mock_mev_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/mock_mev/mock_mev_launcher.star"
 )
 mev_relay_launcher_module = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/mev_relay/mev_relay_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/mev_relay/mev_relay_launcher.star"
 )
 mev_flood_module = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/mev_flood/mev_flood_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/mev_flood/mev_flood_launcher.star"
 )
 mev_custom_flood_module = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/mev_custom_flood/mev_custom_flood_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/mev_custom_flood/mev_custom_flood_launcher.star"
 )
 
 GRAFANA_USER = "admin"
@@ -66,13 +67,12 @@ PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
 
 def run(plan, args={}):
-    args_with_right_defaults, args_with_defaults_dict = parse_input.parse_input(
-        plan, args
-    )
+    args_with_right_defaults = parse_input.parse_input(plan, args)
 
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
     mev_params = args_with_right_defaults.mev_params
+    parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -96,7 +96,20 @@ def run(plan, args={}):
         all_participants,
         cl_genesis_timestamp,
         genesis_validators_root,
-    ) = eth_network_module.run(plan, args_with_defaults_dict)
+    ) = participant_network.launch_participant_network(
+        plan,
+        args_with_right_defaults.participants,
+        network_params,
+        args_with_right_defaults.global_client_log_level,
+        parallel_keystore_generation,
+    )
+
+    plan.print(
+        "NODE JSON RPC URI: '{0}:{1}'".format(
+            all_participants[0].el_client_context.ip_addr,
+            all_participants[0].el_client_context.rpc_port_num,
+        )
+    )
 
     all_el_client_contexts = []
     all_cl_client_contexts = []
@@ -199,20 +212,21 @@ def run(plan, args={}):
     all_mevboost_contexts = []
     if mev_endpoints:
         for index, participant in enumerate(all_participants):
-            mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(
-                MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints
-            )
-            mev_boost_service_name = "{0}{1}".format(
-                parse_input.MEV_BOOST_SERVICE_NAME_PREFIX, index
-            )
-            mev_boost_context = mev_boost_launcher_module.launch(
-                plan,
-                mev_boost_launcher,
-                mev_boost_service_name,
-                network_params.network_id,
-                mev_params.mev_boost_image,
-            )
-            all_mevboost_contexts.append(mev_boost_context)
+            if args_with_right_defaults.participants[index].validator_count != 0:
+                mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(
+                    MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints
+                )
+                mev_boost_service_name = "{0}{1}".format(
+                    parse_input.MEV_BOOST_SERVICE_NAME_PREFIX, index
+                )
+                mev_boost_context = mev_boost_launcher_module.launch(
+                    plan,
+                    mev_boost_launcher,
+                    mev_boost_service_name,
+                    network_params.network_id,
+                    mev_params.mev_boost_image,
+                )
+                all_mevboost_contexts.append(mev_boost_context)
 
     if not args_with_right_defaults.launch_additional_services:
         return
