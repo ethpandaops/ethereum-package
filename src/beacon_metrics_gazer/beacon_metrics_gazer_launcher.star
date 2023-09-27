@@ -2,7 +2,7 @@ shared_utils = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
 )
 prometheus = import_module(
-    "github.com/kurtosis-tech/eth2-package/src/prometheus/prometheus_launcher.star"
+    "github.com/kurtosis-tech/ethereum-package/src/prometheus/prometheus_launcher.star"
 )
 
 
