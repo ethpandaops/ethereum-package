@@ -9,7 +9,7 @@ executors:
       image: ubuntu-2004:202201-02
 
 parameters:
-  # To enable/disabled the check_latest_version workflow execution which will be triggered by this scheduled pipeline: https://app.circleci.com/settings/project/github/kurtosis-tech/eth2-package/triggers
+  # To enable/disabled the check_latest_version workflow execution which will be triggered by this scheduled pipeline: https://app.circleci.com/settings/project/github/kurtosis-tech/ethereum-package/triggers
   # TODO revert this - setting this to true to get all existing tests to run on CI during merge
   should-enable-check-latest-version-workflow:
     type: boolean
@@ -226,7 +226,7 @@ workflows:
             {
                 "ignorePatterns": [
                     {
-                        "pattern": "https://github.com/kurtosis-tech/eth2-package"
+                        "pattern": "https://github.com/kurtosis-tech/ethereum-package"
                     }
                 ]
             }

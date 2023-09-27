@@ -24,13 +24,13 @@ Optional features (enabled via flags or parameter files at runtime):
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
    ```bash
-   kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package
+   kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package
    ```
 
 #### Run with your own configuration
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 ```bash
-kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package "$(cat ~/network_params.json)"
+kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.json)"
 ```
 
 Where `network_params.json` contains the parameters for your network in your home directory.
@@ -421,7 +421,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 ## Proposer Builder Separation (PBS) emulation
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
 ```
-kurtosis run github.com/kurtosis-tech/eth2-package '{"mev_type": "full"}'
+kurtosis run github.com/kurtosis-tech/ethereum-package '{"mev_type": "full"}'
 ```
 
 Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
@@ -449,7 +449,7 @@ This package also supports a `"mev_type": "mock"` mode that will only bring up:
 1. `mock-builder` - a server that listens for builder API directives and responds with payloads built using an execution client
 1. `mev-boost` - for every EL/CL pair launched
 
-For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package).
+For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-ethereum-package).
 
 ## Pre-funded accounts at Genesis
 
