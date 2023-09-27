@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0](https://github.com/kurtosis-tech/eth2-package/compare/0.3.1...0.4.0) (2023-09-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* merge eth-network-package onto eth2-package ([#228](https://github.com/kurtosis-tech/eth2-package/issues/228))
+
+### Code Refactoring
+
+* merge eth-network-package onto eth2-package ([#228](https://github.com/kurtosis-tech/eth2-package/issues/228)) ([b72dad3](https://github.com/kurtosis-tech/eth2-package/commit/b72dad35ac0991a6a33e8720aaa5c9455d34752b))
+
 ## [0.3.1](https://github.com/kurtosis-tech/eth2-package/compare/0.3.0...0.3.1) (2023-09-26)
 
 
