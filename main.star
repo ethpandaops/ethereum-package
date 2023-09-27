@@ -2,16 +2,17 @@ parse_input = import_module(
     "github.com/kurtosis-tech/eth2-package/src/package_io/parse_input.star"
 )
 
+participant_network = import_module(
+    "github.com/kurtosis-tech/eth2-package/src/participant_network.star"
+)
+
 static_files = import_module(
     "github.com/kurtosis-tech/eth2-package/src/static_files/static_files.star"
 )
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/eth-network-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "github.com/kurtosis-tech/eth2-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
-eth_network_module = import_module(
-    "github.com/kurtosis-tech/eth-network-package/main.star"
-)
 transaction_spammer = import_module(
     "github.com/kurtosis-tech/eth2-package/src/transaction_spammer/transaction_spammer.star"
 )
@@ -66,13 +67,12 @@ PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
 
 def run(plan, args={}):
-    args_with_right_defaults, args_with_defaults_dict = parse_input.parse_input(
-        plan, args
-    )
+    args_with_right_defaults = parse_input.parse_input(plan, args)
 
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
     mev_params = args_with_right_defaults.mev_params
+    parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -95,7 +95,20 @@ def run(plan, args={}):
         all_participants,
         cl_genesis_timestamp,
         genesis_validators_root,
-    ) = eth_network_module.run(plan, args_with_defaults_dict)
+    ) = participant_network.launch_participant_network(
+        plan,
+        args_with_right_defaults.participants,
+        network_params,
+        args_with_right_defaults.global_client_log_level,
+        parallel_keystore_generation,
+    )
+
+    plan.print(
+        "NODE JSON RPC URI: '{0}:{1}'".format(
+            all_participants[0].el_client_context.ip_addr,
+            all_participants[0].el_client_context.rpc_port_num,
+        )
+    )
 
     all_el_client_contexts = []
     all_cl_client_contexts = []
