@@ -201,7 +201,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         // The epoch at which the capella and deneb forks are set to occur.
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 4,
-        "electra_fork_epoch": null,
+        "electra_fork_epoch": null
     },
     
     // Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
@@ -227,7 +227,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "el_forkmon",
         "beacon_metrics_gazer",
         "light_beaconchain_explorer",
-        "prometheus_grafana",
+        "prometheus_grafana"
     ],
 
     //  If set, the package will block until a finalized epoch has occurred.

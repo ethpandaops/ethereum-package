@@ -83,6 +83,7 @@ def run(plan, args={}):
     prometheus_config_template = read_file(
         static_files.PROMETHEUS_CONFIG_TEMPLATE_FILEPATH
     )
+    prometheus_additional_metrics_jobs = []
 
     plan.print("Read the prometheus, grafana templates")
 
@@ -229,6 +230,7 @@ def run(plan, args={}):
 
     if not args_with_right_defaults.launch_additional_services:
         return
+    launch_prometheus_grafana = False
     for additional_service in args_with_right_defaults.additional_services:
         if additional_service == "tx_spammer":
             plan.print("Launching transaction spammer")
@@ -283,12 +285,18 @@ def run(plan, args={}):
             beacon_metrics_gazer_config_template = read_file(
                 static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH
             )
-            beacon_metrics_gazer.launch_beacon_metrics_gazer(
-                plan,
-                beacon_metrics_gazer_config_template,
-                all_cl_client_contexts,
-                args_with_right_defaults.participants,
-                network_params,
+            beacon_metrics_gazer_prometheus_metrics_job = (
+                beacon_metrics_gazer.launch_beacon_metrics_gazer(
+                    plan,
+                    beacon_metrics_gazer_config_template,
+                    all_cl_client_contexts,
+                    args_with_right_defaults.participants,
+                    network_params,
+                )
+            )
+            launch_prometheus_grafana = True
+            prometheus_additional_metrics_jobs.append(
+                beacon_metrics_gazer_prometheus_metrics_job
             )
             plan.print("Succesfully launched beacon metrics gazer")
         elif additional_service == "light_beaconchain_explorer":
@@ -301,25 +309,28 @@ def run(plan, args={}):
             )
             plan.print("Succesfully light-beaconchain-explorer")
         elif additional_service == "prometheus_grafana":
-            plan.print("Launching prometheus...")
-            prometheus_private_url = prometheus.launch_prometheus(
-                plan,
-                prometheus_config_template,
-                all_cl_client_contexts,
-                all_el_client_contexts,
-            )
-            plan.print("Successfully launched Prometheus")
-
-            plan.print("Launching grafana...")
-            grafana.launch_grafana(
-                plan,
-                grafana_datasource_config_template,
-                grafana_dashboards_config_template,
-                prometheus_private_url,
-            )
-            plan.print("Succesfully launched grafana")
+            # Allow prometheus to be launched last so is able to collect metrics from other services
+            launch_prometheus_grafana = True
         else:
             fail("Invalid additional service %s" % (additional_service))
+    if launch_prometheus_grafana:
+        plan.print("Launching prometheus...")
+        prometheus_private_url = prometheus.launch_prometheus(
+            plan,
+            prometheus_config_template,
+            all_el_client_contexts,
+            all_cl_client_contexts,
+            prometheus_additional_metrics_jobs,
+        )
+
+        plan.print("Launching grafana...")
+        grafana.launch_grafana(
+            plan,
+            grafana_datasource_config_template,
+            grafana_dashboards_config_template,
+            prometheus_private_url,
+        )
+        plan.print("Succesfully launched grafana")
 
     if args_with_right_defaults.wait_for_finalization:
         plan.print("Waiting for the first finalized epoch")
