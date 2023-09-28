@@ -228,6 +228,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "beacon_metrics_gazer",
         "dora",
         "prometheus_grafana"
+    ],
 
     //  If set, the package will block until a finalized epoch has occurred.
     "wait_for_finalization": false,
