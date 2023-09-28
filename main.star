@@ -301,12 +301,8 @@ def run(plan, args={}):
             plan.print("Succesfully launched beacon metrics gazer")
         elif additional_service == "dora":
             plan.print("Launching dora")
-            dora_config_template = read_file(
-                static_files.DORA_CONFIG_TEMPLATE_FILEPATH
-            )
-            dora.launch_dora(
-                plan, dora_config_template, all_cl_client_contexts
-            )
+            dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
+            dora.launch_dora(plan, dora_config_template, all_cl_client_contexts)
             plan.print("Succesfully launched dora")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services

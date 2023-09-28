@@ -48,9 +48,7 @@ def launch_dora(
         config_template, template_data
     )
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        DORA_CONFIG_FILENAME
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[DORA_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "dora-config"
