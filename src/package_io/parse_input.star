@@ -407,7 +407,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if participant["cl_client_type"] == "nimbus":
             participant["validator_extra_params"].append("--payload-builder=true")
             participant["beacon_extra_params"].append("--payload-builder=true")
-            participant["beacon_extra_params"].append("--payload-builder-url={0}".format(mev_url)
+            participant["beacon_extra_params"].append(
+                "--payload-builder-url={0}".format(mev_url)
             )
         if participant["cl_client_type"] == "teku":
             participant["validator_extra_params"].append(
