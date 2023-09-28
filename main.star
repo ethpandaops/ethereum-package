@@ -28,8 +28,8 @@ el_forkmon = import_module(
 beacon_metrics_gazer = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
 )
-light_beaconchain_explorer = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/light_beaconchain/light_beaconchain_launcher.star"
+dora = import_module(
+    "github.com/kurtosis-tech/ethereum-package/src/dora/dora_launcher.star"
 )
 prometheus = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/prometheus/prometheus_launcher.star"
@@ -299,15 +299,15 @@ def run(plan, args={}):
                 beacon_metrics_gazer_prometheus_metrics_job
             )
             plan.print("Succesfully launched beacon metrics gazer")
-        elif additional_service == "light_beaconchain_explorer":
-            plan.print("Launching light-beaconchain-explorer")
-            light_beaconchain_explorer_config_template = read_file(
-                static_files.LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH
+        elif additional_service == "dora":
+            plan.print("Launching dora")
+            dora_config_template = read_file(
+                static_files.DORA_CONFIG_TEMPLATE_FILEPATH
             )
-            light_beaconchain_explorer.launch_light_beacon(
-                plan, light_beaconchain_explorer_config_template, all_cl_client_contexts
+            dora.launch_dora(
+                plan, dora_config_template, all_cl_client_contexts
             )
-            plan.print("Succesfully light-beaconchain-explorer")
+            plan.print("Succesfully launched dora")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
