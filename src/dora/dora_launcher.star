@@ -3,15 +3,15 @@ shared_utils = import_module(
 )
 
 
-SERVICE_NAME = "light-beaconchain"
+SERVICE_NAME = "dora"
 IMAGE_NAME = "ethpandaops/dora-the-explorer:master"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 8080
 
-LIGHT_BEACONCHAIN_CONFIG_FILENAME = "light-beaconchain-config.yaml"
+DORA_CONFIG_FILENAME = "dora-config.yaml"
 
-LIGHT_BEACONCHAIN_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
+DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE = "/validator-ranges"
 VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
@@ -29,7 +29,7 @@ USED_PORTS = {
 }
 
 
-def launch_light_beacon(
+def launch_dora(
     plan,
     config_template,
     cl_client_contexts,
@@ -48,12 +48,10 @@ def launch_light_beacon(
         config_template, template_data
     )
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        LIGHT_BEACONCHAIN_CONFIG_FILENAME
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[DORA_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "light-beaconchain-config"
+        template_and_data_by_rel_dest_filepath, "dora-config"
     )
 
     config = get_config(config_files_artifact_name)
@@ -63,14 +61,14 @@ def launch_light_beacon(
 
 def get_config(config_files_artifact_name):
     config_file_path = shared_utils.path_join(
-        LIGHT_BEACONCHAIN_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
-        LIGHT_BEACONCHAIN_CONFIG_FILENAME,
+        DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
+        DORA_CONFIG_FILENAME,
     )
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
         files={
-            LIGHT_BEACONCHAIN_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+            DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
             CL_CONFIG_MOUNT_DIRPATH_ON_SERVICE: CL_CONFIG_ARTIFACT_NAME,
         },

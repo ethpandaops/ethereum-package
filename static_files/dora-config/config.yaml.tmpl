@@ -1,10 +1,6 @@
 
 logging:
   outputLevel: "info"
-  #outputStderr: false
-
-  #filePath: "explorer.log"
-  #fileLevel: "warn"
 
 # Chain network configuration
 chain:
@@ -23,7 +19,7 @@ frontend:
   minimize: false # minimize html templates
 
   # Name of the site, displayed in the title tag
-  siteName: "Beaconchain Light"
+  siteName: "Dora the Explorer"
   siteSubtitle: "Kurtosis Testnet"
 
   # link to EL Explorer
@@ -41,7 +37,7 @@ beaconapi:
       archive: true
 {{- end }}
   # local cache for page models
-  localCacheSize: 100 # 100MB
+  localCacheSize: 10 # 10MB
 
   # remote cache for page models
   redisCacheAddr: ""
@@ -49,23 +45,19 @@ beaconapi:
 
 # indexer keeps track of the latest epochs in memory.
 indexer:
-  # number of epochs to load on startup
-  prepopulateEpochs: 2
-
   # max number of epochs to keep in memory
-  inMemoryEpochs: 3
+  inMemoryEpochs: 8
 
-  # epoch processing delay (should be >= 2)
-  epochProcessingDelay: 2
+  # number of epochs to wait before storing unfinalized blocks to db
+  cachePersistenceDelay: 8
 
   # disable synchronizing and everything that writes to the db (indexer just maintains local cache)
   disableIndexWriter: false
 
   # number of seconds to wait between each epoch (don't overload CL client)
-  syncEpochCooldown: 2
-
+  syncEpochCooldown: 1
 
 database:
   engine: "sqlite"
   sqlite:
-    file: ":memory:"
+    file: "/dora-database.sqlite"

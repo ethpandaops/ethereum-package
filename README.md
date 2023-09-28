@@ -226,7 +226,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "cl_forkmon",
         "el_forkmon",
         "beacon_metrics_gazer",
-        "light_beaconchain_explorer",
+        "dora",
         "prometheus_grafana"
     ],
 
