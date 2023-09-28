@@ -50,16 +50,16 @@ beaconapi:
 # indexer keeps track of the latest epochs in memory.
 indexer:
   # max number of epochs to keep in memory
-  inMemoryEpochs: 5
+  inMemoryEpochs: 8
 
   # number of epochs to wait before storing unfinalized blocks to db
-  cachePersistenceDelay: 5
+  cachePersistenceDelay: 8
 
   # disable synchronizing and everything that writes to the db (indexer just maintains local cache)
   disableIndexWriter: false
 
   # number of seconds to wait between each epoch (don't overload CL client)
-  syncEpochCooldown: 2
+  syncEpochCooldown: 1
 
 
 database:
