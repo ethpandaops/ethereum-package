@@ -1,4 +1,5 @@
 # Ethereum Package
+![Run of the Ethereum Network Package](run.gif)
 
 This is a [Kurtosis Package][starlark-docs] that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
@@ -23,13 +24,13 @@ Optional features (enabled via flags or parameter files at runtime):
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
    ```bash
-   kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package
+   kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package
    ```
 
 #### Run with your own configuration
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 ```bash
-kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package "$(cat ~/network_params.json)"
+kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.json)"
 ```
 
 Where `network_params.json` contains the parameters for your network in your home directory.
@@ -200,7 +201,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         // The epoch at which the capella and deneb forks are set to occur.
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 4,
-        "electra_fork_epoch": null,
+        "electra_fork_epoch": null
     },
     
     // Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
@@ -225,8 +226,8 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "cl_forkmon",
         "el_forkmon",
         "beacon_metrics_gazer",
-        "light_beaconchain_explorer",
-        "prometheus_grafana",
+        "dora",
+        "prometheus_grafana"
     ],
 
     //  If set, the package will block until a finalized epoch has occurred.
@@ -420,7 +421,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 ## Proposer Builder Separation (PBS) emulation
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
 ```
-kurtosis run github.com/kurtosis-tech/eth2-package '{"mev_type": "full"}'
+kurtosis run github.com/kurtosis-tech/ethereum-package '{"mev_type": "full"}'
 ```
 
 Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
@@ -452,7 +453,7 @@ For more details, including a guide and architecture of the `mev-boost` infrastr
 
 ## Pre-funded accounts at Genesis
 
-This package builds on top of the [`eth-network-package`](https://github.com/kurtosis-tech/eth-network-package) and comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/eth-network-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
+This package comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
 
 Here's a table of where the keys are used
 
@@ -500,5 +501,3 @@ When you're happy with your changes:
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [starlark-docs]: https://docs.kurtosis.com/starlark-reference
 [using-the-cli]: https://docs.kurtosis.com/cli
-[prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
-[erigon-issue]: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/154

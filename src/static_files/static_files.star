@@ -1,5 +1,5 @@
 # The path on the module container where static files are housed
-STATIC_FILES_DIRPATH = "github.com/kurtosis-tech/eth2-package/static_files"
+STATIC_FILES_DIRPATH = "github.com/kurtosis-tech/ethereum-package/static_files"
 
 # CL Forkmon config
 CL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (
@@ -21,9 +21,7 @@ BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/beacon-metrics-gazer-config/config.yaml.tmpl"
 )
 
-LIGHT_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/light-beaconchain-config/config.yaml.tmpl"
-)
+DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml.tmpl"
 
 # Grafana config
 GRAFANA_CONFIG_DIRPATH = "/grafana-config"
