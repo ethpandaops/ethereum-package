@@ -12,7 +12,6 @@
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
         "capella_fork_epoch": 1
     },    
-    "verifications_epoch_limit": 5,
     "global_client_log_level": "info",
     "mev_type": "full"
 }
