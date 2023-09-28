@@ -1,10 +1,6 @@
 
 logging:
   outputLevel: "info"
-  #outputStderr: false
-
-  #filePath: "explorer.log"
-  #fileLevel: "warn"
 
 # Chain network configuration
 chain:
@@ -41,7 +37,7 @@ beaconapi:
       archive: true
 {{- end }}
   # local cache for page models
-  localCacheSize: 10 # 100MB
+  localCacheSize: 10 # 10MB
 
   # remote cache for page models
   redisCacheAddr: ""
@@ -60,7 +56,6 @@ indexer:
 
   # number of seconds to wait between each epoch (don't overload CL client)
   syncEpochCooldown: 1
-
 
 database:
   engine: "sqlite"
