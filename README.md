@@ -201,7 +201,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         // The epoch at which the capella and deneb forks are set to occur.
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 4,
-        "electra_fork_epoch": null,
+        "electra_fork_epoch": null
     },
     
     // Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
@@ -227,8 +227,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "el_forkmon",
         "beacon_metrics_gazer",
         "dora",
-        "prometheus_grafana",
-    ],
+        "prometheus_grafana"
 
     //  If set, the package will block until a finalized epoch has occurred.
     "wait_for_finalization": false,
@@ -453,7 +452,7 @@ For more details, including a guide and architecture of the `mev-boost` infrastr
 
 ## Pre-funded accounts at Genesis
 
-This package builds on top of the [`eth-network-package`](https://github.com/kurtosis-tech/eth-network-package) and comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/eth-network-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
+This package comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
 
 Here's a table of where the keys are used
 
@@ -501,5 +500,3 @@ When you're happy with your changes:
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [starlark-docs]: https://docs.kurtosis.com/starlark-reference
 [using-the-cli]: https://docs.kurtosis.com/cli
-[prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
-[erigon-issue]: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/154
