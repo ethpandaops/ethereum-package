@@ -170,49 +170,31 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"
 
+  nimbus_mev:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/nimbus-mev.json)"
+
 workflows:
   check_latest_version:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
     jobs:
-      - check_latest_version:
-          context:
-            - slack-secrets
-      - besu-all:
-          context:
-            - slack-secrets
-      - erigon-all:
-          context:
-            - slack-secrets
-      - ethereumjs-all:
-          context:
-            - slack-secrets
-      - geth-all:
-          context:
-            - slack-secrets
-      - lighthouse-all:
-          context:
-            - slack-secrets
-      - lodestar-all:
-          context:
-            - slack-secrets
-      - mix:
-          context:
-            - slack-secrets
-      - nethermind-all:
-          context:
-            - slack-secrets
-      - nimbus-all:
-          context:
-            - slack-secrets
-      - prysm-all:
-          context:
-            - slack-secrets
-      - reth-all:
-          context:
-            - slack-secrets
-      - teku-all:
-          context:
-            - slack-secrets
+      - check_latest_version
+      - besu-all
+      - erigon-all
+      - ethereumjs-all
+      - geth-all
+      - lighthouse-all
+      - lodestar-all
+      - mix
+      - nethermind-all
+      - nimbus-all
+      - prysm-all
+      - reth-all
+      - teku-all
+      - nimbus_mev
 
   build:
     when: << pipeline.parameters.should-enable-build-workflow >>
