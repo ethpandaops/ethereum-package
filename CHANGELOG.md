@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1](https://github.com/kurtosis-tech/ethereum-package/compare/0.5.0...0.5.1) (2023-09-28)
+
+
+### Bug Fixes
+
+* enable all apis for reth ([#241](https://github.com/kurtosis-tech/ethereum-package/issues/241)) ([db92f7b](https://github.com/kurtosis-tech/ethereum-package/commit/db92f7b01be1dd05c65eb88463dee76f2261f42f))
+* rename light-beaconchain-explorer to dora-the-explorer & change db location ([#243](https://github.com/kurtosis-tech/ethereum-package/issues/243)) ([d3a4b49](https://github.com/kurtosis-tech/ethereum-package/commit/d3a4b495873eeb25647a113f3cd39ab42029faf8))
+
 ## [0.5.0](https://github.com/kurtosis-tech/ethereum-package/compare/0.4.0...0.5.0) (2023-09-28)
 
 
