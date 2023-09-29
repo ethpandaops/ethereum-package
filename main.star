@@ -305,7 +305,7 @@ def run(plan, args={}):
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
             dora.launch_dora(plan, dora_config_template, all_cl_client_contexts)
             plan.print("Succesfully launched dora")
-        elif additional_service == "full":
+        elif additional_service == "full_beaconchain":
             plan.print("Launching full-beaconchain-explorer")
             full_beaconchain_explorer_config_template = read_file(static_files.FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH)
             full_beaconchain_explorer.launch_full_beacon(plan, full_beaconchain_explorer_config_template, all_cl_client_contexts, all_el_client_contexts)
