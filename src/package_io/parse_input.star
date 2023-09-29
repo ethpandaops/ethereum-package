@@ -438,6 +438,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
                     "12000",
+                    "--disable-peer-scoring",
                 ],
                 # TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
                 "el_extra_params": [
