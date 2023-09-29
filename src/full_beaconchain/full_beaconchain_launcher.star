@@ -36,6 +36,7 @@ def launch_full_beacon(
     cl_client_contexts,
     el_client_contexts,
 ):
+    # TODO perhaps use the official redis & postgres packages
     db_services = plan.add_services(
         configs={
             # Add a Postgres server
