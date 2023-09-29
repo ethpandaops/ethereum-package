@@ -1,21 +1,21 @@
 shared_utils = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
+    "../../shared_utils/shared_utils.star"
 )
 input_parser = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/parse_input.star"
+    "../../package_io/parse_input.star"
 )
 el_admin_node_info = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/el_admin_node_info.star"
+    "../../el/el_admin_node_info.star"
 )
 el_client_context = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/el_client_context.star"
+    "../../el/el_client_context.star"
 )
 
 node_metrics = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/node_metrics_info.star"
+    "../../node_metrics_info.star"
 )
 package_io = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
+    "../../package_io/constants.star"
 )
 
 # The dirpath of the execution data directory on the client container

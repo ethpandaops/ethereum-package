@@ -1,65 +1,65 @@
 cl_validator_keystores = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star"
+    "./prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star"
 )
 el_genesis_data_generator = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star"
+    "./prelaunch_data_generator/el_genesis/el_genesis_data_generator.star"
 )
 cl_genesis_data_generator = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
+    "./prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
 )
 
 static_files = import_module(
-    "github.com/kurtosis-tech/ethereum-package/static_files/static_files.star"
+    "../static_files/static_files.star"
 )
 
 geth = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/geth/geth_launcher.star"
+    "./el/geth/geth_launcher.star"
 )
 besu = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/besu/besu_launcher.star"
+    "./el/besu/besu_launcher.star"
 )
 erigon = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/erigon/erigon_launcher.star"
+    "./el/erigon/erigon_launcher.star"
 )
 nethermind = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/nethermind/nethermind_launcher.star"
+    "./el/nethermind/nethermind_launcher.star"
 )
 reth = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/reth/reth_launcher.star"
+    "./el/reth/reth_launcher.star"
 )
 ethereumjs = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/ethereumjs/ethereumjs_launcher.star"
+    "./el/ethereumjs/ethereumjs_launcher.star"
 )
 
 lighthouse = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/cl/lighthouse/lighthouse_launcher.star"
+    "./cl/lighthouse/lighthouse_launcher.star"
 )
 lodestar = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/cl/lodestar/lodestar_launcher.star"
+    "./cl/lodestar/lodestar_launcher.star"
 )
 nimbus = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/cl/nimbus/nimbus_launcher.star"
+    "./cl/nimbus/nimbus_launcher.star"
 )
 prysm = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/cl/prysm/prysm_launcher.star"
+    "./cl/prysm/prysm_launcher.star"
 )
 teku = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/cl/teku/teku_launcher.star"
+    "./cl/teku/teku_launcher.star"
 )
 
 snooper = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/snooper/snooper_engine_launcher.star"
+    "./snooper/snooper_engine_launcher.star"
 )
 
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "./prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 participant_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/participant.star"
+    "./participant.star"
 )
 
 package_io = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
+    "./package_io/constants.star"
 )
 
 BOOT_PARTICIPANT_INDEX = 0

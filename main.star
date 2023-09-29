@@ -1,56 +1,56 @@
 parse_input = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/parse_input.star"
+    "./src/package_io/parse_input.star"
 )
 
 participant_network = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/participant_network.star"
+    "./src/participant_network.star"
 )
 
 static_files = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star"
+    "./src/static_files/static_files.star"
 )
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "./src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
 transaction_spammer = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/transaction_spammer/transaction_spammer.star"
+    "./src/transaction_spammer/transaction_spammer.star"
 )
 blob_spammer = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/blob_spammer/blob_spammer.star"
+    "./src/blob_spammer/blob_spammer.star"
 )
 cl_forkmon = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/cl_forkmon/cl_forkmon_launcher.star"
+    "./src/cl_forkmon/cl_forkmon_launcher.star"
 )
 el_forkmon = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el_forkmon/el_forkmon_launcher.star"
+    "./src/el_forkmon/el_forkmon_launcher.star"
 )
 beacon_metrics_gazer = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
+    "./src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
 )
 dora = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/dora/dora_launcher.star"
+    "./src/dora/dora_launcher.star"
 )
 prometheus = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prometheus/prometheus_launcher.star"
+    "./src/prometheus/prometheus_launcher.star"
 )
 grafana = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/grafana/grafana_launcher.star"
+    "./src/grafana/grafana_launcher.star"
 )
 mev_boost_launcher_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mev_boost/mev_boost_launcher.star"
+    "./src/mev_boost/mev_boost_launcher.star"
 )
 mock_mev_launcher_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mock_mev/mock_mev_launcher.star"
+    "./src/mock_mev/mock_mev_launcher.star"
 )
 mev_relay_launcher_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mev_relay/mev_relay_launcher.star"
+    "./src/mev_relay/mev_relay_launcher.star"
 )
 mev_flood_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mev_flood/mev_flood_launcher.star"
+    "./src/mev_flood/mev_flood_launcher.star"
 )
 mev_custom_flood_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mev_custom_flood/mev_custom_flood_launcher.star"
+    "./src/mev_custom_flood/mev_custom_flood_launcher.star"
 )
 
 GRAFANA_USER = "admin"

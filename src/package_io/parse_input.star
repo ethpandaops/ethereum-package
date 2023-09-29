@@ -45,11 +45,11 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 package_io_constants = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
+    "../package_io/constants.star"
 )
 
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
 

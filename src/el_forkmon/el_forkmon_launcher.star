@@ -1,5 +1,5 @@
 shared_utils = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
+    "../shared_utils/shared_utils.star"
 )
 
 
