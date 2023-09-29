@@ -12,8 +12,4 @@ jobs:
         with:
           release-type: simple
           package-name: kurtosis
-          bump-minor-pre-major: true
-          bump-patch-for-minor-pre-major: true
-          # Our CI, Docker Images, Kurtosis-SDK bumps all depend on
-          # non v tags
           include-v-in-tag: false

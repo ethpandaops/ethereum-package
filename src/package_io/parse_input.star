@@ -33,7 +33,7 @@ DEFAULT_ADDITIONAL_SERVICES = [
     "cl_forkmon",
     "el_forkmon",
     "beacon_metrics_gazer",
-    "dora",
+    "explorer",
     "prometheus_grafana",
 ]
 
@@ -43,6 +43,8 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "mev_params",
     "tx_spammer_params",
 )
+
+DEFAULT_EXPLORER_VERSION = "dora"
 
 package_io_constants = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
@@ -61,6 +63,7 @@ def parse_input(plan, input_args):
     result["mev_params"] = get_default_mev_params()
     result["launch_additional_services"] = True
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
+    result["explorer_version"] = DEFAULT_EXPLORER_VERSION
 
     for attr in input_args:
         value = input_args[attr]
@@ -162,6 +165,7 @@ def parse_input(plan, input_args):
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
+        explorer_version=result["explorer_version"],
     )
 
 
@@ -438,6 +442,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
                     "12000",
+                    "--disable-peer-scoring",
                 ],
                 # TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
                 "el_extra_params": [
