@@ -1,0 +1,21 @@
+# NOTE: This does NOT have any relevance to the mnemonics & validator keys in the CL genesis!
+mnemonic: "stumble horn valley travel milk void screen bulk wink hood cup item glove setup wrong toward erase invite saddle this poverty basket index lab"
+el_premine:
+  "m/44'/60'/0'/0/0": 1000000000ETH
+  "m/44'/60'/0'/0/1": 1000000000ETH
+  "m/44'/60'/0'/0/2": 1000000000ETH
+  "m/44'/60'/0'/0/3": 1000000000ETH
+  "m/44'/60'/0'/0/4": 1000000000ETH
+  "m/44'/60'/0'/0/5": 1000000000ETH
+  "m/44'/60'/0'/0/6": 1000000000ETH
+el_premine_addrs: {}
+chain_id: {{ .NetworkId }}
+deposit_contract_address: "{{ .DepositContractAddress }}"
+genesis_timestamp: {{ .UnixTimestamp }}
+# Note: The module runs a merged chain so terminal_total_difficulty is hardcoded to zero.
+terminal_total_difficulty: 0
+genesis_delay: {{ .GenesisDelay }}
+slot_duration_in_seconds: {{ .SecondsPerSlot }}
+capella_fork_epoch: {{ .CapellaForkEpoch }}
+deneb_fork_epoch: {{ .DenebForkEpoch }}
+electra_fork_epoch: {{ .ElectraForkEpoch }}

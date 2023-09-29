@@ -1,4 +1,5 @@
 # Ethereum Package
+![Run of the Ethereum Network Package](run.gif)
 
 This is a [Kurtosis Package][starlark-docs] that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
@@ -13,7 +14,7 @@ Optional features (enabled via flags or parameter files at runtime):
 * Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
 * Spin up & configure parameters for the infrastructure behind Flashbot's implementation of PBS using `mev-boost`, in either `full` or `mock` mode. More details [here](./README.md#proposer-builder-separation-pbs-implementation-via-flashbots-mev-boost-protocol).
 * Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
-* Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client. 
+* Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client.
 * Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
 * Specify the required parameters for the nodes to reach an external block building network
 * Generate keystores for each node in parallel
@@ -23,19 +24,19 @@ Optional features (enabled via flags or parameter files at runtime):
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
    ```bash
-   kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package
+   kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package
    ```
 
 #### Run with your own configuration
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 ```bash
-kurtosis run --enclave my-testnet github.com/kurtosis-tech/eth2-package "$(cat ~/network_params.json)"
+kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.json)"
 ```
 
 Where `network_params.json` contains the parameters for your network in your home directory.
 
 #### Run on Kubernetes
-Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster. 
+Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster.
 
 #### Tear down
 The testnet will reside in an [enclave](https://docs.kurtosis.com/concepts-reference/enclaves/) - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
@@ -44,7 +45,7 @@ kurtosis enclave rm -f my-testnet
 ```
 
 ## Management
-The [Kurtosis CLI](https://docs.kurtosis.com/cli) can be used to inspect and interact with the network. 
+The [Kurtosis CLI](https://docs.kurtosis.com/cli) can be used to inspect and interact with the network.
 
 For example, if you need shell access, simply run:
 ```
@@ -104,6 +105,9 @@ To configure the package behaviour, you can modify your `network_params.json` fi
             //  A list of optional extra params that will be passed to the EL client container for modifying its behaviour
             "el_extra_params": [],
 
+            // A list of optional extra env_vars the el container should spin up with
+            "el_extra_env_vars": {},
+
             //  The type of CL client that should be started
             //  Valid values are "nimbus", "lighthouse", "lodestar", "teku", and "prysm"
             "cl_client_type": "lighthouse",
@@ -142,7 +146,32 @@ To configure the package behaviour, you can modify your `network_params.json` fi
             //   "https://0xdeadbeefcafc@relay.example.com",
             //   "https://0xdeadbeefcafd@relay.example.com"
             //  ]
-            "builder_network_params": null
+            "builder_network_params": null,
+
+            // Resource management for el/beacon/validator containers
+            // CPU is milicores
+            // RAM is in MB
+            // Defaults are set per client
+            "el_min_cpu": "",
+            "el_max_cpu": "",
+            "el_min_mem": "",
+            "el_max_mem": "",
+            "bn_min_cpu": "",
+            "bn_max_cpu": "",
+            "bn_min_mem": "",
+            "bn_max_mem": "",
+            "v_min_cpu": "",
+            "v_max_cpu": "",
+            "v_min_mem": "",
+            "v_max_mem": "",
+
+            // Snooper can be enabled with the `snooper_enabled` flag per client or globally
+            // Defaults to false
+            "snooper_enabled": false,
+
+            // Count of nodes to spin up for this participant
+            // Default to 1
+            "count": 1
         }
     ],
 
@@ -166,36 +195,44 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         //  This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
         //   validator keys already preregistered as validators
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        // How long you want the network to wait before starting up
+        "genesis_delay": 120,
 
         // The epoch at which the capella and deneb forks are set to occur.
-        "capella_fork_epoch": 2,
-        "deneb_fork_epoch": 4
+        "capella_fork_epoch": 0,
+        "deneb_fork_epoch": 4,
+        "electra_fork_epoch": null
+    },
+    
+    // Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
+    "tx_spammer_params": {
+        //  A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
+        "tx_spammer_extra_args": []
     },
 
-    // True by defaults such that in addition to the Ethereum network:
-    //  - A transaction spammer is launched to fake transactions sent to the network
-    //  - Forkmon will be launched after CL genesis has happened
-    //  - A prometheus will be started, coupled with grafana
+    // True by defaults, adds services defined in "additional_services" alongside the Ethereum network
     // If set to false:
     //  - only Ethereum network (EL and CL nodes) will be launched. Nothing else (no transaction spammer)
     //  - params for the CL nodes will be ignored (e.g. CL node image, CL node extra params)
     "launch_additional_services": true,
 
-    // Which blockchain explorer should be used
-    // "light" will use the light beaconchain explorer developped by pk910
-    // "full" will use the explorer developped by the beaconcha.in team
-    // defaults to "light"
-    "explorer_version": "light",
+    // By default includes
+    //  - A transaction spammer is launched to fake transactions sent to the network
+    //  - Forkmon will be launched after CL genesis has happened
+    //  - A prometheus will be started, coupled with grafana
+    //  - by default this launches the `dora` explorer to use the full one use `full_explorer` instead
+    "additional_services": [
+      	"tx_spammer",
+        "blob_spammer",
+        "cl_forkmon",
+        "el_forkmon",
+        "beacon_metrics_gazer",
+        "dora",
+        "prometheus_grafana"
+    ],
 
     //  If set, the package will block until a finalized epoch has occurred.
-    //  If `waitForVerifications` is set to true, this extra wait will be skipped.
     "wait_for_finalization": false,
-
-    //  If set to true, the package will block until all verifications have passed
-    "wait_for_verifications": false,
-
-    //  If set, after the merge, this will be the maximum number of epochs wait for the verifications to succeed.
-    "verifications_epoch_limit": 5,
 
     //  The global log level that all clients should log at
     //  Valid values are "error", "warn", "info", "debug", and "trace"
@@ -214,25 +251,35 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     // Default: "None" - no mev boost, mev builder, mev flood or relays are spun up
     // "mock" - mock-builder & mev-boost are spun up
     // "full" - mev-boost, relays, flooder and builder are all spun up
+    // Users are recommended to set network_params.capella_fork_epoch to non zero when testing MEV
+    // We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
     "mev_type": "None",
 
     // Parameters if MEV is used
     "mev_params": {
       // The image to use for MEV boot relay
-      // This uses the h4ck3rk3y image instead of the flashbots image as that isn't published yet
-		"mev_relay_image": "flashbots/mev-boost-relay",
+      "mev_relay_image": "flashbots/mev-boost-relay",
+      // The image to use for the builder
+      "mev_builder_image": "ethpandaops/flashbots-builder:main",
+      // The image to use for mev-boost
+      "mev_boost_image": "flashbots/mev-boost",
       // Extra parameters to send to the API
-		"mev_relay_api_extra_args": [],
+      "mev_relay_api_extra_args": [],
       // Extra parameters to send to the housekeeper
-		"mev_relay_housekeeper_extra_args": [],
+      "mev_relay_housekeeper_extra_args": [],
       // Extra parameters to send to the website
-		"mev_relay_website_extra_args": [],
+      "mev_relay_website_extra_args": [],
       // Extra parameters to send to the builder
-		"mev_builder_extra_args": [],
+      "mev_builder_extra_args": [],
       // Image to use for mev-flood
-		"mev_flood_image": "flashbots/mev-flood",
+      "mev_flood_image": "flashbots/mev-flood",
       // Extra parameters to send to mev-flood
-		"mev_flood_extra_args": []
+      "mev_flood_extra_args": [],
+      // Number of seconds between bundles for mev-flood
+      "mev_flood_seconds_per_bundle": 15,
+      // A custom flood script that increases the balance of the coinbase addresss leading to more reliable
+      // payload delivery
+      "launch_custom_flood": false
     }
 }
 ```
@@ -344,6 +391,9 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     },
   ],
   "mev_type": "full",
+  "network_params": {
+    "capella_fork_epoch": 1
+  },
   "launch_additional_services": false
 }
 ```
@@ -372,7 +422,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 ## Proposer Builder Separation (PBS) emulation
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
 ```
-kurtosis run github.com/kurtosis-tech/eth2-package '{"mev_type": "full"}'
+kurtosis run github.com/kurtosis-tech/ethereum-package '{"mev_type": "full"}'
 ```
 
 Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
@@ -386,10 +436,12 @@ Starting your network up with `"mev_type": "full"` will instantiate and connect 
 <details>
     <summary>Caveats when using "mev_type": "full"</summary>
 
-* The mev-boost-relay service requires Capella at an epoch of non-zero. For the eth2-package, the Capella fork is set to happen after the first epoch to be started up and fully connected to the CL client.
-* Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 2nd epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 2nd epoch.
+* Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 1st epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 1st epoch.
 * After the 3rd epoch, the mev-relay service will begin to receive execution payloads (eth_sendPayload, which does not contain transaction content) from the mev-builder service (or mock-builder in mock-mev mode).
 * Validators will start to receive validated execution payload headers from the mev-relay service (via mev-boost) after the 4th epoch. The validator selects the most valuable header, signs the payload, and returns the signed header to the relay - effectively proposing the payload of transactions to be included in the soon-to-be-proposed block. Once the relay verifies the block proposer's signature, the relay will respond with the full execution payload body (incl. the transaction contents) for the validator to use when proposing a SignedBeaconBlock to the network.
+
+It is recommended to use non zero value for `capella_fork_epoch` by setting `network_params.capella_fork_epoch` to a non-zero value
+in the arguments passed with `mev_type` set to `full`.
 </details>
 
 
@@ -398,7 +450,22 @@ This package also supports a `"mev_type": "mock"` mode that will only bring up:
 1. `mock-builder` - a server that listens for builder API directives and responds with payloads built using an execution client
 1. `mev-boost` - for every EL/CL pair launched
 
-For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package). 
+For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package).
+
+## Pre-funded accounts at Genesis
+
+This package comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
+
+Here's a table of where the keys are used
+
+| Account Index| Component Used In   | Private Key Used | Public Key Used | Comment                    |
+|----------------|---------------------|------------------|-----------------|----------------------------|
+| 3              | transaction_spammer | ✅                |                 | To spam transactions with  |
+| 0              | mev_flood           | ✅                |                 | As the admin_key           |
+| 2              | mev_flood           | ✅                |                 | As the user_key            |
+| 0              | mev_custom_flood    |                  | ✅               | As the receiver of balance |
+| 6              | mev_custom_flood    | ✅                |                 | As the sender of balance   |
+| 1              | blob_spammer        | ✅                |                 | As the sender of blobs     |
 
 ## Developing On This Package
 
@@ -435,5 +502,3 @@ When you're happy with your changes:
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [starlark-docs]: https://docs.kurtosis.com/starlark-reference
 [using-the-cli]: https://docs.kurtosis.com/cli
-[prysm-issue]: https://github.com/prysmaticlabs/prysm/issues/11508
-[erigon-issue]: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/154

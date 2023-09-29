@@ -9,7 +9,6 @@ executors:
       image: ubuntu-2004:202201-02
 
 parameters:
-  # To enable/disabled the check_latest_version workflow execution which will be triggered by this scheduled pipeline: https://app.circleci.com/settings/project/github/kurtosis-tech/eth2-package/triggers
   should-enable-check-latest-version-workflow:
     type: boolean
     default: false
@@ -24,7 +23,7 @@ setup_kurtosis: &setup_kurtosis
       echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
       sudo apt update
       sudo apt install kurtosis-cli
-      kurtosis config init dont-send-metrics
+      kurtosis analytics disable
       kurtosis engine restart
 
 
@@ -36,6 +35,23 @@ setup_kurtosis: &setup_kurtosis
 jobs:
   run_starlark:
     executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+
+      - run: kurtosis run ${PWD}
+
+  lint:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+
+      - run: kurtosis lint ${PWD}
+
+  run_starlark_arm64:
+    executor: ubuntu_vm
+    resource_class: arm.medium
     steps:
       - <<: *setup_kurtosis
       - checkout
@@ -147,49 +163,38 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/teku-all.json)"
 
+  mev:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"
+
+  nimbus_mev:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/nimbus-mev.json)"
+
 workflows:
   check_latest_version:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
     jobs:
-      - check_latest_version:
-          context:
-            - slack-secrets
-      - besu-all:
-          context:
-            - slack-secrets
-      - erigon-all:
-          context:
-            - slack-secrets
-      - ethereumjs-all:
-          context:
-            - slack-secrets
-      - geth-all:
-          context:
-            - slack-secrets
-      - lighthouse-all:
-          context:
-            - slack-secrets
-      - lodestar-all:
-          context:
-            - slack-secrets
-      - mix:
-          context:
-            - slack-secrets
-      - nethermind-all:
-          context:
-            - slack-secrets
-      - nimbus-all:
-          context:
-            - slack-secrets
-      - prysm-all:
-          context:
-            - slack-secrets
-      - reth-all:
-          context:
-            - slack-secrets
-      - teku-all:
-          context:
-            - slack-secrets
+      - check_latest_version
+      - besu-all
+      - erigon-all
+      - ethereumjs-all
+      - geth-all
+      - lighthouse-all
+      - lodestar-all
+      - mix
+      - nethermind-all
+      - nimbus-all
+      - prysm-all
+      - reth-all
+      - teku-all
+      - nimbus_mev
 
   build:
     when: << pipeline.parameters.should-enable-build-workflow >>
@@ -201,7 +206,7 @@ workflows:
             {
                 "ignorePatterns": [
                     {
-                        "pattern": "https://github.com/kurtosis-tech/eth2-package"
+                        "pattern": "https://github.com/kurtosis-tech/ethereum-package"
                     }
                 ]
             }
@@ -210,9 +215,21 @@ workflows:
               ignore:
                 - main
       - run_starlark:
-          context:
-            # This pulls in KurtosisBot's Github token, so that we can read from our private repos
-            - github-user
+          filters:
+            branches:
+              ignore:
+                - main
+      - run_starlark_arm64:
+          filters:
+            branches:
+              ignore:
+                - main                
+      - lint:
+          filters:
+            branches:
+              ignore:
+                - main                
+      - mev:
           filters:
             branches:
               ignore:
