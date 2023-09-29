@@ -310,24 +310,6 @@ def get_client_log_level_or_default(
 
 
 def default_input_args():
-<<<<<<< HEAD
-	network_params = default_network_params()
-	participants = [default_participant()]
-	mev_params = get_default_mev_params()
-	return {
-		"mev_type": None,
-		"participants":					participants,
-		"network_params":				network_params,
-		"launch_additional_services": 	True,
-		"explorer_version": 			"light",
-		"wait_for_finalization":		False,
-		"wait_for_verifications":		False,
-		"verifications_epoch_limit":	5,
-		"global_client_log_level":		"info",
-		"mev_params": mev_params,
-		"snooper_enabled":				False,
-	}
-=======
     network_params = default_network_params()
     participants = [default_participant()]
     return {
@@ -339,7 +321,6 @@ def default_input_args():
         "parallel_keystore_generation": False,
     }
 
->>>>>>> main
 
 def default_network_params():
     # this is temporary till we get params working
