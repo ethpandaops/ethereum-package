@@ -32,7 +32,7 @@ dora = import_module(
     "./src/dora/dora_launcher.star"
 )
 full_beaconchain_explorer = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/full_beaconchain/full_beaconchain_launcher.star"
+    "./src/full_beaconchain/full_beaconchain_launcher.star"
 )
 prometheus = import_module(
     "./src/prometheus/prometheus_launcher.star"
