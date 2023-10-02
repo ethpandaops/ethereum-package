@@ -31,6 +31,9 @@ beacon_metrics_gazer = import_module(
 dora = import_module(
     "./src/dora/dora_launcher.star"
 )
+full_beaconchain_explorer = import_module(
+    "github.com/kurtosis-tech/ethereum-package/src/full_beaconchain/full_beaconchain_launcher.star"
+)
 prometheus = import_module(
     "./src/prometheus/prometheus_launcher.star"
 )
@@ -156,11 +159,13 @@ def run(plan, args={}):
         builder_uri = "http://{0}:{1}".format(
             all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num
         )
-        beacon_uri = [
-            "http://{0}:{1}".format(context.ip_addr, context.http_port_num)
-            for context in all_cl_client_contexts
-        ][-1]
-        beacon_uris = beacon_uri
+        beacon_uris = ",".join(
+            [
+                "http://{0}:{1}".format(context.ip_addr, context.http_port_num)
+                for context in all_cl_client_contexts
+            ]
+        )
+
         first_cl_client = all_cl_client_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
         mev_flood_module.launch_mev_flood(
@@ -299,11 +304,32 @@ def run(plan, args={}):
                 beacon_metrics_gazer_prometheus_metrics_job
             )
             plan.print("Succesfully launched beacon metrics gazer")
-        elif additional_service == "dora":
-            plan.print("Launching dora")
-            dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
-            dora.launch_dora(plan, dora_config_template, all_cl_client_contexts)
-            plan.print("Succesfully launched dora")
+        elif additional_service == "explorer":
+            if args_with_right_defaults.explorer_version == "dora":
+                plan.print("Launching dora")
+                dora_config_template = read_file(
+                    static_files.DORA_CONFIG_TEMPLATE_FILEPATH
+                )
+                dora.launch_dora(plan, dora_config_template, all_cl_client_contexts)
+                plan.print("Succesfully launched dora")
+            elif args_with_right_defaults.explorer_version == "full":
+                plan.print("Launching full-beaconchain-explorer")
+                full_beaconchain_explorer_config_template = read_file(
+                    static_files.FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH
+                )
+                full_beaconchain_explorer.launch_full_beacon(
+                    plan,
+                    full_beaconchain_explorer_config_template,
+                    all_cl_client_contexts,
+                    all_el_client_contexts,
+                )
+                plan.print("Succesfully launched full-beaconchain-explorer")
+            else:
+                fail(
+                    "expected explorer_version to be one of (dora, full) but got {0} which is invalid".format(
+                        args_with_right_defaults.explorer_version
+                    )
+                )
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True

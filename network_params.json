@@ -27,6 +27,16 @@
 		"electra_fork_epoch": null
 	},
 	"launch_additional_services": true,
+	"additional_services": [
+		"tx_spammer",
+		"blob_spammer",
+		"cl_forkmon",
+		"el_forkmon",
+		"beacon_metrics_gazer",
+		"explorer",
+		"prometheus_grafana"
+	],
+	"explorer_version": "dora",
 	"wait_for_finalization": false,
 	"global_client_log_level": "info",
 	"snooper_enabled": false,

@@ -1,9 +1,9 @@
 # Ethereum Package
 ![Run of the Ethereum Network Package](run.gif)
 
-This is a [Kurtosis Package][starlark-docs] that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
+This is a [Kurtosis][kurtosis-repo] package that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
-Specifically, this package will:
+Specifically, this [package][package-reference] will:
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
 2. Configure & bootstrap a network of Ethereum nodes of *n* size using the genesis data generated above
 3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
@@ -39,7 +39,7 @@ Where `network_params.json` contains the parameters for your network in your hom
 Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster.
 
 #### Tear down
-The testnet will reside in an [enclave](https://docs.kurtosis.com/concepts-reference/enclaves/) - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
+The testnet will reside in an [enclave][enclave] - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
 ```
 kurtosis enclave rm -f my-testnet
 ```
@@ -226,9 +226,15 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "cl_forkmon",
         "el_forkmon",
         "beacon_metrics_gazer",
-        "dora",
+        "explorer",
         "prometheus_grafana"
     ],
+
+    // Which blockchain explorer should be used
+    // "dora" will use the dora explorer developped by pk910
+    // "full" will use the explorer developped by the beaconcha.in team
+    // defaults to "light"
+    "explorer_version": "dora",
 
     //  If set, the package will block until a finalized epoch has occurred.
     "wait_for_finalization": false,
@@ -499,5 +505,8 @@ When you're happy with your changes:
 
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
-[starlark-docs]: https://docs.kurtosis.com/starlark-reference
+[kurtosis-repo]: https://github.com/kurtosis-tech/kurtosis
 [using-the-cli]: https://docs.kurtosis.com/cli
+[enclave]: https://docs.kurtosis.com/concepts-reference/enclaves/
+[package-reference]: https://docs.kurtosis.com/concepts-reference/packages
+
