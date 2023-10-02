@@ -1,5 +1,4 @@
 SERVICE_NAME_PREFIX = "prelaunch-data-generator-"
-
 # Launches a prelaunch data generator IMAGE, for use in various of the genesis generation
 def launch_prelaunch_data_generator(
     plan,
@@ -13,7 +12,7 @@ def launch_prelaunch_data_generator(
 	deneb_fork_epoch,
 	electra_fork_epoch,
 	genesis_unix_timestamp,
-	genesis_delay,
+	genesis_delay
 ):
     config = get_config(
 		network_id,
@@ -25,7 +24,7 @@ def launch_prelaunch_data_generator(
 		deneb_fork_epoch,
 		electra_fork_epoch,
 		genesis_unix_timestamp,
-		genesis_delay,
+		genesis_delay
     )
 
     service_name = "{0}{1}".format(
@@ -49,7 +48,7 @@ def launch_prelaunch_data_generator_parallel(
 	deneb_fork_epoch,
 	electra_fork_epoch,
 	genesis_unix_timestamp,
-	genesis_delay,
+	genesis_delay
 ):
     config = get_config(
 		network_id,
@@ -61,7 +60,7 @@ def launch_prelaunch_data_generator_parallel(
 		deneb_fork_epoch,
 		electra_fork_epoch,
 		genesis_unix_timestamp,
-		genesis_delay,
+		genesis_delay
     )
     service_names = [
         "{0}{1}".format(
@@ -85,7 +84,7 @@ def get_config(
 	deneb_fork_epoch,
 	electra_fork_epoch,
 	genesis_unix_timestamp,
-	genesis_delay,
+	genesis_delay
 	):
 
 
@@ -98,7 +97,10 @@ def get_config(
 
     return ServiceConfig(
         image=img,
-        files= {"/output": el_cl_genesis_data.files_artifact_uuid},
+        files= {
+			"/output": el_cl_genesis_data.files_artifact_uuid,
+			"/validator-ranges.yaml": validator_ranges_artifact_name
+			},
 		env_vars={
 			"CHAIN_ID": network_id,
 			"DEPOSIT_CONTRACT_ADDRESS": deposit_contract_address,
