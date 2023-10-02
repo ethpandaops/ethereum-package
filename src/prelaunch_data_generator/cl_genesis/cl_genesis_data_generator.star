@@ -1,6 +1,4 @@
-shared_utils = import_module(
-    "../../shared_utils/shared_utils.star"
-)
+shared_utils = import_module("../../shared_utils/shared_utils.star")
 cl_genesis_data = import_module(
     "../../prelaunch_data_generator/cl_genesis/cl_genesis_data.star"
 )

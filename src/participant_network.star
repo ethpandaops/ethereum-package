@@ -8,59 +8,29 @@ cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
 )
 
-static_files = import_module(
-    "../static_files/static_files.star"
-)
+static_files = import_module("../static_files/static_files.star")
 
-geth = import_module(
-    "./el/geth/geth_launcher.star"
-)
-besu = import_module(
-    "./el/besu/besu_launcher.star"
-)
-erigon = import_module(
-    "./el/erigon/erigon_launcher.star"
-)
-nethermind = import_module(
-    "./el/nethermind/nethermind_launcher.star"
-)
-reth = import_module(
-    "./el/reth/reth_launcher.star"
-)
-ethereumjs = import_module(
-    "./el/ethereumjs/ethereumjs_launcher.star"
-)
+geth = import_module("./el/geth/geth_launcher.star")
+besu = import_module("./el/besu/besu_launcher.star")
+erigon = import_module("./el/erigon/erigon_launcher.star")
+nethermind = import_module("./el/nethermind/nethermind_launcher.star")
+reth = import_module("./el/reth/reth_launcher.star")
+ethereumjs = import_module("./el/ethereumjs/ethereumjs_launcher.star")
 
-lighthouse = import_module(
-    "./cl/lighthouse/lighthouse_launcher.star"
-)
-lodestar = import_module(
-    "./cl/lodestar/lodestar_launcher.star"
-)
-nimbus = import_module(
-    "./cl/nimbus/nimbus_launcher.star"
-)
-prysm = import_module(
-    "./cl/prysm/prysm_launcher.star"
-)
-teku = import_module(
-    "./cl/teku/teku_launcher.star"
-)
+lighthouse = import_module("./cl/lighthouse/lighthouse_launcher.star")
+lodestar = import_module("./cl/lodestar/lodestar_launcher.star")
+nimbus = import_module("./cl/nimbus/nimbus_launcher.star")
+prysm = import_module("./cl/prysm/prysm_launcher.star")
+teku = import_module("./cl/teku/teku_launcher.star")
 
-snooper = import_module(
-    "./snooper/snooper_engine_launcher.star"
-)
+snooper = import_module("./snooper/snooper_engine_launcher.star")
 
 genesis_constants = import_module(
     "./prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
-participant_module = import_module(
-    "./participant.star"
-)
+participant_module = import_module("./participant.star")
 
-package_io = import_module(
-    "./package_io/constants.star"
-)
+package_io = import_module("./package_io/constants.star")
 
 BOOT_PARTICIPANT_INDEX = 0
 

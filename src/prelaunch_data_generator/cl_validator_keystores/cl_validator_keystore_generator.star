@@ -2,9 +2,7 @@ prelaunch_data_generator_launcher = import_module(
     "../../prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star"
 )
 
-shared_utils = import_module(
-    "../../shared_utils/shared_utils.star"
-)
+shared_utils = import_module("../../shared_utils/shared_utils.star")
 keystore_files_module = import_module(
     "../../prelaunch_data_generator/cl_validator_keystores/keystore_files.star"
 )

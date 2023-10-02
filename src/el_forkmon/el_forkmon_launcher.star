@@ -1,6 +1,4 @@
-shared_utils = import_module(
-    "../shared_utils/shared_utils.star"
-)
+shared_utils = import_module("../shared_utils/shared_utils.star")
 
 
 SERVICE_NAME = "el-forkmon"

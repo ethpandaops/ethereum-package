@@ -1,9 +1,5 @@
-shared_utils = import_module(
-    "../shared_utils/shared_utils.star"
-)
-prometheus = import_module(
-    "../prometheus/prometheus_launcher.star"
-)
+shared_utils = import_module("../shared_utils/shared_utils.star")
+prometheus = import_module("../prometheus/prometheus_launcher.star")
 
 
 SERVICE_NAME = "beacon-metrics-gazer"
