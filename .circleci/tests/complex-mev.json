@@ -23,7 +23,7 @@
     "mev_params": {
       "mev_relay_image": "public.ecr.aws/t1d5h1w5/pepc-boost-relay:latest",
       "mev_builder_image": "public.ecr.aws/t1d5h1w5/pepc-boost-builder:latest",
-          "mev_flood_seconds_per_bundle": 7,
+      "mev_flood_seconds_per_bundle": 7,
       "launch_custom_flood": true
     }
   }

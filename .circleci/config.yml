@@ -175,7 +175,7 @@ jobs:
     steps:
       - <<: *setup_kurtosis
       - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/copmlex-mev.json)"
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/complex-mev.json)"
 
   nimbus_mev:
     executor: ubuntu_vm
