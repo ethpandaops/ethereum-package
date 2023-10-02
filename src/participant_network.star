@@ -1,12 +1,8 @@
 cl_validator_keystores = import_module(
     "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star"
 )
-el_genesis_data_generator = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/el_genesis/el_genesis_data_generator.star"
-)
-cl_genesis_data_generator = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
-)
+
+prelaunch_data_generator = import_module("github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star")
 
 static_files = import_module(
     "github.com/kurtosis-tech/ethereum-package/static_files/static_files.star"
@@ -81,6 +77,7 @@ GLOBAL_INDEX_ZFILL = {
     "zfill_values": [(1, 1), (2, 10), (3, 100), (4, 1000), (5, 10000)]
 }
 
+PARSED_BEACON_STATE_FILENAME = "/output/parsedBeaconState.json"
 
 def launch_participant_network(
     plan,
@@ -106,75 +103,48 @@ def launch_participant_network(
 
     plan.print(json.indent(json.encode(cl_validator_data)))
 
-    # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
     final_genesis_timestamp = get_final_genesis_timestamp(
         plan, CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME
-    )
-    plan.print("Generating EL data")
-    el_genesis_generation_config_template = read_file(
-        static_files.EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
-    )
-    el_genesis_data = el_genesis_data_generator.generate_el_genesis_data(
-        plan,
-        el_genesis_generation_config_template,
-        final_genesis_timestamp,
-        network_params.network_id,
-        network_params.deposit_contract_address,
-        network_params.genesis_delay,
-        network_params.seconds_per_slot,
-        network_params.capella_fork_epoch,
-        network_params.deneb_fork_epoch,
-        network_params.electra_fork_epoch,
-    )
+	)
+    plan.print("Generating EL and CL data")
 
-    plan.print(json.indent(json.encode(el_genesis_data)))
+    total_number_of_validator_keys = 0
+    for participant in participants:
+        total_number_of_validator_keys += participant.validator_count
+    el_cl_genesis_data = prelaunch_data_generator.launch_prelaunch_data_generator(
+		plan,
+		"el-cl-genesis",
+		network_params.network_id,
+		network_params.deposit_contract_address,
+		network_params.preregistered_validator_keys_mnemonic,
+		network_params.seconds_per_slot,
+		total_number_of_validator_keys,
+		network_params.capella_fork_epoch,
+		network_params.deneb_fork_epoch,
+		network_params.electra_fork_epoch,
+		final_genesis_timestamp,
+		network_params.genesis_delay,
+	)
+
+    plan.print(json.indent(json.encode(el_cl_genesis_data)))
 
     plan.print("Uploading GETH prefunded keys")
 
     geth_prefunded_keys_artifact_name = plan.upload_files(
         static_files.GETH_PREFUNDED_KEYS_DIRPATH, name="geth-prefunded-keys"
     )
-
-    plan.print("Uploaded GETH files succesfully")
-
-    plan.print("Generating CL data")
-
-    genesis_generation_config_yml_template = read_file(
-        static_files.CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
-    )
-    genesis_generation_mnemonics_yml_template = read_file(
-        static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH
-    )
-    total_number_of_validator_keys = 0
-    for participant in participants:
-        total_number_of_validator_keys += participant.validator_count
-    cl_genesis_data = cl_genesis_data_generator.generate_cl_genesis_data(
+    genesis_validators_root = get_genesis_validators_root(
         plan,
-        genesis_generation_config_yml_template,
-        genesis_generation_mnemonics_yml_template,
-        el_genesis_data,
-        final_genesis_timestamp,
-        network_params.network_id,
-        network_params.deposit_contract_address,
-        network_params.seconds_per_slot,
-        network_params.preregistered_validator_keys_mnemonic,
-        total_number_of_validator_keys,
-        network_params.genesis_delay,
-        network_params.capella_fork_epoch,
-        network_params.deneb_fork_epoch,
-        network_params.electra_fork_epoch,
+        "genesis_validator_root",
+        PARSED_BEACON_STATE_FILENAME
     )
-
-    plan.print(json.indent(json.encode(cl_genesis_data)))
-    plan.print("Generated CL genesis data succesfully, launching EL & CL Participants")
-
-    genesis_validators_root = cl_genesis_data.genesis_validators_root
+    plan.print("Uploaded GETH files succesfully")
 
     el_launchers = {
         package_io.EL_CLIENT_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
                 network_params.network_id,
-                el_genesis_data,
+                el_cl_genesis_data,
                 geth_prefunded_keys_artifact_name,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
                 genesis_validators_root,
@@ -184,26 +154,26 @@ def launch_participant_network(
         },
         package_io.EL_CLIENT_TYPE.besu: {
             "launcher": besu.new_besu_launcher(
-                network_params.network_id, el_genesis_data
+                network_params.network_id, el_cl_genesis_data
             ),
             "launch_method": besu.launch,
         },
         package_io.EL_CLIENT_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
-                network_params.network_id, el_genesis_data
+                network_params.network_id, el_cl_genesis_data
             ),
             "launch_method": erigon.launch,
         },
         package_io.EL_CLIENT_TYPE.nethermind: {
-            "launcher": nethermind.new_nethermind_launcher(el_genesis_data),
+            "launcher": nethermind.new_nethermind_launcher(el_cl_genesis_data),
             "launch_method": nethermind.launch,
         },
         package_io.EL_CLIENT_TYPE.reth: {
-            "launcher": reth.new_reth_launcher(el_genesis_data),
+            "launcher": reth.new_reth_launcher(el_cl_genesis_data),
             "launch_method": reth.launch,
         },
         package_io.EL_CLIENT_TYPE.ethereumjs: {
-            "launcher": ethereumjs.new_ethereumjs_launcher(el_genesis_data),
+            "launcher": ethereumjs.new_ethereumjs_launcher(el_cl_genesis_data),
             "launch_method": ethereumjs.launch,
         },
     }
@@ -257,27 +227,27 @@ def launch_participant_network(
 
     cl_launchers = {
         package_io.CL_CLIENT_TYPE.lighthouse: {
-            "launcher": lighthouse.new_lighthouse_launcher(cl_genesis_data),
+            "launcher": lighthouse.new_lighthouse_launcher(el_cl_genesis_data),
             "launch_method": lighthouse.launch,
         },
         package_io.CL_CLIENT_TYPE.lodestar: {
-            "launcher": lodestar.new_lodestar_launcher(cl_genesis_data),
+            "launcher": lodestar.new_lodestar_launcher(el_cl_genesis_data),
             "launch_method": lodestar.launch,
         },
         package_io.CL_CLIENT_TYPE.nimbus: {
-            "launcher": nimbus.new_nimbus_launcher(cl_genesis_data),
+            "launcher": nimbus.new_nimbus_launcher(el_cl_genesis_data),
             "launch_method": nimbus.launch,
         },
         package_io.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
-                cl_genesis_data,
+                el_cl_genesis_data,
                 cl_validator_data.prysm_password_relative_filepath,
                 cl_validator_data.prysm_password_artifact_uuid,
             ),
             "launch_method": prysm.launch,
         },
         package_io.CL_CLIENT_TYPE.teku: {
-            "launcher": teku.new_teku_launcher(cl_genesis_data),
+            "launcher": teku.new_teku_launcher(el_cl_genesis_data),
             "launch_method": teku.launch,
         },
     }
@@ -440,3 +410,20 @@ print(int(time.time()+padding), end="")
         args=[str(padding)],
     )
     return result.output
+
+
+def get_genesis_validators_root(plan, service_name, beacon_state_file_path):
+    response = plan.exec(
+        service_name=service_name,
+        recipe=ExecRecipe(
+            command=[
+                "/bin/sh",
+                "-c",
+                "cat {0} | grep genesis_validators_root | grep -oE '0x[0-9a-fA-F]+' | tr -d '\n'".format(
+                    beacon_state_file_path
+                ),
+            ],
+        ),
+    )
+
+    return response["output"]
