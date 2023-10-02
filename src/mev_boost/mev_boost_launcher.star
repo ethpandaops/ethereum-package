@@ -1,12 +1,6 @@
-shared_utils = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
-)
-mev_boost_context_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mev_boost/mev_boost_context.star"
-)
-parse_input = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/parse_input.star"
-)
+shared_utils = import_module("../shared_utils/shared_utils.star")
+mev_boost_context_module = import_module("../mev_boost/mev_boost_context.star")
+parse_input = import_module("../package_io/parse_input.star")
 
 FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 

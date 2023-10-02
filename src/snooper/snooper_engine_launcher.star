@@ -1,21 +1,9 @@
-shared_utils = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
-)
-input_parser = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/parse_input.star"
-)
-el_client_context = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/el_client_context.star"
-)
-el_admin_node_info = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/el_admin_node_info.star"
-)
-package_io = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
-)
-snooper_engine_context = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/snooper/snooper_engine_context.star"
-)
+shared_utils = import_module("../shared_utils/shared_utils.star")
+input_parser = import_module("../package_io/parse_input.star")
+el_client_context = import_module("../el/el_client_context.star")
+el_admin_node_info = import_module("../el/el_admin_node_info.star")
+package_io = import_module("../package_io/constants.star")
+snooper_engine_context = import_module("../snooper/snooper_engine_context.star")
 
 SNOOPER_ENGINE_RPC_PORT_NUM = 8561
 SNOOPER_ENGINE_RPC_PORT_ID = "http"

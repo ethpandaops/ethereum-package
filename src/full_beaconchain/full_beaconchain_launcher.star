@@ -1,6 +1,4 @@
-shared_utils = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
-)
+shared_utils = import_module("../shared_utils/shared_utils.star")
 IMAGE_NAME = "gobitfly/eth2-beaconchain-explorer:kurtosis"
 
 POSTGRES_PORT_ID = "postgres"

@@ -1,21 +1,9 @@
-shared_utils = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/shared_utils/shared_utils.star"
-)
-input_parser = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/parse_input.star"
-)
-el_client_context = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/el_client_context.star"
-)
-el_admin_node_info = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el/el_admin_node_info.star"
-)
-node_metrics = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/node_metrics_info.star"
-)
-package_io = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
-)
+shared_utils = import_module("../../shared_utils/shared_utils.star")
+input_parser = import_module("../../package_io/parse_input.star")
+el_client_context = import_module("../../el/el_client_context.star")
+el_admin_node_info = import_module("../../el/el_admin_node_info.star")
+node_metrics = import_module("../../node_metrics_info.star")
+package_io = import_module("../../package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/besu/execution-data"
