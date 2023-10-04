@@ -82,7 +82,10 @@ def parse_input(plan, input_args):
             result.get("mev_type"),
         )
 
-    if result.get("mev_type") == "full" and result["network_params"]["capella_fork_epoch"] == 0:
+    if (
+        result.get("mev_type") == "full"
+        and result["network_params"]["capella_fork_epoch"] == 0
+    ):
         fail("MEV requires a non-zero value for capella fork epoch")
 
     result["tx_spammer_params"] = get_default_tx_spammer_params()
