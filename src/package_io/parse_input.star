@@ -379,7 +379,7 @@ def default_participant():
 
 def get_default_mev_params():
     return {
-        "mev_relay_image": "flashbots/mev-boost-relay:0.26.0",
+        "mev_relay_image": "flashbots/mev-boost-relay:0.26",
         # TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
         "mev_builder_image": "ethpandaops/flashbots-builder:main",
         "mev_boost_image": "flashbots/mev-boost",
