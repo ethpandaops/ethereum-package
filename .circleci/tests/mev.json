@@ -4,6 +4,7 @@
         "launch_custom_flood": true
     },
     "network_params": {
-        "seconds_per_slot": 3
+        "seconds_per_slot": 3,
+        "capella_fork_epoch": 1
     }
 }
