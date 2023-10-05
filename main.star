@@ -245,7 +245,7 @@ def run(plan, args={}):
                 plan,
                 cl_forkmon_config_template,
                 all_cl_client_contexts,
-                cl_genesis_timestamp,
+                final_genesis_timestamp,
                 network_params.seconds_per_slot,
                 network_params.slots_per_epoch,
             )
