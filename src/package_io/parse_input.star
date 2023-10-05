@@ -15,6 +15,7 @@ DEFAULT_CL_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
 }
 
+MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.26"
 
 NETHERMIND_NODE_NAME = "nethermind"
 NIMBUS_NODE_NAME = "nimbus"
@@ -85,8 +86,13 @@ def parse_input(plan, input_args):
     if (
         result.get("mev_type") == "full"
         and result["network_params"]["capella_fork_epoch"] == 0
+        and result["mev_params"]["mev_relay_image"] == MEV_BOOST_RELAY_DEFAULT_IMAGE
     ):
-        fail("MEV requires a non-zero value for capella fork epoch")
+        fail(
+            "The default MEV image {0} requires a non-zero value for capella fork epoch set via network_params.capella_fork_epoch".format(
+                MEV_BOOST_RELAY_DEFAULT_IMAGE
+            )
+        )
 
     result["tx_spammer_params"] = get_default_tx_spammer_params()
 
@@ -379,7 +385,7 @@ def default_participant():
 
 def get_default_mev_params():
     return {
-        "mev_relay_image": "flashbots/mev-boost-relay:0.26",
+        "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         # TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
         "mev_builder_image": "ethpandaops/flashbots-builder:main",
         "mev_boost_image": "flashbots/mev-boost",
