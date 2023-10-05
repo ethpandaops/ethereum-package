@@ -457,7 +457,7 @@ This package also supports a `"mev_type": "mock"` mode that will only bring up:
 
 For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package).
 
-## MEV with Capella at 0
+## MEV-Boost usage with Capella at Epoch 0
 
 This note is from 2023-10-05
 
