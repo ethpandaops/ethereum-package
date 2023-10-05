@@ -352,6 +352,11 @@ def run(plan, args={}):
         user=GRAFANA_USER,
         password=GRAFANA_PASSWORD,
     )
-    output = struct(grafana_info=grafana_info)
+    output = struct(
+        grafana_info=grafana_info
+        all_participants = all_participants,
+        cl_genesis_timestamp = cl_genesis_timestamp,
+        genesis_validators_root = genesis_validators_root
+    )
 
     return output
