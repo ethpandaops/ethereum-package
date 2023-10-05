@@ -457,6 +457,16 @@ This package also supports a `"mev_type": "mock"` mode that will only bring up:
 
 For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package).
 
+## MEV-Boost usage with Capella at Epoch 0
+
+This note is from 2023-10-05
+
+`flashbots/mev-boost-relay:0.27` and later support `capella_fork_epoch` at `0` but this seems to require a few flags enabled
+on the `lighthouse` beacon client including `--always-prefer-builder-payload` and `--disable-peer-scoring`
+
+Users are recommended to use [`examples/capella-mev.json`](./examples/capella-mev.json); as inspiration for reliable payload
+delivery.
+
 ## Pre-funded accounts at Genesis
 
 This package comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
