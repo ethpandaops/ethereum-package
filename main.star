@@ -71,7 +71,7 @@ def run(plan, args={}):
     )
     (
         all_participants,
-        cl_genesis_timestamp,
+        final_genesis_timestamp,
         genesis_validators_root,
     ) = participant_network.launch_participant_network(
         plan,
@@ -245,7 +245,7 @@ def run(plan, args={}):
                 plan,
                 cl_forkmon_config_template,
                 all_cl_client_contexts,
-                cl_genesis_timestamp,
+                final_genesis_timestamp,
                 network_params.seconds_per_slot,
                 network_params.slots_per_epoch,
             )
@@ -352,6 +352,11 @@ def run(plan, args={}):
         user=GRAFANA_USER,
         password=GRAFANA_PASSWORD,
     )
-    output = struct(grafana_info=grafana_info)
+    output = struct(
+        grafana_info=grafana_info,
+        all_participants=all_participants,
+        final_genesis_timestamp=final_genesis_timestamp,
+        genesis_validators_root=genesis_validators_root,
+    )
 
     return output
