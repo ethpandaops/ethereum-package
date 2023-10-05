@@ -71,7 +71,7 @@ def run(plan, args={}):
     )
     (
         all_participants,
-        cl_genesis_timestamp,
+        final_genesis_timestamp,
         genesis_validators_root,
     ) = participant_network.launch_participant_network(
         plan,
@@ -355,7 +355,7 @@ def run(plan, args={}):
     output = struct(
         grafana_info=grafana_info,
         all_participants=all_participants,
-        cl_genesis_timestamp=cl_genesis_timestamp,
+        final_genesis_timestamp=final_genesis_timestamp,
         genesis_validators_root=genesis_validators_root,
     )
 
