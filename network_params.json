@@ -2,11 +2,11 @@
 	"participants": [
 		{
 			"el_client_type": "geth",
-			"el_client_image": "ethereum/client-go:latest",
+			"el_client_image": "ethpandaops/geth:lightclient-devnet-9-ae44519",
 			"el_client_log_level": "",
 			"el_extra_params": [],
 			"cl_client_type": "lighthouse",
-			"cl_client_image": "sigp/lighthouse:latest",
+			"cl_client_image": "ethpandaops/lighthouse:deneb-free-blobs-57edc0f",
 			"cl_client_log_level": "",
 			"beacon_extra_params": [],
 			"validator_extra_params": [],
@@ -43,7 +43,7 @@
 	"parallel_keystore_generation": false,
 	"mev_type": null,
 	"mev_params": {
-		"mev_relay_image": "flashbots/mev-boost-relay",
+		"mev_relay_image": "flashbots/mev-boost-relay:0.28.0a2",
 		"mev_relay_api_extra_args": [],
 		"mev_relay_housekeeper_extra_args": [],
 		"mev_relay_website_extra_args": [],

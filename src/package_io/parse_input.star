@@ -1,5 +1,5 @@
 DEFAULT_EL_IMAGES = {
-    "geth": "ethereum/client-go:latest",
+    "geth": "ethpandaops/geth:lightclient-devnet-9-ae44519",
     "erigon": "thorax/erigon:devel",
     "nethermind": "nethermind/nethermind:latest",
     "besu": "hyperledger/besu:develop",
@@ -8,14 +8,14 @@ DEFAULT_EL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES = {
-    "lighthouse": "sigp/lighthouse:latest",
+    "lighthouse": "ethpandaops/lighthouse:deneb-free-blobs-57edc0f",
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "prysmaticlabs/prysm-beacon-chain:latest,prysmaticlabs/prysm-validator:latest",
     "lodestar": "chainsafe/lodestar:latest",
 }
 
-MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.26"
+MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.28.0a2"
 
 NETHERMIND_NODE_NAME = "nethermind"
 NIMBUS_NODE_NAME = "nimbus"
@@ -387,8 +387,8 @@ def get_default_mev_params():
     return {
         "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         # TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
-        "mev_builder_image": "ethpandaops/flashbots-builder:main",
-        "mev_boost_image": "flashbots/mev-boost",
+        "mev_builder_image": "flashbots/builder:1.13.2.4844.dev3",
+        "mev_boost_image": "flashbots/mev-boost:1.6.4844.dev4",
         "mev_relay_api_extra_args": [],
         "mev_relay_housekeeper_extra_args": [],
         "mev_relay_website_extra_args": [],
@@ -413,6 +413,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if participant["cl_client_type"] == "lighthouse":
             participant["validator_extra_params"].append("--builder-proposals")
             participant["beacon_extra_params"].append("--builder={0}".format(mev_url))
+            participant["beacon_extra_params"].append("--always-prefer-builder-payload")
         if participant["cl_client_type"] == "lodestar":
             participant["beacon_extra_params"].append("--builder")
             participant["beacon_extra_params"].append(
@@ -447,7 +448,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "el_client_image": parsed_arguments_dict["mev_params"][
                     "mev_builder_image"
                 ],
-                "cl_client_image": "sigp/lighthouse",
+                "cl_client_image": "ethpandaops/lighthouse:deneb-free-blobs-57edc0f",
                 "beacon_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
@@ -459,7 +460,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--builder",
                     "--builder.remote_relay_endpoint=http://mev-relay-api:9062",
                     "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(
-                        num_participants + 1
+                        1
                     ),
                     "--builder.bellatrix_fork_version=0x30000038",
                     "--builder.genesis_fork_version=0x10000038",
