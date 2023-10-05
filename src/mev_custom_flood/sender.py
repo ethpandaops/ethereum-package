@@ -55,6 +55,14 @@ def flood():
         assert tx["from"] == sender_account.address
 
 
+def run_infinitely():
+    while True:
+        try:
+            flood()
+        except Exception as e:
+            print("e")
+            print("restarting flood as previous one failed")
+
 
 if __name__ == "__main__":
-    flood()
+    run_infinitely()
