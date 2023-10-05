@@ -1,9 +1,11 @@
 {
     "mev_type": "full",
     "mev_params": {
-        "launch_custom_flood": true
+        "launch_custom_flood": true,
+        "mev_relay_image": "flashbots/mev-boost-relay:0.27"
     },
     "network_params": {
-        "seconds_per_slot": 3
+        "seconds_per_slot": 3,
+        "capella_fork_epoch": 0
     }
 }

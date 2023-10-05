@@ -202,6 +202,7 @@ workflows:
       - reth-all
       - teku-all
       - nimbus_mev
+      - complex_mev
 
   build:
     when: << pipeline.parameters.should-enable-build-workflow >>
@@ -237,12 +238,6 @@ workflows:
               ignore:
                 - main                
       - mev:
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - complex_mev:
           filters:
             branches:
               ignore:
