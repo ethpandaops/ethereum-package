@@ -203,7 +203,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "deneb_fork_epoch": 4,
         "electra_fork_epoch": null
     },
-    
+
     // Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
     "tx_spammer_params": {
         //  A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
@@ -461,7 +461,17 @@ This package also supports a `"mev_type": "mock"` mode that will only bring up:
 1. `mock-builder` - a server that listens for builder API directives and responds with payloads built using an execution client
 1. `mev-boost` - for every EL/CL pair launched
 
-For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package).
+For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-ethereum-package/).
+
+## MEV-Boost usage with Capella at Epoch 0
+
+This note is from 2023-10-05
+
+`flashbots/mev-boost-relay:0.27` and later support `capella_fork_epoch` at `0` but this seems to require a few flags enabled
+on the `lighthouse` beacon client including `--always-prefer-builder-payload` and `--disable-peer-scoring`
+
+Users are recommended to use [`examples/capella-mev.json`](./examples/capella-mev.json); as inspiration for reliable payload
+delivery.
 
 ## Pre-funded accounts at Genesis
 
