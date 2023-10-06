@@ -2,7 +2,7 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 
 
 SERVICE_NAME = "dora"
-IMAGE_NAME = "ethpandaops/dora-the-explorer:master"
+IMAGE_NAME = "ethpandaops/dora:master"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 8080
