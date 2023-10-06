@@ -1,59 +1,33 @@
-parse_input = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/parse_input.star"
-)
+parse_input = import_module("./src/package_io/parse_input.star")
 
-participant_network = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/participant_network.star"
-)
+participant_network = import_module("./src/participant_network.star")
 
-static_files = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/static_files/static_files.star"
-)
+static_files = import_module("./src/static_files/static_files.star")
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "./src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
 transaction_spammer = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/transaction_spammer/transaction_spammer.star"
+    "./src/transaction_spammer/transaction_spammer.star"
 )
-blob_spammer = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/blob_spammer/blob_spammer.star"
-)
-cl_forkmon = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/cl_forkmon/cl_forkmon_launcher.star"
-)
-el_forkmon = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/el_forkmon/el_forkmon_launcher.star"
-)
+blob_spammer = import_module("./src/blob_spammer/blob_spammer.star")
+cl_forkmon = import_module("./src/cl_forkmon/cl_forkmon_launcher.star")
+el_forkmon = import_module("./src/el_forkmon/el_forkmon_launcher.star")
 beacon_metrics_gazer = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
+    "./src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
 )
-dora = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/dora/dora_launcher.star"
-)
+dora = import_module("./src/dora/dora_launcher.star")
 full_beaconchain_explorer = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/full_beaconchain/full_beaconchain_launcher.star"
+    "./src/full_beaconchain/full_beaconchain_launcher.star"
 )
-prometheus = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prometheus/prometheus_launcher.star"
-)
-grafana = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/grafana/grafana_launcher.star"
-)
-mev_boost_launcher_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mev_boost/mev_boost_launcher.star"
-)
-mock_mev_launcher_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mock_mev/mock_mev_launcher.star"
-)
-mev_relay_launcher_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mev_relay/mev_relay_launcher.star"
-)
-mev_flood_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mev_flood/mev_flood_launcher.star"
-)
+prometheus = import_module("./src/prometheus/prometheus_launcher.star")
+grafana = import_module("./src/grafana/grafana_launcher.star")
+mev_boost_launcher_module = import_module("./src/mev_boost/mev_boost_launcher.star")
+mock_mev_launcher_module = import_module("./src/mock_mev/mock_mev_launcher.star")
+mev_relay_launcher_module = import_module("./src/mev_relay/mev_relay_launcher.star")
+mev_flood_module = import_module("./src/mev_flood/mev_flood_launcher.star")
 mev_custom_flood_module = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/mev_custom_flood/mev_custom_flood_launcher.star"
+    "./src/mev_custom_flood/mev_custom_flood_launcher.star"
 )
 
 GRAFANA_USER = "admin"
@@ -97,7 +71,7 @@ def run(plan, args={}):
     )
     (
         all_participants,
-        cl_genesis_timestamp,
+        final_genesis_timestamp,
         genesis_validators_root,
     ) = participant_network.launch_participant_network(
         plan,
@@ -271,7 +245,7 @@ def run(plan, args={}):
                 plan,
                 cl_forkmon_config_template,
                 all_cl_client_contexts,
-                cl_genesis_timestamp,
+                final_genesis_timestamp,
                 network_params.seconds_per_slot,
                 network_params.slots_per_epoch,
             )
@@ -378,6 +352,11 @@ def run(plan, args={}):
         user=GRAFANA_USER,
         password=GRAFANA_PASSWORD,
     )
-    output = struct(grafana_info=grafana_info)
+    output = struct(
+        grafana_info=grafana_info,
+        all_participants=all_participants,
+        final_genesis_timestamp=final_genesis_timestamp,
+        genesis_validators_root=genesis_validators_root,
+    )
 
     return output

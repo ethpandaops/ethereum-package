@@ -3,9 +3,7 @@ CUSTOM_FLOOD_SREVICE_NAME = "mev-custom-flood"
 
 
 def spam_in_background(plan, sender_key, receiver_key, el_uri):
-    sender_script = plan.upload_files(
-        "github.com/kurtosis-tech/ethereum-package/src/mev_custom_flood/sender.py"
-    )
+    sender_script = plan.upload_files("./sender.py")
 
     plan.add_service(
         name=CUSTOM_FLOOD_SREVICE_NAME,

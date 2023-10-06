@@ -1,5 +1,5 @@
 # The path on the module container where static files are housed
-STATIC_FILES_DIRPATH = "github.com/kurtosis-tech/ethereum-package/static_files"
+STATIC_FILES_DIRPATH = "/static_files"
 
 # Geth + CL genesis generation
 GENESIS_GENERATION_CONFIG_DIRPATH = STATIC_FILES_DIRPATH + "/genesis-generation-config"

@@ -15,6 +15,7 @@ DEFAULT_CL_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
 }
 
+MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.26"
 
 NETHERMIND_NODE_NAME = "nethermind"
 NIMBUS_NODE_NAME = "nimbus"
@@ -46,12 +47,10 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 
 DEFAULT_EXPLORER_VERSION = "dora"
 
-package_io_constants = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/package_io/constants.star"
-)
+package_io_constants = import_module("../package_io/constants.star")
 
 genesis_constants = import_module(
-    "github.com/kurtosis-tech/ethereum-package/src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
 
@@ -82,6 +81,17 @@ def parse_input(plan, input_args):
             MEV_BOOST_SERVICE_NAME_PREFIX,
             FLASHBOTS_MEV_BOOST_PORT,
             result.get("mev_type"),
+        )
+
+    if (
+        result.get("mev_type") == "full"
+        and result["network_params"]["capella_fork_epoch"] == 0
+        and result["mev_params"]["mev_relay_image"] == MEV_BOOST_RELAY_DEFAULT_IMAGE
+    ):
+        fail(
+            "The default MEV image {0} requires a non-zero value for capella fork epoch set via network_params.capella_fork_epoch".format(
+                MEV_BOOST_RELAY_DEFAULT_IMAGE
+            )
         )
 
     result["tx_spammer_params"] = get_default_tx_spammer_params()
@@ -375,7 +385,7 @@ def default_participant():
 
 def get_default_mev_params():
     return {
-        "mev_relay_image": "flashbots/mev-boost-relay:latest",
+        "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         # TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
         "mev_builder_image": "ethpandaops/flashbots-builder:main",
         "mev_boost_image": "flashbots/mev-boost",

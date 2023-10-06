@@ -90,7 +90,9 @@ def get_config(
 
     if capella_fork_epoch > 0 and electra_fork_epoch == None:  # we are running capella
         img = "ethpandaops/ethereum-genesis-generator:1.3.12"
-    elif (capella_fork_epoch == 0 and electra_fork_epoch == None):  # we are running dencun
+    elif (
+        capella_fork_epoch == 0 and electra_fork_epoch == None
+    ):  # we are running dencun
         img = "ethpandaops/ethereum-genesis-generator:2.0.0"
     else:  # we are running electra
         img = "ethpandaops/ethereum-genesis-generator:3.0.0-rc.2"
