@@ -210,6 +210,12 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "tx_spammer_extra_args": []
     },
 
+    // Configuration place for goomy the blob spammer - https://github.com/ethpandaops/blob-spammer
+    "blob_goomy_params": {
+        //  A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
+        "blob_goomy_args": []
+    },
+
     // True by defaults, adds services defined in "additional_services" alongside the Ethereum network
     // If set to false:
     //  - only Ethereum network (EL and CL nodes) will be launched. Nothing else (no transaction spammer)
@@ -471,6 +477,7 @@ Here's a table of where the keys are used
 | 0              | mev_custom_flood    |                  | ✅               | As the receiver of balance |
 | 6              | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 1              | blob_spammer        | ✅                |                 | As the sender of blobs     |
+| 4              | blob_goomy          | ✅                |                 | As the sender of blobs     |
 
 ## Developing On This Package
 

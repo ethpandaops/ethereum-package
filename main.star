@@ -11,6 +11,7 @@ transaction_spammer = import_module(
     "./src/transaction_spammer/transaction_spammer.star"
 )
 blob_spammer = import_module("./src/blob_spammer/blob_spammer.star")
+blob_goomy = import_module("./src/blob_goomy/blob_goomy.star")
 cl_forkmon = import_module("./src/cl_forkmon/cl_forkmon_launcher.star")
 el_forkmon = import_module("./src/el_forkmon/el_forkmon_launcher.star")
 beacon_metrics_gazer = import_module(
@@ -234,6 +235,18 @@ def run(plan, args={}):
                 network_params.genesis_delay,
             )
             plan.print("Succesfully launched blob spammer")
+        elif additional_service == "blob_goomy":
+            plan.print("Launching Goomy the blob spammer")
+            blob_goomy_params = args_with_right_defaults.blob_goomy_params
+            blob_goomy.launch_blob_goomy(
+                plan,
+                genesis_constants.PRE_FUNDED_ACCOUNTS,
+                all_el_client_contexts,
+                all_cl_client_contexts[0],
+                network_params.slots_per_epoch,
+                blob_goomy_params,
+            )
+            plan.print("Succesfully launched goomy the blob spammer")
         # We need a way to do time.sleep
         # TODO add code that waits for CL genesis
         elif additional_service == "cl_forkmon":
