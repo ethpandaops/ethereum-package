@@ -57,7 +57,7 @@ def get_config(
                     "/tx-fuzz.bin blobs --rpc=http://{0}:{1} --sk={2}".format(
                         el_client_context.ip_addr,
                         el_client_context.rpc_port_num,
-                        prefunded_addresses[1].private_key,
+                        prefunded_addresses[5].private_key,
                     ),
                 ]
             )
