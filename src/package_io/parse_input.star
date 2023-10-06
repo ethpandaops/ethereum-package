@@ -42,7 +42,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "participants",
     "mev_params",
     "tx_spammer_params",
-    "blob_goomy_params",
+    "goomy_blob_params",
 )
 
 DEFAULT_EXPLORER_VERSION = "dora"
@@ -84,7 +84,7 @@ def parse_input(plan, input_args):
         )
 
     result["tx_spammer_params"] = get_default_tx_spammer_params()
-    result["blob_goomy_params"] = get_default_blob_goomy_params()
+    result["goomy_blob_params"] = get_default_goomy_blob_params()
 
     return struct(
         participants=[
@@ -158,8 +158,8 @@ def parse_input(plan, input_args):
         tx_spammer_params=struct(
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
-        blob_goomy_params=struct(
-            blob_goomy_args=result["blob_goomy_params"]["blob_goomy_args"],
+        goomy_blob_params=struct(
+            goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
         launch_additional_services=result["launch_additional_services"],
         additional_services=result["additional_services"],
@@ -397,8 +397,8 @@ def get_default_mev_params():
 def get_default_tx_spammer_params():
     return {"tx_spammer_extra_args": []}
 
-def get_default_blob_goomy_params():
-    return {"blob_goomy_args": []}
+def get_default_goomy_blob_params():
+    return {"goomy_blob_args": []}
 
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
