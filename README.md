@@ -210,7 +210,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "tx_spammer_extra_args": []
     },
 
-    // Configuration place for goomy the blob spammer - https://github.com/ethpandaops/blob-spammer
+    // Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
     "goomy_blob_params": {
         //  A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
         "goomy_blob_args": []
