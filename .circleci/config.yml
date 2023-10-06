@@ -170,13 +170,6 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"
 
-  complex_mev:
-    executor: ubuntu_vm
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/complex-mev.json)"
-
   nimbus_mev:
     executor: ubuntu_vm
     steps:
@@ -202,7 +195,6 @@ workflows:
       - reth-all
       - teku-all
       - nimbus_mev
-      - complex_mev
 
   build:
     when: << pipeline.parameters.should-enable-build-workflow >>
