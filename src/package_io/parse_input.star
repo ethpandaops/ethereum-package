@@ -397,8 +397,10 @@ def get_default_mev_params():
 def get_default_tx_spammer_params():
     return {"tx_spammer_extra_args": []}
 
+
 def get_default_goomy_blob_params():
     return {"goomy_blob_args": []}
+
 
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):

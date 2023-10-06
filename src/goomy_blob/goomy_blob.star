@@ -1,8 +1,8 @@
-
 SERVICE_NAME = "goomy-blob-spammer"
 IMAGE_NAME = "ethpandaops/goomy-blob:master"
 
 ENTRYPOINT_ARGS = ["/bin/sh", "-c"]
+
 
 def launch_goomy_blob(
     plan,
@@ -12,7 +12,13 @@ def launch_goomy_blob(
     seconds_per_slot,
     goomy_blob_params,
 ):
-    config = get_config(prefunded_addresses, el_client_contexts, cl_client_context, seconds_per_slot, goomy_blob_params.goomy_blob_args)
+    config = get_config(
+        prefunded_addresses,
+        el_client_contexts,
+        cl_client_context,
+        seconds_per_slot,
+        goomy_blob_params.goomy_blob_args,
+    )
     plan.add_service(SERVICE_NAME, config)
 
 
@@ -31,7 +37,7 @@ def get_config(
                 client.rpc_port_num,
             )
         )
-    
+
     goomy_args = " ".join(goomy_blob_args)
     if goomy_args == "":
         goomy_args = "combined -b 2 -t 2 --max-pending 3"
@@ -54,7 +60,6 @@ def get_config(
                         seconds_per_slot,
                     ),
                     'echo "sleep is over, starting to send blob transactions"',
-
                     "./blob-spammer -p {0} {1}".format(
                         prefunded_addresses[4].private_key,
                         " ".join(goomy_cli_args),
