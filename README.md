@@ -229,6 +229,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "additional_services": [
       	"tx_spammer",
         "blob_spammer",
+        "goomy_blob"
         "cl_forkmon",
         "el_forkmon",
         "beacon_metrics_gazer",
