@@ -29,7 +29,7 @@ def launch_prelaunch_data_generator(
 
     service_name = "{0}{1}".format(
         SERVICE_NAME_PREFIX,
-        service_name_suffix,
+		service_name_suffix
     )
     plan.add_service(service_name, config)
 
@@ -38,7 +38,7 @@ def launch_prelaunch_data_generator(
 
 def launch_prelaunch_data_generator_parallel(
     plan,
-	service_name_suffix,
+	service_name_suffixes,
 	network_id,
 	deposit_contract_address,
 	preregistered_validator_keys_mnemonic,
@@ -100,7 +100,7 @@ def get_config(
     return ServiceConfig(
         image=img,
         files= {
-			"/output": el_cl_genesis_data.files_artifact_uuid,
+			"/output": el_cl_genesis_data_artifact_name,
 			"/validator-ranges.yaml": validator_ranges_artifact_name
 			},
 		env_vars={

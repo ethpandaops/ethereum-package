@@ -20,7 +20,7 @@ prysm = import_module("./cl/prysm/prysm_launcher.star")
 teku = import_module("./cl/teku/teku_launcher.star")
 
 snooper = import_module("./snooper/snooper_engine_launcher.star")
-
+shared_utils = import_module("../shared_utils/shared_utils.star")
 genesis_constants = import_module(
     "./prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
@@ -331,6 +331,14 @@ def launch_participant_network(
 
     plan.print("Succesfully added {0} CL participants".format(num_participants))
 
+    validator_ranges = get_validator_ranges(
+		plan,
+		participants,
+		"validator_ranges",
+		all_cl_client_contexts,
+		validator_ranges
+	)
+
     all_participants = []
 
     for index, participant in enumerate(participants):
@@ -400,7 +408,7 @@ def get_genesis_validators_root(plan, service_name, beacon_state_file_path):
     return response["output"]
 
 
-def get_validator_ranges(plan, service_name, validator_ranges):
+def get_validator_ranges(plan, participants, service_name,cl_client_contexts, validator_ranges):
     data = []
     running_total_validator_count = 0
     for index, client in enumerate(cl_client_contexts):
@@ -417,11 +425,11 @@ def get_validator_ranges(plan, service_name, validator_ranges):
                 "Range": "{0}-{1}".format(start_index, end_index),
             }
         )
-
+    config_template = read_file(static_files.VALIDATOR_RANGES_CONFIG_FILENAME)
     template_data = {"Data": data}
     template_and_data_by_rel_dest_filepath = {}
     template_and_data_by_rel_dest_filepath[
-        VALIDATOR_RANGES_CONFIG_FILENAME
+        static_files.VALIDATOR_RANGES_CONFIG_FILENAME
     ] = shared_utils.new_template_and_data(config_template, template_data)
 
     validator_ranges_artifact_name = plan.render_templates(

@@ -1,6 +1,11 @@
 # The path on the module container where static files are housed
 STATIC_FILES_DIRPATH = "/static_files"
 
+# Validator ranges config
+VALIDATOR_RANGES_CONFIG_FILENAME = (
+	STATIC_FILES_DIRPATH + "/genesis-generation-config/ranges-config.yaml.tmpl"
+)
+
 # CL Forkmon config
 CL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/cl-forkmon-config/config.toml.tmpl"
