@@ -63,6 +63,7 @@ def parse_input(plan, input_args):
     result["launch_additional_services"] = True
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     result["explorer_version"] = DEFAULT_EXPLORER_VERSION
+    result["grafana_additional_dashboards"] = []
 
     for attr in input_args:
         value = input_args[attr]
@@ -176,6 +177,7 @@ def parse_input(plan, input_args):
         snooper_enabled=result["snooper_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
         explorer_version=result["explorer_version"],
+        grafana_additional_dashboards=result["grafana_additional_dashboards"],
     )
 
 

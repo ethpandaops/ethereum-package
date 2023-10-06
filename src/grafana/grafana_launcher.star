@@ -3,7 +3,7 @@ static_files = import_module("../static_files/static_files.star")
 
 SERVICE_NAME = "grafana"
 
-IMAGE_NAME = "grafana/grafana-enterprise:9.2.3"
+IMAGE_NAME = "grafana/grafana-enterprise:latest"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
@@ -19,6 +19,9 @@ GRAFANA_CONFIG_DIRPATH_ON_SERVICE = "/config"
 GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE = "/dashboards"
 GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE = GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
 
+GRAFANA_ADDITIONAL_DASHBOARDS_NAME = "grafana-additional-dashboard"
+GRAFANA_ADDITIONAL_SERVICE_PATH = "ServicePath"
+GRAFANA_ADDITIONAL_ARTIFACT_NAME = "ArtifactName"
 
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -34,19 +37,24 @@ def launch_grafana(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
+    additional_dashboards=[],
 ):
     (
         grafana_config_artifacts_uuid,
         grafana_dashboards_artifacts_uuid,
+        grafana_additional_dashboards_data,
     ) = get_grafana_config_dir_artifact_uuid(
         plan,
         datasource_config_template,
         dashboard_providers_config_template,
         prometheus_private_url,
+        additional_dashboards=additional_dashboards,
     )
 
     config = get_config(
-        grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid
+        grafana_config_artifacts_uuid,
+        grafana_dashboards_artifacts_uuid,
+        grafana_additional_dashboards_data=grafana_additional_dashboards_data,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -57,6 +65,7 @@ def get_grafana_config_dir_artifact_uuid(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
+    additional_dashboards=[],
 ):
     datasource_data = new_datasource_config_template_data(prometheus_private_url)
     datasource_template_and_data = shared_utils.new_template_and_data(
@@ -86,10 +95,31 @@ def get_grafana_config_dir_artifact_uuid(
         static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH, name="grafana-dashboards"
     )
 
-    return grafana_config_artifacts_name, grafana_dashboards_artifacts_name
+    grafana_additional_dashboards_data = new_additional_dashboards_data(
+        plan, additional_dashboards
+    )
+
+    return (
+        grafana_config_artifacts_name,
+        grafana_dashboards_artifacts_name,
+        grafana_additional_dashboards_data,
+    )
 
 
-def get_config(grafana_config_artifacts_name, grafana_dashboards_artifacts_name):
+def get_config(
+    grafana_config_artifacts_name,
+    grafana_dashboards_artifacts_name,
+    grafana_additional_dashboards_data=[],
+):
+    files = {
+        GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
+        GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
+    }
+    for additional_dashboard_data in grafana_additional_dashboards_data:
+        files[
+            additional_dashboard_data[GRAFANA_ADDITIONAL_SERVICE_PATH]
+        ] = additional_dashboard_data[GRAFANA_ADDITIONAL_ARTIFACT_NAME]
+
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
@@ -100,10 +130,7 @@ def get_config(grafana_config_artifacts_name, grafana_dashboards_artifacts_name)
             "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
             "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
         },
-        files={
-            GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
-            GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
-        },
+        files=files,
     )
 
 
@@ -113,3 +140,27 @@ def new_datasource_config_template_data(prometheus_url):
 
 def new_dashboard_providers_config_template_data(dashboards_dirpath):
     return {"DashboardsDirpath": dashboards_dirpath}
+
+
+def new_additional_dashboards_data(plan, additional_dashboards):
+    data = []
+    for index, dashboard_src in enumerate(additional_dashboards):
+        additional_dashboard_name = "{}-{}".format(
+            GRAFANA_ADDITIONAL_DASHBOARDS_NAME,
+            index,
+        )
+        additional_dashboard_service_path = "{}/{}.json".format(
+            GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE,
+            additional_dashboard_name,
+        )
+        additional_dashboard_artifact_name = plan.upload_files(
+            dashboard_src,
+            name=additional_dashboard_name,
+        )
+        data.append(
+            {
+                GRAFANA_ADDITIONAL_SERVICE_PATH: additional_dashboard_service_path,
+                GRAFANA_ADDITIONAL_ARTIFACT_NAME: additional_dashboard_artifact_name,
+            }
+        )
+    return data
