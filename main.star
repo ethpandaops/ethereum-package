@@ -209,7 +209,14 @@ def run(plan, args={}):
                 all_mevboost_contexts.append(mev_boost_context)
 
     if not args_with_right_defaults.launch_additional_services:
-        return
+        output = struct(
+            all_participants=all_participants,
+            final_genesis_timestamp=final_genesis_timestamp,
+            genesis_validators_root=genesis_validators_root,
+        )
+
+        return output
+
     launch_prometheus_grafana = False
     for additional_service in args_with_right_defaults.additional_services:
         if additional_service == "tx_spammer":
