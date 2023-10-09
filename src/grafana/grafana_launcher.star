@@ -115,10 +115,10 @@ def get_config(
         GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
         GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
     }
-    for additional_dashboard_data in grafana_additional_dashboards_data:
+    for additional_dashboard_artifact_name in grafana_additional_dashboards_data:
         files[
-            additional_dashboard_data[GRAFANA_ADDITIONAL_SERVICE_PATH]
-        ] = additional_dashboard_data[GRAFANA_ADDITIONAL_ARTIFACT_NAME]
+            GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE
+        ] = additional_dashboard_artifact_name
 
     return ServiceConfig(
         image=IMAGE_NAME,
@@ -145,22 +145,8 @@ def new_dashboard_providers_config_template_data(dashboards_dirpath):
 def new_additional_dashboards_data(plan, additional_dashboards):
     data = []
     for index, dashboard_src in enumerate(additional_dashboards):
-        additional_dashboard_name = "{}-{}".format(
-            GRAFANA_ADDITIONAL_DASHBOARDS_NAME,
-            index,
-        )
-        additional_dashboard_service_path = "{}/{}.json".format(
-            GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE,
-            additional_dashboard_name,
-        )
         additional_dashboard_artifact_name = plan.upload_files(
             dashboard_src,
-            name=additional_dashboard_name,
         )
-        data.append(
-            {
-                GRAFANA_ADDITIONAL_SERVICE_PATH: additional_dashboard_service_path,
-                GRAFANA_ADDITIONAL_ARTIFACT_NAME: additional_dashboard_artifact_name,
-            }
-        )
+        data.append(additional_dashboard_artifact_name)
     return data
