@@ -41,8 +41,7 @@ DEFAULT_ADDITIONAL_SERVICES = [
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
-    "mev_params",
-    "tx_spammer_params",
+    "mev_params"
 )
 
 DEFAULT_EXPLORER_VERSION = "dora"
@@ -94,7 +93,8 @@ def parse_input(plan, input_args):
             )
         )
 
-    result["tx_spammer_params"] = get_default_tx_spammer_params()
+    if "tx_spammer_params" not in result:
+        result["tx_spammer_params"] = get_default_tx_spammer_params()
 
     return struct(
         participants=[
