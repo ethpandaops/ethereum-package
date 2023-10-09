@@ -19,7 +19,7 @@ GRAFANA_CONFIG_DIRPATH_ON_SERVICE = "/config"
 GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE = "/dashboards"
 GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE = GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
 
-GRAFANA_ADDITIONAL_DASHBOARDS_NAME = "grafana-additional-dashboard"
+GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME = "grafana-additional-dashboards"
 GRAFANA_ADDITIONAL_SERVICE_PATH = "ServicePath"
 GRAFANA_ADDITIONAL_ARTIFACT_NAME = "ArtifactName"
 
@@ -115,10 +115,10 @@ def get_config(
         GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
         GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
     }
-    for additional_dashboard_artifact_name in grafana_additional_dashboards_data:
+    for additional_dashboard_data in grafana_additional_dashboards_data:
         files[
-            GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE
-        ] = additional_dashboard_artifact_name
+            additional_dashboard_data[GRAFANA_ADDITIONAL_SERVICE_PATH]
+        ] = additional_dashboard_data[GRAFANA_ADDITIONAL_ARTIFACT_NAME]
 
     return ServiceConfig(
         image=IMAGE_NAME,
@@ -145,8 +145,25 @@ def new_dashboard_providers_config_template_data(dashboards_dirpath):
 def new_additional_dashboards_data(plan, additional_dashboards):
     data = []
     for index, dashboard_src in enumerate(additional_dashboards):
+        additional_dashboard_folder_name = "-".join(
+            [
+                GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME,
+                str(index),
+            ]
+        )
+        additional_dashboard_service_path = "/".join(
+            [
+                GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE,
+                additional_dashboard_folder_name,
+            ]
+        )
         additional_dashboard_artifact_name = plan.upload_files(
             dashboard_src,
         )
-        data.append(additional_dashboard_artifact_name)
+        data.append(
+            {
+                GRAFANA_ADDITIONAL_SERVICE_PATH: additional_dashboard_service_path,
+                GRAFANA_ADDITIONAL_ARTIFACT_NAME: additional_dashboard_artifact_name,
+            }
+        )
     return data
