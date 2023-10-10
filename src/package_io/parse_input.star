@@ -177,7 +177,6 @@ def parse_input(plan, input_args):
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
-        explorer_version=result["explorer_version"],
     )
 
 
