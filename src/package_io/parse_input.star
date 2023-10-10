@@ -34,7 +34,7 @@ DEFAULT_ADDITIONAL_SERVICES = [
     "cl_forkmon",
     "el_forkmon",
     "beacon_metrics_gazer",
-    "explorer",
+    "dora",
     "prometheus_grafana",
 ]
 
@@ -45,8 +45,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "tx_spammer_params",
     "goomy_blob_params",
 )
-
-DEFAULT_EXPLORER_VERSION = "dora"
 
 package_io_constants = import_module("../package_io/constants.star")
 
@@ -63,7 +61,6 @@ def parse_input(plan, input_args):
     result["mev_params"] = get_default_mev_params()
     result["launch_additional_services"] = True
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
-    result["explorer_version"] = DEFAULT_EXPLORER_VERSION
 
     for attr in input_args:
         value = input_args[attr]
@@ -180,7 +177,6 @@ def parse_input(plan, input_args):
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
-        explorer_version=result["explorer_version"],
     )
 
 

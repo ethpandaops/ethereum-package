@@ -223,9 +223,12 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "launch_additional_services": true,
 
     // By default includes
-    //  - A transaction spammer is launched to fake transactions sent to the network
-    //  - Forkmon will be launched after CL genesis has happened
+    //  - A transaction spammer & blob spammer is launched to fake transactions sent to the network
+    //  - Forkmon for EL & CL will be launched
     //  - A prometheus will be started, coupled with grafana
+    //  - A beacon metrics gazer will be launched
+    //  - A light beacon chain explorer will be launched
+    //  - Default: ["tx_spammer", "blob_spammer", "cl_fork_mon", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
     "additional_services": [
       	"tx_spammer",
         "blob_spammer",
@@ -233,7 +236,8 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "cl_forkmon",
         "el_forkmon",
         "beacon_metrics_gazer",
-        "explorer",
+        "dora",
+        "full_beaconchain_explorer",
         "prometheus_grafana"
     ],
 
