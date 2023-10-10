@@ -20,7 +20,9 @@ GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE = "/dashboards"
 GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE = GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
 
 GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME = "grafana-additional-dashboards-{0}"
-GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE = GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE + "/{0}"
+GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE = (
+    GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE + "/{0}"
+)
 GRAFANA_ADDITIONAL_DASHBOARDS_SERVICE_PATH_KEY = "ServicePath"
 GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY = "ArtifactName"
 
@@ -146,9 +148,13 @@ def new_dashboard_providers_config_template_data(dashboards_dirpath):
 def upload_additional_dashboards(plan, additional_dashboards):
     data = []
     for index, dashboard_src in enumerate(additional_dashboards):
-        additional_dashboard_folder_name = GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME.format(index)
-        additional_dashboard_service_path = GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE.format(
+        additional_dashboard_folder_name = (
+            GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME.format(index)
+        )
+        additional_dashboard_service_path = (
+            GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE.format(
                 additional_dashboard_folder_name,
+            )
         )
         additional_dashboard_artifact_name = plan.upload_files(
             dashboard_src,
