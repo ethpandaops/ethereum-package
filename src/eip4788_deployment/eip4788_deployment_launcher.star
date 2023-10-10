@@ -1,5 +1,5 @@
 PYTHON_IMAGE = "python:3.11-alpine"
-EIP4788_DEPLOYMENT_SERVICE_NAME = "4788-contract-deployment"
+EIP4788_DEPLOYMENT_SERVICE_NAME = "eip4788-contract-deployment"
 
 
 def deploy_eip4788_contract_in_background(plan, sender_key, receiver_key, el_uri):
