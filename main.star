@@ -29,7 +29,9 @@ mev_flood_module = import_module("./src/mev_flood/mev_flood_launcher.star")
 mev_custom_flood_module = import_module(
     "./src/mev_custom_flood/mev_custom_flood_launcher.star"
 )
-eip4788_deployment_module = import_module("./src/eip4788_deployment/eip4788_deployment_launcher.star")
+eip4788_deployment_module = import_module(
+    "./src/eip4788_deployment/eip4788_deployment_launcher.star"
+)
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
@@ -97,8 +99,8 @@ def run(plan, args={}):
     plan.print("Launching 4788 contract deployer")
     if network_params.deneb_fork_epoch != 0:
         el_uri = "http://{0}:{1}".format(
-                    all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
-                )
+            all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
+        )
         eip4788_deployment_module.deploy_eip4788_contract_in_background(
             plan,
             genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
