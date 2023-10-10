@@ -52,5 +52,6 @@
 		"mev_flood_extra_args": [],
 		"mev_flood_seconds_per_bundle": 15,
 		"launch_custom_flood": false
-	}
+	},
+	"grafana_additional_dashboards": []
 }

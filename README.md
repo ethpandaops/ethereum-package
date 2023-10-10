@@ -1,9 +1,11 @@
 # Ethereum Package
+
 ![Run of the Ethereum Network Package](run.gif)
 
 This is a [Kurtosis][kurtosis-repo] package that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
 Specifically, this [package][package-reference] will:
+
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
 2. Configure & bootstrap a network of Ethereum nodes of *n* size using the genesis data generated above
 3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
@@ -11,6 +13,7 @@ Specifically, this [package][package-reference] will:
 5. Spin up a Grafana and Prometheus instance to observe the network
 
 Optional features (enabled via flags or parameter files at runtime):
+
 * Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
 * Spin up & configure parameters for the infrastructure behind Flashbot's implementation of PBS using `mev-boost`, in either `full` or `mock` mode. More details [here](./README.md#proposer-builder-separation-pbs-implementation-via-flashbots-mev-boost-protocol).
 * Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
@@ -20,15 +23,19 @@ Optional features (enabled via flags or parameter files at runtime):
 * Generate keystores for each node in parallel
 
 ## Quickstart
+
 1. [Install Docker & start the Docker Daemon if you haven't done so already][docker-installation]
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
+
    ```bash
    kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package
    ```
 
 #### Run with your own configuration
+
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
+
 ```bash
 kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.json)"
 ```
@@ -36,40 +43,51 @@ kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(c
 Where `network_params.json` contains the parameters for your network in your home directory.
 
 #### Run on Kubernetes
+
 Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster.
 
 #### Tear down
+
 The testnet will reside in an [enclave][enclave] - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
-```
+
+```bash
 kurtosis enclave rm -f my-testnet
 ```
 
 ## Management
+
 The [Kurtosis CLI](https://docs.kurtosis.com/cli) can be used to inspect and interact with the network.
 
 For example, if you need shell access, simply run:
-```
+
+```bash
 kurtosis service shell my-testnet $SERVICE_NAME
 ```
 
 And if you need the logs for a service, simply run:
-```
+
+```bash
 kurtosis service logs my-testnet $SERVICE_NAME
 ```
 
 Check out the full list of CLI commands [here](https://docs.kurtosis.com/cli)
 
 ## Debugging
+
 To grab the genesis files for the network, simply run:
-```
+
+```bash
 kurtosis files download my-testnet $FILE_NAME $OUTPUT_DIRECTORY
 ```
+
 For example, to retrieve the Execution Layer (EL) genesis data, run:
-```
+
+```bash
 kurtosis files download my-testnet el-genesis-data ~/Downloads
 ```
 
 ## Configuration
+
 To configure the package behaviour, you can modify your `network_params.json` file. The full JSON schema that can be passed in is as follows with the defaults provided:
 
 <details>
@@ -230,7 +248,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     //  - A light beacon chain explorer will be launched
     //  - Default: ["tx_spammer", "blob_spammer", "cl_fork_mon", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
     "additional_services": [
-      	"tx_spammer",
+       "tx_spammer",
         "blob_spammer",
         "goomy_blob"
         "cl_forkmon",
@@ -296,9 +314,12 @@ To configure the package behaviour, you can modify your `network_params.json` fi
       // A custom flood script that increases the balance of the coinbase addresss leading to more reliable
       // payload delivery
       "launch_custom_flood": false
-    }
+    },
+    // A list of locators for grafana dashboards to be loaded be the grafana service
+    "grafana_additional_dashboards": []
 }
 ```
+
 </details>
 
 #### Example configurations
@@ -341,6 +362,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
   "global_client_log_level": "info"
 }
 ```
+
 </details>
 
 <details>
@@ -376,6 +398,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
   "launch_additional_services": false
 }
 ```
+
 </details>
 
 <details>
@@ -413,6 +436,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
   "launch_additional_services": false
 }
 ```
+
 </details>
 
 <details>
@@ -433,15 +457,19 @@ To configure the package behaviour, you can modify your `network_params.json` fi
   "snooper_enabled": true
 }
 ```
+
 </details>
 
 ## Proposer Builder Separation (PBS) emulation
+
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
+
 ```
 kurtosis run github.com/kurtosis-tech/ethereum-package '{"mev_type": "full"}'
 ```
 
 Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
+
 1. `Flashbot's block builder & CL validator + beacon` - A modified Geth client that builds blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay.
 2. `mev-relay-api` - Services that provide APIs for (a) proposers, (b) block builders, (c) data
 3. `mev-relay-website` - A website to monitor payloads that have been delivered
@@ -459,7 +487,6 @@ Starting your network up with `"mev_type": "full"` will instantiate and connect 
 It is recommended to use non zero value for `capella_fork_epoch` by setting `network_params.capella_fork_epoch` to a non-zero value
 in the arguments passed with `mev_type` set to `full`.
 </details>
-
 
 This package also supports a `"mev_type": "mock"` mode that will only bring up:
 
@@ -504,9 +531,11 @@ Then, run the dev loop:
 
 1. Make your code changes
 1. Rebuild and re-run the package by running the following from the root of the repo:
+
    ```bash
    kurtosis run . "{}"
    ```
+
    NOTE 1: You can change the value of the second positional argument flag to pass in extra configuration to the package per the "Configuration" section above!
    NOTE 2: The second positional argument accepts JSON.
 
@@ -528,7 +557,5 @@ When you're happy with your changes:
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [kurtosis-repo]: https://github.com/kurtosis-tech/kurtosis
-[using-the-cli]: https://docs.kurtosis.com/cli
 [enclave]: https://docs.kurtosis.com/concepts-reference/enclaves/
 [package-reference]: https://docs.kurtosis.com/concepts-reference/packages
-
