@@ -11,6 +11,7 @@ transaction_spammer = import_module(
     "./src/transaction_spammer/transaction_spammer.star"
 )
 blob_spammer = import_module("./src/blob_spammer/blob_spammer.star")
+goomy_blob = import_module("./src/goomy_blob/goomy_blob.star")
 cl_forkmon = import_module("./src/cl_forkmon/cl_forkmon_launcher.star")
 el_forkmon = import_module("./src/el_forkmon/el_forkmon_launcher.star")
 beacon_metrics_gazer = import_module(
@@ -241,6 +242,18 @@ def run(plan, args={}):
                 network_params.genesis_delay,
             )
             plan.print("Succesfully launched blob spammer")
+        elif additional_service == "goomy_blob":
+            plan.print("Launching Goomy the blob spammer")
+            goomy_blob_params = args_with_right_defaults.goomy_blob_params
+            goomy_blob.launch_goomy_blob(
+                plan,
+                genesis_constants.PRE_FUNDED_ACCOUNTS,
+                all_el_client_contexts,
+                all_cl_client_contexts[0],
+                network_params.slots_per_epoch,
+                goomy_blob_params,
+            )
+            plan.print("Succesfully launched goomy the blob spammer")
         # We need a way to do time.sleep
         # TODO add code that waits for CL genesis
         elif additional_service == "cl_forkmon":
@@ -285,32 +298,23 @@ def run(plan, args={}):
                 beacon_metrics_gazer_prometheus_metrics_job
             )
             plan.print("Succesfully launched beacon metrics gazer")
-        elif additional_service == "explorer":
-            if args_with_right_defaults.explorer_version == "dora":
-                plan.print("Launching dora")
-                dora_config_template = read_file(
-                    static_files.DORA_CONFIG_TEMPLATE_FILEPATH
-                )
-                dora.launch_dora(plan, dora_config_template, all_cl_client_contexts)
-                plan.print("Succesfully launched dora")
-            elif args_with_right_defaults.explorer_version == "full":
-                plan.print("Launching full-beaconchain-explorer")
-                full_beaconchain_explorer_config_template = read_file(
-                    static_files.FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH
-                )
-                full_beaconchain_explorer.launch_full_beacon(
-                    plan,
-                    full_beaconchain_explorer_config_template,
-                    all_cl_client_contexts,
-                    all_el_client_contexts,
-                )
-                plan.print("Succesfully launched full-beaconchain-explorer")
-            else:
-                fail(
-                    "expected explorer_version to be one of (dora, full) but got {0} which is invalid".format(
-                        args_with_right_defaults.explorer_version
-                    )
-                )
+        elif additional_service == "dora":
+            plan.print("Launching dora")
+            dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
+            dora.launch_dora(plan, dora_config_template, all_cl_client_contexts)
+            plan.print("Succesfully launched dora")
+        elif additional_service == "full_beaconchain_explorer":
+            plan.print("Launching full-beaconchain-explorer")
+            full_beaconchain_explorer_config_template = read_file(
+                static_files.FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH
+            )
+            full_beaconchain_explorer.launch_full_beacon(
+                plan,
+                full_beaconchain_explorer_config_template,
+                all_cl_client_contexts,
+                all_el_client_contexts,
+            )
+            plan.print("Succesfully launched full-beaconchain-explorer")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
