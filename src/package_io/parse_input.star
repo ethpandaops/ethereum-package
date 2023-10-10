@@ -38,11 +38,7 @@ DEFAULT_ADDITIONAL_SERVICES = [
     "prometheus_grafana",
 ]
 
-ATTR_TO_BE_SKIPPED_AT_ROOT = (
-    "network_params",
-    "participants",
-    "mev_params"
-)
+ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params")
 
 DEFAULT_EXPLORER_VERSION = "dora"
 
