@@ -175,6 +175,9 @@ def merge_dashboards_artifacts(
     grafana_dashboards_artifacts_name,
     grafana_additional_dashboards_data=[],
 ):
+    if len(grafana_additional_dashboards_data) == 0:
+        return grafana_dashboards_artifacts_name
+
     files = {
         GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
     }
