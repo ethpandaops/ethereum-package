@@ -191,7 +191,7 @@ def merge_dashboards_artifacts(
             "-type",
             "f",
             "-exec",
-            "cp \{\} {0} \\;".format(GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE),
+            "cp {} " + GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE + " \\;",
         ],
         files=files,
         store=[
