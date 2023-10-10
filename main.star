@@ -179,13 +179,6 @@ def run(plan, args={}):
             mev_params.mev_flood_seconds_per_bundle,
             genesis_constants.PRE_FUNDED_ACCOUNTS,
         )
-        if args_with_right_defaults.mev_params.launch_custom_flood:
-            mev_custom_flood_module.spam_in_background(
-                plan,
-                genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
-                genesis_constants.PRE_FUNDED_ACCOUNTS[0].address,
-                el_uri,
-            )
         mev_endpoints.append(endpoint)
 
     # spin up the mev boost contexts if some endpoints for relays have been passed
@@ -318,6 +311,14 @@ def run(plan, args={}):
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
+        elif additional_service == "custom_flood":
+            mev_custom_flood_module.spam_in_background(
+                plan,
+                genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
+                genesis_constants.PRE_FUNDED_ACCOUNTS[0].address,
+                el_uri,
+                args_with_right_defaults.custom_flood,
+            )
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:

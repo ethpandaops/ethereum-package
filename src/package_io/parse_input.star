@@ -94,6 +94,7 @@ def parse_input(plan, input_args):
 
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["goomy_blob_params"] = get_default_goomy_blob_params()
+    result["custom_flood"] = dict(get_default_custom_flood_params(), **result["custom_flood"])
 
     return struct(
         participants=[
@@ -162,13 +163,15 @@ def parse_input(plan, input_args):
             mev_flood_seconds_per_bundle=result["mev_params"][
                 "mev_flood_seconds_per_bundle"
             ],
-            launch_custom_flood=result["mev_params"]["launch_custom_flood"],
         ),
         tx_spammer_params=struct(
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
         goomy_blob_params=struct(
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
+        ),
+        custom_flood=struct(
+            delay=result["custom_flood"]["delay"],
         ),
         launch_additional_services=result["launch_additional_services"],
         additional_services=result["additional_services"],
@@ -397,8 +400,6 @@ def get_default_mev_params():
         "mev_flood_image": "flashbots/mev-flood",
         "mev_flood_extra_args": [],
         "mev_flood_seconds_per_bundle": 15,
-        # this is a simple script that increases the balance of the coinbase address at a cadence
-        "launch_custom_flood": False,
     }
 
 
@@ -409,6 +410,12 @@ def get_default_tx_spammer_params():
 def get_default_goomy_blob_params():
     return {"goomy_blob_args": []}
 
+
+def get_default_custom_flood_params():
+    # this is a simple script that increases the balance of the coinbase address at a cadence
+    return {
+        "delay": 1
+    }
 
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):

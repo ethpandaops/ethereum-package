@@ -20,7 +20,6 @@
 	},
 	"mev_params": {
         "mev_flood_seconds_per_bundle": 12,
-        "launch_custom_flood": false,
         "mev_flood_extra_args": [ "--txsPerBundle=300" ],
         "mev_flood_image": "flashbots/mev-flood:0.0.9",
         "mev_relay_image": "flashbots/mev-boost-relay:0.27.0"

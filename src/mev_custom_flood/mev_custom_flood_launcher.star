@@ -2,7 +2,7 @@ PYTHON_IMAGE = "python:3.11-alpine"
 CUSTOM_FLOOD_SREVICE_NAME = "mev-custom-flood"
 
 
-def spam_in_background(plan, sender_key, receiver_key, el_uri):
+def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
     sender_script = plan.upload_files("./sender.py")
 
     plan.add_service(
@@ -21,12 +21,12 @@ def spam_in_background(plan, sender_key, receiver_key, el_uri):
 
     plan.exec(
         service_name=CUSTOM_FLOOD_SREVICE_NAME,
-        recipe=ExecRecipe(["pip", "install", "web3"]),
+        recipe=ExecRecipe(["pip", "install", "web3", "click"]),
     )
 
     plan.exec(
         service_name=CUSTOM_FLOOD_SREVICE_NAME,
         recipe=ExecRecipe(
-            ["/bin/sh", "-c", "nohup python /tmp/sender.py > /dev/null 2>&1 &"]
+            ["/bin/sh", "-c", "nohup python /tmp/sender.py  --delay {} > /dev/null 2>&1 &".format(params.delay)]
         ),
     )
