@@ -20,8 +20,12 @@ GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE = "/dashboards"
 GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE = GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
 
 GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME = "grafana-additional-dashboards-{0}"
-GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE = (
-    GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE + "/{0}"
+GRAFANA_ADDITIONAL_DASHBOARDS_MERGED_STORED_PATH_FORMAT = (
+    GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE + "/*"
+)
+GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE = "/additional-dashobards"
+GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE_FORMAT = (
+    GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE + "/{0}"
 )
 GRAFANA_ADDITIONAL_DASHBOARDS_SERVICE_PATH_KEY = "ServicePath"
 GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY = "ArtifactName"
@@ -54,10 +58,15 @@ def launch_grafana(
         additional_dashboards=additional_dashboards,
     )
 
+    merged_dashboards_artifact_name = merge_dashboards_artifacts(
+        plan,
+        grafana_dashboards_artifacts_uuid,
+        grafana_additional_dashboards_data,
+    )
+
     config = get_config(
         grafana_config_artifacts_uuid,
-        grafana_dashboards_artifacts_uuid,
-        grafana_additional_dashboards_data=grafana_additional_dashboards_data,
+        merged_dashboards_artifact_name,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -112,17 +121,7 @@ def get_grafana_config_dir_artifact_uuid(
 def get_config(
     grafana_config_artifacts_name,
     grafana_dashboards_artifacts_name,
-    grafana_additional_dashboards_data=[],
 ):
-    files = {
-        GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
-        GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
-    }
-    for additional_dashboard_data in grafana_additional_dashboards_data:
-        files[
-            additional_dashboard_data[GRAFANA_ADDITIONAL_DASHBOARDS_SERVICE_PATH_KEY]
-        ] = additional_dashboard_data[GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY]
-
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
@@ -133,7 +132,10 @@ def get_config(
             "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
             "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
         },
-        files=files,
+        files={
+            GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
+            GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
+        },
     )
 
 
@@ -152,7 +154,7 @@ def upload_additional_dashboards(plan, additional_dashboards):
             GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME.format(index)
         )
         additional_dashboard_service_path = (
-            GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE.format(
+            GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE_FORMAT.format(
                 additional_dashboard_folder_name,
             )
         )
@@ -166,3 +168,35 @@ def upload_additional_dashboards(plan, additional_dashboards):
             }
         )
     return data
+
+
+def merge_dashboards_artifacts(
+    plan,
+    grafana_dashboards_artifacts_name,
+    grafana_additional_dashboards_data=[],
+):
+    files = {
+        GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
+    }
+
+    for additional_dashboard_data in grafana_additional_dashboards_data:
+        files[
+            additional_dashboard_data[GRAFANA_ADDITIONAL_DASHBOARDS_SERVICE_PATH_KEY]
+        ] = additional_dashboard_data[GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY]
+
+    result = plan.run_sh(
+        run=[
+            "find",
+            GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE,
+            "-type",
+            "f",
+            "-exec",
+            "cp \{\} {0} \\;".format(GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE),
+        ],
+        files=files,
+        store=[
+            GRAFANA_ADDITIONAL_DASHBOARDS_MERGED_STORED_PATH_FORMAT,
+        ],
+    )
+
+    return result.files_artifacts[0]
