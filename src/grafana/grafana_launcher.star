@@ -185,14 +185,11 @@ def merge_dashboards_artifacts(
         ] = additional_dashboard_data[GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY]
 
     result = plan.run_sh(
-        run=[
-            "find",
-            GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE,
-            "-type",
-            "f",
-            "-exec",
-            "cp {} " + GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE + " \\;",
-        ],
+        run="find"
+        + GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE
+        + "-type f -exec cp {} "
+        + GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
+        + " \\;",
         files=files,
         store=[
             GRAFANA_ADDITIONAL_DASHBOARDS_MERGED_STORED_PATH_FORMAT,
