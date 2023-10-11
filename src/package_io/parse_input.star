@@ -300,7 +300,7 @@ def parse_network_params(input_args):
     )
     if MIN_VALIDATORS > actual_num_validators:
         fail(
-            "MIN_VALIDATORS - {0} is greater than actual_num_validators - {1}".format(
+            "We require at least {0} validators but got {1}".format(
                 MIN_VALIDATORS, actual_num_validators
             )
         )
