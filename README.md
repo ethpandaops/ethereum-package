@@ -204,9 +204,6 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         //  Number of seconds per slot on the Beacon chain
         "seconds_per_slot": 12,
 
-        //  Number of slots in an epoch on the Beacon chain
-        "slots_per_epoch": 32,
-
         //  The number of validator keys that each CL validator node should get
         "num_validator_keys_per_node": 64,
 

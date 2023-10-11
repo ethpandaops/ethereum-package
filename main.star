@@ -169,8 +169,7 @@ def run(plan, args={}):
             beacon_uris,
             genesis_validators_root,
             builder_uri,
-            network_params.seconds_per_slot,
-            network_params.slots_per_epoch,
+            network_params.seconds_per_slot
         )
         mev_flood_module.spam_in_background(
             plan,
@@ -238,7 +237,6 @@ def run(plan, args={}):
                 all_cl_client_contexts[0],
                 network_params.deneb_fork_epoch,
                 network_params.seconds_per_slot,
-                network_params.slots_per_epoch,
                 network_params.genesis_delay,
             )
             plan.print("Succesfully launched blob spammer")
@@ -250,7 +248,6 @@ def run(plan, args={}):
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
                 all_el_client_contexts,
                 all_cl_client_contexts[0],
-                network_params.slots_per_epoch,
                 goomy_blob_params,
             )
             plan.print("Succesfully launched goomy the blob spammer")
@@ -267,7 +264,6 @@ def run(plan, args={}):
                 all_cl_client_contexts,
                 final_genesis_timestamp,
                 network_params.seconds_per_slot,
-                network_params.slots_per_epoch,
             )
             plan.print("Succesfully launched consensus layer forkmon")
         elif additional_service == "el_forkmon":

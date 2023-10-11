@@ -26,7 +26,6 @@ def launch_cl_forkmon(
     cl_client_contexts,
     genesis_unix_timestamp,
     seconds_per_slot,
-    slots_per_epoch,
 ):
     all_cl_client_info = []
     for client in cl_client_contexts:
@@ -37,7 +36,6 @@ def launch_cl_forkmon(
         HTTP_PORT_NUMBER,
         all_cl_client_info,
         seconds_per_slot,
-        slots_per_epoch,
         genesis_unix_timestamp,
     )
 
@@ -76,14 +74,12 @@ def new_config_template_data(
     listen_port_num,
     cl_client_info,
     seconds_per_slot,
-    slots_per_epoch,
     genesis_unix_timestamp,
 ):
     return {
         "ListenPortNum": listen_port_num,
         "CLClientInfo": cl_client_info,
         "SecondsPerSlot": seconds_per_slot,
-        "SlotsPerEpoch": slots_per_epoch,
         "GenesisUnixTimestamp": genesis_unix_timestamp,
     }
 
