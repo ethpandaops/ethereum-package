@@ -21,5 +21,12 @@ def deploy_eip4788_contract_in_background(plan, sender_key, receiver_key, el_uri
 
     plan.exec(
         service_name=EIP4788_DEPLOYMENT_SERVICE_NAME,
-        recipe=ExecRecipe(["/bin/sh", "-c", "pip install web3 && /tmp/sender.py"]),
+        recipe=ExecRecipe(["pip", "install", "web3"]),
+    )
+
+    plan.exec(
+        service_name=EIP4788_DEPLOYMENT_SERVICE_NAME,
+        recipe=ExecRecipe(
+            ["/bin/sh", "-c", "nohup python /tmp/sender.py > /dev/null 2>&1 &"]
+        ),
     )
