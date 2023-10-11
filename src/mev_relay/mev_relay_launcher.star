@@ -26,7 +26,6 @@ def launch_mev_relay(
     validator_root,
     builder_uri,
     seconds_per_slot,
-    slots_per_epoch=32,
 ):
     redis = redis_module.run(plan)
     # making the password postgres as the relay expects it to be postgres
@@ -50,7 +49,6 @@ def launch_mev_relay(
         "DENEB_FORK_VERSION": "0x50000038",
         "GENESIS_VALIDATORS_ROOT": validator_root,
         "SEC_PER_SLOT": str(seconds_per_slot),
-        "SLOTS_PER_EPOCH": str(slots_per_epoch),
     }
 
     redis_url = "{}:{}".format(redis.hostname, redis.port_number)

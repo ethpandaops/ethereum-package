@@ -28,6 +28,9 @@ HIGH_DENEB_VALUE_FORK_VERKLE = 20000
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
+# Minimum number of validators required for a network to be valid is 64
+MIN_VALIDATORS = 64
+
 DEFAULT_ADDITIONAL_SERVICES = [
     "tx_spammer",
     "blob_spammer",
@@ -139,7 +142,6 @@ def parse_input(plan, input_args):
                 "deposit_contract_address"
             ],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
-            slots_per_epoch=result["network_params"]["slots_per_epoch"],
             genesis_delay=result["network_params"]["genesis_delay"],
             capella_fork_epoch=result["network_params"]["capella_fork_epoch"],
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
@@ -273,9 +275,6 @@ def parse_network_params(input_args):
             "preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length"
         )
 
-    if result["network_params"]["slots_per_epoch"] == 0:
-        fail("slots_per_epoch is 0 needs to be > 0 ")
-
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
 
@@ -295,15 +294,14 @@ def parse_network_params(input_args):
     ):
         fail("electra can only happen with capella genesis not bellatrix")
 
-    required_num_validators = 2 * result["network_params"]["slots_per_epoch"]
     actual_num_validators = (
         total_participant_count
         * result["network_params"]["num_validator_keys_per_node"]
     )
-    if required_num_validators > actual_num_validators:
+    if MIN_VALIDATORS > actual_num_validators:
         fail(
-            "required_num_validators - {0} is greater than actual_num_validators - {1}".format(
-                required_num_validators, actual_num_validators
+            "We require at least {0} validators but got {1}".format(
+                MIN_VALIDATORS, actual_num_validators
             )
         )
 
@@ -346,7 +344,6 @@ def default_network_params():
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
         "seconds_per_slot": 12,
-        "slots_per_epoch": 32,
         "genesis_delay": 120,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 4,
