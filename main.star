@@ -98,7 +98,7 @@ def run(plan, args={}):
         all_cl_client_contexts.append(participant.cl_client_context)
 
     if network_params.deneb_fork_epoch != 0:
-    plan.print("Launching 4788 contract deployer")
+        plan.print("Launching 4788 contract deployer")
         el_uri = "http://{0}:{1}".format(
             all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
         )
