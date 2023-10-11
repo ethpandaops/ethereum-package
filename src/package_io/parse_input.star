@@ -94,7 +94,9 @@ def parse_input(plan, input_args):
 
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["goomy_blob_params"] = get_default_goomy_blob_params()
-    result["custom_flood"] = dict(get_default_custom_flood_params(), **(result.get("custom_flood", {})))
+    result["custom_flood"] = dict(
+        get_default_custom_flood_params(), **(result.get("custom_flood", {}))
+    )
 
     return struct(
         participants=[

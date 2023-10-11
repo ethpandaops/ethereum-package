@@ -27,6 +27,12 @@ def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
     plan.exec(
         service_name=CUSTOM_FLOOD_SREVICE_NAME,
         recipe=ExecRecipe(
-            ["/bin/sh", "-c", "nohup python /tmp/sender.py  --delay {} > /dev/null 2>&1 &".format(params.delay)]
+            [
+                "/bin/sh",
+                "-c",
+                "nohup python /tmp/sender.py  --delay {} > /dev/null 2>&1 &".format(
+                    params.delay
+                ),
+            ]
         ),
     )
