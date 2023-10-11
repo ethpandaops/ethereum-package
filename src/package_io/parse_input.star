@@ -38,7 +38,12 @@ DEFAULT_ADDITIONAL_SERVICES = [
     "prometheus_grafana",
 ]
 
-ATTR_TO_BE_SKIPPED_AT_ROOT = ("network_params", "participants", "mev_params", "goomy_blob_params")
+ATTR_TO_BE_SKIPPED_AT_ROOT = (
+    "network_params",
+    "participants",
+    "mev_params",
+    "goomy_blob_params",
+)
 
 package_io_constants = import_module("../package_io/constants.star")
 
@@ -86,8 +91,10 @@ def parse_input(plan, input_args):
             )
         )
 
-    result["tx_spammer_params"] = dict(get_default_tx_spammer_params(), **(result.get("tx_spammer_params", {}))
-        
+    result["tx_spammer_params"] = dict(
+        get_default_tx_spammer_params(), **(result.get("tx_spammer_params", {}))
+    )
+
     result["goomy_blob_params"] = get_default_goomy_blob_params()
 
     return struct(
