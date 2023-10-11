@@ -103,7 +103,7 @@ def run(plan, args={}):
         )
         eip4788_deployment_module.deploy_eip4788_contract_in_background(
             plan,
-            genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
+            genesis_constants.PRE_FUNDED_ACCOUNTS[5].private_key,
             "0x0B799C86a49DEeb90402691F1041aa3AF2d3C875",
             el_uri,
         )
