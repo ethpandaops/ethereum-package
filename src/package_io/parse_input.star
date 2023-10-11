@@ -86,8 +86,7 @@ def parse_input(plan, input_args):
             )
         )
 
-    if "tx_spammer_params" not in result:
-        result["tx_spammer_params"] = get_default_tx_spammer_params()
+    result["tx_spammer_params"] = dict(get_default_tx_spammer_params(), **(result.get("tx_spammer_params", {}))
         
     result["goomy_blob_params"] = get_default_goomy_blob_params()
 
