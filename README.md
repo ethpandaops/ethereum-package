@@ -189,7 +189,11 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 
             // Count of nodes to spin up for this participant
             // Default to 1
-            "count": 1
+            "count": 1,
+
+            // Count of the number of validators you want to run for a given participant
+            // Default to null, which means that the number of validators will be using the network parameter num_validator_keys_per_node
+            "validator_count": null
         }
     ],
 
@@ -248,7 +252,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     //  - A light beacon chain explorer will be launched
     //  - Default: ["tx_spammer", "blob_spammer", "cl_fork_mon", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
     "additional_services": [
-       "tx_spammer",
+        "tx_spammer",
         "blob_spammer",
         "goomy_blob"
         "cl_forkmon",
@@ -259,12 +263,6 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "prometheus_grafana"
     ],
 
-    // Which blockchain explorer should be used
-    // "dora" will use the dora explorer developped by pk910
-    // "full" will use the explorer developped by the beaconcha.in team
-    // defaults to "light"
-    "explorer_version": "dora",
-
     //  If set, the package will block until a finalized epoch has occurred.
     "wait_for_finalization": false,
 
@@ -273,7 +271,8 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     //  This value will be overridden by participant-specific values
     "global_client_log_level": "info",
 
-    // EngineAPI Snooper
+    // EngineAPI Snooper global flags for all participants
+    // Default to false
     "snooper_enabled": false,
 
     // Parallelizes keystore generation so that each node has keystores being generated in their own container

@@ -190,7 +190,7 @@ def get_config(
 
     accounts_to_unlock_str = ",".join(account_addresses_to_unlock)
 
-    init_datadir_cmd_str = "geth init {0} --datadir={1} {2}".format(
+    init_datadir_cmd_str = "geth init {0} --state.scheme=path --datadir={1} {2}".format(
         "--cache.preimages" if electra_fork_epoch != None else "",
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         genesis_json_filepath_on_client,
@@ -214,6 +214,7 @@ def get_config(
 
     cmd = [
         "geth",
+        "--state.scheme=path",
         "--verbosity=" + verbosity_level,
         "--unlock=" + accounts_to_unlock_str,
         "--password=" + GETH_ACCOUNT_PASSWORDS_FILE,

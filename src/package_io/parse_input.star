@@ -350,7 +350,7 @@ def default_network_params():
         "slots_per_epoch": 32,
         "genesis_delay": 120,
         "capella_fork_epoch": 0,
-        "deneb_fork_epoch": 500,
+        "deneb_fork_epoch": 4,
         "electra_fork_epoch": None,
     }
 
@@ -382,7 +382,7 @@ def default_participant():
         "v_max_mem": 0,
         "validator_count": None,
         "snooper_enabled": False,
-        "count": 1,
+        "count": 2,
     }
 
 

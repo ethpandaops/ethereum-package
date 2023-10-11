@@ -1,8 +1,8 @@
-{   
+{
     "participants": [{
         "el_client_type": "geth",
         "cl_client_type": "nimbus"
-    }],    
+    }],
     "network_params": {
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
@@ -11,7 +11,7 @@
         "num_validator_keys_per_node": 64,
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
         "capella_fork_epoch": 1
-    },    
+    },
     "global_client_log_level": "info",
     "mev_type": "full"
 }
