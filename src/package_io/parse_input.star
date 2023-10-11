@@ -473,6 +473,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     ),
                     '--miner.extradata="Illuminate Dmocratize Dstribute"',
                     "--builder.algotype=greedy",
+                    "--metrics.builder=true",
                 ]
                 + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
                 "el_extra_env_vars": {
