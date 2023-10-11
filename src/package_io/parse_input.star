@@ -34,7 +34,7 @@ DEFAULT_ADDITIONAL_SERVICES = [
     "cl_forkmon",
     "el_forkmon",
     "beacon_metrics_gazer",
-    "explorer",
+    "dora",
     "prometheus_grafana",
 ]
 
@@ -43,9 +43,8 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "participants",
     "mev_params",
     "tx_spammer_params",
+    "goomy_blob_params",
 )
-
-DEFAULT_EXPLORER_VERSION = "dora"
 
 package_io_constants = import_module("../package_io/constants.star")
 
@@ -62,7 +61,6 @@ def parse_input(plan, input_args):
     result["mev_params"] = get_default_mev_params()
     result["launch_additional_services"] = True
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
-    result["explorer_version"] = DEFAULT_EXPLORER_VERSION
 
     for attr in input_args:
         value = input_args[attr]
@@ -95,6 +93,7 @@ def parse_input(plan, input_args):
         )
 
     result["tx_spammer_params"] = get_default_tx_spammer_params()
+    result["goomy_blob_params"] = get_default_goomy_blob_params()
 
     return struct(
         participants=[
@@ -168,6 +167,9 @@ def parse_input(plan, input_args):
         tx_spammer_params=struct(
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
+        goomy_blob_params=struct(
+            goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
+        ),
         launch_additional_services=result["launch_additional_services"],
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -175,7 +177,6 @@ def parse_input(plan, input_args):
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
-        explorer_version=result["explorer_version"],
     )
 
 
@@ -405,6 +406,10 @@ def get_default_tx_spammer_params():
     return {"tx_spammer_extra_args": []}
 
 
+def get_default_goomy_blob_params():
+    return {"goomy_blob_args": []}
+
+
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
@@ -468,6 +473,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     ),
                     '--miner.extradata="Illuminate Dmocratize Dstribute"',
                     "--builder.algotype=greedy",
+                    "--metrics.builder=true",
                 ]
                 + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
                 "el_extra_env_vars": {
