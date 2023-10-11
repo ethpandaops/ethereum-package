@@ -28,6 +28,9 @@ HIGH_DENEB_VALUE_FORK_VERKLE = 20000
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
+# Minimum number of validators required for a network to be valid is 64
+MIN_VALIDATORS = 64
+
 DEFAULT_ADDITIONAL_SERVICES = [
     "tx_spammer",
     "blob_spammer",
@@ -292,15 +295,14 @@ def parse_network_params(input_args):
     ):
         fail("electra can only happen with capella genesis not bellatrix")
 
-    required_num_validators = 64
     actual_num_validators = (
         total_participant_count
         * result["network_params"]["num_validator_keys_per_node"]
     )
-    if required_num_validators > actual_num_validators:
+    if MIN_VALIDATORS > actual_num_validators:
         fail(
-            "required_num_validators - {0} is greater than actual_num_validators - {1}".format(
-                required_num_validators, actual_num_validators
+            "MIN_VALIDATORS - {0} is greater than actual_num_validators - {1}".format(
+                MIN_VALIDATORS, actual_num_validators
             )
         )
 
