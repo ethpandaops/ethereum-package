@@ -169,7 +169,7 @@ def run(plan, args={}):
             beacon_uris,
             genesis_validators_root,
             builder_uri,
-            network_params.seconds_per_slot
+            network_params.seconds_per_slot,
         )
         mev_flood_module.spam_in_background(
             plan,

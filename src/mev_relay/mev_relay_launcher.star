@@ -25,7 +25,7 @@ def launch_mev_relay(
     beacon_uris,
     validator_root,
     builder_uri,
-    seconds_per_slot
+    seconds_per_slot,
 ):
     redis = redis_module.run(plan)
     # making the password postgres as the relay expects it to be postgres
