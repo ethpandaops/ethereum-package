@@ -336,6 +336,7 @@ def run(plan, args={}):
             grafana_datasource_config_template,
             grafana_dashboards_config_template,
             prometheus_private_url,
+            additional_dashboards=args_with_right_defaults.grafana_additional_dashboards,
         )
         plan.print("Succesfully launched grafana")
 

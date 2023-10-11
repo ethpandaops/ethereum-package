@@ -61,6 +61,7 @@ def parse_input(plan, input_args):
     result["mev_params"] = get_default_mev_params()
     result["launch_additional_services"] = True
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
+    result["grafana_additional_dashboards"] = []
 
     for attr in input_args:
         value = input_args[attr]
@@ -177,6 +178,7 @@ def parse_input(plan, input_args):
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
+        grafana_additional_dashboards=result["grafana_additional_dashboards"],
     )
 
 
