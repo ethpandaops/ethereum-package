@@ -210,6 +210,12 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "tx_spammer_extra_args": []
     },
 
+    // Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
+    "goomy_blob_params": {
+        //  A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
+        "goomy_blob_args": []
+    },
+
     // True by defaults, adds services defined in "additional_services" alongside the Ethereum network
     // If set to false:
     //  - only Ethereum network (EL and CL nodes) will be launched. Nothing else (no transaction spammer)
@@ -217,16 +223,21 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "launch_additional_services": true,
 
     // By default includes
-    //  - A transaction spammer is launched to fake transactions sent to the network
-    //  - Forkmon will be launched after CL genesis has happened
+    //  - A transaction spammer & blob spammer is launched to fake transactions sent to the network
+    //  - Forkmon for EL & CL will be launched
     //  - A prometheus will be started, coupled with grafana
+    //  - A beacon metrics gazer will be launched
+    //  - A light beacon chain explorer will be launched
+    //  - Default: ["tx_spammer", "blob_spammer", "cl_fork_mon", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
     "additional_services": [
       	"tx_spammer",
         "blob_spammer",
+        "goomy_blob"
         "cl_forkmon",
         "el_forkmon",
         "beacon_metrics_gazer",
-        "explorer",
+        "dora",
+        "full_beaconchain_explorer",
         "prometheus_grafana"
     ],
 
@@ -483,6 +494,7 @@ Here's a table of where the keys are used
 | 4              | goomy_blob          | ✅                |                 | As the sender of blobs     |
 | 5             | eip4788_deployment  | ✅                |                 | As contract deployer       |
 | 6             | mev_custom_flood    | ✅                |                 | As the sender of balance   |
+
 
 ## Developing On This Package
 
