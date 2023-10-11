@@ -34,7 +34,6 @@ MIN_VALIDATORS = 64
 DEFAULT_ADDITIONAL_SERVICES = [
     "tx_spammer",
     "blob_spammer",
-    "cl_forkmon",
     "el_forkmon",
     "beacon_metrics_gazer",
     "dora",

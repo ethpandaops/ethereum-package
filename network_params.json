@@ -29,7 +29,6 @@
 	"additional_services": [
 		"tx_spammer",
 		"blob_spammer",
-		"cl_forkmon",
 		"el_forkmon",
 		"beacon_metrics_gazer",
 		"dora",
