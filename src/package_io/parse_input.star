@@ -415,9 +415,7 @@ def get_default_goomy_blob_params():
 
 def get_default_custom_flood_params():
     # this is a simple script that increases the balance of the coinbase address at a cadence
-    return {
-        "delay": 1
-    }
+    return {"delay": 1}
 
 
 # TODO perhaps clean this up into a map
