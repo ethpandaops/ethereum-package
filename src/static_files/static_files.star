@@ -1,11 +1,6 @@
 # The path on the module container where static files are housed
 STATIC_FILES_DIRPATH = "/static_files"
 
-# CL Forkmon config
-CL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/cl-forkmon-config/config.toml.tmpl"
-)
-
 # EL Forkmon config
 EL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/el-forkmon-config/config.toml.tmpl"
