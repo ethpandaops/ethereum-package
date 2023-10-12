@@ -8,7 +8,11 @@ cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
 )
 
-static_files = import_module("../static_files/static_files.star")
+el_cl_genesis_data_generator = import_module(
+    "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
+)
+
+static_files = import_module("./static_files/static_files.star")
 
 geth = import_module("./el/geth/geth_launcher.star")
 besu = import_module("./el/besu/besu_launcher.star")
@@ -80,6 +84,31 @@ def launch_participant_network(
     final_genesis_timestamp = get_final_genesis_timestamp(
         plan, CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME
     )
+
+    total_number_of_validator_keys = 0
+    for participant in participants:
+        total_number_of_validator_keys += participant.validator_count
+
+    plan.print("Generating EL CL data")
+    el_cl_genesis_config_template = read_file(
+        static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
+    )
+    el_cl_genesis_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
+        plan,
+        "ethpandaops/ethereum-genesis-generator:2.0.0",
+        el_cl_genesis_config_template,
+        final_genesis_timestamp,
+        network_params.network_id,
+        network_params.deposit_contract_address,
+        network_params.seconds_per_slot,
+        network_params.preregistered_validator_keys_mnemonic,
+        total_number_of_validator_keys,
+        network_params.genesis_delay,
+        network_params.capella_fork_epoch,
+        network_params.deneb_fork_epoch,
+        network_params.electra_fork_epoch,
+    )
+
     plan.print("Generating EL data")
     el_genesis_generation_config_template = read_file(
         static_files.EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
@@ -115,9 +144,7 @@ def launch_participant_network(
     genesis_generation_mnemonics_yml_template = read_file(
         static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH
     )
-    total_number_of_validator_keys = 0
-    for participant in participants:
-        total_number_of_validator_keys += participant.validator_count
+
     cl_genesis_data = cl_genesis_data_generator.generate_cl_genesis_data(
         plan,
         genesis_generation_config_yml_template,
