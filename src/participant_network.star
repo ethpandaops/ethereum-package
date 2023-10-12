@@ -95,7 +95,7 @@ def launch_participant_network(
     )
     el_cl_genesis_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
         plan,
-        "ethpandaops/ethereum-genesis-generator:2.0.0",
+        "bbusa/egg:1",
         el_cl_genesis_config_template,
         final_genesis_timestamp,
         network_params.network_id,
@@ -171,7 +171,7 @@ def launch_participant_network(
         package_io.EL_CLIENT_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
                 network_params.network_id,
-                el_genesis_data,
+                el_cl_genesis_data,
                 geth_prefunded_keys_artifact_name,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
                 genesis_validators_root,
@@ -254,7 +254,7 @@ def launch_participant_network(
 
     cl_launchers = {
         package_io.CL_CLIENT_TYPE.lighthouse: {
-            "launcher": lighthouse.new_lighthouse_launcher(cl_genesis_data),
+            "launcher": lighthouse.new_lighthouse_launcher(el_cl_genesis_data),
             "launch_method": lighthouse.launch,
         },
         package_io.CL_CLIENT_TYPE.lodestar: {

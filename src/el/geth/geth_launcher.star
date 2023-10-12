@@ -34,7 +34,8 @@ METRICS_PORT_ID = "metrics"
 # TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
 NUM_MINING_THREADS = 1
 
-GENESIS_DATA_MOUNT_DIRPATH = "/genesis"
+GENESIS_DATA_MOUNT_DIRPATH = "/data"
+GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNT_DIRPATH + "/custom_config_data/genesis.json"
 
 PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
 
@@ -109,7 +110,7 @@ def launch(
 
     config, jwt_secret_json_filepath_on_client = get_config(
         launcher.network_id,
-        launcher.el_genesis_data,
+        launcher.el_cl_genesis_data,
         launcher.prefunded_geth_keys_artifact_uuid,
         launcher.prefunded_account_info,
         launcher.genesis_validators_root,
@@ -156,7 +157,7 @@ def launch(
 
 def get_config(
     network_id,
-    genesis_data,
+    el_cl_genesis_data,
     prefunded_geth_keys_artifact_uuid,
     prefunded_account_info,
     genesis_validators_root,
@@ -171,12 +172,6 @@ def get_config(
     extra_env_vars,
     electra_fork_epoch,
 ):
-    genesis_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.geth_genesis_json_relative_filepath
-    )
-    jwt_secret_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath
-    )
 
     account_addresses_to_unlock = []
     for prefunded_account in prefunded_account_info:
@@ -193,7 +188,7 @@ def get_config(
     init_datadir_cmd_str = "geth init {0} --datadir={1} {2}".format(
         "--cache.preimages" if electra_fork_epoch != None else "",
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        genesis_json_filepath_on_client,
+        GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
     )
 
     # We need to put the keys into the right spot
@@ -237,7 +232,7 @@ def get_config(
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret={0}".format(jwt_secret_json_filepath_on_client),
+        "--authrpc.jwtsecret=" + package_io.JWT_AUTH_PATH,
         "--syncmode=full",
         "--rpc.allow-unprotected-txs",
         "--metrics",
@@ -280,7 +275,7 @@ def get_config(
             ports=USED_PORTS,
             cmd=[command_str],
             files={
-                GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid,
+                GENESIS_DATA_MOUNT_DIRPATH: el_cl_genesis_data.artifact_uuid,
                 PREFUNDED_KEYS_MOUNT_DIRPATH: prefunded_geth_keys_artifact_uuid,
             },
             entrypoint=ENTRYPOINT_ARGS,
@@ -291,13 +286,12 @@ def get_config(
             max_memory=el_max_mem,
             env_vars=extra_env_vars,
         ),
-        jwt_secret_json_filepath_on_client,
     )
 
 
 def new_geth_launcher(
     network_id,
-    el_genesis_data,
+    el_cl_genesis_data,
     prefunded_geth_keys_artifact_uuid,
     prefunded_account_info,
     genesis_validators_root="",
@@ -305,7 +299,7 @@ def new_geth_launcher(
 ):
     return struct(
         network_id=network_id,
-        el_genesis_data=el_genesis_data,
+        el_cl_genesis_data=el_cl_genesis_data,
         prefunded_account_info=prefunded_account_info,
         prefunded_geth_keys_artifact_uuid=prefunded_geth_keys_artifact_uuid,
         genesis_validators_root=genesis_validators_root,

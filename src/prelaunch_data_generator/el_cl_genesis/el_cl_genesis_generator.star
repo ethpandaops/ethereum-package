@@ -62,6 +62,8 @@ def generate_el_cl_genesis_data(
     plan.print(genesis.output)
     plan.print(genesis.files_artifacts)
 
+    # Returns the genesis data /data
+    return genesis.files_artifacts[0]
 
 def new_env_file_for_el_cl_genesis_data(
     genesis_unix_timestamp,

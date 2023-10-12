@@ -7,7 +7,7 @@ package_io = import_module("../../package_io/constants.star")
 
 LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
 
-GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/genesis"
+GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
 
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
 
@@ -260,9 +260,6 @@ def get_beacon_config(
         GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
         shared_utils.path_dir(genesis_data.config_yml_rel_filepath),
     )
-    jwt_secret_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNTPOINT_ON_CLIENTS, genesis_data.jwt_secret_rel_filepath
-    )
 
     # NOTE: If connecting to the merge devnet remotely we DON'T want the following flags; when they're not set, the node's external IP address is auto-detected
     #  from the peers it communicates with but when they're set they basically say "override the autodetection and
@@ -298,7 +295,7 @@ def get_beacon_config(
         # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
         "--disable-packet-filter",
         "--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secrets=" + jwt_secret_filepath,
+        "--jwt-secrets=" + package_io.JWT_AUTH_PATH,
         "--suggested-fee-recipient=" + package_io.VALIDATING_REWARDS_ACCOUNT,
         # Set per Paris' recommendation to reduce noise in the logs
         "--subscribe-all-subnets",
