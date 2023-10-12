@@ -23,7 +23,7 @@ def eip4788_deployment():
     # this is the 5th prefunded address
     sender = os.getenv("SENDER_PRIVATE_KEY", "7da08f856b5956d40a72968f93396f6acff17193f013e8053f6fbb6c08c194d6")
     # this is the 4788 presigned contract deployer
-    receiver = os.getenv("RECEIVER_PUBLIC_KEY", "0x0B799C86a49DEeb90402691F1041aa3AF2d3C875")
+    receiver = "0x0B799C86a49DEeb90402691F1041aa3AF2d3C875"
     signed_4788_deployment_tx = os.getenv("SIGNED_4788_DEPLOYMENT_TX", "f8838085e8d4a510008303d0908080b86a60618060095f395ff33373fffffffffffffffffffffffffffffffffffffffe14604d57602036146024575f5ffd5b5f35801560495762001fff810690815414603c575f5ffd5b62001fff01545f5260205ff35b5f5ffd5b62001fff42064281555f359062001fff0155001b820539851b9b6eb1f0")
     el_uri = os.getenv("EL_RPC_URI", 'http://0.0.0.0:53913')
     logging.info(f"Using sender {sender} receiver {receiver} and el_uri {el_uri}")

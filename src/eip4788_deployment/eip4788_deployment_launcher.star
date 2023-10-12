@@ -13,7 +13,6 @@ def deploy_eip4788_contract_in_background(plan, sender_key, receiver_key, el_uri
             cmd=["/bin/sh", "-c", "touch /tmp/sender.log && tail -f /tmp/sender.log"],
             env_vars={
                 "SENDER_PRIVATE_KEY": sender_key,
-                "RECEIVER_PUBLIC_KEY": receiver_key,
                 "EL_RPC_URI": el_uri,
             },
         ),
