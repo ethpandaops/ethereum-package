@@ -405,7 +405,7 @@ def get_default_mev_params():
 
 
 def get_default_tx_spammer_params():
-    return {"tx_spammer_extra_args": [ ]}
+    return {"tx_spammer_extra_args": []}
 
 
 def get_default_goomy_blob_params():
