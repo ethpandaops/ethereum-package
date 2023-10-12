@@ -2,7 +2,7 @@ PYTHON_IMAGE = "python:3.11-alpine"
 EIP4788_DEPLOYMENT_SERVICE_NAME = "eip4788-contract-deployment"
 
 
-def deploy_eip4788_contract_in_background(plan, sender_key, receiver_key, el_uri):
+def deploy_eip4788_contract_in_background(plan, sender_key, el_uri):
     sender_script = plan.upload_files("./sender.py")
 
     plan.add_service(
