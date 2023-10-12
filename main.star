@@ -12,7 +12,6 @@ transaction_spammer = import_module(
 )
 blob_spammer = import_module("./src/blob_spammer/blob_spammer.star")
 goomy_blob = import_module("./src/goomy_blob/goomy_blob.star")
-cl_forkmon = import_module("./src/cl_forkmon/cl_forkmon_launcher.star")
 el_forkmon = import_module("./src/el_forkmon/el_forkmon_launcher.star")
 beacon_metrics_gazer = import_module(
     "./src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
@@ -30,7 +29,9 @@ mev_flood_module = import_module("./src/mev_flood/mev_flood_launcher.star")
 mev_custom_flood_module = import_module(
     "./src/mev_custom_flood/mev_custom_flood_launcher.star"
 )
-
+eip4788_deployment_module = import_module(
+    "./src/eip4788_deployment/eip4788_deployment_launcher.star"
+)
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
@@ -94,6 +95,17 @@ def run(plan, args={}):
     for participant in all_participants:
         all_el_client_contexts.append(participant.el_client_context)
         all_cl_client_contexts.append(participant.cl_client_context)
+
+    if network_params.deneb_fork_epoch != 0:
+        plan.print("Launching 4788 contract deployer")
+        el_uri = "http://{0}:{1}".format(
+            all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
+        )
+        eip4788_deployment_module.deploy_eip4788_contract_in_background(
+            plan,
+            genesis_constants.PRE_FUNDED_ACCOUNTS[5].private_key,
+            el_uri,
+        )
 
     mev_endpoints = []
     # passed external relays get priority
@@ -170,7 +182,6 @@ def run(plan, args={}):
             genesis_validators_root,
             builder_uri,
             network_params.seconds_per_slot,
-            network_params.slots_per_epoch,
         )
         mev_flood_module.spam_in_background(
             plan,
@@ -238,7 +249,6 @@ def run(plan, args={}):
                 all_cl_client_contexts[0],
                 network_params.deneb_fork_epoch,
                 network_params.seconds_per_slot,
-                network_params.slots_per_epoch,
                 network_params.genesis_delay,
             )
             plan.print("Succesfully launched blob spammer")
@@ -250,26 +260,11 @@ def run(plan, args={}):
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
                 all_el_client_contexts,
                 all_cl_client_contexts[0],
-                network_params.slots_per_epoch,
                 goomy_blob_params,
             )
             plan.print("Succesfully launched goomy the blob spammer")
         # We need a way to do time.sleep
         # TODO add code that waits for CL genesis
-        elif additional_service == "cl_forkmon":
-            plan.print("Launching cl forkmon")
-            cl_forkmon_config_template = read_file(
-                static_files.CL_FORKMON_CONFIG_TEMPLATE_FILEPATH
-            )
-            cl_forkmon.launch_cl_forkmon(
-                plan,
-                cl_forkmon_config_template,
-                all_cl_client_contexts,
-                final_genesis_timestamp,
-                network_params.seconds_per_slot,
-                network_params.slots_per_epoch,
-            )
-            plan.print("Succesfully launched consensus layer forkmon")
         elif additional_service == "el_forkmon":
             plan.print("Launching el forkmon")
             el_forkmon_config_template = read_file(
@@ -336,6 +331,7 @@ def run(plan, args={}):
             grafana_datasource_config_template,
             grafana_dashboards_config_template,
             prometheus_private_url,
+            additional_dashboards=args_with_right_defaults.grafana_additional_dashboards,
         )
         plan.print("Succesfully launched grafana")
 

@@ -3,7 +3,7 @@ static_files = import_module("../static_files/static_files.star")
 
 SERVICE_NAME = "grafana"
 
-IMAGE_NAME = "grafana/grafana-enterprise:9.2.3"
+IMAGE_NAME = "grafana/grafana-enterprise:9.5.12"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
@@ -19,6 +19,16 @@ GRAFANA_CONFIG_DIRPATH_ON_SERVICE = "/config"
 GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE = "/dashboards"
 GRAFANA_DASHBOARDS_FILEPATH_ON_SERVICE = GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
 
+GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME = "grafana-additional-dashboards-{0}"
+GRAFANA_ADDITIONAL_DASHBOARDS_MERGED_STORED_PATH_FORMAT = (
+    GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE + "/*"
+)
+GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE = "/additional-dashobards"
+GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE_FORMAT = (
+    GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE + "/{0}"
+)
+GRAFANA_ADDITIONAL_DASHBOARDS_SERVICE_PATH_KEY = "ServicePath"
+GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY = "ArtifactName"
 
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -34,19 +44,29 @@ def launch_grafana(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
+    additional_dashboards=[],
 ):
     (
         grafana_config_artifacts_uuid,
         grafana_dashboards_artifacts_uuid,
+        grafana_additional_dashboards_data,
     ) = get_grafana_config_dir_artifact_uuid(
         plan,
         datasource_config_template,
         dashboard_providers_config_template,
         prometheus_private_url,
+        additional_dashboards=additional_dashboards,
+    )
+
+    merged_dashboards_artifact_name = merge_dashboards_artifacts(
+        plan,
+        grafana_dashboards_artifacts_uuid,
+        grafana_additional_dashboards_data,
     )
 
     config = get_config(
-        grafana_config_artifacts_uuid, grafana_dashboards_artifacts_uuid
+        grafana_config_artifacts_uuid,
+        merged_dashboards_artifact_name,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -57,6 +77,7 @@ def get_grafana_config_dir_artifact_uuid(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
+    additional_dashboards=[],
 ):
     datasource_data = new_datasource_config_template_data(prometheus_private_url)
     datasource_template_and_data = shared_utils.new_template_and_data(
@@ -86,10 +107,21 @@ def get_grafana_config_dir_artifact_uuid(
         static_files.GRAFANA_DASHBOARDS_CONFIG_DIRPATH, name="grafana-dashboards"
     )
 
-    return grafana_config_artifacts_name, grafana_dashboards_artifacts_name
+    grafana_additional_dashboards_data = upload_additional_dashboards(
+        plan, additional_dashboards
+    )
+
+    return (
+        grafana_config_artifacts_name,
+        grafana_dashboards_artifacts_name,
+        grafana_additional_dashboards_data,
+    )
 
 
-def get_config(grafana_config_artifacts_name, grafana_dashboards_artifacts_name):
+def get_config(
+    grafana_config_artifacts_name,
+    grafana_dashboards_artifacts_name,
+):
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
@@ -113,3 +145,58 @@ def new_datasource_config_template_data(prometheus_url):
 
 def new_dashboard_providers_config_template_data(dashboards_dirpath):
     return {"DashboardsDirpath": dashboards_dirpath}
+
+
+def upload_additional_dashboards(plan, additional_dashboards):
+    data = []
+    for index, dashboard_src in enumerate(additional_dashboards):
+        additional_dashboard_folder_name = (
+            GRAFANA_ADDITIONAL_DASHBOARDS_FOLDER_NAME.format(index)
+        )
+        additional_dashboard_service_path = (
+            GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE_FORMAT.format(
+                additional_dashboard_folder_name,
+            )
+        )
+        additional_dashboard_artifact_name = plan.upload_files(
+            dashboard_src,
+        )
+        data.append(
+            {
+                GRAFANA_ADDITIONAL_DASHBOARDS_SERVICE_PATH_KEY: additional_dashboard_service_path,
+                GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY: additional_dashboard_artifact_name,
+            }
+        )
+    return data
+
+
+def merge_dashboards_artifacts(
+    plan,
+    grafana_dashboards_artifacts_name,
+    grafana_additional_dashboards_data=[],
+):
+    if len(grafana_additional_dashboards_data) == 0:
+        return grafana_dashboards_artifacts_name
+
+    files = {
+        GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
+    }
+
+    for additional_dashboard_data in grafana_additional_dashboards_data:
+        files[
+            additional_dashboard_data[GRAFANA_ADDITIONAL_DASHBOARDS_SERVICE_PATH_KEY]
+        ] = additional_dashboard_data[GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY]
+
+    result = plan.run_sh(
+        run="find "
+        + GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE
+        + " -type f -exec cp {} "
+        + GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE
+        + " \\;",
+        files=files,
+        store=[
+            GRAFANA_ADDITIONAL_DASHBOARDS_MERGED_STORED_PATH_FORMAT,
+        ],
+    )
+
+    return result.files_artifacts[0]

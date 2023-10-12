@@ -42,6 +42,7 @@ def flood():
             "to": receiver,
             "data": "0xabcd",
             "gasPrice": w3.eth.gas_price,
+            "nonce": w3.eth.get_transaction_count(sender_account.address)
         }
 
         estimated_gas = w3.eth.estimate_gas(transaction)
