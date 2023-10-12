@@ -379,7 +379,7 @@ def default_participant():
         "v_max_mem": 0,
         "validator_count": None,
         "snooper_enabled": False,
-        "count": 2,
+        "count": 1,
     }
 
 
