@@ -44,8 +44,8 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
     "mev_params",
-    "tx_spammer_params",
     "goomy_blob_params",
+    "tx_spammer_params",
 )
 
 package_io_constants = import_module("../package_io/constants.star")
@@ -64,6 +64,7 @@ def parse_input(plan, input_args):
     result["launch_additional_services"] = True
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     result["grafana_additional_dashboards"] = []
+    result["tx_spammer_params"] = get_default_tx_spammer_params()
 
     for attr in input_args:
         value = input_args[attr]
@@ -75,6 +76,10 @@ def parse_input(plan, input_args):
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
                 result["mev_params"][sub_attr] = sub_value
+        elif attr == "tx_spammer_params":
+            for sub_attr in input_args["tx_spammer_params"]:
+                sub_value = input_args["tx_spammer_params"][sub_attr]
+                result["tx_spammer_params"][sub_attr] = sub_value
 
     if result.get("mev_type") in ("mock", "full"):
         result = enrich_mev_extra_params(
@@ -95,7 +100,6 @@ def parse_input(plan, input_args):
             )
         )
 
-    result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["goomy_blob_params"] = get_default_goomy_blob_params()
 
     return struct(
