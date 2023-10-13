@@ -156,6 +156,7 @@ def parse_input(plan, input_args):
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
             mev_builder_image=result["mev_params"]["mev_builder_image"],
+            mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
             mev_relay_housekeeper_extra_args=result["mev_params"][
@@ -395,6 +396,7 @@ def get_default_mev_params():
         "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         # TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
         "mev_builder_image": "ethpandaops/flashbots-builder:main",
+        "mev_builder_cl_image": "sigp/lighthouse:latest",
         "mev_boost_image": "flashbots/mev-boost",
         "mev_relay_api_extra_args": [],
         "mev_relay_housekeeper_extra_args": [],
@@ -458,7 +460,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "el_client_image": parsed_arguments_dict["mev_params"][
                     "mev_builder_image"
                 ],
-                "cl_client_image": "sigp/lighthouse",
+                "cl_client_image": parsed_arguments_dict["mev_params"][
+                    "mev_builder_cl_image"
+                ],
                 "beacon_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",

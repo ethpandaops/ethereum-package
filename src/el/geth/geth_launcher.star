@@ -42,7 +42,7 @@ PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
     RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    #WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
     TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
         DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
     ),
@@ -165,11 +165,11 @@ def get_config(
         # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
         #  that users should NOT store private information in these Kurtosis nodes!
         "--http.api=admin,engine,net,eth,web3,debug",
-        "--ws",
-        "--ws.addr=0.0.0.0",
-        "--ws.port={0}".format(WS_PORT_NUM),
-        "--ws.api=admin,engine,net,eth,web3,debug",
-        "--ws.origins=*",
+        #"--ws",
+        #"--ws.addr=0.0.0.0",
+        #"--ws.port={0}".format(WS_PORT_NUM),
+        #"--ws.api=admin,engine,net,eth,web3,debug",
+        #"--ws.origins=*",
         "--allow-insecure-unlock",
         "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--verbosity=" + verbosity_level,
