@@ -91,6 +91,16 @@ def launch_participant_network(
         total_number_of_validator_keys += participant.validator_count
 
     plan.print("Generating EL CL data")
+    # we are running capella (deprecated)
+    if network_params.capella_fork_epoch > 0 and network_params.electra_fork_epoch == None:
+        ethereum_genesis_generator_image = "ethpandaops/ethereum-genesis-generator:1.3.12"
+    # we are running dencun default behavior
+    elif (network_params.capella_fork_epoch == 0 and network_params.electra_fork_epoch == None):
+        ethereum_genesis_generator_image = "ethpandaops/ethereum-genesis-generator:2.0.3"
+    # we are running electra
+    else:
+        ethereum_genesis_generator_image = "ethpandaops/ethereum-genesis-generator:3.0.0-rc.10"
+
     el_cl_genesis_config_template = read_file(
         static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
     )
@@ -99,7 +109,7 @@ def launch_participant_network(
         genesis_validators_root,
     ) = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
         plan,
-        "bbusa/egg:12",
+        ethereum_genesis_generator_image,
         el_cl_genesis_config_template,
         final_genesis_timestamp,
         network_params.network_id,
