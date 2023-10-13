@@ -4,8 +4,6 @@ prelaunch_data_generator_launcher = import_module(
     "../../prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star"
 )
 
-el_cl_genesis_data = import_module("./el_cl_genesis_data.star")
-
 GENESIS_VALUES_PATH = "/opt"
 GENESIS_VALUES_FILENAME = "values.env"
 
@@ -55,7 +53,7 @@ def generate_el_cl_genesis_data(
     )
 
     genesis = plan.run_sh(
-        run = "cp /opt/values.env /config/values.env && ./entrypoint.sh all && cat /data/custom_config_data/genesis_validators_root.txt",
+        run = "cp /opt/values.env /config/values.env && ./entrypoint.sh all",
         image = image,
         files = {
            GENESIS_VALUES_PATH : genesis_generation_config_artifact_name
@@ -65,12 +63,18 @@ def generate_el_cl_genesis_data(
         ],
         wait= None
     )
-    plan.print(genesis.code)
-    plan.print(genesis.output)
-    plan.print(genesis.files_artifacts[0])
 
+    # this is super hacky lmao
+    genesis_validators_root = plan.run_sh(
+        run = "cat /data/data/custom_config_data/genesis_validators_root.txt",
+        image = "busybox",
+        files = {
+              "/data" : genesis.files_artifacts[0]
+          },
+        wait = None
+    )
 
-    return genesis.files_artifacts[0], genesis.output
+    return genesis.files_artifacts[0], genesis_validators_root.output
 
 
 

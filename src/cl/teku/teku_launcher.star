@@ -8,7 +8,8 @@ package_io = import_module("../../package_io/constants.star")
 
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
-GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/genesis"
+GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
+GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/data/custom_config_data"
 
 # The Docker container runs as the "teku" user so we can't write to root
 CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/consensus-data"
@@ -118,7 +119,7 @@ def launch(
     bn_max_mem = int(v_max_mem) if (int(v_max_mem) > bn_max_mem) else bn_max_mem
 
     config = get_config(
-        launcher.cl_genesis_data,
+        launcher.el_cl_genesis_data,
         image,
         bootnode_context,
         el_client_context,
@@ -174,7 +175,7 @@ def launch(
 
 
 def get_config(
-    genesis_data,
+    el_cl_genesis_data,
     image,
     bootnode_contexts,
     el_client_context,
@@ -199,19 +200,6 @@ def get_config(
             el_client_context.ip_addr,
             el_client_context.engine_rpc_port_num,
         )
-
-    genesis_config_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.config_yml_rel_filepath,
-    )
-    genesis_ssz_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.genesis_ssz_rel_filepath,
-    )
-    jwt_secret_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.jwt_secret_rel_filepath,
-    )
 
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -251,8 +239,8 @@ def get_config(
         TEKU_BINARY_FILEPATH_IN_IMAGE,
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
-        "--network=" + genesis_config_filepath,
-        "--initial-state=" + genesis_ssz_filepath,
+        "--network=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
+        "--initial-state=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
         "--data-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--data-storage-mode={0}".format(
             "ARCHIVE" if package_io.ARCHIVE_MODE else "PRUNE"
@@ -269,7 +257,7 @@ def get_config(
         "--rest-api-port={0}".format(HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
-        "--ee-jwt-secret-file={0}".format(jwt_secret_filepath),
+        "--ee-jwt-secret-file=" + package_io.JWT_AUTH_PATH,
         "--ee-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled",
@@ -311,7 +299,7 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     files = {
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: genesis_data.files_artifact_uuid,
+        GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
     }
     if node_keystore_files:
         files[
@@ -333,5 +321,5 @@ def get_config(
     )
 
 
-def new_teku_launcher(cl_genesis_data):
-    return struct(cl_genesis_data=cl_genesis_data)
+def new_teku_launcher(el_cl_genesis_data):
+    return struct(el_cl_genesis_data=el_cl_genesis_data)

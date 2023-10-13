@@ -5,6 +5,10 @@ el_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_genesis/el_genesis_data_generator.star"
 )
 
+cl_genesis_data_generator = import_module(
+    "./prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
+)
+
 el_cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
 )
@@ -127,13 +131,41 @@ def launch_participant_network(
 
     plan.print(json.indent(json.encode(el_genesis_data)))
 
-    plan.print("Uploading GETH prefunded keys")
-
     geth_prefunded_keys_artifact_name = plan.upload_files(
         static_files.GETH_PREFUNDED_KEYS_DIRPATH, name="geth-prefunded-keys"
     )
 
     plan.print("Uploaded GETH files succesfully")
+
+    plan.print("Generating CL data")
+
+    genesis_generation_config_yml_template = read_file(
+        static_files.CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
+    )
+    genesis_generation_mnemonics_yml_template = read_file(
+        static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH
+    )
+    total_number_of_validator_keys = 0
+    for participant in participants:
+        total_number_of_validator_keys += participant.validator_count
+    cl_genesis_data = cl_genesis_data_generator.generate_cl_genesis_data(
+        plan,
+        genesis_generation_config_yml_template,
+        genesis_generation_mnemonics_yml_template,
+        el_genesis_data,
+        final_genesis_timestamp,
+        network_params.network_id,
+        network_params.deposit_contract_address,
+        network_params.seconds_per_slot,
+        network_params.preregistered_validator_keys_mnemonic,
+        total_number_of_validator_keys,
+        network_params.genesis_delay,
+        network_params.capella_fork_epoch,
+        network_params.deneb_fork_epoch,
+        network_params.electra_fork_epoch,
+    )
+
+    plan.print(json.indent(json.encode(cl_genesis_data)))
 
     el_launchers = {
         package_io.EL_CLIENT_TYPE.geth: {
