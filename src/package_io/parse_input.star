@@ -181,7 +181,9 @@ def parse_input(plan, input_args):
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
         custom_flood_params=struct(
-            interval_between_transactions=result["custom_flood_params"]["interval_between_transactions"],
+            interval_between_transactions=result["custom_flood_params"][
+                "interval_between_transactions"
+            ],
         ),
         launch_additional_services=result["launch_additional_services"],
         additional_services=result["additional_services"],
