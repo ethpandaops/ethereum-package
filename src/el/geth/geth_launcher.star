@@ -147,13 +147,11 @@ def get_config(
     extra_env_vars,
     electra_fork_epoch,
 ):
-
     init_datadir_cmd_str = "geth init {0} --datadir={1} {2}".format(
         "--cache.preimages" if electra_fork_epoch != None else "",
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
-
 
     cmd = [
         "geth",
