@@ -312,7 +312,7 @@ def run(plan, args={}):
                 genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
                 genesis_constants.PRE_FUNDED_ACCOUNTS[0].address,
                 el_uri,
-                args_with_right_defaults.custom_flood,
+                args_with_right_defaults.custom_flood_params,
             )
         else:
             fail("Invalid additional service %s" % (additional_service))

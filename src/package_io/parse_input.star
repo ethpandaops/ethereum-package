@@ -101,8 +101,8 @@ def parse_input(plan, input_args):
         )
 
     result["goomy_blob_params"] = get_default_goomy_blob_params()
-    result["custom_flood"] = dict(
-        get_default_custom_flood_params(), **(result.get("custom_flood", {}))
+    result["custom_flood_params"] = dict(
+        get_default_custom_flood_params(), **(result.get("custom_flood_params", {}))
     )
 
     return struct(
@@ -178,8 +178,8 @@ def parse_input(plan, input_args):
         goomy_blob_params=struct(
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
-        custom_flood=struct(
-            delay=result["custom_flood"]["delay"],
+        custom_flood_params=struct(
+            delay=result["custom_flood_params"]["delay"],
         ),
         launch_additional_services=result["launch_additional_services"],
         additional_services=result["additional_services"],

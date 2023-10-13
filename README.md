@@ -308,9 +308,8 @@ To configure the package behaviour, you can modify your `network_params.json` fi
       "mev_flood_extra_args": [],
       // Number of seconds between bundles for mev-flood
       "mev_flood_seconds_per_bundle": 15,
-      // A custom flood script that increases the balance of the coinbase addresss leading to more reliable
-      // payload delivery
-      "custom_flood": {
+      // Optional parameters to send to the custom_flood script that sends reliable payloads
+      "custom_flood_params": {
         "delay": 1
       }
     },
