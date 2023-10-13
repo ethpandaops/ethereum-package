@@ -37,7 +37,7 @@ DEFAULT_ADDITIONAL_SERVICES = [
     "el_forkmon",
     "beacon_metrics_gazer",
     "dora",
-    # "prometheus_grafana",
+    "prometheus_grafana",
 ]
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
