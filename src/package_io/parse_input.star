@@ -357,7 +357,7 @@ def default_network_params():
 
 def default_participant():
     return {
-        "el_client_type": "geth",
+        "el_client_type": "reth",
         "el_client_image": "",
         "el_client_log_level": "",
         "cl_client_type": "teku",

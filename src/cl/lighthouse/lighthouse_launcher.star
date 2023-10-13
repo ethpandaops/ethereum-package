@@ -7,9 +7,6 @@ package_io = import_module("../../package_io/constants.star")
 
 LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
 
-GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
-GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/data/custom_config_data"
-
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
 
 RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
@@ -269,7 +266,7 @@ def get_beacon_config(
         "beacon_node",
         "--debug-level=" + log_level,
         "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--testnet-dir=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+        "--testnet-dir=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
         "--disable-enr-auto-update",
         "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -339,7 +336,7 @@ def get_beacon_config(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        files={GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data},
+        files={package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data},
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=ready_conditions,
@@ -376,7 +373,7 @@ def get_validator_config(
         "lighthouse",
         "validator_client",
         "--debug-level=" + log_level,
-        "--testnet-dir=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+        "--testnet-dir=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         "--validators-dir=" + validator_keys_dirpath,
         # NOTE: When secrets-dir is specified, we can't add the --data-dir flag
         "--secrets-dir=" + validator_secrets_dirpath,
@@ -406,7 +403,7 @@ def get_validator_config(
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
         },
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},

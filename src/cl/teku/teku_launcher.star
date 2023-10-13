@@ -8,9 +8,6 @@ package_io = import_module("../../package_io/constants.star")
 
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
-GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
-GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/data/custom_config_data"
-
 # The Docker container runs as the "teku" user so we can't write to root
 CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/consensus-data"
 
@@ -239,8 +236,8 @@ def get_config(
         TEKU_BINARY_FILEPATH_IN_IMAGE,
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
-        "--network=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
-        "--initial-state=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
+        "--network=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
+        "--initial-state=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
         "--data-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--data-storage-mode={0}".format(
             "ARCHIVE" if package_io.ARCHIVE_MODE else "PRUNE"
@@ -299,7 +296,7 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     files = {
-        GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
     }
     if node_keystore_files:
         files[

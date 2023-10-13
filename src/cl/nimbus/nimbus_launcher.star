@@ -6,9 +6,6 @@ cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star
 
 package_io = import_module("../../package_io/constants.star")
 
-GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
-GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/data/custom_config_data"
-
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT = "/validator-keys"
 
 # Port IDs
@@ -251,7 +248,7 @@ def get_config(
         "--log-level=" + log_level,
         "--udp-port={0}".format(DISCOVERY_PORT_NUM),
         "--tcp-port={0}".format(DISCOVERY_PORT_NUM),
-        "--network=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+        "--network=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         "--data-dir=" + CONSENSUS_DATA_DIRPATH_IN_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
         "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -299,7 +296,7 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     files = {
-        GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
     }
     if node_keystore_files:
         files[

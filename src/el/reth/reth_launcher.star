@@ -28,7 +28,6 @@ METRICS_PORT_ID = "metrics"
 
 # Paths
 METRICS_PATH = "/metrics"
-GENESIS_DATA_MOUNT_DIRPATH = "/genesis"
 PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
 
 # The dirpath of the execution data directory on the client container
@@ -89,8 +88,8 @@ def launch(
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
 
-    config, jwt_secret_json_filepath_on_client = get_config(
-        launcher.el_genesis_data,
+    config = get_config(
+        launcher.el_cl_genesis_data,
         image,
         existing_el_clients,
         log_level,
@@ -106,10 +105,6 @@ def launch(
 
     enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
-    jwt_secret = shared_utils.read_file_from_service(
-        plan, service_name, jwt_secret_json_filepath_on_client
-    )
-
     metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     reth_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metric_url
@@ -123,14 +118,13 @@ def launch(
         RPC_PORT_NUM,
         WS_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
-        jwt_secret,
         service_name,
         [reth_metrics_info],
     )
 
 
 def get_config(
-    genesis_data,
+    el_cl_genesis_data,
     image,
     existing_el_clients,
     verbosity_level,
@@ -141,16 +135,10 @@ def get_config(
     extra_params,
     extra_env_vars,
 ):
-    genesis_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.geth_genesis_json_relative_filepath
-    )
-    jwt_secret_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath
-    )
 
     init_datadir_cmd_str = "reth init --datadir={0} --chain={1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        genesis_json_filepath_on_client,
+        package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + '/genesis.json',
     )
 
     cmd = [
@@ -158,7 +146,7 @@ def get_config(
         "node",
         "-{0}".format(verbosity_level),
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--chain=" + genesis_json_filepath_on_client,
+        "--chain=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + '/genesis.json',
         "--http",
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
@@ -173,7 +161,7 @@ def get_config(
         "--ws.origins=*",
         "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.jwtsecret={0}".format(jwt_secret_json_filepath_on_client),
+        "--authrpc.jwtsecret=" + package_io.JWT_AUTH_PATH,
         "--authrpc.addr=0.0.0.0",
         "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
     ]
@@ -207,7 +195,7 @@ def get_config(
             ports=USED_PORTS,
             cmd=[command_str],
             files={
-                GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid,
+                package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
             },
             entrypoint=ENTRYPOINT_ARGS,
             private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -216,12 +204,11 @@ def get_config(
             min_memory=el_min_mem,
             max_memory=el_max_mem,
             env_vars=extra_env_vars,
-        ),
-        jwt_secret_json_filepath_on_client,
+        )
     )
 
 
-def new_reth_launcher(el_genesis_data):
+def new_reth_launcher(el_cl_genesis_data):
     return struct(
-        el_genesis_data=el_genesis_data,
+        el_cl_genesis_data=el_cl_genesis_data,
     )

@@ -6,9 +6,6 @@ cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star
 
 package_io = import_module("../../package_io/constants.star")
 
-GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
-GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/data/custom_config_data"
-
 #  ---------------------------------- Beacon client -------------------------------------
 CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/consensus-data"
 # Port IDs
@@ -234,8 +231,8 @@ def get_beacon_config(
         "--port={0}".format(DISCOVERY_PORT_NUM),
         "--discoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--dataDir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--paramsFile=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
-        "--genesisStateFile=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
+        "--paramsFile=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
+        "--genesisStateFile=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
         "--discv5=true",
@@ -277,7 +274,7 @@ def get_beacon_config(
         ports=BEACON_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
@@ -319,7 +316,7 @@ def get_validator_config(
         "validator",
         "--logLevel=" + log_level,
         "--dataDir=" + root_dirpath,
-        "--paramsFile=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
+        "--paramsFile=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
         "--beaconNodes=" + beacon_client_http_url,
         "--keystoresDir=" + validator_keys_dirpath,
         "--secretsDir=" + validator_secrets_dirpath,
@@ -340,7 +337,7 @@ def get_validator_config(
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,

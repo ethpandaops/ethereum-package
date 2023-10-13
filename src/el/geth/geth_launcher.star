@@ -9,7 +9,6 @@ genesis_constants = import_module(
 node_metrics = import_module("../../node_metrics_info.star")
 package_io = import_module("../../package_io/constants.star")
 
-
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
@@ -33,11 +32,6 @@ METRICS_PORT_ID = "metrics"
 
 # TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
 NUM_MINING_THREADS = 1
-
-GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
-GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = shared_utils.path_join(
-    GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/data/custom_config_data/genesis.json"
-)
 
 PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
 
@@ -186,7 +180,7 @@ def get_config(
     init_datadir_cmd_str = "geth init {0} --datadir={1} {2}".format(
         "--cache.preimages" if electra_fork_epoch != None else "",
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+        package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + '/genesis.json',
     )
 
     # We need to put the keys into the right spot
@@ -273,7 +267,7 @@ def get_config(
             ports=USED_PORTS,
             cmd=[command_str],
             files={
-                GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+                package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
                 PREFUNDED_KEYS_MOUNT_DIRPATH: prefunded_geth_keys_artifact_uuid,
             },
             entrypoint=ENTRYPOINT_ARGS,

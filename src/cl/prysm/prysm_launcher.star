@@ -8,9 +8,6 @@ package_io = import_module("../../package_io/constants.star")
 IMAGE_SEPARATOR_DELIMITER = ","
 EXPECTED_NUM_IMAGES = 2
 
-GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
-GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/data/custom_config_data"
-
 #  ---------------------------------- Beacon client -------------------------------------
 CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/consensus-data"
 
@@ -266,8 +263,8 @@ def get_beacon_config(
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--chain-config-file=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
-        "--genesis-state=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
+        "--chain-config-file=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
+        "--genesis-state=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
         "--rpc-port={0}".format(RPC_PORT_NUM),
@@ -306,7 +303,7 @@ def get_beacon_config(
         ports=BEACON_NODE_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
@@ -345,7 +342,7 @@ def get_validator_config(
 
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
-        "--chain-config-file=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
+        "--chain-config-file=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
         "--beacon-rpc-gateway-provider=" + beacon_http_endpoint,
         "--beacon-rpc-provider=" + beacon_rpc_endpoint,
         "--wallet-dir=" + validator_keys_dirpath,
@@ -371,7 +368,7 @@ def get_validator_config(
         ports=VALIDATOR_NODE_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
             PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
         },

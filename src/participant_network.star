@@ -181,26 +181,34 @@ def launch_participant_network(
         },
         package_io.EL_CLIENT_TYPE.besu: {
             "launcher": besu.new_besu_launcher(
-                network_params.network_id, el_genesis_data
+                network_params.network_id,
+                el_cl_data
             ),
             "launch_method": besu.launch,
         },
         package_io.EL_CLIENT_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
-                network_params.network_id, el_genesis_data
+                network_params.network_id,
+                el_cl_data
             ),
             "launch_method": erigon.launch,
         },
         package_io.EL_CLIENT_TYPE.nethermind: {
-            "launcher": nethermind.new_nethermind_launcher(el_genesis_data),
+            "launcher": nethermind.new_nethermind_launcher(
+                el_cl_data
+            ),
             "launch_method": nethermind.launch,
         },
         package_io.EL_CLIENT_TYPE.reth: {
-            "launcher": reth.new_reth_launcher(el_genesis_data),
+            "launcher": reth.new_reth_launcher(
+                el_cl_data
+            ),
             "launch_method": reth.launch,
         },
         package_io.EL_CLIENT_TYPE.ethereumjs: {
-            "launcher": ethereumjs.new_ethereumjs_launcher(el_genesis_data),
+            "launcher": ethereumjs.new_ethereumjs_launcher(
+                el_cl_data
+            ),
             "launch_method": ethereumjs.launch,
         },
     }
