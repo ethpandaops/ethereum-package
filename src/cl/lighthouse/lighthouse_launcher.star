@@ -336,7 +336,9 @@ def get_beacon_config(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        files={package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data},
+        files={
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+        },
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=ready_conditions,
@@ -402,7 +404,7 @@ def get_validator_config(
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
         },
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},

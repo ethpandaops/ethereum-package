@@ -307,7 +307,7 @@ def get_beacon_config(
         ports=BEACON_NODE_USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
@@ -373,7 +373,7 @@ def get_validator_config(
         ports=VALIDATOR_NODE_USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
             PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
         },

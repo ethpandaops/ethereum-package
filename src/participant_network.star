@@ -116,10 +116,8 @@ def launch_participant_network(
     el_cl_genesis_config_template = read_file(
         static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
     )
-    (
-        el_cl_data,
-        genesis_validators_root,
-    ) = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
+
+    el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
         plan,
         ethereum_genesis_generator_image,
         el_cl_genesis_config_template,
@@ -199,7 +197,7 @@ def launch_participant_network(
                 el_cl_data,
                 geth_prefunded_keys_artifact_name,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
-                genesis_validators_root,
+                el_cl_data.genesis_validators_root,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
@@ -431,7 +429,7 @@ def launch_participant_network(
 
         all_participants.append(participant_entry)
 
-    return all_participants, final_genesis_timestamp, genesis_validators_root
+    return all_participants, final_genesis_timestamp, el_cl_data.genesis_validators_root, el_cl_data.files_artifact_uuid
 
 
 def zfill_calculator(participants):

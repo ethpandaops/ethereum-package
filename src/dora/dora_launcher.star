@@ -1,6 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-
-
+package_io = import_module("../package_io/constants.star")
 SERVICE_NAME = "dora"
 IMAGE_NAME = "ethpandaops/dora:master"
 
@@ -13,9 +12,6 @@ DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE = "/validator-ranges"
 VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
-
-CL_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/cl-genesis-data"
-CL_CONFIG_ARTIFACT_NAME = "cl-genesis-data"
 
 
 USED_PORTS = {
@@ -31,6 +27,7 @@ def launch_dora(
     plan,
     config_template,
     cl_client_contexts,
+    el_cl_data_files_artifact_uuid
 ):
     all_cl_client_info = []
     for index, client in enumerate(cl_client_contexts):
@@ -51,13 +48,18 @@ def launch_dora(
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "dora-config"
     )
-
-    config = get_config(config_files_artifact_name)
+    el_cl_data_files_artifact_uuid = el_cl_data_files_artifact_uuid
+    config = get_config(
+        config_files_artifact_name,
+        el_cl_data_files_artifact_uuid,
+        )
 
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(config_files_artifact_name):
+def get_config(
+    config_files_artifact_name,
+    el_cl_data_files_artifact_uuid):
     config_file_path = shared_utils.path_join(
         DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         DORA_CONFIG_FILENAME,
@@ -68,7 +70,7 @@ def get_config(config_files_artifact_name):
         files={
             DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
-            CL_CONFIG_MOUNT_DIRPATH_ON_SERVICE: CL_CONFIG_ARTIFACT_NAME,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
         cmd=["-config", config_file_path],
     )

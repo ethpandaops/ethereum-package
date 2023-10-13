@@ -296,7 +296,7 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     files = {
-        package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
     }
     if node_keystore_files:
         files[

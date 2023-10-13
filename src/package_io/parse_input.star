@@ -361,10 +361,10 @@ def default_network_params():
 
 def default_participant():
     return {
-        "el_client_type": "erigon",
+        "el_client_type": "geth",
         "el_client_image": "",
         "el_client_log_level": "",
-        "cl_client_type": "teku",
+        "cl_client_type": "lighthouse",
         "cl_client_image": "",
         "cl_client_log_level": "",
         "beacon_extra_params": [],

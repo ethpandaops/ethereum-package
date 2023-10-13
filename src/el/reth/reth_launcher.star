@@ -195,7 +195,7 @@ def get_config(
         ports=USED_PORTS,
         cmd=[command_str],
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,

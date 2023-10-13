@@ -4,6 +4,8 @@ prelaunch_data_generator_launcher = import_module(
     "../../prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star"
 )
 
+el_cl_genesis_data = import_module("./el_cl_genesis_data.star")
+
 GENESIS_VALUES_PATH = "/opt"
 GENESIS_VALUES_FILENAME = "values.env"
 
@@ -70,8 +72,12 @@ def generate_el_cl_genesis_data(
         files={"/data": genesis.files_artifacts[0]},
         wait=None,
     )
+    result = el_cl_genesis_data.new_el_cl_genesis_data(
+        genesis.files_artifacts[0],
+        genesis_validators_root.output
+    )
 
-    return genesis.files_artifacts[0], genesis_validators_root.output
+    return result
 
 
 def new_env_file_for_el_cl_genesis_data(
