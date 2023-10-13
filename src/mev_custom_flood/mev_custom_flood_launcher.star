@@ -30,8 +30,8 @@ def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
             [
                 "/bin/sh",
                 "-c",
-                "nohup python /tmp/sender.py  --delay {} > /dev/null 2>&1 &".format(
-                    params.delay
+                "nohup python /tmp/sender.py  --interval_between_transactions {} > /dev/null 2>&1 &".format(
+                    params.interval_between_transactions
                 ),
             ]
         ),

@@ -179,7 +179,7 @@ def parse_input(plan, input_args):
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
         custom_flood_params=struct(
-            delay=result["custom_flood_params"]["delay"],
+            interval_between_transactions=result["custom_flood_params"]["interval_between_transactions"],
         ),
         launch_additional_services=result["launch_additional_services"],
         additional_services=result["additional_services"],
@@ -417,7 +417,7 @@ def get_default_goomy_blob_params():
 
 def get_default_custom_flood_params():
     # this is a simple script that increases the balance of the coinbase address at a cadence
-    return {"delay": 1}
+    return {"interval_between_transactions": 1}
 
 
 # TODO perhaps clean this up into a map

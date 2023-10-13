@@ -51,16 +51,16 @@ def send_transaction():
     logging.info(tx_hash.hex())
     assert tx["from"] == sender_account.address
 
-def delayed_send(delay):
+def delayed_send(interval_between_transactions):
     send_transaction()
-    time.sleep(delay)
+    time.sleep(interval_between_transactions)
 
 
 @click.command()
-@click.option('--delay', default=0.5, help='Delay between successive transaction sends (in seconds). The value may be an integer or decimal')
-def run_infinitely(delay):
+@click.option('--interval_between_transactions', default=0.5, help='Interval between successive transaction sends (in seconds). The value may be an integer or decimal')
+def run_infinitely(interval_between_transactions):
     logging.info(f"Using sender {SENDER} receiver {RECEIVER} and el_uri {EL_URI}")
-    spam = send_transaction if delay == 0 else partial(delayed_send, delay)
+    spam = send_transaction if interval_between_transactions == 0 else partial(delayed_send, interval_between_transactions)
     while True:
         try:
             spam()
