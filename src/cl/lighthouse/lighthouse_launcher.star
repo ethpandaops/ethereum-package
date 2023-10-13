@@ -359,7 +359,6 @@ def get_validator_config(
     v_max_mem,
     extra_params,
 ):
-
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
         node_keystore_files.raw_keys_relative_dirpath,

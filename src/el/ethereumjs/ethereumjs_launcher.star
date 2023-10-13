@@ -138,9 +138,10 @@ def get_config(
     extra_params,
     extra_env_vars,
 ):
-
     cmd = [
-        "--gethGenesis=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + '/genesis.json',
+        "--gethGenesis="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.json",
         "--dataDir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--port={0}".format(DISCOVERY_PORT_NUM),
         "--rpc",
@@ -177,22 +178,20 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-    return (
-        ServiceConfig(
-            image=image,
-            ports=USED_PORTS,
-            cmd=cmd,
-            files={
-                package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
-            },
-            entrypoint=ENTRYPOINT_ARGS,
-            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            min_cpu=el_min_cpu,
-            max_cpu=el_max_cpu,
-            min_memory=el_min_mem,
-            max_memory=el_max_mem,
-            env_vars=extra_env_vars,
-        )
+    return ServiceConfig(
+        image=image,
+        ports=USED_PORTS,
+        cmd=cmd,
+        files={
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        },
+        entrypoint=ENTRYPOINT_ARGS,
+        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=el_min_cpu,
+        max_cpu=el_max_cpu,
+        min_memory=el_min_mem,
+        max_memory=el_max_mem,
+        env_vars=extra_env_vars,
     )
 
 

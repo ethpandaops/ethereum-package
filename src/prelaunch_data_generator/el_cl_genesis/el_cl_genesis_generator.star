@@ -7,6 +7,7 @@ prelaunch_data_generator_launcher = import_module(
 GENESIS_VALUES_PATH = "/opt"
 GENESIS_VALUES_FILENAME = "values.env"
 
+
 def generate_el_cl_genesis_data(
     plan,
     image,
@@ -53,29 +54,24 @@ def generate_el_cl_genesis_data(
     )
 
     genesis = plan.run_sh(
-        run = "cp /opt/values.env /config/values.env && ./entrypoint.sh all",
-        image = image,
-        files = {
-           GENESIS_VALUES_PATH : genesis_generation_config_artifact_name
-        },
-        store = [
+        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all",
+        image=image,
+        files={GENESIS_VALUES_PATH: genesis_generation_config_artifact_name},
+        store=[
             "/data",
         ],
-        wait= None
+        wait=None,
     )
 
     # this is super hacky lmao
     genesis_validators_root = plan.run_sh(
-        run = "cat /data/data/custom_config_data/genesis_validators_root.txt",
-        image = "busybox",
-        files = {
-              "/data" : genesis.files_artifacts[0]
-          },
-        wait = None
+        run="cat /data/data/custom_config_data/genesis_validators_root.txt",
+        image="busybox",
+        files={"/data": genesis.files_artifacts[0]},
+        wait=None,
     )
 
     return genesis.files_artifacts[0], genesis_validators_root.output
-
 
 
 def new_env_file_for_el_cl_genesis_data(
@@ -106,5 +102,3 @@ def new_env_file_for_el_cl_genesis_data(
         "DenebForkEpoch": deneb_fork_epoch,
         "ElectraForkEpoch": electra_fork_epoch,
     }
-
-

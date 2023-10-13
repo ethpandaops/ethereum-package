@@ -128,7 +128,6 @@ def launch(
         plan, service_name, RPC_PORT_ID
     )
 
-
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     geth_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
@@ -164,7 +163,6 @@ def get_config(
     extra_env_vars,
     electra_fork_epoch,
 ):
-
     account_addresses_to_unlock = []
     for prefunded_account in prefunded_account_info:
         account_addresses_to_unlock.append(prefunded_account.address)
@@ -180,7 +178,7 @@ def get_config(
     init_datadir_cmd_str = "geth init {0} --datadir={1} {2}".format(
         "--cache.preimages" if electra_fork_epoch != None else "",
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + '/genesis.json',
+        package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
 
     # We need to put the keys into the right spot
@@ -261,23 +259,21 @@ def get_config(
     ]
     command_str = " && ".join(subcommand_strs)
 
-    return (
-        ServiceConfig(
-            image=image,
-            ports=USED_PORTS,
-            cmd=[command_str],
-            files={
-                package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
-                PREFUNDED_KEYS_MOUNT_DIRPATH: prefunded_geth_keys_artifact_uuid,
-            },
-            entrypoint=ENTRYPOINT_ARGS,
-            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            min_cpu=el_min_cpu,
-            max_cpu=el_max_cpu,
-            min_memory=el_min_mem,
-            max_memory=el_max_mem,
-            env_vars=extra_env_vars,
-        )
+    return ServiceConfig(
+        image=image,
+        ports=USED_PORTS,
+        cmd=[command_str],
+        files={
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+            PREFUNDED_KEYS_MOUNT_DIRPATH: prefunded_geth_keys_artifact_uuid,
+        },
+        entrypoint=ENTRYPOINT_ARGS,
+        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=el_min_cpu,
+        max_cpu=el_max_cpu,
+        min_memory=el_min_mem,
+        max_memory=el_max_mem,
+        env_vars=extra_env_vars,
     )
 
 

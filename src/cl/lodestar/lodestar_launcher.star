@@ -231,8 +231,12 @@ def get_beacon_config(
         "--port={0}".format(DISCOVERY_PORT_NUM),
         "--discoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--dataDir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--paramsFile=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
-        "--genesisStateFile=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
+        "--paramsFile="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
+        "--genesisStateFile="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.ssz",
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
         "--discv5=true",
@@ -273,9 +277,7 @@ def get_beacon_config(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data
-        },
+        files={package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data},
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
         min_cpu=bn_min_cpu,
@@ -316,7 +318,9 @@ def get_validator_config(
         "validator",
         "--logLevel=" + log_level,
         "--dataDir=" + root_dirpath,
-        "--paramsFile=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
+        "--paramsFile="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
         "--beaconNodes=" + beacon_client_http_url,
         "--keystoresDir=" + validator_keys_dirpath,
         "--secretsDir=" + validator_secrets_dirpath,

@@ -236,8 +236,12 @@ def get_config(
         TEKU_BINARY_FILEPATH_IN_IMAGE,
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
-        "--network=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
-        "--initial-state=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
+        "--network="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
+        "--initial-state="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.ssz",
         "--data-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--data-storage-mode={0}".format(
             "ARCHIVE" if package_io.ARCHIVE_MODE else "PRUNE"

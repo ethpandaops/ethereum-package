@@ -263,8 +263,12 @@ def get_beacon_config(
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--chain-config-file=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
-        "--genesis-state=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
+        "--chain-config-file="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
+        "--genesis-state="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.ssz",
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
         "--rpc-port={0}".format(RPC_PORT_NUM),
@@ -330,7 +334,6 @@ def get_validator_config(
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
 ):
-
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
         node_keystore_files.prysm_relative_dirpath,
@@ -342,7 +345,9 @@ def get_validator_config(
 
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
-        "--chain-config-file=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
+        "--chain-config-file="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
         "--beacon-rpc-gateway-provider=" + beacon_http_endpoint,
         "--beacon-rpc-provider=" + beacon_rpc_endpoint,
         "--wallet-dir=" + validator_keys_dirpath,
@@ -381,9 +386,7 @@ def get_validator_config(
 
 
 def new_prysm_launcher(
-    el_cl_genesis_data,
-    prysm_password_relative_filepath,
-    prysm_password_artifact_uuid
+    el_cl_genesis_data, prysm_password_relative_filepath, prysm_password_artifact_uuid
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,

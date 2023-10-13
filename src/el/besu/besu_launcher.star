@@ -133,12 +133,13 @@ def get_config(
     extra_params,
     extra_env_vars,
 ):
-
     cmd = [
         "besu",
         "--logging=" + log_level,
         "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--genesis-file=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + '/besu.json',
+        "--genesis-file="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/besu.json",
         "--network-id=" + network_id,
         "--host-allowlist=*",
         "--rpc-http-enabled=true",
@@ -182,30 +183,22 @@ def get_config(
 
     cmd_str = " ".join(cmd)
 
-    return (
-        ServiceConfig(
-            image=image,
-            ports=USED_PORTS,
-            cmd=[cmd_str],
-            files={
-                package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
-            },
-            entrypoint=ENTRYPOINT_ARGS,
-            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            min_cpu=el_min_cpu,
-            max_cpu=el_max_cpu,
-            min_memory=el_min_mem,
-            max_memory=el_max_mem,
-            env_vars=extra_env_vars,
-        )
+    return ServiceConfig(
+        image=image,
+        ports=USED_PORTS,
+        cmd=[cmd_str],
+        files={
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        },
+        entrypoint=ENTRYPOINT_ARGS,
+        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=el_min_cpu,
+        max_cpu=el_max_cpu,
+        min_memory=el_min_mem,
+        max_memory=el_max_mem,
+        env_vars=extra_env_vars,
     )
 
 
-def new_besu_launcher(
-    network_id,
-    el_cl_genesis_data
-    ):
-    return struct(
-        network_id=network_id,
-        el_cl_genesis_data=el_cl_genesis_data
-        )
+def new_besu_launcher(network_id, el_cl_genesis_data):
+    return struct(network_id=network_id, el_cl_genesis_data=el_cl_genesis_data)

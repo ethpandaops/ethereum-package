@@ -131,11 +131,12 @@ def get_config(
     extra_params,
     extra_env_vars,
 ):
-
     cmd = [
         "--log=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--Init.ChainSpecPath=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + '/chainspec.json',
+        "--Init.ChainSpecPath="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/chainspec.json",
         "--Init.WebSocketsEnabled=true",
         "--Init.KzgSetupPath=" + package_io.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--config=none.cfg",
@@ -152,7 +153,7 @@ def get_config(
         "--JsonRpc.JwtSecretFile=" + package_io.JWT_AUTH_PATH,
         "--Network.OnlyStaticPeers=true",
         "--Metrics.Enabled=true",
-        "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM)
+        "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
     ]
 
     if len(existing_el_clients) > 0:
@@ -170,21 +171,19 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-    return (
-        ServiceConfig(
-            image=image,
-            ports=USED_PORTS,
-            cmd=cmd,
-            files={
-                package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
-            },
-            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            min_cpu=el_min_cpu,
-            max_cpu=el_max_cpu,
-            min_memory=el_min_mem,
-            max_memory=el_max_mem,
-            env_vars=extra_env_vars,
-        )
+    return ServiceConfig(
+        image=image,
+        ports=USED_PORTS,
+        cmd=cmd,
+        files={
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        },
+        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=el_min_cpu,
+        max_cpu=el_max_cpu,
+        min_memory=el_min_mem,
+        max_memory=el_max_mem,
+        env_vars=extra_env_vars,
     )
 
 
