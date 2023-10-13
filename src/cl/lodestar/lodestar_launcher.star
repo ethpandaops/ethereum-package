@@ -277,7 +277,9 @@ def get_beacon_config(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        files={package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid},
+        files={
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+        },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
         min_cpu=bn_min_cpu,

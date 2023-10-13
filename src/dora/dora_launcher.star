@@ -24,10 +24,7 @@ USED_PORTS = {
 
 
 def launch_dora(
-    plan,
-    config_template,
-    cl_client_contexts,
-    el_cl_data_files_artifact_uuid
+    plan, config_template, cl_client_contexts, el_cl_data_files_artifact_uuid
 ):
     all_cl_client_info = []
     for index, client in enumerate(cl_client_contexts):
@@ -52,14 +49,12 @@ def launch_dora(
     config = get_config(
         config_files_artifact_name,
         el_cl_data_files_artifact_uuid,
-        )
+    )
 
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(
-    config_files_artifact_name,
-    el_cl_data_files_artifact_uuid):
+def get_config(config_files_artifact_name, el_cl_data_files_artifact_uuid):
     config_file_path = shared_utils.path_join(
         DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         DORA_CONFIG_FILENAME,
