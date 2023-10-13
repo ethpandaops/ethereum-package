@@ -46,6 +46,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "mev_params",
     "goomy_blob_params",
     "tx_spammer_params",
+    "custom_flood_params",
 )
 
 package_io_constants = import_module("../package_io/constants.star")
@@ -65,6 +66,7 @@ def parse_input(plan, input_args):
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     result["grafana_additional_dashboards"] = []
     result["tx_spammer_params"] = get_default_tx_spammer_params()
+    result["custom_flood_params"] = get_default_custom_flood_params()
 
     for attr in input_args:
         value = input_args[attr]
@@ -80,6 +82,10 @@ def parse_input(plan, input_args):
             for sub_attr in input_args["tx_spammer_params"]:
                 sub_value = input_args["tx_spammer_params"][sub_attr]
                 result["tx_spammer_params"][sub_attr] = sub_value
+        elif attr == "custom_flood_params":
+            for sub_attr in input_args["custom_flood_params"]:
+                sub_value = input_args["custom_flood_params"][sub_attr]
+                result["custom_flood_params"][sub_attr] = sub_value
 
     if result.get("mev_type") in ("mock", "full"):
         result = enrich_mev_extra_params(
@@ -101,10 +107,6 @@ def parse_input(plan, input_args):
         )
 
     result["goomy_blob_params"] = get_default_goomy_blob_params()
-    result["custom_flood_params"] = dict(
-        get_default_custom_flood_params(), **(result.get("custom_flood_params", {}))
-    )
-
     return struct(
         participants=[
             struct(
