@@ -20,7 +20,7 @@ def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
     )
 
     plan.exec(
-        service_name=CUSTOM_FLOOD_SREVICE_NAME,
+        service_name=CUSTOM_FLOOD_SERVICE_NAME,
         recipe=ExecRecipe(["pip", "install", "web3", "click"]),
     )
 
