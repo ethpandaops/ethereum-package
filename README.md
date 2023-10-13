@@ -213,6 +213,16 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         // How long you want the network to wait before starting up
         "genesis_delay": 120,
 
+        // Max churn rate for the network introduced by
+        // EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
+        // Defaults to 8
+        "max_churn": 8,
+
+        // Ejection balance
+        // Defaults to 16ETH
+        // 16000000000 gwei
+        "ejection_balance": 16000000000,
+
         // The epoch at which the capella and deneb forks are set to occur.
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 4,

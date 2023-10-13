@@ -4,6 +4,8 @@ prelaunch_data_generator_launcher = import_module(
     "../../prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star"
 )
 
+el_cl_genesis_data = import_module("./el_cl_genesis_data.star")
+
 GENESIS_VALUES_PATH = "/opt"
 GENESIS_VALUES_FILENAME = "values.env"
 
@@ -18,6 +20,8 @@ def generate_el_cl_genesis_data(
     preregistered_validator_keys_mnemonic,
     total_num_validator_keys_to_preregister,
     genesis_delay,
+    max_churn,
+    ejection_balance,
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
@@ -30,6 +34,8 @@ def generate_el_cl_genesis_data(
         preregistered_validator_keys_mnemonic,
         total_num_validator_keys_to_preregister,
         genesis_delay,
+        max_churn,
+        ejection_balance,
         capella_fork_epoch,
         deneb_fork_epoch,
         electra_fork_epoch,
@@ -49,7 +55,7 @@ def generate_el_cl_genesis_data(
     )
 
     genesis = plan.run_sh(
-        run = "./entrypoint.sh all",
+        run = "cp /opt/values.env /config/values.env && ./entrypoint.sh all && cat /data/custom_config_data/genesis_validators_root.txt",
         image = image,
         files = {
            GENESIS_VALUES_PATH : genesis_generation_config_artifact_name
@@ -63,8 +69,10 @@ def generate_el_cl_genesis_data(
     plan.print(genesis.output)
     plan.print(genesis.files_artifacts[0])
 
-    # Returns the genesis data /data
-    return genesis.files_artifacts[0]
+
+    return genesis.files_artifacts[0], genesis.output
+
+
 
 def new_env_file_for_el_cl_genesis_data(
     genesis_unix_timestamp,
@@ -74,6 +82,8 @@ def new_env_file_for_el_cl_genesis_data(
     preregistered_validator_keys_mnemonic,
     total_num_validator_keys_to_preregister,
     genesis_delay,
+    max_churn,
+    ejection_balance,
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
@@ -86,6 +96,8 @@ def new_env_file_for_el_cl_genesis_data(
         "PreregisteredValidatorKeysMnemonic": preregistered_validator_keys_mnemonic,
         "NumValidatorKeysToPreregister": total_num_validator_keys_to_preregister,
         "GenesisDelay": genesis_delay,
+        "MaxChurn": max_churn,
+        "EjectionBalance": ejection_balance,
         "CapellaForkEpoch": capella_fork_epoch,
         "DenebForkEpoch": deneb_fork_epoch,
         "ElectraForkEpoch": electra_fork_epoch,

@@ -35,7 +35,9 @@ METRICS_PORT_ID = "metrics"
 NUM_MINING_THREADS = 1
 
 GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
-GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/custom_config_data/genesis.json"
+GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = shared_utils.path_join(
+    GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/data/custom_config_data/genesis.json"
+)
 
 PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
 

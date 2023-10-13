@@ -4,9 +4,6 @@ cl_validator_keystores = import_module(
 el_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_genesis/el_genesis_data_generator.star"
 )
-cl_genesis_data_generator = import_module(
-    "./prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
-)
 
 el_cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
@@ -95,7 +92,7 @@ def launch_participant_network(
     )
     el_cl_genesis_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
         plan,
-        "bbusa/egg:10",
+        "bbusa/egg:12",
         el_cl_genesis_config_template,
         final_genesis_timestamp,
         network_params.network_id,
@@ -104,6 +101,8 @@ def launch_participant_network(
         network_params.preregistered_validator_keys_mnemonic,
         total_number_of_validator_keys,
         network_params.genesis_delay,
+        network_params.max_churn,
+        network_params.ejection_balance,
         network_params.capella_fork_epoch,
         network_params.deneb_fork_epoch,
         network_params.electra_fork_epoch,
@@ -136,42 +135,13 @@ def launch_participant_network(
 
     plan.print("Uploaded GETH files succesfully")
 
-    plan.print("Generating CL data")
-
-    genesis_generation_config_yml_template = read_file(
-        static_files.CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
-    )
-    genesis_generation_mnemonics_yml_template = read_file(
-        static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH
-    )
-
-    cl_genesis_data = cl_genesis_data_generator.generate_cl_genesis_data(
-        plan,
-        genesis_generation_config_yml_template,
-        genesis_generation_mnemonics_yml_template,
-        el_genesis_data,
-        final_genesis_timestamp,
-        network_params.network_id,
-        network_params.deposit_contract_address,
-        network_params.seconds_per_slot,
-        network_params.preregistered_validator_keys_mnemonic,
-        total_number_of_validator_keys,
-        network_params.genesis_delay,
-        network_params.capella_fork_epoch,
-        network_params.deneb_fork_epoch,
-        network_params.electra_fork_epoch,
-    )
-
-    plan.print(json.indent(json.encode(cl_genesis_data)))
-    plan.print("Generated CL genesis data succesfully, launching EL & CL Participants")
-
-    genesis_validators_root = cl_genesis_data.genesis_validators_root
+    el_cl_data, genesis_validators_root = el_cl_genesis_data
 
     el_launchers = {
         package_io.EL_CLIENT_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
                 network_params.network_id,
-                el_cl_genesis_data,
+                el_cl_data,
                 geth_prefunded_keys_artifact_name,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
                 genesis_validators_root,
@@ -258,23 +228,23 @@ def launch_participant_network(
             "launch_method": lighthouse.launch,
         },
         package_io.CL_CLIENT_TYPE.lodestar: {
-            "launcher": lodestar.new_lodestar_launcher(cl_genesis_data),
+            "launcher": lodestar.new_lodestar_launcher(el_cl_genesis_data),
             "launch_method": lodestar.launch,
         },
         package_io.CL_CLIENT_TYPE.nimbus: {
-            "launcher": nimbus.new_nimbus_launcher(cl_genesis_data),
+            "launcher": nimbus.new_nimbus_launcher(el_cl_genesis_data),
             "launch_method": nimbus.launch,
         },
         package_io.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
-                cl_genesis_data,
+                el_cl_genesis_data,
                 cl_validator_data.prysm_password_relative_filepath,
                 cl_validator_data.prysm_password_artifact_uuid,
             ),
             "launch_method": prysm.launch,
         },
         package_io.CL_CLIENT_TYPE.teku: {
-            "launcher": teku.new_teku_launcher(cl_genesis_data),
+            "launcher": teku.new_teku_launcher(el_cl_genesis_data),
             "launch_method": teku.launch,
         },
     }
