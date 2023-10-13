@@ -90,7 +90,7 @@ def launch_participant_network(
     el_cl_genesis_config_template = read_file(
         static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
     )
-    el_cl_genesis_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
+    el_cl_data, genesis_validators_root = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
         plan,
         "bbusa/egg:12",
         el_cl_genesis_config_template,
@@ -134,8 +134,6 @@ def launch_participant_network(
     )
 
     plan.print("Uploaded GETH files succesfully")
-
-    el_cl_data, genesis_validators_root = el_cl_genesis_data
 
     el_launchers = {
         package_io.EL_CLIENT_TYPE.geth: {
@@ -224,27 +222,27 @@ def launch_participant_network(
 
     cl_launchers = {
         package_io.CL_CLIENT_TYPE.lighthouse: {
-            "launcher": lighthouse.new_lighthouse_launcher(el_cl_genesis_data),
+            "launcher": lighthouse.new_lighthouse_launcher(el_cl_data),
             "launch_method": lighthouse.launch,
         },
         package_io.CL_CLIENT_TYPE.lodestar: {
-            "launcher": lodestar.new_lodestar_launcher(el_cl_genesis_data),
+            "launcher": lodestar.new_lodestar_launcher(el_cl_data),
             "launch_method": lodestar.launch,
         },
         package_io.CL_CLIENT_TYPE.nimbus: {
-            "launcher": nimbus.new_nimbus_launcher(el_cl_genesis_data),
+            "launcher": nimbus.new_nimbus_launcher(el_cl_data),
             "launch_method": nimbus.launch,
         },
         package_io.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
-                el_cl_genesis_data,
+                el_cl_data,
                 cl_validator_data.prysm_password_relative_filepath,
                 cl_validator_data.prysm_password_artifact_uuid,
             ),
             "launch_method": prysm.launch,
         },
         package_io.CL_CLIENT_TYPE.teku: {
-            "launcher": teku.new_teku_launcher(el_cl_genesis_data),
+            "launcher": teku.new_teku_launcher(el_cl_data),
             "launch_method": teku.launch,
         },
     }
