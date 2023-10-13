@@ -302,25 +302,25 @@ def run(plan, args={}):
             launch_prometheus_grafana = True
         else:
             fail("Invalid additional service %s" % (additional_service))
-    if launch_prometheus_grafana:
-        plan.print("Launching prometheus...")
-        prometheus_private_url = prometheus.launch_prometheus(
-            plan,
-            prometheus_config_template,
-            all_el_client_contexts,
-            all_cl_client_contexts,
-            prometheus_additional_metrics_jobs,
-        )
+    # if launch_prometheus_grafana:
+    #     plan.print("Launching prometheus...")
+    #     prometheus_private_url = prometheus.launch_prometheus(
+    #         plan,
+    #         prometheus_config_template,
+    #         all_el_client_contexts,
+    #         all_cl_client_contexts,
+    #         prometheus_additional_metrics_jobs,
+    #     )
 
-        plan.print("Launching grafana...")
-        grafana.launch_grafana(
-            plan,
-            grafana_datasource_config_template,
-            grafana_dashboards_config_template,
-            prometheus_private_url,
-            additional_dashboards=args_with_right_defaults.grafana_additional_dashboards,
-        )
-        plan.print("Succesfully launched grafana")
+    #     plan.print("Launching grafana...")
+    #     grafana.launch_grafana(
+    #         plan,
+    #         grafana_datasource_config_template,
+    #         grafana_dashboards_config_template,
+    #         prometheus_private_url,
+    #         additional_dashboards=args_with_right_defaults.grafana_additional_dashboards,
+    #     )
+    #     plan.print("Succesfully launched grafana")
 
     if args_with_right_defaults.wait_for_finalization:
         plan.print("Waiting for the first finalized epoch")

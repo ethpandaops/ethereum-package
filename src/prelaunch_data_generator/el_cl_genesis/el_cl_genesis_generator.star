@@ -4,7 +4,8 @@ prelaunch_data_generator_launcher = import_module(
     "../../prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star"
 )
 
-GENESIS_VALUES_PATH = "/config-example/values.env"
+GENESIS_VALUES_PATH = "/opt"
+GENESIS_VALUES_FILENAME = "values.env"
 
 def generate_el_cl_genesis_data(
     plan,
@@ -40,7 +41,7 @@ def generate_el_cl_genesis_data(
     genesis_values_and_dest_filepath = {}
 
     genesis_values_and_dest_filepath[
-        GENESIS_VALUES_PATH
+        GENESIS_VALUES_FILENAME
     ] = genesis_generation_template
 
     genesis_generation_config_artifact_name = plan.render_templates(
@@ -60,7 +61,7 @@ def generate_el_cl_genesis_data(
     )
     plan.print(genesis.code)
     plan.print(genesis.output)
-    plan.print(genesis.files_artifacts)
+    plan.print(genesis.files_artifacts[0])
 
     # Returns the genesis data /data
     return genesis.files_artifacts[0]

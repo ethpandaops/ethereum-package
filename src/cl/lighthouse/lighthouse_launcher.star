@@ -8,6 +8,7 @@ package_io = import_module("../../package_io/constants.star")
 LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
 
 GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
+GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/custom_config_data/config.yaml"
 
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
 
@@ -133,7 +134,7 @@ def launch(
 
     # Launch Beacon node
     beacon_config = get_beacon_config(
-        launcher.genesis_data,
+        launcher.el_cl_genesis_data,
         image,
         bootnode_contexts,
         el_client_context,
@@ -162,7 +163,7 @@ def launch(
         v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
 
         validator_config = get_validator_config(
-            launcher.genesis_data,
+            launcher.el_cl_genesis_data,
             image,
             log_level,
             beacon_http_url,
@@ -230,7 +231,7 @@ def launch(
 
 
 def get_beacon_config(
-    genesis_data,
+    el_cl_genesis_data,
     image,
     boot_cl_client_ctxs,
     el_client_context,
@@ -255,12 +256,6 @@ def get_beacon_config(
             el_client_context.engine_rpc_port_num,
         )
 
-    # For some reason, Lighthouse takes in the parent directory of the config file (rather than the path to the config file itself)
-    genesis_config_parent_dirpath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-        shared_utils.path_dir(genesis_data.config_yml_rel_filepath),
-    )
-
     # NOTE: If connecting to the merge devnet remotely we DON'T want the following flags; when they're not set, the node's external IP address is auto-detected
     #  from the peers it communicates with but when they're set they basically say "override the autodetection and
     #  use what I specify instead." This requires having a know external IP address and port, which we definitely won't
@@ -274,7 +269,7 @@ def get_beacon_config(
         "beacon_node",
         "--debug-level=" + log_level,
         "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--testnet-dir=" + genesis_config_parent_dirpath_on_client,
+        "--testnet-dir=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
         "--disable-enr-auto-update",
         "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -344,7 +339,7 @@ def get_beacon_config(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        files={GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: genesis_data.files_artifact_uuid},
+        files={GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data},
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=ready_conditions,
@@ -356,7 +351,7 @@ def get_beacon_config(
 
 
 def get_validator_config(
-    genesis_data,
+    el_cl_genesis_data,
     image,
     log_level,
     beacon_client_http_url,
@@ -367,11 +362,6 @@ def get_validator_config(
     v_max_mem,
     extra_params,
 ):
-    # For some reason, Lighthouse takes in the parent directory of the config file (rather than the path to the config file itself)
-    genesis_config_parent_dirpath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
-        shared_utils.path_dir(genesis_data.config_yml_rel_filepath),
-    )
 
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
@@ -386,7 +376,7 @@ def get_validator_config(
         "lighthouse",
         "validator_client",
         "--debug-level=" + log_level,
-        "--testnet-dir=" + genesis_config_parent_dirpath_on_client,
+        "--testnet-dir=" + GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         "--validators-dir=" + validator_keys_dirpath,
         # NOTE: When secrets-dir is specified, we can't add the --data-dir flag
         "--secrets-dir=" + validator_secrets_dirpath,
@@ -416,7 +406,7 @@ def get_validator_config(
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: genesis_data.files_artifact_uuid,
+            GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
         },
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
@@ -427,7 +417,7 @@ def get_validator_config(
     )
 
 
-def new_lighthouse_launcher(cl_genesis_data):
+def new_lighthouse_launcher(el_cl_genesis_data):
     return struct(
-        genesis_data=cl_genesis_data,
+        el_cl_genesis_data=el_cl_genesis_data,
     )

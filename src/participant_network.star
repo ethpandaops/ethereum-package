@@ -95,7 +95,7 @@ def launch_participant_network(
     )
     el_cl_genesis_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
         plan,
-        "bbusa/egg:1",
+        "bbusa/egg:10",
         el_cl_genesis_config_template,
         final_genesis_timestamp,
         network_params.network_id,

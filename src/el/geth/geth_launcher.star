@@ -34,8 +34,8 @@ METRICS_PORT_ID = "metrics"
 # TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
 NUM_MINING_THREADS = 1
 
-GENESIS_DATA_MOUNT_DIRPATH = "/data"
-GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNT_DIRPATH + "/custom_config_data/genesis.json"
+GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/data"
+GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/custom_config_data/genesis.json"
 
 PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
 
@@ -108,7 +108,7 @@ def launch(
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
 
-    config, jwt_secret_json_filepath_on_client = get_config(
+    config = get_config(
         launcher.network_id,
         launcher.el_cl_genesis_data,
         launcher.prefunded_geth_keys_artifact_uuid,
@@ -132,9 +132,6 @@ def launch(
         plan, service_name, RPC_PORT_ID
     )
 
-    jwt_secret = shared_utils.read_file_from_service(
-        plan, service_name, jwt_secret_json_filepath_on_client
-    )
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     geth_metrics_info = node_metrics.new_node_metrics_info(
@@ -149,7 +146,6 @@ def launch(
         RPC_PORT_NUM,
         WS_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
-        jwt_secret,
         service_name,
         [geth_metrics_info],
     )
@@ -275,7 +271,7 @@ def get_config(
             ports=USED_PORTS,
             cmd=[command_str],
             files={
-                GENESIS_DATA_MOUNT_DIRPATH: el_cl_genesis_data.artifact_uuid,
+                GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
                 PREFUNDED_KEYS_MOUNT_DIRPATH: prefunded_geth_keys_artifact_uuid,
             },
             entrypoint=ENTRYPOINT_ARGS,
@@ -285,7 +281,7 @@ def get_config(
             min_memory=el_min_mem,
             max_memory=el_max_mem,
             env_vars=extra_env_vars,
-        ),
+        )
     )
 
 
