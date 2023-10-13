@@ -28,10 +28,12 @@ HIGH_DENEB_VALUE_FORK_VERKLE = 20000
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
+# Minimum number of validators required for a network to be valid is 64
+MIN_VALIDATORS = 64
+
 DEFAULT_ADDITIONAL_SERVICES = [
     "tx_spammer",
     "blob_spammer",
-    "cl_forkmon",
     "el_forkmon",
     "beacon_metrics_gazer",
     "dora",
@@ -42,8 +44,8 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
     "mev_params",
-    "tx_spammer_params",
     "goomy_blob_params",
+    "tx_spammer_params",
 )
 
 package_io_constants = import_module("../package_io/constants.star")
@@ -61,6 +63,8 @@ def parse_input(plan, input_args):
     result["mev_params"] = get_default_mev_params()
     result["launch_additional_services"] = True
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
+    result["grafana_additional_dashboards"] = []
+    result["tx_spammer_params"] = get_default_tx_spammer_params()
 
     for attr in input_args:
         value = input_args[attr]
@@ -72,6 +76,10 @@ def parse_input(plan, input_args):
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
                 result["mev_params"][sub_attr] = sub_value
+        elif attr == "tx_spammer_params":
+            for sub_attr in input_args["tx_spammer_params"]:
+                sub_value = input_args["tx_spammer_params"][sub_attr]
+                result["tx_spammer_params"][sub_attr] = sub_value
 
     if result.get("mev_type") in ("mock", "full"):
         result = enrich_mev_extra_params(
@@ -92,7 +100,6 @@ def parse_input(plan, input_args):
             )
         )
 
-    result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["goomy_blob_params"] = get_default_goomy_blob_params()
     result["custom_flood"] = dict(
         get_default_custom_flood_params(), **(result.get("custom_flood", {}))
@@ -142,7 +149,6 @@ def parse_input(plan, input_args):
                 "deposit_contract_address"
             ],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
-            slots_per_epoch=result["network_params"]["slots_per_epoch"],
             genesis_delay=result["network_params"]["genesis_delay"],
             capella_fork_epoch=result["network_params"]["capella_fork_epoch"],
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
@@ -182,6 +188,7 @@ def parse_input(plan, input_args):
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
+        grafana_additional_dashboards=result["grafana_additional_dashboards"],
     )
 
 
@@ -277,9 +284,6 @@ def parse_network_params(input_args):
             "preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length"
         )
 
-    if result["network_params"]["slots_per_epoch"] == 0:
-        fail("slots_per_epoch is 0 needs to be > 0 ")
-
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
 
@@ -299,15 +303,14 @@ def parse_network_params(input_args):
     ):
         fail("electra can only happen with capella genesis not bellatrix")
 
-    required_num_validators = 2 * result["network_params"]["slots_per_epoch"]
     actual_num_validators = (
         total_participant_count
         * result["network_params"]["num_validator_keys_per_node"]
     )
-    if required_num_validators > actual_num_validators:
+    if MIN_VALIDATORS > actual_num_validators:
         fail(
-            "required_num_validators - {0} is greater than actual_num_validators - {1}".format(
-                required_num_validators, actual_num_validators
+            "We require at least {0} validators but got {1}".format(
+                MIN_VALIDATORS, actual_num_validators
             )
         )
 
@@ -350,7 +353,6 @@ def default_network_params():
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
         "seconds_per_slot": 12,
-        "slots_per_epoch": 32,
         "genesis_delay": 120,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 500,
@@ -481,6 +483,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     ),
                     '--miner.extradata="Illuminate Dmocratize Dstribute"',
                     "--builder.algotype=greedy",
+                    "--metrics.builder=true",
                 ]
                 + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
                 "el_extra_env_vars": {
