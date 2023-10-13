@@ -28,9 +28,6 @@ UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 WS_PORT_ENGINE_ID = "ws-engine"
 METRICS_PORT_ID = "metrics"
-
-PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
-
 METRICS_PATH = "/metrics"
 
 # The dirpath of the execution data directory on the client container

@@ -28,7 +28,6 @@ METRICS_PORT_ID = "metrics"
 
 # Paths
 METRICS_PATH = "/metrics"
-PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/execution-data"
