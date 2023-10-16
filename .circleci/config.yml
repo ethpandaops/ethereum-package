@@ -220,7 +220,7 @@ jobs:
   mev_k8s:
     executor: ubuntu_vm
     steps:
-      - <<: *setup_kurtosis
+      - *setup_kurtosis
       - <<: *setup_kurtosis_k3s
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"      
