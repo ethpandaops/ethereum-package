@@ -6,7 +6,7 @@ orbs:
 executors:
   ubuntu_vm:
     machine:
-      image: ubuntu-2004:2023.07.1
+      image: ubuntu-2204:2023.07.2
 
 parameters:
   should-enable-check-latest-version-workflow:
