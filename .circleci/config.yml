@@ -250,7 +250,8 @@ workflows:
       - reth-all
       - teku-all
       - nimbus_mev
-      - mev_k8s
+      - mev_k8s:
+          <<: *setup_kurtosis_k3s
 
   build:
     when: << pipeline.parameters.should-enable-build-workflow >>
@@ -293,8 +294,6 @@ workflows:
 
       - mev_k8s:
           <<: *setup_kurtosis_k3s
-          context:
-            - docker-user
           filters:
             branches:
               ignore:
