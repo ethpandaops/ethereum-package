@@ -6,7 +6,7 @@ orbs:
 executors:
   ubuntu_vm:
     machine:
-      image: ubuntu-2004:202201-02
+      image: ubuntu-2004:2023.07.1
 
 parameters:
   should-enable-check-latest-version-workflow:
@@ -293,7 +293,7 @@ workflows:
 
       - mev_k8s:
           context:
-            - docker-user-noo
+            - docker-user
           filters:
             branches:
               ignore:
