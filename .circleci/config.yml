@@ -292,7 +292,7 @@ workflows:
                 - main
 
       - mev_k8s:
-          <<: *steps_prepare_testing_k8s_k3s
+          <<: *setup_kurtosis_k3s
           context:
             - docker-user
           filters:
