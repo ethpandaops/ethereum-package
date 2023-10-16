@@ -16,6 +16,10 @@ parameters:
   should-enable-build-workflow:
     type: boolean
     default: true
+  kurtosis-cluster-setting-abs-filepath:
+    type: string
+    default: "/home/circleci/.local/share/kurtosis/cluster-setting"
+
 
 # Install go version 1.19 to run our integration tests on the minimal version we support
 setup_kurtosis: &setup_kurtosis
@@ -25,6 +29,50 @@ setup_kurtosis: &setup_kurtosis
       sudo apt install kurtosis-cli
       kurtosis analytics disable
       kurtosis engine restart
+
+# Steps to prepare a job for Kubernetes testing (with K3S K8S distribution)
+setup_kurtosis_k3s: &setup_kurtosis_k3s
+  steps:
+    - run:
+        name: Install K3D and create the K3D/K3S cluster on Docker
+        command: |
+          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+          k3d cluster create --servers 1 --no-lb --wait --verbose
+    # Edit the Kurtosis config file in order to have K3S cluster configuration
+    - run:
+        name: Add K3S cluster config in Kurtosis config file
+        command: |
+          KURTOSIS_CONFIG_FILEPATH=$($KURTOSIS_BINPATH config path)
+          cat \<< EOF > "$KURTOSIS_CONFIG_FILEPATH"
+          config-version: 2
+          should-send-metrics: true
+          kurtosis-clusters:
+            docker:
+              type: docker
+            k3d-k3s-default:
+              type: kubernetes
+              config:
+                kubernetes-cluster-name: k3d-k3s-default
+                storage-class: standard
+                enclave-size-in-megabytes: 2048
+          EOF
+    # Set the K3S cluster with some previous steps to force this cluster type in the cluster-setting file. This save us to start the engine with the cluster set command
+    # because we are going to start it on the next step
+    - run:
+        name: Set K3S Kurtosis cluster
+        command: |
+          KURTOSIS_CLUSTER_SETTING_FILEPATH="<< pipeline.parameters.kurtosis-cluster-setting-abs-filepath >>"
+          echo -n "k3d-k3s-default" > "$KURTOSIS_CLUSTER_SETTING_FILEPATH"
+          echo "Kurtosis cluster-setting file content: $(cat $KURTOSIS_CLUSTER_SETTING_FILEPATH)"
+          ${KURTOSIS_BINPATH} cluster set k3d-k3s-default --cli-log-level trace
+    - run:
+        name: Start Kurtosis engine in K8s backend
+        command: |
+          ${KURTOSIS_BINPATH} engine start --enclave-pool-size 2
+    - run:
+        name: Run Kurtosis gateway
+        command: "${KURTOSIS_BINPATH} gateway"
+        background: true
 
 
 # NOTE: Because CircleCI jobs run on separate machines from each other, we duplicate steps (like checkout) between jobs. This is because doing the "correct" DRY
@@ -170,6 +218,13 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"
 
+  mev_k8s:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis_k3s
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"      
+
   nimbus_mev:
     executor: ubuntu_vm
     steps:
@@ -195,6 +250,7 @@ workflows:
       - reth-all
       - teku-all
       - nimbus_mev
+      - mev_k8s
 
   build:
     when: << pipeline.parameters.should-enable-build-workflow >>
@@ -233,4 +289,10 @@ workflows:
           filters:
             branches:
               ignore:
+                - main
+
+      - mev_k8s:
+          filters:
+            branches:
+              ignoer:
                 - main
