@@ -294,5 +294,5 @@ workflows:
       - mev_k8s:
           filters:
             branches:
-              ignoer:
+              ignore:
                 - main
