@@ -101,10 +101,14 @@ def launch_participant_network(
             "ethpandaops/ethereum-genesis-generator:2.0.3"
         )
     # we are running electra
-    else:
+    elif (
+        network_params.electra_fork_epoch != None
+    ):
         ethereum_genesis_generator_image = (
             "ethpandaops/ethereum-genesis-generator:3.0.0-rc.10"
         )
+    else:
+        fail("Unsupported fork epoch configuration, need to define either deneb_fork_epoch or electra_fork_epoch")
 
     el_cl_genesis_config_template = read_file(
         static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
