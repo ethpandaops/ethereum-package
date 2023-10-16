@@ -269,12 +269,6 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "prometheus_grafana"
     ],
 
-    // Which blockchain explorer should be used
-    // "dora" will use the dora explorer developped by pk910
-    // "full" will use the explorer developped by the beaconcha.in team
-    // defaults to "light"
-    "explorer_version": "dora",
-
     //  If set, the package will block until a finalized epoch has occurred.
     "wait_for_finalization": false,
 

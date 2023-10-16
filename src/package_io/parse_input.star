@@ -15,7 +15,7 @@ DEFAULT_CL_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
 }
 
-MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.26"
+MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.27"
 
 NETHERMIND_NODE_NAME = "nethermind"
 NIMBUS_NODE_NAME = "nimbus"
@@ -355,7 +355,7 @@ def default_network_params():
         "max_churn": 8,
         "ejection_balance": 16000000000,
         "capella_fork_epoch": 0,
-        "deneb_fork_epoch": 500,
+        "deneb_fork_epoch": 4,
         "electra_fork_epoch": None,
     }
 
@@ -395,7 +395,7 @@ def get_default_mev_params():
     return {
         "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         # TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
-        "mev_builder_image": "ethpandaops/flashbots-builder:main",
+        "mev_builder_image": "flashbots/builder:1.13.2.4844.dev5-6e6c723",
         "mev_builder_cl_image": "sigp/lighthouse:latest",
         "mev_boost_image": "flashbots/mev-boost",
         "mev_relay_api_extra_args": [],

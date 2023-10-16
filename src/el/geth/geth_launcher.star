@@ -147,7 +147,7 @@ def get_config(
     extra_env_vars,
     electra_fork_epoch,
 ):
-    init_datadir_cmd_str = "geth init {0} --datadir={1} {2}".format(
+    init_datadir_cmd_str = "geth init {0} --state.scheme=path --datadir={1} {2}".format(
         "--cache.preimages" if electra_fork_epoch != None else "",
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
@@ -155,6 +155,7 @@ def get_config(
 
     cmd = [
         "geth",
+        "--state.scheme=path",
         "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--networkid=" + network_id,
