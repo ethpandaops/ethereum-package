@@ -46,6 +46,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "mev_params",
     "goomy_blob_params",
     "tx_spammer_params",
+    "custom_flood_params",
 )
 
 package_io_constants = import_module("../package_io/constants.star")
@@ -65,6 +66,7 @@ def parse_input(plan, input_args):
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     result["grafana_additional_dashboards"] = []
     result["tx_spammer_params"] = get_default_tx_spammer_params()
+    result["custom_flood_params"] = get_default_custom_flood_params()
 
     for attr in input_args:
         value = input_args[attr]
@@ -80,6 +82,10 @@ def parse_input(plan, input_args):
             for sub_attr in input_args["tx_spammer_params"]:
                 sub_value = input_args["tx_spammer_params"][sub_attr]
                 result["tx_spammer_params"][sub_attr] = sub_value
+        elif attr == "custom_flood_params":
+            for sub_attr in input_args["custom_flood_params"]:
+                sub_value = input_args["custom_flood_params"][sub_attr]
+                result["custom_flood_params"][sub_attr] = sub_value
 
     if result.get("mev_type") in ("mock", "full"):
         result = enrich_mev_extra_params(
@@ -101,7 +107,6 @@ def parse_input(plan, input_args):
         )
 
     result["goomy_blob_params"] = get_default_goomy_blob_params()
-
     return struct(
         participants=[
             struct(
@@ -168,13 +173,17 @@ def parse_input(plan, input_args):
             mev_flood_seconds_per_bundle=result["mev_params"][
                 "mev_flood_seconds_per_bundle"
             ],
-            launch_custom_flood=result["mev_params"]["launch_custom_flood"],
         ),
         tx_spammer_params=struct(
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
         goomy_blob_params=struct(
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
+        ),
+        custom_flood_params=struct(
+            interval_between_transactions=result["custom_flood_params"][
+                "interval_between_transactions"
+            ],
         ),
         launch_additional_services=result["launch_additional_services"],
         additional_services=result["additional_services"],
@@ -399,8 +408,6 @@ def get_default_mev_params():
         "mev_flood_image": "flashbots/mev-flood",
         "mev_flood_extra_args": [],
         "mev_flood_seconds_per_bundle": 15,
-        # this is a simple script that increases the balance of the coinbase address at a cadence
-        "launch_custom_flood": False,
     }
 
 
@@ -410,6 +417,11 @@ def get_default_tx_spammer_params():
 
 def get_default_goomy_blob_params():
     return {"goomy_blob_args": []}
+
+
+def get_default_custom_flood_params():
+    # this is a simple script that increases the balance of the coinbase address at a cadence
+    return {"interval_between_transactions": 1}
 
 
 # TODO perhaps clean this up into a map

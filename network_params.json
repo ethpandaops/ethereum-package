@@ -47,8 +47,7 @@
 		"mev_builder_extra_args": [],
 		"mev_flood_image": "flashbots/mev-flood",
 		"mev_flood_extra_args": [],
-		"mev_flood_seconds_per_bundle": 15,
-		"launch_custom_flood": false
+		"mev_flood_seconds_per_bundle": 15
 	},
 	"grafana_additional_dashboards": []
 }
