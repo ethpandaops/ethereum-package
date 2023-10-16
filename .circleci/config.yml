@@ -238,6 +238,12 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/nimbus-mev.json)"
 
+  mix_with_tools_k8s:
+    executor: ubuntu_vm
+    steps:
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
+
 workflows:
   check_latest_version:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
@@ -257,6 +263,8 @@ workflows:
       - teku-all
       - nimbus_mev
       - mev_k8s:
+          <<: *setup_kurtosis_k3s
+      - mix_with_tools_k8s:
           <<: *setup_kurtosis_k3s
 
   build:
