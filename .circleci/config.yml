@@ -33,11 +33,13 @@ setup_kurtosis: &setup_kurtosis
 # Steps to prepare a job for Kubernetes testing (with K3S K8S distribution)
 setup_kurtosis_k3s: &setup_kurtosis_k3s
   pre-steps:
-    - run: |
-      echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-      sudo apt update
-      sudo apt install kurtosis-cli
-      kurtosis analytics disable
+    - run:
+      name: Install Kurtosis
+      command: |
+        echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+        sudo apt update
+        sudo apt install kurtosis-cli
+        kurtosis analytics disable
     - run:
         name: Install K3D and create the K3D/K3S cluster on Docker
         command: |
