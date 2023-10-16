@@ -43,7 +43,7 @@ setup_kurtosis_k3s: &setup_kurtosis_k3s
     - run:
         name: Add K3S cluster config in Kurtosis config file
         command: |
-          KURTOSIS_CONFIG_FILEPATH=$($KURTOSIS_BINPATH config path)
+          KURTOSIS_CONFIG_FILEPATH=$(kurtosis config path)
           cat \<< EOF > "$KURTOSIS_CONFIG_FILEPATH"
           config-version: 2
           should-send-metrics: true
@@ -65,14 +65,14 @@ setup_kurtosis_k3s: &setup_kurtosis_k3s
           KURTOSIS_CLUSTER_SETTING_FILEPATH="<< pipeline.parameters.kurtosis-cluster-setting-abs-filepath >>"
           echo -n "k3d-k3s-default" > "$KURTOSIS_CLUSTER_SETTING_FILEPATH"
           echo "Kurtosis cluster-setting file content: $(cat $KURTOSIS_CLUSTER_SETTING_FILEPATH)"
-          ${KURTOSIS_BINPATH} cluster set k3d-k3s-default --cli-log-level trace
+          kurtosis cluster set k3d-k3s-default --cli-log-level trace
     - run:
         name: Start Kurtosis engine in K8s backend
         command: |
-          ${KURTOSIS_BINPATH} engine start --enclave-pool-size 2
+          kurtosis engine start --enclave-pool-size 2
     - run:
         name: Run Kurtosis gateway
-        command: "${KURTOSIS_BINPATH} gateway"
+        command: "kurtosis gateway"
         background: true
 
 
