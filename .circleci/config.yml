@@ -291,6 +291,8 @@ workflows:
                 - main
 
       - mev_k8s:
+          context:
+            - docker-user
           filters:
             branches:
               ignore:
