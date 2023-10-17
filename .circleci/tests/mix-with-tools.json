@@ -36,6 +36,9 @@
       "full_beaconchain_explorer",
       "custom_flood"
     ],
-    "mev_type": "full"
+    "mev_type": "full",
+    "mev_params": {
+      "mev_relay_image": "flashbots/mev-boost-relay:0.27"
+    }
   }
   
