@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.6.0](https://github.com/kurtosis-tech/ethereum-package/compare/0.5.1...0.6.0) (2023-10-17)
+
+
+### Features
+
+* Add builder metrics to default mev builder ([#277](https://github.com/kurtosis-tech/ethereum-package/issues/277)) ([d0eff2e](https://github.com/kurtosis-tech/ethereum-package/commit/d0eff2e9dd39411e71e1d36f9d0e66041ff33c0a))
+* Add configurable spamming frequency to custom flood ([#283](https://github.com/kurtosis-tech/ethereum-package/issues/283)) ([f1e18ca](https://github.com/kurtosis-tech/ethereum-package/commit/f1e18ca7440ff9494b9a6bf6c20aa97a695d6084))
+* add full beacon chain explorer ([#253](https://github.com/kurtosis-tech/ethereum-package/issues/253)) ([1eddda5](https://github.com/kurtosis-tech/ethereum-package/commit/1eddda5e61ecb86687ca2eae8d691a58cdafbd45))
+* add inputs for additional grafana dashboards ([#279](https://github.com/kurtosis-tech/ethereum-package/issues/279)) ([ad02c43](https://github.com/kurtosis-tech/ethereum-package/commit/ad02c43c661de9151e541852520fd9f8e68fd0d1))
+* added another blob spamming tool (`goomy_blob`) ([#268](https://github.com/kurtosis-tech/ethereum-package/issues/268)) ([3f2c797](https://github.com/kurtosis-tech/ethereum-package/commit/3f2c797900cf1bfbef9b3dcac35b204e3a258b69))
+* Adding 4788 deployment ([#275](https://github.com/kurtosis-tech/ethereum-package/issues/275)) ([1c7de29](https://github.com/kurtosis-tech/ethereum-package/commit/1c7de293e44822aff2f26267285512c22d5f139c))
+* return participants, timestamp of genesis and validator root for consumers ([#262](https://github.com/kurtosis-tech/ethereum-package/issues/262)) ([3f2ea88](https://github.com/kurtosis-tech/ethereum-package/commit/3f2ea88bb4792ececf7f723c72bce704effc016b))
+* update ethereum-genesis-generator ([#260](https://github.com/kurtosis-tech/ethereum-package/issues/260)) ([a5b939c](https://github.com/kurtosis-tech/ethereum-package/commit/a5b939caa171f8cb7ab3979939f114a8b6398db7))
+
+
+### Bug Fixes
+
+* Add disable peer scoring ([#247](https://github.com/kurtosis-tech/ethereum-package/issues/247)) ([c75af3c](https://github.com/kurtosis-tech/ethereum-package/commit/c75af3cf3215d3aac3eb2d11eafdf9f3c7729512))
+* editor config used tabs still ([#274](https://github.com/kurtosis-tech/ethereum-package/issues/274)) ([7bbba4c](https://github.com/kurtosis-tech/ethereum-package/commit/7bbba4c2b77abbc27efcb2a9af352af6cc932f9b))
+* enable trace http-api for reth ([#251](https://github.com/kurtosis-tech/ethereum-package/issues/251)) ([ba47763](https://github.com/kurtosis-tech/ethereum-package/commit/ba4776365fca21c0a3a0e841834d7379443b76be))
+* explicitly set persist to false ([#296](https://github.com/kurtosis-tech/ethereum-package/issues/296)) ([37d8ccd](https://github.com/kurtosis-tech/ethereum-package/commit/37d8ccd86da44bc2e8fd60150c36068d36c2cb8b))
+* fix dora image ([#270](https://github.com/kurtosis-tech/ethereum-package/issues/270)) ([19fe54a](https://github.com/kurtosis-tech/ethereum-package/commit/19fe54a7ee5b9ced651c8f867c5b38b5ea529d8b))
+* fix the tx_fuzzer params ([#278](https://github.com/kurtosis-tech/ethereum-package/issues/278)) ([b0ee145](https://github.com/kurtosis-tech/ethereum-package/commit/b0ee145e94bc1b02a4dde48f198ab97357fd1ce9))
+* get rid of explorer type ([#280](https://github.com/kurtosis-tech/ethereum-package/issues/280)) ([f5595f4](https://github.com/kurtosis-tech/ethereum-package/commit/f5595f4cbb4307a0b14e9bf379a1823c40d7e170))
+* Pass all beacons to the relay ([#226](https://github.com/kurtosis-tech/ethereum-package/issues/226)) ([b4fde3d](https://github.com/kurtosis-tech/ethereum-package/commit/b4fde3d064e498a14410f776a76d23af97fd4f0f))
+* re run custom flood whenever it crashes ([#264](https://github.com/kurtosis-tech/ethereum-package/issues/264)) ([fab3995](https://github.com/kurtosis-tech/ethereum-package/commit/fab39957b28dbd9731cc15ec2fde242d7d71f5e3)), closes [#245](https://github.com/kurtosis-tech/ethereum-package/issues/245)
+* readme deadlink ([#269](https://github.com/kurtosis-tech/ethereum-package/issues/269)) ([f380cc4](https://github.com/kurtosis-tech/ethereum-package/commit/f380cc4c70e6c5a4f7d5fd0a755231eaf232a31b))
+* remove engine from http-api list for reth ([#249](https://github.com/kurtosis-tech/ethereum-package/issues/249)) ([b3114d1](https://github.com/kurtosis-tech/ethereum-package/commit/b3114d130f8a551853aac9774d864e8b7d36775a))
+* return data about pariticpants even if no additional services are launched ([#273](https://github.com/kurtosis-tech/ethereum-package/issues/273)) ([d29f98e](https://github.com/kurtosis-tech/ethereum-package/commit/d29f98e580afeca3a5d6d305f607d6f297606b9b))
+* set MEV image to 0.26.0 and complain if capella is zero with MEV set to full ([#261](https://github.com/kurtosis-tech/ethereum-package/issues/261)) ([9dfc4de](https://github.com/kurtosis-tech/ethereum-package/commit/9dfc4de19045ee2fd5be4eac31c341921d984e3d))
+* use 0.27 as the mev boost image ([839af19](https://github.com/kurtosis-tech/ethereum-package/commit/839af1986480dec245b03e91a927d693526cd1a1))
+* use ethpandaops/erigon as its multiarch ([839af19](https://github.com/kurtosis-tech/ethereum-package/commit/839af1986480dec245b03e91a927d693526cd1a1))
+
 ## [0.5.1](https://github.com/kurtosis-tech/ethereum-package/compare/0.5.0...0.5.1) (2023-09-28)
 
 
