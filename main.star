@@ -253,6 +253,7 @@ def run(plan, args={}):
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
                 all_el_client_contexts,
                 all_cl_client_contexts[0],
+                network_params.seconds_per_slot,
                 goomy_blob_params,
             )
             plan.print("Succesfully launched goomy the blob spammer")

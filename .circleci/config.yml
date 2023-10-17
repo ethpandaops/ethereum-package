@@ -273,7 +273,6 @@ workflows:
           <<: *setup_kurtosis_k3s
       - mix_with_tools_k8s:
           <<: *setup_kurtosis_k3s
-      - mix_with_tools_docker
 
   build:
     when: << pipeline.parameters.should-enable-build-workflow >>
@@ -316,6 +315,12 @@ workflows:
 
       - mev_k8s:
           <<: *setup_kurtosis_k3s
+          filters:
+            branches:
+              ignore:
+                - main
+
+      - mix_with_tools_docker:
           filters:
             branches:
               ignore:
