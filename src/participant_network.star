@@ -84,15 +84,15 @@ def launch_participant_network(
         total_number_of_validator_keys += participant.validator_count
 
     plan.print("Generating EL CL data")
-    # we are running capella (deprecated)
+    # we are running bellatrix genesis (deprecated) - will be removed in the future
     if (
         network_params.capella_fork_epoch > 0
         and network_params.electra_fork_epoch == None
     ):
         ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:1.3.12"
+            "ethpandaops/ethereum-genesis-generator:1.3.13"
         )
-    # we are running dencun default behavior
+    # we are running capella genesis - default behavior
     elif (
         network_params.capella_fork_epoch == 0
         and network_params.electra_fork_epoch == None
@@ -100,14 +100,14 @@ def launch_participant_network(
         ethereum_genesis_generator_image = (
             "ethpandaops/ethereum-genesis-generator:2.0.3"
         )
-    # we are running electra
+    # we are running electra - experimental
     elif network_params.electra_fork_epoch != None:
         ethereum_genesis_generator_image = (
             "ethpandaops/ethereum-genesis-generator:3.0.0-rc.10"
         )
     else:
         fail(
-            "Unsupported fork epoch configuration, need to define either deneb_fork_epoch or electra_fork_epoch"
+            "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
         )
 
     el_cl_genesis_config_template = read_file(
