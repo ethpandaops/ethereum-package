@@ -1,15 +1,10 @@
-prelaunch_data_generator_launcher = import_module(
-    "../../prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star"
-)
-
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 keystore_files_module = import_module(
-    "../../prelaunch_data_generator/cl_validator_keystores/keystore_files.star"
+    "./keystore_files.star"
 )
 keystores_result = import_module(
-    "../../prelaunch_data_generator/cl_validator_keystores/generate_keystores_result.star"
+    "./generate_keystores_result.star"
 )
-
 
 NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores"
 
@@ -17,7 +12,7 @@ NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores"
 PRYSM_PASSWORD = "password"
 PRYSM_PASSWORD_FILEPATH_ON_GENERATOR = "/tmp/prysm-password.txt"
 
-KEYSTORES_GENERATION_TOOL_NAME = "eth2-val-tools"
+KEYSTORES_GENERATION_TOOL_NAME = "/app/eth2-val-tools"
 
 SUCCESSFUL_EXEC_CMD_EXIT_CODE = 0
 
@@ -32,17 +27,68 @@ TEKU_SECRETS_DIRNAME = "teku-secrets"
 
 KEYSTORE_GENERATION_FINISHED_FILEPATH_FORMAT = "/tmp/keystores_generated-{0}-{1}"
 
+SERVICE_NAME_PREFIX = "validator-key-generation-"
+
+ENTRYPOINT_ARGS = [
+    "sleep",
+    "999999",
+]
+
+
+# Launches a prelaunch data generator IMAGE, for use in various of the genesis generation
+def launch_prelaunch_data_generator(
+    plan,
+    files_artifact_mountpoints,
+    service_name_suffix,
+):
+    config = get_config(
+        files_artifact_mountpoints
+    )
+
+    service_name = "{0}{1}".format(
+        SERVICE_NAME_PREFIX,
+        service_name_suffix,
+    )
+    plan.add_service(service_name, config)
+
+    return service_name
+
+
+def launch_prelaunch_data_generator_parallel(
+    plan,
+    files_artifact_mountpoints,
+    service_name_suffixes
+):
+    config = get_config(
+        files_artifact_mountpoints,
+    )
+    service_names = [
+        "{0}{1}".format(
+            SERVICE_NAME_PREFIX,
+            service_name_suffix,
+        )
+        for service_name_suffix in service_name_suffixes
+    ]
+    services_to_add = {service_name: config for service_name in service_names}
+    plan.add_services(services_to_add)
+    return service_names
+
+
+def get_config(files_artifact_mountpoints):
+    return ServiceConfig(
+        image="protolambda/eth2-val-tools:latest",
+        entrypoint=ENTRYPOINT_ARGS,
+        files=files_artifact_mountpoints,
+    )
 
 # Generates keystores for the given number of nodes from the given mnemonic, where each keystore contains approximately
 #
 # 	num_keys / num_nodes keys
-def generate_cl_validator_keystores(plan, mnemonic, participants):
-    service_name = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
+def generate_validator_keystores(plan, mnemonic, participants):
+    service_name = launch_prelaunch_data_generator(
         plan,
         {},
-        "cl-validator-keystore",
-        capella_fork_epoch=0,  # It doesn't matter how the validator keys are generated
-        electra_fork_epoch=None,  # It doesn't matter how the validator keys are generated
+        "cl-validator-keystore"
     )
 
     all_output_dirpaths = []
@@ -147,13 +193,11 @@ def generate_cl_validator_keystores(plan, mnemonic, participants):
 
 
 # this is like above but runs things in parallel - for large networks that run on k8s or gigantic dockers
-def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
-    service_names = prelaunch_data_generator_launcher.launch_prelaunch_data_generator_parallel(
+def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
+    service_names = launch_prelaunch_data_generator_parallel(
         plan,
         {},
-        ["cl-validator-keystore-" + str(idx) for idx in range(0, len(participants))],
-        capella_fork_epoch=0,  # It doesn't matter how the validator keys are generated
-        electra_fork_epoch=None,
+        ["cl-validator-keystore-" + str(idx) for idx in range(0, len(participants))]
     )  # It doesn't matter how the validator keys are generated
 
     all_output_dirpaths = []
@@ -281,7 +325,3 @@ def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
 
     # we don't cleanup the containers as its a costly operation
     return result
-
-
-def zfill_custom(value, width):
-    return ("0" * (width - len(str(value)))) + str(value)

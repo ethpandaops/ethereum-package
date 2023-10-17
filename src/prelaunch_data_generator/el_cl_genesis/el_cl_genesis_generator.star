@@ -1,9 +1,5 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 
-prelaunch_data_generator_launcher = import_module(
-    "../../prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star"
-)
-
 el_cl_genesis_data = import_module("./el_cl_genesis_data.star")
 
 GENESIS_VALUES_PATH = "/opt"
