@@ -26,6 +26,7 @@ SENDER = os.getenv("SENDER_PRIVATE_KEY", "17fdf89989597e8bcac6cdfcc001b6241c64ce
 RECEIVER = os.getenv("RECEIVER_PUBLIC_KEY", "0x878705ba3f8Bc32FCf7F4CAa1A35E72AF65CF766")
 EL_URI = os.getenv("EL_RPC_URI", 'http://0.0.0.0:53913')
 
+
 def send_transaction():
     # Setting w3 as constant causes recursion exceeded error after ~500 transactions
     # Thus it's created everytime a transaction is sent
@@ -40,8 +41,9 @@ def send_transaction():
         "to": RECEIVER,
         "data": "0xabcd",
         "gasPrice": w3.eth.gas_price,
-        "nonce": w3.eth.get_transaction_count(sender_account.address)
     }
+
+    estimated_gas = w3.eth.estimate_gas(transaction)
 
     transaction["gas"] = estimated_gas
 
@@ -50,6 +52,7 @@ def send_transaction():
     tx = w3.eth.get_transaction(tx_hash)
     logging.info(tx_hash.hex())
     assert tx["from"] == sender_account.address
+
 
 def delayed_send(interval_between_transactions):
     send_transaction()
@@ -65,7 +68,7 @@ def run_infinitely(interval_between_transactions):
         try:
             spam()
         except Exception as e:
-            print("e")
+            print(e)
             print("restarting flood as previous one failed")
 
 
