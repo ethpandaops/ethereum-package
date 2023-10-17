@@ -45,6 +45,7 @@ CL_NODE_STARTUP_TIME = 5
 
 CL_CLIENT_CONTEXT_BOOTNODE = None
 
+
 def launch_participant_network(
     plan,
     participants,
@@ -370,8 +371,10 @@ def launch_participant_network(
         el_cl_data.files_artifact_uuid,
     )
 
+
 def zfill_custom(value, width):
     return ("0" * (width - len(str(value)))) + str(value)
+
 
 # this is a python procedure so that Kurtosis can do idempotent runs
 # time.now() runs everytime bringing non determinism

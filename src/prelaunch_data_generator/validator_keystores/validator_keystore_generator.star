@@ -1,10 +1,6 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-keystore_files_module = import_module(
-    "./keystore_files.star"
-)
-keystores_result = import_module(
-    "./generate_keystores_result.star"
-)
+keystore_files_module = import_module("./keystore_files.star")
+keystores_result = import_module("./generate_keystores_result.star")
 
 NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores"
 
@@ -41,9 +37,7 @@ def launch_prelaunch_data_generator(
     files_artifact_mountpoints,
     service_name_suffix,
 ):
-    config = get_config(
-        files_artifact_mountpoints
-    )
+    config = get_config(files_artifact_mountpoints)
 
     service_name = "{0}{1}".format(
         SERVICE_NAME_PREFIX,
@@ -55,9 +49,7 @@ def launch_prelaunch_data_generator(
 
 
 def launch_prelaunch_data_generator_parallel(
-    plan,
-    files_artifact_mountpoints,
-    service_name_suffixes
+    plan, files_artifact_mountpoints, service_name_suffixes
 ):
     config = get_config(
         files_artifact_mountpoints,
@@ -81,15 +73,12 @@ def get_config(files_artifact_mountpoints):
         files=files_artifact_mountpoints,
     )
 
+
 # Generates keystores for the given number of nodes from the given mnemonic, where each keystore contains approximately
 #
 # 	num_keys / num_nodes keys
 def generate_validator_keystores(plan, mnemonic, participants):
-    service_name = launch_prelaunch_data_generator(
-        plan,
-        {},
-        "cl-validator-keystore"
-    )
+    service_name = launch_prelaunch_data_generator(plan, {}, "cl-validator-keystore")
 
     all_output_dirpaths = []
     all_sub_command_strs = []
@@ -197,7 +186,7 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     service_names = launch_prelaunch_data_generator_parallel(
         plan,
         {},
-        ["cl-validator-keystore-" + str(idx) for idx in range(0, len(participants))]
+        ["cl-validator-keystore-" + str(idx) for idx in range(0, len(participants))],
     )  # It doesn't matter how the validator keys are generated
 
     all_output_dirpaths = []
@@ -325,3 +314,7 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
 
     # we don't cleanup the containers as its a costly operation
     return result
+
+
+def zfill_custom(value, width):
+    return ("0" * (width - len(str(value)))) + str(value)
