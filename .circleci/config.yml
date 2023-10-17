@@ -244,6 +244,13 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
 
+  mix_with_tools_docker:
+  executor: ubuntu_vm
+  steps:
+    - <<: *setup_kurtosis
+    - checkout
+    - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
+
 workflows:
   check_latest_version:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
@@ -266,6 +273,7 @@ workflows:
           <<: *setup_kurtosis_k3s
       - mix_with_tools_k8s:
           <<: *setup_kurtosis_k3s
+      - mix_with_tools_docker
 
   build:
     when: << pipeline.parameters.should-enable-build-workflow >>
