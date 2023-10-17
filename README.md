@@ -261,7 +261,8 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "additional_services": [
         "tx_spammer",
         "blob_spammer",
-        "goomy_blob"
+        "custom_flood",
+        "goomy_blob",
         "el_forkmon",
         "beacon_metrics_gazer",
         "dora",
@@ -316,9 +317,10 @@ To configure the package behaviour, you can modify your `network_params.json` fi
       "mev_flood_extra_args": [],
       // Number of seconds between bundles for mev-flood
       "mev_flood_seconds_per_bundle": 15,
-      // A custom flood script that increases the balance of the coinbase addresss leading to more reliable
-      // payload delivery
-      "launch_custom_flood": false
+      // Optional parameters to send to the custom_flood script that sends reliable payloads
+      "custom_flood_params": {
+        "interval_between_transactions": 1
+      }
     },
     // A list of locators for grafana dashboards to be loaded be the grafana service
     "grafana_additional_dashboards": []
