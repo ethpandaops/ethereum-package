@@ -25,8 +25,17 @@
         "cl_client_type": "teku"
       }
     ],
-    "network_params": {
-      "capella_fork_epoch": 1
-    }
+    "additional_services": [
+      "tx_spammer",
+      "blob_spammer",
+      "el_forkmon",
+      "beacon_metrics_gazer",
+      "dora",
+      "prometheus_grafana",
+      "goomy_blob",
+      "full_beaconchain_explorer",
+      "custom_flood"
+    ],
+    "mev_type": "full"
   }
   
