@@ -99,7 +99,8 @@ def parse_input(plan, input_args):
     if (
         result.get("mev_type") == "full"
         and result["network_params"]["capella_fork_epoch"] == 0
-        and result["mev_params"]["mev_relay_image"] == MEV_BOOST_RELAY_IMAGE_NON_ZERO_CAPELLA
+        and result["mev_params"]["mev_relay_image"]
+        == MEV_BOOST_RELAY_IMAGE_NON_ZERO_CAPELLA
     ):
         fail(
             "The default MEV image {0} requires a non-zero value for capella fork epoch set via network_params.capella_fork_epoch".format(
