@@ -27,7 +27,7 @@ SERVICE_NAME_PREFIX = "validator-key-generation-"
 
 ENTRYPOINT_ARGS = [
     "sleep",
-    "10",
+    "99999",
 ]
 
 
