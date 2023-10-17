@@ -27,7 +27,7 @@ SERVICE_NAME_PREFIX = "validator-key-generation-"
 
 ENTRYPOINT_ARGS = [
     "sleep",
-    "999999",
+    "10",
 ]
 
 
@@ -119,7 +119,7 @@ def generate_validator_keystores(plan, mnemonic, participants):
         if participant.validator_count == 0:
             keystore_files.append(None)
             continue
-        padded_idx = zfill_custom(idx + 1, len(str(len(participants))))
+        padded_idx = shared_utils.zfill_custom(idx + 1, len(str(len(participants))))
         keystore_start_index = running_total_validator_count
         running_total_validator_count += participant.validator_count
         keystore_stop_index = (keystore_start_index + participant.validator_count) - 1
@@ -187,8 +187,7 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
         plan,
         {},
         ["cl-validator-keystore-" + str(idx) for idx in range(0, len(participants))],
-    )  # It doesn't matter how the validator keys are generated
-
+    )
     all_output_dirpaths = []
     all_generation_commands = []
     finished_files_to_verify = []
@@ -198,8 +197,9 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
         if participant.validator_count == 0:
             all_output_dirpaths.append(output_dirpath)
             continue
-        start_index = idx * participant.validator_count
-        stop_index = (idx + 1) * participant.validator_count
+        start_index = running_total_validator_count
+        running_total_validator_count += participant.validator_count
+        stop_index = start_index + participant.validator_count
         generation_finished_filepath = (
             KEYSTORE_GENERATION_FINISHED_FILEPATH_FORMAT.format(start_index, stop_index)
         )
@@ -248,14 +248,13 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     keystore_files = []
     running_total_validator_count = 0
     for idx, participant in enumerate(participants):
+        output_dirpath = all_output_dirpaths[idx]
         if participant.validator_count == 0:
             keystore_files.append(None)
             continue
         service_name = service_names[idx]
-        output_dirpath = all_output_dirpaths[idx]
 
-        running_total_validator_count += participant.validator_count
-        padded_idx = zfill_custom(idx + 1, len(str(len(participants))))
+        padded_idx = shared_utils.zfill_custom(idx + 1, len(str(len(participants))))
         keystore_start_index = running_total_validator_count
         running_total_validator_count += participant.validator_count
         keystore_stop_index = (keystore_start_index + participant.validator_count) - 1
@@ -314,7 +313,3 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
 
     # we don't cleanup the containers as its a costly operation
     return result
-
-
-def zfill_custom(value, width):
-    return ("0" * (width - len(str(value)))) + str(value)

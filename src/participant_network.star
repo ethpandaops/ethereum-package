@@ -5,7 +5,7 @@ validator_keystores = import_module(
 el_cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
 )
-
+shared_utils = import_module("./shared_utils/shared_utils.star")
 static_files = import_module("./static_files/static_files.star")
 
 geth = import_module("./el/geth/geth_launcher.star")
@@ -62,10 +62,8 @@ def launch_participant_network(
             plan, network_params.preregistered_validator_keys_mnemonic, participants
         )
     else:
-        validator_data = (
-            validator_keystores.generate_cl_valdiator_keystores_in_parallel(
-                plan, network_params.preregistered_validator_keys_mnemonic, participants
-            )
+        validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
+            plan, network_params.preregistered_validator_keys_mnemonic, participants
         )
 
     plan.print(json.indent(json.encode(validator_data)))
@@ -180,7 +178,7 @@ def launch_participant_network(
         )
 
         # Zero-pad the index using the calculated zfill value
-        index_str = zfill_custom(index + 1, len(str(len(participants))))
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
         el_service_name = "el-{0}-{1}-{2}".format(
             index_str, el_client_type, cl_client_type
@@ -255,7 +253,7 @@ def launch_participant_network(
             cl_launchers[cl_client_type]["launch_method"],
         )
 
-        index_str = zfill_custom(index + 1, len(str(len(participants))))
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
         cl_service_name = "cl-{0}-{1}-{2}".format(
             index_str, cl_client_type, el_client_type
