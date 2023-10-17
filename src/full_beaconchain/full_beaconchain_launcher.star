@@ -104,28 +104,39 @@ def launch_full_beacon(
 
     # Initialize the db schema
     initdbschema = plan.add_service(
-        name="explorer-initdbschema",
+        name="explorer-schema-initializer",
         config=ServiceConfig(
             image=IMAGE_NAME,
             files={
                 "/app/config/": config_files_artifact_name,
             },
-            entrypoint=["./misc"],
-            cmd=["-config", "/app/config/config.yml", "-command", "applyDbSchema"],
+            entrypoint=["tail", "-f", "/dev/null"],
         ),
     )
+
+    plan.print("applying db schema")
+    plan.exec(
+        service_name=initdbschema.name,
+        recipe=ExecRecipe(
+            ["./misc", "-config", "/app/config/config.yml", "-command", "applyDbSchema"]
+        ),
+    )
+
+    plan.print("applying big table schema")
     # Initialize the bigtable schema
-    initbigtableschema = plan.add_service(
-        name="explorer-initbigtableschema",
-        config=ServiceConfig(
-            image=IMAGE_NAME,
-            files={
-                "/app/config/": config_files_artifact_name,
-            },
-            entrypoint=["./misc"],
-            cmd=["-config", "/app/config/config.yml", "-command", "initBigtableSchema"],
+    plan.exec(
+        service_name=initdbschema.name,
+        recipe=ExecRecipe(
+            [
+                "./misc",
+                "-config",
+                "/app/config/config.yml",
+                "-command",
+                "initBigtableSchema",
+            ]
         ),
     )
+
     # Start the indexer
     indexer = plan.add_service(
         name="explorer-indexer",
