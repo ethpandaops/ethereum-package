@@ -1,6 +1,6 @@
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
-    "erigon": "thorax/erigon:devel",
+    "erigon": "ethpandaops/erigon:devel",
     "nethermind": "nethermind/nethermind:latest",
     "besu": "hyperledger/besu:develop",
     "reth": "ghcr.io/paradigmxyz/reth",
@@ -15,7 +15,7 @@ DEFAULT_CL_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
 }
 
-MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.26"
+MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.27"
 
 NETHERMIND_NODE_NAME = "nethermind"
 NIMBUS_NODE_NAME = "nimbus"
