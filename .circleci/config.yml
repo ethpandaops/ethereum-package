@@ -245,11 +245,11 @@ jobs:
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
 
   mix_with_tools_docker:
-  executor: ubuntu_vm
-  steps:
-    - <<: *setup_kurtosis
-    - checkout
-    - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
 
 workflows:
   check_latest_version:
