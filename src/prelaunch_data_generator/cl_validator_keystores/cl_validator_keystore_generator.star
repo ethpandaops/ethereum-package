@@ -165,6 +165,7 @@ def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
         if participant.validator_count == 0:
             all_generation_commands.append(None)
             all_output_dirpaths.append(None)
+            finished_files_to_verify.append(None)
             continue
         start_index = idx * participant.validator_count
         stop_index = (idx + 1) * participant.validator_count
