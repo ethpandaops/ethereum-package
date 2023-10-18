@@ -197,7 +197,9 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     for idx, participant in enumerate(participants):
         output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx)
         if participant.validator_count == 0:
-            all_output_dirpaths.append(output_dirpath)
+            all_generation_commands.append(None)
+            all_output_dirpaths.append(None)
+            finished_files_to_verify.append(None)
             continue
         start_index = running_total_validator_count
         running_total_validator_count += participant.validator_count
@@ -223,6 +225,9 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     for idx in range(0, len(participants)):
         service_name = service_names[idx]
         generation_command = all_generation_commands[idx]
+        if generation_command == None:
+            # no generation command as validator count is 0
+            continue
         plan.exec(
             recipe=ExecRecipe(
                 command=["sh", "-c", generation_command + " >/dev/null 2>&1 &"]
@@ -234,6 +239,9 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     for idx in range(0, len(participants)):
         service_name = service_names[idx]
         output_dirpath = all_output_dirpaths[idx]
+        if output_dirpath == None:
+            # no output dir path as validator count is 0
+            continue
         generation_finished_filepath = finished_files_to_verify[idx]
         verificaiton_command = ["ls", generation_finished_filepath]
         plan.wait(

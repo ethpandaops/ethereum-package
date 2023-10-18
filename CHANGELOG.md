@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](https://github.com/kurtosis-tech/ethereum-package/compare/0.6.0...0.6.1) (2023-10-17)
+
+
+### Bug Fixes
+
+* `get_transaction_count` does not count pending transactions ([#299](https://github.com/kurtosis-tech/ethereum-package/issues/299)) ([2c64de0](https://github.com/kurtosis-tech/ethereum-package/commit/2c64de058ff0b8b207b6f6908c2daa6c321f12c4))
+* big table spin up logic for k8s ([#298](https://github.com/kurtosis-tech/ethereum-package/issues/298)) ([e01ce16](https://github.com/kurtosis-tech/ethereum-package/commit/e01ce1602addba1eb132ebbe0c03439fdf060f58))
+
 ## [0.6.0](https://github.com/kurtosis-tech/ethereum-package/compare/0.5.1...0.6.0) (2023-10-17)
 
 
