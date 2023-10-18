@@ -228,7 +228,6 @@ def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
         service_name = service_names[idx]
         output_dirpath = all_output_dirpaths[idx]
 
-        running_total_validator_count += participant.validator_count
         padded_idx = zfill_custom(idx + 1, len(str(len(participants))))
         keystore_start_index = running_total_validator_count
         running_total_validator_count += participant.validator_count
