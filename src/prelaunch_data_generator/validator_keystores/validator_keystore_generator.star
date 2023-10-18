@@ -10,6 +10,8 @@ PRYSM_PASSWORD_FILEPATH_ON_GENERATOR = "/tmp/prysm-password.txt"
 
 KEYSTORES_GENERATION_TOOL_NAME = "/app/eth2-val-tools"
 
+ETH_VAL_TOOLS_IMAGE = "protolambda/eth2-val-tools:latest"
+
 SUCCESSFUL_EXEC_CMD_EXIT_CODE = 0
 
 RAW_KEYS_DIRNAME = "keys"
@@ -68,7 +70,7 @@ def launch_prelaunch_data_generator_parallel(
 
 def get_config(files_artifact_mountpoints):
     return ServiceConfig(
-        image="protolambda/eth2-val-tools:latest",
+        image=ETH_VAL_TOOLS_IMAGE,
         entrypoint=ENTRYPOINT_ARGS,
         files=files_artifact_mountpoints,
     )
