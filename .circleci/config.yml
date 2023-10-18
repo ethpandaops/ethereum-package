@@ -335,6 +335,6 @@ workflows:
 
       - parallel_key_store_generation:
           filters:
-            brances:
+            branches:
               ignore:
                 - main
