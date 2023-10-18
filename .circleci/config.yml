@@ -251,6 +251,25 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
 
+  parallel_key_store_generation_1:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/parallel-keystores-1.json)"
+  parallel_key_store_generation_2:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/parallel-keystores-2.json)"
+  parallel_key_store_generation_3:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/parallel-keystores-3.json)"
+
 workflows:
   check_latest_version:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
@@ -301,12 +320,12 @@ workflows:
           filters:
             branches:
               ignore:
-                - main                
+                - main
       - lint:
           filters:
             branches:
               ignore:
-                - main                
+                - main
       - mev:
           filters:
             branches:
@@ -321,6 +340,22 @@ workflows:
                 - main
 
       - mix_with_tools_docker:
+          filters:
+            branches:
+              ignore:
+                - main
+
+      - parallel_key_store_generation_1:
+          filters:
+            branches:
+              ignore:
+                - main
+      - parallel_key_store_generation_2:
+          filters:
+            branches:
+              ignore:
+                - main
+      - parallel_key_store_generation_3:
           filters:
             branches:
               ignore:
