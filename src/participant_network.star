@@ -90,7 +90,7 @@ def launch_participant_network(
         and network_params.electra_fork_epoch == None
     ):
         ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:1.3.13"
+            "ethpandaops/ethereum-genesis-generator:1.3.14"
         )
     # we are running capella genesis - default behavior
     elif (
@@ -98,7 +98,7 @@ def launch_participant_network(
         and network_params.electra_fork_epoch == None
     ):
         ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:2.0.3"
+            "ethpandaops/ethereum-genesis-generator:2.0.4"
         )
     # we are running electra - experimental
     elif network_params.electra_fork_epoch != None:
