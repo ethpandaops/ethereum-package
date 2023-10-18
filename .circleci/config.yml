@@ -251,6 +251,13 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
 
+  parallel_key_store_generation:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/parallel-keystores.json)"
+
 workflows:
   check_latest_version:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
@@ -323,5 +330,11 @@ workflows:
       - mix_with_tools_docker:
           filters:
             branches:
+              ignore:
+                - main
+
+      - parallel_key_store_generation:
+          filters:
+            brances:
               ignore:
                 - main
