@@ -53,21 +53,17 @@ The participant network is the beating heart at the center of the package. The p
 
 We'll explain these phases one by one.
 
-### Generating EL client data
+### Generating EL and CL client data
 
-All EL clients require both a genesis file and a JWT secret. The exact format of the genesis file differs per client, so we first leverage [a Docker image containing tools for generating this genesis data][ethereum-genesis-generator] to create the actual files that the EL clients-to-be will need. This is accomplished by filling in several genesis generation config files found in [the `static_files` directory][static-files].
+All EL clients require both a genesis file and a JWT secret. The exact format of the genesis file differs per client, so we first leverage [a Docker image containing tools for generating this genesis data][ethereum-genesis-generator] to create the actual files that the EL clients-to-be will need. This is accomplished by filling in a single genesis generation environment config files found in [`static_files`](../static_files/genesis-generation-config/el-cl/values.env.tmpl).
 
-The generated output files then get stored in the Kurtosis enclave, ready for use when we start the EL clients. The information about these stored files is tracked in [the `el_genesis_data` struct](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/participant_network/prelaunch_data_generator/el_genesis/el_genesis_data.star).
+CL clients, like EL clients also have a genesis and config files that they need. This is created at the same time as the EL genesis files.
+
+Then the validator keys are generated. A tool called [eth2-val-tools](https://github.com/protolambda/eth2-val-tools) is used to generate the keys. The keys are then stored as a file artifact.
 
 ### Starting EL clients
 
 Next, we plug the generated genesis data [into EL client "launchers"](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/el) to start a mining network of EL nodes. The launchers come with a `launch` function that consumes EL genesis data and produces information about the running EL client node. Running EL node information is represented by [an `el_client_context` struct](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/participant_network/el/el_client_context.star). Each EL client type has its own launcher (e.g. [Geth](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/el/geth), [Besu](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/el/besu)) because each EL client will require different environment variables and flags to be set when launching the client's container.
-
-### Generating CL client data
-
-CL clients, like EL clients, also have genesis and config files that they need. We use [the same Docker image with tools for generating genesis data][ethereum-genesis-generator] to create the necessary CL files, we provide the genesis generation config using templates in [the `static_files` directory][static-files], and we store the generated output files in the Kurtosis enclave in the same way as the EL client genesis files. Like with EL nodes, CL genesis data information is tracked in [the `cl_client_context` struct](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/participant_network/el/el_client_context.star).
-
-The major difference with CL clients is that CL clients have validator keys, so we need to generate keys for the CL clients to use during validation. The generation happens using [the same genesis-generating Docker image][ethereum-genesis-generator], but via a call to [a different tool bundled inside the Docker image](https://github.com/protolambda/eth2-val-tools).
 
 ### Starting CL clients
 

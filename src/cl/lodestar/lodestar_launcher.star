@@ -6,7 +6,6 @@ cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star
 
 package_io = import_module("../../package_io/constants.star")
 
-GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/genesis"
 #  ---------------------------------- Beacon client -------------------------------------
 CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/consensus-data"
 # Port IDs
@@ -108,7 +107,7 @@ def launch(
 
     # Launch Beacon node
     beacon_config = get_beacon_config(
-        launcher.cl_genesis_data,
+        launcher.el_cl_genesis_data,
         image,
         bootnode_contexts,
         el_client_context,
@@ -138,7 +137,7 @@ def launch(
         v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
         validator_config = get_validator_config(
             validator_node_service_name,
-            launcher.cl_genesis_data,
+            launcher.el_cl_genesis_data,
             image,
             log_level,
             beacon_http_url,
@@ -196,7 +195,7 @@ def launch(
 
 
 def get_beacon_config(
-    genesis_data,
+    el_cl_genesis_data,
     image,
     bootnode_contexts,
     el_client_context,
@@ -226,26 +225,18 @@ def get_beacon_config(
             el_client_context.engine_rpc_port_num,
         )
 
-    genesis_config_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.config_yml_rel_filepath,
-    )
-    genesis_ssz_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.genesis_ssz_rel_filepath,
-    )
-    jwt_secret_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.jwt_secret_rel_filepath,
-    )
     cmd = [
         "beacon",
         "--logLevel=" + log_level,
         "--port={0}".format(DISCOVERY_PORT_NUM),
         "--discoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--dataDir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--paramsFile=" + genesis_config_filepath,
-        "--genesisStateFile=" + genesis_ssz_filepath,
+        "--paramsFile="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
+        "--genesisStateFile="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.ssz",
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
         "--discv5=true",
@@ -262,7 +253,7 @@ def get_beacon_config(
         "--enr.udp={0}".format(DISCOVERY_PORT_NUM),
         # Set per Pari's recommendation to reduce noise in the logs
         "--subscribeAllSubnets=true",
-        "--jwt-secret={0}".format(jwt_secret_filepath),
+        "--jwt-secret=" + package_io.JWT_AUTH_PATH,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics.address=0.0.0.0",
@@ -287,7 +278,7 @@ def get_beacon_config(
         ports=BEACON_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: genesis_data.files_artifact_uuid
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
@@ -300,7 +291,7 @@ def get_beacon_config(
 
 def get_validator_config(
     service_name,
-    genesis_data,
+    el_cl_genesis_data,
     image,
     log_level,
     beacon_client_http_url,
@@ -315,15 +306,11 @@ def get_validator_config(
         CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_name
     )
 
-    genesis_config_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.config_yml_rel_filepath,
-    )
-
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
         node_keystore_files.raw_keys_relative_dirpath,
     )
+
     validator_secrets_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
         node_keystore_files.raw_secrets_relative_dirpath,
@@ -333,7 +320,9 @@ def get_validator_config(
         "validator",
         "--logLevel=" + log_level,
         "--dataDir=" + root_dirpath,
-        "--paramsFile=" + genesis_config_filepath,
+        "--paramsFile="
+        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
         "--beaconNodes=" + beacon_client_http_url,
         "--keystoresDir=" + validator_keys_dirpath,
         "--secretsDir=" + validator_secrets_dirpath,
@@ -354,7 +343,7 @@ def get_validator_config(
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: genesis_data.files_artifact_uuid,
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -365,7 +354,7 @@ def get_validator_config(
     )
 
 
-def new_lodestar_launcher(cl_genesis_data):
+def new_lodestar_launcher(el_cl_genesis_data):
     return struct(
-        cl_genesis_data=cl_genesis_data,
+        el_cl_genesis_data=el_cl_genesis_data,
     )

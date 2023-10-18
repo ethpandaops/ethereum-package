@@ -1,10 +1,6 @@
 {
   "participants": [
     {
-      "el_client_type": "geth",
-      "cl_client_type": "teku"
-    },
-    {
       "el_client_type": "reth",
       "cl_client_type": "teku"
     },
@@ -25,8 +21,5 @@
       "cl_client_type": "lodestar"
     }
   ],
-  "network_params": {
-    "capella_fork_epoch": 1
-  },
   "launch_additional_services": false
 }

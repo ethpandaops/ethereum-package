@@ -10,10 +10,10 @@
         "prometheus_grafana"
     ],
     "mev_params": {
-        "mev_relay_image": "flashbots/mev-boost-relay:0.27"
+        "launch_custom_flood": true,
+        "mev_relay_image": "flashbots/mev-boost-relay:0.28.0a2"
     },
     "network_params": {
-        "seconds_per_slot": 3,
-        "capella_fork_epoch": 1
+        "seconds_per_slot": 3
     }
 }

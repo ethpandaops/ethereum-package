@@ -6,7 +6,6 @@ def new_el_client_context(
     rpc_port_num,
     ws_port_num,
     engine_rpc_port_num,
-    jwt_secret,
     service_name="",
     el_metrics_info=None,
 ):
@@ -19,6 +18,5 @@ def new_el_client_context(
         rpc_port_num=rpc_port_num,
         ws_port_num=ws_port_num,
         engine_rpc_port_num=engine_rpc_port_num,
-        jwt_secret=jwt_secret,
         el_metrics_info=el_metrics_info,
     )

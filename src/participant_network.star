@@ -1,14 +1,12 @@
 cl_validator_keystores = import_module(
     "./prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star"
 )
-el_genesis_data_generator = import_module(
-    "./prelaunch_data_generator/el_genesis/el_genesis_data_generator.star"
-)
-cl_genesis_data_generator = import_module(
-    "./prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
+
+el_cl_genesis_data_generator = import_module(
+    "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
 )
 
-static_files = import_module("../static_files/static_files.star")
+static_files = import_module("./static_files/static_files.star")
 
 geth = import_module("./el/geth/geth_launcher.star")
 besu = import_module("./el/besu/besu_launcher.star")
@@ -80,49 +78,46 @@ def launch_participant_network(
     final_genesis_timestamp = get_final_genesis_timestamp(
         plan, CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME
     )
-    plan.print("Generating EL data")
-    el_genesis_generation_config_template = read_file(
-        static_files.EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
-    )
-    el_genesis_data = el_genesis_data_generator.generate_el_genesis_data(
-        plan,
-        el_genesis_generation_config_template,
-        final_genesis_timestamp,
-        network_params.network_id,
-        network_params.deposit_contract_address,
-        network_params.genesis_delay,
-        network_params.seconds_per_slot,
-        network_params.capella_fork_epoch,
-        network_params.deneb_fork_epoch,
-        network_params.electra_fork_epoch,
-    )
 
-    plan.print(json.indent(json.encode(el_genesis_data)))
-
-    plan.print("Uploading GETH prefunded keys")
-
-    geth_prefunded_keys_artifact_name = plan.upload_files(
-        static_files.GETH_PREFUNDED_KEYS_DIRPATH, name="geth-prefunded-keys"
-    )
-
-    plan.print("Uploaded GETH files succesfully")
-
-    plan.print("Generating CL data")
-
-    genesis_generation_config_yml_template = read_file(
-        static_files.CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
-    )
-    genesis_generation_mnemonics_yml_template = read_file(
-        static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH
-    )
     total_number_of_validator_keys = 0
     for participant in participants:
         total_number_of_validator_keys += participant.validator_count
-    cl_genesis_data = cl_genesis_data_generator.generate_cl_genesis_data(
+
+    plan.print("Generating EL CL data")
+    # we are running bellatrix genesis (deprecated) - will be removed in the future
+    if (
+        network_params.capella_fork_epoch > 0
+        and network_params.electra_fork_epoch == None
+    ):
+        ethereum_genesis_generator_image = (
+            "ethpandaops/ethereum-genesis-generator:1.3.14"
+        )
+    # we are running capella genesis - default behavior
+    elif (
+        network_params.capella_fork_epoch == 0
+        and network_params.electra_fork_epoch == None
+    ):
+        ethereum_genesis_generator_image = (
+            "ethpandaops/ethereum-genesis-generator:2.0.4"
+        )
+    # we are running electra - experimental
+    elif network_params.electra_fork_epoch != None:
+        ethereum_genesis_generator_image = (
+            "ethpandaops/ethereum-genesis-generator:3.0.0-rc.10"
+        )
+    else:
+        fail(
+            "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+        )
+
+    el_cl_genesis_config_template = read_file(
+        static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
+    )
+
+    el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
         plan,
-        genesis_generation_config_yml_template,
-        genesis_generation_mnemonics_yml_template,
-        el_genesis_data,
+        ethereum_genesis_generator_image,
+        el_cl_genesis_config_template,
         final_genesis_timestamp,
         network_params.network_id,
         network_params.deposit_contract_address,
@@ -130,50 +125,42 @@ def launch_participant_network(
         network_params.preregistered_validator_keys_mnemonic,
         total_number_of_validator_keys,
         network_params.genesis_delay,
+        network_params.max_churn,
+        network_params.ejection_balance,
         network_params.capella_fork_epoch,
         network_params.deneb_fork_epoch,
         network_params.electra_fork_epoch,
     )
 
-    plan.print(json.indent(json.encode(cl_genesis_data)))
-    plan.print("Generated CL genesis data succesfully, launching EL & CL Participants")
-
-    genesis_validators_root = cl_genesis_data.genesis_validators_root
-
     el_launchers = {
         package_io.EL_CLIENT_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
                 network_params.network_id,
-                el_genesis_data,
-                geth_prefunded_keys_artifact_name,
-                genesis_constants.PRE_FUNDED_ACCOUNTS,
-                genesis_validators_root,
+                el_cl_data,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
         },
         package_io.EL_CLIENT_TYPE.besu: {
-            "launcher": besu.new_besu_launcher(
-                network_params.network_id, el_genesis_data
-            ),
+            "launcher": besu.new_besu_launcher(network_params.network_id, el_cl_data),
             "launch_method": besu.launch,
         },
         package_io.EL_CLIENT_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
-                network_params.network_id, el_genesis_data
+                network_params.network_id, el_cl_data
             ),
             "launch_method": erigon.launch,
         },
         package_io.EL_CLIENT_TYPE.nethermind: {
-            "launcher": nethermind.new_nethermind_launcher(el_genesis_data),
+            "launcher": nethermind.new_nethermind_launcher(el_cl_data),
             "launch_method": nethermind.launch,
         },
         package_io.EL_CLIENT_TYPE.reth: {
-            "launcher": reth.new_reth_launcher(el_genesis_data),
+            "launcher": reth.new_reth_launcher(el_cl_data),
             "launch_method": reth.launch,
         },
         package_io.EL_CLIENT_TYPE.ethereumjs: {
-            "launcher": ethereumjs.new_ethereumjs_launcher(el_genesis_data),
+            "launcher": ethereumjs.new_ethereumjs_launcher(el_cl_data),
             "launch_method": ethereumjs.launch,
         },
     }
@@ -227,27 +214,27 @@ def launch_participant_network(
 
     cl_launchers = {
         package_io.CL_CLIENT_TYPE.lighthouse: {
-            "launcher": lighthouse.new_lighthouse_launcher(cl_genesis_data),
+            "launcher": lighthouse.new_lighthouse_launcher(el_cl_data),
             "launch_method": lighthouse.launch,
         },
         package_io.CL_CLIENT_TYPE.lodestar: {
-            "launcher": lodestar.new_lodestar_launcher(cl_genesis_data),
+            "launcher": lodestar.new_lodestar_launcher(el_cl_data),
             "launch_method": lodestar.launch,
         },
         package_io.CL_CLIENT_TYPE.nimbus: {
-            "launcher": nimbus.new_nimbus_launcher(cl_genesis_data),
+            "launcher": nimbus.new_nimbus_launcher(el_cl_data),
             "launch_method": nimbus.launch,
         },
         package_io.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
-                cl_genesis_data,
+                el_cl_data,
                 cl_validator_data.prysm_password_relative_filepath,
                 cl_validator_data.prysm_password_artifact_uuid,
             ),
             "launch_method": prysm.launch,
         },
         package_io.CL_CLIENT_TYPE.teku: {
-            "launcher": teku.new_teku_launcher(cl_genesis_data),
+            "launcher": teku.new_teku_launcher(el_cl_data),
             "launch_method": teku.launch,
         },
     }
@@ -381,7 +368,12 @@ def launch_participant_network(
 
         all_participants.append(participant_entry)
 
-    return all_participants, final_genesis_timestamp, genesis_validators_root
+    return (
+        all_participants,
+        final_genesis_timestamp,
+        el_cl_data.genesis_validators_root,
+        el_cl_data.files_artifact_uuid,
+    )
 
 
 def zfill_calculator(participants):

@@ -9,7 +9,6 @@ genesis_constants = import_module(
 node_metrics = import_module("../../node_metrics_info.star")
 package_io = import_module("../../package_io/constants.star")
 
-
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
@@ -34,28 +33,16 @@ METRICS_PORT_ID = "metrics"
 # TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
 NUM_MINING_THREADS = 1
 
-GENESIS_DATA_MOUNT_DIRPATH = "/genesis"
-
-PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
-
 METRICS_PATH = "/debug/metrics/prometheus"
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/execution-data"
-KEYSTORE_DIRPATH_ON_CLIENT_CONTAINER = (
-    EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER + "/keystore"
-)
-
-GETH_ACCOUNT_PASSWORD = (
-    "password"  #  Password that the Geth accounts will be locked with
-)
-GETH_ACCOUNT_PASSWORDS_FILE = "/tmp/password.txt"  #  Importing an account to
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
     RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    # WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
     TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
         DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
     ),
@@ -107,12 +94,9 @@ def launch(
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
 
-    config, jwt_secret_json_filepath_on_client = get_config(
+    config = get_config(
         launcher.network_id,
-        launcher.el_genesis_data,
-        launcher.prefunded_geth_keys_artifact_uuid,
-        launcher.prefunded_account_info,
-        launcher.genesis_validators_root,
+        launcher.el_cl_genesis_data,
         image,
         existing_el_clients,
         log_level,
@@ -131,10 +115,6 @@ def launch(
         plan, service_name, RPC_PORT_ID
     )
 
-    jwt_secret = shared_utils.read_file_from_service(
-        plan, service_name, jwt_secret_json_filepath_on_client
-    )
-
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     geth_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
@@ -148,7 +128,6 @@ def launch(
         RPC_PORT_NUM,
         WS_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
-        jwt_secret,
         service_name,
         [geth_metrics_info],
     )
@@ -156,10 +135,7 @@ def launch(
 
 def get_config(
     network_id,
-    genesis_data,
-    prefunded_geth_keys_artifact_uuid,
-    prefunded_account_info,
-    genesis_validators_root,
+    el_cl_genesis_data,
     image,
     existing_el_clients,
     verbosity_level,
@@ -171,52 +147,16 @@ def get_config(
     extra_env_vars,
     electra_fork_epoch,
 ):
-    genesis_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.geth_genesis_json_relative_filepath
-    )
-    jwt_secret_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath
-    )
-
-    account_addresses_to_unlock = []
-    for prefunded_account in prefunded_account_info:
-        account_addresses_to_unlock.append(prefunded_account.address)
-
-    for index, extra_param in enumerate(extra_params):
-        if package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER in extra_param:
-            extra_params[index] = extra_param.replace(
-                package_io.GENESIS_VALIDATORS_ROOT_PLACEHOLDER, genesis_validators_root
-            )
-
-    accounts_to_unlock_str = ",".join(account_addresses_to_unlock)
-
-    init_datadir_cmd_str = "geth init {0} --datadir={1} {2}".format(
+    init_datadir_cmd_str = "geth init {0} --state.scheme=path --datadir={1} {2}".format(
         "--cache.preimages" if electra_fork_epoch != None else "",
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        genesis_json_filepath_on_client,
-    )
-
-    # We need to put the keys into the right spot
-    copy_keys_into_keystore_cmd_str = "cp -r {0}/* {1}/".format(
-        PREFUNDED_KEYS_MOUNT_DIRPATH,
-        KEYSTORE_DIRPATH_ON_CLIENT_CONTAINER,
-    )
-
-    create_passwords_file_cmd_str = (
-        "{"
-        + ' for i in $(seq 1 {0}); do echo "{1}" >> {2}; done; '.format(
-            len(prefunded_account_info),
-            GETH_ACCOUNT_PASSWORD,
-            GETH_ACCOUNT_PASSWORDS_FILE,
-        )
-        + "}"
+        package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
 
     cmd = [
         "geth",
+        "--state.scheme=path",
         "--verbosity=" + verbosity_level,
-        "--unlock=" + accounts_to_unlock_str,
-        "--password=" + GETH_ACCOUNT_PASSWORDS_FILE,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--networkid=" + network_id,
         "--http",
@@ -237,7 +177,7 @@ def get_config(
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret={0}".format(jwt_secret_json_filepath_on_client),
+        "--authrpc.jwtsecret=" + package_io.JWT_AUTH_PATH,
         "--syncmode=full",
         "--rpc.allow-unprotected-txs",
         "--metrics",
@@ -268,46 +208,34 @@ def get_config(
 
     subcommand_strs = [
         init_datadir_cmd_str,
-        copy_keys_into_keystore_cmd_str,
-        create_passwords_file_cmd_str,
         cmd_str,
     ]
     command_str = " && ".join(subcommand_strs)
 
-    return (
-        ServiceConfig(
-            image=image,
-            ports=USED_PORTS,
-            cmd=[command_str],
-            files={
-                GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid,
-                PREFUNDED_KEYS_MOUNT_DIRPATH: prefunded_geth_keys_artifact_uuid,
-            },
-            entrypoint=ENTRYPOINT_ARGS,
-            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            min_cpu=el_min_cpu,
-            max_cpu=el_max_cpu,
-            min_memory=el_min_mem,
-            max_memory=el_max_mem,
-            env_vars=extra_env_vars,
-        ),
-        jwt_secret_json_filepath_on_client,
+    return ServiceConfig(
+        image=image,
+        ports=USED_PORTS,
+        cmd=[command_str],
+        files={
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+        },
+        entrypoint=ENTRYPOINT_ARGS,
+        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=el_min_cpu,
+        max_cpu=el_max_cpu,
+        min_memory=el_min_mem,
+        max_memory=el_max_mem,
+        env_vars=extra_env_vars,
     )
 
 
 def new_geth_launcher(
     network_id,
-    el_genesis_data,
-    prefunded_geth_keys_artifact_uuid,
-    prefunded_account_info,
-    genesis_validators_root="",
+    el_cl_genesis_data,
     electra_fork_epoch=None,
 ):
     return struct(
         network_id=network_id,
-        el_genesis_data=el_genesis_data,
-        prefunded_account_info=prefunded_account_info,
-        prefunded_geth_keys_artifact_uuid=prefunded_geth_keys_artifact_uuid,
-        genesis_validators_root=genesis_validators_root,
+        el_cl_genesis_data=el_cl_genesis_data,
         electra_fork_epoch=electra_fork_epoch,
     )

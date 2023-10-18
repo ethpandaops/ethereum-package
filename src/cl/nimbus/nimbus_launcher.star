@@ -6,8 +6,6 @@ cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star
 
 package_io = import_module("../../package_io/constants.star")
 
-GENESIS_DATA_MOUNTPOINT_ON_CLIENT = "/genesis-data"
-
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT = "/validator-keys"
 
 # Port IDs
@@ -116,7 +114,7 @@ def launch(
     bn_max_mem = int(v_max_mem) if (int(v_max_mem) > bn_max_mem) else bn_max_mem
 
     config = get_config(
-        launcher.cl_genesis_data,
+        launcher.el_cl_genesis_data,
         image,
         bootnode_contexts,
         el_client_context,
@@ -170,7 +168,7 @@ def launch(
 
 
 def get_config(
-    genesis_data,
+    el_cl_genesis_data,
     image,
     bootnode_contexts,
     el_client_context,
@@ -195,15 +193,6 @@ def get_config(
             el_client_context.ip_addr,
             el_client_context.engine_rpc_port_num,
         )
-
-    # For some reason, Nimbus takes in the parent directory of the config file (rather than the path to the config file itself)
-    genesis_config_parent_dirpath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNTPOINT_ON_CLIENT,
-        shared_utils.path_dir(genesis_data.config_yml_rel_filepath),
-    )
-    jwt_secret_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNTPOINT_ON_CLIENT, genesis_data.jwt_secret_rel_filepath
-    )
 
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -259,7 +248,7 @@ def get_config(
         "--log-level=" + log_level,
         "--udp-port={0}".format(DISCOVERY_PORT_NUM),
         "--tcp-port={0}".format(DISCOVERY_PORT_NUM),
-        "--network=" + genesis_config_parent_dirpath_on_client,
+        "--network=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         "--data-dir=" + CONSENSUS_DATA_DIRPATH_IN_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
         "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -277,7 +266,7 @@ def get_config(
         "--subscribe-all-subnets=true",
         # Nimbus can handle a max of 256 threads, if the host has more then nimbus crashes. Setting it to 4 so it doesn't crash on build servers
         "--num-threads=4",
-        "--jwt-secret={0}".format(jwt_secret_filepath),
+        "--jwt-secret=" + package_io.JWT_AUTH_PATH,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
@@ -307,7 +296,7 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     files = {
-        GENESIS_DATA_MOUNTPOINT_ON_CLIENT: genesis_data.files_artifact_uuid,
+        package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
     }
     if node_keystore_files:
         files[
@@ -329,7 +318,7 @@ def get_config(
     )
 
 
-def new_nimbus_launcher(cl_genesis_data):
+def new_nimbus_launcher(el_cl_genesis_data):
     return struct(
-        cl_genesis_data=cl_genesis_data,
+        el_cl_genesis_data=el_cl_genesis_data,
     )

@@ -25,8 +25,5 @@
       "cl_client_type": "lighthouse"
     }
   ],
-  "network_params": {
-    "capella_fork_epoch": 1
-  },
   "launch_additional_services": false
 }

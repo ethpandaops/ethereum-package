@@ -189,7 +189,11 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 
             // Count of nodes to spin up for this participant
             // Default to 1
-            "count": 1
+            "count": 1,
+
+             // Count of the number of validators you want to run for a given participant
+             // Default to null, which means that the number of validators will be using the network parameter num_validator_keys_per_node
+             "validator_count": null
         }
     ],
 
@@ -212,6 +216,16 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
         // How long you want the network to wait before starting up
         "genesis_delay": 120,
+
+        // Max churn rate for the network introduced by
+        // EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
+        // Defaults to 8
+        "max_churn": 8,
+
+        // Ejection balance
+        // Defaults to 16ETH
+        // 16000000000 gwei
+        "ejection_balance": 16000000000,
 
         // The epoch at which the capella and deneb forks are set to occur.
         "capella_fork_epoch": 0,
@@ -245,7 +259,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     //  - A light beacon chain explorer will be launched
     //  - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
     "additional_services": [
-       "tx_spammer",
+        "tx_spammer",
         "blob_spammer",
         "custom_flood",
         "goomy_blob",
@@ -256,12 +270,6 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "prometheus_grafana"
     ],
 
-    // Which blockchain explorer should be used
-    // "dora" will use the dora explorer developped by pk910
-    // "full" will use the explorer developped by the beaconcha.in team
-    // defaults to "light"
-    "explorer_version": "dora",
-
     //  If set, the package will block until a finalized epoch has occurred.
     "wait_for_finalization": false,
 
@@ -270,7 +278,8 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     //  This value will be overridden by participant-specific values
     "global_client_log_level": "info",
 
-    // EngineAPI Snooper
+    // EngineAPI Snooper global flags for all participants
+    // Default to false
     "snooper_enabled": false,
 
     // Parallelizes keystore generation so that each node has keystores being generated in their own container
@@ -509,14 +518,14 @@ This package comes with [seven prefunded keys for testing](https://github.com/ku
 
 Here's a table of where the keys are used
 
-| Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                    |
-|---------------|---------------------|------------------|-----------------|----------------------------|
+| Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                     |
+|---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | mev_flood           | ✅                |                 | As the admin_key           |
-| 0             | mev_custom_flood    |                  | ✅               | As the receiver of balance |
+| 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 2             | mev_flood           | ✅                |                 | As the user_key            |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 4              | goomy_blob          | ✅                |                 | As the sender of blobs     |
+| 4              | goomy_blob         | ✅                |                 | As the sender of blobs     |
 | 5             | eip4788_deployment  | ✅                |                 | As contract deployer       |
 | 6             | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 

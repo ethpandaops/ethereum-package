@@ -75,6 +75,7 @@ def run(plan, args={}):
         all_participants,
         final_genesis_timestamp,
         genesis_validators_root,
+        el_cl_data_files_artifact_uuid,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults.participants,
@@ -290,7 +291,12 @@ def run(plan, args={}):
         elif additional_service == "dora":
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
-            dora.launch_dora(plan, dora_config_template, all_cl_client_contexts)
+            dora.launch_dora(
+                plan,
+                dora_config_template,
+                all_cl_client_contexts,
+                el_cl_data_files_artifact_uuid,
+            )
             plan.print("Succesfully launched dora")
         elif additional_service == "full_beaconchain_explorer":
             plan.print("Launching full-beaconchain-explorer")

@@ -11,7 +11,8 @@
 			"beacon_extra_params": [],
 			"validator_extra_params": [],
 			"builder_network_params": null,
-			"count": 1
+      "validator_count": null,
+			"count": 2
 		}
 	],
 	"network_params": {
@@ -22,7 +23,7 @@
 		"preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
 		"genesis_delay": 120,
 		"capella_fork_epoch": 0,
-		"deneb_fork_epoch": 500,
+		"deneb_fork_epoch": 4,
 		"electra_fork_epoch": null
 	},
 	"launch_additional_services": true,

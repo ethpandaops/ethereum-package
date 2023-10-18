@@ -9,8 +9,6 @@ package_io = import_module("../../package_io/constants.star")
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/home/erigon/execution-data"
 
-GENESIS_DATA_MOUNT_DIRPATH = "/genesis"
-
 METRICS_PATH = "/metrics"
 
 WS_RPC_PORT_NUM = 8545
@@ -87,9 +85,9 @@ def launch(
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
 
-    config, jwt_secret_json_filepath_on_client = get_config(
+    config = get_config(
         launcher.network_id,
-        launcher.el_genesis_data,
+        launcher.el_cl_genesis_data,
         image,
         existing_el_clients,
         log_level,
@@ -107,10 +105,6 @@ def launch(
         plan, service_name, WS_RPC_PORT_ID
     )
 
-    jwt_secret = shared_utils.read_file_from_service(
-        plan, service_name, jwt_secret_json_filepath_on_client
-    )
-
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     erigon_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
@@ -124,7 +118,6 @@ def launch(
         WS_RPC_PORT_NUM,
         WS_RPC_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
-        jwt_secret,
         service_name,
         [erigon_metrics_info],
     )
@@ -132,7 +125,7 @@ def launch(
 
 def get_config(
     network_id,
-    genesis_data,
+    el_cl_genesis_data,
     image,
     existing_el_clients,
     verbosity_level,
@@ -145,23 +138,10 @@ def get_config(
 ):
     network_id = network_id
 
-    genesis_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.erigon_genesis_json_relative_filepath
-    )
-    jwt_secret_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath
-    )
-
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        genesis_json_filepath_on_client,
+        package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
-
-    # TODO remove this based on https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/152
-    if len(existing_el_clients) == 0:
-        fail("Erigon needs at least one node to exist, which it treats as the bootnode")
-
-    boot_node_1 = existing_el_clients[0]
 
     cmd = [
         "erigon",
@@ -178,7 +158,7 @@ def get_config(
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
         "--http.port={0}".format(WS_RPC_PORT_NUM),
-        "--authrpc.jwtsecret={0}".format(jwt_secret_json_filepath_on_client),
+        "--authrpc.jwtsecret=" + package_io.JWT_AUTH_PATH,
         "--authrpc.addr=0.0.0.0",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.vhosts=*",
@@ -215,26 +195,25 @@ def get_config(
 
     command_arg_str = " && ".join(command_arg)
 
-    return (
-        ServiceConfig(
-            image=image,
-            ports=USED_PORTS,
-            cmd=[command_arg_str],
-            files={GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid},
-            entrypoint=ENTRYPOINT_ARGS,
-            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            min_cpu=el_min_cpu,
-            max_cpu=el_max_cpu,
-            min_memory=el_min_mem,
-            max_memory=el_max_mem,
-            env_vars=extra_env_vars,
-        ),
-        jwt_secret_json_filepath_on_client,
+    return ServiceConfig(
+        image=image,
+        ports=USED_PORTS,
+        cmd=[command_arg_str],
+        files={
+            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        },
+        entrypoint=ENTRYPOINT_ARGS,
+        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=el_min_cpu,
+        max_cpu=el_max_cpu,
+        min_memory=el_min_mem,
+        max_memory=el_max_mem,
+        env_vars=extra_env_vars,
     )
 
 
-def new_erigon_launcher(network_id, el_genesis_data):
+def new_erigon_launcher(network_id, el_cl_genesis_data):
     return struct(
         network_id=network_id,
-        el_genesis_data=el_genesis_data,
+        el_cl_genesis_data=el_cl_genesis_data,
     )
