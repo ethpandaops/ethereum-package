@@ -407,7 +407,7 @@ def get_default_mev_params():
     return {
         "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
         # TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
-        "mev_builder_image": "flashbots/builder:1.13.2.4844.dev5-6e6c723",
+        "mev_builder_image": "flashbots/builder:latest",
         "mev_builder_cl_image": "sigp/lighthouse:latest",
         "mev_boost_image": "flashbots/mev-boost",
         "mev_relay_api_extra_args": [],

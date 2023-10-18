@@ -6,6 +6,7 @@ el_cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
 )
 shared_utils = import_module("./shared_utils/shared_utils.star")
+
 static_files = import_module("./static_files/static_files.star")
 
 geth = import_module("./el/geth/geth_launcher.star")
