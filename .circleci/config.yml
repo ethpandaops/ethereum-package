@@ -225,6 +225,13 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"
 
+  mev_mock:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev-mock.json)"
+
   mev_k8s:
     executor: ubuntu_vm
     steps:
@@ -335,6 +342,12 @@ workflows:
               ignore:
                 - main
       - mev:
+          filters:
+            branches:
+              ignore:
+                - main
+
+      - mev_mock:
           filters:
             branches:
               ignore:
