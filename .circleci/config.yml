@@ -11,7 +11,7 @@ executors:
 parameters:
   should-enable-check-latest-version-workflow:
     type: boolean
-    default: true
+    default: false
   # To enable/disabled the check_code workflow execution which will be triggered by the PR's checkers
   should-enable-build-workflow:
     type: boolean
