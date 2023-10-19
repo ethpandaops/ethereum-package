@@ -282,6 +282,12 @@ jobs:
       - <<: *setup_kurtosis
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/disable-peer-scoring.json)"
+  petra:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/petra.json)"
 
 workflows:
   check_latest_version:
@@ -385,6 +391,12 @@ workflows:
                 - main
 
       - disable_peer_scoring:
+          filters:
+            branches:
+              ignore:
+                - main
+
+      - petra:
           filters:
             branches:
               ignore:
