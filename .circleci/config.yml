@@ -269,6 +269,12 @@ jobs:
       - <<: *setup_kurtosis
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/parallel-keystores-3.json)"
+  mock:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mock.json)"
 
 workflows:
   check_latest_version:
@@ -360,3 +366,9 @@ workflows:
             branches:
               ignore:
                 - main
+      - mock:
+          filters:
+            branches:
+              ignore:
+                - main
+

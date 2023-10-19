@@ -128,12 +128,10 @@ def run(plan, args={}):
         beacon_uri = "{0}:{1}".format(
             all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num
         )
-        jwt_secret = all_el_client_contexts[0].jwt_secret
         endpoint = mock_mev_launcher_module.launch_mock_mev(
             plan,
             el_uri,
             beacon_uri,
-            jwt_secret,
             args_with_right_defaults.global_client_log_level,
         )
         mev_endpoints.append(endpoint)
