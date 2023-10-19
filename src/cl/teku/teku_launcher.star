@@ -1,10 +1,10 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
@@ -65,11 +65,11 @@ ENTRYPOINT_ARGS = ["sh", "-c"]
 
 
 TEKU_LOG_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -230,21 +230,21 @@ def get_config(
             DEST_VALIDATOR_SECRETS_DIRPATH_IN_SERVICE_CONTAINER,
         ),
         "--validators-proposer-default-fee-recipient="
-        + package_io.VALIDATING_REWARDS_ACCOUNT,
+        + constants.VALIDATING_REWARDS_ACCOUNT,
     ]
     beacon_start = [
         TEKU_BINARY_FILEPATH_IN_IMAGE,
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
         "--network="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--initial-state="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/genesis.ssz",
         "--data-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--data-storage-mode={0}".format(
-            "ARCHIVE" if package_io.ARCHIVE_MODE else "PRUNE"
+            "ARCHIVE" if constants.ARCHIVE_MODE else "PRUNE"
         ),
         "--p2p-enabled=true",
         # Set per Pari's recommendation, to reduce noise in the logs
@@ -258,7 +258,7 @@ def get_config(
         "--rest-api-port={0}".format(HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
-        "--ee-jwt-secret-file=" + package_io.JWT_AUTH_PATH,
+        "--ee-jwt-secret-file=" + constants.JWT_AUTH_PATH,
         "--ee-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled",
@@ -282,7 +282,7 @@ def get_config(
         cmd.append(
             "--p2p-discovery-bootnodes="
             + ",".join(
-                [ctx.enr for ctx in bootnode_contexts[: package_io.MAX_ENR_ENTRIES]]
+                [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
             )
         )
         cmd.append(
@@ -290,7 +290,7 @@ def get_config(
             + ",".join(
                 [
                     ctx.multiaddr
-                    for ctx in bootnode_contexts[: package_io.MAX_ENR_ENTRIES]
+                    for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
                 ]
             )
         )
@@ -300,7 +300,7 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     files = {
-        package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
     }
     if node_keystore_files:
         files[

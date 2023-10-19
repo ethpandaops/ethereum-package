@@ -1,9 +1,10 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
+cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
 
@@ -84,11 +85,11 @@ VALIDATOR_USED_PORTS = {
 }
 
 LIGHTHOUSE_LOG_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -266,7 +267,7 @@ def get_beacon_config(
         "beacon_node",
         "--debug-level=" + log_level,
         "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--testnet-dir=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+        "--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
         "--disable-enr-auto-update",
         "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -281,14 +282,14 @@ def get_beacon_config(
         "--http-address=0.0.0.0",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--http-allow-sync-stalled",
-        "--slots-per-restore-point={0}".format(32 if package_io.ARCHIVE_MODE else 8192),
+        "--slots-per-restore-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         # NOTE: This comes from:
         #   https://github.com/sigp/lighthouse/blob/7c88f582d955537f7ffff9b2c879dcf5bf80ce13/scripts/local_testnet/beacon_node.sh
         # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
         "--disable-packet-filter",
         "--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secrets=" + package_io.JWT_AUTH_PATH,
-        "--suggested-fee-recipient=" + package_io.VALIDATING_REWARDS_ACCOUNT,
+        "--jwt-secrets=" + constants.JWT_AUTH_PATH,
+        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Paris' recommendation to reduce noise in the logs
         "--subscribe-all-subnets",
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
@@ -303,7 +304,7 @@ def get_beacon_config(
         cmd.append(
             "--boot-nodes="
             + ",".join(
-                [ctx.enr for ctx in boot_cl_client_ctxs[: package_io.MAX_ENR_ENTRIES]]
+                [ctx.enr for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]]
             )
         )
         cmd.append(
@@ -311,7 +312,7 @@ def get_beacon_config(
             + ",".join(
                 [
                     ctx.peer_id
-                    for ctx in boot_cl_client_ctxs[: package_io.MAX_ENR_ENTRIES]
+                    for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
                 ]
             )
         )
@@ -324,24 +325,18 @@ def get_beacon_config(
         endpoint="/eth/v1/node/identity", port_id=BEACON_HTTP_PORT_ID
     )
 
-    ready_conditions = ReadyCondition(
-        recipe=recipe,
-        field="code",
-        assertion="IN",
-        target_value=[200, 206],
-        timeout="15m",
-    )
-
     return ServiceConfig(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
         },
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=ready_conditions,
+        ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+            BEACON_HTTP_PORT_ID
+        ),
         min_cpu=bn_min_cpu,
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
@@ -374,7 +369,7 @@ def get_validator_config(
         "lighthouse",
         "validator_client",
         "--debug-level=" + log_level,
-        "--testnet-dir=" + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+        "--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         "--validators-dir=" + validator_keys_dirpath,
         # NOTE: When secrets-dir is specified, we can't add the --data-dir flag
         "--secrets-dir=" + validator_secrets_dirpath,
@@ -387,7 +382,7 @@ def get_validator_config(
         "--beacon-nodes=" + beacon_client_http_url,
         # "--enable-doppelganger-protection", // Disabled to not have to wait 2 epochs before validator can start
         # burn address - If unset, the validator will scream in its logs
-        "--suggested-fee-recipient=" + package_io.VALIDATING_REWARDS_ACCOUNT,
+        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
@@ -404,7 +399,7 @@ def get_validator_config(
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
         },
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},

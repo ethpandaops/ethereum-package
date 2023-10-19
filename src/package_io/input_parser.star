@@ -1,3 +1,9 @@
+constants = import_module("../package_io/constants.star")
+
+genesis_constants = import_module(
+    "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
+)
+
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
     "erigon": "ethpandaops/erigon:devel",
@@ -51,14 +57,8 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "custom_flood_params",
 )
 
-package_io_constants = import_module("../package_io/constants.star")
 
-genesis_constants = import_module(
-    "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
-)
-
-
-def parse_input(plan, input_args):
+def input_parser(plan, input_args):
     result = parse_network_params(input_args)
 
     # add default eth2 input params
@@ -513,7 +513,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--builder.bellatrix_fork_version=0x30000038",
                     "--builder.genesis_fork_version=0x10000038",
                     "--builder.genesis_validators_root={0}".format(
-                        package_io_constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
+                        constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
                     ),
                     '--miner.extradata="Illuminate Dmocratize Dstribute"',
                     "--builder.algotype=greedy",

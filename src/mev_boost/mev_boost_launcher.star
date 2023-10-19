@@ -1,12 +1,12 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 mev_boost_context_module = import_module("../mev_boost/mev_boost_context.star")
-parse_input = import_module("../package_io/parse_input.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
 USED_PORTS = {
     "api": shared_utils.new_port_spec(
-        parse_input.FLASHBOTS_MEV_BOOST_PORT, FLASHBOTS_MEV_BOOST_PROTOCOL, wait="5s"
+        input_parser.FLASHBOTS_MEV_BOOST_PORT, FLASHBOTS_MEV_BOOST_PROTOCOL, wait="5s"
     )
 }
 
@@ -23,7 +23,7 @@ def launch(plan, mev_boost_launcher, service_name, network_id, mev_boost_image):
     mev_boost_service = plan.add_service(service_name, config)
 
     return mev_boost_context_module.new_mev_boost_context(
-        mev_boost_service.ip_address, parse_input.FLASHBOTS_MEV_BOOST_PORT
+        mev_boost_service.ip_address, input_parser.FLASHBOTS_MEV_BOOST_PORT
     )
 
 
@@ -44,7 +44,7 @@ def get_config(mev_boost_launcher, network_id, mev_boost_image):
             # does this need genesis time to be set as well
             "GENESIS_FORK_VERSION": "0x10000038",
             "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(
-                parse_input.FLASHBOTS_MEV_BOOST_PORT
+                input_parser.FLASHBOTS_MEV_BOOST_PORT
             ),
             # maybe this is breaking; this isn't verifyign the bid and not sending it to the validator
             "SKIP_RELAY_SIGNATURE_CHECK": "1",

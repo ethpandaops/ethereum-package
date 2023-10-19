@@ -1,10 +1,10 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/consensus-data"
@@ -61,11 +61,11 @@ VALIDATOR_USED_PORTS = {
 
 
 LODESTAR_LOG_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -232,10 +232,10 @@ def get_beacon_config(
         "--discoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--dataDir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--paramsFile="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--genesisStateFile="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/genesis.ssz",
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
@@ -253,7 +253,7 @@ def get_beacon_config(
         "--enr.udp={0}".format(DISCOVERY_PORT_NUM),
         # Set per Pari's recommendation to reduce noise in the logs
         "--subscribeAllSubnets=true",
-        "--jwt-secret=" + package_io.JWT_AUTH_PATH,
+        "--jwt-secret=" + constants.JWT_AUTH_PATH,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics.address=0.0.0.0",
@@ -265,7 +265,7 @@ def get_beacon_config(
         cmd.append(
             "--bootnodes="
             + ",".join(
-                [ctx.enr for ctx in bootnode_contexts[: package_io.MAX_ENR_ENTRIES]]
+                [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
             )
         )
 
@@ -278,7 +278,7 @@ def get_beacon_config(
         ports=BEACON_USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
@@ -321,12 +321,12 @@ def get_validator_config(
         "--logLevel=" + log_level,
         "--dataDir=" + root_dirpath,
         "--paramsFile="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--beaconNodes=" + beacon_client_http_url,
         "--keystoresDir=" + validator_keys_dirpath,
         "--secretsDir=" + validator_secrets_dirpath,
-        "--suggestedFeeRecipient=" + package_io.VALIDATING_REWARDS_ACCOUNT,
+        "--suggestedFeeRecipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics.address=0.0.0.0",
@@ -343,7 +343,7 @@ def get_validator_config(
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,

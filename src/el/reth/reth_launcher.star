@@ -1,9 +1,9 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 el_client_context = import_module("../../el/el_client_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 
 RPC_PORT_NUM = 8545
@@ -54,11 +54,11 @@ USED_PORTS = {
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "v",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "vv",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "vvv",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "vvvv",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "vvvvv",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "v",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "vv",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "vvv",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "vvvv",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "vvvvv",
 }
 
 
@@ -136,7 +136,7 @@ def get_config(
 ):
     init_datadir_cmd_str = "reth init --datadir={0} --chain={1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
 
     cmd = [
@@ -144,9 +144,7 @@ def get_config(
         "node",
         "-{0}".format(verbosity_level),
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--chain="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/genesis.json",
+        "--chain=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         "--http",
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
@@ -161,7 +159,7 @@ def get_config(
         "--ws.origins=*",
         "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.jwtsecret=" + package_io.JWT_AUTH_PATH,
+        "--authrpc.jwtsecret=" + constants.JWT_AUTH_PATH,
         "--authrpc.addr=0.0.0.0",
         "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
     ]
@@ -172,7 +170,7 @@ def get_config(
             + ",".join(
                 [
                     ctx.enode
-                    for ctx in existing_el_clients[: package_io.MAX_ENODE_ENTRIES]
+                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
                 ]
             )
         )
@@ -194,7 +192,7 @@ def get_config(
         ports=USED_PORTS,
         cmd=[command_str],
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,

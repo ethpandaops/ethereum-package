@@ -1,10 +1,10 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 el_client_context = import_module("../../el/el_client_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 
 node_metrics = import_module("../../node_metrics_info.star")
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/execution-data"
@@ -51,11 +51,11 @@ USED_PORTS = {
 }
 
 NETHERMIND_LOG_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -135,10 +135,10 @@ def get_config(
         "--log=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--Init.ChainSpecPath="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/chainspec.json",
         "--Init.WebSocketsEnabled=true",
-        "--Init.KzgSetupPath=" + package_io.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        "--Init.KzgSetupPath=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--config=none.cfg",
         "--JsonRpc.Enabled=true",
         "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin",
@@ -150,7 +150,7 @@ def get_config(
         "--Network.ExternalIp={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--Network.DiscoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--Network.P2PPort={0}".format(DISCOVERY_PORT_NUM),
-        "--JsonRpc.JwtSecretFile=" + package_io.JWT_AUTH_PATH,
+        "--JsonRpc.JwtSecretFile=" + constants.JWT_AUTH_PATH,
         "--Network.OnlyStaticPeers=true",
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
@@ -162,7 +162,7 @@ def get_config(
             + ",".join(
                 [
                     ctx.enode
-                    for ctx in existing_el_clients[: package_io.MAX_ENODE_ENTRIES]
+                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
                 ]
             )
         )
@@ -176,7 +176,7 @@ def get_config(
         ports=USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
