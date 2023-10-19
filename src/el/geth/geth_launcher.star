@@ -147,11 +147,16 @@ def get_config(
     extra_env_vars,
     electra_fork_epoch,
 ):
-    init_datadir_cmd_str = "geth init {0} --state.scheme=path --datadir={1} {2}".format(
-        "--cache.preimages" if electra_fork_epoch != None else "",
-        EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-    )
+
+    # TODO: Remove this once electra fork has path based storage scheme implemented
+    if electra_fork_epoch != None:
+        init_datadir_cmd_str = "geth init --cache.preimages --datadir={0} {1}".format(
+            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json")
+    else:
+        init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
+            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json")
 
     cmd = [
         "geth",
