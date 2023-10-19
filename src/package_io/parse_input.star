@@ -444,11 +444,9 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
         if participant["cl_client_type"] == "lighthouse":
             participant["beacon_extra_params"].append("--disable-peer-scoring")
         if participant["cl_client_type"] == "prysm":
-            participant["beacon_extra_params"].append("–-disable-peer-score")
+            participant["beacon_extra_params"].append("--disable-peer-scorer")
         if participant["cl_client_type"] == "teku":
-            participant["beacon_extra_params"].append("-–Xp2p-gossip-scoring-enabled")
-        if participant["cl_client_type"] == "nimbus":
-            participant["beacon_extra_params"].append("-–direct-peer")
+            participant["beacon_extra_params"].append("--Xp2p-gossip-scoring-enabled")
         if participant["cl_client_type"] == "lodestar":
             participant["beacon_extra_params"].append("--disablePeerScoring")
     return parsed_arguments_dict
