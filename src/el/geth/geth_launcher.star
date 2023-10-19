@@ -107,6 +107,7 @@ def launch(
         extra_params,
         extra_env_vars,
         launcher.electra_fork_epoch,
+        launcher.final_genesis_timestamp,
     )
 
     service = plan.add_service(service_name, config)
@@ -146,21 +147,32 @@ def get_config(
     extra_params,
     extra_env_vars,
     electra_fork_epoch,
+    final_genesis_timestamp,
 ):
-
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if electra_fork_epoch != None:
         init_datadir_cmd_str = "geth init --cache.preimages --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json")
+            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        )
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json")
+            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        )
 
     cmd = [
         "geth",
-        "--state.scheme=path",
+        # Disable path based storage scheme for electra fork
+        "{0}".format(
+            "--state.scheme=path" if electra_fork_epoch == None else ""
+        ),
+        # Override prague fork timestamp for electra fork
+        "{0}".format(
+            "--override.prague=" + final_genesis_timestamp
+            if electra_fork_epoch != None
+            else ""
+        ),
         "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--networkid=" + network_id,
@@ -237,10 +249,12 @@ def get_config(
 def new_geth_launcher(
     network_id,
     el_cl_genesis_data,
+    final_genesis_timestamp,
     electra_fork_epoch=None,
 ):
     return struct(
         network_id=network_id,
         el_cl_genesis_data=el_cl_genesis_data,
+        final_genesis_timestamp=final_genesis_timestamp,
         electra_fork_epoch=electra_fork_epoch,
     )
