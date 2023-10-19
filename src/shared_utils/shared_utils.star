@@ -56,3 +56,7 @@ def read_file_from_service(plan, service_name, filename):
         ),
     )
     return output["output"]
+
+
+def zfill_custom(value, width):
+    return ("0" * (width - len(str(value)))) + str(value)

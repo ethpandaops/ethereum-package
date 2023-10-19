@@ -298,6 +298,8 @@ To configure the package behaviour, you can modify your `network_params.json` fi
       "mev_relay_image": "flashbots/mev-boost-relay",
       // The image to use for the builder
       "mev_builder_image": "ethpandaops/flashbots-builder:main",
+      // The image to use for the CL builder
+      "mev_builder_cl_image": "sigp/lighthouse:latest",
       // The image to use for mev-boost
       "mev_boost_image": "flashbots/mev-boost",
       // Extra parameters to send to the API
