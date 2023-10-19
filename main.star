@@ -76,6 +76,7 @@ def run(plan, args={}):
         final_genesis_timestamp,
         genesis_validators_root,
         el_cl_data_files_artifact_uuid,
+        jwt_secret_contents,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults.participants,
@@ -128,10 +129,12 @@ def run(plan, args={}):
         beacon_uri = "{0}:{1}".format(
             all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num
         )
+
         endpoint = mock_mev_launcher_module.launch_mock_mev(
             plan,
             el_uri,
             beacon_uri,
+            jwt_secret_contents,
             args_with_right_defaults.global_client_log_level,
         )
         mev_endpoints.append(endpoint)

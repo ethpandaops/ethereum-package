@@ -373,6 +373,7 @@ def launch_participant_network(
         final_genesis_timestamp,
         el_cl_data.genesis_validators_root,
         el_cl_data.files_artifact_uuid,
+        el_cl_data.jwt_secret_contents,
     )
 
 

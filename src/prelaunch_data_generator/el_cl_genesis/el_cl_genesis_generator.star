@@ -72,8 +72,18 @@ def generate_el_cl_genesis_data(
         files={"/data": genesis.files_artifacts[0]},
         wait=None,
     )
+
+    jwt_secret_contents = plan.run_sh(
+        run="cat /data/data/jwt/jwtsecret",
+        image="busybox",
+        files={"/data": genesis.files_artifacts[0]},
+        wait=None,
+    )
+
     result = el_cl_genesis_data.new_el_cl_genesis_data(
-        genesis.files_artifacts[0], genesis_validators_root.output
+        genesis.files_artifacts[0],
+        genesis_validators_root.output,
+        jwt_secret_contents.output,
     )
 
     return result
