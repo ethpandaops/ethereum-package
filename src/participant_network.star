@@ -1,10 +1,11 @@
-cl_validator_keystores = import_module(
-    "./prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star"
+validator_keystores = import_module(
+    "./prelaunch_data_generator/validator_keystores/validator_keystore_generator.star"
 )
 
 el_cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
 )
+shared_utils = import_module("./shared_utils/shared_utils.star")
 
 static_files = import_module("./static_files/static_files.star")
 
@@ -45,10 +46,6 @@ CL_NODE_STARTUP_TIME = 5
 
 CL_CLIENT_CONTEXT_BOOTNODE = None
 
-GLOBAL_INDEX_ZFILL = {
-    "zfill_values": [(1, 1), (2, 10), (3, 100), (4, 1000), (5, 10000)]
-}
-
 
 def launch_participant_network(
     plan,
@@ -60,19 +57,17 @@ def launch_participant_network(
     num_participants = len(participants)
 
     plan.print("Generating cl validator key stores")
-    cl_validator_data = None
+    validator_data = None
     if not parallel_keystore_generation:
-        cl_validator_data = cl_validator_keystores.generate_cl_validator_keystores(
+        validator_data = validator_keystores.generate_validator_keystores(
             plan, network_params.preregistered_validator_keys_mnemonic, participants
         )
     else:
-        cl_validator_data = (
-            cl_validator_keystores.generate_cl_valdiator_keystores_in_parallel(
-                plan, network_params.preregistered_validator_keys_mnemonic, participants
-            )
+        validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
+            plan, network_params.preregistered_validator_keys_mnemonic, participants
         )
 
-    plan.print(json.indent(json.encode(cl_validator_data)))
+    plan.print(json.indent(json.encode(validator_data)))
 
     # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
     final_genesis_timestamp = get_final_genesis_timestamp(
@@ -184,7 +179,7 @@ def launch_participant_network(
         )
 
         # Zero-pad the index using the calculated zfill value
-        index_str = zfill_custom(index + 1, zfill_calculator(participants))
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
         el_service_name = "el-{0}-{1}-{2}".format(
             index_str, el_client_type, cl_client_type
@@ -228,8 +223,8 @@ def launch_participant_network(
         package_io.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
-                cl_validator_data.prysm_password_relative_filepath,
-                cl_validator_data.prysm_password_artifact_uuid,
+                validator_data.prysm_password_relative_filepath,
+                validator_data.prysm_password_artifact_uuid,
             ),
             "launch_method": prysm.launch,
         },
@@ -241,7 +236,7 @@ def launch_participant_network(
 
     all_snooper_engine_contexts = []
     all_cl_client_contexts = []
-    preregistered_validator_keys_for_nodes = cl_validator_data.per_node_keystores
+    preregistered_validator_keys_for_nodes = validator_data.per_node_keystores
 
     for index, participant in enumerate(participants):
         cl_client_type = participant.cl_client_type
@@ -259,7 +254,7 @@ def launch_participant_network(
             cl_launchers[cl_client_type]["launch_method"],
         )
 
-        index_str = zfill_custom(index + 1, zfill_calculator(participants))
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
         cl_service_name = "cl-{0}-{1}-{2}".format(
             index_str, cl_client_type, el_client_type
@@ -374,14 +369,6 @@ def launch_participant_network(
         el_cl_data.genesis_validators_root,
         el_cl_data.files_artifact_uuid,
     )
-
-
-def zfill_calculator(participants):
-    for zf, par in GLOBAL_INDEX_ZFILL["zfill_values"]:
-        if len(participants) < par:
-            zfill = zf - 1
-            return zfill
-            break
 
 
 def zfill_custom(value, width):

@@ -8,6 +8,10 @@ genesis_constants = import_module(
     "./src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
+validator_ranges = import_module(
+    "./src/prelaunch_data_generator/validator_keystores/validator_ranges_generator.star"
+)
+
 transaction_spammer = import_module(
     "./src/transaction_spammer/transaction_spammer.star"
 )
@@ -97,6 +101,17 @@ def run(plan, args={}):
     for participant in all_participants:
         all_el_client_contexts.append(participant.el_client_context)
         all_cl_client_contexts.append(participant.cl_client_context)
+
+    # Generate validator ranges
+    validator_ranges_config_template = read_file(
+        static_files.VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH
+    )
+    ranges = validator_ranges.generate_validator_ranges(
+        plan,
+        validator_ranges_config_template,
+        all_cl_client_contexts,
+        args_with_right_defaults.participants,
+    )
 
     if network_params.deneb_fork_epoch != 0:
         plan.print("Launching 4788 contract deployer")
@@ -277,15 +292,10 @@ def run(plan, args={}):
             plan.print("Succesfully launched execution layer forkmon")
         elif additional_service == "beacon_metrics_gazer":
             plan.print("Launching beacon metrics gazer")
-            beacon_metrics_gazer_config_template = read_file(
-                static_files.BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH
-            )
             beacon_metrics_gazer_prometheus_metrics_job = (
                 beacon_metrics_gazer.launch_beacon_metrics_gazer(
                     plan,
-                    beacon_metrics_gazer_config_template,
                     all_cl_client_contexts,
-                    args_with_right_defaults.participants,
                     network_params,
                 )
             )
