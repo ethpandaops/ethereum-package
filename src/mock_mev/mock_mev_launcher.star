@@ -1,3 +1,5 @@
+package_io = import_module("../package_io/constants.star")
+
 MOCK_MEV_IMAGE = "ethpandaops/mock-builder:latest"
 MOCK_MEV_SERVICE_NAME = "mock-mev"
 MOCK_MEV_BUILDER_PORT = 18550
@@ -15,6 +17,7 @@ def launch_mock_mev(plan, el_uri, beacon_uri, global_client_log_level):
                 ),
             },
             cmd=[
+                "--jwt-secret=" + package_io.JWT_AUTH_PATH,
                 "--el={0}".format(el_uri),
                 "--cl={0}".format(beacon_uri),
                 "--bid-multiplier=5",  # TODO: This could be customizable
