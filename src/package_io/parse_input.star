@@ -69,6 +69,7 @@ def parse_input(plan, input_args):
     result["grafana_additional_dashboards"] = []
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
+    result["disable_peer_scoring"] = False
 
     for attr in input_args:
         value = input_args[attr]
@@ -88,6 +89,9 @@ def parse_input(plan, input_args):
             for sub_attr in input_args["custom_flood_params"]:
                 sub_value = input_args["custom_flood_params"][sub_attr]
                 result["custom_flood_params"][sub_attr] = sub_value
+
+    if result.get("disable_peer_scoring"):
+        result = enrich_disable_peer_scoring(result)
 
     if result.get("mev_type") in ("mock", "full"):
         result = enrich_mev_extra_params(
@@ -199,6 +203,7 @@ def parse_input(plan, input_args):
         snooper_enabled=result["snooper_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
         grafana_additional_dashboards=result["grafana_additional_dashboards"],
+        disable_peer_scoring=result["disable_peer_scoring"],
     )
 
 
@@ -352,6 +357,7 @@ def default_input_args():
         "global_client_log_level": "info",
         "snooper_enabled": False,
         "parallel_keystore_generation": False,
+        "disable_peer_scoring": False,
     }
 
 
@@ -431,6 +437,21 @@ def get_default_goomy_blob_params():
 def get_default_custom_flood_params():
     # this is a simple script that increases the balance of the coinbase address at a cadence
     return {"interval_between_transactions": 1}
+
+
+def enrich_disable_peer_scoring(parsed_arguments_dict):
+    for index, participant in enumerate(parsed_arguments_dict["participants"]):
+        if participant["cl_client_type"] == "lighthouse":
+            participant["beacon_extra_params"].append("--disable-peer-scoring")
+        if participant["cl_client_type"] == "prysm":
+            participant["beacon_extra_params"].append("–-disable-peer-score")
+        if participant["cl_client_type"] == "teku":
+            participant["beacon_extra_params"].append("-–Xp2p-gossip-scoring-enabled")
+        if participant["cl_client_type"] == "nimbus":
+            participant["beacon_extra_params"].append("-–direct-peer")
+        if participant["cl_client_type"] == "lodestar":
+            participant["beacon_extra_params"].append("--disablePeerScoring")
+    return parsed_arguments_dict
 
 
 # TODO perhaps clean this up into a map
