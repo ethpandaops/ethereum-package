@@ -133,7 +133,7 @@ def launch_participant_network(
                 network_params.network_id,
                 el_cl_data,
                 final_genesis_timestamp,
-                network_params.electra_fork_epoch
+                network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
         },

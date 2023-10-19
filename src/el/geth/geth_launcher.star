@@ -164,9 +164,7 @@ def get_config(
     cmd = [
         "geth",
         # Disable path based storage scheme for electra fork
-        "{0}".format(
-            "--state.scheme=path" if electra_fork_epoch == None else ""
-        ),
+        "{0}".format("--state.scheme=path" if electra_fork_epoch == None else ""),
         # Override prague fork timestamp for electra fork
         "{0}".format(
             "--override.prague=" + final_genesis_timestamp
