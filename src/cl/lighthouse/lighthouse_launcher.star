@@ -334,7 +334,9 @@ def get_beacon_config(
         },
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=cl_node_ready_conditions.get_ready_conditions(BEACON_HTTP_PORT_ID),
+        ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+            BEACON_HTTP_PORT_ID
+        ),
         min_cpu=bn_min_cpu,
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
