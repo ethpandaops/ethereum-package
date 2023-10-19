@@ -1,0 +1,8 @@
+{
+  "network_params": {
+    "seconds_per_slot": 3
+  },
+  "additional_services": [
+  ],
+  "mev_type": "mock"
+}
