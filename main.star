@@ -1,5 +1,5 @@
 input_parser = import_module("./src/package_io/input_parser.star")
-
+constants = import_module("./src/package_io/constants.star")
 participant_network = import_module("./src/participant_network.star")
 
 static_files = import_module("./src/static_files/static_files.star")
@@ -128,12 +128,17 @@ def run(plan, args={}):
         beacon_uri = "{0}:{1}".format(
             all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num
         )
-        jwt_secret = all_el_client_contexts[0].jwt_secret
+        jwt_secret = plan.run_sh(
+            run="cat " + constants.JWT_AUTH_PATH + " | tr -d '\n'",
+            image="busybox",
+            files={"/data": el_cl_data_files_artifact_uuid},
+            wait=None,
+        )
         endpoint = mock_mev.launch_mock_mev(
             plan,
             el_uri,
             beacon_uri,
-            jwt_secret,
+            jwt_secret.output,
             args_with_right_defaults.global_client_log_level,
         )
         mev_endpoints.append(endpoint)

@@ -286,6 +286,9 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
     "parallel_keystore_generation": false,
 
+    // Disable peer scoring to prevent nodes impacted by faults from being permanently ejected from the network
+    // Default to false
+    "disable_peer_scoring": false,
 
     // Supports three valeus
     // Default: "None" - no mev boost, mev builder, mev flood or relays are spun up

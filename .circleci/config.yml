@@ -225,6 +225,13 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"
 
+  mev_mock:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev-mock.json)"
+
   mev_k8s:
     executor: ubuntu_vm
     steps:
@@ -269,6 +276,12 @@ jobs:
       - <<: *setup_kurtosis
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/parallel-keystores-3.json)"
+  disable_peer_scoring:
+    executor: ubuntu_vm
+    steps:
+      - <<: *setup_kurtosis
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/disable-peer-scoring.json)"
 
 workflows:
   check_latest_version:
@@ -311,11 +324,13 @@ workflows:
             branches:
               ignore:
                 - main
+
       - run_starlark:
           filters:
             branches:
               ignore:
                 - main
+
       - run_starlark_arm64:
           filters:
             branches:
@@ -327,6 +342,12 @@ workflows:
               ignore:
                 - main
       - mev:
+          filters:
+            branches:
+              ignore:
+                - main
+
+      - mev_mock:
           filters:
             branches:
               ignore:
@@ -350,12 +371,20 @@ workflows:
             branches:
               ignore:
                 - main
+
       - parallel_key_store_generation_2:
           filters:
             branches:
               ignore:
                 - main
+
       - parallel_key_store_generation_3:
+          filters:
+            branches:
+              ignore:
+                - main
+
+      - disable_peer_scoring:
           filters:
             branches:
               ignore:
