@@ -16,9 +16,9 @@ PROMETHEUS_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/prometheus-config/prometheus.yml.tmpl"
 )
 
-# Beacon Metrics Gazer config
-BEACON_METRICS_GAZER_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/beacon-metrics-gazer-config/config.yaml.tmpl"
+# Validator Ranges config
+VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/validator-ranges/config.yaml.tmpl"
 )
 
 DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml.tmpl"
