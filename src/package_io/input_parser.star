@@ -64,7 +64,6 @@ def input_parser(plan, input_args):
     # add default eth2 input params
     result["mev_type"] = None
     result["mev_params"] = get_default_mev_params()
-    result["launch_additional_services"] = True
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     result["grafana_additional_dashboards"] = []
     result["tx_spammer_params"] = get_default_tx_spammer_params()
@@ -195,7 +194,6 @@ def input_parser(plan, input_args):
                 "interval_between_transactions"
             ],
         ),
-        launch_additional_services=result["launch_additional_services"],
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
         global_client_log_level=result["global_client_log_level"],

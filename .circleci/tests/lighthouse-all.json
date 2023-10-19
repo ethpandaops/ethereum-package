@@ -25,5 +25,5 @@
       "cl_client_type": "lighthouse"
     }
   ],
-  "launch_additional_services": false
+  "additional_services": []
 }

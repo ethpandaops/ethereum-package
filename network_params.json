@@ -26,7 +26,6 @@
 		"deneb_fork_epoch": 4,
 		"electra_fork_epoch": null
 	},
-	"launch_additional_services": true,
 	"additional_services": [
 		"tx_spammer",
 		"blob_spammer",
