@@ -133,7 +133,7 @@ def run(plan, args={}):
             run="cat " + constants.JWT_AUTH_PATH + " | tr -d '\n'",
             image="busybox",
             files={"/data": el_cl_data_files_artifact_uuid},
-            wait=None
+            wait=None,
         )
         endpoint = mock_mev_launcher_module.launch_mock_mev(
             plan,
