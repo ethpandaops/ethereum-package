@@ -1,10 +1,10 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 el_client_context = import_module("../../el/el_client_context.star")
 
 node_metrics = import_module("../../node_metrics_info.star")
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/home/erigon/execution-data"
@@ -53,11 +53,11 @@ USED_PORTS = {
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 ERIGON_LOG_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "1",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "2",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "3",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "4",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "5",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "1",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "2",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "3",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "4",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "5",
 }
 
 
@@ -140,7 +140,7 @@ def get_config(
 
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
 
     cmd = [
@@ -158,7 +158,7 @@ def get_config(
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
         "--http.port={0}".format(WS_RPC_PORT_NUM),
-        "--authrpc.jwtsecret=" + package_io.JWT_AUTH_PATH,
+        "--authrpc.jwtsecret=" + constants.JWT_AUTH_PATH,
         "--authrpc.addr=0.0.0.0",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.vhosts=*",
@@ -173,7 +173,7 @@ def get_config(
             + ",".join(
                 [
                     ctx.enode
-                    for ctx in existing_el_clients[: package_io.MAX_ENODE_ENTRIES]
+                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
                 ]
             )
         )
@@ -182,7 +182,7 @@ def get_config(
             + ",".join(
                 [
                     ctx.enode
-                    for ctx in existing_el_clients[: package_io.MAX_ENODE_ENTRIES]
+                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
                 ]
             )
         )
@@ -200,7 +200,7 @@ def get_config(
         ports=USED_PORTS,
         cmd=[command_arg_str],
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,

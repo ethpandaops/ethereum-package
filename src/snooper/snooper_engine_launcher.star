@@ -1,8 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-input_parser = import_module("../package_io/parse_input.star")
+input_parser = import_module("../package_io/input_parser.star")
 el_client_context = import_module("../el/el_client_context.star")
 el_admin_node_info = import_module("../el/el_admin_node_info.star")
-package_io = import_module("../package_io/constants.star")
 snooper_engine_context = import_module("../snooper/snooper_engine_context.star")
 
 SNOOPER_ENGINE_RPC_PORT_NUM = 8561

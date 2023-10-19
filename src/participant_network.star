@@ -28,7 +28,7 @@ genesis_constants = import_module(
 )
 participant_module = import_module("./participant.star")
 
-package_io = import_module("./package_io/constants.star")
+constants = import_module("./package_io/constants.star")
 
 BOOT_PARTICIPANT_INDEX = 0
 
@@ -133,7 +133,7 @@ def launch_participant_network(
     )
 
     el_launchers = {
-        package_io.EL_CLIENT_TYPE.geth: {
+        constants.EL_CLIENT_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
                 network_params.network_id,
                 el_cl_data,
@@ -141,25 +141,25 @@ def launch_participant_network(
             ),
             "launch_method": geth.launch,
         },
-        package_io.EL_CLIENT_TYPE.besu: {
+        constants.EL_CLIENT_TYPE.besu: {
             "launcher": besu.new_besu_launcher(network_params.network_id, el_cl_data),
             "launch_method": besu.launch,
         },
-        package_io.EL_CLIENT_TYPE.erigon: {
+        constants.EL_CLIENT_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
                 network_params.network_id, el_cl_data
             ),
             "launch_method": erigon.launch,
         },
-        package_io.EL_CLIENT_TYPE.nethermind: {
+        constants.EL_CLIENT_TYPE.nethermind: {
             "launcher": nethermind.new_nethermind_launcher(el_cl_data),
             "launch_method": nethermind.launch,
         },
-        package_io.EL_CLIENT_TYPE.reth: {
+        constants.EL_CLIENT_TYPE.reth: {
             "launcher": reth.new_reth_launcher(el_cl_data),
             "launch_method": reth.launch,
         },
-        package_io.EL_CLIENT_TYPE.ethereumjs: {
+        constants.EL_CLIENT_TYPE.ethereumjs: {
             "launcher": ethereumjs.new_ethereumjs_launcher(el_cl_data),
             "launch_method": ethereumjs.launch,
         },
@@ -213,19 +213,19 @@ def launch_participant_network(
     plan.print("Launching CL network")
 
     cl_launchers = {
-        package_io.CL_CLIENT_TYPE.lighthouse: {
+        constants.CL_CLIENT_TYPE.lighthouse: {
             "launcher": lighthouse.new_lighthouse_launcher(el_cl_data),
             "launch_method": lighthouse.launch,
         },
-        package_io.CL_CLIENT_TYPE.lodestar: {
+        constants.CL_CLIENT_TYPE.lodestar: {
             "launcher": lodestar.new_lodestar_launcher(el_cl_data),
             "launch_method": lodestar.launch,
         },
-        package_io.CL_CLIENT_TYPE.nimbus: {
+        constants.CL_CLIENT_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(el_cl_data),
             "launch_method": nimbus.launch,
         },
-        package_io.CL_CLIENT_TYPE.prysm: {
+        constants.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
                 cl_validator_data.prysm_password_relative_filepath,
@@ -233,7 +233,7 @@ def launch_participant_network(
             ),
             "launch_method": prysm.launch,
         },
-        package_io.CL_CLIENT_TYPE.teku: {
+        constants.CL_CLIENT_TYPE.teku: {
             "launcher": teku.new_teku_launcher(el_cl_data),
             "launch_method": teku.launch,
         },
@@ -278,7 +278,7 @@ def launch_participant_network(
             snooper_service_name = "snooper-{0}-{1}-{2}".format(
                 index_str, cl_client_type, el_client_type
             )
-            snooper_image = package_io.DEFAULT_SNOOPER_IMAGE
+            snooper_image = constants.DEFAULT_SNOOPER_IMAGE
             snooper_engine_context = snooper.launch(
                 plan,
                 snooper_service_name,

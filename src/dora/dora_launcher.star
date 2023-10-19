@@ -1,5 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-package_io = import_module("../package_io/constants.star")
+constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "dora"
 IMAGE_NAME = "ethpandaops/dora:master"
 
@@ -65,7 +65,7 @@ def get_config(config_files_artifact_name, el_cl_data_files_artifact_uuid):
         files={
             DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
         cmd=["-config", config_file_path],
     )

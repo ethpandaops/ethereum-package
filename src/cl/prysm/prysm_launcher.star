@@ -1,9 +1,9 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 IMAGE_SEPARATOR_DELIMITER = ","
 EXPECTED_NUM_IMAGES = 2
@@ -74,11 +74,11 @@ VALIDATOR_NODE_USED_PORTS = {
 }
 
 PRYSM_LOG_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -264,10 +264,10 @@ def get_beacon_config(
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--chain-config-file="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--genesis-state="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/genesis.ssz",
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
@@ -280,11 +280,11 @@ def get_beacon_config(
         "--p2p-udp-port={0}".format(DISCOVERY_UDP_PORT_NUM),
         "--min-sync-peers={0}".format(MIN_PEERS),
         "--verbosity=" + log_level,
-        "--slots-per-archive-point={0}".format(32 if package_io.ARCHIVE_MODE else 8192),
-        "--suggested-fee-recipient=" + package_io.VALIDATING_REWARDS_ACCOUNT,
+        "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
+        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Pari's recommendation to reduce noise
         "--subscribe-all-subnets=true",
-        "--jwt-secret=" + package_io.JWT_AUTH_PATH,
+        "--jwt-secret=" + constants.JWT_AUTH_PATH,
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -293,7 +293,7 @@ def get_beacon_config(
     ]
 
     if bootnode_contexts != None:
-        for ctx in bootnode_contexts[: package_io.MAX_ENR_ENTRIES]:
+        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
             cmd.append("--peer=" + ctx.multiaddr)
             cmd.append("--bootstrap-node=" + ctx.enr)
         cmd.append("--p2p-static-id=true")
@@ -307,7 +307,7 @@ def get_beacon_config(
         ports=BEACON_NODE_USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
@@ -346,7 +346,7 @@ def get_validator_config(
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--chain-config-file="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--beacon-rpc-gateway-provider=" + beacon_http_endpoint,
         "--beacon-rpc-provider=" + beacon_rpc_endpoint,
@@ -355,7 +355,7 @@ def get_validator_config(
         "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM),
         "--verbosity=" + log_level,
-        "--suggested-fee-recipient=" + package_io.VALIDATING_REWARDS_ACCOUNT,
+        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # TODO(old) SOMETHING ABOUT JWT
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
@@ -373,7 +373,7 @@ def get_validator_config(
         ports=VALIDATOR_NODE_USED_PORTS,
         cmd=cmd,
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
             PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
         },

@@ -1,9 +1,9 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 el_client_context = import_module("../../el/el_client_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/besu/execution-data"
@@ -52,11 +52,11 @@ USED_PORTS = {
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 BESU_LOG_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -138,7 +138,7 @@ def get_config(
         "--logging=" + log_level,
         "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--genesis-file="
-        + package_io.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/besu.json",
         "--network-id=" + network_id,
         "--host-allowlist=*",
@@ -155,12 +155,12 @@ def get_config(
         "--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--p2p-port={0}".format(DISCOVERY_PORT_NUM),
         "--engine-rpc-enabled=true",
-        "--engine-jwt-secret=" + package_io.JWT_AUTH_PATH,
+        "--engine-jwt-secret=" + constants.JWT_AUTH_PATH,
         "--engine-host-allowlist=*",
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
         "--data-storage-format=BONSAI",
-        "--kzg-trusted-setup=" + package_io.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        "--kzg-trusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
@@ -172,7 +172,7 @@ def get_config(
             + ",".join(
                 [
                     ctx.enode
-                    for ctx in existing_el_clients[: package_io.MAX_ENODE_ENTRIES]
+                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
                 ]
             )
         )
@@ -188,7 +188,7 @@ def get_config(
         ports=USED_PORTS,
         cmd=[cmd_str],
         files={
-            package_io.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,

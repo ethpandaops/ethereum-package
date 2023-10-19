@@ -1,4 +1,4 @@
-parse_input = import_module("./src/package_io/parse_input.star")
+input_parser = import_module("./src/package_io/input_parser.star")
 
 participant_network = import_module("./src/participant_network.star")
 
@@ -22,14 +22,14 @@ full_beaconchain_explorer = import_module(
 )
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
-mev_boost_launcher_module = import_module("./src/mev_boost/mev_boost_launcher.star")
-mock_mev_launcher_module = import_module("./src/mock_mev/mock_mev_launcher.star")
-mev_relay_launcher_module = import_module("./src/mev_relay/mev_relay_launcher.star")
-mev_flood_module = import_module("./src/mev_flood/mev_flood_launcher.star")
-mev_custom_flood_module = import_module(
+mev_boost = import_module("./src/mev_boost/mev_boost_launcher.star")
+mock_mev = import_module("./src/mock_mev/mock_mev_launcher.star")
+mev_relay = import_module("./src/mev_relay/mev_relay_launcher.star")
+mev_flood = import_module("./src/mev_flood/mev_flood_launcher.star")
+mev_custom_flood = import_module(
     "./src/mev_custom_flood/mev_custom_flood_launcher.star"
 )
-eip4788_deployment_module = import_module(
+eip4788_deployment = import_module(
     "./src/eip4788_deployment/eip4788_deployment_launcher.star"
 )
 GRAFANA_USER = "admin"
@@ -46,7 +46,7 @@ PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
 
 def run(plan, args={}):
-    args_with_right_defaults = parse_input.parse_input(plan, args)
+    args_with_right_defaults = input_parser.input_parser(plan, args)
 
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
@@ -102,7 +102,7 @@ def run(plan, args={}):
         el_uri = "http://{0}:{1}".format(
             all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
         )
-        eip4788_deployment_module.deploy_eip4788_contract_in_background(
+        eip4788_deployment.deploy_eip4788_contract_in_background(
             plan,
             genesis_constants.PRE_FUNDED_ACCOUNTS[5].private_key,
             el_uri,
@@ -129,7 +129,7 @@ def run(plan, args={}):
             all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num
         )
         jwt_secret = all_el_client_contexts[0].jwt_secret
-        endpoint = mock_mev_launcher_module.launch_mock_mev(
+        endpoint = mock_mev.launch_mock_mev(
             plan,
             el_uri,
             beacon_uri,
@@ -156,7 +156,7 @@ def run(plan, args={}):
 
         first_cl_client = all_cl_client_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
-        mev_flood_module.launch_mev_flood(
+        mev_flood.launch_mev_flood(
             plan,
             mev_params.mev_flood_image,
             el_uri,
@@ -175,7 +175,7 @@ def run(plan, args={}):
             timeout="20m",
             service_name=first_client_beacon_name,
         )
-        endpoint = mev_relay_launcher_module.launch_mev_relay(
+        endpoint = mev_relay.launch_mev_relay(
             plan,
             mev_params,
             network_params.network_id,
@@ -184,7 +184,7 @@ def run(plan, args={}):
             builder_uri,
             network_params.seconds_per_slot,
         )
-        mev_flood_module.spam_in_background(
+        mev_flood.spam_in_background(
             plan,
             el_uri,
             mev_params.mev_flood_extra_args,
@@ -198,13 +198,13 @@ def run(plan, args={}):
     if mev_endpoints:
         for index, participant in enumerate(all_participants):
             if args_with_right_defaults.participants[index].validator_count != 0:
-                mev_boost_launcher = mev_boost_launcher_module.new_mev_boost_launcher(
+                mev_boost_launcher = mev_boost.new_mev_boost_launcher(
                     MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints
                 )
                 mev_boost_service_name = "{0}{1}".format(
-                    parse_input.MEV_BOOST_SERVICE_NAME_PREFIX, index
+                    input_parser.MEV_BOOST_SERVICE_NAME_PREFIX, index
                 )
-                mev_boost_context = mev_boost_launcher_module.launch(
+                mev_boost_context = mev_boost.launch(
                     plan,
                     mev_boost_launcher,
                     mev_boost_service_name,
@@ -314,7 +314,7 @@ def run(plan, args={}):
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
         elif additional_service == "custom_flood":
-            mev_custom_flood_module.spam_in_background(
+            mev_custom_flood.spam_in_background(
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
                 genesis_constants.PRE_FUNDED_ACCOUNTS[0].address,
