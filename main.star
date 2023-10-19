@@ -218,7 +218,6 @@ def run(plan, args={}):
                 )
                 all_mevboost_contexts.append(mev_boost_context)
 
-    if not args_with_right_defaults.launch_additional_services:
         output = struct(
             all_participants=all_participants,
             final_genesis_timestamp=final_genesis_timestamp,

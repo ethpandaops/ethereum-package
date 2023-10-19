@@ -245,12 +245,6 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         "goomy_blob_args": []
     },
 
-    // True by defaults, adds services defined in "additional_services" alongside the Ethereum network
-    // If set to false:
-    //  - only Ethereum network (EL and CL nodes) will be launched. Nothing else (no transaction spammer)
-    //  - params for the CL nodes will be ignored (e.g. CL node image, CL node extra params)
-    "launch_additional_services": true,
-
     // By default includes
     //  - A transaction spammer & blob spammer is launched to fake transactions sent to the network
     //  - Forkmon for EL will be launched
@@ -366,7 +360,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "capella_fork_epoch": 2,
     "deneb_fork_epoch": 5
   },
-  "launch_additional_services": false,
+  "additional_services": [],
   "wait_for_finalization": false,
   "wait_for_verifications": false,
   "global_client_log_level": "info"
@@ -405,7 +399,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     },
   ],
   "mev_type": "mock",
-  "launch_additional_services": false
+  "additional_services": []
 }
 ```
 
@@ -443,7 +437,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
   "network_params": {
     "capella_fork_epoch": 1
   },
-  "launch_additional_services": false
+  "additional_services": []
 }
 ```
 
@@ -463,7 +457,6 @@ To configure the package behaviour, you can modify your `network_params.json` fi
       "count": 2
     }
   ],
-  "launch_additional_services": true,
   "snooper_enabled": true
 }
 ```
