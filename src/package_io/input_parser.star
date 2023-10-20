@@ -509,8 +509,12 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(
                         num_participants + 1
                     ),
-                    "--builder.bellatrix_fork_version={0}".format(constants.BELLATRIX_FORK_VERSION),
-                    "--builder.genesis_fork_version={0}".format(constants.GENESIS_FORK_VERSION),
+                    "--builder.bellatrix_fork_version={0}".format(
+                        constants.BELLATRIX_FORK_VERSION
+                    ),
+                    "--builder.genesis_fork_version={0}".format(
+                        constants.GENESIS_FORK_VERSION
+                    ),
                     "--builder.genesis_validators_root={0}".format(
                         constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
                     ),
