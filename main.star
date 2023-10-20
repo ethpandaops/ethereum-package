@@ -311,6 +311,7 @@ def run(plan, args={}):
                 dora_config_template,
                 all_cl_client_contexts,
                 el_cl_data_files_artifact_uuid,
+                network_params.electra_fork_epoch,
             )
             plan.print("Succesfully launched dora")
         elif additional_service == "full_beaconchain_explorer":
