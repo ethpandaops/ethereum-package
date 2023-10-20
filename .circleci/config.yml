@@ -93,7 +93,6 @@ jobs:
     steps:
       - <<: *setup_kurtosis
       - checkout
-
       - run: kurtosis run ${PWD}
 
   lint:
@@ -110,16 +109,7 @@ jobs:
     steps:
       - <<: *setup_kurtosis
       - checkout
-
       - run: kurtosis run ${PWD}
-
-  check_latest_version:
-    executor: ubuntu_vm
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis run --dry-run ${PWD}
 
   besu-all:
     executor: ubuntu_vm
@@ -290,10 +280,9 @@ jobs:
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/petra.json)"
 
 workflows:
-  check_latest_version:
+  nightly_tests:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
     jobs:
-      - check_latest_version
       - besu-all
       - erigon-all
       - ethereumjs-all
@@ -311,8 +300,13 @@ workflows:
           <<: *setup_kurtosis_k3s
       - mix_with_tools_k8s:
           <<: *setup_kurtosis_k3s
+      - petra
+      - parallel_key_store_generation_1
+      - parallel_key_store_generation_2
+      - parallel_key_store_generation_3
+      - disable_peer_scoring
 
-  build:
+  per_pr_test:
     when: << pipeline.parameters.should-enable-build-workflow >>
     jobs:
       # -- PR check jobs ------------------------------------------
@@ -367,36 +361,6 @@ workflows:
                 - main
 
       - mix_with_tools_docker:
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - parallel_key_store_generation_1:
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - parallel_key_store_generation_2:
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - parallel_key_store_generation_3:
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - disable_peer_scoring:
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - petra:
           filters:
             branches:
               ignore:
