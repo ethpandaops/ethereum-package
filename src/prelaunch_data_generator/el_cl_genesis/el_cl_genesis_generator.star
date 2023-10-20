@@ -64,9 +64,11 @@ def generate_el_cl_genesis_data(
     )
 
     # this is super hacky lmao
-    genesis_validators_root = plan.run_sh(
-        run="cat /data/data/custom_config_data/genesis_validators_root.txt |  tr -d '\n'",
-        image="busybox",
+    genesis_validators_root = plan.run_python(
+        run="""
+with open("/data/data/custom_config_data/genesis_validators_root.txt") as genesis_root:
+    print(genesis_root.read().strip(), end="")
+""",
         files={"/data": genesis.files_artifacts[0]},
         wait=None,
     )
