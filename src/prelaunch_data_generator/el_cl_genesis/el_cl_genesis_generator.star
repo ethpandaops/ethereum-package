@@ -107,5 +107,5 @@ def new_env_file_for_el_cl_genesis_data(
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "BellatrixForkVersion": constants.BELLATRIX_FORK_VERSION,
         "CapellaForkVersion": constants.CAPELLA_FORK_VERSION,
-        "DenebForkVeresion": constants.DENEB_FORK_VERSION,
+        "DenebForkVersion": constants.DENEB_FORK_VERSION,
     }
