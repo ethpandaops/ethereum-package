@@ -1,4 +1,4 @@
-PYTHON_IMAGE = "python:3.11-alpine"
+PYTHON_IMAGE = "ethpandaops/python-web3"
 CUSTOM_FLOOD_SERVICE_NAME = "mev-custom-flood"
 
 
@@ -17,11 +17,6 @@ def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
                 "EL_RPC_URI": el_uri,
             },
         ),
-    )
-
-    plan.exec(
-        service_name=CUSTOM_FLOOD_SERVICE_NAME,
-        recipe=ExecRecipe(["pip", "install", "web3", "click"]),
     )
 
     plan.exec(
