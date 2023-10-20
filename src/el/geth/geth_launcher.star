@@ -172,7 +172,13 @@ def get_config(
         # TODO: REMOVE Once geth default db is path based, and builder rebased
         "{0}".format(
             "--state.scheme=path"
-            if electra_fork_epoch != None or "--builder" not in extra_params
+            if electra_fork_epoch == None and "--builder" not in extra_params
+            else ""
+        ),
+        # Override prague fork timestamp for electra fork
+        "{0}".format(
+            "--cache.preimages"
+            if electra_fork_epoch != None
             else ""
         ),
         # Override prague fork timestamp for electra fork
