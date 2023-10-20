@@ -365,3 +365,10 @@ workflows:
             branches:
               ignore:
                 - main
+
+      - mix_with_tools_k8s:
+          <<: *setup_kurtosis_k3s
+          filters:
+            branches:
+              ignore:
+                - main
