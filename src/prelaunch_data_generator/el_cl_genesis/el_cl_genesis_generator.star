@@ -2,6 +2,8 @@ shared_utils = import_module("../../shared_utils/shared_utils.star")
 
 el_cl_genesis_data = import_module("./el_cl_genesis_data.star")
 
+constants = import_module("../../package_io/constants.star")
+
 GENESIS_VALUES_PATH = "/opt"
 GENESIS_VALUES_FILENAME = "values.env"
 
@@ -102,4 +104,8 @@ def new_env_file_for_el_cl_genesis_data(
         "CapellaForkEpoch": capella_fork_epoch,
         "DenebForkEpoch": deneb_fork_epoch,
         "ElectraForkEpoch": electra_fork_epoch,
+        "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
+        "BellatrixForkVersion": constants.BELLATRIX_FORK_VERSION,
+        "CapellaForkVersion": constants.CAPELLA_FORK_VERSION,
+        "DenebForkVersion": constants.DENEB_FORK_VERSION,
     }

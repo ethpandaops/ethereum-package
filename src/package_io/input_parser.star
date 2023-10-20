@@ -413,7 +413,6 @@ def default_participant():
 def get_default_mev_params():
     return {
         "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
-        # TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
         "mev_builder_image": "flashbots/builder:latest",
         "mev_builder_cl_image": "sigp/lighthouse:latest",
         "mev_boost_image": "flashbots/mev-boost",
@@ -491,7 +490,6 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         mev_participant = default_participant()
         mev_participant.update(
             {
-                # TODO replace with actual when flashbots/builder is published
                 "el_client_image": parsed_arguments_dict["mev_params"][
                     "mev_builder_image"
                 ],
@@ -511,8 +509,12 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(
                         num_participants + 1
                     ),
-                    "--builder.bellatrix_fork_version=0x30000038",
-                    "--builder.genesis_fork_version=0x10000038",
+                    "--builder.bellatrix_fork_version={0}".format(
+                        constants.BELLATRIX_FORK_VERSION
+                    ),
+                    "--builder.genesis_fork_version={0}".format(
+                        constants.GENESIS_FORK_VERSION
+                    ),
                     "--builder.genesis_validators_root={0}".format(
                         constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
                     ),
