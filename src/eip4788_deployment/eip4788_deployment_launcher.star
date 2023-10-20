@@ -1,4 +1,4 @@
-PYTHON_IMAGE = "python:3.11-alpine"
+PYTHON_IMAGE = "ethpandaops/python-web3"
 EIP4788_DEPLOYMENT_SERVICE_NAME = "eip4788-contract-deployment"
 
 
@@ -16,11 +16,6 @@ def deploy_eip4788_contract_in_background(plan, sender_key, el_uri):
                 "EL_RPC_URI": el_uri,
             },
         ),
-    )
-
-    plan.exec(
-        service_name=EIP4788_DEPLOYMENT_SERVICE_NAME,
-        recipe=ExecRecipe(["pip", "install", "web3"]),
     )
 
     plan.exec(
