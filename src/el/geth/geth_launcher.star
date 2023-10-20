@@ -155,6 +155,11 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
+    elif "--builder" in extra_params:
+        init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
+            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        )
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -163,8 +168,13 @@ def get_config(
 
     cmd = [
         "geth",
-        # Disable path based storage scheme for electra fork
-        "{0}".format("--state.scheme=path" if electra_fork_epoch == None else ""),
+        # Disable path based storage scheme for electra fork or when builder image is used
+        # TODO: REMOVE Once geth default db is path based, and builder rebased
+        "{0}".format(
+            "--state.scheme=path"
+            if electra_fork_epoch != None or "--builder" not in extra_params
+            else ""
+        ),
         # Override prague fork timestamp for electra fork
         "{0}".format(
             "--override.prague=" + final_genesis_timestamp
