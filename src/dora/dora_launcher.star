@@ -2,8 +2,6 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "dora"
 
-IMAGE_NAME = "ethpandaops/dora:master"
-
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 8080
 
@@ -71,6 +69,8 @@ def get_config(
     # TODO: This is a hack to get the verkle support image for the electra fork
     if electra_fork_epoch != None:
         IMAGE_NAME = "ethpandaops/dora:verkle-support"
+    else:
+        IMAGE_NAME = "ethpandaops/dora:master"
 
     return ServiceConfig(
         image=IMAGE_NAME,
