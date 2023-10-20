@@ -374,7 +374,7 @@ def default_network_params():
         "max_churn": 8,
         "ejection_balance": 16000000000,
         "capella_fork_epoch": 0,
-        "deneb_fork_epoch": 4,
+        "deneb_fork_epoch": 500,
         "electra_fork_epoch": None,
     }
 

@@ -229,7 +229,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 
         // The epoch at which the capella and deneb forks are set to occur.
         "capella_fork_epoch": 0,
-        "deneb_fork_epoch": 4,
+        "deneb_fork_epoch": 500,
         "electra_fork_epoch": null
     },
 
