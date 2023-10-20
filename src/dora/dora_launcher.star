@@ -29,7 +29,7 @@ def launch_dora(
     config_template,
     cl_client_contexts,
     el_cl_data_files_artifact_uuid,
-    electra_fork_epoch
+    electra_fork_epoch,
 ):
     all_cl_client_info = []
     for index, client in enumerate(cl_client_contexts):
@@ -60,7 +60,9 @@ def launch_dora(
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(config_files_artifact_name, el_cl_data_files_artifact_uuid, electra_fork_epoch):
+def get_config(
+    config_files_artifact_name, el_cl_data_files_artifact_uuid, electra_fork_epoch
+):
     config_file_path = shared_utils.path_join(
         DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         DORA_CONFIG_FILENAME,
