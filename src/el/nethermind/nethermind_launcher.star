@@ -1,15 +1,13 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 el_client_context = import_module("../../el/el_client_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 
 node_metrics = import_module("../../node_metrics_info.star")
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/execution-data"
-KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/genesis/output/trusted_setup.txt"
-GENESIS_DATA_MOUNT_DIRPATH = "/genesis"
 
 METRICS_PATH = "/metrics"
 
@@ -53,11 +51,11 @@ USED_PORTS = {
 }
 
 NETHERMIND_LOG_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -85,8 +83,8 @@ def launch(
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
 
-    config, jwt_secret_json_filepath_on_client = get_config(
-        launcher.el_genesis_data,
+    config = get_config(
+        launcher.el_cl_genesis_data,
         image,
         existing_el_clients,
         log_level,
@@ -102,10 +100,6 @@ def launch(
 
     enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
-    jwt_secret = shared_utils.read_file_from_service(
-        plan, service_name, jwt_secret_json_filepath_on_client
-    )
-
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     nethermind_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
@@ -120,14 +114,13 @@ def launch(
         RPC_PORT_NUM,
         WS_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
-        jwt_secret,
         service_name,
         [nethermind_metrics_info],
     )
 
 
 def get_config(
-    genesis_data,
+    el_cl_genesis_data,
     image,
     existing_el_clients,
     log_level,
@@ -138,20 +131,14 @@ def get_config(
     extra_params,
     extra_env_vars,
 ):
-    genesis_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH,
-        genesis_data.nethermind_genesis_json_relative_filepath,
-    )
-    jwt_secret_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath
-    )
-
     cmd = [
         "--log=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--Init.ChainSpecPath=" + genesis_json_filepath_on_client,
+        "--Init.ChainSpecPath="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/chainspec.json",
         "--Init.WebSocketsEnabled=true",
-        "--Init.KzgSetupPath=" + KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        "--Init.KzgSetupPath=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--config=none.cfg",
         "--JsonRpc.Enabled=true",
         "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin",
@@ -163,7 +150,7 @@ def get_config(
         "--Network.ExternalIp={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--Network.DiscoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--Network.P2PPort={0}".format(DISCOVERY_PORT_NUM),
-        "--JsonRpc.JwtSecretFile={0}".format(jwt_secret_json_filepath_on_client),
+        "--JsonRpc.JwtSecretFile=" + constants.JWT_AUTH_PATH,
         "--Network.OnlyStaticPeers=true",
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
@@ -175,7 +162,7 @@ def get_config(
             + ",".join(
                 [
                     ctx.enode
-                    for ctx in existing_el_clients[: package_io.MAX_ENODE_ENTRIES]
+                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
                 ]
             )
         )
@@ -184,24 +171,21 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-    return (
-        ServiceConfig(
-            image=image,
-            ports=USED_PORTS,
-            cmd=cmd,
-            files={
-                GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid,
-            },
-            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            min_cpu=el_min_cpu,
-            max_cpu=el_max_cpu,
-            min_memory=el_min_mem,
-            max_memory=el_max_mem,
-            env_vars=extra_env_vars,
-        ),
-        jwt_secret_json_filepath_on_client,
+    return ServiceConfig(
+        image=image,
+        ports=USED_PORTS,
+        cmd=cmd,
+        files={
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        },
+        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=el_min_cpu,
+        max_cpu=el_max_cpu,
+        min_memory=el_min_mem,
+        max_memory=el_max_mem,
+        env_vars=extra_env_vars,
     )
 
 
-def new_nethermind_launcher(el_genesis_data):
-    return struct(el_genesis_data=el_genesis_data)
+def new_nethermind_launcher(el_cl_genesis_data):
+    return struct(el_cl_genesis_data=el_cl_genesis_data)

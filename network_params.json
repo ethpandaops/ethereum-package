@@ -11,32 +11,29 @@
 			"beacon_extra_params": [],
 			"validator_extra_params": [],
 			"builder_network_params": null,
-			"count": 1
+      "validator_count": null,
+			"count": 2
 		}
 	],
 	"network_params": {
 		"network_id": "3151908",
 		"deposit_contract_address": "0x4242424242424242424242424242424242424242",
 		"seconds_per_slot": 12,
-		"slots_per_epoch": 32,
 		"num_validator_keys_per_node": 64,
 		"preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
 		"genesis_delay": 120,
 		"capella_fork_epoch": 0,
-		"deneb_fork_epoch": 500,
+		"deneb_fork_epoch": 4,
 		"electra_fork_epoch": null
 	},
-	"launch_additional_services": true,
 	"additional_services": [
 		"tx_spammer",
 		"blob_spammer",
-		"cl_forkmon",
 		"el_forkmon",
 		"beacon_metrics_gazer",
-		"explorer",
+		"dora",
 		"prometheus_grafana"
 	],
-	"explorer_version": "dora",
 	"wait_for_finalization": false,
 	"global_client_log_level": "info",
 	"snooper_enabled": false,
@@ -50,7 +47,7 @@
 		"mev_builder_extra_args": [],
 		"mev_flood_image": "flashbots/mev-flood",
 		"mev_flood_extra_args": [],
-		"mev_flood_seconds_per_bundle": 15,
-		"launch_custom_flood": false
-	}
+		"mev_flood_seconds_per_bundle": 15
+	},
+	"grafana_additional_dashboards": []
 }

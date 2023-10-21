@@ -1,10 +1,10 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../..//package_io/parse_input.star")
+input_parser = import_module("../..//package_io/input_parser.star")
 el_client_context = import_module("../../el/el_client_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 
 node_metrics = import_module("../../node_metrics_info.star")
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 
 RPC_PORT_NUM = 8545
@@ -28,11 +28,6 @@ UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 WS_PORT_ENGINE_ID = "ws-engine"
 METRICS_PORT_ID = "metrics"
-
-GENESIS_DATA_MOUNT_DIRPATH = "/genesis"
-
-PREFUNDED_KEYS_MOUNT_DIRPATH = "/prefunded-keys"
-
 METRICS_PATH = "/metrics"
 
 # The dirpath of the execution data directory on the client container
@@ -61,11 +56,11 @@ USED_PORTS = {
 ENTRYPOINT_ARGS = []
 
 VERBOSITY_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -94,8 +89,8 @@ def launch(
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
 
-    config, jwt_secret_json_filepath_on_client = get_config(
-        launcher.el_genesis_data,
+    config = get_config(
+        launcher.el_cl_genesis_data,
         image,
         existing_el_clients,
         log_level,
@@ -111,10 +106,6 @@ def launch(
 
     enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
-    jwt_secret = shared_utils.read_file_from_service(
-        plan, service_name, jwt_secret_json_filepath_on_client
-    )
-
     # TODO: Passing empty string for metrics_url for now https://github.com/kurtosis-tech/ethereum-package/issues/127
     # metrics_url = "http://{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     ethjs_metrics_info = None
@@ -127,14 +118,13 @@ def launch(
         RPC_PORT_NUM,
         WS_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
-        jwt_secret,
         service_name,
         [ethjs_metrics_info],
     )
 
 
 def get_config(
-    genesis_data,
+    el_cl_genesis_data,
     image,
     existing_el_clients,
     verbosity_level,
@@ -145,15 +135,10 @@ def get_config(
     extra_params,
     extra_env_vars,
 ):
-    genesis_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.geth_genesis_json_relative_filepath
-    )
-    jwt_secret_json_filepath_on_client = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH, genesis_data.jwt_secret_relative_filepath
-    )
-
     cmd = [
-        "--gethGenesis=" + genesis_json_filepath_on_client,
+        "--gethGenesis="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.json",
         "--dataDir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--port={0}".format(DISCOVERY_PORT_NUM),
         "--rpc",
@@ -168,7 +153,7 @@ def get_config(
         "--wsPort={0}".format(WS_PORT_NUM),
         "--wsEnginePort={0}".format(WS_PORT_ENGINE_NUM),
         "--wsEngineAddr=0.0.0.0",
-        "--jwt-secret={0}".format(jwt_secret_json_filepath_on_client),
+        "--jwt-secret=" + constants.JWT_AUTH_PATH,
         "--extIP={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--sync=full",
         "--isSingleNode=true",
@@ -181,7 +166,7 @@ def get_config(
             + ",".join(
                 [
                     ctx.enode
-                    for ctx in existing_el_clients[: package_io.MAX_ENODE_ENTRIES]
+                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
                 ]
             )
         )
@@ -190,27 +175,24 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-    return (
-        ServiceConfig(
-            image=image,
-            ports=USED_PORTS,
-            cmd=cmd,
-            files={
-                GENESIS_DATA_MOUNT_DIRPATH: genesis_data.files_artifact_uuid,
-            },
-            entrypoint=ENTRYPOINT_ARGS,
-            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-            min_cpu=el_min_cpu,
-            max_cpu=el_max_cpu,
-            min_memory=el_min_mem,
-            max_memory=el_max_mem,
-            env_vars=extra_env_vars,
-        ),
-        jwt_secret_json_filepath_on_client,
+    return ServiceConfig(
+        image=image,
+        ports=USED_PORTS,
+        cmd=cmd,
+        files={
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        },
+        entrypoint=ENTRYPOINT_ARGS,
+        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=el_min_cpu,
+        max_cpu=el_max_cpu,
+        min_memory=el_min_mem,
+        max_memory=el_max_mem,
+        env_vars=extra_env_vars,
     )
 
 
-def new_ethereumjs_launcher(el_genesis_data):
+def new_ethereumjs_launcher(el_cl_genesis_data):
     return struct(
-        el_genesis_data=el_genesis_data,
+        el_cl_genesis_data=el_cl_genesis_data,
     )

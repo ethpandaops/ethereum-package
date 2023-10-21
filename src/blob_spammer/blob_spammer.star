@@ -11,7 +11,6 @@ def launch_blob_spammer(
     cl_client_context,
     deneb_fork_epoch,
     seconds_per_slot,
-    slots_per_epoch,
     genesis_delay,
 ):
     config = get_config(
@@ -20,7 +19,6 @@ def launch_blob_spammer(
         cl_client_context,
         deneb_fork_epoch,
         seconds_per_slot,
-        slots_per_epoch,
         genesis_delay,
     )
     plan.add_service(SERVICE_NAME, config)
@@ -32,10 +30,9 @@ def get_config(
     cl_client_context,
     deneb_fork_epoch,
     seconds_per_slot,
-    slots_per_epoch,
     genesis_delay,
 ):
-    dencunTime = (deneb_fork_epoch * slots_per_epoch * seconds_per_slot) + genesis_delay
+    dencunTime = (deneb_fork_epoch * 32 * seconds_per_slot) + genesis_delay
     return ServiceConfig(
         image=IMAGE_NAME,
         entrypoint=ENTRYPOINT_ARGS,

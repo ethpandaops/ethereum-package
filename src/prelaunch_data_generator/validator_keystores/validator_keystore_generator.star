@@ -1,15 +1,6 @@
-prelaunch_data_generator_launcher = import_module(
-    "../../prelaunch_data_generator/prelaunch_data_generator_launcher/prelaunch_data_generator_launcher.star"
-)
-
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-keystore_files_module = import_module(
-    "../../prelaunch_data_generator/cl_validator_keystores/keystore_files.star"
-)
-keystores_result = import_module(
-    "../../prelaunch_data_generator/cl_validator_keystores/generate_keystores_result.star"
-)
-
+keystore_files_module = import_module("./keystore_files.star")
+keystores_result = import_module("./generate_keystores_result.star")
 
 NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores"
 
@@ -17,7 +8,9 @@ NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores"
 PRYSM_PASSWORD = "password"
 PRYSM_PASSWORD_FILEPATH_ON_GENERATOR = "/tmp/prysm-password.txt"
 
-KEYSTORES_GENERATION_TOOL_NAME = "eth2-val-tools"
+KEYSTORES_GENERATION_TOOL_NAME = "/app/eth2-val-tools"
+
+ETH_VAL_TOOLS_IMAGE = "protolambda/eth2-val-tools:latest"
 
 SUCCESSFUL_EXEC_CMD_EXIT_CODE = 0
 
@@ -32,18 +25,62 @@ TEKU_SECRETS_DIRNAME = "teku-secrets"
 
 KEYSTORE_GENERATION_FINISHED_FILEPATH_FORMAT = "/tmp/keystores_generated-{0}-{1}"
 
+SERVICE_NAME_PREFIX = "validator-key-generation-"
+
+ENTRYPOINT_ARGS = [
+    "sleep",
+    "99999",
+]
+
+
+# Launches a prelaunch data generator IMAGE, for use in various of the genesis generation
+def launch_prelaunch_data_generator(
+    plan,
+    files_artifact_mountpoints,
+    service_name_suffix,
+):
+    config = get_config(files_artifact_mountpoints)
+
+    service_name = "{0}{1}".format(
+        SERVICE_NAME_PREFIX,
+        service_name_suffix,
+    )
+    plan.add_service(service_name, config)
+
+    return service_name
+
+
+def launch_prelaunch_data_generator_parallel(
+    plan, files_artifact_mountpoints, service_name_suffixes
+):
+    config = get_config(
+        files_artifact_mountpoints,
+    )
+    service_names = [
+        "{0}{1}".format(
+            SERVICE_NAME_PREFIX,
+            service_name_suffix,
+        )
+        for service_name_suffix in service_name_suffixes
+    ]
+    services_to_add = {service_name: config for service_name in service_names}
+    plan.add_services(services_to_add)
+    return service_names
+
+
+def get_config(files_artifact_mountpoints):
+    return ServiceConfig(
+        image=ETH_VAL_TOOLS_IMAGE,
+        entrypoint=ENTRYPOINT_ARGS,
+        files=files_artifact_mountpoints,
+    )
+
 
 # Generates keystores for the given number of nodes from the given mnemonic, where each keystore contains approximately
 #
 # 	num_keys / num_nodes keys
-def generate_cl_validator_keystores(plan, mnemonic, participants):
-    service_name = prelaunch_data_generator_launcher.launch_prelaunch_data_generator(
-        plan,
-        {},
-        "cl-validator-keystore",
-        capella_fork_epoch=0,  # It doesn't matter how the validator keys are generated
-        electra_fork_epoch=None,  # It doesn't matter how the validator keys are generated
-    )
+def generate_validator_keystores(plan, mnemonic, participants):
+    service_name = launch_prelaunch_data_generator(plan, {}, "cl-validator-keystore")
 
     all_output_dirpaths = []
     all_sub_command_strs = []
@@ -84,7 +121,7 @@ def generate_cl_validator_keystores(plan, mnemonic, participants):
         if participant.validator_count == 0:
             keystore_files.append(None)
             continue
-        padded_idx = zfill_custom(idx + 1, len(str(len(participants))))
+        padded_idx = shared_utils.zfill_custom(idx + 1, len(str(len(participants))))
         keystore_start_index = running_total_validator_count
         running_total_validator_count += participant.validator_count
         keystore_stop_index = (keystore_start_index + participant.validator_count) - 1
@@ -147,15 +184,12 @@ def generate_cl_validator_keystores(plan, mnemonic, participants):
 
 
 # this is like above but runs things in parallel - for large networks that run on k8s or gigantic dockers
-def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
-    service_names = prelaunch_data_generator_launcher.launch_prelaunch_data_generator_parallel(
+def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
+    service_names = launch_prelaunch_data_generator_parallel(
         plan,
         {},
         ["cl-validator-keystore-" + str(idx) for idx in range(0, len(participants))],
-        capella_fork_epoch=0,  # It doesn't matter how the validator keys are generated
-        electra_fork_epoch=None,
-    )  # It doesn't matter how the validator keys are generated
-
+    )
     all_output_dirpaths = []
     all_generation_commands = []
     finished_files_to_verify = []
@@ -163,10 +197,13 @@ def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     for idx, participant in enumerate(participants):
         output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx)
         if participant.validator_count == 0:
-            all_output_dirpaths.append(output_dirpath)
+            all_generation_commands.append(None)
+            all_output_dirpaths.append(None)
+            finished_files_to_verify.append(None)
             continue
-        start_index = idx * participant.validator_count
-        stop_index = (idx + 1) * participant.validator_count
+        start_index = running_total_validator_count
+        running_total_validator_count += participant.validator_count
+        stop_index = start_index + participant.validator_count
         generation_finished_filepath = (
             KEYSTORE_GENERATION_FINISHED_FILEPATH_FORMAT.format(start_index, stop_index)
         )
@@ -188,6 +225,9 @@ def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     for idx in range(0, len(participants)):
         service_name = service_names[idx]
         generation_command = all_generation_commands[idx]
+        if generation_command == None:
+            # no generation command as validator count is 0
+            continue
         plan.exec(
             recipe=ExecRecipe(
                 command=["sh", "-c", generation_command + " >/dev/null 2>&1 &"]
@@ -199,6 +239,9 @@ def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     for idx in range(0, len(participants)):
         service_name = service_names[idx]
         output_dirpath = all_output_dirpaths[idx]
+        if output_dirpath == None:
+            # no output dir path as validator count is 0
+            continue
         generation_finished_filepath = finished_files_to_verify[idx]
         verificaiton_command = ["ls", generation_finished_filepath]
         plan.wait(
@@ -215,14 +258,13 @@ def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     keystore_files = []
     running_total_validator_count = 0
     for idx, participant in enumerate(participants):
+        output_dirpath = all_output_dirpaths[idx]
         if participant.validator_count == 0:
             keystore_files.append(None)
             continue
         service_name = service_names[idx]
-        output_dirpath = all_output_dirpaths[idx]
 
-        running_total_validator_count += participant.validator_count
-        padded_idx = zfill_custom(idx + 1, len(str(len(participants))))
+        padded_idx = shared_utils.zfill_custom(idx + 1, len(str(len(participants))))
         keystore_start_index = running_total_validator_count
         running_total_validator_count += participant.validator_count
         keystore_stop_index = (keystore_start_index + participant.validator_count) - 1
@@ -281,7 +323,3 @@ def generate_cl_valdiator_keystores_in_parallel(plan, mnemonic, participants):
 
     # we don't cleanup the containers as its a costly operation
     return result
-
-
-def zfill_custom(value, width):
-    return ("0" * (width - len(str(value)))) + str(value)

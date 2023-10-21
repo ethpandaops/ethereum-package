@@ -58,15 +58,5 @@ def read_file_from_service(plan, service_name, filename):
     return output["output"]
 
 
-def download_trusted_setup(plan, service_name, output_filepath):
-    plan.exec(
-        service_name=service_name,
-        recipe=ExecRecipe(
-            command=[
-                "wget",
-                "-O",
-                output_filepath,
-                "https://raw.githubusercontent.com/ethereum/c-kzg-4844/main/src/trusted_setup.txt",
-            ]
-        ),
-    )
+def zfill_custom(value, width):
+    return ("0" * (width - len(str(value)))) + str(value)

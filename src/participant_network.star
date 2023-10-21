@@ -1,14 +1,13 @@
-cl_validator_keystores = import_module(
-    "./prelaunch_data_generator/cl_validator_keystores/cl_validator_keystore_generator.star"
-)
-el_genesis_data_generator = import_module(
-    "./prelaunch_data_generator/el_genesis/el_genesis_data_generator.star"
-)
-cl_genesis_data_generator = import_module(
-    "./prelaunch_data_generator/cl_genesis/cl_genesis_data_generator.star"
+validator_keystores = import_module(
+    "./prelaunch_data_generator/validator_keystores/validator_keystore_generator.star"
 )
 
-static_files = import_module("../static_files/static_files.star")
+el_cl_genesis_data_generator = import_module(
+    "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
+)
+shared_utils = import_module("./shared_utils/shared_utils.star")
+
+static_files = import_module("./static_files/static_files.star")
 
 geth = import_module("./el/geth/geth_launcher.star")
 besu = import_module("./el/besu/besu_launcher.star")
@@ -30,7 +29,7 @@ genesis_constants = import_module(
 )
 participant_module = import_module("./participant.star")
 
-package_io = import_module("./package_io/constants.star")
+constants = import_module("./package_io/constants.star")
 
 BOOT_PARTICIPANT_INDEX = 0
 
@@ -47,10 +46,6 @@ CL_NODE_STARTUP_TIME = 5
 
 CL_CLIENT_CONTEXT_BOOTNODE = None
 
-GLOBAL_INDEX_ZFILL = {
-    "zfill_values": [(1, 1), (2, 10), (3, 100), (4, 1000), (5, 10000)]
-}
-
 
 def launch_participant_network(
     plan,
@@ -62,67 +57,62 @@ def launch_participant_network(
     num_participants = len(participants)
 
     plan.print("Generating cl validator key stores")
-    cl_validator_data = None
+    validator_data = None
     if not parallel_keystore_generation:
-        cl_validator_data = cl_validator_keystores.generate_cl_validator_keystores(
+        validator_data = validator_keystores.generate_validator_keystores(
             plan, network_params.preregistered_validator_keys_mnemonic, participants
         )
     else:
-        cl_validator_data = (
-            cl_validator_keystores.generate_cl_valdiator_keystores_in_parallel(
-                plan, network_params.preregistered_validator_keys_mnemonic, participants
-            )
+        validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
+            plan, network_params.preregistered_validator_keys_mnemonic, participants
         )
 
-    plan.print(json.indent(json.encode(cl_validator_data)))
+    plan.print(json.indent(json.encode(validator_data)))
 
     # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
     final_genesis_timestamp = get_final_genesis_timestamp(
         plan, CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME
     )
-    plan.print("Generating EL data")
-    el_genesis_generation_config_template = read_file(
-        static_files.EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
-    )
-    el_genesis_data = el_genesis_data_generator.generate_el_genesis_data(
-        plan,
-        el_genesis_generation_config_template,
-        final_genesis_timestamp,
-        network_params.network_id,
-        network_params.deposit_contract_address,
-        network_params.genesis_delay,
-        network_params.seconds_per_slot,
-        network_params.capella_fork_epoch,
-        network_params.deneb_fork_epoch,
-        network_params.electra_fork_epoch,
-    )
 
-    plan.print(json.indent(json.encode(el_genesis_data)))
-
-    plan.print("Uploading GETH prefunded keys")
-
-    geth_prefunded_keys_artifact_name = plan.upload_files(
-        static_files.GETH_PREFUNDED_KEYS_DIRPATH, name="geth-prefunded-keys"
-    )
-
-    plan.print("Uploaded GETH files succesfully")
-
-    plan.print("Generating CL data")
-
-    genesis_generation_config_yml_template = read_file(
-        static_files.CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
-    )
-    genesis_generation_mnemonics_yml_template = read_file(
-        static_files.CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH
-    )
     total_number_of_validator_keys = 0
     for participant in participants:
         total_number_of_validator_keys += participant.validator_count
-    cl_genesis_data = cl_genesis_data_generator.generate_cl_genesis_data(
+
+    plan.print("Generating EL CL data")
+    # we are running bellatrix genesis (deprecated) - will be removed in the future
+    if (
+        network_params.capella_fork_epoch > 0
+        and network_params.electra_fork_epoch == None
+    ):
+        ethereum_genesis_generator_image = (
+            "ethpandaops/ethereum-genesis-generator:1.3.14"
+        )
+    # we are running capella genesis - default behavior
+    elif (
+        network_params.capella_fork_epoch == 0
+        and network_params.electra_fork_epoch == None
+    ):
+        ethereum_genesis_generator_image = (
+            "ethpandaops/ethereum-genesis-generator:2.0.4"
+        )
+    # we are running electra - experimental
+    elif network_params.electra_fork_epoch != None:
+        ethereum_genesis_generator_image = (
+            "ethpandaops/ethereum-genesis-generator:3.0.0-rc.14"
+        )
+    else:
+        fail(
+            "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+        )
+
+    el_cl_genesis_config_template = read_file(
+        static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
+    )
+
+    el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
         plan,
-        genesis_generation_config_yml_template,
-        genesis_generation_mnemonics_yml_template,
-        el_genesis_data,
+        ethereum_genesis_generator_image,
+        el_cl_genesis_config_template,
         final_genesis_timestamp,
         network_params.network_id,
         network_params.deposit_contract_address,
@@ -130,50 +120,43 @@ def launch_participant_network(
         network_params.preregistered_validator_keys_mnemonic,
         total_number_of_validator_keys,
         network_params.genesis_delay,
+        network_params.max_churn,
+        network_params.ejection_balance,
         network_params.capella_fork_epoch,
         network_params.deneb_fork_epoch,
         network_params.electra_fork_epoch,
     )
 
-    plan.print(json.indent(json.encode(cl_genesis_data)))
-    plan.print("Generated CL genesis data succesfully, launching EL & CL Participants")
-
-    genesis_validators_root = cl_genesis_data.genesis_validators_root
-
     el_launchers = {
-        package_io.EL_CLIENT_TYPE.geth: {
+        constants.EL_CLIENT_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
                 network_params.network_id,
-                el_genesis_data,
-                geth_prefunded_keys_artifact_name,
-                genesis_constants.PRE_FUNDED_ACCOUNTS,
-                genesis_validators_root,
+                el_cl_data,
+                final_genesis_timestamp,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
         },
-        package_io.EL_CLIENT_TYPE.besu: {
-            "launcher": besu.new_besu_launcher(
-                network_params.network_id, el_genesis_data
-            ),
+        constants.EL_CLIENT_TYPE.besu: {
+            "launcher": besu.new_besu_launcher(network_params.network_id, el_cl_data),
             "launch_method": besu.launch,
         },
-        package_io.EL_CLIENT_TYPE.erigon: {
+        constants.EL_CLIENT_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
-                network_params.network_id, el_genesis_data
+                network_params.network_id, el_cl_data
             ),
             "launch_method": erigon.launch,
         },
-        package_io.EL_CLIENT_TYPE.nethermind: {
-            "launcher": nethermind.new_nethermind_launcher(el_genesis_data),
+        constants.EL_CLIENT_TYPE.nethermind: {
+            "launcher": nethermind.new_nethermind_launcher(el_cl_data),
             "launch_method": nethermind.launch,
         },
-        package_io.EL_CLIENT_TYPE.reth: {
-            "launcher": reth.new_reth_launcher(el_genesis_data),
+        constants.EL_CLIENT_TYPE.reth: {
+            "launcher": reth.new_reth_launcher(el_cl_data),
             "launch_method": reth.launch,
         },
-        package_io.EL_CLIENT_TYPE.ethereumjs: {
-            "launcher": ethereumjs.new_ethereumjs_launcher(el_genesis_data),
+        constants.EL_CLIENT_TYPE.ethereumjs: {
+            "launcher": ethereumjs.new_ethereumjs_launcher(el_cl_data),
             "launch_method": ethereumjs.launch,
         },
     }
@@ -197,7 +180,7 @@ def launch_participant_network(
         )
 
         # Zero-pad the index using the calculated zfill value
-        index_str = zfill_custom(index + 1, zfill_calculator(participants))
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
         el_service_name = "el-{0}-{1}-{2}".format(
             index_str, el_client_type, cl_client_type
@@ -226,35 +209,35 @@ def launch_participant_network(
     plan.print("Launching CL network")
 
     cl_launchers = {
-        package_io.CL_CLIENT_TYPE.lighthouse: {
-            "launcher": lighthouse.new_lighthouse_launcher(cl_genesis_data),
+        constants.CL_CLIENT_TYPE.lighthouse: {
+            "launcher": lighthouse.new_lighthouse_launcher(el_cl_data),
             "launch_method": lighthouse.launch,
         },
-        package_io.CL_CLIENT_TYPE.lodestar: {
-            "launcher": lodestar.new_lodestar_launcher(cl_genesis_data),
+        constants.CL_CLIENT_TYPE.lodestar: {
+            "launcher": lodestar.new_lodestar_launcher(el_cl_data),
             "launch_method": lodestar.launch,
         },
-        package_io.CL_CLIENT_TYPE.nimbus: {
-            "launcher": nimbus.new_nimbus_launcher(cl_genesis_data),
+        constants.CL_CLIENT_TYPE.nimbus: {
+            "launcher": nimbus.new_nimbus_launcher(el_cl_data),
             "launch_method": nimbus.launch,
         },
-        package_io.CL_CLIENT_TYPE.prysm: {
+        constants.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
-                cl_genesis_data,
-                cl_validator_data.prysm_password_relative_filepath,
-                cl_validator_data.prysm_password_artifact_uuid,
+                el_cl_data,
+                validator_data.prysm_password_relative_filepath,
+                validator_data.prysm_password_artifact_uuid,
             ),
             "launch_method": prysm.launch,
         },
-        package_io.CL_CLIENT_TYPE.teku: {
-            "launcher": teku.new_teku_launcher(cl_genesis_data),
+        constants.CL_CLIENT_TYPE.teku: {
+            "launcher": teku.new_teku_launcher(el_cl_data),
             "launch_method": teku.launch,
         },
     }
 
     all_snooper_engine_contexts = []
     all_cl_client_contexts = []
-    preregistered_validator_keys_for_nodes = cl_validator_data.per_node_keystores
+    preregistered_validator_keys_for_nodes = validator_data.per_node_keystores
 
     for index, participant in enumerate(participants):
         cl_client_type = participant.cl_client_type
@@ -272,7 +255,7 @@ def launch_participant_network(
             cl_launchers[cl_client_type]["launch_method"],
         )
 
-        index_str = zfill_custom(index + 1, zfill_calculator(participants))
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
         cl_service_name = "cl-{0}-{1}-{2}".format(
             index_str, cl_client_type, el_client_type
@@ -291,7 +274,7 @@ def launch_participant_network(
             snooper_service_name = "snooper-{0}-{1}-{2}".format(
                 index_str, cl_client_type, el_client_type
             )
-            snooper_image = package_io.DEFAULT_SNOOPER_IMAGE
+            snooper_image = constants.DEFAULT_SNOOPER_IMAGE
             snooper_engine_context = snooper.launch(
                 plan,
                 snooper_service_name,
@@ -381,15 +364,12 @@ def launch_participant_network(
 
         all_participants.append(participant_entry)
 
-    return all_participants, final_genesis_timestamp, genesis_validators_root
-
-
-def zfill_calculator(participants):
-    for zf, par in GLOBAL_INDEX_ZFILL["zfill_values"]:
-        if len(participants) < par:
-            zfill = zf - 1
-            return zfill
-            break
+    return (
+        all_participants,
+        final_genesis_timestamp,
+        el_cl_data.genesis_validators_root,
+        el_cl_data.files_artifact_uuid,
+    )
 
 
 def zfill_custom(value, width):

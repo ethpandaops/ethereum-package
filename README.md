@@ -1,9 +1,11 @@
 # Ethereum Package
+
 ![Run of the Ethereum Network Package](run.gif)
 
 This is a [Kurtosis][kurtosis-repo] package that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
 Specifically, this [package][package-reference] will:
+
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
 2. Configure & bootstrap a network of Ethereum nodes of *n* size using the genesis data generated above
 3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
@@ -11,6 +13,7 @@ Specifically, this [package][package-reference] will:
 5. Spin up a Grafana and Prometheus instance to observe the network
 
 Optional features (enabled via flags or parameter files at runtime):
+
 * Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
 * Spin up & configure parameters for the infrastructure behind Flashbot's implementation of PBS using `mev-boost`, in either `full` or `mock` mode. More details [here](./README.md#proposer-builder-separation-pbs-implementation-via-flashbots-mev-boost-protocol).
 * Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
@@ -20,15 +23,19 @@ Optional features (enabled via flags or parameter files at runtime):
 * Generate keystores for each node in parallel
 
 ## Quickstart
+
 1. [Install Docker & start the Docker Daemon if you haven't done so already][docker-installation]
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
+
    ```bash
    kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package
    ```
 
 #### Run with your own configuration
+
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
+
 ```bash
 kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.json)"
 ```
@@ -36,40 +43,51 @@ kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(c
 Where `network_params.json` contains the parameters for your network in your home directory.
 
 #### Run on Kubernetes
+
 Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster.
 
 #### Tear down
+
 The testnet will reside in an [enclave][enclave] - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
-```
+
+```bash
 kurtosis enclave rm -f my-testnet
 ```
 
 ## Management
+
 The [Kurtosis CLI](https://docs.kurtosis.com/cli) can be used to inspect and interact with the network.
 
 For example, if you need shell access, simply run:
-```
+
+```bash
 kurtosis service shell my-testnet $SERVICE_NAME
 ```
 
 And if you need the logs for a service, simply run:
-```
+
+```bash
 kurtosis service logs my-testnet $SERVICE_NAME
 ```
 
 Check out the full list of CLI commands [here](https://docs.kurtosis.com/cli)
 
 ## Debugging
+
 To grab the genesis files for the network, simply run:
-```
+
+```bash
 kurtosis files download my-testnet $FILE_NAME $OUTPUT_DIRECTORY
 ```
+
 For example, to retrieve the Execution Layer (EL) genesis data, run:
-```
+
+```bash
 kurtosis files download my-testnet el-genesis-data ~/Downloads
 ```
 
 ## Configuration
+
 To configure the package behaviour, you can modify your `network_params.json` file. The full JSON schema that can be passed in is as follows with the defaults provided:
 
 <details>
@@ -171,7 +189,11 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 
             // Count of nodes to spin up for this participant
             // Default to 1
-            "count": 1
+            "count": 1,
+
+             // Count of the number of validators you want to run for a given participant
+             // Default to null, which means that the number of validators will be using the network parameter num_validator_keys_per_node
+             "validator_count": null
         }
     ],
 
@@ -186,9 +208,6 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         //  Number of seconds per slot on the Beacon chain
         "seconds_per_slot": 12,
 
-        //  Number of slots in an epoch on the Beacon chain
-        "slots_per_epoch": 32,
-
         //  The number of validator keys that each CL validator node should get
         "num_validator_keys_per_node": 64,
 
@@ -198,43 +217,52 @@ To configure the package behaviour, you can modify your `network_params.json` fi
         // How long you want the network to wait before starting up
         "genesis_delay": 120,
 
+        // Max churn rate for the network introduced by
+        // EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
+        // Defaults to 8
+        "max_churn": 8,
+
+        // Ejection balance
+        // Defaults to 16ETH
+        // 16000000000 gwei
+        "ejection_balance": 16000000000,
+
         // The epoch at which the capella and deneb forks are set to occur.
         "capella_fork_epoch": 0,
-        "deneb_fork_epoch": 4,
+        "deneb_fork_epoch": 500,
         "electra_fork_epoch": null
     },
-    
+
     // Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
     "tx_spammer_params": {
         //  A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
         "tx_spammer_extra_args": []
     },
 
-    // True by defaults, adds services defined in "additional_services" alongside the Ethereum network
-    // If set to false:
-    //  - only Ethereum network (EL and CL nodes) will be launched. Nothing else (no transaction spammer)
-    //  - params for the CL nodes will be ignored (e.g. CL node image, CL node extra params)
-    "launch_additional_services": true,
+    // Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
+    "goomy_blob_params": {
+        //  A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
+        "goomy_blob_args": []
+    },
 
     // By default includes
-    //  - A transaction spammer is launched to fake transactions sent to the network
-    //  - Forkmon will be launched after CL genesis has happened
+    //  - A transaction spammer & blob spammer is launched to fake transactions sent to the network
+    //  - Forkmon for EL will be launched
     //  - A prometheus will be started, coupled with grafana
+    //  - A beacon metrics gazer will be launched
+    //  - A light beacon chain explorer will be launched
+    //  - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
     "additional_services": [
-      	"tx_spammer",
+        "tx_spammer",
         "blob_spammer",
-        "cl_forkmon",
+        "custom_flood",
+        "goomy_blob",
         "el_forkmon",
         "beacon_metrics_gazer",
-        "explorer",
+        "dora",
+        "full_beaconchain_explorer",
         "prometheus_grafana"
     ],
-
-    // Which blockchain explorer should be used
-    // "dora" will use the dora explorer developped by pk910
-    // "full" will use the explorer developped by the beaconcha.in team
-    // defaults to "light"
-    "explorer_version": "dora",
 
     //  If set, the package will block until a finalized epoch has occurred.
     "wait_for_finalization": false,
@@ -244,13 +272,17 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     //  This value will be overridden by participant-specific values
     "global_client_log_level": "info",
 
-    // EngineAPI Snooper
+    // EngineAPI Snooper global flags for all participants
+    // Default to false
     "snooper_enabled": false,
 
     // Parallelizes keystore generation so that each node has keystores being generated in their own container
     // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
     "parallel_keystore_generation": false,
 
+    // Disable peer scoring to prevent nodes impacted by faults from being permanently ejected from the network
+    // Default to false
+    "disable_peer_scoring": false,
 
     // Supports three valeus
     // Default: "None" - no mev boost, mev builder, mev flood or relays are spun up
@@ -266,6 +298,8 @@ To configure the package behaviour, you can modify your `network_params.json` fi
       "mev_relay_image": "flashbots/mev-boost-relay",
       // The image to use for the builder
       "mev_builder_image": "ethpandaops/flashbots-builder:main",
+      // The image to use for the CL builder
+      "mev_builder_cl_image": "sigp/lighthouse:latest",
       // The image to use for mev-boost
       "mev_boost_image": "flashbots/mev-boost",
       // Extra parameters to send to the API
@@ -282,12 +316,16 @@ To configure the package behaviour, you can modify your `network_params.json` fi
       "mev_flood_extra_args": [],
       // Number of seconds between bundles for mev-flood
       "mev_flood_seconds_per_bundle": 15,
-      // A custom flood script that increases the balance of the coinbase addresss leading to more reliable
-      // payload delivery
-      "launch_custom_flood": false
-    }
+      // Optional parameters to send to the custom_flood script that sends reliable payloads
+      "custom_flood_params": {
+        "interval_between_transactions": 1
+      }
+    },
+    // A list of locators for grafana dashboards to be loaded be the grafana service
+    "grafana_additional_dashboards": []
 }
 ```
+
 </details>
 
 #### Example configurations
@@ -324,12 +362,13 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     "capella_fork_epoch": 2,
     "deneb_fork_epoch": 5
   },
-  "launch_additional_services": false,
+  "additional_services": [],
   "wait_for_finalization": false,
   "wait_for_verifications": false,
   "global_client_log_level": "info"
 }
 ```
+
 </details>
 
 <details>
@@ -362,9 +401,10 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     },
   ],
   "mev_type": "mock",
-  "launch_additional_services": false
+  "additional_services": []
 }
 ```
+
 </details>
 
 <details>
@@ -399,9 +439,10 @@ To configure the package behaviour, you can modify your `network_params.json` fi
   "network_params": {
     "capella_fork_epoch": 1
   },
-  "launch_additional_services": false
+  "additional_services": []
 }
 ```
+
 </details>
 
 <details>
@@ -418,19 +459,22 @@ To configure the package behaviour, you can modify your `network_params.json` fi
       "count": 2
     }
   ],
-  "launch_additional_services": true,
   "snooper_enabled": true
 }
 ```
+
 </details>
 
 ## Proposer Builder Separation (PBS) emulation
+
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
+
 ```
 kurtosis run github.com/kurtosis-tech/ethereum-package '{"mev_type": "full"}'
 ```
 
 Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
+
 1. `Flashbot's block builder & CL validator + beacon` - A modified Geth client that builds blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay.
 2. `mev-relay-api` - Services that provide APIs for (a) proposers, (b) block builders, (c) data
 3. `mev-relay-website` - A website to monitor payloads that have been delivered
@@ -449,13 +493,22 @@ It is recommended to use non zero value for `capella_fork_epoch` by setting `net
 in the arguments passed with `mev_type` set to `full`.
 </details>
 
-
 This package also supports a `"mev_type": "mock"` mode that will only bring up:
 
 1. `mock-builder` - a server that listens for builder API directives and responds with payloads built using an execution client
 1. `mev-boost` - for every EL/CL pair launched
 
-For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-eth2-package).
+For more details, including a guide and architecture of the `mev-boost` infrastructure, go [here](https://docs.kurtosis.com/how-to-full-mev-with-ethereum-package/).
+
+## MEV-Boost usage with Capella at Epoch 0
+
+This note is from 2023-10-05
+
+`flashbots/mev-boost-relay:0.27` and later support `capella_fork_epoch` at `0` but this seems to require a few flags enabled
+on the `lighthouse` beacon client including `--always-prefer-builder-payload` and `--disable-peer-scoring`
+
+Users are recommended to use [`examples/capella-mev.json`](./examples/capella-mev.json); as inspiration for reliable payload
+delivery.
 
 ## Pre-funded accounts at Genesis
 
@@ -463,14 +516,17 @@ This package comes with [seven prefunded keys for testing](https://github.com/ku
 
 Here's a table of where the keys are used
 
-| Account Index| Component Used In   | Private Key Used | Public Key Used | Comment                    |
-|----------------|---------------------|------------------|-----------------|----------------------------|
-| 3              | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 0              | mev_flood           | ✅                |                 | As the admin_key           |
-| 2              | mev_flood           | ✅                |                 | As the user_key            |
-| 0              | mev_custom_flood    |                  | ✅               | As the receiver of balance |
-| 6              | mev_custom_flood    | ✅                |                 | As the sender of balance   |
-| 1              | blob_spammer        | ✅                |                 | As the sender of blobs     |
+| Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                     |
+|---------------|---------------------|------------------|-----------------|-----------------------------|
+| 0             | mev_flood           | ✅                |                 | As the admin_key           |
+| 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
+| 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
+| 2             | mev_flood           | ✅                |                 | As the user_key            |
+| 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
+| 4              | goomy_blob         | ✅                |                 | As the sender of blobs     |
+| 5             | eip4788_deployment  | ✅                |                 | As contract deployer       |
+| 6             | mev_custom_flood    | ✅                |                 | As the sender of balance   |
+
 
 ## Developing On This Package
 
@@ -482,9 +538,11 @@ Then, run the dev loop:
 
 1. Make your code changes
 1. Rebuild and re-run the package by running the following from the root of the repo:
+
    ```bash
    kurtosis run . "{}"
    ```
+
    NOTE 1: You can change the value of the second positional argument flag to pass in extra configuration to the package per the "Configuration" section above!
    NOTE 2: The second positional argument accepts JSON.
 
@@ -506,7 +564,5 @@ When you're happy with your changes:
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [kurtosis-repo]: https://github.com/kurtosis-tech/kurtosis
-[using-the-cli]: https://docs.kurtosis.com/cli
 [enclave]: https://docs.kurtosis.com/concepts-reference/enclaves/
 [package-reference]: https://docs.kurtosis.com/concepts-reference/packages
-

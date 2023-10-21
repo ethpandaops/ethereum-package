@@ -1,5 +1,10 @@
 redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
+<<<<<<< HEAD
 postgres_module = import_module("github.com/bharath-123/postgres-package/main.star@add-adminer")
+=======
+postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+constants = import_module("../package_io/constants.star")
+>>>>>>> d3cf3f42ebe68b02cf28ad3d7c69c77e7c934af7
 
 DUMMY_SECRET_KEY = "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
 DUMMY_PUB_KEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
@@ -17,6 +22,8 @@ NETWORK_ID_TO_NAME = {
     "3": "ropsten",
 }
 
+DONT_PERSIST_TO_DISK = False
+
 
 def launch_mev_relay(
     plan,
@@ -26,7 +33,6 @@ def launch_mev_relay(
     validator_root,
     builder_uri,
     seconds_per_slot,
-    slots_per_epoch=32,
 ):
     redis = redis_module.run(plan)
     # making the password postgres as the relay expects it to be postgres
@@ -43,15 +49,13 @@ def launch_mev_relay(
 
     image = mev_params.mev_relay_image
 
-    # TODO(maybe) remove hardocded values for the forks
     env_vars = {
-        "GENESIS_FORK_VERSION": "0x10000038",
-        "BELLATRIX_FORK_VERSION": "0x30000038",
-        "CAPELLA_FORK_VERSION": "0x40000038",
-        "DENEB_FORK_VERSION": "0x50000038",
+        "GENESIS_FORK_VERSION": constants.GENESIS_FORK_VERSION,
+        "BELLATRIX_FORK_VERSION": constants.BELLATRIX_FORK_VERSION,
+        "CAPELLA_FORK_VERSION": constants.CAPELLA_FORK_VERSION,
+        "DENEB_FORK_VERSION": constants.DENEB_FORK_VERSION,
         "GENESIS_VALIDATORS_ROOT": validator_root,
         "SEC_PER_SLOT": str(seconds_per_slot),
-        "SLOTS_PER_EPOCH": str(slots_per_epoch),
     }
 
     redis_url = "{}:{}".format(redis.hostname, redis.port_number)

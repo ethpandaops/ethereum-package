@@ -1,6 +1,12 @@
+constants = import_module("../package_io/constants.star")
+
+genesis_constants = import_module(
+    "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
+)
+
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
-    "erigon": "thorax/erigon:devel",
+    "erigon": "ethpandaops/erigon:devel",
     "nethermind": "nethermind/nethermind:latest",
     "besu": "hyperledger/besu:develop",
     "reth": "ghcr.io/paradigmxyz/reth",
@@ -15,6 +21,9 @@ DEFAULT_CL_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
 }
 
+MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.27"
+
+MEV_BOOST_RELAY_IMAGE_NON_ZERO_CAPELLA = "flashbots/mev-boost-relay:0.26"
 
 NETHERMIND_NODE_NAME = "nethermind"
 NIMBUS_NODE_NAME = "nimbus"
@@ -27,13 +36,15 @@ HIGH_DENEB_VALUE_FORK_VERKLE = 20000
 FLASHBOTS_MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
 
+# Minimum number of validators required for a network to be valid is 64
+MIN_VALIDATORS = 64
+
 DEFAULT_ADDITIONAL_SERVICES = [
     "tx_spammer",
     "blob_spammer",
-    "cl_forkmon",
     "el_forkmon",
     "beacon_metrics_gazer",
-    "explorer",
+    "dora",
     "prometheus_grafana",
 ]
 
@@ -41,27 +52,23 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
     "mev_params",
+    "goomy_blob_params",
     "tx_spammer_params",
-)
-
-DEFAULT_EXPLORER_VERSION = "dora"
-
-package_io_constants = import_module("../package_io/constants.star")
-
-genesis_constants = import_module(
-    "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "custom_flood_params",
 )
 
 
-def parse_input(plan, input_args):
+def input_parser(plan, input_args):
     result = parse_network_params(input_args)
 
     # add default eth2 input params
     result["mev_type"] = None
     result["mev_params"] = get_default_mev_params()
-    result["launch_additional_services"] = True
     result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
-    result["explorer_version"] = DEFAULT_EXPLORER_VERSION
+    result["grafana_additional_dashboards"] = []
+    result["tx_spammer_params"] = get_default_tx_spammer_params()
+    result["custom_flood_params"] = get_default_custom_flood_params()
+    result["disable_peer_scoring"] = False
 
     for attr in input_args:
         value = input_args[attr]
@@ -73,6 +80,17 @@ def parse_input(plan, input_args):
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
                 result["mev_params"][sub_attr] = sub_value
+        elif attr == "tx_spammer_params":
+            for sub_attr in input_args["tx_spammer_params"]:
+                sub_value = input_args["tx_spammer_params"][sub_attr]
+                result["tx_spammer_params"][sub_attr] = sub_value
+        elif attr == "custom_flood_params":
+            for sub_attr in input_args["custom_flood_params"]:
+                sub_value = input_args["custom_flood_params"][sub_attr]
+                result["custom_flood_params"][sub_attr] = sub_value
+
+    if result.get("disable_peer_scoring"):
+        result = enrich_disable_peer_scoring(result)
 
     if result.get("mev_type") in ("mock", "full"):
         result = enrich_mev_extra_params(
@@ -82,8 +100,19 @@ def parse_input(plan, input_args):
             result.get("mev_type"),
         )
 
-    result["tx_spammer_params"] = get_default_tx_spammer_params()
+    if (
+        result.get("mev_type") == "full"
+        and result["network_params"]["capella_fork_epoch"] == 0
+        and result["mev_params"]["mev_relay_image"]
+        == MEV_BOOST_RELAY_IMAGE_NON_ZERO_CAPELLA
+    ):
+        fail(
+            "The default MEV image {0} requires a non-zero value for capella fork epoch set via network_params.capella_fork_epoch".format(
+                MEV_BOOST_RELAY_IMAGE_NON_ZERO_CAPELLA
+            )
+        )
 
+    result["goomy_blob_params"] = get_default_goomy_blob_params()
     return struct(
         participants=[
             struct(
@@ -128,8 +157,9 @@ def parse_input(plan, input_args):
                 "deposit_contract_address"
             ],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
-            slots_per_epoch=result["network_params"]["slots_per_epoch"],
             genesis_delay=result["network_params"]["genesis_delay"],
+            max_churn=result["network_params"]["max_churn"],
+            ejection_balance=result["network_params"]["ejection_balance"],
             capella_fork_epoch=result["network_params"]["capella_fork_epoch"],
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
@@ -137,6 +167,7 @@ def parse_input(plan, input_args):
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
             mev_builder_image=result["mev_params"]["mev_builder_image"],
+            mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
             mev_relay_housekeeper_extra_args=result["mev_params"][
@@ -151,19 +182,26 @@ def parse_input(plan, input_args):
             mev_flood_seconds_per_bundle=result["mev_params"][
                 "mev_flood_seconds_per_bundle"
             ],
-            launch_custom_flood=result["mev_params"]["launch_custom_flood"],
         ),
         tx_spammer_params=struct(
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
-        launch_additional_services=result["launch_additional_services"],
+        goomy_blob_params=struct(
+            goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
+        ),
+        custom_flood_params=struct(
+            interval_between_transactions=result["custom_flood_params"][
+                "interval_between_transactions"
+            ],
+        ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
         global_client_log_level=result["global_client_log_level"],
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
-        explorer_version=result["explorer_version"],
+        grafana_additional_dashboards=result["grafana_additional_dashboards"],
+        disable_peer_scoring=result["disable_peer_scoring"],
     )
 
 
@@ -259,9 +297,6 @@ def parse_network_params(input_args):
             "preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length"
         )
 
-    if result["network_params"]["slots_per_epoch"] == 0:
-        fail("slots_per_epoch is 0 needs to be > 0 ")
-
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
 
@@ -274,6 +309,9 @@ def parse_network_params(input_args):
     if result["network_params"]["electra_fork_epoch"] != None:
         # if electra is defined, then deneb needs to be set very high
         result["network_params"]["deneb_fork_epoch"] = HIGH_DENEB_VALUE_FORK_VERKLE
+        # TODO: remove once transition is complete
+        if result["network_params"]["electra_fork_epoch"] != 0:
+            fail("electra_fork_epoch can only be 0 or None")
 
     if (
         result["network_params"]["capella_fork_epoch"] > 0
@@ -281,15 +319,14 @@ def parse_network_params(input_args):
     ):
         fail("electra can only happen with capella genesis not bellatrix")
 
-    required_num_validators = 2 * result["network_params"]["slots_per_epoch"]
     actual_num_validators = (
         total_participant_count
         * result["network_params"]["num_validator_keys_per_node"]
     )
-    if required_num_validators > actual_num_validators:
+    if MIN_VALIDATORS > actual_num_validators:
         fail(
-            "required_num_validators - {0} is greater than actual_num_validators - {1}".format(
-                required_num_validators, actual_num_validators
+            "We require at least {0} validators but got {1}".format(
+                MIN_VALIDATORS, actual_num_validators
             )
         )
 
@@ -321,6 +358,7 @@ def default_input_args():
         "global_client_log_level": "info",
         "snooper_enabled": False,
         "parallel_keystore_generation": False,
+        "disable_peer_scoring": False,
     }
 
 
@@ -332,8 +370,9 @@ def default_network_params():
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
         "seconds_per_slot": 12,
-        "slots_per_epoch": 32,
         "genesis_delay": 120,
+        "max_churn": 8,
+        "ejection_balance": 16000000000,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 500,
         "electra_fork_epoch": None,
@@ -373,9 +412,9 @@ def default_participant():
 
 def get_default_mev_params():
     return {
-        "mev_relay_image": "flashbots/mev-boost-relay:latest",
-        # TODO replace with flashbots/builder when they publish an arm64 image as mentioned in flashbots/builder#105
-        "mev_builder_image": "ethpandaops/flashbots-builder:main",
+        "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
+        "mev_builder_image": "flashbots/builder:latest",
+        "mev_builder_cl_image": "sigp/lighthouse:latest",
         "mev_boost_image": "flashbots/mev-boost",
         "mev_relay_api_extra_args": [],
         "mev_relay_housekeeper_extra_args": [],
@@ -384,13 +423,33 @@ def get_default_mev_params():
         "mev_flood_image": "flashbots/mev-flood",
         "mev_flood_extra_args": [],
         "mev_flood_seconds_per_bundle": 15,
-        # this is a simple script that increases the balance of the coinbase address at a cadence
-        "launch_custom_flood": False,
     }
 
 
 def get_default_tx_spammer_params():
     return {"tx_spammer_extra_args": []}
+
+
+def get_default_goomy_blob_params():
+    return {"goomy_blob_args": []}
+
+
+def get_default_custom_flood_params():
+    # this is a simple script that increases the balance of the coinbase address at a cadence
+    return {"interval_between_transactions": 1}
+
+
+def enrich_disable_peer_scoring(parsed_arguments_dict):
+    for index, participant in enumerate(parsed_arguments_dict["participants"]):
+        if participant["cl_client_type"] == "lighthouse":
+            participant["beacon_extra_params"].append("--disable-peer-scoring")
+        if participant["cl_client_type"] == "prysm":
+            participant["beacon_extra_params"].append("--disable-peer-scorer")
+        if participant["cl_client_type"] == "teku":
+            participant["beacon_extra_params"].append("--Xp2p-gossip-scoring-enabled")
+        if participant["cl_client_type"] == "lodestar":
+            participant["beacon_extra_params"].append("--disablePeerScoring")
+    return parsed_arguments_dict
 
 
 # TODO perhaps clean this up into a map
@@ -431,11 +490,12 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         mev_participant = default_participant()
         mev_participant.update(
             {
-                # TODO replace with actual when flashbots/builder is published
                 "el_client_image": parsed_arguments_dict["mev_params"][
                     "mev_builder_image"
                 ],
-                "cl_client_image": "sigp/lighthouse",
+                "cl_client_image": parsed_arguments_dict["mev_params"][
+                    "mev_builder_cl_image"
+                ],
                 "beacon_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
@@ -449,13 +509,18 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(
                         num_participants + 1
                     ),
-                    "--builder.bellatrix_fork_version=0x30000038",
-                    "--builder.genesis_fork_version=0x10000038",
+                    "--builder.bellatrix_fork_version={0}".format(
+                        constants.BELLATRIX_FORK_VERSION
+                    ),
+                    "--builder.genesis_fork_version={0}".format(
+                        constants.GENESIS_FORK_VERSION
+                    ),
                     "--builder.genesis_validators_root={0}".format(
-                        package_io_constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
+                        constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
                     ),
                     '--miner.extradata="Illuminate Dmocratize Dstribute"',
                     "--builder.algotype=greedy",
+                    "--metrics.builder",
                 ]
                 + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
                 "el_extra_env_vars": {

@@ -1,16 +1,15 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
-input_parser = import_module("../../package_io/parse_input.star")
+input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
-package_io = import_module("../../package_io/constants.star")
+constants = import_module("../../package_io/constants.star")
 
 IMAGE_SEPARATOR_DELIMITER = ","
 EXPECTED_NUM_IMAGES = 2
+
 #  ---------------------------------- Beacon client -------------------------------------
 CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/consensus-data"
-GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/genesis"
-
 
 # Port IDs
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -75,11 +74,11 @@ VALIDATOR_NODE_USED_PORTS = {
 }
 
 PRYSM_LOG_LEVELS = {
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
-    package_io.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -135,7 +134,7 @@ def launch(
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
     beacon_config = get_beacon_config(
-        launcher.genesis_data,
+        launcher.el_cl_genesis_data,
         beacon_image,
         bootnode_contexts,
         el_client_context,
@@ -164,7 +163,7 @@ def launch(
         v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
         v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
         validator_config = get_validator_config(
-            launcher.genesis_data,
+            launcher.el_cl_genesis_data,
             validator_image,
             validator_node_service_name,
             log_level,
@@ -236,7 +235,7 @@ def launch(
 
 
 def get_beacon_config(
-    genesis_data,
+    el_cl_genesis_data,
     beacon_image,
     bootnode_contexts,
     el_client_context,
@@ -261,24 +260,15 @@ def get_beacon_config(
             el_client_context.engine_rpc_port_num,
         )
 
-    genesis_config_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.config_yml_rel_filepath,
-    )
-    genesis_ssz_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.genesis_ssz_rel_filepath,
-    )
-    jwt_secret_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.jwt_secret_rel_filepath,
-    )
-
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--chain-config-file=" + genesis_config_filepath,
-        "--genesis-state=" + genesis_ssz_filepath,
+        "--chain-config-file="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
+        "--genesis-state="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.ssz",
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
         "--rpc-port={0}".format(RPC_PORT_NUM),
@@ -290,11 +280,11 @@ def get_beacon_config(
         "--p2p-udp-port={0}".format(DISCOVERY_UDP_PORT_NUM),
         "--min-sync-peers={0}".format(MIN_PEERS),
         "--verbosity=" + log_level,
-        "--slots-per-archive-point={0}".format(32 if package_io.ARCHIVE_MODE else 8192),
-        "--suggested-fee-recipient=" + package_io.VALIDATING_REWARDS_ACCOUNT,
+        "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
+        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Pari's recommendation to reduce noise
         "--subscribe-all-subnets=true",
-        "--jwt-secret={0}".format(jwt_secret_filepath),
+        "--jwt-secret=" + constants.JWT_AUTH_PATH,
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -303,7 +293,7 @@ def get_beacon_config(
     ]
 
     if bootnode_contexts != None:
-        for ctx in bootnode_contexts[: package_io.MAX_ENR_ENTRIES]:
+        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
             cmd.append("--peer=" + ctx.multiaddr)
             cmd.append("--bootstrap-node=" + ctx.enr)
         cmd.append("--p2p-static-id=true")
@@ -317,7 +307,7 @@ def get_beacon_config(
         ports=BEACON_NODE_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
@@ -329,7 +319,7 @@ def get_beacon_config(
 
 
 def get_validator_config(
-    genesis_data,
+    el_cl_genesis_data,
     validator_image,
     service_name,
     log_level,
@@ -344,14 +334,6 @@ def get_validator_config(
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
 ):
-    consensus_data_dirpath = shared_utils.path_join(
-        CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_name
-    )
-    genesis_config_filepath = shared_utils.path_join(
-        GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
-        genesis_data.config_yml_rel_filepath,
-    )
-
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
         node_keystore_files.prysm_relative_dirpath,
@@ -363,15 +345,17 @@ def get_validator_config(
 
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
-        "--chain-config-file=" + genesis_config_filepath,
+        "--chain-config-file="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
         "--beacon-rpc-gateway-provider=" + beacon_http_endpoint,
         "--beacon-rpc-provider=" + beacon_rpc_endpoint,
         "--wallet-dir=" + validator_keys_dirpath,
         "--wallet-password-file=" + validator_secrets_dirpath,
-        "--datadir=" + consensus_data_dirpath,
+        "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM),
         "--verbosity=" + log_level,
-        "--suggested-fee-recipient=" + package_io.VALIDATING_REWARDS_ACCOUNT,
+        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # TODO(old) SOMETHING ABOUT JWT
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
@@ -389,7 +373,7 @@ def get_validator_config(
         ports=VALIDATOR_NODE_USED_PORTS,
         cmd=cmd,
         files={
-            GENESIS_DATA_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: genesis_data.files_artifact_uuid,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
             VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
             PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
         },
@@ -402,10 +386,10 @@ def get_validator_config(
 
 
 def new_prysm_launcher(
-    genesis_data, prysm_password_relative_filepath, prysm_password_artifact_uuid
+    el_cl_genesis_data, prysm_password_relative_filepath, prysm_password_artifact_uuid
 ):
     return struct(
-        genesis_data=genesis_data,
+        el_cl_genesis_data=el_cl_genesis_data,
         prysm_password_artifact_uuid=prysm_password_artifact_uuid,
         prysm_password_relative_filepath=prysm_password_relative_filepath,
     )

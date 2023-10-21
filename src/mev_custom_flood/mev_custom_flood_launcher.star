@@ -1,12 +1,12 @@
-PYTHON_IMAGE = "python:3.11-alpine"
-CUSTOM_FLOOD_SREVICE_NAME = "mev-custom-flood"
+PYTHON_IMAGE = "ethpandaops/python-web3"
+CUSTOM_FLOOD_SERVICE_NAME = "mev-custom-flood"
 
 
-def spam_in_background(plan, sender_key, receiver_key, el_uri):
-    sender_script = plan.upload_files("../mev_custom_flood/sender.py")
+def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
+    sender_script = plan.upload_files("./sender.py")
 
     plan.add_service(
-        name=CUSTOM_FLOOD_SREVICE_NAME,
+        name=CUSTOM_FLOOD_SERVICE_NAME,
         config=ServiceConfig(
             image=PYTHON_IMAGE,
             files={"/tmp": sender_script},
@@ -20,13 +20,14 @@ def spam_in_background(plan, sender_key, receiver_key, el_uri):
     )
 
     plan.exec(
-        service_name=CUSTOM_FLOOD_SREVICE_NAME,
-        recipe=ExecRecipe(["pip", "install", "web3"]),
-    )
-
-    plan.exec(
-        service_name=CUSTOM_FLOOD_SREVICE_NAME,
+        service_name=CUSTOM_FLOOD_SERVICE_NAME,
         recipe=ExecRecipe(
-            ["/bin/sh", "-c", "nohup python /tmp/sender.py > /dev/null 2>&1 &"]
+            [
+                "/bin/sh",
+                "-c",
+                "nohup python /tmp/sender.py  --interval_between_transactions {} > /dev/null 2>&1 &".format(
+                    params.interval_between_transactions
+                ),
+            ]
         ),
     )
