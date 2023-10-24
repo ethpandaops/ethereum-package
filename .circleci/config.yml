@@ -273,6 +273,21 @@ workflows:
   per_pr_test:
     when: << pipeline.parameters.should-enable-build-workflow >>
     jobs:
+      - kurtosis-docs-checker/check-docs:
+          should-check-changelog: false
+          markdown-link-check-config-json: |
+            {
+                "ignorePatterns": [
+                    {
+                        "pattern": "https://github.com/kurtosis-tech/ethereum-package"
+                    }
+                ]
+            }
+          filters:
+            branches:
+              ignore:
+                - main
+
       - run_starlark_arm64:
           filters:
             branches:
