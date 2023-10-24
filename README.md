@@ -187,6 +187,10 @@ To configure the package behaviour, you can modify your `network_params.json` fi
             // Defaults to false
             "snooper_enabled": false,
 
+            // Enables Ethereum Metrics Exporter for this participant. Can be set globally.
+            // Defaults to false
+            "ethereum_metrics_exporter_enabled": false,
+
             // Count of nodes to spin up for this participant
             // Default to 1
             "count": 1,
@@ -275,6 +279,10 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     // EngineAPI Snooper global flags for all participants
     // Default to false
     "snooper_enabled": false,
+
+    // Enables Ethereum Metrics Exporter for all participants
+    // Defaults to false
+    "ethereum_metrics_exporter_enabled": false,
 
     // Parallelizes keystore generation so that each node has keystores being generated in their own container
     // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
