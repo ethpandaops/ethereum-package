@@ -1,0 +1,25 @@
+name: Nightly test Workflow
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # This schedules the workflow to run at 02:00 UTC every day
+
+jobs:
+  run_with_args:
+    strategy:
+        matrix:
+          file_name: ["./.circleci/tests/besu-all.json", "./.circleci/tests/erigon-all.json", "./.circleci/tests/ethereumjs-all.json", "./.circleci/tests/geth-all.json", "./.circleci/tests/lighthouse-all.json", "./.circleci/tests/lodestar-all.json", "./.circleci/tests/mix.json", "./.circleci/tests/nimbus-mev.json", "./.circleci/tests/nethermind-all.json", "./.circleci/tests/nimbus-all.json", "./.circleci/tests/prysm-all.json", " ./.circleci/tests/reth-all.json", "./.circleci/tests/teku-all.json", "./.circleci/tests/parallel-keystores-1.json", "./.circleci/tests/parallel-keystores-2.json", "./.circleci/tests/parallel-keystores-3.json", "./.circleci/tests/disable-peer-scoring.json", "./.circleci/tests/petra.json"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Kurtosis
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+          kurtosis analytics disable
+
+      - name: Run Starlark
+        run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
