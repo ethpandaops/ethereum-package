@@ -98,7 +98,7 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 ```yaml
 #  Specification of the participants in the network
 participants:
-  # The typoe of EL client that should be started
+  # The type of EL client that should be started
   # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth
 - el_client_type: geth
 
