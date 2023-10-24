@@ -312,7 +312,7 @@ workflows:
       # -- PR check jobs ------------------------------------------
       - kurtosis-docs-checker/check-docs:
           should-check-changelog: false
-          markdown-link-check-config-yaml: |
+          markdown-link-check-config-json: |
             {
                 "ignorePatterns": [
                     {
