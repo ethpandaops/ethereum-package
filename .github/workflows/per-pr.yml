@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  kurtosis-docs-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Kurtosis
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+          kurtosis analytics disable
+
+      - name: Kurtosis Docs Checker
+        uses: kurtosis-tech/docs-checker@v0.2.3
+        with:
+          should-check-changelog: false
+          markdown-link-check-config-json: |
+            {
+                "ignorePatterns": [
+                    {
+                        "pattern": "https://github.com/kurtosis-tech/ethereum-package"
+                    }
+                ]
+            }
+
+  run_starlark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Kurtosis
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+          kurtosis analytics disable
+
+      - name: Run Starlark
+        run: kurtosis run ${{ github.workspace }}
+
+  run_with_args:
+    strategy:
+        matrix:
+          file_name: ["./.circleci/tests/mev.json", "./.circleci/tests/mev-mock.json", "./.circleci/tests/mix-with-tools.json"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Kurtosis
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+          kurtosis analytics disable
+
+      - name: Run Starlark
+        run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Kurtosis
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+          kurtosis analytics disable
+
+      - name: Kurtosis Lint
+        run: kurtosis lint ${{ github.workspace }}
+
+
+
+# Define the other jobs similarly
+

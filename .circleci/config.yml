@@ -88,21 +88,6 @@ setup_kurtosis_k3s: &setup_kurtosis_k3s
 #  images), so we run everything inside a single job.
 # See also: https://discuss.circleci.com/t/can-docker-images-be-preserved-between-jobs-in-a-workflow-without-a-manual-load-save/23388/12
 jobs:
-  run_starlark:
-    executor: ubuntu_vm
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-      - run: kurtosis run ${PWD}
-
-  lint:
-    executor: ubuntu_vm
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-
-      - run: kurtosis lint ${PWD}
-
   run_starlark_arm64:
     executor: ubuntu_vm
     resource_class: arm.medium
@@ -208,20 +193,6 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/teku-all.json)"
 
-  mev:
-    executor: ubuntu_vm
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.json)"
-
-  mev_mock:
-    executor: ubuntu_vm
-    steps:
-      - <<: *setup_kurtosis
-      - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev-mock.json)"
-
   mev_k8s:
     executor: ubuntu_vm
     steps:
@@ -238,13 +209,6 @@ jobs:
   mix_with_tools_k8s:
     executor: ubuntu_vm
     steps:
-      - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
-
-  mix_with_tools_docker:
-    executor: ubuntu_vm
-    steps:
-      - <<: *setup_kurtosis
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.json)"
 
@@ -309,45 +273,7 @@ workflows:
   per_pr_test:
     when: << pipeline.parameters.should-enable-build-workflow >>
     jobs:
-      # -- PR check jobs ------------------------------------------
-      - kurtosis-docs-checker/check-docs:
-          should-check-changelog: false
-          markdown-link-check-config-json: |
-            {
-                "ignorePatterns": [
-                    {
-                        "pattern": "https://github.com/kurtosis-tech/ethereum-package"
-                    }
-                ]
-            }
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - run_starlark:
-          filters:
-            branches:
-              ignore:
-                - main
-
       - run_starlark_arm64:
-          filters:
-            branches:
-              ignore:
-                - main
-      - lint:
-          filters:
-            branches:
-              ignore:
-                - main
-      - mev:
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - mev_mock:
           filters:
             branches:
               ignore:
@@ -355,12 +281,6 @@ workflows:
 
       - mev_k8s:
           <<: *setup_kurtosis_k3s
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - mix_with_tools_docker:
           filters:
             branches:
               ignore:
