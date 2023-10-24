@@ -2,13 +2,33 @@ name: Nightly test Workflow
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # This schedules the workflow to run at 02:00 UTC every day
+    - cron: "0 2 * * *" # This schedules the workflow to run at 02:00 UTC every day
 
 jobs:
   run_with_args:
     strategy:
-        matrix:
-          file_name: ["./.circleci/tests/besu-all.json", "./.circleci/tests/erigon-all.json", "./.circleci/tests/ethereumjs-all.json", "./.circleci/tests/geth-all.json", "./.circleci/tests/lighthouse-all.json", "./.circleci/tests/lodestar-all.json", "./.circleci/tests/mix.json", "./.circleci/tests/nimbus-mev.json", "./.circleci/tests/nethermind-all.json", "./.circleci/tests/nimbus-all.json", "./.circleci/tests/prysm-all.json", " ./.circleci/tests/reth-all.json", "./.circleci/tests/teku-all.json", "./.circleci/tests/parallel-keystores-1.json", "./.circleci/tests/parallel-keystores-2.json", "./.circleci/tests/parallel-keystores-3.json", "./.circleci/tests/disable-peer-scoring.json", "./.circleci/tests/petra.json"]
+      matrix:
+        file_name:
+          [
+            "./.github/tests/besu-all.json",
+            "./.github/tests/erigon-all.json",
+            "./.github/tests/ethereumjs-all.json",
+            "./.github/tests/geth-all.json",
+            "./.github/tests/lighthouse-all.json",
+            "./.github/tests/lodestar-all.json",
+            "./.github/tests/mix.json",
+            "./.github/tests/nimbus-mev.json",
+            "./.github/tests/nethermind-all.json",
+            "./.github/tests/nimbus-all.json",
+            "./.github/tests/prysm-all.json",
+            " ./.github/tests/reth-all.json",
+            "./.github/tests/teku-all.json",
+            "./.github/tests/parallel-keystores-1.json",
+            "./.github/tests/parallel-keystores-2.json",
+            "./.github/tests/parallel-keystores-3.json",
+            "./.github/tests/disable-peer-scoring.json",
+            "./.github/tests/petra.json",
+          ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository

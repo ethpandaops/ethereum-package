@@ -26,8 +26,13 @@ jobs:
 
   run_with_args:
     strategy:
-        matrix:
-          file_name: ["./.circleci/tests/mev.json", "./.circleci/tests/mev-mock.json", "./.circleci/tests/mix-with-tools.json"]
+      matrix:
+        file_name:
+          [
+            "./.github/tests/mev.json",
+            "./.github/tests/mev-mock.json",
+            "./.github/tests/mix-with-tools.json",
+          ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
