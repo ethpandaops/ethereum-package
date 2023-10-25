@@ -270,7 +270,6 @@ def parse_network_params(input_args):
             default_snooper_enabled = result["snooper_enabled"]
             if default_snooper_enabled:
                 participant["snooper_enabled"] = default_snooper_enabled
-        
 
         ethereum_metrics_exporter_enabled = participant[
             "ethereum_metrics_exporter_enabled"

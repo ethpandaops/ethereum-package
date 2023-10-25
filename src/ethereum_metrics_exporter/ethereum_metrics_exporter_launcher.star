@@ -31,7 +31,7 @@ def launch(
             cmd=[
                 "--metrics-port",
                 str(METRICS_PORT_NUMBER),
-                "--consensus-url", 
+                "--consensus-url",
                 "http://{}:{}".format(
                     cl_client_context.ip_addr,
                     cl_client_context.http_port_num,
@@ -52,4 +52,3 @@ def launch(
         cl_client_context.client_name,
         el_client_context.client_name,
     )
-
