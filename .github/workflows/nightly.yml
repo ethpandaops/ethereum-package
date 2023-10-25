@@ -5,30 +5,19 @@ on:
     - cron: "0 2 * * *" # This schedules the workflow to run at 02:00 UTC every day
 
 jobs:
+  list-yamls:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: echo "::set-output name=matrix::$(ls ./.github/tests/*.yaml | jq -R -s -c 'split("\n")[:-1]')"
   run_with_args:
+    needs: list-yamls
     strategy:
       matrix:
-        file_name:
-          [
-            "./.github/tests/besu-all.yaml",
-            "./.github/tests/erigon-all.yaml",
-            "./.github/tests/ethereumjs-all.yaml",
-            "./.github/tests/geth-all.yaml",
-            "./.github/tests/lighthouse-all.yaml",
-            "./.github/tests/lodestar-all.yaml",
-            "./.github/tests/mix.yaml",
-            "./.github/tests/nimbus-mev.yaml",
-            "./.github/tests/nethermind-all.yaml",
-            "./.github/tests/nimbus-all.yaml",
-            "./.github/tests/prysm-all.yaml",
-            " ./.github/tests/reth-all.yaml",
-            "./.github/tests/teku-all.yaml",
-            "./.github/tests/parallel-keystores-1.yaml",
-            "./.github/tests/parallel-keystores-2.yaml",
-            "./.github/tests/parallel-keystores-3.yaml",
-            "./.github/tests/disable-peer-scoring.yaml",
-            "./.github/tests/petra.yaml",
-          ]
+          file_name: ${{ fromJson(needs.list-yamls.outputs.matrix) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
