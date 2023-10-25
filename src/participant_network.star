@@ -355,15 +355,10 @@ def launch_participant_network(
                 "ethereum-metrics-exporter-{0}".format(pair_name)
             )
 
-            ethereum_metrics_exporter_image = (
-                constants.DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE
-            )
-
             ethereum_metrics_exporter_context = ethereum_metrics_exporter.launch(
                 plan,
                 pair_name,
                 ethereum_metrics_exporter_service_name,
-                ethereum_metrics_exporter_image,
                 el_client_context,
                 cl_client_context,
             )

@@ -13,14 +13,13 @@ def launch(
     plan,
     pair_name,
     ethereum_metrics_exporter_service_name,
-    ethereum_metrics_exporter_image,
     el_client_context,
     cl_client_context,
 ):
     exporter_service = plan.add_service(
         ethereum_metrics_exporter_service_name,
         ServiceConfig(
-            image=ethereum_metrics_exporter_image,
+            image=constants.DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE,
             ports={
                 HTTP_PORT_ID: shared_utils.new_port_spec(
                     METRICS_PORT_NUMBER,
