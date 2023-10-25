@@ -160,6 +160,7 @@ def upload_additional_dashboards(plan, additional_dashboards):
         )
         additional_dashboard_artifact_name = plan.upload_files(
             dashboard_src,
+            name = "additional-grafana-dashboard-{0}".format(index)
         )
         data.append(
             {
