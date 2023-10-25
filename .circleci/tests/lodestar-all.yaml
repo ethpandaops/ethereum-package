@@ -1,0 +1,14 @@
+participants:
+  - el_client_type: geth
+    cl_client_type: lodestar
+  - el_client_type: nethermind
+    cl_client_type: lodestar
+  - el_client_type: erigon
+    cl_client_type: lodestar
+  - el_client_type: besu
+    cl_client_type: lodestar
+  - el_client_type: reth
+    cl_client_type: lodestar
+  - el_client_type: ethereumjs
+    cl_client_type: lodestar
+additional_services: []

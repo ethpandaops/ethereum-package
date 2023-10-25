@@ -24,6 +24,10 @@ teku = import_module("./cl/teku/teku_launcher.star")
 
 snooper = import_module("./snooper/snooper_engine_launcher.star")
 
+ethereum_metrics_exporter = import_module(
+    "./ethereum_metrics_exporter/ethereum_metrics_exporter_launcher.star"
+)
+
 genesis_constants = import_module(
     "./prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
@@ -237,6 +241,7 @@ def launch_participant_network(
 
     all_snooper_engine_contexts = []
     all_cl_client_contexts = []
+    all_ethereum_metrics_exporter_contexts = []
     preregistered_validator_keys_for_nodes = validator_data.per_node_keystores
 
     for index, participant in enumerate(participants):
@@ -274,11 +279,9 @@ def launch_participant_network(
             snooper_service_name = "snooper-{0}-{1}-{2}".format(
                 index_str, cl_client_type, el_client_type
             )
-            snooper_image = constants.DEFAULT_SNOOPER_IMAGE
             snooper_engine_context = snooper.launch(
                 plan,
                 snooper_service_name,
-                snooper_image,
                 el_client_context,
             )
             plan.print(
@@ -341,6 +344,30 @@ def launch_participant_network(
 
         all_cl_client_contexts.append(cl_client_context)
 
+        ethereum_metrics_exporter_context = None
+
+        if participant.ethereum_metrics_exporter_enabled:
+            pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
+
+            ethereum_metrics_exporter_service_name = (
+                "ethereum-metrics-exporter-{0}".format(pair_name)
+            )
+
+            ethereum_metrics_exporter_context = ethereum_metrics_exporter.launch(
+                plan,
+                pair_name,
+                ethereum_metrics_exporter_service_name,
+                el_client_context,
+                cl_client_context,
+            )
+            plan.print(
+                "Succesfully added {0} ethereum metrics exporter participants".format(
+                    ethereum_metrics_exporter_context
+                )
+            )
+
+        all_ethereum_metrics_exporter_contexts.append(ethereum_metrics_exporter_context)
+
     plan.print("Succesfully added {0} CL participants".format(num_participants))
 
     all_participants = []
@@ -351,8 +378,16 @@ def launch_participant_network(
 
         el_client_context = all_el_client_contexts[index]
         cl_client_context = all_cl_client_contexts[index]
+
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
+
+        ethereum_metrics_exporter_context = None
+
+        if participant.ethereum_metrics_exporter_enabled:
+            ethereum_metrics_exporter_context = all_ethereum_metrics_exporter_contexts[
+                index
+            ]
 
         participant_entry = participant_module.new_participant(
             el_client_type,
@@ -360,6 +395,7 @@ def launch_participant_network(
             el_client_context,
             cl_client_context,
             snooper_engine_context,
+            ethereum_metrics_exporter_context,
         )
 
         all_participants.append(participant_entry)

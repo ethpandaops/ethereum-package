@@ -100,13 +100,13 @@ jobs:
     executor: ubuntu_vm
     steps:
       - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mev.json)"
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mev.yaml)"
 
   mix_with_tools_k8s:
     executor: ubuntu_vm
     steps:
       - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-with-tools.json)"
+      - run: kurtosis run ${PWD} "$(cat ./.circleci/tests/mix-with-tools.yaml)"
 
 workflows:
   nightly_tests:

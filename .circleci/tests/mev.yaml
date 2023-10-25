@@ -1,0 +1,14 @@
+mev_type: full
+additional_services:
+  - tx_spammer
+  - blob_spammer
+  - custom_flood
+  - el_forkmon
+  - beacon_metrics_gazer
+  - dora
+  - prometheus_grafana
+mev_params:
+  launch_custom_flood: true
+  mev_relay_image: flashbots/mev-boost-relay:0.28.0a2
+network_params:
+  seconds_per_slot: 3
