@@ -137,6 +137,7 @@ def launch_participant_network(
                 network_params.network_id,
                 el_cl_data,
                 final_genesis_timestamp,
+                network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
@@ -424,5 +425,6 @@ padding = int(sys.argv[1])
 print(int(time.time()+padding), end="")
 """,
         args=[str(padding)],
+        store=[StoreSpec(src="/tmp", name="final-genesis-timestamp")],
     )
     return result.output

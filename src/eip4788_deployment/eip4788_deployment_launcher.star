@@ -3,7 +3,9 @@ EIP4788_DEPLOYMENT_SERVICE_NAME = "eip4788-contract-deployment"
 
 
 def deploy_eip4788_contract_in_background(plan, sender_key, el_uri):
-    sender_script = plan.upload_files("./sender.py")
+    sender_script = plan.upload_files(
+        src="./sender.py", name="eip4788-deployment-sender"
+    )
 
     plan.add_service(
         name=EIP4788_DEPLOYMENT_SERVICE_NAME,
