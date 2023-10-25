@@ -106,6 +106,7 @@ def launch(
         el_max_mem,
         extra_params,
         extra_env_vars,
+        launcher.capella_fork_epoch,
         launcher.electra_fork_epoch,
         launcher.final_genesis_timestamp,
     )
@@ -146,6 +147,7 @@ def get_config(
     el_max_mem,
     extra_params,
     extra_env_vars,
+    capella_fork_epoch,
     electra_fork_epoch,
     final_genesis_timestamp,
 ):
@@ -156,7 +158,7 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
-    elif "--builder" in extra_params:
+    elif "--builder" in extra_params or capella_fork_epoch != 0:
         init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
@@ -169,11 +171,12 @@ def get_config(
 
     cmd = [
         "geth",
-        # Disable path based storage scheme for electra fork or when builder image is used
+        # Disable path based storage scheme for electra fork or when builder image or when capella is not 0 is used
         # TODO: REMOVE Once geth default db is path based, and builder rebased
+        # TODO: capella fork epoch check is needed to ensure older versions of geth works.
         "{0}".format(
             "--state.scheme=path"
-            if electra_fork_epoch == None and "--builder" not in extra_params
+            if electra_fork_epoch == None and "--builder" not in extra_params and capella_fork_epoch == 0
             else ""
         ),
         # Override prague fork timestamp for electra fork
@@ -261,11 +264,13 @@ def new_geth_launcher(
     network_id,
     el_cl_genesis_data,
     final_genesis_timestamp,
+    capella_fork_epoch,
     electra_fork_epoch=None,
 ):
     return struct(
         network_id=network_id,
         el_cl_genesis_data=el_cl_genesis_data,
         final_genesis_timestamp=final_genesis_timestamp,
+        capella_fork_epoch=capella_fork_epoch,
         electra_fork_epoch=electra_fork_epoch,
     )
