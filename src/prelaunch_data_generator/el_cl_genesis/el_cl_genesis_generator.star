@@ -57,9 +57,7 @@ def generate_el_cl_genesis_data(
         run="cp /opt/values.env /config/values.env && ./entrypoint.sh all",
         image=image,
         files={GENESIS_VALUES_PATH: genesis_generation_config_artifact_name},
-        store=[
-            "/data",
-        ],
+        store=[StoreSpec(src="/data", name="el-cl-genesis-data")],
         wait=None,
     )
 
@@ -70,6 +68,7 @@ with open("/data/data/custom_config_data/genesis_validators_root.txt") as genesi
     print(genesis_root.read().strip(), end="")
 """,
         files={"/data": genesis.files_artifacts[0]},
+        store=[StoreSpec(src="/tmp", name="genesis-validators-root")],
         wait=None,
     )
     result = el_cl_genesis_data.new_el_cl_genesis_data(
