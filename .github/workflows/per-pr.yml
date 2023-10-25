@@ -29,9 +29,9 @@ jobs:
       matrix:
         file_name:
           [
-            "./.github/tests/mev.json",
-            "./.github/tests/mev-mock.json",
-            "./.github/tests/mix-with-tools.json",
+            "./.github/tests/mev.yaml",
+            "./.github/tests/mev-mock.yaml",
+            "./.github/tests/mix-with-tools.yaml",
           ]
     runs-on: ubuntu-latest
     steps:
