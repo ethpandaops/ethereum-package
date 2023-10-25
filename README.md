@@ -195,7 +195,8 @@ participants:
   count: 1
 
   # Count of the number of validators you want to run for a given participant
-  # Default to null, which means that the number of validators will be using the network parameter num_validator_keys_per_node
+  # Default to null, which means that the number of validators will be using the
+  # network parameter num_validator_keys_per_node
   validator_count: null
 
 # Default configuration parameters for the Eth network
