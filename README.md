@@ -96,61 +96,61 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 <!-- Yes, it's weird that none of this is indented but it's intentional - indenting anything inside this "details" expandable will cause it to render weird" -->
 
 ```yaml
-#  Specification of the participants in the network
+# Specification of the participants in the network
 participants:
   # The type of EL client that should be started
   # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth
 - el_client_type: geth
 
-  #  The Docker image that should be used for the EL client; leave blank to use the default for the client type
-  #  Defaults by client:
-  #  - geth: ethereum/client-go:latest
-  #  - erigon: thorax/erigon:devel
-  #  - nethermind: nethermind/nethermind:latest
-  #  - besu: hyperledger/besu:develop
-  #  - reth: ghcr.io/paradigmxyz/reth
-  #  - ethereumjs: ethpandaops/ethereumjs:master
+  # The Docker image that should be used for the EL client; leave blank to use the default for the client type
+  # Defaults by client:
+  # - geth: ethereum/client-go:latest
+  # - erigon: thorax/erigon:devel
+  # - nethermind: nethermind/nethermind:latest
+  # - besu: hyperledger/besu:develop
+  # - reth: ghcr.io/paradigmxyz/reth
+  # - ethereumjs: ethpandaops/ethereumjs:master
   el_client_image: ""
 
-  #  The log level string that this participant's EL client should log at
-  #  If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-  #   global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
-  #  If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-  #   over a specific participant's logging
+  # The log level string that this participant's EL client should log at
+  # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+  # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
+  # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+  # over a specific participant's logging
   el_client_log_level: ""
 
-  #  A list of optional extra params that will be passed to the EL client container for modifying its behaviour
+  # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
   el_extra_params: []
 
   # A list of optional extra env_vars the el container should spin up with
   el_extra_env_vars: {}
 
-  #  The type of CL client that should be started
-  #  Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+  # The type of CL client that should be started
+  # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
   cl_client_type: lighthouse
 
-  #  The Docker image that should be used for the EL client; leave blank to use the default for the client type
-  #  Defaults by client (note that Prysm is different in that it requires two images - a Beacon and a validator - separated by a comma):
-  #  - lighthouse: sigp/lighthouse:latest
-  #  - teku: consensys/teku:latest
-  #  - nimbus: statusim/nimbus-eth2:multiarch-latest
-  #  - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest
-  #  - lodestar: chainsafe/lodestar:next
+  # The Docker image that should be used for the EL client; leave blank to use the default for the client type
+  # Defaults by client (note that Prysm is different in that it requires two images - a Beacon and a validator - separated by a comma):
+  # - lighthouse: sigp/lighthouse:latest
+  # - teku: consensys/teku:latest
+  # - nimbus: statusim/nimbus-eth2:multiarch-latest
+  # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest
+  # - lodestar: chainsafe/lodestar:next
   cl_client_image: ""
 
-  #  The log level string that this participant's EL client should log at
-  #  If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-  #   global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
-  #  If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-  #   over a specific participant's logging
+  # The log level string that this participant's EL client should log at
+  # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+  # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
+  # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+  # over a specific participant's logging
   cl_client_log_level: ""
 
-  #  A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
-  #  If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
+  # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
+  # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
   beacon_extra_params: []
 
-  #  A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
-  #  If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
+  # A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
+  # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
   validator_extra_params: []
 
   # A set of parameters the node needs to reach an external block building network
@@ -158,11 +158,11 @@ participants:
   # Example:
   #
   # "relay_endpoints": [
-  #   "https:#0xdeadbeefcafa@relay.example.com",
-  #   "https:#0xdeadbeefcafb@relay.example.com",
-  #   "https:#0xdeadbeefcafc@relay.example.com",
-  #   "https:#0xdeadbeefcafd@relay.example.com"
-  #  ]
+  #  "https:#0xdeadbeefcafa@relay.example.com",
+  #  "https:#0xdeadbeefcafb@relay.example.com",
+  #  "https:#0xdeadbeefcafc@relay.example.com",
+  #  "https:#0xdeadbeefcafd@relay.example.com"
+  # ]
   builder_network_params: null
 
   # Resource management for el/beacon/validator containers
@@ -186,6 +186,10 @@ participants:
   # Defaults to false
   snooper_enabled: false
 
+  # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
+  # Defaults to false
+  ethereum_metrics_exporter_enabled: false
+
   # Count of nodes to spin up for this participant
   # Default to 1
   count: 1
@@ -194,22 +198,22 @@ participants:
   # Default to null, which means that the number of validators will be using the network parameter num_validator_keys_per_node
   validator_count: null
 
-#  Default configuration parameters for the Eth network
+# Default configuration parameters for the Eth network
 network_params:
-  #  The network ID of the network.
+  # The network ID of the network.
   network_id: 3151908
 
-  #  The address of the staking contract address on the Eth1 chain
+  # The address of the staking contract address on the Eth1 chain
   deposit_contract_address: "0x4242424242424242424242424242424242424242"
 
-  #  Number of seconds per slot on the Beacon chain
+  # Number of seconds per slot on the Beacon chain
   seconds_per_slot: 12
 
-  #  The number of validator keys that each CL validator node should get
+  # The number of validator keys that each CL validator node should get
   num_validator_keys_per_node: 64
 
-  #  This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
-  #   validator keys already preregistered as validators
+  # This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
+  # validator keys already preregistered as validators
   preregistered_validator_keys_mnemonic: "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete"
   # How long you want the network to wait before starting up
   genesis_delay: 120
@@ -231,21 +235,21 @@ network_params:
 
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
-  #  A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
+  # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
   tx_spammer_extra_args: []
 
 # Configuration place for goomy the blob spammer - https:#github.com/ethpandaops/goomy-blob
 goomy_blob_params:
-  #  A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
+  # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
   goomy_blob_args: []
 
 # By default includes
-#  - A transaction spammer & blob spammer is launched to fake transactions sent to the network
-#  - Forkmon for EL will be launched
-#  - A prometheus will be started, coupled with grafana
-#  - A beacon metrics gazer will be launched
-#  - A light beacon chain explorer will be launched
-#  - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
+# - A transaction spammer & blob spammer is launched to fake transactions sent to the network
+# - Forkmon for EL will be launched
+# - A prometheus will be started, coupled with grafana
+# - A beacon metrics gazer will be launched
+# - A light beacon chain explorer will be launched
+# - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
 additional_services:
   - tx_spammer
   - blob_spammer
@@ -257,17 +261,21 @@ additional_services:
   - full_beaconchain_explorer
   - prometheus_grafana
 
-#  If set, the package will block until a finalized epoch has occurred.
+# If set, the package will block until a finalized epoch has occurred.
 wait_for_finalization: false
 
-#  The global log level that all clients should log at
-#  Valid values are "error", "warn", "info", "debug", and "trace"
-#  This value will be overridden by participant-specific values
+# The global log level that all clients should log at
+# Valid values are "error", "warn", "info", "debug", and "trace"
+# This value will be overridden by participant-specific values
 global_client_log_level: "info"
 
 # EngineAPI Snooper global flags for all participants
 # Default to false
 snooper_enabled: false
+
+# Enables Ethereum Metrics Exporter for all participants
+# Defaults to false
+ethereum_metrics_exporter_enabled: false
 
 # Parallelizes keystore generation so that each node has keystores being generated in their own container
 # This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
@@ -326,24 +334,24 @@ mev_params:
 
 ```yaml
 participants:
-- el_client_type: geth
-  el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
-  elExtraParams:
-  - "--override.verkle=<UNIXTIMESTAMP>"
-  cl_client_type: lighthouse
-  cl_client_image: sigp/lighthouse:latest
-- el_client_type: geth
-  el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
-  elExtraParams:
-  - "--override.verkle=<UNIXTIMESTAMP>"
-  cl_client_type: lighthouse
-  cl_client_image: sigp/lighthouse:latest
-- el_client_type: geth
-  el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
-  elExtraParams:
-  - "--override.verkle=<UNIXTIMESTAMP>"
-  cl_client_type: lighthouse
-  cl_client_image: sigp/lighthouse:latest
+  - el_client_type: geth
+    el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
+    elExtraParams:
+    - "--override.verkle=<UNIXTIMESTAMP>"
+    cl_client_type: lighthouse
+    cl_client_image: sigp/lighthouse:latest
+  - el_client_type: geth
+    el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
+    elExtraParams:
+    - "--override.verkle=<UNIXTIMESTAMP>"
+    cl_client_type: lighthouse
+    cl_client_image: sigp/lighthouse:latest
+  - el_client_type: geth
+    el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
+    elExtraParams:
+    - "--override.verkle=<UNIXTIMESTAMP>"
+    cl_client_type: lighthouse
+    cl_client_image: sigp/lighthouse:latest
 network_params:
   capella_fork_epoch: 2
   deneb_fork_epoch: 5
@@ -362,21 +370,21 @@ global_client_log_level: info
 
 ```yaml
 participants:
-- el_client_type: geth
-  el_client_image: ''
-  cl_client_type: lighthouse
-  cl_client_image: ''
-  count: 2
-- el_client_type: nethermind
-  el_client_image: ''
-  cl_client_type: teku
-  cl_client_image: ''
-  count: 1
-- el_client_type: besu
-  el_client_image: ''
-  cl_client_type: prysm
-  cl_client_image: ''
-  count: 2
+  - el_client_type: geth
+    el_client_image: ''
+    cl_client_type: lighthouse
+    cl_client_image: ''
+    count: 2
+  - el_client_type: nethermind
+    el_client_image: ''
+    cl_client_type: teku
+    cl_client_image: ''
+    count: 1
+  - el_client_type: besu
+    el_client_image: ''
+    cl_client_type: prysm
+    cl_client_image: ''
+    count: 2
 mev_type: mock
 additional_services: []
 ```
@@ -388,14 +396,14 @@ additional_services: []
 
 ```yaml
 participants:
-- el_client_type: geth
-  cl_client_type: lighthouse
-  count: 2
-- el_client_type: nethermind
-  cl_client_type: teku
-- el_client_type: besu
-  cl_client_type: prysm
-  count: 2
+  - el_client_type: geth
+    cl_client_type: lighthouse
+    count: 2
+  - el_client_type: nethermind
+    cl_client_type: teku
+  - el_client_type: besu
+    cl_client_type: prysm
+    count: 2
 mev_type: full
 network_params:
   capella_fork_epoch: 1
@@ -410,9 +418,9 @@ additional_services: []
 
 ```yaml
 participants:
-- el_client_type: geth
-  cl_client_type: lighthouse
-  count: 2
+  - el_client_type: geth
+    cl_client_type: lighthouse
+    count: 2
 snooper_enabled: true
 ```
 
