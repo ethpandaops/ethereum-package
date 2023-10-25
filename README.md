@@ -37,10 +37,10 @@ Optional features (enabled via flags or parameter files at runtime):
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 
 ```bash
-kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.json)"
+kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.yaml)"
 ```
 
-Where `network_params.json` contains the parameters for your network in your home directory.
+Where `network_params.yaml` contains the parameters for your network in your home directory.
 
 #### Run on Kubernetes
 
@@ -88,7 +88,7 @@ kurtosis files download my-testnet el-genesis-data ~/Downloads
 
 ## Configuration
 
-To configure the package behaviour, you can modify your `network_params.json` file. The full JSON schema that can be passed in is as follows with the defaults provided:
+To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
 
 <details>
     <summary>Click to show all configuration options</summary>
@@ -468,7 +468,7 @@ This note is from 2023-10-05
 `flashbots/mev-boost-relay:0.27` and later support `capella_fork_epoch` at `0` but this seems to require a few flags enabled
 on the `lighthouse` beacon client including `--always-prefer-builder-payload` and `--disable-peer-scoring`
 
-Users are recommended to use [`examples/capella-mev.json`](./examples/capella-mev.json); as inspiration for reliable payload
+Users are recommended to use [`examples/capella-mev.yaml`](./examples/capella-mev.yaml); as inspiration for reliable payload
 delivery.
 
 ## Pre-funded accounts at Genesis
