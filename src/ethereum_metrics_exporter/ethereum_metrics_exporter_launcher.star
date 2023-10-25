@@ -18,7 +18,7 @@ def launch(
     cl_client_context,
 ):
     exporter_service = plan.add_service(
-        ethereum_metrics_exporter_service_name, 
+        ethereum_metrics_exporter_service_name,
         ServiceConfig(
             image=ethereum_metrics_exporter_image,
             ports={
@@ -29,12 +29,15 @@ def launch(
                 )
             },
             cmd=[
-                "--metrics-port", str(METRICS_PORT_NUMBER),
-                "--consensus-url", "http://{}:{}".format(
+                "--metrics-port",
+                str(METRICS_PORT_NUMBER),
+                "--consensus-url", 
+                "http://{}:{}".format(
                     cl_client_context.ip_addr,
                     cl_client_context.http_port_num,
                 ),
-                "--execution-url", "http://{}:{}".format(
+                "--execution-url",
+                "http://{}:{}".format(
                     el_client_context.ip_addr,
                     el_client_context.rpc_port_num,
                 ),
