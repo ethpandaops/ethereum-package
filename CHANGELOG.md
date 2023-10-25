@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.0.0](https://github.com/kurtosis-tech/ethereum-package/compare/0.6.1...1.0.0) (2023-10-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* merged genesis generation ([#288](https://github.com/kurtosis-tech/ethereum-package/issues/288))
+
+### Features
+
+* add "disable_peer_scoring" global flag ([#311](https://github.com/kurtosis-tech/ethereum-package/issues/311)) ([63f7ff3](https://github.com/kurtosis-tech/ethereum-package/commit/63f7ff3c396ab567caf3397822ea7c2d614baeb9)), closes [#304](https://github.com/kurtosis-tech/ethereum-package/issues/304)
+* add mock mev ci ([#310](https://github.com/kurtosis-tech/ethereum-package/issues/310)) ([d4bec9e](https://github.com/kurtosis-tech/ethereum-package/commit/d4bec9e7a723d1cdbbd37d63684b526a4f1f325b))
+* add trusted setup file to teku ([#325](https://github.com/kurtosis-tech/ethereum-package/issues/325)) ([605e155](https://github.com/kurtosis-tech/ethereum-package/commit/605e155ee5e5058cc159739ee673eff4b702bc52))
+* bump json-rpc-snooper ([#329](https://github.com/kurtosis-tech/ethereum-package/issues/329)) ([242a4cd](https://github.com/kurtosis-tech/ethereum-package/commit/242a4cdeded040eb50c9e259aacf9a58eee236ec))
+* json to yaml everything ([#332](https://github.com/kurtosis-tech/ethereum-package/issues/332)) ([c9669ae](https://github.com/kurtosis-tech/ethereum-package/commit/c9669ae83063a5dd9faf478f386582a2cac595ac))
+* merged genesis generation ([#288](https://github.com/kurtosis-tech/ethereum-package/issues/288)) ([743ba44](https://github.com/kurtosis-tech/ethereum-package/commit/743ba44d82e9433e6781e4965ef80bc83e962e25))
+* rework how keys are generated ([#301](https://github.com/kurtosis-tech/ethereum-package/issues/301)) ([59f15ca](https://github.com/kurtosis-tech/ethereum-package/commit/59f15cae142b778a676ee6a3f56d4c8e3a2ed1c0))
+* **tooling:** Add Ethereum Metrics Exporter ([#331](https://github.com/kurtosis-tech/ethereum-package/issues/331)) ([de5eee8](https://github.com/kurtosis-tech/ethereum-package/commit/de5eee82a7757b218a902e0bef36dae42e966b31))
+* use base image instead of pip install ([#322](https://github.com/kurtosis-tech/ethereum-package/issues/322)) ([18da90b](https://github.com/kurtosis-tech/ethereum-package/commit/18da90bd3f8b6471457e613edc1e17ff01d2ae0a))
+
+
+### Bug Fixes
+
+* add readme for mev-builder-cl-image ([#314](https://github.com/kurtosis-tech/ethereum-package/issues/314)) ([c46b6bf](https://github.com/kurtosis-tech/ethereum-package/commit/c46b6bf1e83fa567727675ef0644d7d3eefcb1f2))
+* formatting - missing jwt secret ([#312](https://github.com/kurtosis-tech/ethereum-package/issues/312)) ([728964c](https://github.com/kurtosis-tech/ethereum-package/commit/728964c7034c94dff6b2c4479e7a962d69bafc62))
+* genesis validators root had an extra new line ([#326](https://github.com/kurtosis-tech/ethereum-package/issues/326)) ([4fa4937](https://github.com/kurtosis-tech/ethereum-package/commit/4fa49375c0f0e96aaef011e0afd053c2975c3a69))
+* geth flags for verkle genesis ([#328](https://github.com/kurtosis-tech/ethereum-package/issues/328)) ([e721373](https://github.com/kurtosis-tech/ethereum-package/commit/e721373f93e8113802c47e815f3152af5974dc41))
+* path based storage - disable for older forks ([#336](https://github.com/kurtosis-tech/ethereum-package/issues/336)) ([76e3424](https://github.com/kurtosis-tech/ethereum-package/commit/76e34245dffcd6976d631d40cab813880b9a224a))
+* path based storage disable for elecra ([#316](https://github.com/kurtosis-tech/ethereum-package/issues/316)) ([86fa8ef](https://github.com/kurtosis-tech/ethereum-package/commit/86fa8efccd18236d0cbbfd7565f66883cc774fcc))
+* remove image name for ethereum-metrics-exporter ([#335](https://github.com/kurtosis-tech/ethereum-package/issues/335)) ([4bac042](https://github.com/kurtosis-tech/ethereum-package/commit/4bac04249f61a408f792d4eb65c6c1ea3b844f61))
+* remove path based storage when builder is used ([#327](https://github.com/kurtosis-tech/ethereum-package/issues/327)) ([d3cf3f4](https://github.com/kurtosis-tech/ethereum-package/commit/d3cf3f42ebe68b02cf28ad3d7c69c77e7c934af7))
+* revert the default deneb at epoch 4 ([#323](https://github.com/kurtosis-tech/ethereum-package/issues/323)) ([9342418](https://github.com/kurtosis-tech/ethereum-package/commit/9342418fc643fbf41a95db828ec5fcd3be4913cf))
+* take out the genesis versions as constants ([#324](https://github.com/kurtosis-tech/ethereum-package/issues/324)) ([a8afcef](https://github.com/kurtosis-tech/ethereum-package/commit/a8afcef6a8969ad2062c78f1b2d32e275697ea60))
+* wrong builder metrics flag ([#319](https://github.com/kurtosis-tech/ethereum-package/issues/319)) ([51a4422](https://github.com/kurtosis-tech/ethereum-package/commit/51a44228994e2c0088ffccb3c2cca60376087bff))
+* zero count validators and parallel keystore generation ([#302](https://github.com/kurtosis-tech/ethereum-package/issues/302)) ([18b141e](https://github.com/kurtosis-tech/ethereum-package/commit/18b141edf901b39c7ddc8cc60ba81b5185d4e15e))
+
 ## [0.6.1](https://github.com/kurtosis-tech/ethereum-package/compare/0.6.0...0.6.1) (2023-10-17)
 
 
