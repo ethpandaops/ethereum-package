@@ -31,7 +31,7 @@ The main function is the package's entrypoint, where parameters are received fro
 
 ## [Package I/O][package-io]
 
-This particular package has many configuration options (see the "Configuration" section in the README for the full list of values). These are passed in as a JSON-serialized string, and arrive to the package's main function via the `input_args` variable. The process of setting defaults, overriding them with the user's desired options, and validating the resulting config object requires some space in the codebase. All this logic happens inside the `package_io` directory, so you'll want to visit this directory if you want to:
+This particular package has many configuration options (see the "Configuration" section in the README for the full list of values). These are passed in as a YAML or JSON-serialized string, and arrive to the package's main function via the `input_args` variable. The process of setting defaults, overriding them with the user's desired options, and validating the resulting config object requires some space in the codebase. All this logic happens inside the `package_io` directory, so you'll want to visit this directory if you want to:
 
 - View or change parameters that the package can receive
 - Change the default values of package parameters
