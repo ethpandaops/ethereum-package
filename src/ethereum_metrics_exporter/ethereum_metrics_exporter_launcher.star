@@ -1,5 +1,4 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-constants = import_module("../package_io/constants.star")
 static_files = import_module("../static_files/static_files.star")
 ethereum_metrics_exporter_context = import_module(
     "../ethereum_metrics_exporter/ethereum_metrics_exporter_context.star"
@@ -8,19 +7,20 @@ ethereum_metrics_exporter_context = import_module(
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
 
+DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE = "ethpandaops/ethereum-metrics-exporter:0.22.0"
+
 
 def launch(
     plan,
     pair_name,
     ethereum_metrics_exporter_service_name,
-    ethereum_metrics_exporter_image,
     el_client_context,
     cl_client_context,
 ):
     exporter_service = plan.add_service(
         ethereum_metrics_exporter_service_name,
         ServiceConfig(
-            image=ethereum_metrics_exporter_image,
+            image=DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE,
             ports={
                 HTTP_PORT_ID: shared_utils.new_port_spec(
                     METRICS_PORT_NUMBER,

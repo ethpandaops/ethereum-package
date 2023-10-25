@@ -10,6 +10,8 @@ SNOOPER_BINARY_COMMAND = "./json_rpc_snoop"
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
+DEFAULT_SNOOPER_IMAGE = "ethpandaops/json-rpc-snoop:1.1.0"
+
 SNOOPER_USED_PORTS = {
     SNOOPER_ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
         SNOOPER_ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, wait="5s"
@@ -17,10 +19,10 @@ SNOOPER_USED_PORTS = {
 }
 
 
-def launch(plan, service_name, image, el_client_context):
+def launch(plan, service_name, el_client_context):
     snooper_service_name = "{0}".format(service_name)
 
-    snooper_config = get_config(image, service_name, el_client_context)
+    snooper_config = get_config(service_name, el_client_context)
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
     snooper_http_port = snooper_service.ports[SNOOPER_ENGINE_RPC_PORT_ID]
@@ -29,7 +31,7 @@ def launch(plan, service_name, image, el_client_context):
     )
 
 
-def get_config(image, service_name, el_client_context):
+def get_config(service_name, el_client_context):
     engine_rpc_port_num = "http://{0}:{1}".format(
         el_client_context.ip_addr,
         el_client_context.engine_rpc_port_num,
@@ -42,7 +44,7 @@ def get_config(image, service_name, el_client_context):
     ]
 
     return ServiceConfig(
-        image=image,
+        image=DEFAULT_SNOOPER_IMAGE,
         ports=SNOOPER_USED_PORTS,
         cmd=cmd,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
