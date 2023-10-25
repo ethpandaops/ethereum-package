@@ -176,7 +176,9 @@ def get_config(
         # TODO: capella fork epoch check is needed to ensure older versions of geth works.
         "{0}".format(
             "--state.scheme=path"
-            if electra_fork_epoch == None and "--builder" not in extra_params and capella_fork_epoch == 0
+            if electra_fork_epoch == None
+            and "--builder" not in extra_params
+            and capella_fork_epoch == 0
             else ""
         ),
         # Override prague fork timestamp for electra fork
