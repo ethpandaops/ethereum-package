@@ -97,9 +97,13 @@ def run(plan, args={}):
 
     all_el_client_contexts = []
     all_cl_client_contexts = []
+    all_ethereum_metrics_exporter_contexts = []
     for participant in all_participants:
         all_el_client_contexts.append(participant.el_client_context)
         all_cl_client_contexts.append(participant.cl_client_context)
+        all_ethereum_metrics_exporter_contexts.append(
+            participant.ethereum_metrics_exporter_context
+        )
 
     # Generate validator ranges
     validator_ranges_config_template = read_file(
@@ -347,6 +351,7 @@ def run(plan, args={}):
             all_el_client_contexts,
             all_cl_client_contexts,
             prometheus_additional_metrics_jobs,
+            all_ethereum_metrics_exporter_contexts,
         )
 
         plan.print("Launching grafana...")
