@@ -106,7 +106,7 @@ jobs:
     executor: ubuntu_vm
     steps:
       - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-with-tools.yaml)"
+      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-with-tools-mev.yaml)"
 
 workflows:
   nightly_tests:
