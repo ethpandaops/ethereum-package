@@ -3,7 +3,7 @@ CUSTOM_FLOOD_SERVICE_NAME = "mev-custom-flood"
 
 
 def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
-    sender_script = plan.upload_files("./sender.py")
+    sender_script = plan.upload_files(src="./sender.py", name="mev-custom-flood-sender")
 
     plan.add_service(
         name=CUSTOM_FLOOD_SERVICE_NAME,
