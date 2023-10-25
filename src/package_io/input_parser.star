@@ -142,7 +142,9 @@ def input_parser(plan, input_args):
                 validator_count=participant["validator_count"],
                 snooper_enabled=participant["snooper_enabled"],
                 count=participant["count"],
-                ethereum_metrics_exporter_enabled=participant["ethereum_metrics_exporter_enabled"],
+                ethereum_metrics_exporter_enabled=participant[
+                    "ethereum_metrics_exporter_enabled"
+                ],
             )
             for participant in result["participants"]
         ],
@@ -269,11 +271,17 @@ def parse_network_params(input_args):
             if default_snooper_enabled:
                 participant["snooper_enabled"] = default_snooper_enabled
         
-        ethereum_metrics_exporter_enabled = participant["ethereum_metrics_exporter_enabled"]
+        ethereum_metrics_exporter_enabled = participant[
+            "ethereum_metrics_exporter_enabled"
+        ]
         if ethereum_metrics_exporter_enabled == False:
-            default_ethereum_metrics_exporter_enabled = result["ethereum_metrics_exporter_enabled"]
+            default_ethereum_metrics_exporter_enabled = result[
+                "ethereum_metrics_exporter_enabled"
+            ]
             if default_ethereum_metrics_exporter_enabled:
-                participant["ethereum_metrics_exporter_enabled"] = default_ethereum_metrics_exporter_enabled
+                participant[
+                    "ethereum_metrics_exporter_enabled"
+                ] = default_ethereum_metrics_exporter_enabled
 
         validator_count = participant["validator_count"]
         if validator_count == None:
