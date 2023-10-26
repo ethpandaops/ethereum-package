@@ -169,6 +169,7 @@ def launch(
             log_level,
             beacon_rpc_endpoint,
             beacon_http_endpoint,
+            el_client_context,
             node_keystore_files,
             v_min_cpu,
             v_max_cpu,
@@ -315,6 +316,12 @@ def get_beacon_config(
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
         max_memory=bn_max_mem,
+        labels=shared_utils.label_maker(
+            constants.CL_CLIENT_TYPE.prysm,
+            constants.CLIENT_TYPES.cl,
+            beacon_image,
+            el_client_context.client_name,
+        ),
     )
 
 
@@ -325,6 +332,7 @@ def get_validator_config(
     log_level,
     beacon_rpc_endpoint,
     beacon_http_endpoint,
+    el_client_context,
     node_keystore_files,
     v_min_cpu,
     v_max_cpu,
@@ -382,6 +390,12 @@ def get_validator_config(
         max_cpu=v_max_cpu,
         min_memory=v_min_mem,
         max_memory=v_max_mem,
+        labels=shared_utils.label_maker(
+            constants.CL_CLIENT_TYPE.prysm,
+            constants.CLIENT_TYPES.validator,
+            validator_image,
+            el_client_context.client_name,
+        ),
     )
 
 

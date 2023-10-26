@@ -23,6 +23,12 @@ GLOBAL_CLIENT_LOG_LEVEL = struct(
     trace="trace",
 )
 
+CLIENT_TYPES = struct(
+    el="execution",
+    cl="beacon",
+    validator="validator",
+)
+
 VALIDATING_REWARDS_ACCOUNT = "0x878705ba3f8Bc32FCf7F4CAa1A35E72AF65CF766"
 MAX_ENR_ENTRIES = 20
 MAX_ENODE_ENTRIES = 20

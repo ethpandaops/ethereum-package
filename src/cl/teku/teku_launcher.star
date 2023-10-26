@@ -320,6 +320,12 @@ def get_config(
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
         max_memory=bn_max_mem,
+        labels=shared_utils.label_maker(
+            constants.CL_CLIENT_TYPE.teku,
+            constants.CLIENT_TYPES.cl,
+            image,
+            el_client_context.client_name,
+        ),
     )
 
 
