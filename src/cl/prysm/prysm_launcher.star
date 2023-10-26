@@ -316,12 +316,9 @@ def get_beacon_config(
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
         max_memory=bn_max_mem,
-        labels={
-            "ethereum-package-client": "prysm",
-            "ethereum-package-client-type": "beacon",
-            "ethereum-package-image": beacon_image.replace("/", "-").replace(":", "-"),
-            "ethereum-package-connected-el-client": el_client_context.client_name,
-        },
+        labels=shared_utils.label_maker(
+            "prysm", "beacon", beacon_image, el_client_context.client_name
+        ),
     )
 
 
@@ -390,14 +387,9 @@ def get_validator_config(
         max_cpu=v_max_cpu,
         min_memory=v_min_mem,
         max_memory=v_max_mem,
-        labels={
-            "ethereum-package-client": "prysm",
-            "ethereum-package-client-type": "validator",
-            "ethereum-package-image": validator_image.replace("/", "-").replace(
-                ":", "-"
-            ),
-            "ethereum-package-connected-el-client": el_client_context.client_name,
-        },
+        labels=shared_utils.label_maker(
+            "prysm", "validator", validator_image, el_client_context.client_name
+        ),
     )
 
 

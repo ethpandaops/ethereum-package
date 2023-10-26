@@ -287,12 +287,9 @@ def get_beacon_config(
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
         max_memory=bn_max_mem,
-        labels={
-            "ethereum-package-client": "lodestar",
-            "ethereum-package-client-type": "beacon",
-            "ethereum-package-client-image": image.replace("/", "-").replace(":", "-"),
-            "ethereum-package-connected-el-client": el_client_context.client_name,
-        },
+        labels=shared_utils.label_maker(
+            "lodestar", "beacon", image, el_client_context.client_name
+        ),
     )
 
 
@@ -359,12 +356,9 @@ def get_validator_config(
         max_cpu=v_max_cpu,
         min_memory=v_min_mem,
         max_memory=v_max_mem,
-        labels={
-            "ethereum-package-client": "lodestar",
-            "ethereum-package-client-type": "validator",
-            "ethereum-package-client-image": image.replace("/", "-").replace(":", "-"),
-            "ethereum-package-connected-el-client": el_client_context.client_name,
-        },
+        labels=shared_utils.label_maker(
+            "lodestar", "validator", image, el_client_context.client_name
+        ),
     )
 
 
