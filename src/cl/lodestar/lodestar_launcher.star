@@ -288,7 +288,10 @@ def get_beacon_config(
         min_memory=bn_min_mem,
         max_memory=bn_max_mem,
         labels=shared_utils.label_maker(
-            "lodestar", "beacon", image, el_client_context.client_name
+            constants.CL_CLIENT_TYPE.lodestar,
+            constants.CLIENT_TYPES.cl,
+            image,
+            el_client_context.client_name,
         ),
     )
 
@@ -357,7 +360,10 @@ def get_validator_config(
         min_memory=v_min_mem,
         max_memory=v_max_mem,
         labels=shared_utils.label_maker(
-            "lodestar", "validator", image, el_client_context.client_name
+            constants.CL_CLIENT_TYPE.lodestar,
+            constants.CLIENT_TYPES.validator,
+            image,
+            el_client_context.client_name,
         ),
     )
 

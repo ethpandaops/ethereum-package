@@ -189,7 +189,10 @@ def get_config(
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
         labels=shared_utils.label_maker(
-            "nethermind", "execution", image, cl_client_name
+            constants.EL_CLIENT_TYPE.nethermind,
+            constants.CLIENT_TYPES.el,
+            image,
+            cl_client_name,
         ),
     )
 

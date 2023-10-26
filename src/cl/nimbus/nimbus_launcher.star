@@ -316,7 +316,10 @@ def get_config(
         min_memory=bn_min_mem,
         max_memory=bn_max_mem,
         labels=shared_utils.label_maker(
-            "nimbus", "beacon", image, el_client_context.client_name
+            constants.CL_CLIENT_TYPE.nimbus,
+            constants.CLIENT_TYPES.cl,
+            image,
+            el_client_context.client_name,
         ),
     )
 

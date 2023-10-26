@@ -205,7 +205,12 @@ def get_config(
         min_memory=el_min_mem,
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
-        labels=shared_utils.label_maker("reth", "execution", image, cl_client_name),
+        labels=shared_utils.label_maker(
+            constants.EL_CLIENT_TYPE.reth,
+            constants.CLIENT_TYPES.el,
+            image,
+            cl_client_name,
+        ),
     )
 
 
