@@ -315,6 +315,12 @@ def get_config(
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
         max_memory=bn_max_mem,
+        labels={
+            "ethereum-package-client": "nimbus",
+            "ethereum-package-client-type": "beacon",
+            "ethereum-package-client-image": image.replace("/", "-").replace(":", "-"),
+            "ethereum-package-connected-el-client": el_client_context.client_name,
+        },
     )
 
 
