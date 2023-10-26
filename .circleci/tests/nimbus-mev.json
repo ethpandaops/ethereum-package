@@ -1,7 +1,0 @@
-{
-    "participants": [{
-        "el_client_type": "geth",
-        "cl_client_type": "nimbus"
-    }],
-    "mev_type": "full"
-}

@@ -34,11 +34,13 @@ def launch_prometheus(
     el_client_contexts,
     cl_client_contexts,
     additional_metrics_jobs,
+    ethereum_metrics_exporter_contexts,
 ):
     template_data = new_config_template_data(
         el_client_contexts,
         cl_client_contexts,
         additional_metrics_jobs,
+        ethereum_metrics_exporter_contexts,
     )
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
@@ -86,6 +88,7 @@ def new_config_template_data(
     el_client_contexts,
     cl_client_contexts,
     additional_metrics_jobs,
+    ethereum_metrics_exporter_contexts,
 ):
     metrics_jobs = []
     # Adding execution clients metrics jobs
@@ -139,6 +142,25 @@ def new_config_template_data(
                         "service": context.validator_service_name,
                         "client_type": VALIDATOR_CLIENT_TYPE,
                         "client_name": context.client_name,
+                    },
+                )
+            )
+
+    # Adding ethereum-metrics-exporter metrics jobs
+    for context in ethereum_metrics_exporter_contexts:
+        if context != None:
+            metrics_jobs.append(
+                new_metrics_job(
+                    job_name="ethereum-metrics-exporter-{0}".format(context.pair_name),
+                    endpoint="{}:{}".format(
+                        context.ip_addr,
+                        context.metrics_port_num,
+                    ),
+                    metrics_path="/metrics",
+                    labels={
+                        "instance": context.pair_name,
+                        "consensus_client": context.cl_name,
+                        "execution_client": context.el_name,
                     },
                 )
             )

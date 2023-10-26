@@ -37,10 +37,10 @@ Optional features (enabled via flags or parameter files at runtime):
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 
 ```bash
-kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.json)"
+kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package "$(cat ~/network_params.yaml)"
 ```
 
-Where `network_params.json` contains the parameters for your network in your home directory.
+Where `network_params.yaml` contains the parameters for your network in your home directory.
 
 #### Run on Kubernetes
 
@@ -88,242 +88,242 @@ kurtosis files download my-testnet el-genesis-data ~/Downloads
 
 ## Configuration
 
-To configure the package behaviour, you can modify your `network_params.json` file. The full JSON schema that can be passed in is as follows with the defaults provided:
+To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
 
 <details>
     <summary>Click to show all configuration options</summary>
 
 <!-- Yes, it's weird that none of this is indented but it's intentional - indenting anything inside this "details" expandable will cause it to render weird" -->
 
-```json
-{
-    //  Specification of the participants in the network
-    "participants": [
-        {
-            //  The type of EL client that should be started
-            //  Valid values are "geth", "nethermind", "erigon", "besu" and "reth"
-            "el_client_type": "geth",
+```yaml
+# Specification of the participants in the network
+participants:
+  # The type of EL client that should be started
+  # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth
+- el_client_type: geth
 
-            //  The Docker image that should be used for the EL client; leave blank to use the default for the client type
-            //  Defaults by client:
-            //  - geth: ethereum/client-go:latest
-            //  - erigon: thorax/erigon:devel
-            //  - nethermind: nethermind/nethermind:latest
-            //  - besu: hyperledger/besu:develop
-            //  - reth: ghcr.io/paradigmxyz/reth
-            "el_client_image": "",
+  # The Docker image that should be used for the EL client; leave blank to use the default for the client type
+  # Defaults by client:
+  # - geth: ethereum/client-go:latest
+  # - erigon: thorax/erigon:devel
+  # - nethermind: nethermind/nethermind:latest
+  # - besu: hyperledger/besu:develop
+  # - reth: ghcr.io/paradigmxyz/reth
+  # - ethereumjs: ethpandaops/ethereumjs:master
+  el_client_image: ""
 
-            //  The log level string that this participant's EL client should log at
-            //  If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-            //   global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
-            //  If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-            //   over a specific participant's logging
-            "el_client_log_level": "",
+  # The log level string that this participant's EL client should log at
+  # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+  # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
+  # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+  # over a specific participant's logging
+  el_client_log_level: ""
 
-            //  A list of optional extra params that will be passed to the EL client container for modifying its behaviour
-            "el_extra_params": [],
+  # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
+  el_extra_params: []
 
-            // A list of optional extra env_vars the el container should spin up with
-            "el_extra_env_vars": {},
+  # A list of optional extra env_vars the el container should spin up with
+  el_extra_env_vars: {}
 
-            //  The type of CL client that should be started
-            //  Valid values are "nimbus", "lighthouse", "lodestar", "teku", and "prysm"
-            "cl_client_type": "lighthouse",
+  # The type of CL client that should be started
+  # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+  cl_client_type: lighthouse
 
-            //  The Docker image that should be used for the EL client; leave blank to use the default for the client type
-            //  Defaults by client (note that Prysm is different in that it requires two images - a Beacon and a validator - separated by a comma):
-            //  - lighthouse: sigp/lighthouse:latest
-            //  - teku: consensys/teku:latest
-            //  - nimbus: statusim/nimbus-eth2:multiarch-latest
-            //  - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest
-            //  - lodestar: chainsafe/lodestar:next
-            "cl_client_image": "",
+  # The Docker image that should be used for the EL client; leave blank to use the default for the client type
+  # Defaults by client (note that Prysm is different in that it requires two images - a Beacon and a validator - separated by a comma):
+  # - lighthouse: sigp/lighthouse:latest
+  # - teku: consensys/teku:latest
+  # - nimbus: statusim/nimbus-eth2:multiarch-latest
+  # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest
+  # - lodestar: chainsafe/lodestar:next
+  cl_client_image: ""
 
-            //  The log level string that this participant's EL client should log at
-            //  If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-            //   global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
-            //  If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-            //   over a specific participant's logging
-            "cl_client_log_level": "",
+  # The log level string that this participant's EL client should log at
+  # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+  # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
+  # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+  # over a specific participant's logging
+  cl_client_log_level: ""
 
-            //  A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
-            //  If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
-            "beacon_extra_params": [],
+  # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
+  # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
+  beacon_extra_params: []
 
-            //  A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
-            //  If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
-            "validator_extra_params": [],
+  # A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
+  # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
+  validator_extra_params: []
 
-            // A set of parameters the node needs to reach an external block building network
-            // If `null` then the builder infrastructure will not be instantiated
-            // Example:
-            //
-            // "relay_endpoints": [
-            //   "https://0xdeadbeefcafa@relay.example.com",
-            //   "https://0xdeadbeefcafb@relay.example.com",
-            //   "https://0xdeadbeefcafc@relay.example.com",
-            //   "https://0xdeadbeefcafd@relay.example.com"
-            //  ]
-            "builder_network_params": null,
+  # A set of parameters the node needs to reach an external block building network
+  # If `null` then the builder infrastructure will not be instantiated
+  # Example:
+  #
+  # "relay_endpoints": [
+  #  "https:#0xdeadbeefcafa@relay.example.com",
+  #  "https:#0xdeadbeefcafb@relay.example.com",
+  #  "https:#0xdeadbeefcafc@relay.example.com",
+  #  "https:#0xdeadbeefcafd@relay.example.com"
+  # ]
+  builder_network_params: null
 
-            // Resource management for el/beacon/validator containers
-            // CPU is milicores
-            // RAM is in MB
-            // Defaults are set per client
-            "el_min_cpu": "",
-            "el_max_cpu": "",
-            "el_min_mem": "",
-            "el_max_mem": "",
-            "bn_min_cpu": "",
-            "bn_max_cpu": "",
-            "bn_min_mem": "",
-            "bn_max_mem": "",
-            "v_min_cpu": "",
-            "v_max_cpu": "",
-            "v_min_mem": "",
-            "v_max_mem": "",
+  # Resource management for el/beacon/validator containers
+  # CPU is milicores
+  # RAM is in MB
+  # Defaults are set per client
+  el_min_cpu: ''
+  el_max_cpu: ''
+  el_min_mem: ''
+  el_max_mem: ''
+  bn_min_cpu: ''
+  bn_max_cpu: ''
+  bn_min_mem: ''
+  bn_max_mem: ''
+  v_min_cpu: ''
+  v_max_cpu: ''
+  v_min_mem: ''
+  v_max_mem: ''
 
-            // Snooper can be enabled with the `snooper_enabled` flag per client or globally
-            // Defaults to false
-            "snooper_enabled": false,
+  # Snooper can be enabled with the `snooper_enabled` flag per client or globally
+  # Defaults to false
+  snooper_enabled: false
 
-            // Count of nodes to spin up for this participant
-            // Default to 1
-            "count": 1,
+  # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
+  # Defaults to false
+  ethereum_metrics_exporter_enabled: false
 
-             // Count of the number of validators you want to run for a given participant
-             // Default to null, which means that the number of validators will be using the network parameter num_validator_keys_per_node
-             "validator_count": null
-        }
-    ],
+  # Count of nodes to spin up for this participant
+  # Default to 1
+  count: 1
 
-    //  Default configuration parameters for the Eth network
-    "network_params": {
-        //  The network ID of the network.
-        "network_id": "3151908",
+  # Count of the number of validators you want to run for a given participant
+  # Default to null, which means that the number of validators will be using the
+  # network parameter num_validator_keys_per_node
+  validator_count: null
 
-        //  The address of the staking contract address on the Eth1 chain
-        "deposit_contract_address": "0x4242424242424242424242424242424242424242",
+# Default configuration parameters for the Eth network
+network_params:
+  # The network ID of the network.
+  network_id: 3151908
 
-        //  Number of seconds per slot on the Beacon chain
-        "seconds_per_slot": 12,
+  # The address of the staking contract address on the Eth1 chain
+  deposit_contract_address: "0x4242424242424242424242424242424242424242"
 
-        //  The number of validator keys that each CL validator node should get
-        "num_validator_keys_per_node": 64,
+  # Number of seconds per slot on the Beacon chain
+  seconds_per_slot: 12
 
-        //  This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
-        //   validator keys already preregistered as validators
-        "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
-        // How long you want the network to wait before starting up
-        "genesis_delay": 120,
+  # The number of validator keys that each CL validator node should get
+  num_validator_keys_per_node: 64
 
-        // Max churn rate for the network introduced by
-        // EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
-        // Defaults to 8
-        "max_churn": 8,
+  # This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
+  # validator keys already preregistered as validators
+  preregistered_validator_keys_mnemonic: "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete"
+  # How long you want the network to wait before starting up
+  genesis_delay: 120
 
-        // Ejection balance
-        // Defaults to 16ETH
-        // 16000000000 gwei
-        "ejection_balance": 16000000000,
+  # Max churn rate for the network introduced by
+  # EIP-7514 https:#eips.ethereum.org/EIPS/eip-7514
+  # Defaults to 8
+  max_churn: 8
 
-        // The epoch at which the capella and deneb forks are set to occur.
-        "capella_fork_epoch": 0,
-        "deneb_fork_epoch": 500,
-        "electra_fork_epoch": null
-    },
+  # Ejection balance
+  # Defaults to 16ETH
+  # 16000000000 gwei
+  ejection_balance: 16000000000,
 
-    // Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
-    "tx_spammer_params": {
-        //  A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
-        "tx_spammer_extra_args": []
-    },
+  # The epoch at which the capella and deneb forks are set to occur.
+  capella_fork_epoch: 0
+  deneb_fork_epoch: 500
+  electra_fork_epoch: null
 
-    // Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
-    "goomy_blob_params": {
-        //  A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
-        "goomy_blob_args": []
-    },
+# Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
+tx_spammer_params:
+  # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
+  tx_spammer_extra_args: []
 
-    // By default includes
-    //  - A transaction spammer & blob spammer is launched to fake transactions sent to the network
-    //  - Forkmon for EL will be launched
-    //  - A prometheus will be started, coupled with grafana
-    //  - A beacon metrics gazer will be launched
-    //  - A light beacon chain explorer will be launched
-    //  - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
-    "additional_services": [
-        "tx_spammer",
-        "blob_spammer",
-        "custom_flood",
-        "goomy_blob",
-        "el_forkmon",
-        "beacon_metrics_gazer",
-        "dora",
-        "full_beaconchain_explorer",
-        "prometheus_grafana"
-    ],
+# Configuration place for goomy the blob spammer - https:#github.com/ethpandaops/goomy-blob
+goomy_blob_params:
+  # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
+  goomy_blob_args: []
 
-    //  If set, the package will block until a finalized epoch has occurred.
-    "wait_for_finalization": false,
+# By default includes
+# - A transaction spammer & blob spammer is launched to fake transactions sent to the network
+# - Forkmon for EL will be launched
+# - A prometheus will be started, coupled with grafana
+# - A beacon metrics gazer will be launched
+# - A light beacon chain explorer will be launched
+# - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
+additional_services:
+  - tx_spammer
+  - blob_spammer
+  - custom_flood
+  - goomy_blob
+  - el_forkmon
+  - beacon_metrics_gazer
+  - dora
+  - full_beaconchain_explorer
+  - prometheus_grafana
 
-    //  The global log level that all clients should log at
-    //  Valid values are "error", "warn", "info", "debug", and "trace"
-    //  This value will be overridden by participant-specific values
-    "global_client_log_level": "info",
+# If set, the package will block until a finalized epoch has occurred.
+wait_for_finalization: false
 
-    // EngineAPI Snooper global flags for all participants
-    // Default to false
-    "snooper_enabled": false,
+# The global log level that all clients should log at
+# Valid values are "error", "warn", "info", "debug", and "trace"
+# This value will be overridden by participant-specific values
+global_client_log_level: "info"
 
-    // Parallelizes keystore generation so that each node has keystores being generated in their own container
-    // This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
-    "parallel_keystore_generation": false,
+# EngineAPI Snooper global flags for all participants
+# Default to false
+snooper_enabled: false
 
-    // Disable peer scoring to prevent nodes impacted by faults from being permanently ejected from the network
-    // Default to false
-    "disable_peer_scoring": false,
+# Enables Ethereum Metrics Exporter for all participants
+# Defaults to false
+ethereum_metrics_exporter_enabled: false
 
-    // Supports three valeus
-    // Default: "None" - no mev boost, mev builder, mev flood or relays are spun up
-    // "mock" - mock-builder & mev-boost are spun up
-    // "full" - mev-boost, relays, flooder and builder are all spun up
-    // Users are recommended to set network_params.capella_fork_epoch to non zero when testing MEV
-    // We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
-    "mev_type": "None",
+# Parallelizes keystore generation so that each node has keystores being generated in their own container
+# This will result in a large number of containers being spun up than normal. We advise users to only enable this on a sufficiently large machine or in the cloud as it can be resource consuming on a single machine.
+parallel_keystore_generation: false
 
-    // Parameters if MEV is used
-    "mev_params": {
-      // The image to use for MEV boot relay
-      "mev_relay_image": "flashbots/mev-boost-relay",
-      // The image to use for the builder
-      "mev_builder_image": "ethpandaops/flashbots-builder:main",
-      // The image to use for the CL builder
-      "mev_builder_cl_image": "sigp/lighthouse:latest",
-      // The image to use for mev-boost
-      "mev_boost_image": "flashbots/mev-boost",
-      // Extra parameters to send to the API
-      "mev_relay_api_extra_args": [],
-      // Extra parameters to send to the housekeeper
-      "mev_relay_housekeeper_extra_args": [],
-      // Extra parameters to send to the website
-      "mev_relay_website_extra_args": [],
-      // Extra parameters to send to the builder
-      "mev_builder_extra_args": [],
-      // Image to use for mev-flood
-      "mev_flood_image": "flashbots/mev-flood",
-      // Extra parameters to send to mev-flood
-      "mev_flood_extra_args": [],
-      // Number of seconds between bundles for mev-flood
-      "mev_flood_seconds_per_bundle": 15,
-      // Optional parameters to send to the custom_flood script that sends reliable payloads
-      "custom_flood_params": {
-        "interval_between_transactions": 1
-      }
-    },
-    // A list of locators for grafana dashboards to be loaded be the grafana service
-    "grafana_additional_dashboards": []
-}
+# Disable peer scoring to prevent nodes impacted by faults from being permanently ejected from the network
+# Default to false
+disable_peer_scoring: false
+
+# A list of locators for grafana dashboards to be loaded be the grafana service
+grafana_additional_dashboards: []
+
+# Supports three valeus
+# Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
+# "mock" - mock-builder & mev-boost are spun up
+# "full" - mev-boost, relays, flooder and builder are all spun up
+# Users are recommended to set network_params.capella_fork_epoch to non zero when testing MEV
+# We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
+mev_type: null
+
+# Parameters if MEV is used
+mev_params:
+  # The image to use for MEV boot relay
+  mev_relay_image: flashbots/mev-boost-relay
+  # The image to use for the builder
+  mev_builder_image: ethpandaops/flashbots-builder:main
+  # The image to use for the CL builder
+  mev_builder_cl_image: sigp/lighthouse:latest
+  # The image to use for mev-boost
+  mev_boost_image: flashbots/mev-boost
+  # Extra parameters to send to the API
+  mev_relay_api_extra_args: []
+  # Extra parameters to send to the housekeeper
+  mev_relay_housekeeper_extra_args: []
+  # Extra parameters to send to the website
+  mev_relay_website_extra_args: []
+  # Extra parameters to send to the builder
+  mev_builder_extra_args: []
+  # Image to use for mev-flood
+  mev_flood_image: flashbots/mev-flood
+  # Extra parameters to send to mev-flood
+  mev_flood_extra_args: []
+  # Number of seconds between bundles for mev-flood
+  mev_flood_seconds_per_bundle: 15
+  # Optional parameters to send to the custom_flood script that sends reliable payloads
+  custom_flood_params:
+    interval_between_transactions: 1
 ```
 
 </details>
@@ -333,40 +333,34 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 <details>
     <summary>Verkle configuration example</summary>
 
-```json
-{
-  "participants": [
-    {
-      "el_client_type": "geth",
-      "el_client_image": "ethpandaops/geth:<VERKLE_IMAGE>",
-      "elExtraParams": ["--override.verkle=<UNIXTIMESTAMP>"],
-      "cl_client_type": "lighthouse",
-      "cl_client_image": "sigp/lighthouse:latest"
-    },
-    {
-      "el_client_type": "geth",
-      "el_client_image": "ethpandaops/geth:<VERKLE_IMAGE>",
-      "elExtraParams": ["--override.verkle=<UNIXTIMESTAMP>"],
-      "cl_client_type": "lighthouse",
-      "cl_client_image": "sigp/lighthouse:latest"
-    },
-    {
-      "el_client_type": "geth",
-      "el_client_image": "ethpandaops/geth:<VERKLE_IMAGE>",
-      "elExtraParams": ["--override.verkle=<UNIXTIMESTAMP>"],
-      "cl_client_type": "lighthouse",
-      "cl_client_image": "sigp/lighthouse:latest"
-    }
-  ],
-  "network_params": {
-    "capella_fork_epoch": 2,
-    "deneb_fork_epoch": 5
-  },
-  "additional_services": [],
-  "wait_for_finalization": false,
-  "wait_for_verifications": false,
-  "global_client_log_level": "info"
-}
+```yaml
+participants:
+  - el_client_type: geth
+    el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
+    elExtraParams:
+    - "--override.verkle=<UNIXTIMESTAMP>"
+    cl_client_type: lighthouse
+    cl_client_image: sigp/lighthouse:latest
+  - el_client_type: geth
+    el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
+    elExtraParams:
+    - "--override.verkle=<UNIXTIMESTAMP>"
+    cl_client_type: lighthouse
+    cl_client_image: sigp/lighthouse:latest
+  - el_client_type: geth
+    el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
+    elExtraParams:
+    - "--override.verkle=<UNIXTIMESTAMP>"
+    cl_client_type: lighthouse
+    cl_client_image: sigp/lighthouse:latest
+network_params:
+  capella_fork_epoch: 2
+  deneb_fork_epoch: 5
+additional_services: []
+wait_for_finalization: false
+wait_for_verifications: false
+global_client_log_level: info
+
 ```
 
 </details>
@@ -375,34 +369,25 @@ To configure the package behaviour, you can modify your `network_params.json` fi
     <summary>A 3-node Ethereum network with "mock" MEV mode.</summary>
     Useful for testing mev-boost and the client implimentations without adding the complexity of the relay. This can be enabled by a single config command and would deploy the [mock-builder](https://github.com/marioevz/mock-builder), instead of the relay infrastructure.
 
-```json
-{
-  "participants": [
-    {
-      "el_client_type": "geth",
-      "el_client_image": "",
-      "cl_client_type": "lighthouse",
-      "cl_client_image": "",
-      "count": 2
-    },
-    {
-      "el_client_type": "nethermind",
-      "el_client_image": "",
-      "cl_client_type": "teku",
-      "cl_client_image": "",
-      "count": 1
-    },
-    {
-      "el_client_type": "besu",
-      "el_client_image": "",
-      "cl_client_type": "prysm",
-      "cl_client_image": "",
-      "count": 2
-    },
-  ],
-  "mev_type": "mock",
-  "additional_services": []
-}
+```yaml
+participants:
+  - el_client_type: geth
+    el_client_image: ''
+    cl_client_type: lighthouse
+    cl_client_image: ''
+    count: 2
+  - el_client_type: nethermind
+    el_client_image: ''
+    cl_client_type: teku
+    cl_client_image: ''
+    count: 1
+  - el_client_type: besu
+    el_client_image: ''
+    cl_client_type: prysm
+    cl_client_image: ''
+    count: 2
+mev_type: mock
+additional_services: []
 ```
 
 </details>
@@ -410,37 +395,21 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 <details>
     <summary>A 5-node Ethereum network with three different CL and EL client combinations and mev-boost infrastructure in "full" mode.</summary>
 
-```json
-{
-  "participants": [
-    {
-      "el_client_type": "geth",
-      "el_client_image": "",
-      "cl_client_type": "lighthouse",
-      "cl_client_image": "",
-      "count": 2
-    },
-    {
-      "el_client_type": "nethermind",
-      "el_client_image": "",
-      "cl_client_type": "teku",
-      "cl_client_image": "",
-      "count": 1
-    },
-    {
-      "el_client_type": "besu",
-      "el_client_image": "",
-      "cl_client_type": "prysm",
-      "cl_client_image": "",
-      "count": 2
-    },
-  ],
-  "mev_type": "full",
-  "network_params": {
-    "capella_fork_epoch": 1
-  },
-  "additional_services": []
-}
+```yaml
+participants:
+  - el_client_type: geth
+    cl_client_type: lighthouse
+    count: 2
+  - el_client_type: nethermind
+    cl_client_type: teku
+  - el_client_type: besu
+    cl_client_type: prysm
+    count: 2
+mev_type: full
+network_params:
+  capella_fork_epoch: 1
+additional_services: []
+
 ```
 
 </details>
@@ -448,19 +417,12 @@ To configure the package behaviour, you can modify your `network_params.json` fi
 <details>
     <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, transaction-spammer, EngineAPI snooper, and a testnet verifier)</summary>
 
-```json
-{
-  "participants": [
-    {
-      "el_client_type": "geth",
-      "el_client_image": "",
-      "cl_client_type": "lighthouse",
-      "cl_client_image": "",
-      "count": 2
-    }
-  ],
-  "snooper_enabled": true
-}
+```yaml
+participants:
+  - el_client_type: geth
+    cl_client_type: lighthouse
+    count: 2
+snooper_enabled: true
 ```
 
 </details>
@@ -507,7 +469,7 @@ This note is from 2023-10-05
 `flashbots/mev-boost-relay:0.27` and later support `capella_fork_epoch` at `0` but this seems to require a few flags enabled
 on the `lighthouse` beacon client including `--always-prefer-builder-payload` and `--disable-peer-scoring`
 
-Users are recommended to use [`examples/capella-mev.json`](./examples/capella-mev.json); as inspiration for reliable payload
+Users are recommended to use [`examples/capella-mev.yaml`](./examples/capella-mev.yaml); as inspiration for reliable payload
 delivery.
 
 ## Pre-funded accounts at Genesis

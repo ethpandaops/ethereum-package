@@ -1,7 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "dora"
-IMAGE_NAME = "ethpandaops/dora:master"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 8080
@@ -24,7 +23,11 @@ USED_PORTS = {
 
 
 def launch_dora(
-    plan, config_template, cl_client_contexts, el_cl_data_files_artifact_uuid
+    plan,
+    config_template,
+    cl_client_contexts,
+    el_cl_data_files_artifact_uuid,
+    electra_fork_epoch,
 ):
     all_cl_client_info = []
     for index, client in enumerate(cl_client_contexts):
@@ -49,16 +52,26 @@ def launch_dora(
     config = get_config(
         config_files_artifact_name,
         el_cl_data_files_artifact_uuid,
+        electra_fork_epoch,
     )
 
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(config_files_artifact_name, el_cl_data_files_artifact_uuid):
+def get_config(
+    config_files_artifact_name, el_cl_data_files_artifact_uuid, electra_fork_epoch
+):
     config_file_path = shared_utils.path_join(
         DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         DORA_CONFIG_FILENAME,
     )
+
+    # TODO: This is a hack to get the verkle support image for the electra fork
+    if electra_fork_epoch != None:
+        IMAGE_NAME = "ethpandaops/dora:verkle-support"
+    else:
+        IMAGE_NAME = "ethpandaops/dora:master"
+
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
