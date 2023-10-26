@@ -137,6 +137,7 @@ def launch_participant_network(
                 network_params.network_id,
                 el_cl_data,
                 final_genesis_timestamp,
+                network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
@@ -279,11 +280,9 @@ def launch_participant_network(
             snooper_service_name = "snooper-{0}-{1}-{2}".format(
                 index_str, cl_client_type, el_client_type
             )
-            snooper_image = constants.DEFAULT_SNOOPER_IMAGE
             snooper_engine_context = snooper.launch(
                 plan,
                 snooper_service_name,
-                snooper_image,
                 el_client_context,
             )
             plan.print(
@@ -355,15 +354,10 @@ def launch_participant_network(
                 "ethereum-metrics-exporter-{0}".format(pair_name)
             )
 
-            ethereum_metrics_exporter_image = (
-                constants.DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE
-            )
-
             ethereum_metrics_exporter_context = ethereum_metrics_exporter.launch(
                 plan,
                 pair_name,
                 ethereum_metrics_exporter_service_name,
-                ethereum_metrics_exporter_image,
                 el_client_context,
                 cl_client_context,
             )
@@ -431,5 +425,6 @@ padding = int(sys.argv[1])
 print(int(time.time()+padding), end="")
 """,
         args=[str(padding)],
+        store=[StoreSpec(src="/tmp", name="final-genesis-timestamp")],
     )
     return result.output
