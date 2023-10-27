@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: set-matrix
-        run: echo "::set-output name=matrix::$(ls ./.github/tests/*.yaml | jq -R -s -c 'split("\n")[:-1]')"
+        run: echo "name=matrix::$(ls ./.github/tests/*.yaml | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
   run_with_args:
     needs: list-yamls
     strategy:
