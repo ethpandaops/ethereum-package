@@ -12,13 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: set-matrix
-        run: echo "::set-output name=matrix::$(ls ./.github/tests/*.yaml | jq -R -s -c 'split("\n")[:-1]')"
+        run: echo "matrix=$(ls ./.github/tests/*.yaml | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
   run_with_args:
     needs: list-yamls
     strategy:
       matrix:
           file_name: ${{ fromJson(needs.list-yamls.outputs.matrix) }}
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -32,3 +33,12 @@ jobs:
 
       - name: Run Starlark
         run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
+
+      - name: Notify
+        if: cancelled() || failure()
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: "The nightly test for ${{matrix.file_name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
