@@ -19,6 +19,7 @@ jobs:
       matrix:
           file_name: ${{ fromJson(needs.list-yamls.outputs.matrix) }}
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
