@@ -548,6 +548,8 @@ When you're happy with your changes:
 1. Add one of the maintainers of the repo as a "Review Request":
    * `parithosh` (Ethereum Foundation)
    * `barnabasbusa` (Ethereum Foundation)
+   * `pk910` (Ethereum Foundation)
+   * `samcm` (EThereum Foundation)
    * `h4ck3rk3y` (Kurtosis)
    * `mieubrisse` (Kurtosis)
    * `leederek` (Kurtosis)
