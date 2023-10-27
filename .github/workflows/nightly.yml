@@ -33,3 +33,18 @@ jobs:
 
       - name: Run Starlark
         run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
+  notify:
+    name: Discord Notification
+    runs-on: ubuntu-latest
+    needs:
+      - list-yamls
+      - run_with_args
+    if: cancelled() || failure()
+    steps:
+      - name: Notify
+        uses: nobrayner/discord-webhook@v1
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: "The nightly test on ethereum-package has failed"
+
