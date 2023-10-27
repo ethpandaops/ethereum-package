@@ -549,7 +549,7 @@ When you're happy with your changes:
    * `parithosh` (Ethereum Foundation)
    * `barnabasbusa` (Ethereum Foundation)
    * `pk910` (Ethereum Foundation)
-   * `samcm` (EThereum Foundation)
+   * `samcm` (Ethereum Foundation)
    * `h4ck3rk3y` (Kurtosis)
    * `mieubrisse` (Kurtosis)
    * `leederek` (Kurtosis)
