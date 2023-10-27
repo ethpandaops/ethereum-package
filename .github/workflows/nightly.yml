@@ -41,5 +41,5 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          args: "The nightly test for ${{matrix.file_name}} on ethereum-package has failed"
+          args: "The nightly test for ${{matrix.file_name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
