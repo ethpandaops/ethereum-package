@@ -223,8 +223,11 @@ def get_config(
     ]
 
     if BUILDER_IMAGE_STR in image:
-        cmd[10] = "--http.api=admin,engine,net,eth,web3,debug,flashbots"
-        cmd[14] = "--ws.api=admin,engine,net,eth,web3,debug,flashbots"
+        for index, arg in enumerate(cmd):
+            if "--http.api" in arg:
+                cmd[index] = "--http.api=admin,engine,net,eth,web3,debug,mev,flashbots"
+            if "--ws.api" in arg:
+                cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,mev,flashbots"
 
     if len(existing_el_clients) > 0:
         cmd.append(
