@@ -29,7 +29,7 @@ TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_HTTP_RPC_PORT_ID = "engine-rpc"
 METRICS_PORT_ID = "metrics"
-
+JAVA_OPTS = {"JAVA_OPTS": "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"}
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
@@ -187,7 +187,6 @@ def get_config(
 
     cmd_str = " ".join(cmd)
 
-    JAVA_OPTS = {"JAVA_OPTS": "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"}
     extra_env_vars = extra_env_vars | JAVA_OPTS
     return ServiceConfig(
         image=image,
