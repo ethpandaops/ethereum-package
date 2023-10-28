@@ -1,4 +1,5 @@
 EL_CLIENT_TYPE = struct(
+    gethbuilder="geth-builder",
     geth="geth",
     erigon="erigon",
     nethermind="nethermind",
