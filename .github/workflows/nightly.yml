@@ -4,7 +4,6 @@ on:
   schedule:
     - cron: "0 2 * * *" # This schedules the workflow to run at 02:00 UTC every day
   workflow_dispatch:
-  pull_request:
 
 jobs:
   list-yamls:
