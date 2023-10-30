@@ -1,5 +1,5 @@
 redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
-postgres_module = import_module("github.com/bharath-123/postgres-package/main.star@add-adminer")
+postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 constants = import_module("../package_io/constants.star")
 
 DUMMY_SECRET_KEY = "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
