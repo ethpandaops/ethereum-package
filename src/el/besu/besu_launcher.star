@@ -29,7 +29,7 @@ TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_HTTP_RPC_PORT_ID = "engine-rpc"
 METRICS_PORT_ID = "metrics"
-
+JAVA_OPTS = {"JAVA_OPTS": "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"}
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
@@ -187,6 +187,7 @@ def get_config(
 
     cmd_str = " ".join(cmd)
 
+    extra_env_vars = extra_env_vars | JAVA_OPTS
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
@@ -194,13 +195,13 @@ def get_config(
         files={
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
+        env_vars=extra_env_vars,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,
         max_memory=el_max_mem,
-        env_vars=extra_env_vars,
         labels=shared_utils.label_maker(
             constants.EL_CLIENT_TYPE.besu,
             constants.CLIENT_TYPES.el,
