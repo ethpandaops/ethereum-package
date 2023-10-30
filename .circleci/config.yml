@@ -103,6 +103,7 @@ jobs:
       - run: kurtosis run ${PWD} "$(cat ./.github/tests/mev.yaml)"
 
   mix_with_tools_k8s:
+    resource_class: xlarge
     executor: ubuntu_vm
     steps:
       - checkout
