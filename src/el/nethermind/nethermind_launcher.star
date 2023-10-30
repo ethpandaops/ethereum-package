@@ -83,10 +83,13 @@ def launch(
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
 
+    cl_client_name = service_name.split("-")[3]
+
     config = get_config(
         launcher.el_cl_genesis_data,
         image,
         existing_el_clients,
+        cl_client_name,
         log_level,
         el_min_cpu,
         el_max_cpu,
@@ -123,6 +126,7 @@ def get_config(
     el_cl_genesis_data,
     image,
     existing_el_clients,
+    cl_client_name,
     log_level,
     el_min_cpu,
     el_max_cpu,
@@ -184,6 +188,12 @@ def get_config(
         min_memory=el_min_mem,
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
+        labels=shared_utils.label_maker(
+            constants.EL_CLIENT_TYPE.nethermind,
+            constants.CLIENT_TYPES.el,
+            image,
+            cl_client_name,
+        ),
     )
 
 

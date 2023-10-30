@@ -427,6 +427,38 @@ snooper_enabled: true
 
 </details>
 
+## Custom labels for Docker and Kubernetes
+There are 4 custom labels that can be used to identify the nodes in the network. These labels are used to identify the nodes in the network and can be used to run chaos tests on specific nodes. An example for these labels are as follows:
+
+Execution Layer (EL) nodes:
+```sh
+  "com.kurtosistech.custom.ethereum-package-client": "geth",
+  "com.kurtosistech.custom.ethereum-package-client-image": "ethereum-client-go-latest",
+  "com.kurtosistech.custom.ethereum-package-client-type": "execution",
+  "com.kurtosistech.custom.ethereum-package-connected-client": "lighthouse",
+```
+
+Consensus Layer (CL) nodes - Beacon:
+```sh
+  "com.kurtosistech.custom.ethereum-package-client": "lighthouse",
+  "com.kurtosistech.custom.ethereum-package-client-image": "sigp-lighthouse-latest",
+  "com.kurtosistech.custom.ethereum-package-client-type": "beacon",
+  "com.kurtosistech.custom.ethereum-package-connected-client": "geth",
+```
+
+Consensus Layer (CL) nodes - Validator:
+```sh
+  "com.kurtosistech.custom.ethereum-package-client": "lighthouse",
+  "com.kurtosistech.custom.ethereum-package-client-image": "sigp-lighthouse-latest",
+  "com.kurtosistech.custom.ethereum-package-client-type": "validator",
+  "com.kurtosistech.custom.ethereum-package-connected-client": "geth",
+```
+
+`ethereum-package-client` describes which client is running on the node.
+`ethereum-package-client-image` describes the image that is used for the client.
+`ethereum-package-client-type` describes the type of client that is running on the node (`execution`,`beacon` or `validator`).
+`ethereum-package-connected-client` describes the CL/EL client that is connected to the EL/CL client.
+
 ## Proposer Builder Separation (PBS) emulation
 
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
@@ -516,6 +548,8 @@ When you're happy with your changes:
 1. Add one of the maintainers of the repo as a "Review Request":
    * `parithosh` (Ethereum Foundation)
    * `barnabasbusa` (Ethereum Foundation)
+   * `pk910` (Ethereum Foundation)
+   * `samcm` (Ethereum Foundation)
    * `h4ck3rk3y` (Kurtosis)
    * `mieubrisse` (Kurtosis)
    * `leederek` (Kurtosis)
