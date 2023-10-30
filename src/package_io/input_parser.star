@@ -6,7 +6,7 @@ genesis_constants = import_module(
 
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
-    "erigon": "ethpandaops/erigon:devel",
+    "erigon": "ethpandaops/erigon:2.53.0",
     "nethermind": "nethermind/nethermind:latest",
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
