@@ -38,7 +38,7 @@ def launch_mev_relay(
         user="postgres",
         database="postgres",
         service_name="postgres",
-        launch_adminer=True
+        launch_adminer=True,
     )
 
     network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
