@@ -92,6 +92,7 @@ def launch(
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
+        service_name,
         launcher.el_cl_genesis_data,
         image,
         existing_el_clients,
@@ -127,6 +128,7 @@ def launch(
 
 
 def get_config(
+    service_name,
     el_cl_genesis_data,
     image,
     existing_el_clients,
@@ -194,6 +196,7 @@ def get_config(
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
         labels=shared_utils.label_maker(
+            service_name,
             constants.EL_CLIENT_TYPE.ethereumjs,
             constants.CLIENT_TYPES.el,
             image,

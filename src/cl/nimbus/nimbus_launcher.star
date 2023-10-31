@@ -114,6 +114,7 @@ def launch(
     bn_max_mem = int(v_max_mem) if (int(v_max_mem) > bn_max_mem) else bn_max_mem
 
     config = get_config(
+        service_name,
         launcher.el_cl_genesis_data,
         image,
         bootnode_contexts,
@@ -168,6 +169,7 @@ def launch(
 
 
 def get_config(
+    service_name,
     el_cl_genesis_data,
     image,
     bootnode_contexts,
@@ -316,6 +318,7 @@ def get_config(
         min_memory=bn_min_mem,
         max_memory=bn_max_mem,
         labels=shared_utils.label_maker(
+            service_name,
             constants.CL_CLIENT_TYPE.nimbus,
             constants.CLIENT_TYPES.cl,
             image,

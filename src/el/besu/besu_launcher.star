@@ -87,6 +87,7 @@ def launch(
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
+        service_name,
         launcher.network_id,
         launcher.el_cl_genesis_data,
         image,
@@ -124,6 +125,7 @@ def launch(
 
 
 def get_config(
+    service_name,
     network_id,
     el_cl_genesis_data,
     image,
@@ -203,6 +205,7 @@ def get_config(
         min_memory=el_min_mem,
         max_memory=el_max_mem,
         labels=shared_utils.label_maker(
+            service_name,
             constants.EL_CLIENT_TYPE.besu,
             constants.CLIENT_TYPES.el,
             image,

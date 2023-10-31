@@ -62,8 +62,10 @@ def zfill_custom(value, width):
     return ("0" * (width - len(str(value)))) + str(value)
 
 
-def label_maker(client, client_type, image, connected_client):
+def label_maker(service_name, client, client_type, image, connected_client):
+    pod_group = service_name.split("-")[1]
     return {
+        "pod-group": pod_group,
         "ethereum-package-client": client,
         "ethereum-package-client-type": client_type,
         "ethereum-package-client-image": image.replace("/", "-").replace(":", "-"),
