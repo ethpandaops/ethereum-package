@@ -506,7 +506,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 
     if mev_type == "full":
         mev_participant = default_participant()
-        mev_participant["el_client_type"] = mev_participant["el_client_type"] + "-builder"
+        mev_participant["el_client_type"] = (
+            mev_participant["el_client_type"] + "-builder"
+        )
         mev_participant.update(
             {
                 "el_client_image": parsed_arguments_dict["mev_params"][
