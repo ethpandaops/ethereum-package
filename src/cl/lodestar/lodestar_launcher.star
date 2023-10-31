@@ -107,6 +107,7 @@ def launch(
 
     # Launch Beacon node
     beacon_config = get_beacon_config(
+        service_name,
         launcher.el_cl_genesis_data,
         image,
         bootnode_contexts,
@@ -196,6 +197,7 @@ def launch(
 
 
 def get_beacon_config(
+    service_name,
     el_cl_genesis_data,
     image,
     bootnode_contexts,
@@ -288,6 +290,7 @@ def get_beacon_config(
         min_memory=bn_min_mem,
         max_memory=bn_max_mem,
         labels=shared_utils.label_maker(
+            service_name,
             constants.CL_CLIENT_TYPE.lodestar,
             constants.CLIENT_TYPES.cl,
             image,
@@ -360,6 +363,7 @@ def get_validator_config(
         min_memory=v_min_mem,
         max_memory=v_max_mem,
         labels=shared_utils.label_maker(
+            service_name,
             constants.CL_CLIENT_TYPE.lodestar,
             constants.CLIENT_TYPES.validator,
             image,
