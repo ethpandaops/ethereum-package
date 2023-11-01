@@ -9,5 +9,5 @@ def new_node_metrics_info(
         "name": name,
         "path": path,
         "url": url,
-        "additional_labels": additional_labels,
+        "additional_labels": dict(additional_labels),
     }
