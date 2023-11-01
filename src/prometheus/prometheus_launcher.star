@@ -9,6 +9,7 @@ VALIDATOR_CLIENT_TYPE = "validator"
 METRICS_INFO_NAME_KEY = "name"
 METRICS_INFO_URL_KEY = "url"
 METRICS_INFO_PATH_KEY = "path"
+METRICS_INFO_ADDITIONAL_LABELS_KEY = "additional_labels"
 
 # TODO(old) I'm not sure if we should use latest version or ping an specific version instead
 IMAGE_NAME = "prom/prometheus:latest"
@@ -95,16 +96,18 @@ def new_config_template_data(
     for context in el_client_contexts:
         if len(context.el_metrics_info) >= 1 and context.el_metrics_info[0] != None:
             execution_metrics_info = context.el_metrics_info[0]
+            labels = {
+                "service": context.service_name,
+                "client_type": EXECUTION_CLIENT_TYPE,
+                "client_name": context.client_name,
+            }
+            labels.update(execution_metrics_info[METRICS_INFO_ADDITIONAL_LABELS_KEY])
             metrics_jobs.append(
                 new_metrics_job(
                     job_name=execution_metrics_info[METRICS_INFO_NAME_KEY],
                     endpoint=execution_metrics_info[METRICS_INFO_URL_KEY],
                     metrics_path=execution_metrics_info[METRICS_INFO_PATH_KEY],
-                    labels={
-                        "service": context.service_name,
-                        "client_type": EXECUTION_CLIENT_TYPE,
-                        "client_name": context.client_name,
-                    },
+                    labels=labels,
                 )
             )
     # Adding consensus clients metrics jobs
@@ -115,16 +118,18 @@ def new_config_template_data(
         ):
             # Adding beacon node metrics
             beacon_metrics_info = context.cl_nodes_metrics_info[0]
+            labels = {
+                "service": context.beacon_service_name,
+                "client_type": BEACON_CLIENT_TYPE,
+                "client_name": context.client_name,
+            }
+            labels.update(beacon_metrics_info[METRICS_INFO_ADDITIONAL_LABELS_KEY])
             metrics_jobs.append(
                 new_metrics_job(
                     job_name=beacon_metrics_info[METRICS_INFO_NAME_KEY],
                     endpoint=beacon_metrics_info[METRICS_INFO_URL_KEY],
                     metrics_path=beacon_metrics_info[METRICS_INFO_PATH_KEY],
-                    labels={
-                        "service": context.beacon_service_name,
-                        "client_type": BEACON_CLIENT_TYPE,
-                        "client_name": context.client_name,
-                    },
+                    labels=labels,
                 )
             )
         if (
@@ -133,16 +138,18 @@ def new_config_template_data(
         ):
             # Adding validator node metrics
             validator_metrics_info = context.cl_nodes_metrics_info[1]
+            labels = {
+                "service": context.validator_service_name,
+                "client_type": VALIDATOR_CLIENT_TYPE,
+                "client_name": context.client_name,
+            }
+            labels.update(validator_metrics_info[METRICS_INFO_ADDITIONAL_LABELS_KEY])
             metrics_jobs.append(
                 new_metrics_job(
                     job_name=validator_metrics_info[METRICS_INFO_NAME_KEY],
                     endpoint=validator_metrics_info[METRICS_INFO_URL_KEY],
                     metrics_path=validator_metrics_info[METRICS_INFO_PATH_KEY],
-                    labels={
-                        "service": context.validator_service_name,
-                        "client_type": VALIDATOR_CLIENT_TYPE,
-                        "client_name": context.client_name,
-                    },
+                    labels=labels,
                 )
             )
 

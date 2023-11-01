@@ -145,6 +145,9 @@ def input_parser(plan, input_args):
                 ethereum_metrics_exporter_enabled=participant[
                     "ethereum_metrics_exporter_enabled"
                 ],
+                prometheus_additional_labels=participant[
+                    "prometheus_additional_labels"
+                ],
             )
             for participant in result["participants"]
         ],
@@ -184,6 +187,9 @@ def input_parser(plan, input_args):
             mev_flood_extra_args=result["mev_params"]["mev_flood_extra_args"],
             mev_flood_seconds_per_bundle=result["mev_params"][
                 "mev_flood_seconds_per_bundle"
+            ],
+            mev_builder_prometheus_additional_labels=result["mev_params"][
+                "mev_builder_prometheus_additional_labels"
             ],
         ),
         tx_spammer_params=struct(
@@ -425,6 +431,7 @@ def default_participant():
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
         "count": 1,
+        "prometheus_additional_labels": {},
     }
 
 
@@ -441,6 +448,7 @@ def get_default_mev_params():
         "mev_flood_image": "flashbots/mev-flood",
         "mev_flood_extra_args": [],
         "mev_flood_seconds_per_bundle": 15,
+        "mev_builder_prometheus_additional_labels": {},
     }
 
 
@@ -546,6 +554,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     + genesis_constants.PRE_FUNDED_ACCOUNTS[0].private_key
                 },
                 "validator_count": 0,
+                "prometheus_additional_labels": parsed_arguments_dict["mev_params"][
+                    "mev_builder_prometheus_additional_labels"
+                ],
             }
         )
 
