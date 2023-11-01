@@ -188,9 +188,6 @@ def input_parser(plan, input_args):
             mev_flood_seconds_per_bundle=result["mev_params"][
                 "mev_flood_seconds_per_bundle"
             ],
-            mev_builder_prometheus_additional_labels=result["mev_params"][
-                "mev_builder_prometheus_additional_labels"
-            ],
         ),
         tx_spammer_params=struct(
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
