@@ -3,11 +3,11 @@ def new_node_metrics_info(
     name,
     path,
     url,
-    additional_labels={},
+    config=None,
 ):
     return {
         "name": name,
         "path": path,
         "url": url,
-        "additional_labels": dict(additional_labels),
+        "config": config,
     }

@@ -209,9 +209,7 @@ def launch_participant_network(
 
         # Add participant el additional prometheus metrics
         for metrics_info in el_client_context.el_metrics_info:
-            metrics_info["additional_labels"].update(
-                participant.prometheus_additional_labels
-            )
+            metrics_info["config"] = participant.prometheus_config
 
         all_el_client_contexts.append(el_client_context)
 
@@ -351,9 +349,7 @@ def launch_participant_network(
 
         # Add participant cl additional prometheus labels
         for metrics_info in cl_client_context.cl_nodes_metrics_info:
-            metrics_info["additional_labels"].update(
-                participant.prometheus_additional_labels
-            )
+            metrics_info["config"] = participant.prometheus_config
 
         all_cl_client_contexts.append(cl_client_context)
 
