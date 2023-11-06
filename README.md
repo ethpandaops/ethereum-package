@@ -367,7 +367,7 @@ global_client_log_level: info
 
 <details>
     <summary>A 3-node Ethereum network with "mock" MEV mode.</summary>
-    Useful for testing mev-boost and the client implimentations without adding the complexity of the relay. This can be enabled by a single config command and would deploy the [mock-builder](https://github.com/marioevz/mock-builder), instead of the relay infrastructure.
+    Useful for testing mev-boost and the client implementations without adding the complexity of the relay. This can be enabled by a single config command and would deploy the [mock-builder](https://github.com/marioevz/mock-builder), instead of the relay infrastructure.
 
 ```yaml
 participants:
