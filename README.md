@@ -560,5 +560,5 @@ When you're happy with your changes:
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [kurtosis-repo]: https://github.com/kurtosis-tech/kurtosis
-[enclave]: https://docs.kurtosis.com/concepts-reference/enclaves/
-[package-reference]: https://docs.kurtosis.com/concepts-reference/packages
+[enclave]: https://docs.kurtosis.com/advanced-concepts/enclaves/
+[package-reference]: https://docs.kurtosis.com/advanced-concepts/packages
