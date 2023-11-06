@@ -169,18 +169,18 @@ participants:
   # CPU is milicores
   # RAM is in MB
   # Defaults are set per client
-  el_min_cpu: ''
-  el_max_cpu: ''
-  el_min_mem: ''
-  el_max_mem: ''
-  bn_min_cpu: ''
-  bn_max_cpu: ''
-  bn_min_mem: ''
-  bn_max_mem: ''
-  v_min_cpu: ''
-  v_max_cpu: ''
-  v_min_mem: ''
-  v_max_mem: ''
+  el_min_cpu: 0
+  el_max_cpu: 0
+  el_min_mem: 0
+  el_max_mem: 0
+  bn_min_cpu: 0
+  bn_max_cpu: 0
+  bn_min_mem: 0
+  bn_max_mem: 0
+  v_min_cpu: 0
+  v_max_cpu: 0
+  v_min_mem: 0
+  v_max_mem: 0
 
   # Snooper can be enabled with the `snooper_enabled` flag per client or globally
   # Defaults to false
@@ -367,7 +367,7 @@ global_client_log_level: info
 
 <details>
     <summary>A 3-node Ethereum network with "mock" MEV mode.</summary>
-    Useful for testing mev-boost and the client implimentations without adding the complexity of the relay. This can be enabled by a single config command and would deploy the [mock-builder](https://github.com/marioevz/mock-builder), instead of the relay infrastructure.
+    Useful for testing mev-boost and the client implementations without adding the complexity of the relay. This can be enabled by a single config command and would deploy the [mock-builder](https://github.com/marioevz/mock-builder), instead of the relay infrastructure.
 
 ```yaml
 participants:
@@ -560,5 +560,5 @@ When you're happy with your changes:
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [kurtosis-repo]: https://github.com/kurtosis-tech/kurtosis
-[enclave]: https://docs.kurtosis.com/concepts-reference/enclaves/
-[package-reference]: https://docs.kurtosis.com/concepts-reference/packages
+[enclave]: https://docs.kurtosis.com/advanced-concepts/enclaves/
+[package-reference]: https://docs.kurtosis.com/advanced-concepts/packages

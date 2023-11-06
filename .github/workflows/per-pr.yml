@@ -32,6 +32,7 @@ jobs:
             "./.github/tests/mev.yaml",
             "./.github/tests/mev-mock.yaml",
             "./.github/tests/mix-with-tools.yaml",
+            "./network_params.yaml"
           ]
     runs-on: ubuntu-latest
     steps:

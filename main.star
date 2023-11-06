@@ -257,7 +257,7 @@ def run(plan, args={}):
                 all_el_client_contexts[0],
                 tx_spammer_params,
             )
-            plan.print("Succesfully launched transaction spammer")
+            plan.print("Successfully launched transaction spammer")
         elif additional_service == "blob_spammer":
             plan.print("Launching Blob spammer")
             blob_spammer.launch_blob_spammer(
@@ -269,7 +269,7 @@ def run(plan, args={}):
                 network_params.seconds_per_slot,
                 network_params.genesis_delay,
             )
-            plan.print("Succesfully launched blob spammer")
+            plan.print("Successfully launched blob spammer")
         elif additional_service == "goomy_blob":
             plan.print("Launching Goomy the blob spammer")
             goomy_blob_params = args_with_right_defaults.goomy_blob_params
@@ -281,7 +281,7 @@ def run(plan, args={}):
                 network_params.seconds_per_slot,
                 goomy_blob_params,
             )
-            plan.print("Succesfully launched goomy the blob spammer")
+            plan.print("Successfully launched goomy the blob spammer")
         # We need a way to do time.sleep
         # TODO add code that waits for CL genesis
         elif additional_service == "el_forkmon":
@@ -292,7 +292,7 @@ def run(plan, args={}):
             el_forkmon.launch_el_forkmon(
                 plan, el_forkmon_config_template, all_el_client_contexts
             )
-            plan.print("Succesfully launched execution layer forkmon")
+            plan.print("Successfully launched execution layer forkmon")
         elif additional_service == "beacon_metrics_gazer":
             plan.print("Launching beacon metrics gazer")
             beacon_metrics_gazer_prometheus_metrics_job = (
@@ -306,7 +306,7 @@ def run(plan, args={}):
             prometheus_additional_metrics_jobs.append(
                 beacon_metrics_gazer_prometheus_metrics_job
             )
-            plan.print("Succesfully launched beacon metrics gazer")
+            plan.print("Successfully launched beacon metrics gazer")
         elif additional_service == "dora":
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
@@ -317,7 +317,7 @@ def run(plan, args={}):
                 el_cl_data_files_artifact_uuid,
                 network_params.electra_fork_epoch,
             )
-            plan.print("Succesfully launched dora")
+            plan.print("Successfully launched dora")
         elif additional_service == "full_beaconchain_explorer":
             plan.print("Launching full-beaconchain-explorer")
             full_beaconchain_explorer_config_template = read_file(
@@ -329,7 +329,7 @@ def run(plan, args={}):
                 all_cl_client_contexts,
                 all_el_client_contexts,
             )
-            plan.print("Succesfully launched full-beaconchain-explorer")
+            plan.print("Successfully launched full-beaconchain-explorer")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
@@ -362,7 +362,7 @@ def run(plan, args={}):
             prometheus_private_url,
             additional_dashboards=args_with_right_defaults.grafana_additional_dashboards,
         )
-        plan.print("Succesfully launched grafana")
+        plan.print("Successfully launched grafana")
 
     if args_with_right_defaults.wait_for_finalization:
         plan.print("Waiting for the first finalized epoch")
