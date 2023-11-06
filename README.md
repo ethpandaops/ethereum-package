@@ -169,18 +169,18 @@ participants:
   # CPU is milicores
   # RAM is in MB
   # Defaults are set per client
-  el_min_cpu: ''
-  el_max_cpu: ''
-  el_min_mem: ''
-  el_max_mem: ''
-  bn_min_cpu: ''
-  bn_max_cpu: ''
-  bn_min_mem: ''
-  bn_max_mem: ''
-  v_min_cpu: ''
-  v_max_cpu: ''
-  v_min_mem: ''
-  v_max_mem: ''
+  el_min_cpu: 0
+  el_max_cpu: 0
+  el_min_mem: 0
+  el_max_mem: 0
+  bn_min_cpu: 0
+  bn_max_cpu: 0
+  bn_min_mem: 0
+  bn_max_mem: 0
+  v_min_cpu: 0
+  v_max_cpu: 0
+  v_min_mem: 0
+  v_max_mem: 0
 
   # Snooper can be enabled with the `snooper_enabled` flag per client or globally
   # Defaults to false
