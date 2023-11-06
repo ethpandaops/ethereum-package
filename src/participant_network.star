@@ -209,7 +209,7 @@ def launch_participant_network(
 
         all_el_client_contexts.append(el_client_context)
 
-    plan.print("Succesfully added {0} EL participants".format(num_participants))
+    plan.print("Successfully added {0} EL participants".format(num_participants))
 
     plan.print("Launching CL network")
 
@@ -286,7 +286,7 @@ def launch_participant_network(
                 el_client_context,
             )
             plan.print(
-                "Succesfully added {0} snooper participants".format(
+                "Successfully added {0} snooper participants".format(
                     snooper_engine_context
                 )
             )
@@ -362,14 +362,14 @@ def launch_participant_network(
                 cl_client_context,
             )
             plan.print(
-                "Succesfully added {0} ethereum metrics exporter participants".format(
+                "Successfully added {0} ethereum metrics exporter participants".format(
                     ethereum_metrics_exporter_context
                 )
             )
 
         all_ethereum_metrics_exporter_contexts.append(ethereum_metrics_exporter_context)
 
-    plan.print("Succesfully added {0} CL participants".format(num_participants))
+    plan.print("Successfully added {0} CL participants".format(num_participants))
 
     all_participants = []
 
