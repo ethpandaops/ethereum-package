@@ -138,9 +138,7 @@ def new_config_template_data(
                 "client_type": BEACON_CLIENT_TYPE,
                 "client_name": context.client_name,
             }
-            additional_config = execution_metrics_info[
-                METRICS_INFO_ADDITIONAL_CONFIG_KEY
-            ]
+            additional_config = beacon_metrics_info[METRICS_INFO_ADDITIONAL_CONFIG_KEY]
             if additional_config != None:
                 if additional_config.labels != None:
                     labels.update(additional_config.labels)
@@ -170,7 +168,7 @@ def new_config_template_data(
                 "client_type": VALIDATOR_CLIENT_TYPE,
                 "client_name": context.client_name,
             }
-            additional_config = execution_metrics_info[
+            additional_config = validator_metrics_info[
                 METRICS_INFO_ADDITIONAL_CONFIG_KEY
             ]
             if additional_config != None:
