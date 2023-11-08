@@ -36,6 +36,8 @@ mev_custom_flood = import_module(
 eip4788_deployment = import_module(
     "./src/eip4788_deployment/eip4788_deployment_launcher.star"
 )
+broadcaster = import_module("./src/broadcaster/broadcaster.star")
+
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
@@ -127,6 +129,22 @@ def run(plan, args={}):
             el_uri,
         )
 
+    fuzz_target = "http://{0}:{1}".format(
+        all_el_client_contexts[0].ip_addr,
+        all_el_client_contexts[0].rpc_port_num,
+    )
+
+    # Broadcaster forwards requests, sent to it, to all nodes in parallel
+    if "broadcaster" in args_with_right_defaults.additional_services:
+        args_with_right_defaults.additional_services.remove("broadcaster")
+        broadcaster_service = broadcaster.launch_broadcaster(
+            plan, all_el_client_contexts
+        )
+        fuzz_target = "http://{0}:{1}".format(
+            broadcaster_service.ip_address,
+            broadcaster.PORT,
+        )
+
     mev_endpoints = []
     # passed external relays get priority
     # perhaps add mev_type External or remove this
@@ -165,9 +183,6 @@ def run(plan, args={}):
         args_with_right_defaults.mev_type
         and args_with_right_defaults.mev_type == FULL_MEV_TYPE
     ):
-        el_uri = "http://{0}:{1}".format(
-            all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
-        )
         builder_uri = "http://{0}:{1}".format(
             all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num
         )
@@ -183,7 +198,7 @@ def run(plan, args={}):
         mev_flood.launch_mev_flood(
             plan,
             mev_params.mev_flood_image,
-            el_uri,
+            fuzz_target,
             genesis_constants.PRE_FUNDED_ACCOUNTS,
         )
         epoch_recipe = GetHttpRequestRecipe(
@@ -210,7 +225,7 @@ def run(plan, args={}):
         )
         mev_flood.spam_in_background(
             plan,
-            el_uri,
+            fuzz_target,
             mev_params.mev_flood_extra_args,
             mev_params.mev_flood_seconds_per_bundle,
             genesis_constants.PRE_FUNDED_ACCOUNTS,
@@ -254,7 +269,7 @@ def run(plan, args={}):
             transaction_spammer.launch_transaction_spammer(
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
-                all_el_client_contexts[0],
+                fuzz_target,
                 tx_spammer_params,
             )
             plan.print("Successfully launched transaction spammer")
@@ -263,7 +278,7 @@ def run(plan, args={}):
             blob_spammer.launch_blob_spammer(
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
-                all_el_client_contexts[0],
+                fuzz_target,
                 all_cl_client_contexts[0],
                 network_params.deneb_fork_epoch,
                 network_params.seconds_per_slot,
@@ -338,7 +353,7 @@ def run(plan, args={}):
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
                 genesis_constants.PRE_FUNDED_ACCOUNTS[0].address,
-                el_uri,
+                fuzz_target,
                 args_with_right_defaults.custom_flood_params,
             )
         else:
