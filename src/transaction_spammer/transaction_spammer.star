@@ -2,9 +2,7 @@ IMAGE_NAME = "ethpandaops/tx-fuzz:master"
 SERVICE_NAME = "transaction-spammer"
 
 
-def launch_transaction_spammer(
-    plan, prefunded_addresses, el_uri, tx_spammer_params
-):
+def launch_transaction_spammer(plan, prefunded_addresses, el_uri, tx_spammer_params):
     config = get_config(
         prefunded_addresses, el_uri, tx_spammer_params.tx_spammer_extra_args
     )
