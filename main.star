@@ -129,7 +129,10 @@ def run(plan, args={}):
             el_uri,
         )
 
-    fuzz_target = all_el_client_contexts[0]
+    fuzz_target = "http://{0}:{1}".format(
+            all_el_client_contexts[0].ip_addr,
+            all_el_client_contexts[0].rpc_port_num,
+        )
 
     if "broadcaster" in args_with_right_defaults.additional_services:
         args_with_right_defaults.additional_services.remove("broadcaster")
