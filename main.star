@@ -132,9 +132,11 @@ def run(plan, args={}):
 
     fuzz_target = all_el_client_contexts[0]
 
-    if "broadcaster" in args_with_right_defaults.additional_services: 
+    if "broadcaster" in args_with_right_defaults.additional_services:
         args_with_right_defaults.additional_services.remove("broadcaster")
-        broadcaster_service = broadcaster.launch_broadcaster(plan, all_el_client_contexts)
+        broadcaster_service = broadcaster.launch_broadcaster(
+            plan, all_el_client_contexts
+        )
         fuzz_target = el_client_context.new_el_client_context(
             None,
             None,
@@ -186,9 +188,7 @@ def run(plan, args={}):
         args_with_right_defaults.mev_type
         and args_with_right_defaults.mev_type == FULL_MEV_TYPE
     ):
-        el_uri = "http://{0}:{1}".format(
-            fuzz_target.ip_addr, fuzz_target.rpc_port_num
-        )
+        el_uri = "http://{0}:{1}".format(fuzz_target.ip_addr, fuzz_target.rpc_port_num)
         builder_uri = "http://{0}:{1}".format(
             all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num
         )

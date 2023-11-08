@@ -10,9 +10,8 @@ def launch_broadcaster(plan, all_el_client_contexts):
 def get_config(all_el_client_contexts):
     return ServiceConfig(
         image=IMAGE_NAME,
-            cmd=[
-                "http://{0}:{1}".format(context.ip_addr, context.rpc_port_num)
-                for context in all_el_client_contexts
-            ],
-
+        cmd=[
+            "http://{0}:{1}".format(context.ip_addr, context.rpc_port_num)
+            for context in all_el_client_contexts
+        ],
     )
