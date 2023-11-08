@@ -252,6 +252,7 @@ goomy_blob_params:
 # - A light beacon chain explorer will be launched
 # - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
 additional_services:
+  - broadcaster
   - tx_spammer
   - blob_spammer
   - custom_flood

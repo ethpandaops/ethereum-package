@@ -134,6 +134,7 @@ def run(plan, args={}):
         all_el_client_contexts[0].rpc_port_num,
     )
 
+    # Broadcaster forwards requests, sent to it, to all nodes in parallel
     if "broadcaster" in args_with_right_defaults.additional_services:
         args_with_right_defaults.additional_services.remove("broadcaster")
         broadcaster_service = broadcaster.launch_broadcaster(
