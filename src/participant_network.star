@@ -207,6 +207,11 @@ def launch_participant_network(
             participant.el_extra_env_vars,
         )
 
+        # Add participant el additional prometheus metrics
+        for metrics_info in el_client_context.el_metrics_info:
+            if metrics_info != None:
+                metrics_info["config"] = participant.prometheus_config
+
         all_el_client_contexts.append(el_client_context)
 
     plan.print("Successfully added {0} EL participants".format(num_participants))
@@ -342,6 +347,11 @@ def launch_participant_network(
                 participant.beacon_extra_params,
                 participant.validator_extra_params,
             )
+
+        # Add participant cl additional prometheus labels
+        for metrics_info in cl_client_context.cl_nodes_metrics_info:
+            if metrics_info != None:
+                metrics_info["config"] = participant.prometheus_config
 
         all_cl_client_contexts.append(cl_client_context)
 

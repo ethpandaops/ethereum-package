@@ -199,6 +199,15 @@ participants:
   # network parameter num_validator_keys_per_node
   validator_count: null
 
+  # Prometheus additional configuration for a given participant prometheus target.
+  # Execution, beacon and validator client targets on prometheus will include this
+  # configuration.
+  prometheus_config:
+    # Scrape interval to be used. Default to 15 seconds
+    scrape_interval: 15s
+    # Additional labels to be added. Default to empty
+    labels: {}
+
 # Default configuration parameters for the Eth network
 network_params:
   # The network ID of the network.
@@ -315,6 +324,13 @@ mev_params:
   mev_relay_website_extra_args: []
   # Extra parameters to send to the builder
   mev_builder_extra_args: []
+  # Prometheus additional configuration for the mev builder participant.
+  # Execution, beacon and validator client targets on prometheus will include this configuration.
+  mev_builder_prometheus_config:
+    # Scrape interval to be used. Default to 15 seconds
+    scrape_interval: 15s
+    # Additional labels to be added. Default to empty
+    labels: {}
   # Image to use for mev-flood
   mev_flood_image: flashbots/mev-flood
   # Extra parameters to send to mev-flood
@@ -428,9 +444,11 @@ snooper_enabled: true
 </details>
 
 ## Custom labels for Docker and Kubernetes
+
 There are 4 custom labels that can be used to identify the nodes in the network. These labels are used to identify the nodes in the network and can be used to run chaos tests on specific nodes. An example for these labels are as follows:
 
 Execution Layer (EL) nodes:
+
 ```sh
   "com.kurtosistech.custom.ethereum-package-client": "geth",
   "com.kurtosistech.custom.ethereum-package-client-image": "ethereum-client-go-latest",
@@ -439,6 +457,7 @@ Execution Layer (EL) nodes:
 ```
 
 Consensus Layer (CL) nodes - Beacon:
+
 ```sh
   "com.kurtosistech.custom.ethereum-package-client": "lighthouse",
   "com.kurtosistech.custom.ethereum-package-client-image": "sigp-lighthouse-latest",
@@ -447,6 +466,7 @@ Consensus Layer (CL) nodes - Beacon:
 ```
 
 Consensus Layer (CL) nodes - Validator:
+
 ```sh
   "com.kurtosistech.custom.ethereum-package-client": "lighthouse",
   "com.kurtosistech.custom.ethereum-package-client-image": "sigp-lighthouse-latest",
@@ -520,7 +540,6 @@ Here's a table of where the keys are used
 | 4              | goomy_blob         | ✅                |                 | As the sender of blobs     |
 | 5             | eip4788_deployment  | ✅                |                 | As contract deployer       |
 | 6             | mev_custom_flood    | ✅                |                 | As the sender of balance   |
-
 
 ## Developing On This Package
 
