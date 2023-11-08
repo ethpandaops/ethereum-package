@@ -40,7 +40,6 @@ network_params:
   deneb_fork_epoch: 4
   electra_fork_epoch: null
 additional_services:
-  - broadcaster
   - tx_spammer
   - blob_spammer
   - el_forkmon
