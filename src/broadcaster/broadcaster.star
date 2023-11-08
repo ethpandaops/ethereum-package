@@ -1,5 +1,6 @@
 IMAGE_NAME = "nethermind/broadcaster:latest"
 SERVICE_NAME = "broadcaster"
+PORT = 8545
 
 
 def launch_broadcaster(plan, all_el_client_contexts):

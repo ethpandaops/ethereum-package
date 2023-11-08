@@ -36,7 +36,6 @@ mev_custom_flood = import_module(
 eip4788_deployment = import_module(
     "./src/eip4788_deployment/eip4788_deployment_launcher.star"
 )
-el_client_context = import_module("./src/el/el_client_context.star")
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
 
 GRAFANA_USER = "admin"
@@ -137,17 +136,9 @@ def run(plan, args={}):
         broadcaster_service = broadcaster.launch_broadcaster(
             plan, all_el_client_contexts
         )
-        fuzz_target = el_client_context.new_el_client_context(
-            None,
-            None,
-            None,
+        fuzz_target = "http://{0}:{1}".format(
             broadcaster_service.ip_address,
-            8545,
-            None,
-            None,
-            None,
-            None,
-            None,
+            broadcaster.PORT,
         )
 
     mev_endpoints = []
@@ -188,7 +179,6 @@ def run(plan, args={}):
         args_with_right_defaults.mev_type
         and args_with_right_defaults.mev_type == FULL_MEV_TYPE
     ):
-        el_uri = "http://{0}:{1}".format(fuzz_target.ip_addr, fuzz_target.rpc_port_num)
         builder_uri = "http://{0}:{1}".format(
             all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num
         )
@@ -204,7 +194,7 @@ def run(plan, args={}):
         mev_flood.launch_mev_flood(
             plan,
             mev_params.mev_flood_image,
-            el_uri,
+            fuzz_target,
             genesis_constants.PRE_FUNDED_ACCOUNTS,
         )
         epoch_recipe = GetHttpRequestRecipe(
@@ -231,7 +221,7 @@ def run(plan, args={}):
         )
         mev_flood.spam_in_background(
             plan,
-            el_uri,
+            fuzz_target,
             mev_params.mev_flood_extra_args,
             mev_params.mev_flood_seconds_per_bundle,
             genesis_constants.PRE_FUNDED_ACCOUNTS,
@@ -359,7 +349,7 @@ def run(plan, args={}):
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
                 genesis_constants.PRE_FUNDED_ACCOUNTS[0].address,
-                el_uri,
+                fuzz_target,
                 args_with_right_defaults.custom_flood_params,
             )
         else:
