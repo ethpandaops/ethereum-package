@@ -330,8 +330,8 @@ def parse_network_params(input_args):
         # if electra is defined, then deneb needs to be set very high
         result["network_params"]["deneb_fork_epoch"] = HIGH_DENEB_VALUE_FORK_VERKLE
         # TODO: remove once transition is complete
-        if result["network_params"]["electra_fork_epoch"] != 0:
-            fail("electra_fork_epoch can only be 0 or None")
+#        if result["network_params"]["electra_fork_epoch"] != 0:
+#            fail("electra_fork_epoch can only be 0 or None")
 
     if (
         result["network_params"]["capella_fork_epoch"] > 0
