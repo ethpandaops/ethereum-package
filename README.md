@@ -535,6 +535,7 @@ Here's a table of where the keys are used
 
 | Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                     |
 |---------------|---------------------|------------------|-----------------|-----------------------------|
+| 0             | Builder     | ✅                  |               | As coinbase |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
