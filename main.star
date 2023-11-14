@@ -195,11 +195,13 @@ def run(plan, args={}):
 
         first_cl_client = all_cl_client_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
+        contract_owner, normal_user = genesis_constants.PRE_FUNDED_ACCOUNTS[6:8]
         mev_flood.launch_mev_flood(
             plan,
             mev_params.mev_flood_image,
             fuzz_target,
-            genesis_constants.PRE_FUNDED_ACCOUNTS,
+            contract_owner.private_key,
+            normal_user.private_key,
         )
         epoch_recipe = GetHttpRequestRecipe(
             endpoint="/eth/v2/beacon/blocks/head",
@@ -228,7 +230,8 @@ def run(plan, args={}):
             fuzz_target,
             mev_params.mev_flood_extra_args,
             mev_params.mev_flood_seconds_per_bundle,
-            genesis_constants.PRE_FUNDED_ACCOUNTS,
+            contract_owner.private_key,
+            normal_user.private_key,
         )
         mev_endpoints.append(endpoint)
 
