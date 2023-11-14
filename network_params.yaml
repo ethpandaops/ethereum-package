@@ -1,38 +1,42 @@
 participants:
   - el_client_type: geth
     el_client_image: ethereum/client-go:latest
-    el_client_log_level: ''
+    el_client_log_level: ""
     el_extra_params: []
     cl_client_type: lighthouse
     cl_client_image: sigp/lighthouse:latest
-    cl_client_log_level: ''
+    cl_client_log_level: ""
     beacon_extra_params: []
     validator_extra_params: []
     builder_network_params: null
     validator_count: null
     snooper_enabled: false
     ethereum_metrics_exporter_enabled: false
-    el_min_cpu: ''
-    el_max_cpu: ''
-    el_min_mem: ''
-    el_max_mem: ''
-    bn_min_cpu: ''
-    bn_max_cpu: ''
-    bn_min_mem: ''
-    bn_max_mem: ''
-    v_min_cpu: ''
-    v_max_cpu: ''
-    v_min_mem: ''
-    v_max_mem: ''
+    el_min_cpu: 0
+    el_max_cpu: 0
+    el_min_mem: 0
+    el_max_mem: 0
+    bn_min_cpu: 0
+    bn_max_cpu: 0
+    bn_min_mem: 0
+    bn_max_mem: 0
+    v_min_cpu: 0
+    v_max_cpu: 0
+    v_min_mem: 0
+    v_max_mem: 0
     count: 2
+    prometheus_config:
+      scrape_interval: 15s
+      labels: {}
 network_params:
-  network_id: '3151908'
-  deposit_contract_address: '0x4242424242424242424242424242424242424242'
+  network_id: "3151908"
+  deposit_contract_address: "0x4242424242424242424242424242424242424242"
   seconds_per_slot: 12
   num_validator_keys_per_node: 64
-  preregistered_validator_keys_mnemonic: 'giant issue aisle success illegal bike spike
+  preregistered_validator_keys_mnemonic:
+    "giant issue aisle success illegal bike spike
     question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy
-    very lucky have athlete'
+    very lucky have athlete"
   genesis_delay: 120
   max_churn: 8
   ejection_balance: 16000000000
@@ -58,6 +62,9 @@ mev_params:
   mev_relay_housekeeper_extra_args: []
   mev_relay_website_extra_args: []
   mev_builder_extra_args: []
+  mev_builder_prometheus_config:
+    scrape_interval: 15s
+    labels: {}
   mev_flood_image: flashbots/mev-flood
   mev_flood_extra_args: []
   mev_flood_seconds_per_bundle: 15

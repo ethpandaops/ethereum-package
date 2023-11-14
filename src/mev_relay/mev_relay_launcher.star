@@ -19,6 +19,7 @@ NETWORK_ID_TO_NAME = {
 }
 
 DONT_PERSIST_TO_DISK = False
+LAUNCH_ADMINER = True
 
 
 def launch_mev_relay(
@@ -39,6 +40,7 @@ def launch_mev_relay(
         database="postgres",
         service_name="postgres",
         persistent=DONT_PERSIST_TO_DISK,
+        launch_adminer=LAUNCH_ADMINER,
     )
 
     network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)

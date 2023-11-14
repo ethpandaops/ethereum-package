@@ -36,6 +36,8 @@ mev_custom_flood = import_module(
 eip4788_deployment = import_module(
     "./src/eip4788_deployment/eip4788_deployment_launcher.star"
 )
+broadcaster = import_module("./src/broadcaster/broadcaster.star")
+
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
@@ -127,6 +129,22 @@ def run(plan, args={}):
             el_uri,
         )
 
+    fuzz_target = "http://{0}:{1}".format(
+        all_el_client_contexts[0].ip_addr,
+        all_el_client_contexts[0].rpc_port_num,
+    )
+
+    # Broadcaster forwards requests, sent to it, to all nodes in parallel
+    if "broadcaster" in args_with_right_defaults.additional_services:
+        args_with_right_defaults.additional_services.remove("broadcaster")
+        broadcaster_service = broadcaster.launch_broadcaster(
+            plan, all_el_client_contexts
+        )
+        fuzz_target = "http://{0}:{1}".format(
+            broadcaster_service.ip_address,
+            broadcaster.PORT,
+        )
+
     mev_endpoints = []
     # passed external relays get priority
     # perhaps add mev_type External or remove this
@@ -165,9 +183,6 @@ def run(plan, args={}):
         args_with_right_defaults.mev_type
         and args_with_right_defaults.mev_type == FULL_MEV_TYPE
     ):
-        el_uri = "http://{0}:{1}".format(
-            all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
-        )
         builder_uri = "http://{0}:{1}".format(
             all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num
         )
@@ -180,11 +195,13 @@ def run(plan, args={}):
 
         first_cl_client = all_cl_client_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
+        contract_owner, normal_user = genesis_constants.PRE_FUNDED_ACCOUNTS[6:8]
         mev_flood.launch_mev_flood(
             plan,
             mev_params.mev_flood_image,
-            el_uri,
-            genesis_constants.PRE_FUNDED_ACCOUNTS,
+            fuzz_target,
+            contract_owner.private_key,
+            normal_user.private_key,
         )
         epoch_recipe = GetHttpRequestRecipe(
             endpoint="/eth/v2/beacon/blocks/head",
@@ -210,10 +227,11 @@ def run(plan, args={}):
         )
         mev_flood.spam_in_background(
             plan,
-            el_uri,
+            fuzz_target,
             mev_params.mev_flood_extra_args,
             mev_params.mev_flood_seconds_per_bundle,
-            genesis_constants.PRE_FUNDED_ACCOUNTS,
+            contract_owner.private_key,
+            normal_user.private_key,
         )
         mev_endpoints.append(endpoint)
 
@@ -254,22 +272,22 @@ def run(plan, args={}):
             transaction_spammer.launch_transaction_spammer(
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
-                all_el_client_contexts[0],
+                fuzz_target,
                 tx_spammer_params,
             )
-            plan.print("Succesfully launched transaction spammer")
+            plan.print("Successfully launched transaction spammer")
         elif additional_service == "blob_spammer":
             plan.print("Launching Blob spammer")
             blob_spammer.launch_blob_spammer(
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
-                all_el_client_contexts[0],
+                fuzz_target,
                 all_cl_client_contexts[0],
                 network_params.deneb_fork_epoch,
                 network_params.seconds_per_slot,
                 network_params.genesis_delay,
             )
-            plan.print("Succesfully launched blob spammer")
+            plan.print("Successfully launched blob spammer")
         elif additional_service == "goomy_blob":
             plan.print("Launching Goomy the blob spammer")
             goomy_blob_params = args_with_right_defaults.goomy_blob_params
@@ -281,7 +299,7 @@ def run(plan, args={}):
                 network_params.seconds_per_slot,
                 goomy_blob_params,
             )
-            plan.print("Succesfully launched goomy the blob spammer")
+            plan.print("Successfully launched goomy the blob spammer")
         # We need a way to do time.sleep
         # TODO add code that waits for CL genesis
         elif additional_service == "el_forkmon":
@@ -292,7 +310,7 @@ def run(plan, args={}):
             el_forkmon.launch_el_forkmon(
                 plan, el_forkmon_config_template, all_el_client_contexts
             )
-            plan.print("Succesfully launched execution layer forkmon")
+            plan.print("Successfully launched execution layer forkmon")
         elif additional_service == "beacon_metrics_gazer":
             plan.print("Launching beacon metrics gazer")
             beacon_metrics_gazer_prometheus_metrics_job = (
@@ -306,7 +324,7 @@ def run(plan, args={}):
             prometheus_additional_metrics_jobs.append(
                 beacon_metrics_gazer_prometheus_metrics_job
             )
-            plan.print("Succesfully launched beacon metrics gazer")
+            plan.print("Successfully launched beacon metrics gazer")
         elif additional_service == "dora":
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
@@ -317,7 +335,7 @@ def run(plan, args={}):
                 el_cl_data_files_artifact_uuid,
                 network_params.electra_fork_epoch,
             )
-            plan.print("Succesfully launched dora")
+            plan.print("Successfully launched dora")
         elif additional_service == "full_beaconchain_explorer":
             plan.print("Launching full-beaconchain-explorer")
             full_beaconchain_explorer_config_template = read_file(
@@ -329,7 +347,7 @@ def run(plan, args={}):
                 all_cl_client_contexts,
                 all_el_client_contexts,
             )
-            plan.print("Succesfully launched full-beaconchain-explorer")
+            plan.print("Successfully launched full-beaconchain-explorer")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
@@ -338,7 +356,7 @@ def run(plan, args={}):
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
                 genesis_constants.PRE_FUNDED_ACCOUNTS[0].address,
-                el_uri,
+                fuzz_target,
                 args_with_right_defaults.custom_flood_params,
             )
         else:
@@ -362,7 +380,7 @@ def run(plan, args={}):
             prometheus_private_url,
             additional_dashboards=args_with_right_defaults.grafana_additional_dashboards,
         )
-        plan.print("Succesfully launched grafana")
+        plan.print("Successfully launched grafana")
 
     if args_with_right_defaults.wait_for_finalization:
         plan.print("Waiting for the first finalized epoch")

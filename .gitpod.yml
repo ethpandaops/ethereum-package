@@ -7,7 +7,7 @@ tasks:
       echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
       sudo apt update
       sudo apt install kurtosis-cli
-      kurtosis run github.com/fake-package/fake-package-purely-for-analytics || kurtosis clean -a
+      echo -ne '\n' | kurtosis run github.com/fake-package/fake-package-purely-for-analytics || kurtosis clean -a
       code README.md
       source <(kurtosis completion bash)
       echo "source <(kurtosis completion bash)" >> ~/.bashrc

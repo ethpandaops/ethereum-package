@@ -217,9 +217,14 @@ def launch_participant_network(
             participant.el_extra_env_vars,
         )
 
+        # Add participant el additional prometheus metrics
+        for metrics_info in el_client_context.el_metrics_info:
+            if metrics_info != None:
+                metrics_info["config"] = participant.prometheus_config
+
         all_el_client_contexts.append(el_client_context)
 
-    plan.print("Succesfully added {0} EL participants".format(num_participants))
+    plan.print("Successfully added {0} EL participants".format(num_participants))
 
     plan.print("Launching CL network")
 
@@ -296,7 +301,7 @@ def launch_participant_network(
                 el_client_context,
             )
             plan.print(
-                "Succesfully added {0} snooper participants".format(
+                "Successfully added {0} snooper participants".format(
                     snooper_engine_context
                 )
             )
@@ -353,6 +358,11 @@ def launch_participant_network(
                 participant.validator_extra_params,
             )
 
+        # Add participant cl additional prometheus labels
+        for metrics_info in cl_client_context.cl_nodes_metrics_info:
+            if metrics_info != None:
+                metrics_info["config"] = participant.prometheus_config
+
         all_cl_client_contexts.append(cl_client_context)
 
         ethereum_metrics_exporter_context = None
@@ -372,14 +382,14 @@ def launch_participant_network(
                 cl_client_context,
             )
             plan.print(
-                "Succesfully added {0} ethereum metrics exporter participants".format(
+                "Successfully added {0} ethereum metrics exporter participants".format(
                     ethereum_metrics_exporter_context
                 )
             )
 
         all_ethereum_metrics_exporter_contexts.append(ethereum_metrics_exporter_context)
 
-    plan.print("Succesfully added {0} CL participants".format(num_participants))
+    plan.print("Successfully added {0} CL participants".format(num_participants))
 
     all_participants = []
 

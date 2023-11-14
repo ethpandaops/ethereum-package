@@ -2,6 +2,8 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 
 SERVICE_NAME = "prometheus"
 
+PROMETHEUS_DEFAULT_SCRAPE_INTERVAL = "15s"
+
 EXECUTION_CLIENT_TYPE = "execution"
 BEACON_CLIENT_TYPE = "beacon"
 VALIDATOR_CLIENT_TYPE = "validator"
@@ -9,6 +11,7 @@ VALIDATOR_CLIENT_TYPE = "validator"
 METRICS_INFO_NAME_KEY = "name"
 METRICS_INFO_URL_KEY = "url"
 METRICS_INFO_PATH_KEY = "path"
+METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
 # TODO(old) I'm not sure if we should use latest version or ping an specific version instead
 IMAGE_NAME = "prom/prometheus:latest"
@@ -95,16 +98,30 @@ def new_config_template_data(
     for context in el_client_contexts:
         if len(context.el_metrics_info) >= 1 and context.el_metrics_info[0] != None:
             execution_metrics_info = context.el_metrics_info[0]
+            scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
+            labels = {
+                "service": context.service_name,
+                "client_type": EXECUTION_CLIENT_TYPE,
+                "client_name": context.client_name,
+            }
+            additional_config = execution_metrics_info[
+                METRICS_INFO_ADDITIONAL_CONFIG_KEY
+            ]
+            if additional_config != None:
+                if additional_config.labels != None:
+                    labels.update(additional_config.labels)
+                if (
+                    additional_config.scrape_interval != None
+                    and additional_config.scrape_interval != ""
+                ):
+                    scrape_interval = additional_config.scrape_interval
             metrics_jobs.append(
                 new_metrics_job(
                     job_name=execution_metrics_info[METRICS_INFO_NAME_KEY],
                     endpoint=execution_metrics_info[METRICS_INFO_URL_KEY],
                     metrics_path=execution_metrics_info[METRICS_INFO_PATH_KEY],
-                    labels={
-                        "service": context.service_name,
-                        "client_type": EXECUTION_CLIENT_TYPE,
-                        "client_name": context.client_name,
-                    },
+                    labels=labels,
+                    scrape_interval=scrape_interval,
                 )
             )
     # Adding consensus clients metrics jobs
@@ -115,16 +132,28 @@ def new_config_template_data(
         ):
             # Adding beacon node metrics
             beacon_metrics_info = context.cl_nodes_metrics_info[0]
+            scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
+            labels = {
+                "service": context.beacon_service_name,
+                "client_type": BEACON_CLIENT_TYPE,
+                "client_name": context.client_name,
+            }
+            additional_config = beacon_metrics_info[METRICS_INFO_ADDITIONAL_CONFIG_KEY]
+            if additional_config != None:
+                if additional_config.labels != None:
+                    labels.update(additional_config.labels)
+                if (
+                    additional_config.scrape_interval != None
+                    and additional_config.scrape_interval != ""
+                ):
+                    scrape_interval = additional_config.scrape_interval
             metrics_jobs.append(
                 new_metrics_job(
                     job_name=beacon_metrics_info[METRICS_INFO_NAME_KEY],
                     endpoint=beacon_metrics_info[METRICS_INFO_URL_KEY],
                     metrics_path=beacon_metrics_info[METRICS_INFO_PATH_KEY],
-                    labels={
-                        "service": context.beacon_service_name,
-                        "client_type": BEACON_CLIENT_TYPE,
-                        "client_name": context.client_name,
-                    },
+                    labels=labels,
+                    scrape_interval=scrape_interval,
                 )
             )
         if (
@@ -133,16 +162,30 @@ def new_config_template_data(
         ):
             # Adding validator node metrics
             validator_metrics_info = context.cl_nodes_metrics_info[1]
+            scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
+            labels = {
+                "service": context.validator_service_name,
+                "client_type": VALIDATOR_CLIENT_TYPE,
+                "client_name": context.client_name,
+            }
+            additional_config = validator_metrics_info[
+                METRICS_INFO_ADDITIONAL_CONFIG_KEY
+            ]
+            if additional_config != None:
+                if additional_config.labels != None:
+                    labels.update(additional_config.labels)
+                if (
+                    additional_config.scrape_interval != None
+                    and additional_config.scrape_interval != ""
+                ):
+                    scrape_interval = additional_config.scrape_interval
             metrics_jobs.append(
                 new_metrics_job(
                     job_name=validator_metrics_info[METRICS_INFO_NAME_KEY],
                     endpoint=validator_metrics_info[METRICS_INFO_URL_KEY],
                     metrics_path=validator_metrics_info[METRICS_INFO_PATH_KEY],
-                    labels={
-                        "service": context.validator_service_name,
-                        "client_type": VALIDATOR_CLIENT_TYPE,
-                        "client_name": context.client_name,
-                    },
+                    labels=labels,
+                    scrape_interval=scrape_interval,
                 )
             )
 
@@ -179,7 +222,7 @@ def new_metrics_job(
     endpoint,
     metrics_path,
     labels,
-    scrape_interval="15s",
+    scrape_interval=PROMETHEUS_DEFAULT_SCRAPE_INTERVAL,
 ):
     return {
         "Name": job_name,

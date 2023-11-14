@@ -6,7 +6,7 @@ def prefixed_address(address):
     return "0x" + address
 
 
-def launch_mev_flood(plan, image, el_uri, genesis_accounts):
+def launch_mev_flood(plan, image, el_uri, contract_owner, normal_user):
     plan.add_service(
         name="mev-flood",
         config=ServiceConfig(
@@ -23,8 +23,8 @@ def launch_mev_flood(plan, image, el_uri, genesis_accounts):
                 "-c",
                 "./run init -r {0} -k {1} -u {2} -s deployment.json".format(
                     el_uri,
-                    prefixed_address(genesis_accounts[0].private_key),
-                    prefixed_address(genesis_accounts[2].private_key),
+                    prefixed_address(contract_owner),
+                    prefixed_address(normal_user),
                 ),
             ]
         ),
@@ -32,16 +32,14 @@ def launch_mev_flood(plan, image, el_uri, genesis_accounts):
 
 
 def spam_in_background(
-    plan, el_uri, mev_flood_extra_args, seconds_per_bundle, genesis_accounts
+    plan, el_uri, mev_flood_extra_args, seconds_per_bundle, contract_owner, normal_user
 ):
-    admin_key, user_key = prefixed_address(
-        genesis_accounts[0].private_key
-    ), prefixed_address(genesis_accounts[2].private_key)
+    owner, user = prefixed_address(contract_owner), prefixed_address(normal_user)
     command = [
         "/bin/sh",
         "-c",
         "nohup ./run spam -r {0} -k {1} -u {2} -l deployment.json  --secondsPerBundle {3} >main.log 2>&1 &".format(
-            el_uri, admin_key, user_key, seconds_per_bundle
+            el_uri, owner, user, seconds_per_bundle
         ),
     ]
     if mev_flood_extra_args:
@@ -50,7 +48,7 @@ def spam_in_background(
             "/bin/sh",
             "-c",
             "nohup ./run spam -r {0} -k {1} -u {2} -l deployment.json  --secondsPerBundle {3} {4} >main.log 2>&1 &".format(
-                el_uri, admin_key, user_key, seconds_per_bundle, joined_extra_args
+                el_uri, owner, user, seconds_per_bundle, joined_extra_args
             ),
         ]
     plan.exec(service_name="mev-flood", recipe=ExecRecipe(command=command))

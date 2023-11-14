@@ -24,6 +24,8 @@ Optional features (enabled via flags or parameter files at runtime):
 
 ## Quickstart
 
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/new/?editor=code#https://github.com/kurtosis-tech/ethereum-package)
+
 1. [Install Docker & start the Docker Daemon if you haven't done so already][docker-installation]
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
@@ -169,18 +171,18 @@ participants:
   # CPU is milicores
   # RAM is in MB
   # Defaults are set per client
-  el_min_cpu: ''
-  el_max_cpu: ''
-  el_min_mem: ''
-  el_max_mem: ''
-  bn_min_cpu: ''
-  bn_max_cpu: ''
-  bn_min_mem: ''
-  bn_max_mem: ''
-  v_min_cpu: ''
-  v_max_cpu: ''
-  v_min_mem: ''
-  v_max_mem: ''
+  el_min_cpu: 0
+  el_max_cpu: 0
+  el_min_mem: 0
+  el_max_mem: 0
+  bn_min_cpu: 0
+  bn_max_cpu: 0
+  bn_min_mem: 0
+  bn_max_mem: 0
+  v_min_cpu: 0
+  v_max_cpu: 0
+  v_min_mem: 0
+  v_max_mem: 0
 
   # Snooper can be enabled with the `snooper_enabled` flag per client or globally
   # Defaults to false
@@ -198,6 +200,15 @@ participants:
   # Default to null, which means that the number of validators will be using the
   # network parameter num_validator_keys_per_node
   validator_count: null
+
+  # Prometheus additional configuration for a given participant prometheus target.
+  # Execution, beacon and validator client targets on prometheus will include this
+  # configuration.
+  prometheus_config:
+    # Scrape interval to be used. Default to 15 seconds
+    scrape_interval: 15s
+    # Additional labels to be added. Default to empty
+    labels: {}
 
 # Default configuration parameters for the Eth network
 network_params:
@@ -252,6 +263,7 @@ goomy_blob_params:
 # - A light beacon chain explorer will be launched
 # - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
 additional_services:
+  - broadcaster
   - tx_spammer
   - blob_spammer
   - custom_flood
@@ -315,6 +327,13 @@ mev_params:
   mev_relay_website_extra_args: []
   # Extra parameters to send to the builder
   mev_builder_extra_args: []
+  # Prometheus additional configuration for the mev builder participant.
+  # Execution, beacon and validator client targets on prometheus will include this configuration.
+  mev_builder_prometheus_config:
+    # Scrape interval to be used. Default to 15 seconds
+    scrape_interval: 15s
+    # Additional labels to be added. Default to empty
+    labels: {}
   # Image to use for mev-flood
   mev_flood_image: flashbots/mev-flood
   # Extra parameters to send to mev-flood
@@ -367,7 +386,7 @@ global_client_log_level: info
 
 <details>
     <summary>A 3-node Ethereum network with "mock" MEV mode.</summary>
-    Useful for testing mev-boost and the client implimentations without adding the complexity of the relay. This can be enabled by a single config command and would deploy the [mock-builder](https://github.com/marioevz/mock-builder), instead of the relay infrastructure.
+    Useful for testing mev-boost and the client implementations without adding the complexity of the relay. This can be enabled by a single config command and would deploy the [mock-builder](https://github.com/marioevz/mock-builder), instead of the relay infrastructure.
 
 ```yaml
 participants:
@@ -428,9 +447,11 @@ snooper_enabled: true
 </details>
 
 ## Custom labels for Docker and Kubernetes
+
 There are 4 custom labels that can be used to identify the nodes in the network. These labels are used to identify the nodes in the network and can be used to run chaos tests on specific nodes. An example for these labels are as follows:
 
 Execution Layer (EL) nodes:
+
 ```sh
   "com.kurtosistech.custom.ethereum-package-client": "geth",
   "com.kurtosistech.custom.ethereum-package-client-image": "ethereum-client-go-latest",
@@ -439,6 +460,7 @@ Execution Layer (EL) nodes:
 ```
 
 Consensus Layer (CL) nodes - Beacon:
+
 ```sh
   "com.kurtosistech.custom.ethereum-package-client": "lighthouse",
   "com.kurtosistech.custom.ethereum-package-client-image": "sigp-lighthouse-latest",
@@ -447,6 +469,7 @@ Consensus Layer (CL) nodes - Beacon:
 ```
 
 Consensus Layer (CL) nodes - Validator:
+
 ```sh
   "com.kurtosistech.custom.ethereum-package-client": "lighthouse",
   "com.kurtosistech.custom.ethereum-package-client-image": "sigp-lighthouse-latest",
@@ -512,15 +535,15 @@ Here's a table of where the keys are used
 
 | Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                     |
 |---------------|---------------------|------------------|-----------------|-----------------------------|
-| 0             | mev_flood           | ✅                |                 | As the admin_key           |
-| 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
+| 0             | Builder             | ✅                |                 | As coinbase                |
+| 0             | mev_custom_flood    |                  | ✅              | As the receiver of balance |
 | 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
-| 2             | mev_flood           | ✅                |                 | As the user_key            |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
 | 4              | goomy_blob         | ✅                |                 | As the sender of blobs     |
 | 5             | eip4788_deployment  | ✅                |                 | As contract deployer       |
-| 6             | mev_custom_flood    | ✅                |                 | As the sender of balance   |
-
+| 6             | mev_flood           | ✅                |                 | As the contract owner      |
+| 7             | mev_flood           | ✅                |                 | As the user_key            |
+| 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 
 ## Developing On This Package
 
@@ -560,5 +583,5 @@ When you're happy with your changes:
 [docker-installation]: https://docs.docker.com/get-docker/
 [kurtosis-cli-installation]: https://docs.kurtosis.com/install
 [kurtosis-repo]: https://github.com/kurtosis-tech/kurtosis
-[enclave]: https://docs.kurtosis.com/concepts-reference/enclaves/
-[package-reference]: https://docs.kurtosis.com/concepts-reference/packages
+[enclave]: https://docs.kurtosis.com/advanced-concepts/enclaves/
+[package-reference]: https://docs.kurtosis.com/advanced-concepts/packages

@@ -7,7 +7,7 @@ ENTRYPOINT_ARGS = ["/bin/sh", "-c"]
 def launch_blob_spammer(
     plan,
     prefunded_addresses,
-    el_client_context,
+    el_uri,
     cl_client_context,
     deneb_fork_epoch,
     seconds_per_slot,
@@ -15,7 +15,7 @@ def launch_blob_spammer(
 ):
     config = get_config(
         prefunded_addresses,
-        el_client_context,
+        el_uri,
         cl_client_context,
         deneb_fork_epoch,
         seconds_per_slot,
@@ -26,7 +26,7 @@ def launch_blob_spammer(
 
 def get_config(
     prefunded_addresses,
-    el_client_context,
+    el_uri,
     cl_client_context,
     deneb_fork_epoch,
     seconds_per_slot,
@@ -51,9 +51,8 @@ def get_config(
                         seconds_per_slot,
                     ),
                     'echo "sleep is over, starting to send blob transactions"',
-                    "/tx-fuzz.bin blobs --rpc=http://{0}:{1} --sk={2}".format(
-                        el_client_context.ip_addr,
-                        el_client_context.rpc_port_num,
+                    "/tx-fuzz.bin blobs --rpc={} --sk={}".format(
+                        el_uri,
                         prefunded_addresses[1].private_key,
                     ),
                 ]
