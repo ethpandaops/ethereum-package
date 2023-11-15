@@ -21,6 +21,7 @@ beacon_metrics_gazer = import_module(
     "./src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
 )
 dora = import_module("./src/dora/dora_launcher.star")
+blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
 )
@@ -49,6 +50,8 @@ MEV_BOOST_SHOULD_CHECK_RELAY = True
 MOCK_MEV_TYPE = "mock"
 FULL_MEV_TYPE = "full"
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
+
+DORA_BASE_URL = ""
 
 
 def run(plan, args={}):
@@ -328,7 +331,7 @@ def run(plan, args={}):
         elif additional_service == "dora":
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
-            dora.launch_dora(
+            dora_config = dora.launch_dora(
                 plan,
                 dora_config_template,
                 all_cl_client_contexts,
@@ -336,6 +339,19 @@ def run(plan, args={}):
                 network_params.electra_fork_epoch,
             )
             plan.print("Successfully launched dora")
+            DORA_BASE_URL = "http://{0}:{1}".format(
+                dora_config.ip_address, dora_config.ports["http"].number
+            )
+        elif additional_service == "blobscan":
+            plan.print("Launching blobscan")
+            blobscan.launch_blobscan(
+                plan,
+                all_cl_client_contexts,
+                all_el_client_contexts,
+                network_params.network_id,
+                DORA_BASE_URL,
+            )
+            plan.print("Successfully launched blobscan")
         elif additional_service == "full_beaconchain_explorer":
             plan.print("Launching full-beaconchain-explorer")
             full_beaconchain_explorer_config_template = read_file(
