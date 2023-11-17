@@ -1,0 +1,22 @@
+{
+	"participants": [
+		{
+			"el_client_type": "geth",
+			"el_client_image": "ethpandaops/geth:transition-post-genesis-21cebf0",
+			"cl_client_type": "lighthouse",
+			"cl_client_image": "ethpandaops/lighthouse:verkle-trees-capella-2ffb8a9",
+			"count": 3
+		}
+	],
+	"network_params": {
+		"deneb_fork_epoch": 500,
+		"electra_fork_epoch": 1,
+    "genesis_delay": 200
+  },
+	"launch_additional_services": true,
+	"additional_services": [
+		"el_forkmon", "tx_spammer", "dora"
+	],
+	"global_client_log_level": "info",
+	"snooper_enabled": true
+}
