@@ -1,0 +1,14 @@
+mev_type: full
+participants:
+- el_client_type: geth
+  el_client_image: ethpandaops/geth:transition-post-genesis-21cebf0
+  cl_client_type: lighthouse
+  cl_client_image: ethpandaops/lighthouse:verkle-trees-capella-2ffb8a9
+network_params:
+  deneb_fork_epoch: 500
+  electra_fork_epoch: 1
+  genesis_delay: 100
+launch_additional_services: true
+additional_services: ["el_forkmon", "tx_spammer", "dora"]
+snooper_enabled: true
+
