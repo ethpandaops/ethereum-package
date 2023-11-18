@@ -131,6 +131,7 @@ def get_config(
             "GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
             "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
             "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
+            "GF_SECURITY_ALLOW_EMBEDDING": "true"
         },
         files={
             GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
