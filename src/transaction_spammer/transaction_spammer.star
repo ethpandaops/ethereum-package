@@ -1,11 +1,18 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 SERVICE_NAME = "transaction-spammer"
 
-def launch_transaction_spammer(plan, prefunded_addresses, el_uri, tx_spammer_params, electra_fork_epoch):
+
+def launch_transaction_spammer(
+    plan, prefunded_addresses, el_uri, tx_spammer_params, electra_fork_epoch
+):
     config = get_config(
-        prefunded_addresses, el_uri, tx_spammer_params.tx_spammer_extra_args, electra_fork_epoch
+        prefunded_addresses,
+        el_uri,
+        tx_spammer_params.tx_spammer_extra_args,
+        electra_fork_epoch,
     )
     plan.add_service(SERVICE_NAME, config)
+
 
 def get_config(prefunded_addresses, el_uri, tx_spammer_extra_args, electra_fork_epoch):
     # Temp hack to use the old tx-fuzz image until we can get the new one working
