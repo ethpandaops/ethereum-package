@@ -55,7 +55,7 @@ def launch_dora(
         electra_fork_epoch,
     )
 
-    plan.add_service(SERVICE_NAME, config)
+    return plan.add_service(SERVICE_NAME, config)
 
 
 def get_config(
