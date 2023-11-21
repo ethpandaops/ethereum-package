@@ -262,7 +262,7 @@ goomy_blob_params:
 # - A prometheus will be started, coupled with grafana
 # - A beacon metrics gazer will be launched
 # - A light beacon chain explorer will be launched
-# - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana", "blobscan"]
+# - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
 additional_services:
   - broadcaster
   - tx_spammer
@@ -274,6 +274,7 @@ additional_services:
   - dora
   - full_beaconchain_explorer
   - prometheus_grafana
+  - blobscan
 
 # If set, the package will block until a finalized epoch has occurred.
 wait_for_finalization: false
