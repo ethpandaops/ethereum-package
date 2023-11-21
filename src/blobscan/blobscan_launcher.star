@@ -34,7 +34,6 @@ def launch_blobscan(
     cl_client_contexts,
     el_client_contexts,
     chain_id,
-    beacon_explorer_url,
 ):
     beacon_node_rpc_uri = "http://{0}:{1}".format(
         cl_client_contexts[0].ip_addr, cl_client_contexts[0].http_port_num
@@ -51,9 +50,7 @@ def launch_blobscan(
         blobscan_config.ip_address, blobscan_config.ports[HTTP_PORT_ID].number
     )
 
-    web_config = get_web_config(
-        postgres_output.url, beacon_node_rpc_uri, beacon_explorer_url, chain_id
-    )
+    web_config = get_web_config(postgres_output.url, beacon_node_rpc_uri, chain_id)
     plan.add_service(WEB_SERVICE_NAME, web_config)
 
     indexer_config = get_indexer_config(
@@ -89,7 +86,11 @@ def get_api_config(database_url, beacon_node_rpc, chain_id):
     )
 
 
-def get_web_config(database_url, beacon_node_rpc, beacon_explorer_url, chain_id):
+def get_web_config(database_url, beacon_node_rpc, chain_id):
+    """Note: in order for Blobscan to link to blocks and slots explorers (such as Dora), the following environment variables must be set:
+    - NEXT_PUBLIC_BEACON_BASE_URL
+    - NEXT_PUBLIC_EXPLORER_BASE_URL
+    """
     IMAGE_NAME = "blossomlabs/blobscan:stable"
 
     return ServiceConfig(
@@ -99,8 +100,8 @@ def get_web_config(database_url, beacon_node_rpc, beacon_explorer_url, chain_id)
             "DATABASE_URL": database_url,
             "SECRET_KEY": "supersecret",
             "NEXT_PUBLIC_NETWORK_NAME": "local-devnet",
-            "NEXT_PUBLIC_BEACON_BASE_URL": "http://fix-me.localhost",  # TODO: get url from beaconchain explorer
-            "NEXT_PUBLIC_EXPLORER_BASE_URL": beacon_explorer_url,
+            # "NEXT_PUBLIC_BEACON_BASE_URL": "http://my-beacon-explorer.localhost",
+            # "NEXT_PUBLIC_EXPLORER_BASE_URL": "http://my-block-explorer.localhost",
             "BEACON_NODE_ENDPOINT": beacon_node_rpc,
             "CHAIN_ID": chain_id,
         },
