@@ -50,7 +50,6 @@ additional_services:
   - beacon_metrics_gazer
   - dora
   - prometheus_grafana
-  - blobscan
 wait_for_finalization: false
 global_client_log_level: info
 snooper_enabled: false
