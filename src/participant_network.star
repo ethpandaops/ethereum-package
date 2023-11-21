@@ -142,6 +142,16 @@ def launch_participant_network(
             ),
             "launch_method": geth.launch,
         },
+        constants.EL_CLIENT_TYPE.gethbuilder: {
+            "launcher": geth.new_geth_launcher(
+                network_params.network_id,
+                el_cl_data,
+                final_genesis_timestamp,
+                network_params.capella_fork_epoch,
+                network_params.electra_fork_epoch,
+            ),
+            "launch_method": geth.launch,
+        },
         constants.EL_CLIENT_TYPE.besu: {
             "launcher": besu.new_besu_launcher(network_params.network_id, el_cl_data),
             "launch_method": besu.launch,
