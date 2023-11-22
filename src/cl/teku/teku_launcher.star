@@ -29,8 +29,8 @@ METRICS_PORT_NUM = 8008
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 50
 BEACON_MAX_CPU = 1000
-BEACON_MIN_MEMORY = 512
-BEACON_MAX_MEMORY = 1024
+BEACON_MIN_MEMORY = 1024
+BEACON_MAX_MEMORY = 2048
 
 # 1) The Teku container runs as the "teku" user
 # 2) Teku requires write access to the validator secrets directory, so it can write a lockfile into it as it uses the keys
