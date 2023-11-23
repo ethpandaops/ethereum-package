@@ -51,9 +51,6 @@ MOCK_MEV_TYPE = "mock"
 FULL_MEV_TYPE = "full"
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
-SERVICE_URLS = {}
-
-
 def run(plan, args={}):
     args_with_right_defaults = input_parser.input_parser(plan, args)
 
@@ -268,6 +265,7 @@ def run(plan, args={}):
         return output
 
     launch_prometheus_grafana = False
+    SERVICE_URLS = {}
     for additional_service in args_with_right_defaults.additional_services:
         if additional_service == "tx_spammer":
             plan.print("Launching transaction spammer")
@@ -339,9 +337,11 @@ def run(plan, args={}):
                 network_params.electra_fork_epoch,
             )
             plan.print("Successfully launched dora")
-            SERVICE_URLS["dora"] = "http://{0}:{1}".format(
-                dora_config.ip_address, dora_config.ports["http"].number
-            )
+            SERVICE_URLS = {
+                "dora": "http://{0}:{1}".format(
+                    dora_config.ip_address, dora_config.ports["http"].number
+                )
+            }
         elif additional_service == "blobscan":
             plan.print("Launching blobscan")
             blobscan.launch_blobscan(
@@ -349,7 +349,7 @@ def run(plan, args={}):
                 all_cl_client_contexts,
                 all_el_client_contexts,
                 network_params.network_id,
-                SERVICE_URLS.get("dora"),
+                SERVICE_URLS.get("dora", "https://beaconscan.com"),
             )
             plan.print("Successfully launched blobscan")
         elif additional_service == "full_beaconchain_explorer":
