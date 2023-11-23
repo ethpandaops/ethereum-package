@@ -51,6 +51,7 @@ MOCK_MEV_TYPE = "mock"
 FULL_MEV_TYPE = "full"
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
+
 def run(plan, args={}):
     args_with_right_defaults = input_parser.input_parser(plan, args)
 
@@ -337,11 +338,9 @@ def run(plan, args={}):
                 network_params.electra_fork_epoch,
             )
             plan.print("Successfully launched dora")
-            SERVICE_URLS = {
-                "dora": "http://{0}:{1}".format(
-                    dora_config.ip_address, dora_config.ports["http"].number
-                )
-            }
+            SERVICE_URLS["dora"] = "http://{0}:{1}".format(
+                dora_config.ip_address, dora_config.ports["http"].number
+            )
         elif additional_service == "blobscan":
             plan.print("Launching blobscan")
             blobscan.launch_blobscan(
