@@ -99,7 +99,7 @@ def get_web_config(database_url, beacon_explorer, beacon_node_rpc, chain_id):
             "DATABASE_URL": database_url,
             "SECRET_KEY": "supersecret",
             "NEXT_PUBLIC_NETWORK_NAME": "kurtosis-devnet",
-            # "NEXT_PUBLIC_BEACON_BASE_URL": "http://my-block-explorer.localhost",  # TODO
+            "NEXT_PUBLIC_BEACON_BASE_URL": beacon_explorer,
             "NEXT_PUBLIC_EXPLORER_BASE_URL": beacon_explorer,
             "BEACON_NODE_ENDPOINT": beacon_node_rpc,
             "CHAIN_ID": chain_id,
