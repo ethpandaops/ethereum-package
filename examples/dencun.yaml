@@ -17,8 +17,12 @@ participants:
     cl_client_image: ethpandaops/teku:master-992b224
   - el_client_type: reth
     el_client_image: ethpandaops/reth:main-c49cda6
-    cl_client_type: lighthouse
-    cl_client_image: ethpandaops/lighthouse:sidecar-inclusion-proof-c6be31c
+    cl_client_type: nimbus
+    cl_client_image: ethpandaops/nimbus:unstable-6dee4d5
+  - el_client_type: geth
+    el_client_image: ethpandaops/geth:master-5b57727
+    cl_client_type: nimbus
+    cl_client_image: ethpandaops/nimbus:unstable-6dee4d5
 network_params:
   deneb_fork_epoch: 1
 launch_additional_services: true
