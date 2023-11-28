@@ -93,11 +93,6 @@ kurtosis files download my-testnet el-genesis-data ~/Downloads
 
 To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
 
-<details>
-    <summary>Click to show all configuration options</summary>
-
-<!-- Yes, it's weird that none of this is indented but it's intentional - indenting anything inside this "details" expandable will cause it to render weird" -->
-
 ```yaml
 # Specification of the participants in the network
 participants:
@@ -346,8 +341,6 @@ mev_params:
   custom_flood_params:
     interval_between_transactions: 1
 ```
-
-</details>
 
 #### Example configurations
 
