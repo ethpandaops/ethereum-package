@@ -264,6 +264,8 @@ def launch_participant_network(
         cl_client_type = participant.cl_client_type
         el_client_type = participant.el_client_type
 
+        if participant.cl_disabled == True: continue
+
         if cl_client_type not in cl_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
@@ -398,8 +400,11 @@ def launch_participant_network(
         cl_client_type = participant.cl_client_type
 
         el_client_context = all_el_client_contexts[index]
-        cl_client_context = all_cl_client_contexts[index]
+        cl_client_context = None
+        if participant.cl_disabled == False:
+            cl_client_context = all_cl_client_contexts[index]
 
+        snooper_engine_context = None
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
 
@@ -417,6 +422,7 @@ def launch_participant_network(
             cl_client_context,
             snooper_engine_context,
             ethereum_metrics_exporter_context,
+            participant.cl_disabled,
         )
 
         all_participants.append(participant_entry)

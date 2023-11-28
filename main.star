@@ -102,7 +102,7 @@ def run(plan, args={}):
     all_ethereum_metrics_exporter_contexts = []
     for participant in all_participants:
         all_el_client_contexts.append(participant.el_client_context)
-        all_cl_client_contexts.append(participant.cl_client_context)
+        if participant.cl_disabled == False: all_cl_client_contexts.append(participant.cl_client_context)
         all_ethereum_metrics_exporter_contexts.append(
             participant.ethereum_metrics_exporter_context
         )
@@ -288,7 +288,7 @@ def run(plan, args={}):
                 network_params.genesis_delay,
             )
             plan.print("Successfully launched blob spammer")
-        elif additional_service == "goomy_blob":
+        elif additional_service == "goomy_blob" and args_with_right_defaults.cl_disabled == False:
             plan.print("Launching Goomy the blob spammer")
             goomy_blob_params = args_with_right_defaults.goomy_blob_params
             goomy_blob.launch_goomy_blob(
@@ -302,7 +302,7 @@ def run(plan, args={}):
             plan.print("Successfully launched goomy the blob spammer")
         # We need a way to do time.sleep
         # TODO add code that waits for CL genesis
-        elif additional_service == "el_forkmon":
+        elif additional_service == "el_forkmon" and args_with_right_defaults.cl_disabled == False:
             plan.print("Launching el forkmon")
             el_forkmon_config_template = read_file(
                 static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH
@@ -414,3 +414,4 @@ def run(plan, args={}):
     )
 
     return output
+    

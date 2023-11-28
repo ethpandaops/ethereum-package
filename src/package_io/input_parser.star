@@ -141,6 +141,7 @@ def input_parser(plan, input_args):
                 v_max_mem=participant["v_max_mem"],
                 validator_count=participant["validator_count"],
                 snooper_enabled=participant["snooper_enabled"],
+                cl_disabled=participant["cl_disabled"],
                 count=participant["count"],
                 ethereum_metrics_exporter_enabled=participant[
                     "ethereum_metrics_exporter_enabled"
@@ -206,6 +207,7 @@ def input_parser(plan, input_args):
         global_client_log_level=result["global_client_log_level"],
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
+        cl_disabled=result["cl_disabled"],
         ethereum_metrics_exporter_enabled=result["ethereum_metrics_exporter_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
         grafana_additional_dashboards=result["grafana_additional_dashboards"],
@@ -274,6 +276,12 @@ def parse_network_params(input_args):
             default_snooper_enabled = result["snooper_enabled"]
             if default_snooper_enabled:
                 participant["snooper_enabled"] = default_snooper_enabled
+
+        cl_disabled = participant["cl_disabled"]
+        if cl_disabled == False:
+            default_cl_disabled = result["cl_disabled"]
+            if default_cl_disabled:
+                participant["cl_disabled"] = default_cl_disabled
 
         ethereum_metrics_exporter_enabled = participant[
             "ethereum_metrics_exporter_enabled"
@@ -377,6 +385,7 @@ def default_input_args():
         "wait_for_finalization": False,
         "global_client_log_level": "info",
         "snooper_enabled": False,
+        "cl_disabled": False,
         "ethereum_metrics_exporter_enabled": False,
         "parallel_keystore_generation": False,
         "disable_peer_scoring": False,
@@ -427,6 +436,7 @@ def default_participant():
         "v_max_mem": 0,
         "validator_count": None,
         "snooper_enabled": False,
+        "cl_disabled": False,
         "ethereum_metrics_exporter_enabled": False,
         "count": 1,
         "prometheus_config": {
