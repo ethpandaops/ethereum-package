@@ -38,7 +38,7 @@ def launch_mev_relay(
         password="postgres",
         user="postgres",
         database="postgres",
-        service_name="postgres",
+        service_name="mev-relay-postgres",
         persistent=DONT_PERSIST_TO_DISK,
         launch_adminer=LAUNCH_ADMINER,
     )
