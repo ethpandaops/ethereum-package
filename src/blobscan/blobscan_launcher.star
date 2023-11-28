@@ -34,7 +34,6 @@ def launch_blobscan(
     cl_client_contexts,
     el_client_contexts,
     chain_id,
-    beacon_explorer,
 ):
     beacon_node_rpc_uri = "http://{0}:{1}".format(
         cl_client_contexts[0].ip_addr, cl_client_contexts[0].http_port_num
@@ -52,7 +51,7 @@ def launch_blobscan(
     )
 
     web_config = get_web_config(
-        postgres_output.url, beacon_explorer, beacon_node_rpc_uri, chain_id
+        postgres_output.url, beacon_node_rpc_uri, chain_id
     )
     plan.add_service(WEB_SERVICE_NAME, web_config)
 
@@ -89,7 +88,10 @@ def get_api_config(database_url, beacon_node_rpc, chain_id):
     )
 
 
-def get_web_config(database_url, beacon_explorer, beacon_node_rpc, chain_id):
+def get_web_config(database_url, beacon_node_rpc, chain_id):
+    # TODO: https://github.com/kurtosis-tech/kurtosis/issues/1861
+    # Configure NEXT_PUBLIC_BEACON_BASE_URL and NEXT_PUBLIC_EXPLORER_BASE env vars
+    # once retrieving external URLs from services are supported in Kurtosis.
     IMAGE_NAME = "blossomlabs/blobscan:stable"
 
     return ServiceConfig(
@@ -99,8 +101,6 @@ def get_web_config(database_url, beacon_explorer, beacon_node_rpc, chain_id):
             "DATABASE_URL": database_url,
             "SECRET_KEY": "supersecret",
             "NEXT_PUBLIC_NETWORK_NAME": "kurtosis-devnet",
-            "NEXT_PUBLIC_BEACON_BASE_URL": beacon_explorer,
-            "NEXT_PUBLIC_EXPLORER_BASE_URL": beacon_explorer,
             "BEACON_NODE_ENDPOINT": beacon_node_rpc,
             "CHAIN_ID": chain_id,
         },
