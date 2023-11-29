@@ -91,6 +91,8 @@ def launch(
     snooper_engine_context,
     extra_beacon_params,
     extra_validator_params,
+    extra_beacon_labels,
+    extra_validator_labels,
 ):
     beacon_node_service_name = "{0}".format(service_name)
     validator_node_service_name = "{0}-{1}".format(
@@ -119,6 +121,7 @@ def launch(
         snooper_enabled,
         snooper_engine_context,
         extra_beacon_params,
+        extra_beacon_labels,
     )
 
     beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
@@ -148,6 +151,7 @@ def launch(
             v_min_mem,
             v_max_mem,
             extra_validator_params,
+            extra_validator_labels,
         )
 
         plan.add_service(validator_node_service_name, validator_config)
@@ -208,6 +212,7 @@ def get_beacon_config(
     snooper_enabled,
     snooper_engine_context,
     extra_params,
+    extra_labels,
 ):
     el_client_rpc_url_str = "http://{0}:{1}".format(
         el_client_context.ip_addr,
@@ -292,6 +297,7 @@ def get_beacon_config(
             constants.CLIENT_TYPES.cl,
             image,
             el_client_context.client_name,
+            extra_labels,
         ),
     )
 
@@ -309,6 +315,7 @@ def get_validator_config(
     v_min_mem,
     v_max_mem,
     extra_params,
+    extra_labels,
 ):
     root_dirpath = shared_utils.path_join(
         CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_name
@@ -364,6 +371,7 @@ def get_validator_config(
             constants.CLIENT_TYPES.validator,
             image,
             el_client_context.client_name,
+            extra_labels,
         ),
     )
 

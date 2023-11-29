@@ -73,6 +73,7 @@ def launch(
     el_max_mem,
     extra_params,
     extra_env_vars,
+    extra_labels,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, NETHERMIND_LOG_LEVELS
@@ -97,6 +98,7 @@ def launch(
         el_max_mem,
         extra_params,
         extra_env_vars,
+        extra_labels,
     )
 
     service = plan.add_service(service_name, config)
@@ -134,6 +136,7 @@ def get_config(
     el_max_mem,
     extra_params,
     extra_env_vars,
+    extra_labels,
 ):
     cmd = [
         "--log=" + log_level,
@@ -193,6 +196,7 @@ def get_config(
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,
+            extra_labels,
         ),
     )
 

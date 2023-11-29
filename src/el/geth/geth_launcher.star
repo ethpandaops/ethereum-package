@@ -85,6 +85,7 @@ def launch(
     el_max_mem,
     extra_params,
     extra_env_vars,
+    extra_labels,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -109,6 +110,7 @@ def launch(
         el_max_mem,
         extra_params,
         extra_env_vars,
+        extra_labels,
         launcher.capella_fork_epoch,
         launcher.electra_fork_epoch,
         launcher.final_genesis_timestamp,
@@ -151,6 +153,7 @@ def get_config(
     el_max_mem,
     extra_params,
     extra_env_vars,
+    extra_labels,
     capella_fork_epoch,
     electra_fork_epoch,
     final_genesis_timestamp,
@@ -271,7 +274,8 @@ def get_config(
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,
-        ),
+            extra_labels,
+        )
     )
 
 

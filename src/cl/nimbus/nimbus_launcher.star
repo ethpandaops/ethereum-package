@@ -93,6 +93,8 @@ def launch(
     snooper_engine_context,
     extra_beacon_params,
     extra_validator_params,
+    extra_beacon_labels,
+    extra_validator_labels,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, NIMBUS_LOG_LEVELS
@@ -112,6 +114,8 @@ def launch(
     bn_max_cpu = int(v_max_cpu) if (int(v_max_cpu) > bn_max_cpu) else bn_max_cpu
     bn_min_mem = int(v_min_mem) if (int(v_min_mem) > bn_min_mem) else bn_min_mem
     bn_max_mem = int(v_max_mem) if (int(v_max_mem) > bn_max_mem) else bn_max_mem
+
+    extra_labels = extra_beacon_labels | extra_validator_labels
 
     config = get_config(
         launcher.el_cl_genesis_data,
@@ -181,6 +185,7 @@ def get_config(
     snooper_enabled,
     snooper_engine_context,
     extra_params,
+    extra_labels,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -320,6 +325,7 @@ def get_config(
             constants.CLIENT_TYPES.cl,
             image,
             el_client_context.client_name,
+            extra_labels,
         ),
     )
 
