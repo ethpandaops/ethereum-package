@@ -103,7 +103,8 @@ def run(plan, args={}):
     all_ethereum_metrics_exporter_contexts = []
     for participant in all_participants:
         all_el_client_contexts.append(participant.el_client_context)
-        if participant.cl_client_context: all_cl_client_contexts.append(participant.cl_client_context)
+        if participant.cl_client_context:
+            all_cl_client_contexts.append(participant.cl_client_context)
         all_ethereum_metrics_exporter_contexts.append(
             participant.ethereum_metrics_exporter_context
         )

@@ -264,7 +264,8 @@ def launch_participant_network(
         cl_client_type = participant.cl_client_type
         el_client_type = participant.el_client_type
 
-        if not participant.cl_client_image: continue
+        if not participant.cl_client_image:
+            continue
 
         if cl_client_type not in cl_launchers:
             fail(
