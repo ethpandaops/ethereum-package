@@ -327,7 +327,7 @@ def get_beacon_config(
             beacon_image,
             el_client_context.client_name,
             extra_labels,
-        )
+        ),
     )
 
 
@@ -403,7 +403,7 @@ def get_validator_config(
             validator_image,
             el_client_context.client_name,
             extra_labels,
-        )
+        ),
     )
 
 

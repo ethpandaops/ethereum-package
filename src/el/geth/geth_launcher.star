@@ -275,7 +275,7 @@ def get_config(
             image,
             cl_client_name,
             extra_labels,
-        )
+        ),
     )
 
 
