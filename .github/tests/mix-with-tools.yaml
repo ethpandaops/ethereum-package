@@ -21,3 +21,4 @@ additional_services:
   - goomy_blob
   - full_beaconchain_explorer
   - custom_flood
+  - blobscan
