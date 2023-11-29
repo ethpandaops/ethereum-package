@@ -11,6 +11,7 @@ Specifically, this [package][package-reference] will:
 3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
 4. Spin up and connect a [testnet verifier](https://github.com/ethereum/merge-testnet-verifier)
 5. Spin up a Grafana and Prometheus instance to observe the network
+6. Spin up a Blobscan instance to analyze blob transactions (EIP-4844)
 
 Optional features (enabled via flags or parameter files at runtime):
 
@@ -268,6 +269,7 @@ additional_services:
   - dora
   - full_beaconchain_explorer
   - prometheus_grafana
+  - blobscan
 
 # If set, the package will block until a finalized epoch has occurred.
 wait_for_finalization: false
