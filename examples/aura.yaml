@@ -1,6 +1,6 @@
 participants:
   - el_client_type: nethermind
-    el_client_image: gr8h/node:kurtosis-arm
+    el_client_image: nethermind/nethermind:kurtosis
     el_client_log_level: ""
     el_extra_params: [
       "--config=/nethermind/configs/validator.cfg",
@@ -32,7 +32,7 @@ participants:
       scrape_interval: 15s
       labels: {}
   - el_client_type: nethermind
-    el_client_image: gr8h/node:kurtosis-arm
+    el_client_image: nethermind/nethermind:kurtosis
     el_client_log_level: ""
     el_extra_params: [
       "--config=/nethermind/configs/node.cfg",
