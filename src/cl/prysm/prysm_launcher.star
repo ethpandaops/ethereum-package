@@ -104,6 +104,8 @@ def launch(
     snooper_engine_context,
     extra_beacon_params,
     extra_validator_params,
+    extra_beacon_labels,
+    extra_validator_labels,
 ):
     split_images = images.split(IMAGE_SEPARATOR_DELIMITER)
     if len(split_images) != EXPECTED_NUM_IMAGES:
@@ -146,6 +148,7 @@ def launch(
         snooper_enabled,
         snooper_engine_context,
         extra_beacon_params,
+        extra_beacon_labels,
     )
 
     beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
@@ -176,6 +179,7 @@ def launch(
             v_min_mem,
             v_max_mem,
             extra_validator_params,
+            extra_validator_labels,
             launcher.prysm_password_relative_filepath,
             launcher.prysm_password_artifact_uuid,
         )
@@ -248,6 +252,7 @@ def get_beacon_config(
     snooper_enabled,
     snooper_engine_context,
     extra_params,
+    extra_labels,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -321,6 +326,7 @@ def get_beacon_config(
             constants.CLIENT_TYPES.cl,
             beacon_image,
             el_client_context.client_name,
+            extra_labels,
         ),
     )
 
@@ -339,6 +345,7 @@ def get_validator_config(
     v_min_mem,
     v_max_mem,
     extra_params,
+    extra_labels,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
 ):
@@ -395,6 +402,7 @@ def get_validator_config(
             constants.CLIENT_TYPES.validator,
             validator_image,
             el_client_context.client_name,
+            extra_labels,
         ),
     )
 

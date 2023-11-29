@@ -215,6 +215,7 @@ def launch_participant_network(
             participant.el_max_mem,
             participant.el_extra_params,
             participant.el_extra_env_vars,
+            participant.el_extra_labels,
         )
 
         # Add participant el additional prometheus metrics
@@ -331,6 +332,8 @@ def launch_participant_network(
                 snooper_engine_context,
                 participant.beacon_extra_params,
                 participant.validator_extra_params,
+                participant.beacon_extra_labels,
+                participant.validator_extra_labels,
             )
         else:
             boot_cl_client_ctx = all_cl_client_contexts
@@ -356,6 +359,8 @@ def launch_participant_network(
                 snooper_engine_context,
                 participant.beacon_extra_params,
                 participant.validator_extra_params,
+                participant.beacon_extra_labels,
+                participant.validator_extra_labels,
             )
 
         # Add participant cl additional prometheus labels
