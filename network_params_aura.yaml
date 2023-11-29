@@ -1,8 +1,43 @@
 participants:
   - el_client_type: nethermind
-    el_client_image: fusenet/node:d7338f5-beta
+    el_client_image: gr8h/node:kurtosis-arm
     el_client_log_level: ""
-    el_extra_params: []
+    el_extra_params: [
+      "--config=/nethermind/configs/validator.cfg",
+      "--Init.ChainSpecPath=/nethermind/chainspec/chainspec.json"
+    ]
+    cl_client_type: na
+    cl_client_image: null
+    cl_client_log_level: ""
+    beacon_extra_params: []
+    validator_extra_params: []
+    builder_network_params: null
+    validator_count: null
+    snooper_enabled: false
+    ethereum_metrics_exporter_enabled: false
+    el_min_cpu: 0
+    el_max_cpu: 0
+    el_min_mem: 0
+    el_max_mem: 0
+    bn_min_cpu: 0
+    bn_max_cpu: 0
+    bn_min_mem: 0
+    bn_max_mem: 0
+    v_min_cpu: 0
+    v_max_cpu: 0
+    v_min_mem: 0
+    v_max_mem: 0
+    count: 1
+    prometheus_config:
+      scrape_interval: 15s
+      labels: {}
+  - el_client_type: nethermind
+    el_client_image: gr8h/node:kurtosis-arm
+    el_client_log_level: ""
+    el_extra_params: [
+      "--config=/nethermind/configs/node.cfg",
+      "--Init.ChainSpecPath=/nethermind/chainspec/chainspec.json"
+    ]
     cl_client_type: na
     cl_client_image: null
     cl_client_log_level: ""
