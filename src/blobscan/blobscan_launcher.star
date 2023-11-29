@@ -50,9 +50,7 @@ def launch_blobscan(
         blobscan_config.ip_address, blobscan_config.ports[HTTP_PORT_ID].number
     )
 
-    web_config = get_web_config(
-        postgres_output.url, beacon_node_rpc_uri, chain_id
-    )
+    web_config = get_web_config(postgres_output.url, beacon_node_rpc_uri, chain_id)
     plan.add_service(WEB_SERVICE_NAME, web_config)
 
     indexer_config = get_indexer_config(
