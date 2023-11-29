@@ -14,4 +14,3 @@ def new_participant(
         snooper_engine_context=snooper_engine_context,
         ethereum_metrics_exporter_context=ethereum_metrics_exporter_context,
     )
-    
