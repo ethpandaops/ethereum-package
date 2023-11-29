@@ -131,6 +131,7 @@ def launch(
         snooper_enabled,
         snooper_engine_context,
         extra_params,
+        extra_labels,
     )
 
     nimbus_service = plan.add_service(service_name, config)
