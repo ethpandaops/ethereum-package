@@ -1,10 +1,10 @@
 participants:
-  - el_client_type: nethermind
-    el_client_image: fusenet/node:d7338f5-beta
+  - el_client_type: geth
+    el_client_image: ethereum/client-go:latest
     el_client_log_level: ""
     el_extra_params: []
     cl_client_type: lighthouse
-    cl_client_image: NA
+    cl_client_image: sigp/lighthouse:latest
     cl_client_log_level: ""
     beacon_extra_params: []
     validator_extra_params: []
@@ -12,7 +12,6 @@ participants:
     validator_count: null
     snooper_enabled: false
     ethereum_metrics_exporter_enabled: false
-    cl_disabled: true
     el_min_cpu: 0
     el_max_cpu: 0
     el_min_mem: 0
@@ -25,12 +24,12 @@ participants:
     v_max_cpu: 0
     v_min_mem: 0
     v_max_mem: 0
-    count: 3
+    count: 2
     prometheus_config:
       scrape_interval: 15s
       labels: {}
 network_params:
-  network_id: "123"
+  network_id: "3151908"
   deposit_contract_address: "0x4242424242424242424242424242424242424242"
   seconds_per_slot: 12
   num_validator_keys_per_node: 64
@@ -46,11 +45,14 @@ network_params:
   electra_fork_epoch: null
 additional_services:
   - tx_spammer
+  - blob_spammer
+  - el_forkmon
+  - beacon_metrics_gazer
+  - dora
   - prometheus_grafana
 wait_for_finalization: false
 global_client_log_level: info
 snooper_enabled: false
-cl_disabled: true
 ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 mev_type: null

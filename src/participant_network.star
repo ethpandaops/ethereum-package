@@ -264,7 +264,7 @@ def launch_participant_network(
         cl_client_type = participant.cl_client_type
         el_client_type = participant.el_client_type
 
-        if participant.cl_disabled == True: continue
+        if not participant.cl_client_image: continue
 
         if cl_client_type not in cl_launchers:
             fail(
@@ -401,7 +401,7 @@ def launch_participant_network(
 
         el_client_context = all_el_client_contexts[index]
         cl_client_context = None
-        if participant.cl_disabled == False:
+        if participant.cl_client_image:
             cl_client_context = all_cl_client_contexts[index]
 
         snooper_engine_context = None
@@ -422,7 +422,6 @@ def launch_participant_network(
             cl_client_context,
             snooper_engine_context,
             ethereum_metrics_exporter_context,
-            participant.cl_disabled,
         )
 
         all_participants.append(participant_entry)
