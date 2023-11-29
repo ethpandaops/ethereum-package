@@ -11,6 +11,7 @@ Specifically, this [package][package-reference] will:
 3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
 4. Spin up and connect a [testnet verifier](https://github.com/ethereum/merge-testnet-verifier)
 5. Spin up a Grafana and Prometheus instance to observe the network
+6. Spin up a Blobscan instance to analyze blob transactions (EIP-4844)
 
 Optional features (enabled via flags or parameter files at runtime):
 
@@ -91,11 +92,6 @@ kurtosis files download my-testnet el-genesis-data ~/Downloads
 ## Configuration
 
 To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
-
-<details>
-    <summary>Click to show all configuration options</summary>
-
-<!-- Yes, it's weird that none of this is indented but it's intentional - indenting anything inside this "details" expandable will cause it to render weird" -->
 
 ```yaml
 # Specification of the participants in the network
@@ -273,6 +269,7 @@ additional_services:
   - dora
   - full_beaconchain_explorer
   - prometheus_grafana
+  - blobscan
 
 # If set, the package will block until a finalized epoch has occurred.
 wait_for_finalization: false
@@ -344,8 +341,6 @@ mev_params:
   custom_flood_params:
     interval_between_transactions: 1
 ```
-
-</details>
 
 #### Example configurations
 
