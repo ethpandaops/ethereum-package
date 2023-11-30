@@ -115,6 +115,8 @@ def launch(
     snooper_engine_context,
     extra_beacon_params,
     extra_validator_params,
+    extra_beacon_labels,
+    extra_validator_labels,
 ):
     beacon_node_service_name = "{0}".format(service_name)
     validator_node_service_name = "{0}-{1}".format(
@@ -144,6 +146,7 @@ def launch(
         snooper_enabled,
         snooper_engine_context,
         extra_beacon_params,
+        extra_beacon_labels,
     )
 
     beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
@@ -172,6 +175,7 @@ def launch(
             v_min_mem,
             v_max_mem,
             extra_validator_params,
+            extra_validator_labels,
         )
 
         validator_service = plan.add_service(
@@ -242,6 +246,7 @@ def get_beacon_config(
     snooper_enabled,
     snooper_engine_context,
     extra_params,
+    extra_labels,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -347,6 +352,7 @@ def get_beacon_config(
             constants.CLIENT_TYPES.cl,
             image,
             el_client_context.client_name,
+            extra_labels,
         ),
     )
 
@@ -363,6 +369,7 @@ def get_validator_config(
     v_min_mem,
     v_max_mem,
     extra_params,
+    extra_labels,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
@@ -420,6 +427,7 @@ def get_validator_config(
             constants.CLIENT_TYPES.validator,
             image,
             el_client_context.client_name,
+            extra_labels,
         ),
     )
 

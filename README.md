@@ -123,6 +123,10 @@ participants:
   # A list of optional extra env_vars the el container should spin up with
   el_extra_env_vars: {}
 
+  # A list of optional extra labels the el container should spin up with
+  # Example; el_extra_labels: {"ethereum-package.partition": "1"}
+  el_extra_labels: {}
+
   # The type of CL client that should be started
   # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
   cl_client_type: lighthouse
@@ -147,9 +151,17 @@ participants:
   # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
   beacon_extra_params: []
 
+  # A list of optional extra labels that will be passed to the CL client Beacon container.
+  # Example; beacon_extra_labels: {"ethereum-package.partition": "1"}
+  beacon_extra_labels: {}
+
   # A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
   # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
   validator_extra_params: []
+
+  # A list of optional extra labels that will be passed to the CL client validator container.
+  # Example; validator_extra_labels: {"ethereum-package.partition": "1"}
+  validator_extra_labels: {}
 
   # A set of parameters the node needs to reach an external block building network
   # If `null` then the builder infrastructure will not be instantiated
