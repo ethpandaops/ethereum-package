@@ -2,8 +2,8 @@ participants:
   - el_client_type: nethermind
     el_client_image: nethermind/nethermind:latest
     el_extra_params:
-      - --config=/nethermind/configs/spark_validator.cfg
-      - --Init.ChainSpecPath=/nethermind/chainspec/spark.json
+      - --config=/nethermind/configs/validator.cfg
+      - --Init.ChainSpecPath=/nethermind/chainspec/chainspec.json
     beacon_extra_params: []
     validator_extra_params: []
     builder_network_params: null
@@ -14,8 +14,8 @@ participants:
   - el_client_type: nethermind
     el_client_image: nethermind/nethermind:latest
     el_extra_params:
-      - --config=/nethermind/configs/spark.cfg
-      - --Init.ChainSpecPath=/nethermind/chainspec/spark.json
+      - --config=/nethermind/configs/node.cfg
+      - --Init.ChainSpecPath=/nethermind/chainspec/chainspec.json
     beacon_extra_params: []
     validator_extra_params: []
     builder_network_params: null
