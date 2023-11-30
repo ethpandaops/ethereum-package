@@ -243,8 +243,10 @@ def parse_network_params(input_args):
         el_client_type = participant["el_client_type"]
         cl_client_type = participant["cl_client_type"]
 
-        if cl_client_type in (NIMBUS_NODE_NAME) and (
-            result["network_params"]["seconds_per_slot"] < 12
+        if (
+            cl_client_type
+            and cl_client_type in (NIMBUS_NODE_NAME)
+            and (result["network_params"]["seconds_per_slot"] < 12)
         ):
             fail("nimbus can't be run with slot times below 12 seconds")
         el_image = participant["el_client_image"]
@@ -259,7 +261,7 @@ def parse_network_params(input_args):
             participant["el_client_image"] = default_image
 
         cl_image = participant["cl_client_image"]
-        if cl_image == "":
+        if cl_client_type and cl_image == "":
             default_image = DEFAULT_CL_IMAGES.get(cl_client_type, "")
             if default_image == "":
                 fail(

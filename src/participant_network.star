@@ -197,8 +197,10 @@ def launch_participant_network(
         # Zero-pad the index using the calculated zfill value
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
-        el_service_name = "el-{0}-{1}-{2}".format(
-            index_str, el_client_type, cl_client_type
+        el_service_name = "el-{0}-{1}{2}".format(
+            index_str,
+            el_client_type,
+            "-{0}".format(cl_client_type) if cl_client_type else "",
         )
 
         el_client_context = launch_method(
@@ -264,7 +266,7 @@ def launch_participant_network(
         cl_client_type = participant.cl_client_type
         el_client_type = participant.el_client_type
 
-        if not participant.cl_client_image:
+        if not participant.cl_client_type:
             continue
 
         if cl_client_type not in cl_launchers:
@@ -402,7 +404,7 @@ def launch_participant_network(
 
         el_client_context = all_el_client_contexts[index]
         cl_client_context = None
-        if participant.cl_client_image:
+        if participant.cl_client_type:
             cl_client_context = all_cl_client_contexts[index]
 
         snooper_engine_context = None

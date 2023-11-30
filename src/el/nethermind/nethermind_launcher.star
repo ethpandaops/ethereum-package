@@ -83,7 +83,11 @@ def launch(
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
 
-    cl_client_name = service_name.split("-")[3]
+    split_service_name = service_name.split("-")
+    if len(split_service_name) < 4:
+        cl_client_name = "na"
+    else:
+        cl_client_name = split_service_name[3]
 
     config = get_config(
         launcher.el_cl_genesis_data,
