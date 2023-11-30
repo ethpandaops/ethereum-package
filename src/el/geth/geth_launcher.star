@@ -160,16 +160,18 @@ def get_config(
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if electra_fork_epoch != None:
-        if electra_fork_epoch == 0: # verkle-gen
+        if electra_fork_epoch == 0:  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
                 final_genesis_timestamp,
                 constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
             )
-        else: # verkle
-            init_datadir_cmd_str = "geth --datadir={0} --cache.preimages init {1}".format(
-                EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-                constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        else:  # verkle
+            init_datadir_cmd_str = (
+                "geth --datadir={0} --cache.preimages init {1}".format(
+                    EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+                    constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+                )
             )
     elif "--builder" in extra_params or capella_fork_epoch != 0:
         init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
@@ -197,11 +199,11 @@ def get_config(
         # Override prague fork timestamp for electra fork
         "{0}".format("--cache.preimages" if electra_fork_epoch != None else ""),
         # Override prague fork timestamp if electra_fork_epoch == 0
-         "{0}".format(
-             "--override.prague=" + final_genesis_timestamp
-             if electra_fork_epoch == 0
-             else ""
-         ),
+        "{0}".format(
+            "--override.prague=" + final_genesis_timestamp
+            if electra_fork_epoch == 0
+            else ""
+        ),
         "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--networkid=" + network_id,
