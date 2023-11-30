@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.1.0](https://github.com/kurtosis-tech/ethereum-package/compare/1.0.0...1.1.0) (2023-11-30)
+
+
+### Features
+
+* Add adminer ([#295](https://github.com/kurtosis-tech/ethereum-package/issues/295)) ([99b5913](https://github.com/kurtosis-tech/ethereum-package/commit/99b5913bfbc2ea25716b593cafbaebc486bf3c88))
+* Add broadcaster ([#355](https://github.com/kurtosis-tech/ethereum-package/issues/355)) ([0f9c3aa](https://github.com/kurtosis-tech/ethereum-package/commit/0f9c3aad1f1360fa896dce75cb1b2c46e9872af1))
+* add custom label configuration option ([#375](https://github.com/kurtosis-tech/ethereum-package/issues/375)) ([82ec85e](https://github.com/kurtosis-tech/ethereum-package/commit/82ec85e84e8c0972217f43962674493195970866))
+* add custom labels ([#340](https://github.com/kurtosis-tech/ethereum-package/issues/340)) ([789ed8e](https://github.com/kurtosis-tech/ethereum-package/commit/789ed8e7f0a1a1512132732540a713dca17bbe56))
+* add dencun example, bump teku mem, update mev-relay postgres name ([#369](https://github.com/kurtosis-tech/ethereum-package/issues/369)) ([1097531](https://github.com/kurtosis-tech/ethereum-package/commit/10975312c4d5c74b9bb80b872f205374997fc33c))
+* Add Ethereum Metrics Exporter Dash ([#338](https://github.com/kurtosis-tech/ethereum-package/issues/338)) ([3ce9a78](https://github.com/kurtosis-tech/ethereum-package/commit/3ce9a780f50c4909b9fe64ccd6580432135e1c37))
+* Add initial support for Blobscan ([#363](https://github.com/kurtosis-tech/ethereum-package/issues/363)) ([837fb97](https://github.com/kurtosis-tech/ethereum-package/commit/837fb970bb65d12bbe31dfec011a7f323d520111))
+* add prometheus custom configuration for participants ([#354](https://github.com/kurtosis-tech/ethereum-package/issues/354)) ([e9bbc7d](https://github.com/kurtosis-tech/ethereum-package/commit/e9bbc7debf9db9c7f30271084b6276fcbe167d93))
+* added a gitpod badge ([#356](https://github.com/kurtosis-tech/ethereum-package/issues/356)) ([e273993](https://github.com/kurtosis-tech/ethereum-package/commit/e2739935d8ed3993d7152a8403a194ea628360a2))
+* Allow verkle to be at genesis or post genesis ([60a7529](https://github.com/kurtosis-tech/ethereum-package/commit/60a752932242d795e5c087094ca5e26f6f4029c4))
+* differentiate builder ec by suffixing it with '-builder' ([#347](https://github.com/kurtosis-tech/ethereum-package/issues/347)) ([c558cb2](https://github.com/kurtosis-tech/ethereum-package/commit/c558cb2eab25cc8c3718b1fda6759a0819e6f942))
+
+
+### Bug Fixes
+
+* add java opts for besu ([#346](https://github.com/kurtosis-tech/ethereum-package/issues/346)) ([8aa88e3](https://github.com/kurtosis-tech/ethereum-package/commit/8aa88e34212321b2a148fd26c0e5a0da0b1a5b3f))
+* blobscan lint error ([#374](https://github.com/kurtosis-tech/ethereum-package/issues/374)) ([32f862b](https://github.com/kurtosis-tech/ethereum-package/commit/32f862be000a547fba300be4be3f954835ac707f))
+* builder args incorrectly configured ([#343](https://github.com/kurtosis-tech/ethereum-package/issues/343)) ([66e73fb](https://github.com/kurtosis-tech/ethereum-package/commit/66e73fb9f20d8dcce17beb00bf25dafb1e4ada65))
+* network params setting invalid value for min/max configs ([#353](https://github.com/kurtosis-tech/ethereum-package/issues/353)) ([764b7dc](https://github.com/kurtosis-tech/ethereum-package/commit/764b7dc0577a8e8da9dac3519d18db51720f2b4b))
+* update validator reward address ([#350](https://github.com/kurtosis-tech/ethereum-package/issues/350)) ([57f82c0](https://github.com/kurtosis-tech/ethereum-package/commit/57f82c0432c9a77bfa12f78a14b2e0038228a99c))
+* Use unused accounts for mev flood ([#359](https://github.com/kurtosis-tech/ethereum-package/issues/359)) ([286654c](https://github.com/kurtosis-tech/ethereum-package/commit/286654c769b33c1d63d20bf31c1dd3a71f7a3f0d))
+
 ## [1.0.0](https://github.com/kurtosis-tech/ethereum-package/compare/0.6.1...1.0.0) (2023-10-25)
 
 
