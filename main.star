@@ -275,6 +275,7 @@ def run(plan, args={}):
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
                 fuzz_target,
                 tx_spammer_params,
+                network_params.electra_fork_epoch,
             )
             plan.print("Successfully launched transaction spammer")
         elif additional_service == "blob_spammer":
