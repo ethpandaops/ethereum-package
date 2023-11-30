@@ -101,9 +101,14 @@ def launch_participant_network(
         )
     # we are running electra - experimental
     elif network_params.electra_fork_epoch != None:
-        ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:3.0.0-rc.14"
-        )
+        if network_params.electra_fork_epoch == 0:
+            ethereum_genesis_generator_image = (
+                "ethpandaops/ethereum-genesis-generator:3.0.0-rc.14"
+            )
+        else:
+            ethereum_genesis_generator_image = (
+                "ethpandaops/ethereum-genesis-generator:3.0.0-rc.16"
+            )
     else:
         fail(
             "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
@@ -217,6 +222,7 @@ def launch_participant_network(
             participant.el_max_mem,
             participant.el_extra_params,
             participant.el_extra_env_vars,
+            participant.el_extra_labels,
         )
 
         # Add participant el additional prometheus metrics
@@ -336,6 +342,8 @@ def launch_participant_network(
                 snooper_engine_context,
                 participant.beacon_extra_params,
                 participant.validator_extra_params,
+                participant.beacon_extra_labels,
+                participant.validator_extra_labels,
             )
         else:
             boot_cl_client_ctx = all_cl_client_contexts
@@ -361,6 +369,8 @@ def launch_participant_network(
                 snooper_engine_context,
                 participant.beacon_extra_params,
                 participant.validator_extra_params,
+                participant.beacon_extra_labels,
+                participant.validator_extra_labels,
             )
 
         # Add participant cl additional prometheus labels

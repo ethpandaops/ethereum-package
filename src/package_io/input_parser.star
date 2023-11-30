@@ -119,13 +119,16 @@ def input_parser(plan, input_args):
                 el_client_type=participant["el_client_type"],
                 el_client_image=participant["el_client_image"],
                 el_client_log_level=participant["el_client_log_level"],
+                el_extra_params=participant["el_extra_params"],
+                el_extra_env_vars=participant["el_extra_env_vars"],
+                el_extra_labels=participant["el_extra_labels"],
                 cl_client_type=participant["cl_client_type"],
                 cl_client_image=participant["cl_client_image"],
                 cl_client_log_level=participant["cl_client_log_level"],
                 beacon_extra_params=participant["beacon_extra_params"],
-                el_extra_params=participant["el_extra_params"],
-                el_extra_env_vars=participant["el_extra_env_vars"],
+                beacon_extra_labels=participant["beacon_extra_labels"],
                 validator_extra_params=participant["validator_extra_params"],
+                validator_extra_labels=participant["validator_extra_labels"],
                 builder_network_params=participant["builder_network_params"],
                 el_min_cpu=participant["el_min_cpu"],
                 el_max_cpu=participant["el_max_cpu"],
@@ -331,9 +334,6 @@ def parse_network_params(input_args):
     if result["network_params"]["electra_fork_epoch"] != None:
         # if electra is defined, then deneb needs to be set very high
         result["network_params"]["deneb_fork_epoch"] = HIGH_DENEB_VALUE_FORK_VERKLE
-        # TODO: remove once transition is complete
-        if result["network_params"]["electra_fork_epoch"] != 0:
-            fail("electra_fork_epoch can only be 0 or None")
 
     if (
         result["network_params"]["capella_fork_epoch"] > 0
@@ -407,13 +407,16 @@ def default_participant():
         "el_client_type": "geth",
         "el_client_image": "",
         "el_client_log_level": "",
+        "el_extra_params": [],
+        "el_extra_env_vars": {},
+        "el_extra_labels": {},
         "cl_client_type": "lighthouse",
         "cl_client_image": "",
         "cl_client_log_level": "",
         "beacon_extra_params": [],
-        "el_extra_params": [],
-        "el_extra_env_vars": {},
+        "beacon_extra_labels": {},
         "validator_extra_params": [],
+        "validator_extra_labels": {},
         "builder_network_params": None,
         "el_min_cpu": 0,
         "el_max_cpu": 0,
