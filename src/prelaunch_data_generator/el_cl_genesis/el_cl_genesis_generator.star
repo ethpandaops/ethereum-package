@@ -61,16 +61,12 @@ def generate_el_cl_genesis_data(
         wait=None,
     )
 
-    # this is super hacky lmao
-    genesis_validators_root = plan.run_python(
-        run="""
-with open("/data/data/custom_config_data/genesis_validators_root.txt") as genesis_root:
-    print(genesis_root.read().strip(), end="")
-""",
+    genesis_validators_root = plan.run_sh(
+        run="cat /data/data/custom_config_data/genesis_validators_root.txt",
         files={"/data": genesis.files_artifacts[0]},
-        store=[StoreSpec(src="/tmp", name="genesis-validators-root")],
         wait=None,
     )
+
     result = el_cl_genesis_data.new_el_cl_genesis_data(
         genesis.files_artifacts[0], genesis_validators_root.output
     )
