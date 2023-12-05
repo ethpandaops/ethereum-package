@@ -25,7 +25,6 @@ participants:
     cl_client_image: ethpandaops/nimbus:unstable-6dee4d5
 network_params:
   deneb_fork_epoch: 1
-launch_additional_services: true
 additional_services:
   - el_forkmon
   - tx_spammer
