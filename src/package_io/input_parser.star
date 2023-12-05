@@ -173,6 +173,7 @@ def input_parser(plan, input_args):
             capella_fork_epoch=result["network_params"]["capella_fork_epoch"],
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
+            network=result["network_params"]["network"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -239,6 +240,20 @@ def parse_network_params(input_args):
                     participants.append(participant_copy)
             result["participants"] = participants
 
+    # # If network is not kurtosis, run with custom params
+    # if result["network_params"]["network"] != "kurtosis":
+    #     result["network_params"]["preregistered_validator_keys_mnemonic"] = None
+    #     result["network_params"]["num_validator_keys_per_node"] = None
+    #     result["network_params"]["network_id"] = None
+    #     result["network_params"]["deposit_contract_address"] = None
+    #     result["network_params"]["seconds_per_slot"] = None
+    #     result["network_params"]["genesis_delay"] = None
+    #     result["network_params"]["max_churn"] = None
+    #     result["network_params"]["ejection_balance"] = None
+    #     result["network_params"]["capella_fork_epoch"] = None
+    #     result["network_params"]["deneb_fork_epoch"] = None
+    #     result["network_params"]["electra_fork_epoch"] = None
+    # else:
     total_participant_count = 0
     actual_num_validators = 0
     # validation of the above defaults
@@ -397,6 +412,7 @@ def default_network_params():
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 500,
         "electra_fork_epoch": None,
+        "network": "kurtosis",
     }
 
 

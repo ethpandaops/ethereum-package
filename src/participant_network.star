@@ -58,83 +58,92 @@ def launch_participant_network(
     global_log_level,
     parallel_keystore_generation=False,
 ):
-    num_participants = len(participants)
+    if network_params.network == "kurtosis":
+        num_participants = len(participants)
 
-    plan.print("Generating cl validator key stores")
-    validator_data = None
-    if not parallel_keystore_generation:
-        validator_data = validator_keystores.generate_validator_keystores(
-            plan, network_params.preregistered_validator_keys_mnemonic, participants
-        )
-    else:
-        validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
-            plan, network_params.preregistered_validator_keys_mnemonic, participants
-        )
-
-    plan.print(json.indent(json.encode(validator_data)))
-
-    # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
-    final_genesis_timestamp = get_final_genesis_timestamp(
-        plan, CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME
-    )
-
-    total_number_of_validator_keys = 0
-    for participant in participants:
-        total_number_of_validator_keys += participant.validator_count
-
-    plan.print("Generating EL CL data")
-    # we are running bellatrix genesis (deprecated) - will be removed in the future
-    if (
-        network_params.capella_fork_epoch > 0
-        and network_params.electra_fork_epoch == None
-    ):
-        ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:1.3.14"
-        )
-    # we are running capella genesis - default behavior
-    elif (
-        network_params.capella_fork_epoch == 0
-        and network_params.electra_fork_epoch == None
-    ):
-        ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:2.0.4"
-        )
-    # we are running electra - experimental
-    elif network_params.electra_fork_epoch != None:
-        if network_params.electra_fork_epoch == 0:
-            ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:3.0.0-rc.14"
+        plan.print("Generating cl validator key stores")
+        validator_data = None
+        if not parallel_keystore_generation:
+            validator_data = validator_keystores.generate_validator_keystores(
+                plan, network_params.preregistered_validator_keys_mnemonic, participants
             )
         else:
-            ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:3.0.0-rc.16"
+            validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
+                plan, network_params.preregistered_validator_keys_mnemonic, participants
             )
-    else:
-        fail(
-            "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+
+        plan.print(json.indent(json.encode(validator_data)))
+
+        # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
+        final_genesis_timestamp = get_final_genesis_timestamp(
+            plan, CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME
         )
 
-    el_cl_genesis_config_template = read_file(
-        static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
-    )
+        total_number_of_validator_keys = 0
+        for participant in participants:
+            total_number_of_validator_keys += participant.validator_count
 
-    el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
-        plan,
-        ethereum_genesis_generator_image,
-        el_cl_genesis_config_template,
-        final_genesis_timestamp,
-        network_params.network_id,
-        network_params.deposit_contract_address,
-        network_params.seconds_per_slot,
-        network_params.preregistered_validator_keys_mnemonic,
-        total_number_of_validator_keys,
-        network_params.genesis_delay,
-        network_params.max_churn,
-        network_params.ejection_balance,
-        network_params.capella_fork_epoch,
-        network_params.deneb_fork_epoch,
-        network_params.electra_fork_epoch,
-    )
+        plan.print("Generating EL CL data")
+        # we are running bellatrix genesis (deprecated) - will be removed in the future
+        if (
+            network_params.capella_fork_epoch > 0
+            and network_params.electra_fork_epoch == None
+        ):
+            ethereum_genesis_generator_image = (
+                "ethpandaops/ethereum-genesis-generator:1.3.14"
+            )
+        # we are running capella genesis - default behavior
+        elif (
+            network_params.capella_fork_epoch == 0
+            and network_params.electra_fork_epoch == None
+        ):
+            ethereum_genesis_generator_image = (
+                "ethpandaops/ethereum-genesis-generator:2.0.4"
+            )
+        # we are running electra - experimental
+        elif network_params.electra_fork_epoch != None:
+            if network_params.electra_fork_epoch == 0:
+                ethereum_genesis_generator_image = (
+                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.14"
+                )
+            else:
+                ethereum_genesis_generator_image = (
+                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.16"
+                )
+        else:
+            fail(
+                "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+            )
+
+        el_cl_genesis_config_template = read_file(
+            static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
+        )
+
+
+        el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
+            plan,
+            ethereum_genesis_generator_image,
+            el_cl_genesis_config_template,
+            final_genesis_timestamp,
+            network_params.network_id,
+            network_params.deposit_contract_address,
+            network_params.seconds_per_slot,
+            network_params.preregistered_validator_keys_mnemonic,
+            total_number_of_validator_keys,
+            network_params.genesis_delay,
+            network_params.max_churn,
+            network_params.ejection_balance,
+            network_params.capella_fork_epoch,
+            network_params.deneb_fork_epoch,
+            network_params.electra_fork_epoch,
+        )
+    else:
+        # split up the name from dencun-devnet-12 to dencun and devnet-12
+        devnet_name = network_params.network.split("-")[0]
+        devnet_number = network_params.network.split("-")[-1]
+
+        plan.upload_files(src="github.com/ethpandaops/{0}-devnets/network-configs/devnet-{1}".format(devnet_name, devnet_number), name="el_cl_data")
+        final_genesis_timestamp = 0
 
     el_launchers = {
         constants.EL_CLIENT_TYPE.geth: {
