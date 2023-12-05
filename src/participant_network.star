@@ -68,15 +68,20 @@ def launch_participant_network(
                 plan, network_params.preregistered_validator_keys_mnemonic, participants
             )
         else:
-            validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
-                plan, network_params.preregistered_validator_keys_mnemonic, participants
+            validator_data = (
+                validator_keystores.generate_valdiator_keystores_in_parallel(
+                    plan,
+                    network_params.preregistered_validator_keys_mnemonic,
+                    participants,
+                )
             )
 
         plan.print(json.indent(json.encode(validator_data)))
 
         # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
         final_genesis_timestamp = get_final_genesis_timestamp(
-            plan, CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME
+            plan,
+            CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME,
         )
 
         total_number_of_validator_keys = 0
@@ -119,7 +124,6 @@ def launch_participant_network(
             static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
         )
 
-
         el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
             plan,
             ethereum_genesis_generator_image,
@@ -141,8 +145,15 @@ def launch_participant_network(
         # split up the name from dencun-devnet-12 to dencun and devnet-12
         devnet_name = network_params.network.split("-")[0]
         devnet_number = network_params.network.split("-")[-1]
-        el_cl_genesis_uuid = plan.upload_files(src="github.com/ethpandaops/{0}-devnets/network-configs/devnet-{1}".format(devnet_name, devnet_number), name="el_cl_genesis_data")
-        el_cl_genesis = el_cl_genesis.new_el_cl_genesis_data(el_cl_genesis_uuid, "0x123")
+        el_cl_genesis_uuid = plan.upload_files(
+            src="github.com/ethpandaops/{0}-devnets/network-configs/devnet-{1}".format(
+                devnet_name, devnet_number
+            ),
+            name="el_cl_genesis_data",
+        )
+        el_cl_genesis = el_cl_genesis.new_el_cl_genesis_data(
+            el_cl_genesis_uuid, "0x123"
+        )
         final_genesis_timestamp = 0
 
     el_launchers = {
