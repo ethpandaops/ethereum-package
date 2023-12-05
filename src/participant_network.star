@@ -90,7 +90,7 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:1.3.14"
+                "ethpandaops/ethereum-genesis-generator:1.3.15"
             )
         # we are running capella genesis - default behavior
         elif (
@@ -98,17 +98,17 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:2.0.4"
+                "ethpandaops/ethereum-genesis-generator:2.0.6"
             )
         # we are running electra - experimental
         elif network_params.electra_fork_epoch != None:
             if network_params.electra_fork_epoch == 0:
                 ethereum_genesis_generator_image = (
-                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.14"
+                    "ethpandaops/ethereum-genesis-generator:4.0.0-rc.1"
                 )
             else:
                 ethereum_genesis_generator_image = (
-                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.16"
+                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.17"
                 )
         else:
             fail(
@@ -141,8 +141,8 @@ def launch_participant_network(
         # split up the name from dencun-devnet-12 to dencun and devnet-12
         devnet_name = network_params.network.split("-")[0]
         devnet_number = network_params.network.split("-")[-1]
-
-        plan.upload_files(src="github.com/ethpandaops/{0}-devnets/network-configs/devnet-{1}".format(devnet_name, devnet_number), name="el_cl_data")
+        el_cl_genesis_uuid = plan.upload_files(src="github.com/ethpandaops/{0}-devnets/network-configs/devnet-{1}".format(devnet_name, devnet_number), name="el_cl_genesis_data")
+        el_cl_genesis = el_cl_genesis.new_el_cl_genesis_data(el_cl_genesis_uuid, "0x123")
         final_genesis_timestamp = 0
 
     el_launchers = {
