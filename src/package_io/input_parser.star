@@ -338,9 +338,6 @@ def parse_network_params(input_args):
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
 
-    if result["network_params"]["genesis_delay"] == 0:
-        fail("genesis_delay is 0 needs to be > 0 ")
-
     if result["network_params"]["deneb_fork_epoch"] == 0:
         fail("deneb_fork_epoch is 0 needs to be > 0 ")
 
