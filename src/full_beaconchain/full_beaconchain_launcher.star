@@ -132,7 +132,7 @@ def launch_full_beacon(
             max_cpu=LITTLE_BIGTABLE_MAX_CPU,
             min_memory=LITTLE_BIGTABLE_MIN_MEMORY,
             max_memory=LITTLE_BIGTABLE_MAX_MEMORY,
-        )
+        ),
     )
 
     el_uri = "http://{0}:{1}".format(
