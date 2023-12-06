@@ -72,4 +72,8 @@ def get_config(ip_addr, http_port_num):
             "0.0.0.0",
             "-v",
         ],
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )

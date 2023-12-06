@@ -2,8 +2,8 @@ ADMIN_KEY_INDEX = 0
 USER_KEY_INDEX = 2
 
 # The min/max CPU/memory that mev-flood can use
-MIN_CPU = 10
-MAX_CPU = 1000
+MIN_CPU = 100
+MAX_CPU = 2000
 MIN_MEMORY = 128
 MAX_MEMORY = 1024
 
