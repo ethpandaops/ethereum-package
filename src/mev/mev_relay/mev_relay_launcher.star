@@ -1,6 +1,6 @@
-redis_module = import_module("github.com/barnabasbusa/redis-package/main.star@patch-1")
+redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star@patch-1")
 postgres_module = import_module(
-    "github.com/barnabasbusa/postgres-package/main.star@patch-1"
+    "github.com/kurtosis-tech/postgres-package/main.star@patch-1"
 )
 constants = import_module("../../package_io/constants.star")
 

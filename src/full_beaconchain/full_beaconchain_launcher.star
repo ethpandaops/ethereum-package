@@ -1,6 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-postgres = import_module("github.com/barnabasbusa/postgres-package/main.star@patch-1")
-redis = import_module("github.com/barnabasbusa/redis-package/main.star@patch-1")
+postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+redis = import_module("github.com/kurtosis-tech/redis-package/main.star")
 
 IMAGE_NAME = "gobitfly/eth2-beaconchain-explorer:latest"
 
