@@ -1,6 +1,12 @@
 PYTHON_IMAGE = "ethpandaops/python-web3"
 CUSTOM_FLOOD_SERVICE_NAME = "mev-custom-flood"
 
+# The min/max CPU/memory that mev-custom-flood can use
+MIN_CPU = 10
+MAX_CPU = 1000
+MIN_MEMORY = 128
+MAX_MEMORY = 1024
+
 
 def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
     sender_script = plan.upload_files(src="./sender.py", name="mev-custom-flood-sender")
@@ -16,6 +22,10 @@ def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
                 "RECEIVER_PUBLIC_KEY": receiver_key,
                 "EL_RPC_URI": el_uri,
             },
+            min_cpu=MIN_CPU,
+            max_cpu=MAX_CPU,
+            min_memory=MIN_MEMORY,
+            max_memory=MAX_MEMORY,
         ),
     )
 

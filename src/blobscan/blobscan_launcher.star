@@ -1,5 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+postgres = import_module("github.com/barnabasbusa/postgres-package/main.star@patch-1")
 
 WEB_SERVICE_NAME = "blobscan-web"
 API_SERVICE_NAME = "blobscan-api"
@@ -28,6 +28,30 @@ API_PORTS = {
 
 ENTRYPOINT_ARGS = ["/bin/sh", "-c"]
 
+# The min/max CPU/memory that blobscan-indexer can use
+INDEX_MIN_CPU = 10
+INDEX_MAX_CPU = 1000
+INDEX_MIN_MEMORY = 32
+INDEX_MAX_MEMORY = 1024
+
+# The min/max CPU/memory that blobscan-api can use
+API_MIN_CPU = 100
+API_MAX_CPU = 1000
+API_MIN_MEMORY = 1024
+API_MAX_MEMORY = 2048
+
+# The min/max CPU/memory that blobscan-web can use
+WEB_MIN_CPU = 100
+WEB_MAX_CPU = 1000
+WEB_MIN_MEMORY = 512
+WEB_MAX_MEMORY = 2048
+
+# The min/max CPU/memory that postgres can use
+POSTGRES_MIN_CPU = 10
+POSTGRES_MAX_CPU = 1000
+POSTGRES_MIN_MEMORY = 32
+POSTGRES_MAX_MEMORY = 1024
+
 
 def launch_blobscan(
     plan,
@@ -42,7 +66,14 @@ def launch_blobscan(
         el_client_contexts[0].ip_addr, el_client_contexts[0].rpc_port_num
     )
 
-    postgres_output = postgres.run(plan, service_name="blobscan-postgres")
+    postgres_output = postgres.run(
+        plan,
+        service_name="blobscan-postgres",
+        min_cpu=POSTGRES_MIN_CPU,
+        max_cpu=POSTGRES_MAX_CPU,
+        min_memory=POSTGRES_MIN_MEMORY,
+        max_memory=POSTGRES_MAX_MEMORY,
+    )
     api_config = get_api_config(postgres_output.url, beacon_node_rpc_uri, chain_id)
     blobscan_config = plan.add_service(API_SERVICE_NAME, api_config)
 
@@ -83,6 +114,10 @@ def get_api_config(database_url, beacon_node_rpc, chain_id):
             interval="5s",
             timeout="5s",
         ),
+        min_cpu=API_MIN_CPU,
+        max_cpu=API_MAX_CPU,
+        min_memory=API_MIN_MEMORY,
+        max_memory=API_MAX_MEMORY,
     )
 
 
@@ -103,6 +138,10 @@ def get_web_config(database_url, beacon_node_rpc, chain_id):
             "CHAIN_ID": chain_id,
         },
         cmd=["web"],
+        min_cpu=WEB_MIN_CPU,
+        max_cpu=WEB_MAX_CPU,
+        min_memory=WEB_MIN_MEMORY,
+        max_memory=WEB_MAX_MEMORY,
     )
 
 
@@ -119,4 +158,8 @@ def get_indexer_config(beacon_node_rpc, execution_node_rpc, blobscan_api_url):
         },
         entrypoint=ENTRYPOINT_ARGS,
         cmd=[" && ".join(["sleep 90", "/app/blob-indexer"])],
+        min_cpu=INDEX_MIN_CPU,
+        max_cpu=INDEX_MAX_CPU,
+        min_memory=INDEX_MIN_MEMORY,
+        max_memory=INDEX_MAX_MEMORY,
     )

@@ -1,6 +1,12 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 SERVICE_NAME = "transaction-spammer"
 
+# The min/max CPU/memory that tx-spammer can use
+MIN_CPU = 100
+MAX_CPU = 1000
+MIN_MEMORY = 20
+MAX_MEMORY = 300
+
 
 def launch_transaction_spammer(
     plan, prefunded_addresses, el_uri, tx_spammer_params, electra_fork_epoch
@@ -33,4 +39,8 @@ def get_config(prefunded_addresses, el_uri, tx_spammer_extra_args, electra_fork_
     return ServiceConfig(
         image=tx_spammer_image,
         cmd=cmd,
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )
