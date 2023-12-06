@@ -103,7 +103,7 @@ def launch_participant_network(
     elif network_params.electra_fork_epoch != None:
         if network_params.electra_fork_epoch == 0:
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:4.0.0-rc.2"
+                "ethpandaops/ethereum-genesis-generator:4.0.0-rc.3"
             )
         else:
             ethereum_genesis_generator_image = (
