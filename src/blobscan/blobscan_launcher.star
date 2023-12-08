@@ -73,6 +73,7 @@ def launch_blobscan(
         max_cpu=POSTGRES_MAX_CPU,
         min_memory=POSTGRES_MIN_MEMORY,
         max_memory=POSTGRES_MAX_MEMORY,
+        persistent=False,
     )
     api_config = get_api_config(postgres_output.url, beacon_node_rpc_uri, chain_id)
     blobscan_config = plan.add_service(API_SERVICE_NAME, api_config)
