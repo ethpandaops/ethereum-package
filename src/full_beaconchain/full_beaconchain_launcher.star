@@ -108,6 +108,7 @@ def launch_full_beacon(
         max_cpu=POSTGRES_MAX_CPU,
         min_memory=POSTGRES_MIN_MEMORY,
         max_memory=POSTGRES_MAX_MEMORY,
+        persistent=False,
     )
     redis_output = redis.run(
         plan,
