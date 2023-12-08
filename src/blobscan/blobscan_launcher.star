@@ -1,5 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star@patch-1")
+postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
 WEB_SERVICE_NAME = "blobscan-web"
 API_SERVICE_NAME = "blobscan-api"
