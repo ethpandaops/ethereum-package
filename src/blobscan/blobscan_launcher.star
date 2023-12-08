@@ -42,7 +42,9 @@ def launch_blobscan(
         el_client_contexts[0].ip_addr, el_client_contexts[0].rpc_port_num
     )
 
-    postgres_output = postgres.run(plan, service_name="blobscan-postgres", persistent=False)
+    postgres_output = postgres.run(
+        plan, service_name="blobscan-postgres", persistent=False
+    )
     api_config = get_api_config(postgres_output.url, beacon_node_rpc_uri, chain_id)
     blobscan_config = plan.add_service(API_SERVICE_NAME, api_config)
 
