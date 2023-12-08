@@ -102,6 +102,7 @@ def get_api_config(database_url, beacon_node_rpc, chain_id):
             "CHAIN_ID": chain_id,
             "DATABASE_URL": database_url,
             "SECRET_KEY": "supersecret",
+            "BLOBSCAN_API_PORT": str(API_HTTP_PORT_NUMBER),
         },
         cmd=["api"],
         ready_conditions=ReadyCondition(
