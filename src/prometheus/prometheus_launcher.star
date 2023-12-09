@@ -12,6 +12,7 @@ METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
 PROMETHEUS_DEFAULT_SCRAPE_INTERVAL = "15s"
 
+
 def launch_prometheus(
     plan,
     el_client_contexts,
@@ -19,10 +20,16 @@ def launch_prometheus(
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
 ):
-    metrics_jobs = get_metrics_jobs(el_client_contexts, cl_client_contexts, additional_metrics_jobs, ethereum_metrics_exporter_contexts)
+    metrics_jobs = get_metrics_jobs(
+        el_client_contexts,
+        cl_client_contexts,
+        additional_metrics_jobs,
+        ethereum_metrics_exporter_contexts,
+    )
     prometheus_url = prometheus.run(plan, metrics_jobs)
 
     return prometheus_url
+
 
 def get_metrics_jobs(
     el_client_contexts,
@@ -149,8 +156,9 @@ def get_metrics_jobs(
         if job == None:
             continue
         metrics_jobs.append(job)
-        
+
     return metrics_jobs
+
 
 def new_metrics_job(
     job_name,
