@@ -66,9 +66,6 @@ def run(plan, args={}):
     grafana_dashboards_config_template = read_file(
         static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
     )
-    prometheus_config_template = read_file(
-        static_files.PROMETHEUS_CONFIG_TEMPLATE_FILEPATH
-    )
     prometheus_additional_metrics_jobs = []
 
     plan.print("Read the prometheus, grafana templates")
@@ -376,7 +373,6 @@ def run(plan, args={}):
         plan.print("Launching prometheus...")
         prometheus_private_url = prometheus.launch_prometheus(
             plan,
-            prometheus_config_template,
             all_el_client_contexts,
             all_cl_client_contexts,
             prometheus_additional_metrics_jobs,
