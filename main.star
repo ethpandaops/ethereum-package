@@ -241,9 +241,7 @@ def run(plan, args={}):
     if mev_endpoints:
         for index, participant in enumerate(all_participants):
             if args_with_right_defaults.participants[index].validator_count != 0:
-                mev_boost_launcher = mev_boost.new_mev_boost_launcher(
-                    MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints
-                )
+                mev_boost_launcher = mev_boost.new_mev_boost_launcher(mev_endpoints)
                 mev_boost_service_name = "{0}{1}".format(
                     input_parser.MEV_BOOST_SERVICE_NAME_PREFIX, index
                 )
@@ -253,6 +251,7 @@ def run(plan, args={}):
                     mev_boost_service_name,
                     network_params.network_id,
                     mev_params.mev_boost_image,
+                    mev_params.mev_boost_args,
                 )
                 all_mevboost_contexts.append(mev_boost_context)
 

@@ -71,4 +71,6 @@ mev_params:
   mev_flood_image: flashbots/mev-flood
   mev_flood_extra_args: []
   mev_flood_seconds_per_bundle: 15
+  mev_boost_image: flashbots/mev-boost
+  mev_boost_args: ["mev-boost", "--relay-check"]
 grafana_additional_dashboards: []

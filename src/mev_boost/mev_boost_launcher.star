@@ -17,8 +17,10 @@ NETWORK_ID_TO_NAME = {
 }
 
 
-def launch(plan, mev_boost_launcher, service_name, network_id, mev_boost_image):
-    config = get_config(mev_boost_launcher, network_id, mev_boost_image)
+def launch(
+    plan, mev_boost_launcher, service_name, network_id, mev_boost_image, mev_boost_args
+):
+    config = get_config(mev_boost_launcher, network_id, mev_boost_image, mev_boost_args)
 
     mev_boost_service = plan.add_service(service_name, config)
 
@@ -27,11 +29,8 @@ def launch(plan, mev_boost_launcher, service_name, network_id, mev_boost_image):
     )
 
 
-def get_config(mev_boost_launcher, network_id, mev_boost_image):
-    command = ["mev-boost"]
-
-    if mev_boost_launcher.should_check_relay:
-        command.append("-relay-check")
+def get_config(mev_boost_launcher, network_id, mev_boost_image, mev_boost_args):
+    command = mev_boost_args
 
     return ServiceConfig(
         image=mev_boost_image,
@@ -53,7 +52,5 @@ def get_config(mev_boost_launcher, network_id, mev_boost_image):
     )
 
 
-def new_mev_boost_launcher(should_check_relay, relay_end_points):
-    return struct(
-        should_check_relay=should_check_relay, relay_end_points=relay_end_points
-    )
+def new_mev_boost_launcher(relay_end_points):
+    return struct(relay_end_points=relay_end_points)

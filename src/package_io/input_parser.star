@@ -179,6 +179,7 @@ def input_parser(plan, input_args):
             mev_builder_image=result["mev_params"]["mev_builder_image"],
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
+            mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
             mev_relay_housekeeper_extra_args=result["mev_params"][
                 "mev_relay_housekeeper_extra_args"
@@ -442,6 +443,7 @@ def get_default_mev_params():
         "mev_builder_image": "flashbots/builder:latest",
         "mev_builder_cl_image": "sigp/lighthouse:latest",
         "mev_boost_image": "flashbots/mev-boost",
+        "mev_boost_args": ["mev-boost", "--relay-check"],
         "mev_relay_api_extra_args": [],
         "mev_relay_housekeeper_extra_args": [],
         "mev_relay_website_extra_args": [],
