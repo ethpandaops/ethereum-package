@@ -34,7 +34,7 @@ HIGH_DENEB_VALUE_FORK_VERKLE = 20000
 
 # MEV Params
 FLASHBOTS_MEV_BOOST_PORT = 18550
-MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
+MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
 
 # Minimum number of validators required for a network to be valid is 64
 MIN_VALIDATORS = 64
@@ -152,6 +152,8 @@ def input_parser(plan, input_args):
                     scrape_interval=participant["prometheus_config"]["scrape_interval"],
                     labels=participant["prometheus_config"]["labels"],
                 ),
+                blobber_enabled=participant["blobber_enabled"],
+                blobber_extra_params=participant["blobber_extra_params"],
             )
             for participant in result["participants"]
         ],
@@ -281,6 +283,17 @@ def parse_network_params(input_args):
         ethereum_metrics_exporter_enabled = participant[
             "ethereum_metrics_exporter_enabled"
         ]
+
+        blobber_enabled = participant["blobber_enabled"]
+        if blobber_enabled:
+            # unless we are running lighthouse, we don't support blobber
+            if participant["cl_client_type"] != "lighthouse":
+                fail(
+                    "blobber is not supported for {0} client".format(
+                        participant["cl_client_type"]
+                    )
+                )
+
         if ethereum_metrics_exporter_enabled == False:
             default_ethereum_metrics_exporter_enabled = result[
                 "ethereum_metrics_exporter_enabled"
@@ -433,6 +446,8 @@ def default_participant():
             "scrape_interval": "15s",
             "labels": None,
         },
+        "blobber_enabled": False,
+        "blobber_extra_params": [],
     }
 
 

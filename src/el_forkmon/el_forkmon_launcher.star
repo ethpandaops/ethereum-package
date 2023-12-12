@@ -19,6 +19,12 @@ USED_PORTS = {
     )
 }
 
+# The min/max CPU/memory that el-forkmon can use
+MIN_CPU = 10
+MAX_CPU = 100
+MIN_MEMORY = 32
+MAX_MEMORY = 256
+
 
 def launch_el_forkmon(
     plan,
@@ -62,6 +68,10 @@ def get_config(config_files_artifact_name):
             EL_FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
         cmd=[config_file_path],
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )
 
 

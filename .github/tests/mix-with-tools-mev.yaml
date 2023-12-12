@@ -19,8 +19,10 @@ additional_services:
   - dora
   - prometheus_grafana
   - goomy_blob
-  - full_beaconchain_explorer
   - custom_flood
+  - blobscan
+ethereum_metrics_exporter_enabled: true
+snooper_enabled: true
 mev_type: full
 mev_params:
   mev_relay_image: flashbots/mev-boost-relay:0.27

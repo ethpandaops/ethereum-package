@@ -12,6 +12,12 @@ METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
 PROMETHEUS_DEFAULT_SCRAPE_INTERVAL = "15s"
 
+# The min/max CPU/memory that prometheus can use
+MIN_CPU = 10
+MAX_CPU = 1000
+MIN_MEMORY = 128
+MAX_MEMORY = 2048
+
 
 def launch_prometheus(
     plan,
@@ -26,10 +32,9 @@ def launch_prometheus(
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
     )
-    prometheus_url = prometheus.run(plan, metrics_jobs)
+    prometheus_url = prometheus.run(plan, metrics_jobs, MIN_CPU, MAX_CPU, MIN_MEMORY, MAX_MEMORY)
 
     return prometheus_url
-
 
 def get_metrics_jobs(
     el_client_contexts,
