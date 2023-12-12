@@ -140,6 +140,7 @@ def generate_validator_keystores(plan, mnemonic, participants):
         base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
         to_add = keystore_files_module.new_keystore_files(
             artifact_name,
+            shared_utils.path_join(base_dirname_in_artifact),
             shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),
@@ -283,6 +284,7 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
         base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
         to_add = keystore_files_module.new_keystore_files(
             artifact_name,
+            shared_utils.path_join(base_dirname_in_artifact),
             shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),

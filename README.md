@@ -218,6 +218,14 @@ participants:
     # Additional labels to be added. Default to empty
     labels: {}
 
+  # Blobber can be enabled with the `blobber_enabled` flag per client or globally
+  # Defaults to false
+  blobber_enabled: false
+
+  # Blobber extra params can be passed in to the blobber container
+  # Defaults to empty
+  blobber_extra_params: []
+
 # Default configuration parameters for the Eth network
 network_params:
   # The network ID of the network.
