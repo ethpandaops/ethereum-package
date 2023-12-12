@@ -11,11 +11,6 @@ EL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/el-forkmon-config/config.toml.tmpl"
 )
 
-# Prometheus config
-PROMETHEUS_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/prometheus-config/prometheus.yml.tmpl"
-)
-
 # Validator Ranges config
 VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/validator-ranges/config.yaml.tmpl"
