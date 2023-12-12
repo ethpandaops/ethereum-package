@@ -153,7 +153,7 @@ def input_parser(plan, input_args):
                     labels=participant["prometheus_config"]["labels"],
                 ),
                 blobber_enabled=participant["blobber_enabled"],
-                blobber_extra_params=participant["blobber_params"],
+                blobber_extra_params=participant["blobber_extra_params"],
             )
             for participant in result["participants"]
         ],
@@ -443,7 +443,7 @@ def default_participant():
             "labels": None,
         },
         "blobber_enabled": False,
-        "blobber_params": [],
+        "blobber_extra_params": [],
     }
 
 
