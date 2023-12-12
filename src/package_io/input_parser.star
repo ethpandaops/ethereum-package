@@ -286,9 +286,13 @@ def parse_network_params(input_args):
 
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
-            if participant["cl_client_type"] == ("teku" or "nimbus" or "prysm" or "lodestar"):
-                # TODO: remove this once teku,nimbus,prysm support blobber
-                participant["blobber_enabled"] = False
+            # unless we are running lighthouse, we don't support blobber
+            if participant["cl_client_type"] != "lighthouse" :
+                fail(
+                    "blobber is not supported for {0} client".format(
+                        participant["cl_client_type"]
+                    )
+                )
 
         if ethereum_metrics_exporter_enabled == False:
             default_ethereum_metrics_exporter_enabled = result[
