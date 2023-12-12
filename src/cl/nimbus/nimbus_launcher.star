@@ -91,6 +91,8 @@ def launch(
     v_max_mem,
     snooper_enabled,
     snooper_engine_context,
+    blobber_enabled,
+    blobber_extra_params,
     extra_beacon_params,
     extra_validator_params,
     extra_beacon_labels,

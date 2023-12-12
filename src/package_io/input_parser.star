@@ -152,6 +152,8 @@ def input_parser(plan, input_args):
                     scrape_interval=participant["prometheus_config"]["scrape_interval"],
                     labels=participant["prometheus_config"]["labels"],
                 ),
+                blobber_enabled=participant["blobber_enabled"],
+                blobber_extra_params=participant["blobber_params"],
             )
             for participant in result["participants"]
         ],
@@ -281,6 +283,13 @@ def parse_network_params(input_args):
         ethereum_metrics_exporter_enabled = participant[
             "ethereum_metrics_exporter_enabled"
         ]
+
+        blobber_enabled = participant["blobber_enabled"]
+        if blobber_enabled:
+            if participant["cl_client_type"] == ("teku" or "nimbus"):
+                # TODO: remove this once teku and nimbus support blobber
+                participant["blobber_enabled"] = False
+
         if ethereum_metrics_exporter_enabled == False:
             default_ethereum_metrics_exporter_enabled = result[
                 "ethereum_metrics_exporter_enabled"
@@ -433,6 +442,8 @@ def default_participant():
             "scrape_interval": "15s",
             "labels": None,
         },
+        "blobber_enabled": False,
+        "blobber_params": [],
     }
 
 
