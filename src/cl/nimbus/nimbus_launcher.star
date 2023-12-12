@@ -6,6 +6,7 @@ cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star
 
 constants = import_module("../../package_io/constants.star")
 
+blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENT = "/validator-keys"
 
 # Port IDs

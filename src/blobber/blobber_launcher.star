@@ -6,7 +6,7 @@ blobber_context = import_module("../blobber/blobber_context.star")
 
 BLOBBER_BEACON_PORT_NUM = 9000
 BLOBBER_BEACON_PORT_ID = "discovery"
-BLOBBER_VALIDATOR_PROXY_PORT_NUM = 4000
+BLOBBER_VALIDATOR_PROXY_PORT_NUM = 5000
 BLOBBER_VALIDATOR_PROXY_PORT_ID = "http"
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
@@ -34,7 +34,7 @@ def launch(plan, service_name, node_keystore_files, beacon_http_url, extra_param
 
     blobber_service = plan.add_service(blobber_service_name, blobber_config)
     return blobber_context.new_blobber_context(
-        blobber_service.ip_address, BLOBBER_VALIDATOR_PROXY_PORT_NUM
+        blobber_service.ip_address, blobber_service.ports[BLOBBER_VALIDATOR_PROXY_PORT_NUM]
     )
 
 
@@ -50,7 +50,7 @@ def get_config(service_name, node_keystore_files, beacon_http_url, extra_params)
         "--validator-key-folder={0}".format(validator_root_dirpath),
         "--enable-unsafe-mode",
         "--external-ip={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
-        "--validator-proxy-port-start={0}".format(BLOBBER_VALIDATOR_PROXY_PORT_NUM), # use the same port as the beacon http port
+        "--validator-proxy-port-start={0}".format(BLOBBER_VALIDATOR_PROXY_PORT_NUM),
     ]
 
     if len(extra_params) > 0:

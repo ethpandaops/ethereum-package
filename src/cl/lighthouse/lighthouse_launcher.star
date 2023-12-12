@@ -170,9 +170,9 @@ def launch(
         )
 
         blobber_service = plan.add_service(blobber_service_name, blobber_config)
-        blobber_http_port = blobber_service.ports[BEACON_HTTP_PORT_ID]
+        blobber_http_port = blobber_service.ports[blobber_launcher.BLOBBER_VALIDATOR_PROXY_PORT_ID]
         blobber_http_url = "http://{0}:{1}".format(
-            blobber_service.ip_address, beacon_http_port.number
+            blobber_service.ip_address, blobber_http_port.number
         )
         beacon_http_url = blobber_http_url
 
