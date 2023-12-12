@@ -32,9 +32,12 @@ def launch_prometheus(
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
     )
-    prometheus_url = prometheus.run(plan, metrics_jobs, MIN_CPU, MAX_CPU, MIN_MEMORY, MAX_MEMORY)
+    prometheus_url = prometheus.run(
+        plan, metrics_jobs, MIN_CPU, MAX_CPU, MIN_MEMORY, MAX_MEMORY
+    )
 
     return prometheus_url
+
 
 def get_metrics_jobs(
     el_client_contexts,
