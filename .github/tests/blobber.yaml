@@ -17,10 +17,6 @@ participants:
       - --slot-action-frequency=1
       - "--slot-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 1500}"
     count: 1
-  - el_client_type: geth
-    el_client_image: ethpandaops/geth:master
-    cl_client_type: prysm
-    count: 1
 network_params:
   deneb_fork_epoch: 1
 additional_services:
