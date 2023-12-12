@@ -5,7 +5,8 @@ cl_client_context = import_module("../cl/cl_client_context.star")
 blobber_context = import_module("../blobber/blobber_context.star")
 
 BLOBBER_BEACON_PORT_NUM = 9000
-BLOBBER_BEACON_PORT_ID = "discovery"
+BLOBBER_BEACON_PORT_TCP_ID = "discovery"
+BLOBBER_BEACON_PORT_UDP_ID = "discovery-udp"
 BLOBBER_VALIDATOR_PROXY_PORT_NUM = 5000
 BLOBBER_VALIDATOR_PROXY_PORT_ID = "http"
 
@@ -19,8 +20,11 @@ BLOBBER_USED_PORTS = {
     BLOBBER_VALIDATOR_PROXY_PORT_ID: shared_utils.new_port_spec(
         BLOBBER_VALIDATOR_PROXY_PORT_NUM, shared_utils.TCP_PROTOCOL, wait="5s"
     ),
-    BLOBBER_BEACON_PORT_ID: shared_utils.new_port_spec(
+    BLOBBER_BEACON_PORT_TCP_ID: shared_utils.new_port_spec(
         BLOBBER_BEACON_PORT_NUM, shared_utils.TCP_PROTOCOL, wait=None
+    ),
+    BLOBBER_BEACON_PORT_UDP_ID: shared_utils.new_port_spec(
+        BLOBBER_BEACON_PORT_NUM, shared_utils.UDP_PROTOCOL, wait=None
     ),
 }
 
