@@ -4,7 +4,6 @@ cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 constants = import_module("../../package_io/constants.star")
-blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 IMAGE_SEPARATOR_DELIMITER = ","
 EXPECTED_NUM_IMAGES = 2
 
@@ -161,25 +160,6 @@ def launch(
 
     beacon_http_endpoint = "{0}:{1}".format(beacon_service.ip_address, HTTP_PORT_NUM)
     beacon_rpc_endpoint = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
-
-    # Blobber config
-    if blobber_enabled:
-        blobber_service_name = "{0}-{1}".format("blobber", beacon_node_service_name)
-        blobber_config = blobber_launcher.get_config(
-            blobber_service_name,
-            node_keystore_files,
-            beacon_rpc_endpoint,
-            blobber_extra_params,
-        )
-
-        blobber_service = plan.add_service(blobber_service_name, blobber_config)
-        blobber_http_port = blobber_service.ports[
-            blobber_launcher.BLOBBER_VALIDATOR_PROXY_PORT_ID
-        ]
-        blobber_http_url = "http://{0}:{1}".format(
-            blobber_service.ip_address, blobber_http_port.number
-        )
-        beacon_rpc_endpoint = blobber_http_url
 
     # Launch validator node if we have a keystore file
     validator_service = None

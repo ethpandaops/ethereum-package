@@ -5,7 +5,6 @@ node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 
 constants = import_module("../../package_io/constants.star")
-blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
 # The Docker container runs as the "teku" user so we can't write to root

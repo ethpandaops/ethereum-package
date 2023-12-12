@@ -286,8 +286,8 @@ def parse_network_params(input_args):
 
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
-            if participant["cl_client_type"] == ("teku" or "nimbus"):
-                # TODO: remove this once teku and nimbus support blobber
+            if participant["cl_client_type"] == ("teku" or "nimbus" or "prysm"):
+                # TODO: remove this once teku,nimbus,prysm support blobber
                 participant["blobber_enabled"] = False
 
         if ethereum_metrics_exporter_enabled == False:
