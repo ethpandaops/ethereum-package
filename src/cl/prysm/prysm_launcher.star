@@ -61,7 +61,9 @@ BEACON_NODE_USED_PORTS = {
         DISCOVERY_UDP_PORT_NUM, shared_utils.UDP_PROTOCOL
     ),
     RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+        HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+    ),
     BEACON_MONITORING_PORT_ID: shared_utils.new_port_spec(
         BEACON_MONITORING_PORT_NUM, shared_utils.TCP_PROTOCOL
     ),
@@ -171,7 +173,9 @@ def launch(
         )
 
         blobber_service = plan.add_service(blobber_service_name, blobber_config)
-        blobber_http_port = blobber_service.ports[blobber_launcher.BLOBBER_VALIDATOR_PROXY_PORT_ID]
+        blobber_http_port = blobber_service.ports[
+            blobber_launcher.BLOBBER_VALIDATOR_PROXY_PORT_ID
+        ]
         blobber_http_url = "http://{0}:{1}".format(
             blobber_service.ip_address, blobber_http_port.number
         )
@@ -335,7 +339,9 @@ def get_beacon_config(
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=cl_node_ready_conditions.get_ready_conditions(BEACON_HTTP_PORT_ID),
+        ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+            BEACON_HTTP_PORT_ID
+        ),
         min_cpu=bn_min_cpu,
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,

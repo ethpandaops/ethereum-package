@@ -30,6 +30,7 @@ MAX_CPU = 500
 MIN_MEMORY = 10
 MAX_MEMORY = 300
 
+
 def launch(plan, service_name, node_keystore_files, beacon_http_url, extra_params):
     blobber_service_name = "{0}".format(service_name)
 
@@ -39,12 +40,12 @@ def launch(plan, service_name, node_keystore_files, beacon_http_url, extra_param
 
     blobber_service = plan.add_service(blobber_service_name, blobber_config)
     return blobber_context.new_blobber_context(
-        blobber_service.ip_address, blobber_service.ports[BLOBBER_VALIDATOR_PROXY_PORT_NUM]
+        blobber_service.ip_address,
+        blobber_service.ports[BLOBBER_VALIDATOR_PROXY_PORT_NUM],
     )
 
 
 def get_config(service_name, node_keystore_files, beacon_http_url, extra_params):
-
     validator_root_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
         node_keystore_files.raw_root_dirpath,
