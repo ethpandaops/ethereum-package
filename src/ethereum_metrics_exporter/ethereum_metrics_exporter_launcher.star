@@ -9,6 +9,12 @@ METRICS_PORT_NUMBER = 9090
 
 DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE = "ethpandaops/ethereum-metrics-exporter:0.22.0"
 
+# The min/max CPU/memory that ethereum-metrics-exporter can use
+MIN_CPU = 10
+MAX_CPU = 100
+MIN_MEMORY = 16
+MAX_MEMORY = 128
+
 
 def launch(
     plan,
@@ -42,6 +48,10 @@ def launch(
                     el_client_context.rpc_port_num,
                 ),
             ],
+            min_cpu=MIN_CPU,
+            max_cpu=MAX_CPU,
+            min_memory=MIN_MEMORY,
+            max_memory=MAX_MEMORY,
         ),
     )
 

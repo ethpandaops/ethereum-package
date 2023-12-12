@@ -1,6 +1,6 @@
-shared_utils = import_module("../shared_utils/shared_utils.star")
+shared_utils = import_module("../../shared_utils/shared_utils.star")
 mev_boost_context_module = import_module("../mev_boost/mev_boost_context.star")
-input_parser = import_module("../package_io/input_parser.star")
+input_parser = import_module("../../package_io/input_parser.star")
 
 FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
@@ -15,6 +15,12 @@ NETWORK_ID_TO_NAME = {
     "11155111": "sepolia",
     "3": "ropsten",
 }
+
+# The min/max CPU/memory that mev-boost can use
+MIN_CPU = 10
+MAX_CPU = 500
+MIN_MEMORY = 16
+MAX_MEMORY = 256
 
 
 def launch(plan, mev_boost_launcher, service_name, network_id, mev_boost_image):
@@ -50,6 +56,10 @@ def get_config(mev_boost_launcher, network_id, mev_boost_image):
             "SKIP_RELAY_SIGNATURE_CHECK": "1",
             "RELAYS": mev_boost_launcher.relay_end_points[0],
         },
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )
 
 

@@ -1,6 +1,12 @@
 PYTHON_IMAGE = "ethpandaops/python-web3"
 EIP4788_DEPLOYMENT_SERVICE_NAME = "eip4788-contract-deployment"
 
+# The min/max CPU/memory that deployer can use
+MIN_CPU = 10
+MAX_CPU = 100
+MIN_MEMORY = 10
+MAX_MEMORY = 300
+
 
 def deploy_eip4788_contract_in_background(plan, sender_key, el_uri):
     sender_script = plan.upload_files(
@@ -17,6 +23,10 @@ def deploy_eip4788_contract_in_background(plan, sender_key, el_uri):
                 "SENDER_PRIVATE_KEY": sender_key,
                 "EL_RPC_URI": el_uri,
             },
+            min_cpu=MIN_CPU,
+            max_cpu=MAX_CPU,
+            min_memory=MIN_MEMORY,
+            max_memory=MAX_MEMORY,
         ),
     )
 

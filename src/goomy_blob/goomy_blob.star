@@ -3,6 +3,12 @@ IMAGE_NAME = "ethpandaops/goomy-blob:master"
 
 ENTRYPOINT_ARGS = ["/bin/sh", "-c"]
 
+# The min/max CPU/memory that goomy can use
+MIN_CPU = 100
+MAX_CPU = 1000
+MIN_MEMORY = 20
+MAX_MEMORY = 300
+
 
 def launch_goomy_blob(
     plan,
@@ -67,4 +73,8 @@ def get_config(
                 ]
             )
         ],
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )
