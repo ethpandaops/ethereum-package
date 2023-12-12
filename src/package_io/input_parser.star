@@ -287,7 +287,7 @@ def parse_network_params(input_args):
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
             # unless we are running lighthouse, we don't support blobber
-            if participant["cl_client_type"] != "lighthouse" :
+            if participant["cl_client_type"] != "lighthouse":
                 fail(
                     "blobber is not supported for {0} client".format(
                         participant["cl_client_type"]
