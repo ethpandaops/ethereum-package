@@ -24,6 +24,11 @@ BLOBBER_USED_PORTS = {
     ),
 }
 
+# The min/max CPU/memory that blobbers can use
+MIN_CPU = 10
+MAX_CPU = 500
+MIN_MEMORY = 10
+MAX_MEMORY = 300
 
 def launch(plan, service_name, node_keystore_files, beacon_http_url, extra_params):
     blobber_service_name = "{0}".format(service_name)
@@ -64,4 +69,8 @@ def get_config(service_name, node_keystore_files, beacon_http_url, extra_params)
         },
         cmd=cmd,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )
