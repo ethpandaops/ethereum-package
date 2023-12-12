@@ -1,6 +1,12 @@
 ADMIN_KEY_INDEX = 0
 USER_KEY_INDEX = 2
 
+# The min/max CPU/memory that mev-flood can use
+MIN_CPU = 100
+MAX_CPU = 2000
+MIN_MEMORY = 128
+MAX_MEMORY = 1024
+
 
 def prefixed_address(address):
     return "0x" + address
@@ -12,6 +18,10 @@ def launch_mev_flood(plan, image, el_uri, contract_owner, normal_user):
         config=ServiceConfig(
             image=image,
             entrypoint=["/bin/sh", "-c", "touch main.log && tail -F main.log"],
+            min_cpu=MIN_CPU,
+            max_cpu=MAX_CPU,
+            min_memory=MIN_MEMORY,
+            max_memory=MAX_MEMORY,
         ),
     )
 

@@ -30,6 +30,12 @@ USED_PORTS = {
     )
 }
 
+# The min/max CPU/memory that prometheus can use
+MIN_CPU = 10
+MAX_CPU = 1000
+MIN_MEMORY = 128
+MAX_MEMORY = 2048
+
 
 def launch_prometheus(
     plan,
@@ -84,6 +90,10 @@ def get_config(config_files_artifact_name):
             "--web.console.templates=/etc/prometheus/consoles",
             "--web.enable-lifecycle",
         ],
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )
 
 

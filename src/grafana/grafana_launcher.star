@@ -38,6 +38,12 @@ USED_PORTS = {
     )
 }
 
+# The min/max CPU/memory that grafana can use
+MIN_CPU = 10
+MAX_CPU = 1000
+MIN_MEMORY = 128
+MAX_MEMORY = 2048
+
 
 def launch_grafana(
     plan,
@@ -136,6 +142,10 @@ def get_config(
             GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
             GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
         },
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )
 
 
