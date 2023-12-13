@@ -430,7 +430,10 @@ def get_validator_config(
         "--metrics-allow-origin=*",
         "--metrics-port={0}".format(VALIDATOR_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + constants.CL_CLIENT_TYPE.lighthouse + "-" + el_client_context.client_name,
+        "--graffiti="
+        + constants.CL_CLIENT_TYPE.lighthouse
+        + "-"
+        + el_client_context.client_name,
     ]
 
     if len(extra_params):

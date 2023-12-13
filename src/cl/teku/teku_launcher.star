@@ -278,7 +278,10 @@ def get_config(
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--Xtrusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--validators-graffiti=" + constants.CL_CLIENT_TYPE.teku + "-" + el_client_context.client_name,
+        "--validators-graffiti="
+        + constants.CL_CLIENT_TYPE.teku
+        + "-"
+        + el_client_context.client_name,
     ]
 
     # Depending on whether we're using a node keystore, we'll need to add the validator flags
