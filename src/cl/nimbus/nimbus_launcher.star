@@ -141,6 +141,7 @@ def launch(
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    split_mode_enabled,
 ):
     beacon_node_service_name = "{0}".format(service_name)
     validator_node_service_name = "{0}-{1}".format(
@@ -167,10 +168,12 @@ def launch(
         bn_max_cpu,
         bn_min_mem,
         bn_max_mem,
+        beacon_node_service_name,
         snooper_enabled,
         snooper_engine_context,
         extra_beacon_params,
         extra_beacon_labels,
+        split_mode_enabled,
     )
 
     beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
@@ -183,9 +186,30 @@ def launch(
         beacon_service.ip_address, beacon_metrics_port.number
     )
 
+    beacon_node_identity_recipe = GetHttpRequestRecipe(
+        endpoint="/eth/v1/node/identity",
+        port_id=BEACON_HTTP_PORT_ID,
+        extract={
+            "enr": ".data.enr",
+            "multiaddr": ".data.discovery_addresses[0]",
+            "peer_id": ".data.peer_id",
+        },
+    )
+    response = plan.request(
+        recipe=beacon_node_identity_recipe, service_name=service_name
+    )
+    beacon_node_enr = response["extract.enr"]
+    beacon_multiaddr = response["extract.multiaddr"]
+    beacon_peer_id = response["extract.peer_id"]
+
+    nimbus_node_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, BEACON_METRICS_PATH, beacon_metrics_url
+    )
+    nodes_metrics_info = [nimbus_node_metrics_info]
+
     # Launch validator node if we have a keystore
     validator_service = None
-    if node_keystore_files != None:
+    if node_keystore_files != None and split_mode_enabled:
         v_min_cpu = int(v_min_cpu) if int(v_min_cpu) > 0 else VALIDATOR_MIN_CPU
         v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else VALIDATOR_MAX_CPU
         v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
@@ -211,27 +235,6 @@ def launch(
             validator_node_service_name, validator_config
         )
 
-    beacon_node_identity_recipe = GetHttpRequestRecipe(
-        endpoint="/eth/v1/node/identity",
-        port_id=BEACON_HTTP_PORT_ID,
-        extract={
-            "enr": ".data.enr",
-            "multiaddr": ".data.discovery_addresses[0]",
-            "peer_id": ".data.peer_id",
-        },
-    )
-    response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=service_name
-    )
-    beacon_node_enr = response["extract.enr"]
-    beacon_multiaddr = response["extract.multiaddr"]
-    beacon_peer_id = response["extract.peer_id"]
-
-    nimbus_node_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, BEACON_METRICS_PATH, beacon_metrics_url
-    )
-    nodes_metrics_info = [nimbus_node_metrics_info]
-
     if validator_service:
         validator_metrics_port = validator_service.ports[VALIDATOR_METRICS_PORT_ID]
         validator_metrics_url = "{0}:{1}".format(
@@ -256,7 +259,6 @@ def launch(
         snooper_engine_context,
     )
 
-
 def get_beacon_config(
     el_cl_genesis_data,
     image,
@@ -268,11 +270,25 @@ def get_beacon_config(
     bn_max_cpu,
     bn_min_mem,
     bn_max_mem,
+    beacon_node_service_name,
     snooper_enabled,
     snooper_engine_context,
     extra_params,
     extra_labels,
+    split_mode_enabled,
 ):
+
+    validator_keys_dirpath = ""
+    validator_secrets_dirpath = ""
+    if node_keystore_files != None:
+        validator_keys_dirpath = shared_utils.path_join(
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
+            node_keystore_files.nimbus_keys_relative_dirpath,
+        )
+        validator_secrets_dirpath = shared_utils.path_join(
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
+            node_keystore_files.raw_secrets_relative_dirpath,
+        )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
@@ -316,6 +332,16 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
+    validator_flags = [
+        "--validators-dir=" + validator_keys_dirpath,
+        "--secrets-dir=" + validator_secrets_dirpath,
+        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--graffiti=" + beacon_node_service_name,
+    ]
+
+    if node_keystore_files != None and not split_mode_enabled:
+        cmd.extend(validator_flags)
+
     for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
         cmd.append("--bootstrap-node=" + ctx.enr)
         cmd.append("--direct-peer=" + ctx.multiaddr)
@@ -323,14 +349,14 @@ def get_beacon_config(
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
 
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-    }
     return ServiceConfig(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        files=files,
+        files= {
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid
+            },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
@@ -389,7 +415,7 @@ def get_validator_config(
     ]
 
     if len(extra_params) > 0:
-        cmd.extend([param for param in extra_params])
+        cmd.extend([param for param in extra_params if param != "--split=true"])
 
     return ServiceConfig(
         image=image,
@@ -397,8 +423,7 @@ def get_validator_config(
         cmd=cmd,
         entrypoint=DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT,
         files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=v_min_cpu,
@@ -413,6 +438,8 @@ def get_validator_config(
             extra_labels,
         ),
     )
+
+
 
 def new_nimbus_launcher(el_cl_genesis_data):
     return struct(

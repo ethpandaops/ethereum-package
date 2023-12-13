@@ -121,6 +121,7 @@ def launch(
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    split_mode_enabled=False,
 ):
     beacon_node_service_name = "{0}".format(service_name)
     validator_node_service_name = "{0}-{1}".format(

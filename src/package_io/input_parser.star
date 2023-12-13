@@ -125,6 +125,7 @@ def input_parser(plan, input_args):
                 cl_client_type=participant["cl_client_type"],
                 cl_client_image=participant["cl_client_image"],
                 cl_client_log_level=participant["cl_client_log_level"],
+                cl_split_mode_enabled=participant["cl_split_mode_enabled"],
                 beacon_extra_params=participant["beacon_extra_params"],
                 beacon_extra_labels=participant["beacon_extra_labels"],
                 validator_extra_params=participant["validator_extra_params"],
@@ -252,6 +253,14 @@ def parse_network_params(input_args):
             result["network_params"]["seconds_per_slot"] < 12
         ):
             fail("nimbus can't be run with slot times below 12 seconds")
+
+        if participant["cl_split_mode_enabled"] and cl_client_type not in ("nimbus", "teku"):
+            fail(
+                "split mode is only supported for nimbus and teku clients, but you specified {0}".format(
+                    cl_client_type
+                )
+            )
+
         el_image = participant["el_client_image"]
         if el_image == "":
             default_image = DEFAULT_EL_IMAGES.get(el_client_type, "")
@@ -421,6 +430,7 @@ def default_participant():
         "cl_client_type": "lighthouse",
         "cl_client_image": "",
         "cl_client_log_level": "",
+        "cl_split_mode_enabled": False,
         "beacon_extra_params": [],
         "beacon_extra_labels": {},
         "validator_extra_params": [],
