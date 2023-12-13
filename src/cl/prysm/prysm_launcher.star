@@ -384,7 +384,10 @@ def get_validator_config(
         "--monitoring-host=0.0.0.0",
         "--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + service_name,
+        "--graffiti="
+        + constants.CL_CLIENT_TYPE.prysm
+        + "-"
+        + el_client_context.client_name,
     ]
 
     if len(extra_params) > 0:

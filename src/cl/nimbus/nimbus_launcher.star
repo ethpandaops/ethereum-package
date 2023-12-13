@@ -336,7 +336,10 @@ def get_beacon_config(
         "--validators-dir=" + validator_keys_dirpath,
         "--secrets-dir=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=" + beacon_node_service_name,
+        "--graffiti="
+        + constants.CL_CLIENT_TYPE.nimbus
+        + "-"
+        + el_client_context.client_name,
     ]
 
     if node_keystore_files != None and not split_mode_enabled:
@@ -421,7 +424,10 @@ def get_validator_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(VALIDATOR_METRICS_PORT_NUM),
-        "--graffiti=" + validator_node_service_name,
+        "--graffiti="
+        + constants.CL_CLIENT_TYPE.nimbus
+        + "-"
+        + el_client_context.client_name,
     ]
 
     if len(extra_params) > 0:
