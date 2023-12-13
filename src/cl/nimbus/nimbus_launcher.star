@@ -24,7 +24,7 @@ BEACON_MAX_CPU = 1000
 BEACON_MIN_MEMORY = 128
 BEACON_MAX_MEMORY = 1024
 
-DEFAULT_BEACON_IMAGE_ENTRYPOINT = "/home/user/nimbus-eth2/build/nimbus_beacon_node"
+DEFAULT_BEACON_IMAGE_ENTRYPOINT = ["nimbus_beacon_node"]
 
 BEACON_METRICS_PATH = "/metrics"
 
@@ -44,9 +44,7 @@ VALIDATOR_MAX_CPU = 300
 VALIDATOR_MIN_MEMORY = 128
 VALIDATOR_MAX_MEMORY = 512
 
-DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT = (
-    "/home/user/nimbus-eth2/build/nimbus_validator_client"
-)
+DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT = ["nimbus_validator_client"]
 
 VALIDATOR_METRICS_PATH = "/metrics"
 
@@ -254,8 +252,8 @@ def launch(
         validator_node_service_name,
         beacon_multiaddr,
         beacon_peer_id,
-        snooper_enabled=snooper_enabled,
-        snooper_engine_context=snooper_engine_context,
+        snooper_enabled,
+        snooper_engine_context,
     )
 
 
@@ -318,14 +316,9 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
-    if bootnode_contexts == None:
-        # Copied from https://github.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
-        # See explanation there
-        cmd.append("--subscribe-all-subnets")
-    else:
-        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
-            cmd.append("--bootstrap-node=" + ctx.enr)
-            cmd.append("--direct-peer=" + ctx.multiaddr)
+    for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
+        cmd.append("--bootstrap-node=" + ctx.enr)
+        cmd.append("--direct-peer=" + ctx.multiaddr)
 
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
@@ -339,9 +332,9 @@ def get_beacon_config(
         cmd=cmd,
         files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        # ready_conditions=cl_node_ready_conditions.get_ready_conditions(
-        #     BEACON_HTTP_PORT_ID
-        # ),
+        ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+            BEACON_HTTP_PORT_ID
+        ),
         min_cpu=bn_min_cpu,
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
@@ -383,41 +376,10 @@ def get_validator_config(
             node_keystore_files.raw_secrets_relative_dirpath,
         )
 
-    # Sources for these flags:
-    #  1) https://github.com/status-im/nimbus-eth2/blob/stable/scripts/launch_local_testnet.sh
-    #  2) https://github.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
-    # WARNING: Do NOT set the --max-peers flag here, as doing so to the exact number of nodes seems to mess things up!
-    # See: https://github.com/kurtosis-tech/eth2-merge-kurtosis-module/issues/26
-    validator_copy = [
-        "mkdir",
-        CONSENSUS_DATA_DIRPATH_IN_SERVICE_CONTAINER,
-        "-m",
-        CONSENSUS_DATA_DIR_PERMS_STR,
-        "&&",
-        # TODO(old) COMMENT THIS OUT?
-        "cp",
-        "-R",
-        validator_keys_dirpath,
-        VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-        "&&",
-        "cp",
-        "-R",
-        validator_secrets_dirpath,
-        VALIDATOR_SECRETS_DIRPATH_ON_SERVICE_CONTAINER,
-        "&&",
-        # If we don't do this chmod, Nimbus will spend a crazy amount of time manually correcting them
-        #  before it starts
-        "chmod",
-        "600",
-        VALIDATOR_SECRETS_DIRPATH_ON_SERVICE_CONTAINER + "/*",
-        "&&",
-    ]
-
-    validator_cmd = [
-        DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT,
+    cmd = [
         "--beacon-node=" + beacon_http_url,
-        "--validators-dir=" + VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-        "--secrets-dir=" + VALIDATOR_SECRETS_DIRPATH_ON_SERVICE_CONTAINER,
+        "--validators-dir=" + validator_keys_dirpath,
+        "--secrets-dir=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
@@ -426,28 +388,19 @@ def get_validator_config(
         "--graffiti=" + validator_node_service_name,
     ]
 
-    # Depending on whether we're using a node keystore, we'll need to add the validator flags
-    cmd = []
-    cmd.extend(validator_copy)
-    cmd.extend(validator_cmd)
-
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
 
-    cmd_str = " ".join(cmd)
     return ServiceConfig(
         image=image,
         ports=VALIDATOR_USED_PORTS,
-        cmd=[cmd_str],
-        entrypoint=ENTRYPOINT_ARGS,
+        cmd=cmd,
+        entrypoint=DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT,
         files={
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        # ready_conditions=cl_node_ready_conditions.get_ready_conditions(
-        #     VALIDATOR_HTTP_PORT_ID
-        # ),
         min_cpu=v_min_cpu,
         max_cpu=v_max_cpu,
         min_memory=v_min_mem,
@@ -460,7 +413,6 @@ def get_validator_config(
             extra_labels,
         ),
     )
-
 
 def new_nimbus_launcher(el_cl_genesis_data):
     return struct(
