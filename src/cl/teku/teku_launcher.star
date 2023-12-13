@@ -71,7 +71,9 @@ BEACON_USED_PORTS = {
     BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
         BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
     ),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+        BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+    ),
     BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
         BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
     ),
@@ -274,8 +276,7 @@ def get_config(
         + constants.VALIDATING_REWARDS_ACCOUNT,
         "--validators-graffiti=" + service_name,
     ]
-    beacon_start = [
-        TEKU_BINARY_FILEPATH_IN_IMAGE,
+    cmd = [
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
         "--network="
@@ -317,13 +318,8 @@ def get_config(
     ]
 
     # Depending on whether we're using a node keystore, we'll need to add the validator flags
-    cmd = []
     if node_keystore_files != None:
-        cmd.extend(validator_copy)
-        cmd.extend(beacon_start)
         cmd.extend(validator_flags)
-    else:
-        cmd.extend(beacon_start)
 
     if bootnode_contexts != None:
         cmd.append(
@@ -357,11 +353,13 @@ def get_config(
     return ServiceConfig(
         image=image,
         ports=BEACON_USED_PORTS,
-        cmd=[cmd_str],
-        entrypoint=ENTRYPOINT_ARGS,
+        cmd=cmd,
+        # entrypoint=ENTRYPOINT_ARGS,
         files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=cl_node_ready_conditions.get_ready_conditions(BEACON_HTTP_PORT_ID),
+        ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+            BEACON_HTTP_PORT_ID
+        ),
         min_cpu=bn_min_cpu,
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
