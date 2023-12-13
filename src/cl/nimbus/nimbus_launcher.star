@@ -62,14 +62,12 @@ CONSENSUS_DATA_DIRPATH_IN_SERVICE_CONTAINER = "$HOME/consensus-data"
 CONSENSUS_DATA_DIR_PERMS_STR = "0700"
 
 
-
 # Nimbus needs write access to the validator keys/secrets directories, and b/c the module container runs as root
 #  while the Nimbus container does not, we can't just point the Nimbus binary to the paths in the shared dir because
 #  it won't be able to open them. To get around this, we copy the validator keys/secrets to a path inside the Nimbus
 #  container that is owned by the container's user
 
 # ---------------------------------- Metrics ----------------------------------
-
 
 
 # ---------------------------------- Used Ports ----------------------------------
