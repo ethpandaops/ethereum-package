@@ -98,6 +98,7 @@ def launch(
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    split_mode_enabled,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, TEKU_LOG_LEVELS

@@ -340,6 +340,7 @@ def launch_participant_network(
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                participant.cl_split_mode_enabled,
             )
         else:
             boot_cl_client_ctx = all_cl_client_contexts
@@ -369,6 +370,7 @@ def launch_participant_network(
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                participant.cl_split_mode_enabled,
             )
 
         # Add participant cl additional prometheus labels
