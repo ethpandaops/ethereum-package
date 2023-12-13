@@ -294,6 +294,7 @@ def get_beacon_config(
         # Set per Pari's recommendation to reduce noise
         "--subscribe-all-subnets=true",
         "--jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--enable-debug-rpc-endpoints=true",
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
