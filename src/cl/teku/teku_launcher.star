@@ -133,6 +133,7 @@ def launch(
         bn_max_mem,
         snooper_enabled,
         snooper_engine_context,
+        service_name,
         extra_params,
         extra_labels,
     )
@@ -190,6 +191,7 @@ def get_config(
     bn_max_mem,
     snooper_enabled,
     snooper_engine_context,
+    service_name,
     extra_params,
     extra_labels,
 ):
@@ -275,6 +277,7 @@ def get_config(
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--Xtrusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        "--validators-graffiti=" + service_name,
     ]
 
     # Depending on whether we're using a node keystore, we'll need to add the validator flags

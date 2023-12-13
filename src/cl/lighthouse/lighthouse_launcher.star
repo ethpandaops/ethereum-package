@@ -197,6 +197,7 @@ def launch(
             v_max_cpu,
             v_min_mem,
             v_max_mem,
+            validator_node_service_name,
             extra_validator_params,
             extra_validator_labels,
         )
@@ -391,6 +392,7 @@ def get_validator_config(
     v_max_cpu,
     v_min_mem,
     v_max_mem,
+    validator_node_service_name,
     extra_params,
     extra_labels,
 ):
@@ -427,6 +429,7 @@ def get_validator_config(
         "--metrics-allow-origin=*",
         "--metrics-port={0}".format(VALIDATOR_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
+        "--graffiti=" + validator_node_service_name,
     ]
 
     if len(extra_params):
