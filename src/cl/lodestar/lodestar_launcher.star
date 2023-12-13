@@ -375,7 +375,7 @@ def get_validator_config(
         "--metrics.address=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + validator_node_service_name,
+        "--graffiti=" + constants.CL_CLIENT_TYPE.lodestar + "-" + el_client_context.client_name,
     ]
 
     if len(extra_params) > 0:
