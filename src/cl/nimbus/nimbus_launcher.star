@@ -47,10 +47,6 @@ VALIDATOR_MAX_MEMORY = 512
 DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT = ["nimbus_validator_client"]
 
 VALIDATOR_METRICS_PATH = "/metrics"
-
-VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "$HOME/validator-keys"
-VALIDATOR_SECRETS_DIRPATH_ON_SERVICE_CONTAINER = "$HOME/validator-secrets"
-
 # ---------------------------------- Genesis Files ----------------------------------
 
 # Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we

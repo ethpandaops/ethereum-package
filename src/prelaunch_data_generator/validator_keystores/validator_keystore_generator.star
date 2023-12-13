@@ -102,9 +102,11 @@ def generate_validator_keystores(plan, mnemonic, participants):
             start_index,
             stop_index,
         )
-
+        teku_permissions_cmd = "chown teku:teku -R" + output_dirpath + "/teku-keys"
         all_sub_command_strs.append(generate_keystores_cmd)
+        all_sub_command_strs.append(teku_permissions_cmd)
         all_output_dirpaths.append(output_dirpath)
+
 
     command_str = " && ".join(all_sub_command_strs)
 

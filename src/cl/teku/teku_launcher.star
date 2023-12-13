@@ -14,16 +14,17 @@ CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/consensus-data"
 #  into the Teku user's home directory to get around it
 VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
 
+#  ---------------------------------- Beacon client -------------------------------------
 # Port IDs
-TCP_DISCOVERY_PORT_ID = "tcp-discovery"
-UDP_DISCOVERY_PORT_ID = "udp-discovery"
-HTTP_PORT_ID = "http"
-METRICS_PORT_ID = "metrics"
+BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
+BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
+BEACON_HTTP_PORT_ID = "http"
+BEACON_METRICS_PORT_ID = "metrics"
 
 # Port nums
-DISCOVERY_PORT_NUM = 9000
-HTTP_PORT_NUM = 4000
-METRICS_PORT_NUM = 8008
+BEACON_DISCOVERY_PORT_NUM = 9000
+BEACON_HTTP_PORT_NUM = 4000
+BEACON_METRICS_PORT_NUM = 8008
 
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 50
@@ -31,6 +32,24 @@ BEACON_MAX_CPU = 1000
 BEACON_MIN_MEMORY = 1024
 BEACON_MAX_MEMORY = 2048
 
+BEACON_METRICS_PATH = "/metrics"
+#  ---------------------------------- Validator client -------------------------------------
+VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
+VALIDATOR_HTTP_PORT_ID = "http"
+VALIDATOR_METRICS_PORT_ID = "metrics"
+VALIDATOR_HTTP_PORT_NUM = 5042
+VALIDATOR_METRICS_PORT_NUM = 5064
+VALIDATOR_HTTP_PORT_WAIT_DISABLED = None
+
+VALIDATOR_SUFFIX_SERVICE_NAME = "validator"
+
+# The min/max CPU/memory that the validator node can use
+VALIDATOR_MIN_CPU = 50
+VALIDATOR_MAX_CPU = 300
+VALIDATOR_MIN_MEMORY = 128
+VALIDATOR_MAX_MEMORY = 512
+
+VALIDATOR_METRICS_PATH = "/metrics"
 # 1) The Teku container runs as the "teku" user
 # 2) Teku requires write access to the validator secrets directory, so it can write a lockfile into it as it uses the keys
 # 3) The module container runs as 'root'
@@ -43,25 +62,37 @@ DEST_VALIDATOR_SECRETS_DIRPATH_IN_SERVICE_CONTAINER = "$HOME/validator-secrets"
 
 MIN_PEERS = 1
 
-METRICS_PATH = "/metrics"
-
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
-USED_PORTS = {
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
+BEACON_USED_PORTS = {
+    BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+        BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
     ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
+    BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+        BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
     ),
-    HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
+        BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
     ),
 }
 
-ENTRYPOINT_ARGS = ["sh", "-c"]
+VALIDATOR_USED_PORTS = {
+    VALIDATOR_HTTP_PORT_ID: shared_utils.new_port_spec(
+        VALIDATOR_HTTP_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.NOT_PROVIDED_APPLICATION_PROTOCOL,
+        VALIDATOR_HTTP_PORT_WAIT_DISABLED,
+    ),
+    VALIDATOR_METRICS_PORT_ID: shared_utils.new_port_spec(
+        VALIDATOR_METRICS_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+    ),
+}
 
+
+ENTRYPOINT_ARGS = ["sh", "-c"]
 
 TEKU_LOG_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
@@ -143,7 +174,7 @@ def launch(
 
     node_identity_recipe = GetHttpRequestRecipe(
         endpoint="/eth/v1/node/identity",
-        port_id=HTTP_PORT_ID,
+        port_id=BEACON_HTTP_PORT_ID,
         extract={
             "enr": ".data.enr",
             "multiaddr": ".data.discovery_addresses[0]",
@@ -155,13 +186,13 @@ def launch(
     multiaddr = response["extract.multiaddr"]
     peer_id = response["extract.peer_id"]
 
-    teku_metrics_port = teku_service.ports[METRICS_PORT_ID]
+    teku_metrics_port = teku_service.ports[BEACON_METRICS_PORT_ID]
     teku_metrics_url = "{0}:{1}".format(
         teku_service.ip_address, teku_metrics_port.number
     )
 
     teku_node_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, teku_metrics_url
+        service_name, BEACON_METRICS_PATH, teku_metrics_url
     )
     nodes_metrics_info = [teku_node_metrics_info]
 
@@ -169,7 +200,7 @@ def launch(
         "teku",
         node_enr,
         teku_service.ip_address,
-        HTTP_PORT_NUM,
+        BEACON_HTTP_PORT_NUM,
         nodes_metrics_info,
         service_name,
         multiaddr=multiaddr,
@@ -236,11 +267,12 @@ def get_config(
     ]
     validator_flags = [
         "--validator-keys={0}:{1}".format(
-            DEST_VALIDATOR_KEYS_DIRPATH_IN_SERVICE_CONTAINER,
-            DEST_VALIDATOR_SECRETS_DIRPATH_IN_SERVICE_CONTAINER,
+            validator_keys_dirpath,
+            validator_secrets_dirpath,
         ),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--validators-graffiti=" + service_name,
     ]
     beacon_start = [
         TEKU_BINARY_FILEPATH_IN_IMAGE,
@@ -265,7 +297,7 @@ def get_config(
         "--rest-api-enabled=true",
         "--rest-api-docs-enabled=true",
         "--rest-api-interface=0.0.0.0",
-        "--rest-api-port={0}".format(HTTP_PORT_NUM),
+        "--rest-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
         "--ee-jwt-secret-file=" + constants.JWT_AUTH_PATH,
@@ -275,10 +307,9 @@ def get_config(
         "--metrics-interface=0.0.0.0",
         "--metrics-host-allowlist='*'",
         "--metrics-categories=BEACON,PROCESS,LIBP2P,JVM,NETWORK,PROCESS",
-        "--metrics-port={0}".format(METRICS_PORT_NUM),
+        "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--Xtrusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--validators-graffiti=" + service_name,
     ]
 
     # Depending on whether we're using a node keystore, we'll need to add the validator flags
@@ -321,12 +352,12 @@ def get_config(
     cmd_str = " ".join(cmd)
     return ServiceConfig(
         image=image,
-        ports=USED_PORTS,
+        ports=BEACON_USED_PORTS,
         cmd=[cmd_str],
         entrypoint=ENTRYPOINT_ARGS,
         files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
+        ready_conditions=cl_node_ready_conditions.get_ready_conditions(BEACON_HTTP_PORT_ID),
         min_cpu=bn_min_cpu,
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
