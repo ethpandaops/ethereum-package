@@ -206,6 +206,7 @@ def launch(
             v_max_cpu,
             v_min_mem,
             v_max_mem,
+            validator_node_service_name,
             extra_validator_params,
             extra_validator_labels,
         )
@@ -289,7 +290,6 @@ def get_beacon_config(
         )
 
     cmd = [
-        DEFAULT_BEACON_IMAGE_ENTRYPOINT,
         "--non-interactive=true",
         "--log-level=" + log_level,
         "--udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
@@ -339,7 +339,6 @@ def get_beacon_config(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        entrypoint=ENTRYPOINT_ARGS,
         files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         # ready_conditions=cl_node_ready_conditions.get_ready_conditions(
@@ -370,6 +369,7 @@ def get_validator_config(
     v_max_cpu,
     v_min_mem,
     v_max_mem,
+    validator_node_service_name,
     extra_params,
     extra_labels,
 ):
@@ -421,6 +421,11 @@ def get_validator_config(
         "--validators-dir=" + VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
         "--secrets-dir=" + VALIDATOR_SECRETS_DIRPATH_ON_SERVICE_CONTAINER,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
+        "--metrics",
+        "--metrics-address=0.0.0.0",
+        "--metrics-port={0}".format(VALIDATOR_METRICS_PORT_NUM),
+        "--graffiti=" + validator_node_service_name,
     ]
 
     # Depending on whether we're using a node keystore, we'll need to add the validator flags
@@ -442,9 +447,9 @@ def get_validator_config(
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=cl_node_ready_conditions.get_ready_conditions(
-            VALIDATOR_HTTP_PORT_ID
-        ),
+        # ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+        #     VALIDATOR_HTTP_PORT_ID
+        # ),
         min_cpu=v_min_cpu,
         max_cpu=v_max_cpu,
         min_memory=v_min_mem,
