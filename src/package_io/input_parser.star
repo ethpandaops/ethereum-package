@@ -254,7 +254,10 @@ def parse_network_params(input_args):
         ):
             fail("nimbus can't be run with slot times below 12 seconds")
 
-        if participant["cl_split_mode_enabled"] and cl_client_type not in ("nimbus", "teku"):
+        if participant["cl_split_mode_enabled"] and cl_client_type not in (
+            "nimbus",
+            "teku",
+        ):
             fail(
                 "split mode is only supported for nimbus and teku clients, but you specified {0}".format(
                     cl_client_type

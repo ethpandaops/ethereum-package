@@ -259,6 +259,7 @@ def launch(
         snooper_engine_context,
     )
 
+
 def get_beacon_config(
     el_cl_genesis_data,
     image,
@@ -277,7 +278,6 @@ def get_beacon_config(
     extra_labels,
     split_mode_enabled,
 ):
-
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
     if node_keystore_files != None:
@@ -353,10 +353,10 @@ def get_beacon_config(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        files= {
+        files={
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid
-            },
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
+        },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
@@ -438,7 +438,6 @@ def get_validator_config(
             extra_labels,
         ),
     )
-
 
 
 def new_nimbus_launcher(el_cl_genesis_data):
