@@ -1,4 +1,4 @@
-input_parser = import_module("./src/package_io/input_parser.star")
+input_parser = import_module("./src/package_io/input_parser.star")FAIL
 constants = import_module("./src/package_io/constants.star")
 participant_network = import_module("./src/participant_network.star")
 
