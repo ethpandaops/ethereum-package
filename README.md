@@ -148,7 +148,7 @@ participants:
   cl_client_log_level: ""
 
   # A list of optional extra params that will be passed to the CL to run separate Beacon and validator nodes
-  # Only possible for nimbus or teku (coming soon)
+  # Only possible for nimbus or teku
   # Defaults to false
   cl_split_mode_enabled: false
 
