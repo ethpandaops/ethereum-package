@@ -181,7 +181,9 @@ def launch(
             "peer_id": ".data.peer_id",
         },
     )
-    response = plan.request(recipe=beacon_node_identity_recipe, service_name=service_name)
+    response = plan.request(
+        recipe=beacon_node_identity_recipe, service_name=service_name
+    )
     beacon_node_enr = response["extract.enr"]
     beacon_multiaddr = response["extract.multiaddr"]
     beacon_peer_id = response["extract.peer_id"]
@@ -215,9 +217,7 @@ def launch(
             extra_validator_labels,
         )
 
-        validator_service = plan.add_service(
-            validator_service_name, validator_config
-        )
+        validator_service = plan.add_service(validator_service_name, validator_config)
 
     if validator_service:
         validator_metrics_port = validator_service.ports[VALIDATOR_METRICS_PORT_ID]
@@ -228,7 +228,6 @@ def launch(
             validator_service_name, VALIDATOR_METRICS_PATH, validator_metrics_url
         )
         nodes_metrics_info.append(validator_node_metrics_info)
-
 
     return cl_client_context.new_cl_client_context(
         "teku",
@@ -389,6 +388,7 @@ def get_beacon_config(
         ),
     )
 
+
 def get_validator_config(
     el_cl_genesis_data,
     image,
@@ -451,7 +451,7 @@ def get_validator_config(
         cmd=cmd,
         files={
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=v_min_cpu,
@@ -466,6 +466,7 @@ def get_validator_config(
             extra_labels,
         ),
     )
+
 
 def new_teku_launcher(el_cl_genesis_data):
     return struct(el_cl_genesis_data=el_cl_genesis_data)
