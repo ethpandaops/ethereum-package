@@ -1,5 +1,8 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-IMAGE_NAME = "gobitfly/eth2-beaconchain-explorer:kurtosis"
+postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+redis = import_module("github.com/kurtosis-tech/redis-package/main.star")
+
+IMAGE_NAME = "gobitfly/eth2-beaconchain-explorer:latest"
 
 POSTGRES_PORT_ID = "postgres"
 POSTGRES_PORT_NUMBER = 5432
@@ -27,6 +30,66 @@ USED_PORTS = {
     )
 }
 
+# The min/max CPU/memory that postgres can use
+POSTGRES_MIN_CPU = 10
+POSTGRES_MAX_CPU = 1000
+POSTGRES_MIN_MEMORY = 32
+POSTGRES_MAX_MEMORY = 1024
+
+# The min/max CPU/memory that redis can use
+REDIS_MIN_CPU = 10
+REDIS_MAX_CPU = 1000
+REDIS_MIN_MEMORY = 32
+REDIS_MAX_MEMORY = 1024
+
+# The min/max CPU/memory that littlebigtable can use
+LITTLE_BIGTABLE_MIN_CPU = 100
+LITTLE_BIGTABLE_MAX_CPU = 1000
+LITTLE_BIGTABLE_MIN_MEMORY = 128
+LITTLE_BIGTABLE_MAX_MEMORY = 2048
+
+# The min/max CPU/memory that the indexer can use
+INDEXER_MIN_CPU = 100
+INDEXER_MAX_CPU = 1000
+INDEXER_MIN_MEMORY = 1024
+INDEXER_MAX_MEMORY = 2048
+
+# The min/max CPU/memory that the init can use
+INIT_MIN_CPU = 10
+INIT_MAX_CPU = 100
+INIT_MIN_MEMORY = 32
+INIT_MAX_MEMORY = 128
+
+# The min/max CPU/memory that the eth1indexer can use
+ETH1INDEXER_MIN_CPU = 100
+ETH1INDEXER_MAX_CPU = 1000
+ETH1INDEXER_MIN_MEMORY = 128
+ETH1INDEXER_MAX_MEMORY = 1024
+
+# The min/max CPU/memory that the rewards-exporter can use
+REWARDSEXPORTER_MIN_CPU = 10
+REWARDSEXPORTER_MAX_CPU = 100
+REWARDSEXPORTER_MIN_MEMORY = 32
+REWARDSEXPORTER_MAX_MEMORY = 128
+
+# The min/max CPU/memory that the statistics can use
+STATISTICS_MIN_CPU = 10
+STATISTICS_MAX_CPU = 100
+STATISTICS_MIN_MEMORY = 32
+STATISTICS_MAX_MEMORY = 128
+
+# The min/max CPU/memory that the frontend-data-updater can use
+FDU_MIN_CPU = 10
+FDU_MAX_CPU = 100
+FDU_MIN_MEMORY = 32
+FDU_MAX_MEMORY = 128
+
+# The min/max CPU/memory that the frontend can use
+FRONTEND_MIN_CPU = 100
+FRONTEND_MAX_CPU = 1000
+FRONTEND_MIN_MEMORY = 512
+FRONTEND_MAX_MEMORY = 2048
+
 
 def launch_full_beacon(
     plan,
@@ -34,59 +97,58 @@ def launch_full_beacon(
     cl_client_contexts,
     el_client_contexts,
 ):
-    # TODO perhaps use the official redis & postgres packages
-    db_services = plan.add_services(
-        configs={
-            # Add a Postgres server
-            "explorer-postgres": ServiceConfig(
-                image="postgres:15.2-alpine",
-                ports={
-                    POSTGRES_PORT_ID: PortSpec(
-                        POSTGRES_PORT_NUMBER, application_protocol="postgresql"
-                    ),
-                },
-                env_vars={
-                    "POSTGRES_DB": POSTGRES_DB,
-                    "POSTGRES_USER": POSTGRES_USER,
-                    "POSTGRES_PASSWORD": POSTGRES_PASSWORD,
-                },
-            ),
-            # Add a Redis server
-            "explorer-redis": ServiceConfig(
-                image="redis:7",
-                ports={
-                    REDIS_PORT_ID: PortSpec(
-                        REDIS_PORT_NUMBER, application_protocol="tcp"
-                    ),
-                },
-            ),
-            # Add a Bigtable Emulator server
-            "explorer-littlebigtable": ServiceConfig(
-                image="gobitfly/little_bigtable:latest",
-                ports={
-                    LITTLE_BIGTABLE_PORT_ID: PortSpec(
-                        LITTLE_BIGTABLE_PORT_NUMBER, application_protocol="tcp"
-                    ),
-                },
-            ),
-        }
+    postgres_output = postgres.run(
+        plan,
+        service_name="beaconchain-postgres",
+        image="postgres:15.2-alpine",
+        user=POSTGRES_USER,
+        password=POSTGRES_PASSWORD,
+        database=POSTGRES_DB,
+        min_cpu=POSTGRES_MIN_CPU,
+        max_cpu=POSTGRES_MAX_CPU,
+        min_memory=POSTGRES_MIN_MEMORY,
+        max_memory=POSTGRES_MAX_MEMORY,
+        persistent=False,
+    )
+    redis_output = redis.run(
+        plan,
+        service_name="beaconchain-redis",
+        image="redis:7",
+        min_cpu=REDIS_MIN_CPU,
+        max_cpu=REDIS_MAX_CPU,
+        min_memory=REDIS_MIN_MEMORY,
+        max_memory=REDIS_MAX_MEMORY,
+    )
+    # TODO perhaps create a new service for the littlebigtable
+    little_bigtable = plan.add_service(
+        name="beaconchain-littlebigtable",
+        config=ServiceConfig(
+            image="gobitfly/little_bigtable:latest",
+            ports={
+                LITTLE_BIGTABLE_PORT_ID: PortSpec(
+                    LITTLE_BIGTABLE_PORT_NUMBER, application_protocol="tcp"
+                )
+            },
+            min_cpu=LITTLE_BIGTABLE_MIN_CPU,
+            max_cpu=LITTLE_BIGTABLE_MAX_CPU,
+            min_memory=LITTLE_BIGTABLE_MIN_MEMORY,
+            max_memory=LITTLE_BIGTABLE_MAX_MEMORY,
+        ),
     )
 
     el_uri = "http://{0}:{1}".format(
         el_client_contexts[0].ip_addr, el_client_contexts[0].rpc_port_num
     )
-    redis_uri = "{0}:{1}".format(
-        db_services["explorer-redis"].ip_address, REDIS_PORT_NUMBER
-    )
+    redis_url = "{}:{}".format(redis_output.hostname, redis_output.port_number)
 
     template_data = new_config_template_data(
         cl_client_contexts[0],
         el_uri,
-        db_services["explorer-littlebigtable"].ip_address,
+        little_bigtable.ip_address,
         LITTLE_BIGTABLE_PORT_NUMBER,
-        db_services["explorer-postgres"].ip_address,
+        postgres_output.url,
         POSTGRES_PORT_NUMBER,
-        redis_uri,
+        redis_url,
         FRONTEND_PORT_NUMBER,
     )
 
@@ -104,13 +166,17 @@ def launch_full_beacon(
 
     # Initialize the db schema
     initdbschema = plan.add_service(
-        name="explorer-schema-initializer",
+        name="beaconchain-schema-initializer",
         config=ServiceConfig(
             image=IMAGE_NAME,
             files={
                 "/app/config/": config_files_artifact_name,
             },
             entrypoint=["tail", "-f", "/dev/null"],
+            min_cpu=INIT_MIN_CPU,
+            max_cpu=INIT_MAX_CPU,
+            min_memory=INIT_MIN_MEMORY,
+            max_memory=INIT_MAX_MEMORY,
         ),
     )
 
@@ -139,7 +205,7 @@ def launch_full_beacon(
 
     # Start the indexer
     indexer = plan.add_service(
-        name="explorer-indexer",
+        name="beaconchain-indexer",
         config=ServiceConfig(
             image=IMAGE_NAME,
             files={
@@ -153,11 +219,15 @@ def launch_full_beacon(
             env_vars={
                 "INDEXER_ENABLED": "TRUE",
             },
+            min_cpu=INDEXER_MIN_CPU,
+            max_cpu=INDEXER_MAX_CPU,
+            min_memory=INDEXER_MIN_MEMORY,
+            max_memory=INDEXER_MAX_MEMORY,
         ),
     )
     # Start the eth1indexer
     eth1indexer = plan.add_service(
-        name="explorer-eth1indexer",
+        name="beaconchain-eth1indexer",
         config=ServiceConfig(
             image=IMAGE_NAME,
             files={
@@ -175,11 +245,15 @@ def launch_full_beacon(
                 "1",
                 "-balances.enabled",
             ],
+            min_cpu=ETH1INDEXER_MIN_CPU,
+            max_cpu=ETH1INDEXER_MAX_CPU,
+            min_memory=ETH1INDEXER_MIN_MEMORY,
+            max_memory=ETH1INDEXER_MAX_MEMORY,
         ),
     )
 
     rewardsexporter = plan.add_service(
-        name="explorer-rewardsexporter",
+        name="beaconchain-rewardsexporter",
         config=ServiceConfig(
             image=IMAGE_NAME,
             files={
@@ -190,11 +264,15 @@ def launch_full_beacon(
                 "-config",
                 "/app/config/config.yml",
             ],
+            min_cpu=REWARDSEXPORTER_MIN_CPU,
+            max_cpu=REWARDSEXPORTER_MAX_CPU,
+            min_memory=REWARDSEXPORTER_MIN_MEMORY,
+            max_memory=REWARDSEXPORTER_MAX_MEMORY,
         ),
     )
 
     statistics = plan.add_service(
-        name="explorer-statistics",
+        name="beaconchain-statistics",
         config=ServiceConfig(
             image=IMAGE_NAME,
             files={
@@ -208,11 +286,15 @@ def launch_full_beacon(
                 "-graffiti.enabled",
                 "-validators.enabled",
             ],
+            min_cpu=STATISTICS_MIN_CPU,
+            max_cpu=STATISTICS_MAX_CPU,
+            min_memory=STATISTICS_MIN_MEMORY,
+            max_memory=STATISTICS_MAX_MEMORY,
         ),
     )
 
     fdu = plan.add_service(
-        name="explorer-fdu",
+        name="beaconchain-fdu",
         config=ServiceConfig(
             image=IMAGE_NAME,
             files={
@@ -223,11 +305,15 @@ def launch_full_beacon(
                 "-config",
                 "/app/config/config.yml",
             ],
+            min_cpu=FDU_MIN_CPU,
+            max_cpu=FDU_MAX_CPU,
+            min_memory=FDU_MIN_MEMORY,
+            max_memory=FDU_MAX_MEMORY,
         ),
     )
 
     frontend = plan.add_service(
-        name="explorer-frontend",
+        name="beaconchain-frontend",
         config=ServiceConfig(
             image=IMAGE_NAME,
             files={
@@ -246,12 +332,16 @@ def launch_full_beacon(
                     FRONTEND_PORT_NUMBER, application_protocol="http"
                 ),
             },
+            min_cpu=FRONTEND_MIN_CPU,
+            max_cpu=FRONTEND_MAX_CPU,
+            min_memory=FRONTEND_MIN_MEMORY,
+            max_memory=FRONTEND_MAX_MEMORY,
         ),
     )
 
 
 def new_config_template_data(
-    cl_node_info, el_uri, lbt_host, lbt_port, db_host, db_port, redis_uri, frontend_port
+    cl_node_info, el_uri, lbt_host, lbt_port, db_host, db_port, redis_url, frontend_port
 ):
     return {
         "CLNodeHost": cl_node_info.ip_addr,
@@ -261,7 +351,7 @@ def new_config_template_data(
         "LBTPort": lbt_port,
         "DBHost": db_host,
         "DBPort": db_port,
-        "RedisEndpoint": redis_uri,
+        "RedisEndpoint": redis_url,
         "FrontendPort": frontend_port,
     }
 

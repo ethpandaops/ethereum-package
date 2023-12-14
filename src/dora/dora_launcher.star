@@ -12,6 +12,11 @@ DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE = "/validator-ranges"
 VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
 
+# The min/max CPU/memory that dora can use
+MIN_CPU = 100
+MAX_CPU = 1000
+MIN_MEMORY = 128
+MAX_MEMORY = 2048
 
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -81,6 +86,10 @@ def get_config(
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
         cmd=["-config", config_file_path],
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )
 
 

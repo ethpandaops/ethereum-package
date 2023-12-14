@@ -4,7 +4,6 @@ cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 constants = import_module("../../package_io/constants.star")
-
 IMAGE_SEPARATOR_DELIMITER = ","
 EXPECTED_NUM_IMAGES = 2
 
@@ -15,7 +14,7 @@ CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/consensus-data"
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
 RPC_PORT_ID = "rpc"
-HTTP_PORT_ID = "http"
+BEACON_HTTP_PORT_ID = "http"
 BEACON_MONITORING_PORT_ID = "monitoring"
 
 # Port nums
@@ -26,8 +25,8 @@ HTTP_PORT_NUM = 3500
 BEACON_MONITORING_PORT_NUM = 8080
 
 # The min/max CPU/memory that the beacon node can use
-BEACON_MIN_CPU = 50
-BEACON_MAX_CPU = 1000
+BEACON_MIN_CPU = 100
+BEACON_MAX_CPU = 2000
 BEACON_MIN_MEMORY = 256
 BEACON_MAX_MEMORY = 1024
 
@@ -61,7 +60,9 @@ BEACON_NODE_USED_PORTS = {
         DISCOVERY_UDP_PORT_NUM, shared_utils.UDP_PROTOCOL
     ),
     RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    HTTP_PORT_ID: shared_utils.new_port_spec(HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+        HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+    ),
     BEACON_MONITORING_PORT_ID: shared_utils.new_port_spec(
         BEACON_MONITORING_PORT_NUM, shared_utils.TCP_PROTOCOL
     ),
@@ -102,10 +103,13 @@ def launch(
     v_max_mem,
     snooper_enabled,
     snooper_engine_context,
+    blobber_enabled,
+    blobber_extra_params,
     extra_beacon_params,
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    split_mode_enabled=False,
 ):
     split_images = images.split(IMAGE_SEPARATOR_DELIMITER)
     if len(split_images) != EXPECTED_NUM_IMAGES:
@@ -153,7 +157,7 @@ def launch(
 
     beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
 
-    beacon_http_port = beacon_service.ports[HTTP_PORT_ID]
+    beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
     beacon_http_endpoint = "{0}:{1}".format(beacon_service.ip_address, HTTP_PORT_NUM)
     beacon_rpc_endpoint = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
@@ -191,7 +195,7 @@ def launch(
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
     beacon_node_identity_recipe = GetHttpRequestRecipe(
         endpoint="/eth/v1/node/identity",
-        port_id=HTTP_PORT_ID,
+        port_id=BEACON_HTTP_PORT_ID,
         extract={
             "enr": ".data.enr",
             "multiaddr": ".data.discovery_addresses[0]",
@@ -291,6 +295,7 @@ def get_beacon_config(
         # Set per Pari's recommendation to reduce noise
         "--subscribe-all-subnets=true",
         "--jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--enable-debug-rpc-endpoints=true",
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -316,7 +321,9 @@ def get_beacon_config(
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=cl_node_ready_conditions.get_ready_conditions(HTTP_PORT_ID),
+        ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+            BEACON_HTTP_PORT_ID
+        ),
         min_cpu=bn_min_cpu,
         max_cpu=bn_max_cpu,
         min_memory=bn_min_mem,
@@ -375,8 +382,12 @@ def get_validator_config(
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
-        "--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM)
+        "--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
+        "--graffiti="
+        + constants.CL_CLIENT_TYPE.prysm
+        + "-"
+        + el_client_context.client_name,
     ]
 
     if len(extra_params) > 0:

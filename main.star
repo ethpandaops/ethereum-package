@@ -27,12 +27,12 @@ full_beaconchain_explorer = import_module(
 )
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
-mev_boost = import_module("./src/mev_boost/mev_boost_launcher.star")
-mock_mev = import_module("./src/mock_mev/mock_mev_launcher.star")
-mev_relay = import_module("./src/mev_relay/mev_relay_launcher.star")
-mev_flood = import_module("./src/mev_flood/mev_flood_launcher.star")
+mev_boost = import_module("./src/mev/mev_boost/mev_boost_launcher.star")
+mock_mev = import_module("./src/mev/mock_mev/mock_mev_launcher.star")
+mev_relay = import_module("./src/mev/mev_relay/mev_relay_launcher.star")
+mev_flood = import_module("./src/mev/mev_flood/mev_flood_launcher.star")
 mev_custom_flood = import_module(
-    "./src/mev_custom_flood/mev_custom_flood_launcher.star"
+    "./src/mev/mev_custom_flood/mev_custom_flood_launcher.star"
 )
 eip4788_deployment = import_module(
     "./src/eip4788_deployment/eip4788_deployment_launcher.star"
@@ -46,7 +46,6 @@ GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
-MEV_BOOST_SHOULD_CHECK_RELAY = True
 MOCK_MEV_TYPE = "mock"
 FULL_MEV_TYPE = "full"
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
@@ -65,9 +64,6 @@ def run(plan, args={}):
     )
     grafana_dashboards_config_template = read_file(
         static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
-    )
-    prometheus_config_template = read_file(
-        static_files.PROMETHEUS_CONFIG_TEMPLATE_FILEPATH
     )
     prometheus_additional_metrics_jobs = []
 
@@ -375,7 +371,6 @@ def run(plan, args={}):
         plan.print("Launching prometheus...")
         prometheus_private_url = prometheus.launch_prometheus(
             plan,
-            prometheus_config_template,
             all_el_client_contexts,
             all_cl_client_contexts,
             prometheus_additional_metrics_jobs,

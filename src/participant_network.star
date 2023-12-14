@@ -311,7 +311,6 @@ def launch_participant_network(
                     snooper_engine_context
                 )
             )
-
         all_snooper_engine_contexts.append(snooper_engine_context)
 
         if index == 0:
@@ -335,10 +334,13 @@ def launch_participant_network(
                 participant.v_max_mem,
                 participant.snooper_enabled,
                 snooper_engine_context,
+                participant.blobber_enabled,
+                participant.blobber_extra_params,
                 participant.beacon_extra_params,
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                participant.cl_split_mode_enabled,
             )
         else:
             boot_cl_client_ctx = all_cl_client_contexts
@@ -362,10 +364,13 @@ def launch_participant_network(
                 participant.v_max_mem,
                 participant.snooper_enabled,
                 snooper_engine_context,
+                participant.blobber_enabled,
+                participant.blobber_extra_params,
                 participant.beacon_extra_params,
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                participant.cl_split_mode_enabled,
             )
 
         # Add participant cl additional prometheus labels

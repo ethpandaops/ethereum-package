@@ -31,6 +31,8 @@ participants:
     prometheus_config:
       scrape_interval: 15s
       labels: {}
+    blobber_enabled: false
+    blobber_extra_params: []
 network_params:
   network_id: "3151908"
   deposit_contract_address: "0x4242424242424242424242424242424242424242"

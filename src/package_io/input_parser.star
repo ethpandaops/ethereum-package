@@ -16,7 +16,7 @@ DEFAULT_EL_IMAGES = {
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "teku": "consensys/teku:latest",
-    "nimbus": "statusim/nimbus-eth2:multiarch-latest",
+    "nimbus": "ethpandaops/nimbus:unstable",
     "prysm": "prysmaticlabs/prysm-beacon-chain:latest,prysmaticlabs/prysm-validator:latest",
     "lodestar": "chainsafe/lodestar:latest",
 }
@@ -34,7 +34,7 @@ HIGH_DENEB_VALUE_FORK_VERKLE = 20000
 
 # MEV Params
 FLASHBOTS_MEV_BOOST_PORT = 18550
-MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost-"
+MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
 
 # Minimum number of validators required for a network to be valid is 64
 MIN_VALIDATORS = 64
@@ -125,6 +125,7 @@ def input_parser(plan, input_args):
                 cl_client_type=participant["cl_client_type"],
                 cl_client_image=participant["cl_client_image"],
                 cl_client_log_level=participant["cl_client_log_level"],
+                cl_split_mode_enabled=participant["cl_split_mode_enabled"],
                 beacon_extra_params=participant["beacon_extra_params"],
                 beacon_extra_labels=participant["beacon_extra_labels"],
                 validator_extra_params=participant["validator_extra_params"],
@@ -152,6 +153,8 @@ def input_parser(plan, input_args):
                     scrape_interval=participant["prometheus_config"]["scrape_interval"],
                     labels=participant["prometheus_config"]["labels"],
                 ),
+                blobber_enabled=participant["blobber_enabled"],
+                blobber_extra_params=participant["blobber_extra_params"],
             )
             for participant in result["participants"]
         ],
@@ -251,6 +254,17 @@ def parse_network_params(input_args):
             result["network_params"]["seconds_per_slot"] < 12
         ):
             fail("nimbus can't be run with slot times below 12 seconds")
+
+        if participant["cl_split_mode_enabled"] and cl_client_type not in (
+            "nimbus",
+            "teku",
+        ):
+            fail(
+                "split mode is only supported for nimbus and teku clients, but you specified {0}".format(
+                    cl_client_type
+                )
+            )
+
         el_image = participant["el_client_image"]
         if el_image == "":
             default_image = DEFAULT_EL_IMAGES.get(el_client_type, "")
@@ -282,6 +296,17 @@ def parse_network_params(input_args):
         ethereum_metrics_exporter_enabled = participant[
             "ethereum_metrics_exporter_enabled"
         ]
+
+        blobber_enabled = participant["blobber_enabled"]
+        if blobber_enabled:
+            # unless we are running lighthouse, we don't support blobber
+            if participant["cl_client_type"] != "lighthouse":
+                fail(
+                    "blobber is not supported for {0} client".format(
+                        participant["cl_client_type"]
+                    )
+                )
+
         if ethereum_metrics_exporter_enabled == False:
             default_ethereum_metrics_exporter_enabled = result[
                 "ethereum_metrics_exporter_enabled"
@@ -409,6 +434,7 @@ def default_participant():
         "cl_client_type": "lighthouse",
         "cl_client_image": "",
         "cl_client_log_level": "",
+        "cl_split_mode_enabled": False,
         "beacon_extra_params": [],
         "beacon_extra_labels": {},
         "validator_extra_params": [],
@@ -434,6 +460,8 @@ def default_participant():
             "scrape_interval": "15s",
             "labels": None,
         },
+        "blobber_enabled": False,
+        "blobber_extra_params": [],
     }
 
 

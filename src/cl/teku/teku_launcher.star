@@ -5,7 +5,6 @@ node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 
 constants = import_module("../../package_io/constants.star")
-
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
 # The Docker container runs as the "teku" user so we can't write to root
@@ -93,10 +92,13 @@ def launch(
     v_max_mem,
     snooper_enabled,
     snooper_engine_context,
+    blobber_enabled,
+    blobber_extra_params,
     extra_beacon_params,
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    split_mode_enabled,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, TEKU_LOG_LEVELS
@@ -132,6 +134,7 @@ def launch(
         bn_max_mem,
         snooper_enabled,
         snooper_engine_context,
+        service_name,
         extra_params,
         extra_labels,
     )
@@ -189,6 +192,7 @@ def get_config(
     bn_max_mem,
     snooper_enabled,
     snooper_engine_context,
+    service_name,
     extra_params,
     extra_labels,
 ):
@@ -274,6 +278,10 @@ def get_config(
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--Xtrusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        "--validators-graffiti="
+        + constants.CL_CLIENT_TYPE.teku
+        + "-"
+        + el_client_context.client_name,
     ]
 
     # Depending on whether we're using a node keystore, we'll need to add the validator flags
