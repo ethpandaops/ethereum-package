@@ -24,6 +24,12 @@ USED_PORTS = {
     )
 }
 
+# The min/max CPU/memory that beacon-metrics-gazer can use
+MIN_CPU = 10
+MAX_CPU = 500
+MIN_MEMORY = 20
+MAX_MEMORY = 300
+
 
 def launch_beacon_metrics_gazer(plan, cl_client_contexts, network_params):
     config = get_config(
@@ -66,4 +72,8 @@ def get_config(ip_addr, http_port_num):
             "0.0.0.0",
             "-v",
         ],
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
     )

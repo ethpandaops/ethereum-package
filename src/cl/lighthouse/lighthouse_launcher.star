@@ -6,6 +6,8 @@ cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star
 
 constants = import_module("../../package_io/constants.star")
 
+blobber_launcher = import_module("../../blobber/blobber_launcher.star")
+
 LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
 
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
@@ -113,10 +115,13 @@ def launch(
     v_max_mem,
     snooper_enabled,
     snooper_engine_context,
+    blobber_enabled,
+    blobber_extra_params,
     extra_beacon_params,
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    split_mode_enabled=False,
 ):
     beacon_node_service_name = "{0}".format(service_name)
     validator_node_service_name = "{0}-{1}".format(
@@ -155,6 +160,25 @@ def launch(
         beacon_service.ip_address, beacon_http_port.number
     )
 
+    # Blobber config
+    if blobber_enabled:
+        blobber_service_name = "{0}-{1}".format("blobber", beacon_node_service_name)
+        blobber_config = blobber_launcher.get_config(
+            blobber_service_name,
+            node_keystore_files,
+            beacon_http_url,
+            blobber_extra_params,
+        )
+
+        blobber_service = plan.add_service(blobber_service_name, blobber_config)
+        blobber_http_port = blobber_service.ports[
+            blobber_launcher.BLOBBER_VALIDATOR_PROXY_PORT_ID
+        ]
+        blobber_http_url = "http://{0}:{1}".format(
+            blobber_service.ip_address, blobber_http_port.number
+        )
+        beacon_http_url = blobber_http_url
+
     # Launch validator node if we have a keystore
     validator_service = None
     if node_keystore_files != None:
@@ -174,6 +198,7 @@ def launch(
             v_max_cpu,
             v_min_mem,
             v_max_mem,
+            validator_node_service_name,
             extra_validator_params,
             extra_validator_labels,
         )
@@ -368,6 +393,7 @@ def get_validator_config(
     v_max_cpu,
     v_min_mem,
     v_max_mem,
+    validator_node_service_name,
     extra_params,
     extra_labels,
 ):
@@ -404,6 +430,10 @@ def get_validator_config(
         "--metrics-allow-origin=*",
         "--metrics-port={0}".format(VALIDATOR_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
+        "--graffiti="
+        + constants.CL_CLIENT_TYPE.lighthouse
+        + "-"
+        + el_client_context.client_name,
     ]
 
     if len(extra_params):

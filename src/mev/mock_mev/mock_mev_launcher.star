@@ -3,6 +3,12 @@ MOCK_MEV_SERVICE_NAME = "mock-mev"
 MOCK_MEV_BUILDER_PORT = 18550
 DEFAULT_MOCK_MEV_PUB_KEY = "0x95fde78acd5f6886ddaf5d0056610167c513d09c1c0efabbc7cdcc69beea113779c4a81e2d24daafc5387dbf6ac5fe48"
 
+# The min/max CPU/memory that mev-mock-builder can use
+MIN_CPU = 100
+MAX_CPU = 1000
+MIN_MEMORY = 128
+MAX_MEMORY = 1024
+
 
 def launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret, global_client_log_level):
     mock_builder = plan.add_service(
@@ -21,6 +27,10 @@ def launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret, global_client_log_leve
                 "--bid-multiplier=5",  # TODO: This could be customizable
                 "--log-level={0}".format(global_client_log_level),
             ],
+            min_cpu=MIN_CPU,
+            max_cpu=MAX_CPU,
+            min_memory=MIN_MEMORY,
+            max_memory=MAX_MEMORY,
         ),
     )
     return "http://{0}@{1}:{2}".format(

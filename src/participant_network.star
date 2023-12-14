@@ -95,7 +95,7 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:1.3.15"
+                "ethpandaops/ethereum-genesis-generator:4.0.0-rc.3"
             )
         # we are running capella genesis - default behavior
         elif (
@@ -331,7 +331,6 @@ def launch_participant_network(
                     snooper_engine_context
                 )
             )
-
         all_snooper_engine_contexts.append(snooper_engine_context)
 
         if index == 0:
@@ -355,10 +354,13 @@ def launch_participant_network(
                 participant.v_max_mem,
                 participant.snooper_enabled,
                 snooper_engine_context,
+                participant.blobber_enabled,
+                participant.blobber_extra_params,
                 participant.beacon_extra_params,
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                participant.cl_split_mode_enabled,
             )
         else:
             boot_cl_client_ctx = all_cl_client_contexts
@@ -382,10 +384,13 @@ def launch_participant_network(
                 participant.v_max_mem,
                 participant.snooper_enabled,
                 snooper_engine_context,
+                participant.blobber_enabled,
+                participant.blobber_extra_params,
                 participant.beacon_extra_params,
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                participant.cl_split_mode_enabled,
             )
 
         # Add participant cl additional prometheus labels
