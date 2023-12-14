@@ -18,5 +18,4 @@ participants:
   - el_client_type: ethereumjs
     cl_client_type: teku
     cl_split_mode_enabled: true
-additional_services:
-  - dora
+additional_services: []
