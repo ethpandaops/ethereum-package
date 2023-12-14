@@ -47,10 +47,6 @@ VALIDATOR_MAX_MEMORY = 512
 DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT = ["nimbus_validator_client"]
 
 VALIDATOR_METRICS_PATH = "/metrics"
-
-VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "$HOME/validator-keys"
-VALIDATOR_SECRETS_DIRPATH_ON_SERVICE_CONTAINER = "$HOME/validator-secrets"
-
 # ---------------------------------- Genesis Files ----------------------------------
 
 # Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
@@ -360,7 +356,7 @@ def get_beacon_config(
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
     }
-    if node_keystore_files:
+    if node_keystore_files != None and not split_mode_enabled:
         files[
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS
         ] = node_keystore_files.files_artifact_uuid
