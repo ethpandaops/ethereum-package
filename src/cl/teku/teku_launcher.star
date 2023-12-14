@@ -50,15 +50,6 @@ VALIDATOR_MIN_MEMORY = 128
 VALIDATOR_MAX_MEMORY = 512
 
 VALIDATOR_METRICS_PATH = "/metrics"
-# 1) The Teku container runs as the "teku" user
-# 2) Teku requires write access to the validator secrets directory, so it can write a lockfile into it as it uses the keys
-# 3) The module container runs as 'root'
-# With these three things combined, it means that when the module container tries to write the validator keys/secrets into
-#  the shared directory, it does so as 'root'. When Teku tries to consum the same files, it will get a failure because it
-#  doesn't have permission to write to the 'validator-secrets' directory.
-# To get around this, we copy the files AGAIN from
-DEST_VALIDATOR_KEYS_DIRPATH_IN_SERVICE_CONTAINER = "$HOME/validator-keys"
-DEST_VALIDATOR_SECRETS_DIRPATH_IN_SERVICE_CONTAINER = "$HOME/validator-secrets"
 
 MIN_PEERS = 1
 
@@ -133,6 +124,10 @@ def launch(
     extra_validator_labels,
     split_mode_enabled,
 ):
+    beacon_service_name = "{0}".format(service_name)
+    validator_service_name = "{0}-{1}".format(
+        service_name, VALIDATOR_SUFFIX_SERVICE_NAME
+    )
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, TEKU_LOG_LEVELS
     )
@@ -146,15 +141,7 @@ def launch(
     bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
-    # Set the min/max CPU/memory for the beacon node to be the max of the beacon node and validator node values, unless this is defined, it will use the default beacon values
-    bn_min_cpu = int(v_min_cpu) if (int(v_min_cpu) > bn_min_cpu) else bn_min_cpu
-    bn_max_cpu = int(v_max_cpu) if (int(v_max_cpu) > bn_max_cpu) else bn_max_cpu
-    bn_min_mem = int(v_min_mem) if (int(v_min_mem) > bn_min_mem) else bn_min_mem
-    bn_max_mem = int(v_max_mem) if (int(v_max_mem) > bn_max_mem) else bn_max_mem
-
-    extra_labels = extra_beacon_labels | extra_validator_labels
-
-    config = get_config(
+    config = get_beacon_config(
         launcher.el_cl_genesis_data,
         image,
         bootnode_context,
@@ -167,52 +154,98 @@ def launch(
         bn_max_mem,
         snooper_enabled,
         snooper_engine_context,
-        service_name,
-        extra_params,
-        extra_labels,
+        beacon_service_name,
+        extra_beacon_params,
+        extra_beacon_labels,
+        split_mode_enabled,
     )
 
-    teku_service = plan.add_service(service_name, config)
+    beacon_service = plan.add_service(service_name, config)
 
-    node_identity_recipe = GetHttpRequestRecipe(
+    beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
+    beacon_http_url = "http://{0}:{1}".format(
+        beacon_service.ip_address, beacon_http_port.number
+    )
+
+    beacon_metrics_port = beacon_service.ports[BEACON_METRICS_PORT_ID]
+    beacon_metrics_url = "{0}:{1}".format(
+        beacon_service.ip_address, beacon_metrics_port.number
+    )
+
+    beacon_node_identity_recipe = GetHttpRequestRecipe(
         endpoint="/eth/v1/node/identity",
         port_id=BEACON_HTTP_PORT_ID,
         extract={
             "enr": ".data.enr",
-            "multiaddr": ".data.discovery_addresses[0]",
+            "multiaddr": ".data.p2p_addresses[0]",
             "peer_id": ".data.peer_id",
         },
     )
-    response = plan.request(recipe=node_identity_recipe, service_name=service_name)
-    node_enr = response["extract.enr"]
-    multiaddr = response["extract.multiaddr"]
-    peer_id = response["extract.peer_id"]
+    response = plan.request(recipe=beacon_node_identity_recipe, service_name=service_name)
+    beacon_node_enr = response["extract.enr"]
+    beacon_multiaddr = response["extract.multiaddr"]
+    beacon_peer_id = response["extract.peer_id"]
 
-    teku_metrics_port = teku_service.ports[BEACON_METRICS_PORT_ID]
-    teku_metrics_url = "{0}:{1}".format(
-        teku_service.ip_address, teku_metrics_port.number
+    beacon_node_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, BEACON_METRICS_PATH, beacon_metrics_url
     )
+    nodes_metrics_info = [beacon_node_metrics_info]
 
-    teku_node_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, BEACON_METRICS_PATH, teku_metrics_url
-    )
-    nodes_metrics_info = [teku_node_metrics_info]
+    # Launch validator node if we have a keystore
+    validator_service = None
+    if node_keystore_files != None and split_mode_enabled:
+        v_min_cpu = int(v_min_cpu) if int(v_min_cpu) > 0 else VALIDATOR_MIN_CPU
+        v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else VALIDATOR_MAX_CPU
+        v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
+        v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
+
+        validator_config = get_validator_config(
+            launcher.el_cl_genesis_data,
+            image,
+            log_level,
+            beacon_http_url,
+            el_client_context,
+            node_keystore_files,
+            v_min_cpu,
+            v_max_cpu,
+            v_min_mem,
+            v_max_mem,
+            validator_service_name,
+            extra_validator_params,
+            extra_validator_labels,
+        )
+
+        validator_service = plan.add_service(
+            validator_service_name, validator_config
+        )
+
+    if validator_service:
+        validator_metrics_port = validator_service.ports[VALIDATOR_METRICS_PORT_ID]
+        validator_metrics_url = "{0}:{1}".format(
+            validator_service.ip_address, validator_metrics_port.number
+        )
+        validator_node_metrics_info = node_metrics.new_node_metrics_info(
+            validator_service_name, VALIDATOR_METRICS_PATH, validator_metrics_url
+        )
+        nodes_metrics_info.append(validator_node_metrics_info)
+
 
     return cl_client_context.new_cl_client_context(
         "teku",
-        node_enr,
-        teku_service.ip_address,
+        beacon_node_enr,
+        beacon_service.ip_address,
         BEACON_HTTP_PORT_NUM,
         nodes_metrics_info,
-        service_name,
-        multiaddr=multiaddr,
-        peer_id=peer_id,
+        beacon_service_name,
+        validator_service_name,
+        multiaddr=beacon_multiaddr,
+        peer_id=beacon_peer_id,
         snooper_enabled=snooper_enabled,
         snooper_engine_context=snooper_engine_context,
     )
 
 
-def get_config(
+def get_beacon_config(
     el_cl_genesis_data,
     image,
     bootnode_contexts,
@@ -228,19 +261,8 @@ def get_config(
     service_name,
     extra_params,
     extra_labels,
+    split_mode_enabled,
 ):
-    # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_engine_context.ip_addr,
-            snooper_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_client_context.ip_addr,
-            el_client_context.engine_rpc_port_num,
-        )
-
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
     if node_keystore_files:
@@ -252,30 +274,17 @@ def get_config(
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
             node_keystore_files.teku_secrets_relative_dirpath,
         )
-
-    validator_copy = [
-        # Needed because the generated keys are owned by root and the Teku image runs as the 'teku' user
-        "cp",
-        "-R",
-        validator_keys_dirpath,
-        DEST_VALIDATOR_KEYS_DIRPATH_IN_SERVICE_CONTAINER,
-        "&&",
-        # Needed because the generated keys are owned by root and the Teku image runs as the 'teku' user
-        "cp",
-        "-R",
-        validator_secrets_dirpath,
-        DEST_VALIDATOR_SECRETS_DIRPATH_IN_SERVICE_CONTAINER,
-        "&&",
-    ]
-    validator_flags = [
-        "--validator-keys={0}:{1}".format(
-            validator_keys_dirpath,
-            validator_secrets_dirpath,
-        ),
-        "--validators-proposer-default-fee-recipient="
-        + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--validators-graffiti=" + service_name,
-    ]
+    # If snooper is enabled use the snooper engine context, otherwise use the execution client context
+    if snooper_enabled:
+        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+            snooper_engine_context.ip_addr,
+            snooper_engine_context.engine_rpc_port_num,
+        )
+    else:
+        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+            el_client_context.ip_addr,
+            el_client_context.engine_rpc_port_num,
+        )
     cmd = [
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
@@ -311,14 +320,21 @@ def get_config(
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--Xtrusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+    ]
+    validator_flags = [
+        "--validator-keys={0}:{1}".format(
+            validator_keys_dirpath,
+            validator_secrets_dirpath,
+        ),
+        "--validators-proposer-default-fee-recipient="
+        + constants.VALIDATING_REWARDS_ACCOUNT,
         "--validators-graffiti="
         + constants.CL_CLIENT_TYPE.teku
         + "-"
         + el_client_context.client_name,
     ]
 
-    # Depending on whether we're using a node keystore, we'll need to add the validator flags
-    if node_keystore_files != None:
+    if node_keystore_files != None and not split_mode_enabled:
         cmd.extend(validator_flags)
 
     if bootnode_contexts != None:
@@ -345,7 +361,7 @@ def get_config(
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
     }
-    if node_keystore_files:
+    if node_keystore_files != None and not split_mode_enabled:
         files[
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
@@ -373,6 +389,83 @@ def get_config(
         ),
     )
 
+def get_validator_config(
+    el_cl_genesis_data,
+    image,
+    log_level,
+    beacon_http_url,
+    el_client_context,
+    node_keystore_files,
+    v_min_cpu,
+    v_max_cpu,
+    v_min_mem,
+    v_max_mem,
+    validator_service_name,
+    extra_params,
+    extra_labels,
+):
+    validator_keys_dirpath = ""
+    validator_secrets_dirpath = ""
+    if node_keystore_files != None:
+        validator_keys_dirpath = shared_utils.path_join(
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
+            node_keystore_files.teku_keys_relative_dirpath,
+        )
+        validator_secrets_dirpath = shared_utils.path_join(
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
+            node_keystore_files.teku_secrets_relative_dirpath,
+        )
+
+    cmd = [
+        "validator-client",
+        "--logging=" + log_level,
+        "--network="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
+        "--data-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--data-validator-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--beacon-node-api-endpoint=" + beacon_http_url,
+        "--validator-keys={0}:{1}".format(
+            validator_keys_dirpath,
+            validator_secrets_dirpath,
+        ),
+        "--validators-proposer-default-fee-recipient="
+        + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--validators-graffiti="
+        + constants.CL_CLIENT_TYPE.teku
+        + "-"
+        + el_client_context.client_name,
+        # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
+        "--metrics-enabled=true",
+        "--metrics-host-allowlist=*",
+        "--metrics-interface=0.0.0.0",
+        "--metrics-port={0}".format(VALIDATOR_METRICS_PORT_NUM),
+    ]
+
+    if len(extra_params) > 0:
+        cmd.extend([param for param in extra_params if param != "--split=true"])
+
+    return ServiceConfig(
+        image=image,
+        ports=VALIDATOR_USED_PORTS,
+        cmd=cmd,
+        files={
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid
+        },
+        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu=v_min_cpu,
+        max_cpu=v_max_cpu,
+        min_memory=v_min_mem,
+        max_memory=v_max_mem,
+        labels=shared_utils.label_maker(
+            constants.CL_CLIENT_TYPE.teku,
+            constants.CLIENT_TYPES.validator,
+            image,
+            el_client_context.client_name,
+            extra_labels,
+        ),
+    )
 
 def new_teku_launcher(el_cl_genesis_data):
     return struct(el_cl_genesis_data=el_cl_genesis_data)

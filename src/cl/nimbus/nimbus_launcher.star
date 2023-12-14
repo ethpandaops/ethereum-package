@@ -356,7 +356,7 @@ def get_beacon_config(
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
     }
-    if node_keystore_files:
+    if node_keystore_files != None and not split_mode_enabled:
         files[
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS
         ] = node_keystore_files.files_artifact_uuid
