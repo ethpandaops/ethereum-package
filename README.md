@@ -341,7 +341,7 @@ mev_params:
   mev_builder_cl_image: sigp/lighthouse:latest
   # The image to use for mev-boost
   mev_boost_image: flashbots/mev-boost
-  # Parameters for MEV Boost
+  # Parameters for MEV Boost. This override all arguments of the mev-boost container
   mev_boost_args: []
   # Extra parameters to send to the API
   mev_relay_api_extra_args: []
