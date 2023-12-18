@@ -10,6 +10,7 @@ def new_cl_client_context(
     peer_id="",
     snooper_enabled=False,
     snooper_engine_context=None,
+    validator_keystore_files_artifact_uuid="",
 ):
     return struct(
         client_name=client_name,
@@ -23,4 +24,5 @@ def new_cl_client_context(
         peer_id=peer_id,
         snooper_enabled=snooper_enabled,
         snooper_engine_context=snooper_engine_context,
+        validator_keystore_files_artifact_uuid=validator_keystore_files_artifact_uuid,
     )
