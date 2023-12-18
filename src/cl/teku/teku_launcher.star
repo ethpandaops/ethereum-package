@@ -241,7 +241,9 @@ def launch(
         peer_id=beacon_peer_id,
         snooper_enabled=snooper_enabled,
         snooper_engine_context=snooper_engine_context,
-        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid if node_keystore_files else "",
+        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
+        if node_keystore_files
+        else "",
     )
 
 
