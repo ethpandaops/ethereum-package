@@ -187,7 +187,7 @@ def launch(
         port_id=BEACON_HTTP_PORT_ID,
         extract={
             "enr": ".data.enr",
-            "multiaddr": ".data.discovery_addresses[0]",
+            "multiaddr": ".data.p2p_addresses[0]",
             "peer_id": ".data.peer_id",
         },
     )
@@ -253,6 +253,9 @@ def launch(
         beacon_peer_id,
         snooper_enabled,
         snooper_engine_context,
+        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
+        if node_keystore_files
+        else "",
     )
 
 
