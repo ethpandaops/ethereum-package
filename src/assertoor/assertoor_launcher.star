@@ -38,7 +38,11 @@ def launch_assertoor(
         el_client = el_client_contexts[index]
         all_client_info.append(
             new_client_info(
-                client.ip_addr, client.http_port_num, el_client.ip_addr, el_client.rpc_port_num, client.beacon_service_name
+                client.ip_addr,
+                client.http_port_num,
+                el_client.ip_addr,
+                el_client.rpc_port_num,
+                client.beacon_service_name,
             )
         )
 
@@ -48,7 +52,9 @@ def launch_assertoor(
         config_template, template_data
     )
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[ASSERTOOR_CONFIG_FILENAME] = template_and_data
+    template_and_data_by_rel_dest_filepath[
+        ASSERTOOR_CONFIG_FILENAME
+    ] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "assertoor-config"
@@ -60,9 +66,7 @@ def launch_assertoor(
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(
-    config_files_artifact_name
-):
+def get_config(config_files_artifact_name):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         ASSERTOOR_CONFIG_FILENAME,
@@ -93,4 +97,10 @@ def new_config_template_data(listen_port_num, client_info):
 
 
 def new_client_info(cl_ip_addr, cl_port_num, el_ip_addr, el_port_num, service_name):
-    return {"CLIPAddr": cl_ip_addr, "CLPortNum": cl_port_num, "ELIPAddr": el_ip_addr, "ELPortNum": el_port_num, "Name": service_name}
+    return {
+        "CLIPAddr": cl_ip_addr,
+        "CLPortNum": cl_port_num,
+        "ELIPAddr": el_ip_addr,
+        "ELPortNum": el_port_num,
+        "Name": service_name,
+    }

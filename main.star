@@ -365,7 +365,9 @@ def run(plan, args={}):
             launch_prometheus_grafana = True
         elif additional_service == "assertoor":
             plan.print("Launching assertoor")
-            assertoor_config_template = read_file(static_files.ASSERTOOR_CONFIG_TEMPLATE_FILEPATH)
+            assertoor_config_template = read_file(
+                static_files.ASSERTOOR_CONFIG_TEMPLATE_FILEPATH
+            )
             assertoor.launch_assertoor(
                 plan,
                 assertoor_config_template,
