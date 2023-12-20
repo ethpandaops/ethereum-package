@@ -324,6 +324,7 @@ disable_peer_scoring: false
 grafana_additional_dashboards: []
 
 # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+# Note this requires Kurtosis greater than 0.85.49 to work
 # Defaults to False
 persistent: False
 
