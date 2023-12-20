@@ -26,3 +26,4 @@ snooper_enabled: true
 mev_type: full
 mev_params:
   mev_relay_image: flashbots/mev-boost-relay:0.27
+persistent: True
