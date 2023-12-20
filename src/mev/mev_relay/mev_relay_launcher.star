@@ -47,6 +47,7 @@ def launch_mev_relay(
     validator_root,
     builder_uri,
     seconds_per_slot,
+    persistent,
 ):
     redis = redis_module.run(
         plan,
@@ -63,7 +64,7 @@ def launch_mev_relay(
         user="postgres",
         database="postgres",
         service_name="mev-relay-postgres",
-        persistent=True,
+        persistent=persistent,
         launch_adminer=LAUNCH_ADMINER,
         min_cpu=POSTGRES_MIN_CPU,
         max_cpu=POSTGRES_MAX_CPU,

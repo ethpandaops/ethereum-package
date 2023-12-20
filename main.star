@@ -59,6 +59,7 @@ def run(plan, args={}):
     network_params = args_with_right_defaults.network_params
     mev_params = args_with_right_defaults.mev_params
     parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
+    persistent = args_with_right_defaults.persistent
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -357,6 +358,7 @@ def run(plan, args={}):
                 full_beaconchain_explorer_config_template,
                 all_cl_client_contexts,
                 all_el_client_contexts,
+                persistent,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
         elif additional_service == "prometheus_grafana":
