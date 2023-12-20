@@ -276,6 +276,14 @@ goomy_blob_params:
   # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
   goomy_blob_args: []
 
+# Configuration place for the assertoor testing tool - https:#github.com/ethpandaops/assertoor
+assertoor_params:
+  # Run validator lifecycle test (~12h to complete)
+  # This test requires exactly 500 active validator keys.
+  # The test will cause a temporary chain unfinality when running.
+  run_lifecycle_test: false
+
+
 # By default includes
 # - A transaction spammer & blob spammer is launched to fake transactions sent to the network
 # - Forkmon for EL will be launched
@@ -284,6 +292,7 @@ goomy_blob_params:
 # - A light beacon chain explorer will be launched
 # - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
 additional_services:
+  - assertoor
   - broadcaster
   - tx_spammer
   - blob_spammer
@@ -563,6 +572,7 @@ Here's a table of where the keys are used
 | 5             | eip4788_deployment  | ✅                |                 | As contract deployer       |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |
 | 7             | mev_flood           | ✅                |                 | As the user_key            |
+| 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 
 ## Developing On This Package

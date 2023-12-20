@@ -32,6 +32,7 @@ def launch_assertoor(
     config_template,
     cl_client_contexts,
     el_client_contexts,
+    assertoor_params,
 ):
     all_client_info = []
     for index, client in enumerate(cl_client_contexts):
@@ -46,7 +47,7 @@ def launch_assertoor(
             )
         )
 
-    template_data = new_config_template_data(HTTP_PORT_NUMBER, all_client_info)
+    template_data = new_config_template_data(HTTP_PORT_NUMBER, all_client_info, assertoor_params)
 
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
@@ -89,10 +90,11 @@ def get_config(config_files_artifact_name):
     )
 
 
-def new_config_template_data(listen_port_num, client_info):
+def new_config_template_data(listen_port_num, client_info, assertoor_params):
     return {
         "ListenPortNum": listen_port_num,
         "ClientInfo": client_info,
+        "RunLifecycleTest": assertoor_params.run_lifecycle_test,
     }
 
 
