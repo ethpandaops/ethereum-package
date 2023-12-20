@@ -18,7 +18,6 @@ NETWORK_ID_TO_NAME = {
     "3": "ropsten",
 }
 
-DONT_PERSIST_TO_DISK = False
 LAUNCH_ADMINER = True
 
 # The min/max CPU/memory that mev-relay can use
@@ -64,7 +63,7 @@ def launch_mev_relay(
         user="postgres",
         database="postgres",
         service_name="mev-relay-postgres",
-        persistent=DONT_PERSIST_TO_DISK,
+        persistent=True,
         launch_adminer=LAUNCH_ADMINER,
         min_cpu=POSTGRES_MIN_CPU,
         max_cpu=POSTGRES_MAX_CPU,
