@@ -127,7 +127,7 @@ tests:
               minDepositCount: 1
       
   # due to the deposits we should reach un-finality soon.
-  - name: check_consensus_finality
+  - name: check_consensus_validator_status
     title: "Wait for the last deposit to become activated"
     timeout: 1h
     config:

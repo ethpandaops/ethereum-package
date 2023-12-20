@@ -47,7 +47,9 @@ def launch_assertoor(
             )
         )
 
-    template_data = new_config_template_data(HTTP_PORT_NUMBER, all_client_info, assertoor_params)
+    template_data = new_config_template_data(
+        HTTP_PORT_NUMBER, all_client_info, assertoor_params
+    )
 
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
