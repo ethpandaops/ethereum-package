@@ -323,6 +323,11 @@ disable_peer_scoring: false
 # A list of locators for grafana dashboards to be loaded be the grafana service
 grafana_additional_dashboards: []
 
+# Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+# Note this requires Kurtosis greater than 0.85.49 to work
+# Defaults to False
+persistent: False
+
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up

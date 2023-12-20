@@ -69,6 +69,7 @@ def input_parser(plan, input_args):
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
+    result["persistent"] = False
 
     for attr in input_args:
         value = input_args[attr]
@@ -216,6 +217,7 @@ def input_parser(plan, input_args):
         parallel_keystore_generation=result["parallel_keystore_generation"],
         grafana_additional_dashboards=result["grafana_additional_dashboards"],
         disable_peer_scoring=result["disable_peer_scoring"],
+        persistent=result["persistent"],
     )
 
 
