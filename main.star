@@ -223,6 +223,7 @@ def run(plan, args={}):
             genesis_validators_root,
             builder_uri,
             network_params.seconds_per_slot,
+            persistent,
         )
         mev_flood.spam_in_background(
             plan,
@@ -346,6 +347,7 @@ def run(plan, args={}):
                 all_cl_client_contexts,
                 all_el_client_contexts,
                 network_params.network_id,
+                persistent,
             )
             plan.print("Successfully launched blobscan")
         elif additional_service == "full_beaconchain_explorer":
