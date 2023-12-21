@@ -444,11 +444,6 @@ def get_validator_config(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
     }
 
-    if persistent:
-        files[VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS] = Directory(
-            persistent_key=service_name
-        )
-
     return ServiceConfig(
         image=image,
         ports=VALIDATOR_USED_PORTS,

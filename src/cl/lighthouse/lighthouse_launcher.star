@@ -14,7 +14,7 @@ RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
 RUST_FULL_BACKTRACE_KEYWORD = "full"
 
 #  ---------------------------------- Beacon client -------------------------------------
-BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/lighthouse-beacon-data"
+BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/lighthouse/beacon-data"
 
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -34,7 +34,7 @@ BEACON_MIN_MEMORY = 256
 BEACON_MAX_MEMORY = 1024
 
 #  ---------------------------------- Validator client -------------------------------------
-VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
+VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/lighthouse/validator-keys"
 VALIDATOR_HTTP_PORT_ID = "http"
 VALIDATOR_METRICS_PORT_ID = "metrics"
 VALIDATOR_HTTP_PORT_NUM = 5042
@@ -455,11 +455,6 @@ def get_validator_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
     }
-
-    if persistent:
-        files[VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS] = Directory(
-            persistent_key=service_name,
-        )
 
     return ServiceConfig(
         image=image,

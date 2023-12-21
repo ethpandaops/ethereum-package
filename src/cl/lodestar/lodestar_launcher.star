@@ -376,7 +376,7 @@ def get_validator_config(
     cmd = [
         "validator",
         "--logLevel=" + log_level,
-        "--dataDir=" + root_dirpath,
+        #"--dataDir=" + root_dirpath,
         "--paramsFile="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
@@ -403,10 +403,6 @@ def get_validator_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
     }
-    if persistent:
-        files[VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key=service_name
-        )
 
     return ServiceConfig(
         image=image,
