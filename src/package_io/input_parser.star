@@ -363,10 +363,6 @@ def parse_network_params(input_args):
     ):
         fail("electra can only happen with capella genesis not bellatrix")
 
-    actual_num_validators = (
-        total_participant_count
-        * result["network_params"]["num_validator_keys_per_node"]
-    )
     if MIN_VALIDATORS > actual_num_validators:
         fail(
             "We require at least {0} validators but got {1}".format(
