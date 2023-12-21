@@ -390,7 +390,7 @@ def get_validator_config(
         "--beacon-rpc-provider=" + beacon_rpc_endpoint,
         "--wallet-dir=" + validator_keys_dirpath,
         "--wallet-password-file=" + validator_secrets_dirpath,
-        #"--datadir=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        # "--datadir=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM),
         "--verbosity=" + log_level,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,

@@ -376,7 +376,7 @@ def get_validator_config(
     cmd = [
         "validator",
         "--logLevel=" + log_level,
-        #"--dataDir=" + root_dirpath,
+        # "--dataDir=" + root_dirpath,
         "--paramsFile="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",

@@ -437,8 +437,8 @@ def get_validator_config(
         "--network="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        #"--data-path=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        #"--data-validator-path=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        # "--data-path=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        # "--data-validator-path=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--beacon-node-api-endpoint=" + beacon_http_url,
         "--validator-keys={0}:{1}".format(
             validator_keys_dirpath,
