@@ -109,6 +109,13 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-with-tools-mev.yaml)"
 
+  mix_persistence_k8s:
+    resource_class: xlarge
+    executor: ubuntu_vm
+    steps:
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-persistence.yaml)"
+
 workflows:
   nightly_tests:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
