@@ -42,6 +42,7 @@ network_params:
     "giant issue aisle success illegal bike spike
     question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy
     very lucky have athlete"
+  preregistered_validator_count: 0
   genesis_delay: 120
   max_churn: 8
   ejection_balance: 16000000000
