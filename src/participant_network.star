@@ -56,6 +56,7 @@ def launch_participant_network(
     participants,
     network_params,
     global_log_level,
+    persistent,
     parallel_keystore_generation=False,
 ):
     num_participants = len(participants)
@@ -97,7 +98,7 @@ def launch_participant_network(
         and network_params.electra_fork_epoch == None
     ):
         ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:2.0.6"
+            "ethpandaops/ethereum-genesis-generator:2.0.7"
         )
     # we are running electra - experimental
     elif network_params.electra_fork_epoch != None:
@@ -221,6 +222,7 @@ def launch_participant_network(
             participant.el_extra_params,
             participant.el_extra_env_vars,
             participant.el_extra_labels,
+            persistent,
         )
 
         # Add participant el additional prometheus metrics
@@ -340,6 +342,7 @@ def launch_participant_network(
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                persistent,
                 participant.cl_split_mode_enabled,
             )
         else:
@@ -370,6 +373,7 @@ def launch_participant_network(
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                persistent,
                 participant.cl_split_mode_enabled,
             )
 

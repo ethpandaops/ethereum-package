@@ -86,6 +86,7 @@ def launch(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -101,6 +102,7 @@ def launch(
         launcher.network_id,
         launcher.el_cl_genesis_data,
         image,
+        service_name,
         existing_el_clients,
         cl_client_name,
         log_level,
@@ -114,6 +116,7 @@ def launch(
         launcher.capella_fork_epoch,
         launcher.electra_fork_epoch,
         launcher.final_genesis_timestamp,
+        persistent,
     )
 
     service = plan.add_service(service_name, config)
@@ -144,6 +147,7 @@ def get_config(
     network_id,
     el_cl_genesis_data,
     image,
+    service_name,
     existing_el_clients,
     cl_client_name,
     verbosity_level,
@@ -157,6 +161,7 @@ def get_config(
     capella_fork_epoch,
     electra_fork_epoch,
     final_genesis_timestamp,
+    persistent,
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if electra_fork_epoch != None:
@@ -263,13 +268,18 @@ def get_config(
     ]
     command_str = " && ".join(subcommand_strs)
 
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+    }
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key=service_name,
+        )
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
         cmd=[command_str],
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
-        },
+        files=files,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,

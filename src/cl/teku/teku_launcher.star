@@ -7,14 +7,10 @@ cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star
 constants = import_module("../../package_io/constants.star")
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
-# The Docker container runs as the "teku" user so we can't write to root
-CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/consensus-data"
-
-# These will get mounted as root and Teku needs directory write permissions, so we'll copy this
-#  into the Teku user's home directory to get around it
-VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
-
 #  ---------------------------------- Beacon client -------------------------------------
+# The Docker container runs as the "teku" user so we can't write to root
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/teku-beacon-data"
+
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
@@ -34,6 +30,12 @@ BEACON_MAX_MEMORY = 2048
 
 BEACON_METRICS_PATH = "/metrics"
 #  ---------------------------------- Validator client -------------------------------------
+# These will get mounted as root and Teku needs directory write permissions, so we'll copy this
+#  into the Teku user's home directory to get around it
+VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/teku-validator-data"
+
+VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
+
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
 VALIDATOR_HTTP_PORT_ID = "http"
 VALIDATOR_METRICS_PORT_ID = "metrics"
@@ -122,6 +124,7 @@ def launch(
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    persistent,
     split_mode_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -144,6 +147,7 @@ def launch(
     config = get_beacon_config(
         launcher.el_cl_genesis_data,
         image,
+        beacon_service_name,
         bootnode_context,
         el_client_context,
         log_level,
@@ -154,10 +158,10 @@ def launch(
         bn_max_mem,
         snooper_enabled,
         snooper_engine_context,
-        beacon_service_name,
         extra_beacon_params,
         extra_beacon_labels,
         split_mode_enabled,
+        persistent,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -204,6 +208,7 @@ def launch(
         validator_config = get_validator_config(
             launcher.el_cl_genesis_data,
             image,
+            validator_service_name,
             log_level,
             beacon_http_url,
             el_client_context,
@@ -215,6 +220,7 @@ def launch(
             validator_service_name,
             extra_validator_params,
             extra_validator_labels,
+            persistent,
         )
 
         validator_service = plan.add_service(validator_service_name, validator_config)
@@ -250,6 +256,7 @@ def launch(
 def get_beacon_config(
     el_cl_genesis_data,
     image,
+    service_name,
     bootnode_contexts,
     el_client_context,
     log_level,
@@ -260,10 +267,10 @@ def get_beacon_config(
     bn_max_mem,
     snooper_enabled,
     snooper_engine_context,
-    service_name,
     extra_params,
     extra_labels,
     split_mode_enabled,
+    persistent,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -296,7 +303,7 @@ def get_beacon_config(
         "--initial-state="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/genesis.ssz",
-        "--data-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--data-path=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--data-storage-mode={0}".format(
             "ARCHIVE" if constants.ARCHIVE_MODE else "PRUNE"
         ),
@@ -321,7 +328,6 @@ def get_beacon_config(
         "--metrics-categories=BEACON,PROCESS,LIBP2P,JVM,NETWORK,PROCESS",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--Xtrusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
     ]
     validator_flags = [
         "--validator-keys={0}:{1}".format(
@@ -367,7 +373,11 @@ def get_beacon_config(
         files[
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
-    cmd_str = " ".join(cmd)
+
+    if persistent:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key=service_name
+        )
     return ServiceConfig(
         image=image,
         ports=BEACON_USED_PORTS,
@@ -395,6 +405,7 @@ def get_beacon_config(
 def get_validator_config(
     el_cl_genesis_data,
     image,
+    service_name,
     log_level,
     beacon_http_url,
     el_client_context,
@@ -406,6 +417,7 @@ def get_validator_config(
     validator_service_name,
     extra_params,
     extra_labels,
+    persistent,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -425,8 +437,8 @@ def get_validator_config(
         "--network="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--data-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--data-validator-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--data-path=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--data-validator-path=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--beacon-node-api-endpoint=" + beacon_http_url,
         "--validator-keys={0}:{1}".format(
             validator_keys_dirpath,
@@ -448,14 +460,21 @@ def get_validator_config(
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params if param != "--split=true"])
 
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
+    }
+
+    if persistent:
+        files[VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key=service_name
+        )
+
     return ServiceConfig(
         image=image,
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
-        },
+        files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=v_min_cpu,
         max_cpu=v_max_cpu,
