@@ -129,7 +129,7 @@ tests:
   # due to the deposits we should reach un-finality soon.
   - name: check_consensus_validator_status
     title: "Wait for the last deposit to become activated"
-    timeout: 1h
+    timeout: 6h
     config:
       validatorPubKey: 0xa4a6121cb76eaf63e520615368a21d504c6f7363b5045f965e3587f623a6f7f1ce32af63ce3c535e75cd831db27c5abd
       validatorStatus:
@@ -199,15 +199,15 @@ tests:
             config:
               minExitCount: 1
 
-  # exit 100 validators and wait for finality
+  # exit 150 validators and wait for finality
   - name: generate_exits
-    title: "Exit 100 Validators"
+    title: "Exit 150 Validators"
     config:
       mnemonic: "trial jeans seat abstract runway cupboard please elevator club file arrow lounge crash sun thumb clock duty priority key fence funny trick diary album"
-      indexCount: 100
+      indexCount: 150
   - name: check_consensus_finality
     title: "Wait for consensus chain finality"
-    timeout: 1h
+    timeout: 6h
     config:
       maxUnfinalizedEpochs: 4
 
@@ -220,10 +220,10 @@ tests:
         title: "Generate 1 bls change per slot"
         config:
           mnemonic: "trial jeans seat abstract runway cupboard please elevator club file arrow lounge crash sun thumb clock duty priority key fence funny trick diary album"
-          startIndex: 100
-          limitTotal: 100
+          startIndex: 150
+          limitTotal: 50
           limitPerSlot: 1
-          indexCount: 100
+          indexCount: 50
           targetAddress: 0x65D08a056c17Ae13370565B04cF77D2AfA1cB9FA
 
       - name: run_task_matrix
@@ -250,10 +250,10 @@ tests:
         title: "Generate 1 exit per slot"
         config:
           mnemonic: "trial jeans seat abstract runway cupboard please elevator club file arrow lounge crash sun thumb clock duty priority key fence funny trick diary album"
-          startIndex: 100
-          limitTotal: 100
+          startIndex: 150
+          limitTotal: 50
           limitPerSlot: 1
-          indexCount: 100
+          indexCount: 50
 
       - name: run_task_matrix
         title: "Check exit inclusion with all client pairs"
@@ -269,6 +269,66 @@ tests:
               validatorNamePattern: "validatorPairName"
             config:
               minExitCount: 1
+  
+  # check if all client pairs propose blocks with attester slashings
+  - name: run_tasks_concurrent
+    title: "Check if all clients propose blocks with attester slashings during finality"
+    config:
+      tasks:
+      - name: generate_slashings
+        title: "Generate 1 attester slashing per slot"
+        config:
+          slashingType: "attester"
+          mnemonic: "trial jeans seat abstract runway cupboard please elevator club file arrow lounge crash sun thumb clock duty priority key fence funny trick diary album"
+          startIndex: 200
+          limitTotal: 50
+          limitPerSlot: 1
+          indexCount: 50
+
+      - name: run_task_matrix
+        title: "Check slashing inclusion with all client pairs"
+        configVars:
+          matrixValues: "validatorPairNames"
+        config:
+          runConcurrent: true
+          matrixVar: "validatorPairName"
+          task:
+            name: check_consensus_block_proposals
+            title: "Wait for block proposal with attester slashings from ${validatorPairName}"
+            configVars:
+              validatorNamePattern: "validatorPairName"
+            config:
+              minAttesterSlashingCount: 1
+
+  # check if all client pairs propose blocks with proposer slashings
+  - name: run_tasks_concurrent
+    title: "Check if all clients propose blocks with proposer slashings during finality"
+    config:
+      tasks:
+      - name: generate_slashings
+        title: "Generate 1 proposer slashing per slot"
+        config:
+          slashingType: "proposer"
+          mnemonic: "trial jeans seat abstract runway cupboard please elevator club file arrow lounge crash sun thumb clock duty priority key fence funny trick diary album"
+          startIndex: 250
+          limitTotal: 50
+          limitPerSlot: 1
+          indexCount: 50
+
+      - name: run_task_matrix
+        title: "Check slashing inclusion with all client pairs"
+        configVars:
+          matrixValues: "validatorPairNames"
+        config:
+          runConcurrent: true
+          matrixVar: "validatorPairName"
+          task:
+            name: check_consensus_block_proposals
+            title: "Wait for block proposal with proposer slashings from ${validatorPairName}"
+            configVars:
+              validatorNamePattern: "validatorPairName"
+            config:
+              minProposerSlashingCount: 1
 
   cleanupTasks:
   - name: generate_exits
