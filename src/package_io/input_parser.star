@@ -163,6 +163,9 @@ def input_parser(plan, input_args):
             preregistered_validator_keys_mnemonic=result["network_params"][
                 "preregistered_validator_keys_mnemonic"
             ],
+            preregistered_validator_count=result["network_params"][
+                "preregistered_validator_count"
+            ],
             num_validator_keys_per_node=result["network_params"][
                 "num_validator_keys_per_node"
             ],
@@ -407,6 +410,7 @@ def default_network_params():
     # this is temporary till we get params working
     return {
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "preregistered_validator_count": 0,
         "num_validator_keys_per_node": 64,
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
