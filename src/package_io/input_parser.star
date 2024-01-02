@@ -253,7 +253,9 @@ def parse_network_params(input_args):
         result["network_params"]["preregistered_validator_keys_mnemonic"] = None
         result["network_params"]["num_validator_keys_per_node"] = None
         result["network_params"]["network_id"] = str(7011893062)
-        result["network_params"]["deposit_contract_address"] = "0x6f22fFbC56eFF051aECF839396DD1eD9aD6BBA9D"
+        result["network_params"][
+            "deposit_contract_address"
+        ] = "0x6f22fFbC56eFF051aECF839396DD1eD9aD6BBA9D"
         result["network_params"]["seconds_per_slot"] = 32
         result["network_params"]["genesis_delay"] = 60
         result["network_params"]["max_churn"] = 8
