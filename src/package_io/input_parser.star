@@ -163,6 +163,9 @@ def input_parser(plan, input_args):
             preregistered_validator_keys_mnemonic=result["network_params"][
                 "preregistered_validator_keys_mnemonic"
             ],
+            preregistered_validator_count=result["network_params"][
+                "preregistered_validator_count"
+            ],
             num_validator_keys_per_node=result["network_params"][
                 "num_validator_keys_per_node"
             ],
@@ -407,6 +410,7 @@ def default_network_params():
     # this is temporary till we get params working
     return {
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "preregistered_validator_count": 0,
         "num_validator_keys_per_node": 64,
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
@@ -511,7 +515,13 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
-        mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
+        mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
+            MEV_BOOST_SERVICE_NAME_PREFIX,
+            index,
+            participant["cl_client_type"],
+            participant["el_client_type"],
+            mev_port,
+        )
 
         if participant["cl_client_type"] == "lighthouse":
             participant["validator_extra_params"].append("--builder-proposals")
