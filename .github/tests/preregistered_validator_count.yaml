@@ -1,0 +1,14 @@
+participants:
+  - el_client_type: geth
+    cl_client_type: teku
+  - el_client_type: geth
+    cl_client_type: prysm
+  - el_client_type: geth
+    cl_client_type: nimbus
+  - el_client_type: geth
+    cl_client_type: lighthouse
+  - el_client_type: geth
+    cl_client_type: lodestar
+additional_services: []
+network_params:
+  preregistered_validator_count: 400
