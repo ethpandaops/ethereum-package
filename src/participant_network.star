@@ -5,6 +5,9 @@ validator_keystores = import_module(
 el_cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
 )
+el_cl_genesis_data = import_module(
+    "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_data.star"
+)
 shared_utils = import_module("./shared_utils/shared_utils.star")
 
 static_files = import_module("./static_files/static_files.star")
@@ -84,39 +87,21 @@ def launch_participant_network(
             CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME,
         )
 
-        total_number_of_validator_keys = 0
-        for participant in participants:
-            total_number_of_validator_keys += participant.validator_count
+        # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants
+        total_number_of_validator_keys = network_params.preregistered_validator_count
 
-    # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants
-    total_number_of_validator_keys = network_params.preregistered_validator_count
+        if network_params.preregistered_validator_count == 0:
+            for participant in participants:
+                total_number_of_validator_keys += participant.validator_count
 
-    if network_params.preregistered_validator_count == 0:
-        for participant in participants:
-            total_number_of_validator_keys += participant.validator_count
-
-    plan.print("Generating EL CL data")
-    # we are running bellatrix genesis (deprecated) - will be removed in the future
-    if (
-        network_params.capella_fork_epoch > 0
-        and network_params.electra_fork_epoch == None
-    ):
-        ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:1.3.15"
-        )
-    # we are running capella genesis - default behavior
-    elif (
-        network_params.capella_fork_epoch == 0
-        and network_params.electra_fork_epoch == None
-    ):
-        ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:2.0.6"
-        )
-    # we are running electra - experimental
-    elif network_params.electra_fork_epoch != None:
-        if network_params.electra_fork_epoch == 0:
+        plan.print("Generating EL CL data")
+        # we are running bellatrix genesis (deprecated) - will be removed in the future
+        if (
+            network_params.capella_fork_epoch > 0
+            and network_params.electra_fork_epoch == None
+        ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:4.0.0-rc.3"
+                "ethpandaops/ethereum-genesis-generator:1.3.15"
             )
         # we are running capella genesis - default behavior
         elif (
@@ -130,16 +115,30 @@ def launch_participant_network(
         elif network_params.electra_fork_epoch != None:
             if network_params.electra_fork_epoch == 0:
                 ethereum_genesis_generator_image = (
-                    "ethpandaops/ethereum-genesis-generator:4.0.0-rc.2"
+                    "ethpandaops/ethereum-genesis-generator:4.0.0-rc.3"
                 )
-            else:
+            # we are running capella genesis - default behavior
+            elif (
+                network_params.capella_fork_epoch == 0
+                and network_params.electra_fork_epoch == None
+            ):
                 ethereum_genesis_generator_image = (
-                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.17"
+                    "ethpandaops/ethereum-genesis-generator:2.0.6"
                 )
-        else:
-            fail(
-                "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
-            )
+            # we are running electra - experimental
+            elif network_params.electra_fork_epoch != None:
+                if network_params.electra_fork_epoch == 0:
+                    ethereum_genesis_generator_image = (
+                        "ethpandaops/ethereum-genesis-generator:4.0.0-rc.2"
+                    )
+                else:
+                    ethereum_genesis_generator_image = (
+                        "ethpandaops/ethereum-genesis-generator:3.0.0-rc.17"
+                    )
+            else:
+                fail(
+                    "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+                )
 
         el_cl_genesis_config_template = read_file(
             static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
@@ -172,10 +171,13 @@ def launch_participant_network(
             ),
             name="el_cl_genesis_data",
         )
-        el_cl_genesis = el_cl_genesis.new_el_cl_genesis_data(
-            el_cl_genesis_uuid, "0x123"
+        el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
+            el_cl_genesis_uuid,
+            "0x31c7fb3b0dc46ad79c8117cbeafe6060a973f662823b08618d915b644472449d",
         )
-        final_genesis_timestamp = 0
+        final_genesis_timestamp = 1701262800
+        num_participants = 0
+        validator_data = None
 
     el_launchers = {
         constants.EL_CLIENT_TYPE.geth: {
@@ -274,7 +276,16 @@ def launch_participant_network(
     plan.print("Successfully added {0} EL participants".format(num_participants))
 
     plan.print("Launching CL network")
-
+    prysm_password_relative_filepath = (
+        validator_data.prysm_password_relative_filepath
+        if network_params.network == "kurtosis"
+        else None
+    )
+    prysm_password_artifact_uuid = (
+        validator_data.prysm_password_artifact_uuid
+        if network_params.network == "kurtosis"
+        else None
+    )
     cl_launchers = {
         constants.CL_CLIENT_TYPE.lighthouse: {
             "launcher": lighthouse.new_lighthouse_launcher(el_cl_data),
@@ -291,8 +302,8 @@ def launch_participant_network(
         constants.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
-                validator_data.prysm_password_relative_filepath,
-                validator_data.prysm_password_artifact_uuid,
+                prysm_password_relative_filepath,
+                prysm_password_artifact_uuid,
             ),
             "launch_method": prysm.launch,
         },
@@ -305,7 +316,11 @@ def launch_participant_network(
     all_snooper_engine_contexts = []
     all_cl_client_contexts = []
     all_ethereum_metrics_exporter_contexts = []
-    preregistered_validator_keys_for_nodes = validator_data.per_node_keystores
+    preregistered_validator_keys_for_nodes = (
+        validator_data.per_node_keystores
+        if network_params.network == "kurtosis"
+        else None
+    )
 
     for index, participant in enumerate(participants):
         cl_client_type = participant.cl_client_type

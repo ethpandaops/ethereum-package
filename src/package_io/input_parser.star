@@ -248,145 +248,152 @@ def parse_network_params(input_args):
                     participants.append(participant_copy)
             result["participants"] = participants
 
-    # # If network is not kurtosis, run with custom params
-    # if result["network_params"]["network"] != "kurtosis":
-    #     result["network_params"]["preregistered_validator_keys_mnemonic"] = None
-    #     result["network_params"]["num_validator_keys_per_node"] = None
-    #     result["network_params"]["network_id"] = None
-    #     result["network_params"]["deposit_contract_address"] = None
-    #     result["network_params"]["seconds_per_slot"] = None
-    #     result["network_params"]["genesis_delay"] = None
-    #     result["network_params"]["max_churn"] = None
-    #     result["network_params"]["ejection_balance"] = None
-    #     result["network_params"]["capella_fork_epoch"] = None
-    #     result["network_params"]["deneb_fork_epoch"] = None
-    #     result["network_params"]["electra_fork_epoch"] = None
-    # else:
-    total_participant_count = 0
-    actual_num_validators = 0
-    # validation of the above defaults
-    for index, participant in enumerate(result["participants"]):
-        el_client_type = participant["el_client_type"]
-        cl_client_type = participant["cl_client_type"]
+    # If network is not kurtosis, run with custom params
+    if result["network_params"]["network"] != "kurtosis":
+        result["network_params"]["preregistered_validator_keys_mnemonic"] = None
+        result["network_params"]["num_validator_keys_per_node"] = None
+        result["network_params"]["network_id"] = str(7011893062)
+        result["network_params"]["deposit_contract_address"] = "0x6f22fFbC56eFF051aECF839396DD1eD9aD6BBA9D"
+        result["network_params"]["seconds_per_slot"] = 32
+        result["network_params"]["genesis_delay"] = 60
+        result["network_params"]["max_churn"] = 8
+        result["network_params"]["ejection_balance"] = 30000000000
+        result["network_params"]["capella_fork_epoch"] = 0
+        result["network_params"]["deneb_fork_epoch"] = 220
+        result["network_params"]["electra_fork_epoch"] = None
+        result["additional_services"] = []
+        # Don't allow validators on non-kurtosis networks
+        for participant in result["participants"]:
+            participant["validator_count"] = 0
+    else:
+        total_participant_count = 0
+        actual_num_validators = 0
+        # validation of the above defaults
+        for index, participant in enumerate(result["participants"]):
+            el_client_type = participant["el_client_type"]
+            cl_client_type = participant["cl_client_type"]
 
-        if cl_client_type in (NIMBUS_NODE_NAME) and (
-            result["network_params"]["seconds_per_slot"] < 12
-        ):
-            fail("nimbus can't be run with slot times below 12 seconds")
+            if cl_client_type in (NIMBUS_NODE_NAME) and (
+                result["network_params"]["seconds_per_slot"] < 12
+            ):
+                fail("nimbus can't be run with slot times below 12 seconds")
 
-        if participant["cl_split_mode_enabled"] and cl_client_type not in (
-            "nimbus",
-            "teku",
-        ):
-            fail(
-                "split mode is only supported for nimbus and teku clients, but you specified {0}".format(
-                    cl_client_type
-                )
-            )
-
-        el_image = participant["el_client_image"]
-        if el_image == "":
-            default_image = DEFAULT_EL_IMAGES.get(el_client_type, "")
-            if default_image == "":
+            if participant["cl_split_mode_enabled"] and cl_client_type not in (
+                "nimbus",
+                "teku",
+            ):
                 fail(
-                    "{0} received an empty image name and we don't have a default for it".format(
-                        el_client_type
-                    )
-                )
-            participant["el_client_image"] = default_image
-
-        cl_image = participant["cl_client_image"]
-        if cl_image == "":
-            default_image = DEFAULT_CL_IMAGES.get(cl_client_type, "")
-            if default_image == "":
-                fail(
-                    "{0} received an empty image name and we don't have a default for it".format(
+                    "split mode is only supported for nimbus and teku clients, but you specified {0}".format(
                         cl_client_type
                     )
                 )
-            participant["cl_client_image"] = default_image
 
-        snooper_enabled = participant["snooper_enabled"]
-        if snooper_enabled == False:
-            default_snooper_enabled = result["snooper_enabled"]
-            if default_snooper_enabled:
-                participant["snooper_enabled"] = default_snooper_enabled
-
-        ethereum_metrics_exporter_enabled = participant[
-            "ethereum_metrics_exporter_enabled"
-        ]
-
-        blobber_enabled = participant["blobber_enabled"]
-        if blobber_enabled:
-            # unless we are running lighthouse, we don't support blobber
-            if participant["cl_client_type"] != "lighthouse":
-                fail(
-                    "blobber is not supported for {0} client".format(
-                        participant["cl_client_type"]
+            el_image = participant["el_client_image"]
+            if el_image == "":
+                default_image = DEFAULT_EL_IMAGES.get(el_client_type, "")
+                if default_image == "":
+                    fail(
+                        "{0} received an empty image name and we don't have a default for it".format(
+                            el_client_type
+                        )
                     )
-                )
+                participant["el_client_image"] = default_image
 
-        if ethereum_metrics_exporter_enabled == False:
-            default_ethereum_metrics_exporter_enabled = result[
+            cl_image = participant["cl_client_image"]
+            if cl_image == "":
+                default_image = DEFAULT_CL_IMAGES.get(cl_client_type, "")
+                if default_image == "":
+                    fail(
+                        "{0} received an empty image name and we don't have a default for it".format(
+                            cl_client_type
+                        )
+                    )
+                participant["cl_client_image"] = default_image
+
+            snooper_enabled = participant["snooper_enabled"]
+            if snooper_enabled == False:
+                default_snooper_enabled = result["snooper_enabled"]
+                if default_snooper_enabled:
+                    participant["snooper_enabled"] = default_snooper_enabled
+
+            ethereum_metrics_exporter_enabled = participant[
                 "ethereum_metrics_exporter_enabled"
             ]
-            if default_ethereum_metrics_exporter_enabled:
-                participant[
+
+            blobber_enabled = participant["blobber_enabled"]
+            if blobber_enabled:
+                # unless we are running lighthouse, we don't support blobber
+                if participant["cl_client_type"] != "lighthouse":
+                    fail(
+                        "blobber is not supported for {0} client".format(
+                            participant["cl_client_type"]
+                        )
+                    )
+
+            if ethereum_metrics_exporter_enabled == False:
+                default_ethereum_metrics_exporter_enabled = result[
                     "ethereum_metrics_exporter_enabled"
-                ] = default_ethereum_metrics_exporter_enabled
+                ]
+                if default_ethereum_metrics_exporter_enabled:
+                    participant[
+                        "ethereum_metrics_exporter_enabled"
+                    ] = default_ethereum_metrics_exporter_enabled
 
-        validator_count = participant["validator_count"]
-        if validator_count == None:
-            default_validator_count = result["network_params"][
-                "num_validator_keys_per_node"
-            ]
-            participant["validator_count"] = default_validator_count
+            validator_count = participant["validator_count"]
+            if validator_count == None:
+                default_validator_count = result["network_params"][
+                    "num_validator_keys_per_node"
+                ]
+                participant["validator_count"] = default_validator_count
 
-        actual_num_validators += participant["validator_count"]
+            actual_num_validators += participant["validator_count"]
 
-        beacon_extra_params = participant.get("beacon_extra_params", [])
-        participant["beacon_extra_params"] = beacon_extra_params
+            beacon_extra_params = participant.get("beacon_extra_params", [])
+            participant["beacon_extra_params"] = beacon_extra_params
 
-        validator_extra_params = participant.get("validator_extra_params", [])
-        participant["validator_extra_params"] = validator_extra_params
+            validator_extra_params = participant.get("validator_extra_params", [])
+            participant["validator_extra_params"] = validator_extra_params
 
-        total_participant_count += participant["count"]
+            total_participant_count += participant["count"]
 
-    if result["network_params"]["network_id"].strip() == "":
-        fail("network_id is empty or spaces it needs to be of non zero length")
+        if result["network_params"]["network_id"].strip() == "":
+            fail("network_id is empty or spaces it needs to be of non zero length")
 
-    if result["network_params"]["deposit_contract_address"].strip() == "":
-        fail(
-            "deposit_contract_address is empty or spaces it needs to be of non zero length"
-        )
-
-    if result["network_params"]["preregistered_validator_keys_mnemonic"].strip() == "":
-        fail(
-            "preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length"
-        )
-
-    if result["network_params"]["seconds_per_slot"] == 0:
-        fail("seconds_per_slot is 0 needs to be > 0 ")
-
-    if result["network_params"]["deneb_fork_epoch"] == 0:
-        fail("deneb_fork_epoch is 0 needs to be > 0 ")
-
-    if result["network_params"]["electra_fork_epoch"] != None:
-        # if electra is defined, then deneb needs to be set very high
-        result["network_params"]["deneb_fork_epoch"] = HIGH_DENEB_VALUE_FORK_VERKLE
-
-    if (
-        result["network_params"]["capella_fork_epoch"] > 0
-        and result["network_params"]["electra_fork_epoch"] != None
-    ):
-        fail("electra can only happen with capella genesis not bellatrix")
-
-    if MIN_VALIDATORS > actual_num_validators:
-        fail(
-            "We require at least {0} validators but got {1}".format(
-                MIN_VALIDATORS, actual_num_validators
+        if result["network_params"]["deposit_contract_address"].strip() == "":
+            fail(
+                "deposit_contract_address is empty or spaces it needs to be of non zero length"
             )
-        )
+
+        if (
+            result["network_params"]["preregistered_validator_keys_mnemonic"].strip()
+            == ""
+        ):
+            fail(
+                "preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length"
+            )
+
+        if result["network_params"]["seconds_per_slot"] == 0:
+            fail("seconds_per_slot is 0 needs to be > 0 ")
+
+        if result["network_params"]["deneb_fork_epoch"] == 0:
+            fail("deneb_fork_epoch is 0 needs to be > 0 ")
+
+        if result["network_params"]["electra_fork_epoch"] != None:
+            # if electra is defined, then deneb needs to be set very high
+            result["network_params"]["deneb_fork_epoch"] = HIGH_DENEB_VALUE_FORK_VERKLE
+
+        if (
+            result["network_params"]["capella_fork_epoch"] > 0
+            and result["network_params"]["electra_fork_epoch"] != None
+        ):
+            fail("electra can only happen with capella genesis not bellatrix")
+
+        if MIN_VALIDATORS > actual_num_validators:
+            fail(
+                "We require at least {0} validators but got {1}".format(
+                    MIN_VALIDATORS, actual_num_validators
+                )
+            )
 
     return result
 
