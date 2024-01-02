@@ -88,12 +88,33 @@ def launch_participant_network(
         for participant in participants:
             total_number_of_validator_keys += participant.validator_count
 
-        plan.print("Generating EL CL data")
-        # we are running bellatrix genesis (deprecated) - will be removed in the future
-        if (
-            network_params.capella_fork_epoch > 0
-            and network_params.electra_fork_epoch == None
-        ):
+    # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants
+    total_number_of_validator_keys = network_params.preregistered_validator_count
+
+    if network_params.preregistered_validator_count == 0:
+        for participant in participants:
+            total_number_of_validator_keys += participant.validator_count
+
+    plan.print("Generating EL CL data")
+    # we are running bellatrix genesis (deprecated) - will be removed in the future
+    if (
+        network_params.capella_fork_epoch > 0
+        and network_params.electra_fork_epoch == None
+    ):
+        ethereum_genesis_generator_image = (
+            "ethpandaops/ethereum-genesis-generator:1.3.15"
+        )
+    # we are running capella genesis - default behavior
+    elif (
+        network_params.capella_fork_epoch == 0
+        and network_params.electra_fork_epoch == None
+    ):
+        ethereum_genesis_generator_image = (
+            "ethpandaops/ethereum-genesis-generator:2.0.6"
+        )
+    # we are running electra - experimental
+    elif network_params.electra_fork_epoch != None:
+        if network_params.electra_fork_epoch == 0:
             ethereum_genesis_generator_image = (
                 "ethpandaops/ethereum-genesis-generator:4.0.0-rc.3"
             )

@@ -96,6 +96,7 @@ def launch_full_beacon(
     config_template,
     cl_client_contexts,
     el_client_contexts,
+    persistent,
 ):
     postgres_output = postgres.run(
         plan,
@@ -108,7 +109,7 @@ def launch_full_beacon(
         max_cpu=POSTGRES_MAX_CPU,
         min_memory=POSTGRES_MIN_MEMORY,
         max_memory=POSTGRES_MAX_MEMORY,
-        persistent=False,
+        persistent=persistent,
     )
     redis_output = redis.run(
         plan,

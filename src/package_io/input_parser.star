@@ -69,6 +69,7 @@ def input_parser(plan, input_args):
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
+    result["persistent"] = False
 
     for attr in input_args:
         value = input_args[attr]
@@ -162,6 +163,9 @@ def input_parser(plan, input_args):
             preregistered_validator_keys_mnemonic=result["network_params"][
                 "preregistered_validator_keys_mnemonic"
             ],
+            preregistered_validator_count=result["network_params"][
+                "preregistered_validator_count"
+            ],
             num_validator_keys_per_node=result["network_params"][
                 "num_validator_keys_per_node"
             ],
@@ -217,6 +221,7 @@ def input_parser(plan, input_args):
         parallel_keystore_generation=result["parallel_keystore_generation"],
         grafana_additional_dashboards=result["grafana_additional_dashboards"],
         disable_peer_scoring=result["disable_peer_scoring"],
+        persistent=result["persistent"],
     )
 
 
@@ -376,10 +381,6 @@ def parse_network_params(input_args):
     ):
         fail("electra can only happen with capella genesis not bellatrix")
 
-    actual_num_validators = (
-        total_participant_count
-        * result["network_params"]["num_validator_keys_per_node"]
-    )
     if MIN_VALIDATORS > actual_num_validators:
         fail(
             "We require at least {0} validators but got {1}".format(
@@ -424,6 +425,7 @@ def default_network_params():
     # this is temporary till we get params working
     return {
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "preregistered_validator_count": 0,
         "num_validator_keys_per_node": 64,
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
@@ -529,7 +531,13 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
-        mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
+        mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
+            MEV_BOOST_SERVICE_NAME_PREFIX,
+            index,
+            participant["cl_client_type"],
+            participant["el_client_type"],
+            mev_port,
+        )
 
         if participant["cl_client_type"] == "lighthouse":
             participant["validator_extra_params"].append("--builder-proposals")
