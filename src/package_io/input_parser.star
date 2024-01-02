@@ -515,7 +515,13 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
-        mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
+        mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
+            MEV_BOOST_SERVICE_NAME_PREFIX,
+            index,
+            participant["cl_client_type"],
+            participant["el_client_type"],
+            mev_port,
+        )
 
         if participant["cl_client_type"] == "lighthouse":
             participant["validator_extra_params"].append("--builder-proposals")
