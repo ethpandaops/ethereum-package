@@ -214,11 +214,17 @@ def input_parser(plan, input_args):
         ),
         assertoor_params=struct(
             run_stability_check=result["assertoor_params"]["run_stability_check"],
-            run_block_proposal_check=result["assertoor_params"]["run_block_proposal_check"],
+            run_block_proposal_check=result["assertoor_params"][
+                "run_block_proposal_check"
+            ],
             run_lifecycle_test=result["assertoor_params"]["run_lifecycle_test"],
             run_transaction_test=result["assertoor_params"]["run_transaction_test"],
-            run_blob_transaction_test=result["assertoor_params"]["run_blob_transaction_test"],
-            run_opcodes_transaction_test=result["assertoor_params"]["run_opcodes_transaction_test"],
+            run_blob_transaction_test=result["assertoor_params"][
+                "run_blob_transaction_test"
+            ],
+            run_opcodes_transaction_test=result["assertoor_params"][
+                "run_opcodes_transaction_test"
+            ],
         ),
         custom_flood_params=struct(
             interval_between_transactions=result["custom_flood_params"][
