@@ -1,0 +1,5 @@
+participants:
+  - el_client_type: erigon
+    cl_client_type: teku
+additional_services: []
+persistent: true

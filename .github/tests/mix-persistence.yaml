@@ -4,7 +4,7 @@ participants:
     cl_split_mode_enabled: true
   - el_client_type: nethermind
     cl_client_type: prysm
-  - el_client_type: erigon
+  - el_client_type: geth
     cl_client_type: nimbus
     cl_split_mode_enabled: true
   - el_client_type: besu
@@ -13,6 +13,5 @@ participants:
     cl_client_type: lodestar
   - el_client_type: ethereumjs
     cl_client_type: teku
-additional_services:
-  - dora
+additional_services: []
 persistent: true
