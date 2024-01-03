@@ -166,7 +166,6 @@ def get_config(
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
         "--data-storage-format=BONSAI",
-        "--kzg-trusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),

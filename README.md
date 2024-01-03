@@ -263,6 +263,10 @@ network_params:
   # 16000000000 gwei
   ejection_balance: 16000000000,
 
+  # ETH1 follow distance
+  # Defaults to 2048
+  eth1_follow_distance: 2048
+
   # The epoch at which the capella and deneb forks are set to occur.
   capella_fork_epoch: 0
   deneb_fork_epoch: 500

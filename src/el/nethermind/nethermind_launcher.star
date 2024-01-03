@@ -145,7 +145,6 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/chainspec.json",
         "--Init.WebSocketsEnabled=true",
-        "--Init.KzgSetupPath=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--config=none.cfg",
         "--JsonRpc.Enabled=true",
         "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin",

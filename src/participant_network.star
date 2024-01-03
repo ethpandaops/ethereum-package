@@ -110,7 +110,7 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:2.0.6"
+                "ethpandaops/ethereum-genesis-generator:2.0.8"
             )
         # we are running electra - experimental
         elif network_params.electra_fork_epoch != None:
@@ -118,28 +118,14 @@ def launch_participant_network(
                 ethereum_genesis_generator_image = (
                     "ethpandaops/ethereum-genesis-generator:4.0.0-rc.3"
                 )
-            # we are running capella genesis - default behavior
-            elif (
-                network_params.capella_fork_epoch == 0
-                and network_params.electra_fork_epoch == None
-            ):
-                ethereum_genesis_generator_image = (
-                    "ethpandaops/ethereum-genesis-generator:2.0.6"
-                )
-            # we are running electra - experimental
-            elif network_params.electra_fork_epoch != None:
-                if network_params.electra_fork_epoch == 0:
-                    ethereum_genesis_generator_image = (
-                        "ethpandaops/ethereum-genesis-generator:4.0.0-rc.2"
-                    )
-                else:
-                    ethereum_genesis_generator_image = (
-                        "ethpandaops/ethereum-genesis-generator:3.0.0-rc.17"
-                    )
             else:
-                fail(
-                    "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+                ethereum_genesis_generator_image = (
+                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.18"
                 )
+        else:
+            fail(
+                "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+            )
 
         el_cl_genesis_config_template = read_file(
             static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
