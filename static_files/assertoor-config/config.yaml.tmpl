@@ -66,6 +66,8 @@ tests:
         config:
           maxReorgsPerEpoch: 2
           minCheckEpochCount: 1
+      - name: check_consensus_forks
+        title: "Check consensus forks"
 {{ end }}
 
 {{ if .RunBlockProposalCheck }}
@@ -682,5 +684,20 @@ tests:
       - { topic0: "0x0000000000000000000000000000000000000000000000000000000000000059", data: "0x0000000000000000000000000000000000000000000000000000000000000040" }
     configVars:
       privateKey: "walletPrivkey"
+
+  - name: run_tasks_concurrent
+    title: "Check chain stability"
+    timeout: 1h
+    config:
+      tasks:
+      - name: check_consensus_reorgs
+        title: "Check consensus reorgs"
+        config:
+          maxReorgsPerEpoch: 2
+          minCheckEpochCount: 1
+      - name: check_consensus_forks
+        title: "Check consensus forks"
+        config:
+          minCheckEpochCount: 1
 
 {{ end }}
