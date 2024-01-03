@@ -213,7 +213,12 @@ def input_parser(plan, input_args):
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
         assertoor_params=struct(
+            run_stability_check=result["assertoor_params"]["run_stability_check"],
+            run_block_proposal_check=result["assertoor_params"]["run_block_proposal_check"],
             run_lifecycle_test=result["assertoor_params"]["run_lifecycle_test"],
+            run_transaction_test=result["assertoor_params"]["run_transaction_test"],
+            run_blob_transaction_test=result["assertoor_params"]["run_blob_transaction_test"],
+            run_opcodes_transaction_test=result["assertoor_params"]["run_opcodes_transaction_test"],
         ),
         custom_flood_params=struct(
             interval_between_transactions=result["custom_flood_params"][
@@ -506,7 +511,14 @@ def get_default_goomy_blob_params():
 
 
 def get_default_assertoor_params():
-    return {"run_lifecycle_test": False}
+    return {
+        "run_stability_check": True,
+        "run_block_proposal_check": True,
+        "run_lifecycle_test": False,
+        "run_transaction_test": False,
+        "run_blob_transaction_test": False,
+        "run_opcodes_transaction_test": False,
+    }
 
 
 def get_default_custom_flood_params():

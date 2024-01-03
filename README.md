@@ -278,10 +278,53 @@ goomy_blob_params:
 
 # Configuration place for the assertoor testing tool - https:#github.com/ethpandaops/assertoor
 assertoor_params:
+  # Check chain stability
+  # This check monitors the chain and succeeds if:
+  # - all clients are synced
+  # - chain is finalizing for min. 2 epochs
+  # - >= 98% correct target votes
+  # - >= 80% correct head votes
+  # - no reorgs with distance > 2 blocks
+  # - no more than 2 reorgs per epoch
+  run_stability_check: true
+
+  # Check block propöosals
+  # This check monitors the chain and succeeds if:
+  # - all client pairs have proposed a block
+  run_block_proposal_check: true
+
   # Run validator lifecycle test (~12h to complete)
   # This test requires exactly 500 active validator keys.
   # The test will cause a temporary chain unfinality when running.
+  # This test checks:
+  # - Deposit inclusion with/from all client pairs
+  # - BLS Change inclusion with/from all client pairs
+  # - Voluntary Exit inclusion with/from all client pairs
+  # - Attester Slashing inclusion with/from all client pairs
+  # - Proposer Slashing inclusion with/from all client pairs
+  # all checks are done during finality & unfinality
   run_lifecycle_test: false
+
+  # Run normal transaction test
+  # This test generates random EOA transactions and checks inclusion with/from all client pairs
+  # This test checks for:
+  # - block proposals with transactions from all client pairs
+  # - transaction inclusion when submitting via each client pair
+  # test is done twice, first with legacy (type 0) transactions, then with dynfee (type 2) transactions
+  run_transaction_test: false
+
+  # Run blob transaction test
+  # This test generates blob transactions and checks inclusion with/from all client pairs
+  # This test checks for:
+  # - block proposals with blobs from all client pairs
+  # - blob inclusion when submitting via each client pair
+  run_blob_transaction_test: false
+
+  # Run all-opcodes transaction test
+  # This test generates a transaction that triggers all EVM OPCODES once
+  # This test checks for:
+  # - all-opcodes transaction success
+  run_opcodes_transaction_test: false
 
 
 # By default includes

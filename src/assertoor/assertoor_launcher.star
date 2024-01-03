@@ -96,7 +96,12 @@ def new_config_template_data(listen_port_num, client_info, assertoor_params):
     return {
         "ListenPortNum": listen_port_num,
         "ClientInfo": client_info,
+        "RunStabilityCheck": assertoor_params.run_stability_check,
+        "RunBlockProposalCheck": assertoor_params.run_block_proposal_check,
         "RunLifecycleTest": assertoor_params.run_lifecycle_test,
+        "RunTransactionTest": assertoor_params.run_transaction_test,
+        "RunBlobTransactionTest": assertoor_params.run_blob_transaction_test,
+        "RunOpcodesTransactionTest": assertoor_params.run_opcodes_transaction_test,
     }
 
 
