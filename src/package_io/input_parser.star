@@ -1,5 +1,5 @@
-constants = import_module("../package_io/constants.star")
-
+constants = import_module("./constants.star")
+shared_utils = import_module("../shared_utils/shared_utils.star")
 genesis_constants = import_module(
     "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
@@ -517,9 +517,10 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(parsed_arguments_dict["participants"]))))
         mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
             MEV_BOOST_SERVICE_NAME_PREFIX,
-            index,
+            index_str,
             participant["cl_client_type"],
             participant["el_client_type"],
             mev_port,
@@ -529,6 +530,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             participant["validator_extra_params"].append("--builder-proposals")
             participant["beacon_extra_params"].append("--builder={0}".format(mev_url))
         if participant["cl_client_type"] == "lodestar":
+            participant["validator_extra_params"].append("--builder")
             participant["beacon_extra_params"].append("--builder")
             participant["beacon_extra_params"].append(
                 "--builder.urls={0}".format(mev_url)
@@ -553,7 +555,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             )
 
     num_participants = len(parsed_arguments_dict["participants"])
-
+    index_str = shared_utils.zfill_custom(num_participants + 1, len(str(num_participants+1)))
     if mev_type == "full":
         mev_participant = default_participant()
         mev_participant["el_client_type"] = (
@@ -577,8 +579,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "el_extra_params": [
                     "--builder",
                     "--builder.remote_relay_endpoint=http://mev-relay-api:9062",
-                    "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(
-                        num_participants + 1
+                    "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth-builder:4000".format(
+                        index_str
                     ),
                     "--builder.bellatrix_fork_version={0}".format(
                         constants.BELLATRIX_FORK_VERSION
