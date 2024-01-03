@@ -59,6 +59,7 @@ def launch_participant_network(
     participants,
     network_params,
     global_log_level,
+    jwt_file,
     parallel_keystore_generation=False,
 ):
     if network_params.network == "kurtosis":
@@ -184,6 +185,7 @@ def launch_participant_network(
             "launcher": geth.new_geth_launcher(
                 network_params.network_id,
                 el_cl_data,
+                jwt_file,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -194,6 +196,7 @@ def launch_participant_network(
             "launcher": geth.new_geth_launcher(
                 network_params.network_id,
                 el_cl_data,
+                jwt_file,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -201,25 +204,25 @@ def launch_participant_network(
             "launch_method": geth.launch,
         },
         constants.EL_CLIENT_TYPE.besu: {
-            "launcher": besu.new_besu_launcher(network_params.network_id, el_cl_data),
+            "launcher": besu.new_besu_launcher(network_params.network_id, el_cl_data, jwt_file),
             "launch_method": besu.launch,
         },
         constants.EL_CLIENT_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
-                network_params.network_id, el_cl_data
+                network_params.network_id, el_cl_data, jwt_file
             ),
             "launch_method": erigon.launch,
         },
         constants.EL_CLIENT_TYPE.nethermind: {
-            "launcher": nethermind.new_nethermind_launcher(el_cl_data),
+            "launcher": nethermind.new_nethermind_launcher(el_cl_data, jwt_file),
             "launch_method": nethermind.launch,
         },
         constants.EL_CLIENT_TYPE.reth: {
-            "launcher": reth.new_reth_launcher(el_cl_data),
+            "launcher": reth.new_reth_launcher(el_cl_data, jwt_file),
             "launch_method": reth.launch,
         },
         constants.EL_CLIENT_TYPE.ethereumjs: {
-            "launcher": ethereumjs.new_ethereumjs_launcher(el_cl_data),
+            "launcher": ethereumjs.new_ethereumjs_launcher(el_cl_data, jwt_file),
             "launch_method": ethereumjs.launch,
         },
     }
@@ -308,7 +311,7 @@ def launch_participant_network(
             "launch_method": prysm.launch,
         },
         constants.CL_CLIENT_TYPE.teku: {
-            "launcher": teku.new_teku_launcher(el_cl_data),
+            "launcher": teku.new_teku_launcher(el_cl_data,jwt_file),
             "launch_method": teku.launch,
         },
     }

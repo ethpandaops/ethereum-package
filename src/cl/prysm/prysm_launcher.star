@@ -297,7 +297,7 @@ def get_beacon_config(
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Pari's recommendation to reduce noise
         "--subscribe-all-subnets=true",
-        "--jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--jwt-secret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
         "--enable-debug-rpc-endpoints=true",
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
@@ -381,7 +381,6 @@ def get_validator_config(
         "--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM),
         "--verbosity=" + log_level,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        # TODO(old) SOMETHING ABOUT JWT
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",

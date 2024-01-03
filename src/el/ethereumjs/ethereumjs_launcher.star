@@ -6,7 +6,6 @@ el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
-
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 WS_PORT_ENGINE_NUM = 8547
@@ -160,7 +159,7 @@ def get_config(
         "--wsPort={0}".format(WS_PORT_NUM),
         "--wsEnginePort={0}".format(WS_PORT_ENGINE_NUM),
         "--wsEngineAddr=0.0.0.0",
-        "--jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--jwt-secret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
         "--extIP={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--sync=full",
         "--isSingleNode=true",
@@ -206,7 +205,8 @@ def get_config(
     )
 
 
-def new_ethereumjs_launcher(el_cl_genesis_data):
+def new_ethereumjs_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
     )

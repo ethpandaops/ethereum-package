@@ -69,6 +69,11 @@ def run(plan, args={}):
     )
     prometheus_additional_metrics_jobs = []
 
+    raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
+    jwt_file = plan.upload_files(
+        src=static_files.JWT_PATH_FILEPATH,
+        name=jwt_file,
+    )
     plan.print("Read the prometheus, grafana templates")
 
     plan.print(
@@ -86,6 +91,7 @@ def run(plan, args={}):
         args_with_right_defaults.participants,
         network_params,
         args_with_right_defaults.global_client_log_level,
+        jwt_file,
         parallel_keystore_generation,
     )
 
@@ -164,17 +170,11 @@ def run(plan, args={}):
         beacon_uri = "{0}:{1}".format(
             all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num
         )
-        jwt_secret = plan.run_sh(
-            run="cat " + constants.JWT_AUTH_PATH + " | tr -d '\n'",
-            image="busybox",
-            files={"/data": el_cl_data_files_artifact_uuid},
-            wait=None,
-        )
         endpoint = mock_mev.launch_mock_mev(
             plan,
             el_uri,
             beacon_uri,
-            jwt_secret.output,
+            raw_jwt_secret,
             args_with_right_defaults.global_client_log_level,
         )
         mev_endpoints.append(endpoint)

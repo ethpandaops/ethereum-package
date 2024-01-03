@@ -157,7 +157,7 @@ def get_config(
         "--Network.ExternalIp={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--Network.DiscoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--Network.P2PPort={0}".format(DISCOVERY_PORT_NUM),
-        "--JsonRpc.JwtSecretFile=" + constants.JWT_AUTH_PATH,
+        "--JsonRpc.JwtSecretFile=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
         "--Network.OnlyStaticPeers=true",
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
@@ -201,5 +201,5 @@ def get_config(
     )
 
 
-def new_nethermind_launcher(el_cl_genesis_data):
-    return struct(el_cl_genesis_data=el_cl_genesis_data)
+def new_nethermind_launcher(el_cl_genesis_data, jwt_file):
+    return struct(el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file)

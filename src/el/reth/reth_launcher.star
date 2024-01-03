@@ -5,7 +5,6 @@ el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
-
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
@@ -166,7 +165,7 @@ def get_config(
         "--ws.origins=*",
         "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.jwtsecret=" + constants.JWT_AUTH_PATH,
+        "--authrpc.jwtsecret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
         "--authrpc.addr=0.0.0.0",
         "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
     ]
@@ -218,7 +217,8 @@ def get_config(
     )
 
 
-def new_reth_launcher(el_cl_genesis_data):
+def new_reth_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
     )

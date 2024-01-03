@@ -3,8 +3,8 @@ input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
-
 constants = import_module("../../package_io/constants.star")
+static_files = import_module("../static_files/static_files.star")
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
 # The Docker container runs as the "teku" user so we can't write to root
@@ -312,7 +312,7 @@ def get_beacon_config(
         "--rest-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
-        "--ee-jwt-secret-file=" + constants.JWT_AUTH_PATH,
+        "--ee-jwt-secret-file=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
         "--ee-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled",
@@ -362,6 +362,7 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS: jwt_file.files_artifact_uuid,
     }
     if node_keystore_files != None and not split_mode_enabled:
         files[
@@ -471,5 +472,5 @@ def get_validator_config(
     )
 
 
-def new_teku_launcher(el_cl_genesis_data):
-    return struct(el_cl_genesis_data=el_cl_genesis_data)
+def new_teku_launcher(el_cl_genesis_data, jwt_file):
+    return struct(el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file)

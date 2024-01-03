@@ -165,7 +165,7 @@ def get_config(
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
         "--http.port={0}".format(WS_RPC_PORT_NUM),
-        "--authrpc.jwtsecret=" + constants.JWT_AUTH_PATH,
+        "--authrpc.jwtsecret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
         "--authrpc.addr=0.0.0.0",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.vhosts=*",
@@ -226,8 +226,9 @@ def get_config(
     )
 
 
-def new_erigon_launcher(network_id, el_cl_genesis_data):
+def new_erigon_launcher(network_id, el_cl_genesis_data, jwt_file):
     return struct(
         network_id=network_id,
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
     )

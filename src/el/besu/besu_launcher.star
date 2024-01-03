@@ -4,7 +4,6 @@ el_client_context = import_module("../../el/el_client_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
-
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/besu/execution-data"
 
@@ -162,7 +161,7 @@ def get_config(
         "--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--p2p-port={0}".format(DISCOVERY_PORT_NUM),
         "--engine-rpc-enabled=true",
-        "--engine-jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--engine-jwt-secret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
         "--engine-host-allowlist=*",
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
@@ -215,5 +214,5 @@ def get_config(
     )
 
 
-def new_besu_launcher(network_id, el_cl_genesis_data):
-    return struct(network_id=network_id, el_cl_genesis_data=el_cl_genesis_data)
+def new_besu_launcher(network_id, el_cl_genesis_data, jwt_file):
+    return struct(network_id=network_id, el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file)

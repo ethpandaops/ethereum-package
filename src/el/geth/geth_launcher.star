@@ -225,7 +225,7 @@ def get_config(
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret=" + constants.JWT_AUTH_PATH,
+        "--authrpc.jwtsecret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
         "--syncmode=full",
         "--rpc.allow-unprotected-txs",
         "--metrics",
@@ -268,7 +268,8 @@ def get_config(
         ports=USED_PORTS,
         cmd=[command_str],
         files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS: jwt_file.files_artifact_uuid,
         },
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -290,6 +291,7 @@ def get_config(
 def new_geth_launcher(
     network_id,
     el_cl_genesis_data,
+    jwt_file,
     final_genesis_timestamp,
     capella_fork_epoch,
     electra_fork_epoch=None,
@@ -297,6 +299,7 @@ def new_geth_launcher(
     return struct(
         network_id=network_id,
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
         final_genesis_timestamp=final_genesis_timestamp,
         capella_fork_epoch=capella_fork_epoch,
         electra_fork_epoch=electra_fork_epoch,
