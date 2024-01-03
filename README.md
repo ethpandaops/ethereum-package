@@ -248,6 +248,8 @@ network_params:
   # This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
   # validator keys already preregistered as validators
   preregistered_validator_keys_mnemonic: "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete"
+  # The number of pre-registered validators for genesis. If 0 or not specified then the value will be calculated from the participants
+  preregistered_validator_count: 0
   # How long you want the network to wait before starting up
   genesis_delay: 120
 
@@ -260,6 +262,10 @@ network_params:
   # Defaults to 16ETH
   # 16000000000 gwei
   ejection_balance: 16000000000,
+
+  # ETH1 follow distance
+  # Defaults to 2048
+  eth1_follow_distance: 2048
 
   # The epoch at which the capella and deneb forks are set to occur.
   capella_fork_epoch: 0
@@ -374,6 +380,11 @@ disable_peer_scoring: false
 
 # A list of locators for grafana dashboards to be loaded be the grafana service
 grafana_additional_dashboards: []
+
+# Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+# Note this requires Kurtosis greater than 0.85.49 to work
+# Defaults to False
+persistent: False
 
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
