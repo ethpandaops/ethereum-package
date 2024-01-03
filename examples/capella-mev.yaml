@@ -1,21 +1,18 @@
 mev_type: full
 participants:
 - el_client_type: geth
-  el_client_image: ethereum/client-go:latest
-  el_client_log_level: ''
   cl_client_type: lighthouse
-  cl_client_log_level: ''
-  cl_client_image: sigp/lighthouse
-  el_extra_params: []
+  cl_client_image: ethpandaops/lighthouse:unstable-c55608b
   beacon_extra_params:
   - "--always-prefer-builder-payload"
   - "--disable-peer-scoring"
-network_params:
-  capella_fork_epoch: 0
-  seconds_per_slot: 12
+network_config:
+  deneb_fork_epoch: 1
 mev_params:
   mev_flood_seconds_per_bundle: 12
   mev_flood_extra_args:
   - "--txsPerBundle=300"
   mev_flood_image: flashbots/mev-flood:0.0.9
-  mev_relay_image: flashbots/mev-boost-relay:0.27.0
+  mev_relay_image: flashbots/mev-boost-relay:0.28.0a7
+  mev_boost_image: flashbots/mev-boost:1.6.4844.dev5
+  mev_builder_image: flashbots/builder:1.13.2.4844.dev7-4d161de
