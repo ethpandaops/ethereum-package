@@ -101,17 +101,17 @@ def launch_participant_network(
         and network_params.electra_fork_epoch == None
     ):
         ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:2.0.7"
+            "ethpandaops/ethereum-genesis-generator:2.0.8"
         )
     # we are running electra - experimental
     elif network_params.electra_fork_epoch != None:
         if network_params.electra_fork_epoch == 0:
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:4.0.0-rc.3"
+                "ethpandaops/ethereum-genesis-generator:4.0.0-rc.4"
             )
         else:
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:3.0.0-rc.17"
+                "ethpandaops/ethereum-genesis-generator:3.0.0-rc.18"
             )
     else:
         fail(
@@ -135,6 +135,7 @@ def launch_participant_network(
         network_params.genesis_delay,
         network_params.max_churn,
         network_params.ejection_balance,
+        network_params.eth1_follow_distance,
         network_params.capella_fork_epoch,
         network_params.deneb_fork_epoch,
         network_params.electra_fork_epoch,
