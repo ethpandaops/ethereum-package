@@ -6,11 +6,9 @@ participants:
   beacon_extra_params:
   - "--always-prefer-builder-payload"
   - "--disable-peer-scoring"
-  count: 8
 - el_client_type: geth
   cl_client_type: teku
   cl_client_image: ethpandaops/teku:master-f733b7c
-  validator_count: 0
 - el_client_type: geth
   cl_client_type: lodestar
   cl_client_image: ethpandaops/lodestar:blobs-inclproof-d5a5a47

@@ -239,7 +239,9 @@ def run(plan, args={}):
     all_mevboost_contexts = []
     if mev_endpoints:
         for index, participant in enumerate(all_participants):
-            index_str = shared_utils.zfill_custom(index + 1, len(str(len(all_participants))))
+            index_str = shared_utils.zfill_custom(
+                index + 1, len(str(len(all_participants)))
+            )
             if args_with_right_defaults.participants[index].validator_count != 0:
                 mev_boost_launcher = mev_boost.new_mev_boost_launcher(
                     MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints
