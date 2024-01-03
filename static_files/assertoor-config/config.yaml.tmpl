@@ -605,7 +605,7 @@ tests:
               - name: check_consensus_block_proposals
                 title: "Wait for block proposal with >= 2 blobs"
                 config:
-                  minTransactionCount: 5
+                  minBlobCount: 2
           - name: "sleep"
             title: "Wait 30sec to clear up pending transactions"
             config:
