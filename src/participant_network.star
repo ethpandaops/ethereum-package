@@ -280,20 +280,21 @@ def launch_participant_network(
     )
     cl_launchers = {
         constants.CL_CLIENT_TYPE.lighthouse: {
-            "launcher": lighthouse.new_lighthouse_launcher(el_cl_data),
+            "launcher": lighthouse.new_lighthouse_launcher(el_cl_data, jwt_file),
             "launch_method": lighthouse.launch,
         },
         constants.CL_CLIENT_TYPE.lodestar: {
-            "launcher": lodestar.new_lodestar_launcher(el_cl_data),
+            "launcher": lodestar.new_lodestar_launcher(el_cl_data, jwt_file),
             "launch_method": lodestar.launch,
         },
         constants.CL_CLIENT_TYPE.nimbus: {
-            "launcher": nimbus.new_nimbus_launcher(el_cl_data),
+            "launcher": nimbus.new_nimbus_launcher(el_cl_data, jwt_file),
             "launch_method": nimbus.launch,
         },
         constants.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
+                jwt_file,
                 prysm_password_relative_filepath,
                 prysm_password_artifact_uuid,
             ),

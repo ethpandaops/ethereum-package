@@ -424,10 +424,14 @@ def get_validator_config(
 
 
 def new_prysm_launcher(
-    el_cl_genesis_data, prysm_password_relative_filepath, prysm_password_artifact_uuid
+    el_cl_genesis_data,
+    jwt_file,
+    prysm_password_relative_filepath,
+    prysm_password_artifact_uuid,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
         prysm_password_artifact_uuid=prysm_password_artifact_uuid,
         prysm_password_relative_filepath=prysm_password_relative_filepath,
     )

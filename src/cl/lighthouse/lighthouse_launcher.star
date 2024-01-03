@@ -467,7 +467,8 @@ def get_validator_config(
     )
 
 
-def new_lighthouse_launcher(el_cl_genesis_data):
+def new_lighthouse_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
     )
