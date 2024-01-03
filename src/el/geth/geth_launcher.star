@@ -100,6 +100,7 @@ def launch(
     config = get_config(
         launcher.network_id,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
         image,
         existing_el_clients,
         cl_client_name,
@@ -143,6 +144,7 @@ def launch(
 def get_config(
     network_id,
     el_cl_genesis_data,
+    jwt_file,
     image,
     existing_el_clients,
     cl_client_name,

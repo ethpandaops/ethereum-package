@@ -4,7 +4,6 @@ cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 constants = import_module("../../package_io/constants.star")
-static_files = import_module("../static_files/static_files.star")
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
 # The Docker container runs as the "teku" user so we can't write to root
@@ -143,6 +142,7 @@ def launch(
 
     config = get_beacon_config(
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
         image,
         bootnode_context,
         el_client_context,
@@ -249,6 +249,7 @@ def launch(
 
 def get_beacon_config(
     el_cl_genesis_data,
+    jwt_file,
     image,
     bootnode_contexts,
     el_client_context,

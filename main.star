@@ -72,7 +72,7 @@ def run(plan, args={}):
     raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
     jwt_file = plan.upload_files(
         src=static_files.JWT_PATH_FILEPATH,
-        name=jwt_file,
+        name="jwt_file",
     )
     plan.print("Read the prometheus, grafana templates")
 
