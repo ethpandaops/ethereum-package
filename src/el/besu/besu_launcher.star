@@ -214,4 +214,6 @@ def get_config(
 
 
 def new_besu_launcher(network_id, el_cl_genesis_data, jwt_file):
-    return struct(network_id=network_id, el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file)
+    return struct(
+        network_id=network_id, el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file
+    )

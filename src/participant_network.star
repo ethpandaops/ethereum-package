@@ -190,7 +190,9 @@ def launch_participant_network(
             "launch_method": geth.launch,
         },
         constants.EL_CLIENT_TYPE.besu: {
-            "launcher": besu.new_besu_launcher(network_params.network_id, el_cl_data, jwt_file),
+            "launcher": besu.new_besu_launcher(
+                network_params.network_id, el_cl_data, jwt_file
+            ),
             "launch_method": besu.launch,
         },
         constants.EL_CLIENT_TYPE.erigon: {
@@ -297,7 +299,7 @@ def launch_participant_network(
             "launch_method": prysm.launch,
         },
         constants.CL_CLIENT_TYPE.teku: {
-            "launcher": teku.new_teku_launcher(el_cl_data,jwt_file),
+            "launcher": teku.new_teku_launcher(el_cl_data, jwt_file),
             "launch_method": teku.launch,
         },
     }
