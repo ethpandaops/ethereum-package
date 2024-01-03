@@ -14,7 +14,7 @@ RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
 RUST_FULL_BACKTRACE_KEYWORD = "full"
 
 #  ---------------------------------- Beacon client -------------------------------------
-BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/lighthouse/beacon-data"
+BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/lighthouse/beacon-data"
 
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -34,7 +34,7 @@ BEACON_MIN_MEMORY = 256
 BEACON_MAX_MEMORY = 1024
 
 #  ---------------------------------- Validator client -------------------------------------
-VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/lighthouse/validator-keys"
+VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/lighthouse/validator-keys"
 VALIDATOR_HTTP_PORT_ID = "http"
 VALIDATOR_METRICS_PORT_ID = "metrics"
 VALIDATOR_HTTP_PORT_NUM = 5042

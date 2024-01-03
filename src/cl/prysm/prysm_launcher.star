@@ -8,7 +8,7 @@ IMAGE_SEPARATOR_DELIMITER = ","
 EXPECTED_NUM_IMAGES = 2
 
 #  ---------------------------------- Beacon client -------------------------------------
-BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-beacon-data/"
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
 
 # Port IDs
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -31,7 +31,7 @@ BEACON_MIN_MEMORY = 256
 BEACON_MAX_MEMORY = 1024
 
 #  ---------------------------------- Validator client -------------------------------------
-VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-validator-data/"
+VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/validator-data/"
 VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
 PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-password"
 

@@ -51,7 +51,7 @@ VALIDATOR_METRICS_PATH = "/metrics"
 
 # Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
 #  have to to create it
-BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "$HOME/consensus-data"
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/beacon-data"
 # Nimbus wants the data dir to have these perms
 CONSENSUS_DATA_DIR_PERMS_STR = "0700"
 

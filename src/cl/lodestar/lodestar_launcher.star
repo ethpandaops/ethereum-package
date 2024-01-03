@@ -7,7 +7,7 @@ blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 constants = import_module("../../package_io/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
-BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/lodestar-beacon-data"
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/lodestar/beacon-data"
 # Port IDs
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
@@ -28,7 +28,7 @@ BEACON_MAX_MEMORY = 1024
 
 #  ---------------------------------- Validator client -------------------------------------
 VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
-VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/lodestar-validator-data"
+VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/lodestar/validator-data"
 # The min/max CPU/memory that the validator node can use
 VALIDATOR_MIN_CPU = 50
 VALIDATOR_MAX_CPU = 300

@@ -9,7 +9,7 @@ TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
 #  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "teku" user so we can't write to root
-BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/teku-beacon-data"
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/teku/teku-beacon-data"
 
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -32,7 +32,7 @@ BEACON_METRICS_PATH = "/metrics"
 #  ---------------------------------- Validator client -------------------------------------
 # These will get mounted as root and Teku needs directory write permissions, so we'll copy this
 #  into the Teku user's home directory to get around it
-VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/teku-validator-data"
+VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/teku/teku-validator-data"
 
 VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
 
