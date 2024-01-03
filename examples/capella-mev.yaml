@@ -6,12 +6,6 @@ participants:
   beacon_extra_params:
   - "--always-prefer-builder-payload"
   - "--disable-peer-scoring"
-- el_client_type: geth
-  cl_client_type: teku
-  cl_client_image: ethpandaops/teku:master-f733b7c
-- el_client_type: geth
-  cl_client_type: lodestar
-  cl_client_image: ethpandaops/lodestar:blobs-inclproof-d5a5a47
 network_config:
   deneb_fork_epoch: 1
 mev_params:
