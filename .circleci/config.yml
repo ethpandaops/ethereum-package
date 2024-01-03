@@ -114,7 +114,7 @@ jobs:
     executor: ubuntu_vm
     steps:
       - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-persistence.yaml)"
+      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-persistence-k8s.yaml)"
 
 workflows:
   nightly_tests:
