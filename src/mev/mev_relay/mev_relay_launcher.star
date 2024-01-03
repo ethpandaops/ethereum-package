@@ -83,6 +83,8 @@ def launch_mev_relay(
         "DENEB_FORK_VERSION": constants.DENEB_FORK_VERSION,
         "GENESIS_VALIDATORS_ROOT": validator_root,
         "SEC_PER_SLOT": str(seconds_per_slot),
+        "LOG_LEVEL": "debug",
+        "DB_TABLE_PREFIX": "custom",
     }
 
     redis_url = "{}:{}".format(redis.hostname, redis.port_number)

@@ -1,7 +1,7 @@
 input_parser = import_module("./src/package_io/input_parser.star")
 constants = import_module("./src/package_io/constants.star")
 participant_network = import_module("./src/participant_network.star")
-
+shared_utils = import_module("./src/shared_utils/shared_utils.star")
 static_files = import_module("./src/static_files/static_files.star")
 genesis_constants = import_module(
     "./src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
@@ -239,13 +239,16 @@ def run(plan, args={}):
     all_mevboost_contexts = []
     if mev_endpoints:
         for index, participant in enumerate(all_participants):
+            index_str = shared_utils.zfill_custom(
+                index + 1, len(str(len(all_participants)))
+            )
             if args_with_right_defaults.participants[index].validator_count != 0:
                 mev_boost_launcher = mev_boost.new_mev_boost_launcher(
                     MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints
                 )
                 mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
                     input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
-                    index,
+                    index_str,
                     participant.cl_client_type,
                     participant.el_client_type,
                 )
