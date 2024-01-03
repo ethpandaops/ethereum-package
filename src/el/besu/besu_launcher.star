@@ -89,6 +89,7 @@ def launch(
     config = get_config(
         launcher.network_id,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
         image,
         existing_el_clients,
         cl_client_name,
@@ -127,6 +128,7 @@ def launch(
 def get_config(
     network_id,
     el_cl_genesis_data,
+    jwt_file,
     image,
     existing_el_clients,
     cl_client_name,
@@ -161,7 +163,7 @@ def get_config(
         "--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--p2p-port={0}".format(DISCOVERY_PORT_NUM),
         "--engine-rpc-enabled=true",
-        "--engine-jwt-secret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
+        "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--engine-host-allowlist=*",
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
@@ -195,6 +197,7 @@ def get_config(
         cmd=[cmd_str],
         files={
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars=extra_env_vars,
         entrypoint=ENTRYPOINT_ARGS,

@@ -141,6 +141,7 @@ def launch(
 
     beacon_config = get_beacon_config(
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
         beacon_image,
         bootnode_contexts,
         el_client_context,
@@ -248,6 +249,7 @@ def launch(
 
 def get_beacon_config(
     el_cl_genesis_data,
+    jwt_file,
     beacon_image,
     bootnode_contexts,
     el_client_context,
@@ -297,7 +299,7 @@ def get_beacon_config(
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Pari's recommendation to reduce noise
         "--subscribe-all-subnets=true",
-        "--jwt-secret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--enable-debug-rpc-endpoints=true",
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
@@ -322,6 +324,7 @@ def get_beacon_config(
         cmd=cmd,
         files={
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(

@@ -227,7 +227,7 @@ def get_config(
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
+        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full",
         "--rpc.allow-unprotected-txs",
         "--metrics",
@@ -271,7 +271,7 @@ def get_config(
         cmd=[command_str],
         files={
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS: jwt_file.files_artifact_uuid,
+            constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,

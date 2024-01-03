@@ -313,7 +313,7 @@ def get_beacon_config(
         "--rest-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
-        "--ee-jwt-secret-file=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
+        "--ee-jwt-secret-file=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--ee-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled",
@@ -362,7 +362,7 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS: jwt_file.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
     if node_keystore_files != None and not split_mode_enabled:
         files[

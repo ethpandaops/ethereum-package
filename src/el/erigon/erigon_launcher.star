@@ -91,6 +91,7 @@ def launch(
     config = get_config(
         launcher.network_id,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
         image,
         existing_el_clients,
         cl_client_name,
@@ -131,6 +132,7 @@ def launch(
 def get_config(
     network_id,
     el_cl_genesis_data,
+    jwt_file,
     image,
     existing_el_clients,
     cl_client_name,
@@ -165,7 +167,7 @@ def get_config(
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
         "--http.port={0}".format(WS_RPC_PORT_NUM),
-        "--authrpc.jwtsecret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
+        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.vhosts=*",
@@ -208,6 +210,7 @@ def get_config(
         cmd=[command_arg_str],
         files={
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,

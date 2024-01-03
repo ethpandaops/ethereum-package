@@ -115,6 +115,7 @@ def launch(
     # Launch Beacon node
     beacon_config = get_beacon_config(
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
         image,
         bootnode_contexts,
         el_client_context,
@@ -229,6 +230,7 @@ def launch(
 
 def get_beacon_config(
     el_cl_genesis_data,
+    jwt_file,
     image,
     bootnode_contexts,
     el_client_context,
@@ -287,7 +289,7 @@ def get_beacon_config(
         "--enr.udp={0}".format(DISCOVERY_PORT_NUM),
         # Set per Pari's recommendation to reduce noise in the logs
         "--subscribeAllSubnets=true",
-        "--jwt-secret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics.address=0.0.0.0",
@@ -312,7 +314,8 @@ def get_beacon_config(
         ports=BEACON_USED_PORTS,
         cmd=cmd,
         files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(

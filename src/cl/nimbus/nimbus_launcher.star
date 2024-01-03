@@ -155,6 +155,7 @@ def launch(
 
     beacon_config = get_beacon_config(
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
         image,
         bootnode_contexts,
         el_client_context,
@@ -261,6 +262,7 @@ def launch(
 
 def get_beacon_config(
     el_cl_genesis_data,
+    jwt_file,
     image,
     bootnode_contexts,
     el_client_context,
@@ -323,7 +325,7 @@ def get_beacon_config(
         "--subscribe-all-subnets=true",
         # Nimbus can handle a max of 256 threads, if the host has more then nimbus crashes. Setting it to 4 so it doesn't crash on build servers
         "--num-threads=4",
-        "--jwt-secret=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
@@ -358,6 +360,7 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
     if node_keystore_files != None and not split_mode_enabled:
         files[

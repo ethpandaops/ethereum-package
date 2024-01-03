@@ -139,6 +139,7 @@ def launch(
     # Launch Beacon node
     beacon_config = get_beacon_config(
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
         image,
         bootnode_contexts,
         el_client_context,
@@ -262,6 +263,7 @@ def launch(
 
 def get_beacon_config(
     el_cl_genesis_data,
+    jwt_file,
     image,
     boot_cl_client_ctxs,
     el_client_context,
@@ -321,7 +323,7 @@ def get_beacon_config(
         # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
         "--disable-packet-filter",
         "--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secrets=" + constants.JWT_DATA_MOUNTPOINT_ON_CLIENTS,
+        "--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Paris' recommendation to reduce noise in the logs
         "--subscribe-all-subnets",
@@ -363,7 +365,8 @@ def get_beacon_config(
         ports=BEACON_USED_PORTS,
         cmd=cmd,
         files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+            constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         },
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
