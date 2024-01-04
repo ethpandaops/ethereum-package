@@ -106,6 +106,7 @@ print(",".join(bootnodes), end="")
     )
     return enr_list.output
 
+
 # Prysm and Nimbus needs to have the enrs in a list format
 # Can't figure out how to pass each item as a list, as I can't return an array from the starlark function
 # So for now I'm just returning the last item in the list

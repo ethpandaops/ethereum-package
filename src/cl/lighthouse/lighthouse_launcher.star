@@ -347,7 +347,10 @@ def get_beacon_config(
             cmd.append(
                 "--boot-nodes="
                 + ",".join(
-                    [ctx.enr for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]]
+                    [
+                        ctx.enr
+                        for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
+                    ]
                 )
             )
             cmd.append(
@@ -360,7 +363,12 @@ def get_beacon_config(
                 )
             )
     elif network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--boot-nodes=" + shared_utils.get_devnet_enrs_list(plan, el_cl_genesis_data.files_artifact_uuid))
+        cmd.append(
+            "--boot-nodes="
+            + shared_utils.get_devnet_enrs_list(
+                plan, el_cl_genesis_data.files_artifact_uuid
+            )
+        )
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
