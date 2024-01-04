@@ -60,7 +60,7 @@ def generate_el_cl_genesis_data(
         image=image,
         files={GENESIS_VALUES_PATH: genesis_generation_config_artifact_name},
         store=[
-            StoreSpec(src="/network-configs/", name="el-cl-genesis-data"),
+            StoreSpec(src="/network-configs/", name="el_cl_genesis_data"),
             StoreSpec(
                 src="/network-configs/genesis_validators_root.txt",
                 name="genesis_validators_root",

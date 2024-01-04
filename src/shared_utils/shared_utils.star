@@ -77,10 +77,10 @@ def label_maker(client, client_type, image, connected_client, extra_labels):
 
 def get_devnet_enodes(plan, filename):
     enode_list = plan.run_python(
-        files={"/data": filename},
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="""
-with open("/data/bootnode.txt") as bootnode_file:
+        run = """
+with open("/network-configs/network-configs/bootnode.txt") as bootnode_file:
     bootnodes = []
     for line in bootnode_file:
         line = line.strip()
@@ -93,10 +93,10 @@ print(",".join(bootnodes), end="")
 
 def get_devnet_enrs_list(plan, filename):
     enr_list = plan.run_python(
-        files={"/data": filename},
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         run="""
-with open("/data/bootstrap_nodes.txt") as bootnode_file:
+with open("/network-configs/network-configs/bootstrap_nodes.txt") as bootnode_file:
     bootnodes = []
     for line in bootnode_file:
         line = line.strip()
@@ -112,10 +112,10 @@ print(",".join(bootnodes), end="")
 # So for now I'm just returning the last item in the list
 def get_devnet_enr(plan, filename):
     enr_items = plan.run_python(
-        files={"/data": filename},
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         run="""
-with open("/data/bootstrap_nodes.txt") as bootnode_file:
+with open("/network-configs/network-configs/bootstrap_nodes.txt") as bootnode_file:
     last_enr = bootnode_file.read().splitlines()[-1]
     print(last_enr, end="")
             """,

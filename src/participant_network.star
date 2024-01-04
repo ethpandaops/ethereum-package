@@ -158,10 +158,15 @@ def launch_participant_network(
             src="github.com/ethpandaops/{0}-devnets/network-configs/devnet-{1}".format(
                 devnet_name, devnet_number
             ),
-            name="el_cl_genesis_data",
+            name="el_cl_genesis",
+        )
+        el_cl_genesis_data_uuid = plan.run_sh(
+            run="mkdir -p /network-configs/ && mv /opt/* /network-configs/ && ls -la /network-configs/",
+            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
+            files={"/opt": el_cl_genesis_uuid},
         )
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
-            el_cl_genesis_uuid,
+            el_cl_genesis_data_uuid.files_artifacts[0],
             "0",
         )
         final_genesis_timestamp = 0
