@@ -76,6 +76,7 @@ def launch(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, ERIGON_LOG_LEVELS
@@ -92,6 +93,7 @@ def launch(
         launcher.network_id,
         launcher.el_cl_genesis_data,
         image,
+        service_name,
         existing_el_clients,
         cl_client_name,
         log_level,
@@ -102,6 +104,7 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
+        persistent,
     )
 
     service = plan.add_service(service_name, config)
@@ -132,6 +135,7 @@ def get_config(
     network_id,
     el_cl_genesis_data,
     image,
+    service_name,
     existing_el_clients,
     cl_client_name,
     verbosity_level,
@@ -142,6 +146,7 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     network_id = network_id
 
@@ -201,14 +206,19 @@ def get_config(
     command_arg = [init_datadir_cmd_str, " ".join(cmd)]
 
     command_arg_str = " && ".join(command_arg)
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+    }
 
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+        )
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
         cmd=[command_arg_str],
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        },
+        files=files,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
