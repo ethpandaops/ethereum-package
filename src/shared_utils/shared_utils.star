@@ -79,7 +79,7 @@ def get_devnet_enodes(plan, filename):
     enode_list = plan.run_python(
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run = """
+        run="""
 with open("/network-configs/network-configs/bootnode.txt") as bootnode_file:
     bootnodes = []
     for line in bootnode_file:

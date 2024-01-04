@@ -123,17 +123,18 @@ def run(plan, args={}):
         all_cl_client_contexts,
         args_with_right_defaults.participants,
     )
-
-    if network_params.deneb_fork_epoch != 0:
-        plan.print("Launching 4788 contract deployer")
-        el_uri = "http://{0}:{1}".format(
-            all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
-        )
-        eip4788_deployment.deploy_eip4788_contract_in_background(
-            plan,
-            genesis_constants.PRE_FUNDED_ACCOUNTS[5].private_key,
-            el_uri,
-        )
+    if network_params.network == "kurtosis":
+        if network_params.deneb_fork_epoch != 0:
+            plan.print("Launching 4788 contract deployer")
+            el_uri = "http://{0}:{1}".format(
+                all_el_client_contexts[0].ip_addr,
+                all_el_client_contexts[0].rpc_port_num,
+            )
+            eip4788_deployment.deploy_eip4788_contract_in_background(
+                plan,
+                genesis_constants.PRE_FUNDED_ACCOUNTS[5].private_key,
+                el_uri,
+            )
 
     fuzz_target = "http://{0}:{1}".format(
         all_el_client_contexts[0].ip_addr,
