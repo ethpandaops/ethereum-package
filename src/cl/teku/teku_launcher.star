@@ -369,15 +369,7 @@ def get_beacon_config(
                 )
             )
     elif network not in constants.PUBLIC_NETWORKS:
-        devnet_bootnodes = plan.run_sh(
-            run="cat /data/bootstrap_nodes.txt",
-            files={"/data": el_cl_genesis_data.files_artifact_uuid},
-            wait=None,
-        )
-        cmd.append(
-            "--p2p-discovery-bootnodes="
-            + ",".join([bootnode for bootnode in devnet_bootnodes.output.splitlines()])
-        )
+        cmd.append("--p2p-discovery-bootnodes=" + shared_utils.get_devnet_enrs_list(plan, el_cl_genesis_data.files_artifact_uuid))
 
     if len(extra_params) > 0:
         # we do the list comprehension as the default extra_params is a proto repeated string

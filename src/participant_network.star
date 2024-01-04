@@ -195,26 +195,44 @@ def launch_participant_network(
         },
         constants.EL_CLIENT_TYPE.besu: {
             "launcher": besu.new_besu_launcher(
-                network_params.network_id, el_cl_data, jwt_file
+                network_params.network_id,
+                el_cl_data,
+                jwt_file,
+                network_params.network,
             ),
             "launch_method": besu.launch,
         },
         constants.EL_CLIENT_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
-                network_params.network_id, el_cl_data, jwt_file
+                network_params.network_id,
+                el_cl_data,
+                jwt_file,
+                network_params.network,
             ),
             "launch_method": erigon.launch,
         },
         constants.EL_CLIENT_TYPE.nethermind: {
-            "launcher": nethermind.new_nethermind_launcher(el_cl_data, jwt_file),
+            "launcher": nethermind.new_nethermind_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
             "launch_method": nethermind.launch,
         },
         constants.EL_CLIENT_TYPE.reth: {
-            "launcher": reth.new_reth_launcher(el_cl_data, jwt_file),
+            "launcher": reth.new_reth_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
             "launch_method": reth.launch,
         },
         constants.EL_CLIENT_TYPE.ethereumjs: {
-            "launcher": ethereumjs.new_ethereumjs_launcher(el_cl_data, jwt_file),
+            "launcher": ethereumjs.new_ethereumjs_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
             "launch_method": ethereumjs.launch,
         },
     }
@@ -284,21 +302,28 @@ def launch_participant_network(
     )
     cl_launchers = {
         constants.CL_CLIENT_TYPE.lighthouse: {
-            "launcher": lighthouse.new_lighthouse_launcher(el_cl_data, jwt_file),
+            "launcher": lighthouse.new_lighthouse_launcher(
+                el_cl_data, jwt_file, network_params.network
+            ),
             "launch_method": lighthouse.launch,
         },
         constants.CL_CLIENT_TYPE.lodestar: {
-            "launcher": lodestar.new_lodestar_launcher(el_cl_data, jwt_file),
+            "launcher": lodestar.new_lodestar_launcher(
+                el_cl_data, jwt_file, network_params.network
+            ),
             "launch_method": lodestar.launch,
         },
         constants.CL_CLIENT_TYPE.nimbus: {
-            "launcher": nimbus.new_nimbus_launcher(el_cl_data, jwt_file),
+            "launcher": nimbus.new_nimbus_launcher(
+                el_cl_data, jwt_file, network_params.network
+            ),
             "launch_method": nimbus.launch,
         },
         constants.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
                 jwt_file,
+                network_params.network,
                 prysm_password_relative_filepath,
                 prysm_password_artifact_uuid,
             ),

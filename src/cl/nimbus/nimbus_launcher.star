@@ -155,8 +155,10 @@ def launch(
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
     beacon_config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
+        launcher.network,
         image,
         beacon_service_name,
         bootnode_contexts,
@@ -262,8 +264,10 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
     jwt_file,
+    network,
     image,
     service_name,
     bootnode_contexts,
@@ -348,14 +352,18 @@ def get_beacon_config(
     if node_keystore_files != None and not split_mode_enabled:
         cmd.extend(validator_flags)
 
-    if bootnode_contexts == None:
-        # Copied from https://github.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
-        # See explanation there
-        cmd.append("--subscribe-all-subnets")
-    else:
-        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
-            cmd.append("--bootstrap-node=" + ctx.enr)
-            cmd.append("--direct-peer=" + ctx.multiaddr)
+    if network == "kurtosis":
+        if bootnode_contexts == None:
+            # Copied from https://github.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
+            # See explanation there
+            cmd.append("--subscribe-all-subnets")
+        else:
+            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
+                cmd.append("--bootstrap-node=" + ctx.enr)
+                cmd.append("--direct-peer=" + ctx.multiaddr)
+    elif network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--bootstrap-node=" + shared_utils.get_devnet_enr(plan, el_cl_genesis_data.files_artifact_uuid))
+        cmd.append("--p2p-static-id=true")
 
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
@@ -468,8 +476,9 @@ def get_validator_config(
     )
 
 
-def new_nimbus_launcher(el_cl_genesis_data, jwt_file):
+def new_nimbus_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
+        network=network,
     )

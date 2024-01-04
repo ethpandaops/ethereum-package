@@ -142,8 +142,10 @@ def launch(
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
     beacon_config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
+        launcher.network,
         beacon_image,
         beacon_service_name,
         bootnode_contexts,
@@ -251,8 +253,10 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
     jwt_file,
+    network,
     beacon_image,
     service_name,
     bootnode_contexts,
@@ -312,11 +316,14 @@ def get_beacon_config(
         "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM)
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
-
-    if bootnode_contexts != None:
-        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
-            cmd.append("--peer=" + ctx.multiaddr)
-            cmd.append("--bootstrap-node=" + ctx.enr)
+    if network == "kurtosis":
+        if bootnode_contexts != None:
+            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
+                cmd.append("--peer=" + ctx.multiaddr)
+                cmd.append("--bootstrap-node=" + ctx.enr)
+            cmd.append("--p2p-static-id=true")
+    elif network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--bootstrap-node=" + shared_utils.get_devnet_enr(plan, el_cl_genesis_data.files_artifact_uuid))
         cmd.append("--p2p-static-id=true")
 
     if len(extra_params) > 0:
@@ -446,12 +453,14 @@ def get_validator_config(
 def new_prysm_launcher(
     el_cl_genesis_data,
     jwt_file,
+    network,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
+        network=network,
         prysm_password_artifact_uuid=prysm_password_artifact_uuid,
         prysm_password_relative_filepath=prysm_password_relative_filepath,
     )

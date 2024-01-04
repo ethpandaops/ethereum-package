@@ -116,8 +116,10 @@ def launch(
 
     # Launch Beacon node
     beacon_config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
+        launcher.network,
         image,
         beacon_service_name,
         bootnode_contexts,
@@ -233,8 +235,10 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
     jwt_file,
+    network,
     image,
     service_name,
     bootnode_contexts,
@@ -302,14 +306,16 @@ def get_beacon_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
-
-    if bootnode_contexts != None:
-        cmd.append(
-            "--bootnodes="
-            + ",".join(
-                [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+    if network == "kurtosis":
+        if bootnode_contexts != None:
+            cmd.append(
+                "--bootnodes="
+                + ",".join(
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+                )
             )
-        )
+    elif network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--bootnodes=" + shared_utils.get_devnet_enrs_list(plan, el_cl_genesis_data.files_artifact_uuid))
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -429,8 +435,9 @@ def get_validator_config(
     )
 
 
-def new_lodestar_launcher(el_cl_genesis_data, jwt_file):
+def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
+        network=network,
     )
