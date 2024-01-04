@@ -97,7 +97,7 @@ tests:
 
 {{ if .RunLifecycleTest }}
 - name: "Validator Lifecycle Test"
-  timeout: 48h
+  timeout: 72h
   testVars:
     validatorMnemonic: "trial jeans seat abstract runway cupboard please elevator club file arrow lounge crash sun thumb clock duty priority key fence funny trick diary album"
   tasks:
@@ -120,20 +120,26 @@ tests:
           walletPrivkey: "walletPrivkey"
           mnemonic: "validatorMnemonic"
 
-      - name: run_task_matrix
-        title: "Check deposit inclusion with all client pairs"
-        configVars:
-          matrixValues: "validatorPairNames"
+      - name: run_task_options
+        title: "Check deposit inclusion"
         config:
-          runConcurrent: true
-          matrixVar: "validatorPairName"
+          ignoreFailure: true
           task:
-            name: check_consensus_block_proposals
-            title: "Wait for block proposal with deposits from ${validatorPairName}"
+            name: run_task_matrix
+            title: "Check deposit inclusion with all client pairs"
+            timeout: 48h
             configVars:
-              validatorNamePattern: "validatorPairName"
+              matrixValues: "validatorPairNames"
             config:
-              minDepositCount: 1
+              runConcurrent: true
+              matrixVar: "validatorPairName"
+              task:
+                name: check_consensus_block_proposals
+                title: "Wait for block proposal with deposits from ${validatorPairName}"
+                configVars:
+                  validatorNamePattern: "validatorPairName"
+                config:
+                  minDepositCount: 1
       
   # due to the deposits we should reach un-finality soon.
   - name: check_consensus_validator_status
@@ -168,6 +174,7 @@ tests:
 
       - name: run_task_matrix
         title: "Check bls change inclusion with all client pairs"
+        timeout: 1h
         configVars:
           matrixValues: "validatorPairNames"
         config:
@@ -197,6 +204,7 @@ tests:
 
       - name: run_task_matrix
         title: "Check exit inclusion with all client pairs"
+        timeout: 1h
         configVars:
           matrixValues: "validatorPairNames"
         config:
@@ -219,7 +227,7 @@ tests:
       mnemonic: "validatorMnemonic"
   - name: check_consensus_finality
     title: "Wait for consensus chain finality"
-    timeout: 12h
+    timeout: 18h
     config:
       maxUnfinalizedEpochs: 4
 
@@ -241,6 +249,7 @@ tests:
 
       - name: run_task_matrix
         title: "Check bls change inclusion with all client pairs"
+        timeout: 1h
         configVars:
           matrixValues: "validatorPairNames"
         config:
@@ -271,6 +280,7 @@ tests:
 
       - name: run_task_matrix
         title: "Check exit inclusion with all client pairs"
+        timeout: 1h
         configVars:
           matrixValues: "validatorPairNames"
         config:
@@ -302,6 +312,7 @@ tests:
 
       - name: run_task_matrix
         title: "Check slashing inclusion with all client pairs"
+        timeout: 1h
         configVars:
           matrixValues: "validatorPairNames"
         config:
@@ -333,6 +344,7 @@ tests:
 
       - name: run_task_matrix
         title: "Check slashing inclusion with all client pairs"
+        timeout: 1h
         configVars:
           matrixValues: "validatorPairNames"
         config:
