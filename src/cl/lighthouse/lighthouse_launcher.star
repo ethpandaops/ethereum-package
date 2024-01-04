@@ -309,7 +309,6 @@ def get_beacon_config(
         "beacon_node",
         "--debug-level=" + log_level,
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
         "--disable-enr-auto-update",
         "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -341,6 +340,12 @@ def get_beacon_config(
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
+
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
+    else:
+        cmd.append("--network=" + network)
+        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if network == "kurtosis":
         if boot_cl_client_ctxs != None:

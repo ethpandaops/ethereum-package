@@ -302,12 +302,11 @@ def get_beacon_config(
     cmd = [
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
-        "--network="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/config.yaml",
-        "--initial-state="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/genesis.ssz",
+        "--network={0}".format(
+            network
+            if network in constants.PUBLIC_NETWORKS
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml"
+        ),
         "--data-path=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--data-storage-mode={0}".format(
             "ARCHIVE" if constants.ARCHIVE_MODE else "PRUNE"
@@ -348,6 +347,15 @@ def get_beacon_config(
         + "-"
         + el_client_context.client_name,
     ]
+
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append(
+            "--initial-state="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/genesis.ssz"
+        )
+    else:
+        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if node_keystore_files != None and not split_mode_enabled:
         cmd.extend(validator_flags)

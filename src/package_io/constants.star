@@ -59,3 +59,9 @@ PUBLIC_NETWORKS = (
     "sepolia",
     "holesky",
 )
+CHECKPOINT_SYNC_URL = {
+    "mainnet": "https://beaconstate.info",
+    "goerli": "https://checkpoint-sync.goerli.ethpandaops.io",
+    "sepolia": "https://checkpoint-sync.sepolia.ethpandaops.io",
+    "holesky": "https://checkpoint-sync.holesky.ethpandaops.io",
+}

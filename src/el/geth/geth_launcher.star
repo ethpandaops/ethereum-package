@@ -213,6 +213,9 @@ def get_config(
             if electra_fork_epoch == 0
             else ""
         ),
+        "{0}".format(
+            "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
+        ),
         "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--http",
@@ -272,12 +275,14 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     cmd_str = " ".join(cmd)
-
-    subcommand_strs = [
-        init_datadir_cmd_str,
-        cmd_str,
-    ]
-    command_str = " && ".join(subcommand_strs)
+    if network not in constants.PUBLIC_NETWORKS:
+        subcommand_strs = [
+            init_datadir_cmd_str,
+            cmd_str,
+        ]
+        command_str = " && ".join(subcommand_strs)
+    else:
+        command_str = cmd_str
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,

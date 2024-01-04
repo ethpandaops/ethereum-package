@@ -277,12 +277,6 @@ def get_beacon_config(
         "--port={0}".format(DISCOVERY_PORT_NUM),
         "--discoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--dataDir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--paramsFile="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/config.yaml",
-        "--genesisStateFile="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/genesis.ssz",
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
         "--discv5=true",
@@ -306,21 +300,39 @@ def get_beacon_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
-    if network == "kurtosis":
-        if bootnode_contexts != None:
+
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append(
+            "--paramsFile="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/config.yaml"
+        )
+        cmd.append(
+            "--genesisStateFile="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/genesis.ssz"
+        )
+        if network == "kurtosis":  # kurtosis
+            if bootnode_contexts != None:
+                cmd.append(
+                    "--bootnodes="
+                    + ",".join(
+                        [
+                            ctx.enr
+                            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
+                        ]
+                    )
+                )
+        else:  # devnet
             cmd.append(
                 "--bootnodes="
-                + ",".join(
-                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+                + shared_utils.get_devnet_enrs_list(
+                    plan, el_cl_genesis_data.files_artifact_uuid
                 )
             )
-    elif network not in constants.PUBLIC_NETWORKS:
-        cmd.append(
-            "--bootnodes="
-            + shared_utils.get_devnet_enrs_list(
-                plan, el_cl_genesis_data.files_artifact_uuid
-            )
-        )
+    else:
+        cmd.append("--network=" + network)
+        cmd.append("--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

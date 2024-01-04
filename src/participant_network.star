@@ -149,6 +149,18 @@ def launch_participant_network(
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
         )
+    elif network_params.network in constants.PUBLIC_NETWORKS:
+        dummy = plan.run_sh(
+            run="mkdir /network-configs",
+            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
+        )
+        el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
+            dummy.files_artifacts[0],
+            "0",
+        )
+
+        final_genesis_timestamp = 0
+        validator_data = None
     else:
         # split up the name from dencun-devnet-12 to dencun and devnet-12
         devnet_name = network_params.network.split("-")[0]
