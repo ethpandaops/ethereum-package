@@ -98,9 +98,11 @@ def launch(
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
+        plan,
         launcher.network_id,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
+        launcher.network,
         image,
         existing_el_clients,
         cl_client_name,
@@ -142,9 +144,11 @@ def launch(
 
 
 def get_config(
+    plan,
     network_id,
     el_cl_genesis_data,
     jwt_file,
+    network,
     image,
     existing_el_clients,
     cl_client_name,
@@ -242,16 +246,34 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,mev,flashbots"
 
-    if len(existing_el_clients) > 0:
-        cmd.append(
-            "--bootnodes="
-            + ",".join(
-                [
-                    ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
+    if network == "kurtosis":
+        if len(existing_el_clients) > 0:
+            cmd.append(
+                "--bootnodes="
+                + ",".join(
+                    [
+                        ctx.enode
+                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                    ]
+                )
             )
+    elif network not in constants.PUBLIC_NETWORKS:
+        devnet_bootnodes = plan.run_sh(
+            run="cat /data/bootnode.txt",
+            files={"/data": el_cl_genesis_data.files_artifact_uuid},
+            wait=None,
         )
+
+        # Assuming devnet_bootnodes.output contains the values "ABC" and "CBA" in separate lines
+        bootnodes_list = devnet_bootnodes.output.splitlines(True)
+        plan.print("Bootnodes list: " + str(bootnodes_list))
+
+        # Replace newline characters with empty string and join with commas
+        bootnodes_string = ",".join(bootnodes_list)
+        plan.print("Bootnodes string: " + bootnodes_string)
+
+        # Append the bootnodes_string to the cmd list
+        cmd.append("--bootnodes=" + bootnodes_string)
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -294,6 +316,7 @@ def new_geth_launcher(
     network_id,
     el_cl_genesis_data,
     jwt_file,
+    network,
     final_genesis_timestamp,
     capella_fork_epoch,
     electra_fork_epoch=None,
@@ -302,6 +325,7 @@ def new_geth_launcher(
         network_id=network_id,
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
+        network=network,
         final_genesis_timestamp=final_genesis_timestamp,
         capella_fork_epoch=capella_fork_epoch,
         electra_fork_epoch=electra_fork_epoch,

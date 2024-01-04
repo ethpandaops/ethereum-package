@@ -173,6 +173,7 @@ def launch_participant_network(
                 network_params.network_id,
                 el_cl_data,
                 jwt_file,
+                network_params.network,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -184,6 +185,7 @@ def launch_participant_network(
                 network_params.network_id,
                 el_cl_data,
                 jwt_file,
+                network_params.network,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -301,7 +303,11 @@ def launch_participant_network(
             "launch_method": prysm.launch,
         },
         constants.CL_CLIENT_TYPE.teku: {
-            "launcher": teku.new_teku_launcher(el_cl_data, jwt_file),
+            "launcher": teku.new_teku_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
             "launch_method": teku.launch,
         },
     }

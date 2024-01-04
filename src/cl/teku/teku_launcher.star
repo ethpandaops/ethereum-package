@@ -141,8 +141,10 @@ def launch(
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
     config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
+        launcher.network,
         image,
         bootnode_context,
         el_client_context,
@@ -248,8 +250,10 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
     jwt_file,
+    network,
     image,
     bootnode_contexts,
     el_client_context,
@@ -322,6 +326,8 @@ def get_beacon_config(
         "--metrics-categories=BEACON,PROCESS,LIBP2P,JVM,NETWORK,PROCESS",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
+        # To enable syncing other networks too without checkpoint syncing
+        "--ignore-weak-subjectivity-period-enabled=true",
     ]
     validator_flags = [
         "--validator-keys={0}:{1}".format(
@@ -338,22 +344,32 @@ def get_beacon_config(
 
     if node_keystore_files != None and not split_mode_enabled:
         cmd.extend(validator_flags)
-
-    if bootnode_contexts != None:
-        cmd.append(
-            "--p2p-discovery-bootnodes="
-            + ",".join(
-                [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+    if network == "kurtosis":
+        if bootnode_contexts != None:
+            cmd.append(
+                "--p2p-discovery-bootnodes="
+                + ",".join(
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+                )
             )
+            cmd.append(
+                "--p2p-static-peers="
+                + ",".join(
+                    [
+                        ctx.multiaddr
+                        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
+        devnet_bootnodes = plan.run_sh(
+            run="cat /data/bootstrap_nodes.txt",
+            files={"/data": el_cl_genesis_data.files_artifact_uuid},
+            wait=None,
         )
         cmd.append(
-            "--p2p-static-peers="
-            + ",".join(
-                [
-                    ctx.multiaddr
-                    for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                ]
-            )
+            "--p2p-discovery-bootnodes="
+            + ",".join([bootnode for bootnode in devnet_bootnodes.output.splitlines()])
         )
 
     if len(extra_params) > 0:
@@ -472,5 +488,7 @@ def get_validator_config(
     )
 
 
-def new_teku_launcher(el_cl_genesis_data, jwt_file):
-    return struct(el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file)
+def new_teku_launcher(el_cl_genesis_data, jwt_file, network):
+    return struct(
+        el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file, network=network
+    )
