@@ -178,6 +178,7 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
+        "--db.size.limit=100GB",
     ]
 
     if network == "kurtosis":

@@ -366,7 +366,6 @@ def get_beacon_config(
             "--bootstrap-node="
             + shared_utils.get_devnet_enr(plan, el_cl_genesis_data.files_artifact_uuid)
         )
-        cmd.append("--p2p-static-id=true")
 
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
