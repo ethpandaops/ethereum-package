@@ -25,6 +25,4 @@ participants:
     cl_client_image: ethpandaops/teku:master
 network_params:
   network: "dencun-devnet-12"
-additional_services:
-  - dora
-persistent: true
+additional_services: []
