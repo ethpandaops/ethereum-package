@@ -87,6 +87,7 @@ def run(plan, args={}):
         args_with_right_defaults.participants,
         network_params,
         args_with_right_defaults.global_client_log_level,
+        persistent,
         parallel_keystore_generation,
     )
 

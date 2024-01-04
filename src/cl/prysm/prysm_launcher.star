@@ -8,7 +8,7 @@ IMAGE_SEPARATOR_DELIMITER = ","
 EXPECTED_NUM_IMAGES = 2
 
 #  ---------------------------------- Beacon client -------------------------------------
-CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/consensus-data"
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
 
 # Port IDs
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -31,6 +31,7 @@ BEACON_MIN_MEMORY = 256
 BEACON_MAX_MEMORY = 1024
 
 #  ---------------------------------- Validator client -------------------------------------
+VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/validator-data/"
 VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
 PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-password"
 
@@ -109,6 +110,7 @@ def launch(
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    persistent,
     split_mode_enabled=False,
 ):
     split_images = images.split(IMAGE_SEPARATOR_DELIMITER)
@@ -126,8 +128,8 @@ def launch(
     if validator_image.strip() == "":
         fail("An empty validator image was provided")
 
-    beacon_node_service_name = "{0}".format(service_name)
-    validator_node_service_name = "{0}-{1}".format(
+    beacon_service_name = "{0}".format(service_name)
+    validator_service_name = "{0}-{1}".format(
         service_name, VALIDATOR_SUFFIX_SERVICE_NAME
     )
     log_level = input_parser.get_client_log_level_or_default(
@@ -142,6 +144,7 @@ def launch(
     beacon_config = get_beacon_config(
         launcher.el_cl_genesis_data,
         beacon_image,
+        beacon_service_name,
         bootnode_contexts,
         el_client_context,
         log_level,
@@ -153,9 +156,10 @@ def launch(
         snooper_engine_context,
         extra_beacon_params,
         extra_beacon_labels,
+        persistent,
     )
 
-    beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
+    beacon_service = plan.add_service(beacon_service_name, beacon_config)
 
     beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
@@ -172,7 +176,7 @@ def launch(
         validator_config = get_validator_config(
             launcher.el_cl_genesis_data,
             validator_image,
-            validator_node_service_name,
+            validator_service_name,
             log_level,
             beacon_rpc_endpoint,
             beacon_http_endpoint,
@@ -186,11 +190,10 @@ def launch(
             extra_validator_labels,
             launcher.prysm_password_relative_filepath,
             launcher.prysm_password_artifact_uuid,
+            persistent,
         )
 
-        validator_service = plan.add_service(
-            validator_node_service_name, validator_config
-        )
+        validator_service = plan.add_service(validator_service_name, validator_config)
 
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
     beacon_node_identity_recipe = GetHttpRequestRecipe(
@@ -203,7 +206,7 @@ def launch(
         },
     )
     response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=beacon_node_service_name
+        recipe=beacon_node_identity_recipe, service_name=beacon_service_name
     )
     beacon_node_enr = response["extract.enr"]
     beacon_multiaddr = response["extract.multiaddr"]
@@ -214,7 +217,7 @@ def launch(
         beacon_service.ip_address, beacon_metrics_port.number
     )
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
-        beacon_node_service_name, METRICS_PATH, beacon_metrics_url
+        beacon_service_name, METRICS_PATH, beacon_metrics_url
     )
     nodes_metrics_info = [beacon_node_metrics_info]
 
@@ -224,7 +227,7 @@ def launch(
             validator_service.ip_address, validator_metrics_port.number
         )
         validator_node_metrics_info = node_metrics.new_node_metrics_info(
-            validator_node_service_name, METRICS_PATH, validator_metrics_url
+            validator_service_name, METRICS_PATH, validator_metrics_url
         )
         nodes_metrics_info.append(validator_node_metrics_info)
 
@@ -234,8 +237,8 @@ def launch(
         beacon_service.ip_address,
         HTTP_PORT_NUM,
         nodes_metrics_info,
-        beacon_node_service_name,
-        validator_node_service_name,
+        beacon_service_name,
+        validator_service_name,
         beacon_multiaddr,
         beacon_peer_id,
         snooper_enabled,
@@ -249,6 +252,7 @@ def launch(
 def get_beacon_config(
     el_cl_genesis_data,
     beacon_image,
+    service_name,
     bootnode_contexts,
     el_client_context,
     log_level,
@@ -260,6 +264,7 @@ def get_beacon_config(
     snooper_engine_context,
     extra_params,
     extra_labels,
+    persistent,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -275,7 +280,7 @@ def get_beacon_config(
 
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
-        "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--chain-config-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
@@ -316,13 +321,20 @@ def get_beacon_config(
         # we do the for loop as otherwise its a proto repeated array
         cmd.extend([param for param in extra_params])
 
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+    }
+
+    if persistent:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name)
+        )
+
     return ServiceConfig(
         image=beacon_image,
         ports=BEACON_NODE_USED_PORTS,
         cmd=cmd,
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        },
+        files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
@@ -358,6 +370,7 @@ def get_validator_config(
     extra_labels,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
+    persistent,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
@@ -377,7 +390,7 @@ def get_validator_config(
         "--beacon-rpc-provider=" + beacon_rpc_endpoint,
         "--wallet-dir=" + validator_keys_dirpath,
         "--wallet-password-file=" + validator_secrets_dirpath,
-        "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        # "--datadir=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM),
         "--verbosity=" + log_level,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
@@ -396,16 +409,21 @@ def get_validator_config(
     if len(extra_params) > 0:
         # we do the for loop as otherwise its a proto repeated array
         cmd.extend([param for param in extra_params])
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
+        PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
+    }
+    if persistent:
+        files[VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name)
+        )
 
     return ServiceConfig(
         image=validator_image,
         ports=VALIDATOR_NODE_USED_PORTS,
         cmd=cmd,
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
-            PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
-        },
+        files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=v_min_cpu,
         max_cpu=v_max_cpu,
