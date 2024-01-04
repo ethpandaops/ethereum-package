@@ -92,6 +92,7 @@ def run(plan, args={}):
         network_params,
         args_with_right_defaults.global_client_log_level,
         jwt_file,
+        persistent,
         parallel_keystore_generation,
     )
 

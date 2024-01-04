@@ -7,7 +7,7 @@ node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nethermind/execution-data"
 
 METRICS_PATH = "/metrics"
 
@@ -74,6 +74,7 @@ def launch(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, NETHERMIND_LOG_LEVELS
@@ -90,6 +91,7 @@ def launch(
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
         image,
+        service_name,
         existing_el_clients,
         cl_client_name,
         log_level,
@@ -100,6 +102,7 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
+        persistent,
     )
 
     service = plan.add_service(service_name, config)
@@ -129,6 +132,7 @@ def get_config(
     el_cl_genesis_data,
     jwt_file,
     image,
+    service_name,
     existing_el_clients,
     cl_client_name,
     log_level,
@@ -139,6 +143,7 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     cmd = [
         "--log=" + log_level,
@@ -178,6 +183,15 @@ def get_config(
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
+
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+    }
+
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+        )
 
     return ServiceConfig(
         image=image,

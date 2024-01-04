@@ -60,6 +60,7 @@ def launch_participant_network(
     network_params,
     global_log_level,
     jwt_file,
+    persistent,
     parallel_keystore_generation=False,
 ):
     if network_params.network == "kurtosis":
@@ -258,6 +259,7 @@ def launch_participant_network(
             participant.el_extra_params,
             participant.el_extra_env_vars,
             participant.el_extra_labels,
+            persistent,
         )
 
         # Add participant el additional prometheus metrics
@@ -395,6 +397,7 @@ def launch_participant_network(
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                persistent,
                 participant.cl_split_mode_enabled,
             )
         else:
@@ -425,6 +428,7 @@ def launch_participant_network(
                 participant.validator_extra_params,
                 participant.beacon_extra_labels,
                 participant.validator_extra_labels,
+                persistent,
                 participant.cl_split_mode_enabled,
             )
 
