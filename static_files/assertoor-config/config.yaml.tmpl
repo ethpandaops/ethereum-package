@@ -509,7 +509,7 @@ tests:
     config:
       tasks:
       - name: generate_bls_changes
-        title: "Generate 1 bls change per slot"
+        title: "Generate 50 BLS changes (1 bls change per slot)"
         config:
           limitTotal: 50
           limitPerSlot: 1
@@ -540,7 +540,7 @@ tests:
     config:
       tasks:
       - name: generate_exits
-        title: "Generate 1 exit per slot"
+        title: "Generate 50 Voluntary Exits (1 exit per slot)"
         config:
           limitTotal: 50
           limitPerSlot: 1
@@ -563,6 +563,70 @@ tests:
               validatorNamePattern: "validatorPairName"
             config:
               minExitCount: 1
+
+  # check if all client pairs propose blocks with attester slashings
+  - name: run_tasks_concurrent
+    title: "Check if all clients propose blocks with attester slashings during un-finality"
+    config:
+      tasks:
+      - name: generate_slashings
+        title: "Generate 1 attester slashing per slot"
+        config:
+          slashingType: "attester"
+          startIndex: 50
+          limitTotal: 50
+          limitPerSlot: 1
+          indexCount: 50
+        configVars:
+          mnemonic: "validatorMnemonic"
+
+      - name: run_task_matrix
+        title: "Check slashing inclusion with all client pairs"
+        timeout: 1h
+        configVars:
+          matrixValues: "validatorPairNames"
+        config:
+          runConcurrent: true
+          matrixVar: "validatorPairName"
+          task:
+            name: check_consensus_block_proposals
+            title: "Wait for block proposal with attester slashings from ${validatorPairName}"
+            configVars:
+              validatorNamePattern: "validatorPairName"
+            config:
+              minAttesterSlashingCount: 1
+
+  # check if all client pairs propose blocks with proposer slashings
+  - name: run_tasks_concurrent
+    title: "Check if all clients propose blocks with proposer slashings during un-finality"
+    config:
+      tasks:
+      - name: generate_slashings
+        title: "Generate 1 proposer slashing per slot"
+        config:
+          slashingType: "proposer"
+          startIndex: 100
+          limitTotal: 50
+          limitPerSlot: 1
+          indexCount: 50
+        configVars:
+          mnemonic: "validatorMnemonic"
+
+      - name: run_task_matrix
+        title: "Check slashing inclusion with all client pairs"
+        timeout: 1h
+        configVars:
+          matrixValues: "validatorPairNames"
+        config:
+          runConcurrent: true
+          matrixVar: "validatorPairName"
+          task:
+            name: check_consensus_block_proposals
+            title: "Wait for block proposal with proposer slashings from ${validatorPairName}"
+            configVars:
+              validatorNamePattern: "validatorPairName"
+            config:
+              minProposerSlashingCount: 1
 
   # exit 150 validators and wait for finality
   - name: generate_exits
