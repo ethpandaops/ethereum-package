@@ -89,7 +89,6 @@ def launch(
 
     config = get_config(
         plan,
-        launcher.network_id,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
         launcher.network,
@@ -132,7 +131,6 @@ def launch(
 
 def get_config(
     plan,
-    network_id,
     el_cl_genesis_data,
     jwt_file,
     network,
@@ -157,7 +155,6 @@ def get_config(
         "--genesis-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/besu.json",
-        "--network-id=" + network_id,
         "--host-allowlist=*",
         "--rpc-http-enabled=true",
         "--rpc-http-host=0.0.0.0",
@@ -239,9 +236,8 @@ def get_config(
     )
 
 
-def new_besu_launcher(network_id, el_cl_genesis_data, jwt_file, network):
+def new_besu_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
-        network_id=network_id,
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,

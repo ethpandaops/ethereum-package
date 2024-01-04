@@ -63,9 +63,8 @@ def launch_participant_network(
     persistent,
     parallel_keystore_generation=False,
 ):
+    num_participants = len(participants)
     if network_params.network == "kurtosis":
-        num_participants = len(participants)
-
         plan.print("Generating cl validator key stores")
         validator_data = None
         if not parallel_keystore_generation:
@@ -161,7 +160,7 @@ def launch_participant_network(
             name="el_cl_genesis",
         )
         el_cl_genesis_data_uuid = plan.run_sh(
-            run="mkdir -p /network-configs/ && mv /opt/* /network-configs/ && ls -la /network-configs/",
+            run="mkdir -p /network-configs/ && mv /opt/* /network-configs/",
             store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
             files={"/opt": el_cl_genesis_uuid},
         )
@@ -170,13 +169,11 @@ def launch_participant_network(
             "0",
         )
         final_genesis_timestamp = 0
-        num_participants = 0
         validator_data = None
 
     el_launchers = {
         constants.EL_CLIENT_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
-                network_params.network_id,
                 el_cl_data,
                 jwt_file,
                 network_params.network,
@@ -188,7 +185,6 @@ def launch_participant_network(
         },
         constants.EL_CLIENT_TYPE.gethbuilder: {
             "launcher": geth.new_geth_launcher(
-                network_params.network_id,
                 el_cl_data,
                 jwt_file,
                 network_params.network,
@@ -200,7 +196,6 @@ def launch_participant_network(
         },
         constants.EL_CLIENT_TYPE.besu: {
             "launcher": besu.new_besu_launcher(
-                network_params.network_id,
                 el_cl_data,
                 jwt_file,
                 network_params.network,

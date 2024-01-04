@@ -100,7 +100,6 @@ def launch(
 
     config = get_config(
         plan,
-        launcher.network_id,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
         launcher.network,
@@ -148,7 +147,6 @@ def launch(
 
 def get_config(
     plan,
-    network_id,
     el_cl_genesis_data,
     jwt_file,
     network,
@@ -217,7 +215,6 @@ def get_config(
         ),
         "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--networkid=" + network_id,
         "--http",
         "--http.addr=0.0.0.0",
         "--http.vhosts=*",
@@ -313,7 +310,6 @@ def get_config(
 
 
 def new_geth_launcher(
-    network_id,
     el_cl_genesis_data,
     jwt_file,
     network,
@@ -322,7 +318,6 @@ def new_geth_launcher(
     electra_fork_epoch=None,
 ):
     return struct(
-        network_id=network_id,
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,

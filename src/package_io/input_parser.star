@@ -64,7 +64,10 @@ def input_parser(plan, input_args):
     # add default eth2 input params
     result["mev_type"] = None
     result["mev_params"] = get_default_mev_params()
-    result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
+    if result["network_params"]["network"] == "kurtosis":
+        result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
+    else:
+        result["additional_services"] = []
     result["grafana_additional_dashboards"] = []
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
@@ -249,25 +252,6 @@ def parse_network_params(input_args):
                     participants.append(participant_copy)
             result["participants"] = participants
 
-    # If network is not kurtosis, run with custom params
-    if result["network_params"]["network"] != "kurtosis":
-        result["network_params"]["preregistered_validator_keys_mnemonic"] = None
-        result["network_params"]["num_validator_keys_per_node"] = None
-        result["network_params"]["network_id"] = str(7011893062)
-        result["network_params"][
-            "deposit_contract_address"
-        ] = "0x6f22fFbC56eFF051aECF839396DD1eD9aD6BBA9D"
-        result["network_params"]["seconds_per_slot"] = 32
-        result["network_params"]["genesis_delay"] = 60
-        result["network_params"]["max_churn"] = 8
-        result["network_params"]["ejection_balance"] = 30000000000
-        result["network_params"]["capella_fork_epoch"] = 0
-        result["network_params"]["deneb_fork_epoch"] = 220
-        result["network_params"]["electra_fork_epoch"] = None
-        result["additional_services"] = []
-        # Don't allow validators on non-kurtosis networks
-        for participant in result["participants"]:
-            participant["validator_count"] = 0
     total_participant_count = 0
     actual_num_validators = 0
     # validation of the above defaults
@@ -398,6 +382,10 @@ def parse_network_params(input_args):
                     MIN_VALIDATORS, actual_num_validators
                 )
             )
+    else:
+        # Don't allow validators on non-kurtosis networks
+        for participant in result["participants"]:
+            participant["validator_count"] = 0
 
     return result
 
