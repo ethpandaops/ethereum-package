@@ -204,7 +204,6 @@ def launch_participant_network(
         },
         constants.EL_CLIENT_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
-                network_params.network_id,
                 el_cl_data,
                 jwt_file,
                 network_params.network,
