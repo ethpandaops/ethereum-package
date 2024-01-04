@@ -367,7 +367,7 @@ def get_beacon_config(
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = Directory(
-            persistent_key="beacon_data_folder",
+            persistent_key="data-{0}".format(service_name),
         )
     return ServiceConfig(
         image=image,

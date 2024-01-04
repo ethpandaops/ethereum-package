@@ -205,7 +205,7 @@ def get_config(
 
     if persistent:
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key=service_name,
+            persistent_key="data-{0}".format(service_name),
         )
     return ServiceConfig(
         image=image,

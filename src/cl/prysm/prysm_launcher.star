@@ -327,7 +327,7 @@ def get_beacon_config(
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key=service_name
+            persistent_key="data-{0}".format(service_name)
         )
 
     return ServiceConfig(
@@ -416,7 +416,7 @@ def get_validator_config(
     }
     if persistent:
         files[VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key=service_name
+            persistent_key="data-{0}".format(service_name)
         )
 
     return ServiceConfig(
