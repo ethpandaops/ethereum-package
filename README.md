@@ -320,7 +320,7 @@ assertoor_params:
   # - all-opcodes transaction success
   run_opcodes_transaction_test: false
 
-  # Run validator lifecycle test (~12h to complete)
+  # Run validator lifecycle test (~48h to complete)
   # This test requires exactly 500 active validator keys.
   # The test will cause a temporary chain unfinality when running.
   # This test checks:

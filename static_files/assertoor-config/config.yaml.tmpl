@@ -490,7 +490,7 @@ tests:
   # due to the deposits we should reach un-finality soon.
   - name: check_consensus_validator_status
     title: "Wait for the last deposit to become activated"
-    timeout: 12h
+    timeout: 48h
     config:
       validatorPubKey: 0xa4a6121cb76eaf63e520615368a21d504c6f7363b5045f965e3587f623a6f7f1ce32af63ce3c535e75cd831db27c5abd
       validatorStatus:
