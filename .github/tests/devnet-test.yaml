@@ -20,7 +20,7 @@ participants:
     cl_client_type: lodestar
     cl_client_image: ethpandaops/lodestar:unstable
   - el_client_type: ethereumjs
-    el_client_image: ethpandaops/ethereumjs:main
+    el_client_image: ethpandaops/ethereumjs:master
     cl_client_type: teku
     cl_client_image: ethpandaops/teku:master
 network_params:
