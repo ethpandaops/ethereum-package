@@ -162,9 +162,9 @@ def launch_participant_network(
         )
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             el_cl_genesis_uuid,
-            "0x31c7fb3b0dc46ad79c8117cbeafe6060a973f662823b08618d915b644472449d",
+            "0",
         )
-        final_genesis_timestamp = 1701262800
+        final_genesis_timestamp = 0
         num_participants = 0
         validator_data = None
 

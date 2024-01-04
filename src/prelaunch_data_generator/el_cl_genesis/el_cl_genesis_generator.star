@@ -56,16 +56,22 @@ def generate_el_cl_genesis_data(
     )
 
     genesis = plan.run_sh(
-        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all",
+        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/custom_config_data/* /network-configs/",
         image=image,
         files={GENESIS_VALUES_PATH: genesis_generation_config_artifact_name},
-        store=[StoreSpec(src="/data", name="el-cl-genesis-data")],
+        store=[
+            StoreSpec(src="/network-configs/", name="el-cl-genesis-data"),
+            StoreSpec(
+                src="/network-configs/genesis_validators_root.txt",
+                name="genesis_validators_root",
+            ),
+        ],
         wait=None,
     )
 
     genesis_validators_root = plan.run_sh(
-        run="cat /data/data/custom_config_data/genesis_validators_root.txt",
-        files={"/data": genesis.files_artifacts[0]},
+        run="cat /data/genesis_validators_root.txt",
+        files={"/data": genesis.files_artifacts[1]},
         wait=None,
     )
 

@@ -210,6 +210,7 @@ def get_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
     if persistent:
@@ -220,10 +221,7 @@ def get_config(
         image=image,
         ports=USED_PORTS,
         cmd=[cmd_str],
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
-        },
+        files=files,
         env_vars=extra_env_vars,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
