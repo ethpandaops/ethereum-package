@@ -299,18 +299,6 @@ assertoor_params:
   # - all client pairs have proposed a block
   run_block_proposal_check: true
 
-  # Run validator lifecycle test (~12h to complete)
-  # This test requires exactly 500 active validator keys.
-  # The test will cause a temporary chain unfinality when running.
-  # This test checks:
-  # - Deposit inclusion with/from all client pairs
-  # - BLS Change inclusion with/from all client pairs
-  # - Voluntary Exit inclusion with/from all client pairs
-  # - Attester Slashing inclusion with/from all client pairs
-  # - Proposer Slashing inclusion with/from all client pairs
-  # all checks are done during finality & unfinality
-  run_lifecycle_test: false
-
   # Run normal transaction test
   # This test generates random EOA transactions and checks inclusion with/from all client pairs
   # This test checks for:
@@ -331,6 +319,18 @@ assertoor_params:
   # This test checks for:
   # - all-opcodes transaction success
   run_opcodes_transaction_test: false
+
+  # Run validator lifecycle test (~12h to complete)
+  # This test requires exactly 500 active validator keys.
+  # The test will cause a temporary chain unfinality when running.
+  # This test checks:
+  # - Deposit inclusion with/from all client pairs
+  # - BLS Change inclusion with/from all client pairs
+  # - Voluntary Exit inclusion with/from all client pairs
+  # - Attester Slashing inclusion with/from all client pairs
+  # - Proposer Slashing inclusion with/from all client pairs
+  # all checks are done during finality & unfinality
+  run_lifecycle_test: false
 
 
 # By default includes
