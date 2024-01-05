@@ -161,7 +161,11 @@ def get_config(
         "node",
         "-{0}".format(verbosity_level),
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--chain=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        "--chain={0}".format(
+            network
+            if network in constants.PUBLIC_NETWORKS
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+        ),
         "--http",
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
@@ -204,11 +208,16 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     cmd_str = " ".join(cmd)
+    if network not in constants.PUBLIC_NETWORKS:
+        subcommand_strs = [
+            init_datadir_cmd_str,
+            cmd_str,
+        ]
+    else:
+        subcommand_strs = [
+            cmd_str
+        ]
 
-    subcommand_strs = [
-        init_datadir_cmd_str,
-        cmd_str,
-    ]
     command_str = " && ".join(subcommand_strs)
 
     files = {

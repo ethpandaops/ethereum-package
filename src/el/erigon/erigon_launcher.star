@@ -178,7 +178,6 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--db.size.limit=100GB",
     ]
 
     if network == "kurtosis":
@@ -202,6 +201,7 @@ def get_config(
                 )
             )
     elif network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--db.size.limit=100GB")
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
@@ -219,9 +219,16 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-    command_arg = [init_datadir_cmd_str, " ".join(cmd)]
+    if network not in constants.PUBLIC_NETWORKS:
+        command_arg = [init_datadir_cmd_str, " ".join(cmd)]
 
-    command_arg_str = " && ".join(command_arg)
+        command_arg_str = " && ".join(command_arg)
+    else:
+        cmd.append("--chain={0}".format(network))
+        cmd.append("--db.size.limit=3TB")
+        command_arg = cmd
+        command_arg_str = " ".join(command_arg)
+
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,

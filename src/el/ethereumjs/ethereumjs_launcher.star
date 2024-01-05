@@ -153,9 +153,6 @@ def get_config(
     persistent,
 ):
     cmd = [
-        "--gethGenesis="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/genesis.json",
         "--dataDir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--port={0}".format(DISCOVERY_PORT_NUM),
         "--rpc",
@@ -176,6 +173,16 @@ def get_config(
         "--isSingleNode=true",
         "--logLevel={0}".format(verbosity_level),
     ]
+
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append(
+            "--gethGenesis="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/genesis.json",
+        )
+    else:
+        cmd.append("--network=" + network)
+
     if network == "kurtosis":
         if len(existing_el_clients) > 0:
             cmd.append(

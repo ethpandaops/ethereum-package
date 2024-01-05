@@ -152,9 +152,6 @@ def get_config(
         "besu",
         "--logging=" + log_level,
         "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--genesis-file="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/besu.json",
         "--host-allowlist=*",
         "--rpc-http-enabled=true",
         "--rpc-http-host=0.0.0.0",
@@ -178,6 +175,15 @@ def get_config(
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
     ]
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append(
+            "--genesis-file="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/besu.json"
+        )
+    else:
+        cmd.append("--network=" + network)
+
     if network == "kurtosis":
         if len(existing_el_clients) > 0:
             cmd.append(
