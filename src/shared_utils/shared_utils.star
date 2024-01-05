@@ -122,6 +122,7 @@ with open("/network-configs/network-configs/bootstrap_nodes.txt") as bootnode_fi
     )
     return enr_items.output
 
+
 def read_genesis_timestamp_from_config(plan, filename):
     value = plan.run_python(
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},

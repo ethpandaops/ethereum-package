@@ -167,9 +167,11 @@ def launch_participant_network(
         network_parts = network_params.network.split("-devnet-", 1)
         devnet_name, devnet_number = network_parts[0], network_parts[1]
         devnet_category = devnet_name.split("-")[0]
-        devnet_subname = devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
+        devnet_subname = (
+            devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
+        )
         url = "github.com/ethpandaops/{0}-devnets/network-configs/{1}devnet-{2}".format(
-            devnet_category,devnet_subname, devnet_number
+            devnet_category, devnet_subname, devnet_number
         )
         el_cl_genesis_uuid = plan.upload_files(
             src=url,
@@ -184,7 +186,9 @@ def launch_participant_network(
             el_cl_genesis_data_uuid.files_artifacts[0],
             "0",
         )
-        final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(plan,el_cl_genesis_uuid)
+        final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
+            plan, el_cl_genesis_uuid
+        )
         validator_data = None
 
     el_launchers = {
