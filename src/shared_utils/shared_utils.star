@@ -127,17 +127,13 @@ def read_genesis_timestamp_from_config(plan, filename):
     value = plan.run_python(
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
+        packages=["PyYAML"],
         run="""
+import yaml
 with open("/network-configs/config.yaml", "r") as f:
-    yaml_content = f.read()
+    yaml_data = yaml.safe_load(f)
 
-# Manually parse YAML-like content
-yaml_data = {}
-for line in yaml_content.splitlines():
-    if ":" in line:
-        key, value = map(str.strip, line.split(":", 1))
-        yaml_data[key] = value
-
+# Get values from the YAML content
 min_genesis_time = int(yaml_data.get("MIN_GENESIS_TIME", 0))
 genesis_delay = int(yaml_data.get("GENESIS_DELAY", 0))
 
