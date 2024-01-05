@@ -69,6 +69,11 @@ def run(plan, args={}):
     )
     prometheus_additional_metrics_jobs = []
 
+    raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
+    jwt_file = plan.upload_files(
+        src=static_files.JWT_PATH_FILEPATH,
+        name="jwt_file",
+    )
     plan.print("Read the prometheus, grafana templates")
 
     plan.print(
@@ -86,6 +91,7 @@ def run(plan, args={}):
         args_with_right_defaults.participants,
         network_params,
         args_with_right_defaults.global_client_log_level,
+        jwt_file,
         persistent,
         parallel_keystore_generation,
     )
@@ -117,17 +123,18 @@ def run(plan, args={}):
         all_cl_client_contexts,
         args_with_right_defaults.participants,
     )
-
-    if network_params.deneb_fork_epoch != 0:
-        plan.print("Launching 4788 contract deployer")
-        el_uri = "http://{0}:{1}".format(
-            all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
-        )
-        eip4788_deployment.deploy_eip4788_contract_in_background(
-            plan,
-            genesis_constants.PRE_FUNDED_ACCOUNTS[5].private_key,
-            el_uri,
-        )
+    if network_params.network == "kurtosis":
+        if network_params.deneb_fork_epoch != 0:
+            plan.print("Launching 4788 contract deployer")
+            el_uri = "http://{0}:{1}".format(
+                all_el_client_contexts[0].ip_addr,
+                all_el_client_contexts[0].rpc_port_num,
+            )
+            eip4788_deployment.deploy_eip4788_contract_in_background(
+                plan,
+                genesis_constants.PRE_FUNDED_ACCOUNTS[5].private_key,
+                el_uri,
+            )
 
     fuzz_target = "http://{0}:{1}".format(
         all_el_client_contexts[0].ip_addr,
@@ -165,17 +172,11 @@ def run(plan, args={}):
         beacon_uri = "{0}:{1}".format(
             all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num
         )
-        jwt_secret = plan.run_sh(
-            run="cat " + constants.JWT_AUTH_PATH + " | tr -d '\n'",
-            image="busybox",
-            files={"/data": el_cl_data_files_artifact_uuid},
-            wait=None,
-        )
         endpoint = mock_mev.launch_mock_mev(
             plan,
             el_uri,
             beacon_uri,
-            jwt_secret.output,
+            raw_jwt_secret,
             args_with_right_defaults.global_client_log_level,
         )
         mev_endpoints.append(endpoint)

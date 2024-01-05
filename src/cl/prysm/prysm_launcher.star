@@ -142,7 +142,10 @@ def launch(
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
     beacon_config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         beacon_image,
         beacon_service_name,
         bootnode_contexts,
@@ -250,7 +253,10 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     beacon_image,
     service_name,
     bootnode_contexts,
@@ -302,7 +308,7 @@ def get_beacon_config(
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Pari's recommendation to reduce noise
         "--subscribe-all-subnets=true",
-        "--jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--enable-debug-rpc-endpoints=true",
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
@@ -310,11 +316,17 @@ def get_beacon_config(
         "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM)
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
-
-    if bootnode_contexts != None:
-        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
-            cmd.append("--peer=" + ctx.multiaddr)
-            cmd.append("--bootstrap-node=" + ctx.enr)
+    if network == "kurtosis":
+        if bootnode_contexts != None:
+            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
+                cmd.append("--peer=" + ctx.multiaddr)
+                cmd.append("--bootstrap-node=" + ctx.enr)
+            cmd.append("--p2p-static-id=true")
+    elif network not in constants.PUBLIC_NETWORKS:
+        cmd.append(
+            "--bootstrap-node="
+            + shared_utils.get_devnet_enr(plan, el_cl_genesis_data.files_artifact_uuid)
+        )
         cmd.append("--p2p-static-id=true")
 
     if len(extra_params) > 0:
@@ -322,7 +334,8 @@ def get_beacon_config(
         cmd.extend([param for param in extra_params])
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
     if persistent:
@@ -394,7 +407,6 @@ def get_validator_config(
         "--monitoring-port={0}".format(VALIDATOR_MONITORING_PORT_NUM),
         "--verbosity=" + log_level,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        # TODO(old) SOMETHING ABOUT JWT
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -440,10 +452,16 @@ def get_validator_config(
 
 
 def new_prysm_launcher(
-    el_cl_genesis_data, prysm_password_relative_filepath, prysm_password_artifact_uuid
+    el_cl_genesis_data,
+    jwt_file,
+    network,
+    prysm_password_relative_filepath,
+    prysm_password_artifact_uuid,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
         prysm_password_artifact_uuid=prysm_password_artifact_uuid,
         prysm_password_relative_filepath=prysm_password_relative_filepath,
     )

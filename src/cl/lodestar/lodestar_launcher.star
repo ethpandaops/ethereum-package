@@ -116,7 +116,10 @@ def launch(
 
     # Launch Beacon node
     beacon_config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
         beacon_service_name,
         bootnode_contexts,
@@ -232,7 +235,10 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
     service_name,
     bootnode_contexts,
@@ -293,19 +299,26 @@ def get_beacon_config(
         "--enr.udp={0}".format(DISCOVERY_PORT_NUM),
         # Set per Pari's recommendation to reduce noise in the logs
         "--subscribeAllSubnets=true",
-        "--jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics.address=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
-
-    if bootnode_contexts != None:
+    if network == "kurtosis":
+        if bootnode_contexts != None:
+            cmd.append(
+                "--bootnodes="
+                + ",".join(
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootnodes="
-            + ",".join(
-                [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+            + shared_utils.get_devnet_enrs_list(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -313,7 +326,8 @@ def get_beacon_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
     if persistent:
@@ -424,7 +438,9 @@ def get_validator_config(
     )
 
 
-def new_lodestar_launcher(el_cl_genesis_data):
+def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
     )

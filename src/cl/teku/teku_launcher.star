@@ -3,7 +3,6 @@ input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
-
 constants = import_module("../../package_io/constants.star")
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
@@ -145,7 +144,10 @@ def launch(
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
     config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
         beacon_service_name,
         bootnode_context,
@@ -254,7 +256,10 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
     service_name,
     bootnode_contexts,
@@ -319,7 +324,7 @@ def get_beacon_config(
         "--rest-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
-        "--ee-jwt-secret-file=" + constants.JWT_AUTH_PATH,
+        "--ee-jwt-secret-file=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--ee-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled",
@@ -328,6 +333,8 @@ def get_beacon_config(
         "--metrics-categories=BEACON,PROCESS,LIBP2P,JVM,NETWORK,PROCESS",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
+        # To enable syncing other networks too without checkpoint syncing
+        "--ignore-weak-subjectivity-period-enabled=true",
     ]
     validator_flags = [
         "--validator-keys={0}:{1}".format(
@@ -344,21 +351,28 @@ def get_beacon_config(
 
     if node_keystore_files != None and not split_mode_enabled:
         cmd.extend(validator_flags)
-
-    if bootnode_contexts != None:
+    if network == "kurtosis":
+        if bootnode_contexts != None:
+            cmd.append(
+                "--p2p-discovery-bootnodes="
+                + ",".join(
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+                )
+            )
+            cmd.append(
+                "--p2p-static-peers="
+                + ",".join(
+                    [
+                        ctx.multiaddr
+                        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--p2p-discovery-bootnodes="
-            + ",".join(
-                [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
-            )
-        )
-        cmd.append(
-            "--p2p-static-peers="
-            + ",".join(
-                [
-                    ctx.multiaddr
-                    for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enrs_list(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -368,6 +382,7 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
     if node_keystore_files != None and not split_mode_enabled:
         files[
@@ -485,5 +500,7 @@ def get_validator_config(
     )
 
 
-def new_teku_launcher(el_cl_genesis_data):
-    return struct(el_cl_genesis_data=el_cl_genesis_data)
+def new_teku_launcher(el_cl_genesis_data, jwt_file, network):
+    return struct(
+        el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file, network=network
+    )
