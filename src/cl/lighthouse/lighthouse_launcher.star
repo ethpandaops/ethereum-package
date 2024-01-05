@@ -3,7 +3,6 @@ input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
-
 constants = import_module("../../package_io/constants.star")
 
 blobber_launcher = import_module("../../blobber/blobber_launcher.star")
@@ -139,7 +138,10 @@ def launch(
 
     # Launch Beacon node
     beacon_config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
         beacon_service_name,
         bootnode_contexts,
@@ -263,7 +265,10 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
     service_name,
     boot_cl_client_ctxs,
@@ -304,7 +309,6 @@ def get_beacon_config(
         "beacon_node",
         "--debug-level=" + log_level,
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
         "--disable-enr-auto-update",
         "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -325,7 +329,7 @@ def get_beacon_config(
         # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
         "--disable-packet-filter",
         "--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secrets=" + constants.JWT_AUTH_PATH,
+        "--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Paris' recommendation to reduce noise in the logs
         "--subscribe-all-subnets",
@@ -337,20 +341,37 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
-    if boot_cl_client_ctxs != None:
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
+    else:
+        cmd.append("--network=" + network)
+        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
+
+    if network == "kurtosis":
+        if boot_cl_client_ctxs != None:
+            cmd.append(
+                "--boot-nodes="
+                + ",".join(
+                    [
+                        ctx.enr
+                        for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
+                    ]
+                )
+            )
+            cmd.append(
+                "--trusted-peers="
+                + ",".join(
+                    [
+                        ctx.peer_id
+                        for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--boot-nodes="
-            + ",".join(
-                [ctx.enr for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]]
-            )
-        )
-        cmd.append(
-            "--trusted-peers="
-            + ",".join(
-                [
-                    ctx.peer_id
-                    for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enrs_list(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -362,7 +383,8 @@ def get_beacon_config(
         endpoint="/eth/v1/node/identity", port_id=BEACON_HTTP_PORT_ID
     )
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
     if persistent:
@@ -476,7 +498,9 @@ def get_validator_config(
     )
 
 
-def new_lighthouse_launcher(el_cl_genesis_data):
+def new_lighthouse_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
     )

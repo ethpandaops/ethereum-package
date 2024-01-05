@@ -90,8 +90,10 @@ def launch(
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
-        launcher.network_id,
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
         service_name,
         existing_el_clients,
@@ -132,8 +134,10 @@ def launch(
 
 
 def get_config(
-    network_id,
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
     service_name,
     existing_el_clients,
@@ -148,8 +152,6 @@ def get_config(
     extra_labels,
     persistent,
 ):
-    network_id = network_id
-
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
@@ -160,7 +162,6 @@ def get_config(
         "--log.console.verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--port={0}".format(DISCOVERY_PORT_NUM),
-        "--networkid=" + network_id,
         "--http.api=eth,erigon,engine,web3,net,debug,trace,txpool,admin",
         "--http.vhosts=*",
         "--ws",
@@ -170,7 +171,7 @@ def get_config(
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
         "--http.port={0}".format(WS_RPC_PORT_NUM),
-        "--authrpc.jwtsecret=" + constants.JWT_AUTH_PATH,
+        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.vhosts=*",
@@ -179,23 +180,38 @@ def get_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
     ]
 
-    if len(existing_el_clients) > 0:
+    if network == "kurtosis":
+        if len(existing_el_clients) > 0:
+            cmd.append(
+                "--bootnodes="
+                + ",".join(
+                    [
+                        ctx.enode
+                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                    ]
+                )
+            )
+            cmd.append(
+                "--staticpeers="
+                + ",".join(
+                    [
+                        ctx.enode
+                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--db.size.limit=100GB")
         cmd.append(
             "--bootnodes="
-            + ",".join(
-                [
-                    ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enodes(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
         cmd.append(
             "--staticpeers="
-            + ",".join(
-                [
-                    ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enodes(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -203,11 +219,19 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-    command_arg = [init_datadir_cmd_str, " ".join(cmd)]
+    if network not in constants.PUBLIC_NETWORKS:
+        command_arg = [init_datadir_cmd_str, " ".join(cmd)]
 
-    command_arg_str = " && ".join(command_arg)
+        command_arg_str = " && ".join(command_arg)
+    else:
+        cmd.append("--chain={0}".format(network))
+        cmd.append("--db.size.limit=3TB")
+        command_arg = cmd
+        command_arg_str = " ".join(command_arg)
+
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
     if persistent:
@@ -236,8 +260,9 @@ def get_config(
     )
 
 
-def new_erigon_launcher(network_id, el_cl_genesis_data):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
-        network_id=network_id,
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
     )

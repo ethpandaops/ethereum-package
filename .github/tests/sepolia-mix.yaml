@@ -1,0 +1,16 @@
+participants:
+  - el_client_type: geth
+    cl_client_type: teku
+  - el_client_type: nethermind
+    cl_client_type: prysm
+  - el_client_type: erigon
+    cl_client_type: lighthouse
+  - el_client_type: besu
+    cl_client_type: lighthouse
+  - el_client_type: reth
+    cl_client_type: lodestar
+  - el_client_type: ethereumjs
+    cl_client_type: nimbus
+network_params:
+  network: "sepolia"
+additional_services: []

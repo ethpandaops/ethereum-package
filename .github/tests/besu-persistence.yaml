@@ -1,5 +1,0 @@
-participants:
-  - el_client_type: besu
-    cl_client_type: lighthouse
-additional_services: []
-persistent: true

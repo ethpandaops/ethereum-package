@@ -5,7 +5,6 @@ el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
-
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
@@ -92,7 +91,10 @@ def launch(
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
         service_name,
         existing_el_clients,
@@ -131,7 +133,10 @@ def launch(
 
 
 def get_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
     service_name,
     existing_el_clients,
@@ -156,7 +161,11 @@ def get_config(
         "node",
         "-{0}".format(verbosity_level),
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--chain=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        "--chain={0}".format(
+            network
+            if network in constants.PUBLIC_NETWORKS
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+        ),
         "--http",
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
@@ -171,19 +180,26 @@ def get_config(
         "--ws.origins=*",
         "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.jwtsecret=" + constants.JWT_AUTH_PATH,
+        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",
         "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
     ]
-
-    if len(existing_el_clients) > 0:
+    if network == "kurtosis":
+        if len(existing_el_clients) > 0:
+            cmd.append(
+                "--bootnodes="
+                + ",".join(
+                    [
+                        ctx.enode
+                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootnodes="
-            + ",".join(
-                [
-                    ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enodes(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -192,15 +208,19 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     cmd_str = " ".join(cmd)
+    if network not in constants.PUBLIC_NETWORKS:
+        subcommand_strs = [
+            init_datadir_cmd_str,
+            cmd_str,
+        ]
+    else:
+        subcommand_strs = [cmd_str]
 
-    subcommand_strs = [
-        init_datadir_cmd_str,
-        cmd_str,
-    ]
     command_str = " && ".join(subcommand_strs)
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
 
     if persistent:
@@ -229,7 +249,9 @@ def get_config(
     )
 
 
-def new_reth_launcher(el_cl_genesis_data):
+def new_reth_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
     )
