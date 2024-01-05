@@ -7,7 +7,7 @@ blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 constants = import_module("../../package_io/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
-CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/consensus-data"
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/lodestar/beacon-data"
 # Port IDs
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
@@ -28,6 +28,7 @@ BEACON_MAX_MEMORY = 1024
 
 #  ---------------------------------- Validator client -------------------------------------
 VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
+VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/lodestar/validator-data"
 # The min/max CPU/memory that the validator node can use
 VALIDATOR_MIN_CPU = 50
 VALIDATOR_MAX_CPU = 300
@@ -97,10 +98,11 @@ def launch(
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    persistent,
     split_mode_enabled=False,
 ):
-    beacon_node_service_name = "{0}".format(service_name)
-    validator_node_service_name = "{0}-{1}".format(
+    beacon_service_name = "{0}".format(service_name)
+    validator_service_name = "{0}-{1}".format(
         service_name, VALIDATOR_SUFFIX_SERVICE_NAME
     )
     log_level = input_parser.get_client_log_level_or_default(
@@ -114,8 +116,12 @@ def launch(
 
     # Launch Beacon node
     beacon_config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
+        beacon_service_name,
         bootnode_contexts,
         el_client_context,
         log_level,
@@ -127,9 +133,10 @@ def launch(
         snooper_engine_context,
         extra_beacon_params,
         extra_beacon_labels,
+        persistent,
     )
 
-    beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
+    beacon_service = plan.add_service(beacon_service_name, beacon_config)
 
     beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
@@ -139,7 +146,7 @@ def launch(
 
     # Blobber config
     if blobber_enabled:
-        blobber_service_name = "{0}-{1}".format("blobber", beacon_node_service_name)
+        blobber_service_name = "{0}-{1}".format("blobber", beacon_service_name)
         blobber_config = blobber_launcher.get_config(
             blobber_service_name,
             node_keystore_files,
@@ -163,9 +170,9 @@ def launch(
         v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
         v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
         validator_config = get_validator_config(
-            validator_node_service_name,
             launcher.el_cl_genesis_data,
             image,
+            validator_service_name,
             log_level,
             beacon_http_url,
             el_client_context,
@@ -174,12 +181,12 @@ def launch(
             v_max_cpu,
             v_min_mem,
             v_max_mem,
-            validator_node_service_name,
             extra_validator_params,
             extra_validator_labels,
+            persistent,
         )
 
-        plan.add_service(validator_node_service_name, validator_config)
+        plan.add_service(validator_service_name, validator_config)
 
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
@@ -193,7 +200,7 @@ def launch(
         },
     )
     response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=beacon_node_service_name
+        recipe=beacon_node_identity_recipe, service_name=beacon_service_name
     )
     beacon_node_enr = response["extract.enr"]
     beacon_multiaddr = response["extract.multiaddr"]
@@ -215,8 +222,8 @@ def launch(
         beacon_service.ip_address,
         HTTP_PORT_NUM,
         nodes_metrics_info,
-        beacon_node_service_name,
-        validator_node_service_name,
+        beacon_service_name,
+        validator_service_name,
         beacon_multiaddr,
         beacon_peer_id,
         snooper_enabled,
@@ -228,8 +235,12 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
+    service_name,
     bootnode_contexts,
     el_client_context,
     log_level,
@@ -241,6 +252,7 @@ def get_beacon_config(
     snooper_engine_context,
     extra_params,
     extra_labels,
+    persistent,
 ):
     el_client_rpc_url_str = "http://{0}:{1}".format(
         el_client_context.ip_addr,
@@ -264,13 +276,7 @@ def get_beacon_config(
         "--logLevel=" + log_level,
         "--port={0}".format(DISCOVERY_PORT_NUM),
         "--discoveryPort={0}".format(DISCOVERY_PORT_NUM),
-        "--dataDir=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--paramsFile="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/config.yaml",
-        "--genesisStateFile="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/genesis.ssz",
+        "--dataDir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
         "--discv5=true",
@@ -287,7 +293,7 @@ def get_beacon_config(
         "--enr.udp={0}".format(DISCOVERY_PORT_NUM),
         # Set per Pari's recommendation to reduce noise in the logs
         "--subscribeAllSubnets=true",
-        "--jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics.address=0.0.0.0",
@@ -295,25 +301,56 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
-    if bootnode_contexts != None:
+    if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
-            "--bootnodes="
-            + ",".join(
-                [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
-            )
+            "--paramsFile="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/config.yaml"
         )
+        cmd.append(
+            "--genesisStateFile="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/genesis.ssz"
+        )
+        if network == "kurtosis":  # kurtosis
+            if bootnode_contexts != None:
+                cmd.append(
+                    "--bootnodes="
+                    + ",".join(
+                        [
+                            ctx.enr
+                            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
+                        ]
+                    )
+                )
+        else:  # devnet
+            cmd.append(
+                "--bootnodes="
+                + shared_utils.get_devnet_enrs_list(
+                    plan, el_cl_genesis_data.files_artifact_uuid
+                )
+            )
+    else:
+        cmd.append("--network=" + network)
+        cmd.append("--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+    }
 
+    if persistent:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name)
+        )
     return ServiceConfig(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
-        },
+        files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
@@ -333,9 +370,9 @@ def get_beacon_config(
 
 
 def get_validator_config(
-    service_name,
     el_cl_genesis_data,
     image,
+    service_name,
     log_level,
     beacon_client_http_url,
     el_client_context,
@@ -344,12 +381,12 @@ def get_validator_config(
     v_max_cpu,
     v_min_mem,
     v_max_mem,
-    validator_node_service_name,
     extra_params,
     extra_labels,
+    persistent,
 ):
     root_dirpath = shared_utils.path_join(
-        CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_name
+        VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER, service_name
     )
 
     validator_keys_dirpath = shared_utils.path_join(
@@ -365,7 +402,7 @@ def get_validator_config(
     cmd = [
         "validator",
         "--logLevel=" + log_level,
-        "--dataDir=" + root_dirpath,
+        # "--dataDir=" + root_dirpath,
         "--paramsFile="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
@@ -388,14 +425,16 @@ def get_validator_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
+    }
+
     return ServiceConfig(
         image=image,
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
-        },
+        files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=v_min_cpu,
         max_cpu=v_max_cpu,
@@ -411,7 +450,9 @@ def get_validator_config(
     )
 
 
-def new_lodestar_launcher(el_cl_genesis_data):
+def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
     )

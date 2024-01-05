@@ -4,7 +4,6 @@ el_client_context = import_module("../../el/el_client_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
-
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/besu/execution-data"
 
@@ -75,6 +74,7 @@ def launch(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, BESU_LOG_LEVELS
@@ -88,9 +88,12 @@ def launch(
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
-        launcher.network_id,
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
+        service_name,
         existing_el_clients,
         cl_client_name,
         log_level,
@@ -101,6 +104,7 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
+        persistent,
     )
 
     service = plan.add_service(service_name, config)
@@ -126,9 +130,12 @@ def launch(
 
 
 def get_config(
-    network_id,
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
+    service_name,
     existing_el_clients,
     cl_client_name,
     log_level,
@@ -139,15 +146,12 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     cmd = [
         "besu",
         "--logging=" + log_level,
         "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--genesis-file="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/besu.json",
-        "--network-id=" + network_id,
         "--host-allowlist=*",
         "--rpc-http-enabled=true",
         "--rpc-http-host=0.0.0.0",
@@ -162,25 +166,40 @@ def get_config(
         "--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--p2p-port={0}".format(DISCOVERY_PORT_NUM),
         "--engine-rpc-enabled=true",
-        "--engine-jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--engine-host-allowlist=*",
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
         "--data-storage-format=BONSAI",
-        "--kzg-trusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
     ]
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append(
+            "--genesis-file="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/besu.json"
+        )
+    else:
+        cmd.append("--network=" + network)
 
-    if len(existing_el_clients) > 0:
+    if network == "kurtosis":
+        if len(existing_el_clients) > 0:
+            cmd.append(
+                "--bootnodes="
+                + ",".join(
+                    [
+                        ctx.enode
+                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootnodes="
-            + ",".join(
-                [
-                    ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enodes(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -191,13 +210,21 @@ def get_config(
     cmd_str = " ".join(cmd)
 
     extra_env_vars = extra_env_vars | JAVA_OPTS
+
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+    }
+
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+        )
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
         cmd=[cmd_str],
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        },
+        files=files,
         env_vars=extra_env_vars,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -215,5 +242,9 @@ def get_config(
     )
 
 
-def new_besu_launcher(network_id, el_cl_genesis_data):
-    return struct(network_id=network_id, el_cl_genesis_data=el_cl_genesis_data)
+def new_besu_launcher(el_cl_genesis_data, jwt_file, network):
+    return struct(
+        el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
+    )
