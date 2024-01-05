@@ -168,8 +168,8 @@ def get_config(
     persistent,
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
-    if electra_fork_epoch != None:
-        if electra_fork_epoch == 0:  # verkle-gen
+    if electra_fork_epoch != None or "verkle" in network:
+        if electra_fork_epoch == 0 or "verkle-gen" in network:  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
                 final_genesis_timestamp,
@@ -200,17 +200,17 @@ def get_config(
         # TODO: capella fork epoch check is needed to ensure older versions of geth works.
         "{0}".format(
             "--state.scheme=path"
-            if electra_fork_epoch == None
+            if electra_fork_epoch == None and "verkle" not in network
             and "--builder" not in extra_params
             and capella_fork_epoch == 0
             else ""
         ),
         # Override prague fork timestamp for electra fork
-        "{0}".format("--cache.preimages" if electra_fork_epoch != None else ""),
+        "{0}".format("--cache.preimages" if electra_fork_epoch != None or "verkle" in network else ""),
         # Override prague fork timestamp if electra_fork_epoch == 0
         "{0}".format(
             "--override.prague=" + final_genesis_timestamp
-            if electra_fork_epoch == 0
+            if electra_fork_epoch == 0 or "verkle-gen" in network
             else ""
         ),
         "{0}".format(
