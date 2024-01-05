@@ -4,6 +4,8 @@
 
 This is a [Kurtosis][kurtosis-repo] package that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
+You now have the ability to spin up a private Ethereum testnet or public devnet/testnet (e.g. Goerli, Holesky, Sepolia, dencun-devnet-12, verkle-gen-devnet-2 etc) with a single command. This package is designed to be used for testing, validation, and development of Ethereum clients, and is not intended for production use. For more details check network_params.network in the [configuration section](./README.md#configuration).
+
 Specifically, this [package][package-reference] will:
 
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
@@ -271,6 +273,12 @@ network_params:
   capella_fork_epoch: 0
   deneb_fork_epoch: 500
   electra_fork_epoch: null
+
+  # Network name, used to enable syncing of alternative networks
+  # Defaults to "kurtosis"
+  # You can sync any public network by setting this to the network name (e.g. "mainnet", "goerli", "sepolia", "holesky")
+  # You can sync any devnet by setting this to the network name (e.g. "dencun-devnet-12", "verkle-gen-devnet-2")
+  network: "kurtosis"
 
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
