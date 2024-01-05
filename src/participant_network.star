@@ -65,6 +65,7 @@ def launch_participant_network(
 ):
     num_participants = len(participants)
     if network_params.network == "kurtosis":
+        # We are running a kurtosis network
         plan.print("Generating cl validator key stores")
         validator_data = None
         if not parallel_keystore_generation:
@@ -149,14 +150,23 @@ def launch_participant_network(
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
         )
+    elif network_params.network in constants.PUBLIC_NETWORKS:
+        # We are running a public network
+        dummy = plan.run_sh(
+            run="mkdir /network-configs",
+            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
+        )
+        el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
+            dummy.files_artifacts[0],
+            constants.GENESIS_VALIDATORS_ROOT[network_params.network],
+        )
+        final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
+        validator_data = None
     else:
-        # split up the name from dencun-devnet-12 to dencun and devnet-12
-        devnet_name = network_params.network.split("-")[0]
-        devnet_number = network_params.network.split("-")[-1]
+        # We are running a devnet
+        url = calculate_devnet_url(network_params.network)
         el_cl_genesis_uuid = plan.upload_files(
-            src="github.com/ethpandaops/{0}-devnets/network-configs/devnet-{1}".format(
-                devnet_name, devnet_number
-            ),
+            src=url,
             name="el_cl_genesis",
         )
         el_cl_genesis_data_uuid = plan.run_sh(
@@ -164,11 +174,14 @@ def launch_participant_network(
             store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
             files={"/opt": el_cl_genesis_uuid},
         )
+        genesis_validators_root = read_file(url + "/genesis_validators_root.txt")
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             el_cl_genesis_data_uuid.files_artifacts[0],
-            "0",
+            genesis_validators_root,
         )
-        final_genesis_timestamp = 0
+        final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
+            plan, el_cl_genesis_uuid
+        )
         validator_data = None
 
     el_launchers = {
@@ -527,10 +540,6 @@ def launch_participant_network(
     )
 
 
-def zfill_custom(value, width):
-    return ("0" * (width - len(str(value)))) + str(value)
-
-
 # this is a python procedure so that Kurtosis can do idempotent runs
 # time.now() runs everytime bringing non determinism
 # note that the timestamp it returns is a string
@@ -546,3 +555,15 @@ print(int(time.time()+padding), end="")
         store=[StoreSpec(src="/tmp", name="final-genesis-timestamp")],
     )
     return result.output
+
+
+def calculate_devnet_url(network):
+    network_parts = network.split("-devnet-", 1)
+    devnet_name, devnet_number = network_parts[0], network_parts[1]
+    devnet_category = devnet_name.split("-")[0]
+    devnet_subname = (
+        devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
+    )
+    return "github.com/ethpandaops/{0}-devnets/network-configs/{1}devnet-{2}".format(
+        devnet_category, devnet_subname, devnet_number
+    )

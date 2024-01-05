@@ -152,11 +152,7 @@ def get_config(
     cmd = [
         "--log=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--Init.ChainSpecPath="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/chainspec.json",
         "--Init.WebSocketsEnabled=true",
-        "--config=none.cfg",
         "--JsonRpc.Enabled=true",
         "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin",
         "--JsonRpc.Host=0.0.0.0",
@@ -172,6 +168,17 @@ def get_config(
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
     ]
+
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--config=none.cfg")
+        cmd.append(
+            "--Init.ChainSpecPath="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/chainspec.json"
+        )
+    else:
+        cmd.append("--config=" + network)
+
     if network == "kurtosis":
         if len(existing_el_clients) > 0:
             cmd.append(

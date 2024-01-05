@@ -51,7 +51,7 @@ VALIDATOR_METRICS_PATH = "/metrics"
 
 # Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
 #  have to to create it
-BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/beacon-data"
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/nimbus/beacon-data"
 # Nimbus wants the data dir to have these perms
 CONSENSUS_DATA_DIR_PERMS_STR = "0700"
 
@@ -313,7 +313,11 @@ def get_beacon_config(
         "--log-level=" + log_level,
         "--udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--network=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+        "--network={0}".format(
+            network
+            if network in constants.PUBLIC_NETWORKS
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
         "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,

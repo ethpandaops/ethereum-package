@@ -287,12 +287,6 @@ def get_beacon_config(
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--chain-config-file="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/config.yaml",
-        "--genesis-state="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/genesis.ssz",
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
         "--rpc-port={0}".format(RPC_PORT_NUM),
@@ -316,18 +310,34 @@ def get_beacon_config(
         "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM)
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
-    if network == "kurtosis":
-        if bootnode_contexts != None:
-            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
-                cmd.append("--peer=" + ctx.multiaddr)
-                cmd.append("--bootstrap-node=" + ctx.enr)
-            cmd.append("--p2p-static-id=true")
-    elif network not in constants.PUBLIC_NETWORKS:
-        cmd.append(
-            "--bootstrap-node="
-            + shared_utils.get_devnet_enr(plan, el_cl_genesis_data.files_artifact_uuid)
-        )
+    if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--p2p-static-id=true")
+        cmd.append(
+            "--chain-config-file="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/config.yaml"
+        )
+        cmd.append(
+            "--genesis-state="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/genesis.ssz",
+        )
+        if network == "kurtosis":  # Kurtosis
+            if bootnode_contexts != None:
+                for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
+                    cmd.append("--peer=" + ctx.multiaddr)
+                    cmd.append("--bootstrap-node=" + ctx.enr)
+        else:  # Devnet
+            cmd.append(
+                "--bootstrap-node="
+                + shared_utils.get_devnet_enr(
+                    plan, el_cl_genesis_data.files_artifact_uuid
+                )
+            )
+    else:  # Public network
+        cmd.append("--{}".format(network))
+        cmd.append("--genesis-beacon-api-url=" + constants.CHECKPOINT_SYNC_URL[network])
+        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if len(extra_params) > 0:
         # we do the for loop as otherwise its a proto repeated array
