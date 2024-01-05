@@ -214,9 +214,7 @@ def get_config(
             cmd_str,
         ]
     else:
-        subcommand_strs = [
-            cmd_str
-        ]
+        subcommand_strs = [cmd_str]
 
     command_str = " && ".join(subcommand_strs)
 
