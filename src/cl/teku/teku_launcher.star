@@ -3,18 +3,13 @@ input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
-
 constants = import_module("../../package_io/constants.star")
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
-# The Docker container runs as the "teku" user so we can't write to root
-CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/consensus-data"
-
-# These will get mounted as root and Teku needs directory write permissions, so we'll copy this
-#  into the Teku user's home directory to get around it
-VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
-
 #  ---------------------------------- Beacon client -------------------------------------
+# The Docker container runs as the "teku" user so we can't write to root
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/teku-beacon-data"
+
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
@@ -34,6 +29,12 @@ BEACON_MAX_MEMORY = 2048
 
 BEACON_METRICS_PATH = "/metrics"
 #  ---------------------------------- Validator client -------------------------------------
+# These will get mounted as root and Teku needs directory write permissions, so we'll copy this
+#  into the Teku user's home directory to get around it
+VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/teku-validator-data"
+
+VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
+
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
 VALIDATOR_HTTP_PORT_ID = "http"
 VALIDATOR_METRICS_PORT_ID = "metrics"
@@ -122,6 +123,7 @@ def launch(
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    persistent,
     split_mode_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -142,8 +144,12 @@ def launch(
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
     config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
+        beacon_service_name,
         bootnode_context,
         el_client_context,
         log_level,
@@ -154,10 +160,10 @@ def launch(
         bn_max_mem,
         snooper_enabled,
         snooper_engine_context,
-        beacon_service_name,
         extra_beacon_params,
         extra_beacon_labels,
         split_mode_enabled,
+        persistent,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -204,6 +210,7 @@ def launch(
         validator_config = get_validator_config(
             launcher.el_cl_genesis_data,
             image,
+            validator_service_name,
             log_level,
             beacon_http_url,
             el_client_context,
@@ -215,6 +222,7 @@ def launch(
             validator_service_name,
             extra_validator_params,
             extra_validator_labels,
+            persistent,
         )
 
         validator_service = plan.add_service(validator_service_name, validator_config)
@@ -241,12 +249,19 @@ def launch(
         peer_id=beacon_peer_id,
         snooper_enabled=snooper_enabled,
         snooper_engine_context=snooper_engine_context,
+        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
+        if node_keystore_files
+        else "",
     )
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
+    service_name,
     bootnode_contexts,
     el_client_context,
     log_level,
@@ -257,10 +272,10 @@ def get_beacon_config(
     bn_max_mem,
     snooper_enabled,
     snooper_engine_context,
-    service_name,
     extra_params,
     extra_labels,
     split_mode_enabled,
+    persistent,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -287,13 +302,12 @@ def get_beacon_config(
     cmd = [
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
-        "--network="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/config.yaml",
-        "--initial-state="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/genesis.ssz",
-        "--data-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--network={0}".format(
+            network
+            if network in constants.PUBLIC_NETWORKS
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml"
+        ),
+        "--data-path=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--data-storage-mode={0}".format(
             "ARCHIVE" if constants.ARCHIVE_MODE else "PRUNE"
         ),
@@ -309,7 +323,7 @@ def get_beacon_config(
         "--rest-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
-        "--ee-jwt-secret-file=" + constants.JWT_AUTH_PATH,
+        "--ee-jwt-secret-file=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--ee-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled",
@@ -318,7 +332,8 @@ def get_beacon_config(
         "--metrics-categories=BEACON,PROCESS,LIBP2P,JVM,NETWORK,PROCESS",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--Xtrusted-setup=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        # To enable syncing other networks too without checkpoint syncing
+        "--ignore-weak-subjectivity-period-enabled=true",
     ]
     validator_flags = [
         "--validator-keys={0}:{1}".format(
@@ -333,23 +348,39 @@ def get_beacon_config(
         + el_client_context.client_name,
     ]
 
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append(
+            "--initial-state="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/genesis.ssz"
+        )
+    else:
+        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
+
     if node_keystore_files != None and not split_mode_enabled:
         cmd.extend(validator_flags)
-
-    if bootnode_contexts != None:
+    if network == "kurtosis":
+        if bootnode_contexts != None:
+            cmd.append(
+                "--p2p-discovery-bootnodes="
+                + ",".join(
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+                )
+            )
+            cmd.append(
+                "--p2p-static-peers="
+                + ",".join(
+                    [
+                        ctx.multiaddr
+                        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--p2p-discovery-bootnodes="
-            + ",".join(
-                [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
-            )
-        )
-        cmd.append(
-            "--p2p-static-peers="
-            + ",".join(
-                [
-                    ctx.multiaddr
-                    for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enrs_list(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -359,12 +390,17 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
     if node_keystore_files != None and not split_mode_enabled:
         files[
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
-    cmd_str = " ".join(cmd)
+
+    if persistent:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name)
+        )
     return ServiceConfig(
         image=image,
         ports=BEACON_USED_PORTS,
@@ -392,6 +428,7 @@ def get_beacon_config(
 def get_validator_config(
     el_cl_genesis_data,
     image,
+    service_name,
     log_level,
     beacon_http_url,
     el_client_context,
@@ -403,6 +440,7 @@ def get_validator_config(
     validator_service_name,
     extra_params,
     extra_labels,
+    persistent,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -422,8 +460,8 @@ def get_validator_config(
         "--network="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--data-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--data-validator-path=" + CONSENSUS_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        # "--data-path=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        # "--data-validator-path=" + VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--beacon-node-api-endpoint=" + beacon_http_url,
         "--validator-keys={0}:{1}".format(
             validator_keys_dirpath,
@@ -445,14 +483,16 @@ def get_validator_config(
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params if param != "--split=true"])
 
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
+    }
+
     return ServiceConfig(
         image=image,
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
-        },
+        files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=v_min_cpu,
         max_cpu=v_max_cpu,
@@ -468,5 +508,7 @@ def get_validator_config(
     )
 
 
-def new_teku_launcher(el_cl_genesis_data):
-    return struct(el_cl_genesis_data=el_cl_genesis_data)
+def new_teku_launcher(el_cl_genesis_data, jwt_file, network):
+    return struct(
+        el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file, network=network
+    )

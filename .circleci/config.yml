@@ -60,7 +60,7 @@ setup_kurtosis_k3s: &setup_kurtosis_k3s
               type: kubernetes
               config:
                 kubernetes-cluster-name: k3d-k3s-default
-                storage-class: standard
+                storage-class: local-path
                 enclave-size-in-megabytes: 2048
           EOF
     # Set the K3S cluster with some previous steps to force this cluster type in the cluster-setting file. This save us to start the engine with the cluster set command
@@ -109,6 +109,13 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-with-tools-mev.yaml)"
 
+  mix_persistence_k8s:
+    resource_class: xlarge
+    executor: ubuntu_vm
+    steps:
+      - checkout
+      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-persistence-k8s.yaml)"
+
 workflows:
   nightly_tests:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
@@ -150,6 +157,13 @@ workflows:
                 - main
 
       - mix_with_tools_k8s:
+          <<: *setup_kurtosis_k3s
+          filters:
+            branches:
+              ignore:
+                - main
+
+      - mix_persistence_k8s:
           <<: *setup_kurtosis_k3s
           filters:
             branches:

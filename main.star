@@ -1,7 +1,7 @@
 input_parser = import_module("./src/package_io/input_parser.star")
 constants = import_module("./src/package_io/constants.star")
 participant_network = import_module("./src/participant_network.star")
-
+shared_utils = import_module("./src/shared_utils/shared_utils.star")
 static_files = import_module("./src/static_files/static_files.star")
 genesis_constants = import_module(
     "./src/prelaunch_data_generator/genesis_constants/genesis_constants.star"
@@ -58,6 +58,7 @@ def run(plan, args={}):
     network_params = args_with_right_defaults.network_params
     mev_params = args_with_right_defaults.mev_params
     parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
+    persistent = args_with_right_defaults.persistent
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -67,6 +68,11 @@ def run(plan, args={}):
     )
     prometheus_additional_metrics_jobs = []
 
+    raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
+    jwt_file = plan.upload_files(
+        src=static_files.JWT_PATH_FILEPATH,
+        name="jwt_file",
+    )
     plan.print("Read the prometheus, grafana templates")
 
     plan.print(
@@ -84,6 +90,8 @@ def run(plan, args={}):
         args_with_right_defaults.participants,
         network_params,
         args_with_right_defaults.global_client_log_level,
+        jwt_file,
+        persistent,
         parallel_keystore_generation,
     )
 
@@ -114,17 +122,18 @@ def run(plan, args={}):
         all_cl_client_contexts,
         args_with_right_defaults.participants,
     )
-
-    if network_params.deneb_fork_epoch != 0:
-        plan.print("Launching 4788 contract deployer")
-        el_uri = "http://{0}:{1}".format(
-            all_el_client_contexts[0].ip_addr, all_el_client_contexts[0].rpc_port_num
-        )
-        eip4788_deployment.deploy_eip4788_contract_in_background(
-            plan,
-            genesis_constants.PRE_FUNDED_ACCOUNTS[5].private_key,
-            el_uri,
-        )
+    if network_params.network == "kurtosis":
+        if network_params.deneb_fork_epoch != 0:
+            plan.print("Launching 4788 contract deployer")
+            el_uri = "http://{0}:{1}".format(
+                all_el_client_contexts[0].ip_addr,
+                all_el_client_contexts[0].rpc_port_num,
+            )
+            eip4788_deployment.deploy_eip4788_contract_in_background(
+                plan,
+                genesis_constants.PRE_FUNDED_ACCOUNTS[5].private_key,
+                el_uri,
+            )
 
     fuzz_target = "http://{0}:{1}".format(
         all_el_client_contexts[0].ip_addr,
@@ -162,17 +171,11 @@ def run(plan, args={}):
         beacon_uri = "{0}:{1}".format(
             all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num
         )
-        jwt_secret = plan.run_sh(
-            run="cat " + constants.JWT_AUTH_PATH + " | tr -d '\n'",
-            image="busybox",
-            files={"/data": el_cl_data_files_artifact_uuid},
-            wait=None,
-        )
         endpoint = mock_mev.launch_mock_mev(
             plan,
             el_uri,
             beacon_uri,
-            jwt_secret.output,
+            raw_jwt_secret,
             args_with_right_defaults.global_client_log_level,
         )
         mev_endpoints.append(endpoint)
@@ -221,6 +224,7 @@ def run(plan, args={}):
             genesis_validators_root,
             builder_uri,
             network_params.seconds_per_slot,
+            persistent,
         )
         mev_flood.spam_in_background(
             plan,
@@ -236,10 +240,18 @@ def run(plan, args={}):
     all_mevboost_contexts = []
     if mev_endpoints:
         for index, participant in enumerate(all_participants):
+            index_str = shared_utils.zfill_custom(
+                index + 1, len(str(len(all_participants)))
+            )
             if args_with_right_defaults.participants[index].validator_count != 0:
-                mev_boost_launcher = mev_boost.new_mev_boost_launcher(mev_endpoints)
-                mev_boost_service_name = "{0}{1}".format(
-                    input_parser.MEV_BOOST_SERVICE_NAME_PREFIX, index
+                mev_boost_launcher = mev_boost.new_mev_boost_launcher(
+                    MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints
+                )
+                mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
+                    input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                    index_str,
+                    participant.cl_client_type,
+                    participant.el_client_type,
                 )
                 mev_boost_context = mev_boost.launch(
                     plan,
@@ -340,6 +352,7 @@ def run(plan, args={}):
                 all_cl_client_contexts,
                 all_el_client_contexts,
                 network_params.network_id,
+                persistent,
             )
             plan.print("Successfully launched blobscan")
         elif additional_service == "full_beaconchain_explorer":
@@ -352,6 +365,7 @@ def run(plan, args={}):
                 full_beaconchain_explorer_config_template,
                 all_cl_client_contexts,
                 all_el_client_contexts,
+                persistent,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
         elif additional_service == "prometheus_grafana":

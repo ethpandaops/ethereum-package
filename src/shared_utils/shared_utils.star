@@ -1,3 +1,5 @@
+constants = import_module("../package_io/constants.star")
+
 TCP_PROTOCOL = "TCP"
 UDP_PROTOCOL = "UDP"
 HTTP_APPLICATION_PROTOCOL = "http"
@@ -71,3 +73,71 @@ def label_maker(client, client_type, image, connected_client, extra_labels):
     }
     labels.update(extra_labels)  # Add extra_labels to the labels dictionary
     return labels
+
+
+def get_devnet_enodes(plan, filename):
+    enode_list = plan.run_python(
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        run="""
+with open("/network-configs/network-configs/bootnode.txt") as bootnode_file:
+    bootnodes = []
+    for line in bootnode_file:
+        line = line.strip()
+        bootnodes.append(line)
+print(",".join(bootnodes), end="")
+            """,
+    )
+    return enode_list.output
+
+
+def get_devnet_enrs_list(plan, filename):
+    enr_list = plan.run_python(
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        run="""
+with open("/network-configs/network-configs/bootstrap_nodes.txt") as bootnode_file:
+    bootnodes = []
+    for line in bootnode_file:
+        line = line.strip()
+        bootnodes.append(line)
+print(",".join(bootnodes), end="")
+            """,
+    )
+    return enr_list.output
+
+
+# Prysm and Nimbus needs to have the enrs in a list format
+# Can't figure out how to pass each item as a list, as I can't return an array from the starlark function
+# So for now I'm just returning the last item in the list
+def get_devnet_enr(plan, filename):
+    enr_items = plan.run_python(
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        run="""
+with open("/network-configs/network-configs/bootstrap_nodes.txt") as bootnode_file:
+    last_enr = bootnode_file.read().splitlines()[-1]
+    print(last_enr, end="")
+            """,
+    )
+    return enr_items.output
+
+
+def read_genesis_timestamp_from_config(plan, filename):
+    value = plan.run_python(
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        packages=["PyYAML"],
+        run="""
+import yaml
+with open("/network-configs/config.yaml", "r") as f:
+    yaml_data = yaml.safe_load(f)
+
+# Get values from the YAML content
+min_genesis_time = int(yaml_data.get("MIN_GENESIS_TIME", 0))
+genesis_delay = int(yaml_data.get("GENESIS_DELAY", 0))
+
+print(int(min_genesis_time + genesis_delay), end="")
+        """,
+    )
+    return value.output

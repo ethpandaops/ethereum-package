@@ -18,7 +18,6 @@ NETWORK_ID_TO_NAME = {
     "3": "ropsten",
 }
 
-DONT_PERSIST_TO_DISK = False
 LAUNCH_ADMINER = True
 
 # The min/max CPU/memory that mev-relay can use
@@ -48,6 +47,7 @@ def launch_mev_relay(
     validator_root,
     builder_uri,
     seconds_per_slot,
+    persistent,
 ):
     redis = redis_module.run(
         plan,
@@ -64,7 +64,7 @@ def launch_mev_relay(
         user="postgres",
         database="postgres",
         service_name="mev-relay-postgres",
-        persistent=DONT_PERSIST_TO_DISK,
+        persistent=persistent,
         launch_adminer=LAUNCH_ADMINER,
         min_cpu=POSTGRES_MIN_CPU,
         max_cpu=POSTGRES_MAX_CPU,
@@ -83,6 +83,8 @@ def launch_mev_relay(
         "DENEB_FORK_VERSION": constants.DENEB_FORK_VERSION,
         "GENESIS_VALIDATORS_ROOT": validator_root,
         "SEC_PER_SLOT": str(seconds_per_slot),
+        "LOG_LEVEL": "debug",
+        "DB_TABLE_PREFIX": "custom",
     }
 
     redis_url = "{}:{}".format(redis.hostname, redis.port_number)

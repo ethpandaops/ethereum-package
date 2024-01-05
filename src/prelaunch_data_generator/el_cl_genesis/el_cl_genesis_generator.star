@@ -21,6 +21,7 @@ def generate_el_cl_genesis_data(
     genesis_delay,
     max_churn,
     ejection_balance,
+    eth1_follow_distance,
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
@@ -35,6 +36,7 @@ def generate_el_cl_genesis_data(
         genesis_delay,
         max_churn,
         ejection_balance,
+        eth1_follow_distance,
         capella_fork_epoch,
         deneb_fork_epoch,
         electra_fork_epoch,
@@ -54,16 +56,22 @@ def generate_el_cl_genesis_data(
     )
 
     genesis = plan.run_sh(
-        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all",
+        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/custom_config_data/* /network-configs/",
         image=image,
         files={GENESIS_VALUES_PATH: genesis_generation_config_artifact_name},
-        store=[StoreSpec(src="/data", name="el-cl-genesis-data")],
+        store=[
+            StoreSpec(src="/network-configs/", name="el_cl_genesis_data"),
+            StoreSpec(
+                src="/network-configs/genesis_validators_root.txt",
+                name="genesis_validators_root",
+            ),
+        ],
         wait=None,
     )
 
     genesis_validators_root = plan.run_sh(
-        run="cat /data/data/custom_config_data/genesis_validators_root.txt",
-        files={"/data": genesis.files_artifacts[0]},
+        run="cat /data/genesis_validators_root.txt",
+        files={"/data": genesis.files_artifacts[1]},
         wait=None,
     )
 
@@ -84,6 +92,7 @@ def new_env_file_for_el_cl_genesis_data(
     genesis_delay,
     max_churn,
     ejection_balance,
+    eth1_follow_distance,
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
@@ -98,6 +107,7 @@ def new_env_file_for_el_cl_genesis_data(
         "GenesisDelay": genesis_delay,
         "MaxChurn": max_churn,
         "EjectionBalance": ejection_balance,
+        "Eth1FollowDistance": eth1_follow_distance,
         "CapellaForkEpoch": capella_fork_epoch,
         "DenebForkEpoch": deneb_fork_epoch,
         "ElectraForkEpoch": electra_fork_epoch,
@@ -105,4 +115,5 @@ def new_env_file_for_el_cl_genesis_data(
         "BellatrixForkVersion": constants.BELLATRIX_FORK_VERSION,
         "CapellaForkVersion": constants.CAPELLA_FORK_VERSION,
         "DenebForkVersion": constants.DENEB_FORK_VERSION,
+        "ElectraForkVersion": constants.ELECTRA_FORK_VERSION,
     }

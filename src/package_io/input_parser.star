@@ -1,5 +1,5 @@
-constants = import_module("../package_io/constants.star")
-
+constants = import_module("./constants.star")
+shared_utils = import_module("../shared_utils/shared_utils.star")
 genesis_constants = import_module(
     "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
@@ -64,11 +64,15 @@ def input_parser(plan, input_args):
     # add default eth2 input params
     result["mev_type"] = None
     result["mev_params"] = get_default_mev_params()
-    result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
+    if result["network_params"]["network"] == "kurtosis":
+        result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
+    else:
+        result["additional_services"] = []
     result["grafana_additional_dashboards"] = []
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
+    result["persistent"] = False
 
     for attr in input_args:
         value = input_args[attr]
@@ -162,6 +166,9 @@ def input_parser(plan, input_args):
             preregistered_validator_keys_mnemonic=result["network_params"][
                 "preregistered_validator_keys_mnemonic"
             ],
+            preregistered_validator_count=result["network_params"][
+                "preregistered_validator_count"
+            ],
             num_validator_keys_per_node=result["network_params"][
                 "num_validator_keys_per_node"
             ],
@@ -173,9 +180,11 @@ def input_parser(plan, input_args):
             genesis_delay=result["network_params"]["genesis_delay"],
             max_churn=result["network_params"]["max_churn"],
             ejection_balance=result["network_params"]["ejection_balance"],
+            eth1_follow_distance=result["network_params"]["eth1_follow_distance"],
             capella_fork_epoch=result["network_params"]["capella_fork_epoch"],
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
+            network=result["network_params"]["network"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -217,6 +226,7 @@ def input_parser(plan, input_args):
         parallel_keystore_generation=result["parallel_keystore_generation"],
         grafana_additional_dashboards=result["grafana_additional_dashboards"],
         disable_peer_scoring=result["disable_peer_scoring"],
+        persistent=result["persistent"],
     )
 
 
@@ -341,10 +351,14 @@ def parse_network_params(input_args):
             "deposit_contract_address is empty or spaces it needs to be of non zero length"
         )
 
-    if result["network_params"]["preregistered_validator_keys_mnemonic"].strip() == "":
-        fail(
-            "preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length"
-        )
+    if result["network_params"]["network"] == "kurtosis":
+        if (
+            result["network_params"]["preregistered_validator_keys_mnemonic"].strip()
+            == ""
+        ):
+            fail(
+                "preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length"
+            )
 
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
@@ -362,16 +376,17 @@ def parse_network_params(input_args):
     ):
         fail("electra can only happen with capella genesis not bellatrix")
 
-    actual_num_validators = (
-        total_participant_count
-        * result["network_params"]["num_validator_keys_per_node"]
-    )
-    if MIN_VALIDATORS > actual_num_validators:
-        fail(
-            "We require at least {0} validators but got {1}".format(
-                MIN_VALIDATORS, actual_num_validators
+    if result["network_params"]["network"] == "kurtosis":
+        if MIN_VALIDATORS > actual_num_validators:
+            fail(
+                "We require at least {0} validators but got {1}".format(
+                    MIN_VALIDATORS, actual_num_validators
+                )
             )
-        )
+    else:
+        # Don't allow validators on non-kurtosis networks
+        for participant in result["participants"]:
+            participant["validator_count"] = 0
 
     return result
 
@@ -410,6 +425,7 @@ def default_network_params():
     # this is temporary till we get params working
     return {
         "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "preregistered_validator_count": 0,
         "num_validator_keys_per_node": 64,
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
@@ -417,9 +433,11 @@ def default_network_params():
         "genesis_delay": 120,
         "max_churn": 8,
         "ejection_balance": 16000000000,
+        "eth1_follow_distance": 2048,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 500,
         "electra_fork_epoch": None,
+        "network": "kurtosis",
     }
 
 
@@ -515,12 +533,22 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
-        mev_url = "http://{0}{1}:{2}".format(mev_prefix, index, mev_port)
+        index_str = shared_utils.zfill_custom(
+            index + 1, len(str(len(parsed_arguments_dict["participants"])))
+        )
+        mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
+            MEV_BOOST_SERVICE_NAME_PREFIX,
+            index_str,
+            participant["cl_client_type"],
+            participant["el_client_type"],
+            mev_port,
+        )
 
         if participant["cl_client_type"] == "lighthouse":
             participant["validator_extra_params"].append("--builder-proposals")
             participant["beacon_extra_params"].append("--builder={0}".format(mev_url))
         if participant["cl_client_type"] == "lodestar":
+            participant["validator_extra_params"].append("--builder")
             participant["beacon_extra_params"].append("--builder")
             participant["beacon_extra_params"].append(
                 "--builder.urls={0}".format(mev_url)
@@ -545,7 +573,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             )
 
     num_participants = len(parsed_arguments_dict["participants"])
-
+    index_str = shared_utils.zfill_custom(
+        num_participants + 1, len(str(num_participants + 1))
+    )
     if mev_type == "full":
         mev_participant = default_participant()
         mev_participant["el_client_type"] = (
@@ -569,8 +599,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "el_extra_params": [
                     "--builder",
                     "--builder.remote_relay_endpoint=http://mev-relay-api:9062",
-                    "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth:4000".format(
-                        num_participants + 1
+                    "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth-builder:4000".format(
+                        index_str
                     ),
                     "--builder.bellatrix_fork_version={0}".format(
                         constants.BELLATRIX_FORK_VERSION
