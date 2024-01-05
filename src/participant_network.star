@@ -156,10 +156,9 @@ def launch_participant_network(
         )
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             dummy.files_artifacts[0],
-            "0",
+            constants.GENESIS_VALIDATORS_ROOT[network]
         )
-
-        final_genesis_timestamp = 0
+        final_genesis_timestamp = constants.GENESIS_TIME[network]
         validator_data = None
     else:
         # split up the name from dencun-devnet-12 to dencun and devnet-12
