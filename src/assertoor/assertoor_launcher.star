@@ -55,7 +55,7 @@ def launch_assertoor(
         )
 
         if participant_config.validator_count != 0:
-            all_client_info.append(
+            validator_client_info.append(
                 new_client_info(
                     cl_client.ip_addr,
                     cl_client.http_port_num,
