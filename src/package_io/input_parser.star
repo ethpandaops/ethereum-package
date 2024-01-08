@@ -234,9 +234,7 @@ def input_parser(plan, input_args):
             run_opcodes_transaction_test=result["assertoor_params"][
                 "run_opcodes_transaction_test"
             ],
-            tests=result["assertoor_params"][
-                "tests"
-            ],
+            tests=result["assertoor_params"]["tests"],
         ),
         custom_flood_params=struct(
             interval_between_transactions=result["custom_flood_params"][
