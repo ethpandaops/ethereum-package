@@ -130,6 +130,7 @@ def new_config_template_data(
         "RunTransactionTest": assertoor_params.run_transaction_test,
         "RunBlobTransactionTest": assertoor_params.run_blob_transaction_test,
         "RunOpcodesTransactionTest": assertoor_params.run_opcodes_transaction_test,
+        "AdditionalTests": assertoor_params.tests,
     }
 
 

@@ -340,6 +340,11 @@ assertoor_params:
   # all checks are done during finality & unfinality
   run_lifecycle_test: false
 
+  # Run additional tests from external test definitions
+  # eg:
+  #   - https://raw.githubusercontent.com/ethpandaops/assertoor/master/example/tests/block-proposal-check.yaml
+  tests: []
+
 
 # By default includes
 # - A transaction spammer & blob spammer is launched to fake transactions sent to the network

@@ -33,23 +33,21 @@ externalTests:
 {{ if .RunStabilityCheck }}
 - file: /tests/stability-check.yaml
 {{ end }}
-
 {{ if .RunBlockProposalCheck }}
 - file: /tests/block-proposal-check.yaml
 {{ end }}
-
 {{ if .RunTransactionTest }}
 - file: /tests/eoa-transactions-test.yaml
 {{ end }}
-
 {{ if .RunBlobTransactionTest }}
 - file: /tests/blob-transactions-test.yaml
 {{ end }}
-
 {{ if .RunOpcodesTransactionTest }}
 - file: /tests/all-opcodes-transaction-test.yaml
 {{ end }}
-
 {{ if .RunLifecycleTest }}
 - file: /tests/validator-lifecycle-test.yaml
 {{ end }}
+{{ range $test := .AdditionalTests }}
+- file: "{{ $test }}"
+{{- end }}
