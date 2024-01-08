@@ -117,7 +117,9 @@ def get_config(config_files_artifact_name, tests_config_artifacts_name):
     )
 
 
-def new_config_template_data(listen_port_num, client_info, validator_client_info, assertoor_params):
+def new_config_template_data(
+    listen_port_num, client_info, validator_client_info, assertoor_params
+):
     return {
         "ListenPortNum": listen_port_num,
         "ClientInfo": client_info,
