@@ -380,8 +380,8 @@ def run(plan, args={}):
             assertoor.launch_assertoor(
                 plan,
                 assertoor_config_template,
-                all_cl_client_contexts,
-                all_el_client_contexts,
+                all_participants,
+                args_with_right_defaults.participants,
                 assertoor_params,
             )
             plan.print("Successfully launched assertoor")

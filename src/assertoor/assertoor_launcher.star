@@ -30,25 +30,41 @@ USED_PORTS = {
 def launch_assertoor(
     plan,
     config_template,
-    cl_client_contexts,
-    el_client_contexts,
+    participant_contexts,
+    participant_configs,
     assertoor_params,
 ):
     all_client_info = []
-    for index, client in enumerate(cl_client_contexts):
-        el_client = el_client_contexts[index]
+    validator_client_info = []
+
+    for index, participant in enumerate(participant_contexts):
+        participant_config = participant_configs[index]
+        cl_client = participant.cl_client_context
+        el_client = participant.el_client_context
+
         all_client_info.append(
             new_client_info(
-                client.ip_addr,
-                client.http_port_num,
+                cl_client.ip_addr,
+                cl_client.http_port_num,
                 el_client.ip_addr,
                 el_client.rpc_port_num,
-                client.beacon_service_name,
+                cl_client.beacon_service_name,
             )
         )
 
+        if participant_config.validator_count != 0:
+            all_client_info.append(
+                new_client_info(
+                    cl_client.ip_addr,
+                    cl_client.http_port_num,
+                    el_client.ip_addr,
+                    el_client.rpc_port_num,
+                    cl_client.beacon_service_name,
+                )
+            )
+
     template_data = new_config_template_data(
-        HTTP_PORT_NUMBER, all_client_info, assertoor_params
+        HTTP_PORT_NUMBER, all_client_info, validator_client_info, assertoor_params
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -92,10 +108,11 @@ def get_config(config_files_artifact_name):
     )
 
 
-def new_config_template_data(listen_port_num, client_info, assertoor_params):
+def new_config_template_data(listen_port_num, client_info, validator_client_info, assertoor_params):
     return {
         "ListenPortNum": listen_port_num,
         "ClientInfo": client_info,
+        "ValidatorClientInfo": validator_client_info,
         "RunStabilityCheck": assertoor_params.run_stability_check,
         "RunBlockProposalCheck": assertoor_params.run_block_proposal_check,
         "RunLifecycleTest": assertoor_params.run_lifecycle_test,
