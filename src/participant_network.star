@@ -5,6 +5,9 @@ validator_keystores = import_module(
 el_cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
 )
+el_cl_genesis_data = import_module(
+    "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_data.star"
+)
 shared_utils = import_module("./shared_utils/shared_utils.star")
 
 static_files = import_module("./static_files/static_files.star")
@@ -56,96 +59,137 @@ def launch_participant_network(
     participants,
     network_params,
     global_log_level,
+    jwt_file,
     persistent,
     parallel_keystore_generation=False,
 ):
     num_participants = len(participants)
-
-    plan.print("Generating cl validator key stores")
-    validator_data = None
-    if not parallel_keystore_generation:
-        validator_data = validator_keystores.generate_validator_keystores(
-            plan, network_params.preregistered_validator_keys_mnemonic, participants
-        )
-    else:
-        validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
-            plan, network_params.preregistered_validator_keys_mnemonic, participants
-        )
-
-    plan.print(json.indent(json.encode(validator_data)))
-
-    # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
-    final_genesis_timestamp = get_final_genesis_timestamp(
-        plan, CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME
-    )
-
-    # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants
-    total_number_of_validator_keys = network_params.preregistered_validator_count
-
-    if network_params.preregistered_validator_count == 0:
-        for participant in participants:
-            total_number_of_validator_keys += participant.validator_count
-
-    plan.print("Generating EL CL data")
-    # we are running bellatrix genesis (deprecated) - will be removed in the future
-    if (
-        network_params.capella_fork_epoch > 0
-        and network_params.electra_fork_epoch == None
-    ):
-        ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:1.3.15"
-        )
-    # we are running capella genesis - default behavior
-    elif (
-        network_params.capella_fork_epoch == 0
-        and network_params.electra_fork_epoch == None
-    ):
-        ethereum_genesis_generator_image = (
-            "ethpandaops/ethereum-genesis-generator:2.0.8"
-        )
-    # we are running electra - experimental
-    elif network_params.electra_fork_epoch != None:
-        if network_params.electra_fork_epoch == 0:
-            ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:4.0.0-rc.4"
+    if network_params.network == "kurtosis":
+        # We are running a kurtosis network
+        plan.print("Generating cl validator key stores")
+        validator_data = None
+        if not parallel_keystore_generation:
+            validator_data = validator_keystores.generate_validator_keystores(
+                plan, network_params.preregistered_validator_keys_mnemonic, participants
             )
         else:
-            ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:3.0.0-rc.18"
+            validator_data = (
+                validator_keystores.generate_valdiator_keystores_in_parallel(
+                    plan,
+                    network_params.preregistered_validator_keys_mnemonic,
+                    participants,
+                )
             )
-    else:
-        fail(
-            "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+
+        plan.print(json.indent(json.encode(validator_data)))
+
+        # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
+        final_genesis_timestamp = get_final_genesis_timestamp(
+            plan,
+            CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME,
         )
 
-    el_cl_genesis_config_template = read_file(
-        static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
-    )
+        # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants
+        total_number_of_validator_keys = network_params.preregistered_validator_count
 
-    el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
-        plan,
-        ethereum_genesis_generator_image,
-        el_cl_genesis_config_template,
-        final_genesis_timestamp,
-        network_params.network_id,
-        network_params.deposit_contract_address,
-        network_params.seconds_per_slot,
-        network_params.preregistered_validator_keys_mnemonic,
-        total_number_of_validator_keys,
-        network_params.genesis_delay,
-        network_params.max_churn,
-        network_params.ejection_balance,
-        network_params.eth1_follow_distance,
-        network_params.capella_fork_epoch,
-        network_params.deneb_fork_epoch,
-        network_params.electra_fork_epoch,
-    )
+        if network_params.preregistered_validator_count == 0:
+            for participant in participants:
+                total_number_of_validator_keys += participant.validator_count
+
+        plan.print("Generating EL CL data")
+        # we are running bellatrix genesis (deprecated) - will be removed in the future
+        if (
+            network_params.capella_fork_epoch > 0
+            and network_params.electra_fork_epoch == None
+        ):
+            ethereum_genesis_generator_image = (
+                "ethpandaops/ethereum-genesis-generator:1.3.15"
+            )
+        # we are running capella genesis - default behavior
+        elif (
+            network_params.capella_fork_epoch == 0
+            and network_params.electra_fork_epoch == None
+        ):
+            ethereum_genesis_generator_image = (
+                "ethpandaops/ethereum-genesis-generator:2.0.8"
+            )
+        # we are running electra - experimental
+        elif network_params.electra_fork_epoch != None:
+            if network_params.electra_fork_epoch == 0:
+                ethereum_genesis_generator_image = (
+                    "ethpandaops/ethereum-genesis-generator:4.0.0-rc.3"
+                )
+            else:
+                ethereum_genesis_generator_image = (
+                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.18"
+                )
+        else:
+            fail(
+                "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+            )
+
+        el_cl_genesis_config_template = read_file(
+            static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
+        )
+
+        el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
+            plan,
+            ethereum_genesis_generator_image,
+            el_cl_genesis_config_template,
+            final_genesis_timestamp,
+            network_params.network_id,
+            network_params.deposit_contract_address,
+            network_params.seconds_per_slot,
+            network_params.preregistered_validator_keys_mnemonic,
+            total_number_of_validator_keys,
+            network_params.genesis_delay,
+            network_params.max_churn,
+            network_params.ejection_balance,
+            network_params.eth1_follow_distance,
+            network_params.capella_fork_epoch,
+            network_params.deneb_fork_epoch,
+            network_params.electra_fork_epoch,
+        )
+    elif network_params.network in constants.PUBLIC_NETWORKS:
+        # We are running a public network
+        dummy = plan.run_sh(
+            run="mkdir /network-configs",
+            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
+        )
+        el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
+            dummy.files_artifacts[0],
+            constants.GENESIS_VALIDATORS_ROOT[network_params.network],
+        )
+        final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
+        validator_data = None
+    else:
+        # We are running a devnet
+        url = calculate_devnet_url(network_params.network)
+        el_cl_genesis_uuid = plan.upload_files(
+            src=url,
+            name="el_cl_genesis",
+        )
+        el_cl_genesis_data_uuid = plan.run_sh(
+            run="mkdir -p /network-configs/ && mv /opt/* /network-configs/",
+            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
+            files={"/opt": el_cl_genesis_uuid},
+        )
+        genesis_validators_root = read_file(url + "/genesis_validators_root.txt")
+        el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
+            el_cl_genesis_data_uuid.files_artifacts[0],
+            genesis_validators_root,
+        )
+        final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
+            plan, el_cl_genesis_uuid
+        )
+        validator_data = None
 
     el_launchers = {
         constants.EL_CLIENT_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
-                network_params.network_id,
                 el_cl_data,
+                jwt_file,
+                network_params.network,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -154,8 +198,9 @@ def launch_participant_network(
         },
         constants.EL_CLIENT_TYPE.gethbuilder: {
             "launcher": geth.new_geth_launcher(
-                network_params.network_id,
                 el_cl_data,
+                jwt_file,
+                network_params.network,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -163,25 +208,43 @@ def launch_participant_network(
             "launch_method": geth.launch,
         },
         constants.EL_CLIENT_TYPE.besu: {
-            "launcher": besu.new_besu_launcher(network_params.network_id, el_cl_data),
+            "launcher": besu.new_besu_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
             "launch_method": besu.launch,
         },
         constants.EL_CLIENT_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
-                network_params.network_id, el_cl_data
+                el_cl_data,
+                jwt_file,
+                network_params.network,
             ),
             "launch_method": erigon.launch,
         },
         constants.EL_CLIENT_TYPE.nethermind: {
-            "launcher": nethermind.new_nethermind_launcher(el_cl_data),
+            "launcher": nethermind.new_nethermind_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
             "launch_method": nethermind.launch,
         },
         constants.EL_CLIENT_TYPE.reth: {
-            "launcher": reth.new_reth_launcher(el_cl_data),
+            "launcher": reth.new_reth_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
             "launch_method": reth.launch,
         },
         constants.EL_CLIENT_TYPE.ethereumjs: {
-            "launcher": ethereumjs.new_ethereumjs_launcher(el_cl_data),
+            "launcher": ethereumjs.new_ethereumjs_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
             "launch_method": ethereumjs.launch,
         },
     }
@@ -239,30 +302,51 @@ def launch_participant_network(
     plan.print("Successfully added {0} EL participants".format(num_participants))
 
     plan.print("Launching CL network")
-
+    prysm_password_relative_filepath = (
+        validator_data.prysm_password_relative_filepath
+        if network_params.network == "kurtosis"
+        else None
+    )
+    prysm_password_artifact_uuid = (
+        validator_data.prysm_password_artifact_uuid
+        if network_params.network == "kurtosis"
+        else None
+    )
     cl_launchers = {
         constants.CL_CLIENT_TYPE.lighthouse: {
-            "launcher": lighthouse.new_lighthouse_launcher(el_cl_data),
+            "launcher": lighthouse.new_lighthouse_launcher(
+                el_cl_data, jwt_file, network_params.network
+            ),
             "launch_method": lighthouse.launch,
         },
         constants.CL_CLIENT_TYPE.lodestar: {
-            "launcher": lodestar.new_lodestar_launcher(el_cl_data),
+            "launcher": lodestar.new_lodestar_launcher(
+                el_cl_data, jwt_file, network_params.network
+            ),
             "launch_method": lodestar.launch,
         },
         constants.CL_CLIENT_TYPE.nimbus: {
-            "launcher": nimbus.new_nimbus_launcher(el_cl_data),
+            "launcher": nimbus.new_nimbus_launcher(
+                el_cl_data, jwt_file, network_params.network
+            ),
             "launch_method": nimbus.launch,
         },
         constants.CL_CLIENT_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
-                validator_data.prysm_password_relative_filepath,
-                validator_data.prysm_password_artifact_uuid,
+                jwt_file,
+                network_params.network,
+                prysm_password_relative_filepath,
+                prysm_password_artifact_uuid,
             ),
             "launch_method": prysm.launch,
         },
         constants.CL_CLIENT_TYPE.teku: {
-            "launcher": teku.new_teku_launcher(el_cl_data),
+            "launcher": teku.new_teku_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
             "launch_method": teku.launch,
         },
     }
@@ -270,7 +354,11 @@ def launch_participant_network(
     all_snooper_engine_contexts = []
     all_cl_client_contexts = []
     all_ethereum_metrics_exporter_contexts = []
-    preregistered_validator_keys_for_nodes = validator_data.per_node_keystores
+    preregistered_validator_keys_for_nodes = (
+        validator_data.per_node_keystores
+        if network_params.network == "kurtosis"
+        else None
+    )
 
     for index, participant in enumerate(participants):
         cl_client_type = participant.cl_client_type
@@ -452,10 +540,6 @@ def launch_participant_network(
     )
 
 
-def zfill_custom(value, width):
-    return ("0" * (width - len(str(value)))) + str(value)
-
-
 # this is a python procedure so that Kurtosis can do idempotent runs
 # time.now() runs everytime bringing non determinism
 # note that the timestamp it returns is a string
@@ -471,3 +555,15 @@ print(int(time.time()+padding), end="")
         store=[StoreSpec(src="/tmp", name="final-genesis-timestamp")],
     )
     return result.output
+
+
+def calculate_devnet_url(network):
+    network_parts = network.split("-devnet-", 1)
+    devnet_name, devnet_number = network_parts[0], network_parts[1]
+    devnet_category = devnet_name.split("-")[0]
+    devnet_subname = (
+        devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
+    )
+    return "github.com/ethpandaops/{0}-devnets/network-configs/{1}devnet-{2}".format(
+        devnet_category, devnet_subname, devnet_number
+    )

@@ -65,7 +65,10 @@ def input_parser(plan, input_args):
     # add default eth2 input params
     result["mev_type"] = None
     result["mev_params"] = get_default_mev_params()
-    result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
+    if result["network_params"]["network"] == "kurtosis":
+        result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
+    else:
+        result["additional_services"] = []
     result["grafana_additional_dashboards"] = []
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
@@ -191,6 +194,7 @@ def input_parser(plan, input_args):
             capella_fork_epoch=result["network_params"]["capella_fork_epoch"],
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
+            network=result["network_params"]["network"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -370,10 +374,14 @@ def parse_network_params(input_args):
             "deposit_contract_address is empty or spaces it needs to be of non zero length"
         )
 
-    if result["network_params"]["preregistered_validator_keys_mnemonic"].strip() == "":
-        fail(
-            "preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length"
-        )
+    if result["network_params"]["network"] == "kurtosis":
+        if (
+            result["network_params"]["preregistered_validator_keys_mnemonic"].strip()
+            == ""
+        ):
+            fail(
+                "preregistered_validator_keys_mnemonic is empty or spaces it needs to be of non zero length"
+            )
 
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
@@ -391,12 +399,17 @@ def parse_network_params(input_args):
     ):
         fail("electra can only happen with capella genesis not bellatrix")
 
-    if MIN_VALIDATORS > actual_num_validators:
-        fail(
-            "We require at least {0} validators but got {1}".format(
-                MIN_VALIDATORS, actual_num_validators
+    if result["network_params"]["network"] == "kurtosis":
+        if MIN_VALIDATORS > actual_num_validators:
+            fail(
+                "We require at least {0} validators but got {1}".format(
+                    MIN_VALIDATORS, actual_num_validators
+                )
             )
-        )
+    else:
+        # Don't allow validators on non-kurtosis networks
+        for participant in result["participants"]:
+            participant["validator_count"] = 0
 
     return result
 
@@ -447,6 +460,7 @@ def default_network_params():
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 500,
         "electra_fork_epoch": None,
+        "network": "kurtosis",
     }
 
 
