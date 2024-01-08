@@ -340,8 +340,8 @@ grafana_additional_dashboards: []
 # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
 # Note this requires Kurtosis greater than 0.85.49 to work
 # Note Erigon, Besu, Teku persistence is not currently supported with docker.
-# Defaults to False
-persistent: False
+# Defaults to false
+persistent: false
 
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
