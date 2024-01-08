@@ -151,7 +151,8 @@ def launch(
 
     # Holesky has a bigger memory footprint, so it needs more memory
     if launcher.network == "holesky":
-        BEACON_MAX_MEMORY = 4096
+        holesky_beacon_memory_limit = 4096
+        bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
 
     bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
     bn_max_cpu = int(bn_max_cpu) if int(bn_max_cpu) > 0 else BEACON_MAX_CPU
