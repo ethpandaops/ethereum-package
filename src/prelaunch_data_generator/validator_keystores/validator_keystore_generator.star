@@ -227,14 +227,14 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
             generation_finished_filepath,
         )
         teku_permissions_cmd = (
-            "chmod 777 -R " + output_dirpath + "/" + TEKU_KEYS_DIRNAME
+            " && chmod 777 -R " + output_dirpath + "/" + TEKU_KEYS_DIRNAME
         )
         raw_secret_permissions_cmd = (
-            "chmod 0600 -R " + output_dirpath + "/" + RAW_SECRETS_DIRNAME
+            " && chmod 0600 -R " + output_dirpath + "/" + RAW_SECRETS_DIRNAME
         )
+        generate_keystores_cmd += teku_permissions_cmd
+        generate_keystores_cmd += raw_secret_permissions_cmd
         all_generation_commands.append(generate_keystores_cmd)
-        all_generation_commands.append(teku_permissions_cmd)
-        all_generation_commands.append(raw_secret_permissions_cmd)
         all_output_dirpaths.append(output_dirpath)
 
     # spin up all jobs
