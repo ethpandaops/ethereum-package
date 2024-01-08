@@ -21,7 +21,7 @@ BEACON_METRICS_PORT_NUM = 8008
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 50
 BEACON_MAX_CPU = 1000
-BEACON_MIN_MEMORY = 128
+BEACON_MIN_MEMORY = 256
 BEACON_MAX_MEMORY = 1024
 
 DEFAULT_BEACON_IMAGE_ENTRYPOINT = ["nimbus_beacon_node"]
@@ -148,6 +148,13 @@ def launch(
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, NIMBUS_LOG_LEVELS
     )
+
+    # Holesky has a bigger memory footprint, so it needs more memory
+    if launcher.network == "holesky":
+        holesky_beacon_memory_limit = 4096
+        bn_max_mem = (
+            int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
+        )
 
     bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
     bn_max_cpu = int(bn_max_cpu) if int(bn_max_cpu) > 0 else BEACON_MAX_CPU
