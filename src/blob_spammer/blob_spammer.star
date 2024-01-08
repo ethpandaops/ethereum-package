@@ -6,8 +6,8 @@ ENTRYPOINT_ARGS = ["/bin/sh", "-c"]
 # The min/max CPU/memory that blob-spammer can use
 MIN_CPU = 100
 MAX_CPU = 1000
-MIN_MEMORY = 20
-MAX_MEMORY = 300
+MIN_MEMORY = 256
+MAX_MEMORY = 512
 
 
 def launch_blob_spammer(

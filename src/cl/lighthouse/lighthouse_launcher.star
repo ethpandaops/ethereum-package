@@ -3,20 +3,17 @@ input_parser = import_module("../../package_io/input_parser.star")
 cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
-
 constants = import_module("../../package_io/constants.star")
 
 blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 
 LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
 
-VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
-
 RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
 RUST_FULL_BACKTRACE_KEYWORD = "full"
 
 #  ---------------------------------- Beacon client -------------------------------------
-CONSENSUS_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/consensus-data"
+BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/lighthouse/beacon-data"
 
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -36,6 +33,7 @@ BEACON_MIN_MEMORY = 256
 BEACON_MAX_MEMORY = 1024
 
 #  ---------------------------------- Validator client -------------------------------------
+VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/lighthouse/validator-keys"
 VALIDATOR_HTTP_PORT_ID = "http"
 VALIDATOR_METRICS_PORT_ID = "metrics"
 VALIDATOR_HTTP_PORT_NUM = 5042
@@ -121,10 +119,11 @@ def launch(
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    persistent,
     split_mode_enabled=False,
 ):
-    beacon_node_service_name = "{0}".format(service_name)
-    validator_node_service_name = "{0}-{1}".format(
+    beacon_service_name = "{0}".format(service_name)
+    validator_service_name = "{0}-{1}".format(
         service_name, VALIDATOR_SUFFIX_SERVICE_NAME
     )
 
@@ -139,8 +138,12 @@ def launch(
 
     # Launch Beacon node
     beacon_config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
+        beacon_service_name,
         bootnode_contexts,
         el_client_context,
         log_level,
@@ -152,9 +155,10 @@ def launch(
         snooper_engine_context,
         extra_beacon_params,
         extra_beacon_labels,
+        persistent,
     )
 
-    beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
+    beacon_service = plan.add_service(beacon_service_name, beacon_config)
     beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(
         beacon_service.ip_address, beacon_http_port.number
@@ -162,7 +166,7 @@ def launch(
 
     # Blobber config
     if blobber_enabled:
-        blobber_service_name = "{0}-{1}".format("blobber", beacon_node_service_name)
+        blobber_service_name = "{0}-{1}".format("blobber", beacon_service_name)
         blobber_config = blobber_launcher.get_config(
             blobber_service_name,
             node_keystore_files,
@@ -190,6 +194,7 @@ def launch(
         validator_config = get_validator_config(
             launcher.el_cl_genesis_data,
             image,
+            validator_service_name,
             log_level,
             beacon_http_url,
             el_client_context,
@@ -198,14 +203,12 @@ def launch(
             v_max_cpu,
             v_min_mem,
             v_max_mem,
-            validator_node_service_name,
             extra_validator_params,
             extra_validator_labels,
+            persistent,
         )
 
-        validator_service = plan.add_service(
-            validator_node_service_name, validator_config
-        )
+        validator_service = plan.add_service(validator_service_name, validator_config)
 
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
     beacon_node_identity_recipe = GetHttpRequestRecipe(
@@ -218,7 +221,7 @@ def launch(
         },
     )
     response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=beacon_node_service_name
+        recipe=beacon_node_identity_recipe, service_name=beacon_service_name
     )
     beacon_node_enr = response["extract.enr"]
     beacon_multiaddr = response["extract.multiaddr"]
@@ -229,7 +232,7 @@ def launch(
         beacon_service.ip_address, beacon_metrics_port.number
     )
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
-        beacon_node_service_name, METRICS_PATH, beacon_metrics_url
+        beacon_service_name, METRICS_PATH, beacon_metrics_url
     )
     nodes_metrics_info = [beacon_node_metrics_info]
 
@@ -239,7 +242,7 @@ def launch(
             validator_service.ip_address, validator_metrics_port.number
         )
         validator_node_metrics_info = node_metrics.new_node_metrics_info(
-            validator_node_service_name, METRICS_PATH, validator_metrics_url
+            validator_service_name, METRICS_PATH, validator_metrics_url
         )
         nodes_metrics_info.append(validator_node_metrics_info)
 
@@ -249,8 +252,8 @@ def launch(
         beacon_service.ip_address,
         BEACON_HTTP_PORT_NUM,
         nodes_metrics_info,
-        beacon_node_service_name,
-        validator_node_service_name,
+        beacon_service_name,
+        validator_service_name,
         beacon_multiaddr,
         beacon_peer_id,
         snooper_enabled,
@@ -262,8 +265,12 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
+    service_name,
     boot_cl_client_ctxs,
     el_client_context,
     log_level,
@@ -275,6 +282,7 @@ def get_beacon_config(
     snooper_engine_context,
     extra_params,
     extra_labels,
+    persistent,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -300,8 +308,7 @@ def get_beacon_config(
         LIGHTHOUSE_BINARY_COMMAND,
         "beacon_node",
         "--debug-level=" + log_level,
-        "--datadir=" + CONSENSUS_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+        "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
         "--disable-enr-auto-update",
         "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -322,7 +329,7 @@ def get_beacon_config(
         # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
         "--disable-packet-filter",
         "--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secrets=" + constants.JWT_AUTH_PATH,
+        "--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Paris' recommendation to reduce noise in the logs
         "--subscribe-all-subnets",
@@ -334,20 +341,37 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
-    if boot_cl_client_ctxs != None:
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
+    else:
+        cmd.append("--network=" + network)
+        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
+
+    if network == "kurtosis":
+        if boot_cl_client_ctxs != None:
+            cmd.append(
+                "--boot-nodes="
+                + ",".join(
+                    [
+                        ctx.enr
+                        for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
+                    ]
+                )
+            )
+            cmd.append(
+                "--trusted-peers="
+                + ",".join(
+                    [
+                        ctx.peer_id
+                        for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--boot-nodes="
-            + ",".join(
-                [ctx.enr for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]]
-            )
-        )
-        cmd.append(
-            "--trusted-peers="
-            + ",".join(
-                [
-                    ctx.peer_id
-                    for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enrs_list(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -358,14 +382,20 @@ def get_beacon_config(
     recipe = GetHttpRequestRecipe(
         endpoint="/eth/v1/node/identity", port_id=BEACON_HTTP_PORT_ID
     )
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+    }
 
+    if persistent:
+        files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+        )
     return ServiceConfig(
         image=image,
         ports=BEACON_USED_PORTS,
         cmd=cmd,
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
-        },
+        files=files,
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
@@ -388,6 +418,7 @@ def get_beacon_config(
 def get_validator_config(
     el_cl_genesis_data,
     image,
+    service_name,
     log_level,
     beacon_client_http_url,
     el_client_context,
@@ -396,9 +427,9 @@ def get_validator_config(
     v_max_cpu,
     v_min_mem,
     v_max_mem,
-    validator_node_service_name,
     extra_params,
     extra_labels,
+    persistent,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
@@ -442,14 +473,16 @@ def get_validator_config(
     if len(extra_params):
         cmd.extend([param for param in extra_params])
 
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
+    }
+
     return ServiceConfig(
         image=image,
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
-        },
+        files=files,
         env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
         min_cpu=v_min_cpu,
         max_cpu=v_max_cpu,
@@ -465,7 +498,9 @@ def get_validator_config(
     )
 
 
-def new_lighthouse_launcher(el_cl_genesis_data):
+def new_lighthouse_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
     )

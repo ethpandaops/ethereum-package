@@ -36,7 +36,7 @@ NUM_MINING_THREADS = 1
 METRICS_PATH = "/debug/metrics/prometheus"
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
@@ -86,6 +86,7 @@ def launch(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -98,9 +99,12 @@ def launch(
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
-        launcher.network_id,
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
+        service_name,
         existing_el_clients,
         cl_client_name,
         log_level,
@@ -114,6 +118,7 @@ def launch(
         launcher.capella_fork_epoch,
         launcher.electra_fork_epoch,
         launcher.final_genesis_timestamp,
+        persistent,
     )
 
     service = plan.add_service(service_name, config)
@@ -141,9 +146,12 @@ def launch(
 
 
 def get_config(
-    network_id,
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
+    service_name,
     existing_el_clients,
     cl_client_name,
     verbosity_level,
@@ -157,10 +165,11 @@ def get_config(
     capella_fork_epoch,
     electra_fork_epoch,
     final_genesis_timestamp,
+    persistent,
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
-    if electra_fork_epoch != None:
-        if electra_fork_epoch == 0:  # verkle-gen
+    if electra_fork_epoch != None or "verkle" in network:
+        if electra_fork_epoch == 0 or "verkle-gen" in network:  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
                 final_genesis_timestamp,
@@ -192,21 +201,28 @@ def get_config(
         "{0}".format(
             "--state.scheme=path"
             if electra_fork_epoch == None
+            and "verkle" not in network
             and "--builder" not in extra_params
             and capella_fork_epoch == 0
             else ""
         ),
         # Override prague fork timestamp for electra fork
-        "{0}".format("--cache.preimages" if electra_fork_epoch != None else ""),
+        "{0}".format(
+            "--cache.preimages"
+            if electra_fork_epoch != None or "verkle" in network
+            else ""
+        ),
         # Override prague fork timestamp if electra_fork_epoch == 0
         "{0}".format(
             "--override.prague=" + final_genesis_timestamp
-            if electra_fork_epoch == 0
+            if electra_fork_epoch == 0 or "verkle-gen" in network
             else ""
+        ),
+        "{0}".format(
+            "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
         ),
         "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--networkid=" + network_id,
         "--http",
         "--http.addr=0.0.0.0",
         "--http.vhosts=*",
@@ -225,7 +241,7 @@ def get_config(
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret=" + constants.JWT_AUTH_PATH,
+        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full",
         "--rpc.allow-unprotected-txs",
         "--metrics",
@@ -240,14 +256,22 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,mev,flashbots"
 
-    if len(existing_el_clients) > 0:
+    if network == "kurtosis":
+        if len(existing_el_clients) > 0:
+            cmd.append(
+                "--bootnodes="
+                + ",".join(
+                    [
+                        ctx.enode
+                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootnodes="
-            + ",".join(
-                [
-                    ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enodes(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -256,20 +280,28 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     cmd_str = " ".join(cmd)
+    if network not in constants.PUBLIC_NETWORKS:
+        subcommand_strs = [
+            init_datadir_cmd_str,
+            cmd_str,
+        ]
+        command_str = " && ".join(subcommand_strs)
+    else:
+        command_str = cmd_str
 
-    subcommand_strs = [
-        init_datadir_cmd_str,
-        cmd_str,
-    ]
-    command_str = " && ".join(subcommand_strs)
-
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+    }
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+        )
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
         cmd=[command_str],
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid
-        },
+        files=files,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
@@ -288,15 +320,17 @@ def get_config(
 
 
 def new_geth_launcher(
-    network_id,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     final_genesis_timestamp,
     capella_fork_epoch,
     electra_fork_epoch=None,
 ):
     return struct(
-        network_id=network_id,
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
         final_genesis_timestamp=final_genesis_timestamp,
         capella_fork_epoch=capella_fork_epoch,
         electra_fork_epoch=electra_fork_epoch,

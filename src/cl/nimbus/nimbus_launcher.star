@@ -51,7 +51,7 @@ VALIDATOR_METRICS_PATH = "/metrics"
 
 # Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
 #  have to to create it
-CONSENSUS_DATA_DIRPATH_IN_SERVICE_CONTAINER = "$HOME/consensus-data"
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/nimbus/beacon-data"
 # Nimbus wants the data dir to have these perms
 CONSENSUS_DATA_DIR_PERMS_STR = "0700"
 
@@ -137,10 +137,11 @@ def launch(
     extra_validator_params,
     extra_beacon_labels,
     extra_validator_labels,
+    persistent,
     split_mode_enabled,
 ):
-    beacon_node_service_name = "{0}".format(service_name)
-    validator_node_service_name = "{0}-{1}".format(
+    beacon_service_name = "{0}".format(service_name)
+    validator_service_name = "{0}-{1}".format(
         service_name, VALIDATOR_SUFFIX_SERVICE_NAME
     )
 
@@ -154,8 +155,12 @@ def launch(
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
     beacon_config = get_beacon_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
+        beacon_service_name,
         bootnode_contexts,
         el_client_context,
         log_level,
@@ -164,15 +169,15 @@ def launch(
         bn_max_cpu,
         bn_min_mem,
         bn_max_mem,
-        beacon_node_service_name,
         snooper_enabled,
         snooper_engine_context,
         extra_beacon_params,
         extra_beacon_labels,
         split_mode_enabled,
+        persistent,
     )
 
-    beacon_service = plan.add_service(beacon_node_service_name, beacon_config)
+    beacon_service = plan.add_service(beacon_service_name, beacon_config)
     beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
     beacon_metrics_port = beacon_service.ports[BEACON_METRICS_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(
@@ -214,6 +219,7 @@ def launch(
         validator_config = get_validator_config(
             launcher.el_cl_genesis_data,
             image,
+            validator_service_name,
             log_level,
             beacon_http_url,
             el_client_context,
@@ -222,14 +228,12 @@ def launch(
             v_max_cpu,
             v_min_mem,
             v_max_mem,
-            validator_node_service_name,
             extra_validator_params,
             extra_validator_labels,
+            persistent,
         )
 
-        validator_service = plan.add_service(
-            validator_node_service_name, validator_config
-        )
+        validator_service = plan.add_service(validator_service_name, validator_config)
 
     if validator_service:
         validator_metrics_port = validator_service.ports[VALIDATOR_METRICS_PORT_ID]
@@ -237,7 +241,7 @@ def launch(
             validator_service.ip_address, validator_metrics_port.number
         )
         validator_node_metrics_info = node_metrics.new_node_metrics_info(
-            validator_node_service_name, VALIDATOR_METRICS_PATH, validator_metrics_url
+            validator_service_name, VALIDATOR_METRICS_PATH, validator_metrics_url
         )
         nodes_metrics_info.append(validator_node_metrics_info)
 
@@ -247,8 +251,8 @@ def launch(
         beacon_service.ip_address,
         BEACON_HTTP_PORT_NUM,
         nodes_metrics_info,
-        beacon_node_service_name,
-        validator_node_service_name,
+        beacon_service_name,
+        validator_service_name,
         beacon_multiaddr,
         beacon_peer_id,
         snooper_enabled,
@@ -260,8 +264,12 @@ def launch(
 
 
 def get_beacon_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
+    service_name,
     bootnode_contexts,
     el_client_context,
     log_level,
@@ -270,12 +278,12 @@ def get_beacon_config(
     bn_max_cpu,
     bn_min_mem,
     bn_max_mem,
-    beacon_node_service_name,
     snooper_enabled,
     snooper_engine_context,
     extra_params,
     extra_labels,
     split_mode_enabled,
+    persistent,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -305,8 +313,12 @@ def get_beacon_config(
         "--log-level=" + log_level,
         "--udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--network=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
-        "--data-dir=" + CONSENSUS_DATA_DIRPATH_IN_SERVICE_CONTAINER,
+        "--network={0}".format(
+            network
+            if network in constants.PUBLIC_NETWORKS
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        ),
+        "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
         "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--enr-auto-update=false",
@@ -323,7 +335,7 @@ def get_beacon_config(
         "--subscribe-all-subnets=true",
         # Nimbus can handle a max of 256 threads, if the host has more then nimbus crashes. Setting it to 4 so it doesn't crash on build servers
         "--num-threads=4",
-        "--jwt-secret=" + constants.JWT_AUTH_PATH,
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
@@ -344,25 +356,37 @@ def get_beacon_config(
     if node_keystore_files != None and not split_mode_enabled:
         cmd.extend(validator_flags)
 
-    if bootnode_contexts == None:
-        # Copied from https://github.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
-        # See explanation there
-        cmd.append("--subscribe-all-subnets")
-    else:
-        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
-            cmd.append("--bootstrap-node=" + ctx.enr)
-            cmd.append("--direct-peer=" + ctx.multiaddr)
+    if network == "kurtosis":
+        if bootnode_contexts == None:
+            # Copied from https://github.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
+            # See explanation there
+            cmd.append("--subscribe-all-subnets")
+        else:
+            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
+                cmd.append("--bootstrap-node=" + ctx.enr)
+                cmd.append("--direct-peer=" + ctx.multiaddr)
+    elif network not in constants.PUBLIC_NETWORKS:
+        cmd.append(
+            "--bootstrap-node="
+            + shared_utils.get_devnet_enr(plan, el_cl_genesis_data.files_artifact_uuid)
+        )
 
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
     if node_keystore_files != None and not split_mode_enabled:
         files[
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS
         ] = node_keystore_files.files_artifact_uuid
+
+    if persistent:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name)
+        )
 
     return ServiceConfig(
         image=image,
@@ -390,6 +414,7 @@ def get_beacon_config(
 def get_validator_config(
     el_cl_genesis_data,
     image,
+    service_name,
     log_level,
     beacon_http_url,
     el_client_context,
@@ -398,9 +423,9 @@ def get_validator_config(
     v_max_cpu,
     v_min_mem,
     v_max_mem,
-    validator_node_service_name,
     extra_params,
     extra_labels,
+    persistent,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -432,14 +457,16 @@ def get_validator_config(
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params if param != "--split=true"])
 
+    files = {
+        VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
+    }
+
     return ServiceConfig(
         image=image,
         ports=VALIDATOR_USED_PORTS,
         cmd=cmd,
         entrypoint=DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT,
-        files={
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid
-        },
+        files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=v_min_cpu,
         max_cpu=v_max_cpu,
@@ -455,7 +482,9 @@ def get_validator_config(
     )
 
 
-def new_nimbus_launcher(el_cl_genesis_data):
+def new_nimbus_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
     )

@@ -4,6 +4,8 @@
 
 This is a [Kurtosis][kurtosis-repo] package that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
+You now have the ability to spin up a private Ethereum testnet or public devnet/testnet (e.g. Goerli, Holesky, Sepolia, dencun-devnet-12, verkle-gen-devnet-2 etc) with a single command. This package is designed to be used for testing, validation, and development of Ethereum clients, and is not intended for production use. For more details check network_params.network in the [configuration section](./README.md#configuration).
+
 Specifically, this [package][package-reference] will:
 
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
@@ -248,6 +250,8 @@ network_params:
   # This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
   # validator keys already preregistered as validators
   preregistered_validator_keys_mnemonic: "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete"
+  # The number of pre-registered validators for genesis. If 0 or not specified then the value will be calculated from the participants
+  preregistered_validator_count: 0
   # How long you want the network to wait before starting up
   genesis_delay: 120
 
@@ -261,10 +265,20 @@ network_params:
   # 16000000000 gwei
   ejection_balance: 16000000000,
 
+  # ETH1 follow distance
+  # Defaults to 2048
+  eth1_follow_distance: 2048
+
   # The epoch at which the capella and deneb forks are set to occur.
   capella_fork_epoch: 0
   deneb_fork_epoch: 500
   electra_fork_epoch: null
+
+  # Network name, used to enable syncing of alternative networks
+  # Defaults to "kurtosis"
+  # You can sync any public network by setting this to the network name (e.g. "mainnet", "goerli", "sepolia", "holesky")
+  # You can sync any devnet by setting this to the network name (e.g. "dencun-devnet-12", "verkle-gen-devnet-2")
+  network: "kurtosis"
 
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
@@ -325,6 +339,7 @@ grafana_additional_dashboards: []
 
 # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
 # Note this requires Kurtosis greater than 0.85.49 to work
+# Note Erigon, Besu, Teku persistence is not currently supported with docker.
 # Defaults to False
 persistent: False
 

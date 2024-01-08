@@ -1,5 +1,43 @@
 # Changelog
 
+## [1.2.0](https://github.com/kurtosis-tech/ethereum-package/compare/1.1.0...1.2.0) (2024-01-03)
+
+
+### Features
+
+* add blobber ([#401](https://github.com/kurtosis-tech/ethereum-package/issues/401)) ([d2755b0](https://github.com/kurtosis-tech/ethereum-package/commit/d2755b011da5199273b9719395132f98c0c9d57d))
+* add files artifact uuid information to cl client context ([#418](https://github.com/kurtosis-tech/ethereum-package/issues/418)) ([806ef47](https://github.com/kurtosis-tech/ethereum-package/commit/806ef47aefc4e22f79b6a96ad941b72ac5d5c099))
+* add graffiti ([#408](https://github.com/kurtosis-tech/ethereum-package/issues/408)) ([21eae3b](https://github.com/kurtosis-tech/ethereum-package/commit/21eae3b58a607c3897943d692bbc62229eb534ca))
+* add nethermind verkle example file ([#379](https://github.com/kurtosis-tech/ethereum-package/issues/379)) ([244d1ee](https://github.com/kurtosis-tech/ethereum-package/commit/244d1ee981d64b10ae73ef302fefb854d1580d40))
+* add preregistered_validator_count network param field ([#426](https://github.com/kurtosis-tech/ethereum-package/issues/426)) ([d598018](https://github.com/kurtosis-tech/ethereum-package/commit/d598018afda5824cf6c365f23426a518ec83fe9a))
+* add prysm latency dashboard ([#397](https://github.com/kurtosis-tech/ethereum-package/issues/397)) ([83b5b4e](https://github.com/kurtosis-tech/ethereum-package/commit/83b5b4e93d3e8579ef66b18f97dca46b83fcb72c))
+* add resource requests/limits to most applications ([#396](https://github.com/kurtosis-tech/ethereum-package/issues/396)) ([c5728d9](https://github.com/kurtosis-tech/ethereum-package/commit/c5728d980f76be66bfb9ba3bbf275dbcaf5c5beb))
+* allow 0 genesis delay ([#383](https://github.com/kurtosis-tech/ethereum-package/issues/383)) ([11c2693](https://github.com/kurtosis-tech/ethereum-package/commit/11c26939c53a6db0d8816254f6b7ac535535e754))
+* enable teku split beacon &lt;&gt; validator setup ([#409](https://github.com/kurtosis-tech/ethereum-package/issues/409)) ([51f76bd](https://github.com/kurtosis-tech/ethereum-package/commit/51f76bd109036def06a5ad55cb72d9ab18a3b869))
+* make eth1 follow distance configurable ([#433](https://github.com/kurtosis-tech/ethereum-package/issues/433)) ([a40f7dc](https://github.com/kurtosis-tech/ethereum-package/commit/a40f7dc83a610d96aa61ded96bbfe689c467748a))
+* split nimbus CL-validator ([#404](https://github.com/kurtosis-tech/ethereum-package/issues/404)) ([cb33648](https://github.com/kurtosis-tech/ethereum-package/commit/cb33648d3df801bffac18a46ff84fec808956586))
+* update ethereum-genesis-generator images ([#385](https://github.com/kurtosis-tech/ethereum-package/issues/385)) ([8959fc8](https://github.com/kurtosis-tech/ethereum-package/commit/8959fc80786c04200aecabcbbd426e47ead24ae4))
+* use prometheus kurtosis package ([#399](https://github.com/kurtosis-tech/ethereum-package/issues/399)) ([c41a989](https://github.com/kurtosis-tech/ethereum-package/commit/c41a989e95f0c5bcb96987ef55fb673330132b6b))
+
+
+### Bug Fixes
+
+* ci was broken as it was using the wrong storage class for k3s ([#420](https://github.com/kurtosis-tech/ethereum-package/issues/420)) ([f957f85](https://github.com/kurtosis-tech/ethereum-package/commit/f957f8518b28c6fc3da0fd62f63d96517f717a9a))
+* enable debug namespace in prysm ([#405](https://github.com/kurtosis-tech/ethereum-package/issues/405)) ([31badc2](https://github.com/kurtosis-tech/ethereum-package/commit/31badc238688fb409fba533fe8a237097c3577f4))
+* ethereum-genesis-generator version for verkle genesis ([#395](https://github.com/kurtosis-tech/ethereum-package/issues/395)) ([d7c9b92](https://github.com/kurtosis-tech/ethereum-package/commit/d7c9b92f09c0c1f602f88cc604e63c0992eda182))
+* fixing too long graffitis ([#410](https://github.com/kurtosis-tech/ethereum-package/issues/410)) ([a18935f](https://github.com/kurtosis-tech/ethereum-package/commit/a18935f52a44efaf00c9fb0fa104433018afb0c3))
+* increase memory for blob spammer to prevent container from getting OOM killed ([#431](https://github.com/kurtosis-tech/ethereum-package/issues/431)) ([4d4fac0](https://github.com/kurtosis-tech/ethereum-package/commit/4d4fac0cc0e6fa58aa314ce301f0cfcc20026bef))
+* mev workflow ([#434](https://github.com/kurtosis-tech/ethereum-package/issues/434)) ([91794e9](https://github.com/kurtosis-tech/ethereum-package/commit/91794e9fe2b7b08d50ee137a6b647479b9190d37))
+* mev-boost naming scheme change ([#428](https://github.com/kurtosis-tech/ethereum-package/issues/428)) ([fce899b](https://github.com/kurtosis-tech/ethereum-package/commit/fce899bec2796a8b54f5a331721839a752e7040c))
+* peering issue between lighthouse-teku on k8s ([#382](https://github.com/kurtosis-tech/ethereum-package/issues/382)) ([97a070b](https://github.com/kurtosis-tech/ethereum-package/commit/97a070b662e153404498dccb5b045f6e2ed510b0))
+* peering issue with prysm and nimbus ([#416](https://github.com/kurtosis-tech/ethereum-package/issues/416)) ([132fc83](https://github.com/kurtosis-tech/ethereum-package/commit/132fc835ff8966ef671e1ecb61fc68765e81a16f))
+* rename package icon for package catalog compatability ([#413](https://github.com/kurtosis-tech/ethereum-package/issues/413)) ([f49185b](https://github.com/kurtosis-tech/ethereum-package/commit/f49185b2a15be84e0ea8dc821ed39622dde104cc))
+* roll out persistence for postgres on ethereum-package ([#421](https://github.com/kurtosis-tech/ethereum-package/issues/421)) ([ed3982b](https://github.com/kurtosis-tech/ethereum-package/commit/ed3982b5630c0bfdeb022f9853373d34e1f270cf))
+* set persistence to false for blobscan ([#398](https://github.com/kurtosis-tech/ethereum-package/issues/398)) ([3c06194](https://github.com/kurtosis-tech/ethereum-package/commit/3c06194ca60b82b37d7a216fd6325100ebe72b0b))
+* tx-spammer extra args ([#394](https://github.com/kurtosis-tech/ethereum-package/issues/394)) ([709b4ad](https://github.com/kurtosis-tech/ethereum-package/commit/709b4adc75e5c6bb7d6977edb43b9e5438f2bc7c))
+* Update README.md remove teku coming soon ([#414](https://github.com/kurtosis-tech/ethereum-package/issues/414)) ([5a1ce2e](https://github.com/kurtosis-tech/ethereum-package/commit/5a1ce2e123353692614688cc4fae304bfe0a51e4))
+* validator counting ([#425](https://github.com/kurtosis-tech/ethereum-package/issues/425)) ([698305a](https://github.com/kurtosis-tech/ethereum-package/commit/698305ad45f6ff4e200abe8a77c43b09120a5ed6))
+
 ## [1.1.0](https://github.com/kurtosis-tech/ethereum-package/compare/1.0.0...1.1.0) (2023-11-30)
 
 

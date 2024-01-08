@@ -7,7 +7,7 @@ node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nethermind/execution-data"
 
 METRICS_PATH = "/metrics"
 
@@ -74,6 +74,7 @@ def launch(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, NETHERMIND_LOG_LEVELS
@@ -87,8 +88,12 @@ def launch(
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
+        plan,
         launcher.el_cl_genesis_data,
+        launcher.jwt_file,
+        launcher.network,
         image,
+        service_name,
         existing_el_clients,
         cl_client_name,
         log_level,
@@ -99,6 +104,7 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
+        persistent,
     )
 
     service = plan.add_service(service_name, config)
@@ -125,8 +131,12 @@ def launch(
 
 
 def get_config(
+    plan,
     el_cl_genesis_data,
+    jwt_file,
+    network,
     image,
+    service_name,
     existing_el_clients,
     cl_client_name,
     log_level,
@@ -137,16 +147,12 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
+    persistent,
 ):
     cmd = [
         "--log=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--Init.ChainSpecPath="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/chainspec.json",
         "--Init.WebSocketsEnabled=true",
-        "--Init.KzgSetupPath=" + constants.KZG_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--config=none.cfg",
         "--JsonRpc.Enabled=true",
         "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin",
         "--JsonRpc.Host=0.0.0.0",
@@ -157,20 +163,38 @@ def get_config(
         "--Network.ExternalIp={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--Network.DiscoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--Network.P2PPort={0}".format(DISCOVERY_PORT_NUM),
-        "--JsonRpc.JwtSecretFile=" + constants.JWT_AUTH_PATH,
+        "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--Network.OnlyStaticPeers=true",
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
     ]
 
-    if len(existing_el_clients) > 0:
+    if network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--config=none.cfg")
+        cmd.append(
+            "--Init.ChainSpecPath="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/chainspec.json"
+        )
+    else:
+        cmd.append("--config=" + network)
+
+    if network == "kurtosis":
+        if len(existing_el_clients) > 0:
+            cmd.append(
+                "--Network.StaticPeers="
+                + ",".join(
+                    [
+                        ctx.enode
+                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                    ]
+                )
+            )
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--Network.StaticPeers="
-            + ",".join(
-                [
-                    ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
+            + shared_utils.get_devnet_enodes(
+                plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
 
@@ -178,13 +202,21 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+    }
+
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+        )
+
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
         cmd=cmd,
-        files={
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        },
+        files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
@@ -201,5 +233,7 @@ def get_config(
     )
 
 
-def new_nethermind_launcher(el_cl_genesis_data):
-    return struct(el_cl_genesis_data=el_cl_genesis_data)
+def new_nethermind_launcher(el_cl_genesis_data, jwt_file, network):
+    return struct(
+        el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file, network=network
+    )
