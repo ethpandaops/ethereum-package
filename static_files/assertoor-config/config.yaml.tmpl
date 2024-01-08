@@ -31,25 +31,25 @@ globalVars:
 
 externalTests:
 {{ if .RunStabilityCheck }}
-- file: stability-check.yaml
+- file: /tests/stability-check.yaml
 {{ end }}
 
 {{ if .RunBlockProposalCheck }}
-- file: block-proposal-check.yaml
+- file: /tests/block-proposal-check.yaml
 {{ end }}
 
 {{ if .RunTransactionTest }}
-- file: eoa-transactions-test.yaml
+- file: /tests/eoa-transactions-test.yaml
 {{ end }}
 
 {{ if .RunBlobTransactionTest }}
-- file: blob-transactions-test.yaml
+- file: /tests/blob-transactions-test.yaml
 {{ end }}
 
 {{ if .RunOpcodesTransactionTest }}
-- file: all-opcodes-transaction-test.yaml
+- file: /tests/all-opcodes-transaction-test.yaml
 {{ end }}
 
 {{ if .RunLifecycleTest }}
-- file: validator-lifecycle-test.yaml
+- file: /tests/validator-lifecycle-test.yaml
 {{ end }}

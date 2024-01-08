@@ -1,4 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
+static_files = import_module("../static_files/static_files.star")
 constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "assertoor"
 
@@ -8,6 +9,7 @@ HTTP_PORT_NUMBER = 8080
 ASSERTOOR_CONFIG_FILENAME = "assertoor-config.yaml"
 
 ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
+ASSERTOOR_TESTS_MOUNT_DIRPATH_ON_SERVICE = "/tests"
 
 VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE = "/validator-ranges"
 VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
@@ -78,14 +80,20 @@ def launch_assertoor(
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "assertoor-config"
     )
+
+    tests_config_artifacts_name = plan.upload_files(
+        static_files.ASSERTOOR_TESTS_CONFIG_DIRPATH, name="assertoor-tests"
+    )
+
     config = get_config(
         config_files_artifact_name,
+        tests_config_artifacts_name,
     )
 
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(config_files_artifact_name):
+def get_config(config_files_artifact_name, tests_config_artifacts_name):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         ASSERTOOR_CONFIG_FILENAME,
@@ -98,6 +106,7 @@ def get_config(config_files_artifact_name):
         ports=USED_PORTS,
         files={
             ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+            ASSERTOOR_TESTS_MOUNT_DIRPATH_ON_SERVICE: tests_config_artifacts_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
         },
         cmd=["--config", config_file_path],

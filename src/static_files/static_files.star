@@ -22,8 +22,13 @@ FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/full-beaconchain-config/config.yaml.tmpl"
 )
 
+# assertoor config
+ASSERTOOR_CONFIG_DIRPATH = "/assertoor-config"
 ASSERTOOR_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/assertoor-config/config.yaml.tmpl"
+    STATIC_FILES_DIRPATH + ASSERTOOR_CONFIG_DIRPATH + "/config.yaml.tmpl"
+)
+ASSERTOOR_TESTS_CONFIG_DIRPATH = (
+    STATIC_FILES_DIRPATH + ASSERTOOR_CONFIG_DIRPATH + "/tests"
 )
 
 # Grafana config
