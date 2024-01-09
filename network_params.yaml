@@ -75,4 +75,4 @@ mev_params:
   mev_flood_extra_args: []
   mev_flood_seconds_per_bundle: 15
 grafana_additional_dashboards: []
-persistent: False
+persistent: false
