@@ -169,6 +169,7 @@ participants:
 
   # A list of optional extra params that will be passed to the CL to run separate Beacon and validator nodes
   # Only possible for nimbus or teku
+  # Please note that in order to get it to work with Nimbus, you have to use `ethpandaops/nimbus:unstable` as the image (default upstream image does not yet support this out of the box)
   # Defaults to false
   cl_split_mode_enabled: false
 
