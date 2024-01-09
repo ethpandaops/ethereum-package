@@ -177,6 +177,7 @@ def launch(
         extra_beacon_labels,
         split_mode_enabled,
         persistent,
+        cl_volume_size,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -289,6 +290,7 @@ def get_beacon_config(
     extra_labels,
     split_mode_enabled,
     persistent,
+    cl_volume_size,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -412,7 +414,8 @@ def get_beacon_config(
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name)
+            persistent_key="data-{0}".format(service_name),
+            size=cl_volume_size,
         )
     return ServiceConfig(
         image=image,
