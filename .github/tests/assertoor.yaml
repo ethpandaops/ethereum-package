@@ -1,0 +1,9 @@
+participants:
+  - el_client_type: geth
+    cl_client_type: lighthouse
+    count: 1
+  - el_client_type: geth
+    cl_client_type: lodestar
+    count: 1
+additional_services:
+  - assertoor
