@@ -7,6 +7,9 @@ node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
+# Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
+#  have to to create it
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/nimbus/beacon-data"
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
@@ -29,7 +32,7 @@ DEFAULT_BEACON_IMAGE_ENTRYPOINT = ["nimbus_beacon_node"]
 BEACON_METRICS_PATH = "/metrics"
 
 #  ---------------------------------- Validator client -------------------------------------
-VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
+VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/nimbus/validator-keys"
 VALIDATOR_HTTP_PORT_ID = "http"
 VALIDATOR_METRICS_PORT_ID = "metrics"
 VALIDATOR_HTTP_PORT_NUM = 5042
@@ -48,13 +51,6 @@ DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT = ["nimbus_validator_client"]
 
 VALIDATOR_METRICS_PATH = "/metrics"
 # ---------------------------------- Genesis Files ----------------------------------
-
-# Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
-#  have to to create it
-BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/nimbus/beacon-data"
-# Nimbus wants the data dir to have these perms
-CONSENSUS_DATA_DIR_PERMS_STR = "0700"
-
 
 # Nimbus needs write access to the validator keys/secrets directories, and b/c the module container runs as root
 #  while the Nimbus container does not, we can't just point the Nimbus binary to the paths in the shared dir because
@@ -431,6 +427,7 @@ def get_beacon_config(
             el_client_context.client_name,
             extra_labels,
         ),
+        user=User(uid=0, gid=0)
     )
 
 
