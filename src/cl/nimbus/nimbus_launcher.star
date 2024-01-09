@@ -165,7 +165,7 @@ def launch(
     network_name = (
         "devnets"
         if launcher.network != "kurtosis"
-        or launcher.network not in constants.PUBLIC_NETWORKS
+        and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
     cl_volume_size = (
