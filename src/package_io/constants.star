@@ -79,3 +79,84 @@ GENESIS_TIME = {
     "sepolia": 1655733600,
     "holesky": 1695902400,
 }
+
+VOLUME_SIZE = {
+    "mainnet": {
+        "geth_volume_size": 1000000,  # 1TB
+        "erigon_volume_size": 3000000,  # 3TB
+        "nethermind_volume_size": 1000000,  # 1TB
+        "besu_volume_size": 1000000,  # 1TB
+        "reth_volume_size": 3000000,  # 3TB
+        "ethereumjs_volume_size": 1000000,  # 1TB
+        "prysm_volume_size": 500000,  # 500GB
+        "lighthouse_volume_size": 500000,  # 500GB
+        "teku_volume_size": 500000,  # 500GB
+        "nimbus_volume_size": 500000,  # 500GB
+        "lodestar_volume_size": 500000,  # 500GB
+    },
+    "goerli": {
+        "geth_volume_size": 800000,  # 800GB
+        "erigon_volume_size": 1200000,  # 1200GB
+        "nethermind_volume_size": 800000,  # 800GB
+        "besu_volume_size": 800000,  # 800GB
+        "reth_volume_size": 1200000,  # 1200GB
+        "ethereumjs_volume_size": 800000,  # 800GB
+        "prysm_volume_size": 300000,  # 300GB
+        "lighthouse_volume_size": 300000,  # 300GB
+        "teku_volume_size": 300000,  # 300GB
+        "nimbus_volume_size": 300000,  # 300GB
+        "lodestar_volume_size": 300000,  # 300GB
+    },
+    "sepolia": {
+        "geth_volume_size": 300000,  # 300GB
+        "erigon_volume_size": 500000,  # 500GB
+        "nethermind_volume_size": 300000,  # 300GB
+        "besu_volume_size": 300000,  # 300GB
+        "reth_volume_size": 500000,  # 500GB
+        "ethereumjs_volume_size": 300000,  # 300GB
+        "prysm_volume_size": 150000,  # 150GB
+        "lighthouse_volume_size": 150000,  # 150GB
+        "teku_volume_size": 150000,  # 150GB
+        "nimbus_volume_size": 150000,  # 150GB
+        "lodestar_volume_size": 150000,  # 150GB
+    },
+    "holesky": {
+        "geth_volume_size": 100000,  # 100GB
+        "erigon_volume_size": 200000,  # 200GB
+        "nethermind_volume_size": 100000,  # 100GB
+        "besu_volume_size": 100000,  # 100GB
+        "reth_volume_size": 200000,  # 200GB
+        "ethereumjs_volume_size": 100000,  # 100GB
+        "prysm_volume_size": 100000,  # 100GB
+        "lighthouse_volume_size": 100000,  # 100GB
+        "teku_volume_size": 100000,  # 100GB
+        "nimbus_volume_size": 100000,  # 100GB
+        "lodestar_volume_size": 100000,  # 100GB
+    },
+    "devnets": {
+        "geth_volume_size": 100000,  # 100GB
+        "erigon_volume_size": 200000,  # 200GB
+        "nethermind_volume_size": 100000,  # 100GB
+        "besu_volume_size": 100000,  # 100GB
+        "reth_volume_size": 200000,  # 200GB
+        "ethereumjs_volume_size": 100000,  # 100GB
+        "prysm_volume_size": 100000,  # 100GB
+        "lighthouse_volume_size": 100000,  # 100GB
+        "teku_volume_size": 100000,  # 100GB
+        "nimbus_volume_size": 100000,  # 100GB
+        "lodestar_volume_size": 100000,  # 100GB
+    },
+    "kurtosis": {
+        "geth_volume_size": 3000,  # 3GB
+        "erigon_volume_size": 3000,  # 3GB
+        "nethermind_volume_size": 3000,  # 3GB
+        "besu_volume_size": 3000,  # 3GB
+        "reth_volume_size": 3000,  # 3GB
+        "ethereumjs_volume_size": 3000,  # 3GB
+        "prysm_volume_size": 1000,  # 1GB
+        "lighthouse_volume_size": 1000,  # 1GB
+        "teku_volume_size": 1000,  # 1GB
+        "nimbus_volume_size": 1000,  # 1GB
+        "lodestar_volume_size": 1000,  # 1GB
+    },
+}
