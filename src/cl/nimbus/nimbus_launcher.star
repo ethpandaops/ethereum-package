@@ -427,7 +427,7 @@ def get_beacon_config(
             el_client_context.client_name,
             extra_labels,
         ),
-        user=User(uid=0, gid=0)
+        user=User(uid=0, gid=0),
     )
 
 
