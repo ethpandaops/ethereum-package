@@ -5,14 +5,14 @@ participants:
     cl_client_type: prysm
   - el_client_type: erigon
     cl_client_type: nimbus
-    cl_split_mode: true
+    cl_split_mode_enabled: true
   - el_client_type: besu
     cl_client_type: lighthouse
   - el_client_type: reth
     cl_client_type: lodestar
   - el_client_type: ethereumjs
     cl_client_type: teku
-    cl_split_mode: true
+    cl_split_mode_enabled: true
 additional_services:
   - dora
 persistent: true
