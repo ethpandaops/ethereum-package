@@ -51,6 +51,19 @@ Where `network_params.yaml` contains the parameters for your network in your hom
 
 Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster.
 
+#### Considerations for Running on a Public Testnet with a Cloud Provider
+When running on a public testnet using a cloud provider's Kubernetes cluster, there are a few important factors to consider:
+
+1. State Growth: The growth of the state might be faster than anticipated. This could potentially lead to issues if the default parameters become insufficient over time. It's important to monitor state growth and adjust parameters as necessary.
+
+2. Persistent Storage Speed: Most cloud providers provision their Kubernetes clusters with relatively slow persistent storage by default. This can cause performance issues, particularly with Ethereum Light (EL) clients.
+
+3. Network Syncing: The disk speed provided by cloud providers may not be sufficient to sync with networks that have high demands, such as the mainnet. This could lead to syncing issues and delays.
+
+To mitigate these issues, you can use the `el_client_volume_size` and `cl_client_volume_size` flags to override the default settings locally. This allows you to allocate more storage to the EL and CL clients, which can help accommodate faster state growth and improve syncing performance. However, keep in mind that increasing the volume size may also increase your cloud provider costs. Always monitor your usage and adjust as necessary to balance performance and cost.
+
+For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self hosting your own Kubernetes cluster with fast persistent storage.
+
 #### Tear down
 
 The testnet will reside in an [enclave][enclave] - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
@@ -125,6 +138,11 @@ participants:
   # A list of optional extra env_vars the el container should spin up with
   el_extra_env_vars: {}
 
+  # Persistent storage size for the EL client container (in MB)
+  # Defaults to 0, which means that the default size for the client will be used
+  # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+  el_client_volume_size: 0
+
   # A list of optional extra labels the el container should spin up with
   # Example; el_extra_labels: {"ethereum-package.partition": "1"}
   el_extra_labels: {}
@@ -153,6 +171,11 @@ participants:
   # Only possible for nimbus or teku
   # Defaults to false
   cl_split_mode_enabled: false
+
+  # Persistent storage size for the CL client container (in MB)
+  # Defaults to 0, which means that the default size for the client will be used
+  # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+  cl_client_volume_size: 0
 
   # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
   # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
@@ -397,8 +420,8 @@ grafana_additional_dashboards: []
 # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
 # Note this requires Kurtosis greater than 0.85.49 to work
 # Note Erigon, Besu, Teku persistence is not currently supported with docker.
-# Defaults to False
-persistent: False
+# Defaults to false
+persistent: false
 
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
