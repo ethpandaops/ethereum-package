@@ -193,7 +193,7 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--db.size.limit={0}MB".format(el_volume_size)
+        "--db.size.limit={0}MB".format(el_volume_size),
     ]
 
     files = {
