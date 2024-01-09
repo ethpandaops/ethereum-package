@@ -138,6 +138,7 @@ def launch(
     extra_beacon_labels,
     extra_validator_labels,
     persistent,
+    cl_volume_size,
     split_mode_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -161,6 +162,18 @@ def launch(
     bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
 
+    network_name = (
+        "devnets"
+        if launcher.network != "kurtosis"
+        or launcher.network not in constants.PUBLIC_NETWORKS
+        else launcher.network
+    )
+    cl_volume_size = (
+        int(cl_volume_size)
+        if int(cl_volume_size) > 0
+        else constants.VOLUME_SIZE[network_name]["nimbus_volume_size"]
+    )
+
     beacon_config = get_beacon_config(
         plan,
         launcher.el_cl_genesis_data,
@@ -182,6 +195,7 @@ def launch(
         extra_beacon_labels,
         split_mode_enabled,
         persistent,
+        cl_volume_size,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -291,6 +305,7 @@ def get_beacon_config(
     extra_labels,
     split_mode_enabled,
     persistent,
+    cl_volume_size,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -392,7 +407,8 @@ def get_beacon_config(
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name)
+            persistent_key="data-{0}".format(service_name),
+            size=cl_volume_size,
         )
 
     return ServiceConfig(

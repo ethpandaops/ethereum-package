@@ -60,7 +60,7 @@ When running on a public testnet using a cloud provider's Kubernetes cluster, th
 
 3. Network Syncing: The disk speed provided by cloud providers may not be sufficient to sync with networks that have high demands, such as the mainnet. This could lead to syncing issues and delays.
 
-To mitigate these issues, you can use the `el_client_volume_size`(coming soon) and `cl_client_volume_size`(coming soon) flags to override the default settings locally. This allows you to allocate more storage to the EL and CL clients, which can help accommodate faster state growth and improve syncing performance. However, keep in mind that increasing the volume size may also increase your cloud provider costs. Always monitor your usage and adjust as necessary to balance performance and cost.
+To mitigate these issues, you can use the `el_client_volume_size` and `cl_client_volume_size` flags to override the default settings locally. This allows you to allocate more storage to the EL and CL clients, which can help accommodate faster state growth and improve syncing performance. However, keep in mind that increasing the volume size may also increase your cloud provider costs. Always monitor your usage and adjust as necessary to balance performance and cost.
 
 For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self hosting your own Kubernetes cluster with fast persistent storage.
 
@@ -138,6 +138,11 @@ participants:
   # A list of optional extra env_vars the el container should spin up with
   el_extra_env_vars: {}
 
+  # Persistent storage size for the EL client container (in MB)
+  # Defaults to 0, which means that the default size for the client will be used
+  # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+  el_client_volume_size: 0
+
   # A list of optional extra labels the el container should spin up with
   # Example; el_extra_labels: {"ethereum-package.partition": "1"}
   el_extra_labels: {}
@@ -166,6 +171,11 @@ participants:
   # Only possible for nimbus or teku
   # Defaults to false
   cl_split_mode_enabled: false
+
+  # Persistent storage size for the CL client container (in MB)
+  # Defaults to 0, which means that the default size for the client will be used
+  # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+  cl_client_volume_size: 0
 
   # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
   # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
