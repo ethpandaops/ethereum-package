@@ -70,7 +70,6 @@ def launch(
     image,
     participant_log_level,
     global_log_level,
-    # If empty then the node will be launched as a bootnode
     existing_el_clients,
     el_min_cpu,
     el_max_cpu,
@@ -80,6 +79,7 @@ def launch(
     extra_env_vars,
     extra_labels,
     persistent,
+    el_volume_size,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -89,6 +89,18 @@ def launch(
     el_max_cpu = el_max_cpu if int(el_max_cpu) > 0 else EXECUTION_MAX_CPU
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
+
+    network_name = (
+        "devnets"
+        if launcher.network != "kurtosis"
+        or launcher.network not in constants.PUBLIC_NETWORKS
+        else launcher.network
+    )
+    el_volume_size = (
+        el_volume_size
+        if int(el_volume_size) > 0
+        else constants.VOLUME_SIZE[network_name]["ethereumjs_volume_size"]
+    )
 
     cl_client_name = service_name.split("-")[3]
 
@@ -110,6 +122,7 @@ def launch(
         extra_env_vars,
         extra_labels,
         persistent,
+        el_volume_size,
     )
 
     service = plan.add_service(service_name, config)
@@ -151,6 +164,7 @@ def get_config(
     extra_env_vars,
     extra_labels,
     persistent,
+    el_volume_size,
 ):
     cmd = [
         "--dataDir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -214,6 +228,7 @@ def get_config(
     if persistent:
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
+            size=el_volume_size,
         )
     return ServiceConfig(
         image=image,
