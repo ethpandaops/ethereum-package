@@ -6,7 +6,7 @@ genesis_constants = import_module(
 
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
-    "erigon": "ethpandaops/erigon:2.53.0",
+    "erigon": "ethpandaops/erigon:devel",
     "nethermind": "nethermind/nethermind:latest",
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
@@ -16,7 +16,7 @@ DEFAULT_EL_IMAGES = {
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "teku": "consensys/teku:latest",
-    "nimbus": "ethpandaops/nimbus:unstable",
+    "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "prysmaticlabs/prysm-beacon-chain:latest,prysmaticlabs/prysm-validator:latest",
     "lodestar": "chainsafe/lodestar:latest",
 }
@@ -52,6 +52,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
     "mev_params",
+    "assertoor_params",
     "goomy_blob_params",
     "tx_spammer_params",
     "custom_flood_params",
@@ -72,6 +73,8 @@ def input_parser(plan, input_args):
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
+    result["goomy_blob_params"] = get_default_goomy_blob_params()
+    result["assertoor_params"] = get_default_assertoor_params()
     result["persistent"] = False
 
     for attr in input_args:
@@ -92,6 +95,14 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["custom_flood_params"]:
                 sub_value = input_args["custom_flood_params"][sub_attr]
                 result["custom_flood_params"][sub_attr] = sub_value
+        elif attr == "goomy_blob_params":
+            for sub_attr in input_args["goomy_blob_params"]:
+                sub_value = input_args["goomy_blob_params"][sub_attr]
+                result["goomy_blob_params"][sub_attr] = sub_value
+        elif attr == "assertoor_params":
+            for sub_attr in input_args["assertoor_params"]:
+                sub_value = input_args["assertoor_params"][sub_attr]
+                result["assertoor_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -116,19 +127,20 @@ def input_parser(plan, input_args):
             )
         )
 
-    result["goomy_blob_params"] = get_default_goomy_blob_params()
     return struct(
         participants=[
             struct(
                 el_client_type=participant["el_client_type"],
                 el_client_image=participant["el_client_image"],
                 el_client_log_level=participant["el_client_log_level"],
+                el_client_volume_size=participant["el_client_volume_size"],
                 el_extra_params=participant["el_extra_params"],
                 el_extra_env_vars=participant["el_extra_env_vars"],
                 el_extra_labels=participant["el_extra_labels"],
                 cl_client_type=participant["cl_client_type"],
                 cl_client_image=participant["cl_client_image"],
                 cl_client_log_level=participant["cl_client_log_level"],
+                cl_client_volume_size=participant["cl_client_volume_size"],
                 cl_split_mode_enabled=participant["cl_split_mode_enabled"],
                 beacon_extra_params=participant["beacon_extra_params"],
                 beacon_extra_labels=participant["beacon_extra_labels"],
@@ -211,6 +223,21 @@ def input_parser(plan, input_args):
         ),
         goomy_blob_params=struct(
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
+        ),
+        assertoor_params=struct(
+            run_stability_check=result["assertoor_params"]["run_stability_check"],
+            run_block_proposal_check=result["assertoor_params"][
+                "run_block_proposal_check"
+            ],
+            run_lifecycle_test=result["assertoor_params"]["run_lifecycle_test"],
+            run_transaction_test=result["assertoor_params"]["run_transaction_test"],
+            run_blob_transaction_test=result["assertoor_params"][
+                "run_blob_transaction_test"
+            ],
+            run_opcodes_transaction_test=result["assertoor_params"][
+                "run_opcodes_transaction_test"
+            ],
+            tests=result["assertoor_params"]["tests"],
         ),
         custom_flood_params=struct(
             interval_between_transactions=result["custom_flood_params"][
@@ -446,12 +473,14 @@ def default_participant():
         "el_client_type": "geth",
         "el_client_image": "",
         "el_client_log_level": "",
+        "el_client_volume_size": 0,
         "el_extra_params": [],
         "el_extra_env_vars": {},
         "el_extra_labels": {},
         "cl_client_type": "lighthouse",
         "cl_client_image": "",
         "cl_client_log_level": "",
+        "cl_client_volume_size": 0,
         "cl_split_mode_enabled": False,
         "beacon_extra_params": [],
         "beacon_extra_labels": {},
@@ -510,6 +539,18 @@ def get_default_tx_spammer_params():
 
 def get_default_goomy_blob_params():
     return {"goomy_blob_args": []}
+
+
+def get_default_assertoor_params():
+    return {
+        "run_stability_check": True,
+        "run_block_proposal_check": True,
+        "run_lifecycle_test": False,
+        "run_transaction_test": False,
+        "run_blob_transaction_test": False,
+        "run_opcodes_transaction_test": False,
+        "tests": [],
+    }
 
 
 def get_default_custom_flood_params():

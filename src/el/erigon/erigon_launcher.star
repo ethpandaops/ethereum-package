@@ -7,7 +7,7 @@ node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/home/erigon/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/erigon/execution-data"
 
 METRICS_PATH = "/metrics"
 
@@ -77,6 +77,7 @@ def launch(
     extra_env_vars,
     extra_labels,
     persistent,
+    el_volume_size,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, ERIGON_LOG_LEVELS
@@ -86,6 +87,18 @@ def launch(
     el_max_cpu = el_max_cpu if int(el_max_cpu) > 0 else EXECUTION_MAX_CPU
     el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
     el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
+
+    network_name = (
+        "devnets"
+        if launcher.network != "kurtosis"
+        and launcher.network not in constants.PUBLIC_NETWORKS
+        else launcher.network
+    )
+    el_volume_size = (
+        el_volume_size
+        if int(el_volume_size) > 0
+        else constants.VOLUME_SIZE[network_name]["erigon_volume_size"]
+    )
 
     cl_client_name = service_name.split("-")[3]
 
@@ -107,6 +120,7 @@ def launch(
         extra_env_vars,
         extra_labels,
         persistent,
+        el_volume_size,
     )
 
     service = plan.add_service(service_name, config)
@@ -151,6 +165,7 @@ def get_config(
     extra_env_vars,
     extra_labels,
     persistent,
+    el_volume_size,
 ):
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -178,7 +193,19 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
+        "--db.size.limit={0}MB".format(el_volume_size),
     ]
+
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+    }
+
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=el_volume_size,
+        )
 
     if network == "kurtosis":
         if len(existing_el_clients) > 0:
@@ -201,7 +228,6 @@ def get_config(
                 )
             )
     elif network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--db.size.limit=100GB")
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
@@ -225,19 +251,9 @@ def get_config(
         command_arg_str = " && ".join(command_arg)
     else:
         cmd.append("--chain={0}".format(network))
-        cmd.append("--db.size.limit=3TB")
         command_arg = cmd
         command_arg_str = " ".join(command_arg)
 
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
-    }
-
-    if persistent:
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-        )
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
@@ -257,6 +273,7 @@ def get_config(
             cl_client_name,
             extra_labels,
         ),
+        user=User(uid=0, gid=0),
     )
 
 

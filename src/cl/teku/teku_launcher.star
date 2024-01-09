@@ -8,7 +8,7 @@ TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
 #  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "teku" user so we can't write to root
-BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/teku-beacon-data"
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/teku/teku-beacon-data"
 
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -31,7 +31,7 @@ BEACON_METRICS_PATH = "/metrics"
 #  ---------------------------------- Validator client -------------------------------------
 # These will get mounted as root and Teku needs directory write permissions, so we'll copy this
 #  into the Teku user's home directory to get around it
-VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/opt/teku/teku-validator-data"
+VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/teku/teku-validator-data"
 
 VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
 
@@ -124,6 +124,7 @@ def launch(
     extra_beacon_labels,
     extra_validator_labels,
     persistent,
+    cl_volume_size,
     split_mode_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -142,6 +143,18 @@ def launch(
     bn_max_cpu = int(bn_max_cpu) if int(bn_max_cpu) > 0 else BEACON_MAX_CPU
     bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
+
+    network_name = (
+        "devnets"
+        if launcher.network != "kurtosis"
+        and launcher.network not in constants.PUBLIC_NETWORKS
+        else launcher.network
+    )
+    cl_volume_size = (
+        int(cl_volume_size)
+        if int(cl_volume_size) > 0
+        else constants.VOLUME_SIZE[network_name]["teku_volume_size"]
+    )
 
     config = get_beacon_config(
         plan,
@@ -164,6 +177,7 @@ def launch(
         extra_beacon_labels,
         split_mode_enabled,
         persistent,
+        cl_volume_size,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -276,6 +290,7 @@ def get_beacon_config(
     extra_labels,
     split_mode_enabled,
     persistent,
+    cl_volume_size,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -399,7 +414,8 @@ def get_beacon_config(
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name)
+            persistent_key="data-{0}".format(service_name),
+            size=cl_volume_size,
         )
     return ServiceConfig(
         image=image,
@@ -422,6 +438,7 @@ def get_beacon_config(
             el_client_context.client_name,
             extra_labels,
         ),
+        user=User(uid=0, gid=0),
     )
 
 

@@ -7,6 +7,9 @@ node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
+# Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
+#  have to to create it
+BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/nimbus/beacon-data"
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
@@ -21,7 +24,7 @@ BEACON_METRICS_PORT_NUM = 8008
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 50
 BEACON_MAX_CPU = 1000
-BEACON_MIN_MEMORY = 128
+BEACON_MIN_MEMORY = 256
 BEACON_MAX_MEMORY = 1024
 
 DEFAULT_BEACON_IMAGE_ENTRYPOINT = ["nimbus_beacon_node"]
@@ -29,7 +32,7 @@ DEFAULT_BEACON_IMAGE_ENTRYPOINT = ["nimbus_beacon_node"]
 BEACON_METRICS_PATH = "/metrics"
 
 #  ---------------------------------- Validator client -------------------------------------
-VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
+VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/nimbus/validator-keys"
 VALIDATOR_HTTP_PORT_ID = "http"
 VALIDATOR_METRICS_PORT_ID = "metrics"
 VALIDATOR_HTTP_PORT_NUM = 5042
@@ -48,13 +51,6 @@ DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT = ["nimbus_validator_client"]
 
 VALIDATOR_METRICS_PATH = "/metrics"
 # ---------------------------------- Genesis Files ----------------------------------
-
-# Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
-#  have to to create it
-BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/nimbus/beacon-data"
-# Nimbus wants the data dir to have these perms
-CONSENSUS_DATA_DIR_PERMS_STR = "0700"
-
 
 # Nimbus needs write access to the validator keys/secrets directories, and b/c the module container runs as root
 #  while the Nimbus container does not, we can't just point the Nimbus binary to the paths in the shared dir because
@@ -138,6 +134,7 @@ def launch(
     extra_beacon_labels,
     extra_validator_labels,
     persistent,
+    cl_volume_size,
     split_mode_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -149,10 +146,29 @@ def launch(
         participant_log_level, global_log_level, NIMBUS_LOG_LEVELS
     )
 
+    # Holesky has a bigger memory footprint, so it needs more memory
+    if launcher.network == "holesky":
+        holesky_beacon_memory_limit = 4096
+        bn_max_mem = (
+            int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
+        )
+
     bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
     bn_max_cpu = int(bn_max_cpu) if int(bn_max_cpu) > 0 else BEACON_MAX_CPU
     bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
     bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
+
+    network_name = (
+        "devnets"
+        if launcher.network != "kurtosis"
+        and launcher.network not in constants.PUBLIC_NETWORKS
+        else launcher.network
+    )
+    cl_volume_size = (
+        int(cl_volume_size)
+        if int(cl_volume_size) > 0
+        else constants.VOLUME_SIZE[network_name]["nimbus_volume_size"]
+    )
 
     beacon_config = get_beacon_config(
         plan,
@@ -175,6 +191,7 @@ def launch(
         extra_beacon_labels,
         split_mode_enabled,
         persistent,
+        cl_volume_size,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -284,6 +301,7 @@ def get_beacon_config(
     extra_labels,
     split_mode_enabled,
     persistent,
+    cl_volume_size,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -385,7 +403,8 @@ def get_beacon_config(
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name)
+            persistent_key="data-{0}".format(service_name),
+            size=cl_volume_size,
         )
 
     return ServiceConfig(
@@ -408,6 +427,7 @@ def get_beacon_config(
             el_client_context.client_name,
             extra_labels,
         ),
+        user=User(uid=0, gid=0),
     )
 
 

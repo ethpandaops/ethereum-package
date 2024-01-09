@@ -77,4 +77,4 @@ mev_params:
   mev_boost_image: flashbots/mev-boost
   mev_boost_args: ["mev-boost", "--relay-check"]
 grafana_additional_dashboards: []
-persistent: False
+persistent: false
