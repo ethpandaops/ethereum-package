@@ -5,7 +5,7 @@ el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/besu/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/besu/execution-data"
 
 METRICS_PATH = "/metrics"
 
@@ -254,6 +254,7 @@ def get_config(
             cl_client_name,
             extra_labels,
         ),
+        user=User(uid=0, gid=0),
     )
 
 

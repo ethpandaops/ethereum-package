@@ -7,7 +7,7 @@ node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
 # The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/home/erigon/execution-data"
+EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/erigon/execution-data"
 
 METRICS_PATH = "/metrics"
 
@@ -193,7 +193,19 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
+        "--db.size.limit={0}MB".format(el_volume_size),
     ]
+
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+    }
+
+    if persistent:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=el_volume_size,
+        )
 
     if network == "kurtosis":
         if len(existing_el_clients) > 0:
@@ -216,7 +228,6 @@ def get_config(
                 )
             )
     elif network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--db.size.limit=100GB")
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
@@ -240,20 +251,9 @@ def get_config(
         command_arg_str = " && ".join(command_arg)
     else:
         cmd.append("--chain={0}".format(network))
-        cmd.append("--db.size.limit=3TB")
         command_arg = cmd
         command_arg_str = " ".join(command_arg)
 
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
-    }
-
-    if persistent:
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=el_volume_size,
-        )
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
@@ -273,6 +273,7 @@ def get_config(
             cl_client_name,
             extra_labels,
         ),
+        user=User(uid=0, gid=0),
     )
 
 
