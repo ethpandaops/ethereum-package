@@ -117,6 +117,7 @@ def launch(
         extra_env_vars,
         extra_labels,
         persistent,
+        el_volume_size,
     )
 
     service = plan.add_service(service_name, config)
