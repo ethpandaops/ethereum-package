@@ -52,6 +52,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
     "mev_params",
+    "assertoor_params",
     "goomy_blob_params",
     "tx_spammer_params",
     "custom_flood_params",
@@ -72,6 +73,8 @@ def input_parser(plan, input_args):
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
+    result["goomy_blob_params"] = get_default_goomy_blob_params()
+    result["assertoor_params"] = get_default_assertoor_params()
     result["persistent"] = False
 
     for attr in input_args:
@@ -92,6 +95,14 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["custom_flood_params"]:
                 sub_value = input_args["custom_flood_params"][sub_attr]
                 result["custom_flood_params"][sub_attr] = sub_value
+        elif attr == "goomy_blob_params":
+            for sub_attr in input_args["goomy_blob_params"]:
+                sub_value = input_args["goomy_blob_params"][sub_attr]
+                result["goomy_blob_params"][sub_attr] = sub_value
+        elif attr == "assertoor_params":
+            for sub_attr in input_args["assertoor_params"]:
+                sub_value = input_args["assertoor_params"][sub_attr]
+                result["assertoor_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -116,7 +127,6 @@ def input_parser(plan, input_args):
             )
         )
 
-    result["goomy_blob_params"] = get_default_goomy_blob_params()
     return struct(
         participants=[
             struct(
@@ -212,6 +222,21 @@ def input_parser(plan, input_args):
         ),
         goomy_blob_params=struct(
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
+        ),
+        assertoor_params=struct(
+            run_stability_check=result["assertoor_params"]["run_stability_check"],
+            run_block_proposal_check=result["assertoor_params"][
+                "run_block_proposal_check"
+            ],
+            run_lifecycle_test=result["assertoor_params"]["run_lifecycle_test"],
+            run_transaction_test=result["assertoor_params"]["run_transaction_test"],
+            run_blob_transaction_test=result["assertoor_params"][
+                "run_blob_transaction_test"
+            ],
+            run_opcodes_transaction_test=result["assertoor_params"][
+                "run_opcodes_transaction_test"
+            ],
+            tests=result["assertoor_params"]["tests"],
         ),
         custom_flood_params=struct(
             interval_between_transactions=result["custom_flood_params"][
@@ -512,6 +537,18 @@ def get_default_tx_spammer_params():
 
 def get_default_goomy_blob_params():
     return {"goomy_blob_args": []}
+
+
+def get_default_assertoor_params():
+    return {
+        "run_stability_check": True,
+        "run_block_proposal_check": True,
+        "run_lifecycle_test": False,
+        "run_transaction_test": False,
+        "run_blob_transaction_test": False,
+        "run_opcodes_transaction_test": False,
+        "tests": [],
+    }
 
 
 def get_default_custom_flood_params():

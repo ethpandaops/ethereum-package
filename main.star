@@ -38,6 +38,7 @@ eip4788_deployment = import_module(
     "./src/eip4788_deployment/eip4788_deployment_launcher.star"
 )
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
+assertoor = import_module("./src/assertoor/assertoor_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -371,6 +372,20 @@ def run(plan, args={}):
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
+        elif additional_service == "assertoor":
+            plan.print("Launching assertoor")
+            assertoor_config_template = read_file(
+                static_files.ASSERTOOR_CONFIG_TEMPLATE_FILEPATH
+            )
+            assertoor_params = args_with_right_defaults.assertoor_params
+            assertoor.launch_assertoor(
+                plan,
+                assertoor_config_template,
+                all_participants,
+                args_with_right_defaults.participants,
+                assertoor_params,
+            )
+            plan.print("Successfully launched assertoor")
         elif additional_service == "custom_flood":
             mev_custom_flood.spam_in_background(
                 plan,
