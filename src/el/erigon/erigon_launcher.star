@@ -174,6 +174,9 @@ def get_config(
 
     cmd = [
         "erigon",
+        "--chain={0}".format(
+            network if network in constants.PUBLIC_NETWORKS else "dev"
+        ),
         "--log.console.verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--port={0}".format(DISCOVERY_PORT_NUM),
@@ -242,17 +245,11 @@ def get_config(
         )
 
     if len(extra_params) > 0:
-        # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
     if network not in constants.PUBLIC_NETWORKS:
         command_arg = [init_datadir_cmd_str, " ".join(cmd)]
-
         command_arg_str = " && ".join(command_arg)
-    else:
-        cmd.append("--chain={0}".format(network))
-        command_arg = cmd
-        command_arg_str = " ".join(command_arg)
 
     return ServiceConfig(
         image=image,
