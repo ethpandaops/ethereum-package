@@ -344,6 +344,7 @@ def run(plan, args={}):
                 all_cl_client_contexts,
                 el_cl_data_files_artifact_uuid,
                 network_params.electra_fork_epoch,
+                network_params.network,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "blobscan":

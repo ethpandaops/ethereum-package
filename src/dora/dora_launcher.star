@@ -33,6 +33,7 @@ def launch_dora(
     cl_client_contexts,
     el_cl_data_files_artifact_uuid,
     electra_fork_epoch,
+    network,
 ):
     all_cl_client_info = []
     for index, client in enumerate(cl_client_contexts):
@@ -42,7 +43,9 @@ def launch_dora(
             )
         )
 
-    template_data = new_config_template_data(HTTP_PORT_NUMBER, all_cl_client_info)
+    template_data = new_config_template_data(
+        network, HTTP_PORT_NUMBER, all_cl_client_info
+    )
 
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
@@ -58,13 +61,17 @@ def launch_dora(
         config_files_artifact_name,
         el_cl_data_files_artifact_uuid,
         electra_fork_epoch,
+        network,
     )
 
     plan.add_service(SERVICE_NAME, config)
 
 
 def get_config(
-    config_files_artifact_name, el_cl_data_files_artifact_uuid, electra_fork_epoch
+    config_files_artifact_name,
+    el_cl_data_files_artifact_uuid,
+    electra_fork_epoch,
+    network,
 ):
     config_file_path = shared_utils.path_join(
         DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -72,7 +79,7 @@ def get_config(
     )
 
     # TODO: This is a hack to get the verkle support image for the electra fork
-    if electra_fork_epoch != None:
+    if electra_fork_epoch != None or "verkle" in network:
         IMAGE_NAME = "ethpandaops/dora:verkle-support"
     else:
         IMAGE_NAME = "ethpandaops/dora:master"
@@ -93,10 +100,12 @@ def get_config(
     )
 
 
-def new_config_template_data(listen_port_num, cl_client_info):
+def new_config_template_data(network, listen_port_num, cl_client_info):
     return {
+        "Network": network,
         "ListenPortNum": listen_port_num,
         "CLClientInfo": cl_client_info,
+        "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
     }
 
 
