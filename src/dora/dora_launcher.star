@@ -105,6 +105,7 @@ def new_config_template_data(network, listen_port_num, cl_client_info):
         "Network": network,
         "ListenPortNum": listen_port_num,
         "CLClientInfo": cl_client_info,
+        "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
     }
 
 

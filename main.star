@@ -337,14 +337,7 @@ def run(plan, args={}):
             plan.print("Successfully launched beacon metrics gazer")
         elif additional_service == "dora":
             plan.print("Launching dora")
-            if network_params.network in constants.PUBLIC_NETWORKS:
-                dora_config_template = read_file(
-                    static_files.DORA_PUBLIC_CONFIG_TEMPLATE_FILEPATH
-                )
-            else:
-                dora_config_template = read_file(
-                    static_files.DORA_CONFIG_TEMPLATE_FILEPATH
-                )
+            dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
             dora.launch_dora(
                 plan,
                 dora_config_template,
