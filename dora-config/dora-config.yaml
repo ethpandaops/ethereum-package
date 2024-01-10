@@ -4,9 +4,9 @@ logging:
 
 # Chain network configuration
 chain:
-  name: {{ .Network }}
-  configPath: "/network-configs/network-configs/config.yaml"
-  displayName: "{{ .Network }}"
+  name: "kurtosis-testnet"
+  network: holesky
+  displayName: "Kurtosis Testnet"
 
 # HTTP Server configuration
 server:
@@ -20,7 +20,7 @@ frontend:
 
   # Name of the site, displayed in the title tag
   siteName: "Dora the Explorer"
-  siteSubtitle: "{{ .Network }} - Kurtosis"
+  siteSubtitle: "Kurtosis Testnet"
 
   # link to EL Explorer
   ethExplorerLink: ""
@@ -31,11 +31,10 @@ frontend:
 beaconapi:
   # CL Client RPC
   endpoints:
-{{ range $clClient := .CLClientInfo }}
-    - url: "http://{{ $clClient.IPAddr }}:{{ $clClient.PortNum }}"
-      name: "{{ $clClient.Name }}"
+
+    - url: "http://172.16.0.6:4000"
+      name: "cl-1-teku-geth"
       archive: true
-{{- end }}
   # local cache for page models
   localCacheSize: 10 # 10MB
 
