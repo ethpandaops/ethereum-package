@@ -387,7 +387,7 @@ def get_beacon_config(
         cmd.append(
             "--bootstrap-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/bootstrap_nodex.txt"
+            + "/bootstrap_nodes.txt"
         )
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
