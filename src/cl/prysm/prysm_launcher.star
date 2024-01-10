@@ -343,6 +343,11 @@ def get_beacon_config(
                     cmd.append("--bootstrap-node=" + ctx.enr)
         else:  # Devnet
             cmd.append(
+                "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                    network
+                )
+            )
+            cmd.append(
                 "--bootstrap-node="
                 + shared_utils.get_devnet_enr(
                     plan, el_cl_genesis_data.files_artifact_uuid

@@ -340,12 +340,17 @@ def get_beacon_config(
                 )
         else:  # devnet
             cmd.append(
+                "--checkpointSyncUrl=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                    network
+                )
+            )
+            cmd.append(
                 "--bootnodes="
                 + shared_utils.get_devnet_enrs_list(
                     plan, el_cl_genesis_data.files_artifact_uuid
                 )
             )
-    else:
+    else:  # public testnet
         cmd.append("--network=" + network)
         cmd.append("--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network])
 
