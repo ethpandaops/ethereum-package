@@ -174,7 +174,9 @@ def get_config(
 
     cmd = [
         "erigon",
-        "--chain={0}".format(network if network in constants.PUBLIC_NETWORKS else "dev"),
+        "--chain={0}".format(
+            network if network in constants.PUBLIC_NETWORKS else "dev"
+        ),
         "--log.console.verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--port={0}".format(DISCOVERY_PORT_NUM),
