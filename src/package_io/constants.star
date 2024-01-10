@@ -147,7 +147,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 100000,  # 100GB
     },
     "kurtosis": {
-        "geth_volume_size": 3000,  # 3GB
+        "geth_volume_size": 5000,  # 5GB
         "erigon_volume_size": 3000,  # 3GB
         "nethermind_volume_size": 3000,  # 3GB
         "besu_volume_size": 3000,  # 3GB
