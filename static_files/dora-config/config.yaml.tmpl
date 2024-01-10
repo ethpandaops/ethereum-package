@@ -4,9 +4,11 @@ logging:
 
 # Chain network configuration
 chain:
-  name: "kurtosis-testnet"
+  name: {{ .Network }}
+{{ if not .PublicNetwork }}
   configPath: "/network-configs/network-configs/config.yaml"
-  displayName: "Kurtosis Testnet"
+{{ end }}
+  displayName: "{{ .Network }}"
 
 # HTTP Server configuration
 server:
@@ -20,7 +22,7 @@ frontend:
 
   # Name of the site, displayed in the title tag
   siteName: "Dora the Explorer"
-  siteSubtitle: "Kurtosis Testnet"
+  siteSubtitle: "{{ .Network }} - Kurtosis"
 
   # link to EL Explorer
   ethExplorerLink: ""
