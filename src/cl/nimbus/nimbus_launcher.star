@@ -385,7 +385,9 @@ def get_beacon_config(
                 cmd.append("--direct-peer=" + ctx.multiaddr)
     elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
-            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/bootstrap_nodex.txt"
+            "---bootstrap-file="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/bootstrap_nodex.txt"
         )
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
