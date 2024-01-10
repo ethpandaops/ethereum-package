@@ -43,7 +43,9 @@ def launch_dora(
             )
         )
 
-    template_data = new_config_template_data(network, HTTP_PORT_NUMBER, all_cl_client_info)
+    template_data = new_config_template_data(
+        network, HTTP_PORT_NUMBER, all_cl_client_info
+    )
 
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data

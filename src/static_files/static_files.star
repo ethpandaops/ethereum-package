@@ -17,7 +17,9 @@ VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH = (
 )
 
 DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml.tmpl"
-DORA_PUBLIC_CONFIG_TEMPLATE_FILEPATH = ( STATIC_FILES_DIRPATH + "/dora-config/public-config.yaml.tmpl" )
+DORA_PUBLIC_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/dora-config/public-config.yaml.tmpl"
+)
 
 FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/full-beaconchain-config/config.yaml.tmpl"

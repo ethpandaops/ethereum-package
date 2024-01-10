@@ -343,8 +343,8 @@ def run(plan, args={}):
                 )
             else:
                 dora_config_template = read_file(
-                        static_files.DORA_CONFIG_TEMPLATE_FILEPATH
-                    )
+                    static_files.DORA_CONFIG_TEMPLATE_FILEPATH
+                )
             dora.launch_dora(
                 plan,
                 dora_config_template,
