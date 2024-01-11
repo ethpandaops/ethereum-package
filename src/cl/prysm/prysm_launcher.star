@@ -349,9 +349,8 @@ def get_beacon_config(
             )
             cmd.append(
                 "--bootstrap-node="
-                + shared_utils.get_devnet_enr(
-                    plan, el_cl_genesis_data.files_artifact_uuid
-                )
+                + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+                + "/boot_enr.yaml"
             )
     else:  # Public network
         cmd.append("--{}".format(network))
