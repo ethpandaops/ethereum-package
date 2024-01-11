@@ -250,6 +250,8 @@ def get_config(
     if network not in constants.PUBLIC_NETWORKS:
         command_arg = [init_datadir_cmd_str, " ".join(cmd)]
         command_arg_str = " && ".join(command_arg)
+    else:
+        command_arg_str = " ".join(cmd)
 
     return ServiceConfig(
         image=image,
