@@ -107,22 +107,6 @@ print(",".join(bootnodes), end="")
     return enr_list.output
 
 
-# Prysm and Nimbus needs to have the enrs in a list format
-# Can't figure out how to pass each item as a list, as I can't return an array from the starlark function
-# So for now I'm just returning the last item in the list
-def get_devnet_enr(plan, filename):
-    enr_items = plan.run_python(
-        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
-        wait=None,
-        run="""
-with open("/network-configs/network-configs/bootstrap_nodes.txt") as bootnode_file:
-    last_enr = bootnode_file.read().splitlines()[-1]
-    print(last_enr, end="")
-            """,
-    )
-    return enr_items.output
-
-
 def read_genesis_timestamp_from_config(plan, filename):
     value = plan.run_python(
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
