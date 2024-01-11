@@ -565,10 +565,10 @@ def calculate_devnet_url(network):
     shadowfork = "sf-" in network
 
     if shadowfork:
-      for suffix, delimiter in sf_suffix_mapping.items():
-          if delimiter in network:
-              network_parts = network.split(delimiter, 1)
-              network_type = suffix
+        for suffix, delimiter in sf_suffix_mapping.items():
+            if delimiter in network:
+                network_parts = network.split(delimiter, 1)
+                network_type = suffix
     else:
         network_parts = network.split("-devnet-", 1)
         network_type = "devnet"
