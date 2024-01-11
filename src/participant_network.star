@@ -561,12 +561,24 @@ print(int(time.time()+padding), end="")
 
 
 def calculate_devnet_url(network):
-    network_parts = network.split("-devnet-", 1)
+    sf_suffix_mapping = {"hsf": "-hsf-", "gsf": "-gsf-", "ssf": "-ssf-"}
+    shadowfork = "sf-" in network
+
+    if shadowfork:
+      for suffix, delimiter in sf_suffix_mapping.items():
+          if delimiter in network:
+              network_parts = network.split(delimiter, 1)
+              network_type = suffix
+    else:
+        network_parts = network.split("-devnet-", 1)
+        network_type = "devnet"
+
     devnet_name, devnet_number = network_parts[0], network_parts[1]
     devnet_category = devnet_name.split("-")[0]
     devnet_subname = (
         devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
     )
-    return "github.com/ethpandaops/{0}-devnets/network-configs/{1}devnet-{2}".format(
-        devnet_category, devnet_subname, devnet_number
+
+    return "github.com/ethpandaops/{0}-devnets/network-configs/{1}{2}-{3}".format(
+        devnet_category, devnet_subname, network_type, devnet_number
     )
