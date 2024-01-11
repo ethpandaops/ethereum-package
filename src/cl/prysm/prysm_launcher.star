@@ -348,7 +348,9 @@ def get_beacon_config(
                 )
             )
             cmd.append(
-                "--bootstrap-node=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/boot_enr.yaml"
+                "--bootstrap-node="
+                + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+                + "/boot_enr.yaml"
             )
     else:  # Public network
         cmd.append("--{}".format(network))
