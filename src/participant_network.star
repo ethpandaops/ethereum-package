@@ -165,7 +165,7 @@ def launch_participant_network(
     elif network_params.network == "ephemery":
         url = "https://ephemery.dev/latest.tar.gz"
         el_cl_genesis_uuid = plan.run_sh(
-            run="curl https://ephemery.dev/latest.tar.gz && tar xvzf latest.tar.gz -C /opt",
+            run="curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && tar xvzf latest.tar.gz -C opt",
             image="badouralix/curl-jq",
             store=[StoreSpec(src="/opt", name="el_cl_genesis")],
         )
