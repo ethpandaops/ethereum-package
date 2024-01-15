@@ -353,6 +353,7 @@ def get_beacon_config(
         "--metrics-allow-origin=*",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
+        # "--allow-insecure-genesis-sync",
     ]
 
     if network not in constants.PUBLIC_NETWORKS:

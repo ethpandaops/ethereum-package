@@ -164,16 +164,20 @@ def launch_participant_network(
         validator_data = None
     elif network_params.network == "ephemery":
         url = "https://ephemery.dev/latest.tar.gz"
-        el_cl_genesis_uuid = plan.run_sh(
-            run="curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && tar xvzf latest.tar.gz -C /opt",
-            image="badouralix/curl-jq",
-            store=[StoreSpec(src="/opt", name="el_cl_genesis")],
-        )
         el_cl_genesis_data_uuid = plan.run_sh(
-            run="mkdir -p /network-configs/ && mv /opt/* /network-configs/",
-            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
-            files={"/opt": el_cl_genesis_uuid},
+            run="mkdir -p /network-configs && curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && tar xvzf latest.tar.gz -C /network-configs",
+            image="badouralix/curl-jq",
+            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis")],
         )
+        genesis_validators_root = "0x00"
+        el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
+            el_cl_genesis_data_uuid.files_artifacts[0],
+            genesis_validators_root,
+        )
+        final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
+        )
+        validator_data = None
     else:
         # We are running a devnet
         url = calculate_devnet_url(network_params.network)
