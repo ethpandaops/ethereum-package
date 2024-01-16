@@ -324,6 +324,7 @@ def get_beacon_config(
         "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM)
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
+
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--p2p-static-id=true")
         cmd.append(
@@ -341,7 +342,24 @@ def get_beacon_config(
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     cmd.append("--peer=" + ctx.multiaddr)
                     cmd.append("--bootstrap-node=" + ctx.enr)
-        else:  # Devnet
+        elif network == "ephemery":  # Ephemery
+            cmd.append(
+                "--genesis-beacon-api-url=" + constants.CHECKPOINT_SYNC_URL[network]
+            )
+            cmd.append(
+                "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
+            )
+            cmd.append(
+                "--bootstrap-node="
+                + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+                + "/boot_enr.yaml"
+            )
+        else:  # Devnets
+            cmd.append(
+                "--genesis-beacon-api-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                    network
+                )
+            )
             cmd.append(
                 "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
                     network

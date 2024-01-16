@@ -370,46 +370,59 @@ def get_beacon_config(
         + el_client_context.client_name,
     ]
 
+    if node_keystore_files != None and not split_mode_enabled:
+        cmd.extend(validator_flags)
+
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--initial-state="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
-    else:
-        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
-
-    if node_keystore_files != None and not split_mode_enabled:
-        cmd.extend(validator_flags)
-    if network == "kurtosis":
-        if bootnode_contexts != None:
+        if network == "kurtosis":  # Kurtosis
+            if bootnode_contexts != None:
+                cmd.append(
+                    "--p2p-discovery-bootnodes="
+                    + ",".join(
+                        [
+                            ctx.enr
+                            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
+                        ]
+                    )
+                )
+                cmd.append(
+                    "--p2p-static-peers="
+                    + ",".join(
+                        [
+                            ctx.multiaddr
+                            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
+                        ]
+                    )
+                )
+        elif network == "ephemery":  # Ephemery
+            cmd.append(
+                "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
+            )
             cmd.append(
                 "--p2p-discovery-bootnodes="
-                + ",".join(
-                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+                + shared_utils.get_devnet_enrs_list(
+                    plan, el_cl_genesis_data.files_artifact_uuid
+                )
+            )
+        else:  # Devnets
+            cmd.append(
+                "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                    network
                 )
             )
             cmd.append(
-                "--p2p-static-peers="
-                + ",".join(
-                    [
-                        ctx.multiaddr
-                        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                    ]
+                "--p2p-discovery-bootnodes="
+                + shared_utils.get_devnet_enrs_list(
+                    plan, el_cl_genesis_data.files_artifact_uuid
                 )
             )
-    elif network not in constants.PUBLIC_NETWORKS:
-        cmd.append(
-            "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                network
-            )
-        )
-        cmd.append(
-            "--p2p-discovery-bootnodes="
-            + shared_utils.get_devnet_enrs_list(
-                plan, el_cl_genesis_data.files_artifact_uuid
-            )
-        )
+    else:  # Public networks
+        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if len(extra_params) > 0:
         # we do the list comprehension as the default extra_params is a proto repeated string

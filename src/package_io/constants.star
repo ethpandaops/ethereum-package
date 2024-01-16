@@ -72,6 +72,7 @@ CHECKPOINT_SYNC_URL = {
     "goerli": "https://checkpoint-sync.goerli.ethpandaops.io",
     "sepolia": "https://checkpoint-sync.sepolia.ethpandaops.io",
     "holesky": "https://checkpoint-sync.holesky.ethpandaops.io",
+    "ephemery": "https://checkpointz.bordel.wtf/",
 }
 
 GENESIS_VALIDATORS_ROOT = {

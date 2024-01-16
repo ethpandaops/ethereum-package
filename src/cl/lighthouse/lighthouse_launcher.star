@@ -358,42 +358,51 @@ def get_beacon_config(
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
-    else:
-        cmd.append("--network=" + network)
-        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
-
-    if network == "kurtosis":
-        if boot_cl_client_ctxs != None:
+        if network == "kurtosis":  # Kurtosis
+            if boot_cl_client_ctxs != None:
+                cmd.append(
+                    "--boot-nodes="
+                    + ",".join(
+                        [
+                            ctx.enr
+                            for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
+                        ]
+                    )
+                )
+                cmd.append(
+                    "--trusted-peers="
+                    + ",".join(
+                        [
+                            ctx.peer_id
+                            for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
+                        ]
+                    )
+                )
+        elif network == "ephemery":  # Ephemery
+            cmd.append(
+                "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
+            )
             cmd.append(
                 "--boot-nodes="
-                + ",".join(
-                    [
-                        ctx.enr
-                        for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
-                    ]
+                + shared_utils.get_devnet_enrs_list(
+                    plan, el_cl_genesis_data.files_artifact_uuid
+                )
+            )
+        else:  # Devnets
+            cmd.append(
+                "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                    network
                 )
             )
             cmd.append(
-                "--trusted-peers="
-                + ",".join(
-                    [
-                        ctx.peer_id
-                        for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
-                    ]
+                "--boot-nodes="
+                + shared_utils.get_devnet_enrs_list(
+                    plan, el_cl_genesis_data.files_artifact_uuid
                 )
             )
-    elif network not in constants.PUBLIC_NETWORKS:
-        cmd.append(
-            "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                network
-            )
-        )
-        cmd.append(
-            "--boot-nodes="
-            + shared_utils.get_devnet_enrs_list(
-                plan, el_cl_genesis_data.files_artifact_uuid
-            )
-        )
+    else:  # Public networks
+        cmd.append("--network=" + network)
+        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

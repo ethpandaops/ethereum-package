@@ -167,9 +167,9 @@ def launch_participant_network(
         validator_data = None
     elif network_params.network == "ephemery":
         el_cl_genesis_data_uuid = plan.run_sh(
-            run="mkdir -p /network-configs && curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && tar xvzf latest.tar.gz -C /network-configs && cat /network-configs/genesis_validators_root.txt",
+            run="mkdir -p /network-configs/ && curl -o latest.tar.gz https://ephemery.dev/test-genesis2.tar.gz && tar xvzf latest.tar.gz -C /network-configs && cat /network-configs/genesis_validators_root.txt",
             image="badouralix/curl-jq",
-            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis")],
+            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
         )
         genesis_validators_root = el_cl_genesis_data_uuid.output
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
@@ -202,10 +202,10 @@ def launch_participant_network(
             genesis_validators_root,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
-            plan, el_cl_genesis_uuid
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
         )
         network_id = shared_utils.read_genesis_network_id_from_config(
-            plan, el_cl_genesis_uuid
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
         )
         validator_data = None
 
