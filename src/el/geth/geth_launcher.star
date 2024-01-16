@@ -237,6 +237,7 @@ def get_config(
         "{0}".format(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
         ),
+        "--networkid={0}".format(networkid),
         "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--http",
@@ -295,17 +296,14 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-
+    cmd_str = " ".join(cmd)
     if network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--networkid=" + networkid)
-        cmd_str = " ".join(cmd)
         subcommand_strs = [
             init_datadir_cmd_str,
             cmd_str,
         ]
         command_str = " && ".join(subcommand_strs)
     else:
-        cmd_str = " ".join(cmd)
         command_str = cmd_str
 
     files = {

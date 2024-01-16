@@ -124,6 +124,7 @@ print(min_genesis_time + genesis_delay, end="")
     )
     return value.output
 
+
 def read_genesis_network_id_from_config(plan, filename):
     value = plan.run_python(
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},

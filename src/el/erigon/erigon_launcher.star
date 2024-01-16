@@ -179,6 +179,7 @@ def get_config(
         "--chain={0}".format(
             network if network in constants.PUBLIC_NETWORKS else "dev"
         ),
+        "--networkid={0}".format(networkid),
         "--log.console.verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--port={0}".format(DISCOVERY_PORT_NUM),
@@ -250,7 +251,6 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     if network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--networkid={0}".format(networkid))
         command_arg = [init_datadir_cmd_str, " ".join(cmd)]
         command_arg_str = " && ".join(command_arg)
     else:
@@ -279,7 +279,7 @@ def get_config(
     )
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, network,networkid):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,

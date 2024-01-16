@@ -191,7 +191,6 @@ def launch_participant_network(
         )
         validator_data = None
 
-
     el_launchers = {
         constants.EL_CLIENT_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
