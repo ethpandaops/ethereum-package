@@ -184,6 +184,7 @@ def launch_participant_network(
             plan, el_cl_genesis_data_uuid.files_artifacts[0]
         )
         validator_data = None
+        
     else:
         # We are running a devnet
         url = calculate_devnet_url(network_params.network)
