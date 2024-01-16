@@ -83,6 +83,8 @@ def launch_participant_network(
 
         plan.print(json.indent(json.encode(validator_data)))
 
+        network_id = network_params.network_id
+
         # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
         final_genesis_timestamp = get_final_genesis_timestamp(
             plan,
@@ -161,6 +163,7 @@ def launch_participant_network(
             constants.GENESIS_VALIDATORS_ROOT[network_params.network],
         )
         final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
+        network_id = constants.NETWORK_ID[network_params.network]
         validator_data = None
     else:
         # We are running a devnet
@@ -175,11 +178,15 @@ def launch_participant_network(
             files={"/opt": el_cl_genesis_uuid},
         )
         genesis_validators_root = read_file(url + "/genesis_validators_root.txt")
+
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             el_cl_genesis_data_uuid.files_artifacts[0],
             genesis_validators_root,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
+            plan, el_cl_genesis_uuid
+        )
+        network_id = shared_utils.read_genesis_network_id_from_config(
             plan, el_cl_genesis_uuid
         )
         validator_data = None
@@ -190,6 +197,7 @@ def launch_participant_network(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                network_id,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -201,6 +209,7 @@ def launch_participant_network(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                network_id,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -220,6 +229,7 @@ def launch_participant_network(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                network_id,
             ),
             "launch_method": erigon.launch,
         },
