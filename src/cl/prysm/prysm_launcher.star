@@ -355,16 +355,18 @@ def get_beacon_config(
                 + "/boot_enr.yaml"
             )
         else:  # Devnets
-            cmd.append(
-                "--genesis-beacon-api-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                    network
+            # TODO Remove once checkpoint sync is working for verkle
+            if "verkle" not in network:
+                cmd.append(
+                    "--genesis-beacon-api-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
                 )
-            )
-            cmd.append(
-                "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                    network
+                cmd.append(
+                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
                 )
-            )
             cmd.append(
                 "--bootstrap-node="
                 + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER

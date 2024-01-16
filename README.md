@@ -645,8 +645,7 @@ This note is from 2023-10-05
 `flashbots/mev-boost-relay:0.27` and later support `capella_fork_epoch` at `0` but this seems to require a few flags enabled
 on the `lighthouse` beacon client including `--always-prefer-builder-payload` and `--disable-peer-scoring`
 
-Users are recommended to use [`examples/capella-mev.yaml`](./examples/capella-mev.yaml); as inspiration for reliable payload
-delivery.
+Users are recommended to browse the example tests [`./github/tests`](./github/tests); as inspiration for different ways to use the package.
 
 ## Pre-funded accounts at Genesis
 

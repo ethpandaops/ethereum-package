@@ -347,11 +347,13 @@ def get_beacon_config(
                 )
             )
         else:  # Devnets
-            cmd.append(
-                "--checkpointSyncUrl=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                    network
+            # TODO Remove once checkpoint sync is working for verkle
+            if "verkle" not in network:
+                cmd.append(
+                    "--checkpointSyncUrl=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
                 )
-            )
             cmd.append(
                 "--bootnodes="
                 + shared_utils.get_devnet_enrs_list(
