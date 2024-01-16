@@ -421,7 +421,7 @@ def parse_network_params(input_args):
 def get_client_log_level_or_default(
     participant_log_level, global_log_level, client_log_levels
 ):
-    log_level = participant_log_level
+    log_level = client_log_levels.get(participant_log_level, "")
     if log_level == "":
         log_level = client_log_levels.get(global_log_level, "")
         if log_level == "":
