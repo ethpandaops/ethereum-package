@@ -46,7 +46,8 @@ USED_PORTS = {
         ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
     ),
     METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL,
+        wait = None
     ),
 }
 
