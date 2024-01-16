@@ -107,6 +107,7 @@ def launch(
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
         launcher.network,
+        launcher.networkid,
         image,
         service_name,
         existing_el_clients,
@@ -152,6 +153,7 @@ def get_config(
     el_cl_genesis_data,
     jwt_file,
     network,
+    networkid,
     image,
     service_name,
     existing_el_clients,
@@ -248,6 +250,7 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     if network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--networkid={0}".format(networkid))
         command_arg = [init_datadir_cmd_str, " ".join(cmd)]
         command_arg_str = " && ".join(command_arg)
     else:
@@ -276,9 +279,10 @@ def get_config(
     )
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, network):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, network,networkid):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
+        networkid=networkid,
     )

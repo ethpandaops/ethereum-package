@@ -115,6 +115,7 @@ def launch(
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
         launcher.network,
+        launcher.networkid,
         image,
         service_name,
         existing_el_clients,
@@ -163,6 +164,7 @@ def get_config(
     el_cl_genesis_data,
     jwt_file,
     network,
+    networkid,
     image,
     service_name,
     existing_el_clients,
@@ -293,14 +295,17 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in extra_params])
 
-    cmd_str = " ".join(cmd)
+
     if network not in constants.PUBLIC_NETWORKS:
+        cmd.append("--networkid=" + networkid)
+        cmd_str = " ".join(cmd)
         subcommand_strs = [
             init_datadir_cmd_str,
             cmd_str,
         ]
         command_str = " && ".join(subcommand_strs)
     else:
+        cmd_str = " ".join(cmd)
         command_str = cmd_str
 
     files = {
@@ -338,6 +343,7 @@ def new_geth_launcher(
     el_cl_genesis_data,
     jwt_file,
     network,
+    networkid,
     final_genesis_timestamp,
     capella_fork_epoch,
     electra_fork_epoch=None,
@@ -346,6 +352,7 @@ def new_geth_launcher(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
+        networkid=networkid,
         final_genesis_timestamp=final_genesis_timestamp,
         capella_fork_epoch=capella_fork_epoch,
         electra_fork_epoch=electra_fork_epoch,
