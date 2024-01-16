@@ -166,7 +166,6 @@ def launch_participant_network(
         network_id = constants.NETWORK_ID[network_params.network]
         validator_data = None
     elif network_params.network == "ephemery":
-        url = "https://ephemery.dev/latest.tar.gz"
         el_cl_genesis_data_uuid = plan.run_sh(
             run="mkdir -p /network-configs && curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && tar xvzf latest.tar.gz -C /network-configs && cat /network-configs/genesis_validators_root.txt",
             image="badouralix/curl-jq",
@@ -184,7 +183,6 @@ def launch_participant_network(
             plan, el_cl_genesis_data_uuid.files_artifacts[0]
         )
         validator_data = None
-        
     else:
         # We are running a devnet
         url = calculate_devnet_url(network_params.network)
