@@ -181,6 +181,7 @@ def get_config(
         "--Network.OnlyStaticPeers=true",
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
+        "--Metrics.ExposeHost=0.0.0.0",
     ]
 
     if network not in constants.PUBLIC_NETWORKS:
