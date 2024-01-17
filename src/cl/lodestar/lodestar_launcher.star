@@ -327,7 +327,7 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
-        if network == "kurtosis":  # Kurtosis
+        if network == "kurtosis":
             if bootnode_contexts != None:
                 cmd.append(
                     "--bootnodes="
@@ -338,7 +338,7 @@ def get_beacon_config(
                         ]
                     )
                 )
-        elif network == "ephemery":  # Ephemery
+        elif network == "ephemery":
             cmd.append("--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network])
             cmd.append(
                 "--bootnodes="

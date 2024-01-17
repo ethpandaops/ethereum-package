@@ -387,12 +387,6 @@ def get_beacon_config(
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     cmd.append("--bootstrap-node=" + ctx.enr)
                     cmd.append("--direct-peer=" + ctx.multiaddr)
-    #     elif network == "ephemery": # Ephemery
-    #         # Placeholder for future checkpoint sync
-    #     else: # Devnets
-    #         # Placeholder for future checkpoint sync
-    # else: # Public networks
-    #     # Placeholder for future checkpoint sync
 
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])

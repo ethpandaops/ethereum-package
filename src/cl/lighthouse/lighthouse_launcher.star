@@ -358,7 +358,7 @@ def get_beacon_config(
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
-        if network == "kurtosis":  # Kurtosis
+        if network == "kurtosis":
             if boot_cl_client_ctxs != None:
                 cmd.append(
                     "--boot-nodes="
@@ -378,7 +378,7 @@ def get_beacon_config(
                         ]
                     )
                 )
-        elif network == "ephemery":  # Ephemery
+        elif network == "ephemery":
             cmd.append(
                 "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
             )
