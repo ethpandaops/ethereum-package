@@ -1,0 +1,102 @@
+shared_utils = import_module("../shared_utils/shared_utils.star")
+static_files = import_module("../static_files/static_files.star")
+xatu_sentry_context = import_module(
+    "../xatu_sentry/xatu_sentry_context.star"
+)
+
+HTTP_PORT_ID = "http"
+METRICS_PORT_NUMBER = 9090
+
+DEFAULT_XATU_SENTRY_IMAGE = "ethpandaops/xatu:latest"
+
+XATU_SENTRY_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
+XATU_SENTRY_CONFIG_FILENAME = "config.yaml"
+
+# The min/max CPU/memory that xatu-sentry can use
+MIN_CPU = 10
+MAX_CPU = 1000
+MIN_MEMORY = 16
+MAX_MEMORY = 1024
+
+
+def launch(
+    plan,
+    xatu_sentry_service_name,
+    cl_client_context,
+    xatu_sentry_params,
+):
+    config_template = read_file(static_files.XATU_SENTRY_CONFIG_TEMPLATE_FILEPATH)
+
+    template_data = new_config_template_data(
+        str(METRICS_PORT_NUMBER),
+        xatu_sentry_service_name,
+        "http://{}:{}".format(
+            cl_client_context.ip_addr,
+            cl_client_context.http_port_num,
+        ),
+        xatu_sentry_params.xatu_server_addr,
+    )
+
+    template_and_data = shared_utils.new_template_and_data(
+        config_template, template_data
+    )
+
+    template_and_data_by_rel_dest_filepath = {}
+
+    template_and_data_by_rel_dest_filepath[
+        XATU_SENTRY_CONFIG_FILENAME
+    ] = template_and_data
+
+    config_files_artifact_name = plan.render_templates(
+        template_and_data_by_rel_dest_filepath, "config"
+    )
+
+    config_file_path = shared_utils.path_join(
+        XATU_SENTRY_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
+        XATU_SENTRY_CONFIG_FILENAME,
+    )
+
+
+    xatu_sentry_service = plan.add_service(
+        xatu_sentry_service_name,
+        ServiceConfig(
+            image=DEFAULT_XATU_SENTRY_IMAGE,
+            ports={
+                HTTP_PORT_ID: shared_utils.new_port_spec(
+                    METRICS_PORT_NUMBER,
+                    shared_utils.TCP_PROTOCOL,
+                    shared_utils.HTTP_APPLICATION_PROTOCOL,
+                )
+            },
+            files={
+                XATU_SENTRY_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+            },
+            cmd=[
+                "sentry",
+                "--config",
+                config_file_path,
+            ],
+            min_cpu=MIN_CPU,
+            max_cpu=MAX_CPU,
+            min_memory=MIN_MEMORY,
+            max_memory=MAX_MEMORY,
+        ),
+    )
+
+    return xatu_sentry_context.new_xatu_sentry_context(
+        xatu_sentry_service.ip_address,
+        METRICS_PORT_NUMBER,
+    )
+
+def new_config_template_data(
+    metrics_port,
+    beacon_node_name,
+    beacon_node_addr,
+    xatu_server_addr,
+):
+    return {
+        "MetricPort": metrics_port,
+        "BeaconNodeName": beacon_node_name,
+        "BeaconNodeAddr": beacon_node_addr,
+        "XatuServerAddr": xatu_server_addr,
+    }

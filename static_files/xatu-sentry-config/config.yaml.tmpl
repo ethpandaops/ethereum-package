@@ -1,0 +1,55 @@
+logging: "debug"
+metricsAddr: ":{{ .MetricsPort }}"
+
+name: "{{ .BeaconNodeName }}"
+
+ntpServer: time.google.com
+
+ethereum:
+  beaconNodeAddress: "{{ .BeaconNodeAddress }}"
+
+forkChoice:
+  enabled: false
+
+  onReOrgEvent:
+    enabled: false
+
+  interval:
+    enabled: false
+    every: 30s
+
+  at:
+    enabled: false
+    slotTimes:
+    - 4s
+
+attestationData:
+  enabled: false
+
+  # Regular beacon node -> validator client pairs only use committee index 0
+  # true - gets data from all committees
+  # false - only gets data from committee index 0
+  allCommittees: false
+
+  interval:
+    enabled: false
+    every: 30s
+
+  at:
+    enabled: false
+    slotTimes:
+    - 4s
+
+beaconCommittees:
+  enabled: true
+
+outputs:
+- name: xatu-server
+  type: xatu
+  config:
+    address: "{{ .XatuServerAddress }}"
+    tls: false
+    maxQueueSize: 51200
+    batchTimeout: 1s
+    exportTimeout: 10s
+    maxExportBatchSize: 256
