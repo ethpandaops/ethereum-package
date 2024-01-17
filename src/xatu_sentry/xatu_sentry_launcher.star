@@ -24,6 +24,7 @@ def launch(
     xatu_sentry_service_name,
     cl_client_context,
     xatu_sentry_params,
+    network_params,
 ):
     config_template = read_file(static_files.XATU_SENTRY_CONFIG_TEMPLATE_FILEPATH)
 
@@ -35,6 +36,10 @@ def launch(
             cl_client_context.http_port_num,
         ),
         xatu_sentry_params.xatu_server_addr,
+        network_params.network,
+        xatu_sentry_params.beacon_subscriptions,
+        xatu_sentry_params.xatu_server_headers,
+        xatu_sentry_params.xatu_server_tls,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -43,17 +48,22 @@ def launch(
 
     template_and_data_by_rel_dest_filepath = {}
 
-    template_and_data_by_rel_dest_filepath[
+    config_name = "{}-{}".format(
+        xatu_sentry_service_name,
         XATU_SENTRY_CONFIG_FILENAME
+    )
+
+    template_and_data_by_rel_dest_filepath[
+        config_name
     ] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "config"
+        template_and_data_by_rel_dest_filepath, config_name
     )
 
     config_file_path = shared_utils.path_join(
         XATU_SENTRY_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
-        XATU_SENTRY_CONFIG_FILENAME,
+        config_name,
     )
 
 
@@ -93,10 +103,18 @@ def new_config_template_data(
     beacon_node_name,
     beacon_node_addr,
     xatu_server_addr,
+    network_name,
+    beacon_subscriptions,
+    xatu_server_headers,
+    xatu_server_tls,
 ):
     return {
-        "MetricPort": metrics_port,
+        "MetricsPort": metrics_port,
         "BeaconNodeName": beacon_node_name,
-        "BeaconNodeAddr": beacon_node_addr,
-        "XatuServerAddr": xatu_server_addr,
+        "BeaconNodeAddress": beacon_node_addr,
+        "XatuServerAddress": xatu_server_addr,
+        "EthereumNetworkName": network_name,
+        "BeaconSubscriptions": beacon_subscriptions,
+        "XatuServerHeaders": xatu_server_headers,
+        "XatuServerTLS": xatu_server_tls,
     }

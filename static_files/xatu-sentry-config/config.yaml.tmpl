@@ -7,6 +7,11 @@ ntpServer: time.google.com
 
 ethereum:
   beaconNodeAddress: "{{ .BeaconNodeAddress }}"
+  overrideNetworkName: "{{ .EthereumNetworkName }}"
+  beaconSubscriptions:
+  {{- range .BeaconSubscriptions }}
+  - "{{ . }}"
+  {{- end }}
 
 forkChoice:
   enabled: false
@@ -26,9 +31,6 @@ forkChoice:
 attestationData:
   enabled: false
 
-  # Regular beacon node -> validator client pairs only use committee index 0
-  # true - gets data from all committees
-  # false - only gets data from committee index 0
   allCommittees: false
 
   interval:
@@ -48,8 +50,14 @@ outputs:
   type: xatu
   config:
     address: "{{ .XatuServerAddress }}"
-    tls: false
+    tls: {{ .XatuServerTLS }}
     maxQueueSize: 51200
     batchTimeout: 1s
     exportTimeout: 10s
     maxExportBatchSize: 256
+    {{- if .XatuServerHeaders }}
+    headers:
+    {{- range $key, $value := .XatuServerHeaders }}
+      {{ $key }}: "{{ $value }}"
+    {{- end }}
+    {{- end }}

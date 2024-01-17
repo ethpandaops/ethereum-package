@@ -78,5 +78,3 @@ mev_params:
 grafana_additional_dashboards: []
 persistent: false
 xatu_sentry_enabled: false
-xatu_sentry_params:
-  xatu_server_endpoint: http://localhost:8080

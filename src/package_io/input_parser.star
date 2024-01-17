@@ -56,6 +56,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "goomy_blob_params",
     "tx_spammer_params",
     "custom_flood_params",
+    "xatu_sentry_params",
 )
 
 
@@ -75,6 +76,7 @@ def input_parser(plan, input_args):
     result["disable_peer_scoring"] = False
     result["goomy_blob_params"] = get_default_goomy_blob_params()
     result["assertoor_params"] = get_default_assertoor_params()
+    result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
 
     for attr in input_args:
@@ -103,6 +105,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["assertoor_params"]:
                 sub_value = input_args["assertoor_params"][sub_attr]
                 result["assertoor_params"][sub_attr] = sub_value
+        elif attr == "xatu_sentry_params":
+            for sub_attr in input_args["xatu_sentry_params"]:
+                sub_value = input_args["xatu_sentry_params"][sub_attr]
+                result["xatu_sentry_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -256,8 +262,11 @@ def input_parser(plan, input_args):
         disable_peer_scoring=result["disable_peer_scoring"],
         persistent=result["persistent"],
         xatu_sentry_params=struct(
-            xatu_sentry_image="ethpandaops/xatu-sentry:latest",
-            xatu_server_addr="http://localhost:5052",
+            xatu_sentry_image=result["xatu_sentry_params"]["xatu_sentry_image"],
+            xatu_server_addr=result["xatu_sentry_params"]["xatu_server_addr"],
+            xatu_server_headers=result["xatu_sentry_params"]["xatu_server_headers"],
+            beacon_subscriptions=result["xatu_sentry_params"]["beacon_subscriptions"],
+            xatu_server_tls=result["xatu_sentry_params"]["xatu_server_tls"],
         ),
     )
 
@@ -569,6 +578,23 @@ def get_default_assertoor_params():
         "tests": [],
     }
 
+def get_default_xatu_sentry_params():
+    return {
+        "xatu_sentry_image": "ethpandaops/xatu:latest",
+        "xatu_server_addr": "localhost:8080",
+        "xatu_server_headers": {},
+        "xatu_server_tls": False,
+        "beacon_subscriptions": [
+          "attestation",
+          "block",
+          "chain_reorg",
+          "finalized_checkpoint",
+          "head",
+          "voluntary_exit",
+          "contribution_and_proof",
+          "blob_sidecar",
+        ],
+    }
 
 def get_default_custom_flood_params():
     # this is a simple script that increases the balance of the coinbase address at a cadence
@@ -698,3 +724,4 @@ def deep_copy_participant(participant):
         else:
             part[k] = v
     return part
+
