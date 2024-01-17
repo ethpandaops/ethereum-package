@@ -167,7 +167,10 @@ def launch_participant_network(
         validator_data = None
     elif network_params.network == "ephemery":
         el_cl_genesis_data_uuid = plan.run_sh(
-            run="mkdir -p /network-configs/ && curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && tar xvzf latest.tar.gz -C /network-configs && cat /network-configs/genesis_validators_root.txt",
+            run="mkdir -p /network-configs/ && \
+                curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && \
+                tar xvzf latest.tar.gz -C /network-configs && \
+                cat /network-configs/genesis_validators_root.txt",
             image="badouralix/curl-jq",
             store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
         )
