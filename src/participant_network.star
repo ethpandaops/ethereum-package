@@ -64,7 +64,7 @@ def launch_participant_network(
     parallel_keystore_generation=False,
 ):
     num_participants = len(participants)
-    if network_params.network == "kurtosis":
+    if network_params.network == constants.NETWORK_NAME.kurtosis:
         # We are running a kurtosis network
         plan.print("Generating cl validator key stores")
         validator_data = None
@@ -165,7 +165,7 @@ def launch_participant_network(
         final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
         network_id = constants.NETWORK_ID[network_params.network]
         validator_data = None
-    elif network_params.network == "ephemery":
+    elif network_params.network == constants.NETWORK_NAME.ephemery:
         el_cl_genesis_data_uuid = plan.run_sh(
             run="mkdir -p /network-configs/ && \
                 curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && \
@@ -336,12 +336,12 @@ def launch_participant_network(
     plan.print("Launching CL network")
     prysm_password_relative_filepath = (
         validator_data.prysm_password_relative_filepath
-        if network_params.network == "kurtosis"
+        if network_params.network == constants.NETWORK_NAME.kurtosis
         else None
     )
     prysm_password_artifact_uuid = (
         validator_data.prysm_password_artifact_uuid
-        if network_params.network == "kurtosis"
+        if network_params.network == constants.NETWORK_NAME.kurtosis
         else None
     )
     cl_launchers = {
@@ -388,7 +388,7 @@ def launch_participant_network(
     all_ethereum_metrics_exporter_contexts = []
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
-        if network_params.network == "kurtosis"
+        if network_params.network == constants.NETWORK_NAME.kurtosis
         else None
     )
 

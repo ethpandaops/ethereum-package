@@ -147,7 +147,7 @@ def launch(
     )
 
     # Holesky has a bigger memory footprint, so it needs more memory
-    if launcher.network == "holesky":
+    if launcher.network == constants.NETWORK_NAME.holesky:
         holesky_beacon_memory_limit = 4096
         bn_max_mem = (
             int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
@@ -160,7 +160,7 @@ def launch(
 
     network_name = (
         "devnets"
-        if launcher.network != "kurtosis"
+        if launcher.network != constants.NETWORK_NAME.kurtosis
         and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
@@ -380,7 +380,7 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/bootstrap_nodes.txt"
         )
-        if network == "kurtosis":  # Kurtosis
+        if network == constants.NETWORK_NAME.kurtosis:
             if bootnode_contexts == None:
                 cmd.append("--subscribe-all-subnets")
             else:

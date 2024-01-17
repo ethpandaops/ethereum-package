@@ -213,7 +213,7 @@ def get_config(
             size=el_volume_size,
         )
 
-    if network == "kurtosis":
+    if network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="

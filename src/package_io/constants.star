@@ -53,6 +53,16 @@ CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
 
+NETWORK_NAME = struct(
+    mainnet="mainnet",
+    goerli="goerli",
+    sepolia="sepolia",
+    holesky="holesky",
+    ephemery="ephemery",
+    kurtosis="kurtosis",
+    verkle="verkle",
+)
+
 PUBLIC_NETWORKS = (
     "mainnet",
     "goerli",
