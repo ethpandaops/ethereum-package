@@ -477,10 +477,14 @@ xatu_sentry_enabled: false
 
 # Xatu Sentry params
 xatu_sentry_params:
-  # GRPC Endpoint of Xatu Server for event aggregation
-  xatu_server_addr: localhost:8080
   # The image to use for Xatu Sentry
   xatu_sentry_image: ethpandaops/xatu:latest
+  # GRPC Endpoint of Xatu Server to send events to
+  xatu_server_addr: localhost:8080
+  # Enables TLS to Xatu Server
+  xatu_server_tls: false
+  # Headers to add on to Xatu Server requests
+  xatu_server_headers: {}
   # Beacon event stream topics to subscribe to
   beacon_subscriptions:
   - attestation

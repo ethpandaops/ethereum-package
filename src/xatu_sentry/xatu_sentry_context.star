@@ -3,5 +3,6 @@ def new_xatu_sentry_context(
     metrics_port_num,
 ):
     return struct(
+        ip_addr=ip_addr,
         metrics_port_num=metrics_port_num,
     )

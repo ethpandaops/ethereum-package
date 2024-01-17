@@ -7,8 +7,6 @@ xatu_sentry_context = import_module(
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
 
-DEFAULT_XATU_SENTRY_IMAGE = "ethpandaops/xatu:latest"
-
 XATU_SENTRY_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 XATU_SENTRY_CONFIG_FILENAME = "config.yaml"
 
@@ -70,7 +68,7 @@ def launch(
     xatu_sentry_service = plan.add_service(
         xatu_sentry_service_name,
         ServiceConfig(
-            image=DEFAULT_XATU_SENTRY_IMAGE,
+            image=xatu_sentry_params.xatu_sentry_image,
             ports={
                 HTTP_PORT_ID: shared_utils.new_port_spec(
                     METRICS_PORT_NUMBER,
