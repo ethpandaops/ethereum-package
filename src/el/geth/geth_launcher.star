@@ -185,7 +185,9 @@ def get_config(
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network:
-        if electra_fork_epoch == 0 or constants.NETWORK_NAME.verkle + "-gen" in network:  # verkle-gen
+        if (
+            electra_fork_epoch == 0 or constants.NETWORK_NAME.verkle + "-gen" in network
+        ):  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
                 final_genesis_timestamp,
