@@ -1,8 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
-xatu_sentry_context = import_module(
-    "../xatu_sentry/xatu_sentry_context.star"
-)
+xatu_sentry_context = import_module("../xatu_sentry/xatu_sentry_context.star")
 
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
@@ -46,14 +44,9 @@ def launch(
 
     template_and_data_by_rel_dest_filepath = {}
 
-    config_name = "{}-{}".format(
-        xatu_sentry_service_name,
-        XATU_SENTRY_CONFIG_FILENAME
-    )
+    config_name = "{}-{}".format(xatu_sentry_service_name, XATU_SENTRY_CONFIG_FILENAME)
 
-    template_and_data_by_rel_dest_filepath[
-        config_name
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[config_name] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, config_name
@@ -63,7 +56,6 @@ def launch(
         XATU_SENTRY_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         config_name,
     )
-
 
     xatu_sentry_service = plan.add_service(
         xatu_sentry_service_name,
@@ -95,6 +87,7 @@ def launch(
         xatu_sentry_service.ip_address,
         METRICS_PORT_NUMBER,
     )
+
 
 def new_config_template_data(
     metrics_port,

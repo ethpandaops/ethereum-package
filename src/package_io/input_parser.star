@@ -368,15 +368,11 @@ def parse_network_params(input_args):
                 participant[
                     "ethereum_metrics_exporter_enabled"
                 ] = default_ethereum_metrics_exporter_enabled
-    
+
         if xatu_sentry_enabled == False:
-            default_xatu_sentry_enabled = result[
-                "xatu_sentry_enabled"
-            ]
+            default_xatu_sentry_enabled = result["xatu_sentry_enabled"]
             if default_xatu_sentry_enabled:
-                participant[
-                    "xatu_sentry_enabled"
-                ] = default_xatu_sentry_enabled
+                participant["xatu_sentry_enabled"] = default_xatu_sentry_enabled
 
         validator_count = participant["validator_count"]
         if validator_count == None:
@@ -578,6 +574,7 @@ def get_default_assertoor_params():
         "tests": [],
     }
 
+
 def get_default_xatu_sentry_params():
     return {
         "xatu_sentry_image": "ethpandaops/xatu:latest",
@@ -585,16 +582,17 @@ def get_default_xatu_sentry_params():
         "xatu_server_headers": {},
         "xatu_server_tls": False,
         "beacon_subscriptions": [
-          "attestation",
-          "block",
-          "chain_reorg",
-          "finalized_checkpoint",
-          "head",
-          "voluntary_exit",
-          "contribution_and_proof",
-          "blob_sidecar",
+            "attestation",
+            "block",
+            "chain_reorg",
+            "finalized_checkpoint",
+            "head",
+            "voluntary_exit",
+            "contribution_and_proof",
+            "blob_sidecar",
         ],
     }
+
 
 def get_default_custom_flood_params():
     # this is a simple script that increases the balance of the coinbase address at a cadence
@@ -724,4 +722,3 @@ def deep_copy_participant(participant):
         else:
             part[k] = v
     return part
-
