@@ -165,6 +165,7 @@ def input_parser(plan, input_args):
                 ethereum_metrics_exporter_enabled=participant[
                     "ethereum_metrics_exporter_enabled"
                 ],
+                xatu_sentry_enabled=participant["xatu_sentry_enabled"],
                 prometheus_config=struct(
                     scrape_interval=participant["prometheus_config"]["scrape_interval"],
                     labels=participant["prometheus_config"]["labels"],
@@ -249,10 +250,15 @@ def input_parser(plan, input_args):
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         ethereum_metrics_exporter_enabled=result["ethereum_metrics_exporter_enabled"],
+        xatu_sentry_enabled=result["xatu_sentry_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
         grafana_additional_dashboards=result["grafana_additional_dashboards"],
         disable_peer_scoring=result["disable_peer_scoring"],
         persistent=result["persistent"],
+        xatu_sentry_params=struct(
+            xatu_sentry_image="ethpandaops/xatu-sentry:latest",
+            xatu_server_addr="http://localhost:5052",
+        ),
     )
 
 
@@ -333,6 +339,8 @@ def parse_network_params(input_args):
             "ethereum_metrics_exporter_enabled"
         ]
 
+        xatu_sentry_enabled = participant["xatu_sentry_enabled"]
+
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
             # unless we are running lighthouse, we don't support blobber
@@ -351,6 +359,15 @@ def parse_network_params(input_args):
                 participant[
                     "ethereum_metrics_exporter_enabled"
                 ] = default_ethereum_metrics_exporter_enabled
+    
+        if xatu_sentry_enabled == False:
+            default_xatu_sentry_enabled = result[
+                "xatu_sentry_enabled"
+            ]
+            if default_xatu_sentry_enabled:
+                participant[
+                    "xatu_sentry_enabled"
+                ] = default_xatu_sentry_enabled
 
         validator_count = participant["validator_count"]
         if validator_count == None:
@@ -442,6 +459,7 @@ def default_input_args():
         "global_client_log_level": "info",
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
+        "xatu_sentry_enabled": False,
         "parallel_keystore_generation": False,
         "disable_peer_scoring": False,
     }
@@ -501,6 +519,7 @@ def default_participant():
         "validator_count": None,
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
+        "xatu_sentry_enabled": False,
         "count": 1,
         "prometheus_config": {
             "scrape_interval": "15s",

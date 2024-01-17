@@ -31,6 +31,8 @@ ethereum_metrics_exporter = import_module(
     "./ethereum_metrics_exporter/ethereum_metrics_exporter_launcher.star"
 )
 
+xatu_sentry = import_module("./xatu_sentry/xatu_sentry_launcher.star")
+
 genesis_constants = import_module(
     "./prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
@@ -61,6 +63,7 @@ def launch_participant_network(
     global_log_level,
     jwt_file,
     persistent,
+    xatu_sentry_params,
     parallel_keystore_generation=False,
 ):
     num_participants = len(participants)
@@ -355,6 +358,7 @@ def launch_participant_network(
     all_snooper_engine_contexts = []
     all_cl_client_contexts = []
     all_ethereum_metrics_exporter_contexts = []
+    all_xatu_sentry_contexts = []
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
         if network_params.network == "kurtosis"
@@ -503,6 +507,27 @@ def launch_participant_network(
 
         all_ethereum_metrics_exporter_contexts.append(ethereum_metrics_exporter_context)
 
+        xatu_sentry_context = None
+
+        if participant.xatu_sentry_enabled:
+            pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
+
+            xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
+
+            xatu_sentry_context = xatu_sentry.launch(
+                plan,
+                xatu_sentry_service_name,
+                cl_client_context,
+                xatu_sentry_params,
+            )
+            plan.print(
+                "Successfully added {0} xatu sentry participants".format(
+                    xatu_sentry_context
+                )
+            )
+
+        all_xatu_sentry_contexts.append(xatu_sentry_context)
+
     plan.print("Successfully added {0} CL participants".format(num_participants))
 
     all_participants = []
@@ -523,6 +548,10 @@ def launch_participant_network(
             ethereum_metrics_exporter_context = all_ethereum_metrics_exporter_contexts[
                 index
             ]
+        xatu_sentry_context = None
+
+        if participant.xatu_sentry_enabled:
+            xatu_sentry_context = all_xatu_sentry_contexts[index]
 
         participant_entry = participant_module.new_participant(
             el_client_type,
@@ -531,6 +560,7 @@ def launch_participant_network(
             cl_client_context,
             snooper_engine_context,
             ethereum_metrics_exporter_context,
+            xatu_sentry_context,
         )
 
         all_participants.append(participant_entry)

@@ -231,6 +231,10 @@ participants:
   # Defaults to false
   ethereum_metrics_exporter_enabled: false
 
+  # Enables Xatu Sentry for this participant. Can be set globally.
+  # Defaults to false
+  xatu_sentry_enabled: false
+
   # Count of nodes to spin up for this participant
   # Default to 1
   count: 1
@@ -466,6 +470,15 @@ mev_params:
   # Optional parameters to send to the custom_flood script that sends reliable payloads
   custom_flood_params:
     interval_between_transactions: 1
+
+# Enables Xatu Sentry for all participants
+# Defaults to false
+xatu_sentry_enabled: false
+
+# Xatu Sentry params
+xatu_sentry_params:
+  # Endpoint of Xatu Server for event aggregation
+  xatu_server_endpoint: http://localhost:8080
 ```
 
 #### Example configurations
