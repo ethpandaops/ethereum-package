@@ -1,0 +1,63 @@
+logging: "debug"
+metricsAddr: ":{{ .MetricsPort }}"
+
+name: "{{ .BeaconNodeName }}"
+
+ntpServer: time.google.com
+
+ethereum:
+  beaconNodeAddress: "{{ .BeaconNodeAddress }}"
+  overrideNetworkName: "{{ .EthereumNetworkName }}"
+  beaconSubscriptions:
+  {{- range .BeaconSubscriptions }}
+  - "{{ . }}"
+  {{- end }}
+
+forkChoice:
+  enabled: false
+
+  onReOrgEvent:
+    enabled: false
+
+  interval:
+    enabled: false
+    every: 30s
+
+  at:
+    enabled: false
+    slotTimes:
+    - 4s
+
+attestationData:
+  enabled: false
+
+  allCommittees: false
+
+  interval:
+    enabled: false
+    every: 30s
+
+  at:
+    enabled: false
+    slotTimes:
+    - 4s
+
+beaconCommittees:
+  enabled: true
+
+outputs:
+- name: xatu-server
+  type: xatu
+  config:
+    address: "{{ .XatuServerAddress }}"
+    tls: {{ .XatuServerTLS }}
+    maxQueueSize: 51200
+    batchTimeout: 1s
+    exportTimeout: 10s
+    maxExportBatchSize: 256
+    {{- if .XatuServerHeaders }}
+    headers:
+    {{- range $key, $value := .XatuServerHeaders }}
+      {{ $key }}: "{{ $value }}"
+    {{- end }}
+    {{- end }}

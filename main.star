@@ -61,6 +61,7 @@ def run(plan, args={}):
     mev_params = args_with_right_defaults.mev_params
     parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
     persistent = args_with_right_defaults.persistent
+    xatu_sentry_params = args_with_right_defaults.xatu_sentry_params
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -94,6 +95,7 @@ def run(plan, args={}):
         args_with_right_defaults.global_client_log_level,
         jwt_file,
         persistent,
+        xatu_sentry_params,
         parallel_keystore_generation,
     )
 
@@ -107,12 +109,14 @@ def run(plan, args={}):
     all_el_client_contexts = []
     all_cl_client_contexts = []
     all_ethereum_metrics_exporter_contexts = []
+    all_xatu_sentry_contexts = []
     for participant in all_participants:
         all_el_client_contexts.append(participant.el_client_context)
         all_cl_client_contexts.append(participant.cl_client_context)
         all_ethereum_metrics_exporter_contexts.append(
             participant.ethereum_metrics_exporter_context
         )
+        all_xatu_sentry_contexts.append(participant.xatu_sentry_context)
 
     # Generate validator ranges
     validator_ranges_config_template = read_file(
@@ -405,6 +409,7 @@ def run(plan, args={}):
             all_cl_client_contexts,
             prometheus_additional_metrics_jobs,
             all_ethereum_metrics_exporter_contexts,
+            all_xatu_sentry_contexts,
         )
 
         plan.print("Launching grafana...")

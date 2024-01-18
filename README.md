@@ -231,6 +231,10 @@ participants:
   # Defaults to false
   ethereum_metrics_exporter_enabled: false
 
+  # Enables Xatu Sentry for this participant. Can be set globally.
+  # Defaults to false
+  xatu_sentry_enabled: false
+
   # Count of nodes to spin up for this participant
   # Default to 1
   count: 1
@@ -466,6 +470,31 @@ mev_params:
   # Optional parameters to send to the custom_flood script that sends reliable payloads
   custom_flood_params:
     interval_between_transactions: 1
+
+# Enables Xatu Sentry for all participants
+# Defaults to false
+xatu_sentry_enabled: false
+
+# Xatu Sentry params
+xatu_sentry_params:
+  # The image to use for Xatu Sentry
+  xatu_sentry_image: ethpandaops/xatu:latest
+  # GRPC Endpoint of Xatu Server to send events to
+  xatu_server_addr: localhost:8080
+  # Enables TLS to Xatu Server
+  xatu_server_tls: false
+  # Headers to add on to Xatu Server requests
+  xatu_server_headers: {}
+  # Beacon event stream topics to subscribe to
+  beacon_subscriptions:
+  - attestation
+  - block
+  - chain_reorg
+  - finalized_checkpoint
+  - head
+  - voluntary_exit
+  - contribution_and_proof
+  - blob_sidecar
 ```
 
 #### Example configurations
