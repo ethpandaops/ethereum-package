@@ -63,8 +63,6 @@ def run(plan, args={}):
     persistent = args_with_right_defaults.persistent
     xatu_sentry_params = args_with_right_defaults.xatu_sentry_params
 
-    plan.print(xatu_sentry_params)
-
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
     )
