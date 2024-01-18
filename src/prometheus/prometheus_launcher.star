@@ -174,9 +174,7 @@ def get_metrics_jobs(
                     ),
                     metrics_path="/metrics",
                     labels={
-                        "instance": context.pair_name,
-                        "consensus_client": context.cl_name,
-                        "execution_client": context.el_name,
+                        "pair": context.pair_name,
                     },
                 )
             )

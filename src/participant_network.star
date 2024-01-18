@@ -530,6 +530,7 @@ def launch_participant_network(
                 cl_client_context,
                 xatu_sentry_params,
                 network_params,
+                pair_name,
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(

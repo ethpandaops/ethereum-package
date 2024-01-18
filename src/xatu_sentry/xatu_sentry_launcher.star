@@ -21,12 +21,13 @@ def launch(
     cl_client_context,
     xatu_sentry_params,
     network_params,
+    pair_name,
 ):
     config_template = read_file(static_files.XATU_SENTRY_CONFIG_TEMPLATE_FILEPATH)
 
     template_data = new_config_template_data(
         str(METRICS_PORT_NUMBER),
-        xatu_sentry_service_name,
+        pair_name,
         "http://{}:{}".format(
             cl_client_context.ip_addr,
             cl_client_context.http_port_num,
@@ -86,6 +87,7 @@ def launch(
     return xatu_sentry_context.new_xatu_sentry_context(
         xatu_sentry_service.ip_address,
         METRICS_PORT_NUMBER,
+        pair_name,
     )
 
 
