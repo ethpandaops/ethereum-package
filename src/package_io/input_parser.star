@@ -56,6 +56,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "goomy_blob_params",
     "tx_spammer_params",
     "custom_flood_params",
+    "xatu_sentry_params",
 )
 
 
@@ -75,6 +76,7 @@ def input_parser(plan, input_args):
     result["disable_peer_scoring"] = False
     result["goomy_blob_params"] = get_default_goomy_blob_params()
     result["assertoor_params"] = get_default_assertoor_params()
+    result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
 
     for attr in input_args:
@@ -103,6 +105,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["assertoor_params"]:
                 sub_value = input_args["assertoor_params"][sub_attr]
                 result["assertoor_params"][sub_attr] = sub_value
+        elif attr == "xatu_sentry_params":
+            for sub_attr in input_args["xatu_sentry_params"]:
+                sub_value = input_args["xatu_sentry_params"][sub_attr]
+                result["xatu_sentry_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -165,6 +171,7 @@ def input_parser(plan, input_args):
                 ethereum_metrics_exporter_enabled=participant[
                     "ethereum_metrics_exporter_enabled"
                 ],
+                xatu_sentry_enabled=participant["xatu_sentry_enabled"],
                 prometheus_config=struct(
                     scrape_interval=participant["prometheus_config"]["scrape_interval"],
                     labels=participant["prometheus_config"]["labels"],
@@ -249,10 +256,18 @@ def input_parser(plan, input_args):
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         ethereum_metrics_exporter_enabled=result["ethereum_metrics_exporter_enabled"],
+        xatu_sentry_enabled=result["xatu_sentry_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
         grafana_additional_dashboards=result["grafana_additional_dashboards"],
         disable_peer_scoring=result["disable_peer_scoring"],
         persistent=result["persistent"],
+        xatu_sentry_params=struct(
+            xatu_sentry_image=result["xatu_sentry_params"]["xatu_sentry_image"],
+            xatu_server_addr=result["xatu_sentry_params"]["xatu_server_addr"],
+            xatu_server_headers=result["xatu_sentry_params"]["xatu_server_headers"],
+            beacon_subscriptions=result["xatu_sentry_params"]["beacon_subscriptions"],
+            xatu_server_tls=result["xatu_sentry_params"]["xatu_server_tls"],
+        ),
     )
 
 
@@ -333,6 +348,8 @@ def parse_network_params(input_args):
             "ethereum_metrics_exporter_enabled"
         ]
 
+        xatu_sentry_enabled = participant["xatu_sentry_enabled"]
+
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
             # unless we are running lighthouse, we don't support blobber
@@ -351,6 +368,11 @@ def parse_network_params(input_args):
                 participant[
                     "ethereum_metrics_exporter_enabled"
                 ] = default_ethereum_metrics_exporter_enabled
+
+        if xatu_sentry_enabled == False:
+            default_xatu_sentry_enabled = result["xatu_sentry_enabled"]
+            if default_xatu_sentry_enabled:
+                participant["xatu_sentry_enabled"] = default_xatu_sentry_enabled
 
         validator_count = participant["validator_count"]
         if validator_count == None:
@@ -442,6 +464,7 @@ def default_input_args():
         "global_client_log_level": "info",
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
+        "xatu_sentry_enabled": False,
         "parallel_keystore_generation": False,
         "disable_peer_scoring": False,
     }
@@ -501,6 +524,7 @@ def default_participant():
         "validator_count": None,
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
+        "xatu_sentry_enabled": False,
         "count": 1,
         "prometheus_config": {
             "scrape_interval": "15s",
@@ -548,6 +572,25 @@ def get_default_assertoor_params():
         "run_blob_transaction_test": False,
         "run_opcodes_transaction_test": False,
         "tests": [],
+    }
+
+
+def get_default_xatu_sentry_params():
+    return {
+        "xatu_sentry_image": "ethpandaops/xatu:latest",
+        "xatu_server_addr": "localhost:8080",
+        "xatu_server_headers": {},
+        "xatu_server_tls": False,
+        "beacon_subscriptions": [
+            "attestation",
+            "block",
+            "chain_reorg",
+            "finalized_checkpoint",
+            "head",
+            "voluntary_exit",
+            "contribution_and_proof",
+            "blob_sidecar",
+        ],
     }
 
 
