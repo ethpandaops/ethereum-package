@@ -25,12 +25,14 @@ def launch_prometheus(
     cl_client_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
+    xatu_sentry_contexts,
 ):
     metrics_jobs = get_metrics_jobs(
         el_client_contexts,
         cl_client_contexts,
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
+        xatu_sentry_contexts,
     )
     prometheus_url = prometheus.run(
         plan, metrics_jobs, MIN_CPU, MAX_CPU, MIN_MEMORY, MAX_MEMORY
@@ -44,6 +46,7 @@ def get_metrics_jobs(
     cl_client_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
+    xatu_sentry_contexts,
 ):
     metrics_jobs = []
     # Adding execution clients metrics jobs
@@ -159,6 +162,23 @@ def get_metrics_jobs(
                     },
                 )
             )
+    # Adding Xatu Sentry metrics jobs
+    for context in xatu_sentry_contexts:
+        if context != None:
+            metrics_jobs.append(
+                new_metrics_job(
+                    job_name="xatu-sentry-{0}".format(context.pair_name),
+                    endpoint="{}:{}".format(
+                        context.ip_addr,
+                        context.metrics_port_num,
+                    ),
+                    metrics_path="/metrics",
+                    labels={
+                        "pair": context.pair_name,
+                    },
+                )
+            )
+
     # Adding additional metrics jobs
     for job in additional_metrics_jobs:
         if job == None:
