@@ -147,7 +147,7 @@ def launch(
     )
 
     # Holesky has a bigger memory footprint, so it needs more memory
-    if launcher.network == "holesky":
+    if launcher.network == constants.NETWORK_NAME.holesky:
         holesky_beacon_memory_limit = 4096
         bn_max_mem = (
             int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
@@ -160,7 +160,7 @@ def launch(
 
     network_name = (
         "devnets"
-        if launcher.network != "kurtosis"
+        if launcher.network != constants.NETWORK_NAME.kurtosis
         and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
@@ -374,21 +374,20 @@ def get_beacon_config(
     if node_keystore_files != None and not split_mode_enabled:
         cmd.extend(validator_flags)
 
-    if network == "kurtosis":
-        if bootnode_contexts == None:
-            # Copied from https://github.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
-            # See explanation there
-            cmd.append("--subscribe-all-subnets")
-        else:
-            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
-                cmd.append("--bootstrap-node=" + ctx.enr)
-                cmd.append("--direct-peer=" + ctx.multiaddr)
-    elif network not in constants.PUBLIC_NETWORKS:
+    if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootstrap-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/bootstrap_nodes.txt"
         )
+        if network == constants.NETWORK_NAME.kurtosis:
+            if bootnode_contexts == None:
+                cmd.append("--subscribe-all-subnets")
+            else:
+                for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
+                    cmd.append("--bootstrap-node=" + ctx.enr)
+                    cmd.append("--direct-peer=" + ctx.multiaddr)
+
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
 

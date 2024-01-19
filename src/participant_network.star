@@ -67,7 +67,7 @@ def launch_participant_network(
     parallel_keystore_generation=False,
 ):
     num_participants = len(participants)
-    if network_params.network == "kurtosis":
+    if network_params.network == constants.NETWORK_NAME.kurtosis:
         # We are running a kurtosis network
         plan.print("Generating cl validator key stores")
         validator_data = None
@@ -168,6 +168,27 @@ def launch_participant_network(
         final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
         network_id = constants.NETWORK_ID[network_params.network]
         validator_data = None
+    elif network_params.network == constants.NETWORK_NAME.ephemery:
+        el_cl_genesis_data_uuid = plan.run_sh(
+            run="mkdir -p /network-configs/ && \
+                curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && \
+                tar xvzf latest.tar.gz -C /network-configs && \
+                cat /network-configs/genesis_validators_root.txt",
+            image="badouralix/curl-jq",
+            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
+        )
+        genesis_validators_root = el_cl_genesis_data_uuid.output
+        el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
+            el_cl_genesis_data_uuid.files_artifacts[0],
+            genesis_validators_root,
+        )
+        final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
+        )
+        network_id = shared_utils.read_genesis_network_id_from_config(
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
+        )
+        validator_data = None
     else:
         # We are running a devnet
         url = calculate_devnet_url(network_params.network)
@@ -187,10 +208,10 @@ def launch_participant_network(
             genesis_validators_root,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
-            plan, el_cl_genesis_uuid
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
         )
         network_id = shared_utils.read_genesis_network_id_from_config(
-            plan, el_cl_genesis_uuid
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
         )
         validator_data = None
 
@@ -318,12 +339,12 @@ def launch_participant_network(
     plan.print("Launching CL network")
     prysm_password_relative_filepath = (
         validator_data.prysm_password_relative_filepath
-        if network_params.network == "kurtosis"
+        if network_params.network == constants.NETWORK_NAME.kurtosis
         else None
     )
     prysm_password_artifact_uuid = (
         validator_data.prysm_password_artifact_uuid
-        if network_params.network == "kurtosis"
+        if network_params.network == constants.NETWORK_NAME.kurtosis
         else None
     )
     cl_launchers = {
@@ -371,7 +392,7 @@ def launch_participant_network(
     all_xatu_sentry_contexts = []
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
-        if network_params.network == "kurtosis"
+        if network_params.network == constants.NETWORK_NAME.kurtosis
         else None
     )
 

@@ -324,6 +324,7 @@ def get_beacon_config(
         "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM)
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
+
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--p2p-static-id=true")
         cmd.append(
@@ -336,17 +337,36 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz",
         )
-        if network == "kurtosis":  # Kurtosis
+        if network == constants.NETWORK_NAME.kurtosis:
             if bootnode_contexts != None:
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     cmd.append("--peer=" + ctx.multiaddr)
                     cmd.append("--bootstrap-node=" + ctx.enr)
-        else:  # Devnet
+        elif network == constants.NETWORK_NAME.ephemery:
             cmd.append(
-                "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                    network
-                )
+                "--genesis-beacon-api-url=" + constants.CHECKPOINT_SYNC_URL[network]
             )
+            cmd.append(
+                "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
+            )
+            cmd.append(
+                "--bootstrap-node="
+                + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+                + "/boot_enr.yaml"
+            )
+        else:  # Devnets
+            # TODO Remove once checkpoint sync is working for verkle
+            if constants.NETWORK_NAME.verkle not in network:
+                cmd.append(
+                    "--genesis-beacon-api-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
+                )
+                cmd.append(
+                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
+                )
             cmd.append(
                 "--bootstrap-node="
                 + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER

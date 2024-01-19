@@ -6,7 +6,7 @@ participants:
   - el_client_type: nethermind
     el_client_image: ethpandaops/nethermind:master
     cl_client_type: prysm
-    cl_client_image: ethpandaops/prysm:develop,ethpandaops/prysm-validator:develop
+    cl_client_image: gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest
   - el_client_type: erigon
     el_client_image: ethpandaops/erigon:devel
     cl_client_type: nimbus
@@ -24,5 +24,5 @@ participants:
     cl_client_type: teku
     cl_client_image: ethpandaops/teku:master
 network_params:
-  network: "dencun-devnet-12"
+  network: "ephemery"
 additional_services: []
