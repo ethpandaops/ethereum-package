@@ -128,7 +128,7 @@ def run(plan, args={}):
         all_cl_client_contexts,
         args_with_right_defaults.participants,
     )
-    if network_params.network == "kurtosis":
+    if network_params.network == constants.NETWORK_NAME.kurtosis:
         if network_params.deneb_fork_epoch != 0:
             plan.print("Launching 4788 contract deployer")
             el_uri = "http://{0}:{1}".format(

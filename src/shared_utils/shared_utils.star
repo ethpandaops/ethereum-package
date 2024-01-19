@@ -114,7 +114,7 @@ def read_genesis_timestamp_from_config(plan, filename):
         packages=["PyYAML"],
         run="""
 import yaml
-with open("/network-configs/config.yaml", "r") as f:
+with open("/network-configs/network-configs/config.yaml", "r") as f:
     yaml_data = yaml.safe_load(f)
 
 min_genesis_time = int(yaml_data.get("MIN_GENESIS_TIME", 0))
@@ -132,7 +132,7 @@ def read_genesis_network_id_from_config(plan, filename):
         packages=["PyYAML"],
         run="""
 import yaml
-with open("/network-configs/config.yaml", "r") as f:
+with open("/network-configs/network-configs/config.yaml", "r") as f:
     yaml_data = yaml.safe_load(f)
 network_id = int(yaml_data.get("DEPOSIT_NETWORK_ID", 0))
 print(network_id, end="")

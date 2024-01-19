@@ -327,7 +327,7 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
-        if network == "kurtosis":  # kurtosis
+        if network == constants.NETWORK_NAME.kurtosis:
             if bootnode_contexts != None:
                 cmd.append(
                     "--bootnodes="
@@ -338,19 +338,29 @@ def get_beacon_config(
                         ]
                     )
                 )
-        else:  # devnet
-            cmd.append(
-                "--checkpointSyncUrl=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                    network
-                )
-            )
+        elif network == constants.NETWORK_NAME.ephemery:
+            cmd.append("--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network])
             cmd.append(
                 "--bootnodes="
                 + shared_utils.get_devnet_enrs_list(
                     plan, el_cl_genesis_data.files_artifact_uuid
                 )
             )
-    else:  # public testnet
+        else:  # Devnets
+            # TODO Remove once checkpoint sync is working for verkle
+            if constants.NETWORK_NAME.verkle not in network:
+                cmd.append(
+                    "--checkpointSyncUrl=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
+                )
+            cmd.append(
+                "--bootnodes="
+                + shared_utils.get_devnet_enrs_list(
+                    plan, el_cl_genesis_data.files_artifact_uuid
+                )
+            )
+    else:  # Public testnet
         cmd.append("--network=" + network)
         cmd.append("--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network])
 

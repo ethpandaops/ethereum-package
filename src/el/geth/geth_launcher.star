@@ -184,8 +184,10 @@ def get_config(
     el_volume_size,
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
-    if electra_fork_epoch != None or "verkle" in network:
-        if electra_fork_epoch == 0 or "verkle-gen" in network:  # verkle-gen
+    if electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network:
+        if (
+            electra_fork_epoch == 0 or constants.NETWORK_NAME.verkle + "-gen" in network
+        ):  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
                 final_genesis_timestamp,
@@ -273,7 +275,7 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,mev,flashbots"
 
-    if network == "kurtosis":
+    if network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="

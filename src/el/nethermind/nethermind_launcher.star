@@ -194,7 +194,7 @@ def get_config(
     else:
         cmd.append("--config=" + network)
 
-    if network == "kurtosis":
+    if network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--Network.StaticPeers="
