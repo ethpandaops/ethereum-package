@@ -480,7 +480,7 @@ def default_network_params():
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
         "seconds_per_slot": 12,
-        "genesis_delay": 120,
+        "genesis_delay": 20,
         "max_churn": 8,
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,

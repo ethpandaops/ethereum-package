@@ -44,7 +44,7 @@ network_params:
     question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy
     very lucky have athlete"
   preregistered_validator_count: 0
-  genesis_delay: 120
+  genesis_delay: 20
   max_churn: 8
   ejection_balance: 16000000000
   capella_fork_epoch: 0
