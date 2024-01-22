@@ -281,7 +281,7 @@ network_params:
   # The number of pre-registered validators for genesis. If 0 or not specified then the value will be calculated from the participants
   preregistered_validator_count: 0
   # How long you want the network to wait before starting up
-  genesis_delay: 120
+  genesis_delay: 20
 
   # Max churn rate for the network introduced by
   # EIP-7514 https:#eips.ethereum.org/EIPS/eip-7514
