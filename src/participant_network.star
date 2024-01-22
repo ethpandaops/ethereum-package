@@ -91,7 +91,9 @@ def launch_participant_network(
         # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
         final_genesis_timestamp = get_final_genesis_timestamp(
             plan,
-            CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME,
+            network_params.genesis_delay
+            + CL_GENESIS_DATA_GENERATION_TIME
+            + num_participants * CL_NODE_STARTUP_TIME,
         )
 
         # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants
