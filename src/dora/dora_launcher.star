@@ -87,6 +87,7 @@ def get_config(
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
+        public_ports=USED_PORTS,
         files={
             DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
