@@ -169,6 +169,7 @@ def launch(
         if int(cl_volume_size) > 0
         else constants.VOLUME_SIZE[network_name]["nimbus_volume_size"]
     )
+    public_ports = int(service_name.split("-")[1]) == 2
 
     beacon_config = get_beacon_config(
         plan,
@@ -192,6 +193,7 @@ def launch(
         split_mode_enabled,
         persistent,
         cl_volume_size,
+        public_ports
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -302,6 +304,7 @@ def get_beacon_config(
     split_mode_enabled,
     persistent,
     cl_volume_size,
+    public_ports
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -406,6 +409,31 @@ def get_beacon_config(
             size=cl_volume_size,
         )
 
+    if public_ports:
+        return ServiceConfig(
+            image=image,
+            ports=BEACON_USED_PORTS,
+            public_ports=BEACON_USED_PORTS,
+            cmd=cmd,
+            files=files,
+            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+            ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+                BEACON_HTTP_PORT_ID
+            ),
+            min_cpu=bn_min_cpu,
+            max_cpu=bn_max_cpu,
+            min_memory=bn_min_mem,
+            max_memory=bn_max_mem,
+            labels=shared_utils.label_maker(
+                constants.CL_CLIENT_TYPE.nimbus,
+                constants.CLIENT_TYPES.cl,
+                image,
+                el_client_context.client_name,
+                extra_labels,
+            ),
+            user=User(uid=0, gid=0),
+        )
+
     return ServiceConfig(
         image=image,
         ports=BEACON_USED_PORTS,
@@ -428,7 +456,6 @@ def get_beacon_config(
         ),
         user=User(uid=0, gid=0),
     )
-
 
 def get_validator_config(
     el_cl_genesis_data,
