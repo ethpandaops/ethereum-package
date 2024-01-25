@@ -53,20 +53,22 @@ PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 BEACON_USED_PORTS = {
     BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
+        BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL, None
     ),
     BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
+        BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL, None
     ),
     BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
         BEACON_HTTP_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        None
     ),
     BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
         BEACON_METRICS_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        None
     ),
 }
 
@@ -76,11 +78,13 @@ VALIDATOR_USED_PORTS = {
         shared_utils.TCP_PROTOCOL,
         shared_utils.NOT_PROVIDED_APPLICATION_PROTOCOL,
         VALIDATOR_HTTP_PORT_WAIT_DISABLED,
+        None
     ),
     VALIDATOR_METRICS_PORT_ID: shared_utils.new_port_spec(
         VALIDATOR_METRICS_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        None
     ),
 }
 
