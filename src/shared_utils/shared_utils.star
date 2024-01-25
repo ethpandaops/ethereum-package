@@ -35,18 +35,12 @@ def new_port_spec(
     application_protocol=NOT_PROVIDED_APPLICATION_PROTOCOL,
     wait=NOT_PROVIDED_WAIT,
 ):
-    if wait == NOT_PROVIDED_WAIT:
-        return PortSpec(
-            number=number,
-            transport_protocol=transport_protocol,
-            application_protocol=application_protocol,
-        )
 
     return PortSpec(
         number=number,
         transport_protocol=transport_protocol,
         application_protocol=application_protocol,
-        wait=wait,
+        wait=None,
     )
 
 
