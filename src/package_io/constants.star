@@ -301,6 +301,30 @@ RAM_CPU_OVERRIDES = {
         "lodestar_max_mem": 4096,  # 4GB
         "lodestar_max_cpu": 1000,  # 1 core
     },
+    "ephemery": {
+        "geth_max_mem": 1024,  # 1GB
+        "geth_max_cpu": 1000,  # 1 core
+        "erigon_max_mem": 1024,  # 1GB
+        "erigon_max_cpu": 1000,  # 1 core
+        "nethermind_max_mem": 1024,  # 1GB
+        "nethermind_max_cpu": 1000,  # 1 core
+        "besu_max_mem": 1024,  # 1GB
+        "besu_max_cpu": 1000,  # 1 core
+        "reth_max_mem": 1024,  # 1GB
+        "reth_max_cpu": 1000,  # 1 core
+        "ethereumjs_max_mem": 1024,  # 1GB
+        "ethereumjs_max_cpu": 1000,  # 1 core
+        "prysm_max_mem": 1024,  # 1GB
+        "prysm_max_cpu": 1000,  # 1 core
+        "lighthouse_max_mem": 1024,  # 1GB
+        "lighthouse_max_cpu": 1000,  # 1 core
+        "teku_max_mem": 1024,  # 1GB
+        "teku_max_cpu": 1000,  # 1 core
+        "nimbus_max_mem": 1024,  # 1GB
+        "nimbus_max_cpu": 1000,  # 1 core
+        "lodestar_max_mem": 1024,  # 1GB
+        "lodestar_max_cpu": 1000,  # 1 core
+    },
     "kurtosis": {
         "geth_max_mem": 1024,  # 1GB
         "geth_max_cpu": 1000,  # 1 core
