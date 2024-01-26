@@ -484,6 +484,7 @@ def get_client_tolerations(
                     )
                 )
             # Gyani has to fix this in the future
+            # https://github.com/kurtosis-tech/kurtosis/issues/2093
             else:
                 toleration_list.append(
                     Toleration(
