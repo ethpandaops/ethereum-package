@@ -50,7 +50,7 @@ USED_PORTS = {
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
-ERIGON_LOG_LEVELS = {
+VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "1",
     constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "2",
     constants.GLOBAL_CLIENT_LOG_LEVEL.info: "3",

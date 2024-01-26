@@ -50,7 +50,7 @@ USED_PORTS = {
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
-BESU_LOG_LEVELS = {
+VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
     constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
     constants.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",

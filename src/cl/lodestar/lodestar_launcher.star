@@ -61,7 +61,7 @@ VALIDATOR_USED_PORTS = {
 }
 
 
-LODESTAR_LOG_LEVELS = {
+VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
     constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
     constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
@@ -109,7 +109,7 @@ def launch(
         service_name, VALIDATOR_SUFFIX_SERVICE_NAME
     )
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, LODESTAR_LOG_LEVELS
+        participant_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
     tolerations = input_parser.get_client_tolerations(
