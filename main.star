@@ -62,6 +62,7 @@ def run(plan, args={}):
     parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
     persistent = args_with_right_defaults.persistent
     xatu_sentry_params = args_with_right_defaults.xatu_sentry_params
+    global_tolerations = args_with_right_defaults.global_tolerations
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -96,6 +97,7 @@ def run(plan, args={}):
         jwt_file,
         persistent,
         xatu_sentry_params,
+        global_tolerations,
         parallel_keystore_generation,
     )
 

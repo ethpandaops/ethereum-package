@@ -50,7 +50,7 @@ USED_PORTS = {
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
-ERIGON_LOG_LEVELS = {
+VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "1",
     constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "2",
     constants.GLOBAL_CLIENT_LOG_LEVEL.info: "3",
@@ -76,9 +76,15 @@ def launch(
     extra_labels,
     persistent,
     el_volume_size,
+    el_tolerations,
+    participant_tolerations,
+    global_tolerations,
 ):
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, ERIGON_LOG_LEVELS
+        participant_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+    tolerations = input_parser.get_client_tolerations(
+        el_tolerations, participant_tolerations, global_tolerations
     )
 
     network_name = (
@@ -130,6 +136,7 @@ def launch(
         extra_labels,
         persistent,
         el_volume_size,
+        tolerations,
     )
 
     service = plan.add_service(service_name, config)
@@ -176,6 +183,7 @@ def get_config(
     extra_labels,
     persistent,
     el_volume_size,
+    tolerations,
 ):
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -284,6 +292,7 @@ def get_config(
             extra_labels,
         ),
         user=User(uid=0, gid=0),
+        tolerations=tolerations,
     )
 
 
