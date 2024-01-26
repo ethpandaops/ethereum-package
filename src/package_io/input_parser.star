@@ -479,9 +479,7 @@ def get_client_tolerations(
                     value=toleration_data.get("value", ""),
                     operator=toleration_data.get("operator", ""),
                     effect=toleration_data.get("effect", ""),
-                    toleration_seconds=(
-                        int(toleration_data.get("toleration_seconds", 60))
-                    ),
+                    toleration_seconds=("tolerationSeconds", ""),
                 )
             )
 

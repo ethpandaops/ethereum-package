@@ -64,6 +64,26 @@ To mitigate these issues, you can use the `el_client_volume_size` and `cl_client
 
 For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self hosting your own Kubernetes cluster with fast persistent storage.
 
+#### Taints and tolerations
+It is possible to run the package on a Kubernetes cluster with taints and tolerations. This is done by adding the tolerations to the `tolerations` field in the `network_params.yaml` file. For example:
+```yaml
+participants:
+  - el_client_type: reth
+    cl_client_type: teku
+global_tolerations:
+  - key: "node-role.kubernetes.io/master6"
+    value: "true"
+    operator: "Equal"
+    effect: "NoSchedule"
+```
+
+It is possible to define toleration globally, per participant or per container. The order of precedence is as follows:
+1. Container (`el_tolerations`, `cl_tolerations`, `validator_tolerations`)
+2. Participant (`tolerations`)
+3. Global (`global_tolerations`)
+
+This feature is only available for Kubernetes. To learn more about taints and tolerations, please visit the [Kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/).
+
 #### Tear down
 
 The testnet will reside in an [enclave][enclave] - an isolated, ephemeral environment. The enclave and its contents (e.g. running containers, files artifacts, etc) will persist until torn down. You can remove an enclave and its contents with:
@@ -148,11 +168,13 @@ participants:
   el_extra_labels: {}
 
   # A list of tolerations that will be passed to the EL client container
+  # Only works with Kubernetes
   # Example: el_tolerations:
   # - key: "key"
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+  #   tolerationSeconds: 3600
   # Defaults to empty
   el_tolerations: []
 
@@ -188,30 +210,36 @@ participants:
   cl_client_volume_size: 0
 
   # A list of tolerations that will be passed to the CL client container
+  # Only works with Kubernetes
   # Example: el_tolerations:
   # - key: "key"
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+  #   tolerationSeconds: 3600
   # Defaults to empty
   el_tolerations: []
 
   # A list of tolerations that will be passed to the validator container
+  # Only works with Kubernetes
   # Example: el_tolerations:
   # - key: "key"
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+  #   tolerationSeconds: 3600
   # Defaults to empty
   validator_tolerations: []
 
   # A list of tolerations that will be passed to the EL/CL/validator containers
   # This is to be used when you don't want to specify the tolerations for each container separately
+  # Only works with Kubernetes
   # Example: tolerations:
   # - key: "key"
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
+  #   tolerationSeconds: 3600
   # Defaults to empty
   tolerations: []
 
@@ -532,6 +560,17 @@ xatu_sentry_params:
   - voluntary_exit
   - contribution_and_proof
   - blob_sidecar
+
+# Global tolerations that will be passed to all containers (unless overridden by a more specific toleration)
+# Only works with Kubernetes
+# Example: tolerations:
+# - key: "key"
+#   operator: "Equal"
+#   value: "value"
+#   effect: "NoSchedule"
+#   tolerationSeconds: 3600
+# Defaults to empty
+global_tolerations: []
 ```
 
 #### Example configurations
