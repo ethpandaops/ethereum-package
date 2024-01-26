@@ -473,15 +473,26 @@ def get_client_tolerations(
 
     if tolerations != []:
         for toleration_data in tolerations:
-            toleration_list.append(
-                Toleration(
-                    key=toleration_data.get("key", ""),
-                    value=toleration_data.get("value", ""),
-                    operator=toleration_data.get("operator", ""),
-                    effect=toleration_data.get("effect", ""),
-                    toleration_seconds=("toleration_seconds", None),
+            if toleration_data.get("toleration_seconds"):
+                toleration_list.append(
+                    Toleration(
+                        key=toleration_data.get("key", ""),
+                        value=toleration_data.get("value", ""),
+                        operator=toleration_data.get("operator", ""),
+                        effect=toleration_data.get("effect", ""),
+                        toleration_seconds=toleration_data.get("toleration_seconds")
+                    )
                 )
-            )
+            # Gyani has to fix this in the future
+            else:
+                toleration_list.append(
+                    Toleration(
+                        key=toleration_data.get("key", ""),
+                        value=toleration_data.get("value", ""),
+                        operator=toleration_data.get("operator", ""),
+                        effect=toleration_data.get("effect", ""),
+                    )
+                )
 
     return toleration_list
 
