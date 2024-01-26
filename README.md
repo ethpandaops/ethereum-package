@@ -174,7 +174,7 @@ participants:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
-  #   tolerationSeconds: 3600
+  #   toleration_seconds: 3600
   # Defaults to empty
   el_tolerations: []
 
@@ -216,7 +216,7 @@ participants:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
-  #   tolerationSeconds: 3600
+  #   toleration_seconds: 3600
   # Defaults to empty
   el_tolerations: []
 
@@ -227,7 +227,7 @@ participants:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
-  #   tolerationSeconds: 3600
+  #   toleration_seconds: 3600
   # Defaults to empty
   validator_tolerations: []
 
@@ -239,7 +239,7 @@ participants:
   #   operator: "Equal"
   #   value: "value"
   #   effect: "NoSchedule"
-  #   tolerationSeconds: 3600
+  #   toleration_seconds: 3600
   # Defaults to empty
   tolerations: []
 
@@ -568,7 +568,7 @@ xatu_sentry_params:
 #   operator: "Equal"
 #   value: "value"
 #   effect: "NoSchedule"
-#   tolerationSeconds: 3600
+#   toleration_seconds: 3600
 # Defaults to empty
 global_tolerations: []
 ```
