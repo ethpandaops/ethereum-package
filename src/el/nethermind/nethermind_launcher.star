@@ -97,7 +97,7 @@ def launch(
     el_max_mem = (
         int(el_max_mem)
         if int(el_max_mem) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["nethermind_max_memory"]
+        else constants.RAM_CPU_OVERRIDES[network_name]["nethermind_max_mem"]
     )
 
     el_volume_size = (
