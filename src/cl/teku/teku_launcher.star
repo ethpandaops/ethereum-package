@@ -23,9 +23,7 @@ BEACON_METRICS_PORT_NUM = 8008
 
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 50
-BEACON_MAX_CPU = 1000
 BEACON_MIN_MEMORY = 1024
-BEACON_MAX_MEMORY = 2048
 
 BEACON_METRICS_PATH = "/metrics"
 #  ---------------------------------- Validator client -------------------------------------
@@ -146,17 +144,27 @@ def launch(
             int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
         )
 
-    bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
-    bn_max_cpu = int(bn_max_cpu) if int(bn_max_cpu) > 0 else BEACON_MAX_CPU
-    bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
-    bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
-
     network_name = (
         "devnets"
         if launcher.network != "kurtosis"
+        and launcher.network != "ephemery"
         and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
+
+    bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
+    bn_max_cpu = (
+        int(bn_max_cpu)
+        if int(bn_max_cpu) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["teku_max_cpu"]
+    )
+    bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
+    bn_max_mem = (
+        int(bn_max_mem)
+        if int(bn_max_mem) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["teku_max_memory"]
+    )
+
     cl_volume_size = (
         int(cl_volume_size)
         if int(cl_volume_size) > 0
