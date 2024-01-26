@@ -200,7 +200,7 @@ def launch(
         v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else VALIDATOR_MAX_CPU
         v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
         v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
-        tolerations= input_parser.get_client_tolerations(
+        tolerations = input_parser.get_client_tolerations(
             validator_tolerations, participant_tolerations, global_tolerations
         )
         validator_config = get_validator_config(
