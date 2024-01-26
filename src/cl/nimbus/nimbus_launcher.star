@@ -260,6 +260,7 @@ def launch(
             extra_validator_params,
             extra_validator_labels,
             persistent,
+            tolerations,
         )
 
         validator_service = plan.add_service(validator_service_name, validator_config)
