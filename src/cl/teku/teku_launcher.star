@@ -162,7 +162,7 @@ def launch(
     bn_max_mem = (
         int(bn_max_mem)
         if int(bn_max_mem) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["teku_max_memory"]
+        else constants.RAM_CPU_OVERRIDES[network_name]["teku_max_mem"]
     )
 
     cl_volume_size = (
