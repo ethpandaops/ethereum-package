@@ -165,6 +165,19 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 100000,  # 100GB
         "lodestar_volume_size": 100000,  # 100GB
     },
+    "ephemery": {
+        "geth_volume_size": 5000,  # 5GB
+        "erigon_volume_size": 3000,  # 3GB
+        "nethermind_volume_size": 3000,  # 3GB
+        "besu_volume_size": 3000,  # 3GB
+        "reth_volume_size": 3000,  # 3GB
+        "ethereumjs_volume_size": 3000,  # 3GB
+        "prysm_volume_size": 1000,  # 1GB
+        "lighthouse_volume_size": 1000,  # 1GB
+        "teku_volume_size": 1000,  # 1GB
+        "nimbus_volume_size": 1000,  # 1GB
+        "lodestar_volume_size": 1000,  # 1GB
+    },
     "kurtosis": {
         "geth_volume_size": 5000,  # 5GB
         "erigon_volume_size": 3000,  # 3GB
