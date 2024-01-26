@@ -76,9 +76,15 @@ def launch(
     extra_labels,
     persistent,
     el_volume_size,
+    el_tolerations,
+    participant_tolerations,
+    global_tolerations,
 ):
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, BESU_LOG_LEVELS
+        participant_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+    tolerations = input_parser.get_client_tolerations(
+        el_tolerations, participant_tolerations, global_tolerations
     )
 
     network_name = (
@@ -129,6 +135,7 @@ def launch(
         extra_labels,
         persistent,
         el_volume_size,
+        tolerations,
     )
 
     service = plan.add_service(service_name, config)
@@ -172,6 +179,7 @@ def get_config(
     extra_labels,
     persistent,
     el_volume_size,
+    tolerations,
 ):
     cmd = [
         "besu",
@@ -266,6 +274,7 @@ def get_config(
             extra_labels,
         ),
         user=User(uid=0, gid=0),
+        tolerations=tolerations,
     )
 
 

@@ -133,6 +133,10 @@ def launch(
     extra_validator_labels,
     persistent,
     cl_volume_size,
+    cl_tolerations,
+    validator_tolerations,
+    participant_tolerations,
+    global_tolerations,
     split_mode_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -142,6 +146,10 @@ def launch(
 
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, NIMBUS_LOG_LEVELS
+    )
+
+    tolerations = input_parser.get_client_tolerations(
+        cl_tolerations, participant_tolerations, global_tolerations
     )
 
     network_name = (
@@ -193,6 +201,7 @@ def launch(
         split_mode_enabled,
         persistent,
         cl_volume_size,
+        tolerations,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -233,7 +242,9 @@ def launch(
         v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else VALIDATOR_MAX_CPU
         v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
         v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
-
+        tolerations= input_parser.get_client_tolerations(
+            validator_tolerations, participant_tolerations, global_tolerations
+        )
         validator_config = get_validator_config(
             launcher.el_cl_genesis_data,
             image,
@@ -303,6 +314,7 @@ def get_beacon_config(
     split_mode_enabled,
     persistent,
     cl_volume_size,
+    tolerations,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -428,6 +440,7 @@ def get_beacon_config(
             extra_labels,
         ),
         user=User(uid=0, gid=0),
+        tolerations=tolerations,
     )
 
 
@@ -446,6 +459,7 @@ def get_validator_config(
     extra_params,
     extra_labels,
     persistent,
+    tolerations,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -499,6 +513,7 @@ def get_validator_config(
             el_client_context.client_name,
             extra_labels,
         ),
+        tolerations=tolerations,
     )
 
 

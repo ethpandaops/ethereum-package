@@ -147,6 +147,15 @@ participants:
   # Example; el_extra_labels: {"ethereum-package.partition": "1"}
   el_extra_labels: {}
 
+  # A list of tolerations that will be passed to the EL client container
+  # Example: el_tolerations:
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+  # Defaults to empty
+  el_tolerations: []
+
   # The type of CL client that should be started
   # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
   cl_client_type: lighthouse
@@ -177,6 +186,34 @@ participants:
   # Defaults to 0, which means that the default size for the client will be used
   # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
   cl_client_volume_size: 0
+
+  # A list of tolerations that will be passed to the CL client container
+  # Example: el_tolerations:
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+  # Defaults to empty
+  el_tolerations: []
+
+  # A list of tolerations that will be passed to the validator container
+  # Example: el_tolerations:
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+  # Defaults to empty
+  validator_tolerations: []
+
+  # A list of tolerations that will be passed to the EL/CL/validator containers
+  # This is to be used when you don't want to specify the tolerations for each container separately
+  # Example: tolerations:
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+  # Defaults to empty
+  tolerations: []
 
   # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
   # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node

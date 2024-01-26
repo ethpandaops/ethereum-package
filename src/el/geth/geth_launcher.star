@@ -86,10 +86,17 @@ def launch(
     extra_labels,
     persistent,
     el_volume_size,
+    el_tolerations,
+    participant_tolerations,
+    global_tolerations,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
     )
+    tolerations = input_parser.get_client_tolerations(
+        el_tolerations, participant_tolerations, global_tolerations
+    )
+
     network_name = (
         "devnets"
         if launcher.network != "kurtosis"
@@ -142,6 +149,7 @@ def launch(
         launcher.final_genesis_timestamp,
         persistent,
         el_volume_size,
+        tolerations,
     )
 
     service = plan.add_service(service_name, config)
@@ -191,6 +199,7 @@ def get_config(
     final_genesis_timestamp,
     persistent,
     el_volume_size,
+    tolerations,
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network:
@@ -345,6 +354,7 @@ def get_config(
             cl_client_name,
             extra_labels,
         ),
+        tolerations=tolerations,
     )
 
 

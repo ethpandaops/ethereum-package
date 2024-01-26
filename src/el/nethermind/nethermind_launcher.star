@@ -74,9 +74,15 @@ def launch(
     extra_labels,
     persistent,
     el_volume_size,
+    el_tolerations,
+    participant_tolerations,
+    global_tolerations,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, NETHERMIND_LOG_LEVELS
+    )
+    tolerations = input_parser.get_client_tolerations(
+        el_tolerations, participant_tolerations, global_tolerations
     )
 
     network_name = (
@@ -127,6 +133,7 @@ def launch(
         extra_labels,
         persistent,
         el_volume_size,
+        tolerations,
     )
 
     service = plan.add_service(service_name, config)
@@ -171,6 +178,7 @@ def get_config(
     extra_labels,
     persistent,
     el_volume_size,
+    tolerations,
 ):
     cmd = [
         "--log=" + log_level,
@@ -255,6 +263,7 @@ def get_config(
             cl_client_name,
             extra_labels,
         ),
+        tolerations=tolerations,
     )
 
 
