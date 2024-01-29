@@ -25,6 +25,7 @@ def generate_el_cl_genesis_data(
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
+    shadowfork_file_path,
 ):
     template_data = new_env_file_for_el_cl_genesis_data(
         genesis_unix_timestamp,
@@ -40,6 +41,7 @@ def generate_el_cl_genesis_data(
         capella_fork_epoch,
         deneb_fork_epoch,
         electra_fork_epoch,
+        shadowfork_file_path,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
         genesis_generation_config_yml_template, template_data
@@ -96,6 +98,7 @@ def new_env_file_for_el_cl_genesis_data(
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
+    shadowfork_file_path,
 ):
     return {
         "UnixTimestamp": genesis_unix_timestamp,
@@ -116,4 +119,5 @@ def new_env_file_for_el_cl_genesis_data(
         "CapellaForkVersion": constants.CAPELLA_FORK_VERSION,
         "DenebForkVersion": constants.DENEB_FORK_VERSION,
         "ElectraForkVersion": constants.ELECTRA_FORK_VERSION,
+        "ShadowforkFilePath": shadowfork_file_path,
     }

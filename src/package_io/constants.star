@@ -61,6 +61,7 @@ NETWORK_NAME = struct(
     ephemery="ephemery",
     kurtosis="kurtosis",
     verkle="verkle",
+    shadowfork="shadowfork",
 )
 
 PUBLIC_NETWORKS = (

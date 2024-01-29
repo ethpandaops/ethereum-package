@@ -157,6 +157,7 @@ def launch_participant_network(
             network_params.capella_fork_epoch,
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
+            shadowfork_file_path="",
         )
     elif network_params.network in constants.PUBLIC_NETWORKS:
         # We are running a public network
@@ -171,6 +172,86 @@ def launch_participant_network(
         final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
         network_id = constants.NETWORK_ID[network_params.network]
         validator_data = None
+    elif constants.NETWORK_NAME.shadowfork in network_params.network:   # Shadowfork
+        # if not persistent:
+        #     fail("Shadowforks are only supported with persistent storage")
+        # We are running a shadowfork
+        latest_block = plan.run_sh(
+            run="mkdir -p /network-configs/ && \
+                curl -o latest_block.json https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/latest_block.json",
+            image="badouralix/curl-jq",
+            store=[StoreSpec(src="/network-configs/", name="latest_block")],
+        )
+        shadowfork_file_path = "/network-configs/latest_block.json"
+
+        for participant in participants:
+            if participant.el_client_type == constants.EL_CLIENT_TYPE.geth:
+                geth_fetch = plan.run_sh(
+                    run="mkdir -p /geth && \
+                        curl -o geth.tar.gz https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar.gz && \
+                        tar xvzf geth.tar.gz -C /data",
+                    image="badouralix/curl-jq",
+                    store=[StoreSpec(src="/data/geth/execution-data", name="geth_data")],
+                )
+
+        plan.print("Generating cl validator key stores")
+        validator_data = None
+        if not parallel_keystore_generation:
+            validator_data = validator_keystores.generate_validator_keystores(
+                plan, network_params.preregistered_validator_keys_mnemonic, participants
+            )
+        else:
+            validator_data = (
+                validator_keystores.generate_valdiator_keystores_in_parallel(
+                    plan,
+                    network_params.preregistered_validator_keys_mnemonic,
+                    participants,
+                )
+            )
+
+        plan.print(json.indent(json.encode(validator_data)))
+
+        network_id = network_params.network_id
+
+        # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
+        final_genesis_timestamp = get_final_genesis_timestamp(
+            plan,
+            network_params.genesis_delay
+            + CL_GENESIS_DATA_GENERATION_TIME
+            + num_participants * CL_NODE_STARTUP_TIME,
+        )
+
+        # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants
+        total_number_of_validator_keys = network_params.preregistered_validator_count
+
+        if network_params.preregistered_validator_count == 0:
+            for participant in participants:
+                total_number_of_validator_keys += participant.validator_count
+
+        ethereum_genesis_generator_image = ("parithoshj/ethereum-genesis-generator:shadowfork-from-file")
+        el_cl_genesis_config_template = read_file(
+            static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
+        )
+        el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
+            plan,
+            ethereum_genesis_generator_image,
+            el_cl_genesis_config_template,
+            final_genesis_timestamp,
+            network_params.network_id,
+            network_params.deposit_contract_address,
+            network_params.seconds_per_slot,
+            network_params.preregistered_validator_keys_mnemonic,
+            total_number_of_validator_keys,
+            network_params.genesis_delay,
+            network_params.max_churn,
+            network_params.ejection_balance,
+            network_params.eth1_follow_distance,
+            network_params.capella_fork_epoch,
+            network_params.deneb_fork_epoch,
+            network_params.electra_fork_epoch,
+            shadowfork_file_path,
+        )
+
     elif network_params.network == constants.NETWORK_NAME.ephemery:
         el_cl_genesis_data_uuid = plan.run_sh(
             run="mkdir -p /network-configs/ && \
