@@ -18,9 +18,7 @@ METRICS_PORT_NUM = 9001
 
 # The min/max CPU/memory that the execution node can use
 EXECUTION_MIN_CPU = 100
-EXECUTION_MAX_CPU = 1000
 EXECUTION_MIN_MEMORY = 512
-EXECUTION_MAX_MEMORY = 2048
 
 # Port IDs
 WS_RPC_PORT_ID = "ws-rpc"
@@ -52,7 +50,7 @@ USED_PORTS = {
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
-ERIGON_LOG_LEVELS = {
+VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "1",
     constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "2",
     constants.GLOBAL_CLIENT_LOG_LEVEL.info: "3",
@@ -78,22 +76,38 @@ def launch(
     extra_labels,
     persistent,
     el_volume_size,
+    el_tolerations,
+    participant_tolerations,
+    global_tolerations,
 ):
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, ERIGON_LOG_LEVELS
+        participant_log_level, global_log_level, VERBOSITY_LEVELS
     )
-
-    el_min_cpu = el_min_cpu if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
-    el_max_cpu = el_max_cpu if int(el_max_cpu) > 0 else EXECUTION_MAX_CPU
-    el_min_mem = el_min_mem if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
-    el_max_mem = el_max_mem if int(el_max_mem) > 0 else EXECUTION_MAX_MEMORY
+    tolerations = input_parser.get_client_tolerations(
+        el_tolerations, participant_tolerations, global_tolerations
+    )
 
     network_name = (
         "devnets"
         if launcher.network != "kurtosis"
+        and launcher.network != "ephemery"
         and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
+
+    el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
+    el_max_cpu = (
+        int(el_max_cpu)
+        if int(el_max_cpu) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["erigon_max_cpu"]
+    )
+    el_min_mem = int(el_min_mem) if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
+    el_max_mem = (
+        int(el_max_mem)
+        if int(el_max_mem) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["erigon_max_mem"]
+    )
+
     el_volume_size = (
         el_volume_size
         if int(el_volume_size) > 0
@@ -122,6 +136,7 @@ def launch(
         extra_labels,
         persistent,
         el_volume_size,
+        tolerations,
     )
 
     service = plan.add_service(service_name, config)
@@ -168,6 +183,7 @@ def get_config(
     extra_labels,
     persistent,
     el_volume_size,
+    tolerations,
 ):
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -276,6 +292,7 @@ def get_config(
             extra_labels,
         ),
         user=User(uid=0, gid=0),
+        tolerations=tolerations,
     )
 
 

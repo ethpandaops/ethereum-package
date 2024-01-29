@@ -26,9 +26,7 @@ BEACON_MONITORING_PORT_NUM = 8080
 
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 100
-BEACON_MAX_CPU = 2000
 BEACON_MIN_MEMORY = 256
-BEACON_MAX_MEMORY = 1024
 
 #  ---------------------------------- Validator client -------------------------------------
 VALIDATOR_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/validator-data/"
@@ -75,7 +73,7 @@ VALIDATOR_NODE_USED_PORTS = {
     ),
 }
 
-PRYSM_LOG_LEVELS = {
+VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
     constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
     constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
@@ -112,6 +110,10 @@ def launch(
     extra_validator_labels,
     persistent,
     cl_volume_size,
+    cl_tolerations,
+    validator_tolerations,
+    participant_tolerations,
+    global_tolerations,
     split_mode_enabled=False,
 ):
     split_images = images.split(IMAGE_SEPARATOR_DELIMITER)
@@ -134,19 +136,34 @@ def launch(
         service_name, VALIDATOR_SUFFIX_SERVICE_NAME
     )
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, PRYSM_LOG_LEVELS
+        participant_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
-    bn_max_cpu = int(bn_max_cpu) if int(bn_max_cpu) > 0 else BEACON_MAX_CPU
-    bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
-    bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
+    tolerations = input_parser.get_client_tolerations(
+        cl_tolerations, participant_tolerations, global_tolerations
+    )
+
     network_name = (
         "devnets"
         if launcher.network != "kurtosis"
+        and launcher.network != "ephemery"
         and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
+
+    bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
+    bn_max_cpu = (
+        int(bn_max_cpu)
+        if int(bn_max_cpu) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["prysm_max_cpu"]
+    )
+    bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
+    bn_max_mem = (
+        int(bn_max_mem)
+        if int(bn_max_mem) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["prysm_max_mem"]
+    )
+
     cl_volume_size = (
         int(cl_volume_size)
         if int(cl_volume_size) > 0
@@ -173,6 +190,7 @@ def launch(
         extra_beacon_labels,
         persistent,
         cl_volume_size,
+        tolerations,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -189,6 +207,9 @@ def launch(
         v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else VALIDATOR_MAX_CPU
         v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
         v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
+        tolerations = input_parser.get_client_tolerations(
+            validator_tolerations, participant_tolerations, global_tolerations
+        )
         validator_config = get_validator_config(
             launcher.el_cl_genesis_data,
             validator_image,
@@ -207,6 +228,7 @@ def launch(
             launcher.prysm_password_relative_filepath,
             launcher.prysm_password_artifact_uuid,
             persistent,
+            tolerations,
         )
 
         validator_service = plan.add_service(validator_service_name, validator_config)
@@ -285,6 +307,7 @@ def get_beacon_config(
     extra_labels,
     persistent,
     cl_volume_size,
+    tolerations,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -412,6 +435,7 @@ def get_beacon_config(
             el_client_context.client_name,
             extra_labels,
         ),
+        tolerations=tolerations,
     )
 
 
@@ -433,6 +457,7 @@ def get_validator_config(
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
     persistent,
+    tolerations,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
@@ -497,6 +522,7 @@ def get_validator_config(
             el_client_context.client_name,
             extra_labels,
         ),
+        tolerations=tolerations,
     )
 
 

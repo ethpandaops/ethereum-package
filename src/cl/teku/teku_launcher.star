@@ -23,9 +23,7 @@ BEACON_METRICS_PORT_NUM = 8008
 
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 50
-BEACON_MAX_CPU = 1000
 BEACON_MIN_MEMORY = 1024
-BEACON_MAX_MEMORY = 2048
 
 BEACON_METRICS_PATH = "/metrics"
 #  ---------------------------------- Validator client -------------------------------------
@@ -88,7 +86,7 @@ VALIDATOR_USED_PORTS = {
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
-TEKU_LOG_LEVELS = {
+VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
     constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
     constants.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
@@ -125,6 +123,10 @@ def launch(
     extra_validator_labels,
     persistent,
     cl_volume_size,
+    cl_tolerations,
+    validator_tolerations,
+    participant_tolerations,
+    global_tolerations,
     split_mode_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -132,7 +134,11 @@ def launch(
         service_name, VALIDATOR_SUFFIX_SERVICE_NAME
     )
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, TEKU_LOG_LEVELS
+        participant_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
+    tolerations = input_parser.get_client_tolerations(
+        cl_tolerations, participant_tolerations, global_tolerations
     )
 
     extra_params = [param for param in extra_beacon_params] + [
@@ -146,17 +152,27 @@ def launch(
             int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
         )
 
-    bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
-    bn_max_cpu = int(bn_max_cpu) if int(bn_max_cpu) > 0 else BEACON_MAX_CPU
-    bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
-    bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
-
     network_name = (
         "devnets"
         if launcher.network != "kurtosis"
+        and launcher.network != "ephemery"
         and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
+
+    bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
+    bn_max_cpu = (
+        int(bn_max_cpu)
+        if int(bn_max_cpu) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["teku_max_cpu"]
+    )
+    bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
+    bn_max_mem = (
+        int(bn_max_mem)
+        if int(bn_max_mem) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["teku_max_mem"]
+    )
+
     cl_volume_size = (
         int(cl_volume_size)
         if int(cl_volume_size) > 0
@@ -185,6 +201,7 @@ def launch(
         split_mode_enabled,
         persistent,
         cl_volume_size,
+        tolerations,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -227,7 +244,9 @@ def launch(
         v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else VALIDATOR_MAX_CPU
         v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
         v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
-
+        tolerations = input_parser.get_client_tolerations(
+            validator_tolerations, participant_tolerations, global_tolerations
+        )
         validator_config = get_validator_config(
             launcher.el_cl_genesis_data,
             image,
@@ -244,6 +263,7 @@ def launch(
             extra_validator_params,
             extra_validator_labels,
             persistent,
+            tolerations,
         )
 
         validator_service = plan.add_service(validator_service_name, validator_config)
@@ -298,6 +318,7 @@ def get_beacon_config(
     split_mode_enabled,
     persistent,
     cl_volume_size,
+    tolerations,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -466,6 +487,7 @@ def get_beacon_config(
             extra_labels,
         ),
         user=User(uid=0, gid=0),
+        tolerations=tolerations,
     )
 
 
@@ -485,6 +507,7 @@ def get_validator_config(
     extra_params,
     extra_labels,
     persistent,
+    tolerations,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -549,6 +572,7 @@ def get_validator_config(
             el_client_context.client_name,
             extra_labels,
         ),
+        tolerations=tolerations,
     )
 
 
