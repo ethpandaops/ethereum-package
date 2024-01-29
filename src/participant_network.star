@@ -64,6 +64,7 @@ def launch_participant_network(
     jwt_file,
     persistent,
     xatu_sentry_params,
+    global_tolerations,
     parallel_keystore_generation=False,
 ):
     num_participants = len(participants)
@@ -327,6 +328,9 @@ def launch_participant_network(
             participant.el_extra_labels,
             persistent,
             participant.el_client_volume_size,
+            participant.el_tolerations,
+            participant.tolerations,
+            global_tolerations,
         )
 
         # Add participant el additional prometheus metrics
@@ -474,6 +478,10 @@ def launch_participant_network(
                 participant.validator_extra_labels,
                 persistent,
                 participant.cl_client_volume_size,
+                participant.cl_tolerations,
+                participant.validator_tolerations,
+                participant.tolerations,
+                global_tolerations,
                 participant.cl_split_mode_enabled,
             )
         else:
@@ -506,6 +514,10 @@ def launch_participant_network(
                 participant.validator_extra_labels,
                 persistent,
                 participant.cl_client_volume_size,
+                participant.cl_tolerations,
+                participant.validator_tolerations,
+                participant.tolerations,
+                global_tolerations,
                 participant.cl_split_mode_enabled,
             )
 
