@@ -153,6 +153,7 @@ def launch(
         launcher.electra_fork_epoch,
         launcher.final_genesis_timestamp,
         launcher.cancun_time,
+        launcher.geth_shadowfork_data,
         persistent,
         el_volume_size,
         tolerations,
@@ -204,6 +205,7 @@ def get_config(
     electra_fork_epoch,
     final_genesis_timestamp,
     cancun_time,
+    geth_shadowfork_data,
     persistent,
     el_volume_size,
     tolerations,
@@ -354,6 +356,8 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=el_volume_size,
         )
+    if constants.NETWORK_NAME.shadowfork in network:
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = geth_shadowfork_data
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
@@ -385,6 +389,7 @@ def new_geth_launcher(
     final_genesis_timestamp,
     capella_fork_epoch,
     cancun_time,
+    geth_shadowfork_data,
     electra_fork_epoch=None,
 ):
     return struct(
@@ -395,5 +400,6 @@ def new_geth_launcher(
         final_genesis_timestamp=final_genesis_timestamp,
         capella_fork_epoch=capella_fork_epoch,
         cancun_time=cancun_time,
+        geth_shadowfork_data=geth_shadowfork_data,
         electra_fork_epoch=electra_fork_epoch,
     )

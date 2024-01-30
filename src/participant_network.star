@@ -95,12 +95,14 @@ def launch_participant_network(
                 participant
             ) in participants:  # fetch the latest state for each EL participant
                 if participant.el_client_type == constants.EL_CLIENT_TYPE.geth:
-                    geth_fetch = plan.run_sh(
+                    geth_shadowfork_data = plan.run_sh(
                         run="mkdir -p /data && \
-                            curl -o geth.tar.gz https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth-test.tar.gz && \
+                            curl -o geth.tar.gz https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar.gz && \
                             tar xvzf geth.tar.gz -C /data",
                         image="badouralix/curl-jq",
-                        store=[StoreSpec(src="/data/geth-test/", name="geth_data")],
+                        store=[
+                            StoreSpec(src="/data/geth", name="geth_shadowfork_data")
+                        ],
                     )
 
         ethereum_genesis_generator_image = (
@@ -272,6 +274,9 @@ def launch_participant_network(
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 el_cl_data.cancun_time,
+                geth_shadowfork_data.files_artifacts[0]
+                if constants.NETWORK_NAME.shadowfork in network_params.network
+                else None,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
@@ -284,6 +289,10 @@ def launch_participant_network(
                 network_id,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
+                el_cl_data.cancun_time,
+                geth_shadowfork_data.files_artifacts[0]
+                if constants.NETWORK_NAME.shadowfork in network_params.network
+                else None,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
