@@ -64,6 +64,16 @@ To mitigate these issues, you can use the `el_client_volume_size` and `cl_client
 
 For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self hosting your own Kubernetes cluster with fast persistent storage.
 
+### Shadowforking
+In order to enable shadowfork capabilities, you can use the `network_params.network` flag. The expected value is the name of the network you want to shadowfork followed by `-shadowfork`. For example, to shadowfork the Holesky testnet, you can use the following command:
+```yaml
+...
+network_params:
+  network: "holesky-shadowfork"
+...
+```
+
+
 #### Taints and tolerations
 It is possible to run the package on a Kubernetes cluster with taints and tolerations. This is done by adding the tolerations to the `tolerations` field in the `network_params.yaml` file. For example:
 ```yaml

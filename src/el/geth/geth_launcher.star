@@ -105,6 +105,10 @@ def launch(
         and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
+    if (
+        constants.NETWORK_NAME.shadowfork in network_name
+    ):  # if its a shadowfork we want proper resource allocation based on public network
+        network_name = launcher.network.split("-shadowfork")[0]
 
     el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
     el_max_cpu = (

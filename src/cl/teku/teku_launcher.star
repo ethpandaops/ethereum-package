@@ -160,6 +160,9 @@ def launch(
         else launcher.network
     )
 
+    if constants.NETWORK_NAME.shadowfork in network_name:
+        network_name = network_name.split("-shadowfork")[0]
+
     bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
     bn_max_cpu = (
         int(bn_max_cpu)
