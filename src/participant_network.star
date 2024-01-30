@@ -67,8 +67,10 @@ def launch_participant_network(
     global_tolerations,
     parallel_keystore_generation=False,
 ):
+    network_id = network_params.network_id
     num_participants = len(participants)
     latest_block = ""
+    cancun_time = 0
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
@@ -76,6 +78,9 @@ def launch_participant_network(
         if (
             constants.NETWORK_NAME.shadowfork in network_params.network
         ):  # shadowfork requires some preparation
+
+            network_name = network_params.network.split("-shadowfork")[0] # overload the network name to remove the shadowfork suffix
+            network_id = constants.NETWORK_ID[network_name] # overload the network id to match the network name
             latest_block = plan.run_sh(  # fetch the latest block
                 run="mkdir -p /shadowfork && \
                     curl -o /shadowfork/latest_block.json https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/latest_block.json",
@@ -116,8 +121,6 @@ def launch_participant_network(
             )
 
         plan.print(json.indent(json.encode(validator_data)))
-
-        network_id = network_params.network_id
 
         # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
         final_genesis_timestamp = get_final_genesis_timestamp(
@@ -179,7 +182,7 @@ def launch_participant_network(
             ethereum_genesis_generator_image,
             el_cl_genesis_config_template,
             final_genesis_timestamp,
-            network_params.network_id,
+            network_id,
             network_params.deposit_contract_address,
             network_params.seconds_per_slot,
             network_params.preregistered_validator_keys_mnemonic,
@@ -202,6 +205,7 @@ def launch_participant_network(
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             dummy.files_artifacts[0],
             constants.GENESIS_VALIDATORS_ROOT[network_params.network],
+            cancun_time,
         )
         final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
         network_id = constants.NETWORK_ID[network_params.network]
@@ -219,6 +223,7 @@ def launch_participant_network(
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             el_cl_genesis_data_uuid.files_artifacts[0],
             genesis_validators_root,
+            cancun_time,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
             plan, el_cl_genesis_data_uuid.files_artifacts[0]
@@ -244,6 +249,7 @@ def launch_participant_network(
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             el_cl_genesis_data_uuid.files_artifacts[0],
             genesis_validators_root,
+            cancun_time,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
             plan, el_cl_genesis_data_uuid.files_artifacts[0]
@@ -262,6 +268,7 @@ def launch_participant_network(
                 network_id,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
+                el_cl_data.cancun_time,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,

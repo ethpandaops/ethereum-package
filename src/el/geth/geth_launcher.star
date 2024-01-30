@@ -148,6 +148,7 @@ def launch(
         launcher.capella_fork_epoch,
         launcher.electra_fork_epoch,
         launcher.final_genesis_timestamp,
+        launcher.cancun_time,
         persistent,
         el_volume_size,
         tolerations,
@@ -198,6 +199,7 @@ def get_config(
     capella_fork_epoch,
     electra_fork_epoch,
     final_genesis_timestamp,
+    cancun_time,
     persistent,
     el_volume_size,
     tolerations,
@@ -224,6 +226,8 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
+    elif constants.NETWORK_NAME.shadowfork in network: # if its a shadowfork we dont need to init the datadir
+        init_datadir_cmd_str = "echo shadowfork"
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -258,6 +262,10 @@ def get_config(
         "{0}".format(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
         ),
+        # "{0}".format(
+        #     "--override.cancun={}".format(cancun_time) if constants.NETWORK_NAME.shadowfork in network else ""
+        # ),
+        "--override.cancun={}".format(cancun_time),
         "--networkid={0}".format(networkid),
         "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -369,6 +377,7 @@ def new_geth_launcher(
     networkid,
     final_genesis_timestamp,
     capella_fork_epoch,
+    cancun_time,
     electra_fork_epoch=None,
 ):
     return struct(
@@ -378,5 +387,6 @@ def new_geth_launcher(
         networkid=networkid,
         final_genesis_timestamp=final_genesis_timestamp,
         capella_fork_epoch=capella_fork_epoch,
+        cancun_time=cancun_time,
         electra_fork_epoch=electra_fork_epoch,
     )

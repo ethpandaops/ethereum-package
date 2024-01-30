@@ -389,7 +389,7 @@ RAM_CPU_OVERRIDES = {
         "reth_max_cpu": 1000,  # 1 core
         "ethereumjs_max_mem": 4096,  # 4GB
         "ethereumjs_max_cpu": 1000,  # 1 core
-        "prysm_max_mem": 4096,  # 4GB
+        "prysm_max_mem": 8192,  # 8GB
         "prysm_max_cpu": 1000,  # 1 core
         "lighthouse_max_mem": 4096,  # 4GB
         "lighthouse_max_cpu": 1000,  # 1 core
