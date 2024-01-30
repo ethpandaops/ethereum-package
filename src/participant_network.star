@@ -97,7 +97,7 @@ def launch_participant_network(
                 if participant.el_client_type == constants.EL_CLIENT_TYPE.geth:
                     geth_shadowfork_data = plan.run_sh(
                         run="mkdir -p /data && \
-                            wget -O geth.tar https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar.gz && \
+                            wget https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar && \
                             tar -xf geth.tar -C /data",
                         image="badouralix/curl-jq",
                         store=[
