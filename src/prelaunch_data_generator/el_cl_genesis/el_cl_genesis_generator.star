@@ -88,7 +88,7 @@ def generate_el_cl_genesis_data(
 
     cancun_time = plan.run_sh(
         run="jq .config.cancunTime /data/network-configs/genesis.json | tr -d '\n'",
-        image= "badouralix/curl-jq",
+        image="badouralix/curl-jq",
         files={"/data": genesis.files_artifacts[0]},
     )
 

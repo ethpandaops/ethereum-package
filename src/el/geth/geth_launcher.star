@@ -226,7 +226,9 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
-    elif constants.NETWORK_NAME.shadowfork in network: # if its a shadowfork we dont need to init the datadir
+    elif (
+        constants.NETWORK_NAME.shadowfork in network
+    ):  # if its a shadowfork we dont need to init the datadir
         init_datadir_cmd_str = "echo shadowfork"
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
