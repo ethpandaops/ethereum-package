@@ -1,0 +1,12 @@
+participants:
+  - el_client_type: geth
+    el_client_image: ethereum/client-go:v1.13.11
+    cl_client_type: teku
+    cl_client_image: consensys/teku:24.1.1
+network_params:
+  dencun_fork_epoch: 1
+  network: holesky-shadowfork
+additional_services:
+  - dora
+ethereum_metrics_exporter_enabled: true
+snoopy_enabled: true

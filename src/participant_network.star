@@ -103,8 +103,7 @@ def launch_participant_network(
                         store=[
                             StoreSpec(src="/data/geth", name="geth_shadowfork_data")
                         ],
-                        wait="800s"
-
+                        wait="800s",
                     )
 
         ethereum_genesis_generator_image = (
