@@ -28,10 +28,12 @@ def generate_el_cl_genesis_data(
     electra_fork_epoch,
     latest_block,
 ):
+    files = {}
     if latest_block == "":
         shadowfork_file = ""
+
     else:
-        shadowfork_file = "/shadowfork/shadowfork/latest_block.json"
+        shadowfork_file = SHADOWFORK_FILEPATH + "/shadowfork/latest_block.json"
 
     template_data = new_env_file_for_el_cl_genesis_data(
         genesis_unix_timestamp,
@@ -63,13 +65,13 @@ def generate_el_cl_genesis_data(
         genesis_values_and_dest_filepath, "genesis-el-cl-env-file"
     )
 
+    files = {GENESIS_VALUES_PATH: genesis_generation_config_artifact_name}
+    if latest_block != "":
+        files[SHADOWFORK_FILEPATH] = latest_block
     genesis = plan.run_sh(
         run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/custom_config_data/* /network-configs/",
         image=image,
-        files={
-            GENESIS_VALUES_PATH: genesis_generation_config_artifact_name,
-            SHADOWFORK_FILEPATH: latest_block,
-        },
+        files=files,
         store=[
             StoreSpec(src="/network-configs/", name="el_cl_genesis_data"),
             StoreSpec(

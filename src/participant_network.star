@@ -197,7 +197,7 @@ def launch_participant_network(
             network_params.capella_fork_epoch,
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
-            latest_block.files_artifacts[0],
+            latest_block.files_artifacts[0] if latest_block != "" else "",
         )
     elif network_params.network in constants.PUBLIC_NETWORKS:
         # We are running a public network
