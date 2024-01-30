@@ -99,8 +99,9 @@ def launch(
 
     network_name = (
         "devnets"
-        if launcher.network != "kurtosis"
-        and launcher.network != "ephemery"
+        if launcher.network != constants.NETWORK_NAME.kurtosis
+        and launcher.network != constants.NETWORK_NAME.ephemery
+        and launcher.network != constants.NETWORK_NAME.shadowfork
         and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
@@ -293,7 +294,10 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,mev,flashbots"
 
-    if network == constants.NETWORK_NAME.kurtosis:
+    if (
+        network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="

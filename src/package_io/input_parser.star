@@ -66,7 +66,10 @@ def input_parser(plan, input_args):
     # add default eth2 input params
     result["mev_type"] = None
     result["mev_params"] = get_default_mev_params()
-    if result["network_params"]["network"] == "kurtosis":
+    if (
+        result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
+    ):
         result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     else:
         result["additional_services"] = []
@@ -405,7 +408,10 @@ def parse_network_params(input_args):
             "deposit_contract_address is empty or spaces it needs to be of non zero length"
         )
 
-    if result["network_params"]["network"] == "kurtosis":
+    if (
+        result["network_params"]["network"] == "kurtosis"
+        or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
+    ):
         if (
             result["network_params"]["preregistered_validator_keys_mnemonic"].strip()
             == ""
@@ -430,7 +436,10 @@ def parse_network_params(input_args):
     ):
         fail("electra can only happen with capella genesis not bellatrix")
 
-    if result["network_params"]["network"] == "kurtosis":
+    if (
+        result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
+    ):
         if MIN_VALIDATORS > actual_num_validators:
             fail(
                 "We require at least {0} validators but got {1}".format(

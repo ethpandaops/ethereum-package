@@ -6,6 +6,7 @@ constants = import_module("../../package_io/constants.star")
 
 GENESIS_VALUES_PATH = "/opt"
 GENESIS_VALUES_FILENAME = "values.env"
+SHADOWFORK_FILEPATH = "/shadowfork"
 
 
 def generate_el_cl_genesis_data(
@@ -25,8 +26,13 @@ def generate_el_cl_genesis_data(
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
-    shadowfork_file_path,
+    latest_block,
 ):
+    if latest_block == "":
+        shadowfork_file = ""
+    else:
+        shadowfork_file = "/shadowfork/shadowfork/latest_block.json"
+
     template_data = new_env_file_for_el_cl_genesis_data(
         genesis_unix_timestamp,
         network_id,
@@ -41,7 +47,7 @@ def generate_el_cl_genesis_data(
         capella_fork_epoch,
         deneb_fork_epoch,
         electra_fork_epoch,
-        shadowfork_file_path,
+        shadowfork_file,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
         genesis_generation_config_yml_template, template_data
@@ -60,7 +66,10 @@ def generate_el_cl_genesis_data(
     genesis = plan.run_sh(
         run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/custom_config_data/* /network-configs/",
         image=image,
-        files={GENESIS_VALUES_PATH: genesis_generation_config_artifact_name},
+        files={
+            GENESIS_VALUES_PATH: genesis_generation_config_artifact_name,
+            SHADOWFORK_FILEPATH: latest_block,
+        },
         store=[
             StoreSpec(src="/network-configs/", name="el_cl_genesis_data"),
             StoreSpec(
@@ -98,7 +107,7 @@ def new_env_file_for_el_cl_genesis_data(
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
-    shadowfork_file_path,
+    shadowfork_file,
 ):
     return {
         "UnixTimestamp": genesis_unix_timestamp,
@@ -119,5 +128,5 @@ def new_env_file_for_el_cl_genesis_data(
         "CapellaForkVersion": constants.CAPELLA_FORK_VERSION,
         "DenebForkVersion": constants.DENEB_FORK_VERSION,
         "ElectraForkVersion": constants.ELECTRA_FORK_VERSION,
-        "ShadowforkFilePath": shadowfork_file_path,
+        "ShadowForkFile": shadowfork_file,
     }
