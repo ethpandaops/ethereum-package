@@ -25,6 +25,7 @@ blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
 )
+blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
 mev_boost = import_module("./src/mev/mev_boost/mev_boost_launcher.star")
@@ -374,6 +375,13 @@ def run(plan, args={}):
                 persistent,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
+        elif additional_service == "blockscout":
+            plan.print("Launching blockscout")
+            blockscout.launch_blockscout(
+                plan,
+                all_el_client_contexts,
+            )
+            plan.print("Successfully launched dora")                
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True

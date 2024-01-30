@@ -56,6 +56,7 @@ additional_services:
   - el_forkmon
   - beacon_metrics_gazer
   - dora
+  - blockscout
   - prometheus_grafana
 wait_for_finalization: false
 global_client_log_level: info
