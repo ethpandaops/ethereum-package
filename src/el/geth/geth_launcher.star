@@ -216,10 +216,8 @@ def get_config(
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if (
-        electra_fork_epoch != None
-        or constants.NETWORK_NAME.verkle in network
-        and constants.NETWORK_NAME.shadowfork not in network
-    ):
+        electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network
+    ) and constants.NETWORK_NAME.shadowfork not in network:
         if (
             electra_fork_epoch == 0 or constants.NETWORK_NAME.verkle + "-gen" in network
         ):  # verkle-gen
@@ -240,9 +238,7 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
-    elif (
-        constants.NETWORK_NAME.shadowfork in network
-    ):  # if its a shadowfork we dont need to init the datadir
+    elif constants.NETWORK_NAME.shadowfork in network:
         init_datadir_cmd_str = "mkdir -p /data/geth/execution-data && wget -qO- https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar | tar xvf - -C /data/geth/execution-data --strip-components=1"
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
