@@ -39,8 +39,12 @@ EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
-    RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL, wait=None),
+    RPC_PORT_ID: shared_utils.new_port_spec(
+        RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, wait=None
+    ),
+    WS_PORT_ID: shared_utils.new_port_spec(
+        WS_PORT_NUM, shared_utils.TCP_PROTOCOL, wait=None
+    ),
     TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
         DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL, wait=None
     ),
@@ -366,15 +370,15 @@ def get_config(
         min_memory=el_min_mem,
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
-        ready_conditions = ReadyCondition(
-            recipe = GetHttpRequestRecipe(
-                port_id = RPC_PORT_ID,
-                endpoint = "/",
+        ready_conditions=ReadyCondition(
+            recipe=GetHttpRequestRecipe(
+                port_id=RPC_PORT_ID,
+                endpoint="/",
             ),
-            field = "code",
-            assertion = "==",
-            target_value = 200,
-            timeout = "5m",
+            field="code",
+            assertion="==",
+            target_value=200,
+            timeout="5m",
         ),
         labels=shared_utils.label_maker(
             constants.EL_CLIENT_TYPE.geth,
