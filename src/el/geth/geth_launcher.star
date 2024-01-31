@@ -233,7 +233,7 @@ def get_config(
     elif (
         constants.NETWORK_NAME.shadowfork in network
     ):  # if its a shadowfork we dont need to init the datadir
-        init_datadir_cmd_str = "mkdir -p /data && wget https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar && tar -xvf geth.tar -C /data"
+        init_datadir_cmd_str = "mkdir -p /data && wget https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar && tar -xvf geth.tar -C /data/geth/execution-data"
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
