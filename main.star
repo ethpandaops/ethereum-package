@@ -25,6 +25,7 @@ blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
 )
+blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
 mev_boost = import_module("./src/mev/mev_boost/mev_boost_launcher.star")
@@ -43,6 +44,7 @@ assertoor = import_module("./src/assertoor/assertoor_launcher.star")
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
+BLOCKSCOUT_VERIFY_SC_URL = ""
 
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
@@ -341,6 +343,13 @@ def run(plan, args={}):
                 beacon_metrics_gazer_prometheus_metrics_job
             )
             plan.print("Successfully launched beacon metrics gazer")
+        elif additional_service == "blockscout":
+            plan.print("Launching blockscout")
+            BLOCKSCOUT_VERIFY_SC_URL = blockscout.launch_blockscout(
+                plan,
+                all_el_client_contexts,
+            )
+            plan.print("Successfully launched blockscout")
         elif additional_service == "dora":
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
@@ -443,16 +452,16 @@ def run(plan, args={}):
         )
         plan.print("First finalized epoch occurred successfully")
 
-    grafana_info = struct(
-        dashboard_path=GRAFANA_DASHBOARD_PATH_URL,
-        user=GRAFANA_USER,
-        password=GRAFANA_PASSWORD,
+    blockscout_info = struct(
+        verify_url=BLOCKSCOUT_VERIFY_SC_URL,
     )
     output = struct(
         grafana_info=grafana_info,
+        blockscout_info=blockscout_info,
         all_participants=all_participants,
         final_genesis_timestamp=final_genesis_timestamp,
         genesis_validators_root=genesis_validators_root,
     )
+
 
     return output

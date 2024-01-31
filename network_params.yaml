@@ -54,6 +54,7 @@ additional_services:
   - tx_spammer
   - blob_spammer
   - el_forkmon
+  - blockscout
   - beacon_metrics_gazer
   - dora
   - prometheus_grafana
