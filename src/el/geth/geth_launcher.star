@@ -277,7 +277,7 @@ def get_config(
         # Override prague fork timestamp if electra_fork_epoch not Null
         "{0}".format(
             "--override.prague="
-            + final_genesis_timestamp * 32 * 12 * electra_fork_epoch
+            + final_genesis_timestamp + (32 * 12 * electra_fork_epoch)
             if electra_fork_epoch != None or "verkle" in network
             else ""
         ),
