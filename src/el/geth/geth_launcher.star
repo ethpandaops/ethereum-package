@@ -48,7 +48,7 @@ USED_PORTS = {
         DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
     ),
     ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-        ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, wait=None
     ),
     METRICS_PORT_ID: shared_utils.new_port_spec(
         METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
