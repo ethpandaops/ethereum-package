@@ -101,7 +101,10 @@ def generate_el_cl_genesis_data(
     )
 
     result = el_cl_genesis_data.new_el_cl_genesis_data(
-        genesis.files_artifacts[0], genesis_validators_root.output, cancun_time.output, prague_time.output
+        genesis.files_artifacts[0],
+        genesis_validators_root.output,
+        cancun_time.output,
+        prague_time.output,
     )
 
     return result
