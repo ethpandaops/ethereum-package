@@ -23,10 +23,6 @@ BLOCKSCOUT_VERIF_MAX_CPU = 1000
 BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
 
-POSTGRES_MIN_CPU = 10
-POSTGRES_MAX_CPU = 1000
-POSTGRES_MIN_MEMORY = 32
-POSTGRES_MAX_MEMORY = 1024
 
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -73,10 +69,10 @@ def get_config_verif():
         env_vars={
             "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR":"0.0.0.0:{}".format(HTTP_PORT_NUMBER_VERIF) 
         },
-        min_cpu=POSTGRES_MIN_CPU,
-        max_cpu=POSTGRES_MAX_CPU,
-        min_memory=POSTGRES_MIN_MEMORY,
-        max_memory=POSTGRES_MAX_MEMORY
+        min_cpu=BLOCKSCOUT_VERIF_MIN_CPU,
+        max_cpu=BLOCKSCOUT_VERIF_MAX_CPU,
+        min_memory=BLOCKSCOUT_VERIF_MIN_MEMORY,
+        max_memory=BLOCKSCOUT_VERIF_MAX_MEMORY
     )
 
 
@@ -115,8 +111,8 @@ def get_config_backend(postgres_output, el_client_rpc_url,service_name,el_client
             "PORT": "{}".format(HTTP_PORT_NUMBER),
             "SECRET_KEY_BASE":"56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN"
         },
-        min_cpu=BLOCKSCOUT_VERIF_MIN_CPU,
-        max_cpu=BLOCKSCOUT_VERIF_MAX_CPU,
-        min_memory=BLOCKSCOUT_VERIF_MIN_MEMORY,
-        max_memory=BLOCKSCOUT_VERIF_MAX_MEMORY,        
+        min_cpu=BLOCKSCOUT_MIN_CPU,
+        max_cpu=BLOCKSCOUT_MAX_CPU,
+        min_memory=BLOCKSCOUT_MIN_MEMORY,
+        max_memory=BLOCKSCOUT_MAX_MEMORY,        
     )
