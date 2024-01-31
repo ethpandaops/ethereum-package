@@ -73,6 +73,15 @@ network_params:
 ...
 ```
 
+##### Shadowforking custom verkle networks
+In order to enable shadowfork capabilities for verkle networks, you need to define electra and mention verkle in the network name after shadowfork.
+```yaml
+...
+network_params:
+  electra_fork_epoch: 1
+  network: "holesky-shadowfork-verkle"
+...
+```
 
 #### Taints and tolerations
 It is possible to run the package on a Kubernetes cluster with taints and tolerations. This is done by adding the tolerations to the `tolerations` field in the `network_params.yaml` file. For example:
