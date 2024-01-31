@@ -1,6 +1,7 @@
 participants:
   - el_client_type: geth
     cl_client_type: lighthouse
+<<<<<<< HEAD
     validator_count: 32
   - el_client_type: nethermind
     cl_client_type: prysm
@@ -49,3 +50,9 @@ mev_params:
 grafana_additional_dashboards: []
 persistent: false
 xatu_sentry_enabled: false
+=======
+  - el_client_type: geth
+    cl_client_type: nimbus
+additional_services: []
+mev_type: null
+>>>>>>> 89767201d440ffa34aa1a49b3ea3fa76441569be
