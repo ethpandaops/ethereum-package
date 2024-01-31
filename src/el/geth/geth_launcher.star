@@ -379,7 +379,7 @@ def get_config(
             field="code",
             assertion="==",
             target_value=200,
-            timeout="5m",
+            timeout="60m",
         ),
         labels=shared_utils.label_maker(
             constants.EL_CLIENT_TYPE.geth,
