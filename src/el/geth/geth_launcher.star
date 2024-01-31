@@ -213,7 +213,11 @@ def get_config(
     tolerations,
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
-    if electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network and constants.NETWORK_NAME.shadowfork not in network:
+    if (
+        electra_fork_epoch != None
+        or constants.NETWORK_NAME.verkle in network
+        and constants.NETWORK_NAME.shadowfork not in network
+    ):
         if (
             electra_fork_epoch == 0 or constants.NETWORK_NAME.verkle + "-gen" in network
         ):  # verkle-gen
@@ -272,7 +276,8 @@ def get_config(
         ),
         # Override prague fork timestamp if electra_fork_epoch not Null
         "{0}".format(
-            "--override.prague=" + final_genesis_timestamp * 32 * 12 * electra_fork_epoch
+            "--override.prague="
+            + final_genesis_timestamp * 32 * 12 * electra_fork_epoch
             if electra_fork_epoch != None or "verkle" in network
             else ""
         ),
