@@ -272,10 +272,11 @@ def get_config(
             if electra_fork_epoch == 0 or "verkle-gen" in network
             else ""
         ),
-        # Override prague fork timestamp if electra_fork_epoch not Null
+        # Override prague fork timestamp if we are shadowforking for verkle
         "{0}".format(
-            "--override.prague=" + prague_time
-            if electra_fork_epoch != None or "verkle" in network
+            "--override.prague=" + str(prague_time)
+            if constants.NETWORK_NAME.shadowfork in network
+            and "verkle" in network
             else ""
         ),
         "{0}".format(

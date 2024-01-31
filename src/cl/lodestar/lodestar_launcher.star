@@ -368,6 +368,13 @@ def get_beacon_config(
                     plan, el_cl_genesis_data.files_artifact_uuid
                 )
             )
+        elif constants.NETWORK_NAME.shadowfork in network:
+            cmd.append(
+                "--bootnodes="
+                + shared_utils.get_devnet_enrs_list(
+                    plan, el_cl_genesis_data.files_artifact_uuid
+                )
+            )
         else:  # Devnets
             # TODO Remove once checkpoint sync is working for verkle
             if constants.NETWORK_NAME.verkle not in network:

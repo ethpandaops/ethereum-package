@@ -377,6 +377,12 @@ def get_beacon_config(
                 + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
                 + "/boot_enr.yaml"
             )
+        elif constants.NETWORK_NAME.shadowfork in network:
+            cmd.append(
+                "--bootstrap-node="
+                + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+                + "/boot_enr.yaml"
+            )
         else:  # Devnets
             # TODO Remove once checkpoint sync is working for verkle
             if constants.NETWORK_NAME.verkle not in network:
