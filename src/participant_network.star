@@ -91,20 +91,20 @@ def launch_participant_network(
                 store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
             )
 
-            for (
-                participant
-            ) in participants:  # fetch the latest state for each EL participant
-                if participant.el_client_type == constants.EL_CLIENT_TYPE.geth:
-                    geth_shadowfork_data = plan.run_sh(
-                        run="mkdir -p /data && \
-                            wget https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar && \
-                            tar -xf geth.tar -C /data",
-                        image="badouralix/curl-jq",
-                        store=[
-                            StoreSpec(src="/data/geth", name="geth_shadowfork_data")
-                        ],
-                        wait="800s",
-                    )
+            # for (
+            #     participant
+            # ) in participants:  # fetch the latest state for each EL participant
+            #     if participant.el_client_type == constants.EL_CLIENT_TYPE.geth:
+            #         geth_shadowfork_data = plan.run_sh(
+            #             run="mkdir -p /data && \
+            #                 wget https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar && \
+            #                 tar -xf geth.tar -C /data",
+            #             image="badouralix/curl-jq",
+            #             store=[
+            #                 StoreSpec(src="/data/geth", name="geth_shadowfork_data")
+            #             ],
+            #             wait="800s",
+            #         )
 
         ethereum_genesis_generator_image = (
             "parithoshj/ethereum-genesis-generator:shadowfork-from-file"
