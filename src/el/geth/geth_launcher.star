@@ -274,7 +274,12 @@ def get_config(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
         ),
         "{0}".format(
-            "--override.cancun={}".format(cancun_time)
+            "--override.cancun=" + cancun_time
+            if constants.NETWORK_NAME.shadowfork in network
+            else ""
+        ),
+        "{0}".format(
+            "--override.shanghai=" + final_genesis_timestamp
             if constants.NETWORK_NAME.shadowfork in network
             else ""
         ),
