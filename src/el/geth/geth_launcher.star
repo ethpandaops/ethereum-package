@@ -366,6 +366,16 @@ def get_config(
         min_memory=el_min_mem,
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
+        ready_conditions = ReadyCondition(
+            recipe = GetHttpRequestRecipe(
+                port_id = RPC_PORT_ID,
+                endpoint = "/",
+            ),
+            field = "code",
+            assertion = "==",
+            target_value = 200,
+            timeout = "5m",
+        ),
         labels=shared_utils.label_maker(
             constants.EL_CLIENT_TYPE.geth,
             constants.CLIENT_TYPES.el,
