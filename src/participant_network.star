@@ -275,9 +275,6 @@ def launch_participant_network(
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 el_cl_data.cancun_time,
-                geth_shadowfork_data.files_artifacts[0]
-                if constants.NETWORK_NAME.shadowfork in network_params.network
-                else None,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
@@ -291,9 +288,6 @@ def launch_participant_network(
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 el_cl_data.cancun_time,
-                geth_shadowfork_data.files_artifacts[0]
-                if constants.NETWORK_NAME.shadowfork in network_params.network
-                else None,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
