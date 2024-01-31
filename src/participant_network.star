@@ -91,7 +91,7 @@ def launch_participant_network(
                 image="badouralix/curl-jq",
                 store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
             )
-
+            # maybe we can do the copy in the same step as the fetch?
             # for (
             #     participant
             # ) in participants:  # fetch the latest state for each EL participant
@@ -141,10 +141,7 @@ def launch_participant_network(
                 total_number_of_validator_keys += participant.validator_count
 
         plan.print("Generating EL CL data")
-        # if constants.NETWORK_NAME.shadowfork in network_params.network:
-        #     ethereum_genesis_generator_image = (
-        #         "parithoshj/ethereum-genesis-generator:shadowfork-from-file"
-        #     )
+
         # we are running bellatrix genesis (deprecated) - will be removed in the future
         if (
             network_params.capella_fork_epoch > 0
@@ -159,7 +156,7 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:2.0.9"
+                "ethpandaops/ethereum-genesis-generator:2.0.10"
             )
         # we are running electra - experimental
         elif network_params.electra_fork_epoch != None:
