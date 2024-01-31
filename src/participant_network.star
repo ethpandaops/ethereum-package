@@ -71,6 +71,7 @@ def launch_participant_network(
     num_participants = len(participants)
     latest_block = ""
     cancun_time = 0
+    prague_time = 0
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
@@ -106,10 +107,6 @@ def launch_participant_network(
             #             wait="800s",
             #         )
 
-        ethereum_genesis_generator_image = (
-            "parithoshj/ethereum-genesis-generator:shadowfork-from-file"
-        )
-
         # We are running a kurtosis or shadowfork network
         plan.print("Generating cl validator key stores")
         validator_data = None
@@ -144,12 +141,12 @@ def launch_participant_network(
                 total_number_of_validator_keys += participant.validator_count
 
         plan.print("Generating EL CL data")
-        if constants.NETWORK_NAME.shadowfork in network_params.network:
-            ethereum_genesis_generator_image = (
-                "parithoshj/ethereum-genesis-generator:shadowfork-from-file"
-            )
+        # if constants.NETWORK_NAME.shadowfork in network_params.network:
+        #     ethereum_genesis_generator_image = (
+        #         "parithoshj/ethereum-genesis-generator:shadowfork-from-file"
+        #     )
         # we are running bellatrix genesis (deprecated) - will be removed in the future
-        elif (
+        if (
             network_params.capella_fork_epoch > 0
             and network_params.electra_fork_epoch == None
         ):
@@ -212,6 +209,7 @@ def launch_participant_network(
             dummy.files_artifacts[0],
             constants.GENESIS_VALIDATORS_ROOT[network_params.network],
             cancun_time,
+            prague_time,
         )
         final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
         network_id = constants.NETWORK_ID[network_params.network]
@@ -230,6 +228,7 @@ def launch_participant_network(
             el_cl_genesis_data_uuid.files_artifacts[0],
             genesis_validators_root,
             cancun_time,
+            prague_time,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
             plan, el_cl_genesis_data_uuid.files_artifacts[0]
@@ -256,6 +255,7 @@ def launch_participant_network(
             el_cl_genesis_data_uuid.files_artifacts[0],
             genesis_validators_root,
             cancun_time,
+            prague_time,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
             plan, el_cl_genesis_data_uuid.files_artifacts[0]
@@ -275,6 +275,7 @@ def launch_participant_network(
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 el_cl_data.cancun_time,
+                el_cl_data.prague_time,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
@@ -288,6 +289,7 @@ def launch_participant_network(
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 el_cl_data.cancun_time,
+                el_cl_data.prague_time,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,

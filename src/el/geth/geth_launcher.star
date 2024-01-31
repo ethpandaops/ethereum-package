@@ -157,6 +157,7 @@ def launch(
         launcher.electra_fork_epoch,
         launcher.final_genesis_timestamp,
         launcher.cancun_time,
+        launcher.prague_time,
         persistent,
         el_volume_size,
         tolerations,
@@ -208,6 +209,7 @@ def get_config(
     electra_fork_epoch,
     final_genesis_timestamp,
     cancun_time,
+    prague_time,
     persistent,
     el_volume_size,
     tolerations,
@@ -276,8 +278,7 @@ def get_config(
         ),
         # Override prague fork timestamp if electra_fork_epoch not Null
         "{0}".format(
-            "--override.prague="
-            + final_genesis_timestamp + (32 * 12 * electra_fork_epoch)
+            "--override.prague=" + prague_time
             if electra_fork_epoch != None or "verkle" in network
             else ""
         ),
@@ -411,6 +412,7 @@ def new_geth_launcher(
     final_genesis_timestamp,
     capella_fork_epoch,
     cancun_time,
+    prague_time,
     electra_fork_epoch=None,
 ):
     return struct(
@@ -421,5 +423,6 @@ def new_geth_launcher(
         final_genesis_timestamp=final_genesis_timestamp,
         capella_fork_epoch=capella_fork_epoch,
         cancun_time=cancun_time,
+        prague_time=prague_time,
         electra_fork_epoch=electra_fork_epoch,
     )
