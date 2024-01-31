@@ -57,6 +57,23 @@ USED_PORTS = {
     ),
 }
 
+PUBLIC_PORTS = {
+    RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
+    ),
+    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
+    ),
+    ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
+        ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+    ),
+    METRICS_PORT_ID: shared_utils.new_port_spec(
+        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+    ),
+}
+
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
@@ -109,6 +126,7 @@ def launch(
     )
 
     cl_client_name = service_name.split("-")[3]
+    public_ports = int(service_name.split("-")[1]) == 2
 
     config = get_config(
         plan,
@@ -133,6 +151,7 @@ def launch(
         launcher.final_genesis_timestamp,
         persistent,
         el_volume_size,
+        public_ports
     )
 
     service = plan.add_service(service_name, config)
@@ -182,6 +201,7 @@ def get_config(
     final_genesis_timestamp,
     persistent,
     el_volume_size,
+    public_ports
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network:
@@ -317,6 +337,29 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=el_volume_size,
         )
+    
+    if public_ports:
+        return ServiceConfig(
+            image=image,
+            ports=USED_PORTS,
+            public_ports=USED_PORTS,
+            cmd=[command_str],
+            files=files,
+            entrypoint=ENTRYPOINT_ARGS,
+            private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+            min_cpu=el_min_cpu,
+            max_cpu=el_max_cpu,
+            min_memory=el_min_mem,
+            max_memory=el_max_mem,
+            env_vars=extra_env_vars,
+            labels=shared_utils.label_maker(
+                constants.EL_CLIENT_TYPE.geth,
+                constants.CLIENT_TYPES.el,
+                image,
+                cl_client_name,
+                extra_labels,
+            ),
+        )
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
@@ -337,7 +380,6 @@ def get_config(
             extra_labels,
         ),
     )
-
 
 def new_geth_launcher(
     el_cl_genesis_data,
