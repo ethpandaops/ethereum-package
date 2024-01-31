@@ -273,11 +273,11 @@ def get_config(
         "{0}".format(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
         ),
-        "{0}".format(
-            "--override.cancun=" + cancun_time
-            if constants.NETWORK_NAME.shadowfork in network
-            else ""
-        ),
+        # "{0}".format(
+        #     "--override.cancun=" + cancun_time
+        #     if constants.NETWORK_NAME.shadowfork in network
+        #     else ""
+        # ),
         "--networkid={0}".format(networkid),
         "--verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
