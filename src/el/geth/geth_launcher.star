@@ -253,7 +253,7 @@ def get_config(
             "--state.scheme=path"
             if electra_fork_epoch == None
             and "verkle" not in network
-            and constants.NETWORK_NAME.shadowfork not in network # for now
+            and constants.NETWORK_NAME.shadowfork not in network  # for now
             and "--builder" not in extra_params
             and capella_fork_epoch == 0
             else ""
@@ -275,11 +275,6 @@ def get_config(
         ),
         "{0}".format(
             "--override.cancun=" + cancun_time
-            if constants.NETWORK_NAME.shadowfork in network
-            else ""
-        ),
-        "{0}".format(
-            "--override.shanghai=" + final_genesis_timestamp
             if constants.NETWORK_NAME.shadowfork in network
             else ""
         ),
