@@ -23,7 +23,6 @@ BLOCKSCOUT_VERIF_MAX_CPU = 1000
 BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
 
-
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
@@ -46,38 +45,54 @@ def launch_blockscout(
     el_client_contexts,
 ):
     postgres_output = postgres.run(
-        plan, 
-        service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT_POSTGRES), 
-        database="blockscout", 
+        plan,
+        service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT_POSTGRES),
+        database="blockscout",
         extra_configs=["max_connections=1000"],
     )
 
     el_client_context = el_client_contexts[0]
-    el_client_rpc_url = "http://{}:{}/".format(el_client_context.ip_addr, el_client_context.rpc_port_num)    
-    el_client_name = el_client_context.client_name                    
+    el_client_rpc_url = "http://{}:{}/".format(
+        el_client_context.ip_addr, el_client_context.rpc_port_num
+    )
+    el_client_name = el_client_context.client_name
 
     config_verif = get_config_verif()
-    verif_service= plan.add_service(SERVICE_NAME_BLOCKSCOUT_VERIF, config_verif)  
-    config_backend = get_config_backend(postgres_output, el_client_rpc_url,verif_service.hostname,el_client_name)
-    blockscout_service= plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)  
+    verif_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT_VERIF, config_verif)
+    verif_url = "http://{}:{}/api".format(
+        verif_service.hostname, verif_service.ports["http"].number
+    )
+
+    config_backend = get_config_backend(
+        postgres_output, el_client_rpc_url, verif_url, el_client_name
+    )
+    blockscout_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)
+    plan.print(blockscout_service)
+
+    blockscout_url = "http://{}:{}/api".format(
+        blockscout_service.hostname, blockscout_service.ports["http"].number
+    )
+
+    return blockscout_url
+
 
 def get_config_verif():
-
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT_VERIF,
         ports=VERIF_USED_PORTS,
         env_vars={
-            "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR":"0.0.0.0:{}".format(HTTP_PORT_NUMBER_VERIF) 
+            "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR": "0.0.0.0:{}".format(
+                HTTP_PORT_NUMBER_VERIF
+            )
         },
         min_cpu=BLOCKSCOUT_VERIF_MIN_CPU,
         max_cpu=BLOCKSCOUT_VERIF_MAX_CPU,
         min_memory=BLOCKSCOUT_VERIF_MIN_MEMORY,
-        max_memory=BLOCKSCOUT_VERIF_MAX_MEMORY
+        max_memory=BLOCKSCOUT_VERIF_MAX_MEMORY,
     )
 
 
-def get_config_backend(postgres_output, el_client_rpc_url,service_name,el_client_name):
-    
+def get_config_backend(postgres_output, el_client_rpc_url, verif_url, el_client_name):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
         user=postgres_output.user,
@@ -91,8 +106,9 @@ def get_config_backend(postgres_output, el_client_rpc_url,service_name,el_client
         image=IMAGE_NAME_BLOCKSCOUT,
         ports=USED_PORTS,
         cmd=[
-            "/bin/sh", "-c", 
-            'bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()" && bin/blockscout start'
+            "/bin/sh",
+            "-c",
+            'bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()" && bin/blockscout start',
         ],
         env_vars={
             "ETHEREUM_JSONRPC_VARIANT": el_client_name,
@@ -101,7 +117,7 @@ def get_config_backend(postgres_output, el_client_rpc_url,service_name,el_client
             "DATABASE_URL": database_url,
             "COIN": "ETH",
             "MICROSERVICE_SC_VERIFIER_ENABLED": "true",
-            "MICROSERVICE_SC_VERIFIER_URL": service_name+":{}".format(HTTP_PORT_NUMBER_VERIF),
+            "MICROSERVICE_SC_VERIFIER_URL": verif_url,
             "MICROSERVICE_SC_VERIFIER_TYPE": "sc_verifier",
             "INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER": "true",
             "ECTO_USE_SSL": "false",
@@ -109,10 +125,10 @@ def get_config_backend(postgres_output, el_client_rpc_url,service_name,el_client
             "SUBNETWORK": "Kurtosis",
             "API_V2_ENABLED": "true",
             "PORT": "{}".format(HTTP_PORT_NUMBER),
-            "SECRET_KEY_BASE":"56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN"
+            "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
         },
         min_cpu=BLOCKSCOUT_MIN_CPU,
         max_cpu=BLOCKSCOUT_MAX_CPU,
         min_memory=BLOCKSCOUT_MIN_MEMORY,
-        max_memory=BLOCKSCOUT_MAX_MEMORY,        
+        max_memory=BLOCKSCOUT_MAX_MEMORY,
     )

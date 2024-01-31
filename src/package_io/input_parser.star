@@ -45,7 +45,6 @@ DEFAULT_ADDITIONAL_SERVICES = [
     "el_forkmon",
     "beacon_metrics_gazer",
     "dora",
-    "blockscout",    
     "prometheus_grafana",
 ]
 

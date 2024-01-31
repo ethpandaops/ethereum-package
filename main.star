@@ -45,6 +45,8 @@ GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
 
+BLOCKSCOUT_VERIFY_SC_URL = ""
+
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
@@ -377,11 +379,11 @@ def run(plan, args={}):
             plan.print("Successfully launched full-beaconchain-explorer")
         elif additional_service == "blockscout":
             plan.print("Launching blockscout")
-            blockscout.launch_blockscout(
+            BLOCKSCOUT_VERIFY_SC_URL = blockscout.launch_blockscout(
                 plan,
                 all_el_client_contexts,
             )
-            plan.print("Successfully launched dora")                
+            plan.print("Successfully launched dora")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
@@ -454,8 +456,12 @@ def run(plan, args={}):
         user=GRAFANA_USER,
         password=GRAFANA_PASSWORD,
     )
+    blockscout_info = struct(
+        verify_url=BLOCKSCOUT_VERIFY_SC_URL,
+    )
     output = struct(
         grafana_info=grafana_info,
+        blockscout_info=blockscout_info,
         all_participants=all_participants,
         final_genesis_timestamp=final_genesis_timestamp,
         genesis_validators_root=genesis_validators_root,

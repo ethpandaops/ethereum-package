@@ -1,39 +1,10 @@
 participants:
   - el_client_type: geth
-    el_client_image: ethereum/client-go:latest
-    el_client_log_level: ""
-    el_extra_params: []
-    el_extra_labels: {}
     cl_client_type: lighthouse
-    cl_client_image: sigp/lighthouse:latest
-    cl_client_log_level: ""
-    beacon_extra_params: []
-    beacon_extra_labels: {}
-    validator_extra_params: []
-    validator_extra_labels: {}
-    builder_network_params: null
-    validator_count: null
-    snooper_enabled: false
-    ethereum_metrics_exporter_enabled: false
-    xatu_sentry_enabled: false
-    el_min_cpu: 0
-    el_max_cpu: 0
-    el_min_mem: 0
-    el_max_mem: 0
-    bn_min_cpu: 0
-    bn_max_cpu: 0
-    bn_min_mem: 0
-    bn_max_mem: 0
-    v_min_cpu: 0
-    v_max_cpu: 0
-    v_min_mem: 0
-    v_max_mem: 0
-    count: 2
-    prometheus_config:
-      scrape_interval: 15s
-      labels: {}
-    blobber_enabled: false
-    blobber_extra_params: []
+    validator_count: 32
+  - el_client_type: nethermind
+    cl_client_type: prysm
+    validator_count: 32
 network_params:
   network_id: "3151908"
   deposit_contract_address: "0x4242424242424242424242424242424242424242"
@@ -48,7 +19,7 @@ network_params:
   max_churn: 8
   ejection_balance: 16000000000
   capella_fork_epoch: 0
-  deneb_fork_epoch: 4
+  deneb_fork_epoch: 5000
   electra_fork_epoch: null
 additional_services:
   - tx_spammer
@@ -57,7 +28,6 @@ additional_services:
   - beacon_metrics_gazer
   - dora
   - blockscout
-  - prometheus_grafana
 wait_for_finalization: false
 global_client_log_level: info
 snooper_enabled: false
