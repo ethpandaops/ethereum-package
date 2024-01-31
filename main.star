@@ -44,7 +44,6 @@ assertoor = import_module("./src/assertoor/assertoor_launcher.star")
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
-BLOCKSCOUT_VERIFY_SC_URL = ""
 
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
@@ -345,7 +344,7 @@ def run(plan, args={}):
             plan.print("Successfully launched beacon metrics gazer")
         elif additional_service == "blockscout":
             plan.print("Launching blockscout")
-            BLOCKSCOUT_VERIFY_SC_URL = blockscout.launch_blockscout(
+            blockscout.launch_blockscout(
                 plan,
                 all_el_client_contexts,
             )
@@ -452,16 +451,16 @@ def run(plan, args={}):
         )
         plan.print("First finalized epoch occurred successfully")
 
-    blockscout_info = struct(
-        verify_url=BLOCKSCOUT_VERIFY_SC_URL,
+    grafana_info = struct(
+        dashboard_path=GRAFANA_DASHBOARD_PATH_URL,
+        user=GRAFANA_USER,
+        password=GRAFANA_PASSWORD,
     )
     output = struct(
         grafana_info=grafana_info,
-        blockscout_info=blockscout_info,
         all_participants=all_participants,
         final_genesis_timestamp=final_genesis_timestamp,
         genesis_validators_root=genesis_validators_root,
     )
-
 
     return output
