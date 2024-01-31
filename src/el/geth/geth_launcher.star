@@ -275,8 +275,7 @@ def get_config(
         # Override prague fork timestamp if we are shadowforking for verkle
         "{0}".format(
             "--override.prague=" + str(prague_time)
-            if constants.NETWORK_NAME.shadowfork in network
-            and "verkle" in network
+            if constants.NETWORK_NAME.shadowfork in network and "verkle" in network
             else ""
         ),
         "{0}".format(
