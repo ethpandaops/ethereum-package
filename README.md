@@ -404,6 +404,10 @@ goomy_blob_params:
 
 # Configuration place for the assertoor testing tool - https:#github.com/ethpandaops/assertoor
 assertoor_params:
+  # Assertoor docker image to use
+  # Leave blank to use the default image according to your network params
+  image: ""
+
   # Check chain stability
   # This check monitors the chain and succeeds if:
   # - all clients are synced
@@ -784,7 +788,6 @@ Here's a table of where the keys are used
 | 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
 | 4              | goomy_blob         | ✅                |                 | As the sender of blobs     |
-| 5             | eip4788_deployment  | ✅                |                 | As contract deployer       |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |
 | 7             | mev_flood           | ✅                |                 | As the user_key            |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
