@@ -7,7 +7,7 @@ genesis_constants = import_module(
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
     "erigon": "ethpandaops/erigon:devel",
-    "nethermind": "nethermind/nethermind:latest",
+    "nethermind": "nethermindeth/nethermind:master",
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
@@ -56,6 +56,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "goomy_blob_params",
     "tx_spammer_params",
     "custom_flood_params",
+    "xatu_sentry_params",
 )
 
 
@@ -75,7 +76,9 @@ def input_parser(plan, input_args):
     result["disable_peer_scoring"] = False
     result["goomy_blob_params"] = get_default_goomy_blob_params()
     result["assertoor_params"] = get_default_assertoor_params()
+    result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
+    result["global_tolerations"] = []
 
     for attr in input_args:
         value = input_args[attr]
@@ -103,6 +106,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["assertoor_params"]:
                 sub_value = input_args["assertoor_params"][sub_attr]
                 result["assertoor_params"][sub_attr] = sub_value
+        elif attr == "xatu_sentry_params":
+            for sub_attr in input_args["xatu_sentry_params"]:
+                sub_value = input_args["xatu_sentry_params"][sub_attr]
+                result["xatu_sentry_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -137,11 +144,15 @@ def input_parser(plan, input_args):
                 el_extra_params=participant["el_extra_params"],
                 el_extra_env_vars=participant["el_extra_env_vars"],
                 el_extra_labels=participant["el_extra_labels"],
+                el_tolerations=participant["el_tolerations"],
                 cl_client_type=participant["cl_client_type"],
                 cl_client_image=participant["cl_client_image"],
                 cl_client_log_level=participant["cl_client_log_level"],
                 cl_client_volume_size=participant["cl_client_volume_size"],
                 cl_split_mode_enabled=participant["cl_split_mode_enabled"],
+                cl_tolerations=participant["cl_tolerations"],
+                tolerations=participant["tolerations"],
+                validator_tolerations=participant["validator_tolerations"],
                 beacon_extra_params=participant["beacon_extra_params"],
                 beacon_extra_labels=participant["beacon_extra_labels"],
                 validator_extra_params=participant["validator_extra_params"],
@@ -165,6 +176,7 @@ def input_parser(plan, input_args):
                 ethereum_metrics_exporter_enabled=participant[
                     "ethereum_metrics_exporter_enabled"
                 ],
+                xatu_sentry_enabled=participant["xatu_sentry_enabled"],
                 prometheus_config=struct(
                     scrape_interval=participant["prometheus_config"]["scrape_interval"],
                     labels=participant["prometheus_config"]["labels"],
@@ -224,6 +236,7 @@ def input_parser(plan, input_args):
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
         assertoor_params=struct(
+            image=result["assertoor_params"]["image"],
             run_stability_check=result["assertoor_params"]["run_stability_check"],
             run_block_proposal_check=result["assertoor_params"][
                 "run_block_proposal_check"
@@ -249,10 +262,19 @@ def input_parser(plan, input_args):
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         ethereum_metrics_exporter_enabled=result["ethereum_metrics_exporter_enabled"],
+        xatu_sentry_enabled=result["xatu_sentry_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
         grafana_additional_dashboards=result["grafana_additional_dashboards"],
         disable_peer_scoring=result["disable_peer_scoring"],
         persistent=result["persistent"],
+        xatu_sentry_params=struct(
+            xatu_sentry_image=result["xatu_sentry_params"]["xatu_sentry_image"],
+            xatu_server_addr=result["xatu_sentry_params"]["xatu_server_addr"],
+            xatu_server_headers=result["xatu_sentry_params"]["xatu_server_headers"],
+            beacon_subscriptions=result["xatu_sentry_params"]["beacon_subscriptions"],
+            xatu_server_tls=result["xatu_sentry_params"]["xatu_server_tls"],
+        ),
+        global_tolerations=result["global_tolerations"],
     )
 
 
@@ -333,6 +355,8 @@ def parse_network_params(input_args):
             "ethereum_metrics_exporter_enabled"
         ]
 
+        xatu_sentry_enabled = participant["xatu_sentry_enabled"]
+
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
             # unless we are running lighthouse, we don't support blobber
@@ -351,6 +375,11 @@ def parse_network_params(input_args):
                 participant[
                     "ethereum_metrics_exporter_enabled"
                 ] = default_ethereum_metrics_exporter_enabled
+
+        if xatu_sentry_enabled == False:
+            default_xatu_sentry_enabled = result["xatu_sentry_enabled"]
+            if default_xatu_sentry_enabled:
+                participant["xatu_sentry_enabled"] = default_xatu_sentry_enabled
 
         validator_count = participant["validator_count"]
         if validator_count == None:
@@ -420,7 +449,7 @@ def parse_network_params(input_args):
 def get_client_log_level_or_default(
     participant_log_level, global_log_level, client_log_levels
 ):
-    log_level = participant_log_level
+    log_level = client_log_levels.get(participant_log_level, "")
     if log_level == "":
         log_level = client_log_levels.get(global_log_level, "")
         if log_level == "":
@@ -430,6 +459,44 @@ def get_client_log_level_or_default(
                 )
             )
     return log_level
+
+
+def get_client_tolerations(
+    specific_container_toleration, participant_tolerations, global_tolerations
+):
+    toleration_list = []
+    tolerations = []
+    tolerations = specific_container_toleration if specific_container_toleration else []
+    if not tolerations:
+        tolerations = participant_tolerations if participant_tolerations else []
+        if not tolerations:
+            tolerations = global_tolerations if global_tolerations else []
+
+    if tolerations != []:
+        for toleration_data in tolerations:
+            if toleration_data.get("toleration_seconds"):
+                toleration_list.append(
+                    Toleration(
+                        key=toleration_data.get("key", ""),
+                        value=toleration_data.get("value", ""),
+                        operator=toleration_data.get("operator", ""),
+                        effect=toleration_data.get("effect", ""),
+                        toleration_seconds=toleration_data.get("toleration_seconds"),
+                    )
+                )
+            # Gyani has to fix this in the future
+            # https://github.com/kurtosis-tech/kurtosis/issues/2093
+            else:
+                toleration_list.append(
+                    Toleration(
+                        key=toleration_data.get("key", ""),
+                        value=toleration_data.get("value", ""),
+                        operator=toleration_data.get("operator", ""),
+                        effect=toleration_data.get("effect", ""),
+                    )
+                )
+
+    return toleration_list
 
 
 def default_input_args():
@@ -442,8 +509,10 @@ def default_input_args():
         "global_client_log_level": "info",
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
+        "xatu_sentry_enabled": False,
         "parallel_keystore_generation": False,
         "disable_peer_scoring": False,
+        "global_tolerations": [],
     }
 
 
@@ -456,7 +525,7 @@ def default_network_params():
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
         "seconds_per_slot": 12,
-        "genesis_delay": 120,
+        "genesis_delay": 20,
         "max_churn": 8,
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
@@ -476,11 +545,15 @@ def default_participant():
         "el_extra_params": [],
         "el_extra_env_vars": {},
         "el_extra_labels": {},
+        "el_tolerations": [],
         "cl_client_type": "lighthouse",
         "cl_client_image": "",
         "cl_client_log_level": "",
         "cl_client_volume_size": 0,
         "cl_split_mode_enabled": False,
+        "cl_tolerations": [],
+        "validator_tolerations": [],
+        "tolerations": [],
         "beacon_extra_params": [],
         "beacon_extra_labels": {},
         "validator_extra_params": [],
@@ -501,6 +574,7 @@ def default_participant():
         "validator_count": None,
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
+        "xatu_sentry_enabled": False,
         "count": 1,
         "prometheus_config": {
             "scrape_interval": "15s",
@@ -541,6 +615,7 @@ def get_default_goomy_blob_params():
 
 def get_default_assertoor_params():
     return {
+        "image": "",
         "run_stability_check": True,
         "run_block_proposal_check": True,
         "run_lifecycle_test": False,
@@ -548,6 +623,25 @@ def get_default_assertoor_params():
         "run_blob_transaction_test": False,
         "run_opcodes_transaction_test": False,
         "tests": [],
+    }
+
+
+def get_default_xatu_sentry_params():
+    return {
+        "xatu_sentry_image": "ethpandaops/xatu:latest",
+        "xatu_server_addr": "localhost:8080",
+        "xatu_server_headers": {},
+        "xatu_server_tls": False,
+        "beacon_subscriptions": [
+            "attestation",
+            "block",
+            "chain_reorg",
+            "finalized_checkpoint",
+            "head",
+            "voluntary_exit",
+            "contribution_and_proof",
+            "blob_sidecar",
+        ],
     }
 
 

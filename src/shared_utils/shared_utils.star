@@ -114,14 +114,28 @@ def read_genesis_timestamp_from_config(plan, filename):
         packages=["PyYAML"],
         run="""
 import yaml
-with open("/network-configs/config.yaml", "r") as f:
+with open("/network-configs/network-configs/config.yaml", "r") as f:
     yaml_data = yaml.safe_load(f)
 
-# Get values from the YAML content
 min_genesis_time = int(yaml_data.get("MIN_GENESIS_TIME", 0))
 genesis_delay = int(yaml_data.get("GENESIS_DELAY", 0))
+print(min_genesis_time + genesis_delay, end="")
+        """,
+    )
+    return value.output
 
-print(int(min_genesis_time + genesis_delay), end="")
+
+def read_genesis_network_id_from_config(plan, filename):
+    value = plan.run_python(
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        packages=["PyYAML"],
+        run="""
+import yaml
+with open("/network-configs/network-configs/config.yaml", "r") as f:
+    yaml_data = yaml.safe_load(f)
+network_id = int(yaml_data.get("DEPOSIT_NETWORK_ID", 0))
+print(network_id, end="")
         """,
     )
     return value.output

@@ -34,6 +34,7 @@ def launch_assertoor(
     config_template,
     participant_contexts,
     participant_configs,
+    network_params,
     assertoor_params,
 ):
     all_client_info = []
@@ -88,18 +89,30 @@ def launch_assertoor(
     config = get_config(
         config_files_artifact_name,
         tests_config_artifacts_name,
+        network_params,
+        assertoor_params,
     )
 
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(config_files_artifact_name, tests_config_artifacts_name):
+def get_config(
+    config_files_artifact_name,
+    tests_config_artifacts_name,
+    network_params,
+    assertoor_params,
+):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         ASSERTOOR_CONFIG_FILENAME,
     )
 
-    IMAGE_NAME = "ethpandaops/assertoor:master"
+    if assertoor_params.image != "":
+        IMAGE_NAME = assertoor_params.image
+    elif network_params.electra_fork_epoch != None:
+        IMAGE_NAME = "ethpandaops/assertoor:verkle-support"
+    else:
+        IMAGE_NAME = "ethpandaops/assertoor:latest"
 
     return ServiceConfig(
         image=IMAGE_NAME,

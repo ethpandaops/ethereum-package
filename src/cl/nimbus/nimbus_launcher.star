@@ -23,9 +23,7 @@ BEACON_METRICS_PORT_NUM = 8008
 
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 50
-BEACON_MAX_CPU = 1000
 BEACON_MIN_MEMORY = 256
-BEACON_MAX_MEMORY = 1024
 
 DEFAULT_BEACON_IMAGE_ENTRYPOINT = ["nimbus_beacon_node"]
 
@@ -96,7 +94,7 @@ VALIDATOR_USED_PORTS = {
     ),
 }
 
-NIMBUS_LOG_LEVELS = {
+VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
     constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
     constants.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
@@ -135,6 +133,10 @@ def launch(
     extra_validator_labels,
     persistent,
     cl_volume_size,
+    cl_tolerations,
+    validator_tolerations,
+    participant_tolerations,
+    global_tolerations,
     split_mode_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -143,27 +145,34 @@ def launch(
     )
 
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, NIMBUS_LOG_LEVELS
+        participant_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    # Holesky has a bigger memory footprint, so it needs more memory
-    if launcher.network == "holesky":
-        holesky_beacon_memory_limit = 4096
-        bn_max_mem = (
-            int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
-        )
-
-    bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
-    bn_max_cpu = int(bn_max_cpu) if int(bn_max_cpu) > 0 else BEACON_MAX_CPU
-    bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
-    bn_max_mem = int(bn_max_mem) if int(bn_max_mem) > 0 else BEACON_MAX_MEMORY
+    tolerations = input_parser.get_client_tolerations(
+        cl_tolerations, participant_tolerations, global_tolerations
+    )
 
     network_name = (
         "devnets"
         if launcher.network != "kurtosis"
+        and launcher.network != "ephemery"
         and launcher.network not in constants.PUBLIC_NETWORKS
         else launcher.network
     )
+
+    bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
+    bn_max_cpu = (
+        int(bn_max_cpu)
+        if int(bn_max_cpu) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["nimbus_max_cpu"]
+    )
+    bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
+    bn_max_mem = (
+        int(bn_max_mem)
+        if int(bn_max_mem) > 0
+        else constants.RAM_CPU_OVERRIDES[network_name]["nimbus_max_mem"]
+    )
+
     cl_volume_size = (
         int(cl_volume_size)
         if int(cl_volume_size) > 0
@@ -192,6 +201,7 @@ def launch(
         split_mode_enabled,
         persistent,
         cl_volume_size,
+        tolerations,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -232,7 +242,9 @@ def launch(
         v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else VALIDATOR_MAX_CPU
         v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
         v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
-
+        tolerations = input_parser.get_client_tolerations(
+            validator_tolerations, participant_tolerations, global_tolerations
+        )
         validator_config = get_validator_config(
             launcher.el_cl_genesis_data,
             image,
@@ -248,6 +260,7 @@ def launch(
             extra_validator_params,
             extra_validator_labels,
             persistent,
+            tolerations,
         )
 
         validator_service = plan.add_service(validator_service_name, validator_config)
@@ -302,6 +315,7 @@ def get_beacon_config(
     split_mode_enabled,
     persistent,
     cl_volume_size,
+    tolerations,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -374,21 +388,20 @@ def get_beacon_config(
     if node_keystore_files != None and not split_mode_enabled:
         cmd.extend(validator_flags)
 
-    if network == "kurtosis":
-        if bootnode_contexts == None:
-            # Copied from https://github.com/status-im/nimbus-eth2/blob/67ab477a27e358d605e99bffeb67f98d18218eca/scripts/launch_local_testnet.sh#L417
-            # See explanation there
-            cmd.append("--subscribe-all-subnets")
-        else:
-            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
-                cmd.append("--bootstrap-node=" + ctx.enr)
-                cmd.append("--direct-peer=" + ctx.multiaddr)
-    elif network not in constants.PUBLIC_NETWORKS:
+    if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootstrap-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/bootstrap_nodes.txt"
         )
+        if network == constants.NETWORK_NAME.kurtosis:
+            if bootnode_contexts == None:
+                cmd.append("--subscribe-all-subnets")
+            else:
+                for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
+                    cmd.append("--bootstrap-node=" + ctx.enr)
+                    cmd.append("--direct-peer=" + ctx.multiaddr)
+
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
 
@@ -428,6 +441,7 @@ def get_beacon_config(
             extra_labels,
         ),
         user=User(uid=0, gid=0),
+        tolerations=tolerations,
     )
 
 
@@ -446,6 +460,7 @@ def get_validator_config(
     extra_params,
     extra_labels,
     persistent,
+    tolerations,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -499,6 +514,7 @@ def get_validator_config(
             el_client_context.client_name,
             extra_labels,
         ),
+        tolerations=tolerations,
     )
 
 

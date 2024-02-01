@@ -31,6 +31,8 @@ ethereum_metrics_exporter = import_module(
     "./ethereum_metrics_exporter/ethereum_metrics_exporter_launcher.star"
 )
 
+xatu_sentry = import_module("./xatu_sentry/xatu_sentry_launcher.star")
+
 genesis_constants = import_module(
     "./prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
@@ -61,10 +63,12 @@ def launch_participant_network(
     global_log_level,
     jwt_file,
     persistent,
+    xatu_sentry_params,
+    global_tolerations,
     parallel_keystore_generation=False,
 ):
     num_participants = len(participants)
-    if network_params.network == "kurtosis":
+    if network_params.network == constants.NETWORK_NAME.kurtosis:
         # We are running a kurtosis network
         plan.print("Generating cl validator key stores")
         validator_data = None
@@ -83,10 +87,14 @@ def launch_participant_network(
 
         plan.print(json.indent(json.encode(validator_data)))
 
+        network_id = network_params.network_id
+
         # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
         final_genesis_timestamp = get_final_genesis_timestamp(
             plan,
-            CL_GENESIS_DATA_GENERATION_TIME + num_participants * CL_NODE_STARTUP_TIME,
+            network_params.genesis_delay
+            + CL_GENESIS_DATA_GENERATION_TIME
+            + num_participants * CL_NODE_STARTUP_TIME,
         )
 
         # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants
@@ -111,7 +119,7 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:2.0.8"
+                "ethpandaops/ethereum-genesis-generator:2.0.11"
             )
         # we are running electra - experimental
         elif network_params.electra_fork_epoch != None:
@@ -161,6 +169,28 @@ def launch_participant_network(
             constants.GENESIS_VALIDATORS_ROOT[network_params.network],
         )
         final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
+        network_id = constants.NETWORK_ID[network_params.network]
+        validator_data = None
+    elif network_params.network == constants.NETWORK_NAME.ephemery:
+        el_cl_genesis_data_uuid = plan.run_sh(
+            run="mkdir -p /network-configs/ && \
+                curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && \
+                tar xvzf latest.tar.gz -C /network-configs && \
+                cat /network-configs/genesis_validators_root.txt",
+            image="badouralix/curl-jq",
+            store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
+        )
+        genesis_validators_root = el_cl_genesis_data_uuid.output
+        el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
+            el_cl_genesis_data_uuid.files_artifacts[0],
+            genesis_validators_root,
+        )
+        final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
+        )
+        network_id = shared_utils.read_genesis_network_id_from_config(
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
+        )
         validator_data = None
     else:
         # We are running a devnet
@@ -175,12 +205,16 @@ def launch_participant_network(
             files={"/opt": el_cl_genesis_uuid},
         )
         genesis_validators_root = read_file(url + "/genesis_validators_root.txt")
+
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             el_cl_genesis_data_uuid.files_artifacts[0],
             genesis_validators_root,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
-            plan, el_cl_genesis_uuid
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
+        )
+        network_id = shared_utils.read_genesis_network_id_from_config(
+            plan, el_cl_genesis_data_uuid.files_artifacts[0]
         )
         validator_data = None
 
@@ -190,6 +224,7 @@ def launch_participant_network(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                network_id,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -201,6 +236,7 @@ def launch_participant_network(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                network_id,
                 final_genesis_timestamp,
                 network_params.capella_fork_epoch,
                 network_params.electra_fork_epoch,
@@ -220,6 +256,7 @@ def launch_participant_network(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                network_id,
             ),
             "launch_method": erigon.launch,
         },
@@ -291,6 +328,9 @@ def launch_participant_network(
             participant.el_extra_labels,
             persistent,
             participant.el_client_volume_size,
+            participant.el_tolerations,
+            participant.tolerations,
+            global_tolerations,
         )
 
         # Add participant el additional prometheus metrics
@@ -305,12 +345,12 @@ def launch_participant_network(
     plan.print("Launching CL network")
     prysm_password_relative_filepath = (
         validator_data.prysm_password_relative_filepath
-        if network_params.network == "kurtosis"
+        if network_params.network == constants.NETWORK_NAME.kurtosis
         else None
     )
     prysm_password_artifact_uuid = (
         validator_data.prysm_password_artifact_uuid
-        if network_params.network == "kurtosis"
+        if network_params.network == constants.NETWORK_NAME.kurtosis
         else None
     )
     cl_launchers = {
@@ -355,9 +395,10 @@ def launch_participant_network(
     all_snooper_engine_contexts = []
     all_cl_client_contexts = []
     all_ethereum_metrics_exporter_contexts = []
+    all_xatu_sentry_contexts = []
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
-        if network_params.network == "kurtosis"
+        if network_params.network == constants.NETWORK_NAME.kurtosis
         else None
     )
 
@@ -437,6 +478,10 @@ def launch_participant_network(
                 participant.validator_extra_labels,
                 persistent,
                 participant.cl_client_volume_size,
+                participant.cl_tolerations,
+                participant.validator_tolerations,
+                participant.tolerations,
+                global_tolerations,
                 participant.cl_split_mode_enabled,
             )
         else:
@@ -469,6 +514,10 @@ def launch_participant_network(
                 participant.validator_extra_labels,
                 persistent,
                 participant.cl_client_volume_size,
+                participant.cl_tolerations,
+                participant.validator_tolerations,
+                participant.tolerations,
+                global_tolerations,
                 participant.cl_split_mode_enabled,
             )
 
@@ -503,6 +552,29 @@ def launch_participant_network(
 
         all_ethereum_metrics_exporter_contexts.append(ethereum_metrics_exporter_context)
 
+        xatu_sentry_context = None
+
+        if participant.xatu_sentry_enabled:
+            pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
+
+            xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
+
+            xatu_sentry_context = xatu_sentry.launch(
+                plan,
+                xatu_sentry_service_name,
+                cl_client_context,
+                xatu_sentry_params,
+                network_params,
+                pair_name,
+            )
+            plan.print(
+                "Successfully added {0} xatu sentry participants".format(
+                    xatu_sentry_context
+                )
+            )
+
+        all_xatu_sentry_contexts.append(xatu_sentry_context)
+
     plan.print("Successfully added {0} CL participants".format(num_participants))
 
     all_participants = []
@@ -523,6 +595,10 @@ def launch_participant_network(
             ethereum_metrics_exporter_context = all_ethereum_metrics_exporter_contexts[
                 index
             ]
+        xatu_sentry_context = None
+
+        if participant.xatu_sentry_enabled:
+            xatu_sentry_context = all_xatu_sentry_contexts[index]
 
         participant_entry = participant_module.new_participant(
             el_client_type,
@@ -531,6 +607,7 @@ def launch_participant_network(
             cl_client_context,
             snooper_engine_context,
             ethereum_metrics_exporter_context,
+            xatu_sentry_context,
         )
 
         all_participants.append(participant_entry)
