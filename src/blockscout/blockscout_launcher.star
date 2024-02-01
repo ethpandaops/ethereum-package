@@ -6,7 +6,6 @@ IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout:6.0.0"
 IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.6.0"
 
 SERVICE_NAME_BLOCKSCOUT = "blockscout"
-SERVICE_NAME_BLOCKSCOUT_VERIF = "blockscout-verif"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 4000
@@ -129,5 +128,4 @@ def get_config_backend(postgres_output, el_client_rpc_url, verif_url, el_client_
         max_cpu=BLOCKSCOUT_MAX_CPU,
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
-        # persistent=persistent
     )
