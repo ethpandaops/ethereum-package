@@ -112,7 +112,7 @@ def get_config(
     elif network_params.electra_fork_epoch != None:
         IMAGE_NAME = "ethpandaops/assertoor:verkle-support"
     else:
-        IMAGE_NAME = "ethpandaops/assertoor:latest"
+        IMAGE_NAME = "ethpandaops/assertoor:master"
 
     return ServiceConfig(
         image=IMAGE_NAME,
