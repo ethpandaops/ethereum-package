@@ -236,6 +236,7 @@ def input_parser(plan, input_args):
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
         assertoor_params=struct(
+            image=result["assertoor_params"]["image"],
             run_stability_check=result["assertoor_params"]["run_stability_check"],
             run_block_proposal_check=result["assertoor_params"][
                 "run_block_proposal_check"
@@ -614,6 +615,7 @@ def get_default_goomy_blob_params():
 
 def get_default_assertoor_params():
     return {
+        "image": "",
         "run_stability_check": True,
         "run_block_proposal_check": True,
         "run_lifecycle_test": False,
