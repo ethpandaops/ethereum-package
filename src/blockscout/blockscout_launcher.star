@@ -6,7 +6,6 @@ IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout:6.0.0"
 IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.6.0"
 
 SERVICE_NAME_BLOCKSCOUT = "blockscout"
-SERVICE_NAME_BLOCKSCOUT_POSTGRES = "blockscout-posgres"
 SERVICE_NAME_BLOCKSCOUT_VERIF = "blockscout-verif"
 
 HTTP_PORT_ID = "http"
@@ -40,15 +39,13 @@ VERIF_USED_PORTS = {
 }
 
 
-def launch_blockscout(
-    plan,
-    el_client_contexts,
-):
+def launch_blockscout(plan, el_client_contexts, persistent):
     postgres_output = postgres.run(
         plan,
-        service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT_POSTGRES),
+        service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
         database="blockscout",
         extra_configs=["max_connections=1000"],
+        persistent=persistent,
     )
 
     el_client_context = el_client_contexts[0]
@@ -58,7 +55,8 @@ def launch_blockscout(
     el_client_name = el_client_context.client_name
 
     config_verif = get_config_verif()
-    verif_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT_VERIF, config_verif)
+    verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)
+    verif_service = plan.add_service(verif_service_name, config_verif)
     verif_url = "http://{}:{}/api".format(
         verif_service.hostname, verif_service.ports["http"].number
     )
@@ -131,4 +129,5 @@ def get_config_backend(postgres_output, el_client_rpc_url, verif_url, el_client_
         max_cpu=BLOCKSCOUT_MAX_CPU,
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
+        # persistent=persistent
     )
