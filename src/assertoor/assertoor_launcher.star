@@ -96,7 +96,12 @@ def launch_assertoor(
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(config_files_artifact_name, tests_config_artifacts_name, network_params, assertoor_params):
+def get_config(
+    config_files_artifact_name,
+    tests_config_artifacts_name,
+    network_params,
+    assertoor_params,
+):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         ASSERTOOR_CONFIG_FILENAME,
