@@ -385,6 +385,10 @@ goomy_blob_params:
 
 # Configuration place for the assertoor testing tool - https:#github.com/ethpandaops/assertoor
 assertoor_params:
+  # Assertoor docker image to use
+  # Leave blank to use the default image according to your network params
+  image: ""
+
   # Check chain stability
   # This check monitors the chain and succeeds if:
   # - all clients are synced

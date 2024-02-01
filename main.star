@@ -398,6 +398,7 @@ def run(plan, args={}):
                 assertoor_config_template,
                 all_participants,
                 args_with_right_defaults.participants,
+                network_params,
                 assertoor_params,
             )
             plan.print("Successfully launched assertoor")
