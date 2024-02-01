@@ -66,7 +66,7 @@ def launch_blockscout(plan, el_client_contexts, persistent):
     blockscout_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)
     plan.print(blockscout_service)
 
-    blockscout_url = "http://{}:{}/api".format(
+    blockscout_url = "http://{}:{}".format(
         blockscout_service.hostname, blockscout_service.ports["http"].number
     )
 
