@@ -91,21 +91,41 @@ def launch_participant_network(
                 image="badouralix/curl-jq",
                 store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
             )
+
             # maybe we can do the copy in the same step as the fetch?
-            # for (
-            #     participant
-            # ) in participants:  # fetch the latest state for each EL participant
-            #     if participant.el_client_type == constants.EL_CLIENT_TYPE.geth:
-            #         geth_shadowfork_data = plan.run_sh(
-            #             run="mkdir -p /data && \
-            #                 wget https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar && \
-            #                 tar -xf geth.tar -C /data",
-            #             image="badouralix/curl-jq",
-            #             store=[
-            #                 StoreSpec(src="/data/geth", name="geth_shadowfork_data")
-            #             ],
-            #             wait="800s",
-            #         )
+            for index, participant in enumerate(participants):
+                cl_client_type = participant.cl_client_type
+                el_client_type = participant.el_client_type
+
+                # Zero-pad the index using the calculated zfill value
+                index_str = shared_utils.zfill_custom(
+                    index + 1, len(str(len(participants)))
+                )
+
+                el_service_name = "el-{0}-{1}-{2}".format(
+                    index_str, el_client_type, cl_client_type
+                )
+                if participant.el_client_type == constants.EL_CLIENT_TYPE.geth:
+                    geth_shadowfork_data = plan.add_service(
+                        name="geth-shadowfork-data",
+                        config=ServiceConfig(
+                            image="rclone/rclone:1.55.1",
+                            cmd=[
+                                "-c",
+                                "copy -P mys3:ethpandaops-ethereum-node-snapshots/holesky/geth/latest /data/geth/execution-data --transfers=100 --checkers=200",
+                            ],
+                            files={
+                                "/data/geth/execution-data": Directory(
+                                    persistent_key="data-{0}".format(el_service_name)
+                                ),
+                            },
+                            env_vars={
+                                "RCLONE_CONFIG_MYS3_TYPE": "s3",
+                                "RCLONE_CONFIG_MYS3_PROVIDER": "DigitalOcean",
+                                "RCLONE_CONFIG_MYS3_ENDPOINT": "https://ams3.digitaloceanspaces.com",
+                            },
+                        ),
+                    )
 
         # We are running a kurtosis or shadowfork network
         plan.print("Generating cl validator key stores")

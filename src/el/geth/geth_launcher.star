@@ -239,7 +239,8 @@ def get_config(
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
     elif constants.NETWORK_NAME.shadowfork in network:
-        init_datadir_cmd_str = "mkdir -p /data/geth/execution-data && wget -qO- https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar | tar xvf - -C /data/geth/execution-data --strip-components=1"
+        init_datadir_cmd_str = "echo shadowfork"
+        # mkdir -p /data/geth/execution-data && wget -qO- https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/geth.tar | tar xvf - -C /data/geth/execution-data --strip-components=1"
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
