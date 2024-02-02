@@ -25,6 +25,7 @@ blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
 )
+blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
 mev_boost = import_module("./src/mev/mev_boost/mev_boost_launcher.star")
@@ -67,7 +68,6 @@ def run(plan, args={}):
         static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
     )
     prometheus_additional_metrics_jobs = []
-
     raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
     jwt_file = plan.upload_files(
         src=static_files.JWT_PATH_FILEPATH,
@@ -326,6 +326,12 @@ def run(plan, args={}):
                 beacon_metrics_gazer_prometheus_metrics_job
             )
             plan.print("Successfully launched beacon metrics gazer")
+        elif additional_service == "blockscout":
+            plan.print("Launching blockscout")
+            blockscout_sc_verif_url = blockscout.launch_blockscout(
+                plan, all_el_client_contexts, persistent
+            )
+            plan.print("Successfully launched blockscout")
         elif additional_service == "dora":
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
@@ -434,8 +440,12 @@ def run(plan, args={}):
         user=GRAFANA_USER,
         password=GRAFANA_PASSWORD,
     )
+
     output = struct(
         grafana_info=grafana_info,
+        blockscout_sc_verif_url=None
+        if ("blockscout" in args_with_right_defaults.additional_services) == False
+        else blockscout_sc_verif_url,
         all_participants=all_participants,
         final_genesis_timestamp=final_genesis_timestamp,
         genesis_validators_root=genesis_validators_root,
