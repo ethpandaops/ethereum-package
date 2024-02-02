@@ -458,6 +458,7 @@ additional_services:
   - custom_flood
   - goomy_blob
   - el_forkmon
+  - blockscout
   - beacon_metrics_gazer
   - dora
   - full_beaconchain_explorer
