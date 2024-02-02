@@ -21,6 +21,7 @@ additional_services:
   - goomy_blob
   - custom_flood
   - blobscan
+  - blockscout
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 mev_type: full
