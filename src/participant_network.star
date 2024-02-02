@@ -87,7 +87,7 @@ def launch_participant_network(
             ]  # overload the network id to match the network name
             latest_block = plan.run_sh(  # fetch the latest block
                 run="mkdir -p /shadowfork && \
-                    curl -o /shadowfork/latest_block.json https://holesky-shadowfork.fra1.cdn.digitaloceanspaces.com/latest_block.json",
+                    curl -o /shadowfork/latest_block.json https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/holesky/geth/latest/latest_snapshot_block.json",
                 image="badouralix/curl-jq",
                 store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
             )
