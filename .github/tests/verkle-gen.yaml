@@ -1,13 +1,14 @@
 participants:
   - el_client_type: geth
-    el_client_image: ethpandaops/geth:gballet-kaustinen-with-shapella-fc8f4b9
+    el_client_image: ethpandaops/geth:kaustinen-with-shapella-6d7b22c
     cl_client_type: lighthouse
     cl_client_image: ethpandaops/lighthouse:verkle-trees-capella-2ffb8a9
     count: 2
   - el_client_type: geth
-    el_client_image: ethpandaops/geth:gballet-kaustinen-with-shapella-fc8f4b9
+    el_client_image: ethpandaops/geth:kaustinen-with-shapella-6d7b22c
     cl_client_type: lodestar
     cl_client_image: ethpandaops/lodestar:g11tech-verge-815364b
+    count: 2
 network_params:
   electra_fork_epoch: 0
 additional_services:
