@@ -82,9 +82,16 @@ def launch_participant_network(
             base_network = network_params.network.split("-shadowfork")[
                 0
             ]  # overload the network name to remove the shadowfork suffix
-            network_id = constants.NETWORK_ID[
-                base_network
-            ]  # overload the network id to match the network name
+            if constants.NETWORK_NAME.ephemery in base_network:
+                chain_id = plan.run_sh(
+                    run="curl -s https://ephemery.dev/latest/config.yaml | yq .DEPOSIT_CHAIN_ID | tr -d '\n'",
+                    image="linuxserver/yq",
+                )
+                network_id = chain_id.output
+            else:
+                network_id = constants.NETWORK_ID[
+                    base_network
+                ]  # overload the network id to match the network name
             latest_block = plan.run_sh(  # fetch the latest block
                 run="mkdir -p /shadowfork && \
                     curl -o /shadowfork/latest_block.json https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
