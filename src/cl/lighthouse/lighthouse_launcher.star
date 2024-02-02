@@ -381,7 +381,10 @@ def get_beacon_config(
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
-        if network == constants.NETWORK_NAME.kurtosis or constants.NETWORK_NAME.shadowfork in network:
+        if (
+            network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in network
+        ):
             if boot_cl_client_ctxs != None:
                 cmd.append(
                     "--boot-nodes="
