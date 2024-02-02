@@ -349,7 +349,7 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
-        if network == constants.NETWORK_NAME.kurtosis:
+        if network == constants.NETWORK_NAME.kurtosis or constants.NETWORK_NAME.shadowfork in network:
             if bootnode_contexts != None:
                 cmd.append(
                     "--bootnodes="
@@ -362,13 +362,6 @@ def get_beacon_config(
                 )
         elif network == constants.NETWORK_NAME.ephemery:
             cmd.append("--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network])
-            cmd.append(
-                "--bootnodes="
-                + shared_utils.get_devnet_enrs_list(
-                    plan, el_cl_genesis_data.files_artifact_uuid
-                )
-            )
-        elif constants.NETWORK_NAME.shadowfork in network:
             cmd.append(
                 "--bootnodes="
                 + shared_utils.get_devnet_enrs_list(

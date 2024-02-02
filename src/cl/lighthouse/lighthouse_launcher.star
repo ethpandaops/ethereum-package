@@ -381,7 +381,7 @@ def get_beacon_config(
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
-        if network == constants.NETWORK_NAME.kurtosis:
+        if network == constants.NETWORK_NAME.kurtosis or constants.NETWORK_NAME.shadowfork in network:
             if boot_cl_client_ctxs != None:
                 cmd.append(
                     "--boot-nodes="
@@ -405,13 +405,6 @@ def get_beacon_config(
             cmd.append(
                 "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
             )
-            cmd.append(
-                "--boot-nodes="
-                + shared_utils.get_devnet_enrs_list(
-                    plan, el_cl_genesis_data.files_artifact_uuid
-                )
-            )
-        elif constants.NETWORK_NAME.shadowfork in network:
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(

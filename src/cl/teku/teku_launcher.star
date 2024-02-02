@@ -403,7 +403,7 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
-        if network == constants.NETWORK_NAME.kurtosis:
+        if network == constants.NETWORK_NAME.kurtosis or constants.NETWORK_NAME.shadowfork in network:
             if bootnode_contexts != None:
                 cmd.append(
                     "--p2p-discovery-bootnodes="

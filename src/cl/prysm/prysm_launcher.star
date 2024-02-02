@@ -360,7 +360,7 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz",
         )
-        if network == constants.NETWORK_NAME.kurtosis:
+        if network == constants.NETWORK_NAME.kurtosis or constants.NETWORK_NAME.shadowfork in network:
             if bootnode_contexts != None:
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     cmd.append("--peer=" + ctx.multiaddr)
@@ -372,12 +372,6 @@ def get_beacon_config(
             cmd.append(
                 "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
             )
-            cmd.append(
-                "--bootstrap-node="
-                + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-                + "/boot_enr.yaml"
-            )
-        elif constants.NETWORK_NAME.shadowfork in network:
             cmd.append(
                 "--bootstrap-node="
                 + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
