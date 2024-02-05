@@ -119,13 +119,23 @@ def launch_participant_network(
                     config=ServiceConfig(
                         image="rclone/rclone:1.55.1",
                         cmd=[
-                            "rclone copy -P mys3:ethpandaops-ethereum-node-snapshots/"+ base_network +"/"+ el_client_type +"/latest /data/"+ el_client_type +"/execution-data"
+                            "rclone copy -P mys3:ethpandaops-ethereum-node-snapshots/"
+                            + base_network
+                            + "/"
+                            + el_client_type
+                            + "/latest /data/"
+                            + el_client_type
+                            + "/execution-data"
                         ],
                         entrypoint=["/bin/sh", "-c"],
                         files={
-                            "/data/"+ el_client_type +"/execution-data": Directory(
+                            "/data/"
+                            + el_client_type
+                            + "/execution-data": Directory(
                                 persistent_key="data-{0}".format(el_service_name),
-                                size = constants.VOLUME_SIZE[base_network][el_client_type + "_volume_size"]
+                                size=constants.VOLUME_SIZE[base_network][
+                                    el_client_type + "_volume_size"
+                                ],
                             ),
                         },
                         env_vars={
@@ -133,7 +143,7 @@ def launch_participant_network(
                             "RCLONE_CONFIG_MYS3_PROVIDER": "DigitalOcean",
                             "RCLONE_CONFIG_MYS3_ENDPOINT": "https://ams3.digitaloceanspaces.com",
                         },
-                    )
+                    ),
                 )
 
         # We are running a kurtosis or shadowfork network
