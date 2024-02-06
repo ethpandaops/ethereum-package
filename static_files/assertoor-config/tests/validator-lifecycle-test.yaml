@@ -19,6 +19,7 @@ tasks:
       title: "Generate 300 deposits"
       config:
         limitTotal: 300
+        limitPerSlot: 20
         depositContract: "0x4242424242424242424242424242424242424242"
       configVars:
         walletPrivkey: "walletPrivkey"
