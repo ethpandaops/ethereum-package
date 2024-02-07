@@ -134,6 +134,7 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
+        launcher.cancun_time,
         persistent,
         el_volume_size,
         tolerations,
@@ -181,6 +182,7 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
+    cancun_time,
     persistent,
     el_volume_size,
     tolerations,
@@ -194,6 +196,11 @@ def get_config(
         "erigon",
         "--chain={0}".format(
             network if network in constants.PUBLIC_NETWORKS else "dev"
+        ),
+        "{0}".format(
+            "--override.cancun=" + cancun_time
+            if constants.NETWORK_NAME.shadowfork in network and "verkle" not in network
+            else ""
         ),
         "--networkid={0}".format(networkid),
         "--log.console.verbosity=" + verbosity_level,
@@ -296,10 +303,11 @@ def get_config(
     )
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid, cancun_time):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
+        cancun_time=cancun_time,
     )

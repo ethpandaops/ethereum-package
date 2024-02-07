@@ -208,10 +208,20 @@ def get_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/chainspec.json"
         )
+    elif constants.NETWORK_NAME.shadowfork in network:
+        cmd.append(
+            "--Init.ChainSpecPath="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/chainspec.json"
+        )
+        cmd.append("--config=" + network)
     else:
         cmd.append("--config=" + network)
 
-    if network == constants.NETWORK_NAME.kurtosis:
+    if (
+        network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--Network.StaticPeers="

@@ -155,7 +155,6 @@ def launch(
         extra_labels,
         launcher.capella_fork_epoch,
         launcher.electra_fork_epoch,
-        launcher.final_genesis_timestamp,
         launcher.cancun_time,
         launcher.prague_time,
         persistent,
@@ -207,7 +206,6 @@ def get_config(
     extra_labels,
     capella_fork_epoch,
     electra_fork_epoch,
-    final_genesis_timestamp,
     cancun_time,
     prague_time,
     persistent,
@@ -223,7 +221,7 @@ def get_config(
         ):  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-                final_genesis_timestamp,
+                prague_time,
                 constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
             )
         else:  # verkle
@@ -238,9 +236,6 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
-    elif constants.NETWORK_NAME.shadowfork in network:
-        base_network = network.split("-shadowfork")[0]
-        init_datadir_cmd_str = "echo shadowfork"
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -269,7 +264,7 @@ def get_config(
         ),
         # Override prague fork timestamp if electra_fork_epoch == 0
         "{0}".format(
-            "--override.prague=" + final_genesis_timestamp
+            "--override.prague=" + prague_time
             if electra_fork_epoch == 0 or "verkle-gen" in network
             else ""
         ),
@@ -407,7 +402,6 @@ def new_geth_launcher(
     jwt_file,
     network,
     networkid,
-    final_genesis_timestamp,
     capella_fork_epoch,
     cancun_time,
     prague_time,
@@ -418,7 +412,6 @@ def new_geth_launcher(
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
-        final_genesis_timestamp=final_genesis_timestamp,
         capella_fork_epoch=capella_fork_epoch,
         cancun_time=cancun_time,
         prague_time=prague_time,
