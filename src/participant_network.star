@@ -160,18 +160,14 @@ def launch_participant_network(
                     index_str, el_client_type, cl_client_type
                 )
                 plan.wait(
-                    service_name = "shadowfork-{0}".format(el_service_name),
-                    recipe = ExecRecipe(
-                        command = ["cat", "/tmp/finished"]
-                    ),
-                    field = "code",
-                    assertion = "==",
-                    target_value = 0,
-                    interval = "1s",
-                    timeout = "20m",
+                    service_name="shadowfork-{0}".format(el_service_name),
+                    recipe=ExecRecipe(command=["cat", "/tmp/finished"]),
+                    field="code",
+                    assertion="==",
+                    target_value=0,
+                    interval="1s",
+                    timeout="20m",
                 )
-
-
 
         # We are running a kurtosis or shadowfork network
         plan.print("Generating cl validator key stores")
