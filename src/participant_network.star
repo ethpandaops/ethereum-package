@@ -126,6 +126,8 @@ def launch_participant_network(
                             + "/latest /data/"
                             + el_client_type
                             + "/execution-data"
+                            + "&& touch /tmp/finished"
+                            + "&& tail -f /dev/null"
                         ],
                         entrypoint=["/bin/sh", "-c"],
                         files={
@@ -145,6 +147,31 @@ def launch_participant_network(
                         },
                     ),
                 )
+            for index, participant in enumerate(participants):
+                cl_client_type = participant.cl_client_type
+                el_client_type = participant.el_client_type
+
+                # Zero-pad the index using the calculated zfill value
+                index_str = shared_utils.zfill_custom(
+                    index + 1, len(str(len(participants)))
+                )
+
+                el_service_name = "el-{0}-{1}-{2}".format(
+                    index_str, el_client_type, cl_client_type
+                )
+                plan.wait(
+                    service_name = "shadowfork-{0}".format(el_service_name),
+                    recipe = ExecRecipe(
+                        command = ["cat", "/tmp/finished"]
+                    ),
+                    field = "code",
+                    assertion = "==",
+                    target_value = 0,
+                    interval = "1s",
+                    timeout = "20m",
+                )
+
+
 
         # We are running a kurtosis or shadowfork network
         plan.print("Generating cl validator key stores")
