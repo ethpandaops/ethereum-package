@@ -260,7 +260,7 @@ def get_config(
         ),
         # Override prague fork timestamp if electra_fork_epoch == 0
         "{0}".format(
-            "--override.prague=" + prague_time
+            "--override.prague=" + str(prague_time)
             if electra_fork_epoch == 0 or "verkle-gen" in network
             else ""
         ),
@@ -268,7 +268,7 @@ def get_config(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
         ),
         "{0}".format(
-            "--override.cancun=" + cancun_time
+            "--override.cancun=" + str(cancun_time)
             if constants.NETWORK_NAME.shadowfork in network and "verkle" not in network
             else ""
         ),

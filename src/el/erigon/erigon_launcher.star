@@ -198,7 +198,7 @@ def get_config(
             network if network in constants.PUBLIC_NETWORKS else "dev"
         ),
         "{0}".format(
-            "--override.cancun=" + cancun_time
+            "--override.cancun=" + str(cancun_time)
             if constants.NETWORK_NAME.shadowfork in network and "verkle" not in network
             else ""
         ),
