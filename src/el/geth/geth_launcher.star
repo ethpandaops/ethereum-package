@@ -289,7 +289,7 @@ def get_config(
         ),
         "{0}".format(
             "--override.cancun=" + cancun_time
-            if constants.NETWORK_NAME.shadowfork in network
+            if constants.NETWORK_NAME.shadowfork in network and "verkle"  not in network
             else ""
         ),
         "--networkid={0}".format(networkid),
