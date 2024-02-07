@@ -103,6 +103,11 @@ def launch_participant_network(
 
             # maybe we can do the copy in the same step as the fetch?
             for index, participant in enumerate(participants):
+                tolerations = input_parser.get_client_tolerations(
+                    participant.el_tolerations,
+                    participant.tolerations,
+                    global_tolerations,
+                )
                 cl_client_type = participant.cl_client_type
                 el_client_type = participant.el_client_type
 
@@ -145,6 +150,7 @@ def launch_participant_network(
                             "RCLONE_CONFIG_MYS3_PROVIDER": "DigitalOcean",
                             "RCLONE_CONFIG_MYS3_ENDPOINT": "https://ams3.digitaloceanspaces.com",
                         },
+                        tolerations=tolerations,
                     ),
                 )
             for index, participant in enumerate(participants):
@@ -166,7 +172,7 @@ def launch_participant_network(
                     assertion="==",
                     target_value=0,
                     interval="1s",
-                    timeout="20m",
+                    timeout="6h",  # 6 hours should be enough for the biggest network
                 )
 
         # We are running a kurtosis or shadowfork network

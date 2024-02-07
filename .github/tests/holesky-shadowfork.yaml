@@ -8,5 +8,5 @@ network_params:
   network: holesky-shadowfork
 additional_services:
   - dora
-ethereum_metrics_exporter_enabled: true
-snoopy_enabled: true
+snooper_enabled: true
+persistent: true
