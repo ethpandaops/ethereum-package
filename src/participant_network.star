@@ -8,6 +8,9 @@ el_cl_genesis_data_generator = import_module(
 el_cl_genesis_data = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_data.star"
 )
+
+input_parser = import_module("./package_io/input_parser.star")
+
 shared_utils = import_module("./shared_utils/shared_utils.star")
 
 static_files = import_module("./static_files/static_files.star")
