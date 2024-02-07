@@ -241,11 +241,6 @@ def get_config(
     elif constants.NETWORK_NAME.shadowfork in network:
         base_network = network.split("-shadowfork")[0]
         init_datadir_cmd_str = "echo shadowfork"
-        # init_datadir_cmd_str = (
-        #     "apk add rclone && export RCLONE_CONFIG_MYS3_TYPE=s3;export RCLONE_CONFIG_MYS3_PROVIDER=DigitalOcean; export RCLONE_CONFIG_MYS3_ENDPOINT=https://ams3.digitaloceanspaces.com && rclone copy -P mys3:ethpandaops-ethereum-node-snapshots/"
-        #     + base_network
-        #     + "/geth/latest /data/geth/execution-data --transfers=100 --checkers=200"
-        # )
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -276,12 +271,6 @@ def get_config(
         "{0}".format(
             "--override.prague=" + final_genesis_timestamp
             if electra_fork_epoch == 0 or "verkle-gen" in network
-            else ""
-        ),
-        # Override prague fork timestamp if we are shadowforking for verkle
-        "{0}".format(
-            "--override.prague=" + str(prague_time)
-            if constants.NETWORK_NAME.shadowfork in network and "verkle" in network
             else ""
         ),
         "{0}".format(
@@ -342,6 +331,13 @@ def get_config(
                     ]
                 )
             )
+        if (
+            constants.NETWORK_NAME.shadowfork in network and "verkle" in network
+        ):  # verkle shadowfork
+            cmd.append("--override.prague=" + str(prague_time))
+            cmd.append("--override.overlay-stride=10000")
+            cmd.append("--override.blockproof=true")
+            cmd.append("--clear.verkle.costs=true")
     elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootnodes="
