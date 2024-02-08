@@ -27,6 +27,8 @@ def generate_el_cl_genesis_data(
     deneb_fork_epoch,
     electra_fork_epoch,
     latest_block,
+    min_validator_withdrawability_delay,
+    shard_committee_period,
 ):
     files = {}
     if latest_block == "":
