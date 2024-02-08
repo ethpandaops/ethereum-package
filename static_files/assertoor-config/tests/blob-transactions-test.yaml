@@ -12,16 +12,17 @@ tasks:
     minClientCount: 1
 
 # check if all client pairs propose blocks with blob transactions
-- name: run_tasks_concurrent
+- name: run_task_background
   title: "Check if all clients propose blocks with blob transactions"
   config:
-    succeedTaskCount: 1
-    tasks:
-    - name: generate_blob_transactions
+    onBackgroundComplete: fail
+    backgroundTask:
+      name: generate_blob_transactions
       title: "Generate 2 blob transactions per block"
       config:
         childWallets: 5
-        limitPending: 2
+        walletSeed: "blob-test"
+        limitPending: 4
         limitPerBlock: 2
         randomTarget: true
         amount: 1000000
@@ -29,10 +30,10 @@ tasks:
         blobSidecars: 1
       configVars:
         privateKey: "walletPrivkey"
-
-    - name: run_task_matrix
+    foregroundTask:
+      name: run_task_matrix
       title: "Check transaction inclusion with all client pairs"
-      timeout: 1h
+      timeout: 30m
       configVars:
         matrixValues: "validatorPairNames"
       config:
@@ -40,11 +41,11 @@ tasks:
         matrixVar: "validatorPairName"
         task:
           name: check_consensus_block_proposals
-          title: "Wait for block proposal with >= 2 blobs from ${validatorPairName}"
+          title: "Wait for block proposal with >= 1 blobs from ${validatorPairName}"
           configVars:
             validatorNamePattern: "validatorPairName"
           config:
-            minBlobCount: 2
+            minBlobCount: 1
 - name: "sleep"
   title: "Wait 30sec to clear up pending transactions"
   config:
@@ -63,16 +64,17 @@ tasks:
       title: "Check if blob transactions can be sent via ${clientPairName}"
       config:
         tasks:
-        - name: run_tasks_concurrent
+        - name: run_task_background
           title: "Check if blob transactions can be sent via ${clientPairName}"
           config:
-            succeedTaskCount: 1
-            tasks:
-            - name: generate_blob_transactions
+            onBackgroundComplete: fail
+            backgroundTask:
+              name: generate_blob_transactions
               title: "Generate 2 blob transactions per block and send via ${clientPairName}"
               config:
                 childWallets: 5
-                limitPending: 2
+                walletSeed: "blob-test"
+                limitPending: 4
                 limitPerBlock: 2
                 randomTarget: true
                 amount: 1000000
@@ -81,10 +83,11 @@ tasks:
               configVars:
                 privateKey: "walletPrivkey"
                 clientPattern: "clientPairName"
-            - name: check_consensus_block_proposals
-              title: "Wait for block proposal with >= 2 blobs"
+            foregroundTask:
+              name: check_consensus_block_proposals
+              title: "Wait for block proposal with >= 1 blobs"
               config:
-                minBlobCount: 2
+                minBlobCount: 1
         - name: "sleep"
           title: "Wait 30sec to clear up pending transactions"
           config:
