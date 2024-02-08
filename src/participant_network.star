@@ -227,7 +227,7 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:2.0.11"
+                "ethpandaops/ethereum-genesis-generator:2.0.12"
             )
         # we are running electra - experimental
         elif network_params.electra_fork_epoch != None:
@@ -266,6 +266,8 @@ def launch_participant_network(
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
             latest_block.files_artifacts[0] if latest_block != "" else "",
+            network_params.min_validator_withdrawability_delay,
+            network_params.shard_committee_period,
         )
     elif network_params.network in constants.PUBLIC_NETWORKS:
         # We are running a public network

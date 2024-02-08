@@ -218,6 +218,10 @@ def input_parser(plan, input_args):
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
             network=result["network_params"]["network"],
+            min_validator_withdrawability_delay=result["network_params"][
+                "min_validator_withdrawability_delay"
+            ],
+            shard_committee_period=result["network_params"]["shard_committee_period"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -548,6 +552,8 @@ def default_network_params():
         "deneb_fork_epoch": 500,
         "electra_fork_epoch": None,
         "network": "kurtosis",
+        "min_validator_withdrawability_delay": 256,
+        "shard_committee_period": 256,
     }
 
 

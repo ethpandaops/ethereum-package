@@ -4,9 +4,13 @@ participants:
     el_client_log_level: ""
     el_extra_params: []
     el_extra_labels: {}
+    el_tolerations: []
     cl_client_type: lighthouse
     cl_client_image: sigp/lighthouse:latest
     cl_client_log_level: ""
+    cl_tolerations: []
+    validator_tolerations: []
+    tolerations: []
     beacon_extra_params: []
     beacon_extra_labels: {}
     validator_extra_params: []
@@ -50,6 +54,10 @@ network_params:
   capella_fork_epoch: 0
   deneb_fork_epoch: 4
   electra_fork_epoch: null
+  network: kurtosis
+  min_validator_withdrawability_delay: 256
+  shard_committee_period: 256
+
 additional_services:
   - tx_spammer
   - blob_spammer
@@ -78,3 +86,4 @@ mev_params:
 grafana_additional_dashboards: []
 persistent: false
 xatu_sentry_enabled: false
+global_tolerations: []

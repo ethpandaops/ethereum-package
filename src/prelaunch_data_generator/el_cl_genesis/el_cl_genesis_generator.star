@@ -50,6 +50,8 @@ def generate_el_cl_genesis_data(
         deneb_fork_epoch,
         electra_fork_epoch,
         shadowfork_file,
+        min_validator_withdrawability_delay,
+        shard_committee_period,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
         genesis_generation_config_yml_template, template_data
@@ -125,6 +127,8 @@ def new_env_file_for_el_cl_genesis_data(
     deneb_fork_epoch,
     electra_fork_epoch,
     shadowfork_file,
+    min_validator_withdrawability_delay,
+    shard_committee_period,
 ):
     return {
         "UnixTimestamp": genesis_unix_timestamp,
@@ -146,4 +150,6 @@ def new_env_file_for_el_cl_genesis_data(
         "DenebForkVersion": constants.DENEB_FORK_VERSION,
         "ElectraForkVersion": constants.ELECTRA_FORK_VERSION,
         "ShadowForkFile": shadowfork_file,
+        "MinValidatorWithdrawabilityDelay": min_validator_withdrawability_delay,
+        "ShardCommitteePeriod": shard_committee_period,
     }
