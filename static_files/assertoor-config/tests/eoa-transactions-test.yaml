@@ -12,12 +12,12 @@ tasks:
     minClientCount: 1
 
 # check if all client pairs propose blocks with legacy EOA transactions
-- name: run_tasks_concurrent
+- name: run_task_background
   title: "Check if all clients propose blocks with legacy EOA transactions"
   config:
-    succeedTaskCount: 1
-    tasks:
-    - name: generate_eoa_transactions
+    onBackgroundComplete: fail
+    backgroundTask:
+      name: generate_eoa_transactions
       title: "Generate 10 EOA transaction per block"
       config:
         childWallets: 10
@@ -30,9 +30,10 @@ tasks:
       configVars:
         privateKey: "walletPrivkey"
 
-    - name: run_task_matrix
+    foregroundTask:
+      name: run_task_matrix
       title: "Check transaction inclusion with all client pairs"
-      timeout: 1h
+      timeout: 30m
       configVars:
         matrixValues: "validatorPairNames"
       config:
@@ -63,12 +64,12 @@ tasks:
       title: "Check if legacy EOA transactions can be sent via ${clientPairName}"
       config:
         tasks:
-        - name: run_tasks_concurrent
+        - name: run_task_background
           title: "Check if legacy EOA transactions can be sent via ${clientPairName}"
           config:
-            succeedTaskCount: 1
-            tasks:
-            - name: generate_eoa_transactions
+            onBackgroundComplete: fail
+            backgroundTask:
+              name: generate_eoa_transactions
               title: "Generate 10 EOA transaction per block and send via ${clientPairName}"
               config:
                 childWallets: 10
@@ -81,7 +82,9 @@ tasks:
               configVars:
                 privateKey: "walletPrivkey"
                 clientPattern: "clientPairName"
-            - name: check_consensus_block_proposals
+
+            foregroundTask:
+              name: check_consensus_block_proposals
               title: "Wait for block proposal with >= 5 transactions"
               config:
                 minTransactionCount: 5
@@ -91,12 +94,12 @@ tasks:
             duration: 30s
 
 # check if all client pairs propose blocks with dynfee EOA transactions
-- name: run_tasks_concurrent
+- name: run_task_background
   title: "Check if all clients propose blocks with dynfee EOA transactions"
   config:
-    succeedTaskCount: 1
-    tasks:
-    - name: generate_eoa_transactions
+    onBackgroundComplete: fail
+    backgroundTask:
+      name: generate_eoa_transactions
       title: "Generate 10 EOA transaction per block"
       config:
         childWallets: 10
@@ -108,9 +111,10 @@ tasks:
       configVars:
         privateKey: "walletPrivkey"
 
-    - name: run_task_matrix
+    foregroundTask:
+      name: run_task_matrix
       title: "Check transaction inclusion with all client pairs"
-      timeout: 1h
+      timeout: 30m
       configVars:
         matrixValues: "validatorPairNames"
       config:
@@ -141,12 +145,12 @@ tasks:
       title: "Check if dynfee EOA transactions can be sent via ${clientPairName}"
       config:
         tasks:
-        - name: run_tasks_concurrent
+        - name: run_task_background
           title: "Check if dynfee EOA transactions can be sent via ${clientPairName}"
           config:
-            succeedTaskCount: 1
-            tasks:
-            - name: generate_eoa_transactions
+            onBackgroundComplete: fail
+            backgroundTask:
+              name: generate_eoa_transactions
               title: "Generate 10 EOA transaction per block and send via ${clientPairName}"
               config:
                 childWallets: 10
@@ -158,7 +162,8 @@ tasks:
               configVars:
                 privateKey: "walletPrivkey"
                 clientPattern: "clientPairName"
-            - name: check_consensus_block_proposals
+            foregroundTask:
+              name: check_consensus_block_proposals
               title: "Wait for block proposal with >= 5 transactions"
               config:
                 minTransactionCount: 5
