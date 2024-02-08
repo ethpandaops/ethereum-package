@@ -99,10 +99,13 @@ def launch(
 
     network_name = (
         "devnets"
-        if launcher.network != constants.NETWORK_NAME.kurtosis
-        and launcher.network != constants.NETWORK_NAME.ephemery
-        and launcher.network != constants.NETWORK_NAME.shadowfork
-        and launcher.network not in constants.PUBLIC_NETWORKS
+        if launcher.network
+        not in (
+            constants.NETWORK_NAME.kurtosis,
+            constants.NETWORK_NAME.ephemery,
+            constants.NETWORK_NAME.shadowfork,
+            constants.PUBLIC_NETWORKS,
+        )
         else launcher.network
     )
     if (
@@ -232,6 +235,8 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
+    elif constants.NETWORK_NAME.shadowfork in network:
+        init_datadir_cmd_str = "echo shadowfork"
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -269,7 +274,7 @@ def get_config(
         ),
         "{0}".format(
             "--override.cancun=" + str(cancun_time)
-            if constants.NETWORK_NAME.shadowfork in network and "verkle" not in network
+            if constants.NETWORK_NAME.shadowfork in network
             else ""
         ),
         "--networkid={0}".format(networkid),

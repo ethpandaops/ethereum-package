@@ -30,7 +30,7 @@ NIMBUS_NODE_NAME = "nimbus"
 
 # Placeholder value for the deneb fork epoch if electra is being run
 # TODO: This is a hack, and should be removed once we electra is rebased on deneb
-HIGH_DENEB_VALUE_FORK_VERKLE = 20000
+HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
 
 # MEV Params
 FLASHBOTS_MEV_BOOST_PORT = 18550
