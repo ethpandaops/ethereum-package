@@ -64,6 +64,27 @@ To mitigate these issues, you can use the `el_client_volume_size` and `cl_client
 
 For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self hosting your own Kubernetes cluster with fast persistent storage.
 
+### Shadowforking
+In order to enable shadowfork capabilities, you can use the `network_params.network` flag. The expected value is the name of the network you want to shadowfork followed by `-shadowfork`. Please note that `persistent` configuration parameter has to be enabled for shadowforks to work! Current limitation on k8s is it is only working on a single node cluster. For example, to shadowfork the Holesky testnet, you can use the following command:
+```yaml
+...
+network_params:
+  network: "holesky-shadowfork"
+persistent: true
+...
+```
+
+##### Shadowforking custom verkle networks
+In order to enable shadowfork capabilities for verkle networks, you need to define electra and mention verkle in the network name after shadowfork.
+```yaml
+...
+network_params:
+  electra_fork_epoch: 1
+  network: "holesky-shadowfork-verkle"
+persistent: true
+...
+```
+
 #### Taints and tolerations
 It is possible to run the package on a Kubernetes cluster with taints and tolerations. This is done by adding the tolerations to the `tolerations` field in the `network_params.yaml` file. For example:
 ```yaml
@@ -218,7 +239,7 @@ participants:
   #   effect: "NoSchedule"
   #   toleration_seconds: 3600
   # Defaults to empty
-  el_tolerations: []
+  cl_tolerations: []
 
   # A list of tolerations that will be passed to the validator container
   # Only works with Kubernetes
@@ -362,7 +383,7 @@ network_params:
   # Defaults to 2048
   eth1_follow_distance: 2048
 
-  # The epoch at which the capella and deneb forks are set to occur.
+  # The epoch at which the capella/deneb/electra forks are set to occur.
   capella_fork_epoch: 0
   deneb_fork_epoch: 500
   electra_fork_epoch: null
@@ -372,6 +393,14 @@ network_params:
   # You can sync any public network by setting this to the network name (e.g. "mainnet", "goerli", "sepolia", "holesky")
   # You can sync any devnet by setting this to the network name (e.g. "dencun-devnet-12", "verkle-gen-devnet-2")
   network: "kurtosis"
+
+  # The number of epochs to wait validators to be able to withdraw
+  # Defaults to 256 epochs ~27 hours
+  min_validator_withdrawability_delay: 256
+
+  # The period of the shard committee
+  # Defaults to 256 epoch ~27 hours
+  shard_committee_period: 256
 
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:

@@ -98,13 +98,7 @@ def launch(
         el_tolerations, participant_tolerations, global_tolerations
     )
 
-    network_name = (
-        "devnets"
-        if launcher.network != "kurtosis"
-        and launcher.network != "ephemery"
-        and launcher.network not in constants.PUBLIC_NETWORKS
-        else launcher.network
-    )
+    network_name = shared_utils.get_network_name(launcher.network)
 
     el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
     el_max_cpu = (
@@ -147,7 +141,8 @@ def launch(
         extra_labels,
         launcher.capella_fork_epoch,
         launcher.electra_fork_epoch,
-        launcher.final_genesis_timestamp,
+        launcher.cancun_time,
+        launcher.prague_time,
         persistent,
         el_volume_size,
         tolerations,
@@ -197,19 +192,22 @@ def get_config(
     extra_labels,
     capella_fork_epoch,
     electra_fork_epoch,
-    final_genesis_timestamp,
+    cancun_time,
+    prague_time,
     persistent,
     el_volume_size,
     tolerations,
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
-    if electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network:
+    if (
+        electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network
+    ) and constants.NETWORK_NAME.shadowfork not in network:
         if (
             electra_fork_epoch == 0 or constants.NETWORK_NAME.verkle + "-gen" in network
         ):  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-                final_genesis_timestamp,
+                prague_time,
                 constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
             )
         else:  # verkle
@@ -224,6 +222,8 @@ def get_config(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
+    elif constants.NETWORK_NAME.shadowfork in network:
+        init_datadir_cmd_str = "echo shadowfork"
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -239,6 +239,7 @@ def get_config(
             "--state.scheme=path"
             if electra_fork_epoch == None
             and "verkle" not in network
+            and constants.NETWORK_NAME.shadowfork not in network  # for now
             and "--builder" not in extra_params
             and capella_fork_epoch == 0
             else ""
@@ -251,12 +252,17 @@ def get_config(
         ),
         # Override prague fork timestamp if electra_fork_epoch == 0
         "{0}".format(
-            "--override.prague=" + final_genesis_timestamp
+            "--override.prague=" + str(prague_time)
             if electra_fork_epoch == 0 or "verkle-gen" in network
             else ""
         ),
         "{0}".format(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
+        ),
+        "{0}".format(
+            "--override.cancun=" + str(cancun_time)
+            if constants.NETWORK_NAME.shadowfork in network
+            else ""
         ),
         "--networkid={0}".format(networkid),
         "--verbosity=" + verbosity_level,
@@ -301,7 +307,10 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"
 
-    if network == constants.NETWORK_NAME.kurtosis:
+    if (
+        network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -312,6 +321,13 @@ def get_config(
                     ]
                 )
             )
+        if (
+            constants.NETWORK_NAME.shadowfork in network and "verkle" in network
+        ):  # verkle shadowfork
+            cmd.append("--override.prague=" + str(prague_time))
+            cmd.append("--override.overlay-stride=10000")
+            cmd.append("--override.blockproof=true")
+            cmd.append("--clear.verkle.costs=true")
     elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootnodes="
@@ -371,8 +387,9 @@ def new_geth_launcher(
     jwt_file,
     network,
     networkid,
-    final_genesis_timestamp,
     capella_fork_epoch,
+    cancun_time,
+    prague_time,
     electra_fork_epoch=None,
 ):
     return struct(
@@ -380,7 +397,8 @@ def new_geth_launcher(
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
-        final_genesis_timestamp=final_genesis_timestamp,
         capella_fork_epoch=capella_fork_epoch,
+        cancun_time=cancun_time,
+        prague_time=prague_time,
         electra_fork_epoch=electra_fork_epoch,
     )

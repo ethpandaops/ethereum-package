@@ -6,6 +6,7 @@ constants = import_module("../../package_io/constants.star")
 
 GENESIS_VALUES_PATH = "/opt"
 GENESIS_VALUES_FILENAME = "values.env"
+SHADOWFORK_FILEPATH = "/shadowfork"
 
 
 def generate_el_cl_genesis_data(
@@ -25,7 +26,16 @@ def generate_el_cl_genesis_data(
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
+    latest_block,
+    min_validator_withdrawability_delay,
+    shard_committee_period,
 ):
+    files = {}
+    shadowfork_file = ""
+    if latest_block != "":
+        files[SHADOWFORK_FILEPATH] = latest_block
+        shadowfork_file = SHADOWFORK_FILEPATH + "/shadowfork/latest_block.json"
+
     template_data = new_env_file_for_el_cl_genesis_data(
         genesis_unix_timestamp,
         network_id,
@@ -40,6 +50,9 @@ def generate_el_cl_genesis_data(
         capella_fork_epoch,
         deneb_fork_epoch,
         electra_fork_epoch,
+        shadowfork_file,
+        min_validator_withdrawability_delay,
+        shard_committee_period,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
         genesis_generation_config_yml_template, template_data
@@ -55,10 +68,12 @@ def generate_el_cl_genesis_data(
         genesis_values_and_dest_filepath, "genesis-el-cl-env-file"
     )
 
+    files[GENESIS_VALUES_PATH] = genesis_generation_config_artifact_name
+
     genesis = plan.run_sh(
         run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/custom_config_data/* /network-configs/",
         image=image,
-        files={GENESIS_VALUES_PATH: genesis_generation_config_artifact_name},
+        files=files,
         store=[
             StoreSpec(src="/network-configs/", name="el_cl_genesis_data"),
             StoreSpec(
@@ -75,8 +90,23 @@ def generate_el_cl_genesis_data(
         wait=None,
     )
 
+    cancun_time = plan.run_sh(
+        run="jq .config.cancunTime /data/network-configs/genesis.json | tr -d '\n'",
+        image="badouralix/curl-jq",
+        files={"/data": genesis.files_artifacts[0]},
+    )
+
+    prague_time = plan.run_sh(
+        run="jq .config.pragueTime /data/network-configs/genesis.json | tr -d '\n'",
+        image="badouralix/curl-jq",
+        files={"/data": genesis.files_artifacts[0]},
+    )
+
     result = el_cl_genesis_data.new_el_cl_genesis_data(
-        genesis.files_artifacts[0], genesis_validators_root.output
+        genesis.files_artifacts[0],
+        genesis_validators_root.output,
+        cancun_time.output,
+        prague_time.output,
     )
 
     return result
@@ -96,6 +126,9 @@ def new_env_file_for_el_cl_genesis_data(
     capella_fork_epoch,
     deneb_fork_epoch,
     electra_fork_epoch,
+    shadowfork_file,
+    min_validator_withdrawability_delay,
+    shard_committee_period,
 ):
     return {
         "UnixTimestamp": genesis_unix_timestamp,
@@ -116,4 +149,7 @@ def new_env_file_for_el_cl_genesis_data(
         "CapellaForkVersion": constants.CAPELLA_FORK_VERSION,
         "DenebForkVersion": constants.DENEB_FORK_VERSION,
         "ElectraForkVersion": constants.ELECTRA_FORK_VERSION,
+        "ShadowForkFile": shadowfork_file,
+        "MinValidatorWithdrawabilityDelay": min_validator_withdrawability_delay,
+        "ShardCommitteePeriod": shard_committee_period,
     }

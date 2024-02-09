@@ -87,13 +87,7 @@ def launch(
         el_tolerations, participant_tolerations, global_tolerations
     )
 
-    network_name = (
-        "devnets"
-        if launcher.network != "kurtosis"
-        and launcher.network != "ephemery"
-        and launcher.network not in constants.PUBLIC_NETWORKS
-        else launcher.network
-    )
+    network_name = shared_utils.get_network_name(launcher.network)
 
     el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
     el_max_cpu = (
@@ -134,6 +128,7 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
+        launcher.cancun_time,
         persistent,
         el_volume_size,
         tolerations,
@@ -181,6 +176,7 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
+    cancun_time,
     persistent,
     el_volume_size,
     tolerations,
@@ -194,6 +190,11 @@ def get_config(
         "erigon",
         "--chain={0}".format(
             network if network in constants.PUBLIC_NETWORKS else "dev"
+        ),
+        "{0}".format(
+            "--override.cancun=" + str(cancun_time)
+            if constants.NETWORK_NAME.shadowfork in network
+            else ""
         ),
         "--networkid={0}".format(networkid),
         "--log.console.verbosity=" + verbosity_level,
@@ -296,10 +297,11 @@ def get_config(
     )
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid, cancun_time):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
+        cancun_time=cancun_time,
     )

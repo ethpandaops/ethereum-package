@@ -8,6 +8,9 @@ el_cl_genesis_data_generator = import_module(
 el_cl_genesis_data = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_data.star"
 )
+
+input_parser = import_module("./package_io/input_parser.star")
+
 shared_utils = import_module("./shared_utils/shared_utils.star")
 
 static_files = import_module("./static_files/static_files.star")
@@ -67,9 +70,127 @@ def launch_participant_network(
     global_tolerations,
     parallel_keystore_generation=False,
 ):
+    network_id = network_params.network_id
     num_participants = len(participants)
-    if network_params.network == constants.NETWORK_NAME.kurtosis:
-        # We are running a kurtosis network
+    latest_block = ""
+    cancun_time = 0
+    prague_time = 0
+    shadowfork_block = "latest"
+    if (
+        constants.NETWORK_NAME.shadowfork in network_params.network
+        and ("verkle" in network_params.network)
+        and ("holesky" in network_params.network)
+    ):
+        shadowfork_block = "793312"  # Hardcodes verkle shadowfork block for holesky
+
+    if (
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
+    ):
+        if (
+            constants.NETWORK_NAME.shadowfork in network_params.network
+        ):  # shadowfork requires some preparation
+            base_network = shared_utils.get_network_name(network_params.network)
+            # overload the network name to remove the shadowfork suffix
+            if constants.NETWORK_NAME.ephemery in base_network:
+                chain_id = plan.run_sh(
+                    run="curl -s https://ephemery.dev/latest/config.yaml | yq .DEPOSIT_CHAIN_ID | tr -d '\n'",
+                    image="linuxserver/yq",
+                )
+                network_id = chain_id.output
+            else:
+                network_id = constants.NETWORK_ID[
+                    base_network
+                ]  # overload the network id to match the network name
+            latest_block = plan.run_sh(  # fetch the latest block
+                run="mkdir -p /shadowfork && \
+                    curl -o /shadowfork/latest_block.json https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
+                + base_network
+                + "/geth/"
+                + shadowfork_block
+                + "/_snapshot_eth_getBlockByNumber.json",
+                image="badouralix/curl-jq",
+                store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
+            )
+
+            # maybe we can do the copy in the same step as the fetch?
+            for index, participant in enumerate(participants):
+                tolerations = input_parser.get_client_tolerations(
+                    participant.el_tolerations,
+                    participant.tolerations,
+                    global_tolerations,
+                )
+                cl_client_type = participant.cl_client_type
+                el_client_type = participant.el_client_type
+
+                # Zero-pad the index using the calculated zfill value
+                index_str = shared_utils.zfill_custom(
+                    index + 1, len(str(len(participants)))
+                )
+
+                el_service_name = "el-{0}-{1}-{2}".format(
+                    index_str, el_client_type, cl_client_type
+                )
+                shadowfork_data = plan.add_service(
+                    name="shadowfork-{0}".format(el_service_name),
+                    config=ServiceConfig(
+                        image="alpine:3.19.1",
+                        cmd=[
+                            "apk add --no-cache curl tar zstd && curl -s -L https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
+                            + base_network
+                            + "/"
+                            + el_client_type
+                            + "/"
+                            + shadowfork_block
+                            + "/snapshot.tar.zst"
+                            + " | tar -I zstd -xvf - -C /data/"
+                            + el_client_type
+                            + "/execution-data"
+                            + " && touch /tmp/finished"
+                            + " && tail -f /dev/null"
+                        ],
+                        entrypoint=["/bin/sh", "-c"],
+                        files={
+                            "/data/"
+                            + el_client_type
+                            + "/execution-data": Directory(
+                                persistent_key="data-{0}".format(el_service_name),
+                                size=constants.VOLUME_SIZE[base_network][
+                                    el_client_type + "_volume_size"
+                                ],
+                            ),
+                        },
+                        env_vars={
+                            "RCLONE_CONFIG_MYS3_TYPE": "s3",
+                            "RCLONE_CONFIG_MYS3_PROVIDER": "DigitalOcean",
+                            "RCLONE_CONFIG_MYS3_ENDPOINT": "https://ams3.digitaloceanspaces.com",
+                        },
+                        tolerations=tolerations,
+                    ),
+                )
+            for index, participant in enumerate(participants):
+                cl_client_type = participant.cl_client_type
+                el_client_type = participant.el_client_type
+
+                # Zero-pad the index using the calculated zfill value
+                index_str = shared_utils.zfill_custom(
+                    index + 1, len(str(len(participants)))
+                )
+
+                el_service_name = "el-{0}-{1}-{2}".format(
+                    index_str, el_client_type, cl_client_type
+                )
+                plan.wait(
+                    service_name="shadowfork-{0}".format(el_service_name),
+                    recipe=ExecRecipe(command=["cat", "/tmp/finished"]),
+                    field="code",
+                    assertion="==",
+                    target_value=0,
+                    interval="1s",
+                    timeout="6h",  # 6 hours should be enough for the biggest network
+                )
+
+        # We are running a kurtosis or shadowfork network
         plan.print("Generating cl validator key stores")
         validator_data = None
         if not parallel_keystore_generation:
@@ -87,8 +208,6 @@ def launch_participant_network(
 
         plan.print(json.indent(json.encode(validator_data)))
 
-        network_id = network_params.network_id
-
         # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
         final_genesis_timestamp = get_final_genesis_timestamp(
             plan,
@@ -105,13 +224,14 @@ def launch_participant_network(
                 total_number_of_validator_keys += participant.validator_count
 
         plan.print("Generating EL CL data")
+
         # we are running bellatrix genesis (deprecated) - will be removed in the future
         if (
             network_params.capella_fork_epoch > 0
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:1.3.15"
+                constants.ETHEREUM_GENESIS_GENERATOR.bellatrix_genesis
             )
         # we are running capella genesis - default behavior
         elif (
@@ -119,17 +239,17 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:2.0.11"
+                constants.ETHEREUM_GENESIS_GENERATOR.capella_genesis
             )
         # we are running electra - experimental
         elif network_params.electra_fork_epoch != None:
             if network_params.electra_fork_epoch == 0:
                 ethereum_genesis_generator_image = (
-                    "ethpandaops/ethereum-genesis-generator:4.0.0-rc.6"
+                    constants.ETHEREUM_GENESIS_GENERATOR.verkle_genesis
                 )
             else:
                 ethereum_genesis_generator_image = (
-                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.18"
+                    constants.ETHEREUM_GENESIS_GENERATOR.verkle_support_genesis
                 )
         else:
             fail(
@@ -145,7 +265,7 @@ def launch_participant_network(
             ethereum_genesis_generator_image,
             el_cl_genesis_config_template,
             final_genesis_timestamp,
-            network_params.network_id,
+            network_id,
             network_params.deposit_contract_address,
             network_params.seconds_per_slot,
             network_params.preregistered_validator_keys_mnemonic,
@@ -157,6 +277,9 @@ def launch_participant_network(
             network_params.capella_fork_epoch,
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
+            latest_block.files_artifacts[0] if latest_block != "" else "",
+            network_params.min_validator_withdrawability_delay,
+            network_params.shard_committee_period,
         )
     elif network_params.network in constants.PUBLIC_NETWORKS:
         # We are running a public network
@@ -167,6 +290,8 @@ def launch_participant_network(
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             dummy.files_artifacts[0],
             constants.GENESIS_VALIDATORS_ROOT[network_params.network],
+            cancun_time,
+            prague_time,
         )
         final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
         network_id = constants.NETWORK_ID[network_params.network]
@@ -184,6 +309,8 @@ def launch_participant_network(
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             el_cl_genesis_data_uuid.files_artifacts[0],
             genesis_validators_root,
+            cancun_time,
+            prague_time,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
             plan, el_cl_genesis_data_uuid.files_artifacts[0]
@@ -209,6 +336,8 @@ def launch_participant_network(
         el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
             el_cl_genesis_data_uuid.files_artifacts[0],
             genesis_validators_root,
+            cancun_time,
+            prague_time,
         )
         final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
             plan, el_cl_genesis_data_uuid.files_artifacts[0]
@@ -225,8 +354,9 @@ def launch_participant_network(
                 jwt_file,
                 network_params.network,
                 network_id,
-                final_genesis_timestamp,
                 network_params.capella_fork_epoch,
+                el_cl_data.cancun_time,
+                el_cl_data.prague_time,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
@@ -237,8 +367,9 @@ def launch_participant_network(
                 jwt_file,
                 network_params.network,
                 network_id,
-                final_genesis_timestamp,
                 network_params.capella_fork_epoch,
+                el_cl_data.cancun_time,
+                el_cl_data.prague_time,
                 network_params.electra_fork_epoch,
             ),
             "launch_method": geth.launch,
@@ -257,6 +388,7 @@ def launch_participant_network(
                 jwt_file,
                 network_params.network,
                 network_id,
+                el_cl_data.cancun_time,
             ),
             "launch_method": erigon.launch,
         },
@@ -399,6 +531,7 @@ def launch_participant_network(
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
         if network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
         else None
     )
 

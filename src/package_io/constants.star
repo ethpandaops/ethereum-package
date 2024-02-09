@@ -53,6 +53,13 @@ CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
 
+ETHEREUM_GENESIS_GENERATOR = struct(
+    bellatrix_genesis="ethpandaops/ethereum-genesis-generator:1.3.15",  # EOL
+    capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Default
+    verkle_support_genesis="ethpandaops/ethereum-genesis-generator:3.0.0-rc.19",  # soon to be deneb genesis
+    verkle_genesis="ethpandaops/ethereum-genesis-generator:4.0.0-rc.6",
+)
+
 NETWORK_NAME = struct(
     mainnet="mainnet",
     goerli="goerli",
@@ -61,6 +68,7 @@ NETWORK_NAME = struct(
     ephemery="ephemery",
     kurtosis="kurtosis",
     verkle="verkle",
+    shadowfork="shadowfork",
 )
 
 PUBLIC_NETWORKS = (
@@ -90,6 +98,14 @@ GENESIS_VALIDATORS_ROOT = {
     "goerli": "0x043db0d9a83813551ee2f33450d23797757d430911a9320530ad8a0eabc43efb",
     "sepolia": "0xd8ea171f3c94aea21ebc42a1ed61052acf3f9209c00e4efbaaddac09ed9b8078",
     "holesky": "0x9143aa7c615a7f7115e2b6aac319c03529df8242ae705fba9df39b79c59fa8b1",
+}
+
+DEPOSIT_CONTRACT_ADDRESS = {
+    "mainnet": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
+    "goerli": "0xff50ed3d0ec03aC01D4C79aAd74928BFF48a7b2b",
+    "sepolia": "0x7f02C3E3c98b133055B8B348B2Ac625669Ed295D",
+    "holesky": "0x4242424242424242424242424242424242424242",
+    "ephemery": "0x4242424242424242424242424242424242424242",
 }
 
 GENESIS_TIME = {
