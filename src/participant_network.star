@@ -137,7 +137,7 @@ def launch_participant_network(
                             + "/" + shadowfork_block + "/snapshot.tar.zst"
                             + " /data/"
                             + el_client_type
-                            + "/execution-data.tar.zst"
+                            + "/execution-data.tar.zst && sleep 5"
                             + " && tar -axvf /data/"
                             + el_client_type
                             + "/execution-data.tar.zst -C /data/"
