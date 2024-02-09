@@ -319,8 +319,8 @@ def get_config(
             if "--http.api" in arg:
                 cmd[index] = "--http.api=admin,engine,net,eth,web3,debug,suavex"
             if "--ws.api" in arg:
-                cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"              
-                
+                cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"
+
     if (
         network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network
