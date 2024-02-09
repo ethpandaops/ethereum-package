@@ -31,10 +31,9 @@ def generate_el_cl_genesis_data(
     shard_committee_period,
 ):
     files = {}
-    if latest_block == "":
-        shadowfork_file = ""
-
-    else:
+    shadowfork_file = ""
+    if latest_block != "":
+        files[SHADOWFORK_FILEPATH] = latest_block
         shadowfork_file = SHADOWFORK_FILEPATH + "/shadowfork/latest_block.json"
 
     template_data = new_env_file_for_el_cl_genesis_data(
@@ -70,8 +69,6 @@ def generate_el_cl_genesis_data(
     )
 
     files = {GENESIS_VALUES_PATH: genesis_generation_config_artifact_name}
-    if latest_block != "":
-        files[SHADOWFORK_FILEPATH] = latest_block
     genesis = plan.run_sh(
         run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/custom_config_data/* /network-configs/",
         image=image,
