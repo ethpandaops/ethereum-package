@@ -66,6 +66,7 @@ VERBOSITY_LEVELS = {
 }
 
 BUILDER_IMAGE_STR = "builder"
+SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
 
 
 def launch(
@@ -313,6 +314,13 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,mev,flashbots"
 
+    if SUAVE_ENABLED_GETH_IMAGE_STR in image:
+        for index, arg in enumerate(cmd):
+            if "--http.api" in arg:
+                cmd[index] = "--http.api=admin,engine,net,eth,web3,debug,suavex"
+            if "--ws.api" in arg:
+                cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"              
+                
     if (
         network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network
