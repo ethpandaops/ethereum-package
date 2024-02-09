@@ -152,13 +152,7 @@ def launch(
             int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
         )
 
-    network_name = (
-        "devnets"
-        if launcher.network != "kurtosis"
-        and launcher.network != "ephemery"
-        and launcher.network not in constants.PUBLIC_NETWORKS
-        else launcher.network
-    )
+    network_name = shared_utils.get_network_name(launcher.network)
 
     bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
     bn_max_cpu = (
@@ -400,7 +394,10 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
-        if network == constants.NETWORK_NAME.kurtosis:
+        if (
+            network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in network
+        ):
             if bootnode_contexts != None:
                 cmd.append(
                     "--p2p-discovery-bootnodes="
@@ -424,6 +421,13 @@ def get_beacon_config(
             cmd.append(
                 "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
             )
+            cmd.append(
+                "--p2p-discovery-bootnodes="
+                + shared_utils.get_devnet_enrs_list(
+                    plan, el_cl_genesis_data.files_artifact_uuid
+                )
+            )
+        elif constants.NETWORK_NAME.shadowfork in network:
             cmd.append(
                 "--p2p-discovery-bootnodes="
                 + shared_utils.get_devnet_enrs_list(

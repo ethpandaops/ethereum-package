@@ -87,13 +87,7 @@ def launch(
         el_tolerations, participant_tolerations, global_tolerations
     )
 
-    network_name = (
-        "devnets"
-        if launcher.network != "kurtosis"
-        and launcher.network != "ephemery"
-        and launcher.network not in constants.PUBLIC_NETWORKS
-        else launcher.network
-    )
+    network_name = shared_utils.get_network_name(launcher.network)
 
     el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
     el_max_cpu = (
@@ -208,7 +202,10 @@ def get_config(
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
     ]
-    if network not in constants.PUBLIC_NETWORKS:
+    if (
+        network not in constants.PUBLIC_NETWORKS
+        or constants.NETWORK_NAME.shadowfork in network
+    ):
         cmd.append(
             "--genesis-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
