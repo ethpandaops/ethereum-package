@@ -138,16 +138,16 @@ def launch_participant_network(
                             + " /data/"
                             + el_client_type
                             + "/execution-data.tar.zst"
-                            + "&& tar -axvf /data/"
+                            + " && tar -axvf /data/"
                             + el_client_type
                             + "/execution-data.tar.zst -C /data/"
                             + el_client_type
                             + "/execution-data"
-                            + "&& rm /data/"
+                            + " && rm /data/"
                             + el_client_type
                             + "/execution-data.tar.zst"
-                            + "&& touch /tmp/finished"
-                            + "&& tail -f /dev/null"
+                            + " && touch /tmp/finished"
+                            + " && tail -f /dev/null"
                         ],
                         entrypoint=["/bin/sh", "-c"],
                         files={
