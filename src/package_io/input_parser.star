@@ -520,15 +520,15 @@ def get_client_tolerations(
 
     return toleration_list
 
-def get_client_node_selectors(
-    participant_node_selectors, global_node_selectors
-):
+
+def get_client_node_selectors(participant_node_selectors, global_node_selectors):
     node_selectors = {}
     node_selectors = participant_node_selectors if participant_node_selectors else {}
     if not node_selectors:
         node_selectors = global_node_selectors if global_node_selectors else {}
 
     return node_selectors
+
 
 def default_input_args():
     network_params = default_network_params()
