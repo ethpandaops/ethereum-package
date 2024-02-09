@@ -80,9 +80,6 @@ def input_parser(plan, input_args):
     result["goomy_blob_params"] = get_default_goomy_blob_params()
     result["assertoor_params"] = get_default_assertoor_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
-    result["persistent"] = False
-    result["global_tolerations"] = []
-    result["global_node_selectors"] = {}
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -524,7 +521,7 @@ def get_client_tolerations(
 def get_client_node_selectors(participant_node_selectors, global_node_selectors):
     node_selectors = {}
     node_selectors = participant_node_selectors if participant_node_selectors else {}
-    if not node_selectors:
+    if node_selectors == {}:
         node_selectors = global_node_selectors if global_node_selectors else {}
 
     return node_selectors
