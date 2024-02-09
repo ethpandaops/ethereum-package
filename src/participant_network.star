@@ -128,24 +128,16 @@ def launch_participant_network(
                 shadowfork_data = plan.add_service(
                     name="shadowfork-{0}".format(el_service_name),
                     config=ServiceConfig(
-                        image="rclone/rclone:1.55.1",
+                        image="alpine:3.19.1",
                         cmd=[
-                            "rclone copy -P mys3:ethpandaops-ethereum-node-snapshots/"
+                            "apk add --no-cache curl tar zstd && curl -s -L https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
                             + base_network
                             + "/"
                             + el_client_type
                             + "/" + shadowfork_block + "/snapshot.tar.zst"
-                            + " /data/"
-                            + el_client_type
-                            + "/execution-data.tar.zst && sleep 5"
-                            + " && tar -axvf /data/"
-                            + el_client_type
-                            + "/execution-data.tar.zst -C /data/"
+                            + " | tar -I zstd -xvf - -C /data/"
                             + el_client_type
                             + "/execution-data"
-                            + " && rm /data/"
-                            + el_client_type
-                            + "/execution-data.tar.zst"
                             + " && touch /tmp/finished"
                             + " && tail -f /dev/null"
                         ],
