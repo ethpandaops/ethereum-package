@@ -76,7 +76,7 @@ def launch_participant_network(
     cancun_time = 0
     prague_time = 0
     shadowfork_block = "latest"
-    if constants.NETWORK_NAME.shadowfork in network and ("verkle" in network) and ("holesky" in network):
+    if constants.NETWORK_NAME.shadowfork in network_params.network and ("verkle" in network_params.network) and ("holesky" in network_params.network):
         shadowfork_block = "793312" # Hardcodes verkle shadowfork block for holesky
 
     if (
@@ -134,9 +134,13 @@ def launch_participant_network(
                             + base_network
                             + "/"
                             + el_client_type
-                            + "/" + shadowfork_block + " /data/"
+                            + "/" + shadowfork_block + "/snapshot.tar.zst"
+                            + " /data/"
                             + el_client_type
-                            + "/snapshot.tar.zst | tar -I zstd -xvf - -C /data/"
+                            + "/execution-data.tar.zst"
+                            + "&& tar -I zstd -xvf /data/"
+                            + el_client_type
+                            + "/execution-data.tar.zst -C /data/"
                             + el_client_type
                             + "/execution-data"
                             + "&& rm /data/"
