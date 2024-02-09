@@ -76,8 +76,12 @@ def launch_participant_network(
     cancun_time = 0
     prague_time = 0
     shadowfork_block = "latest"
-    if constants.NETWORK_NAME.shadowfork in network_params.network and ("verkle" in network_params.network) and ("holesky" in network_params.network):
-        shadowfork_block = "793312" # Hardcodes verkle shadowfork block for holesky
+    if (
+        constants.NETWORK_NAME.shadowfork in network_params.network
+        and ("verkle" in network_params.network)
+        and ("holesky" in network_params.network)
+    ):
+        shadowfork_block = "793312"  # Hardcodes verkle shadowfork block for holesky
 
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
@@ -102,7 +106,9 @@ def launch_participant_network(
                 run="mkdir -p /shadowfork && \
                     curl -o /shadowfork/latest_block.json https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
                 + base_network
-                + "/geth/" + shadowfork_block + "/_snapshot_eth_getBlockByNumber.json",
+                + "/geth/"
+                + shadowfork_block
+                + "/_snapshot_eth_getBlockByNumber.json",
                 image="badouralix/curl-jq",
                 store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
             )
@@ -134,7 +140,9 @@ def launch_participant_network(
                             + base_network
                             + "/"
                             + el_client_type
-                            + "/" + shadowfork_block + "/snapshot.tar.zst"
+                            + "/"
+                            + shadowfork_block
+                            + "/snapshot.tar.zst"
                             + " | tar -I zstd -xvf - -C /data/"
                             + el_client_type
                             + "/execution-data"
