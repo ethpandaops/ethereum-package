@@ -114,7 +114,6 @@ def launch_participant_network(
                 store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
             )
 
-            # maybe we can do the copy in the same step as the fetch?
             for index, participant in enumerate(participants):
                 tolerations = input_parser.get_client_tolerations(
                     participant.el_tolerations,
@@ -166,14 +165,8 @@ def launch_participant_network(
                                 ],
                             ),
                         },
-                        env_vars={
-                            "RCLONE_CONFIG_MYS3_TYPE": "s3",
-                            "RCLONE_CONFIG_MYS3_PROVIDER": "DigitalOcean",
-                            "RCLONE_CONFIG_MYS3_ENDPOINT": "https://ams3.digitaloceanspaces.com",
-                        },
                         tolerations=tolerations,
                         node_selectors=node_selectors,
-
                     ),
                 )
             for index, participant in enumerate(participants):
