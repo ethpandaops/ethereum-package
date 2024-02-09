@@ -80,6 +80,10 @@ def input_parser(plan, input_args):
     result["goomy_blob_params"] = get_default_goomy_blob_params()
     result["assertoor_params"] = get_default_assertoor_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
+    result["persistent"] = False
+    result["parallel_keystore_generation"] = False
+    result["global_tolerations"] = []
+    result["global_node_selectors"] = {}
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
