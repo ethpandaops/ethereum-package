@@ -138,7 +138,7 @@ def launch_participant_network(
                             + " /data/"
                             + el_client_type
                             + "/execution-data.tar.zst"
-                            + "&& tar -I zstd -xvf /data/"
+                            + "&& tar -axvf /data/"
                             + el_client_type
                             + "/execution-data.tar.zst -C /data/"
                             + el_client_type
