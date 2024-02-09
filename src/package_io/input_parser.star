@@ -82,6 +82,7 @@ def input_parser(plan, input_args):
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
     result["global_tolerations"] = []
+    result["global_node_selectors"] = {}
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -162,6 +163,7 @@ def input_parser(plan, input_args):
                 cl_tolerations=participant["cl_tolerations"],
                 tolerations=participant["tolerations"],
                 validator_tolerations=participant["validator_tolerations"],
+                node_selectors=participant["node_selectors"],
                 beacon_extra_params=participant["beacon_extra_params"],
                 beacon_extra_labels=participant["beacon_extra_labels"],
                 validator_extra_params=participant["validator_extra_params"],
@@ -288,6 +290,7 @@ def input_parser(plan, input_args):
             xatu_server_tls=result["xatu_sentry_params"]["xatu_server_tls"],
         ),
         global_tolerations=result["global_tolerations"],
+        global_node_selectors=result["global_node_selectors"],
     )
 
 
@@ -517,6 +520,15 @@ def get_client_tolerations(
 
     return toleration_list
 
+def get_client_node_selectors(
+    participant_node_selectors, global_node_selectors
+):
+    node_selectors = {}
+    node_selectors = participant_node_selectors if participant_node_selectors else {}
+    if not node_selectors:
+        node_selectors = global_node_selectors if global_node_selectors else {}
+
+    return node_selectors
 
 def default_input_args():
     network_params = default_network_params()
@@ -575,6 +587,7 @@ def default_participant():
         "cl_tolerations": [],
         "validator_tolerations": [],
         "tolerations": [],
+        "node_selectors": {},
         "beacon_extra_params": [],
         "beacon_extra_labels": {},
         "validator_extra_params": [],
@@ -603,6 +616,8 @@ def default_participant():
         },
         "blobber_enabled": False,
         "blobber_extra_params": [],
+        "global_tolerations": [],
+        "global_node_selectors": {},
     }
 
 

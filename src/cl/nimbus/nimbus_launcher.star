@@ -137,6 +137,8 @@ def launch(
     validator_tolerations,
     participant_tolerations,
     global_tolerations,
+    participant_node_selectors,
+    global_node_selectors,
     split_mode_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -150,6 +152,10 @@ def launch(
 
     tolerations = input_parser.get_client_tolerations(
         cl_tolerations, participant_tolerations, global_tolerations
+    )
+
+    node_selectors = input_parser.get_client_node_selectors(
+        participant_node_selectors, global_node_selectors
     )
 
     network_name = shared_utils.get_network_name(launcher.network)
@@ -196,6 +202,7 @@ def launch(
         persistent,
         cl_volume_size,
         tolerations,
+        node_selectors,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -255,6 +262,7 @@ def launch(
             extra_validator_labels,
             persistent,
             tolerations,
+            node_selectors,
         )
 
         validator_service = plan.add_service(validator_service_name, validator_config)
@@ -310,6 +318,7 @@ def get_beacon_config(
     persistent,
     cl_volume_size,
     tolerations,
+    node_selectors,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -439,6 +448,7 @@ def get_beacon_config(
         ),
         user=User(uid=0, gid=0),
         tolerations=tolerations,
+        node_selectors=node_selectors,
     )
 
 
@@ -458,6 +468,7 @@ def get_validator_config(
     extra_labels,
     persistent,
     tolerations,
+    node_selectors,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -512,6 +523,7 @@ def get_validator_config(
             extra_labels,
         ),
         tolerations=tolerations,
+        node_selectors=node_selectors,
     )
 
 

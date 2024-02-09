@@ -68,6 +68,7 @@ def launch_participant_network(
     persistent,
     xatu_sentry_params,
     global_tolerations,
+    global_node_selectors,
     parallel_keystore_generation=False,
 ):
     network_id = network_params.network_id
@@ -109,6 +110,10 @@ def launch_participant_network(
                     participant.el_tolerations,
                     participant.tolerations,
                     global_tolerations,
+                )
+                node_selectors = input_parser.get_client_node_selectors(
+                    participant.node_selectors,
+                    global_node_selectors,
                 )
                 cl_client_type = participant.cl_client_type
                 el_client_type = participant.el_client_type
@@ -153,6 +158,7 @@ def launch_participant_network(
                             "RCLONE_CONFIG_MYS3_ENDPOINT": "https://ams3.digitaloceanspaces.com",
                         },
                         tolerations=tolerations,
+                        node_selectors=node_selectors,
                     ),
                 )
             for index, participant in enumerate(participants):
@@ -450,6 +456,8 @@ def launch_participant_network(
             participant.el_tolerations,
             participant.tolerations,
             global_tolerations,
+            participant.node_selectors,
+            global_node_selectors,
         )
 
         # Add participant el additional prometheus metrics
@@ -602,6 +610,8 @@ def launch_participant_network(
                 participant.validator_tolerations,
                 participant.tolerations,
                 global_tolerations,
+                participant.node_selectors,
+                global_node_selectors,
                 participant.cl_split_mode_enabled,
             )
         else:
@@ -638,6 +648,8 @@ def launch_participant_network(
                 participant.validator_tolerations,
                 participant.tolerations,
                 global_tolerations,
+                participant.node_selectors,
+                global_node_selectors,
                 participant.cl_split_mode_enabled,
             )
 
