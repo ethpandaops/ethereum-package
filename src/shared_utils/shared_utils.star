@@ -142,13 +142,14 @@ print(network_id, end="")
 
 
 def get_network_name(network):
+    network_name = network
     if (
         network != constants.NETWORK_NAME.kurtosis
         and network != constants.NETWORK_NAME.ephemery
         and constants.NETWORK_NAME.shadowfork not in network
         and network not in constants.PUBLIC_NETWORKS
     ):
-        return "devnets"
+        network_name = "devnets"
 
     if constants.NETWORK_NAME.shadowfork in network:
         network_name = network.split("-shadowfork")[0]
