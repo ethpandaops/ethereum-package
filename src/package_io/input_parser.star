@@ -91,6 +91,12 @@ def input_parser(plan, input_args):
             "deposit_contract_address"
         ] = constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
 
+    if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
+        shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
+        result["network_params"][
+            "deposit_contract_address"
+        ] = constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+
     for attr in input_args:
         value = input_args[attr]
         # if its inserted we use the value inserted

@@ -88,6 +88,7 @@ def launch(
     tolerations = input_parser.get_client_tolerations(
         el_tolerations, participant_tolerations, global_tolerations
     )
+    
     node_selectors = input_parser.get_client_node_selectors(
         participant_node_selectors, global_node_selectors
     )

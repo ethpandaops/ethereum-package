@@ -125,6 +125,7 @@ def launch_participant_network(
                     participant.node_selectors,
                     global_node_selectors,
                 )
+
                 cl_client_type = participant.cl_client_type
                 el_client_type = participant.el_client_type
 
@@ -172,6 +173,7 @@ def launch_participant_network(
                         },
                         tolerations=tolerations,
                         node_selectors=node_selectors,
+
                     ),
                 )
             for index, participant in enumerate(participants):
