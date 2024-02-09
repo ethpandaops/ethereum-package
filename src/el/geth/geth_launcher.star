@@ -98,21 +98,7 @@ def launch(
         el_tolerations, participant_tolerations, global_tolerations
     )
 
-    network_name = (
-        "devnets"
-        if launcher.network
-        not in (
-            constants.NETWORK_NAME.kurtosis,
-            constants.NETWORK_NAME.ephemery,
-            constants.NETWORK_NAME.shadowfork,
-            constants.PUBLIC_NETWORKS,
-        )
-        else launcher.network
-    )
-    if (
-        constants.NETWORK_NAME.shadowfork in network_name
-    ):  # if its a shadowfork we want proper resource allocation based on public network
-        network_name = launcher.network.split("-shadowfork")[0]
+    network_name = shared_utils.get_network_name(launcher.network)
 
     el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
     el_max_cpu = (

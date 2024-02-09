@@ -65,11 +65,12 @@ To mitigate these issues, you can use the `el_client_volume_size` and `cl_client
 For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self hosting your own Kubernetes cluster with fast persistent storage.
 
 ### Shadowforking
-In order to enable shadowfork capabilities, you can use the `network_params.network` flag. The expected value is the name of the network you want to shadowfork followed by `-shadowfork`. For example, to shadowfork the Holesky testnet, you can use the following command:
+In order to enable shadowfork capabilities, you can use the `network_params.network` flag. The expected value is the name of the network you want to shadowfork followed by `-shadowfork`. Please note that `persistent` configuration parameter has to be enabled for shadowforks to work! Current limitation on k8s is it is only working on a single node cluster. For example, to shadowfork the Holesky testnet, you can use the following command:
 ```yaml
 ...
 network_params:
   network: "holesky-shadowfork"
+persistent: true
 ...
 ```
 
@@ -80,6 +81,7 @@ In order to enable shadowfork capabilities for verkle networks, you need to defi
 network_params:
   electra_fork_epoch: 1
   network: "holesky-shadowfork-verkle"
+persistent: true
 ...
 ```
 

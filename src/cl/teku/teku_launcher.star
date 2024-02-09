@@ -152,16 +152,7 @@ def launch(
             int(bn_max_mem) if int(bn_max_mem) > 0 else holesky_beacon_memory_limit
         )
 
-    network_name = (
-        "devnets"
-        if launcher.network != "kurtosis"
-        and launcher.network != "ephemery"
-        and launcher.network not in constants.PUBLIC_NETWORKS
-        else launcher.network
-    )
-
-    if constants.NETWORK_NAME.shadowfork in network_name:
-        network_name = network_name.split("-shadowfork")[0]
+    network_name = shared_utils.get_network_name(launcher.network)
 
     bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
     bn_max_cpu = (

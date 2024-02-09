@@ -82,9 +82,8 @@ def launch_participant_network(
         if (
             constants.NETWORK_NAME.shadowfork in network_params.network
         ):  # shadowfork requires some preparation
-            base_network = network_params.network.split("-shadowfork")[
-                0
-            ]  # overload the network name to remove the shadowfork suffix
+            base_network = shared_utils.get_network_name(network_params.network)
+            # overload the network name to remove the shadowfork suffix
             if constants.NETWORK_NAME.ephemery in base_network:
                 chain_id = plan.run_sh(
                     run="curl -s https://ephemery.dev/latest/config.yaml | yq .DEPOSIT_CHAIN_ID | tr -d '\n'",
@@ -219,7 +218,7 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:1.3.15"
+                constants.ETHEREUM_GENESIS_GENERATOR.bellatrix_genesis
             )
         # we are running capella genesis - default behavior
         elif (
@@ -227,17 +226,17 @@ def launch_participant_network(
             and network_params.electra_fork_epoch == None
         ):
             ethereum_genesis_generator_image = (
-                "ethpandaops/ethereum-genesis-generator:2.0.12"
+                constants.ETHEREUM_GENESIS_GENERATOR.capella_genesis
             )
         # we are running electra - experimental
         elif network_params.electra_fork_epoch != None:
             if network_params.electra_fork_epoch == 0:
                 ethereum_genesis_generator_image = (
-                    "ethpandaops/ethereum-genesis-generator:4.0.0-rc.6"
+                    constants.ETHEREUM_GENESIS_GENERATOR.verkle_genesis
                 )
             else:
                 ethereum_genesis_generator_image = (
-                    "ethpandaops/ethereum-genesis-generator:3.0.0-rc.19"
+                    constants.ETHEREUM_GENESIS_GENERATOR.verkle_support_genesis
                 )
         else:
             fail(
