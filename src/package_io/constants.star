@@ -16,6 +16,14 @@ CL_CLIENT_TYPE = struct(
     lodestar="lodestar",
 )
 
+VC_CLIENT_TYPE = struct(
+    lighthouse="lighthouse",
+    lodestar="lodestar",
+    nimbus="nimbus",
+    prysm="prysm",
+    teku="teku",
+)
+
 GLOBAL_CLIENT_LOG_LEVEL = struct(
     info="info",
     error="error",
