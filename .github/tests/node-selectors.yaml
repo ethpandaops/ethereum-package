@@ -9,5 +9,5 @@ participants:
     cl_client_type: teku
     cl_split_mode_enabled: true
 global_node_selectors: {
-  " kubernetes.io/hostname": testing-2,
+  "kubernetes.io/hostname": testing-2,
 }
