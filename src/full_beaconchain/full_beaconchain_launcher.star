@@ -97,7 +97,9 @@ def launch_full_beacon(
     cl_client_contexts,
     el_client_contexts,
     persistent,
+    global_node_selectors,
 ):
+    node_selectors = global_node_selectors
     postgres_output = postgres.run(
         plan,
         service_name="beaconchain-postgres",
@@ -110,6 +112,7 @@ def launch_full_beacon(
         min_memory=POSTGRES_MIN_MEMORY,
         max_memory=POSTGRES_MAX_MEMORY,
         persistent=persistent,
+        node_selectors=node_selectors,
     )
     redis_output = redis.run(
         plan,
@@ -119,6 +122,7 @@ def launch_full_beacon(
         max_cpu=REDIS_MAX_CPU,
         min_memory=REDIS_MIN_MEMORY,
         max_memory=REDIS_MAX_MEMORY,
+        node_selectors=node_selectors,
     )
     # TODO perhaps create a new service for the littlebigtable
     little_bigtable = plan.add_service(
@@ -134,6 +138,7 @@ def launch_full_beacon(
             max_cpu=LITTLE_BIGTABLE_MAX_CPU,
             min_memory=LITTLE_BIGTABLE_MIN_MEMORY,
             max_memory=LITTLE_BIGTABLE_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 
@@ -178,6 +183,7 @@ def launch_full_beacon(
             max_cpu=INIT_MAX_CPU,
             min_memory=INIT_MIN_MEMORY,
             max_memory=INIT_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 
@@ -224,6 +230,7 @@ def launch_full_beacon(
             max_cpu=INDEXER_MAX_CPU,
             min_memory=INDEXER_MIN_MEMORY,
             max_memory=INDEXER_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
     # Start the eth1indexer
@@ -250,6 +257,7 @@ def launch_full_beacon(
             max_cpu=ETH1INDEXER_MAX_CPU,
             min_memory=ETH1INDEXER_MIN_MEMORY,
             max_memory=ETH1INDEXER_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 
@@ -269,6 +277,7 @@ def launch_full_beacon(
             max_cpu=REWARDSEXPORTER_MAX_CPU,
             min_memory=REWARDSEXPORTER_MIN_MEMORY,
             max_memory=REWARDSEXPORTER_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 
@@ -291,6 +300,7 @@ def launch_full_beacon(
             max_cpu=STATISTICS_MAX_CPU,
             min_memory=STATISTICS_MIN_MEMORY,
             max_memory=STATISTICS_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 
@@ -310,6 +320,7 @@ def launch_full_beacon(
             max_cpu=FDU_MAX_CPU,
             min_memory=FDU_MIN_MEMORY,
             max_memory=FDU_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 
@@ -337,6 +348,7 @@ def launch_full_beacon(
             max_cpu=FRONTEND_MAX_CPU,
             min_memory=FRONTEND_MIN_MEMORY,
             max_memory=FRONTEND_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 

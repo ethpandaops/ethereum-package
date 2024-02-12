@@ -23,8 +23,20 @@ MIN_MEMORY = 16
 MAX_MEMORY = 256
 
 
-def launch(plan, mev_boost_launcher, service_name, network_id, mev_boost_image):
-    config = get_config(mev_boost_launcher, network_id, mev_boost_image)
+def launch(
+    plan,
+    mev_boost_launcher,
+    service_name,
+    network_id,
+    mev_boost_image,
+    global_node_selectors,
+):
+    config = get_config(
+        mev_boost_launcher,
+        network_id,
+        mev_boost_image,
+        global_node_selectors,
+    )
 
     mev_boost_service = plan.add_service(service_name, config)
 
@@ -33,7 +45,12 @@ def launch(plan, mev_boost_launcher, service_name, network_id, mev_boost_image):
     )
 
 
-def get_config(mev_boost_launcher, network_id, mev_boost_image):
+def get_config(
+    mev_boost_launcher,
+    network_id,
+    mev_boost_image,
+    node_selectors,
+):
     command = ["mev-boost"]
 
     if mev_boost_launcher.should_check_relay:
@@ -60,6 +77,7 @@ def get_config(mev_boost_launcher, network_id, mev_boost_image):
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
 

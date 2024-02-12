@@ -59,7 +59,9 @@ def launch_blobscan(
     el_client_contexts,
     chain_id,
     persistent,
+    global_node_selectors,
 ):
+    node_selectors = global_node_selectors
     beacon_node_rpc_uri = "http://{0}:{1}".format(
         cl_client_contexts[0].ip_addr, cl_client_contexts[0].http_port_num
     )
@@ -75,24 +77,43 @@ def launch_blobscan(
         min_memory=POSTGRES_MIN_MEMORY,
         max_memory=POSTGRES_MAX_MEMORY,
         persistent=persistent,
+        node_selectors=node_selectors,
     )
-    api_config = get_api_config(postgres_output.url, beacon_node_rpc_uri, chain_id)
+    api_config = get_api_config(
+        postgres_output.url,
+        beacon_node_rpc_uri,
+        chain_id,
+        node_selectors,
+    )
     blobscan_config = plan.add_service(API_SERVICE_NAME, api_config)
 
     blobscan_api_url = "http://{0}:{1}".format(
         blobscan_config.ip_address, blobscan_config.ports[HTTP_PORT_ID].number
     )
 
-    web_config = get_web_config(postgres_output.url, beacon_node_rpc_uri, chain_id)
+    web_config = get_web_config(
+        postgres_output.url,
+        beacon_node_rpc_uri,
+        chain_id,
+        node_selectors,
+    )
     plan.add_service(WEB_SERVICE_NAME, web_config)
 
     indexer_config = get_indexer_config(
-        beacon_node_rpc_uri, execution_node_rpc_uri, blobscan_api_url
+        beacon_node_rpc_uri,
+        execution_node_rpc_uri,
+        blobscan_api_url,
+        node_selectors,
     )
     plan.add_service(INDEXER_SERVICE_NAME, indexer_config)
 
 
-def get_api_config(database_url, beacon_node_rpc, chain_id):
+def get_api_config(
+    database_url,
+    beacon_node_rpc,
+    chain_id,
+    node_selectors,
+):
     IMAGE_NAME = "blossomlabs/blobscan:stable"
 
     return ServiceConfig(
@@ -121,10 +142,11 @@ def get_api_config(database_url, beacon_node_rpc, chain_id):
         max_cpu=API_MAX_CPU,
         min_memory=API_MIN_MEMORY,
         max_memory=API_MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
 
-def get_web_config(database_url, beacon_node_rpc, chain_id):
+def get_web_config(database_url, beacon_node_rpc, chain_id, node_selectors):
     # TODO: https://github.com/kurtosis-tech/kurtosis/issues/1861
     # Configure NEXT_PUBLIC_BEACON_BASE_URL and NEXT_PUBLIC_EXPLORER_BASE env vars
     # once retrieving external URLs from services are supported in Kurtosis.
@@ -145,10 +167,16 @@ def get_web_config(database_url, beacon_node_rpc, chain_id):
         max_cpu=WEB_MAX_CPU,
         min_memory=WEB_MIN_MEMORY,
         max_memory=WEB_MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
 
-def get_indexer_config(beacon_node_rpc, execution_node_rpc, blobscan_api_url):
+def get_indexer_config(
+    beacon_node_rpc,
+    execution_node_rpc,
+    blobscan_api_url,
+    node_selectors,
+):
     IMAGE_NAME = "blossomlabs/blobscan-indexer:master"
 
     return ServiceConfig(
@@ -165,4 +193,5 @@ def get_indexer_config(beacon_node_rpc, execution_node_rpc, blobscan_api_url):
         max_cpu=INDEX_MAX_CPU,
         min_memory=INDEX_MIN_MEMORY,
         max_memory=INDEX_MAX_MEMORY,
+        node_selectors=node_selectors,
     )

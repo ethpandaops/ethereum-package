@@ -102,8 +102,7 @@ def launch(
     validator_tolerations,
     participant_tolerations,
     global_tolerations,
-    participant_node_selectors,
-    global_node_selectors,
+    node_selectors,
     split_mode_enabled=False,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -116,10 +115,6 @@ def launch(
 
     tolerations = input_parser.get_client_tolerations(
         cl_tolerations, participant_tolerations, global_tolerations
-    )
-
-    node_selectors = input_parser.get_client_node_selectors(
-        participant_node_selectors, global_node_selectors
     )
 
     network_name = shared_utils.get_network_name(launcher.network)

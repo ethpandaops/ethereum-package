@@ -12,7 +12,14 @@ def prefixed_address(address):
     return "0x" + address
 
 
-def launch_mev_flood(plan, image, el_uri, contract_owner, normal_user):
+def launch_mev_flood(
+    plan,
+    image,
+    el_uri,
+    contract_owner,
+    normal_user,
+    global_node_selectors,
+):
     plan.add_service(
         name="mev-flood",
         config=ServiceConfig(
@@ -22,6 +29,7 @@ def launch_mev_flood(plan, image, el_uri, contract_owner, normal_user):
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
+            node_selectors=global_node_selectors,
         ),
     )
 

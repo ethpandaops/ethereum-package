@@ -541,6 +541,10 @@ def launch_participant_network(
     for index, participant in enumerate(participants):
         cl_client_type = participant.cl_client_type
         el_client_type = participant.el_client_type
+        node_selectors = input_parser.get_client_node_selectors(
+            participant.node_selectors,
+            global_node_selectors,
+        )
 
         if cl_client_type not in cl_launchers:
             fail(
@@ -577,6 +581,7 @@ def launch_participant_network(
                 plan,
                 snooper_service_name,
                 el_client_context,
+                node_selectors,
             )
             plan.print(
                 "Successfully added {0} snooper participants".format(
@@ -618,8 +623,7 @@ def launch_participant_network(
                 participant.validator_tolerations,
                 participant.tolerations,
                 global_tolerations,
-                participant.node_selectors,
-                global_node_selectors,
+                node_selectors,
                 participant.cl_split_mode_enabled,
             )
         else:
@@ -656,8 +660,7 @@ def launch_participant_network(
                 participant.validator_tolerations,
                 participant.tolerations,
                 global_tolerations,
-                participant.node_selectors,
-                global_node_selectors,
+                node_selectors,
                 participant.cl_split_mode_enabled,
             )
 
@@ -683,6 +686,7 @@ def launch_participant_network(
                 ethereum_metrics_exporter_service_name,
                 el_client_context,
                 cl_client_context,
+                node_selectors,
             )
             plan.print(
                 "Successfully added {0} ethereum metrics exporter participants".format(
@@ -706,6 +710,7 @@ def launch_participant_network(
                 xatu_sentry_params,
                 network_params,
                 pair_name,
+                node_selectors,
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(

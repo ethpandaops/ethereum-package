@@ -8,7 +8,14 @@ MIN_MEMORY = 128
 MAX_MEMORY = 1024
 
 
-def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
+def spam_in_background(
+    plan,
+    sender_key,
+    receiver_key,
+    el_uri,
+    params,
+    global_node_selectors,
+):
     sender_script = plan.upload_files(src="./sender.py", name="mev-custom-flood-sender")
 
     plan.add_service(
@@ -26,6 +33,7 @@ def spam_in_background(plan, sender_key, receiver_key, el_uri, params):
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
+            node_selectors=global_node_selectors,
         ),
     )
 

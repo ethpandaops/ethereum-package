@@ -18,6 +18,7 @@ def launch_blob_spammer(
     deneb_fork_epoch,
     seconds_per_slot,
     genesis_delay,
+    global_node_selectors,
 ):
     config = get_config(
         prefunded_addresses,
@@ -26,6 +27,7 @@ def launch_blob_spammer(
         deneb_fork_epoch,
         seconds_per_slot,
         genesis_delay,
+        global_node_selectors,
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -37,6 +39,7 @@ def get_config(
     deneb_fork_epoch,
     seconds_per_slot,
     genesis_delay,
+    node_selectors,
 ):
     dencunTime = (deneb_fork_epoch * 32 * seconds_per_slot) + genesis_delay
     return ServiceConfig(
@@ -68,4 +71,5 @@ def get_config(
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )
