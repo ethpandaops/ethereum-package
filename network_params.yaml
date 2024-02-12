@@ -11,6 +11,7 @@ participants:
     cl_tolerations: []
     validator_tolerations: []
     tolerations: []
+    node_selectors: {}
     beacon_extra_params: []
     beacon_extra_labels: {}
     validator_extra_params: []
@@ -87,3 +88,4 @@ grafana_additional_dashboards: []
 persistent: false
 xatu_sentry_enabled: false
 global_tolerations: []
+global_node_selectors: {}

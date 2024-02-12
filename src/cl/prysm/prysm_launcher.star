@@ -114,6 +114,7 @@ def launch(
     validator_tolerations,
     participant_tolerations,
     global_tolerations,
+    node_selectors,
     split_mode_enabled=False,
 ):
     split_images = images.split(IMAGE_SEPARATOR_DELIMITER)
@@ -185,6 +186,7 @@ def launch(
         persistent,
         cl_volume_size,
         tolerations,
+        node_selectors,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -223,6 +225,7 @@ def launch(
             launcher.prysm_password_artifact_uuid,
             persistent,
             tolerations,
+            node_selectors,
         )
 
         validator_service = plan.add_service(validator_service_name, validator_config)
@@ -302,6 +305,7 @@ def get_beacon_config(
     persistent,
     cl_volume_size,
     tolerations,
+    node_selectors,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -433,6 +437,7 @@ def get_beacon_config(
             extra_labels,
         ),
         tolerations=tolerations,
+        node_selectors=node_selectors,
     )
 
 
@@ -455,6 +460,7 @@ def get_validator_config(
     prysm_password_artifact_uuid,
     persistent,
     tolerations,
+    node_selectors,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNT_DIRPATH_ON_SERVICE_CONTAINER,
@@ -520,6 +526,7 @@ def get_validator_config(
             extra_labels,
         ),
         tolerations=tolerations,
+        node_selectors=node_selectors,
     )
 
 

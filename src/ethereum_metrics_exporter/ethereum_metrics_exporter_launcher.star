@@ -22,6 +22,7 @@ def launch(
     ethereum_metrics_exporter_service_name,
     el_client_context,
     cl_client_context,
+    node_selectors,
 ):
     exporter_service = plan.add_service(
         ethereum_metrics_exporter_service_name,
@@ -52,6 +53,7 @@ def launch(
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 

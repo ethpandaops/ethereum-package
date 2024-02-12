@@ -22,6 +22,7 @@ def launch(
     xatu_sentry_params,
     network_params,
     pair_name,
+    node_selectors,
 ):
     config_template = read_file(static_files.XATU_SENTRY_CONFIG_TEMPLATE_FILEPATH)
 
@@ -81,6 +82,7 @@ def launch(
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 

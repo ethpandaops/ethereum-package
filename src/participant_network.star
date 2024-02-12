@@ -68,6 +68,7 @@ def launch_participant_network(
     persistent,
     xatu_sentry_params,
     global_tolerations,
+    global_node_selectors,
     parallel_keystore_generation=False,
 ):
     network_id = network_params.network_id
@@ -113,13 +114,17 @@ def launch_participant_network(
                 store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
             )
 
-            # maybe we can do the copy in the same step as the fetch?
             for index, participant in enumerate(participants):
                 tolerations = input_parser.get_client_tolerations(
                     participant.el_tolerations,
                     participant.tolerations,
                     global_tolerations,
                 )
+                node_selectors = input_parser.get_client_node_selectors(
+                    participant.node_selectors,
+                    global_node_selectors,
+                )
+
                 cl_client_type = participant.cl_client_type
                 el_client_type = participant.el_client_type
 
@@ -160,12 +165,8 @@ def launch_participant_network(
                                 ],
                             ),
                         },
-                        env_vars={
-                            "RCLONE_CONFIG_MYS3_TYPE": "s3",
-                            "RCLONE_CONFIG_MYS3_PROVIDER": "DigitalOcean",
-                            "RCLONE_CONFIG_MYS3_ENDPOINT": "https://ams3.digitaloceanspaces.com",
-                        },
                         tolerations=tolerations,
+                        node_selectors=node_selectors,
                     ),
                 )
             for index, participant in enumerate(participants):
@@ -423,7 +424,13 @@ def launch_participant_network(
     for index, participant in enumerate(participants):
         cl_client_type = participant.cl_client_type
         el_client_type = participant.el_client_type
-
+        node_selectors = input_parser.get_client_node_selectors(
+            participant.node_selectors,
+            global_node_selectors,
+        )
+        tolerations = input_parser.get_client_tolerations(
+            participant.el_tolerations, participant.tolerations, global_tolerations
+        )
         if el_client_type not in el_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
@@ -460,9 +467,8 @@ def launch_participant_network(
             participant.el_extra_labels,
             persistent,
             participant.el_client_volume_size,
-            participant.el_tolerations,
-            participant.tolerations,
-            global_tolerations,
+            tolerations,
+            node_selectors,
         )
 
         # Add participant el additional prometheus metrics
@@ -538,6 +544,10 @@ def launch_participant_network(
     for index, participant in enumerate(participants):
         cl_client_type = participant.cl_client_type
         el_client_type = participant.el_client_type
+        node_selectors = input_parser.get_client_node_selectors(
+            participant.node_selectors,
+            global_node_selectors,
+        )
 
         if cl_client_type not in cl_launchers:
             fail(
@@ -574,6 +584,7 @@ def launch_participant_network(
                 plan,
                 snooper_service_name,
                 el_client_context,
+                node_selectors,
             )
             plan.print(
                 "Successfully added {0} snooper participants".format(
@@ -615,6 +626,7 @@ def launch_participant_network(
                 participant.validator_tolerations,
                 participant.tolerations,
                 global_tolerations,
+                node_selectors,
                 participant.cl_split_mode_enabled,
             )
         else:
@@ -651,6 +663,7 @@ def launch_participant_network(
                 participant.validator_tolerations,
                 participant.tolerations,
                 global_tolerations,
+                node_selectors,
                 participant.cl_split_mode_enabled,
             )
 
@@ -676,6 +689,7 @@ def launch_participant_network(
                 ethereum_metrics_exporter_service_name,
                 el_client_context,
                 cl_client_context,
+                node_selectors,
             )
             plan.print(
                 "Successfully added {0} ethereum metrics exporter participants".format(
@@ -699,6 +713,7 @@ def launch_participant_network(
                 xatu_sentry_params,
                 network_params,
                 pair_name,
+                node_selectors,
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(

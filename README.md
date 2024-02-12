@@ -264,6 +264,12 @@ participants:
   # Defaults to empty
   tolerations: []
 
+  # Node selector
+  # Only works with Kubernetes
+  # Example: node_selectors: { "disktype": "ssd" }
+  # Defaults to empty
+  node_selectors: {}
+
   # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
   # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
   beacon_extra_params: []
@@ -605,6 +611,12 @@ xatu_sentry_params:
 #   toleration_seconds: 3600
 # Defaults to empty
 global_tolerations: []
+
+# Global node selector that will be passed to all containers (unless overridden by a more specific node selector)
+# Only works with Kubernetes
+# Example: node_selectors: { "disktype": "ssd" }
+# Defaults to empty
+node_selectors: {}
 ```
 
 #### Example configurations

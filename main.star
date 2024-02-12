@@ -61,6 +61,7 @@ def run(plan, args={}):
     persistent = args_with_right_defaults.persistent
     xatu_sentry_params = args_with_right_defaults.xatu_sentry_params
     global_tolerations = args_with_right_defaults.global_tolerations
+    global_node_selectors = args_with_right_defaults.global_node_selectors
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -95,6 +96,7 @@ def run(plan, args={}):
         persistent,
         xatu_sentry_params,
         global_tolerations,
+        global_node_selectors,
         parallel_keystore_generation,
     )
 
@@ -137,7 +139,9 @@ def run(plan, args={}):
     if "broadcaster" in args_with_right_defaults.additional_services:
         args_with_right_defaults.additional_services.remove("broadcaster")
         broadcaster_service = broadcaster.launch_broadcaster(
-            plan, all_el_client_contexts
+            plan,
+            all_el_client_contexts,
+            global_node_selectors,
         )
         fuzz_target = "http://{0}:{1}".format(
             broadcaster_service.ip_address,
@@ -170,6 +174,7 @@ def run(plan, args={}):
             beacon_uri,
             raw_jwt_secret,
             args_with_right_defaults.global_client_log_level,
+            global_node_selectors,
         )
         mev_endpoints.append(endpoint)
     elif (
@@ -195,6 +200,7 @@ def run(plan, args={}):
             fuzz_target,
             contract_owner.private_key,
             normal_user.private_key,
+            global_node_selectors,
         )
         epoch_recipe = GetHttpRequestRecipe(
             endpoint="/eth/v2/beacon/blocks/head",
@@ -218,6 +224,7 @@ def run(plan, args={}):
             builder_uri,
             network_params.seconds_per_slot,
             persistent,
+            global_node_selectors,
         )
         mev_flood.spam_in_background(
             plan,
@@ -238,7 +245,8 @@ def run(plan, args={}):
             )
             if args_with_right_defaults.participants[index].validator_count != 0:
                 mev_boost_launcher = mev_boost.new_mev_boost_launcher(
-                    MEV_BOOST_SHOULD_CHECK_RELAY, mev_endpoints
+                    MEV_BOOST_SHOULD_CHECK_RELAY,
+                    mev_endpoints,
                 )
                 mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
                     input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
@@ -252,6 +260,7 @@ def run(plan, args={}):
                     mev_boost_service_name,
                     network_params.network_id,
                     mev_params.mev_boost_image,
+                    global_node_selectors,
                 )
                 all_mevboost_contexts.append(mev_boost_context)
 
@@ -275,6 +284,7 @@ def run(plan, args={}):
                 fuzz_target,
                 tx_spammer_params,
                 network_params.electra_fork_epoch,
+                global_node_selectors,
             )
             plan.print("Successfully launched transaction spammer")
         elif additional_service == "blob_spammer":
@@ -287,6 +297,7 @@ def run(plan, args={}):
                 network_params.deneb_fork_epoch,
                 network_params.seconds_per_slot,
                 network_params.genesis_delay,
+                global_node_selectors,
             )
             plan.print("Successfully launched blob spammer")
         elif additional_service == "goomy_blob":
@@ -299,6 +310,7 @@ def run(plan, args={}):
                 all_cl_client_contexts[0],
                 network_params.seconds_per_slot,
                 goomy_blob_params,
+                global_node_selectors,
             )
             plan.print("Successfully launched goomy the blob spammer")
         # We need a way to do time.sleep
@@ -309,7 +321,10 @@ def run(plan, args={}):
                 static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH
             )
             el_forkmon.launch_el_forkmon(
-                plan, el_forkmon_config_template, all_el_client_contexts
+                plan,
+                el_forkmon_config_template,
+                all_el_client_contexts,
+                global_node_selectors,
             )
             plan.print("Successfully launched execution layer forkmon")
         elif additional_service == "beacon_metrics_gazer":
@@ -319,6 +334,7 @@ def run(plan, args={}):
                     plan,
                     all_cl_client_contexts,
                     network_params,
+                    global_node_selectors,
                 )
             )
             launch_prometheus_grafana = True
@@ -329,7 +345,10 @@ def run(plan, args={}):
         elif additional_service == "blockscout":
             plan.print("Launching blockscout")
             blockscout_sc_verif_url = blockscout.launch_blockscout(
-                plan, all_el_client_contexts, persistent
+                plan,
+                all_el_client_contexts,
+                persistent,
+                global_node_selectors,
             )
             plan.print("Successfully launched blockscout")
         elif additional_service == "dora":
@@ -342,6 +361,7 @@ def run(plan, args={}):
                 el_cl_data_files_artifact_uuid,
                 network_params.electra_fork_epoch,
                 network_params.network,
+                global_node_selectors,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "blobscan":
@@ -352,6 +372,7 @@ def run(plan, args={}):
                 all_el_client_contexts,
                 network_params.network_id,
                 persistent,
+                global_node_selectors,
             )
             plan.print("Successfully launched blobscan")
         elif additional_service == "full_beaconchain_explorer":
@@ -365,6 +386,7 @@ def run(plan, args={}):
                 all_cl_client_contexts,
                 all_el_client_contexts,
                 persistent,
+                global_node_selectors,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
         elif additional_service == "prometheus_grafana":
@@ -383,6 +405,7 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 network_params,
                 assertoor_params,
+                global_node_selectors,
             )
             plan.print("Successfully launched assertoor")
         elif additional_service == "custom_flood":
@@ -392,6 +415,7 @@ def run(plan, args={}):
                 genesis_constants.PRE_FUNDED_ACCOUNTS[0].address,
                 fuzz_target,
                 args_with_right_defaults.custom_flood_params,
+                global_node_selectors,
             )
         else:
             fail("Invalid additional service %s" % (additional_service))
@@ -404,6 +428,7 @@ def run(plan, args={}):
             prometheus_additional_metrics_jobs,
             all_ethereum_metrics_exporter_contexts,
             all_xatu_sentry_contexts,
+            global_node_selectors,
         )
 
         plan.print("Launching grafana...")
@@ -412,6 +437,7 @@ def run(plan, args={}):
             grafana_datasource_config_template,
             grafana_dashboards_config_template,
             prometheus_private_url,
+            global_node_selectors,
             additional_dashboards=args_with_right_defaults.grafana_additional_dashboards,
         )
         plan.print("Successfully launched grafana")

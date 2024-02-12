@@ -48,7 +48,9 @@ def launch_mev_relay(
     builder_uri,
     seconds_per_slot,
     persistent,
+    global_node_selectors,
 ):
+    node_selectors = global_node_selectors
     redis = redis_module.run(
         plan,
         service_name="mev-relay-redis",
@@ -56,6 +58,7 @@ def launch_mev_relay(
         max_cpu=REDIS_MAX_CPU,
         min_memory=REDIS_MIN_MEMORY,
         max_memory=REDIS_MAX_MEMORY,
+        node_selectors=node_selectors,
     )
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(
@@ -70,6 +73,7 @@ def launch_mev_relay(
         max_cpu=POSTGRES_MAX_CPU,
         min_memory=POSTGRES_MIN_MEMORY,
         max_memory=POSTGRES_MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
     network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
@@ -110,6 +114,7 @@ def launch_mev_relay(
             max_cpu=RELAY_MAX_CPU,
             min_memory=RELAY_MIN_MEMORY,
             max_memory=RELAY_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 
@@ -145,6 +150,7 @@ def launch_mev_relay(
             max_cpu=RELAY_MAX_CPU,
             min_memory=RELAY_MIN_MEMORY,
             max_memory=RELAY_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 
@@ -177,6 +183,7 @@ def launch_mev_relay(
             max_cpu=RELAY_MAX_CPU,
             min_memory=RELAY_MIN_MEMORY,
             max_memory=RELAY_MAX_MEMORY,
+            node_selectors=node_selectors,
         ),
     )
 

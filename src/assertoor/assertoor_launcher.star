@@ -36,6 +36,7 @@ def launch_assertoor(
     participant_configs,
     network_params,
     assertoor_params,
+    global_node_selectors,
 ):
     all_client_info = []
     validator_client_info = []
@@ -91,6 +92,7 @@ def launch_assertoor(
         tests_config_artifacts_name,
         network_params,
         assertoor_params,
+        global_node_selectors,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -101,6 +103,7 @@ def get_config(
     tests_config_artifacts_name,
     network_params,
     assertoor_params,
+    node_selectors,
 ):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -127,6 +130,7 @@ def get_config(
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
 
