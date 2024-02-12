@@ -4,7 +4,6 @@ participants:
     cl_client_type: teku
     cl_client_image: consensys/teku:24.1.1
 network_params:
-  dencun_fork_epoch: 1
   network: holesky-shadowfork
 additional_services:
   - dora
