@@ -424,7 +424,13 @@ def launch_participant_network(
     for index, participant in enumerate(participants):
         cl_client_type = participant.cl_client_type
         el_client_type = participant.el_client_type
-
+        node_selectors = input_parser.get_client_node_selectors(
+            participant.node_selectors,
+            global_node_selectors,
+        )
+        tolerations = input_parser.get_client_tolerations(
+            participant.el_tolerations, participant.tolerations, global_tolerations
+        )
         if el_client_type not in el_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
@@ -461,11 +467,8 @@ def launch_participant_network(
             participant.el_extra_labels,
             persistent,
             participant.el_client_volume_size,
-            participant.el_tolerations,
-            participant.tolerations,
-            global_tolerations,
-            participant.node_selectors,
-            global_node_selectors,
+            tolerations,
+            node_selectors,
         )
 
         # Add participant el additional prometheus metrics
