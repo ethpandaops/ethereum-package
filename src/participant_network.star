@@ -141,12 +141,7 @@ def launch_participant_network(
                     config=ServiceConfig(
                         image="alpine:3.19.1",
                         cmd=[
-                            "apk add --no-cache curl tar zstd && curl -s -L https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
-                            + base_network
-                            + "/"
-                            + el_client_type
-                            + "/"
-                            + shadowfork_block
+                            "apk add --no-cache curl tar zstd && http://10.10.101.5:9000/geth-snapshots/holesky.tar.zst"
                             + "/snapshot.tar.zst"
                             + " | tar -I zstd -xvf - -C /data/"
                             + el_client_type
