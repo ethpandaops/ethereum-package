@@ -142,7 +142,6 @@ def launch_participant_network(
                         image="alpine:3.19.1",
                         cmd=[
                             "apk add --no-cache curl tar zstd && http://10.10.101.5:9000/geth-snapshots/holesky.tar.zst"
-                            + "/snapshot.tar.zst"
                             + " | tar -I zstd -xvf - -C /data/"
                             + el_client_type
                             + "/execution-data"
