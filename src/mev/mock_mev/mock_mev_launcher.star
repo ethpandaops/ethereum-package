@@ -10,7 +10,14 @@ MIN_MEMORY = 128
 MAX_MEMORY = 1024
 
 
-def launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret, global_client_log_level):
+def launch_mock_mev(
+    plan,
+    el_uri,
+    beacon_uri,
+    jwt_secret,
+    global_client_log_level,
+    global_node_selectors,
+):
     mock_builder = plan.add_service(
         name=MOCK_MEV_SERVICE_NAME,
         config=ServiceConfig(
@@ -31,6 +38,7 @@ def launch_mock_mev(plan, el_uri, beacon_uri, jwt_secret, global_client_log_leve
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
+            node_selectors=global_node_selectors,
         ),
     )
     return "http://{0}@{1}:{2}".format(

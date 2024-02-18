@@ -9,12 +9,15 @@ MIN_MEMORY = 128
 MAX_MEMORY = 2048
 
 
-def launch_broadcaster(plan, all_el_client_contexts):
-    config = get_config(all_el_client_contexts)
+def launch_broadcaster(plan, all_el_client_contexts, global_node_selectors):
+    config = get_config(all_el_client_contexts, global_node_selectors)
     return plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(all_el_client_contexts):
+def get_config(
+    all_el_client_contexts,
+    node_selectors,
+):
     return ServiceConfig(
         image=IMAGE_NAME,
         cmd=[
@@ -25,4 +28,5 @@ def get_config(all_el_client_contexts):
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )

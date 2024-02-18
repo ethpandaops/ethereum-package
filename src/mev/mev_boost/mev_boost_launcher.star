@@ -24,9 +24,21 @@ MAX_MEMORY = 256
 
 
 def launch(
-    plan, mev_boost_launcher, service_name, network_id, mev_boost_image, mev_boost_args
+    plan,
+    mev_boost_launcher,
+    service_name,
+    network_id,
+    mev_boost_image,
+    mev_boost_args
+    global_node_selectors,
 ):
-    config = get_config(mev_boost_launcher, network_id, mev_boost_image, mev_boost_args)
+    config = get_config(
+        mev_boost_launcher,
+        network_id,
+        mev_boost_image,
+        mev_boost_args,
+        global_node_selectors,
+    )
 
     mev_boost_service = plan.add_service(service_name, config)
 
@@ -34,8 +46,13 @@ def launch(
         mev_boost_service.ip_address, input_parser.FLASHBOTS_MEV_BOOST_PORT
     )
 
-
-def get_config(mev_boost_launcher, network_id, mev_boost_image, mev_boost_args):
+def get_config(
+    mev_boost_launcher,
+    network_id,
+    mev_boost_image,
+    mev_boost_args,
+    node_selectors,
+):
     command = mev_boost_args
 
     return ServiceConfig(
@@ -59,6 +76,7 @@ def get_config(mev_boost_launcher, network_id, mev_boost_image, mev_boost_args):
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
 

@@ -17,6 +17,7 @@ def launch_goomy_blob(
     cl_client_context,
     seconds_per_slot,
     goomy_blob_params,
+    global_node_selectors,
 ):
     config = get_config(
         prefunded_addresses,
@@ -24,6 +25,7 @@ def launch_goomy_blob(
         cl_client_context,
         seconds_per_slot,
         goomy_blob_params.goomy_blob_args,
+        global_node_selectors,
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -34,6 +36,7 @@ def get_config(
     cl_client_context,
     seconds_per_slot,
     goomy_blob_args,
+    node_selectors,
 ):
     goomy_cli_args = []
     for index, client in enumerate(el_client_contexts):
@@ -77,4 +80,5 @@ def get_config(
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )

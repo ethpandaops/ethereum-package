@@ -30,6 +30,7 @@ def launch_el_forkmon(
     plan,
     config_template,
     el_client_contexts,
+    global_node_selectors,
 ):
     all_el_client_info = []
     for client in el_client_contexts:
@@ -52,12 +53,15 @@ def launch_el_forkmon(
         template_and_data_by_rel_dest_filepath, "el-forkmon-config"
     )
 
-    config = get_config(config_files_artifact_name)
+    config = get_config(
+        config_files_artifact_name,
+        global_node_selectors,
+    )
 
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(config_files_artifact_name):
+def get_config(config_files_artifact_name, node_selectors):
     config_file_path = shared_utils.path_join(
         EL_FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, EL_FORKMON_CONFIG_FILENAME
     )
@@ -72,6 +76,7 @@ def get_config(config_files_artifact_name):
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
 

@@ -9,18 +9,30 @@ MAX_MEMORY = 300
 
 
 def launch_transaction_spammer(
-    plan, prefunded_addresses, el_uri, tx_spammer_params, electra_fork_epoch
+    plan,
+    prefunded_addresses,
+    el_uri,
+    tx_spammer_params,
+    electra_fork_epoch,
+    global_node_selectors,
 ):
     config = get_config(
         prefunded_addresses,
         el_uri,
         tx_spammer_params.tx_spammer_extra_args,
         electra_fork_epoch,
+        global_node_selectors,
     )
     plan.add_service(SERVICE_NAME, config)
 
 
-def get_config(prefunded_addresses, el_uri, tx_spammer_extra_args, electra_fork_epoch):
+def get_config(
+    prefunded_addresses,
+    el_uri,
+    tx_spammer_extra_args,
+    electra_fork_epoch,
+    node_selectors,
+):
     # Temp hack to use the old tx-fuzz image until we can get the new one working
     if electra_fork_epoch != None:
         tx_spammer_image = "ethpandaops/tx-fuzz:kaustinen-281adbc"
@@ -43,4 +55,5 @@ def get_config(prefunded_addresses, el_uri, tx_spammer_extra_args, electra_fork_
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )

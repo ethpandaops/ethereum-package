@@ -25,10 +25,10 @@ MIN_MEMORY = 10
 MAX_MEMORY = 300
 
 
-def launch(plan, service_name, el_client_context):
+def launch(plan, service_name, el_client_context, node_selectors):
     snooper_service_name = "{0}".format(service_name)
 
-    snooper_config = get_config(service_name, el_client_context)
+    snooper_config = get_config(service_name, el_client_context, node_selectors)
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
     snooper_http_port = snooper_service.ports[SNOOPER_ENGINE_RPC_PORT_ID]
@@ -37,7 +37,7 @@ def launch(plan, service_name, el_client_context):
     )
 
 
-def get_config(service_name, el_client_context):
+def get_config(service_name, el_client_context, node_selectors):
     engine_rpc_port_num = "http://{0}:{1}".format(
         el_client_context.ip_addr,
         el_client_context.engine_rpc_port_num,
@@ -58,4 +58,5 @@ def get_config(service_name, el_client_context):
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )

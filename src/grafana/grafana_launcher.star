@@ -50,6 +50,7 @@ def launch_grafana(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
+    global_node_selectors,
     additional_dashboards=[],
 ):
     (
@@ -73,6 +74,7 @@ def launch_grafana(
     config = get_config(
         grafana_config_artifacts_uuid,
         merged_dashboards_artifact_name,
+        global_node_selectors,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -127,6 +129,7 @@ def get_grafana_config_dir_artifact_uuid(
 def get_config(
     grafana_config_artifacts_name,
     grafana_dashboards_artifacts_name,
+    node_selectors,
 ):
     return ServiceConfig(
         image=IMAGE_NAME,
@@ -146,6 +149,7 @@ def get_config(
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
 

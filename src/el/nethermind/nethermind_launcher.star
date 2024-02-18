@@ -74,15 +74,11 @@ def launch(
     extra_labels,
     persistent,
     el_volume_size,
-    el_tolerations,
-    participant_tolerations,
-    global_tolerations,
+    tolerations,
+    node_selectors,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-    tolerations = input_parser.get_client_tolerations(
-        el_tolerations, participant_tolerations, global_tolerations
     )
 
     network_name = shared_utils.get_network_name(launcher.network)
@@ -128,6 +124,7 @@ def launch(
         persistent,
         el_volume_size,
         tolerations,
+        node_selectors,
     )
 
     service = plan.add_service(service_name, config)
@@ -173,6 +170,7 @@ def get_config(
     persistent,
     el_volume_size,
     tolerations,
+    node_selectors,
 ):
     cmd = [
         "--log=" + log_level,
@@ -268,6 +266,7 @@ def get_config(
             extra_labels,
         ),
         tolerations=tolerations,
+        node_selectors=node_selectors,
     )
 
 

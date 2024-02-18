@@ -38,13 +38,19 @@ VERIF_USED_PORTS = {
 }
 
 
-def launch_blockscout(plan, el_client_contexts, persistent):
+def launch_blockscout(
+    plan,
+    el_client_contexts,
+    persistent,
+    global_node_selectors,
+):
     postgres_output = postgres.run(
         plan,
         service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
         database="blockscout",
         extra_configs=["max_connections=1000"],
         persistent=persistent,
+        node_selectors=global_node_selectors,
     )
 
     el_client_context = el_client_contexts[0]
@@ -53,7 +59,7 @@ def launch_blockscout(plan, el_client_contexts, persistent):
     )
     el_client_name = el_client_context.client_name
 
-    config_verif = get_config_verif()
+    config_verif = get_config_verif(global_node_selectors)
     verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)
     verif_service = plan.add_service(verif_service_name, config_verif)
     verif_url = "http://{}:{}/api".format(
@@ -61,7 +67,11 @@ def launch_blockscout(plan, el_client_contexts, persistent):
     )
 
     config_backend = get_config_backend(
-        postgres_output, el_client_rpc_url, verif_url, el_client_name
+        postgres_output,
+        el_client_rpc_url,
+        verif_url,
+        el_client_name,
+        global_node_selectors,
     )
     blockscout_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)
     plan.print(blockscout_service)
@@ -73,7 +83,7 @@ def launch_blockscout(plan, el_client_contexts, persistent):
     return blockscout_url
 
 
-def get_config_verif():
+def get_config_verif(node_selectors):
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT_VERIF,
         ports=VERIF_USED_PORTS,
@@ -86,10 +96,13 @@ def get_config_verif():
         max_cpu=BLOCKSCOUT_VERIF_MAX_CPU,
         min_memory=BLOCKSCOUT_VERIF_MIN_MEMORY,
         max_memory=BLOCKSCOUT_VERIF_MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
 
-def get_config_backend(postgres_output, el_client_rpc_url, verif_url, el_client_name):
+def get_config_backend(
+    postgres_output, el_client_rpc_url, verif_url, el_client_name, node_selectors
+):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
         user=postgres_output.user,
@@ -128,4 +141,5 @@ def get_config_backend(postgres_output, el_client_rpc_url, verif_url, el_client_
         max_cpu=BLOCKSCOUT_MAX_CPU,
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
+        node_selectors=node_selectors,
     )

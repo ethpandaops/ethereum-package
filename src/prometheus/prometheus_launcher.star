@@ -26,6 +26,7 @@ def launch_prometheus(
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
+    global_node_selectors,
 ):
     metrics_jobs = get_metrics_jobs(
         el_client_contexts,
@@ -35,7 +36,13 @@ def launch_prometheus(
         xatu_sentry_contexts,
     )
     prometheus_url = prometheus.run(
-        plan, metrics_jobs, MIN_CPU, MAX_CPU, MIN_MEMORY, MAX_MEMORY
+        plan,
+        metrics_jobs,
+        MIN_CPU,
+        MAX_CPU,
+        MIN_MEMORY,
+        MAX_MEMORY,
+        node_selectors=global_node_selectors,
     )
 
     return prometheus_url
