@@ -29,7 +29,7 @@ def launch(
     service_name,
     network_id,
     mev_boost_image,
-    mev_boost_args
+    mev_boost_args,
     global_node_selectors,
 ):
     config = get_config(
@@ -45,6 +45,7 @@ def launch(
     return mev_boost_context_module.new_mev_boost_context(
         mev_boost_service.ip_address, input_parser.FLASHBOTS_MEV_BOOST_PORT
     )
+
 
 def get_config(
     mev_boost_launcher,
@@ -80,5 +81,7 @@ def get_config(
     )
 
 
-def new_mev_boost_launcher(relay_end_points):
-    return struct(relay_end_points=relay_end_points)
+def new_mev_boost_launcher(should_check_relay, relay_end_points):
+    return struct(
+        should_check_relay=should_check_relay, relay_end_points=relay_end_points
+    )

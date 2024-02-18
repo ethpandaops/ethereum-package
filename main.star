@@ -45,6 +45,7 @@ GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?
 FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
+MEV_BOOST_SHOULD_CHECK_RELAY = True
 MOCK_MEV_TYPE = "mock"
 FULL_MEV_TYPE = "full"
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
