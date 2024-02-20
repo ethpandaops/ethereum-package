@@ -725,6 +725,12 @@ def launch_participant_network(
         cl_client_type = participant.cl_client_type
         validator_client_type = participant.validator_client_type
 
+        if participant.use_separate_validator_client == None:
+            # This should only be the case for the MEV participant,
+            # the regular participants default to False/True
+            all_validator_client_contexts.append(None)
+            continue
+
         if cl_client_type in _cls_that_need_separate_vc and not participant.use_separate_validator_client:
             fail("{0} needs a separate validator client!".format(cl_client_type))
 
