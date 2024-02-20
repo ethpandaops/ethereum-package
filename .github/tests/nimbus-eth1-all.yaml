@@ -12,3 +12,4 @@ participants:
   - el_client_type: nimbus
     cl_client_type: lodestar
 additional_services: []
+global_client_log_level: debug
