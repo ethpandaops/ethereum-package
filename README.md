@@ -543,7 +543,7 @@ mev_type: null
 
 # Parameters if MEV is used
 mev_params:
-  # The image to use for MEV boot relay
+  # The image to use for MEV boost relay
   mev_relay_image: flashbots/mev-boost-relay
   # The image to use for the builder
   mev_builder_image: ethpandaops/flashbots-builder:main
@@ -551,6 +551,8 @@ mev_params:
   mev_builder_cl_image: sigp/lighthouse:latest
   # The image to use for mev-boost
   mev_boost_image: flashbots/mev-boost
+  # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
+  mev_boost_args: []
   # Extra parameters to send to the API
   mev_relay_api_extra_args: []
   # Extra parameters to send to the housekeeper
