@@ -719,7 +719,7 @@ def launch_participant_network(
     _cls_that_need_separate_vc = [
         constants.CL_CLIENT_TYPE.prysm,
         constants.CL_CLIENT_TYPE.lodestar,
-        constants.CL_CLIENT_TYPE.lighthouse
+        constants.CL_CLIENT_TYPE.lighthouse,
     ]
     for index, participant in enumerate(participants):
         cl_client_type = participant.cl_client_type
@@ -731,7 +731,10 @@ def launch_participant_network(
             all_validator_client_contexts.append(None)
             continue
 
-        if cl_client_type in _cls_that_need_separate_vc and not participant.use_separate_validator_client:
+        if (
+            cl_client_type in _cls_that_need_separate_vc
+            and not participant.use_separate_validator_client
+        ):
             fail("{0} needs a separate validator client!".format(cl_client_type))
 
         if not participant.use_separate_validator_client:
@@ -742,17 +745,15 @@ def launch_participant_network(
         cl_client_context = all_cl_client_contexts[index]
 
         # Zero-pad the index using the calculated zfill value
-        index_str = shared_utils.zfill_custom(
-            index + 1, len(str(len(participants)))
-        )
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
-        plan.print("Using separate validator client for participant #{0}".format(index_str))
+        plan.print(
+            "Using separate validator client for participant #{0}".format(index_str)
+        )
 
         vc_keystores = None
         if participant.validator_count != 0:
-            vc_keystores = preregistered_validator_keys_for_nodes[
-                index
-            ]
+            vc_keystores = preregistered_validator_keys_for_nodes[index]
 
         validator_client_context = validator_client.launch(
             plan=plan,

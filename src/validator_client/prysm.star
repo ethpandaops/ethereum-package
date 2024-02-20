@@ -5,6 +5,7 @@ validator_client_shared = import_module("./shared.star")
 PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-password"
 PRYSM_BEACON_RPC_PORT = 4000
 
+
 def get_config(
     el_cl_genesis_data,
     image,
@@ -37,7 +38,8 @@ def get_config(
         "--chain-config-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--beacon-rpc-provider=" + "{}:{}".format(
+        "--beacon-rpc-provider="
+        + "{}:{}".format(
             cl_client_context.ip_addr,
             PRYSM_BEACON_RPC_PORT,
         ),
@@ -48,7 +50,9 @@ def get_config(
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
-        "--monitoring-port={0}".format(validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
+        "--monitoring-port={0}".format(
+            validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
+        ),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti="
         + cl_client_context.client_name

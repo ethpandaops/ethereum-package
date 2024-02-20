@@ -39,7 +39,9 @@ def get_config(
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
-        "--metrics-port={0}".format(validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
+        "--metrics-port={0}".format(
+            validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
+        ),
         "--graffiti="
         + cl_client_context.client_name
         + "-"
@@ -69,7 +71,7 @@ def get_config(
             constants.CLIENT_TYPES.validator,
             image,
             cl_client_context.client_name,
-            extra_labels
+            extra_labels,
         ),
         user=User(uid=0, gid=0),
         tolerations=tolerations,

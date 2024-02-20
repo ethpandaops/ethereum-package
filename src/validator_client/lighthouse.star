@@ -14,6 +14,7 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
 }
 
+
 def get_config(
     el_cl_genesis_data,
     image,
@@ -63,7 +64,9 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-allow-origin=*",
-        "--metrics-port={0}".format(validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
+        "--metrics-port={0}".format(
+            validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
+        ),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti="
         + cl_client_context.client_name

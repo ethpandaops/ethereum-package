@@ -2,6 +2,7 @@ constants = import_module("../package_io/constants.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
 validator_client_shared = import_module("./shared.star")
 
+
 def get_config(
     el_cl_genesis_data,
     image,
@@ -50,7 +51,9 @@ def get_config(
         "--metrics-enabled=true",
         "--metrics-host-allowlist=*",
         "--metrics-interface=0.0.0.0",
-        "--metrics-port={0}".format(validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
+        "--metrics-port={0}".format(
+            validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
+        ),
     ]
 
     if len(extra_params) > 0:

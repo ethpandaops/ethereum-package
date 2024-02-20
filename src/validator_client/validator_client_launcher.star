@@ -155,7 +155,9 @@ def launch(
 
     validator_service = plan.add_service(service_name, config)
 
-    validator_metrics_port = validator_service.ports[validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_ID]
+    validator_metrics_port = validator_service.ports[
+        validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_ID
+    ]
     validator_metrics_url = "{0}:{1}".format(
         validator_service.ip_address, validator_metrics_port.number
     )
@@ -171,6 +173,4 @@ def launch(
 
 
 def new_validator_client_launcher(el_cl_genesis_data):
-    return struct(
-        el_cl_genesis_data=el_cl_genesis_data
-    )
+    return struct(el_cl_genesis_data=el_cl_genesis_data)

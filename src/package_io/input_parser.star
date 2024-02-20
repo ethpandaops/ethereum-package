@@ -175,7 +175,9 @@ def input_parser(plan, input_args):
                 cl_client_log_level=participant["cl_client_log_level"],
                 cl_client_volume_size=participant["cl_client_volume_size"],
                 cl_tolerations=participant["cl_tolerations"],
-                use_separate_validator_client=participant["use_separate_validator_client"],
+                use_separate_validator_client=participant[
+                    "use_separate_validator_client"
+                ],
                 validator_client_type=participant["validator_client_type"],
                 validator_client_image=participant["validator_client_image"],
                 validator_client_log_level=participant["validator_client_log_level"],
@@ -374,7 +376,10 @@ def parse_network_params(input_args):
         if participant["use_separate_validator_client"] == None:
             # Default to false for CL clients that can run validator clients
             # in the same process.
-            if cl_client_type in (constants.CL_CLIENT_TYPE.nimbus, constants.CL_CLIENT_TYPE.teku):
+            if cl_client_type in (
+                constants.CL_CLIENT_TYPE.nimbus,
+                constants.CL_CLIENT_TYPE.teku,
+            ):
                 participant["use_separate_validator_client"] = False
             else:
                 participant["use_separate_validator_client"] = True
