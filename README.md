@@ -473,8 +473,12 @@ assertoor_params:
   run_lifecycle_test: false
 
   # Run additional tests from external test definitions
+  # Entries may be simple strings (link to the test file) or dictionaries with more flexibility
   # eg:
   #   - https://raw.githubusercontent.com/ethpandaops/assertoor/master/example/tests/block-proposal-check.yaml
+  #   - file: "https://raw.githubusercontent.com/ethpandaops/assertoor/master/example/tests/block-proposal-check.yaml"
+  #     config:
+  #       someCustomTestConfig: "some value"
   tests: []
 
 
