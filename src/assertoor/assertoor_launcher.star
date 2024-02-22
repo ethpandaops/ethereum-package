@@ -142,9 +142,13 @@ def new_config_template_data(
         if type(testcfg) == "dict":
             additional_tests.append(json.encode(testcfg))
         else:
-            additional_tests.append(json.encode({
-                "file": testcfg,
-            }))
+            additional_tests.append(
+                json.encode(
+                    {
+                        "file": testcfg,
+                    }
+                )
+            )
 
     return {
         "ListenPortNum": listen_port_num,
