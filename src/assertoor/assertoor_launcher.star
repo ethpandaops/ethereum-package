@@ -137,6 +137,19 @@ def get_config(
 def new_config_template_data(
     listen_port_num, client_info, validator_client_info, assertoor_params
 ):
+    additional_tests = []
+    for index, testcfg in enumerate(assertoor_params.tests):
+        if type(testcfg) == "dict":
+            additional_tests.append(json.encode(testcfg))
+        else:
+            additional_tests.append(
+                json.encode(
+                    {
+                        "file": testcfg,
+                    }
+                )
+            )
+
     return {
         "ListenPortNum": listen_port_num,
         "ClientInfo": client_info,
@@ -147,7 +160,7 @@ def new_config_template_data(
         "RunTransactionTest": assertoor_params.run_transaction_test,
         "RunBlobTransactionTest": assertoor_params.run_blob_transaction_test,
         "RunOpcodesTransactionTest": assertoor_params.run_opcodes_transaction_test,
-        "AdditionalTests": assertoor_params.tests,
+        "AdditionalTests": additional_tests,
     }
 
 

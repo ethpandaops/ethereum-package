@@ -51,5 +51,5 @@ externalTests:
 - file: /tests/validator-lifecycle-test.yaml
 {{ end }}
 {{ range $test := .AdditionalTests }}
-- file: "{{ $test }}"
+- {{ $test }}
 {{- end }}
