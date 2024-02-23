@@ -786,7 +786,9 @@ def launch_participant_network(
         all_validator_client_contexts.append(validator_client_context)
 
         if validator_client_context and validator_client_context.metrics_info:
-            validator_client_context.metrics_info["config"] = participant.prometheus_config
+            validator_client_context.metrics_info[
+                "config"
+            ] = participant.prometheus_config
 
     all_participants = []
 
