@@ -30,18 +30,25 @@ EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nimbus/execution-data"
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
-    WS_RPC_PORT_ID: shared_utils.new_port_spec(WS_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL,  ),
+    WS_RPC_PORT_ID: shared_utils.new_port_spec(
+        WS_RPC_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
+    ),
     TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL,
+        DISCOVERY_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
     ),
     UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL,
+        DISCOVERY_PORT_NUM,
+        shared_utils.UDP_PROTOCOL,
     ),
     ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-        ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL,
+        ENGINE_RPC_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
     ),
     METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL,
+        METRICS_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
     ),
 }
 
