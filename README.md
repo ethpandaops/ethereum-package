@@ -153,7 +153,7 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 # Specification of the participants in the network
 participants:
   # The type of EL client that should be started
-  # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth
+  # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1
 - el_client_type: geth
 
   # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -164,6 +164,7 @@ participants:
   # - besu: hyperledger/besu:develop
   # - reth: ghcr.io/paradigmxyz/reth
   # - ethereumjs: ethpandaops/ethereumjs:master
+  # - nimbus-eth1: ethpandaops/nimbus-eth1:master
   el_client_image: ""
 
   # The log level string that this participant's EL client should log at

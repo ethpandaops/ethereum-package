@@ -21,6 +21,7 @@ erigon = import_module("./el/erigon/erigon_launcher.star")
 nethermind = import_module("./el/nethermind/nethermind_launcher.star")
 reth = import_module("./el/reth/reth_launcher.star")
 ethereumjs = import_module("./el/ethereumjs/ethereumjs_launcher.star")
+nimbus_eth1 = import_module("./el/nimbus-eth1/nimbus_launcher.star")
 
 lighthouse = import_module("./cl/lighthouse/lighthouse_launcher.star")
 lodestar = import_module("./cl/lodestar/lodestar_launcher.star")
@@ -424,6 +425,14 @@ def launch_participant_network(
                 network_params.network,
             ),
             "launch_method": ethereumjs.launch,
+        },
+        constants.EL_CLIENT_TYPE.nimbus: {
+            "launcher": nimbus_eth1.new_nimbus_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
+            "launch_method": nimbus_eth1.launch,
         },
     }
 
