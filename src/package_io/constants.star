@@ -6,6 +6,7 @@ EL_CLIENT_TYPE = struct(
     besu="besu",
     reth="reth",
     ethereumjs="ethereumjs",
+    nimbus="nimbus",
 )
 
 CL_CLIENT_TYPE = struct(
@@ -131,6 +132,7 @@ VOLUME_SIZE = {
         "besu_volume_size": 1000000,  # 1TB
         "reth_volume_size": 3000000,  # 3TB
         "ethereumjs_volume_size": 1000000,  # 1TB
+        "nimbus_eth1_volume_size": 1000000,  # 1TB
         "prysm_volume_size": 500000,  # 500GB
         "lighthouse_volume_size": 500000,  # 500GB
         "teku_volume_size": 500000,  # 500GB
@@ -144,6 +146,7 @@ VOLUME_SIZE = {
         "besu_volume_size": 800000,  # 800GB
         "reth_volume_size": 1200000,  # 1200GB
         "ethereumjs_volume_size": 800000,  # 800GB
+        "nimbus_eth1_volume_size": 800000,  # 800GB
         "prysm_volume_size": 300000,  # 300GB
         "lighthouse_volume_size": 300000,  # 300GB
         "teku_volume_size": 300000,  # 300GB
@@ -157,6 +160,7 @@ VOLUME_SIZE = {
         "besu_volume_size": 300000,  # 300GB
         "reth_volume_size": 500000,  # 500GB
         "ethereumjs_volume_size": 300000,  # 300GB
+        "nimbus_eth1_volume_size": 300000,  # 300GB
         "prysm_volume_size": 150000,  # 150GB
         "lighthouse_volume_size": 150000,  # 150GB
         "teku_volume_size": 150000,  # 150GB
@@ -170,6 +174,7 @@ VOLUME_SIZE = {
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
+        "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
         "lighthouse_volume_size": 100000,  # 100GB
         "teku_volume_size": 100000,  # 100GB
@@ -183,6 +188,7 @@ VOLUME_SIZE = {
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
+        "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
         "lighthouse_volume_size": 100000,  # 100GB
         "teku_volume_size": 100000,  # 100GB
@@ -196,6 +202,7 @@ VOLUME_SIZE = {
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
+        "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
         "lighthouse_volume_size": 1000,  # 1GB
         "teku_volume_size": 1000,  # 1GB
@@ -209,6 +216,7 @@ VOLUME_SIZE = {
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
+        "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
         "lighthouse_volume_size": 1000,  # 1GB
         "teku_volume_size": 1000,  # 1GB
@@ -231,6 +239,8 @@ RAM_CPU_OVERRIDES = {
         "reth_max_cpu": 4000,  # 4 cores
         "ethereumjs_max_mem": 16384,  # 16GB
         "ethereumjs_max_cpu": 4000,  # 4 cores
+        "nimbus_eth1_max_mem": 16384,  # 16GB
+        "nimbus_eth1_max_cpu": 4000,  # 4 cores
         "prysm_max_mem": 16384,  # 16GB
         "prysm_max_cpu": 4000,  # 4 cores
         "lighthouse_max_mem": 16384,  # 16GB
@@ -255,6 +265,8 @@ RAM_CPU_OVERRIDES = {
         "reth_max_cpu": 2000,  # 2 cores
         "ethereumjs_max_mem": 8192,  # 8GB
         "ethereumjs_max_cpu": 2000,  # 2 cores
+        "nimbus_eth1_max_mem": 8192,  # 8GB
+        "nimbus_eth1_max_cpu": 2000,  # 2 cores
         "prysm_max_mem": 8192,  # 8GB
         "prysm_max_cpu": 2000,  # 2 cores
         "lighthouse_max_mem": 8192,  # 8GB
@@ -279,6 +291,8 @@ RAM_CPU_OVERRIDES = {
         "reth_max_cpu": 1000,  # 1 core
         "ethereumjs_max_mem": 4096,  # 4GB
         "ethereumjs_max_cpu": 1000,  # 1 core
+        "nimbus_eth1_max_mem": 4096,  # 4GB
+        "nimbus_eth1_max_cpu": 1000,  # 1 core
         "prysm_max_mem": 4096,  # 4GB
         "prysm_max_cpu": 1000,  # 1 core
         "lighthouse_max_mem": 4096,  # 4GB
@@ -303,6 +317,8 @@ RAM_CPU_OVERRIDES = {
         "reth_max_cpu": 2000,  # 2 cores
         "ethereumjs_max_mem": 8192,  # 8GB
         "ethereumjs_max_cpu": 2000,  # 2 cores
+        "nimbus_eth1_max_mem": 8192,  # 8GB
+        "nimbus_eth1_max_cpu": 2000,  # 2 cores
         "prysm_max_mem": 8192,  # 8GB
         "prysm_max_cpu": 2000,  # 2 cores
         "lighthouse_max_mem": 8192,  # 8GB
@@ -327,6 +343,8 @@ RAM_CPU_OVERRIDES = {
         "reth_max_cpu": 1000,  # 1 core
         "ethereumjs_max_mem": 4096,  # 4GB
         "ethereumjs_max_cpu": 1000,  # 1 core
+        "nimbus_eth1_max_mem": 4096,  # 4GB
+        "nimbus_eth1_max_cpu": 1000,  # 1 core
         "prysm_max_mem": 4096,  # 4GB
         "prysm_max_cpu": 1000,  # 1 core
         "lighthouse_max_mem": 4096,  # 4GB
@@ -351,6 +369,8 @@ RAM_CPU_OVERRIDES = {
         "reth_max_cpu": 1000,  # 1 core
         "ethereumjs_max_mem": 1024,  # 1GB
         "ethereumjs_max_cpu": 1000,  # 1 core
+        "nimbus_eth1_max_mem": 1024,  # 1GB
+        "nimbus_eth1_max_cpu": 1000,  # 1 core
         "prysm_max_mem": 1024,  # 1GB
         "prysm_max_cpu": 1000,  # 1 core
         "lighthouse_max_mem": 1024,  # 1GB
@@ -375,6 +395,8 @@ RAM_CPU_OVERRIDES = {
         "reth_max_cpu": 1000,  # 1 core
         "ethereumjs_max_mem": 1024,  # 1GB
         "ethereumjs_max_cpu": 1000,  # 1 core
+        "nimbus_eth1_max_mem": 1024,  # 1GB
+        "nimbus_eth1_max_cpu": 1000,  # 1 core
         "prysm_max_mem": 1024,  # 1GB
         "prysm_max_cpu": 1000,  # 1 core
         "lighthouse_max_mem": 1024,  # 1GB

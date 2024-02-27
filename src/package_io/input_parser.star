@@ -11,6 +11,7 @@ DEFAULT_EL_IMAGES = {
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
+    "nimbus": "ethpandaops/nimbus-eth1:master",
 }
 
 DEFAULT_CL_IMAGES = {
