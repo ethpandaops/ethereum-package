@@ -204,11 +204,11 @@ participants:
   cl_client_type: lighthouse
 
   # The Docker image that should be used for the CL client; leave blank to use the default for the client type
-  # Defaults by client (note that Prysm is different in that it requires two images - a Beacon and a validator - separated by a comma):
+  # Defaults by client:
   # - lighthouse: sigp/lighthouse:latest
   # - teku: consensys/teku:latest
   # - nimbus: statusim/nimbus-eth2:multiarch-latest
-  # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest
+  # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
   # - lodestar: chainsafe/lodestar:next
   cl_client_image: ""
 
@@ -221,7 +221,7 @@ participants:
 
   # Whether to use a separate validator client attached to the CL client.
   # Defaults to false for clients that can run both in one process (Teku, Nimbus)
-  use_separate_validator_client: true/false
+  use_separate_validator_client: false
 
   # The type of validator client that should be used
   # Valid values are nimbus, lighthouse, lodestar, teku, and prysm

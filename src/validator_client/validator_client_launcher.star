@@ -41,6 +41,10 @@ def launch(
     global_tolerations,
     node_selectors,
 ):
+
+    if node_keystore_files == None:
+        return None
+
     tolerations = input_parser.get_client_tolerations(
         validator_tolerations, participant_tolerations, global_tolerations
     )
