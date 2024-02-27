@@ -1,0 +1,10 @@
+participants:
+  - el_client_type: geth
+    cl_client_type: teku
+    use_separate_validator_client: true
+    validator_client_type: lodestar
+  - el_client_type: besu
+    cl_client_type: nimbus
+    use_separate_validator_client: true
+    validator_client_type: lighthouse
+additional_services: []
