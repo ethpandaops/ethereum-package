@@ -241,9 +241,15 @@ def launch_participant_network(
         elif (
             network_params.capella_fork_epoch == 0
             and network_params.electra_fork_epoch == None
+            and network_params.deneb_fork_epoch > 0
         ):
             ethereum_genesis_generator_image = (
                 constants.ETHEREUM_GENESIS_GENERATOR.capella_genesis
+            )
+        # we are running deneb genesis -  experimental, soon to become default
+        elif network_params.deneb_fork_epoch == 0:
+            ethereum_genesis_generator_image = (
+                constants.ETHEREUM_GENESIS_GENERATOR.deneb_genesis
             )
         # we are running electra - experimental
         elif network_params.electra_fork_epoch != None:

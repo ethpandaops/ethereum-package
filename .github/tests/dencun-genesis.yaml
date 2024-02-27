@@ -1,0 +1,28 @@
+participants:
+  - el_client_type: geth
+    el_client_image: ethpandaops/geth:master
+    cl_client_type: teku
+    cl_client_image: ethpandaops/teku:master
+  - el_client_type: nethermind
+    el_client_image: ethpandaops/nethermind:master
+    cl_client_type: prysm
+    cl_client_image: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
+  - el_client_type: erigon
+    el_client_image: ethpandaops/erigon:devel
+    cl_client_type: nimbus
+    cl_client_image: ethpandaops/nimbus:unstable
+  - el_client_type: besu
+    el_client_image: ethpandaops/besu:main
+    cl_client_type: lighthouse
+    cl_client_image: ethpandaops/lighthouse:unstable
+  - el_client_type: reth
+    el_client_image: ethpandaops/reth:main
+    cl_client_type: lodestar
+    cl_client_image: ethpandaops/lodestar:unstable
+  - el_client_type: ethereumjs
+    el_client_image: ethpandaops/ethereumjs:master
+    cl_client_type: teku
+    cl_client_image: ethpandaops/teku:master
+network_params:
+  deneb_fork_epoch: 0
+additional_services: []
