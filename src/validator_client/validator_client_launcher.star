@@ -41,7 +41,6 @@ def launch(
     global_tolerations,
     node_selectors,
 ):
-
     if node_keystore_files == None:
         return None
 
