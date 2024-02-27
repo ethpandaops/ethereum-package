@@ -192,6 +192,7 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
+        "--nat=extip:{0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
     ]
     if (
         network not in constants.PUBLIC_NETWORKS
