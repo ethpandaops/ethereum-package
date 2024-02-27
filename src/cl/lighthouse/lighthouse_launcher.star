@@ -30,22 +30,7 @@ BEACON_METRICS_PORT_NUM = 5054
 BEACON_MIN_CPU = 50
 BEACON_MIN_MEMORY = 256
 
-#  ---------------------------------- Validator client -------------------------------------
-VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/lighthouse/validator-keys"
-VALIDATOR_HTTP_PORT_ID = "http"
-VALIDATOR_METRICS_PORT_ID = "metrics"
-VALIDATOR_HTTP_PORT_NUM = 5042
-VALIDATOR_METRICS_PORT_NUM = 5064
-VALIDATOR_HTTP_PORT_WAIT_DISABLED = None
-
 METRICS_PATH = "/metrics"
-VALIDATOR_SUFFIX_SERVICE_NAME = "validator"
-
-# The min/max CPU/memory that the validator node can use
-VALIDATOR_MIN_CPU = 50
-VALIDATOR_MAX_CPU = 300
-VALIDATOR_MIN_MEMORY = 128
-VALIDATOR_MAX_MEMORY = 512
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
@@ -63,20 +48,6 @@ BEACON_USED_PORTS = {
     ),
     BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
         BEACON_METRICS_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-}
-
-VALIDATOR_USED_PORTS = {
-    VALIDATOR_HTTP_PORT_ID: shared_utils.new_port_spec(
-        VALIDATOR_HTTP_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.NOT_PROVIDED_APPLICATION_PROTOCOL,
-        VALIDATOR_HTTP_PORT_WAIT_DISABLED,
-    ),
-    VALIDATOR_METRICS_PORT_ID: shared_utils.new_port_spec(
-        VALIDATOR_METRICS_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
     ),
@@ -105,31 +76,21 @@ def launch(
     bn_max_cpu,
     bn_min_mem,
     bn_max_mem,
-    v_min_cpu,
-    v_max_cpu,
-    v_min_mem,
-    v_max_mem,
     snooper_enabled,
     snooper_engine_context,
     blobber_enabled,
     blobber_extra_params,
     extra_beacon_params,
-    extra_validator_params,
     extra_beacon_labels,
-    extra_validator_labels,
     persistent,
     cl_volume_size,
     cl_tolerations,
-    validator_tolerations,
     participant_tolerations,
     global_tolerations,
     node_selectors,
-    split_mode_enabled=False,
+    use_separate_validator_client=True,
 ):
     beacon_service_name = "{0}".format(service_name)
-    validator_service_name = "{0}-{1}".format(
-        service_name, VALIDATOR_SUFFIX_SERVICE_NAME
-    )
 
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -211,37 +172,6 @@ def launch(
         )
         beacon_http_url = blobber_http_url
 
-    # Launch validator node if we have a keystore
-    validator_service = None
-    if node_keystore_files != None:
-        v_min_cpu = int(v_min_cpu) if int(v_min_cpu) > 0 else VALIDATOR_MIN_CPU
-        v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else VALIDATOR_MAX_CPU
-        v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
-        v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
-        tolerations = input_parser.get_client_tolerations(
-            validator_tolerations, participant_tolerations, global_tolerations
-        )
-        validator_config = get_validator_config(
-            launcher.el_cl_genesis_data,
-            image,
-            validator_service_name,
-            log_level,
-            beacon_http_url,
-            el_client_context,
-            node_keystore_files,
-            v_min_cpu,
-            v_max_cpu,
-            v_min_mem,
-            v_max_mem,
-            extra_validator_params,
-            extra_validator_labels,
-            persistent,
-            tolerations,
-            node_selectors,
-        )
-
-        validator_service = plan.add_service(validator_service_name, validator_config)
-
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
     beacon_node_identity_recipe = GetHttpRequestRecipe(
         endpoint="/eth/v1/node/identity",
@@ -268,16 +198,6 @@ def launch(
     )
     nodes_metrics_info = [beacon_node_metrics_info]
 
-    if validator_service:
-        validator_metrics_port = validator_service.ports[VALIDATOR_METRICS_PORT_ID]
-        validator_metrics_url = "{0}:{1}".format(
-            validator_service.ip_address, validator_metrics_port.number
-        )
-        validator_node_metrics_info = node_metrics.new_node_metrics_info(
-            validator_service_name, METRICS_PATH, validator_metrics_url
-        )
-        nodes_metrics_info.append(validator_node_metrics_info)
-
     return cl_client_context.new_cl_client_context(
         "lighthouse",
         beacon_node_enr,
@@ -285,7 +205,6 @@ def launch(
         BEACON_HTTP_PORT_NUM,
         nodes_metrics_info,
         beacon_service_name,
-        validator_service_name,
         beacon_multiaddr,
         beacon_peer_id,
         snooper_enabled,
@@ -465,93 +384,6 @@ def get_beacon_config(
         labels=shared_utils.label_maker(
             constants.CL_CLIENT_TYPE.lighthouse,
             constants.CLIENT_TYPES.cl,
-            image,
-            el_client_context.client_name,
-            extra_labels,
-        ),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
-
-
-def get_validator_config(
-    el_cl_genesis_data,
-    image,
-    service_name,
-    log_level,
-    beacon_client_http_url,
-    el_client_context,
-    node_keystore_files,
-    v_min_cpu,
-    v_max_cpu,
-    v_min_mem,
-    v_max_mem,
-    extra_params,
-    extra_labels,
-    persistent,
-    tolerations,
-    node_selectors,
-):
-    validator_keys_dirpath = shared_utils.path_join(
-        VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
-        node_keystore_files.raw_keys_relative_dirpath,
-    )
-    validator_secrets_dirpath = shared_utils.path_join(
-        VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
-        node_keystore_files.raw_secrets_relative_dirpath,
-    )
-
-    cmd = [
-        "lighthouse",
-        "validator_client",
-        "--debug-level=" + log_level,
-        "--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
-        "--validators-dir=" + validator_keys_dirpath,
-        # NOTE: When secrets-dir is specified, we can't add the --data-dir flag
-        "--secrets-dir=" + validator_secrets_dirpath,
-        # The node won't have a slashing protection database and will fail to start otherwise
-        "--init-slashing-protection",
-        "--http",
-        "--unencrypted-http-transport",
-        "--http-address=0.0.0.0",
-        "--http-port={0}".format(VALIDATOR_HTTP_PORT_NUM),
-        "--beacon-nodes=" + beacon_client_http_url,
-        # "--enable-doppelganger-protection", // Disabled to not have to wait 2 epochs before validator can start
-        # burn address - If unset, the validator will scream in its logs
-        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
-        "--metrics",
-        "--metrics-address=0.0.0.0",
-        "--metrics-allow-origin=*",
-        "--metrics-port={0}".format(VALIDATOR_METRICS_PORT_NUM),
-        # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti="
-        + constants.CL_CLIENT_TYPE.lighthouse
-        + "-"
-        + el_client_context.client_name,
-    ]
-
-    if len(extra_params):
-        cmd.extend([param for param in extra_params])
-
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
-    }
-
-    return ServiceConfig(
-        image=image,
-        ports=VALIDATOR_USED_PORTS,
-        cmd=cmd,
-        files=files,
-        env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
-        min_cpu=v_min_cpu,
-        max_cpu=v_max_cpu,
-        min_memory=v_min_mem,
-        max_memory=v_max_mem,
-        labels=shared_utils.label_maker(
-            constants.CL_CLIENT_TYPE.lighthouse,
-            constants.CLIENT_TYPES.validator,
             image,
             el_client_context.client_name,
             extra_labels,

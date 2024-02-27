@@ -29,6 +29,8 @@ nimbus = import_module("./cl/nimbus/nimbus_launcher.star")
 prysm = import_module("./cl/prysm/prysm_launcher.star")
 teku = import_module("./cl/teku/teku_launcher.star")
 
+validator_client = import_module("./validator_client/validator_client_launcher.star")
+
 snooper = import_module("./snooper/snooper_engine_launcher.star")
 
 ethereum_metrics_exporter = import_module(
@@ -617,26 +619,19 @@ def launch_participant_network(
                 participant.bn_max_cpu,
                 participant.bn_min_mem,
                 participant.bn_max_mem,
-                participant.v_min_cpu,
-                participant.v_max_cpu,
-                participant.v_min_mem,
-                participant.v_max_mem,
                 participant.snooper_enabled,
                 snooper_engine_context,
                 participant.blobber_enabled,
                 participant.blobber_extra_params,
                 participant.beacon_extra_params,
-                participant.validator_extra_params,
                 participant.beacon_extra_labels,
-                participant.validator_extra_labels,
                 persistent,
                 participant.cl_client_volume_size,
                 participant.cl_tolerations,
-                participant.validator_tolerations,
                 participant.tolerations,
                 global_tolerations,
                 node_selectors,
-                participant.cl_split_mode_enabled,
+                participant.use_separate_validator_client,
             )
         else:
             boot_cl_client_ctx = all_cl_client_contexts
@@ -654,26 +649,19 @@ def launch_participant_network(
                 participant.bn_max_cpu,
                 participant.bn_min_mem,
                 participant.bn_max_mem,
-                participant.v_min_cpu,
-                participant.v_max_cpu,
-                participant.v_min_mem,
-                participant.v_max_mem,
                 participant.snooper_enabled,
                 snooper_engine_context,
                 participant.blobber_enabled,
                 participant.blobber_extra_params,
                 participant.beacon_extra_params,
-                participant.validator_extra_params,
                 participant.beacon_extra_labels,
-                participant.validator_extra_labels,
                 persistent,
                 participant.cl_client_volume_size,
                 participant.cl_tolerations,
-                participant.validator_tolerations,
                 participant.tolerations,
                 global_tolerations,
                 node_selectors,
-                participant.cl_split_mode_enabled,
+                participant.use_separate_validator_client,
             )
 
         # Add participant cl additional prometheus labels
@@ -734,14 +722,93 @@ def launch_participant_network(
 
     plan.print("Successfully added {0} CL participants".format(num_participants))
 
+    all_validator_client_contexts = []
+    # Some CL clients cannot run validator clients in the same process and need
+    # a separate validator client
+    _cls_that_need_separate_vc = [
+        constants.CL_CLIENT_TYPE.prysm,
+        constants.CL_CLIENT_TYPE.lodestar,
+        constants.CL_CLIENT_TYPE.lighthouse,
+    ]
+    for index, participant in enumerate(participants):
+        cl_client_type = participant.cl_client_type
+        validator_client_type = participant.validator_client_type
+
+        if participant.use_separate_validator_client == None:
+            # This should only be the case for the MEV participant,
+            # the regular participants default to False/True
+            all_validator_client_contexts.append(None)
+            continue
+
+        if (
+            cl_client_type in _cls_that_need_separate_vc
+            and not participant.use_separate_validator_client
+        ):
+            fail("{0} needs a separate validator client!".format(cl_client_type))
+
+        if not participant.use_separate_validator_client:
+            all_validator_client_contexts.append(None)
+            continue
+
+        el_client_context = all_el_client_contexts[index]
+        cl_client_context = all_cl_client_contexts[index]
+
+        # Zero-pad the index using the calculated zfill value
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
+
+        plan.print(
+            "Using separate validator client for participant #{0}".format(index_str)
+        )
+
+        vc_keystores = None
+        if participant.validator_count != 0:
+            vc_keystores = preregistered_validator_keys_for_nodes[index]
+
+        validator_client_context = validator_client.launch(
+            plan=plan,
+            launcher=validator_client.new_validator_client_launcher(
+                el_cl_genesis_data=el_cl_data
+            ),
+            service_name="validator-client-{0}-{1}".format(
+                index_str, validator_client_type
+            ),
+            validator_client_type=validator_client_type,
+            image=participant.validator_client_image,
+            participant_log_level=participant.validator_client_log_level,
+            global_log_level=global_log_level,
+            cl_client_context=cl_client_context,
+            el_client_context=el_client_context,
+            node_keystore_files=vc_keystores,
+            v_min_cpu=participant.v_min_cpu,
+            v_max_cpu=participant.v_max_cpu,
+            v_min_mem=participant.v_min_mem,
+            v_max_mem=participant.v_max_mem,
+            extra_params=participant.validator_extra_params,
+            extra_labels=participant.validator_extra_labels,
+            prysm_password_relative_filepath=prysm_password_relative_filepath,
+            prysm_password_artifact_uuid=prysm_password_artifact_uuid,
+            validator_tolerations=participant.validator_tolerations,
+            participant_tolerations=participant.tolerations,
+            global_tolerations=global_tolerations,
+            node_selectors=node_selectors,
+        )
+        all_validator_client_contexts.append(validator_client_context)
+
+        if validator_client_context and validator_client_context.metrics_info:
+            validator_client_context.metrics_info[
+                "config"
+            ] = participant.prometheus_config
+
     all_participants = []
 
     for index, participant in enumerate(participants):
         el_client_type = participant.el_client_type
         cl_client_type = participant.cl_client_type
+        validator_client_type = participant.validator_client_type
 
         el_client_context = all_el_client_contexts[index]
         cl_client_context = all_cl_client_contexts[index]
+        validator_client_context = all_validator_client_contexts[index]
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
@@ -760,8 +827,10 @@ def launch_participant_network(
         participant_entry = participant_module.new_participant(
             el_client_type,
             cl_client_type,
+            validator_client_type,
             el_client_context,
             cl_client_context,
+            validator_client_context,
             snooper_engine_context,
             ethereum_metrics_exporter_context,
             xatu_sentry_context,

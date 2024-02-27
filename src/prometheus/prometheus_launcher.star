@@ -23,6 +23,7 @@ def launch_prometheus(
     plan,
     el_client_contexts,
     cl_client_contexts,
+    validator_client_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
@@ -31,6 +32,7 @@ def launch_prometheus(
     metrics_jobs = get_metrics_jobs(
         el_client_contexts,
         cl_client_contexts,
+        validator_client_contexts,
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
         xatu_sentry_contexts,
@@ -51,6 +53,7 @@ def launch_prometheus(
 def get_metrics_jobs(
     el_client_contexts,
     cl_client_contexts,
+    validator_client_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
@@ -118,38 +121,29 @@ def get_metrics_jobs(
                     scrape_interval=scrape_interval,
                 )
             )
-        if (
-            len(context.cl_nodes_metrics_info) >= 2
-            and context.cl_nodes_metrics_info[1] != None
-        ):
-            # Adding validator node metrics
-            validator_metrics_info = context.cl_nodes_metrics_info[1]
-            scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
-            labels = {
-                "service": context.validator_service_name,
-                "client_type": VALIDATOR_CLIENT_TYPE,
-                "client_name": context.client_name,
-            }
-            additional_config = validator_metrics_info[
-                METRICS_INFO_ADDITIONAL_CONFIG_KEY
-            ]
-            if additional_config != None:
-                if additional_config.labels != None:
-                    labels.update(additional_config.labels)
-                if (
-                    additional_config.scrape_interval != None
-                    and additional_config.scrape_interval != ""
-                ):
-                    scrape_interval = additional_config.scrape_interval
-            metrics_jobs.append(
-                new_metrics_job(
-                    job_name=validator_metrics_info[METRICS_INFO_NAME_KEY],
-                    endpoint=validator_metrics_info[METRICS_INFO_URL_KEY],
-                    metrics_path=validator_metrics_info[METRICS_INFO_PATH_KEY],
-                    labels=labels,
-                    scrape_interval=scrape_interval,
-                )
+
+    # Adding validator clients metrics jobs
+    for context in validator_client_contexts:
+        if context == None:
+            continue
+        metrics_info = context.metrics_info
+
+        scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
+        labels = {
+            "service": context.service_name,
+            "client_type": VALIDATOR_CLIENT_TYPE,
+            "client_name": context.client_name,
+        }
+
+        metrics_jobs.append(
+            new_metrics_job(
+                job_name=metrics_info[METRICS_INFO_NAME_KEY],
+                endpoint=metrics_info[METRICS_INFO_URL_KEY],
+                metrics_path=metrics_info[METRICS_INFO_PATH_KEY],
+                labels=labels,
+                scrape_interval=scrape_interval,
             )
+        )
 
     # Adding ethereum-metrics-exporter metrics jobs
     for context in ethereum_metrics_exporter_contexts:
