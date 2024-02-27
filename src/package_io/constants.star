@@ -65,7 +65,7 @@ ELECTRA_FORK_VERSION = "0x60000038"
 ETHEREUM_GENESIS_GENERATOR = struct(
     bellatrix_genesis="ethpandaops/ethereum-genesis-generator:1.3.15",  # EOL
     capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Default
-    deneb_genesis="bbusa/egg:latest",  # Soon to become default
+    deneb_genesis="ethpandaops/ethereum-genesis-generator:default-deneb-genesis",  # Soon to become default
     verkle_support_genesis="ethpandaops/ethereum-genesis-generator:3.0.0-rc.19",  # soon to be deneb genesis
     verkle_genesis="ethpandaops/ethereum-genesis-generator:4.0.0-rc.6",
 )
