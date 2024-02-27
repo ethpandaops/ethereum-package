@@ -240,6 +240,7 @@ def launch_participant_network(
         elif (
             network_params.capella_fork_epoch == 0
             and network_params.electra_fork_epoch == None
+            and network_params.deneb_fork_epoch > 0
         ):
             ethereum_genesis_generator_image = (
                 constants.ETHEREUM_GENESIS_GENERATOR.capella_genesis
