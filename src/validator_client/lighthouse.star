@@ -64,6 +64,7 @@ def get_config(
         "--http-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
         "--http-address=0.0.0.0",
         "--http-allow-origin=*",
+        "--unencrypted-http-transport",
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
