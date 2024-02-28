@@ -168,6 +168,10 @@ def launch(
         service_name, validator_client_shared.METRICS_PATH, validator_metrics_url
     )
 
+    validator_http_port = validator_service.ports[
+        validator_client_shared.VALIDATOR_HTTP_PORT_ID
+    ]
+
     return validator_client_context.new_validator_client_context(
         service_name=service_name,
         client_name=validator_client_type,

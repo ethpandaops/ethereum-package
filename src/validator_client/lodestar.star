@@ -54,6 +54,11 @@ def get_config(
         "--keystoresDir=" + validator_keys_dirpath,
         "--secretsDir=" + validator_secrets_dirpath,
         "--suggestedFeeRecipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--keymanager",
+        "--keymanager.authEnabled=true",
+        "--keymanager.port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--keymanager.address=0.0.0.0",
+        "--keymanager.cors=*",
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics.address=0.0.0.0",
@@ -65,6 +70,7 @@ def get_config(
         + cl_client_context.client_name
         + "-"
         + el_client_context.client_name,
+        "--useProduceBlockV3",
     ]
 
     if len(extra_params) > 0:

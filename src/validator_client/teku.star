@@ -47,6 +47,12 @@ def get_config(
         + cl_client_context.client_name
         + "-"
         + el_client_context.client_name,
+        "--validator-api-enabled=true",
+        "--validator-api-host-allowlist=*",
+        "--validator-api-port={0}".format(
+            validator_client_shared.VALIDATOR_HTTP_PORT_NUM
+        ),
+        "--validator-api-interface=0.0.0.0",
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled=true",
         "--metrics-host-allowlist=*",

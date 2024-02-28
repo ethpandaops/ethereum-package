@@ -60,6 +60,10 @@ def get_config(
         # "--enable-doppelganger-protection", // Disabled to not have to wait 2 epochs before validator can start
         # burn address - If unset, the validator will scream in its logs
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--http",
+        "--http-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--http-address=0.0.0.0",
+        "--http-allow-origin=*",
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
@@ -72,6 +76,7 @@ def get_config(
         + cl_client_context.client_name
         + "-"
         + el_client_context.client_name,
+        "--produce-block-v3",
     ]
 
     if len(extra_params):

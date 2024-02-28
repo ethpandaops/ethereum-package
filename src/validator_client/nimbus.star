@@ -36,6 +36,10 @@ def get_config(
         "--validators-dir=" + validator_keys_dirpath,
         "--secrets-dir=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--keymanager",
+        "--keymanager-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--keymanager-address=0.0.0.0",
+        "--keymanager-allow-origin=*",
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",

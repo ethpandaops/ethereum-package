@@ -5,7 +5,7 @@ cl_client_context = import_module("../../cl/cl_client_context.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
-
+validator_client_shared = import_module("../../validator_client/shared.star")
 #  ---------------------------------- Beacon client -------------------------------------
 # Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
 #  have to to create it
@@ -296,6 +296,10 @@ def get_beacon_config(
         + constants.CL_CLIENT_TYPE.nimbus
         + "-"
         + el_client_context.client_name,
+        "--keymanager",
+        "--keymanager-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--keymanager-address=0.0.0.0",
+        "--keymanager-allow-origin=*",
     ]
 
     if node_keystore_files != None and not use_separate_validator_client:

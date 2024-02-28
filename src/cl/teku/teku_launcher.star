@@ -4,9 +4,10 @@ cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 constants = import_module("../../package_io/constants.star")
+validator_client_shared = import_module("../../validator_client/shared.star")
+#  ---------------------------------- Beacon client -------------------------------------
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
-#  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "teku" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/teku/teku-beacon-data"
 
@@ -290,6 +291,12 @@ def get_beacon_config(
         + constants.CL_CLIENT_TYPE.teku
         + "-"
         + el_client_context.client_name,
+        "--validator-api-enabled=true",
+        "--validator-api-host-allowlist=*",
+        "--validator-api-port={0}".format(
+            validator_client_shared.VALIDATOR_HTTP_PORT_NUM
+        ),
+        "--validator-api-interface=0.0.0.0",
     ]
 
     if node_keystore_files != None and not use_separate_validator_client:
