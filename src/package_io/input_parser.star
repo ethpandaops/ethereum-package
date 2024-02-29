@@ -392,7 +392,18 @@ def parse_network_params(input_args):
 
         validator_client_image = participant["validator_client_image"]
         if validator_client_image == "":
-            default_image = DEFAULT_VC_IMAGES.get(validator_client_type, "")
+            if cl_image == "":
+                # If the validator client image is also empty, default to the image for the chosen CL client
+                default_image = DEFAULT_VC_IMAGES.get(validator_client_type, "")
+            else:
+                if cl_client_type == "prysm":
+                    default_image = cl_image.replace("beacon-chain", "validator")
+                elif cl_client_type == "nimbus":
+                    default_image = cl_image.replace(
+                        "nimbus-eth2", "nimbus-validator-client"
+                    )
+                else:
+                    default_image = cl_image
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
