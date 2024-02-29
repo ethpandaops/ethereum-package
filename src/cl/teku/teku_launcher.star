@@ -125,6 +125,7 @@ def launch(
         plan,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
+        launcher.keymanager_file,
         launcher.network,
         image,
         beacon_service_name,
@@ -201,6 +202,7 @@ def get_beacon_config(
     plan,
     el_cl_genesis_data,
     jwt_file,
+    keymanager_file,
     network,
     image,
     service_name,
@@ -297,6 +299,7 @@ def get_beacon_config(
             validator_client_shared.VALIDATOR_HTTP_PORT_NUM
         ),
         "--validator-api-interface=0.0.0.0",
+        "--validator-api-keystore-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
     if node_keystore_files != None and not use_separate_validator_client:
@@ -372,6 +375,7 @@ def get_beacon_config(
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+        constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
     }
     if node_keystore_files != None and not use_separate_validator_client:
         files[
@@ -410,7 +414,10 @@ def get_beacon_config(
     )
 
 
-def new_teku_launcher(el_cl_genesis_data, jwt_file, network):
+def new_teku_launcher(el_cl_genesis_data, jwt_file, network, keymanager_file):
     return struct(
-        el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file, network=network
+        el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
+        keymanager_file=keymanager_file,
     )

@@ -6,6 +6,7 @@ validator_client_shared = import_module("./shared.star")
 def get_config(
     el_cl_genesis_data,
     image,
+    keymanager_file,
     beacon_http_url,
     cl_client_context,
     el_client_context,
@@ -40,6 +41,7 @@ def get_config(
         "--keymanager-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
         "--keymanager-address=0.0.0.0",
         "--keymanager-allow-origin=*",
+        "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
@@ -58,6 +60,7 @@ def get_config(
 
     files = {
         validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
+        constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
     }
 
     return ServiceConfig(

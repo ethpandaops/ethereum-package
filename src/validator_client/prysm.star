@@ -49,7 +49,7 @@ def get_config(
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         "--rpc",
         "--rpc-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--rpc-address=0.0.0.0",
+        "--rpc-host=0.0.0.0",
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",

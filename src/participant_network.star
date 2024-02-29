@@ -68,6 +68,7 @@ def launch_participant_network(
     network_params,
     global_log_level,
     jwt_file,
+    keymanager_file,
     persistent,
     xatu_sentry_params,
     global_tolerations,
@@ -523,7 +524,7 @@ def launch_participant_network(
         },
         constants.CL_CLIENT_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(
-                el_cl_data, jwt_file, network_params.network
+                el_cl_data, jwt_file, network_params.network, keymanager_file
             ),
             "launch_method": nimbus.launch,
         },
@@ -542,6 +543,7 @@ def launch_participant_network(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                keymanager_file,
             ),
             "launch_method": teku.launch,
         },

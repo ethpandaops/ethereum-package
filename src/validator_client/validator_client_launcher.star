@@ -99,6 +99,7 @@ def launch(
     elif validator_client_type == constants.VC_CLIENT_TYPE.teku:
         config = teku.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
+            keymanager_file=launcher.keymanager_file,
             image=image,
             beacon_http_url=beacon_http_url,
             cl_client_context=cl_client_context,
@@ -116,6 +117,7 @@ def launch(
     elif validator_client_type == constants.VC_CLIENT_TYPE.nimbus:
         config = nimbus.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
+            keymanager_file=launcher.keymanager_file,
             image=image,
             beacon_http_url=beacon_http_url,
             cl_client_context=cl_client_context,
@@ -137,6 +139,7 @@ def launch(
 
         config = prysm.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
+            keymanager_file=launcher.keymanager_file,
             image=image,
             beacon_http_url=beacon_http_url,
             cl_client_context=cl_client_context,
