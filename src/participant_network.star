@@ -80,12 +80,14 @@ def launch_participant_network(
     cancun_time = 0
     prague_time = 0
     shadowfork_block = "latest"
+    snapshot_url_base = "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
     if (
         constants.NETWORK_NAME.shadowfork in network_params.network
         and ("verkle" in network_params.network)
         and ("holesky" in network_params.network)
     ):
         shadowfork_block = "793312"  # Hardcodes verkle shadowfork block for holesky
+        snapshot_url_base = "http://10.10.101.7:9000/snapshots/" # for local testing
 
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
@@ -108,7 +110,8 @@ def launch_participant_network(
                 ]  # overload the network id to match the network name
             latest_block = plan.run_sh(  # fetch the latest block
                 run="mkdir -p /shadowfork && \
-                    curl -o /shadowfork/latest_block.json https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
+                    curl -o /shadowfork/latest_block.json "
+                + snapshot_url_base
                 + base_network
                 + "/geth/"
                 + shadowfork_block
@@ -144,7 +147,14 @@ def launch_participant_network(
                     config=ServiceConfig(
                         image="alpine:3.19.1",
                         cmd=[
-                            "apk add --no-cache curl tar zstd && curl -s -L http://10.10.101.5:9000/geth-snapshots/holesky.tar.zst"
+                            "apk add --no-cache curl tar zstd && curl -s -L "
+                            + snapshot_url_base
+                            + base_network
+                            + "/"
+                            + el_client_type
+                            + "/"
+                            + shadowfork_block
+                            + "/snapshot.tar.zst"
                             + " | tar -I zstd -xvf - -C /data/"
                             + el_client_type
                             + "/execution-data"
