@@ -9,6 +9,6 @@ additional_services:
   - prometheus_grafana
 mev_params:
   launch_custom_flood: true
-  mev_relay_image: flashbots/mev-boost-relay:0.28.0a2
+  mev_relay_image: flashbots/mev-boost-relay:latest
 network_params:
   seconds_per_slot: 3
