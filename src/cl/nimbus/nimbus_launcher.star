@@ -29,25 +29,7 @@ DEFAULT_BEACON_IMAGE_ENTRYPOINT = ["nimbus_beacon_node"]
 
 BEACON_METRICS_PATH = "/metrics"
 
-#  ---------------------------------- Validator client -------------------------------------
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/nimbus/validator-keys"
-VALIDATOR_HTTP_PORT_ID = "http"
-VALIDATOR_METRICS_PORT_ID = "metrics"
-VALIDATOR_HTTP_PORT_NUM = 5042
-VALIDATOR_METRICS_PORT_NUM = 5064
-VALIDATOR_HTTP_PORT_WAIT_DISABLED = None
-
-VALIDATOR_SUFFIX_SERVICE_NAME = "validator"
-
-# The min/max CPU/memory that the validator node can use
-VALIDATOR_MIN_CPU = 50
-VALIDATOR_MAX_CPU = 300
-VALIDATOR_MIN_MEMORY = 128
-VALIDATOR_MAX_MEMORY = 512
-
-DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT = ["nimbus_validator_client"]
-
-VALIDATOR_METRICS_PATH = "/metrics"
 # ---------------------------------- Genesis Files ----------------------------------
 
 # Nimbus needs write access to the validator keys/secrets directories, and b/c the module container runs as root
@@ -79,21 +61,6 @@ BEACON_USED_PORTS = {
     ),
 }
 
-
-VALIDATOR_USED_PORTS = {
-    VALIDATOR_HTTP_PORT_ID: shared_utils.new_port_spec(
-        VALIDATOR_HTTP_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.NOT_PROVIDED_APPLICATION_PROTOCOL,
-        VALIDATOR_HTTP_PORT_WAIT_DISABLED,
-    ),
-    VALIDATOR_METRICS_PORT_ID: shared_utils.new_port_spec(
-        VALIDATOR_METRICS_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-}
-
 VERBOSITY_LEVELS = {
     constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
     constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
@@ -119,31 +86,21 @@ def launch(
     bn_max_cpu,
     bn_min_mem,
     bn_max_mem,
-    v_min_cpu,
-    v_max_cpu,
-    v_min_mem,
-    v_max_mem,
     snooper_enabled,
     snooper_engine_context,
     blobber_enabled,
     blobber_extra_params,
     extra_beacon_params,
-    extra_validator_params,
     extra_beacon_labels,
-    extra_validator_labels,
     persistent,
     cl_volume_size,
     cl_tolerations,
-    validator_tolerations,
     participant_tolerations,
     global_tolerations,
     node_selectors,
-    split_mode_enabled,
+    use_separate_validator_client,
 ):
     beacon_service_name = "{0}".format(service_name)
-    validator_service_name = "{0}-{1}".format(
-        service_name, VALIDATOR_SUFFIX_SERVICE_NAME
-    )
 
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -193,7 +150,7 @@ def launch(
         snooper_engine_context,
         extra_beacon_params,
         extra_beacon_labels,
-        split_mode_enabled,
+        use_separate_validator_client,
         persistent,
         cl_volume_size,
         tolerations,
@@ -231,47 +188,6 @@ def launch(
     )
     nodes_metrics_info = [nimbus_node_metrics_info]
 
-    # Launch validator node if we have a keystore
-    validator_service = None
-    if node_keystore_files != None and split_mode_enabled:
-        v_min_cpu = int(v_min_cpu) if int(v_min_cpu) > 0 else VALIDATOR_MIN_CPU
-        v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else VALIDATOR_MAX_CPU
-        v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else VALIDATOR_MIN_MEMORY
-        v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else VALIDATOR_MAX_MEMORY
-        tolerations = input_parser.get_client_tolerations(
-            validator_tolerations, participant_tolerations, global_tolerations
-        )
-        validator_config = get_validator_config(
-            launcher.el_cl_genesis_data,
-            image,
-            validator_service_name,
-            log_level,
-            beacon_http_url,
-            el_client_context,
-            node_keystore_files,
-            v_min_cpu,
-            v_max_cpu,
-            v_min_mem,
-            v_max_mem,
-            extra_validator_params,
-            extra_validator_labels,
-            persistent,
-            tolerations,
-            node_selectors,
-        )
-
-        validator_service = plan.add_service(validator_service_name, validator_config)
-
-    if validator_service:
-        validator_metrics_port = validator_service.ports[VALIDATOR_METRICS_PORT_ID]
-        validator_metrics_url = "{0}:{1}".format(
-            validator_service.ip_address, validator_metrics_port.number
-        )
-        validator_node_metrics_info = node_metrics.new_node_metrics_info(
-            validator_service_name, VALIDATOR_METRICS_PATH, validator_metrics_url
-        )
-        nodes_metrics_info.append(validator_node_metrics_info)
-
     return cl_client_context.new_cl_client_context(
         "nimbus",
         beacon_node_enr,
@@ -279,7 +195,6 @@ def launch(
         BEACON_HTTP_PORT_NUM,
         nodes_metrics_info,
         beacon_service_name,
-        validator_service_name,
         beacon_multiaddr,
         beacon_peer_id,
         snooper_enabled,
@@ -309,7 +224,7 @@ def get_beacon_config(
     snooper_engine_context,
     extra_params,
     extra_labels,
-    split_mode_enabled,
+    use_separate_validator_client,
     persistent,
     cl_volume_size,
     tolerations,
@@ -383,7 +298,7 @@ def get_beacon_config(
         + el_client_context.client_name,
     ]
 
-    if node_keystore_files != None and not split_mode_enabled:
+    if node_keystore_files != None and not use_separate_validator_client:
         cmd.extend(validator_flags)
 
     if network not in constants.PUBLIC_NETWORKS:
@@ -410,7 +325,7 @@ def get_beacon_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
-    if node_keystore_files != None and not split_mode_enabled:
+    if node_keystore_files != None and not use_separate_validator_client:
         files[
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS
         ] = node_keystore_files.files_artifact_uuid
@@ -442,81 +357,6 @@ def get_beacon_config(
             extra_labels,
         ),
         user=User(uid=0, gid=0),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
-
-
-def get_validator_config(
-    el_cl_genesis_data,
-    image,
-    service_name,
-    log_level,
-    beacon_http_url,
-    el_client_context,
-    node_keystore_files,
-    v_min_cpu,
-    v_max_cpu,
-    v_min_mem,
-    v_max_mem,
-    extra_params,
-    extra_labels,
-    persistent,
-    tolerations,
-    node_selectors,
-):
-    validator_keys_dirpath = ""
-    validator_secrets_dirpath = ""
-    if node_keystore_files != None:
-        validator_keys_dirpath = shared_utils.path_join(
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
-            node_keystore_files.nimbus_keys_relative_dirpath,
-        )
-        validator_secrets_dirpath = shared_utils.path_join(
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
-            node_keystore_files.raw_secrets_relative_dirpath,
-        )
-
-    cmd = [
-        "--beacon-node=" + beacon_http_url,
-        "--validators-dir=" + validator_keys_dirpath,
-        "--secrets-dir=" + validator_secrets_dirpath,
-        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
-        "--metrics",
-        "--metrics-address=0.0.0.0",
-        "--metrics-port={0}".format(VALIDATOR_METRICS_PORT_NUM),
-        "--graffiti="
-        + constants.CL_CLIENT_TYPE.nimbus
-        + "-"
-        + el_client_context.client_name,
-    ]
-
-    if len(extra_params) > 0:
-        cmd.extend([param for param in extra_params if param != "--split=true"])
-
-    files = {
-        VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
-    }
-
-    return ServiceConfig(
-        image=image,
-        ports=VALIDATOR_USED_PORTS,
-        cmd=cmd,
-        entrypoint=DEFAULT_VALIDATOR_IMAGE_ENTRYPOINT,
-        files=files,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        min_cpu=v_min_cpu,
-        max_cpu=v_max_cpu,
-        min_memory=v_min_mem,
-        max_memory=v_max_mem,
-        labels=shared_utils.label_maker(
-            constants.CL_CLIENT_TYPE.nimbus,
-            constants.CLIENT_TYPES.validator,
-            image,
-            el_client_context.client_name,
-            extra_labels,
-        ),
         tolerations=tolerations,
         node_selectors=node_selectors,
     )

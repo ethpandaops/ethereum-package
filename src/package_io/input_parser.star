@@ -11,14 +11,23 @@ DEFAULT_EL_IMAGES = {
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
+    "nimbus": "ethpandaops/nimbus-eth1:master",
 }
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
-    "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest",
+    "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
     "lodestar": "chainsafe/lodestar:latest",
+}
+
+DEFAULT_VC_IMAGES = {
+    "lighthouse": "sigp/lighthouse:latest",
+    "lodestar": "chainsafe/lodestar:latest",
+    "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
+    "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
+    "teku": "consensys/teku:latest",
 }
 
 MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.27"
@@ -166,10 +175,15 @@ def input_parser(plan, input_args):
                 cl_client_image=participant["cl_client_image"],
                 cl_client_log_level=participant["cl_client_log_level"],
                 cl_client_volume_size=participant["cl_client_volume_size"],
-                cl_split_mode_enabled=participant["cl_split_mode_enabled"],
                 cl_tolerations=participant["cl_tolerations"],
-                tolerations=participant["tolerations"],
+                use_separate_validator_client=participant[
+                    "use_separate_validator_client"
+                ],
+                validator_client_type=participant["validator_client_type"],
+                validator_client_image=participant["validator_client_image"],
+                validator_client_log_level=participant["validator_client_log_level"],
                 validator_tolerations=participant["validator_tolerations"],
+                tolerations=participant["tolerations"],
                 node_selectors=participant["node_selectors"],
                 beacon_extra_params=participant["beacon_extra_params"],
                 beacon_extra_labels=participant["beacon_extra_labels"],
@@ -237,6 +251,7 @@ def input_parser(plan, input_args):
             mev_builder_image=result["mev_params"]["mev_builder_image"],
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
+            mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
             mev_relay_housekeeper_extra_args=result["mev_params"][
                 "mev_relay_housekeeper_extra_args"
@@ -330,21 +345,12 @@ def parse_network_params(input_args):
     for index, participant in enumerate(result["participants"]):
         el_client_type = participant["el_client_type"]
         cl_client_type = participant["cl_client_type"]
+        validator_client_type = participant["validator_client_type"]
 
         if cl_client_type in (NIMBUS_NODE_NAME) and (
             result["network_params"]["seconds_per_slot"] < 12
         ):
             fail("nimbus can't be run with slot times below 12 seconds")
-
-        if participant["cl_split_mode_enabled"] and cl_client_type not in (
-            "nimbus",
-            "teku",
-        ):
-            fail(
-                "split mode is only supported for nimbus and teku clients, but you specified {0}".format(
-                    cl_client_type
-                )
-            )
 
         el_image = participant["el_client_image"]
         if el_image == "":
@@ -367,6 +373,44 @@ def parse_network_params(input_args):
                     )
                 )
             participant["cl_client_image"] = default_image
+
+        if participant["use_separate_validator_client"] == None:
+            # Default to false for CL clients that can run validator clients
+            # in the same process.
+            if cl_client_type in (
+                constants.CL_CLIENT_TYPE.nimbus,
+                constants.CL_CLIENT_TYPE.teku,
+            ):
+                participant["use_separate_validator_client"] = False
+            else:
+                participant["use_separate_validator_client"] = True
+
+        if validator_client_type == "":
+            # Defaults to matching the chosen CL client
+            validator_client_type = cl_client_type
+            participant["validator_client_type"] = validator_client_type
+
+        validator_client_image = participant["validator_client_image"]
+        if validator_client_image == "":
+            if cl_image == "":
+                # If the validator client image is also empty, default to the image for the chosen CL client
+                default_image = DEFAULT_VC_IMAGES.get(validator_client_type, "")
+            else:
+                if cl_client_type == "prysm":
+                    default_image = cl_image.replace("beacon-chain", "validator")
+                elif cl_client_type == "nimbus":
+                    default_image = cl_image.replace(
+                        "nimbus-eth2", "nimbus-validator-client"
+                    )
+                else:
+                    default_image = cl_image
+            if default_image == "":
+                fail(
+                    "{0} received an empty image name and we don't have a default for it".format(
+                        validator_client_type
+                    )
+                )
+            participant["validator_client_image"] = default_image
 
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == False:
@@ -443,9 +487,6 @@ def parse_network_params(input_args):
 
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
-
-    if result["network_params"]["deneb_fork_epoch"] == 0:
-        fail("deneb_fork_epoch is 0 needs to be > 0 ")
 
     if result["network_params"]["electra_fork_epoch"] != None:
         # if electra is defined, then deneb needs to be set very high
@@ -590,7 +631,10 @@ def default_participant():
         "cl_client_image": "",
         "cl_client_log_level": "",
         "cl_client_volume_size": 0,
-        "cl_split_mode_enabled": False,
+        "use_separate_validator_client": None,
+        "validator_client_type": "",
+        "validator_client_log_level": "",
+        "validator_client_image": "",
         "cl_tolerations": [],
         "validator_tolerations": [],
         "tolerations": [],
@@ -634,6 +678,7 @@ def get_default_mev_params():
         "mev_builder_image": "flashbots/builder:latest",
         "mev_builder_cl_image": "sigp/lighthouse:latest",
         "mev_boost_image": "flashbots/mev-boost",
+        "mev_boost_args": ["mev-boost", "--relay-check"],
         "mev_relay_api_extra_args": [],
         "mev_relay_housekeeper_extra_args": [],
         "mev_relay_website_extra_args": [],

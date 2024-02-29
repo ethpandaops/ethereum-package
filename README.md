@@ -56,7 +56,7 @@ When running on a public testnet using a cloud provider's Kubernetes cluster, th
 
 1. State Growth: The growth of the state might be faster than anticipated. This could potentially lead to issues if the default parameters become insufficient over time. It's important to monitor state growth and adjust parameters as necessary.
 
-2. Persistent Storage Speed: Most cloud providers provision their Kubernetes clusters with relatively slow persistent storage by default. This can cause performance issues, particularly with Ethereum Light (EL) clients.
+2. Persistent Storage Speed: Most cloud providers provision their Kubernetes clusters with relatively slow persistent storage by default. This can cause performance issues, particularly with Execution Layer (EL) clients.
 
 3. Network Syncing: The disk speed provided by cloud providers may not be sufficient to sync with networks that have high demands, such as the mainnet. This could lead to syncing issues and delays.
 
@@ -153,7 +153,7 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 # Specification of the participants in the network
 participants:
   # The type of EL client that should be started
-  # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth
+  # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1
 - el_client_type: geth
 
   # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -164,6 +164,7 @@ participants:
   # - besu: hyperledger/besu:develop
   # - reth: ghcr.io/paradigmxyz/reth
   # - ethereumjs: ethpandaops/ethereumjs:master
+  # - nimbus-eth1: ethpandaops/nimbus-eth1:master
   el_client_image: ""
 
   # The log level string that this participant's EL client should log at
@@ -203,27 +204,40 @@ participants:
   # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
   cl_client_type: lighthouse
 
-  # The Docker image that should be used for the EL client; leave blank to use the default for the client type
-  # Defaults by client (note that Prysm is different in that it requires two images - a Beacon and a validator - separated by a comma):
+  # The Docker image that should be used for the CL client; leave blank to use the default for the client type
+  # Defaults by client:
   # - lighthouse: sigp/lighthouse:latest
   # - teku: consensys/teku:latest
   # - nimbus: statusim/nimbus-eth2:multiarch-latest
-  # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest,gcr.io/prysmaticlabs/prysm/validator:latest
+  # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
   # - lodestar: chainsafe/lodestar:next
   cl_client_image: ""
 
-  # The log level string that this participant's EL client should log at
+  # The log level string that this participant's CL client should log at
   # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
   # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
   # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
   # over a specific participant's logging
   cl_client_log_level: ""
 
-  # A list of optional extra params that will be passed to the CL to run separate Beacon and validator nodes
-  # Only possible for nimbus or teku
-  # Please note that in order to get it to work with Nimbus, you have to use `ethpandaops/nimbus:unstable` as the image (default upstream image does not yet support this out of the box)
-  # Defaults to false
-  cl_split_mode_enabled: false
+  # Whether to use a separate validator client attached to the CL client.
+  # Defaults to false for clients that can run both in one process (Teku, Nimbus)
+  use_separate_validator_client: false
+
+  # The type of validator client that should be used
+  # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+  # ( The prysm validator only works with a prysm CL client )
+  # Defaults to matching the chosen CL client (cl_client_type)
+  validator_client_type: ""
+
+  # The Docker image that should be used for the separate validator client
+  # Defaults by client:
+  # - lighthouse: sigp/lighthouse:latest
+  # - lodestar: chainsafe/lodestar:latest
+  # - nimbus: statusim/nimbus-validator-client:multiarch-latest
+  # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
+  # - teku: consensys/teku:latest
+  validator_client_image: ""
 
   # Persistent storage size for the CL client container (in MB)
   # Defaults to 0, which means that the default size for the client will be used
@@ -473,8 +487,12 @@ assertoor_params:
   run_lifecycle_test: false
 
   # Run additional tests from external test definitions
+  # Entries may be simple strings (link to the test file) or dictionaries with more flexibility
   # eg:
   #   - https://raw.githubusercontent.com/ethpandaops/assertoor/master/example/tests/block-proposal-check.yaml
+  #   - file: "https://raw.githubusercontent.com/ethpandaops/assertoor/master/example/tests/block-proposal-check.yaml"
+  #     config:
+  #       someCustomTestConfig: "some value"
   tests: []
 
 
@@ -543,7 +561,7 @@ mev_type: null
 
 # Parameters if MEV is used
 mev_params:
-  # The image to use for MEV boot relay
+  # The image to use for MEV boost relay
   mev_relay_image: flashbots/mev-boost-relay
   # The image to use for the builder
   mev_builder_image: ethpandaops/flashbots-builder:main
@@ -551,6 +569,8 @@ mev_params:
   mev_builder_cl_image: sigp/lighthouse:latest
   # The image to use for mev-boost
   mev_boost_image: flashbots/mev-boost
+  # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
+  mev_boost_args: []
   # Extra parameters to send to the API
   mev_relay_api_extra_args: []
   # Extra parameters to send to the housekeeper

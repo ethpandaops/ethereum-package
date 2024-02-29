@@ -29,12 +29,14 @@ def launch(
     service_name,
     network_id,
     mev_boost_image,
+    mev_boost_args,
     global_node_selectors,
 ):
     config = get_config(
         mev_boost_launcher,
         network_id,
         mev_boost_image,
+        mev_boost_args,
         global_node_selectors,
     )
 
@@ -49,12 +51,10 @@ def get_config(
     mev_boost_launcher,
     network_id,
     mev_boost_image,
+    mev_boost_args,
     node_selectors,
 ):
-    command = ["mev-boost"]
-
-    if mev_boost_launcher.should_check_relay:
-        command.append("-relay-check")
+    command = mev_boost_args
 
     return ServiceConfig(
         image=mev_boost_image,

@@ -36,7 +36,7 @@ jobs:
       - name: Run Starlark
         run: |
           if [ "${{ matrix.file_name }}" != "./.github/tests/mix-with-tools-mev.yaml" ]; then
-            kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
+            kurtosis run ${{ github.workspace }} --verbosity detailed --args-file ${{ matrix.file_name }}
           else
             echo "Skipping ./.github/tests/mix-with-tools-mev.yaml"
           fi

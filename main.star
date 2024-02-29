@@ -109,11 +109,13 @@ def run(plan, args={}):
 
     all_el_client_contexts = []
     all_cl_client_contexts = []
+    all_validator_client_contexts = []
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     for participant in all_participants:
         all_el_client_contexts.append(participant.el_client_context)
         all_cl_client_contexts.append(participant.cl_client_context)
+        all_validator_client_contexts.append(participant.validator_client_context)
         all_ethereum_metrics_exporter_contexts.append(
             participant.ethereum_metrics_exporter_context
         )
@@ -260,6 +262,7 @@ def run(plan, args={}):
                     mev_boost_service_name,
                     network_params.network_id,
                     mev_params.mev_boost_image,
+                    mev_params.mev_boost_args,
                     global_node_selectors,
                 )
                 all_mevboost_contexts.append(mev_boost_context)
@@ -425,6 +428,7 @@ def run(plan, args={}):
             plan,
             all_el_client_contexts,
             all_cl_client_contexts,
+            all_validator_client_contexts,
             prometheus_additional_metrics_jobs,
             all_ethereum_metrics_exporter_contexts,
             all_xatu_sentry_contexts,
