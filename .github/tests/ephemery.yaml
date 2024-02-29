@@ -12,6 +12,5 @@ participants:
   - el_client_type: ethereumjs
     cl_client_type: teku
 network_params:
-network_params:
   network: "ephemery"
 additional_services: []
