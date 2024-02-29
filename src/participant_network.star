@@ -777,6 +777,7 @@ def launch_participant_network(
             launcher=validator_client.new_validator_client_launcher(
                 el_cl_genesis_data=el_cl_data
             ),
+            keymanager_file=keymanager_file,
             service_name="validator-client-{0}-{1}".format(
                 index_str, validator_client_type
             ),
