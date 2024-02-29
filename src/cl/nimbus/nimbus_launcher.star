@@ -15,6 +15,7 @@ BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
 BEACON_HTTP_PORT_ID = "http"
 BEACON_METRICS_PORT_ID = "metrics"
+VALIDATOR_HTTP_PORT_ID = "http-validator"
 
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
@@ -305,9 +306,6 @@ def get_beacon_config(
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
-    if node_keystore_files != None and not use_separate_validator_client:
-        cmd.extend(validator_flags)
-
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootstrap-file="
@@ -333,7 +331,16 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
     }
+    BEACON_VALIDATOR_USED_PORTS = {}
+    BEACON_VALIDATOR_USED_PORTS.update(BEACON_USED_PORTS)
     if node_keystore_files != None and not use_separate_validator_client:
+        VALIDATOR_HTTP_PORT_ID_SPEC = shared_utils.new_port_spec(
+        validator_client_shared.VALIDATOR_HTTP_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        )
+        BEACON_VALIDATOR_USED_PORTS.update({VALIDATOR_HTTP_PORT_ID: VALIDATOR_HTTP_PORT_ID_SPEC})
+        cmd.extend(validator_flags)
         files[
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS
         ] = node_keystore_files.files_artifact_uuid
