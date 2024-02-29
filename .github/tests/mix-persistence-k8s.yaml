@@ -6,7 +6,6 @@ participants:
     cl_client_type: prysm
   - el_client_type: erigon
     cl_client_type: nimbus
-    cl_client_image: ethpandaops/nimbus:unstable
     use_separate_validator_client: true
   - el_client_type: besu
     cl_client_type: lighthouse

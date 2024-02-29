@@ -26,5 +26,5 @@ ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 mev_type: full
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay:0.27
+  mev_relay_image: flashbots/mev-boost-relay:latest
 persistent: True
