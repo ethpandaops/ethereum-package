@@ -775,7 +775,7 @@ def launch_participant_network(
             launcher=validator_client.new_validator_client_launcher(
                 el_cl_genesis_data=el_cl_data
             ),
-            service_name="val-{0}-{1}-{2}".format(
+            service_name="vc-{0}-{1}-{2}".format(
                 index_str, validator_client_type, el_client_type
             ),
             validator_client_type=validator_client_type,
