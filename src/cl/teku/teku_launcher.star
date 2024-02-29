@@ -379,11 +379,13 @@ def get_beacon_config(
     BEACON_VALIDATOR_USED_PORTS.update(BEACON_USED_PORTS)
     if node_keystore_files != None and not use_separate_validator_client:
         VALIDATOR_HTTP_PORT_ID_SPEC = shared_utils.new_port_spec(
-        validator_client_shared.VALIDATOR_HTTP_PORT_NUM,
+            validator_client_shared.VALIDATOR_HTTP_PORT_NUM,
             shared_utils.TCP_PROTOCOL,
             shared_utils.HTTP_APPLICATION_PROTOCOL,
         )
-        BEACON_VALIDATOR_USED_PORTS.update({VALIDATOR_HTTP_PORT_ID: VALIDATOR_HTTP_PORT_ID_SPEC})
+        BEACON_VALIDATOR_USED_PORTS.update(
+            {VALIDATOR_HTTP_PORT_ID: VALIDATOR_HTTP_PORT_ID_SPEC}
+        )
         cmd.extend(validator_flags)
         files[
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
