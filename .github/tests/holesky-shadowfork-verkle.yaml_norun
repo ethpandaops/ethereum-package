@@ -9,8 +9,8 @@ participants:
     cl_client_image: ethpandaops/lodestar:g11tech-verge-815364b
 network_params:
   electra_fork_epoch: 1
+  seconds_per_slot: 3
   network: holesky-shadowfork-verkle
-  genesis_delay: 300
 additional_services:
   - dora
 snooper_enabled: true
