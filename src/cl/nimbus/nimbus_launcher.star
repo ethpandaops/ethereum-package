@@ -331,16 +331,16 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
         constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
     }
-    BEACON_VALIDATOR_USED_PORTS = {}
-    BEACON_VALIDATOR_USED_PORTS.update(BEACON_USED_PORTS)
+    beacon_validator_used_ports = {}
+    beacon_validator_used_ports.update(BEACON_USED_PORTS)
     if node_keystore_files != None and not use_separate_validator_client:
-        VALIDATOR_HTTP_PORT_ID_SPEC = shared_utils.new_port_spec(
+        validator_http_port_id_spec = shared_utils.new_port_spec(
             validator_client_shared.VALIDATOR_HTTP_PORT_NUM,
             shared_utils.TCP_PROTOCOL,
             shared_utils.HTTP_APPLICATION_PROTOCOL,
         )
-        BEACON_VALIDATOR_USED_PORTS.update(
-            {VALIDATOR_HTTP_PORT_ID: VALIDATOR_HTTP_PORT_ID_SPEC}
+        beacon_validator_used_ports.update(
+            {VALIDATOR_HTTP_PORT_ID: validator_http_port_id_spec}
         )
         cmd.extend(validator_flags)
         files[
@@ -355,7 +355,7 @@ def get_beacon_config(
 
     return ServiceConfig(
         image=image,
-        ports=BEACON_USED_PORTS,
+        ports=beacon_validator_used_ports,
         cmd=cmd,
         files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
