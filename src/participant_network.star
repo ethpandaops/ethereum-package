@@ -89,7 +89,7 @@ def launch_participant_network(
         and ("holesky" in network_params.network)
     ):
         shadowfork_block = "793312"  # Hardcodes verkle shadowfork block for holesky
-        snapshot_url_base = "http://localhost:10000/snapshots/"  # for local testing
+        snapshot_url_base = "http://127.0.0.1:10000/snapshots/"  # for local testing
 
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
