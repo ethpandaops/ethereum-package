@@ -329,7 +329,6 @@ def get_beacon_config(
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
-        constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
     }
     beacon_validator_used_ports = {}
     beacon_validator_used_ports.update(BEACON_USED_PORTS)
@@ -346,6 +345,7 @@ def get_beacon_config(
         files[
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS
         ] = node_keystore_files.files_artifact_uuid
+        files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(

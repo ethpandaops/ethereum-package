@@ -21,6 +21,7 @@ def launch(
     plan,
     launcher,
     keymanager_file,
+    keymanager_p12_file,
     service_name,
     validator_client_type,
     image,
@@ -101,6 +102,7 @@ def launch(
         config = teku.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
+            keymanager_p12_file=keymanager_p12_file,
             image=image,
             beacon_http_url=beacon_http_url,
             cl_client_context=cl_client_context,

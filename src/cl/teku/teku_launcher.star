@@ -127,6 +127,7 @@ def launch(
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
         launcher.keymanager_file,
+        launcher.keymanager_p12_file,
         launcher.network,
         image,
         beacon_service_name,
@@ -204,6 +205,7 @@ def get_beacon_config(
     el_cl_genesis_data,
     jwt_file,
     keymanager_file,
+    keymanager_p12_file,
     network,
     image,
     service_name,
@@ -300,7 +302,11 @@ def get_beacon_config(
             validator_client_shared.VALIDATOR_HTTP_PORT_NUM
         ),
         "--validator-api-interface=0.0.0.0",
-        "--validator-api-keystore-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
+        "--validator-api-keystore-file="
+        + constants.KEYMANAGER_P12_MOUNT_PATH_ON_CONTAINER,
+        "--validator-api-keystore-password-file="
+        + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
+        "--validator-api-docs-enabled=true",
     ]
 
     if network not in constants.PUBLIC_NETWORKS:
@@ -373,7 +379,6 @@ def get_beacon_config(
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
-        constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
     }
     beacon_validator_used_ports = {}
     beacon_validator_used_ports.update(BEACON_USED_PORTS)
@@ -390,6 +395,8 @@ def get_beacon_config(
         files[
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
+        files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
+        files[constants.KEYMANAGER_P12_MOUNT_PATH_ON_CLIENTS] = keymanager_p12_file
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
@@ -423,10 +430,13 @@ def get_beacon_config(
     )
 
 
-def new_teku_launcher(el_cl_genesis_data, jwt_file, network, keymanager_file):
+def new_teku_launcher(
+    el_cl_genesis_data, jwt_file, network, keymanager_file, keymanager_p12_file
+):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
         keymanager_file=keymanager_file,
+        keymanager_p12_file=keymanager_p12_file,
     )

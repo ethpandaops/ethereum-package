@@ -69,6 +69,7 @@ def launch_participant_network(
     global_log_level,
     jwt_file,
     keymanager_file,
+    keymanager_p12_file,
     persistent,
     xatu_sentry_params,
     global_tolerations,
@@ -544,6 +545,7 @@ def launch_participant_network(
                 jwt_file,
                 network_params.network,
                 keymanager_file,
+                keymanager_p12_file,
             ),
             "launch_method": teku.launch,
         },
@@ -778,6 +780,7 @@ def launch_participant_network(
                 el_cl_genesis_data=el_cl_data
             ),
             keymanager_file=keymanager_file,
+            keymanager_p12_file=keymanager_p12_file,
             service_name="vc-{0}-{1}-{2}".format(
                 index_str, validator_client_type, el_client_type
             ),
