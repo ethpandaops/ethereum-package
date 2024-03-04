@@ -42,6 +42,8 @@ def launch(
     participant_tolerations,
     global_tolerations,
     node_selectors,
+    network,  # TODO: remove when deneb rebase is done
+    electra_fork_epoch,  # TODO: remove when deneb rebase is done
 ):
     if node_keystore_files == None:
         return None
@@ -78,6 +80,8 @@ def launch(
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
+            network=network,  # TODO: remove when deneb rebase is done
+            electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
         )
     elif validator_client_type == constants.VC_CLIENT_TYPE.lodestar:
         config = lodestar.get_config(

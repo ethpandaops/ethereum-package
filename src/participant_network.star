@@ -803,6 +803,8 @@ def launch_participant_network(
             participant_tolerations=participant.tolerations,
             global_tolerations=global_tolerations,
             node_selectors=node_selectors,
+            network=network_params.network,  # TODO: remove when deneb rebase is done
+            electra_fork_epoch=network_params.electra_fork_epoch,  # TODO: remove when deneb rebase is done
         )
         all_validator_client_contexts.append(validator_client_context)
 

@@ -32,6 +32,8 @@ def get_config(
     extra_labels,
     tolerations,
     node_selectors,
+    network,
+    electra_fork_epoch,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -77,8 +79,13 @@ def get_config(
         + cl_client_context.client_name
         + "-"
         + el_client_context.client_name,
-        "--produce-block-v3",
     ]
+
+    is_verkle = (
+        "verkle" in network or electra_fork_epoch != None
+    )  # TODO: remove when deneb rebase is done
+    if not is_verkle:
+        cmd.append("--produce-block-v3")
 
     if len(extra_params):
         cmd.extend([param for param in extra_params])
