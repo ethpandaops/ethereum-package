@@ -1,0 +1,23 @@
+[req]
+distinguished_name = Kurtosis
+x509_extensions = v3_req
+prompt = no
+
+[Kurtosis]
+countryName = EU
+stateOrProvinceName = CA
+localityName = San Francisco
+organizationName = Kurtosis
+organizationalUnitName = ethereum-package
+
+[v3_req]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+basicConstraints = CA:TRUE
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = mydomain.com
+DNS.2 = localhost
+IP.1 = 127.0.0.1
+IP.2 = 10.0.0.6

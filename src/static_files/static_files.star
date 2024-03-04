@@ -68,5 +68,9 @@ CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH = (
 )
 
 JWT_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/jwt/jwtsecret"
+KEYMANAGER_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/keymanager/keymanager.txt"
+KEYMANAGER_P12_PATH_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/keymanager/validator_keystore.p12"
+)
 
 SHADOWFORK_FILEPATH = "/network-configs/latest_block.json"

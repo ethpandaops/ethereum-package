@@ -32,6 +32,8 @@ def get_config(
     extra_labels,
     tolerations,
     node_selectors,
+    network,
+    electra_fork_epoch,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -60,6 +62,11 @@ def get_config(
         # "--enable-doppelganger-protection", // Disabled to not have to wait 2 epochs before validator can start
         # burn address - If unset, the validator will scream in its logs
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--http",
+        "--http-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--http-address=0.0.0.0",
+        "--http-allow-origin=*",
+        "--unencrypted-http-transport",
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
@@ -73,6 +80,9 @@ def get_config(
         + "-"
         + el_client_context.client_name,
     ]
+
+    if not (constants.NETWORK_NAME.verkle in network and electra_fork_epoch == None):
+        cmd.append("--produce-block-v3")
 
     if len(extra_params):
         cmd.extend([param for param in extra_params])
