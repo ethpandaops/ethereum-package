@@ -11,6 +11,7 @@ network_params:
   electra_fork_epoch: 1
   seconds_per_slot: 3
   network: holesky-shadowfork-verkle
+  #network_sync_base_url: localhost:10000/snapshots/
 additional_services:
   - dora
 snooper_enabled: true

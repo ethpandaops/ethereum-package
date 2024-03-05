@@ -80,16 +80,12 @@ def launch_participant_network(
     cancun_time = 0
     prague_time = 0
     shadowfork_block = "latest"
-    snapshot_url_base = (
-        "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
-    )
     if (
         constants.NETWORK_NAME.shadowfork in network_params.network
         and ("verkle" in network_params.network)
         and ("holesky" in network_params.network)
     ):
         shadowfork_block = "793312"  # Hardcodes verkle shadowfork block for holesky
-        snapshot_url_base = "http://10.10.101.21:10000/snapshots/"  # for local testing
 
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
@@ -113,7 +109,7 @@ def launch_participant_network(
             latest_block = plan.run_sh(  # fetch the latest block
                 run="mkdir -p /shadowfork && \
                     curl -o /shadowfork/latest_block.json "
-                + snapshot_url_base
+                + network_params.network_sync_base_url
                 + base_network
                 + "/geth/"
                 + shadowfork_block
@@ -150,7 +146,7 @@ def launch_participant_network(
                         image="alpine:3.19.1",
                         cmd=[
                             "apk add --no-cache curl tar zstd && curl -s -L "
-                            + snapshot_url_base
+                            + network_params.network_sync_base_url
                             + base_network
                             + "/"
                             + el_client_type
