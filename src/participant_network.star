@@ -147,9 +147,12 @@ def launch_participant_network(
         ) = launch_ephemery.launch(plan, cancun_time, prague_time)
     else:
         # We are running a devnet
-        el_cl_data, final_genesis_timestamp, network_id, validator_data = launch_devnet.launch(
-            plan, network_params.network, cancun_time, prague_time
-        )
+        (
+            el_cl_data,
+            final_genesis_timestamp,
+            network_id,
+            validator_data,
+        ) = launch_devnet.launch(plan, network_params.network, cancun_time, prague_time)
 
     el_launchers = {
         constants.EL_CLIENT_TYPE.geth: {
