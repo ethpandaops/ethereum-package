@@ -58,6 +58,7 @@ network_params:
   network: kurtosis
   min_validator_withdrawability_delay: 256
   shard_committee_period: 256
+  network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
 
 additional_services:
   - tx_spammer
