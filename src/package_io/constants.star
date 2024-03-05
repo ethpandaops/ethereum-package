@@ -164,7 +164,7 @@ VOLUME_SIZE = {
     },
     "sepolia": {
         "geth_volume_size": 300000,  # 300GB
-        "erigon_volume_size": 500000,  # 500GB
+        "erigon_volume_size": 1000000,  # 1000GB
         "nethermind_volume_size": 300000,  # 300GB
         "besu_volume_size": 300000,  # 300GB
         "reth_volume_size": 500000,  # 500GB
