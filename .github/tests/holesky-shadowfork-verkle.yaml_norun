@@ -10,7 +10,6 @@ participants:
 network_params:
   electra_fork_epoch: 1
   network: holesky-shadowfork-verkle
-  #network_sync_base_url: localhost:10000/snapshots/
 additional_services:
   - dora
 snooper_enabled: true
