@@ -228,7 +228,7 @@ participants:
   # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
   # ( The prysm validator only works with a prysm CL client )
   # Defaults to matching the chosen CL client (cl_client_type)
-  validator_client_type: ""
+  vc_client_type: ""
 
   # The Docker image that should be used for the separate validator client
   # Defaults by client:

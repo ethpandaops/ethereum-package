@@ -23,7 +23,7 @@ def launch(
     keymanager_file,
     keymanager_p12_file,
     service_name,
-    validator_client_type,
+    vc_client_type,
     image,
     participant_log_level,
     global_log_level,
@@ -62,7 +62,7 @@ def launch(
     v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else MIN_MEMORY
     v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else MAX_MEMORY
 
-    if validator_client_type == constants.VC_CLIENT_TYPE.lighthouse:
+    if vc_client_type == constants.VC_CLIENT_TYPE.lighthouse:
         config = lighthouse.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
@@ -83,7 +83,7 @@ def launch(
             network=network,  # TODO: remove when deneb rebase is done
             electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
         )
-    elif validator_client_type == constants.VC_CLIENT_TYPE.lodestar:
+    elif vc_client_type == constants.VC_CLIENT_TYPE.lodestar:
         config = lodestar.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
@@ -102,7 +102,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
         )
-    elif validator_client_type == constants.VC_CLIENT_TYPE.teku:
+    elif vc_client_type == constants.VC_CLIENT_TYPE.teku:
         config = teku.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
@@ -121,7 +121,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
         )
-    elif validator_client_type == constants.VC_CLIENT_TYPE.nimbus:
+    elif vc_client_type == constants.VC_CLIENT_TYPE.nimbus:
         config = nimbus.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
@@ -139,10 +139,13 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
         )
-    elif validator_client_type == constants.VC_CLIENT_TYPE.prysm:
+    elif vc_client_type == constants.VC_CLIENT_TYPE.prysm:
         # Prysm VC only works with Prysm beacon node right now
         if cl_client_context.client_name != constants.CL_CLIENT_TYPE.prysm:
-            fail("Prysm VC is only compatible with Prysm beacon node")
+            fail(
+                cl_client_context.client_name
+                + "Prysm VC is only compatible with Prysm beacon node"
+            )
 
         config = prysm.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
@@ -163,7 +166,7 @@ def launch(
             node_selectors=node_selectors,
         )
     else:
-        fail("Unsupported validator_client_type: {0}".format(validator_client_type))
+        fail("Unsupported vc_client_type: {0}".format(vc_client_type))
 
     validator_service = plan.add_service(service_name, config)
 
@@ -183,7 +186,7 @@ def launch(
 
     return validator_client_context.new_validator_client_context(
         service_name=service_name,
-        client_name=validator_client_type,
+        client_name=vc_client_type,
         metrics_info=validator_node_metrics_info,
     )
 

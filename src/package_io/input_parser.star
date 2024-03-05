@@ -179,7 +179,7 @@ def input_parser(plan, input_args):
                 use_separate_validator_client=participant[
                     "use_separate_validator_client"
                 ],
-                validator_client_type=participant["validator_client_type"],
+                vc_client_type=participant["vc_client_type"],
                 validator_client_image=participant["validator_client_image"],
                 validator_client_log_level=participant["validator_client_log_level"],
                 validator_tolerations=participant["validator_tolerations"],
@@ -346,7 +346,7 @@ def parse_network_params(input_args):
     for index, participant in enumerate(result["participants"]):
         el_client_type = participant["el_client_type"]
         cl_client_type = participant["cl_client_type"]
-        validator_client_type = participant["validator_client_type"]
+        vc_client_type = participant["vc_client_type"]
 
         if cl_client_type in (NIMBUS_NODE_NAME) and (
             result["network_params"]["seconds_per_slot"] < 12
@@ -386,16 +386,16 @@ def parse_network_params(input_args):
             else:
                 participant["use_separate_validator_client"] = True
 
-        if validator_client_type == "":
+        if vc_client_type == "":
             # Defaults to matching the chosen CL client
-            validator_client_type = cl_client_type
-            participant["validator_client_type"] = validator_client_type
+            vc_client_type = cl_client_type
+            participant["vc_client_type"] = vc_client_type
 
         validator_client_image = participant["validator_client_image"]
         if validator_client_image == "":
             if cl_image == "":
                 # If the validator client image is also empty, default to the image for the chosen CL client
-                default_image = DEFAULT_VC_IMAGES.get(validator_client_type, "")
+                default_image = DEFAULT_VC_IMAGES.get(vc_client_type, "")
             else:
                 if cl_client_type == "prysm":
                     default_image = cl_image.replace("beacon-chain", "validator")
@@ -408,7 +408,7 @@ def parse_network_params(input_args):
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
-                        validator_client_type
+                        vc_client_type
                     )
                 )
             participant["validator_client_image"] = default_image
@@ -634,7 +634,7 @@ def default_participant():
         "cl_client_log_level": "",
         "cl_client_volume_size": 0,
         "use_separate_validator_client": None,
-        "validator_client_type": "",
+        "vc_client_type": "",
         "validator_client_log_level": "",
         "validator_client_image": "",
         "cl_tolerations": [],

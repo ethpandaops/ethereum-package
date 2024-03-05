@@ -1,7 +1,7 @@
 def new_participant(
     el_client_type,
     cl_client_type,
-    validator_client_type,
+    vc_client_type,
     el_client_context,
     cl_client_context,
     validator_client_context,
@@ -12,7 +12,7 @@ def new_participant(
     return struct(
         el_client_type=el_client_type,
         cl_client_type=cl_client_type,
-        validator_client_type=validator_client_type,
+        vc_client_type=vc_client_type,
         el_client_context=el_client_context,
         cl_client_context=cl_client_context,
         validator_client_context=validator_client_context,

@@ -3,7 +3,7 @@ prometheus = import_module("github.com/kurtosis-tech/prometheus-package/main.sta
 
 EXECUTION_CLIENT_TYPE = "execution"
 BEACON_CLIENT_TYPE = "beacon"
-VALIDATOR_CLIENT_TYPE = "validator"
+vc_client_type = "validator"
 
 METRICS_INFO_NAME_KEY = "name"
 METRICS_INFO_URL_KEY = "url"
@@ -131,7 +131,7 @@ def get_metrics_jobs(
         scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
         labels = {
             "service": context.service_name,
-            "client_type": VALIDATOR_CLIENT_TYPE,
+            "client_type": vc_client_type,
             "client_name": context.client_name,
         }
 

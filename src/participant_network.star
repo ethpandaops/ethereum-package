@@ -184,10 +184,21 @@ def launch_participant_network(
     ethereum_metrics_exporter_context = None
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
+    all_validator_client_contexts = []
+    # Some CL clients cannot run validator clients in the same process and need
+    # a separate validator client
+    _cls_that_need_separate_vc = [
+        constants.CL_CLIENT_TYPE.prysm,
+        constants.CL_CLIENT_TYPE.lodestar,
+        constants.CL_CLIENT_TYPE.lighthouse,
+    ]
     for index, participant in enumerate(participants):
         el_client_type = participant.el_client_type
         cl_client_type = participant.cl_client_type
+        vc_client_type = participant.vc_client_type
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
+        el_client_context = all_el_client_contexts[index]
+        cl_client_context = all_cl_client_contexts[index]
         if participant.ethereum_metrics_exporter_enabled:
             pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
 
@@ -237,18 +248,7 @@ def launch_participant_network(
 
         plan.print("Successfully added {0} CL participants".format(num_participants))
 
-    all_validator_client_contexts = []
-    # Some CL clients cannot run validator clients in the same process and need
-    # a separate validator client
-    _cls_that_need_separate_vc = [
-        constants.CL_CLIENT_TYPE.prysm,
-        constants.CL_CLIENT_TYPE.lodestar,
-        constants.CL_CLIENT_TYPE.lighthouse,
-    ]
-    for index, participant in enumerate(participants):
-        cl_client_type = participant.cl_client_type
-        validator_client_type = participant.validator_client_type
-
+        plan.print("Start adding validators for participant #{0}".format(index_str))
         if participant.use_separate_validator_client == None:
             # This should only be the case for the MEV participant,
             # the regular participants default to False/True
@@ -264,12 +264,6 @@ def launch_participant_network(
         if not participant.use_separate_validator_client:
             all_validator_client_contexts.append(None)
             continue
-
-        el_client_context = all_el_client_contexts[index]
-        cl_client_context = all_cl_client_contexts[index]
-
-        # Zero-pad the index using the calculated zfill value
-        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
         plan.print(
             "Using separate validator client for participant #{0}".format(index_str)
@@ -287,9 +281,9 @@ def launch_participant_network(
             keymanager_file=keymanager_file,
             keymanager_p12_file=keymanager_p12_file,
             service_name="vc-{0}-{1}-{2}".format(
-                index_str, validator_client_type, el_client_type
+                index_str, vc_client_type, el_client_type
             ),
-            validator_client_type=validator_client_type,
+            vc_client_type=vc_client_type,
             image=participant.validator_client_image,
             participant_log_level=participant.validator_client_log_level,
             global_log_level=global_log_level,
@@ -323,7 +317,7 @@ def launch_participant_network(
     for index, participant in enumerate(participants):
         el_client_type = participant.el_client_type
         cl_client_type = participant.cl_client_type
-        validator_client_type = participant.validator_client_type
+        vc_client_type = participant.vc_client_type
         snooper_engine_context = None
 
         el_client_context = all_el_client_contexts[index]
@@ -347,7 +341,7 @@ def launch_participant_network(
         participant_entry = participant_module.new_participant(
             el_client_type,
             cl_client_type,
-            validator_client_type,
+            vc_client_type,
             el_client_context,
             cl_client_context,
             validator_client_context,
