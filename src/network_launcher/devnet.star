@@ -4,7 +4,7 @@ el_cl_genesis_data = import_module(
 )
 
 
-def launch_devnet(plan, network, cancun_time, prague_time):
+def launch(plan, network, cancun_time, prague_time):
     # We are running a devnet
     url = shared_utils.calculate_devnet_url(network)
     el_cl_genesis_uuid = plan.upload_files(

@@ -98,7 +98,7 @@ def launch_participant_network(
             ethereum_genesis_generator_image,
             final_genesis_timestamp,
             validator_data,
-        ) = launch_kurtosis.launch_kurtosis_network(
+        ) = launch_kurtosis.launch(
             plan, network_params, participants, parallel_keystore_generation
         )
 
@@ -134,7 +134,7 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_public_network.launch_public_network(
+        ) = launch_public_network.launch(
             plan, network_params.network, cancun_time, prague_time
         )
     elif network_params.network == constants.NETWORK_NAME.ephemery:
@@ -144,10 +144,10 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_ephemery.launch_ephemery(plan, cancun_time, prague_time)
+        ) = launch_ephemery.launch(plan, cancun_time, prague_time)
     else:
         # We are running a devnet
-        el_cl_data, final_genesis_timestamp, network_id, validator_data = launch_devnet(
+        el_cl_data, final_genesis_timestamp, network_id, validator_data = launch_devnet.launch(
             plan, network_params.network, cancun_time, prague_time
         )
 

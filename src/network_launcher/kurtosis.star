@@ -17,7 +17,7 @@ CL_GENESIS_DATA_GENERATION_TIME = 5
 CL_NODE_STARTUP_TIME = 5
 
 
-def launch_kurtosis_network(
+def launch(
     plan, network_params, participants, parallel_keystore_generation
 ):
     num_participants = len(participants)

@@ -5,7 +5,7 @@ el_cl_genesis_data = import_module(
 constants = import_module("../package_io/constants.star")
 
 
-def launch_public_network(plan, network, cancun_time, prague_time):
+def launch(plan, network, cancun_time, prague_time):
     # We are running a public network
     dummy = plan.run_sh(
         run="mkdir /network-configs",
