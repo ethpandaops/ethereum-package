@@ -108,3 +108,4 @@ def shadowfork_prep(
             interval="1s",
             timeout="6h",  # 6 hours should be enough for the biggest network
         )
+    return latest_block, network_id
