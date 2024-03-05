@@ -1,8 +1,8 @@
 participants:
   - el_client_type: geth
     cl_client_type: teku
-    use_separate_validator_client: true
     validator_count: 0
+    use_separate_validator_client: true
   - el_client_type: nethermind
     cl_client_type: teku
     use_separate_validator_client: true

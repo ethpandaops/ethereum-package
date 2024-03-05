@@ -68,6 +68,8 @@ def launch_participant_network(
     network_params,
     global_log_level,
     jwt_file,
+    keymanager_file,
+    keymanager_p12_file,
     persistent,
     xatu_sentry_params,
     global_tolerations,
@@ -525,7 +527,7 @@ def launch_participant_network(
         },
         constants.CL_CLIENT_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(
-                el_cl_data, jwt_file, network_params.network
+                el_cl_data, jwt_file, network_params.network, keymanager_file
             ),
             "launch_method": nimbus.launch,
         },
@@ -544,6 +546,8 @@ def launch_participant_network(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                keymanager_file,
+                keymanager_p12_file,
             ),
             "launch_method": teku.launch,
         },
@@ -777,6 +781,8 @@ def launch_participant_network(
             launcher=validator_client.new_validator_client_launcher(
                 el_cl_genesis_data=el_cl_data
             ),
+            keymanager_file=keymanager_file,
+            keymanager_p12_file=keymanager_p12_file,
             service_name="vc-{0}-{1}-{2}".format(
                 index_str, validator_client_type, el_client_type
             ),
@@ -799,6 +805,8 @@ def launch_participant_network(
             participant_tolerations=participant.tolerations,
             global_tolerations=global_tolerations,
             node_selectors=node_selectors,
+            network=network_params.network,  # TODO: remove when deneb rebase is done
+            electra_fork_epoch=network_params.electra_fork_epoch,  # TODO: remove when deneb rebase is done
         )
         all_validator_client_contexts.append(validator_client_context)
 

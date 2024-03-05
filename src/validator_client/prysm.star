@@ -47,6 +47,9 @@ def get_config(
         "--wallet-dir=" + validator_keys_dirpath,
         "--wallet-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--rpc",
+        "--rpc-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--rpc-host=0.0.0.0",
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",

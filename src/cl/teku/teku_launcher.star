@@ -4,9 +4,10 @@ cl_client_context = import_module("../../cl/cl_client_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 constants = import_module("../../package_io/constants.star")
+validator_client_shared = import_module("../../validator_client/shared.star")
+#  ---------------------------------- Beacon client -------------------------------------
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
-#  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "teku" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/teku/teku-beacon-data"
 
@@ -15,6 +16,7 @@ BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
 BEACON_HTTP_PORT_ID = "http"
 BEACON_METRICS_PORT_ID = "metrics"
+VALIDATOR_HTTP_PORT_ID = "http-validator"
 
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
@@ -124,6 +126,8 @@ def launch(
         plan,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
+        launcher.keymanager_file,
+        launcher.keymanager_p12_file,
         launcher.network,
         image,
         beacon_service_name,
@@ -200,6 +204,8 @@ def get_beacon_config(
     plan,
     el_cl_genesis_data,
     jwt_file,
+    keymanager_file,
+    keymanager_p12_file,
     network,
     image,
     service_name,
@@ -290,10 +296,18 @@ def get_beacon_config(
         + constants.CL_CLIENT_TYPE.teku
         + "-"
         + el_client_context.client_name,
+        "--validator-api-enabled=true",
+        "--validator-api-host-allowlist=*",
+        "--validator-api-port={0}".format(
+            validator_client_shared.VALIDATOR_HTTP_PORT_NUM
+        ),
+        "--validator-api-interface=0.0.0.0",
+        "--validator-api-keystore-file="
+        + constants.KEYMANAGER_P12_MOUNT_PATH_ON_CONTAINER,
+        "--validator-api-keystore-password-file="
+        + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
+        "--validator-api-docs-enabled=true",
     ]
-
-    if node_keystore_files != None and not use_separate_validator_client:
-        cmd.extend(validator_flags)
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
@@ -366,10 +380,23 @@ def get_beacon_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
+    beacon_validator_used_ports = {}
+    beacon_validator_used_ports.update(BEACON_USED_PORTS)
     if node_keystore_files != None and not use_separate_validator_client:
+        validator_http_port_id_spec = shared_utils.new_port_spec(
+            validator_client_shared.VALIDATOR_HTTP_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        )
+        beacon_validator_used_ports.update(
+            {VALIDATOR_HTTP_PORT_ID: validator_http_port_id_spec}
+        )
+        cmd.extend(validator_flags)
         files[
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
+        files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
+        files[constants.KEYMANAGER_P12_MOUNT_PATH_ON_CLIENTS] = keymanager_p12_file
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
@@ -378,7 +405,7 @@ def get_beacon_config(
         )
     return ServiceConfig(
         image=image,
-        ports=BEACON_USED_PORTS,
+        ports=beacon_validator_used_ports,
         cmd=cmd,
         # entrypoint=ENTRYPOINT_ARGS,
         files=files,
@@ -403,7 +430,13 @@ def get_beacon_config(
     )
 
 
-def new_teku_launcher(el_cl_genesis_data, jwt_file, network):
+def new_teku_launcher(
+    el_cl_genesis_data, jwt_file, network, keymanager_file, keymanager_p12_file
+):
     return struct(
-        el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file, network=network
+        el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+        network=network,
+        keymanager_file=keymanager_file,
+        keymanager_p12_file=keymanager_p12_file,
     )

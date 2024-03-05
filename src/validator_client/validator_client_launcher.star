@@ -20,6 +20,8 @@ MAX_MEMORY = 512
 def launch(
     plan,
     launcher,
+    keymanager_file,
+    keymanager_p12_file,
     service_name,
     validator_client_type,
     image,
@@ -40,6 +42,8 @@ def launch(
     participant_tolerations,
     global_tolerations,
     node_selectors,
+    network,  # TODO: remove when deneb rebase is done
+    electra_fork_epoch,  # TODO: remove when deneb rebase is done
 ):
     if node_keystore_files == None:
         return None
@@ -76,6 +80,8 @@ def launch(
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
+            network=network,  # TODO: remove when deneb rebase is done
+            electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
         )
     elif validator_client_type == constants.VC_CLIENT_TYPE.lodestar:
         config = lodestar.get_config(
@@ -99,6 +105,8 @@ def launch(
     elif validator_client_type == constants.VC_CLIENT_TYPE.teku:
         config = teku.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
+            keymanager_file=keymanager_file,
+            keymanager_p12_file=keymanager_p12_file,
             image=image,
             beacon_http_url=beacon_http_url,
             cl_client_context=cl_client_context,
@@ -116,6 +124,7 @@ def launch(
     elif validator_client_type == constants.VC_CLIENT_TYPE.nimbus:
         config = nimbus.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
+            keymanager_file=keymanager_file,
             image=image,
             beacon_http_url=beacon_http_url,
             cl_client_context=cl_client_context,
@@ -167,6 +176,10 @@ def launch(
     validator_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, validator_client_shared.METRICS_PATH, validator_metrics_url
     )
+
+    validator_http_port = validator_service.ports[
+        validator_client_shared.VALIDATOR_HTTP_PORT_ID
+    ]
 
     return validator_client_context.new_validator_client_context(
         service_name=service_name,
