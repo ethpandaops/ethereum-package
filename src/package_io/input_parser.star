@@ -245,6 +245,7 @@ def input_parser(plan, input_args):
                 "min_validator_withdrawability_delay"
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
+            network_sync_base_url=result["network_params"]["network_sync_base_url"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -614,6 +615,7 @@ def default_network_params():
         "network": "kurtosis",
         "min_validator_withdrawability_delay": 256,
         "shard_committee_period": 256,
+        "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
     }
 
 

@@ -422,6 +422,13 @@ network_params:
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
 
+  # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
+  # Defaults to "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
+  # If you have a local snapshot, you can set this to the local url:
+  # network_snapshot_url_base = "http://10.10.101.21:10000/snapshots/"
+  # The snapshots are taken with https://github.com/ethpandaops/snapshotter
+  network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
+
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour

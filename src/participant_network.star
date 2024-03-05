@@ -110,7 +110,8 @@ def launch_participant_network(
                 ]  # overload the network id to match the network name
             latest_block = plan.run_sh(  # fetch the latest block
                 run="mkdir -p /shadowfork && \
-                    curl -o /shadowfork/latest_block.json https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
+                    curl -o /shadowfork/latest_block.json "
+                + network_params.network_sync_base_url
                 + base_network
                 + "/geth/"
                 + shadowfork_block
@@ -146,7 +147,8 @@ def launch_participant_network(
                     config=ServiceConfig(
                         image="alpine:3.19.1",
                         cmd=[
-                            "apk add --no-cache curl tar zstd && curl -s -L https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/"
+                            "apk add --no-cache curl tar zstd && curl -s -L "
+                            + network_params.network_sync_base_url
                             + base_network
                             + "/"
                             + el_client_type
