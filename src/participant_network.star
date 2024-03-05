@@ -1,9 +1,6 @@
 el_cl_genesis_data_generator = import_module(
     "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
 )
-el_cl_genesis_data = import_module(
-    "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_data.star"
-)
 
 input_parser = import_module("./package_io/input_parser.star")
 shared_utils = import_module("./shared_utils/shared_utils.star")
@@ -14,9 +11,6 @@ ethereum_metrics_exporter = import_module(
     "./ethereum_metrics_exporter/ethereum_metrics_exporter_launcher.star"
 )
 
-genesis_constants = import_module(
-    "./prelaunch_data_generator/genesis_constants/genesis_constants.star"
-)
 participant_module = import_module("./participant.star")
 
 xatu_sentry = import_module("./xatu_sentry/xatu_sentry_launcher.star")
