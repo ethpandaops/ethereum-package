@@ -17,7 +17,6 @@ def launch(
     el_cl_data,
     jwt_file,
     participants,
-    node_selectors,
     global_log_level,
     global_node_selectors,
     global_tolerations,

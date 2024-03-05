@@ -4,8 +4,13 @@ nimbus = import_module("./nimbus/nimbus_launcher.star")
 prysm = import_module("./prysm/prysm_launcher.star")
 teku = import_module("./teku/teku_launcher.star")
 
+constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
+shared_utils = import_module("../shared_utils/shared_utils.star")
 
 snooper = import_module("../snooper/snooper_engine_launcher.star")
+
+CL_CLIENT_CONTEXT_BOOTNODE = None
 
 
 def launch(
@@ -13,8 +18,10 @@ def launch(
     network_params,
     el_cl_data,
     jwt_file,
+    keymanager_file,
+    keymanager_p12_file,
     participants,
-    node_selectors,
+    all_el_client_contexts,
     global_log_level,
     global_node_selectors,
     global_tolerations,
@@ -22,18 +29,11 @@ def launch(
     network_id,
     num_participants,
     validator_data,
+    prysm_password_relative_filepath,
+    prysm_password_artifact_uuid,
 ):
     plan.print("Launching CL network")
-    prysm_password_relative_filepath = (
-        validator_data.prysm_password_relative_filepath
-        if network_params.network == constants.NETWORK_NAME.kurtosis
-        else None
-    )
-    prysm_password_artifact_uuid = (
-        validator_data.prysm_password_artifact_uuid
-        if network_params.network == constants.NETWORK_NAME.kurtosis
-        else None
-    )
+
     cl_launchers = {
         constants.CL_CLIENT_TYPE.lighthouse: {
             "launcher": lighthouse.new_lighthouse_launcher(
@@ -49,7 +49,10 @@ def launch(
         },
         constants.CL_CLIENT_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(
-                el_cl_data, jwt_file, network_params.network
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+                keymanager_file,
             ),
             "launch_method": nimbus.launch,
         },
@@ -68,6 +71,8 @@ def launch(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                keymanager_file,
+                keymanager_p12_file,
             ),
             "launch_method": teku.launch,
         },
@@ -75,7 +80,6 @@ def launch(
 
     all_snooper_engine_contexts = []
     all_cl_client_contexts = []
-    all_xatu_sentry_contexts = []
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
         if network_params.network == constants.NETWORK_NAME.kurtosis
@@ -201,4 +205,8 @@ def launch(
                 metrics_info["config"] = participant.prometheus_config
 
         all_cl_client_contexts.append(cl_client_context)
-    return all_cl_client_contexts
+    return (
+        all_cl_client_contexts,
+        all_snooper_engine_contexts,
+        preregistered_validator_keys_for_nodes,
+    )

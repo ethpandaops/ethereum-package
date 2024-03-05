@@ -29,7 +29,6 @@ launch_shadowfork = import_module("./network_launcher/shadowfork.star")
 el_client_launcher = import_module("./el/el_client_launcher.star")
 cl_client_launcher = import_module("./cl/cl_client_launcher.star")
 validator_client = import_module("./validator_client/validator_client_launcher.star")
-CL_CLIENT_CONTEXT_BOOTNODE = None
 
 
 def launch_participant_network(
@@ -38,6 +37,8 @@ def launch_participant_network(
     network_params,
     global_log_level,
     jwt_file,
+    keymanager_file,
+    keymanager_p12_file,
     persistent,
     xatu_sentry_params,
     global_tolerations,
@@ -142,7 +143,6 @@ def launch_participant_network(
         el_cl_data,
         jwt_file,
         participants,
-        node_selectors,
         global_log_level,
         global_node_selectors,
         global_tolerations,
@@ -152,14 +152,30 @@ def launch_participant_network(
     )
 
     # Launch all consensus layer clients
+    prysm_password_relative_filepath = (
+        validator_data.prysm_password_relative_filepath
+        if network_params.network == constants.NETWORK_NAME.kurtosis
+        else None
+    )
+    prysm_password_artifact_uuid = (
+        validator_data.prysm_password_artifact_uuid
+        if network_params.network == constants.NETWORK_NAME.kurtosis
+        else None
+    )
 
-    all_cl_client_contexts = cl_client_launcher.launch(
+    (
+        all_cl_client_contexts,
+        all_snooper_engine_contexts,
+        preregistered_validator_keys_for_nodes,
+    ) = cl_client_launcher.launch(
         plan,
         network_params,
         el_cl_data,
         jwt_file,
+        keymanager_file,
+        keymanager_p12_file,
         participants,
-        node_selectors,
+        all_el_client_contexts,
         global_log_level,
         global_node_selectors,
         global_tolerations,
@@ -167,58 +183,65 @@ def launch_participant_network(
         network_id,
         num_participants,
         validator_data,
+        prysm_password_relative_filepath,
+        prysm_password_artifact_uuid,
     )
 
     ethereum_metrics_exporter_context = None
     all_ethereum_metrics_exporter_contexts = []
-    if participant.ethereum_metrics_exporter_enabled:
-        pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
+    all_xatu_sentry_contexts = []
+    for index, participant in enumerate(participants):
+        el_client_type = participant.el_client_type
+        cl_client_type = participant.cl_client_type
+        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
+        if participant.ethereum_metrics_exporter_enabled:
+            pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
 
-        ethereum_metrics_exporter_service_name = "ethereum-metrics-exporter-{0}".format(
-            pair_name
-        )
-
-        ethereum_metrics_exporter_context = ethereum_metrics_exporter.launch(
-            plan,
-            pair_name,
-            ethereum_metrics_exporter_service_name,
-            el_client_context,
-            cl_client_context,
-            node_selectors,
-        )
-        plan.print(
-            "Successfully added {0} ethereum metrics exporter participants".format(
-                ethereum_metrics_exporter_context
+            ethereum_metrics_exporter_service_name = (
+                "ethereum-metrics-exporter-{0}".format(pair_name)
             )
-        )
 
-    all_ethereum_metrics_exporter_contexts.append(ethereum_metrics_exporter_context)
-
-    xatu_sentry_context = None
-
-    if participant.xatu_sentry_enabled:
-        pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
-
-        xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
-
-        xatu_sentry_context = xatu_sentry.launch(
-            plan,
-            xatu_sentry_service_name,
-            cl_client_context,
-            xatu_sentry_params,
-            network_params,
-            pair_name,
-            node_selectors,
-        )
-        plan.print(
-            "Successfully added {0} xatu sentry participants".format(
-                xatu_sentry_context
+            ethereum_metrics_exporter_context = ethereum_metrics_exporter.launch(
+                plan,
+                pair_name,
+                ethereum_metrics_exporter_service_name,
+                el_client_context,
+                cl_client_context,
+                participant.node_selectors,
             )
-        )
+            plan.print(
+                "Successfully added {0} ethereum metrics exporter participants".format(
+                    ethereum_metrics_exporter_context
+                )
+            )
 
-    all_xatu_sentry_contexts.append(xatu_sentry_context)
+        all_ethereum_metrics_exporter_contexts.append(ethereum_metrics_exporter_context)
 
-    plan.print("Successfully added {0} CL participants".format(num_participants))
+        xatu_sentry_context = None
+
+        if participant.xatu_sentry_enabled:
+            pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
+
+            xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
+
+            xatu_sentry_context = xatu_sentry.launch(
+                plan,
+                xatu_sentry_service_name,
+                cl_client_context,
+                xatu_sentry_params,
+                network_params,
+                pair_name,
+                participant.node_selectors,
+            )
+            plan.print(
+                "Successfully added {0} xatu sentry participants".format(
+                    xatu_sentry_context
+                )
+            )
+
+        all_xatu_sentry_contexts.append(xatu_sentry_context)
+
+        plan.print("Successfully added {0} CL participants".format(num_participants))
 
     all_validator_client_contexts = []
     # Some CL clients cannot run validator clients in the same process and need
@@ -267,6 +290,8 @@ def launch_participant_network(
             launcher=validator_client.new_validator_client_launcher(
                 el_cl_genesis_data=el_cl_data
             ),
+            keymanager_file=keymanager_file,
+            keymanager_p12_file=keymanager_p12_file,
             service_name="vc-{0}-{1}-{2}".format(
                 index_str, validator_client_type, el_client_type
             ),
@@ -288,7 +313,9 @@ def launch_participant_network(
             validator_tolerations=participant.validator_tolerations,
             participant_tolerations=participant.tolerations,
             global_tolerations=global_tolerations,
-            node_selectors=node_selectors,
+            node_selectors=participant.node_selectors,
+            network=network_params.network,
+            electra_fork_epoch=network_params.electra_fork_epoch,
         )
         all_validator_client_contexts.append(validator_client_context)
 
@@ -303,6 +330,7 @@ def launch_participant_network(
         el_client_type = participant.el_client_type
         cl_client_type = participant.cl_client_type
         validator_client_type = participant.validator_client_type
+        snooper_engine_context = None
 
         el_client_context = all_el_client_contexts[index]
         cl_client_context = all_cl_client_contexts[index]
