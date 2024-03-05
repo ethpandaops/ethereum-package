@@ -81,7 +81,7 @@ def get_config(
         + el_client_context.client_name,
     ]
 
-    if not (constants.NETWORK_NAME.verkle in network and electra_fork_epoch == None):
+    if not (constants.NETWORK_NAME.verkle in network or electra_fork_epoch != None):
         cmd.append("--produce-block-v3")
 
     if len(extra_params):
