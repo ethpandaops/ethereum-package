@@ -641,9 +641,9 @@ global_tolerations: []
 
 # Global node selector that will be passed to all containers (unless overridden by a more specific node selector)
 # Only works with Kubernetes
-# Example: node_selectors: { "disktype": "ssd" }
+# Example: global_node_selectors: { "disktype": "ssd" }
 # Defaults to empty
-node_selectors: {}
+global_node_selectors: {}
 ```
 
 #### Example configurations
