@@ -7,7 +7,7 @@ constants = import_module("../package_io/constants.star")
 
 def launch(plan, network, cancun_time, prague_time):
     # We are running a public network
-    dummy = plan.run_sh(
+    dummy_genesis_data = plan.run_sh(
         run="mkdir /network-configs",
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
     )
