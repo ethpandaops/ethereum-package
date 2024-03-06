@@ -12,7 +12,7 @@ def launch(plan, network, cancun_time, prague_time):
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
     )
     el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
-        dummy.files_artifacts[0],
+        dummy_genesis_data.files_artifacts[0],
         constants.GENESIS_VALIDATORS_ROOT[network],
         cancun_time,
         prague_time,
