@@ -25,7 +25,7 @@ participants:
     cl_max_cpu: 0
     cl_min_mem: 0
     cl_max_mem: 0
-    use_separate_validator_client: false
+    use_separate_validator_client: true
 # Validator
     vc_min_cpu: 0
     vc_max_cpu: 0
