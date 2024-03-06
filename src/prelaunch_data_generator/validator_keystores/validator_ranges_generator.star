@@ -5,12 +5,12 @@ shared_utils = import_module("../../shared_utils/shared_utils.star")
 def generate_validator_ranges(
     plan,
     config_template,
-    cl_client_contexts,
+    cl_contexts,
     participants,
 ):
     data = []
     running_total_validator_count = 0
-    for index, client in enumerate(cl_client_contexts):
+    for index, client in enumerate(cl_contexts):
         participant = participants[index]
         if participant.validator_count == 0:
             continue

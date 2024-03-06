@@ -15,7 +15,7 @@ def launch_mock_mev(
     el_uri,
     beacon_uri,
     jwt_secret,
-    global_client_log_level,
+    global_log_level,
     global_node_selectors,
 ):
     mock_builder = plan.add_service(
@@ -32,7 +32,7 @@ def launch_mock_mev(
                 "--el={0}".format(el_uri),
                 "--cl={0}".format(beacon_uri),
                 "--bid-multiplier=5",  # TODO: This could be customizable
-                "--log-level={0}".format(global_client_log_level),
+                "--log-level={0}".format(global_log_level),
             ],
             min_cpu=MIN_CPU,
             max_cpu=MAX_CPU,

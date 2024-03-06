@@ -63,7 +63,7 @@ Then the validator keys are generated. A tool called [eth2-val-tools](https://gi
 
 ### Starting EL clients
 
-Next, we plug the generated genesis data [into EL client "launchers"](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/el) to start a mining network of EL nodes. The launchers come with a `launch` function that consumes EL genesis data and produces information about the running EL client node. Running EL node information is represented by [an `el_client_context` struct](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/participant_network/el/el_client_context.star). Each EL client type has its own launcher (e.g. [Geth](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/el/geth), [Besu](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/el/besu)) because each EL client will require different environment variables and flags to be set when launching the client's container.
+Next, we plug the generated genesis data [into EL client "launchers"](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/el) to start a mining network of EL nodes. The launchers come with a `launch` function that consumes EL genesis data and produces information about the running EL client node. Running EL node information is represented by [an `el_context` struct](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/participant_network/el/el_context.star). Each EL client type has its own launcher (e.g. [Geth](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/el/geth), [Besu](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/el/besu)) because each EL client will require different environment variables and flags to be set when launching the client's container.
 
 ### Starting CL clients
 
@@ -71,9 +71,9 @@ Once CL genesis data and keys have been created, the CL client nodes are started
 
 - CL client launchers implement come with a `launch` method
 - One CL client launcher exists per client type (e.g. [Nimbus](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/cl/nimbus), [Lighthouse](https://github.com/kurtosis-tech/ethereum-package/tree/main/src/participant_network/cl/lighthouse))
-- Launched CL node information is tracked in [a `cl_client_context` struct](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/participant_network/cl/cl_client_context.star)
+- Launched CL node information is tracked in [a `cl_context` struct](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/participant_network/cl/cl_context.star)
 
-There are only two major difference between CL client and EL client launchers. First, the `cl_client_launcher.launch` method also consumes an `el_client_context`, because each CL client is connected in a 1:1 relationship with an EL client. Second, because CL clients have keys, the keystore files are passed in to the `launch` function as well.
+There are only two major difference between CL client and EL client launchers. First, the `cl_client_launcher.launch` method also consumes an `el_context`, because each CL client is connected in a 1:1 relationship with an EL client. Second, because CL clients have keys, the keystore files are passed in to the `launch` function as well.
 
 ## Auxiliary Services
 

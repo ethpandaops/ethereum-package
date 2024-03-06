@@ -23,22 +23,23 @@ def launch(
     keymanager_file,
     keymanager_p12_file,
     service_name,
-    vc_client_type,
+    vc_type,
     image,
     participant_log_level,
     global_log_level,
-    cl_client_context,
-    el_client_context,
+    cl_context,
+    el_context,
     node_keystore_files,
-    v_min_cpu,
-    v_max_cpu,
-    v_min_mem,
-    v_max_mem,
+    vc_min_cpu,
+    vc_max_cpu,
+    vc_min_mem,
+    vc_max_mem,
     extra_params,
+    extra_env_vars,
     extra_labels,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
-    validator_tolerations,
+    vc_tolerations,
     participant_tolerations,
     global_tolerations,
     node_selectors,
@@ -49,101 +50,105 @@ def launch(
         return None
 
     tolerations = input_parser.get_client_tolerations(
-        validator_tolerations, participant_tolerations, global_tolerations
+        vc_tolerations, participant_tolerations, global_tolerations
     )
 
     beacon_http_url = "http://{}:{}".format(
-        cl_client_context.ip_addr,
-        cl_client_context.http_port_num,
+        cl_context.ip_addr,
+        cl_context.http_port_num,
     )
 
-    v_min_cpu = int(v_min_cpu) if int(v_min_cpu) > 0 else MIN_CPU
-    v_max_cpu = int(v_max_cpu) if int(v_max_cpu) > 0 else MAX_CPU
-    v_min_mem = int(v_min_mem) if int(v_min_mem) > 0 else MIN_MEMORY
-    v_max_mem = int(v_max_mem) if int(v_max_mem) > 0 else MAX_MEMORY
+    vc_min_cpu = int(vc_min_cpu) if int(vc_min_cpu) > 0 else MIN_CPU
+    vc_max_cpu = int(vc_max_cpu) if int(vc_max_cpu) > 0 else MAX_CPU
+    vc_min_mem = int(vc_min_mem) if int(vc_min_mem) > 0 else MIN_MEMORY
+    vc_max_mem = int(vc_max_mem) if int(vc_max_mem) > 0 else MAX_MEMORY
 
-    if vc_client_type == constants.VC_CLIENT_TYPE.lighthouse:
+    if vc_type == constants.VC_TYPE.lighthouse:
         config = lighthouse.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
             participant_log_level=participant_log_level,
             global_log_level=global_log_level,
             beacon_http_url=beacon_http_url,
-            cl_client_context=cl_client_context,
-            el_client_context=el_client_context,
+            cl_context=cl_context,
+            el_context=el_context,
             node_keystore_files=node_keystore_files,
-            v_min_cpu=v_min_cpu,
-            v_max_cpu=v_max_cpu,
-            v_min_mem=v_min_mem,
-            v_max_mem=v_max_mem,
+            vc_min_cpu=vc_min_cpu,
+            vc_max_cpu=vc_max_cpu,
+            vc_min_mem=vc_min_mem,
+            vc_max_mem=vc_max_mem,
             extra_params=extra_params,
+            extra_env_vars=extra_env_vars,
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
             network=network,  # TODO: remove when deneb rebase is done
             electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
         )
-    elif vc_client_type == constants.VC_CLIENT_TYPE.lodestar:
+    elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
             participant_log_level=participant_log_level,
             global_log_level=global_log_level,
             beacon_http_url=beacon_http_url,
-            cl_client_context=cl_client_context,
-            el_client_context=el_client_context,
+            cl_context=cl_context,
+            el_context=el_context,
             node_keystore_files=node_keystore_files,
-            v_min_cpu=v_min_cpu,
-            v_max_cpu=v_max_cpu,
-            v_min_mem=v_min_mem,
-            v_max_mem=v_max_mem,
+            vc_min_cpu=vc_min_cpu,
+            vc_max_cpu=vc_max_cpu,
+            vc_min_mem=vc_min_mem,
+            vc_max_mem=vc_max_mem,
             extra_params=extra_params,
+            extra_env_vars=extra_env_vars,
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
         )
-    elif vc_client_type == constants.VC_CLIENT_TYPE.teku:
+    elif vc_type == constants.VC_TYPE.teku:
         config = teku.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             keymanager_p12_file=keymanager_p12_file,
             image=image,
             beacon_http_url=beacon_http_url,
-            cl_client_context=cl_client_context,
-            el_client_context=el_client_context,
+            cl_context=cl_context,
+            el_context=el_context,
             node_keystore_files=node_keystore_files,
-            v_min_cpu=v_min_cpu,
-            v_max_cpu=v_max_cpu,
-            v_min_mem=v_min_mem,
-            v_max_mem=v_max_mem,
+            vc_min_cpu=vc_min_cpu,
+            vc_max_cpu=vc_max_cpu,
+            vc_min_mem=vc_min_mem,
+            vc_max_mem=vc_max_mem,
             extra_params=extra_params,
+            extra_env_vars=extra_env_vars,
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
         )
-    elif vc_client_type == constants.VC_CLIENT_TYPE.nimbus:
+    elif vc_type == constants.VC_TYPE.nimbus:
         config = nimbus.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
             beacon_http_url=beacon_http_url,
-            cl_client_context=cl_client_context,
-            el_client_context=el_client_context,
+            cl_context=cl_context,
+            el_context=el_context,
             node_keystore_files=node_keystore_files,
-            v_min_cpu=v_min_cpu,
-            v_max_cpu=v_max_cpu,
-            v_min_mem=v_min_mem,
-            v_max_mem=v_max_mem,
+            vc_min_cpu=vc_min_cpu,
+            vc_max_cpu=vc_max_cpu,
+            vc_min_mem=vc_min_mem,
+            vc_max_mem=vc_max_mem,
             extra_params=extra_params,
+            extra_env_vars=extra_env_vars,
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
         )
-    elif vc_client_type == constants.VC_CLIENT_TYPE.prysm:
+    elif vc_type == constants.VC_TYPE.prysm:
         # Prysm VC only works with Prysm beacon node right now
-        if cl_client_context.client_name != constants.CL_CLIENT_TYPE.prysm:
+        if cl_context.client_name != constants.cl_type.prysm:
             fail(
-                cl_client_context.client_name
+                cl_context.client_name
                 + "Prysm VC is only compatible with Prysm beacon node"
             )
 
@@ -151,14 +156,15 @@ def launch(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
             beacon_http_url=beacon_http_url,
-            cl_client_context=cl_client_context,
-            el_client_context=el_client_context,
+            cl_context=cl_context,
+            el_context=el_context,
             node_keystore_files=node_keystore_files,
-            v_min_cpu=v_min_cpu,
-            v_max_cpu=v_max_cpu,
-            v_min_mem=v_min_mem,
-            v_max_mem=v_max_mem,
+            vc_min_cpu=vc_min_cpu,
+            vc_max_cpu=vc_max_cpu,
+            vc_min_mem=vc_min_mem,
+            vc_max_mem=vc_max_mem,
             extra_params=extra_params,
+            extra_env_vars=extra_env_vars,
             extra_labels=extra_labels,
             prysm_password_relative_filepath=prysm_password_relative_filepath,
             prysm_password_artifact_uuid=prysm_password_artifact_uuid,
@@ -166,7 +172,7 @@ def launch(
             node_selectors=node_selectors,
         )
     else:
-        fail("Unsupported vc_client_type: {0}".format(vc_client_type))
+        fail("Unsupported vc_type: {0}".format(vc_type))
 
     validator_service = plan.add_service(service_name, config)
 
@@ -186,7 +192,7 @@ def launch(
 
     return validator_client_context.new_validator_client_context(
         service_name=service_name,
-        client_name=vc_client_type,
+        client_name=vc_type,
         metrics_info=validator_node_metrics_info,
     )
 

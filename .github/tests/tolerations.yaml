@@ -1,6 +1,6 @@
 participants:
-  - el_client_type: reth
-    cl_client_type: teku
+  - el_type: reth
+    cl_type: teku
     use_separate_validator_client: true
     cl_tolerations:
       - key: "node-role.kubernetes.io/master1"
@@ -13,19 +13,19 @@ participants:
       - key: "node-role.kubernetes.io/master3"
         operator: "Exists"
         effect: "NoSchedule"
-    validator_tolerations:
+    vc_tolerations:
       - key: "node-role.kubernetes.io/master4"
         operator: "Exists"
         effect: "NoSchedule"
-  - el_client_type: reth
-    cl_client_type: teku
+  - el_type: reth
+    cl_type: teku
     use_separate_validator_client: true
     tolerations:
       - key: "node-role.kubernetes.io/master5"
         operator: "Exists"
         effect: "NoSchedule"
-  - el_client_type: reth
-    cl_client_type: teku
+  - el_type: reth
+    cl_type: teku
     use_separate_validator_client: true
 additional_services:
   - dora

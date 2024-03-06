@@ -134,8 +134,8 @@ def generate_validator_keystores(plan, mnemonic, participants):
         keystore_stop_index = (keystore_start_index + participant.validator_count) - 1
         artifact_name = "{0}-{1}-{2}-{3}-{4}".format(
             padded_idx,
-            participant.cl_client_type,
-            participant.el_client_type,
+            participant.cl_type,
+            participant.el_type,
             keystore_start_index,
             keystore_stop_index,
         )
@@ -286,8 +286,8 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
         keystore_stop_index = (keystore_start_index + participant.validator_count) - 1
         artifact_name = "{0}-{1}-{2}-{3}-{4}".format(
             padded_idx,
-            participant.cl_client_type,
-            participant.el_client_type,
+            participant.cl_type,
+            participant.el_type,
             keystore_start_index,
             keystore_stop_index,
         )

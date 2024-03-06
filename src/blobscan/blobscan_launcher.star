@@ -55,18 +55,18 @@ POSTGRES_MAX_MEMORY = 1024
 
 def launch_blobscan(
     plan,
-    cl_client_contexts,
-    el_client_contexts,
+    cl_contexts,
+    el_contexts,
     chain_id,
     persistent,
     global_node_selectors,
 ):
     node_selectors = global_node_selectors
     beacon_node_rpc_uri = "http://{0}:{1}".format(
-        cl_client_contexts[0].ip_addr, cl_client_contexts[0].http_port_num
+        cl_contexts[0].ip_addr, cl_contexts[0].http_port_num
     )
     execution_node_rpc_uri = "http://{0}:{1}".format(
-        el_client_contexts[0].ip_addr, el_client_contexts[0].rpc_port_num
+        el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
     )
 
     postgres_output = postgres.run(

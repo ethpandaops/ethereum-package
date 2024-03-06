@@ -60,7 +60,7 @@ When running on a public testnet using a cloud provider's Kubernetes cluster, th
 
 3. Network Syncing: The disk speed provided by cloud providers may not be sufficient to sync with networks that have high demands, such as the mainnet. This could lead to syncing issues and delays.
 
-To mitigate these issues, you can use the `el_client_volume_size` and `cl_client_volume_size` flags to override the default settings locally. This allows you to allocate more storage to the EL and CL clients, which can help accommodate faster state growth and improve syncing performance. However, keep in mind that increasing the volume size may also increase your cloud provider costs. Always monitor your usage and adjust as necessary to balance performance and cost.
+To mitigate these issues, you can use the `el_volume_size` and `cl_volume_size` flags to override the default settings locally. This allows you to allocate more storage to the EL and CL clients, which can help accommodate faster state growth and improve syncing performance. However, keep in mind that increasing the volume size may also increase your cloud provider costs. Always monitor your usage and adjust as necessary to balance performance and cost.
 
 For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self hosting your own Kubernetes cluster with fast persistent storage.
 
@@ -89,8 +89,8 @@ persistent: true
 It is possible to run the package on a Kubernetes cluster with taints and tolerations. This is done by adding the tolerations to the `tolerations` field in the `network_params.yaml` file. For example:
 ```yaml
 participants:
-  - el_client_type: reth
-    cl_client_type: teku
+  - el_type: reth
+    cl_type: teku
 global_tolerations:
   - key: "node-role.kubernetes.io/master6"
     value: "true"
@@ -99,7 +99,7 @@ global_tolerations:
 ```
 
 It is possible to define toleration globally, per participant or per container. The order of precedence is as follows:
-1. Container (`el_tolerations`, `cl_tolerations`, `validator_tolerations`)
+1. Container (`el_tolerations`, `cl_tolerations`, `vc_tolerations`)
 2. Participant (`tolerations`)
 3. Global (`global_tolerations`)
 
@@ -154,7 +154,7 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 participants:
   # The type of EL client that should be started
   # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1
-- el_client_type: geth
+- el_type: geth
 
   # The Docker image that should be used for the EL client; leave blank to use the default for the client type
   # Defaults by client:
@@ -165,14 +165,14 @@ participants:
   # - reth: ghcr.io/paradigmxyz/reth
   # - ethereumjs: ethpandaops/ethereumjs:master
   # - nimbus-eth1: ethpandaops/nimbus-eth1:master
-  el_client_image: ""
+  el_image: ""
 
   # The log level string that this participant's EL client should log at
   # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
   # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
   # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
   # over a specific participant's logging
-  el_client_log_level: ""
+  el_log_level: ""
 
   # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
   el_extra_params: []
@@ -183,7 +183,7 @@ participants:
   # Persistent storage size for the EL client container (in MB)
   # Defaults to 0, which means that the default size for the client will be used
   # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
-  el_client_volume_size: 0
+  el_volume_size: 0
 
   # A list of optional extra labels the el container should spin up with
   # Example; el_extra_labels: {"ethereum-package.partition": "1"}
@@ -202,7 +202,7 @@ participants:
 
   # The type of CL client that should be started
   # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
-  cl_client_type: lighthouse
+  cl_type: lighthouse
 
   # The Docker image that should be used for the CL client; leave blank to use the default for the client type
   # Defaults by client:
@@ -211,38 +211,19 @@ participants:
   # - nimbus: statusim/nimbus-eth2:multiarch-latest
   # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
   # - lodestar: chainsafe/lodestar:next
-  cl_client_image: ""
+  cl_image: ""
 
   # The log level string that this participant's CL client should log at
   # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
   # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
   # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
   # over a specific participant's logging
-  cl_client_log_level: ""
-
-  # Whether to use a separate validator client attached to the CL client.
-  # Defaults to false for clients that can run both in one process (Teku, Nimbus)
-  use_separate_validator_client: false
-
-  # The type of validator client that should be used
-  # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
-  # ( The prysm validator only works with a prysm CL client )
-  # Defaults to matching the chosen CL client (cl_client_type)
-  vc_client_type: ""
-
-  # The Docker image that should be used for the separate validator client
-  # Defaults by client:
-  # - lighthouse: sigp/lighthouse:latest
-  # - lodestar: chainsafe/lodestar:latest
-  # - nimbus: statusim/nimbus-validator-client:multiarch-latest
-  # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
-  # - teku: consensys/teku:latest
-  validator_client_image: ""
+  cl_log_level: ""
 
   # Persistent storage size for the CL client container (in MB)
   # Defaults to 0, which means that the default size for the client will be used
   # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
-  cl_client_volume_size: 0
+  cl_volume_size: 0
 
   # A list of tolerations that will be passed to the CL client container
   # Only works with Kubernetes
@@ -255,6 +236,36 @@ participants:
   # Defaults to empty
   cl_tolerations: []
 
+  # Whether to use a separate validator client attached to the CL client.
+  # Defaults to false for clients that can run both in one process (Teku, Nimbus)
+  use_separate_validator_client: false
+
+  # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
+  # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
+  cl_extra_params: []
+
+  # A list of optional extra env_vars the cl container should spin up with
+  cl_extra_env_vars: {}
+
+  # A list of optional extra labels that will be passed to the CL client Beacon container.
+  # Example; cl_extra_labels: {"ethereum-package.partition": "1"}
+  cl_extra_labels: {}
+  # The type of validator client that should be used
+  # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+  # ( The prysm validator only works with a prysm CL client )
+  # Defaults to matching the chosen CL client (cl_type)
+
+  vc_type: ""
+
+  # The Docker image that should be used for the separate validator client
+  # Defaults by client:
+  # - lighthouse: sigp/lighthouse:latest
+  # - lodestar: chainsafe/lodestar:latest
+  # - nimbus: statusim/nimbus-validator-client:multiarch-latest
+  # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
+  # - teku: consensys/teku:latest
+  vc_image: ""
+
   # A list of tolerations that will be passed to the validator container
   # Only works with Kubernetes
   # Example: el_tolerations:
@@ -264,41 +275,18 @@ participants:
   #   effect: "NoSchedule"
   #   toleration_seconds: 3600
   # Defaults to empty
-  validator_tolerations: []
-
-  # A list of tolerations that will be passed to the EL/CL/validator containers
-  # This is to be used when you don't want to specify the tolerations for each container separately
-  # Only works with Kubernetes
-  # Example: tolerations:
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-  #   toleration_seconds: 3600
-  # Defaults to empty
-  tolerations: []
-
-  # Node selector
-  # Only works with Kubernetes
-  # Example: node_selectors: { "disktype": "ssd" }
-  # Defaults to empty
-  node_selectors: {}
-
-  # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
-  # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
-  beacon_extra_params: []
-
-  # A list of optional extra labels that will be passed to the CL client Beacon container.
-  # Example; beacon_extra_labels: {"ethereum-package.partition": "1"}
-  beacon_extra_labels: {}
+  vc_tolerations: []
 
   # A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
   # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
-  validator_extra_params: []
+  vc_extra_params: []
+
+  # A list of optional extra env_vars the vc container should spin up with
+  vc_extra_env_vars: {}
 
   # A list of optional extra labels that will be passed to the CL client validator container.
-  # Example; validator_extra_labels: {"ethereum-package.partition": "1"}
-  validator_extra_labels: {}
+  # Example; vc_extra_labels: {"ethereum-package.partition": "1"}
+  vc_extra_labels: {}
 
   # A set of parameters the node needs to reach an external block building network
   # If `null` then the builder infrastructure will not be instantiated
@@ -320,14 +308,32 @@ participants:
   el_max_cpu: 0
   el_min_mem: 0
   el_max_mem: 0
-  bn_min_cpu: 0
-  bn_max_cpu: 0
-  bn_min_mem: 0
-  bn_max_mem: 0
-  v_min_cpu: 0
-  v_max_cpu: 0
-  v_min_mem: 0
-  v_max_mem: 0
+  cl_min_cpu: 0
+  cl_max_cpu: 0
+  cl_min_mem: 0
+  cl_max_mem: 0
+  vc_min_cpu: 0
+  vc_max_cpu: 0
+  vc_min_mem: 0
+  vc_max_mem: 0
+
+  # A list of tolerations that will be passed to the EL/CL/validator containers
+  # This is to be used when you don't want to specify the tolerations for each container separately
+  # Only works with Kubernetes
+  # Example: tolerations:
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+  #   toleration_seconds: 3600
+  # Defaults to empty
+  tolerations: []
+
+  # Node selector
+  # Only works with Kubernetes
+  # Example: node_selectors: { "disktype": "ssd" }
+  # Defaults to empty
+  node_selectors: {}
 
   # Snooper can be enabled with the `snooper_enabled` flag per client or globally
   # Defaults to false
@@ -531,7 +537,7 @@ wait_for_finalization: false
 # The global log level that all clients should log at
 # Valid values are "error", "warn", "info", "debug", and "trace"
 # This value will be overridden by participant-specific values
-global_client_log_level: "info"
+global_log_level: "info"
 
 # EngineAPI Snooper global flags for all participants
 # Default to false
@@ -653,31 +659,31 @@ global_node_selectors: {}
 
 ```yaml
 participants:
-  - el_client_type: geth
-    el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
+  - el_type: geth
+    el_image: ethpandaops/geth:<VERKLE_IMAGE>
     elExtraParams:
     - "--override.verkle=<UNIXTIMESTAMP>"
-    cl_client_type: lighthouse
-    cl_client_image: sigp/lighthouse:latest
-  - el_client_type: geth
-    el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
+    cl_type: lighthouse
+    cl_image: sigp/lighthouse:latest
+  - el_type: geth
+    el_image: ethpandaops/geth:<VERKLE_IMAGE>
     elExtraParams:
     - "--override.verkle=<UNIXTIMESTAMP>"
-    cl_client_type: lighthouse
-    cl_client_image: sigp/lighthouse:latest
-  - el_client_type: geth
-    el_client_image: ethpandaops/geth:<VERKLE_IMAGE>
+    cl_type: lighthouse
+    cl_image: sigp/lighthouse:latest
+  - el_type: geth
+    el_image: ethpandaops/geth:<VERKLE_IMAGE>
     elExtraParams:
     - "--override.verkle=<UNIXTIMESTAMP>"
-    cl_client_type: lighthouse
-    cl_client_image: sigp/lighthouse:latest
+    cl_type: lighthouse
+    cl_image: sigp/lighthouse:latest
 network_params:
   capella_fork_epoch: 2
   deneb_fork_epoch: 5
 additional_services: []
 wait_for_finalization: false
 wait_for_verifications: false
-global_client_log_level: info
+global_log_level: info
 
 ```
 
@@ -689,20 +695,20 @@ global_client_log_level: info
 
 ```yaml
 participants:
-  - el_client_type: geth
-    el_client_image: ''
-    cl_client_type: lighthouse
-    cl_client_image: ''
+  - el_type: geth
+    el_image: ''
+    cl_type: lighthouse
+    cl_image: ''
     count: 2
-  - el_client_type: nethermind
-    el_client_image: ''
-    cl_client_type: teku
-    cl_client_image: ''
+  - el_type: nethermind
+    el_image: ''
+    cl_type: teku
+    cl_image: ''
     count: 1
-  - el_client_type: besu
-    el_client_image: ''
-    cl_client_type: prysm
-    cl_client_image: ''
+  - el_type: besu
+    el_image: ''
+    cl_type: prysm
+    cl_image: ''
     count: 2
 mev_type: mock
 additional_services: []
@@ -715,13 +721,13 @@ additional_services: []
 
 ```yaml
 participants:
-  - el_client_type: geth
-    cl_client_type: lighthouse
+  - el_type: geth
+    cl_type: lighthouse
     count: 2
-  - el_client_type: nethermind
-    cl_client_type: teku
-  - el_client_type: besu
-    cl_client_type: prysm
+  - el_type: nethermind
+    cl_type: teku
+  - el_type: besu
+    cl_type: prysm
     count: 2
 mev_type: full
 network_params:
@@ -737,8 +743,8 @@ additional_services: []
 
 ```yaml
 participants:
-  - el_client_type: geth
-    cl_client_type: lighthouse
+  - el_type: geth
+    cl_type: lighthouse
     count: 2
 snooper_enabled: true
 ```

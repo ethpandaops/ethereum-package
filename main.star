@@ -99,7 +99,7 @@ def run(plan, args={}):
         plan,
         args_with_right_defaults.participants,
         network_params,
-        args_with_right_defaults.global_client_log_level,
+        args_with_right_defaults.global_log_level,
         jwt_file,
         keymanager_file,
         keymanager_p12_file,
@@ -112,19 +112,19 @@ def run(plan, args={}):
 
     plan.print(
         "NODE JSON RPC URI: '{0}:{1}'".format(
-            all_participants[0].el_client_context.ip_addr,
-            all_participants[0].el_client_context.rpc_port_num,
+            all_participants[0].el_context.ip_addr,
+            all_participants[0].el_context.rpc_port_num,
         )
     )
 
-    all_el_client_contexts = []
-    all_cl_client_contexts = []
+    all_el_contexts = []
+    all_cl_contexts = []
     all_validator_client_contexts = []
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     for participant in all_participants:
-        all_el_client_contexts.append(participant.el_client_context)
-        all_cl_client_contexts.append(participant.cl_client_context)
+        all_el_contexts.append(participant.el_context)
+        all_cl_contexts.append(participant.cl_context)
         all_validator_client_contexts.append(participant.validator_client_context)
         all_ethereum_metrics_exporter_contexts.append(
             participant.ethereum_metrics_exporter_context
@@ -138,13 +138,13 @@ def run(plan, args={}):
     ranges = validator_ranges.generate_validator_ranges(
         plan,
         validator_ranges_config_template,
-        all_cl_client_contexts,
+        all_cl_contexts,
         args_with_right_defaults.participants,
     )
 
     fuzz_target = "http://{0}:{1}".format(
-        all_el_client_contexts[0].ip_addr,
-        all_el_client_contexts[0].rpc_port_num,
+        all_el_contexts[0].ip_addr,
+        all_el_contexts[0].rpc_port_num,
     )
 
     # Broadcaster forwards requests, sent to it, to all nodes in parallel
@@ -152,7 +152,7 @@ def run(plan, args={}):
         args_with_right_defaults.additional_services.remove("broadcaster")
         broadcaster_service = broadcaster.launch_broadcaster(
             plan,
-            all_el_client_contexts,
+            all_el_contexts,
             global_node_selectors,
         )
         fuzz_target = "http://{0}:{1}".format(
@@ -174,18 +174,18 @@ def run(plan, args={}):
         and args_with_right_defaults.mev_type == MOCK_MEV_TYPE
     ):
         el_uri = "{0}:{1}".format(
-            all_el_client_contexts[0].ip_addr,
-            all_el_client_contexts[0].engine_rpc_port_num,
+            all_el_contexts[0].ip_addr,
+            all_el_contexts[0].engine_rpc_port_num,
         )
         beacon_uri = "{0}:{1}".format(
-            all_cl_client_contexts[0].ip_addr, all_cl_client_contexts[0].http_port_num
+            all_cl_contexts[0].ip_addr, all_cl_contexts[0].http_port_num
         )
         endpoint = mock_mev.launch_mock_mev(
             plan,
             el_uri,
             beacon_uri,
             raw_jwt_secret,
-            args_with_right_defaults.global_client_log_level,
+            args_with_right_defaults.global_log_level,
             global_node_selectors,
         )
         mev_endpoints.append(endpoint)
@@ -194,16 +194,16 @@ def run(plan, args={}):
         and args_with_right_defaults.mev_type == FULL_MEV_TYPE
     ):
         builder_uri = "http://{0}:{1}".format(
-            all_el_client_contexts[-1].ip_addr, all_el_client_contexts[-1].rpc_port_num
+            all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
         )
         beacon_uris = ",".join(
             [
                 "http://{0}:{1}".format(context.ip_addr, context.http_port_num)
-                for context in all_cl_client_contexts
+                for context in all_cl_contexts
             ]
         )
 
-        first_cl_client = all_cl_client_contexts[0]
+        first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
         contract_owner, normal_user = genesis_constants.PRE_FUNDED_ACCOUNTS[6:8]
         mev_flood.launch_mev_flood(
@@ -263,8 +263,8 @@ def run(plan, args={}):
                 mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
                     input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
                     index_str,
-                    participant.cl_client_type,
-                    participant.el_client_type,
+                    participant.cl_type,
+                    participant.el_type,
                 )
                 mev_boost_context = mev_boost.launch(
                     plan,
@@ -306,7 +306,7 @@ def run(plan, args={}):
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
                 fuzz_target,
-                all_cl_client_contexts[0],
+                all_cl_contexts[0],
                 network_params.deneb_fork_epoch,
                 network_params.seconds_per_slot,
                 network_params.genesis_delay,
@@ -319,8 +319,8 @@ def run(plan, args={}):
             goomy_blob.launch_goomy_blob(
                 plan,
                 genesis_constants.PRE_FUNDED_ACCOUNTS,
-                all_el_client_contexts,
-                all_cl_client_contexts[0],
+                all_el_contexts,
+                all_cl_contexts[0],
                 network_params.seconds_per_slot,
                 goomy_blob_params,
                 global_node_selectors,
@@ -336,7 +336,7 @@ def run(plan, args={}):
             el_forkmon.launch_el_forkmon(
                 plan,
                 el_forkmon_config_template,
-                all_el_client_contexts,
+                all_el_contexts,
                 global_node_selectors,
             )
             plan.print("Successfully launched execution layer forkmon")
@@ -345,7 +345,7 @@ def run(plan, args={}):
             beacon_metrics_gazer_prometheus_metrics_job = (
                 beacon_metrics_gazer.launch_beacon_metrics_gazer(
                     plan,
-                    all_cl_client_contexts,
+                    all_cl_contexts,
                     network_params,
                     global_node_selectors,
                 )
@@ -359,7 +359,7 @@ def run(plan, args={}):
             plan.print("Launching blockscout")
             blockscout_sc_verif_url = blockscout.launch_blockscout(
                 plan,
-                all_el_client_contexts,
+                all_el_contexts,
                 persistent,
                 global_node_selectors,
             )
@@ -370,7 +370,7 @@ def run(plan, args={}):
             dora.launch_dora(
                 plan,
                 dora_config_template,
-                all_cl_client_contexts,
+                all_cl_contexts,
                 el_cl_data_files_artifact_uuid,
                 network_params.electra_fork_epoch,
                 network_params.network,
@@ -381,8 +381,8 @@ def run(plan, args={}):
             plan.print("Launching blobscan")
             blobscan.launch_blobscan(
                 plan,
-                all_cl_client_contexts,
-                all_el_client_contexts,
+                all_cl_contexts,
+                all_el_contexts,
                 network_params.network_id,
                 persistent,
                 global_node_selectors,
@@ -396,8 +396,8 @@ def run(plan, args={}):
             full_beaconchain_explorer.launch_full_beacon(
                 plan,
                 full_beaconchain_explorer_config_template,
-                all_cl_client_contexts,
-                all_el_client_contexts,
+                all_cl_contexts,
+                all_el_contexts,
                 persistent,
                 global_node_selectors,
             )
@@ -436,8 +436,8 @@ def run(plan, args={}):
         plan.print("Launching prometheus...")
         prometheus_private_url = prometheus.launch_prometheus(
             plan,
-            all_el_client_contexts,
-            all_cl_client_contexts,
+            all_el_contexts,
+            all_cl_contexts,
             all_validator_client_contexts,
             prometheus_additional_metrics_jobs,
             all_ethereum_metrics_exporter_contexts,
@@ -458,7 +458,7 @@ def run(plan, args={}):
 
     if args_with_right_defaults.wait_for_finalization:
         plan.print("Waiting for the first finalized epoch")
-        first_cl_client = all_cl_client_contexts[0]
+        first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
         epoch_recipe = GetHttpRequestRecipe(
             endpoint="/eth/v1/beacon/states/head/finality_checkpoints",

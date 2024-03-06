@@ -94,8 +94,8 @@ FRONTEND_MAX_MEMORY = 2048
 def launch_full_beacon(
     plan,
     config_template,
-    cl_client_contexts,
-    el_client_contexts,
+    cl_contexts,
+    el_contexts,
     persistent,
     global_node_selectors,
 ):
@@ -143,12 +143,12 @@ def launch_full_beacon(
     )
 
     el_uri = "http://{0}:{1}".format(
-        el_client_contexts[0].ip_addr, el_client_contexts[0].rpc_port_num
+        el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
     )
     redis_url = "{}:{}".format(redis_output.hostname, redis_output.port_number)
 
     template_data = new_config_template_data(
-        cl_client_contexts[0],
+        cl_contexts[0],
         el_uri,
         little_bigtable.ip_address,
         LITTLE_BIGTABLE_PORT_NUMBER,

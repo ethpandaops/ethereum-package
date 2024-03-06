@@ -8,14 +8,15 @@ def get_config(
     image,
     keymanager_file,
     beacon_http_url,
-    cl_client_context,
-    el_client_context,
+    cl_context,
+    el_context,
     node_keystore_files,
-    v_min_cpu,
-    v_max_cpu,
-    v_min_mem,
-    v_max_mem,
+    vc_min_cpu,
+    vc_max_cpu,
+    vc_min_mem,
+    vc_max_mem,
     extra_params,
+    extra_env_vars,
     extra_labels,
     tolerations,
     node_selectors,
@@ -48,10 +49,7 @@ def get_config(
         "--metrics-port={0}".format(
             validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
         ),
-        "--graffiti="
-        + cl_client_context.client_name
-        + "-"
-        + el_client_context.client_name,
+        "--graffiti=" + cl_context.client_name + "-" + el_context.client_name,
     ]
 
     if len(extra_params) > 0:
@@ -67,17 +65,18 @@ def get_config(
         image=image,
         ports=validator_client_shared.VALIDATOR_CLIENT_USED_PORTS,
         cmd=cmd,
+        env_vars=extra_env_vars,
         files=files,
         private_ip_address_placeholder=validator_client_shared.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        min_cpu=v_min_cpu,
-        max_cpu=v_max_cpu,
-        min_memory=v_min_mem,
-        max_memory=v_max_mem,
+        min_cpu=vc_min_cpu,
+        max_cpu=vc_max_cpu,
+        min_memory=vc_min_mem,
+        max_memory=vc_max_mem,
         labels=shared_utils.label_maker(
-            constants.VC_CLIENT_TYPE.nimbus,
+            constants.VC_TYPE.nimbus,
             constants.CLIENT_TYPES.validator,
             image,
-            cl_client_context.client_name,
+            cl_context.client_name,
             extra_labels,
         ),
         user=User(uid=0, gid=0),

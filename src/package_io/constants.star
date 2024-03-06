@@ -1,4 +1,4 @@
-EL_CLIENT_TYPE = struct(
+el_type = struct(
     gethbuilder="geth-builder",
     geth="geth",
     erigon="erigon",
@@ -9,7 +9,7 @@ EL_CLIENT_TYPE = struct(
     nimbus="nimbus",
 )
 
-CL_CLIENT_TYPE = struct(
+cl_type = struct(
     lighthouse="lighthouse",
     teku="teku",
     nimbus="nimbus",
@@ -17,7 +17,7 @@ CL_CLIENT_TYPE = struct(
     lodestar="lodestar",
 )
 
-VC_CLIENT_TYPE = struct(
+VC_TYPE = struct(
     lighthouse="lighthouse",
     lodestar="lodestar",
     nimbus="nimbus",
@@ -25,7 +25,7 @@ VC_CLIENT_TYPE = struct(
     teku="teku",
 )
 
-GLOBAL_CLIENT_LOG_LEVEL = struct(
+global_log_level = struct(
     info="info",
     error="error",
     warn="warn",

@@ -25,7 +25,7 @@ def launch(
     num_participants,
 ):
     el_launchers = {
-        constants.EL_CLIENT_TYPE.geth: {
+        constants.el_type.geth: {
             "launcher": geth.new_geth_launcher(
                 el_cl_data,
                 jwt_file,
@@ -38,7 +38,7 @@ def launch(
             ),
             "launch_method": geth.launch,
         },
-        constants.EL_CLIENT_TYPE.gethbuilder: {
+        constants.el_type.gethbuilder: {
             "launcher": geth.new_geth_launcher(
                 el_cl_data,
                 jwt_file,
@@ -51,7 +51,7 @@ def launch(
             ),
             "launch_method": geth.launch,
         },
-        constants.EL_CLIENT_TYPE.besu: {
+        constants.el_type.besu: {
             "launcher": besu.new_besu_launcher(
                 el_cl_data,
                 jwt_file,
@@ -59,7 +59,7 @@ def launch(
             ),
             "launch_method": besu.launch,
         },
-        constants.EL_CLIENT_TYPE.erigon: {
+        constants.el_type.erigon: {
             "launcher": erigon.new_erigon_launcher(
                 el_cl_data,
                 jwt_file,
@@ -69,7 +69,7 @@ def launch(
             ),
             "launch_method": erigon.launch,
         },
-        constants.EL_CLIENT_TYPE.nethermind: {
+        constants.el_type.nethermind: {
             "launcher": nethermind.new_nethermind_launcher(
                 el_cl_data,
                 jwt_file,
@@ -77,7 +77,7 @@ def launch(
             ),
             "launch_method": nethermind.launch,
         },
-        constants.EL_CLIENT_TYPE.reth: {
+        constants.el_type.reth: {
             "launcher": reth.new_reth_launcher(
                 el_cl_data,
                 jwt_file,
@@ -85,7 +85,7 @@ def launch(
             ),
             "launch_method": reth.launch,
         },
-        constants.EL_CLIENT_TYPE.ethereumjs: {
+        constants.el_type.ethereumjs: {
             "launcher": ethereumjs.new_ethereumjs_launcher(
                 el_cl_data,
                 jwt_file,
@@ -93,7 +93,7 @@ def launch(
             ),
             "launch_method": ethereumjs.launch,
         },
-        constants.EL_CLIENT_TYPE.nimbus: {
+        constants.el_type.nimbus: {
             "launcher": nimbus_eth1.new_nimbus_launcher(
                 el_cl_data,
                 jwt_file,
@@ -103,11 +103,11 @@ def launch(
         },
     }
 
-    all_el_client_contexts = []
+    all_el_contexts = []
 
     for index, participant in enumerate(participants):
-        cl_client_type = participant.cl_client_type
-        el_client_type = participant.el_client_type
+        cl_type = participant.cl_type
+        el_type = participant.el_type
         node_selectors = input_parser.get_client_node_selectors(
             participant.node_selectors,
             global_node_selectors,
@@ -115,33 +115,31 @@ def launch(
         tolerations = input_parser.get_client_tolerations(
             participant.el_tolerations, participant.tolerations, global_tolerations
         )
-        if el_client_type not in el_launchers:
+        if el_type not in el_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    el_client_type, ",".join([el.name for el in el_launchers.keys()])
+                    el_type, ",".join([el.name for el in el_launchers.keys()])
                 )
             )
 
         el_launcher, launch_method = (
-            el_launchers[el_client_type]["launcher"],
-            el_launchers[el_client_type]["launch_method"],
+            el_launchers[el_type]["launcher"],
+            el_launchers[el_type]["launch_method"],
         )
 
         # Zero-pad the index using the calculated zfill value
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
-        el_service_name = "el-{0}-{1}-{2}".format(
-            index_str, el_client_type, cl_client_type
-        )
+        el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
-        el_client_context = launch_method(
+        el_context = launch_method(
             plan,
             el_launcher,
             el_service_name,
-            participant.el_client_image,
-            participant.el_client_log_level,
+            participant.el_image,
+            participant.el_log_level,
             global_log_level,
-            all_el_client_contexts,
+            all_el_contexts,
             participant.el_min_cpu,
             participant.el_max_cpu,
             participant.el_min_mem,
@@ -150,16 +148,16 @@ def launch(
             participant.el_extra_env_vars,
             participant.el_extra_labels,
             persistent,
-            participant.el_client_volume_size,
+            participant.el_volume_size,
             tolerations,
             node_selectors,
         )
         # Add participant el additional prometheus metrics
-        for metrics_info in el_client_context.el_metrics_info:
+        for metrics_info in el_context.el_metrics_info:
             if metrics_info != None:
                 metrics_info["config"] = participant.prometheus_config
 
-        all_el_client_contexts.append(el_client_context)
+        all_el_contexts.append(el_context)
 
     plan.print("Successfully added {0} EL participants".format(num_participants))
-    return all_el_client_contexts
+    return all_el_contexts

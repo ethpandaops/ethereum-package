@@ -7,11 +7,11 @@ RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
 RUST_FULL_BACKTRACE_KEYWORD = "full"
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
+    constants.global_log_level.error: "error",
+    constants.global_log_level.warn: "warn",
+    constants.global_log_level.info: "info",
+    constants.global_log_level.debug: "debug",
+    constants.global_log_level.trace: "trace",
 }
 
 
@@ -21,14 +21,15 @@ def get_config(
     participant_log_level,
     global_log_level,
     beacon_http_url,
-    cl_client_context,
-    el_client_context,
+    cl_context,
+    el_context,
     node_keystore_files,
-    v_min_cpu,
-    v_max_cpu,
-    v_min_mem,
-    v_max_mem,
+    vc_min_cpu,
+    vc_max_cpu,
+    vc_min_mem,
+    vc_max_mem,
     extra_params,
+    extra_env_vars,
     extra_labels,
     tolerations,
     node_selectors,
@@ -75,10 +76,7 @@ def get_config(
             validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
         ),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti="
-        + cl_client_context.client_name
-        + "-"
-        + el_client_context.client_name,
+        "--graffiti=" + cl_context.client_name + "-" + el_context.client_name,
     ]
 
     if not (constants.NETWORK_NAME.verkle in network or electra_fork_epoch != None):
@@ -91,22 +89,23 @@ def get_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
     }
-
+    env = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
+    env.update(extra_env_vars)
     return ServiceConfig(
         image=image,
         ports=validator_client_shared.VALIDATOR_CLIENT_USED_PORTS,
         cmd=cmd,
+        env_vars=env,
         files=files,
-        env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
-        min_cpu=v_min_cpu,
-        max_cpu=v_max_cpu,
-        min_memory=v_min_mem,
-        max_memory=v_max_mem,
+        min_cpu=vc_min_cpu,
+        max_cpu=vc_max_cpu,
+        min_memory=vc_min_mem,
+        max_memory=vc_max_mem,
         labels=shared_utils.label_maker(
-            constants.VC_CLIENT_TYPE.lighthouse,
+            constants.VC_TYPE.lighthouse,
             constants.CLIENT_TYPES.validator,
             image,
-            cl_client_context.client_name,
+            cl_context.client_name,
             extra_labels,
         ),
         tolerations=tolerations,

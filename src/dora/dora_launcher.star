@@ -30,14 +30,14 @@ USED_PORTS = {
 def launch_dora(
     plan,
     config_template,
-    cl_client_contexts,
+    cl_contexts,
     el_cl_data_files_artifact_uuid,
     electra_fork_epoch,
     network,
     global_node_selectors,
 ):
     all_cl_client_info = []
-    for index, client in enumerate(cl_client_contexts):
+    for index, client in enumerate(cl_contexts):
         all_cl_client_info.append(
             new_cl_client_info(
                 client.ip_addr, client.http_port_num, client.beacon_service_name

@@ -20,8 +20,8 @@ launch_devnet = import_module("./network_launcher/devnet.star")
 launch_kurtosis = import_module("./network_launcher/kurtosis.star")
 launch_shadowfork = import_module("./network_launcher/shadowfork.star")
 
-el_client_launcher = import_module("./el/el_client_launcher.star")
-cl_client_launcher = import_module("./cl/cl_client_launcher.star")
+el_client_launcher = import_module("./el/el_launcher.star")
+cl_client_launcher = import_module("./cl/cl_launcher.star")
 validator_client = import_module("./validator_client/validator_client_launcher.star")
 
 
@@ -131,7 +131,7 @@ def launch_participant_network(
         ) = launch_devnet.launch(plan, network_params.network, cancun_time, prague_time)
 
     # Launch all execution layer clients
-    all_el_client_contexts = el_client_launcher.launch(
+    all_el_contexts = el_client_launcher.launch(
         plan,
         network_params,
         el_cl_data,
@@ -158,7 +158,7 @@ def launch_participant_network(
     )
 
     (
-        all_cl_client_contexts,
+        all_cl_contexts,
         all_snooper_engine_contexts,
         preregistered_validator_keys_for_nodes,
     ) = cl_client_launcher.launch(
@@ -169,7 +169,7 @@ def launch_participant_network(
         keymanager_file,
         keymanager_p12_file,
         participants,
-        all_el_client_contexts,
+        all_el_contexts,
         global_log_level,
         global_node_selectors,
         global_tolerations,
@@ -188,19 +188,19 @@ def launch_participant_network(
     # Some CL clients cannot run validator clients in the same process and need
     # a separate validator client
     _cls_that_need_separate_vc = [
-        constants.CL_CLIENT_TYPE.prysm,
-        constants.CL_CLIENT_TYPE.lodestar,
-        constants.CL_CLIENT_TYPE.lighthouse,
+        constants.cl_type.prysm,
+        constants.cl_type.lodestar,
+        constants.cl_type.lighthouse,
     ]
     for index, participant in enumerate(participants):
-        el_client_type = participant.el_client_type
-        cl_client_type = participant.cl_client_type
-        vc_client_type = participant.vc_client_type
+        el_type = participant.el_type
+        cl_type = participant.cl_type
+        vc_type = participant.vc_type
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
-        el_client_context = all_el_client_contexts[index]
-        cl_client_context = all_cl_client_contexts[index]
+        el_context = all_el_contexts[index]
+        cl_context = all_cl_contexts[index]
         if participant.ethereum_metrics_exporter_enabled:
-            pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
+            pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
             ethereum_metrics_exporter_service_name = (
                 "ethereum-metrics-exporter-{0}".format(pair_name)
@@ -210,8 +210,8 @@ def launch_participant_network(
                 plan,
                 pair_name,
                 ethereum_metrics_exporter_service_name,
-                el_client_context,
-                cl_client_context,
+                el_context,
+                cl_context,
                 participant.node_selectors,
             )
             plan.print(
@@ -225,14 +225,14 @@ def launch_participant_network(
         xatu_sentry_context = None
 
         if participant.xatu_sentry_enabled:
-            pair_name = "{0}-{1}-{2}".format(index_str, cl_client_type, el_client_type)
+            pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
             xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
 
             xatu_sentry_context = xatu_sentry.launch(
                 plan,
                 xatu_sentry_service_name,
-                cl_client_context,
+                cl_context,
                 xatu_sentry_params,
                 network_params,
                 pair_name,
@@ -256,10 +256,10 @@ def launch_participant_network(
             continue
 
         if (
-            cl_client_type in _cls_that_need_separate_vc
+            cl_type in _cls_that_need_separate_vc
             and not participant.use_separate_validator_client
         ):
-            fail("{0} needs a separate validator client!".format(cl_client_type))
+            fail("{0} needs a separate validator client!".format(cl_type))
 
         if not participant.use_separate_validator_client:
             all_validator_client_contexts.append(None)
@@ -280,25 +280,24 @@ def launch_participant_network(
             ),
             keymanager_file=keymanager_file,
             keymanager_p12_file=keymanager_p12_file,
-            service_name="vc-{0}-{1}-{2}".format(
-                index_str, vc_client_type, el_client_type
-            ),
-            vc_client_type=vc_client_type,
-            image=participant.validator_client_image,
-            participant_log_level=participant.validator_client_log_level,
+            service_name="vc-{0}-{1}-{2}".format(index_str, vc_type, el_type),
+            vc_type=vc_type,
+            image=participant.vc_image,
+            participant_log_level=participant.vc_log_level,
             global_log_level=global_log_level,
-            cl_client_context=cl_client_context,
-            el_client_context=el_client_context,
+            cl_context=cl_context,
+            el_context=el_context,
             node_keystore_files=vc_keystores,
-            v_min_cpu=participant.v_min_cpu,
-            v_max_cpu=participant.v_max_cpu,
-            v_min_mem=participant.v_min_mem,
-            v_max_mem=participant.v_max_mem,
-            extra_params=participant.validator_extra_params,
-            extra_labels=participant.validator_extra_labels,
+            vc_min_cpu=participant.vc_min_cpu,
+            vc_max_cpu=participant.vc_max_cpu,
+            vc_min_mem=participant.vc_min_mem,
+            vc_max_mem=participant.vc_max_mem,
+            extra_params=participant.vc_extra_params,
+            extra_env_vars=participant.vc_extra_env_vars,
+            extra_labels=participant.vc_extra_labels,
             prysm_password_relative_filepath=prysm_password_relative_filepath,
             prysm_password_artifact_uuid=prysm_password_artifact_uuid,
-            validator_tolerations=participant.validator_tolerations,
+            vc_tolerations=participant.vc_tolerations,
             participant_tolerations=participant.tolerations,
             global_tolerations=global_tolerations,
             node_selectors=participant.node_selectors,
@@ -315,13 +314,13 @@ def launch_participant_network(
     all_participants = []
 
     for index, participant in enumerate(participants):
-        el_client_type = participant.el_client_type
-        cl_client_type = participant.cl_client_type
-        vc_client_type = participant.vc_client_type
+        el_type = participant.el_type
+        cl_type = participant.cl_type
+        vc_type = participant.vc_type
         snooper_engine_context = None
 
-        el_client_context = all_el_client_contexts[index]
-        cl_client_context = all_cl_client_contexts[index]
+        el_context = all_el_contexts[index]
+        cl_context = all_cl_contexts[index]
         validator_client_context = all_validator_client_contexts[index]
 
         if participant.snooper_enabled:
@@ -339,11 +338,11 @@ def launch_participant_network(
             xatu_sentry_context = all_xatu_sentry_contexts[index]
 
         participant_entry = participant_module.new_participant(
-            el_client_type,
-            cl_client_type,
-            vc_client_type,
-            el_client_context,
-            cl_client_context,
+            el_type,
+            cl_type,
+            vc_type,
+            el_context,
+            cl_context,
             validator_client_context,
             snooper_engine_context,
             ethereum_metrics_exporter_context,

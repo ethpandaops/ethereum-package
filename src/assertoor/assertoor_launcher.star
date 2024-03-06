@@ -43,8 +43,8 @@ def launch_assertoor(
 
     for index, participant in enumerate(participant_contexts):
         participant_config = participant_configs[index]
-        cl_client = participant.cl_client_context
-        el_client = participant.el_client_context
+        cl_client = participant.cl_context
+        el_client = participant.el_context
 
         all_client_info.append(
             new_client_info(
