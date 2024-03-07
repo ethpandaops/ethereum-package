@@ -25,7 +25,7 @@ use_separate_validator_client -> use_separate_vc
 ```
 validator_client_type -> vc_type
 validator_tolerations -> vc_tolerations
-vc_image -> vc_image
+validator_client_image -> vc_image
 validator_extra_params -> vc_extra_params
 validator_extra_labels -> vc_extra_labels
 v_min_cpu -> vc_min_cpu
