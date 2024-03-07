@@ -9,7 +9,7 @@ perform_replacements() {
     for ((i = 0; i < ${#replacements[@]}; i+=2)); do
         original="${replacements[$i]}"
         replacement="${replacements[$i+1]}"
-        sed -i '' "s/$original/$replacement/g" "$input_file"
+        sed -i -- "s/$original/$replacement/g" "$input_file"
     done
 }
 
