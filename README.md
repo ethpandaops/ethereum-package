@@ -23,7 +23,7 @@ use_separate_validator_client -> use_separate_vc
 ```
 ### Validator flags
 ```
-vc_type -> vc_type
+validator_client_type -> vc_type
 validator_tolerations -> vc_tolerations
 vc_image -> vc_image
 validator_extra_params -> vc_extra_params
