@@ -410,11 +410,11 @@ RAM_CPU_OVERRIDES = {
         "prysm_max_cpu": 1000,  # 1 core
         "lighthouse_max_mem": 1024,  # 1GB
         "lighthouse_max_cpu": 1000,  # 1 core
-        "teku_max_mem": 1024,  # 1GB
+        "teku_max_mem": 2048,  # 2GB
         "teku_max_cpu": 1000,  # 1 core
         "nimbus_max_mem": 1024,  # 1GB
         "nimbus_max_cpu": 1000,  # 1 core
-        "lodestar_max_mem": 1024,  # 1GB
+        "lodestar_max_mem": 2048,  # 2GB
         "lodestar_max_cpu": 1000,  # 1 core
     },
 }
