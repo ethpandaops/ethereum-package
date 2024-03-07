@@ -1,6 +1,6 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../../package_io/input_parser.star")
-cl_client_context = import_module("../../cl/cl_client_context.star")
+cl_context = import_module("../../cl/cl_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 constants = import_module("../../package_io/constants.star")
@@ -50,11 +50,11 @@ BEACON_NODE_USED_PORTS = {
 }
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -66,25 +66,26 @@ def launch(
     participant_log_level,
     global_log_level,
     bootnode_contexts,
-    el_client_context,
+    el_context,
     node_keystore_files,
-    bn_min_cpu,
-    bn_max_cpu,
-    bn_min_mem,
-    bn_max_mem,
+    cl_min_cpu,
+    cl_max_cpu,
+    cl_min_mem,
+    cl_max_mem,
     snooper_enabled,
     snooper_engine_context,
     blobber_enabled,
     blobber_extra_params,
-    extra_beacon_params,
-    extra_beacon_labels,
+    extra_params,
+    extra_env_vars,
+    extra_labels,
     persistent,
     cl_volume_size,
     cl_tolerations,
     participant_tolerations,
     global_tolerations,
     node_selectors,
-    use_separate_validator_client=True,
+    use_separate_vc=True,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -97,16 +98,16 @@ def launch(
 
     network_name = shared_utils.get_network_name(launcher.network)
 
-    bn_min_cpu = int(bn_min_cpu) if int(bn_min_cpu) > 0 else BEACON_MIN_CPU
-    bn_max_cpu = (
-        int(bn_max_cpu)
-        if int(bn_max_cpu) > 0
+    cl_min_cpu = int(cl_min_cpu) if int(cl_min_cpu) > 0 else BEACON_MIN_CPU
+    cl_max_cpu = (
+        int(cl_max_cpu)
+        if int(cl_max_cpu) > 0
         else constants.RAM_CPU_OVERRIDES[network_name]["prysm_max_cpu"]
     )
-    bn_min_mem = int(bn_min_mem) if int(bn_min_mem) > 0 else BEACON_MIN_MEMORY
-    bn_max_mem = (
-        int(bn_max_mem)
-        if int(bn_max_mem) > 0
+    cl_min_mem = int(cl_min_mem) if int(cl_min_mem) > 0 else BEACON_MIN_MEMORY
+    cl_max_mem = (
+        int(cl_max_mem)
+        if int(cl_max_mem) > 0
         else constants.RAM_CPU_OVERRIDES[network_name]["prysm_max_mem"]
     )
 
@@ -124,16 +125,17 @@ def launch(
         image,
         beacon_service_name,
         bootnode_contexts,
-        el_client_context,
+        el_context,
         log_level,
-        bn_min_cpu,
-        bn_max_cpu,
-        bn_min_mem,
-        bn_max_mem,
+        cl_min_cpu,
+        cl_max_cpu,
+        cl_min_mem,
+        cl_max_mem,
         snooper_enabled,
         snooper_engine_context,
-        extra_beacon_params,
-        extra_beacon_labels,
+        extra_params,
+        extra_env_vars,
+        extra_labels,
         persistent,
         cl_volume_size,
         tolerations,
@@ -173,7 +175,7 @@ def launch(
     )
     nodes_metrics_info = [beacon_node_metrics_info]
 
-    return cl_client_context.new_cl_client_context(
+    return cl_context.new_cl_context(
         "prysm",
         beacon_node_enr,
         beacon_service.ip_address,
@@ -198,15 +200,16 @@ def get_beacon_config(
     beacon_image,
     service_name,
     bootnode_contexts,
-    el_client_context,
+    el_context,
     log_level,
-    bn_min_cpu,
-    bn_max_cpu,
-    bn_min_mem,
-    bn_max_mem,
+    cl_min_cpu,
+    cl_max_cpu,
+    cl_min_mem,
+    cl_max_mem,
     snooper_enabled,
     snooper_engine_context,
     extra_params,
+    extra_env_vars,
     extra_labels,
     persistent,
     cl_volume_size,
@@ -221,8 +224,8 @@ def get_beacon_config(
         )
     else:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_client_context.ip_addr,
-            el_client_context.engine_rpc_port_num,
+            el_context.ip_addr,
+            el_context.engine_rpc_port_num,
         )
 
     cmd = [
@@ -326,20 +329,21 @@ def get_beacon_config(
         image=beacon_image,
         ports=BEACON_NODE_USED_PORTS,
         cmd=cmd,
+        env_vars=extra_env_vars,
         files=files,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
         ),
-        min_cpu=bn_min_cpu,
-        max_cpu=bn_max_cpu,
-        min_memory=bn_min_mem,
-        max_memory=bn_max_mem,
+        min_cpu=cl_min_cpu,
+        max_cpu=cl_max_cpu,
+        min_memory=cl_min_mem,
+        max_memory=cl_max_mem,
         labels=shared_utils.label_maker(
-            constants.CL_CLIENT_TYPE.prysm,
+            constants.CL_TYPE.prysm,
             constants.CLIENT_TYPES.cl,
             beacon_image,
-            el_client_context.client_name,
+            el_context.client_name,
             extra_labels,
         ),
         tolerations=tolerations,

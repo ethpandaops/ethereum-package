@@ -1,6 +1,6 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../..//package_io/input_parser.star")
-el_client_context = import_module("../../el/el_client_context.star")
+el_context = import_module("../../el/el_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 
 node_metrics = import_module("../../node_metrics_info.star")
@@ -53,11 +53,11 @@ USED_PORTS = {
 ENTRYPOINT_ARGS = []
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -139,7 +139,7 @@ def launch(
     # metrics_url = "http://{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     ethjs_metrics_info = None
 
-    return el_client_context.new_el_client_context(
+    return el_context.new_el_context(
         "ethereumjs",
         "",  # ethereumjs has no enr
         enode,
@@ -251,7 +251,7 @@ def get_config(
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
         labels=shared_utils.label_maker(
-            constants.EL_CLIENT_TYPE.ethereumjs,
+            constants.EL_TYPE.ethereumjs,
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,

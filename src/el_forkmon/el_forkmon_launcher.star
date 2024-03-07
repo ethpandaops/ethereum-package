@@ -29,11 +29,11 @@ MAX_MEMORY = 256
 def launch_el_forkmon(
     plan,
     config_template,
-    el_client_contexts,
+    el_contexts,
     global_node_selectors,
 ):
     all_el_client_info = []
-    for client in el_client_contexts:
+    for client in el_contexts:
         client_info = new_el_client_info(
             client.ip_addr, client.rpc_port_num, client.service_name
         )

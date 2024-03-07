@@ -1,14 +1,14 @@
 participants:
-  - el_client_type: geth
-    cl_client_type: nimbus
-  - el_client_type: nethermind
-    cl_client_type: nimbus
-  - el_client_type: erigon
-    cl_client_type: nimbus
-  - el_client_type: besu
-    cl_client_type: nimbus
-  - el_client_type: reth
-    cl_client_type: nimbus
-  - el_client_type: ethereumjs
-    cl_client_type: nimbus
+  - el_type: geth
+    cl_type: nimbus
+  - el_type: nethermind
+    cl_type: nimbus
+  - el_type: erigon
+    cl_type: nimbus
+  - el_type: besu
+    cl_type: nimbus
+  - el_type: reth
+    cl_type: nimbus
+  - el_type: ethereumjs
+    cl_type: nimbus
 additional_services: []

@@ -1,6 +1,6 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../../package_io/input_parser.star")
-el_client_context = import_module("../../el/el_client_context.star")
+el_context = import_module("../../el/el_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 genesis_constants = import_module(
     "../../prelaunch_data_generator/genesis_constants/genesis_constants.star"
@@ -58,11 +58,11 @@ USED_PORTS = {
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "1",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "2",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "3",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "4",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "5",
+    constants.GLOBAL_LOG_LEVEL.error: "1",
+    constants.GLOBAL_LOG_LEVEL.warn: "2",
+    constants.GLOBAL_LOG_LEVEL.info: "3",
+    constants.GLOBAL_LOG_LEVEL.debug: "4",
+    constants.GLOBAL_LOG_LEVEL.trace: "5",
 }
 
 BUILDER_IMAGE_STR = "builder"
@@ -156,7 +156,7 @@ def launch(
         service_name, METRICS_PATH, metrics_url
     )
 
-    return el_client_context.new_el_client_context(
+    return el_context.new_el_context(
         "geth",
         enr,
         enode,
@@ -370,7 +370,7 @@ def get_config(
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
         labels=shared_utils.label_maker(
-            constants.EL_CLIENT_TYPE.geth,
+            constants.EL_TYPE.geth,
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,

@@ -40,7 +40,7 @@ VERIF_USED_PORTS = {
 
 def launch_blockscout(
     plan,
-    el_client_contexts,
+    el_contexts,
     persistent,
     global_node_selectors,
 ):
@@ -53,11 +53,11 @@ def launch_blockscout(
         node_selectors=global_node_selectors,
     )
 
-    el_client_context = el_client_contexts[0]
+    el_context = el_contexts[0]
     el_client_rpc_url = "http://{}:{}/".format(
-        el_client_context.ip_addr, el_client_context.rpc_port_num
+        el_context.ip_addr, el_context.rpc_port_num
     )
-    el_client_name = el_client_context.client_name
+    el_client_name = el_context.client_name
 
     config_verif = get_config_verif(global_node_selectors)
     verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)

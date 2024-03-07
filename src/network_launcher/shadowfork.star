@@ -46,15 +46,13 @@ def shadowfork_prep(
             global_node_selectors,
         )
 
-        cl_client_type = participant.cl_client_type
-        el_client_type = participant.el_client_type
+        cl_type = participant.cl_type
+        el_type = participant.el_type
 
         # Zero-pad the index using the calculated zfill value
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
-        el_service_name = "el-{0}-{1}-{2}".format(
-            index_str, el_client_type, cl_client_type
-        )
+        el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
         shadowfork_data = plan.add_service(
             name="shadowfork-{0}".format(el_service_name),
             config=ServiceConfig(
@@ -64,12 +62,12 @@ def shadowfork_prep(
                     + network_params.network_sync_base_url
                     + base_network
                     + "/"
-                    + el_client_type
+                    + el_type
                     + "/"
                     + shadowfork_block
                     + "/snapshot.tar.zst"
                     + " | tar -I zstd -xvf - -C /data/"
-                    + el_client_type
+                    + el_type
                     + "/execution-data"
                     + " && touch /tmp/finished"
                     + " && tail -f /dev/null"
@@ -77,11 +75,11 @@ def shadowfork_prep(
                 entrypoint=["/bin/sh", "-c"],
                 files={
                     "/data/"
-                    + el_client_type
+                    + el_type
                     + "/execution-data": Directory(
                         persistent_key="data-{0}".format(el_service_name),
                         size=constants.VOLUME_SIZE[base_network][
-                            el_client_type + "_volume_size"
+                            el_type + "_volume_size"
                         ],
                     ),
                 },
@@ -90,15 +88,13 @@ def shadowfork_prep(
             ),
         )
     for index, participant in enumerate(participants):
-        cl_client_type = participant.cl_client_type
-        el_client_type = participant.el_client_type
+        cl_type = participant.cl_type
+        el_type = participant.el_type
 
         # Zero-pad the index using the calculated zfill value
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
-        el_service_name = "el-{0}-{1}-{2}".format(
-            index_str, el_client_type, cl_client_type
-        )
+        el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
         plan.wait(
             service_name="shadowfork-{0}".format(el_service_name),
             recipe=ExecRecipe(command=["cat", "/tmp/finished"]),

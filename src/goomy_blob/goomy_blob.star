@@ -13,16 +13,16 @@ MAX_MEMORY = 300
 def launch_goomy_blob(
     plan,
     prefunded_addresses,
-    el_client_contexts,
-    cl_client_context,
+    el_contexts,
+    cl_context,
     seconds_per_slot,
     goomy_blob_params,
     global_node_selectors,
 ):
     config = get_config(
         prefunded_addresses,
-        el_client_contexts,
-        cl_client_context,
+        el_contexts,
+        cl_context,
         seconds_per_slot,
         goomy_blob_params.goomy_blob_args,
         global_node_selectors,
@@ -32,14 +32,14 @@ def launch_goomy_blob(
 
 def get_config(
     prefunded_addresses,
-    el_client_contexts,
-    cl_client_context,
+    el_contexts,
+    cl_context,
     seconds_per_slot,
     goomy_blob_args,
     node_selectors,
 ):
     goomy_cli_args = []
-    for index, client in enumerate(el_client_contexts):
+    for index, client in enumerate(el_contexts):
         goomy_cli_args.append(
             "-h http://{0}:{1}".format(
                 client.ip_addr,
@@ -61,11 +61,11 @@ def get_config(
                     "apt-get update",
                     "apt-get install -y curl jq",
                     'current_epoch=$(curl -s http://{0}:{1}/eth/v2/beacon/blocks/head | jq -r ".version")'.format(
-                        cl_client_context.ip_addr, cl_client_context.http_port_num
+                        cl_context.ip_addr, cl_context.http_port_num
                     ),
                     'while [ $current_epoch != "deneb" ]; do echo "waiting for deneb, current epoch is $current_epoch"; current_epoch=$(curl -s http://{0}:{1}/eth/v2/beacon/blocks/head | jq -r ".version"); sleep {2}; done'.format(
-                        cl_client_context.ip_addr,
-                        cl_client_context.http_port_num,
+                        cl_context.ip_addr,
+                        cl_context.http_port_num,
                         seconds_per_slot,
                     ),
                     'echo "sleep is over, starting to send blob transactions"',

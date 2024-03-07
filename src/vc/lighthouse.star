@@ -1,17 +1,17 @@
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
-validator_client_shared = import_module("./shared.star")
+vc_shared = import_module("./shared.star")
 
 RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
 RUST_FULL_BACKTRACE_KEYWORD = "full"
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "error",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "warn",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "info",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "debug",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "trace",
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -21,14 +21,15 @@ def get_config(
     participant_log_level,
     global_log_level,
     beacon_http_url,
-    cl_client_context,
-    el_client_context,
+    cl_context,
+    el_context,
     node_keystore_files,
-    v_min_cpu,
-    v_max_cpu,
-    v_min_mem,
-    v_max_mem,
+    vc_min_cpu,
+    vc_max_cpu,
+    vc_min_mem,
+    vc_max_mem,
     extra_params,
+    extra_env_vars,
     extra_labels,
     tolerations,
     node_selectors,
@@ -40,17 +41,17 @@ def get_config(
     )
 
     validator_keys_dirpath = shared_utils.path_join(
-        validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
         node_keystore_files.raw_keys_relative_dirpath,
     )
     validator_secrets_dirpath = shared_utils.path_join(
-        validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
         node_keystore_files.raw_secrets_relative_dirpath,
     )
 
     cmd = [
         "lighthouse",
-        "validator_client",
+        "vc",
         "--debug-level=" + log_level,
         "--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
         "--validators-dir=" + validator_keys_dirpath,
@@ -63,7 +64,7 @@ def get_config(
         # burn address - If unset, the validator will scream in its logs
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         "--http",
-        "--http-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--http-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--http-address=0.0.0.0",
         "--http-allow-origin=*",
         "--unencrypted-http-transport",
@@ -71,14 +72,9 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-allow-origin=*",
-        "--metrics-port={0}".format(
-            validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
-        ),
+        "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti="
-        + cl_client_context.client_name
-        + "-"
-        + el_client_context.client_name,
+        "--graffiti=" + cl_context.client_name + "-" + el_context.client_name,
     ]
 
     if not (constants.NETWORK_NAME.verkle in network or electra_fork_epoch != None):
@@ -89,24 +85,25 @@ def get_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
+        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
     }
-
+    env = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
+    env.update(extra_env_vars)
     return ServiceConfig(
         image=image,
-        ports=validator_client_shared.VALIDATOR_CLIENT_USED_PORTS,
+        ports=vc_shared.VALIDATOR_CLIENT_USED_PORTS,
         cmd=cmd,
+        env_vars=env,
         files=files,
-        env_vars={RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD},
-        min_cpu=v_min_cpu,
-        max_cpu=v_max_cpu,
-        min_memory=v_min_mem,
-        max_memory=v_max_mem,
+        min_cpu=vc_min_cpu,
+        max_cpu=vc_max_cpu,
+        min_memory=vc_min_mem,
+        max_memory=vc_max_mem,
         labels=shared_utils.label_maker(
-            constants.VC_CLIENT_TYPE.lighthouse,
+            constants.VC_TYPE.lighthouse,
             constants.CLIENT_TYPES.validator,
             image,
-            cl_client_context.client_name,
+            cl_context.client_name,
             extra_labels,
         ),
         tolerations=tolerations,

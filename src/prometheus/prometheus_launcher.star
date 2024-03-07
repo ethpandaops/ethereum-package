@@ -3,7 +3,7 @@ prometheus = import_module("github.com/kurtosis-tech/prometheus-package/main.sta
 
 EXECUTION_CLIENT_TYPE = "execution"
 BEACON_CLIENT_TYPE = "beacon"
-vc_client_type = "validator"
+vc_type = "validator"
 
 METRICS_INFO_NAME_KEY = "name"
 METRICS_INFO_URL_KEY = "url"
@@ -21,18 +21,18 @@ MAX_MEMORY = 2048
 
 def launch_prometheus(
     plan,
-    el_client_contexts,
-    cl_client_contexts,
-    validator_client_contexts,
+    el_contexts,
+    cl_contexts,
+    vc_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
     global_node_selectors,
 ):
     metrics_jobs = get_metrics_jobs(
-        el_client_contexts,
-        cl_client_contexts,
-        validator_client_contexts,
+        el_contexts,
+        cl_contexts,
+        vc_contexts,
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
         xatu_sentry_contexts,
@@ -51,16 +51,16 @@ def launch_prometheus(
 
 
 def get_metrics_jobs(
-    el_client_contexts,
-    cl_client_contexts,
-    validator_client_contexts,
+    el_contexts,
+    cl_contexts,
+    vc_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
 ):
     metrics_jobs = []
     # Adding execution clients metrics jobs
-    for context in el_client_contexts:
+    for context in el_contexts:
         if len(context.el_metrics_info) >= 1 and context.el_metrics_info[0] != None:
             execution_metrics_info = context.el_metrics_info[0]
             scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
@@ -90,7 +90,7 @@ def get_metrics_jobs(
                 )
             )
     # Adding consensus clients metrics jobs
-    for context in cl_client_contexts:
+    for context in cl_contexts:
         if (
             len(context.cl_nodes_metrics_info) >= 1
             and context.cl_nodes_metrics_info[0] != None
@@ -123,7 +123,7 @@ def get_metrics_jobs(
             )
 
     # Adding validator clients metrics jobs
-    for context in validator_client_contexts:
+    for context in vc_contexts:
         if context == None:
             continue
         metrics_info = context.metrics_info
@@ -131,7 +131,7 @@ def get_metrics_jobs(
         scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
         labels = {
             "service": context.service_name,
-            "client_type": vc_client_type,
+            "client_type": vc_type,
             "client_name": context.client_name,
         }
 

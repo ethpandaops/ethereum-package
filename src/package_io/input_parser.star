@@ -163,46 +163,46 @@ def input_parser(plan, input_args):
     return struct(
         participants=[
             struct(
-                el_client_type=participant["el_client_type"],
-                el_client_image=participant["el_client_image"],
-                el_client_log_level=participant["el_client_log_level"],
-                el_client_volume_size=participant["el_client_volume_size"],
+                el_type=participant["el_type"],
+                el_image=participant["el_image"],
+                el_log_level=participant["el_log_level"],
+                el_volume_size=participant["el_volume_size"],
                 el_extra_params=participant["el_extra_params"],
                 el_extra_env_vars=participant["el_extra_env_vars"],
                 el_extra_labels=participant["el_extra_labels"],
                 el_tolerations=participant["el_tolerations"],
-                cl_client_type=participant["cl_client_type"],
-                cl_client_image=participant["cl_client_image"],
-                cl_client_log_level=participant["cl_client_log_level"],
-                cl_client_volume_size=participant["cl_client_volume_size"],
+                cl_type=participant["cl_type"],
+                cl_image=participant["cl_image"],
+                cl_log_level=participant["cl_log_level"],
+                cl_volume_size=participant["cl_volume_size"],
+                cl_extra_env_vars=participant["cl_extra_env_vars"],
                 cl_tolerations=participant["cl_tolerations"],
-                use_separate_validator_client=participant[
-                    "use_separate_validator_client"
-                ],
-                vc_client_type=participant["vc_client_type"],
-                validator_client_image=participant["validator_client_image"],
-                validator_client_log_level=participant["validator_client_log_level"],
-                validator_tolerations=participant["validator_tolerations"],
-                tolerations=participant["tolerations"],
-                node_selectors=participant["node_selectors"],
-                beacon_extra_params=participant["beacon_extra_params"],
-                beacon_extra_labels=participant["beacon_extra_labels"],
-                validator_extra_params=participant["validator_extra_params"],
-                validator_extra_labels=participant["validator_extra_labels"],
+                use_separate_vc=participant["use_separate_vc"],
+                vc_type=participant["vc_type"],
+                vc_image=participant["vc_image"],
+                vc_log_level=participant["vc_log_level"],
+                vc_tolerations=participant["vc_tolerations"],
+                cl_extra_params=participant["cl_extra_params"],
+                cl_extra_labels=participant["cl_extra_labels"],
+                vc_extra_params=participant["vc_extra_params"],
+                vc_extra_env_vars=participant["vc_extra_env_vars"],
+                vc_extra_labels=participant["vc_extra_labels"],
                 builder_network_params=participant["builder_network_params"],
                 el_min_cpu=participant["el_min_cpu"],
                 el_max_cpu=participant["el_max_cpu"],
                 el_min_mem=participant["el_min_mem"],
                 el_max_mem=participant["el_max_mem"],
-                bn_min_cpu=participant["bn_min_cpu"],
-                bn_max_cpu=participant["bn_max_cpu"],
-                bn_min_mem=participant["bn_min_mem"],
-                bn_max_mem=participant["bn_max_mem"],
-                v_min_cpu=participant["v_min_cpu"],
-                v_max_cpu=participant["v_max_cpu"],
-                v_min_mem=participant["v_min_mem"],
-                v_max_mem=participant["v_max_mem"],
+                cl_min_cpu=participant["cl_min_cpu"],
+                cl_max_cpu=participant["cl_max_cpu"],
+                cl_min_mem=participant["cl_min_mem"],
+                cl_max_mem=participant["cl_max_mem"],
+                vc_min_cpu=participant["vc_min_cpu"],
+                vc_max_cpu=participant["vc_max_cpu"],
+                vc_min_mem=participant["vc_min_mem"],
+                vc_max_mem=participant["vc_max_mem"],
                 validator_count=participant["validator_count"],
+                tolerations=participant["tolerations"],
+                node_selectors=participant["node_selectors"],
                 snooper_enabled=participant["snooper_enabled"],
                 count=participant["count"],
                 ethereum_metrics_exporter_enabled=participant[
@@ -296,7 +296,7 @@ def input_parser(plan, input_args):
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
-        global_client_log_level=result["global_client_log_level"],
+        global_log_level=result["global_log_level"],
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
         ethereum_metrics_exporter_enabled=result["ethereum_metrics_exporter_enabled"],
@@ -344,62 +344,62 @@ def parse_network_params(input_args):
     actual_num_validators = 0
     # validation of the above defaults
     for index, participant in enumerate(result["participants"]):
-        el_client_type = participant["el_client_type"]
-        cl_client_type = participant["cl_client_type"]
-        vc_client_type = participant["vc_client_type"]
+        el_type = participant["el_type"]
+        cl_type = participant["cl_type"]
+        vc_type = participant["vc_type"]
 
-        if cl_client_type in (NIMBUS_NODE_NAME) and (
+        if cl_type in (NIMBUS_NODE_NAME) and (
             result["network_params"]["seconds_per_slot"] < 12
         ):
             fail("nimbus can't be run with slot times below 12 seconds")
 
-        el_image = participant["el_client_image"]
+        el_image = participant["el_image"]
         if el_image == "":
-            default_image = DEFAULT_EL_IMAGES.get(el_client_type, "")
+            default_image = DEFAULT_EL_IMAGES.get(el_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
-                        el_client_type
+                        el_type
                     )
                 )
-            participant["el_client_image"] = default_image
+            participant["el_image"] = default_image
 
-        cl_image = participant["cl_client_image"]
+        cl_image = participant["cl_image"]
         if cl_image == "":
-            default_image = DEFAULT_CL_IMAGES.get(cl_client_type, "")
+            default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
-                        cl_client_type
+                        cl_type
                     )
                 )
-            participant["cl_client_image"] = default_image
+            participant["cl_image"] = default_image
 
-        if participant["use_separate_validator_client"] == None:
+        if participant["use_separate_vc"] == None:
             # Default to false for CL clients that can run validator clients
             # in the same process.
-            if cl_client_type in (
-                constants.CL_CLIENT_TYPE.nimbus,
-                constants.CL_CLIENT_TYPE.teku,
+            if cl_type in (
+                constants.CL_TYPE.nimbus,
+                constants.CL_TYPE.teku,
             ):
-                participant["use_separate_validator_client"] = False
+                participant["use_separate_vc"] = False
             else:
-                participant["use_separate_validator_client"] = True
+                participant["use_separate_vc"] = True
 
-        if vc_client_type == "":
+        if vc_type == "":
             # Defaults to matching the chosen CL client
-            vc_client_type = cl_client_type
-            participant["vc_client_type"] = vc_client_type
+            vc_type = cl_type
+            participant["vc_type"] = vc_type
 
-        validator_client_image = participant["validator_client_image"]
-        if validator_client_image == "":
+        vc_image = participant["vc_image"]
+        if vc_image == "":
             if cl_image == "":
                 # If the validator client image is also empty, default to the image for the chosen CL client
-                default_image = DEFAULT_VC_IMAGES.get(vc_client_type, "")
+                default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
             else:
-                if cl_client_type == "prysm":
+                if cl_type == "prysm":
                     default_image = cl_image.replace("beacon-chain", "validator")
-                elif cl_client_type == "nimbus":
+                elif cl_type == "nimbus":
                     default_image = cl_image.replace(
                         "nimbus-eth2", "nimbus-validator-client"
                     )
@@ -408,10 +408,10 @@ def parse_network_params(input_args):
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
-                        vc_client_type
+                        vc_type
                     )
                 )
-            participant["validator_client_image"] = default_image
+            participant["vc_image"] = default_image
 
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == False:
@@ -428,10 +428,10 @@ def parse_network_params(input_args):
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
             # unless we are running lighthouse, we don't support blobber
-            if participant["cl_client_type"] != "lighthouse":
+            if participant["cl_type"] != "lighthouse":
                 fail(
                     "blobber is not supported for {0} client".format(
-                        participant["cl_client_type"]
+                        participant["cl_type"]
                     )
                 )
 
@@ -458,11 +458,11 @@ def parse_network_params(input_args):
 
         actual_num_validators += participant["validator_count"]
 
-        beacon_extra_params = participant.get("beacon_extra_params", [])
-        participant["beacon_extra_params"] = beacon_extra_params
+        cl_extra_params = participant.get("cl_extra_params", [])
+        participant["cl_extra_params"] = cl_extra_params
 
-        validator_extra_params = participant.get("validator_extra_params", [])
-        participant["validator_extra_params"] = validator_extra_params
+        vc_extra_params = participant.get("vc_extra_params", [])
+        participant["vc_extra_params"] = vc_extra_params
 
         total_participant_count += participant["count"]
 
@@ -586,91 +586,94 @@ def default_input_args():
         "participants": participants,
         "network_params": network_params,
         "wait_for_finalization": False,
-        "global_client_log_level": "info",
+        "global_log_level": "info",
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
-        "xatu_sentry_enabled": False,
         "parallel_keystore_generation": False,
         "disable_peer_scoring": False,
+        "persistent": False,
+        "mev_type": None,
+        "xatu_sentry_enabled": False,
         "global_tolerations": [],
+        "global_node_selectors": {},
     }
 
 
 def default_network_params():
     # this is temporary till we get params working
     return {
-        "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
-        "preregistered_validator_count": 0,
-        "num_validator_keys_per_node": 64,
+        "network": "kurtosis",
         "network_id": "3151908",
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
         "seconds_per_slot": 12,
+        "num_validator_keys_per_node": 64,
+        "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "preregistered_validator_count": 0,
         "genesis_delay": 20,
         "max_churn": 8,
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
-        "capella_fork_epoch": 0,
-        "deneb_fork_epoch": 500,
-        "electra_fork_epoch": None,
-        "network": "kurtosis",
         "min_validator_withdrawability_delay": 256,
         "shard_committee_period": 256,
+        "capella_fork_epoch": 0,
+        "deneb_fork_epoch": 4,
+        "electra_fork_epoch": None,
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
     }
 
 
 def default_participant():
     return {
-        "el_client_type": "geth",
-        "el_client_image": "",
-        "el_client_log_level": "",
-        "el_client_volume_size": 0,
-        "el_extra_params": [],
+        "el_type": "geth",
+        "el_image": "",
+        "el_log_level": "",
         "el_extra_env_vars": {},
         "el_extra_labels": {},
+        "el_extra_params": [],
         "el_tolerations": [],
-        "cl_client_type": "lighthouse",
-        "cl_client_image": "",
-        "cl_client_log_level": "",
-        "cl_client_volume_size": 0,
-        "use_separate_validator_client": None,
-        "vc_client_type": "",
-        "validator_client_log_level": "",
-        "validator_client_image": "",
-        "cl_tolerations": [],
-        "validator_tolerations": [],
-        "tolerations": [],
-        "node_selectors": {},
-        "beacon_extra_params": [],
-        "beacon_extra_labels": {},
-        "validator_extra_params": [],
-        "validator_extra_labels": {},
-        "builder_network_params": None,
+        "el_volume_size": 0,
         "el_min_cpu": 0,
         "el_max_cpu": 0,
         "el_min_mem": 0,
         "el_max_mem": 0,
-        "bn_min_cpu": 0,
-        "bn_max_cpu": 0,
-        "bn_min_mem": 0,
-        "bn_max_mem": 0,
-        "v_min_cpu": 0,
-        "v_max_cpu": 0,
-        "v_min_mem": 0,
-        "v_max_mem": 0,
+        "cl_type": "lighthouse",
+        "cl_image": "",
+        "cl_log_level": "",
+        "cl_extra_env_vars": {},
+        "cl_extra_labels": {},
+        "cl_extra_params": [],
+        "cl_tolerations": [],
+        "cl_volume_size": 0,
+        "cl_min_cpu": 0,
+        "cl_max_cpu": 0,
+        "cl_min_mem": 0,
+        "cl_max_mem": 0,
+        "use_separate_vc": None,
+        "vc_type": "",
+        "vc_image": "",
+        "vc_log_level": "",
+        "vc_extra_env_vars": {},
+        "vc_extra_labels": {},
+        "vc_extra_params": [],
+        "vc_tolerations": [],
+        "vc_min_cpu": 0,
+        "vc_max_cpu": 0,
+        "vc_min_mem": 0,
+        "vc_max_mem": 0,
         "validator_count": None,
+        "node_selectors": {},
+        "tolerations": [],
+        "count": 1,
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
         "xatu_sentry_enabled": False,
-        "count": 1,
         "prometheus_config": {
             "scrape_interval": "15s",
             "labels": None,
         },
         "blobber_enabled": False,
         "blobber_extra_params": [],
-        "global_tolerations": [],
-        "global_node_selectors": {},
+        "builder_network_params": None,
     }
 
 
@@ -742,14 +745,14 @@ def get_default_custom_flood_params():
 
 def enrich_disable_peer_scoring(parsed_arguments_dict):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
-        if participant["cl_client_type"] == "lighthouse":
-            participant["beacon_extra_params"].append("--disable-peer-scoring")
-        if participant["cl_client_type"] == "prysm":
-            participant["beacon_extra_params"].append("--disable-peer-scorer")
-        if participant["cl_client_type"] == "teku":
-            participant["beacon_extra_params"].append("--Xp2p-gossip-scoring-enabled")
-        if participant["cl_client_type"] == "lodestar":
-            participant["beacon_extra_params"].append("--disablePeerScoring")
+        if participant["cl_type"] == "lighthouse":
+            participant["cl_extra_params"].append("--disable-peer-scoring")
+        if participant["cl_type"] == "prysm":
+            participant["cl_extra_params"].append("--disable-peer-scorer")
+        if participant["cl_type"] == "teku":
+            participant["cl_extra_params"].append("--Xp2p-gossip-scoring-enabled")
+        if participant["cl_type"] == "lodestar":
+            participant["cl_extra_params"].append("--disablePeerScoring")
     return parsed_arguments_dict
 
 
@@ -762,36 +765,34 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
             MEV_BOOST_SERVICE_NAME_PREFIX,
             index_str,
-            participant["cl_client_type"],
-            participant["el_client_type"],
+            participant["cl_type"],
+            participant["el_type"],
             mev_port,
         )
 
-        if participant["cl_client_type"] == "lighthouse":
-            participant["validator_extra_params"].append("--builder-proposals")
-            participant["beacon_extra_params"].append("--builder={0}".format(mev_url))
-        if participant["cl_client_type"] == "lodestar":
-            participant["validator_extra_params"].append("--builder")
-            participant["beacon_extra_params"].append("--builder")
-            participant["beacon_extra_params"].append(
-                "--builder.urls={0}".format(mev_url)
-            )
-        if participant["cl_client_type"] == "nimbus":
-            participant["validator_extra_params"].append("--payload-builder=true")
-            participant["beacon_extra_params"].append("--payload-builder=true")
-            participant["beacon_extra_params"].append(
+        if participant["cl_type"] == "lighthouse":
+            participant["vc_extra_params"].append("--builder-proposals")
+            participant["cl_extra_params"].append("--builder={0}".format(mev_url))
+        if participant["cl_type"] == "lodestar":
+            participant["vc_extra_params"].append("--builder")
+            participant["cl_extra_params"].append("--builder")
+            participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
+        if participant["cl_type"] == "nimbus":
+            participant["vc_extra_params"].append("--payload-builder=true")
+            participant["cl_extra_params"].append("--payload-builder=true")
+            participant["cl_extra_params"].append(
                 "--payload-builder-url={0}".format(mev_url)
             )
-        if participant["cl_client_type"] == "teku":
-            participant["validator_extra_params"].append(
+        if participant["cl_type"] == "teku":
+            participant["vc_extra_params"].append(
                 "--validators-builder-registration-default-enabled=true"
             )
-            participant["beacon_extra_params"].append(
+            participant["cl_extra_params"].append(
                 "--builder-endpoint={0}".format(mev_url)
             )
-        if participant["cl_client_type"] == "prysm":
-            participant["validator_extra_params"].append("--enable-builder")
-            participant["beacon_extra_params"].append(
+        if participant["cl_type"] == "prysm":
+            participant["vc_extra_params"].append("--enable-builder")
+            participant["cl_extra_params"].append(
                 "--http-mev-relay={0}".format(mev_url)
             )
 
@@ -801,18 +802,12 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     )
     if mev_type == "full":
         mev_participant = default_participant()
-        mev_participant["el_client_type"] = (
-            mev_participant["el_client_type"] + "-builder"
-        )
+        mev_participant["el_type"] = mev_participant["el_type"] + "-builder"
         mev_participant.update(
             {
-                "el_client_image": parsed_arguments_dict["mev_params"][
-                    "mev_builder_image"
-                ],
-                "cl_client_image": parsed_arguments_dict["mev_params"][
-                    "mev_builder_cl_image"
-                ],
-                "beacon_extra_params": [
+                "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
+                "cl_image": parsed_arguments_dict["mev_params"]["mev_builder_cl_image"],
+                "cl_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
                     "12000",

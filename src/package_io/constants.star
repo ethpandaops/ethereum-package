@@ -1,4 +1,4 @@
-EL_CLIENT_TYPE = struct(
+EL_TYPE = struct(
     gethbuilder="geth-builder",
     geth="geth",
     erigon="erigon",
@@ -9,7 +9,7 @@ EL_CLIENT_TYPE = struct(
     nimbus="nimbus",
 )
 
-CL_CLIENT_TYPE = struct(
+CL_TYPE = struct(
     lighthouse="lighthouse",
     teku="teku",
     nimbus="nimbus",
@@ -17,7 +17,7 @@ CL_CLIENT_TYPE = struct(
     lodestar="lodestar",
 )
 
-VC_CLIENT_TYPE = struct(
+VC_TYPE = struct(
     lighthouse="lighthouse",
     lodestar="lodestar",
     nimbus="nimbus",
@@ -25,7 +25,7 @@ VC_CLIENT_TYPE = struct(
     teku="teku",
 )
 
-GLOBAL_CLIENT_LOG_LEVEL = struct(
+GLOBAL_LOG_LEVEL = struct(
     info="info",
     error="error",
     warn="warn",
@@ -410,11 +410,11 @@ RAM_CPU_OVERRIDES = {
         "prysm_max_cpu": 1000,  # 1 core
         "lighthouse_max_mem": 1024,  # 1GB
         "lighthouse_max_cpu": 1000,  # 1 core
-        "teku_max_mem": 1024,  # 1GB
+        "teku_max_mem": 2048,  # 2GB
         "teku_max_cpu": 1000,  # 1 core
         "nimbus_max_mem": 1024,  # 1GB
         "nimbus_max_cpu": 1000,  # 1 core
-        "lodestar_max_mem": 1024,  # 1GB
+        "lodestar_max_mem": 2048,  # 2GB
         "lodestar_max_cpu": 1000,  # 1 core
     },
 }

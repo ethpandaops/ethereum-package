@@ -1,6 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 input_parser = import_module("../package_io/input_parser.star")
-el_client_context = import_module("../el/el_client_context.star")
+el_context = import_module("../el/el_context.star")
 el_admin_node_info = import_module("../el/el_admin_node_info.star")
 snooper_engine_context = import_module("../snooper/snooper_engine_context.star")
 
@@ -25,10 +25,10 @@ MIN_MEMORY = 10
 MAX_MEMORY = 300
 
 
-def launch(plan, service_name, el_client_context, node_selectors):
+def launch(plan, service_name, el_context, node_selectors):
     snooper_service_name = "{0}".format(service_name)
 
-    snooper_config = get_config(service_name, el_client_context, node_selectors)
+    snooper_config = get_config(service_name, el_context, node_selectors)
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
     snooper_http_port = snooper_service.ports[SNOOPER_ENGINE_RPC_PORT_ID]
@@ -37,10 +37,10 @@ def launch(plan, service_name, el_client_context, node_selectors):
     )
 
 
-def get_config(service_name, el_client_context, node_selectors):
+def get_config(service_name, el_context, node_selectors):
     engine_rpc_port_num = "http://{0}:{1}".format(
-        el_client_context.ip_addr,
-        el_client_context.engine_rpc_port_num,
+        el_context.ip_addr,
+        el_context.engine_rpc_port_num,
     )
     cmd = [
         SNOOPER_BINARY_COMMAND,
