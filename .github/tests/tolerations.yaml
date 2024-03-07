@@ -1,7 +1,7 @@
 participants:
   - el_type: reth
     cl_type: teku
-    use_separate_validator_client: true
+    use_separate_vc: true
     cl_tolerations:
       - key: "node-role.kubernetes.io/master1"
         operator: "Exists"
@@ -19,14 +19,14 @@ participants:
         effect: "NoSchedule"
   - el_type: reth
     cl_type: teku
-    use_separate_validator_client: true
+    use_separate_vc: true
     tolerations:
       - key: "node-role.kubernetes.io/master5"
         operator: "Exists"
         effect: "NoSchedule"
   - el_type: reth
     cl_type: teku
-    use_separate_validator_client: true
+    use_separate_vc: true
 additional_services:
   - dora
 global_tolerations:

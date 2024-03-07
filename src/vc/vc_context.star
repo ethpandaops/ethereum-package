@@ -1,4 +1,4 @@
-def new_validator_client_context(
+def new_vc_context(
     service_name,
     client_name,
     metrics_info,

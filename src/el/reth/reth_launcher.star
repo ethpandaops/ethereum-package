@@ -51,11 +51,11 @@ USED_PORTS = {
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    constants.global_log_level.error: "v",
-    constants.global_log_level.warn: "vv",
-    constants.global_log_level.info: "vvv",
-    constants.global_log_level.debug: "vvvv",
-    constants.global_log_level.trace: "vvvvv",
+    constants.GLOBAL_LOG_LEVEL.error: "v",
+    constants.GLOBAL_LOG_LEVEL.warn: "vv",
+    constants.GLOBAL_LOG_LEVEL.info: "vvv",
+    constants.GLOBAL_LOG_LEVEL.debug: "vvvv",
+    constants.GLOBAL_LOG_LEVEL.trace: "vvvvv",
 }
 
 

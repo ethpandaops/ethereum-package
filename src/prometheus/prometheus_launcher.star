@@ -23,7 +23,7 @@ def launch_prometheus(
     plan,
     el_contexts,
     cl_contexts,
-    validator_client_contexts,
+    vc_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
@@ -32,7 +32,7 @@ def launch_prometheus(
     metrics_jobs = get_metrics_jobs(
         el_contexts,
         cl_contexts,
-        validator_client_contexts,
+        vc_contexts,
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
         xatu_sentry_contexts,
@@ -53,7 +53,7 @@ def launch_prometheus(
 def get_metrics_jobs(
     el_contexts,
     cl_contexts,
-    validator_client_contexts,
+    vc_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
@@ -123,7 +123,7 @@ def get_metrics_jobs(
             )
 
     # Adding validator clients metrics jobs
-    for context in validator_client_contexts:
+    for context in vc_contexts:
         if context == None:
             continue
         metrics_info = context.metrics_info

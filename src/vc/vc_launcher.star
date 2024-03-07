@@ -1,14 +1,14 @@
 input_parser = import_module("../package_io/input_parser.star")
 constants = import_module("../package_io/constants.star")
 node_metrics = import_module("../node_metrics_info.star")
-validator_client_context = import_module("./validator_client_context.star")
+vc_context = import_module("./vc_context.star")
 
 lighthouse = import_module("./lighthouse.star")
 lodestar = import_module("./lodestar.star")
 nimbus = import_module("./nimbus.star")
 prysm = import_module("./prysm.star")
 teku = import_module("./teku.star")
-validator_client_shared = import_module("./shared.star")
+vc_shared = import_module("./shared.star")
 
 # The defaults for min/max CPU/memory that the validator client can use
 MIN_CPU = 50
@@ -177,25 +177,23 @@ def launch(
     validator_service = plan.add_service(service_name, config)
 
     validator_metrics_port = validator_service.ports[
-        validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_ID
+        vc_shared.VALIDATOR_CLIENT_METRICS_PORT_ID
     ]
     validator_metrics_url = "{0}:{1}".format(
         validator_service.ip_address, validator_metrics_port.number
     )
     validator_node_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, validator_client_shared.METRICS_PATH, validator_metrics_url
+        service_name, vc_shared.METRICS_PATH, validator_metrics_url
     )
 
-    validator_http_port = validator_service.ports[
-        validator_client_shared.VALIDATOR_HTTP_PORT_ID
-    ]
+    validator_http_port = validator_service.ports[vc_shared.VALIDATOR_HTTP_PORT_ID]
 
-    return validator_client_context.new_validator_client_context(
+    return vc_context.new_vc_context(
         service_name=service_name,
         client_name=vc_type,
         metrics_info=validator_node_metrics_info,
     )
 
 
-def new_validator_client_launcher(el_cl_genesis_data):
+def new_vc_launcher(el_cl_genesis_data):
     return struct(el_cl_genesis_data=el_cl_genesis_data)

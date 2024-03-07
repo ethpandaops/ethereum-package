@@ -22,7 +22,7 @@ launch_shadowfork = import_module("./network_launcher/shadowfork.star")
 
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
-validator_client = import_module("./validator_client/validator_client_launcher.star")
+vc = import_module("./vc/vc_launcher.star")
 
 
 def launch_participant_network(
@@ -184,7 +184,7 @@ def launch_participant_network(
     ethereum_metrics_exporter_context = None
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
-    all_validator_client_contexts = []
+    all_vc_contexts = []
     # Some CL clients cannot run validator clients in the same process and need
     # a separate validator client
     _cls_that_need_separate_vc = [
@@ -249,20 +249,17 @@ def launch_participant_network(
         plan.print("Successfully added {0} CL participants".format(num_participants))
 
         plan.print("Start adding validators for participant #{0}".format(index_str))
-        if participant.use_separate_validator_client == None:
+        if participant.use_separate_vc == None:
             # This should only be the case for the MEV participant,
             # the regular participants default to False/True
-            all_validator_client_contexts.append(None)
+            all_vc_contexts.append(None)
             continue
 
-        if (
-            cl_type in _cls_that_need_separate_vc
-            and not participant.use_separate_validator_client
-        ):
+        if cl_type in _cls_that_need_separate_vc and not participant.use_separate_vc:
             fail("{0} needs a separate validator client!".format(cl_type))
 
-        if not participant.use_separate_validator_client:
-            all_validator_client_contexts.append(None)
+        if not participant.use_separate_vc:
+            all_vc_contexts.append(None)
             continue
 
         plan.print(
@@ -273,11 +270,9 @@ def launch_participant_network(
         if participant.validator_count != 0:
             vc_keystores = preregistered_validator_keys_for_nodes[index]
 
-        validator_client_context = validator_client.launch(
+        vc_context = vc.launch(
             plan=plan,
-            launcher=validator_client.new_validator_client_launcher(
-                el_cl_genesis_data=el_cl_data
-            ),
+            launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
             keymanager_file=keymanager_file,
             keymanager_p12_file=keymanager_p12_file,
             service_name="vc-{0}-{1}-{2}".format(index_str, vc_type, el_type),
@@ -304,12 +299,10 @@ def launch_participant_network(
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
         )
-        all_validator_client_contexts.append(validator_client_context)
+        all_vc_contexts.append(vc_context)
 
-        if validator_client_context and validator_client_context.metrics_info:
-            validator_client_context.metrics_info[
-                "config"
-            ] = participant.prometheus_config
+        if vc_context and vc_context.metrics_info:
+            vc_context.metrics_info["config"] = participant.prometheus_config
 
     all_participants = []
 
@@ -321,7 +314,7 @@ def launch_participant_network(
 
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
-        validator_client_context = all_validator_client_contexts[index]
+        vc_context = all_vc_contexts[index]
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
@@ -343,7 +336,7 @@ def launch_participant_network(
             vc_type,
             el_context,
             cl_context,
-            validator_client_context,
+            vc_context,
             snooper_engine_context,
             ethereum_metrics_exporter_context,
             xatu_sentry_context,

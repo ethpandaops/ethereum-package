@@ -25,7 +25,7 @@ VC_TYPE = struct(
     teku="teku",
 )
 
-global_log_level = struct(
+GLOBAL_LOG_LEVEL = struct(
     info="info",
     error="error",
     warn="warn",

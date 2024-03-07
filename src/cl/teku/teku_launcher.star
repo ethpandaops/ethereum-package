@@ -4,7 +4,7 @@ cl_context = import_module("../../cl/cl_context.star")
 node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 constants = import_module("../../package_io/constants.star")
-validator_client_shared = import_module("../../validator_client/shared.star")
+vc_shared = import_module("../../vc/shared.star")
 #  ---------------------------------- Beacon client -------------------------------------
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
 
@@ -54,11 +54,11 @@ BEACON_USED_PORTS = {
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    constants.global_log_level.error: "ERROR",
-    constants.global_log_level.warn: "WARN",
-    constants.global_log_level.info: "INFO",
-    constants.global_log_level.debug: "DEBUG",
-    constants.global_log_level.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_LOG_LEVEL.warn: "WARN",
+    constants.GLOBAL_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -89,7 +89,7 @@ def launch(
     participant_tolerations,
     global_tolerations,
     node_selectors,
-    use_separate_validator_client,
+    use_separate_vc,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -145,7 +145,7 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
-        use_separate_validator_client,
+        use_separate_vc,
         persistent,
         cl_volume_size,
         tolerations,
@@ -224,7 +224,7 @@ def get_beacon_config(
     extra_params,
     extra_env_vars,
     extra_labels,
-    use_separate_validator_client,
+    use_separate_vc,
     persistent,
     cl_volume_size,
     tolerations,
@@ -301,9 +301,7 @@ def get_beacon_config(
         + el_context.client_name,
         "--validator-api-enabled=true",
         "--validator-api-host-allowlist=*",
-        "--validator-api-port={0}".format(
-            validator_client_shared.VALIDATOR_HTTP_PORT_NUM
-        ),
+        "--validator-api-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--validator-api-interface=0.0.0.0",
         "--validator-api-keystore-file="
         + constants.KEYMANAGER_P12_MOUNT_PATH_ON_CONTAINER,
@@ -385,9 +383,9 @@ def get_beacon_config(
     }
     beacon_validator_used_ports = {}
     beacon_validator_used_ports.update(BEACON_USED_PORTS)
-    if node_keystore_files != None and not use_separate_validator_client:
+    if node_keystore_files != None and not use_separate_vc:
         validator_http_port_id_spec = shared_utils.new_port_spec(
-            validator_client_shared.VALIDATOR_HTTP_PORT_NUM,
+            vc_shared.VALIDATOR_HTTP_PORT_NUM,
             shared_utils.TCP_PROTOCOL,
             shared_utils.HTTP_APPLICATION_PROTOCOL,
         )

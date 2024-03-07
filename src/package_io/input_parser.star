@@ -177,9 +177,7 @@ def input_parser(plan, input_args):
                 cl_volume_size=participant["cl_volume_size"],
                 cl_extra_env_vars=participant["cl_extra_env_vars"],
                 cl_tolerations=participant["cl_tolerations"],
-                use_separate_validator_client=participant[
-                    "use_separate_validator_client"
-                ],
+                use_separate_vc=participant["use_separate_vc"],
                 vc_type=participant["vc_type"],
                 vc_image=participant["vc_image"],
                 vc_log_level=participant["vc_log_level"],
@@ -377,16 +375,16 @@ def parse_network_params(input_args):
                 )
             participant["cl_image"] = default_image
 
-        if participant["use_separate_validator_client"] == None:
+        if participant["use_separate_vc"] == None:
             # Default to false for CL clients that can run validator clients
             # in the same process.
             if cl_type in (
                 constants.CL_TYPE.nimbus,
                 constants.CL_TYPE.teku,
             ):
-                participant["use_separate_validator_client"] = False
+                participant["use_separate_vc"] = False
             else:
-                participant["use_separate_validator_client"] = True
+                participant["use_separate_vc"] = True
 
         if vc_type == "":
             # Defaults to matching the chosen CL client
@@ -647,7 +645,7 @@ def default_participant():
         "cl_max_cpu": 0,
         "cl_min_mem": 0,
         "cl_max_mem": 0,
-        "use_separate_validator_client": None,
+        "use_separate_vc": None,
         "vc_type": "",
         "vc_image": "",
         "vc_log_level": "",

@@ -1,6 +1,6 @@
 constants = import_module("../package_io/constants.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
-validator_client_shared = import_module("./shared.star")
+vc_shared = import_module("./shared.star")
 
 
 def get_config(
@@ -26,11 +26,11 @@ def get_config(
     validator_secrets_dirpath = ""
     if node_keystore_files != None:
         validator_keys_dirpath = shared_utils.path_join(
-            validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+            vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
             node_keystore_files.teku_keys_relative_dirpath,
         )
         validator_secrets_dirpath = shared_utils.path_join(
-            validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+            vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
             node_keystore_files.teku_secrets_relative_dirpath,
         )
 
@@ -52,9 +52,7 @@ def get_config(
         + el_context.client_name,
         "--validator-api-enabled=true",
         "--validator-api-host-allowlist=*",
-        "--validator-api-port={0}".format(
-            validator_client_shared.VALIDATOR_HTTP_PORT_NUM
-        ),
+        "--validator-api-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--validator-api-interface=0.0.0.0",
         "--validator-api-keystore-file="
         + constants.KEYMANAGER_P12_MOUNT_PATH_ON_CONTAINER,
@@ -64,9 +62,7 @@ def get_config(
         "--metrics-enabled=true",
         "--metrics-host-allowlist=*",
         "--metrics-interface=0.0.0.0",
-        "--metrics-port={0}".format(
-            validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
-        ),
+        "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
     ]
 
     if len(extra_params) > 0:
@@ -75,18 +71,18 @@ def get_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
+        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
         constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
         constants.KEYMANAGER_P12_MOUNT_PATH_ON_CLIENTS: keymanager_p12_file,
     }
 
     return ServiceConfig(
         image=image,
-        ports=validator_client_shared.VALIDATOR_CLIENT_USED_PORTS,
+        ports=vc_shared.VALIDATOR_CLIENT_USED_PORTS,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=validator_client_shared.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=vc_shared.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=vc_min_cpu,
         max_cpu=vc_max_cpu,
         min_memory=vc_min_mem,

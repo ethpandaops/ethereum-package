@@ -50,11 +50,11 @@ BEACON_NODE_USED_PORTS = {
 }
 
 VERBOSITY_LEVELS = {
-    constants.global_log_level.error: "error",
-    constants.global_log_level.warn: "warn",
-    constants.global_log_level.info: "info",
-    constants.global_log_level.debug: "debug",
-    constants.global_log_level.trace: "trace",
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -85,7 +85,7 @@ def launch(
     participant_tolerations,
     global_tolerations,
     node_selectors,
-    use_separate_validator_client=True,
+    use_separate_vc=True,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(

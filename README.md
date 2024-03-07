@@ -16,10 +16,11 @@ There are many participant fields that have been renamed to be more consistent w
 `bn_max_cpu` -> `cl_max_cpu`
 `bn_min_mem` -> `cl_min_mem`
 `bn_max_mem` -> `cl_max_mem`
+`use_separate_validator_client` -> `use_separate_vc`
 ### Validator flags
-`validator_client_type` -> `vc_type`
+`vc_type` -> `vc_type`
 `validator_tolerations` -> `vc_tolerations`
-`validator_client_image` -> `vc_image`
+`vc_image` -> `vc_image`
 `validator_extra_params` -> `vc_extra_params`
 `validator_extra_labels` -> `vc_extra_labels`
 `v_min_cpu` -> `vc_min_cpu`
@@ -271,7 +272,7 @@ participants:
 
   # Whether to use a separate validator client attached to the CL client.
   # Defaults to false for clients that can run both in one process (Teku, Nimbus)
-  use_separate_validator_client: false
+  use_separate_vc: false
 
   # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
   # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node

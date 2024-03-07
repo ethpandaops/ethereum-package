@@ -1,6 +1,6 @@
 constants = import_module("../package_io/constants.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
-validator_client_shared = import_module("./shared.star")
+vc_shared = import_module("./shared.star")
 
 PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-password"
 PRYSM_BEACON_RPC_PORT = 4000
@@ -26,7 +26,7 @@ def get_config(
     node_selectors,
 ):
     validator_keys_dirpath = shared_utils.path_join(
-        validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
         node_keystore_files.prysm_relative_dirpath,
     )
     validator_secrets_dirpath = shared_utils.path_join(
@@ -49,14 +49,12 @@ def get_config(
         "--wallet-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         "--rpc",
-        "--rpc-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--rpc-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--rpc-host=0.0.0.0",
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
-        "--monitoring-port={0}".format(
-            validator_client_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM
-        ),
+        "--monitoring-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + cl_context.client_name + "-" + el_context.client_name,
     ]
@@ -67,17 +65,17 @@ def get_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        validator_client_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
+        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
         PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
     }
 
     return ServiceConfig(
         image=image,
-        ports=validator_client_shared.VALIDATOR_CLIENT_USED_PORTS,
+        ports=vc_shared.VALIDATOR_CLIENT_USED_PORTS,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=validator_client_shared.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=vc_shared.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=vc_min_cpu,
         max_cpu=vc_max_cpu,
         min_memory=vc_min_mem,

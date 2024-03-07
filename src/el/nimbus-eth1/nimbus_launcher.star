@@ -53,11 +53,11 @@ USED_PORTS = {
 }
 
 VERBOSITY_LEVELS = {
-    constants.global_log_level.error: "ERROR",
-    constants.global_log_level.warn: "WARN",
-    constants.global_log_level.info: "INFO",
-    constants.global_log_level.debug: "DEBUG",
-    constants.global_log_level.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_LOG_LEVEL.warn: "WARN",
+    constants.GLOBAL_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
 }
 
 
