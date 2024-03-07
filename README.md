@@ -38,6 +38,11 @@ v_max_mem -> vc_max_mem
 global_client_log_level -> global_log_level
 ```
 
+To help you with the transition, we have added a script that will automatically update your `yaml` file to the new format. You can run the following command to update your network_params.yaml file:
+```bash
+./rename.sh example.yaml
+```
+
 
 # Ethereum Package
 
