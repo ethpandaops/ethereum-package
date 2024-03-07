@@ -25,7 +25,7 @@ def launch(
     num_participants,
 ):
     el_launchers = {
-        constants.el_type.geth: {
+        constants.EL_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
                 el_cl_data,
                 jwt_file,
@@ -38,7 +38,7 @@ def launch(
             ),
             "launch_method": geth.launch,
         },
-        constants.el_type.gethbuilder: {
+        constants.EL_TYPE.gethbuilder: {
             "launcher": geth.new_geth_launcher(
                 el_cl_data,
                 jwt_file,
@@ -51,7 +51,7 @@ def launch(
             ),
             "launch_method": geth.launch,
         },
-        constants.el_type.besu: {
+        constants.EL_TYPE.besu: {
             "launcher": besu.new_besu_launcher(
                 el_cl_data,
                 jwt_file,
@@ -59,7 +59,7 @@ def launch(
             ),
             "launch_method": besu.launch,
         },
-        constants.el_type.erigon: {
+        constants.EL_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
                 el_cl_data,
                 jwt_file,
@@ -69,7 +69,7 @@ def launch(
             ),
             "launch_method": erigon.launch,
         },
-        constants.el_type.nethermind: {
+        constants.EL_TYPE.nethermind: {
             "launcher": nethermind.new_nethermind_launcher(
                 el_cl_data,
                 jwt_file,
@@ -77,7 +77,7 @@ def launch(
             ),
             "launch_method": nethermind.launch,
         },
-        constants.el_type.reth: {
+        constants.EL_TYPE.reth: {
             "launcher": reth.new_reth_launcher(
                 el_cl_data,
                 jwt_file,
@@ -85,7 +85,7 @@ def launch(
             ),
             "launch_method": reth.launch,
         },
-        constants.el_type.ethereumjs: {
+        constants.EL_TYPE.ethereumjs: {
             "launcher": ethereumjs.new_ethereumjs_launcher(
                 el_cl_data,
                 jwt_file,
@@ -93,7 +93,7 @@ def launch(
             ),
             "launch_method": ethereumjs.launch,
         },
-        constants.el_type.nimbus: {
+        constants.EL_TYPE.nimbus: {
             "launcher": nimbus_eth1.new_nimbus_launcher(
                 el_cl_data,
                 jwt_file,

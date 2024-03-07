@@ -35,19 +35,19 @@ def launch(
     plan.print("Launching CL network")
 
     cl_launchers = {
-        constants.cl_type.lighthouse: {
+        constants.CL_TYPE.lighthouse: {
             "launcher": lighthouse.new_lighthouse_launcher(
                 el_cl_data, jwt_file, network_params.network
             ),
             "launch_method": lighthouse.launch,
         },
-        constants.cl_type.lodestar: {
+        constants.CL_TYPE.lodestar: {
             "launcher": lodestar.new_lodestar_launcher(
                 el_cl_data, jwt_file, network_params.network
             ),
             "launch_method": lodestar.launch,
         },
-        constants.cl_type.nimbus: {
+        constants.CL_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(
                 el_cl_data,
                 jwt_file,
@@ -56,7 +56,7 @@ def launch(
             ),
             "launch_method": nimbus.launch,
         },
-        constants.cl_type.prysm: {
+        constants.CL_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
                 jwt_file,
@@ -66,7 +66,7 @@ def launch(
             ),
             "launch_method": prysm.launch,
         },
-        constants.cl_type.teku: {
+        constants.CL_TYPE.teku: {
             "launcher": teku.new_teku_launcher(
                 el_cl_data,
                 jwt_file,

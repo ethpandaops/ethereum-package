@@ -358,7 +358,7 @@ def get_beacon_config(
         min_memory=cl_min_mem,
         max_memory=cl_max_mem,
         labels=shared_utils.label_maker(
-            constants.cl_type.lodestar,
+            constants.CL_TYPE.lodestar,
             constants.CLIENT_TYPES.cl,
             image,
             el_context.client_name,

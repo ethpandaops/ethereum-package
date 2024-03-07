@@ -262,7 +262,7 @@ def get_config(
         min_memory=el_min_mem,
         max_memory=el_max_mem,
         labels=shared_utils.label_maker(
-            constants.el_type.besu,
+            constants.EL_TYPE.besu,
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,

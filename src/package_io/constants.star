@@ -1,4 +1,4 @@
-el_type = struct(
+EL_TYPE = struct(
     gethbuilder="geth-builder",
     geth="geth",
     erigon="erigon",
@@ -9,7 +9,7 @@ el_type = struct(
     nimbus="nimbus",
 )
 
-cl_type = struct(
+CL_TYPE = struct(
     lighthouse="lighthouse",
     teku="teku",
     nimbus="nimbus",

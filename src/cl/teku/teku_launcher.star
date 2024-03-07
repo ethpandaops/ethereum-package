@@ -296,7 +296,7 @@ def get_beacon_config(
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
         "--validators-graffiti="
-        + constants.cl_type.teku
+        + constants.CL_TYPE.teku
         + "-"
         + el_context.client_name,
         "--validator-api-enabled=true",
@@ -421,7 +421,7 @@ def get_beacon_config(
         min_memory=cl_min_mem,
         max_memory=cl_max_mem,
         labels=shared_utils.label_maker(
-            constants.cl_type.teku,
+            constants.CL_TYPE.teku,
             constants.CLIENT_TYPES.cl,
             image,
             el_context.client_name,

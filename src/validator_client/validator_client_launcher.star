@@ -146,7 +146,7 @@ def launch(
         )
     elif vc_type == constants.VC_TYPE.prysm:
         # Prysm VC only works with Prysm beacon node right now
-        if cl_context.client_name != constants.cl_type.prysm:
+        if cl_context.client_name != constants.CL_TYPE.prysm:
             fail(
                 cl_context.client_name
                 + "Prysm VC is only compatible with Prysm beacon node"

@@ -340,7 +340,7 @@ def get_beacon_config(
         min_memory=cl_min_mem,
         max_memory=cl_max_mem,
         labels=shared_utils.label_maker(
-            constants.cl_type.prysm,
+            constants.CL_TYPE.prysm,
             constants.CLIENT_TYPES.cl,
             beacon_image,
             el_context.client_name,

@@ -188,9 +188,9 @@ def launch_participant_network(
     # Some CL clients cannot run validator clients in the same process and need
     # a separate validator client
     _cls_that_need_separate_vc = [
-        constants.cl_type.prysm,
-        constants.cl_type.lodestar,
-        constants.cl_type.lighthouse,
+        constants.CL_TYPE.prysm,
+        constants.CL_TYPE.lodestar,
+        constants.CL_TYPE.lighthouse,
     ]
     for index, participant in enumerate(participants):
         el_type = participant.el_type

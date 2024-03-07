@@ -298,7 +298,7 @@ def get_beacon_config(
         "--validators-dir=" + validator_keys_dirpath,
         "--secrets-dir=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=" + constants.cl_type.nimbus + "-" + el_context.client_name,
+        "--graffiti=" + constants.CL_TYPE.nimbus + "-" + el_context.client_name,
         "--keymanager",
         "--keymanager-port={0}".format(validator_client_shared.VALIDATOR_HTTP_PORT_NUM),
         "--keymanager-address=0.0.0.0",
@@ -368,7 +368,7 @@ def get_beacon_config(
         min_memory=cl_min_mem,
         max_memory=cl_max_mem,
         labels=shared_utils.label_maker(
-            constants.cl_type.nimbus,
+            constants.CL_TYPE.nimbus,
             constants.CLIENT_TYPES.cl,
             image,
             el_context.client_name,
