@@ -1,8 +1,8 @@
 participants:
-  - el_client_type: geth
-    el_client_image: ethereum/client-go:v1.13.14
-    cl_client_type: teku
-    cl_client_image: consensys/teku:24.2.0
+  - el_type: geth
+    el_image: ethereum/client-go:v1.13.14
+    cl_type: teku
+    cl_image: consensys/teku:24.2.0
 network_params:
   dencun_fork_epoch: 0
   network: holesky-shadowfork

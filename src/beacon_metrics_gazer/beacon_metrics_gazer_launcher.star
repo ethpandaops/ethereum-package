@@ -33,13 +33,13 @@ MAX_MEMORY = 300
 
 def launch_beacon_metrics_gazer(
     plan,
-    cl_client_contexts,
+    cl_contexts,
     network_params,
     global_node_selectors,
 ):
     config = get_config(
-        cl_client_contexts[0].ip_addr,
-        cl_client_contexts[0].http_port_num,
+        cl_contexts[0].ip_addr,
+        cl_contexts[0].http_port_num,
         global_node_selectors,
     )
 

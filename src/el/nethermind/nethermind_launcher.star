@@ -1,6 +1,6 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../../package_io/input_parser.star")
-el_client_context = import_module("../../el/el_client_context.star")
+el_context = import_module("../../el/el_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 
 node_metrics = import_module("../../node_metrics_info.star")
@@ -49,11 +49,11 @@ USED_PORTS = {
 }
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "ERROR",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "WARN",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "INFO",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "DEBUG",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_LOG_LEVEL.warn: "WARN",
+    constants.GLOBAL_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -136,7 +136,7 @@ def launch(
         service_name, METRICS_PATH, metrics_url
     )
 
-    return el_client_context.new_el_client_context(
+    return el_context.new_el_context(
         "nethermind",
         "",  # nethermind has no ENR in the eth2-merge-kurtosis-module either
         # Nethermind node info endpoint doesn't return ENR field https://docs.nethermind.io/nethermind/ethereum-client/json-rpc/admin
@@ -259,7 +259,7 @@ def get_config(
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
         labels=shared_utils.label_maker(
-            constants.EL_CLIENT_TYPE.nethermind,
+            constants.EL_TYPE.nethermind,
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,

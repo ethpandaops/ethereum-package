@@ -1,4 +1,4 @@
-def new_el_client_context(
+def new_el_context(
     client_name,
     enr,
     enode,

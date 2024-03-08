@@ -39,12 +39,12 @@ def launch_assertoor(
     global_node_selectors,
 ):
     all_client_info = []
-    validator_client_info = []
+    vc_info = []
 
     for index, participant in enumerate(participant_contexts):
         participant_config = participant_configs[index]
-        cl_client = participant.cl_client_context
-        el_client = participant.el_client_context
+        cl_client = participant.cl_context
+        el_client = participant.el_context
 
         all_client_info.append(
             new_client_info(
@@ -57,7 +57,7 @@ def launch_assertoor(
         )
 
         if participant_config.validator_count != 0:
-            validator_client_info.append(
+            vc_info.append(
                 new_client_info(
                     cl_client.ip_addr,
                     cl_client.http_port_num,
@@ -68,7 +68,7 @@ def launch_assertoor(
             )
 
     template_data = new_config_template_data(
-        HTTP_PORT_NUMBER, all_client_info, validator_client_info, assertoor_params
+        HTTP_PORT_NUMBER, all_client_info, vc_info, assertoor_params
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -134,9 +134,7 @@ def get_config(
     )
 
 
-def new_config_template_data(
-    listen_port_num, client_info, validator_client_info, assertoor_params
-):
+def new_config_template_data(listen_port_num, client_info, vc_info, assertoor_params):
     additional_tests = []
     for index, testcfg in enumerate(assertoor_params.tests):
         if type(testcfg) == "dict":
@@ -153,7 +151,7 @@ def new_config_template_data(
     return {
         "ListenPortNum": listen_port_num,
         "ClientInfo": client_info,
-        "ValidatorClientInfo": validator_client_info,
+        "ValidatorClientInfo": vc_info,
         "RunStabilityCheck": assertoor_params.run_stability_check,
         "RunBlockProposalCheck": assertoor_params.run_block_proposal_check,
         "RunLifecycleTest": assertoor_params.run_lifecycle_test,

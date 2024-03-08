@@ -1,4 +1,4 @@
-def new_cl_client_context(
+def new_cl_context(
     client_name,
     enr,
     ip_addr,

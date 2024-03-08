@@ -18,7 +18,7 @@ MAX_MEMORY = 1024
 def launch(
     plan,
     xatu_sentry_service_name,
-    cl_client_context,
+    cl_context,
     xatu_sentry_params,
     network_params,
     pair_name,
@@ -30,8 +30,8 @@ def launch(
         str(METRICS_PORT_NUMBER),
         pair_name,
         "http://{}:{}".format(
-            cl_client_context.ip_addr,
-            cl_client_context.http_port_num,
+            cl_context.ip_addr,
+            cl_context.http_port_num,
         ),
         xatu_sentry_params.xatu_server_addr,
         network_params.network,

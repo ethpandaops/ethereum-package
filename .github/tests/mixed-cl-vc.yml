@@ -1,10 +1,10 @@
 participants:
-  - el_client_type: geth
-    cl_client_type: teku
-    use_separate_validator_client: true
-    validator_client_type: lodestar
-  - el_client_type: besu
-    cl_client_type: nimbus
-    use_separate_validator_client: true
-    validator_client_type: lighthouse
+  - el_type: geth
+    cl_type: teku
+    use_separate_vc: true
+    vc_type: lodestar
+  - el_type: besu
+    cl_type: nimbus
+    use_separate_vc: true
+    vc_type: lighthouse
 additional_services: []

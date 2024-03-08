@@ -1,7 +1,7 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../../package_io/input_parser.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
-el_client_context = import_module("../../el/el_client_context.star")
+el_context = import_module("../../el/el_context.star")
 
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
@@ -51,11 +51,11 @@ USED_PORTS = {
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_CLIENT_LOG_LEVEL.error: "1",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.warn: "2",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.info: "3",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.debug: "4",
-    constants.GLOBAL_CLIENT_LOG_LEVEL.trace: "5",
+    constants.GLOBAL_LOG_LEVEL.error: "1",
+    constants.GLOBAL_LOG_LEVEL.warn: "2",
+    constants.GLOBAL_LOG_LEVEL.info: "3",
+    constants.GLOBAL_LOG_LEVEL.debug: "4",
+    constants.GLOBAL_LOG_LEVEL.trace: "5",
 }
 
 
@@ -142,7 +142,7 @@ def launch(
         service_name, METRICS_PATH, metrics_url
     )
 
-    return el_client_context.new_el_client_context(
+    return el_context.new_el_context(
         "erigon",
         enr,
         enode,
@@ -284,7 +284,7 @@ def get_config(
         max_memory=el_max_mem,
         env_vars=extra_env_vars,
         labels=shared_utils.label_maker(
-            constants.EL_CLIENT_TYPE.erigon,
+            constants.EL_TYPE.erigon,
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,
