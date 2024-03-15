@@ -130,7 +130,7 @@ def get_api_config(
         ready_conditions=ReadyCondition(
             recipe=GetHttpRequestRecipe(
                 port_id="http",
-                endpoint="/api/healthcheck",
+                endpoint="/healthcheck",
             ),
             field="code",
             assertion="==",
