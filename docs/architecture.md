@@ -22,7 +22,7 @@ The package has six main components, in accordance with the above operation:
 1. [Package I/O][package-io]
 1. [Static Files][static-files]
 1. [Participant Network][participant-network]
-1. [Auxiliary Services][auxiliary-services]
+1. [Auxiliary Services](#auxiliary-services)
 1. [Merge Verification Logic][testnet-verifier]
 
 ## [Main][main-function]
@@ -75,7 +75,7 @@ Once CL genesis data and keys have been created, the CL client nodes are started
 
 There are only two major difference between CL client and EL client launchers. First, the `cl_client_launcher.launch` method also consumes an `el_context`, because each CL client is connected in a 1:1 relationship with an EL client. Second, because CL clients have keys, the keystore files are passed in to the `launch` function as well.
 
-## [Auxiliary Services][auxiliary-services]
+## Auxiliary Services
 
 After the Ethereum network is up and running, this package starts several auxiliary containers to make it easier to work with the Ethereum network. At time of writing, these are:
 
@@ -97,4 +97,3 @@ Once the Ethereum network is up and running, verification logic will be run to e
 [ethereum-genesis-generator]: https://github.com/ethpandaops/ethereum-genesis-generator
 [static-files]: https://github.com/kurtosis-tech/ethereum-package/tree/main/static_files
 [testnet-verifier]: https://github.com/kurtosis-tech/ethereum-package/tree/main/src/testnet_verifier
-[auxiliary-services]: #auxiliary-services
