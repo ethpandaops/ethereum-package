@@ -22,7 +22,7 @@ The package has six main components, in accordance with the above operation:
 1. [Package I/O][package-io]
 1. [Static Files][static-files]
 1. [Participant Network][participant-network]
-1. [Auxiliary Services](#auxiliary-services)
+1. Auxiliary Services
 1. [Merge Verification Logic][testnet-verifier]
 
 ## [Main][main-function]
