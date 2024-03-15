@@ -75,7 +75,7 @@ Once CL genesis data and keys have been created, the CL client nodes are started
 
 There are only two major difference between CL client and EL client launchers. First, the `cl_client_launcher.launch` method also consumes an `el_context`, because each CL client is connected in a 1:1 relationship with an EL client. Second, because CL clients have keys, the keystore files are passed in to the `launch` function as well.
 
-## Auxiliary Services
+## [Auxiliary Services][auxilary-services]
 
 After the Ethereum network is up and running, this package starts several auxiliary containers to make it easier to work with the Ethereum network. At time of writing, these are:
 
