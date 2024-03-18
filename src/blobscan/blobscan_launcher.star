@@ -158,7 +158,7 @@ def get_web_config(database_url, beacon_node_rpc, chain_id, node_selectors):
         env_vars={
             "DATABASE_URL": database_url,
             "SECRET_KEY": "supersecret",
-            "NEXT_PUBLIC_NETWORK_NAME": "kurtosis-devnet",
+            "NEXT_PUBLIC_NETWORK_NAME": "devnet",
             "BEACON_NODE_ENDPOINT": beacon_node_rpc,
             "CHAIN_ID": chain_id,
         },
