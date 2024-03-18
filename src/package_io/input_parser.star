@@ -20,6 +20,7 @@ DEFAULT_CL_IMAGES = {
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
     "lodestar": "chainsafe/lodestar:latest",
+    "grandine": "sifrai/grandine:latest",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -28,6 +29,7 @@ DEFAULT_VC_IMAGES = {
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
     "teku": "consensys/teku:latest",
+    "grandine": "sifrai/grandine:latest",
 }
 
 MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.27"
@@ -381,6 +383,7 @@ def parse_network_params(input_args):
             if cl_type in (
                 constants.CL_TYPE.nimbus,
                 constants.CL_TYPE.teku,
+                constants.CL_TYPE.grandine,
             ):
                 participant["use_separate_vc"] = False
             else:
@@ -390,6 +393,9 @@ def parse_network_params(input_args):
             # Defaults to matching the chosen CL client
             vc_type = cl_type
             participant["vc_type"] = vc_type
+
+        if cl_type == constants.CL_TYPE.grandine and vc_type != constants.CL_TYPE.grandine:
+            fail("grandine does not support running a different validator client")
 
         vc_image = participant["vc_image"]
         if vc_image == "":
@@ -753,6 +759,8 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
             participant["cl_extra_params"].append("--Xp2p-gossip-scoring-enabled")
         if participant["cl_type"] == "lodestar":
             participant["cl_extra_params"].append("--disablePeerScoring")
+        if participant["cl_type"] == "grandine":
+            participant["cl_extra_params"].append("--disable-peer-scoring")
     return parsed_arguments_dict
 
 
@@ -794,6 +802,10 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             participant["vc_extra_params"].append("--enable-builder")
             participant["cl_extra_params"].append(
                 "--http-mev-relay={0}".format(mev_url)
+            )
+        if participant["cl_type"] == "grandine":
+            participant["cl_extra_params"].append(
+                "--builder-url={0}".format(mev_url)
             )
 
     num_participants = len(parsed_arguments_dict["participants"])
