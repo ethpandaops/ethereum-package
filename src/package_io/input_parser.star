@@ -394,7 +394,10 @@ def parse_network_params(input_args):
             vc_type = cl_type
             participant["vc_type"] = vc_type
 
-        if cl_type == constants.CL_TYPE.grandine and vc_type != constants.CL_TYPE.grandine:
+        if (
+            cl_type == constants.CL_TYPE.grandine
+            and vc_type != constants.CL_TYPE.grandine
+        ):
             fail("grandine does not support running a different validator client")
 
         vc_image = participant["vc_image"]
@@ -804,9 +807,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "--http-mev-relay={0}".format(mev_url)
             )
         if participant["cl_type"] == "grandine":
-            participant["cl_extra_params"].append(
-                "--builder-url={0}".format(mev_url)
-            )
+            participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(

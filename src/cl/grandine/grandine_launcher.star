@@ -165,7 +165,7 @@ def launch(
         port_id=BEACON_HTTP_PORT_ID,
         extract={
             "enr": ".data.enr",
-            #"multiaddr": ".data.p2p_addresses[0]",
+            # "multiaddr": ".data.p2p_addresses[0]",
             "peer_id": ".data.peer_id",
         },
     )
@@ -248,9 +248,7 @@ def get_beacon_config(
         )
     cmd = [
         "--network={0}".format(
-            network
-            if network in constants.PUBLIC_NETWORKS
-            else "custom"
+            network if network in constants.PUBLIC_NETWORKS else "custom"
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--http-address=0.0.0.0",
@@ -265,17 +263,12 @@ def get_beacon_config(
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         # To enable syncing other networks too without checkpoint syncing
-
     ]
     validator_flags = [
         "--keystore-dir=" + validator_keys_dirpath,
         "--keystore-password-file=" + validator_secrets_dirpath,
-        "--suggested-fee-recipient="
-        + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti="
-        + constants.CL_TYPE.grandine
-        + "-"
-        + el_context.client_name,
+        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--graffiti=" + constants.CL_TYPE.grandine + "-" + el_context.client_name,
     ]
 
     if network not in constants.PUBLIC_NETWORKS:
@@ -388,7 +381,9 @@ def get_beacon_config(
 
 
 def new_grandine_launcher(
-    el_cl_genesis_data, jwt_file, network,
+    el_cl_genesis_data,
+    jwt_file,
+    network,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
