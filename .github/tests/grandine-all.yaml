@@ -1,16 +1,14 @@
 participants:
   - el_type: geth
-    cl_type: teku
+    cl_type: grandine
   - el_type: nethermind
-    cl_type: prysm
+    cl_type: grandine
   - el_type: erigon
-    cl_type: nimbus
+    cl_type: grandine
   - el_type: besu
-    cl_type: lighthouse
+    cl_type: grandine
   - el_type: reth
-    cl_type: lodestar
-  - el_type: nimbus
-    cl_type: teku
+    cl_type: grandine
   - el_type: ethereumjs
     cl_type: grandine
 additional_services: []

@@ -3,6 +3,7 @@ lodestar = import_module("./lodestar/lodestar_launcher.star")
 nimbus = import_module("./nimbus/nimbus_launcher.star")
 prysm = import_module("./prysm/prysm_launcher.star")
 teku = import_module("./teku/teku_launcher.star")
+grandine = import_module("./grandine/grandine_launcher.star")
 
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
@@ -75,6 +76,14 @@ def launch(
                 keymanager_p12_file,
             ),
             "launch_method": teku.launch,
+        },
+        constants.CL_TYPE.grandine: {
+            "launcher": grandine.new_grandine_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
+            "launch_method": grandine.launch,
         },
     }
 

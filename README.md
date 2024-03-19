@@ -258,7 +258,7 @@ participants:
 
 # CL(Consensus Layer) Specific flags
   # The type of CL client that should be started
-  # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+  # Valid values are nimbus, lighthouse, lodestar, teku, prysm, and grandine
   cl_type: lighthouse
 
   # The Docker image that should be used for the CL client; leave blank to use the default for the client type
