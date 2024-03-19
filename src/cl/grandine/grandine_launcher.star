@@ -229,11 +229,11 @@ def get_beacon_config(
     if node_keystore_files:
         validator_keys_dirpath = shared_utils.path_join(
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-            node_keystore_files.raw_keys_relative_dirpath,
+            node_keystore_files.teku_keys_relative_dirpath,
         )
         validator_secrets_dirpath = shared_utils.path_join(
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-            node_keystore_files.raw_secrets_relative_dirpath,
+            node_keystore_files.teku_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
