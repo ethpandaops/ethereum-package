@@ -494,7 +494,7 @@ network_params:
 
   # The epoch at which the deneb/electra forks are set to occur.
   deneb_fork_epoch: 0
-  electra_fork_epoch: null
+  electra_fork_epoch: 500
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/

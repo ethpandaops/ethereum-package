@@ -135,7 +135,6 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
-        launcher.electra_fork_epoch,
         launcher.cancun_time,
         launcher.prague_time,
         persistent,
@@ -186,7 +185,6 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
-    electra_fork_epoch,
     cancun_time,
     prague_time,
     persistent,
@@ -196,10 +194,10 @@ def get_config(
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if (
-        electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network
+        constants.NETWORK_NAME.verkle in network
     ) and constants.NETWORK_NAME.shadowfork not in network:
         if (
-            electra_fork_epoch == 0 or constants.NETWORK_NAME.verkle + "-gen" in network
+            constants.NETWORK_NAME.verkle + "-gen" in network
         ):  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -227,21 +225,19 @@ def get_config(
         # TODO: REMOVE Once geth default db is path based, and builder rebased
         "{0}".format(
             "--state.scheme=path"
-            if electra_fork_epoch == None
-            and "verkle" not in network
-            and constants.NETWORK_NAME.shadowfork not in network  # for now
+            if "verkle" not in network
             else ""
         ),
         # Override prague fork timestamp for electra fork
         "{0}".format(
             "--cache.preimages"
-            if electra_fork_epoch != None or "verkle" in network
+            if "verkle" in network
             else ""
         ),
-        # Override prague fork timestamp if electra_fork_epoch == 0
+        # Override prague fork timestamp
         "{0}".format(
             "--override.prague=" + str(prague_time)
-            if electra_fork_epoch == 0 or "verkle-gen" in network
+            if "verkle-gen" in network
             else ""
         ),
         "{0}".format(
@@ -378,7 +374,6 @@ def new_geth_launcher(
     networkid,
     cancun_time,
     prague_time,
-    electra_fork_epoch=None,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
@@ -387,5 +382,4 @@ def new_geth_launcher(
         networkid=networkid,
         cancun_time=cancun_time,
         prague_time=prague_time,
-        electra_fork_epoch=electra_fork_epoch,
     )

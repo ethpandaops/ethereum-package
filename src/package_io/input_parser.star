@@ -498,11 +498,7 @@ def parse_network_params(input_args):
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
 
-    if result["network_params"]["electra_fork_epoch"] != None:
-        # if electra is defined, then deneb needs to be set very high
-        result["network_params"]["deneb_fork_epoch"] = HIGH_DENEB_VALUE_FORK_VERKLE
-
-    if (result["network_params"]["capella_fork_epoch"] > 0):
+    if result["network_params"]["capella_fork_epoch"] > 0:
         fail("bellatrix fork epoch is no longer supported")
 
     if (
@@ -629,7 +625,7 @@ def default_network_params():
         "shard_committee_period": 256,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": None,
+        "electra_fork_epoch": 500,
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
     }
 
