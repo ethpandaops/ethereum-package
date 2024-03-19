@@ -196,9 +196,7 @@ def get_config(
     if (
         constants.NETWORK_NAME.verkle in network
     ) and constants.NETWORK_NAME.shadowfork not in network:
-        if (
-            constants.NETWORK_NAME.verkle + "-gen" in network
-        ):  # verkle-gen
+        if constants.NETWORK_NAME.verkle + "-gen" in network:  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
                 prague_time,
@@ -223,22 +221,12 @@ def get_config(
         "geth",
         # Disable path based storage scheme for electra fork and verkle
         # TODO: REMOVE Once geth default db is path based, and builder rebased
-        "{0}".format(
-            "--state.scheme=path"
-            if "verkle" not in network
-            else ""
-        ),
+        "{0}".format("--state.scheme=path" if "verkle" not in network else ""),
         # Override prague fork timestamp for electra fork
-        "{0}".format(
-            "--cache.preimages"
-            if "verkle" in network
-            else ""
-        ),
+        "{0}".format("--cache.preimages" if "verkle" in network else ""),
         # Override prague fork timestamp
         "{0}".format(
-            "--override.prague=" + str(prague_time)
-            if "verkle-gen" in network
-            else ""
+            "--override.prague=" + str(prague_time) if "verkle-gen" in network else ""
         ),
         "{0}".format(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""

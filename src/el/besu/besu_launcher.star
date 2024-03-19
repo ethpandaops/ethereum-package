@@ -196,9 +196,7 @@ def get_config(
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
         "--data-storage-format={0}".format(
-            "VERKLE"
-            if "verkle-gen" in network
-            else "BONSAI"
+            "VERKLE" if "verkle-gen" in network else "BONSAI"
         ),
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
