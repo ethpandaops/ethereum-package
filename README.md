@@ -825,14 +825,14 @@ snooper_enabled: true
 
 ## Beacon Node <> Validator Client compatibility
 
-|               | Lighthouse VC          | Prysm VC               | Teku VC                | Lodestar VC            | Nimbus VC
-|---------------|------------------------|------------------------|------------------------|------------------------|------------------------|
-| Lighthouse BN |:heavy_check_mark:      |:heavy_multiplication_x:|:heavy_multiplication_x:|:heavy_multiplication_x:|:heavy_check_mark:
-| Prysm BN      |:heavy_check_mark:      |:heavy_check_mark:      |:heavy_check_mark:      |:heavy_multiplication_x:|:heavy_check_mark:
-| Teku BN       |:heavy_check_mark:      |:heavy_multiplication_x:|:heavy_check_mark:      |:heavy_check_mark:      |:heavy_check_mark:
-| Lodestar BN   |:heavy_check_mark:      |:heavy_multiplication_x:|:heavy_multiplication_x:|:heavy_check_mark:      |:heavy_multiplication_x:
-| Nimbus BN     |:heavy_check_mark:      |:heavy_multiplication_x:|:heavy_check_mark:      |:heavy_check_mark:      |:heavy_check_mark:
-| Grandine BN   |:heavy_multiplication_x:|:heavy_multiplication_x:|:heavy_multiplication_x:|:heavy_multiplication_x:|:heavy_multiplication_x:
+|               | Lighthouse VC | Prysm VC | Teku VC | Lodestar VC | Nimbus VC
+|---------------|---------------|----------|---------|-------------|------------------------|
+| Lighthouse BN | ✅            | ❌       | ❌      | ❌          | ✅
+| Prysm BN      | ✅            | ✅       | ✅      | ❌          | ✅
+| Teku BN       | ✅            | ❌       | ✅      | ✅          | ✅
+| Lodestar BN   | ✅            | ❌       | ❌      | ✅          | ❌ 
+| Nimbus BN     | ✅            | ❌       | ✅      | ✅          | ✅
+| Grandine BN   | ❌            | ❌       | ❌      | ❌          | ❌ 
 
 ## Custom labels for Docker and Kubernetes
 
