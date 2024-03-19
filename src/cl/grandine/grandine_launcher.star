@@ -165,7 +165,7 @@ def launch(
         port_id=BEACON_HTTP_PORT_ID,
         extract={
             "enr": ".data.enr",
-            # "multiaddr": ".data.p2p_addresses[0]",
+            "multiaddr": ".data.p2p_addresses[0]",
             "peer_id": ".data.peer_id",
         },
     )
@@ -173,7 +173,7 @@ def launch(
         recipe=beacon_node_identity_recipe, service_name=service_name
     )
     beacon_node_enr = response["extract.enr"]
-    beacon_multiaddr = ""
+    beacon_multiaddr = response["extract.multiaddr"]
     beacon_peer_id = response["extract.peer_id"]
 
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
