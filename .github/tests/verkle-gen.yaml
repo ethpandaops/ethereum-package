@@ -1,18 +1,25 @@
 participants:
   - el_type: geth
-    el_image: ethpandaops/geth:kaustinen-with-shapella-0b110bd
-    cl_type: lighthouse
-    cl_image: ethpandaops/lighthouse:verkle-trees-capella-2ffb8a9
-    count: 2
-  - el_type: geth
-    el_image: ethpandaops/geth:kaustinen-with-shapella-0b110bd
+    el_image: ethpandaops/geth:gballet-kaustinen-with-shapella-fcdcd3b
     cl_type: lodestar
     cl_image: ethpandaops/lodestar:g11tech-verge-815364b
-    count: 2
+  - el_type: geth
+    el_image: ethpandaops/geth:gballet-kaustinen-with-shapella-fcdcd3b
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:verkle-trees-capella-2ffb8a9
+  - el_type: besu
+    el_image: ethpandaops/besu:matkt-fork-verkle-f2e19f9
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:g11tech-verge-815364b
+    validator_count: 10
+  - el_type: besu
+    el_image: ethpandaops/besu:matkt-fork-verkle-f2e19f9
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:verkle-trees-capella-2ffb8a9
+    validator_count: 10
 network_params:
   electra_fork_epoch: 0
 additional_services:
-  - el_forkmon
-  - tx_spammer
-  - dora
+- el_forkmon
+- dora
 snooper_enabled: true

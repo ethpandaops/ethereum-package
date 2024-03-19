@@ -56,6 +56,7 @@ def launch(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
+                network_params.electra_fork_epoch,
             ),
             "launch_method": besu.launch,
         },
