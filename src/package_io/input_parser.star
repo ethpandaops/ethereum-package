@@ -20,7 +20,7 @@ DEFAULT_CL_IMAGES = {
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
     "lodestar": "chainsafe/lodestar:latest",
-    "grandine": "sifrai/grandine:latest",
+    "grandine": "ethpandaops/grandine:develop",
 }
 
 DEFAULT_VC_IMAGES = {
