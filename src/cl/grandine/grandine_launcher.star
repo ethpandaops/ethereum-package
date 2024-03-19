@@ -257,6 +257,12 @@ def get_beacon_config(
         "--discovery-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--eth1-rpc-urls=" + EXECUTION_ENGINE_ENDPOINT,
+        # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
+        "--disable-enr-auto-update",
+        "--enr-address=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--enr-udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--enr-tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        # ^^^^^^^^^^^^^^^^^^^ REMOVE THESE WHEN CONNECTING TO EXTERNAL NET ^^^^^^^^^^^^^^^^^^^^^
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
