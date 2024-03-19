@@ -135,7 +135,6 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
-        launcher.capella_fork_epoch,
         launcher.electra_fork_epoch,
         launcher.cancun_time,
         launcher.prague_time,
@@ -187,7 +186,6 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
-    capella_fork_epoch,
     electra_fork_epoch,
     cancun_time,
     prague_time,
@@ -215,11 +213,6 @@ def get_config(
                     constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
                 )
             )
-    elif "--builder" in extra_params or capella_fork_epoch != 0:
-        init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
-            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-        )
     elif constants.NETWORK_NAME.shadowfork in network:
         init_datadir_cmd_str = "echo shadowfork"
     else:
@@ -230,16 +223,13 @@ def get_config(
 
     cmd = [
         "geth",
-        # Disable path based storage scheme for electra fork or when builder image or when capella is not 0 is used
+        # Disable path based storage scheme for electra fork and verkle
         # TODO: REMOVE Once geth default db is path based, and builder rebased
-        # TODO: capella fork epoch check is needed to ensure older versions of geth works.
         "{0}".format(
             "--state.scheme=path"
             if electra_fork_epoch == None
             and "verkle" not in network
             and constants.NETWORK_NAME.shadowfork not in network  # for now
-            and "--builder" not in extra_params
-            and capella_fork_epoch == 0
             else ""
         ),
         # Override prague fork timestamp for electra fork
@@ -386,7 +376,6 @@ def new_geth_launcher(
     jwt_file,
     network,
     networkid,
-    capella_fork_epoch,
     cancun_time,
     prague_time,
     electra_fork_epoch=None,
@@ -396,7 +385,6 @@ def new_geth_launcher(
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
-        capella_fork_epoch=capella_fork_epoch,
         cancun_time=cancun_time,
         prague_time=prague_time,
         electra_fork_epoch=electra_fork_epoch,

@@ -69,8 +69,7 @@ network_params:
   eth1_follow_distance: 2048
   min_validator_withdrawability_delay: 256
   shard_committee_period: 256
-  capella_fork_epoch: 0
-  deneb_fork_epoch: 4
+  deneb_fork_epoch: 0
   electra_fork_epoch: null
   network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
 additional_services:

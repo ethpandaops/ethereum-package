@@ -12,5 +12,5 @@ participants:
   - el_type: ethereumjs
     cl_type: teku
 network_params:
-  capella_fork_epoch: 1
+  deneb_fork_epoch: 1
 additional_services: []
