@@ -494,7 +494,7 @@ network_params:
 
   # The epoch at which the capella/deneb/electra forks are set to occur.
   capella_fork_epoch: 0
-  deneb_fork_epoch: 4
+  deneb_fork_epoch: 0
   electra_fork_epoch: null
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
@@ -750,8 +750,8 @@ participants:
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
 network_params:
-  capella_fork_epoch: 2
-  deneb_fork_epoch: 4
+  capella_fork_epoch: 0
+  deneb_fork_epoch: 0
 additional_services: []
 wait_for_finalization: false
 wait_for_verifications: false

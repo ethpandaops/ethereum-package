@@ -625,7 +625,7 @@ def default_network_params():
         "min_validator_withdrawability_delay": 256,
         "shard_committee_period": 256,
         "capella_fork_epoch": 0,
-        "deneb_fork_epoch": 4,
+        "deneb_fork_epoch": 0,
         "electra_fork_epoch": None,
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
     }
