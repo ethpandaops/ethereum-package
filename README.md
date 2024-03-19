@@ -826,7 +826,7 @@ snooper_enabled: true
 ## Beacon Node <> Validator Client compatibility
 
 |               | Lighthouse VC | Prysm VC | Teku VC | Lodestar VC | Nimbus VC
-|---------------|---------------|----------|---------|-------------|------------------------|
+|---------------|---------------|----------|---------|-------------|-----------|
 | Lighthouse BN | ✅            | ❌       | ❌      | ❌          | ✅
 | Prysm BN      | ✅            | ✅       | ✅      | ❌          | ✅
 | Teku BN       | ✅            | ❌       | ✅      | ✅          | ✅
