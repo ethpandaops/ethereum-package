@@ -309,7 +309,11 @@ def launch_participant_network(
                 )
             )
         all_snooper_beacon_contexts.append(snooper_beacon_context)
-
+        full_name = (
+            "{0}-{1}-{2}".format(index_str, el_type, cl_type) + "-{0}".format(vc_type)
+            if vc_type != cl_type
+            else ""
+        )
         vc_context = vc.launch(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
@@ -322,6 +326,7 @@ def launch_participant_network(
             global_log_level=global_log_level,
             cl_context=cl_context,
             el_context=el_context,
+            full_name=full_name,
             snooper_enabled=participant.snooper_enabled,
             snooper_beacon_context=snooper_beacon_context,
             node_keystore_files=vc_keystores,

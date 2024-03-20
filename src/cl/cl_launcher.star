@@ -145,7 +145,7 @@ def launch(
                 )
             )
         all_snooper_engine_contexts.append(snooper_engine_context)
-
+        full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         if index == 0:
             cl_context = launch_method(
                 plan,
@@ -156,6 +156,7 @@ def launch(
                 global_log_level,
                 cl_context_BOOTNODE,
                 el_context,
+                full_name,
                 new_cl_node_validator_keystores,
                 participant.cl_min_cpu,
                 participant.cl_max_cpu,
@@ -187,6 +188,7 @@ def launch(
                 global_log_level,
                 boot_cl_client_ctx,
                 el_context,
+                full_name,
                 new_cl_node_validator_keystores,
                 participant.cl_min_cpu,
                 participant.cl_max_cpu,

@@ -23,6 +23,7 @@ def get_config(
     beacon_http_url,
     cl_context,
     el_context,
+    full_name,
     node_keystore_files,
     vc_min_cpu,
     vc_max_cpu,
@@ -74,7 +75,7 @@ def get_config(
         "--metrics-allow-origin=*",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + cl_context.client_name + "-" + el_context.client_name,
+        "--graffiti=" + full_name,
     ]
 
     if not (constants.NETWORK_NAME.verkle in network or electra_fork_epoch != None):

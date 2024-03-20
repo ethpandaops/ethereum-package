@@ -10,7 +10,9 @@ participants:
   - el_type: reth
     cl_type: lodestar
   - el_type: ethereumjs
-    cl_type: teku
+    cl_type: grandine
+  - el_type: geth
+    cl_type: grandine
 additional_services:
   - tx_spammer
   - blob_spammer

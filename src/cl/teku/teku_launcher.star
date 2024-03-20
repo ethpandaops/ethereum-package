@@ -71,6 +71,7 @@ def launch(
     global_log_level,
     bootnode_context,
     el_context,
+    full_name,
     node_keystore_files,
     cl_min_cpu,
     cl_max_cpu,
@@ -134,6 +135,7 @@ def launch(
         beacon_service_name,
         bootnode_context,
         el_context,
+        full_name,
         log_level,
         node_keystore_files,
         cl_min_cpu,
@@ -213,6 +215,7 @@ def get_beacon_config(
     service_name,
     bootnode_contexts,
     el_context,
+    full_name,
     log_level,
     node_keystore_files,
     cl_min_cpu,
@@ -295,10 +298,7 @@ def get_beacon_config(
         ),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--validators-graffiti="
-        + constants.CL_TYPE.teku
-        + "-"
-        + el_context.client_name,
+        "--validators-graffiti=" + full_name,
         "--validator-api-enabled=true",
         "--validator-api-host-allowlist=*",
         "--validator-api-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),

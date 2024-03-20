@@ -210,16 +210,14 @@ def get_client_names(participant, index, participant_contexts, participant_confi
         + el_client.client_name
         + "-"
         + cl_client.client_name
-        + ("-" + vc_client.client_name if vc_client != None else "")
-        if (
-            participant_config.validator_count != 0
-            or (
-                participant_config.cl_type == constants.CL_TYPE.teku
-                or participant_config.cl_type == constants.CL_TYPE.nimbus
-                or participant_config.cl_type == constants.CL_TYPE.grandine
+        + (
+            "-" + vc_client.client_name
+            if vc_client != None
+            and (
+                participant_config.validator_count != 0
+                or cl_client.client_name != vc_client.client_name
             )
-            and cl_client.client_name != vc_client.client_name
+            else ""
         )
-        else ""
     )
     return full_name, cl_client, el_client, participant_config
