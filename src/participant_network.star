@@ -311,9 +311,10 @@ def launch_participant_network(
         all_snooper_beacon_contexts.append(snooper_beacon_context)
         full_name = (
             "{0}-{1}-{2}".format(index_str, el_type, cl_type) + "-{0}".format(vc_type)
-            if vc_type != cl_type
-            else ""
+            if participant.cl_type != participant.vc_type
+            else "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         )
+        plan.print("HALLLO fullname{0}".format(full_name))
         vc_context = vc.launch(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),

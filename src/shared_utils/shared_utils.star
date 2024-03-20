@@ -205,19 +205,11 @@ def get_client_names(participant, index, participant_contexts, participant_confi
     el_client = participant.el_context
     vc_client = participant.vc_context
     full_name = (
-        index_str
-        + "-"
-        + el_client.client_name
-        + "-"
-        + cl_client.client_name
-        + (
-            "-" + vc_client.client_name
-            if vc_client != None
-            and (
-                participant_config.validator_count != 0
-                or cl_client.client_name != vc_client.client_name
-            )
-            else ""
+        "{0}-{1}-{2}".format(index_str, el_client.client_name, cl_client.client_name)
+        + "-{0}".format(vc_client.client_name)
+        if vc_client != None and cl_client.client_name != vc_client.client_name
+        else "{0}-{1}-{2}".format(
+            index_str, el_client.client_name, cl_client.client_name
         )
     )
     return full_name, cl_client, el_client, participant_config
