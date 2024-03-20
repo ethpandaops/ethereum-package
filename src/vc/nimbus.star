@@ -10,6 +10,7 @@ def get_config(
     beacon_http_url,
     cl_context,
     el_context,
+    full_name,
     node_keystore_files,
     vc_min_cpu,
     vc_max_cpu,
@@ -47,7 +48,7 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
-        "--graffiti=" + cl_context.client_name + "-" + el_context.client_name,
+        "--graffiti=" + full_name,
     ]
 
     if len(extra_params) > 0:

@@ -11,6 +11,7 @@ def get_config(
     beacon_http_url,
     cl_context,
     el_context,
+    full_name,
     node_keystore_files,
     vc_min_cpu,
     vc_max_cpu,
@@ -46,10 +47,7 @@ def get_config(
         ),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--validators-graffiti="
-        + cl_context.client_name
-        + "-"
-        + el_context.client_name,
+        "--validators-graffiti=" + full_name,
         "--validator-api-enabled=true",
         "--validator-api-host-allowlist=*",
         "--validator-api-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),

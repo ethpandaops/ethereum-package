@@ -29,6 +29,9 @@ def launch(
     global_log_level,
     cl_context,
     el_context,
+    full_name,
+    snooper_enabled,
+    snooper_beacon_context,
     node_keystore_files,
     vc_min_cpu,
     vc_max_cpu,
@@ -53,10 +56,16 @@ def launch(
         vc_tolerations, participant_tolerations, global_tolerations
     )
 
-    beacon_http_url = "http://{}:{}".format(
-        cl_context.ip_addr,
-        cl_context.http_port_num,
-    )
+    if snooper_enabled:
+        beacon_http_url = "http://{}:{}".format(
+            snooper_beacon_context.ip_addr,
+            snooper_beacon_context.beacon_rpc_port_num,
+        )
+    else:
+        beacon_http_url = "http://{}:{}".format(
+            cl_context.ip_addr,
+            cl_context.http_port_num,
+        )
 
     vc_min_cpu = int(vc_min_cpu) if int(vc_min_cpu) > 0 else MIN_CPU
     vc_max_cpu = int(vc_max_cpu) if int(vc_max_cpu) > 0 else MAX_CPU
@@ -72,6 +81,7 @@ def launch(
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
+            full_name=full_name,
             node_keystore_files=node_keystore_files,
             vc_min_cpu=vc_min_cpu,
             vc_max_cpu=vc_max_cpu,
@@ -94,6 +104,7 @@ def launch(
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
+            full_name=full_name,
             node_keystore_files=node_keystore_files,
             vc_min_cpu=vc_min_cpu,
             vc_max_cpu=vc_max_cpu,
@@ -114,6 +125,7 @@ def launch(
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
+            full_name=full_name,
             node_keystore_files=node_keystore_files,
             vc_min_cpu=vc_min_cpu,
             vc_max_cpu=vc_max_cpu,
@@ -133,6 +145,7 @@ def launch(
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
+            full_name=full_name,
             node_keystore_files=node_keystore_files,
             vc_min_cpu=vc_min_cpu,
             vc_max_cpu=vc_max_cpu,
@@ -158,6 +171,7 @@ def launch(
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
+            full_name=full_name,
             node_keystore_files=node_keystore_files,
             vc_min_cpu=vc_min_cpu,
             vc_max_cpu=vc_max_cpu,
@@ -171,6 +185,8 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
         )
+    elif vc_type == constants.VC_TYPE.grandine:
+        fail("Grandine VC is not yet supported")
     else:
         fail("Unsupported vc_type: {0}".format(vc_type))
 
@@ -189,8 +205,8 @@ def launch(
     validator_http_port = validator_service.ports[vc_shared.VALIDATOR_HTTP_PORT_ID]
 
     return vc_context.new_vc_context(
-        service_name=service_name,
         client_name=vc_type,
+        service_name=service_name,
         metrics_info=validator_node_metrics_info,
     )
 

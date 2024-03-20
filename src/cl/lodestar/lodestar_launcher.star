@@ -60,6 +60,7 @@ def launch(
     global_log_level,
     bootnode_contexts,
     el_context,
+    full_name,
     node_keystore_files,
     cl_min_cpu,
     cl_max_cpu,

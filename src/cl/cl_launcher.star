@@ -9,7 +9,7 @@ constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
 
-snooper = import_module("../snooper/snooper_engine_launcher.star")
+engine_snooper = import_module("../snooper/snooper_engine_launcher.star")
 
 cl_context_BOOTNODE = None
 
@@ -130,10 +130,10 @@ def launch(
         cl_context = None
         snooper_engine_context = None
         if participant.snooper_enabled:
-            snooper_service_name = "snooper-{0}-{1}-{2}".format(
+            snooper_service_name = "snooper-engine-{0}-{1}-{2}".format(
                 index_str, cl_type, el_type
             )
-            snooper_engine_context = snooper.launch(
+            snooper_engine_context = engine_snooper.launch(
                 plan,
                 snooper_service_name,
                 el_context,
@@ -145,7 +145,7 @@ def launch(
                 )
             )
         all_snooper_engine_contexts.append(snooper_engine_context)
-
+        full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         if index == 0:
             cl_context = launch_method(
                 plan,
@@ -156,6 +156,7 @@ def launch(
                 global_log_level,
                 cl_context_BOOTNODE,
                 el_context,
+                full_name,
                 new_cl_node_validator_keystores,
                 participant.cl_min_cpu,
                 participant.cl_max_cpu,
@@ -187,6 +188,7 @@ def launch(
                 global_log_level,
                 boot_cl_client_ctx,
                 el_context,
+                full_name,
                 new_cl_node_validator_keystores,
                 participant.cl_min_cpu,
                 participant.cl_max_cpu,
