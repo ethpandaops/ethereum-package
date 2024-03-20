@@ -30,17 +30,37 @@ USED_PORTS = {
 def launch_dora(
     plan,
     config_template,
-    cl_contexts,
+    participant_contexts,
+    participant_configs,
     el_cl_data_files_artifact_uuid,
     electra_fork_epoch,
     network,
     global_node_selectors,
 ):
     all_cl_client_info = []
-    for index, client in enumerate(cl_contexts):
+    for index, participant in enumerate(participant_contexts):
+        index_str = shared_utils.zfill_custom(
+            index + 1, len(str(len(participant_contexts)))
+        )
+        participant_config = participant_configs[index]
+        cl_client = participant.cl_context
+        el_client = participant.el_context
+        vc_client = participant.vc_context
+        full_name = (
+            index_str
+            + "-"
+            + el_client.client_name
+            + "-"
+            + cl_client.client_name
+            + ("-" + vc_client.client_name)
+            if (participant_config.validator_count != 0)
+            else ""
+        )
         all_cl_client_info.append(
             new_cl_client_info(
-                client.ip_addr, client.http_port_num, client.beacon_service_name
+                cl_client.ip_addr,
+                cl_client.http_port_num,
+                full_name,
             )
         )
 
@@ -113,5 +133,9 @@ def new_config_template_data(network, listen_port_num, cl_client_info):
     }
 
 
-def new_cl_client_info(ip_addr, port_num, service_name):
-    return {"IPAddr": ip_addr, "PortNum": port_num, "Name": service_name}
+def new_cl_client_info(ip_addr, port_num, full_name):
+    return {
+        "IPAddr": ip_addr,
+        "PortNum": port_num,
+        "FullName": full_name,
+    }

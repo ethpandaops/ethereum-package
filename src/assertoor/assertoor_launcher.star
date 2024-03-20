@@ -42,17 +42,30 @@ def launch_assertoor(
     vc_info = []
 
     for index, participant in enumerate(participant_contexts):
+        index_str = shared_utils.zfill_custom(
+            index + 1, len(str(len(participant_contexts)))
+        )
         participant_config = participant_configs[index]
         cl_client = participant.cl_context
         el_client = participant.el_context
-
+        vc_client = participant.vc_context
+        full_name = (
+            index_str
+            + "-"
+            + el_client.client_name
+            + "-"
+            + cl_client.client_name
+            + ("-" + vc_client.client_name)
+            if (participant_config.validator_count != 0)
+            else ""
+        )
         all_client_info.append(
             new_client_info(
                 cl_client.ip_addr,
                 cl_client.http_port_num,
                 el_client.ip_addr,
                 el_client.rpc_port_num,
-                cl_client.beacon_service_name,
+                full_name,
             )
         )
 
@@ -162,11 +175,11 @@ def new_config_template_data(listen_port_num, client_info, vc_info, assertoor_pa
     }
 
 
-def new_client_info(cl_ip_addr, cl_port_num, el_ip_addr, el_port_num, service_name):
+def new_client_info(cl_ip_addr, cl_port_num, el_ip_addr, el_port_num, full_name):
     return {
         "CLIPAddr": cl_ip_addr,
         "CLPortNum": cl_port_num,
         "ELIPAddr": el_ip_addr,
         "ELPortNum": el_port_num,
-        "Name": service_name,
+        "Name": full_name,
     }

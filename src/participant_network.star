@@ -24,6 +24,8 @@ el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
 vc = import_module("./vc/vc_launcher.star")
 
+beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
+
 
 def launch_participant_network(
     plan,
@@ -185,6 +187,7 @@ def launch_participant_network(
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     all_vc_contexts = []
+    all_snooper_beacon_contexts = []
     # Some CL clients cannot run validator clients in the same process and need
     # a separate validator client
     _cls_that_need_separate_vc = [
@@ -192,6 +195,7 @@ def launch_participant_network(
         constants.CL_TYPE.lodestar,
         constants.CL_TYPE.lighthouse,
     ]
+
     for index, participant in enumerate(participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
@@ -199,6 +203,11 @@ def launch_participant_network(
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
+
+        node_selectors = input_parser.get_client_node_selectors(
+            participant.node_selectors,
+            global_node_selectors,
+        )
         if participant.ethereum_metrics_exporter_enabled:
             pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
@@ -212,7 +221,7 @@ def launch_participant_network(
                 ethereum_metrics_exporter_service_name,
                 el_context,
                 cl_context,
-                participant.node_selectors,
+                node_selectors,
             )
             plan.print(
                 "Successfully added {0} ethereum metrics exporter participants".format(
@@ -236,7 +245,7 @@ def launch_participant_network(
                 xatu_sentry_params,
                 network_params,
                 pair_name,
-                participant.node_selectors,
+                node_selectors,
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(
@@ -270,6 +279,25 @@ def launch_participant_network(
         if participant.validator_count != 0:
             vc_keystores = preregistered_validator_keys_for_nodes[index]
 
+        vc_context = None
+        snooper_beacon_context = None
+        if participant.snooper_enabled:
+            snooper_service_name = "snooper-beacon-{0}-{1}-{2}".format(
+                index_str, cl_type, vc_type
+            )
+            snooper_beacon_context = beacon_snooper.launch(
+                plan,
+                snooper_service_name,
+                cl_context,
+                node_selectors,
+            )
+            plan.print(
+                "Successfully added {0} snooper participants".format(
+                    snooper_beacon_context
+                )
+            )
+        all_snooper_beacon_contexts.append(snooper_beacon_context)
+
         vc_context = vc.launch(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
@@ -282,6 +310,8 @@ def launch_participant_network(
             global_log_level=global_log_level,
             cl_context=cl_context,
             el_context=el_context,
+            snooper_enabled=participant.snooper_enabled,
+            snooper_beacon_context=snooper_beacon_context,
             node_keystore_files=vc_keystores,
             vc_min_cpu=participant.vc_min_cpu,
             vc_max_cpu=participant.vc_max_cpu,
@@ -295,7 +325,7 @@ def launch_participant_network(
             vc_tolerations=participant.vc_tolerations,
             participant_tolerations=participant.tolerations,
             global_tolerations=global_tolerations,
-            node_selectors=participant.node_selectors,
+            node_selectors=node_selectors,
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
         )
@@ -311,6 +341,7 @@ def launch_participant_network(
         cl_type = participant.cl_type
         vc_type = participant.vc_type
         snooper_engine_context = None
+        snooper_beacon_context = None
 
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
@@ -318,6 +349,7 @@ def launch_participant_network(
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
+            snooper_beacon_context = all_snooper_beacon_contexts[index]
 
         ethereum_metrics_exporter_context = None
 
