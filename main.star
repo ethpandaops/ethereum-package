@@ -138,7 +138,7 @@ def run(plan, args={}):
     ranges = validator_ranges.generate_validator_ranges(
         plan,
         validator_ranges_config_template,
-        all_cl_contexts,
+        all_participants,
         args_with_right_defaults.participants,
     )
 
@@ -370,7 +370,8 @@ def run(plan, args={}):
             dora.launch_dora(
                 plan,
                 dora_config_template,
-                all_cl_contexts,
+                all_participants,
+                args_with_right_defaults.participants,
                 el_cl_data_files_artifact_uuid,
                 network_params.electra_fork_epoch,
                 network_params.network,

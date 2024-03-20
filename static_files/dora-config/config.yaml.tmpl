@@ -35,7 +35,7 @@ beaconapi:
   endpoints:
 {{ range $clClient := .CLClientInfo }}
     - url: "http://{{ $clClient.IPAddr }}:{{ $clClient.PortNum }}"
-      name: "{{ $clClient.Name }}"
+      name: "{{ $clClient.FullName }}"
       archive: true
 {{- end }}
   # local cache for page models

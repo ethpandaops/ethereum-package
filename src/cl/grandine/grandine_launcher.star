@@ -69,6 +69,7 @@ def launch(
     global_log_level,
     bootnode_context,
     el_context,
+    full_name,
     node_keystore_files,
     cl_min_cpu,
     cl_max_cpu,
@@ -130,6 +131,7 @@ def launch(
         beacon_service_name,
         bootnode_context,
         el_context,
+        full_name,
         log_level,
         node_keystore_files,
         cl_min_cpu,
@@ -207,6 +209,7 @@ def get_beacon_config(
     service_name,
     bootnode_contexts,
     el_context,
+    full_name,
     log_level,
     node_keystore_files,
     cl_min_cpu,
@@ -274,7 +277,7 @@ def get_beacon_config(
         "--keystore-dir=" + validator_keys_dirpath,
         "--keystore-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=" + constants.CL_TYPE.grandine + "-" + el_context.client_name,
+        "--graffiti=" + full_name,
     ]
 
     if network not in constants.PUBLIC_NETWORKS:

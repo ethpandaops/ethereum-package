@@ -4,11 +4,11 @@ participants:
     use_separate_vc: true
   - el_type: nethermind
     cl_type: prysm
+  - el_type: besu
+    cl_type: lighthouse
   - el_type: erigon
     cl_type: nimbus
     use_separate_vc: true
-  - el_type: besu
-    cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
   - el_type: ethereumjs
