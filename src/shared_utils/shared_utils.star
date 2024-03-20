@@ -196,3 +196,30 @@ def calculate_devnet_url(network):
     return "github.com/ethpandaops/{0}-devnets/network-configs/{1}{2}-{3}".format(
         devnet_category, devnet_subname, network_type, devnet_number
     )
+
+
+def get_client_names(participant, index, participant_contexts, participant_configs):
+    index_str = zfill_custom(index + 1, len(str(len(participant_contexts))))
+    participant_config = participant_configs[index]
+    cl_client = participant.cl_context
+    el_client = participant.el_context
+    vc_client = participant.vc_context
+    full_name = (
+        index_str
+        + "-"
+        + el_client.client_name
+        + "-"
+        + cl_client.client_name
+        + ("-" + vc_client.client_name if vc_client != None else "")
+        if (
+            participant_config.validator_count != 0
+            or (
+                participant_config.cl_type == constants.CL_TYPE.teku
+                or participant_config.cl_type == constants.CL_TYPE.nimbus
+                or participant_config.cl_type == constants.CL_TYPE.grandine
+            )
+            and cl_client.client_name != vc_client.client_name
+        )
+        else ""
+    )
+    return full_name, cl_client, el_client, participant_config

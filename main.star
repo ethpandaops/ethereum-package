@@ -138,9 +138,7 @@ def run(plan, args={}):
     ranges = validator_ranges.generate_validator_ranges(
         plan,
         validator_ranges_config_template,
-        all_el_contexts,
-        all_cl_contexts,
-        all_vc_contexts,
+        all_participants,
         args_with_right_defaults.participants,
     )
 

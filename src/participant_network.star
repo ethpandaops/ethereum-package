@@ -282,6 +282,18 @@ def launch_participant_network(
         vc_context = None
         snooper_beacon_context = None
         if participant.snooper_enabled:
+            if (
+                participant.cl_type == constants.CL_TYPE.teku
+                or participant.cl_type == constants.CL_TYPE.nimbus
+                or participant.cl_type == constants.CL_TYPE.grandine
+            ) and participant.use_separate_vc != False:
+                plan.print(
+                    "Beacon snooper not supported for non split operation for {0}".format(
+                        participant.cl_type
+                    )
+                )
+                continue
+
             snooper_service_name = "snooper-beacon-{0}-{1}-{2}".format(
                 index_str, cl_type, vc_type
             )
@@ -341,7 +353,6 @@ def launch_participant_network(
         cl_type = participant.cl_type
         vc_type = participant.vc_type
         snooper_engine_context = None
-        snooper_beacon_context = None
 
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
@@ -349,7 +360,6 @@ def launch_participant_network(
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
-            snooper_beacon_context = all_snooper_beacon_contexts[index]
 
         ethereum_metrics_exporter_context = None
 

@@ -42,22 +42,13 @@ def launch_assertoor(
     vc_info = []
 
     for index, participant in enumerate(participant_contexts):
-        index_str = shared_utils.zfill_custom(
-            index + 1, len(str(len(participant_contexts)))
-        )
-        participant_config = participant_configs[index]
-        cl_client = participant.cl_context
-        el_client = participant.el_context
-        vc_client = participant.vc_context
-        full_name = (
-            index_str
-            + "-"
-            + el_client.client_name
-            + "-"
-            + cl_client.client_name
-            + ("-" + vc_client.client_name)
-            if (participant_config.validator_count != 0)
-            else ""
+        (
+            full_name,
+            cl_client,
+            el_client,
+            participant_config,
+        ) = shared_utils.get_client_names(
+            participant, index, participant_contexts, participant_configs
         )
         all_client_info.append(
             new_client_info(
