@@ -820,6 +820,17 @@ snooper_enabled: true
 
 </details>
 
+## Beacon Node <> Validator Client compatibility
+
+|               | Lighthouse VC | Prysm VC | Teku VC | Lodestar VC | Nimbus VC
+|---------------|---------------|----------|---------|-------------|-----------|
+| Lighthouse BN | ✅            | ❌       | ❌      | ❌          | ✅
+| Prysm BN      | ✅            | ✅       | ✅      | ❌          | ✅
+| Teku BN       | ✅            | ❌       | ✅      | ✅          | ✅
+| Lodestar BN   | ✅            | ❌       | ❌      | ✅          | ❌ 
+| Nimbus BN     | ✅            | ❌       | ✅      | ✅          | ✅
+| Grandine BN   | ❌            | ❌       | ❌      | ❌          | ❌ 
+
 ## Custom labels for Docker and Kubernetes
 
 There are 4 custom labels that can be used to identify the nodes in the network. These labels are used to identify the nodes in the network and can be used to run chaos tests on specific nodes. An example for these labels are as follows:
