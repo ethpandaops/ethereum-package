@@ -127,7 +127,6 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
-        launcher.electra_fork_epoch,
     )
 
     service = plan.add_service(service_name, config)
@@ -173,7 +172,6 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
-    electra_fork_epoch,
 ):
     cmd = [
         "besu",
@@ -198,9 +196,7 @@ def get_config(
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
         "--data-storage-format={0}".format(
-            "VERKLE"
-            if electra_fork_epoch != None or "verkle-gen" in network
-            else "BONSAI"
+            "VERKLE" if "verkle-gen" in network else "BONSAI"
         ),
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
@@ -280,10 +276,9 @@ def get_config(
     )
 
 
-def new_besu_launcher(el_cl_genesis_data, jwt_file, network, electra_fork_epoch=None):
+def new_besu_launcher(el_cl_genesis_data, jwt_file, network):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
-        electra_fork_epoch=electra_fork_epoch,
     )

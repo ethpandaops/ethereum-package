@@ -12,5 +12,5 @@ participants:
   - el_type: ethereumjs
     cl_type: teku
 network_params:
-  network: "dencun-devnet-12"
+  deneb_fork_epoch: 1
 additional_services: []

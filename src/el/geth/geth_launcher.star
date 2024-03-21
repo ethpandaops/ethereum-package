@@ -135,8 +135,6 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
-        launcher.capella_fork_epoch,
-        launcher.electra_fork_epoch,
         launcher.cancun_time,
         launcher.prague_time,
         persistent,
@@ -187,8 +185,6 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
-    capella_fork_epoch,
-    electra_fork_epoch,
     cancun_time,
     prague_time,
     persistent,
@@ -198,11 +194,9 @@ def get_config(
 ):
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if (
-        electra_fork_epoch != None or constants.NETWORK_NAME.verkle in network
+        constants.NETWORK_NAME.verkle in network
     ) and constants.NETWORK_NAME.shadowfork not in network:
-        if (
-            electra_fork_epoch == 0 or constants.NETWORK_NAME.verkle + "-gen" in network
-        ):  # verkle-gen
+        if constants.NETWORK_NAME.verkle + "-gen" in network:  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
                 prague_time,
@@ -215,11 +209,6 @@ def get_config(
                     constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
                 )
             )
-    elif "--builder" in extra_params or capella_fork_epoch != 0:
-        init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
-            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-        )
     elif constants.NETWORK_NAME.shadowfork in network:
         init_datadir_cmd_str = "echo shadowfork"
     else:
@@ -230,29 +219,14 @@ def get_config(
 
     cmd = [
         "geth",
-        # Disable path based storage scheme for electra fork or when builder image or when capella is not 0 is used
+        # Disable path based storage scheme for electra fork and verkle
         # TODO: REMOVE Once geth default db is path based, and builder rebased
-        # TODO: capella fork epoch check is needed to ensure older versions of geth works.
-        "{0}".format(
-            "--state.scheme=path"
-            if electra_fork_epoch == None
-            and "verkle" not in network
-            and constants.NETWORK_NAME.shadowfork not in network  # for now
-            and "--builder" not in extra_params
-            and capella_fork_epoch == 0
-            else ""
-        ),
+        "{0}".format("--state.scheme=path" if "verkle" not in network else ""),
         # Override prague fork timestamp for electra fork
+        "{0}".format("--cache.preimages" if "verkle" in network else ""),
+        # Override prague fork timestamp
         "{0}".format(
-            "--cache.preimages"
-            if electra_fork_epoch != None or "verkle" in network
-            else ""
-        ),
-        # Override prague fork timestamp if electra_fork_epoch == 0
-        "{0}".format(
-            "--override.prague=" + str(prague_time)
-            if electra_fork_epoch == 0 or "verkle-gen" in network
-            else ""
+            "--override.prague=" + str(prague_time) if "verkle-gen" in network else ""
         ),
         "{0}".format(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
@@ -386,18 +360,14 @@ def new_geth_launcher(
     jwt_file,
     network,
     networkid,
-    capella_fork_epoch,
     cancun_time,
     prague_time,
-    electra_fork_epoch=None,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
-        capella_fork_epoch=capella_fork_epoch,
         cancun_time=cancun_time,
         prague_time=prague_time,
-        electra_fork_epoch=electra_fork_epoch,
     )
