@@ -223,7 +223,7 @@ def run(plan, args={}):
             recipe=epoch_recipe,
             field="extract.epoch",
             assertion=">=",
-            target_value=str(network_params.capella_fork_epoch),
+            target_value=str(network_params.deneb_fork_epoch),
             timeout="20m",
             service_name=first_client_beacon_name,
         )

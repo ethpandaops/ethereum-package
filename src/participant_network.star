@@ -98,7 +98,6 @@ def launch_participant_network(
             network_params.max_churn,
             network_params.ejection_balance,
             network_params.eth1_follow_distance,
-            network_params.capella_fork_epoch,
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
             latest_block.files_artifacts[0] if latest_block != "" else "",

@@ -52,11 +52,7 @@ def launch(plan, network_params, participants, parallel_keystore_generation):
     plan.print("Generating EL CL data")
 
     # we are running capella genesis - deprecated
-    if (
-        network_params.capella_fork_epoch == 0
-        and network_params.electra_fork_epoch == None
-        and network_params.deneb_fork_epoch > 0
-    ):
+    if network_params.deneb_fork_epoch > 0:
         ethereum_genesis_generator_image = (
             constants.ETHEREUM_GENESIS_GENERATOR.capella_genesis
         )
@@ -77,7 +73,7 @@ def launch(plan, network_params, participants, parallel_keystore_generation):
             )
     else:
         fail(
-            "Unsupported fork epoch configuration, need to define either capella_fork_epoch, deneb_fork_epoch or electra_fork_epoch"
+            "Unsupported fork epoch configuration, need to define either deneb_fork_epoch or electra_fork_epoch"
         )
     return (
         total_number_of_validator_keys,
