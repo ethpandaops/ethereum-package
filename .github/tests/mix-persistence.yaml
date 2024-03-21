@@ -1,9 +1,9 @@
 participants:
+  - el_type: besu
+    cl_type: lighthouse
   - el_type: geth
     cl_type: teku
     use_separate_vc: true
-  - el_type: besu
-    cl_type: lighthouse
   - el_type: nethermind
     cl_type: prysm
   - el_type: erigon
