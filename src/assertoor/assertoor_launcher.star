@@ -67,7 +67,7 @@ def launch_assertoor(
                     cl_client.http_port_num,
                     el_client.ip_addr,
                     el_client.rpc_port_num,
-                    cl_client.beacon_service_name,
+                    full_name,
                 )
             )
 
