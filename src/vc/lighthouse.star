@@ -65,7 +65,6 @@ def get_config(
         # "--enable-doppelganger-protection", // Disabled to not have to wait 2 epochs before validator can start
         # burn address - If unset, the validator will scream in its logs
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--unencrypted-http-transport",
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
@@ -80,6 +79,7 @@ def get_config(
         "--http-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--http-address=0.0.0.0",
         "--http-allow-origin=*",
+        "--unencrypted-http-transport",
     ]
 
     if not (constants.NETWORK_NAME.verkle in network or electra_fork_epoch != None):
