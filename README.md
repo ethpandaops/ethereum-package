@@ -440,6 +440,11 @@ participants:
   # ]
   builder_network_params: null
 
+  # Participant flag for keymanager api
+  # This will open up http ports to your validator services!
+  # Defaults to false
+  keymanager_enabled: false
+
 # Default configuration parameters for the network
 network_params:
   # Network name, used to enable syncing of alternative networks
