@@ -87,11 +87,7 @@ def get_config(
         DORA_CONFIG_FILENAME,
     )
 
-    # TODO: This is a hack to get the verkle support image for the electra fork
-    if electra_fork_epoch != None or "verkle" in network:
-        IMAGE_NAME = "ethpandaops/dora:verkle-support"
-    else:
-        IMAGE_NAME = "ethpandaops/dora:master"
+    IMAGE_NAME = "ethpandaops/dora:latest"
 
     return ServiceConfig(
         image=IMAGE_NAME,
