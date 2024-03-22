@@ -508,6 +508,12 @@ network_params:
   # The snapshots are taken with https://github.com/ethpandaops/snapshotter
   network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
 
+  # Preset for the network
+  # Default: "mainnet"
+  # Options: "mainnet", "minimal"
+  preset: "mainnet"
+
+
 # Global parameters for the network
 
 # By default includes

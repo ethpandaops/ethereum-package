@@ -28,6 +28,7 @@ def generate_el_cl_genesis_data(
     latest_block,
     min_validator_withdrawability_delay,
     shard_committee_period,
+    preset,
 ):
     files = {}
     shadowfork_file = ""
@@ -51,6 +52,7 @@ def generate_el_cl_genesis_data(
         shadowfork_file,
         min_validator_withdrawability_delay,
         shard_committee_period,
+        preset,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
         genesis_generation_config_yml_template, template_data
@@ -126,6 +128,7 @@ def new_env_file_for_el_cl_genesis_data(
     shadowfork_file,
     min_validator_withdrawability_delay,
     shard_committee_period,
+    preset,
 ):
     return {
         "UnixTimestamp": genesis_unix_timestamp,
@@ -148,4 +151,5 @@ def new_env_file_for_el_cl_genesis_data(
         "ShadowForkFile": shadowfork_file,
         "MinValidatorWithdrawabilityDelay": min_validator_withdrawability_delay,
         "ShardCommitteePeriod": shard_committee_period,
+        "Preset": preset,
     }

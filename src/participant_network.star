@@ -104,6 +104,7 @@ def launch_participant_network(
             latest_block.files_artifacts[0] if latest_block != "" else "",
             network_params.min_validator_withdrawability_delay,
             network_params.shard_committee_period,
+            network_params.preset,
         )
     elif network_params.network in constants.PUBLIC_NETWORKS:
         # We are running a public network

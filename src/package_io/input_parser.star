@@ -236,6 +236,7 @@ def input_parser(plan, input_args):
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
+            preset=result["network_params"]["preset"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -613,6 +614,7 @@ def default_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 500,
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
+        "preset": "mainnet",
     }
 
 
