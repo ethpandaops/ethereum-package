@@ -22,6 +22,7 @@ def get_config(
     extra_labels,
     tolerations,
     node_selectors,
+    keymanager_enabled,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -48,6 +49,14 @@ def get_config(
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
         "--validators-graffiti=" + full_name,
+        # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
+        "--metrics-enabled=true",
+        "--metrics-host-allowlist=*",
+        "--metrics-interface=0.0.0.0",
+        "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
+    ]
+
+    keymanager_api_cmd = [
         "--validator-api-enabled=true",
         "--validator-api-host-allowlist=*",
         "--validator-api-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
@@ -56,11 +65,6 @@ def get_config(
         + constants.KEYMANAGER_P12_MOUNT_PATH_ON_CONTAINER,
         "--validator-api-keystore-password-file="
         + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
-        # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
-        "--metrics-enabled=true",
-        "--metrics-host-allowlist=*",
-        "--metrics-interface=0.0.0.0",
-        "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
     ]
 
     if len(extra_params) > 0:
@@ -74,9 +78,16 @@ def get_config(
         constants.KEYMANAGER_P12_MOUNT_PATH_ON_CLIENTS: keymanager_p12_file,
     }
 
+    ports = {}
+    ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
+
+    if keymanager_enabled:
+        cmd.extend(keymanager_api_cmd)
+        ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+
     return ServiceConfig(
         image=image,
-        ports=vc_shared.VALIDATOR_CLIENT_USED_PORTS,
+        ports=ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

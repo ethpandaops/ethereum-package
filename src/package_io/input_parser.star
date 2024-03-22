@@ -205,6 +205,7 @@ def input_parser(plan, input_args):
                 ),
                 blobber_enabled=participant["blobber_enabled"],
                 blobber_extra_params=participant["blobber_extra_params"],
+                keymanager_enabled=participant["keymanager_enabled"],
             )
             for participant in result["participants"]
         ],
@@ -303,6 +304,7 @@ def input_parser(plan, input_args):
         ),
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
+        keymanager_enabled=result["keymanager_enabled"],
     )
 
 
@@ -414,6 +416,12 @@ def parse_network_params(input_args):
             default_snooper_enabled = result["snooper_enabled"]
             if default_snooper_enabled:
                 participant["snooper_enabled"] = default_snooper_enabled
+
+        keymanager_enabled = participant["keymanager_enabled"]
+        if keymanager_enabled == False:
+            default_keymanager_enabled = result["keymanager_enabled"]
+            if default_keymanager_enabled:
+                participant["keymanager_enabled"] = default_keymanager_enabled
 
         ethereum_metrics_exporter_enabled = participant[
             "ethereum_metrics_exporter_enabled"
@@ -582,6 +590,7 @@ def default_input_args():
         "xatu_sentry_enabled": False,
         "global_tolerations": [],
         "global_node_selectors": {},
+        "keymanager_enabled": False,
     }
 
 
@@ -659,6 +668,7 @@ def default_participant():
         "blobber_enabled": False,
         "blobber_extra_params": [],
         "builder_network_params": None,
+        "keymanager_enabled": False,
     }
 
 

@@ -102,6 +102,7 @@ def launch(
     global_tolerations,
     node_selectors,
     use_separate_vc,
+    keymanager_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
 
@@ -138,6 +139,7 @@ def launch(
         plan,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
+        keymanager_enabled,
         launcher.keymanager_file,
         launcher.network,
         image,
@@ -215,6 +217,7 @@ def get_beacon_config(
     plan,
     el_cl_genesis_data,
     jwt_file,
+    keymanager_enabled,
     keymanager_file,
     network,
     image,
@@ -297,11 +300,14 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
-    validator_flags = [
+    validator_default_cmd = [
         "--validators-dir=" + validator_keys_dirpath,
         "--secrets-dir=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         "--graffiti=" + full_name,
+    ]
+
+    keymanager_api_cmd = [
         "--keymanager",
         "--keymanager-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--keymanager-address=0.0.0.0",
@@ -333,22 +339,18 @@ def get_beacon_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
-    beacon_validator_used_ports = {}
-    beacon_validator_used_ports.update(BEACON_USED_PORTS)
+    ports = {}
+    ports.update(BEACON_USED_PORTS)
     if node_keystore_files != None and not use_separate_vc:
-        validator_http_port_id_spec = shared_utils.new_port_spec(
-            vc_shared.VALIDATOR_HTTP_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
-        )
-        beacon_validator_used_ports.update(
-            {VALIDATOR_HTTP_PORT_ID: validator_http_port_id_spec}
-        )
-        cmd.extend(validator_flags)
+        cmd.extend(validator_default_cmd)
         files[
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS
         ] = node_keystore_files.files_artifact_uuid
         files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
+
+        if keymanager_enabled:
+            cmd.extend(keymanager_api_cmd)
+            ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
@@ -358,7 +360,7 @@ def get_beacon_config(
 
     return ServiceConfig(
         image=image,
-        ports=beacon_validator_used_ports,
+        ports=ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

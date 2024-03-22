@@ -25,6 +25,7 @@ def get_config(
     prysm_password_artifact_uuid,
     tolerations,
     node_selectors,
+    keymanager_enabled,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
@@ -49,15 +50,19 @@ def get_config(
         "--wallet-dir=" + validator_keys_dirpath,
         "--wallet-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--rpc",
-        "--rpc-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--rpc-host=0.0.0.0",
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
         "--monitoring-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
+        "--enable-beacon-rest-api",
+    ]
+
+    keymanager_api_cmd = [
+        "--rpc",
+        "--rpc-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--rpc-host=0.0.0.0",
     ]
 
     if len(extra_params) > 0:
@@ -70,9 +75,16 @@ def get_config(
         PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
     }
 
+    ports = {}
+    ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
+
+    if keymanager_enabled:
+        cmd.extend(keymanager_api_cmd)
+        ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+
     return ServiceConfig(
         image=image,
-        ports=vc_shared.VALIDATOR_CLIENT_USED_PORTS,
+        ports=ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

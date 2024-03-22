@@ -62,6 +62,7 @@ def run(plan, args={}):
     xatu_sentry_params = args_with_right_defaults.xatu_sentry_params
     global_tolerations = args_with_right_defaults.global_tolerations
     global_node_selectors = args_with_right_defaults.global_node_selectors
+    keymanager_enabled = args_with_right_defaults.keymanager_enabled
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -107,6 +108,7 @@ def run(plan, args={}):
         xatu_sentry_params,
         global_tolerations,
         global_node_selectors,
+        keymanager_enabled,
         parallel_keystore_generation,
     )
 

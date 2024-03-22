@@ -21,6 +21,7 @@ def get_config(
     extra_labels,
     tolerations,
     node_selectors,
+    keymanager_enabled,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -39,16 +40,19 @@ def get_config(
         "--validators-dir=" + validator_keys_dirpath,
         "--secrets-dir=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--keymanager",
-        "--keymanager-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--keymanager-address=0.0.0.0",
-        "--keymanager-allow-origin=*",
-        "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         "--graffiti=" + full_name,
+    ]
+
+    keymanager_api_cmd = [
+        "--keymanager",
+        "--keymanager-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--keymanager-address=0.0.0.0",
+        "--keymanager-allow-origin=*",
+        "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
     if len(extra_params) > 0:
@@ -60,9 +64,16 @@ def get_config(
         constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
     }
 
+    ports = {}
+    ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
+
+    if keymanager_enabled:
+        cmd.extend(keymanager_api_cmd)
+        ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+
     return ServiceConfig(
         image=image,
-        ports=vc_shared.VALIDATOR_CLIENT_USED_PORTS,
+        ports=ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

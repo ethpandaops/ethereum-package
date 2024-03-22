@@ -720,6 +720,11 @@ global_tolerations: []
 # Example: global_node_selectors: { "disktype": "ssd" }
 # Defaults to empty
 global_node_selectors: {}
+
+# Global parameters for keymanager api
+# This will open up http ports to your validator services!
+# Defaults to false
+keymanager_enabled: false
 ```
 
 #### Example configurations
@@ -827,9 +832,9 @@ snooper_enabled: true
 | Lighthouse BN | ✅            | ❌       | ❌      | ❌          | ✅
 | Prysm BN      | ✅            | ✅       | ✅      | ❌          | ✅
 | Teku BN       | ✅            | ❌       | ✅      | ✅          | ✅
-| Lodestar BN   | ✅            | ❌       | ❌      | ✅          | ❌ 
+| Lodestar BN   | ✅            | ❌       | ❌      | ✅          | ❌
 | Nimbus BN     | ✅            | ❌       | ✅      | ✅          | ✅
-| Grandine BN   | ❌            | ❌       | ❌      | ❌          | ❌ 
+| Grandine BN   | ❌            | ❌       | ❌      | ❌          | ❌
 
 ## Custom labels for Docker and Kubernetes
 

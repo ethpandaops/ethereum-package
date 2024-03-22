@@ -176,6 +176,7 @@ def launch(
                 global_tolerations,
                 node_selectors,
                 participant.use_separate_vc,
+                participant.keymanager_enabled,
             )
         else:
             boot_cl_client_ctx = all_cl_contexts
@@ -208,6 +209,7 @@ def launch(
                 global_tolerations,
                 node_selectors,
                 participant.use_separate_vc,
+                participant.keymanager_enabled,
             )
 
         # Add participant cl additional prometheus labels

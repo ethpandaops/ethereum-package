@@ -34,6 +34,7 @@ def get_config(
     extra_labels,
     tolerations,
     node_selectors,
+    keymanager_enabled,
     network,
     electra_fork_epoch,
 ):
@@ -64,10 +65,6 @@ def get_config(
         # "--enable-doppelganger-protection", // Disabled to not have to wait 2 epochs before validator can start
         # burn address - If unset, the validator will scream in its logs
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--http",
-        "--http-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--http-address=0.0.0.0",
-        "--http-allow-origin=*",
         "--unencrypted-http-transport",
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
@@ -76,6 +73,13 @@ def get_config(
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
+    ]
+
+    keymanager_api_cmd = [
+        "--http",
+        "--http-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--http-address=0.0.0.0",
+        "--http-allow-origin=*",
     ]
 
     if not (constants.NETWORK_NAME.verkle in network or electra_fork_epoch != None):
@@ -90,9 +94,17 @@ def get_config(
     }
     env = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
     env.update(extra_env_vars)
+
+    ports = {}
+    ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
+
+    if keymanager_enabled:
+        cmd.extend(keymanager_api_cmd)
+        ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+
     return ServiceConfig(
         image=image,
-        ports=vc_shared.VALIDATOR_CLIENT_USED_PORTS,
+        ports=ports,
         cmd=cmd,
         env_vars=env,
         files=files,

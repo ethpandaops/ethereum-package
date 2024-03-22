@@ -91,6 +91,7 @@ def launch(
     global_tolerations,
     node_selectors,
     use_separate_vc=True,
+    keymanager_enabled=False,
 ):
     beacon_service_name = "{0}".format(service_name)
 
