@@ -116,8 +116,6 @@ def get_config(
 
     if assertoor_params.image != "":
         IMAGE_NAME = assertoor_params.image
-    elif network_params.electra_fork_epoch != None:
-        IMAGE_NAME = "ethpandaops/assertoor:verkle-support"
     else:
         IMAGE_NAME = "ethpandaops/assertoor:latest"
 
