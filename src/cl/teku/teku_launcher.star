@@ -317,6 +317,11 @@ def get_beacon_config(
     ]
 
     if network not in constants.PUBLIC_NETWORKS:
+        # cmd.append(
+        #     "--config-file="
+        #     + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        #     + "/config.yaml"
+        # )
         cmd.append(
             "--initial-state="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
@@ -378,6 +383,7 @@ def get_beacon_config(
             )
     else:  # Public networks
         cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
+    #        cmd.append("--network={0}".format(network))
 
     if len(extra_params) > 0:
         # we do the list comprehension as the default extra_params is a proto repeated string

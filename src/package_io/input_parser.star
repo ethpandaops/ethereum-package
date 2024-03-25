@@ -36,9 +36,6 @@ MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.27"
 
 MEV_BOOST_RELAY_IMAGE_NON_ZERO_CAPELLA = "flashbots/mev-boost-relay:0.26"
 
-NETHERMIND_NODE_NAME = "nethermind"
-NIMBUS_NODE_NAME = "nimbus"
-
 # Placeholder value for the deneb fork epoch if electra is being run
 # TODO: This is a hack, and should be removed once we electra is rebased on deneb
 HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
@@ -340,10 +337,23 @@ def parse_network_params(input_args):
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
 
-        if cl_type in (NIMBUS_NODE_NAME) and (
-            result["network_params"]["seconds_per_slot"] < 12
+        if (
+            cl_type in (constants.CL_TYPE.nimbus)
+            and (result["network_params"]["seconds_per_slot"] < 12)
+            and result["network_params"]["preset"] == "mainnet"
         ):
-            fail("nimbus can't be run with slot times below 12 seconds")
+            fail(
+                "nimbus can't be run with slot times below 12 seconds with " + result["network_params"]["preset"] +  " preset"
+            )
+
+        if (
+            cl_type in (constants.CL_TYPE.nimbus)
+            and (result["network_params"]["seconds_per_slot"] != 6)
+            and result["network_params"]["preset"] == "minimal"
+        ):
+            fail(
+                "nimbus can't be run with slot times different than 6 seconds with " + result["network_params"]["preset"] +  " preset"
+            )
 
         el_image = participant["el_image"]
         if el_image == "":
@@ -508,6 +518,17 @@ def parse_network_params(input_args):
         # Don't allow validators on non-kurtosis networks
         for participant in result["participants"]:
             participant["validator_count"] = 0
+
+    if result["network_params"]["preset"] not in ["mainnet", "minimal"]:
+        fail(
+            "preset "
+            + result["network_params"]["preset"]
+            + " is not supported, it can only be mainnet or minimal"
+        )
+
+    if result["network_params"]["preset"] == "minimal":
+        if result["network_params"]["deneb_fork_epoch"] > 0:
+            fail("minimal preset only supports deneb genesis fork epoch")
 
     return result
 
