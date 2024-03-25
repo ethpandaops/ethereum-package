@@ -343,7 +343,9 @@ def parse_network_params(input_args):
             and result["network_params"]["preset"] == "mainnet"
         ):
             fail(
-                "nimbus can't be run with slot times below 12 seconds with " + result["network_params"]["preset"] +  " preset"
+                "nimbus can't be run with slot times below 12 seconds with "
+                + result["network_params"]["preset"]
+                + " preset"
             )
 
         if (
@@ -352,7 +354,9 @@ def parse_network_params(input_args):
             and result["network_params"]["preset"] == "minimal"
         ):
             fail(
-                "nimbus can't be run with slot times different than 6 seconds with " + result["network_params"]["preset"] +  " preset"
+                "nimbus can't be run with slot times different than 6 seconds with "
+                + result["network_params"]["preset"]
+                + " preset"
             )
 
         el_image = participant["el_image"]
