@@ -389,20 +389,15 @@ def parse_network_params(input_args):
                 constants.CL_TYPE.teku,
                 constants.CL_TYPE.grandine,
             ):
-                participant["use_separate_vc"] = False
-            else:
-                participant["use_separate_vc"] = True
+                if vc_type == "":
+                    participant["use_separate_vc"] = False
+                else:
+                    participant["use_separate_vc"] = True
 
         if vc_type == "":
             # Defaults to matching the chosen CL client
             vc_type = cl_type
             participant["vc_type"] = vc_type
-
-        if (
-            cl_type == constants.CL_TYPE.grandine
-            and vc_type != constants.CL_TYPE.grandine
-        ):
-            fail("grandine does not support running a different validator client")
 
         vc_image = participant["vc_image"]
         if vc_image == "":
