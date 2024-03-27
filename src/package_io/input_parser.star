@@ -388,11 +388,10 @@ def parse_network_params(input_args):
                 constants.CL_TYPE.nimbus,
                 constants.CL_TYPE.teku,
                 constants.CL_TYPE.grandine,
-            ):
-                if vc_type == "":
-                    participant["use_separate_vc"] = False
-                else:
-                    participant["use_separate_vc"] = True
+            ) and vc_type == "":
+                participant["use_separate_vc"] = False
+            else:
+                participant["use_separate_vc"] = True
 
         if vc_type == "":
             # Defaults to matching the chosen CL client
