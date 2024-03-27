@@ -839,7 +839,7 @@ snooper_enabled: true
 | Teku BN       | ✅            | ❌       | ✅      | ✅          | ✅
 | Lodestar BN   | ✅            | ❌       | ❌      | ✅          | ❌
 | Nimbus BN     | ✅            | ❌       | ✅      | ✅          | ✅
-| Grandine BN   | ❌            | ❌       | ❌      | ❌          | ❌
+| Grandine BN   | ✅            | ❌       | ✅      | ❌          | ❌
 
 ## Custom labels for Docker and Kubernetes
 
