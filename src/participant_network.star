@@ -294,7 +294,6 @@ def launch_participant_network(
                         participant.cl_type
                     )
                 )
-                continue
 
             snooper_service_name = "snooper-beacon-{0}-{1}-{2}".format(
                 index_str, cl_type, vc_type
