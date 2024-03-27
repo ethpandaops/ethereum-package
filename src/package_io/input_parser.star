@@ -384,11 +384,15 @@ def parse_network_params(input_args):
         if participant["use_separate_vc"] == None:
             # Default to false for CL clients that can run validator clients
             # in the same process.
-            if cl_type in (
-                constants.CL_TYPE.nimbus,
-                constants.CL_TYPE.teku,
-                constants.CL_TYPE.grandine,
-            ) and vc_type == "":
+            if (
+                cl_type
+                in (
+                    constants.CL_TYPE.nimbus,
+                    constants.CL_TYPE.teku,
+                    constants.CL_TYPE.grandine,
+                )
+                and vc_type == ""
+            ):
                 participant["use_separate_vc"] = False
             else:
                 participant["use_separate_vc"] = True
