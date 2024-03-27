@@ -511,6 +511,10 @@ network_params:
   # Preset for the network
   # Default: "mainnet"
   # Options: "mainnet", "minimal"
+  # "minimal" preset will spin up a network with minimal preset. This is useful for rapid testing and development.
+  # 192 seconds to get to finalized epoch vs 1536 seconds with mainnet defaults
+  # Please note that minimal preset requires alternative client images.
+  # For an example of minimal preset, please refer to [minimal.yaml](.github/tests/minimal.yaml)
   preset: "mainnet"
 
 
