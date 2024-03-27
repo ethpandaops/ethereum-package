@@ -284,17 +284,6 @@ def launch_participant_network(
         snooper_beacon_context = None
 
         if participant.snooper_enabled:
-            if (
-                participant.cl_type == constants.CL_TYPE.teku
-                or participant.cl_type == constants.CL_TYPE.nimbus
-                or participant.cl_type == constants.CL_TYPE.grandine
-            ) and participant.use_separate_vc != False:
-                fail(
-                    "Beacon snooper not supported for non split operation for {0}".format(
-                        participant.cl_type
-                    )
-                )
-
             snooper_service_name = "snooper-beacon-{0}-{1}-{2}".format(
                 index_str, cl_type, vc_type
             )
