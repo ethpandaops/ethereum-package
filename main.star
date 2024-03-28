@@ -179,7 +179,9 @@ def run(plan, args={}):
             all_el_contexts[0].ip_addr,
             all_el_contexts[0].engine_rpc_port_num,
         )
-        beacon_uri = "{0}".format(all_cl_contexts[0].beacon_http_url)[7:] # remove http://
+        beacon_uri = "{0}".format(all_cl_contexts[0].beacon_http_url)[
+            7:
+        ]  # remove http://
         endpoint = mock_mev.launch_mock_mev(
             plan,
             el_uri,
