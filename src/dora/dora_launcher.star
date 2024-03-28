@@ -44,8 +44,7 @@ def launch_dora(
         )
         all_cl_client_info.append(
             new_cl_client_info(
-                cl_client.ip_addr,
-                cl_client.http_port_num,
+                cl_client.beacon_http_url,
                 full_name,
             )
         )
@@ -115,9 +114,8 @@ def new_config_template_data(network, listen_port_num, cl_client_info):
     }
 
 
-def new_cl_client_info(ip_addr, port_num, full_name):
+def new_cl_client_info(beacon_http_url, full_name):
     return {
-        "IPAddr": ip_addr,
-        "PortNum": port_num,
+        "Beacon_HTTP_URL": beacon_http_url,
         "FullName": full_name,
     }

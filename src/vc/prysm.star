@@ -42,9 +42,8 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--beacon-rpc-provider="
-        + "{}:{}".format(
-            cl_context.ip_addr,
-            PRYSM_BEACON_RPC_PORT,
+        + "{0}".format(
+            cl_context.beacon_http_url,
         ),
         "--beacon-rest-api-provider=" + beacon_http_url,
         "--wallet-dir=" + validator_keys_dirpath,

@@ -63,11 +63,9 @@ def launch(
             snooper_beacon_context.beacon_rpc_port_num,
         )
     else:
-        beacon_http_url = "http://{}:{}".format(
-            cl_context.ip_addr,
-            cl_context.http_port_num,
+        beacon_http_url = "http://{}".format(
+            cl_context.beacon_http_url,
         )
-
     vc_min_cpu = int(vc_min_cpu) if int(vc_min_cpu) > 0 else MIN_CPU
     vc_max_cpu = int(vc_max_cpu) if int(vc_max_cpu) > 0 else MAX_CPU
     vc_min_mem = int(vc_min_mem) if int(vc_min_mem) > 0 else MIN_MEMORY

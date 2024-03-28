@@ -184,12 +184,10 @@ def launch(
         service_name, BEACON_METRICS_PATH, beacon_metrics_url
     )
     nodes_metrics_info = [beacon_node_metrics_info]
-
     return cl_context.new_cl_context(
         "grandine",
         beacon_node_enr,
-        beacon_service.ip_address,
-        BEACON_HTTP_PORT_NUM,
+        beacon_http_url,
         nodes_metrics_info,
         beacon_service_name,
         multiaddr=beacon_multiaddr,

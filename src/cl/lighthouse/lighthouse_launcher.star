@@ -201,12 +201,10 @@ def launch(
         beacon_service_name, METRICS_PATH, beacon_metrics_url
     )
     nodes_metrics_info = [beacon_node_metrics_info]
-
     return cl_context.new_cl_context(
         "lighthouse",
         beacon_node_enr,
-        beacon_service.ip_address,
-        BEACON_HTTP_PORT_NUM,
+        beacon_http_url,
         nodes_metrics_info,
         beacon_service_name,
         beacon_multiaddr,
