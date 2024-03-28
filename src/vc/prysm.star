@@ -56,7 +56,6 @@ def get_config(
         "--monitoring-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
-        "--enable-beacon-rest-api",
     ]
 
     keymanager_api_cmd = [
@@ -64,6 +63,15 @@ def get_config(
         "--rpc-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--rpc-host=0.0.0.0",
     ]
+
+    keymanager_api_cmd = [
+        "--rpc",
+        "--rpc-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--rpc-host=0.0.0.0",
+    ]
+
+    if cl_context.client_name != constants.CL_TYPE.prysm:
+        cmd.append("--enable-beacon-rest-api")
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
