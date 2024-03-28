@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.1.0](https://github.com/kurtosis-tech/ethereum-package/compare/2.0.0...2.1.0) (2024-03-28)
+
+
+### Features
+
+* add beacon snooper ([#520](https://github.com/kurtosis-tech/ethereum-package/issues/520)) ([7e36191](https://github.com/kurtosis-tech/ethereum-package/commit/7e361913c754ddf37eaf2cf3ad4a93aed8770899))
+* add BN&lt;&gt;CL compatibility matrix to readme ([#519](https://github.com/kurtosis-tech/ethereum-package/issues/519)) ([177beeb](https://github.com/kurtosis-tech/ethereum-package/commit/177beeb9b46f61b3dd3dc3009ff2abf9b576c569))
+* add grandine ([#517](https://github.com/kurtosis-tech/ethereum-package/issues/517)) ([3ac4d2a](https://github.com/kurtosis-tech/ethereum-package/commit/3ac4d2a4fae1c33ff658f0f43657a09522348127))
+* enable preset to be set, mainnet/minimal ([#524](https://github.com/kurtosis-tech/ethereum-package/issues/524)) ([f6e1b13](https://github.com/kurtosis-tech/ethereum-package/commit/f6e1b136ef6b884e540c1289b8acc2b4d359e6ce))
+* make deneb genesis default ([#518](https://github.com/kurtosis-tech/ethereum-package/issues/518)) ([49509b9](https://github.com/kurtosis-tech/ethereum-package/commit/49509b9ecb8b00d361e4119ee053ba86c366619e))
+* make keymanager optional ([#523](https://github.com/kurtosis-tech/ethereum-package/issues/523)) ([969012c](https://github.com/kurtosis-tech/ethereum-package/commit/969012c3b504be1c475bd583675857d0605ed430))
+* update verkle genesis + add besu support to verkle testing  ([#512](https://github.com/kurtosis-tech/ethereum-package/issues/512)) ([0615cd1](https://github.com/kurtosis-tech/ethereum-package/commit/0615cd1b4466d8f63e3adb721d97ee768211114f))
+
+
+### Bug Fixes
+
+* architecture.md ([#514](https://github.com/kurtosis-tech/ethereum-package/issues/514)) ([f0ec4f0](https://github.com/kurtosis-tech/ethereum-package/commit/f0ec4f076837b282a8972bd2211a0522ed67a06b))
+* blobscan network name ([#516](https://github.com/kurtosis-tech/ethereum-package/issues/516)) ([83c2a55](https://github.com/kurtosis-tech/ethereum-package/commit/83c2a5592445c0efc10ab418d87ab2ecd4d10cf4))
+* **blobscan:** update healthcheck endpoint ([#513](https://github.com/kurtosis-tech/ethereum-package/issues/513)) ([8b2fc61](https://github.com/kurtosis-tech/ethereum-package/commit/8b2fc61f77b53642441d3bd0bdeea89b2a2d35eb))
+* separate vc ([#526](https://github.com/kurtosis-tech/ethereum-package/issues/526)) ([baa04e9](https://github.com/kurtosis-tech/ethereum-package/commit/baa04e9118f39b10ed7d867eec164483c6fd807d))
+* Updated Readme with VCs supported by Grandine BN ([#527](https://github.com/kurtosis-tech/ethereum-package/issues/527)) ([9cbe0b3](https://github.com/kurtosis-tech/ethereum-package/commit/9cbe0b368205f70ee274d9c0c57f634f9621e6d7))
+* use correct dora & assertoor images ([#522](https://github.com/kurtosis-tech/ethereum-package/issues/522)) ([2a8d73a](https://github.com/kurtosis-tech/ethereum-package/commit/2a8d73aba35bf26bfcd474036bac32c4f5713e35))
+* use new validator names in assertoor config ([#521](https://github.com/kurtosis-tech/ethereum-package/issues/521)) ([f595eb9](https://github.com/kurtosis-tech/ethereum-package/commit/f595eb9a75e8c2147d530d1a70e6ccb9f3542257))
+
 ## [2.0.0](https://github.com/kurtosis-tech/ethereum-package/compare/1.4.0...2.0.0) (2024-03-08)
 
 
