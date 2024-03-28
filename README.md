@@ -268,6 +268,7 @@ participants:
   # - nimbus: statusim/nimbus-eth2:multiarch-latest
   # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
   # - lodestar: chainsafe/lodestar:next
+  # - grandine: ethpandaops/grandine:develop
   cl_image: ""
 
   # The log level string that this participant's CL client should log at

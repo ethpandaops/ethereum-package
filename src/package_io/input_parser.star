@@ -384,10 +384,14 @@ def parse_network_params(input_args):
         if participant["use_separate_vc"] == None:
             # Default to false for CL clients that can run validator clients
             # in the same process.
-            if cl_type in (
-                constants.CL_TYPE.nimbus,
-                constants.CL_TYPE.teku,
-                constants.CL_TYPE.grandine,
+            if (
+                cl_type
+                in (
+                    constants.CL_TYPE.nimbus,
+                    constants.CL_TYPE.teku,
+                    constants.CL_TYPE.grandine,
+                )
+                and vc_type == ""
             ):
                 participant["use_separate_vc"] = False
             else:
@@ -397,12 +401,6 @@ def parse_network_params(input_args):
             # Defaults to matching the chosen CL client
             vc_type = cl_type
             participant["vc_type"] = vc_type
-
-        if (
-            cl_type == constants.CL_TYPE.grandine
-            and vc_type != constants.CL_TYPE.grandine
-        ):
-            fail("grandine does not support running a different validator client")
 
         vc_image = participant["vc_image"]
         if vc_image == "":
