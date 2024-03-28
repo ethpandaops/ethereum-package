@@ -91,6 +91,7 @@ def launch(
     global_tolerations,
     node_selectors,
     use_separate_vc,
+    keymanager_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -128,6 +129,7 @@ def launch(
         plan,
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
+        keymanager_enabled,
         launcher.keymanager_file,
         launcher.keymanager_p12_file,
         launcher.network,
@@ -208,6 +210,7 @@ def get_beacon_config(
     plan,
     el_cl_genesis_data,
     jwt_file,
+    keymanager_enabled,
     keymanager_file,
     keymanager_p12_file,
     network,
@@ -291,7 +294,7 @@ def get_beacon_config(
         # To enable syncing other networks too without checkpoint syncing
         "--ignore-weak-subjectivity-period-enabled=true",
     ]
-    validator_flags = [
+    validator_default_cmd = [
         "--validator-keys={0}:{1}".format(
             validator_keys_dirpath,
             validator_secrets_dirpath,
@@ -299,6 +302,9 @@ def get_beacon_config(
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
         "--validators-graffiti=" + full_name,
+    ]
+
+    keymanager_api_cmd = [
         "--validator-api-enabled=true",
         "--validator-api-host-allowlist=*",
         "--validator-api-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
@@ -381,32 +387,29 @@ def get_beacon_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
-    beacon_validator_used_ports = {}
-    beacon_validator_used_ports.update(BEACON_USED_PORTS)
+    ports = {}
+    ports.update(BEACON_USED_PORTS)
     if node_keystore_files != None and not use_separate_vc:
-        validator_http_port_id_spec = shared_utils.new_port_spec(
-            vc_shared.VALIDATOR_HTTP_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
-        )
-        beacon_validator_used_ports.update(
-            {VALIDATOR_HTTP_PORT_ID: validator_http_port_id_spec}
-        )
-        cmd.extend(validator_flags)
+        cmd.extend(validator_default_cmd)
         files[
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
         files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         files[constants.KEYMANAGER_P12_MOUNT_PATH_ON_CLIENTS] = keymanager_p12_file
 
+        if keymanager_enabled:
+            cmd.extend(keymanager_api_cmd)
+            ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=cl_volume_size,
         )
+
     return ServiceConfig(
         image=image,
-        ports=beacon_validator_used_ports,
+        ports=ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

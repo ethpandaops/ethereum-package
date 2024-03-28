@@ -46,6 +46,7 @@ def launch(
     participant_tolerations,
     global_tolerations,
     node_selectors,
+    keymanager_enabled,
     network,  # TODO: remove when deneb rebase is done
     electra_fork_epoch,  # TODO: remove when deneb rebase is done
 ):
@@ -92,6 +93,7 @@ def launch(
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
+            keymanager_enabled=keymanager_enabled,
             network=network,  # TODO: remove when deneb rebase is done
             electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
         )
@@ -115,6 +117,7 @@ def launch(
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
+            keymanager_enabled=keymanager_enabled,
         )
     elif vc_type == constants.VC_TYPE.teku:
         config = teku.get_config(
@@ -136,6 +139,7 @@ def launch(
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
+            keymanager_enabled=keymanager_enabled,
         )
     elif vc_type == constants.VC_TYPE.nimbus:
         config = nimbus.get_config(
@@ -156,6 +160,7 @@ def launch(
             extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
+            keymanager_enabled=keymanager_enabled,
         )
     elif vc_type == constants.VC_TYPE.prysm:
         # Prysm VC only works with Prysm beacon node right now
@@ -184,6 +189,7 @@ def launch(
             prysm_password_artifact_uuid=prysm_password_artifact_uuid,
             tolerations=tolerations,
             node_selectors=node_selectors,
+            keymanager_enabled=keymanager_enabled,
         )
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
@@ -202,7 +208,11 @@ def launch(
         service_name, vc_shared.METRICS_PATH, validator_metrics_url
     )
 
-    validator_http_port = validator_service.ports[vc_shared.VALIDATOR_HTTP_PORT_ID]
+    validator_http_port = (
+        validator_service.ports[vc_shared.VALIDATOR_HTTP_PORT_ID]
+        if keymanager_enabled
+        else None
+    )
 
     return vc_context.new_vc_context(
         client_name=vc_type,

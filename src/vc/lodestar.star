@@ -31,6 +31,7 @@ def get_config(
     extra_labels,
     tolerations,
     node_selectors,
+    keymanager_enabled,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -56,11 +57,6 @@ def get_config(
         "--keystoresDir=" + validator_keys_dirpath,
         "--secretsDir=" + validator_secrets_dirpath,
         "--suggestedFeeRecipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--keymanager",
-        "--keymanager.authEnabled=true",
-        "--keymanager.port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--keymanager.address=0.0.0.0",
-        "--keymanager.cors=*",
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics.address=0.0.0.0",
@@ -68,6 +64,14 @@ def get_config(
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
         "--useProduceBlockV3",
+    ]
+
+    keymanager_api_cmd = [
+        "--keymanager",
+        "--keymanager.authEnabled=true",
+        "--keymanager.port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--keymanager.address=0.0.0.0",
+        "--keymanager.cors=*",
     ]
 
     if len(extra_params) > 0:
@@ -79,9 +83,16 @@ def get_config(
         vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
     }
 
+    ports = {}
+    ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
+
+    if keymanager_enabled:
+        cmd.extend(keymanager_api_cmd)
+        ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+
     return ServiceConfig(
         image=image,
-        ports=vc_shared.VALIDATOR_CLIENT_USED_PORTS,
+        ports=ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

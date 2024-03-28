@@ -39,6 +39,7 @@ def launch_participant_network(
     xatu_sentry_params,
     global_tolerations,
     global_node_selectors,
+    keymanager_enabled,
     parallel_keystore_generation=False,
 ):
     network_id = network_params.network_id
@@ -343,6 +344,7 @@ def launch_participant_network(
             participant_tolerations=participant.tolerations,
             global_tolerations=global_tolerations,
             node_selectors=node_selectors,
+            keymanager_enabled=participant.keymanager_enabled,
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
         )

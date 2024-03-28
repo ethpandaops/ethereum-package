@@ -52,6 +52,7 @@ participants:
     blobber_enabled: false
     blobber_extra_params: []
     builder_network_params: null
+    keymanager_enabled: false
 network_params:
   network: kurtosis
   network_id: "3151908"
@@ -136,3 +137,4 @@ xatu_sentry_params:
     - blob_sidecar
 global_tolerations: []
 global_node_selectors: {}
+keymanager_enabled: false

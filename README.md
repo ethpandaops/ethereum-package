@@ -440,6 +440,11 @@ participants:
   # ]
   builder_network_params: null
 
+  # Participant flag for keymanager api
+  # This will open up http ports to your validator services!
+  # Defaults to false
+  keymanager_enabled: false
+
 # Default configuration parameters for the network
 network_params:
   # Network name, used to enable syncing of alternative networks
@@ -720,6 +725,11 @@ global_tolerations: []
 # Example: global_node_selectors: { "disktype": "ssd" }
 # Defaults to empty
 global_node_selectors: {}
+
+# Global parameters for keymanager api
+# This will open up http ports to your validator services!
+# Defaults to false
+keymanager_enabled: false
 ```
 
 #### Example configurations
@@ -827,7 +837,7 @@ snooper_enabled: true
 | Lighthouse BN | ✅            | ❌       | ❌      | ❌          | ✅
 | Prysm BN      | ✅            | ✅       | ✅      | ❌          | ✅
 | Teku BN       | ✅            | ❌       | ✅      | ✅          | ✅
-| Lodestar BN   | ✅            | ❌       | ❌      | ✅          | ❌ 
+| Lodestar BN   | ✅            | ❌       | ❌      | ✅          | ❌
 | Nimbus BN     | ✅            | ❌       | ✅      | ✅          | ✅
 | Grandine BN   | ✅            | ❌       | ✅      | ❌          | ❌
 

@@ -89,6 +89,7 @@ def launch(
     global_tolerations,
     node_selectors,
     use_separate_vc,
+    keymanager_enabled,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -127,6 +128,7 @@ def launch(
         launcher.el_cl_genesis_data,
         launcher.jwt_file,
         launcher.network,
+        keymanager_enabled,
         image,
         beacon_service_name,
         bootnode_context,
@@ -205,6 +207,7 @@ def get_beacon_config(
     el_cl_genesis_data,
     jwt_file,
     network,
+    keymanager_enabled,
     image,
     service_name,
     bootnode_contexts,
@@ -273,12 +276,14 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         # To enable syncing other networks too without checkpoint syncing
     ]
-    validator_flags = [
+    validator_default_cmd = [
         "--keystore-dir=" + validator_keys_dirpath,
         "--keystore-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         "--graffiti=" + full_name,
     ]
+
+    keymanager_api_cmd = []
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
@@ -341,30 +346,29 @@ def get_beacon_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
-    beacon_validator_used_ports = {}
-    beacon_validator_used_ports.update(BEACON_USED_PORTS)
+
+    ports = {}
+    ports.update(BEACON_USED_PORTS)
     if node_keystore_files != None and not use_separate_vc:
-        # validator_http_port_id_spec = shared_utils.new_port_spec(
-        #     vc_shared.VALIDATOR_HTTP_PORT_NUM,
-        #     shared_utils.TCP_PROTOCOL,
-        #     shared_utils.HTTP_APPLICATION_PROTOCOL,
-        # )
-        # beacon_validator_used_ports.update(
-        #     {VALIDATOR_HTTP_PORT_ID: validator_http_port_id_spec}
-        # )
-        cmd.extend(validator_flags)
+        cmd.extend(validator_default_cmd)
         files[
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
+
+        # Keymanager is still unimplemented in grandine
+        # if keymanager_enabled:
+        #     cmd.extend(keymanager_api_cmd)
+        #     ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=cl_volume_size,
         )
+
     return ServiceConfig(
         image=image,
-        ports=beacon_validator_used_ports,
+        ports=ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
