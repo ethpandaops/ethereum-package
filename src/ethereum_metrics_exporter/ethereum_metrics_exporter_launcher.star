@@ -39,7 +39,7 @@ def launch(
                 "--metrics-port",
                 str(METRICS_PORT_NUMBER),
                 "--consensus-url",
-                "http://{0}".format(
+                "{0}".format(
                     cl_context.beacon_http_url,
                 ),
                 "--execution-url",

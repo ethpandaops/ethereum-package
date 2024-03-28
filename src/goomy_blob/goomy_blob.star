@@ -60,10 +60,10 @@ def get_config(
                 [
                     "apt-get update",
                     "apt-get install -y curl jq",
-                    'current_epoch=$(curl -s http://{0}/eth/v2/beacon/blocks/head | jq -r ".version")'.format(
+                    'current_epoch=$(curl -s {0}/eth/v2/beacon/blocks/head | jq -r ".version")'.format(
                         cl_context.beacon_http_url,
                     ),
-                    'while [ $current_epoch != "deneb" ]; do echo "waiting for deneb, current epoch is $current_epoch"; current_epoch=$(curl -s http://{0}/eth/v2/beacon/blocks/head | jq -r ".version"); sleep {1}; done'.format(
+                    'while [ $current_epoch != "deneb" ]; do echo "waiting for deneb, current epoch is $current_epoch"; current_epoch=$(curl -s {0}/eth/v2/beacon/blocks/head | jq -r ".version"); sleep {1}; done'.format(
                         cl_context.beacon_http_url,
                         seconds_per_slot,
                     ),

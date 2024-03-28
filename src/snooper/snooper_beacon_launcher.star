@@ -37,7 +37,7 @@ def launch(plan, service_name, cl_context, node_selectors):
 
 
 def get_config(service_name, cl_context, node_selectors):
-    beacon_rpc_port_num = "http://{0}".format(
+    beacon_rpc_port_num = "{0}".format(
         cl_context.beacon_http_url,
     )
     cmd = [
