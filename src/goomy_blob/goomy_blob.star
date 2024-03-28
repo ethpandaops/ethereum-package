@@ -60,12 +60,11 @@ def get_config(
                 [
                     "apt-get update",
                     "apt-get install -y curl jq",
-                    'current_epoch=$(curl -s http://{0}:{1}/eth/v2/beacon/blocks/head | jq -r ".version")'.format(
-                        cl_context.ip_addr, cl_context.http_port_num
+                    'current_epoch=$(curl -s {0}/eth/v2/beacon/blocks/head | jq -r ".version")'.format(
+                        cl_context.beacon_http_url,
                     ),
-                    'while [ $current_epoch != "deneb" ]; do echo "waiting for deneb, current epoch is $current_epoch"; current_epoch=$(curl -s http://{0}:{1}/eth/v2/beacon/blocks/head | jq -r ".version"); sleep {2}; done'.format(
-                        cl_context.ip_addr,
-                        cl_context.http_port_num,
+                    'while [ $current_epoch != "deneb" ]; do echo "waiting for deneb, current epoch is $current_epoch"; current_epoch=$(curl -s {0}/eth/v2/beacon/blocks/head | jq -r ".version"); sleep {1}; done'.format(
+                        cl_context.beacon_http_url,
                         seconds_per_slot,
                     ),
                     'echo "sleep is over, starting to send blob transactions"',

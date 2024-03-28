@@ -37,9 +37,8 @@ def launch(plan, service_name, cl_context, node_selectors):
 
 
 def get_config(service_name, cl_context, node_selectors):
-    beacon_rpc_port_num = "http://{0}:{1}".format(
-        cl_context.ip_addr,
-        cl_context.http_port_num,
+    beacon_rpc_port_num = "{0}".format(
+        cl_context.beacon_http_url,
     )
     cmd = [
         SNOOPER_BINARY_COMMAND,

@@ -62,9 +62,7 @@ def launch_blobscan(
     global_node_selectors,
 ):
     node_selectors = global_node_selectors
-    beacon_node_rpc_uri = "http://{0}:{1}".format(
-        cl_contexts[0].ip_addr, cl_contexts[0].http_port_num
-    )
+    beacon_node_rpc_uri = "{0}".format(cl_contexts[0].beacon_http_url)
     execution_node_rpc_uri = "http://{0}:{1}".format(
         el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
     )

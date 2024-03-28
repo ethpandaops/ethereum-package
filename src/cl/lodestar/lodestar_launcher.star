@@ -196,8 +196,7 @@ def launch(
     return cl_context.new_cl_context(
         "lodestar",
         beacon_node_enr,
-        beacon_service.ip_address,
-        HTTP_PORT_NUM,
+        beacon_http_url,
         nodes_metrics_info,
         beacon_service_name,
         beacon_multiaddr,

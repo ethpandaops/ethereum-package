@@ -38,8 +38,7 @@ def launch_beacon_metrics_gazer(
     global_node_selectors,
 ):
     config = get_config(
-        cl_contexts[0].ip_addr,
-        cl_contexts[0].http_port_num,
+        cl_contexts[0].beacon_http_url,
         global_node_selectors,
     )
 
@@ -57,7 +56,7 @@ def launch_beacon_metrics_gazer(
     )
 
 
-def get_config(ip_addr, http_port_num, node_selectors):
+def get_config(beacon_http_url, node_selectors):
     config_file_path = shared_utils.path_join(
         BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         BEACON_METRICS_GAZER_CONFIG_FILENAME,
@@ -69,7 +68,7 @@ def get_config(ip_addr, http_port_num, node_selectors):
             BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
         },
         cmd=[
-            "http://{0}:{1}".format(ip_addr, http_port_num),
+            "{0}".format(beacon_http_url),
             "--ranges-file",
             config_file_path,
             "--port",

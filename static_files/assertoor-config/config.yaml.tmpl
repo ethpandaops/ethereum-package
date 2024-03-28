@@ -2,7 +2,7 @@
 endpoints:
 {{ range $client := .ClientInfo }}
 - name: "{{ $client.Name }}"
-  consensusUrl: "http://{{ $client.CLIPAddr }}:{{ $client.CLPortNum }}"
+  consensusUrl: "{{ $client.CL_HTTP_URL }}"
   executionUrl: "http://{{ $client.ELIPAddr }}:{{ $client.ELPortNum }}"
 {{- end }}
 

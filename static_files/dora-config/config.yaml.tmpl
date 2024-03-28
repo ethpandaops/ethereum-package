@@ -34,7 +34,7 @@ beaconapi:
   # CL Client RPC
   endpoints:
 {{ range $clClient := .CLClientInfo }}
-    - url: "http://{{ $clClient.IPAddr }}:{{ $clClient.PortNum }}"
+    - url: "{{ $clClient.Beacon_HTTP_URL }}"
       name: "{{ $clClient.FullName }}"
       archive: true
 {{- end }}

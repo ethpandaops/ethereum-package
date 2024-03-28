@@ -29,10 +29,7 @@ def launch(
     template_data = new_config_template_data(
         str(METRICS_PORT_NUMBER),
         pair_name,
-        "http://{}:{}".format(
-            cl_context.ip_addr,
-            cl_context.http_port_num,
-        ),
+        "{0}".format(cl_context.beacon_http_url),
         xatu_sentry_params.xatu_server_addr,
         network_params.network,
         xatu_sentry_params.beacon_subscriptions,
