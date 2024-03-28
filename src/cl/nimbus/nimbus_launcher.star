@@ -329,7 +329,6 @@ def get_beacon_config(
             else:
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     cmd.append("--bootstrap-node=" + ctx.enr)
-                    # cmd.append("--direct-peer=" + ctx.multiaddr)
 
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
