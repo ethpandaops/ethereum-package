@@ -246,7 +246,7 @@ def get_config(
                 plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
-        
+
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
 
