@@ -298,6 +298,7 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         # Enable this flag once we have https://github.com/sigp/lighthouse/issues/5054 fixed
         # "--allow-insecure-genesis-sync",
+        "--enable-private-discovery",
     ]
 
     if network not in constants.PUBLIC_NETWORKS:
