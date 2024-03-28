@@ -56,7 +56,6 @@ def get_config(
         "--monitoring-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
-        "--enable-beacon-rest-api",
     ]
 
     keymanager_api_cmd = [
