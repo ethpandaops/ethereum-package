@@ -274,7 +274,7 @@ def get_beacon_config(
         ):
             if bootnode_contexts != None:
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
-                    cmd.append("--peer=" + ctx.multiaddr)
+                    # cmd.append("--peer=" + ctx.multiaddr)
                     cmd.append("--bootstrap-node=" + ctx.enr)
         elif network == constants.NETWORK_NAME.ephemery:
             cmd.append(
