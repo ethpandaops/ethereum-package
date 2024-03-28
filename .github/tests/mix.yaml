@@ -1,7 +1,7 @@
 participants:
   - el_type: geth
     cl_type: teku
-  - el_type: geth
+  - el_type: nethermind
     cl_type: prysm
   - el_type: erigon
     cl_type: nimbus
@@ -11,7 +11,6 @@ participants:
     cl_type: lodestar
   - el_type: nimbus
     cl_type: teku
-  - el_type: nethermind
+  - el_type: ethereumjs
     cl_type: grandine
-additional_services:
-  - dora
+additional_services: []

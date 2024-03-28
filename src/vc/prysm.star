@@ -64,6 +64,12 @@ def get_config(
         "--rpc-host=0.0.0.0",
     ]
 
+    keymanager_api_cmd = [
+        "--rpc",
+        "--rpc-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--rpc-host=0.0.0.0",
+    ]
+
     if cl_context.client_name != constants.CL_TYPE.prysm:
         cmd.append("--enable-beacon-rest-api")
 
