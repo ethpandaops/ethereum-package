@@ -239,15 +239,6 @@ def get_config(
                     ]
                 )
             )
-            # cmd.append(
-            #     "--staticpeers="
-            #     + ",".join(
-            #         [
-            #             ctx.enode
-            #             for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-            #         ]
-            #     )
-            # )
     elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootnodes="
@@ -255,13 +246,7 @@ def get_config(
                 plan, el_cl_genesis_data.files_artifact_uuid
             )
         )
-        # cmd.append(
-        #     "--staticpeers="
-        #     + shared_utils.get_devnet_enodes(
-        #         plan, el_cl_genesis_data.files_artifact_uuid
-        #     )
-        # )
-
+        
     if len(extra_params) > 0:
         cmd.extend([param for param in extra_params])
 
