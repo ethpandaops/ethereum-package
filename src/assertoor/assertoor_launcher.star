@@ -52,8 +52,7 @@ def launch_assertoor(
         )
         all_client_info.append(
             new_client_info(
-                cl_client.ip_addr,
-                cl_client.http_port_num,
+                cl_client.beacon_http_url,
                 el_client.ip_addr,
                 el_client.rpc_port_num,
                 full_name,
@@ -63,8 +62,7 @@ def launch_assertoor(
         if participant_config.validator_count != 0:
             vc_info.append(
                 new_client_info(
-                    cl_client.ip_addr,
-                    cl_client.http_port_num,
+                    cl_client.beacon_http_url,
                     el_client.ip_addr,
                     el_client.rpc_port_num,
                     full_name,
@@ -164,10 +162,9 @@ def new_config_template_data(listen_port_num, client_info, vc_info, assertoor_pa
     }
 
 
-def new_client_info(cl_ip_addr, cl_port_num, el_ip_addr, el_port_num, full_name):
+def new_client_info(beacon_http_url, el_ip_addr, el_port_num, full_name):
     return {
-        "CLIPAddr": cl_ip_addr,
-        "CLPortNum": cl_port_num,
+        "CL_HTTP_URL": beacon_http_url,
         "ELIPAddr": el_ip_addr,
         "ELPortNum": el_port_num,
         "Name": full_name,

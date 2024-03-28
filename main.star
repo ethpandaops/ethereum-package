@@ -197,10 +197,7 @@ def run(plan, args={}):
             all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
         )
         beacon_uris = ",".join(
-            [
-                "http://{0}:{1}".format(context.ip_addr, context.http_port_num)
-                for context in all_cl_contexts
-            ]
+            ["{0}".format(context.beacon_http_url) for context in all_cl_contexts]
         )
 
         first_cl_client = all_cl_contexts[0]
