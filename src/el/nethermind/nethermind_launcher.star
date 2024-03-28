@@ -216,7 +216,7 @@ def get_config(
     ):
         if len(existing_el_clients) > 0:
             cmd.append(
-                "--Network.StaticPeers="
+                "--Network.Bootnodes="
                 + ",".join(
                     [
                         ctx.enode
@@ -226,7 +226,7 @@ def get_config(
             )
     elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
-            "--Network.StaticPeers="
+            "--Network.Bootnodes="
             + shared_utils.get_devnet_enodes(
                 plan, el_cl_genesis_data.files_artifact_uuid
             )
