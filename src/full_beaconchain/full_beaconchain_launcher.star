@@ -357,8 +357,8 @@ def new_config_template_data(
     cl_node_info, el_uri, lbt_host, lbt_port, db_host, db_port, redis_url, frontend_port
 ):
     return {
-        "CLNodeHost": cl_node_info.ip_addr,
-        "CLNodePort": cl_node_info.http_port_num,
+        "CLNodeHost": cl_node_info.beacon_http_url[7:],
+        "CLNodePort": cl_node_info.beacon_http_url.split(":")[2],
         "ELNodeEndpoint": el_uri,
         "LBTHost": lbt_host,
         "LBTPort": lbt_port,
@@ -369,5 +369,5 @@ def new_config_template_data(
     }
 
 
-def new_cl_client_info(ip_addr, port_num, service_name):
-    return {"IPAddr": ip_addr, "PortNum": port_num, "Name": service_name}
+def new_cl_client_info(beacon_http_url, service_name):
+    return {"Beacon_HTTP_URL": beacon_http_url, "Name": service_name}
