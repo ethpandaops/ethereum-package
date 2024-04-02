@@ -335,15 +335,6 @@ def get_beacon_config(
                         ]
                     )
                 )
-                cmd.append(
-                    "--p2p-static-peers="
-                    + ",".join(
-                        [
-                            ctx.multiaddr
-                            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                        ]
-                    )
-                )
         elif network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]

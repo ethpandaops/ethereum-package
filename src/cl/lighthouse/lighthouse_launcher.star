@@ -317,15 +317,6 @@ def get_beacon_config(
                         ]
                     )
                 )
-                cmd.append(
-                    "--trusted-peers="
-                    + ",".join(
-                        [
-                            ctx.peer_id
-                            for ctx in boot_cl_client_ctxs[: constants.MAX_ENR_ENTRIES]
-                        ]
-                    )
-                )
         elif network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
