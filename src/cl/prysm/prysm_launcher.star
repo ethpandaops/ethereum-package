@@ -148,8 +148,12 @@ def launch(
 
     beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
 
-    beacon_http_endpoint = "{0}:{1}".format(beacon_service.ip_address, HTTP_PORT_NUM)
-    beacon_rpc_endpoint = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
+    beacon_http_endpoint = "http://{0}:{1}".format(
+        beacon_service.ip_address, HTTP_PORT_NUM
+    )
+    beacon_rpc_endpoint = "http://{0}:{1}".format(
+        beacon_service.ip_address, RPC_PORT_NUM
+    )
     beacon_http_url = beacon_rpc_endpoint
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
     beacon_node_identity_recipe = GetHttpRequestRecipe(
