@@ -187,7 +187,6 @@ def get_config(
         "--Network.DiscoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--Network.P2PPort={0}".format(DISCOVERY_PORT_NUM),
         "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--Network.OnlyStaticPeers=true",
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
         "--Metrics.ExposeHost=0.0.0.0",
@@ -216,7 +215,7 @@ def get_config(
     ):
         if len(existing_el_clients) > 0:
             cmd.append(
-                "--Network.StaticPeers="
+                "--Discovery.Bootnodes="
                 + ",".join(
                     [
                         ctx.enode
@@ -226,7 +225,7 @@ def get_config(
             )
     elif network not in constants.PUBLIC_NETWORKS:
         cmd.append(
-            "--Network.StaticPeers="
+            "--Discovery.Bootnodes="
             + shared_utils.get_devnet_enodes(
                 plan, el_cl_genesis_data.files_artifact_uuid
             )
