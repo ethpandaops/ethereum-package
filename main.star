@@ -372,8 +372,7 @@ def run(plan, args={}):
                 all_participants,
                 args_with_right_defaults.participants,
                 el_cl_data_files_artifact_uuid,
-                network_params.electra_fork_epoch,
-                network_params.network,
+                network_params,
                 global_node_selectors,
             )
             plan.print("Successfully launched dora")
