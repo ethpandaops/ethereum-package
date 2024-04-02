@@ -21,7 +21,6 @@ def launch(
     plan,
     launcher,
     keymanager_file,
-    keymanager_p12_file,
     service_name,
     vc_type,
     image,
@@ -98,6 +97,7 @@ def launch(
     elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
+            keymanager_file=keymanager_file,
             image=image,
             participant_log_level=participant_log_level,
             global_log_level=global_log_level,
@@ -121,7 +121,6 @@ def launch(
         config = teku.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
-            keymanager_p12_file=keymanager_p12_file,
             image=image,
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
@@ -170,6 +169,7 @@ def launch(
 
         config = prysm.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
+            keymanager_file=keymanager_file,
             image=image,
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,

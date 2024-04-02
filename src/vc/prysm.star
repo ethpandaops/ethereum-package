@@ -8,6 +8,7 @@ PRYSM_BEACON_RPC_PORT = 4000
 
 def get_config(
     el_cl_genesis_data,
+    keymanager_file,
     image,
     beacon_http_url,
     cl_context,
@@ -61,12 +62,7 @@ def get_config(
         "--rpc",
         "--rpc-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--rpc-host=0.0.0.0",
-    ]
-
-    keymanager_api_cmd = [
-        "--rpc",
-        "--rpc-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--rpc-host=0.0.0.0",
+        "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
     if cl_context.client_name != constants.CL_TYPE.prysm:
@@ -86,6 +82,7 @@ def get_config(
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
     if keymanager_enabled:
+        files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
 
