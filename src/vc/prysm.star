@@ -44,8 +44,8 @@ def get_config(
         "--chain-config-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--beacon-rpc-provider=" + beacon_grpc_url,
-        "--beacon-rest-api-provider=" + beacon_grpc_url,
+        "--beacon-rpc-provider=" + cl_context.beacon_grpc_url,
+        "--beacon-rest-api-provider=" + cl_context.beacon_grpc_url,
         "--wallet-dir=" + validator_keys_dirpath,
         "--wallet-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
