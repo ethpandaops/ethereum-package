@@ -33,8 +33,7 @@ def launch_dora(
     participant_contexts,
     participant_configs,
     el_cl_data_files_artifact_uuid,
-    electra_fork_epoch,
-    network,
+    network_params,
     global_node_selectors,
 ):
     all_cl_client_info = []
@@ -50,7 +49,7 @@ def launch_dora(
         )
 
     template_data = new_config_template_data(
-        network, HTTP_PORT_NUMBER, all_cl_client_info
+        network_params.network, HTTP_PORT_NUMBER, all_cl_client_info
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -66,8 +65,7 @@ def launch_dora(
     config = get_config(
         config_files_artifact_name,
         el_cl_data_files_artifact_uuid,
-        electra_fork_epoch,
-        network,
+        network_params,
         global_node_selectors,
     )
 
@@ -77,8 +75,7 @@ def launch_dora(
 def get_config(
     config_files_artifact_name,
     el_cl_data_files_artifact_uuid,
-    electra_fork_epoch,
-    network,
+    network_params,
     node_selectors,
 ):
     config_file_path = shared_utils.path_join(
@@ -86,7 +83,10 @@ def get_config(
         DORA_CONFIG_FILENAME,
     )
 
-    IMAGE_NAME = "ethpandaops/dora:latest"
+    if network_params.preset == "minimal":
+        IMAGE_NAME = "ethpandaops/dora:minimal-preset"
+    else:
+        IMAGE_NAME = "ethpandaops/dora:latest"
 
     return ServiceConfig(
         image=IMAGE_NAME,
