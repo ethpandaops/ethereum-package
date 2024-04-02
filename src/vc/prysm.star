@@ -36,15 +36,14 @@ def get_config(
         prysm_password_relative_filepath,
     )
 
+    beacon_http_url = beacon_http_url[7:]  # remove the "http://"
+
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--chain-config-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--beacon-rpc-provider="
-        + "{0}".format(
-            cl_context.beacon_http_url,
-        ),
+        "--beacon-rpc-provider=" + beacon_http_url,
         "--beacon-rest-api-provider=" + beacon_http_url,
         "--wallet-dir=" + validator_keys_dirpath,
         "--wallet-password-file=" + validator_secrets_dirpath,
