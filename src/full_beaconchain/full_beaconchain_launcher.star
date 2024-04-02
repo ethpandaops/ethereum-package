@@ -147,8 +147,12 @@ def launch_full_beacon(
     )
     redis_url = "{}:{}".format(redis_output.hostname, redis_output.port_number)
 
+    cl_url = cl_contexts[0].beacon_http_url[7:]  # Remove the "http://"
+    cl_port = cl_contexts[0].beacon_http_url.split(":")[2]  # Get the port number
+
     template_data = new_config_template_data(
-        cl_contexts[0],
+        cl_url,
+        cl_port,
         el_uri,
         little_bigtable.ip_address,
         LITTLE_BIGTABLE_PORT_NUMBER,
@@ -354,11 +358,19 @@ def launch_full_beacon(
 
 
 def new_config_template_data(
-    cl_node_info, el_uri, lbt_host, lbt_port, db_host, db_port, redis_url, frontend_port
+    cl_url,
+    cl_port,
+    el_uri,
+    lbt_host,
+    lbt_port,
+    db_host,
+    db_port,
+    redis_url,
+    frontend_port,
 ):
     return {
-        "CLNodeHost": cl_node_info.ip_addr,
-        "CLNodePort": cl_node_info.http_port_num,
+        "CLNodeHost": cl_url,
+        "CLNodePort": cl_port,
         "ELNodeEndpoint": el_uri,
         "LBTHost": lbt_host,
         "LBTPort": lbt_port,
@@ -367,7 +379,3 @@ def new_config_template_data(
         "RedisEndpoint": redis_url,
         "FrontendPort": frontend_port,
     }
-
-
-def new_cl_client_info(ip_addr, port_num, service_name):
-    return {"IPAddr": ip_addr, "PortNum": port_num, "Name": service_name}
