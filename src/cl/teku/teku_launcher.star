@@ -419,9 +419,7 @@ def get_beacon_config(
     )
 
 
-def new_teku_launcher(
-    el_cl_genesis_data, jwt_file, network, keymanager_file
-):
+def new_teku_launcher(el_cl_genesis_data, jwt_file, network, keymanager_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
