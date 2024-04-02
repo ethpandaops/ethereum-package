@@ -66,3 +66,61 @@ jobs:
 
       - name: Kurtosis Lint
         run: kurtosis lint ${{ github.workspace }}
+
+  assertoor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Kurtosis
+        run: |
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli
+          kurtosis analytics disable
+
+      - name: Run Starlark
+        run: kurtosis run ${{ github.workspace }} --enclave assertoor-${{ github.run_id }}-${{ inputs.id }} --args-file ./.github/tests/mix-assert.yaml --image-download always --non-blocking-tasks --verbosity DETAILED
+
+      - name: Return test result
+        shell: bash
+        run: |
+          test_result="${{ steps.test_result.outputs.result }}"
+          test_status=$(
+          cat <<"EOF"
+          ${{ steps.test_result.outputs.test_overview }}
+          EOF
+          )
+          failed_test_status=$(
+          cat <<"EOF"
+          ${{ steps.test_result.outputs.failed_test_details }}
+          EOF
+          )
+          chatgpt_summary=$(
+          cat <<"EOF"
+          ${{ steps.chatgpt.outputs.summary }}
+          EOF
+          )
+
+          echo "Test Result:  $test_result"
+          echo "$test_status"
+
+          if ! [ "$test_result" == "success" ]; then
+            echo ""
+            echo "Failed Test Task Status:"
+            echo "$failed_test_status"
+
+            if ! [ -z "$chatgpt_summary" ]; then
+              echo ""
+              echo "Failure summary (ChatGPT):"
+              echo "$chatgpt_summary"
+            fi
+
+
+            echo ""
+            echo "See 'Await test completion' task for detailed logs about this failure!"
+            echo ""
+
+            exit 1 # fail action
+          fi
