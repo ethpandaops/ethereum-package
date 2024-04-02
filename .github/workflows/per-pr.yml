@@ -81,7 +81,13 @@ jobs:
           kurtosis analytics disable
 
       - name: Run Starlark
-        run: kurtosis run ${{ github.workspace }} --enclave assertoor-${{ github.run_id }}-${{ inputs.id }} --args-file ./.github/tests/mix-assert.yaml --image-download always --non-blocking-tasks --verbosity DETAILED
+        run: kurtosis run ${{ github.workspace }} --enclave assertoor-${{ github.run_id }} --args-file ./.github/tests/mix-assert.yaml --image-download always --non-blocking-tasks --verbosity DETAILED
+
+      - name: Assertoor Status Check
+        id: test_result
+        uses: ethpandaops/assertoor-github-action@v1
+        with:
+          kurtosis_enclave_name: "assertoor-${{ github.run_id }}"
 
       - name: Return test result
         shell: bash
@@ -97,12 +103,6 @@ jobs:
           ${{ steps.test_result.outputs.failed_test_details }}
           EOF
           )
-          chatgpt_summary=$(
-          cat <<"EOF"
-          ${{ steps.chatgpt.outputs.summary }}
-          EOF
-          )
-
           echo "Test Result:  $test_result"
           echo "$test_status"
 
@@ -110,13 +110,6 @@ jobs:
             echo ""
             echo "Failed Test Task Status:"
             echo "$failed_test_status"
-
-            if ! [ -z "$chatgpt_summary" ]; then
-              echo ""
-              echo "Failure summary (ChatGPT):"
-              echo "$chatgpt_summary"
-            fi
-
 
             echo ""
             echo "See 'Await test completion' task for detailed logs about this failure!"
