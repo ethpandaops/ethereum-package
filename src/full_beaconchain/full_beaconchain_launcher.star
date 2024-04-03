@@ -196,7 +196,13 @@ def launch_full_beacon(
     plan.exec(
         service_name=initdbschema.name,
         recipe=ExecRecipe(
-            ["./misc", "-config", "/app/config/beaconchain-config.yml", "-command", "applyDbSchema"]
+            [
+                "./misc",
+                "-config",
+                "/app/config/beaconchain-config.yml",
+                "-command",
+                "applyDbSchema",
+            ]
         ),
     )
 
