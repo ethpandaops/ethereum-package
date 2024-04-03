@@ -199,6 +199,8 @@ def launch(
     return cl_context.new_cl_context(
         "nimbus",
         beacon_node_enr,
+        beacon_service.ip_address,
+        beacon_http_port.number,
         beacon_http_url,
         nodes_metrics_info,
         beacon_service_name,
