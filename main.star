@@ -395,6 +395,7 @@ def run(plan, args={}):
             full_beaconchain_explorer.launch_full_beacon(
                 plan,
                 full_beaconchain_explorer_config_template,
+                el_cl_data_files_artifact_uuid,
                 all_cl_contexts,
                 all_el_contexts,
                 persistent,

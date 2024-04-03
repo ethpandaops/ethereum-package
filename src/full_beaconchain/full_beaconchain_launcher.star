@@ -1,7 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 redis = import_module("github.com/kurtosis-tech/redis-package/main.star")
-
+constants = import_module("../package_io/constants.star")
 IMAGE_NAME = "gobitfly/eth2-beaconchain-explorer:latest"
 
 POSTGRES_PORT_ID = "postgres"
@@ -19,8 +19,7 @@ FRONTEND_PORT_NUMBER = 8080
 LITTLE_BIGTABLE_PORT_ID = "littlebigtable"
 LITTLE_BIGTABLE_PORT_NUMBER = 9000
 
-FULL_BEACONCHAIN_CONFIG_FILENAME = "config.yml"
-
+FULL_BEACONCHAIN_CONFIG_FILENAME = "beaconchain-config.yml"
 
 USED_PORTS = {
     FRONTEND_PORT_ID: shared_utils.new_port_spec(
@@ -94,6 +93,7 @@ FRONTEND_MAX_MEMORY = 2048
 def launch_full_beacon(
     plan,
     config_template,
+    el_cl_data_files_artifact_uuid,
     cl_contexts,
     el_contexts,
     persistent,
@@ -147,16 +147,14 @@ def launch_full_beacon(
     )
     redis_url = "{}:{}".format(redis_output.hostname, redis_output.port_number)
 
-    cl_url = cl_contexts[0].beacon_http_url[7:]  # Remove the "http://"
-    cl_port = cl_contexts[0].beacon_http_url.split(":")[2]  # Get the port number
-
     template_data = new_config_template_data(
-        cl_url,
-        cl_port,
+        cl_contexts[0].ip_addr,
+        cl_contexts[0].http_port,
+        cl_contexts[0].client_name,
         el_uri,
         little_bigtable.ip_address,
         LITTLE_BIGTABLE_PORT_NUMBER,
-        postgres_output.url,
+        postgres_output.service.name,
         POSTGRES_PORT_NUMBER,
         redis_url,
         FRONTEND_PORT_NUMBER,
@@ -171,17 +169,20 @@ def launch_full_beacon(
     ] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "config.yml"
+        template_and_data_by_rel_dest_filepath, "beaconchain-config.yml"
     )
+
+    files = {
+        "/app/config/": config_files_artifact_name,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
+    }
 
     # Initialize the db schema
     initdbschema = plan.add_service(
         name="beaconchain-schema-initializer",
         config=ServiceConfig(
             image=IMAGE_NAME,
-            files={
-                "/app/config/": config_files_artifact_name,
-            },
+            files=files,
             entrypoint=["tail", "-f", "/dev/null"],
             min_cpu=INIT_MIN_CPU,
             max_cpu=INIT_MAX_CPU,
@@ -195,7 +196,7 @@ def launch_full_beacon(
     plan.exec(
         service_name=initdbschema.name,
         recipe=ExecRecipe(
-            ["./misc", "-config", "/app/config/config.yml", "-command", "applyDbSchema"]
+            ["./misc", "-config", "/app/config/beaconchain-config.yml", "-command", "applyDbSchema"]
         ),
     )
 
@@ -207,7 +208,7 @@ def launch_full_beacon(
             [
                 "./misc",
                 "-config",
-                "/app/config/config.yml",
+                "/app/config/beaconchain-config.yml",
                 "-command",
                 "initBigtableSchema",
             ]
@@ -219,13 +220,11 @@ def launch_full_beacon(
         name="beaconchain-indexer",
         config=ServiceConfig(
             image=IMAGE_NAME,
-            files={
-                "/app/config/": config_files_artifact_name,
-            },
+            files=files,
             entrypoint=["./explorer"],
             cmd=[
                 "-config",
-                "/app/config/config.yml",
+                "/app/config/beaconchain-config.yml",
             ],
             env_vars={
                 "INDEXER_ENABLED": "TRUE",
@@ -242,13 +241,11 @@ def launch_full_beacon(
         name="beaconchain-eth1indexer",
         config=ServiceConfig(
             image=IMAGE_NAME,
-            files={
-                "/app/config/": config_files_artifact_name,
-            },
+            files=files,
             entrypoint=["./eth1indexer"],
             cmd=[
                 "-config",
-                "/app/config/config.yml",
+                "/app/config/beaconchain-config.yml",
                 "-blocks.concurrency",
                 "1",
                 "-blocks.tracemode",
@@ -269,13 +266,11 @@ def launch_full_beacon(
         name="beaconchain-rewardsexporter",
         config=ServiceConfig(
             image=IMAGE_NAME,
-            files={
-                "/app/config/": config_files_artifact_name,
-            },
+            files=files,
             entrypoint=["./rewards-exporter"],
             cmd=[
                 "-config",
-                "/app/config/config.yml",
+                "/app/config/beaconchain-config.yml",
             ],
             min_cpu=REWARDSEXPORTER_MIN_CPU,
             max_cpu=REWARDSEXPORTER_MAX_CPU,
@@ -289,13 +284,11 @@ def launch_full_beacon(
         name="beaconchain-statistics",
         config=ServiceConfig(
             image=IMAGE_NAME,
-            files={
-                "/app/config/": config_files_artifact_name,
-            },
+            files=files,
             entrypoint=["./statistics"],
             cmd=[
                 "-config",
-                "/app/config/config.yml",
+                "/app/config/beaconchain-config.yml",
                 "-charts.enabled",
                 "-graffiti.enabled",
                 "-validators.enabled",
@@ -312,13 +305,11 @@ def launch_full_beacon(
         name="beaconchain-fdu",
         config=ServiceConfig(
             image=IMAGE_NAME,
-            files={
-                "/app/config/": config_files_artifact_name,
-            },
+            files=files,
             entrypoint=["./frontend-data-updater"],
             cmd=[
                 "-config",
-                "/app/config/config.yml",
+                "/app/config/beaconchain-config.yml",
             ],
             min_cpu=FDU_MIN_CPU,
             max_cpu=FDU_MAX_CPU,
@@ -332,13 +323,11 @@ def launch_full_beacon(
         name="beaconchain-frontend",
         config=ServiceConfig(
             image=IMAGE_NAME,
-            files={
-                "/app/config/": config_files_artifact_name,
-            },
+            files=files,
             entrypoint=["./explorer"],
             cmd=[
                 "-config",
-                "/app/config/config.yml",
+                "/app/config/beaconchain-config.yml",
             ],
             env_vars={
                 "FRONTEND_ENABLED": "TRUE",
@@ -360,6 +349,7 @@ def launch_full_beacon(
 def new_config_template_data(
     cl_url,
     cl_port,
+    cl_type,
     el_uri,
     lbt_host,
     lbt_port,
@@ -371,9 +361,13 @@ def new_config_template_data(
     return {
         "CLNodeHost": cl_url,
         "CLNodePort": cl_port,
+        "CLNodeType": cl_type,
         "ELNodeEndpoint": el_uri,
         "LBTHost": lbt_host,
         "LBTPort": lbt_port,
+        "DBName": POSTGRES_DB,
+        "DBUser": POSTGRES_USER,
+        "DBPass": POSTGRES_PASSWORD,
         "DBHost": db_host,
         "DBPort": db_port,
         "RedisEndpoint": redis_url,
