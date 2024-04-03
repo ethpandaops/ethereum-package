@@ -40,6 +40,7 @@ def launch_prometheus(
     prometheus_url = prometheus.run(
         plan,
         metrics_jobs,
+        "prometheus",
         MIN_CPU,
         MAX_CPU,
         MIN_MEMORY,
