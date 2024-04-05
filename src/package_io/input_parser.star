@@ -404,7 +404,7 @@ def parse_network_params(input_args):
 
         vc_image = participant["vc_image"]
         if vc_image == "":
-            if cl_image == "":
+            if cl_image == "" or vc_type != cl_type:
                 # If the validator client image is also empty, default to the image for the chosen CL client
                 default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
             else:
