@@ -845,12 +845,12 @@ snooper_enabled: true
 
 |               | Lighthouse VC | Prysm VC | Teku VC | Lodestar VC | Nimbus VC
 |---------------|---------------|----------|---------|-------------|-----------|
-| Lighthouse BN | ✅            | ❌       | ❌      | ❌          | ✅
-| Prysm BN      | ✅            | ✅       | ✅      | ❌          | ✅
-| Teku BN       | ✅            | ❌       | ✅      | ✅          | ✅
+| Lighthouse BN | ✅            | ❌       | ✅      | ✅          | ✅
+| Prysm BN      | ✅            | ✅       | ✅      | ✅          | ✅
+| Teku BN       | ✅            | ✅       | ✅      | ✅          | ✅
 | Lodestar BN   | ✅            | ❌       | ❌      | ✅          | ❌
-| Nimbus BN     | ✅            | ❌       | ✅      | ✅          | ✅
-| Grandine BN   | ✅            | ❌       | ✅      | ❌          | ❌
+| Nimbus BN     | ✅            | ❌       | ✅      | ❌          | ✅
+| Grandine BN   | ✅            | ✅       | ✅      | ❌          | ✅
 
 ## Custom labels for Docker and Kubernetes
 
