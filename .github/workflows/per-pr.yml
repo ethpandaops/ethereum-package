@@ -75,4 +75,4 @@ jobs:
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@v1
         with:
-          ethereum_package_args: ../tests/mix-assert.yaml
+          ethereum_package_args: .github/tests/mix-assert.yaml
