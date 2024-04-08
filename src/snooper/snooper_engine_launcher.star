@@ -21,7 +21,7 @@ SNOOPER_USED_PORTS = {
 MIN_CPU = 10
 MAX_CPU = 100
 MIN_MEMORY = 10
-MAX_MEMORY = 300
+MAX_MEMORY = 600
 
 
 def launch(plan, service_name, el_context, node_selectors):
