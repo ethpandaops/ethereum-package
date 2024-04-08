@@ -15,7 +15,7 @@ EXECUTION_MIN_CPU = 100
 EXECUTION_MIN_MEMORY = 256
 
 # Port IDs
-WS_RPC_PORT_ID = "ws-rpc"
+WS_RPC_PORT_ID = "http"
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
