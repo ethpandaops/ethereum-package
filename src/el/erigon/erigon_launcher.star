@@ -32,8 +32,7 @@ PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
     WS_RPC_PORT_ID: shared_utils.new_port_spec(
-        WS_RPC_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
+        WS_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, "http"
     ),
     TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
         DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
