@@ -33,6 +33,7 @@ USED_PORTS = {
     WS_RPC_PORT_ID: shared_utils.new_port_spec(
         WS_RPC_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,        
     ),
     TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
         DISCOVERY_PORT_NUM,
