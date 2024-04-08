@@ -72,48 +72,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Setup Kurtosis
-        run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-          kurtosis analytics disable
-
-      - name: Run Starlark
-        run: kurtosis run ${{ github.workspace }} --enclave assertoor-${{ github.run_id }} --args-file ./.github/tests/mix-assert.yaml --image-download always --non-blocking-tasks --verbosity DETAILED
-
-      - name: Assertoor Status Check
-        id: test_result
-        uses: ethpandaops/assertoor-github-action@v1
+      - name: Kurtosis Assertoor GitHub Action
+        uses: ethpandaops/kurtosis-assertoor-github-action@v1
         with:
-          kurtosis_enclave_name: "assertoor-${{ github.run_id }}"
-
-      - name: Return test result
-        shell: bash
-        run: |
-          test_result="${{ steps.test_result.outputs.result }}"
-          test_status=$(
-          cat <<"EOF"
-          ${{ steps.test_result.outputs.test_overview }}
-          EOF
-          )
-          failed_test_status=$(
-          cat <<"EOF"
-          ${{ steps.test_result.outputs.failed_test_details }}
-          EOF
-          )
-          echo "Test Result:  $test_result"
-          echo "$test_status"
-
-          if ! [ "$test_result" == "success" ]; then
-            echo ""
-            echo "Failed Test Task Status:"
-            echo "$failed_test_status"
-
-            echo ""
-            echo "See 'Await test completion' task for detailed logs about this failure!"
-            echo ""
-
-            exit 1 # fail action
-          fi
+          ethereum_package_args: .github/tests/mix-assert.yaml
