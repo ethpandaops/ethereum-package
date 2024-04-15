@@ -195,6 +195,7 @@ def launch_full_beacon(
     plan.print("applying db schema")
     plan.exec(
         service_name=initdbschema.name,
+        description="Applying db schema",
         recipe=ExecRecipe(
             [
                 "./misc",
@@ -210,6 +211,7 @@ def launch_full_beacon(
     # Initialize the bigtable schema
     plan.exec(
         service_name=initdbschema.name,
+        description="Applying big table schema",
         recipe=ExecRecipe(
             [
                 "./misc",
