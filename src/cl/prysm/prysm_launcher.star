@@ -271,6 +271,7 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz",
         )
+        cmd.append("--contract-deployment-block=0")
         if (
             network == constants.NETWORK_NAME.kurtosis
             or constants.NETWORK_NAME.shadowfork in network
