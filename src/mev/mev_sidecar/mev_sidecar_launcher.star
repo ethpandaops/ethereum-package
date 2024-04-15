@@ -14,7 +14,8 @@ MEV_SIDECAR_MAX_MEMORY = 1024
 
 def launch_mev_sidecar(
     plan,
-    mev_params
+    mev_params,
+    node_selectors,
 ):
     image = mev_params.mev_sidecar_image
 

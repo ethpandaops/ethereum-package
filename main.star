@@ -257,7 +257,8 @@ def run(plan, args={}):
         # add mev-sidecar
         mev_sidecar.launch_mev_sidecar(
             plan,
-            mev_params
+            mev_params,
+            global_node_selectors
         )
 
     # spin up the mev boost contexts if some endpoints for relays have been passed
