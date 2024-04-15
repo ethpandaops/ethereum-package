@@ -216,6 +216,12 @@ def get_config(
             )
     elif constants.NETWORK_NAME.shadowfork in network:
         init_datadir_cmd_str = "echo shadowfork"
+
+    elif "--gcmode archive" in extra_params: # Disable path based storage scheme archive mode
+        init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
+            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+        )
     else:
         init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -226,7 +232,7 @@ def get_config(
         "geth",
         # Disable path based storage scheme for electra fork and verkle
         # TODO: REMOVE Once geth default db is path based, and builder rebased
-        "{0}".format("--state.scheme=path" if "verkle" not in network else ""),
+        "{0}".format("--state.scheme=path" if "verkle" not in network and "--gcmode archive" not in extra_params else ""),
         # Override prague fork timestamp for electra fork
         "{0}".format("--cache.preimages" if "verkle" in network else ""),
         # Override prague fork timestamp
