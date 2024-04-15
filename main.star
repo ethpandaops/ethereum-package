@@ -52,6 +52,12 @@ PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
 
 def run(plan, args={}):
+    """Launches an arbitrarily complex ethereum testnet based on the arguments provided
+
+    Args:
+        arg: A YAML or JSON argument to configure the network; example https://github.com/kurtosis-tech/ethereum-package/blob/main/network_params.yaml
+    """
+
     args_with_right_defaults = input_parser.input_parser(plan, args)
 
     num_participants = len(args_with_right_defaults.participants)
