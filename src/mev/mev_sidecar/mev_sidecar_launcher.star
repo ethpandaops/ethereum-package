@@ -20,7 +20,7 @@ def launch_mev_sidecar(
     image = mev_params.mev_sidecar_image
 
     env_vars = {
-        "RUST_LOG": "debug",
+        "RUST_LOG": "info",
     }
 
     api = plan.add_service(
