@@ -275,7 +275,9 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--syncmode=full",
+        "--syncmode=full"
+        if "--gcmode archive" not in extra_params
+        else "--gcmode archive",
         "--rpc.allow-unprotected-txs",
         "--metrics",
         "--metrics.addr=0.0.0.0",
