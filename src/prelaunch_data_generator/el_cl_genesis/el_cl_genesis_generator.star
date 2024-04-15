@@ -71,6 +71,7 @@ def generate_el_cl_genesis_data(
     files[GENESIS_VALUES_PATH] = genesis_generation_config_artifact_name
 
     genesis = plan.run_sh(
+        description="Creating genesis",
         run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/custom_config_data/* /network-configs/",
         image=image,
         files=files,
@@ -85,18 +86,21 @@ def generate_el_cl_genesis_data(
     )
 
     genesis_validators_root = plan.run_sh(
+        description="Reading genesis validators root",
         run="cat /data/genesis_validators_root.txt",
         files={"/data": genesis.files_artifacts[1]},
         wait=None,
     )
 
     cancun_time = plan.run_sh(
+        description="Reading cancun time from genesis",
         run="jq .config.cancunTime /data/network-configs/genesis.json | tr -d '\n'",
         image="badouralix/curl-jq",
         files={"/data": genesis.files_artifacts[0]},
     )
 
     prague_time = plan.run_sh(
+        description="Reading prague time from genesis",
         run="jq .config.pragueTime /data/network-configs/genesis.json | tr -d '\n'",
         image="badouralix/curl-jq",
         files={"/data": genesis.files_artifacts[0]},

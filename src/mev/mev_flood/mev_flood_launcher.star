@@ -35,6 +35,7 @@ def launch_mev_flood(
 
     plan.exec(
         service_name="mev-flood",
+        description="Initializing mev flood",
         recipe=ExecRecipe(
             command=[
                 "/bin/sh",
@@ -69,4 +70,8 @@ def spam_in_background(
                 el_uri, owner, user, seconds_per_bundle, joined_extra_args
             ),
         ]
-    plan.exec(service_name="mev-flood", recipe=ExecRecipe(command=command))
+    plan.exec(
+        service_name="mev-flood",
+        description="Sending spam transactions",
+        recipe=ExecRecipe(command=command),
+    )

@@ -39,6 +39,7 @@ def spam_in_background(
 
     plan.exec(
         service_name=CUSTOM_FLOOD_SERVICE_NAME,
+        description="Sending transactions",
         recipe=ExecRecipe(
             [
                 "/bin/sh",
