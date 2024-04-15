@@ -37,16 +37,11 @@ def get_config(
         prysm_password_relative_filepath,
     )
 
-    if cl_context.client_name != constants.CL_TYPE.prysm:
-        beacon_grpc_url = beacon_http_url[7:]  # remove the "http://" prefix
-
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--chain-config-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--beacon-rpc-provider=" + cl_context.beacon_grpc_url,
-        "--beacon-rest-api-provider=" + cl_context.beacon_grpc_url,
         "--wallet-dir=" + validator_keys_dirpath,
         "--wallet-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
@@ -66,7 +61,12 @@ def get_config(
     ]
 
     if cl_context.client_name != constants.CL_TYPE.prysm:
+        cmd.append("--beacon-rpc-provider=" + beacon_http_url)
+        cmd.append("--beacon-rest-api-provider=" + beacon_http_url)
         cmd.append("--enable-beacon-rest-api")
+    else:  # we are using Prysm CL
+        cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
+        cmd.append("--beacon-rest-api-provider=" + cl_context.beacon_grpc_url)
 
     if len(extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

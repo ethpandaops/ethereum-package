@@ -404,7 +404,7 @@ def parse_network_params(input_args):
 
         vc_image = participant["vc_image"]
         if vc_image == "":
-            if cl_image == "":
+            if cl_image == "" or vc_type != cl_type:
                 # If the validator client image is also empty, default to the image for the chosen CL client
                 default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
             else:
@@ -482,6 +482,14 @@ def parse_network_params(input_args):
         participant["vc_extra_params"] = vc_extra_params
 
         total_participant_count += participant["count"]
+
+
+    if total_participant_count == 1:
+        for index, participant in enumerate(result["participants"]):
+            # If there is only one participant, we run lodestar as a single node mode
+            if participant["cl_type"] == constants.CL_TYPE.lodestar:
+                participant["cl_extra_params"].append("--sync.isSingleNode")
+                participant["cl_extra_params"].append("--network.allowPublishToZeroPeers")
 
     if result["network_params"]["network_id"].strip() == "":
         fail("network_id is empty or spaces it needs to be of non zero length")

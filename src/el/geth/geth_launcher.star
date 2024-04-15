@@ -39,7 +39,11 @@ EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 USED_PORTS = {
-    RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
+    RPC_PORT_ID: shared_utils.new_port_spec(
+        RPC_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+    ),
     WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
     TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
         DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
@@ -48,7 +52,8 @@ USED_PORTS = {
         DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
     ),
     ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-        ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ENGINE_RPC_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
     ),
     METRICS_PORT_ID: shared_utils.new_port_spec(
         METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
