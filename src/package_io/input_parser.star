@@ -483,6 +483,14 @@ def parse_network_params(input_args):
 
         total_participant_count += participant["count"]
 
+
+    if total_participant_count == 1:
+        for index, participant in enumerate(result["participants"]):
+            # If there is only one participant, we run lodestar as a single node mode
+            if participant["cl_type"] == constants.CL_TYPE.lodestar:
+                participant["cl_extra_params"].append("--sync.isSingleNode")
+                participant["cl_extra_params"].append("--network.allowPublishToZeroPeers")
+
     if result["network_params"]["network_id"].strip() == "":
         fail("network_id is empty or spaces it needs to be of non zero length")
 
