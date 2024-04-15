@@ -197,6 +197,8 @@ def get_config(
     tolerations,
     node_selectors,
 ):
+    if "--gcmode archive" in extra_params or "--gcmode archive" in extra_params:
+        gcmode_archive = True
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if (
         constants.NETWORK_NAME.verkle in network
@@ -217,9 +219,7 @@ def get_config(
     elif constants.NETWORK_NAME.shadowfork in network:
         init_datadir_cmd_str = "echo shadowfork"
 
-    elif (
-        "--gcmode archive" in extra_params
-    ):  # Disable path based storage scheme archive mode
+    elif gcmode_archive:  # Disable path based storage scheme archive mode
         init_datadir_cmd_str = "geth init --state.scheme=hash --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
@@ -275,9 +275,7 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--syncmode=full"
-        if "--gcmode archive" not in extra_params
-        else "--gcmode archive",
+        "--syncmode=full" if not gcmode_archive else "--gcmode=archive",
         "--rpc.allow-unprotected-txs",
         "--metrics",
         "--metrics.addr=0.0.0.0",
