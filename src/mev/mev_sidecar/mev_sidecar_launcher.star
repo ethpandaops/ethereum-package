@@ -28,6 +28,7 @@ def launch_mev_sidecar(
         config=ServiceConfig(
             image=image,
             cmd=[
+                "bolt-sidecar",
                 "--port",
                 str(MEV_SIDECAR_ENDPOINT_PORT),
             ],
