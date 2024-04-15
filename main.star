@@ -37,6 +37,7 @@ mev_custom_flood = import_module(
 )
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
 assertoor = import_module("./src/assertoor/assertoor_launcher.star")
+mev_sidecar = import_module("./src/mev/mev_sidecar/mev_sidecar_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -252,6 +253,12 @@ def run(plan, args={}):
             normal_user.private_key,
         )
         mev_endpoints.append(endpoint)
+
+        # add mev-sidecar
+        mev_sidecar.launch_mev_sidecar(
+            plan,
+            mev_params
+        )
 
     # spin up the mev boost contexts if some endpoints for relays have been passed
     all_mevboost_contexts = []
