@@ -29,7 +29,7 @@ def launch_mev_sidecar(
             cmd=[
                 "--port",
                 str(MEV_SIDECAR_ENDPOINT_PORT),
-            ]
+            ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
                 "api": PortSpec(
