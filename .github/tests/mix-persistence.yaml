@@ -1,6 +1,4 @@
 participants:
-  - el_type: besu
-    cl_type: lighthouse
   - el_type: geth
     cl_type: teku
     use_separate_vc: true
@@ -11,6 +9,8 @@ participants:
     use_separate_vc: true
   - el_type: reth
     cl_type: lodestar
+  - el_type: besu
+    cl_type: lighthouse
   - el_type: ethereumjs
     cl_type: nimbus
 additional_services: []
