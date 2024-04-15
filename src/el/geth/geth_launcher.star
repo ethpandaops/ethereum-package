@@ -197,8 +197,10 @@ def get_config(
     tolerations,
     node_selectors,
 ):
-    if "--gcmode archive" in extra_params or "--gcmode archive" in extra_params:
+    if "--gcmode=archive" in extra_params or "--gcmode archive" in extra_params:
         gcmode_archive = True
+    else:
+        gcmode_archive = False
     # TODO: Remove this once electra fork has path based storage scheme implemented
     if (
         constants.NETWORK_NAME.verkle in network
@@ -236,7 +238,7 @@ def get_config(
         # TODO: REMOVE Once geth default db is path based, and builder rebased
         "{0}".format(
             "--state.scheme=path"
-            if "verkle" not in network and "--gcmode archive" not in extra_params
+            if "verkle" not in network and not gcmode_archive
             else ""
         ),
         # Override prague fork timestamp for electra fork
