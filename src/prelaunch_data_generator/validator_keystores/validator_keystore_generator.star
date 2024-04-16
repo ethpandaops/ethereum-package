@@ -116,7 +116,9 @@ def generate_validator_keystores(plan, mnemonic, participants):
     command_str = " && ".join(all_sub_command_strs)
 
     command_result = plan.exec(
-        recipe=ExecRecipe(command=["sh", "-c", command_str]), service_name=service_name
+        service_name=service_name,
+        description="Generating keystores",
+        recipe=ExecRecipe(command=["sh", "-c", command_str]),
     )
     plan.verify(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
@@ -167,8 +169,9 @@ def generate_validator_keystores(plan, mnemonic, participants):
         ),
     ]
     write_prysm_password_file_cmd_result = plan.exec(
-        recipe=ExecRecipe(command=write_prysm_password_file_cmd),
         service_name=service_name,
+        description="Storing prysm password in a file",
+        recipe=ExecRecipe(command=write_prysm_password_file_cmd),
     )
     plan.verify(
         write_prysm_password_file_cmd_result["code"],
@@ -245,10 +248,11 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
             # no generation command as validator count is 0
             continue
         plan.exec(
+            service_name=service_name,
+            description="Generating keystore for participant " + str(idx),
             recipe=ExecRecipe(
                 command=["sh", "-c", generation_command + " >/dev/null 2>&1 &"]
             ),
-            service_name=service_name,
         )
 
     # verify that files got created
@@ -319,8 +323,9 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
         ),
     ]
     write_prysm_password_file_cmd_result = plan.exec(
-        recipe=ExecRecipe(command=write_prysm_password_file_cmd),
         service_name=service_names[0],
+        description="Storing prysm password in a file",
+        recipe=ExecRecipe(command=write_prysm_password_file_cmd),
     )
     plan.verify(
         write_prysm_password_file_cmd_result["code"],
