@@ -13,7 +13,7 @@ BLUTGANG_CONFIG_FILENAME = "config.toml"
 BLUTGANG_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 IMAGE_NAME = "makemake1337/blutgang:latest"
-#IMAGE_NAME = "busybox:latest"
+# IMAGE_NAME = "busybox:latest"
 
 # The min/max CPU/memory that blutgang can use
 MIN_CPU = 100
@@ -31,7 +31,7 @@ USED_PORTS = {
         ADMIN_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
 }
 
 
@@ -96,14 +96,14 @@ def get_config(
         files={
             BLUTGANG_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
-        cmd=["-c " +  config_file_path],
+        cmd=["-c " + config_file_path],
         entrypoint=["/app/blutgang"],
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
-        env_vars={"RUST_BACKTRACE": "1"}
+        env_vars={"RUST_BACKTRACE": "1"},
     )
 
 
