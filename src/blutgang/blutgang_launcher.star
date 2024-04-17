@@ -3,13 +3,17 @@ constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "blutgang"
 
 HTTP_PORT_ID = "http"
-HTTP_PORT_NUMBER = 8080
+HTTP_PORT_NUMBER = 3000
+
+ADMIN_PORT_ID = "admin"
+ADMIN_PORT_NUMBER = 5715
 
 BLUTGANG_CONFIG_FILENAME = "config.toml"
 
-BLUTGANG_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/app"
+BLUTGANG_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 IMAGE_NAME = "makemake1337/blutgang:latest"
+#IMAGE_NAME = "busybox:latest"
 
 # The min/max CPU/memory that blutgang can use
 MIN_CPU = 100
@@ -22,6 +26,11 @@ USED_PORTS = {
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+    ),
+    ADMIN_PORT_ID: shared_utils.new_port_spec(
+        ADMIN_PORT_NUMBER,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
 }
 
@@ -31,13 +40,12 @@ def launch_blutgang(
     config_template,
     participant_contexts,
     participant_configs,
-    el_cl_data_files_artifact_uuid,
     network_params,
     global_node_selectors,
 ):
     all_el_client_info = []
     for index, participant in enumerate(participant_contexts):
-        full_name, el_client, _, _ = shared_utils.get_client_names(
+        full_name, _, el_client, _ = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
         all_el_client_info.append(
@@ -62,10 +70,9 @@ def launch_blutgang(
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "blutgang-config"
     )
-    el_cl_data_files_artifact_uuid = el_cl_data_files_artifact_uuid
+
     config = get_config(
         config_files_artifact_name,
-        el_cl_data_files_artifact_uuid,
         network_params,
         global_node_selectors,
     )
@@ -75,7 +82,6 @@ def launch_blutgang(
 
 def get_config(
     config_files_artifact_name,
-    el_cl_data_files_artifact_uuid,
     network_params,
     node_selectors,
 ):
@@ -89,13 +95,15 @@ def get_config(
         ports=USED_PORTS,
         files={
             BLUTGANG_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
+        cmd=["-c " +  config_file_path],
+        entrypoint=["/app/blutgang"],
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        env_vars={"RUST_BACKTRACE": "1"}
     )
 
 

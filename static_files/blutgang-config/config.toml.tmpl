@@ -64,11 +64,11 @@ flush_every_ms = 240
 # DO NOT name an rpc `blutgang`, `admin`, or `sled`
 
 
-# Beacon Node Endpoints
+# RPC Node Endpoints
 {{ range $elClient := .ELClientInfo }}
-[ {{ $elClient.FullName }} ]
-    url = {{ $elClient.IP_Addr }}:{{ $elClient.RPC_PortNum }}
-    ws_url = {{ $elClient.IP_Addr }}:{{ $elClient.WS_PortNum }}
-    max_consecutive = 150
-    max_per_second = 200
+[{{ $elClient.FullName }}]
+url = "http://{{ $elClient.IP_Addr }}:{{ $elClient.RPC_PortNum }}"
+ws_url = "ws://{{ $elClient.IP_Addr }}:{{ $elClient.WS_PortNum }}"
+max_consecutive = 150
+max_per_second = 200
 {{- end }}
