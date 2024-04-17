@@ -32,6 +32,7 @@ additional_services:
   - custom_flood
   - blobscan
   - blockscout
+  - dugtrio
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true
