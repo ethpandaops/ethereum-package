@@ -22,6 +22,8 @@ additional_services:
   - custom_flood
   - blobscan
   - blockscout
+  - dugtrio
+  - blutgang
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 mev_type: full

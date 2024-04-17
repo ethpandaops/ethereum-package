@@ -21,6 +21,8 @@ beacon_metrics_gazer = import_module(
     "./src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
 )
 dora = import_module("./src/dora/dora_launcher.star")
+dugtrio = import_module("./src/dugtrio/dugtrio_launcher.star")
+blutgang = import_module("./src/blutgang/blutgang_launcher.star")
 blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
@@ -382,6 +384,34 @@ def run(plan, args={}):
                 global_node_selectors,
             )
             plan.print("Successfully launched dora")
+        elif additional_service == "dugtrio":
+            plan.print("Launching dugtrio")
+            dugtrio_config_template = read_file(
+                static_files.DUGTRIO_CONFIG_TEMPLATE_FILEPATH
+            )
+            dugtrio.launch_dugtrio(
+                plan,
+                dugtrio_config_template,
+                all_participants,
+                args_with_right_defaults.participants,
+                network_params,
+                global_node_selectors,
+            )
+            plan.print("Successfully launched dugtrio")
+        elif additional_service == "blutgang":
+            plan.print("Launching blutgang")
+            blutgang_config_template = read_file(
+                static_files.BLUTGANG_CONFIG_TEMPLATE_FILEPATH
+            )
+            blutgang.launch_blutgang(
+                plan,
+                blutgang_config_template,
+                all_participants,
+                args_with_right_defaults.participants,
+                network_params,
+                global_node_selectors,
+            )
+            plan.print("Successfully launched blutgang")
         elif additional_service == "blobscan":
             plan.print("Launching blobscan")
             blobscan.launch_blobscan(

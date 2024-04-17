@@ -1,0 +1,57 @@
+logging:
+  outputLevel: "debug"
+  #outputStderr: false
+  #filePath: "explorer.log"
+  #fileLevel: "warn"
+
+# HTTP Server configuration
+server:
+  # Address to listen on
+  host: "0.0.0.0"
+
+  # Port to listen on
+  port: "8080"
+
+# Beacon Node Endpoints
+endpoints:
+{{ range $clClient := .CLClientInfo }}
+  - url: "{{ $clClient.Beacon_HTTP_URL }}"
+    name: "{{ $clClient.FullName }}"
+{{- end }}
+
+# Pool configuration
+pool:
+  schedulerMode: "rr"
+  followDistance: 10
+  maxHeadDistance: 2
+
+# Proxy configuration
+proxy:
+  # number of proxies in front of dugtrio
+  proxyCount: 0
+
+  # proxy call timeout
+  callTimeout: 60s
+
+  # proxy session timeout
+  sessionTimeout: 10m
+
+  # reuse the same endpoint when possible
+  stickyEndpoint: true
+
+  # call rate limit (calls per second)
+  callRateLimit: 100
+
+  # call rate burst limit
+  callRateBurst: 1000
+
+  # blocked api paths (regex patterns)
+  blockedPaths:
+    - ^/eth/v[0-9]+/debug/.*
+
+# Frontend configuration
+frontend:
+  # Enable or disable to web frontend
+  enabled: true
+  minify: true
+  siteName: "Dugtrio-Kurtosis"
