@@ -31,7 +31,6 @@ def launch_dugtrio(
     config_template,
     participant_contexts,
     participant_configs,
-    el_cl_data_files_artifact_uuid,
     network_params,
     global_node_selectors,
 ):
@@ -60,10 +59,8 @@ def launch_dugtrio(
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "dugtrio-config"
     )
-    el_cl_data_files_artifact_uuid = el_cl_data_files_artifact_uuid
     config = get_config(
         config_files_artifact_name,
-        el_cl_data_files_artifact_uuid,
         network_params,
         global_node_selectors,
     )
@@ -73,7 +70,6 @@ def launch_dugtrio(
 
 def get_config(
     config_files_artifact_name,
-    el_cl_data_files_artifact_uuid,
     network_params,
     node_selectors,
 ):
@@ -87,7 +83,6 @@ def get_config(
         ports=USED_PORTS,
         files={
             DUGTRIO_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
         cmd=["-config", config_file_path],
         min_cpu=MIN_CPU,
@@ -95,6 +90,15 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        ready_conditions=ReadyCondition(
+            recipe=GetHttpRequestRecipe(
+                port_id="http",
+                endpoint="/healthcheck",
+            ),
+            field="code",
+            assertion="==",
+            target_value=200,
+        ),
     )
 
 

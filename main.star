@@ -393,7 +393,6 @@ def run(plan, args={}):
                 dugtrio_config_template,
                 all_participants,
                 args_with_right_defaults.participants,
-                el_cl_data_files_artifact_uuid,
                 network_params,
                 global_node_selectors,
             )
