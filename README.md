@@ -542,7 +542,8 @@ additional_services:
   - full_beaconchain_explorer
   - prometheus_grafana
   - blobscan
-
+  - dugtrio
+  - blutgang
 
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:

@@ -1,0 +1,74 @@
+# To use the config file, use the -c/--config option pointing to the path of a config file
+
+# Config for blutgang goes here
+[blutgang]
+# Clear the cache DB on startup
+do_clear = false
+# Where to bind blutgang to
+address = "0.0.0.0:3000"
+# Moving average length for the latency
+ma_length = 100
+# Sort RPCs by latency on startup. Recommended to leave on.
+sort_on_startup = true
+# Enable health checking
+health_check = true
+# Enable content type header checking. Set this to `true` if you want
+# Blutgang to be JSON-RPC compliant.
+header_check = true
+# Acceptable time to wait for a response in ms
+ttl = 30
+# How many times to retry a request before giving up
+max_retries = 32
+# Block time in ms, used as a sanity check when not receiving subscriptions
+expected_block_time = 13000
+# Time between health checks in ms
+health_check_ttl = 400
+# Supress the health check running info messages
+supress_rpc_check = false
+
+# Note: the admin namespace contains volatile functions and
+# should not be exposed publicly.
+[admin]
+# Enable the admin namespace
+enabled = true
+# Address for the admin RPC
+address = "0.0.0.0:5715"
+# Only allow read-only methods
+# Recommended `true` unless you 100% need write methods
+readonly = true
+# Enable the use of JWT for auth
+# Should be on if exposing to the internet
+jwt = false
+# jwt token
+key = ""
+
+# Sled config
+# Sled is the database we use for our cache, for more info check their docs
+[sled]
+# Path to db
+db_path = "./blutgang-cache"
+# sled mode. Can be HighThroughput/LowSpace
+mode = "HighThroughput"
+# Cache size in bytes.
+cache_capacity = 1000000000
+# Use zstd compression. Reduces size 60-70%,
+# and increases CPU and latency by around 10% for db writes and 2% for reads.
+# If storage constrained, it's fine to have it be on.
+compression = false
+# Print DB profile when dropped. Doesn't do anything for now.
+print_profile = false
+# Frequency of flushes in ms
+flush_every_ms = 240
+
+# Add separate RPCs as TOML tables
+# DO NOT name an rpc `blutgang`, `admin`, or `sled`
+
+
+# RPC Node Endpoints
+{{ range $elClient := .ELClientInfo }}
+[{{ $elClient.FullName }}]
+url = "http://{{ $elClient.IP_Addr }}:{{ $elClient.RPC_PortNum }}"
+ws_url = "ws://{{ $elClient.IP_Addr }}:{{ $elClient.WS_PortNum }}"
+max_consecutive = 150
+max_per_second = 200
+{{- end }}
