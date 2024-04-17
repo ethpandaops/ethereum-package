@@ -385,7 +385,9 @@ def run(plan, args={}):
             plan.print("Successfully launched dora")
         elif additional_service == "dugtrio":
             plan.print("Launching dugtrio")
-            dugtrio_config_template = read_file(static_files.DUGTRIO_CONFIG_TEMPLATE_FILEPATH)
+            dugtrio_config_template = read_file(
+                static_files.DUGTRIO_CONFIG_TEMPLATE_FILEPATH
+            )
             dugtrio.launch_dugtrio(
                 plan,
                 dugtrio_config_template,

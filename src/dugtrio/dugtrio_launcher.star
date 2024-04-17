@@ -25,6 +25,7 @@ USED_PORTS = {
     )
 }
 
+
 def launch_dugtrio(
     plan,
     config_template,
@@ -96,12 +97,14 @@ def get_config(
         node_selectors=node_selectors,
     )
 
+
 def new_config_template_data(network, listen_port_num, cl_client_info):
     return {
         "Network": network,
         "ListenPortNum": listen_port_num,
         "CLClientInfo": cl_client_info,
     }
+
 
 def new_cl_client_info(beacon_http_url, full_name):
     return {
