@@ -25,6 +25,7 @@ USED_PORTS = {
     )
 }
 
+
 def launch_blutgang(
     plan,
     config_template,
@@ -97,12 +98,14 @@ def get_config(
         node_selectors=node_selectors,
     )
 
+
 def new_config_template_data(network, listen_port_num, el_client_info):
     return {
         "Network": network,
         "ListenPortNum": listen_port_num,
         "ELClientInfo": el_client_info,
     }
+
 
 def new_el_client_info(ip_addr, rpc_port_num, ws_port_num, full_name):
     return {

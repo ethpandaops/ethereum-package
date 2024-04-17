@@ -17,8 +17,12 @@ VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH = (
 )
 
 DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml.tmpl"
-DUGTRIO_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dugtrio-config/config.yaml.tmpl"
-BLUTGANG_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/blutgang-config/config.toml.tmpl"
+DUGTRIO_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/dugtrio-config/config.yaml.tmpl"
+)
+BLUTGANG_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/blutgang-config/config.toml.tmpl"
+)
 
 FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/full-beaconchain-config/config.yaml.tmpl"
