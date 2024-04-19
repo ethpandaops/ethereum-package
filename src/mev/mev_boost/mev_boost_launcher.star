@@ -11,9 +11,9 @@ USED_PORTS = {
 }
 
 NETWORK_ID_TO_NAME = {
-    "5": "goerli",
+    "1": "mainnet",
+    "17000": "holesky",
     "11155111": "sepolia",
-    "3": "ropsten",
 }
 
 # The min/max CPU/memory that mev-boost can use

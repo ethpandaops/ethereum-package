@@ -450,7 +450,7 @@ participants:
 network_params:
   # Network name, used to enable syncing of alternative networks
   # Defaults to "kurtosis"
-  # You can sync any public network by setting this to the network name (e.g. "mainnet", "goerli", "sepolia", "holesky")
+  # You can sync any public network by setting this to the network name (e.g. "mainnet", "sepolia", "holesky")
   # You can sync any devnet by setting this to the network name (e.g. "dencun-devnet-12", "verkle-gen-devnet-2")
   network: "kurtosis"
 

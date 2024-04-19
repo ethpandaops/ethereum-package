@@ -13,9 +13,9 @@ MEV_RELAY_ENDPOINT_PORT = 9062
 MEV_RELAY_WEBSITE_PORT = 9060
 
 NETWORK_ID_TO_NAME = {
-    "5": "goerli",
+    "1": "mainnet",
+    "17000": "holesky",
     "11155111": "sepolia",
-    "3": "ropsten",
 }
 
 LAUNCH_ADMINER = True
