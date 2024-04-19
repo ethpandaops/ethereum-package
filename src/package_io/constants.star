@@ -82,7 +82,6 @@ ETHEREUM_GENESIS_GENERATOR = struct(
 
 NETWORK_NAME = struct(
     mainnet="mainnet",
-    goerli="goerli",
     sepolia="sepolia",
     holesky="holesky",
     ephemery="ephemery",
@@ -93,21 +92,18 @@ NETWORK_NAME = struct(
 
 PUBLIC_NETWORKS = (
     "mainnet",
-    "goerli",
     "sepolia",
     "holesky",
 )
 
 NETWORK_ID = {
     "mainnet": 1,
-    "goerli": 5,
     "sepolia": 11155111,
     "holesky": 17000,
 }
 
 CHECKPOINT_SYNC_URL = {
     "mainnet": "https://beaconstate.info",
-    "goerli": "https://checkpoint-sync.goerli.ethpandaops.io",
     "sepolia": "https://checkpoint-sync.sepolia.ethpandaops.io",
     "holesky": "https://checkpoint-sync.holesky.ethpandaops.io",
     "ephemery": "https://checkpointz.bordel.wtf/",
@@ -115,14 +111,12 @@ CHECKPOINT_SYNC_URL = {
 
 GENESIS_VALIDATORS_ROOT = {
     "mainnet": "0x4b363db94e286120d76eb905340fdd4e54bfe9f06bf33ff6cf5ad27f511bfe95",
-    "goerli": "0x043db0d9a83813551ee2f33450d23797757d430911a9320530ad8a0eabc43efb",
     "sepolia": "0xd8ea171f3c94aea21ebc42a1ed61052acf3f9209c00e4efbaaddac09ed9b8078",
     "holesky": "0x9143aa7c615a7f7115e2b6aac319c03529df8242ae705fba9df39b79c59fa8b1",
 }
 
 DEPOSIT_CONTRACT_ADDRESS = {
     "mainnet": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
-    "goerli": "0xff50ed3d0ec03aC01D4C79aAd74928BFF48a7b2b",
     "sepolia": "0x7f02C3E3c98b133055B8B348B2Ac625669Ed295D",
     "holesky": "0x4242424242424242424242424242424242424242",
     "ephemery": "0x4242424242424242424242424242424242424242",
@@ -130,7 +124,6 @@ DEPOSIT_CONTRACT_ADDRESS = {
 
 GENESIS_TIME = {
     "mainnet": 1606824023,
-    "goerli": 1616508000,
     "sepolia": 1655733600,
     "holesky": 1695902400,
 }
@@ -150,21 +143,6 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 500000,  # 500GB
         "lodestar_volume_size": 500000,  # 500GB
         "grandine_volume_size": 500000,  # 500GB
-    },
-    "goerli": {
-        "geth_volume_size": 800000,  # 800GB
-        "erigon_volume_size": 1200000,  # 1200GB
-        "nethermind_volume_size": 800000,  # 800GB
-        "besu_volume_size": 800000,  # 800GB
-        "reth_volume_size": 1200000,  # 1200GB
-        "ethereumjs_volume_size": 800000,  # 800GB
-        "nimbus_eth1_volume_size": 800000,  # 800GB
-        "prysm_volume_size": 300000,  # 300GB
-        "lighthouse_volume_size": 300000,  # 300GB
-        "teku_volume_size": 300000,  # 300GB
-        "nimbus_volume_size": 300000,  # 300GB
-        "lodestar_volume_size": 300000,  # 300GB
-        "grandine_volume_size": 300000,  # 300GB
     },
     "sepolia": {
         "geth_volume_size": 300000,  # 300GB
@@ -271,34 +249,6 @@ RAM_CPU_OVERRIDES = {
         "lodestar_max_cpu": 4000,  # 4 cores
         "grandine_max_mem": 16384,  # 16GB
         "grandine_max_cpu": 4000,  # 4 cores
-    },
-    "goerli": {
-        "geth_max_mem": 8192,  # 8GB
-        "geth_max_cpu": 2000,  # 2 cores
-        "erigon_max_mem": 8192,  # 8GB
-        "erigon_max_cpu": 2000,  # 2 cores
-        "nethermind_max_mem": 8192,  # 8GB
-        "nethermind_max_cpu": 2000,  # 2 cores
-        "besu_max_mem": 8192,  # 8GB
-        "besu_max_cpu": 2000,  # 2 cores
-        "reth_max_mem": 8192,  # 8GB
-        "reth_max_cpu": 2000,  # 2 cores
-        "ethereumjs_max_mem": 8192,  # 8GB
-        "ethereumjs_max_cpu": 2000,  # 2 cores
-        "nimbus_eth1_max_mem": 8192,  # 8GB
-        "nimbus_eth1_max_cpu": 2000,  # 2 cores
-        "prysm_max_mem": 8192,  # 8GB
-        "prysm_max_cpu": 2000,  # 2 cores
-        "lighthouse_max_mem": 8192,  # 8GB
-        "lighthouse_max_cpu": 2000,  # 2 cores
-        "teku_max_mem": 8192,  # 8GB
-        "teku_max_cpu": 2000,  # 2 cores
-        "nimbus_max_mem": 8192,  # 8GB
-        "nimbus_max_cpu": 2000,  # 2 cores
-        "lodestar_max_mem": 8192,  # 8GB
-        "lodestar_max_cpu": 2000,  # 2 cores
-        "grandine_max_mem": 8192,  # 8GB
-        "grandine_max_cpu": 2000,  # 2 cores
     },
     "sepolia": {
         "geth_max_mem": 4096,  # 4GB
