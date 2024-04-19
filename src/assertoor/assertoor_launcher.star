@@ -177,16 +177,19 @@ def new_client_info(
     cl_snooper_context,
     full_name,
 ):
-    snooper_enabled = False
+    el_snooper_enabled = False
     el_snooper_url = ""
+    cl_snooper_enabled = False
     cl_snooper_url = ""
 
-    if el_snooper_context != None and cl_snooper_context != None:
-        snooper_enabled = True
+    if el_snooper_context != None:
+        el_snooper_enabled = True
         el_snooper_url = "http://{0}:{1}".format(
             el_snooper_context.ip_addr,
             el_snooper_context.engine_rpc_port_num,
         )
+    if cl_snooper_context != None:
+        cl_snooper_enabled = True
         cl_snooper_url = "http://{0}:{1}".format(
             cl_snooper_context.ip_addr,
             cl_snooper_context.beacon_rpc_port_num,
@@ -196,8 +199,9 @@ def new_client_info(
         "CL_HTTP_URL": beacon_http_url,
         "ELIPAddr": el_ip_addr,
         "ELPortNum": el_port_num,
-        "SnooperEnabled": snooper_enabled,
+        "ELSnooperEnabled": el_snooper_enabled,
         "ELSnooperUrl": el_snooper_url,
+        "CLSnooperEnabled": cl_snooper_enabled,
         "CLSnooperUrl": cl_snooper_url,
         "Name": full_name,
     }

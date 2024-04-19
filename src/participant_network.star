@@ -261,6 +261,7 @@ def launch_participant_network(
             # This should only be the case for the MEV participant,
             # the regular participants default to False/True
             all_vc_contexts.append(None)
+            all_snooper_beacon_contexts.append(None)
             continue
 
         if cl_type in _cls_that_need_separate_vc and not participant.use_separate_vc:
@@ -268,6 +269,7 @@ def launch_participant_network(
 
         if not participant.use_separate_vc:
             all_vc_contexts.append(None)
+            all_snooper_beacon_contexts.append(None)
             continue
 
         plan.print(
