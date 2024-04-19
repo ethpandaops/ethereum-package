@@ -169,7 +169,14 @@ def new_config_template_data(listen_port_num, client_info, vc_info, assertoor_pa
     }
 
 
-def new_client_info(beacon_http_url, el_ip_addr, el_port_num, el_snooper_context, cl_snooper_context, full_name):
+def new_client_info(
+    beacon_http_url,
+    el_ip_addr,
+    el_port_num,
+    el_snooper_context,
+    cl_snooper_context,
+    full_name,
+):
     snooper_enabled = False
     el_snooper_url = ""
     cl_snooper_url = ""
