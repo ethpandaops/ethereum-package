@@ -14,6 +14,7 @@ VERBOSITY_LEVELS = {
 
 def get_config(
     el_cl_genesis_data,
+    keymanager_file,
     image,
     participant_log_level,
     global_log_level,
@@ -72,6 +73,7 @@ def get_config(
         "--keymanager.port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
         "--keymanager.address=0.0.0.0",
         "--keymanager.cors=*",
+        "--keymanager.tokenFile=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
     if len(extra_params) > 0:
@@ -87,6 +89,7 @@ def get_config(
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
     if keymanager_enabled:
+        files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
 

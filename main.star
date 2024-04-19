@@ -88,10 +88,7 @@ def run(plan, args={}):
         src=static_files.KEYMANAGER_PATH_FILEPATH,
         name="keymanager_file",
     )
-    keymanager_p12_file = plan.upload_files(
-        src=static_files.KEYMANAGER_P12_PATH_FILEPATH,
-        name="keymanager_p12_file",
-    )
+
     plan.print("Read the prometheus, grafana templates")
 
     plan.print(
@@ -111,7 +108,6 @@ def run(plan, args={}):
         args_with_right_defaults.global_log_level,
         jwt_file,
         keymanager_file,
-        keymanager_p12_file,
         persistent,
         xatu_sentry_params,
         global_tolerations,

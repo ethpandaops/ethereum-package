@@ -82,9 +82,6 @@ def get_config(
         "--unencrypted-http-transport",
     ]
 
-    if not (constants.NETWORK_NAME.verkle in network or electra_fork_epoch != None):
-        cmd.append("--produce-block-v3")
-
     if len(extra_params):
         cmd.extend([param for param in extra_params])
 

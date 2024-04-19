@@ -284,7 +284,13 @@ def get_beacon_config(
         "--enable-private-discovery",
     ]
 
-    keymanager_api_cmd = []
+    keymanager_api_cmd = [
+        "--enable-validator-api",
+        "--validator-api-address=0.0.0.0",
+        "--validator-api-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--validator-api-allowed-origins=*",
+        # "--validator-api-bearer-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER, Not yet supported
+    ]
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
@@ -356,10 +362,9 @@ def get_beacon_config(
             VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
 
-        # Keymanager is still unimplemented in grandine
-        # if keymanager_enabled:
-        #     cmd.extend(keymanager_api_cmd)
-        #     ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+        if keymanager_enabled:
+            cmd.extend(keymanager_api_cmd)
+            ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(

@@ -19,13 +19,13 @@ DEFAULT_CL_IMAGES = {
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
-    "lodestar": "chainsafe/lodestar:latest",
+    "lodestar": "chainsafe/lodestar:next",
     "grandine": "ethpandaops/grandine:develop",
 }
 
 DEFAULT_VC_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "lodestar": "chainsafe/lodestar:latest",
+    "lodestar": "chainsafe/lodestar:next",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
     "teku": "consensys/teku:latest",
