@@ -4,6 +4,10 @@ endpoints:
 - name: "{{ $client.Name }}"
   consensusUrl: "{{ $client.CL_HTTP_URL }}"
   executionUrl: "http://{{ $client.ELIPAddr }}:{{ $client.ELPortNum }}"
+  {{- if .SnooperEnabled }}
+  executionSnooperUrl: "{{ $client.ELSnooperUrl }}"
+  consensusSnooperUrl: "{{ $client.CLSnooperUrl }}"
+  {{- end }}
 {{- end }}
 
 web:

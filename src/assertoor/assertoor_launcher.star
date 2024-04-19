@@ -50,11 +50,14 @@ def launch_assertoor(
         ) = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
+
         all_client_info.append(
             new_client_info(
                 cl_client.beacon_http_url,
                 el_client.ip_addr,
                 el_client.rpc_port_num,
+                participant.snooper_engine_context,
+                participant.snooper_beacon_context,
                 full_name,
             )
         )
@@ -65,6 +68,8 @@ def launch_assertoor(
                     cl_client.beacon_http_url,
                     el_client.ip_addr,
                     el_client.rpc_port_num,
+                    participant.snooper_engine_context,
+                    participant.snooper_beacon_context,
                     full_name,
                 )
             )
@@ -164,10 +169,28 @@ def new_config_template_data(listen_port_num, client_info, vc_info, assertoor_pa
     }
 
 
-def new_client_info(beacon_http_url, el_ip_addr, el_port_num, full_name):
+def new_client_info(beacon_http_url, el_ip_addr, el_port_num, el_snooper_context, cl_snooper_context, full_name):
+    snooper_enabled = False
+    el_snooper_url = ""
+    cl_snooper_url = ""
+
+    if el_snooper_context != None and cl_snooper_context != None:
+        snooper_enabled = True
+        el_snooper_url = "http://{0}:{1}".format(
+            el_snooper_context.ip_addr,
+            el_snooper_context.engine_rpc_port_num,
+        )
+        cl_snooper_url = "http://{0}:{1}".format(
+            cl_snooper_context.ip_addr,
+            cl_snooper_context.beacon_rpc_port_num,
+        )
+
     return {
         "CL_HTTP_URL": beacon_http_url,
         "ELIPAddr": el_ip_addr,
         "ELPortNum": el_port_num,
+        "SnooperEnabled": snooper_enabled,
+        "ELSnooperUrl": el_snooper_url,
+        "CLSnooperUrl": cl_snooper_url,
         "Name": full_name,
     }
