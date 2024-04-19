@@ -72,7 +72,12 @@ def launch_assertoor(
             clients_with_cl_snooper.append(client_info)
 
     template_data = new_config_template_data(
-        HTTP_PORT_NUMBER, all_client_info, clients_with_validators, clients_with_el_snooper, clients_with_cl_snooper, assertoor_params
+        HTTP_PORT_NUMBER,
+        all_client_info,
+        clients_with_validators,
+        clients_with_el_snooper,
+        clients_with_cl_snooper,
+        assertoor_params,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -138,7 +143,14 @@ def get_config(
     )
 
 
-def new_config_template_data(listen_port_num, all_client_info, clients_with_validators, clients_with_el_snooper, clients_with_cl_snooper, assertoor_params):
+def new_config_template_data(
+    listen_port_num,
+    all_client_info,
+    clients_with_validators,
+    clients_with_el_snooper,
+    clients_with_cl_snooper,
+    assertoor_params,
+):
     additional_tests = []
     for index, testcfg in enumerate(assertoor_params.tests):
         if type(testcfg) == "dict":
