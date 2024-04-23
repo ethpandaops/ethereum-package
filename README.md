@@ -401,16 +401,16 @@ participants:
   count: 1
 
   # Snooper can be enabled with the `snooper_enabled` flag per client or globally
-  # Defaults to false
-  snooper_enabled: false
+  # Defaults null and then set to global snooper default (false)
+  snooper_enabled: null
 
   # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
-  # Defaults to false
-  ethereum_metrics_exporter_enabled: false
+  # Defaults null and then set to global ethereum_metrics_exporter_enabled (false)
+  ethereum_metrics_exporter_enabled: null
 
   # Enables Xatu Sentry for this participant. Can be set globally.
-  # Defaults to false
-  xatu_sentry_enabled: false
+  # Defaults null and then set to global xatu_sentry_enabled (false)
+  xatu_sentry_enabled: null
 
   # Prometheus additional configuration for a given participant prometheus target.
   # Execution, beacon and validator client targets on prometheus will include this
@@ -443,8 +443,8 @@ participants:
 
   # Participant flag for keymanager api
   # This will open up http ports to your validator services!
-  # Defaults to false
-  keymanager_enabled: false
+  # Defaults null and then set to default global keymanager_enabled (false)
+  keymanager_enabled: null
 
 # Default configuration parameters for the network
 network_params:
