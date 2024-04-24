@@ -425,53 +425,40 @@ def parse_network_params(input_args):
             participant["vc_image"] = default_image
 
         snooper_enabled = participant["snooper_enabled"]
-        if snooper_enabled == False:
-            default_snooper_enabled = result["snooper_enabled"]
-            if default_snooper_enabled:
-                participant["snooper_enabled"] = default_snooper_enabled
+        if snooper_enabled == None:
+            participant["snooper_enabled"] = result["snooper_enabled"]
 
         keymanager_enabled = participant["keymanager_enabled"]
-        if keymanager_enabled == False:
-            default_keymanager_enabled = result["keymanager_enabled"]
-            if default_keymanager_enabled:
-                participant["keymanager_enabled"] = default_keymanager_enabled
+        if keymanager_enabled == None:
+            participant["keymanager_enabled"] = result["keymanager_enabled"]
 
         ethereum_metrics_exporter_enabled = participant[
             "ethereum_metrics_exporter_enabled"
         ]
+        if ethereum_metrics_exporter_enabled == None:
+            participant["ethereum_metrics_exporter_enabled"] = result[
+                "ethereum_metrics_exporter_enabled"
+            ]
 
         xatu_sentry_enabled = participant["xatu_sentry_enabled"]
+        if xatu_sentry_enabled == None:
+            participant["xatu_sentry_enabled"] = result["xatu_sentry_enabled"]
 
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
             # unless we are running lighthouse, we don't support blobber
-            if participant["cl_type"] != "lighthouse":
+            if participant["cl_type"] != constants.CL_TYPE.lighthouse:
                 fail(
                     "blobber is not supported for {0} client".format(
                         participant["cl_type"]
                     )
                 )
 
-        if ethereum_metrics_exporter_enabled == False:
-            default_ethereum_metrics_exporter_enabled = result[
-                "ethereum_metrics_exporter_enabled"
-            ]
-            if default_ethereum_metrics_exporter_enabled:
-                participant[
-                    "ethereum_metrics_exporter_enabled"
-                ] = default_ethereum_metrics_exporter_enabled
-
-        if xatu_sentry_enabled == False:
-            default_xatu_sentry_enabled = result["xatu_sentry_enabled"]
-            if default_xatu_sentry_enabled:
-                participant["xatu_sentry_enabled"] = default_xatu_sentry_enabled
-
         validator_count = participant["validator_count"]
         if validator_count == None:
-            default_validator_count = result["network_params"][
+            participant["validator_count"] = result["network_params"][
                 "num_validator_keys_per_node"
             ]
-            participant["validator_count"] = default_validator_count
 
         actual_num_validators += participant["validator_count"]
 
@@ -692,9 +679,9 @@ def default_participant():
         "node_selectors": {},
         "tolerations": [],
         "count": 1,
-        "snooper_enabled": False,
-        "ethereum_metrics_exporter_enabled": False,
-        "xatu_sentry_enabled": False,
+        "snooper_enabled": None,
+        "ethereum_metrics_exporter_enabled": None,
+        "xatu_sentry_enabled": None,
         "prometheus_config": {
             "scrape_interval": "15s",
             "labels": None,
@@ -702,7 +689,7 @@ def default_participant():
         "blobber_enabled": False,
         "blobber_extra_params": [],
         "builder_network_params": None,
-        "keymanager_enabled": False,
+        "keymanager_enabled": None,
     }
 
 
