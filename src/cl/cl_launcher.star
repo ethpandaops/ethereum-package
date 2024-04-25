@@ -105,7 +105,7 @@ def launch(
         if cl_type not in cl_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    cl_type, ",".join([cl.name for cl in cl_launchers.keys()])
+                    cl_type, ",".join(cl_launchers.keys())
                 )
             )
 
