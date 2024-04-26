@@ -24,6 +24,7 @@ dora = import_module("./src/dora/dora_launcher.star")
 dugtrio = import_module("./src/dugtrio/dugtrio_launcher.star")
 blutgang = import_module("./src/blutgang/blutgang_launcher.star")
 blobscan = import_module("./src/blobscan/blobscan_launcher.star")
+apache = import_module("./src/apache/apache_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
 )
@@ -419,6 +420,14 @@ def run(plan, args={}):
                 global_node_selectors,
             )
             plan.print("Successfully launched blobscan")
+        elif additional_service == "apache":
+            plan.print("Launching apache")
+            apache.launch_apache(
+                plan,
+                el_cl_data_files_artifact_uuid,
+                global_node_selectors,
+            )
+            plan.print("Successfully launched apache")
         elif additional_service == "full_beaconchain_explorer":
             plan.print("Launching full-beaconchain-explorer")
             full_beaconchain_explorer_config_template = read_file(
