@@ -2,14 +2,12 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
 constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "apache"
-
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 80
 
 APACHE_CONFIG_FILENAME = "index.html"
 
 APACHE_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/usr/local/apache2/htdocs/"
-
 
 # The min/max CPU/memory that assertoor can use
 MIN_CPU = 100
