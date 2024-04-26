@@ -73,7 +73,7 @@ def get_config(
         "/network-configs/",
         ".",
         "&&",
-        "httpd-foreground"
+        "httpd-foreground",
     ]
 
     cmd_str = " ".join(cmd)
@@ -81,7 +81,7 @@ def get_config(
     return ServiceConfig(
         image="httpd:latest",
         ports=USED_PORTS,
-        cmd = [cmd_str],
+        cmd=[cmd_str],
         entrypoint=["sh", "-c"],
         files=files,
         min_cpu=MIN_CPU,
