@@ -23,6 +23,7 @@ def launch_transaction_spammer(
         tx_spammer_params.tx_spammer_extra_args,
         electra_fork_epoch,
         global_node_selectors,
+        network_params
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -33,6 +34,7 @@ def get_config(
     tx_spammer_extra_args,
     electra_fork_epoch,
     node_selectors,
+    network_params,
 ):
     # Temp hack to use the old tx-fuzz image until we can get the new one working
     if electra_fork_epoch != None:
