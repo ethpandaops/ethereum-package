@@ -28,7 +28,6 @@ USED_PORTS = {
 
 def launch_apache(
     plan,
-    apache_config,
     el_cl_genesis_data,
     global_node_selectors,
 ):

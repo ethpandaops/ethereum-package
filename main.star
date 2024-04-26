@@ -422,10 +422,8 @@ def run(plan, args={}):
             plan.print("Successfully launched blobscan")
         elif additional_service == "apache":
             plan.print("Launching apache")
-            apache_config = read_file(static_files.APACHE_CONFIG_FILEPATH)
             apache.launch_apache(
                 plan,
-                apache_config,
                 el_cl_data_files_artifact_uuid,
                 global_node_selectors,
             )
