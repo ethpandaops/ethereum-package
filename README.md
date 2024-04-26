@@ -191,6 +191,15 @@ For example, to retrieve the Execution Layer (EL) genesis data, run:
 kurtosis files download my-testnet el-genesis-data ~/Downloads
 ```
 
+# Basic file sharing
+
+Apache is included in the package to allow for basic file sharing. The Apache service is started when additional services are enabled. It will expose the network-configs directory, which might needed if you want to share the network config publicly.
+
+```yaml
+additional_services:
+  - apache
+```
+
 ## Configuration
 
 To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
@@ -544,6 +553,7 @@ additional_services:
   - blobscan
   - dugtrio
   - blutgang
+  - apache
 
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
