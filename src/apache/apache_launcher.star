@@ -8,7 +8,7 @@ HTTP_PORT_NUMBER = 80
 
 APACHE_CONFIG_FILENAME = "index.html"
 
-APACHE_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/usr/local/apache2/htdocs"
+APACHE_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/usr/local/apache2/htdocs/"
 
 
 # The min/max CPU/memory that assertoor can use
@@ -32,13 +32,8 @@ def launch_apache(
     el_cl_genesis_data,
     global_node_selectors,
 ):
-    template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        APACHE_CONFIG_FILENAME
-    ] = shared_utils.new_template_and_data(apache_config, {})
-
-    config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "apache-config"
+    config_files_artifact_name = plan.upload_files(
+        src=static_files.APACHE_CONFIG_FILEPATH, name="apache-config"
     )
 
     config = get_config(
