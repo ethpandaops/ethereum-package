@@ -4,6 +4,12 @@ endpoints:
 - name: "{{ $client.Name }}"
   consensusUrl: "{{ $client.CL_HTTP_URL }}"
   executionUrl: "http://{{ $client.ELIPAddr }}:{{ $client.ELPortNum }}"
+  {{- if .ELSnooperEnabled }}
+  executionSnooperUrl: "{{ $client.ELSnooperUrl }}"
+  {{- end }}
+  {{- if .CLSnooperEnabled }}
+  consensusSnooperUrl: "{{ $client.CLSnooperUrl }}"
+  {{- end }}
 {{- end }}
 
 web:
@@ -23,33 +29,41 @@ validatorNames:
 globalVars:
   walletPrivkey: "850643a0224065ecce3882673c21f56bcf6eef86274cc21cadff15930b59fc8c"
   clientPairNames:
-{{ range $client := .ClientInfo }}
+{{- range $client := .ClientInfo }}
   - "{{ $client.Name }}"
 {{- end }}
-  validatorPairNames:
-{{ range $client := .ValidatorClientInfo }}
+  validatorPairNames: {{ if eq (len .ValidatorClientInfo) 0 }}[]{{ end }}
+{{- range $client := .ValidatorClientInfo }}
+  - "{{ $client.Name }}"
+{{- end }}
+  elSnooperClientPairNames: {{ if eq (len .ElSnooperClientInfo) 0 }}[]{{ end }}
+{{- range $client := .ElSnooperClientInfo }}
+  - "{{ $client.Name }}"
+{{- end }}
+  clSnooperClientPairNames: {{ if eq (len .ClSnooperClientInfo) 0 }}[]{{ end }}
+{{- range $client := .ClSnooperClientInfo }}
   - "{{ $client.Name }}"
 {{- end }}
 
 externalTests:
-{{ if .RunStabilityCheck }}
+{{- if .RunStabilityCheck }}
 - file: /tests/stability-check.yaml
-{{ end }}
-{{ if .RunBlockProposalCheck }}
+{{- end }}
+{{- if .RunBlockProposalCheck }}
 - file: /tests/block-proposal-check.yaml
-{{ end }}
-{{ if .RunTransactionTest }}
+{{- end }}
+{{- if .RunTransactionTest }}
 - file: /tests/eoa-transactions-test.yaml
-{{ end }}
-{{ if .RunBlobTransactionTest }}
+{{- end }}
+{{- if .RunBlobTransactionTest }}
 - file: /tests/blob-transactions-test.yaml
-{{ end }}
-{{ if .RunOpcodesTransactionTest }}
+{{- end }}
+{{- if .RunOpcodesTransactionTest }}
 - file: /tests/all-opcodes-transaction-test.yaml
-{{ end }}
-{{ if .RunLifecycleTest }}
+{{- end }}
+{{- if .RunLifecycleTest }}
 - file: /tests/validator-lifecycle-test.yaml
-{{ end }}
-{{ range $test := .AdditionalTests }}
+{{- end }}
+{{- range $test := .AdditionalTests }}
 - {{ $test }}
 {{- end }}

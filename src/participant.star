@@ -6,6 +6,7 @@ def new_participant(
     cl_context,
     vc_context,
     snooper_engine_context,
+    snooper_beacon_context,
     ethereum_metrics_exporter_context,
     xatu_sentry_context,
 ):
@@ -17,6 +18,7 @@ def new_participant(
         cl_context=cl_context,
         vc_context=vc_context,
         snooper_engine_context=snooper_engine_context,
+        snooper_beacon_context=snooper_beacon_context,
         ethereum_metrics_exporter_context=ethereum_metrics_exporter_context,
         xatu_sentry_context=xatu_sentry_context,
     )
