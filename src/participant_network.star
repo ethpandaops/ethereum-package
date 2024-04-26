@@ -261,6 +261,7 @@ def launch_participant_network(
             # This should only be the case for the MEV participant,
             # the regular participants default to False/True
             all_vc_contexts.append(None)
+            all_snooper_beacon_contexts.append(None)
             continue
 
         if cl_type in _cls_that_need_separate_vc and not participant.use_separate_vc:
@@ -268,6 +269,7 @@ def launch_participant_network(
 
         if not participant.use_separate_vc:
             all_vc_contexts.append(None)
+            all_snooper_beacon_contexts.append(None)
             continue
 
         plan.print(
@@ -347,6 +349,7 @@ def launch_participant_network(
         cl_type = participant.cl_type
         vc_type = participant.vc_type
         snooper_engine_context = None
+        snooper_beacon_context = None
 
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
@@ -354,6 +357,7 @@ def launch_participant_network(
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
+            snooper_beacon_context = all_snooper_beacon_contexts[index]
 
         ethereum_metrics_exporter_context = None
 
@@ -374,6 +378,7 @@ def launch_participant_network(
             cl_context,
             vc_context,
             snooper_engine_context,
+            snooper_beacon_context,
             ethereum_metrics_exporter_context,
             xatu_sentry_context,
         )

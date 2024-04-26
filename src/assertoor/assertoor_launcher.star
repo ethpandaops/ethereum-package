@@ -39,7 +39,9 @@ def launch_assertoor(
     global_node_selectors,
 ):
     all_client_info = []
-    vc_info = []
+    clients_with_validators = []
+    clients_with_el_snooper = []
+    clients_with_cl_snooper = []
 
     for index, participant in enumerate(participant_contexts):
         (
@@ -50,27 +52,32 @@ def launch_assertoor(
         ) = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
-        all_client_info.append(
-            new_client_info(
-                cl_client.beacon_http_url,
-                el_client.ip_addr,
-                el_client.rpc_port_num,
-                full_name,
-            )
+
+        client_info = new_client_info(
+            cl_client.beacon_http_url,
+            el_client.ip_addr,
+            el_client.rpc_port_num,
+            participant.snooper_engine_context,
+            participant.snooper_beacon_context,
+            full_name,
         )
 
+        all_client_info.append(client_info)
+
         if participant_config.validator_count != 0:
-            vc_info.append(
-                new_client_info(
-                    cl_client.beacon_http_url,
-                    el_client.ip_addr,
-                    el_client.rpc_port_num,
-                    full_name,
-                )
-            )
+            clients_with_validators.append(client_info)
+        if participant.snooper_engine_context != None:
+            clients_with_el_snooper.append(client_info)
+        if participant.snooper_beacon_context != None:
+            clients_with_cl_snooper.append(client_info)
 
     template_data = new_config_template_data(
-        HTTP_PORT_NUMBER, all_client_info, vc_info, assertoor_params
+        HTTP_PORT_NUMBER,
+        all_client_info,
+        clients_with_validators,
+        clients_with_el_snooper,
+        clients_with_cl_snooper,
+        assertoor_params,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -136,7 +143,14 @@ def get_config(
     )
 
 
-def new_config_template_data(listen_port_num, client_info, vc_info, assertoor_params):
+def new_config_template_data(
+    listen_port_num,
+    all_client_info,
+    clients_with_validators,
+    clients_with_el_snooper,
+    clients_with_cl_snooper,
+    assertoor_params,
+):
     additional_tests = []
     for index, testcfg in enumerate(assertoor_params.tests):
         if type(testcfg) == "dict":
@@ -152,8 +166,10 @@ def new_config_template_data(listen_port_num, client_info, vc_info, assertoor_pa
 
     return {
         "ListenPortNum": listen_port_num,
-        "ClientInfo": client_info,
-        "ValidatorClientInfo": vc_info,
+        "ClientInfo": all_client_info,
+        "ValidatorClientInfo": clients_with_validators,
+        "ElSnooperClientInfo": clients_with_el_snooper,
+        "ClSnooperClientInfo": clients_with_cl_snooper,
         "RunStabilityCheck": assertoor_params.run_stability_check,
         "RunBlockProposalCheck": assertoor_params.run_block_proposal_check,
         "RunLifecycleTest": assertoor_params.run_lifecycle_test,
@@ -164,10 +180,39 @@ def new_config_template_data(listen_port_num, client_info, vc_info, assertoor_pa
     }
 
 
-def new_client_info(beacon_http_url, el_ip_addr, el_port_num, full_name):
+def new_client_info(
+    beacon_http_url,
+    el_ip_addr,
+    el_port_num,
+    el_snooper_context,
+    cl_snooper_context,
+    full_name,
+):
+    el_snooper_enabled = False
+    el_snooper_url = ""
+    cl_snooper_enabled = False
+    cl_snooper_url = ""
+
+    if el_snooper_context != None:
+        el_snooper_enabled = True
+        el_snooper_url = "http://{0}:{1}".format(
+            el_snooper_context.ip_addr,
+            el_snooper_context.engine_rpc_port_num,
+        )
+    if cl_snooper_context != None:
+        cl_snooper_enabled = True
+        cl_snooper_url = "http://{0}:{1}".format(
+            cl_snooper_context.ip_addr,
+            cl_snooper_context.beacon_rpc_port_num,
+        )
+
     return {
         "CL_HTTP_URL": beacon_http_url,
         "ELIPAddr": el_ip_addr,
         "ELPortNum": el_port_num,
+        "ELSnooperEnabled": el_snooper_enabled,
+        "ELSnooperUrl": el_snooper_url,
+        "CLSnooperEnabled": cl_snooper_enabled,
+        "CLSnooperUrl": cl_snooper_url,
         "Name": full_name,
     }
