@@ -29,7 +29,7 @@ def get_config(
     keymanager_enabled,
 ):
     validator_keys_dirpath = shared_utils.path_join(
-        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT,
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
         node_keystore_files.prysm_relative_dirpath,
     )
     validator_secrets_dirpath = shared_utils.path_join(
@@ -74,7 +74,7 @@ def get_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        vc_shared.VALIDATOR_CLIENT_KEYS_MOUNTPOINT: node_keystore_files.files_artifact_uuid,
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
         PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
     }
 
