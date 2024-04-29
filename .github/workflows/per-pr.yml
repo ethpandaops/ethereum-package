@@ -72,8 +72,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - name: Get branch name
+        shell: git rev-parse --abbrev-ref HEAD
+        id: branch
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@v1
         with:
-          ethereum_package_branch: ${{ github.sha }}
+          ethereum_package_branch: ${{ steps.branch.outputs.stdout }}
           ethereum_package_args: .github/tests/mix-assert.yaml
