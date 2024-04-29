@@ -94,14 +94,14 @@ def generate_el_cl_genesis_data(
 
     cancun_time = plan.run_sh(
         description="Reading cancun time from genesis",
-        run="jq .config.cancunTime /data/network-configs/genesis.json | tr -d '\n'",
+        run="jq .config.cancunTime /data/genesis.json | tr -d '\n'",
         image="badouralix/curl-jq",
         files={"/data": genesis.files_artifacts[0]},
     )
 
     prague_time = plan.run_sh(
         description="Reading prague time from genesis",
-        run="jq .config.pragueTime /data/network-configs/genesis.json | tr -d '\n'",
+        run="jq .config.pragueTime /data/genesis.json | tr -d '\n'",
         image="badouralix/curl-jq",
         files={"/data": genesis.files_artifacts[0]},
     )
