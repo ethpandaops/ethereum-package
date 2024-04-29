@@ -521,7 +521,6 @@ def run(plan, args={}):
         user=GRAFANA_USER,
         password=GRAFANA_PASSWORD,
     )
-
     output = struct(
         grafana_info=grafana_info,
         blockscout_sc_verif_url=None
