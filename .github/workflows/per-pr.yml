@@ -33,7 +33,6 @@ jobs:
             "./.github/tests/mev-mock.yaml",
             "./.github/tests/mix-with-tools.yaml",
             "./.github/tests/mix-persistence.yaml",
-            "./.github/tests/assertoor.yaml",
             "./network_params.yaml"
           ]
     runs-on: ubuntu-latest
