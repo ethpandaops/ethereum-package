@@ -102,9 +102,7 @@ def generate_validator_keystores(plan, mnemonic, participants):
             start_index,
             stop_index,
         )
-        teku_permissions_cmd = (
-            "chmod 0777 -R " + output_dirpath + TEKU_KEYS_DIRNAME
-        )
+        teku_permissions_cmd = "chmod 0777 -R " + output_dirpath + TEKU_KEYS_DIRNAME
         raw_secret_permissions_cmd = (
             "chmod 0600 -R " + output_dirpath + RAW_SECRETS_DIRNAME
         )
