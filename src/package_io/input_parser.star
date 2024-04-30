@@ -141,6 +141,14 @@ def input_parser(plan, input_args):
             MEV_BOOST_PORT,
             result.get("mev_type"),
         )
+    elif result.get("mev_type") == None:
+        pass
+    else:
+        fail(
+            "Unsupported MEV type: {0}, please use 'mock', 'flashbots' or 'mev-rs' type".format(
+                result.get("mev_type")
+            )
+        )
 
     return struct(
         participants=[
@@ -718,7 +726,6 @@ def get_default_mev_params(mev_type):
         mev_builder_extra_args = ["--mev-builder-config=" + "/config/config.toml"]
         mev_boost_image = constants.DEFAULT_MEV_RS_IMAGE
 
-
     return {
         "mev_relay_image": mev_relay_image,
         "mev_builder_image": mev_builder_image,
@@ -845,7 +852,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     )
     if mev_type == "flashbots":
         mev_participant = default_participant()
-        mev_participant["el_type"] = mev_participant["el_type"] + "-builder"
+        mev_participant["el_type"] = "geth-builder"
         mev_participant.update(
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
@@ -889,10 +896,10 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         )
 
         parsed_arguments_dict["participants"].append(mev_participant)
-
+        return parsed_arguments_dict
     if mev_type == "mev-rs":
         mev_participant = default_participant()
-        mev_participant["el_type"] = mev_participant[constants.EL_TYPE.rethbuilder]
+        mev_participant["el_type"] = "reth-builder"
         mev_participant.update(
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
@@ -903,14 +910,15 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "12000",
                     "--disable-peer-scoring",
                 ],
-                "el_extra_params": parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
+                "el_extra_params": parsed_arguments_dict["mev_params"][
+                    "mev_builder_extra_args"
+                ],
                 "validator_count": 0,
             }
         )
+        parsed_arguments_dict["participants"].append(mev_participant)
+        return parsed_arguments_dict
 
-    parsed_arguments_dict["participants"].append(mev_participant)
-
-    return parsed_arguments_dict
 
 def deep_copy_participant(participant):
     part = {}

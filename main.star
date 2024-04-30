@@ -34,7 +34,7 @@ grafana = import_module("./src/grafana/grafana_launcher.star")
 mev_rs_mev_boost = import_module("./src/mev/mev-rs/mev_boost/mev_boost_launcher.star")
 mev_rs_mev_relay = import_module("./src/mev/mev-rs/mev_relay/mev_relay_launcher.star")
 mev_rs_mev_builder = import_module(
-    "./src/el/reth/reth_launcher.star"
+    "./src/mev/mev-rs/mev_builder/mev_builder_launcher.star"
 )
 flashbots_mev_boost = import_module(
     "./src/mev/flashbots/mev_boost/mev_boost_launcher.star"
@@ -203,9 +203,8 @@ def run(plan, args={}):
             global_node_selectors,
         )
         mev_endpoints.append(endpoint)
-    elif (
-        args_with_right_defaults.mev_type
-        and args_with_right_defaults.mev_type == "flashbots"
+    elif args_with_right_defaults.mev_type and (
+        args_with_right_defaults.mev_type == "flashbots"
         or args_with_right_defaults.mev_type == "mev-rs"
     ):
         builder_uri = "http://{0}:{1}".format(
@@ -284,8 +283,7 @@ def run(plan, args={}):
         #     contract_owner.private_key,
         #     normal_user.private_key,
         # )
-    mev_endpoints.append(endpoint)
-    plan.print("MEV endpoints: {0}".format(mev_endpoints))
+        mev_endpoints.append(endpoint)
 
     # spin up the mev boost contexts if some endpoints for relays have been passed
     all_mevboost_contexts = []

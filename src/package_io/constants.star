@@ -1,11 +1,11 @@
 EL_TYPE = struct(
-    gethbuilder="geth-builder",
+    geth_builder="geth-builder",
     geth="geth",
     erigon="erigon",
     nethermind="nethermind",
     besu="besu",
     reth="reth",
-    rethbuilder="reth-builder",
+    reth_builder="reth-builder",
     ethereumjs="ethereumjs",
     nimbus="nimbus",
 )

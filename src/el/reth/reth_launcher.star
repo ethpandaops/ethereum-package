@@ -1,10 +1,10 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../../package_io/input_parser.star")
-el_context = import_module("../../el/el_context.star")
-el_admin_node_info = import_module("../../el/el_admin_node_info.star")
+el_context = import_module("..//el_context.star")
+el_admin_node_info = import_module("../el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
-mev_rs_builder = import_module("../../mev/mev-rs/mev_builder/mev_builder.star")
+mev_rs_builder = import_module("../../mev/mev-rs/mev_builder/mev_builder_launcher.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -259,7 +259,9 @@ def get_config(
         )
 
     if builder:
-        files[mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE]= mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
+        files[
+            mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
+        ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
 
     return ServiceConfig(
         image=image,

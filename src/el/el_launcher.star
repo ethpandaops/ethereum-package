@@ -36,7 +36,7 @@ def launch(
             ),
             "launch_method": geth.launch,
         },
-        constants.EL_TYPE.gethbuilder: {
+        constants.EL_TYPE.geth_builder: {
             "launcher": geth.new_geth_launcher(
                 el_cl_data,
                 jwt_file,
@@ -81,7 +81,7 @@ def launch(
             ),
             "launch_method": reth.launch,
         },
-        constants.EL_TYPE.rethbuilder: {
+        constants.EL_TYPE.reth_builder: {
             "launcher": reth.new_reth_launcher(
                 el_cl_data,
                 jwt_file,
@@ -123,7 +123,7 @@ def launch(
         if el_type not in el_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    el_type, ",".join([el.name for el in el_launchers.keys()])
+                    el_type, ",".join(el_launchers.keys())
                 )
             )
 
