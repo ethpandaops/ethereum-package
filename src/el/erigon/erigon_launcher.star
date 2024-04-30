@@ -77,6 +77,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -128,6 +129,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
+        nat_exit_ip,
     )
 
     service = plan.add_service(service_name, config)
@@ -177,6 +179,7 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -198,7 +201,7 @@ def get_config(
         "--http.vhosts=*",
         "--ws",
         "--allow-insecure-unlock",
-        "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + nat_exit_ip,
         "--http",
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",

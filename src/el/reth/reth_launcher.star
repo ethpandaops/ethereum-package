@@ -79,6 +79,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -128,6 +129,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
+        nat_exit_ip,
     )
 
     service = plan.add_service(service_name, config)
@@ -173,6 +175,7 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     init_datadir_cmd_str = "reth init --datadir={0} --chain={1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -201,7 +204,7 @@ def get_config(
         "--ws.port={0}".format(WS_PORT_NUM),
         "--ws.api=net,eth",
         "--ws.origins=*",
-        "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + nat_exit_ip,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",
@@ -258,7 +261,7 @@ def get_config(
         cmd=[command_str],
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,

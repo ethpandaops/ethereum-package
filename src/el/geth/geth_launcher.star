@@ -92,6 +92,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -144,6 +145,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
+        nat_exit_ip,
     )
 
     service = plan.add_service(service_name, config)
@@ -194,6 +196,7 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     if "--gcmode=archive" in extra_params or "--gcmode archive" in extra_params:
         gcmode_archive = True
@@ -269,7 +272,7 @@ def get_config(
         "--ws.api=admin,engine,net,eth,web3,debug",
         "--ws.origins=*",
         "--allow-insecure-unlock",
-        "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + nat_exit_ip,
         "--verbosity=" + verbosity_level,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",

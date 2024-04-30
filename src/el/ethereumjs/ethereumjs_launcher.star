@@ -80,6 +80,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -129,6 +130,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
+        nat_exit_ip,
     )
 
     service = plan.add_service(service_name, config)
@@ -173,6 +175,7 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     cmd = [
         "--dataDir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -190,7 +193,7 @@ def get_config(
         "--wsEnginePort={0}".format(WS_PORT_ENGINE_NUM),
         "--wsEngineAddr=0.0.0.0",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--extIP={0}".format(constants.PRIVATE_IP_ADDRESS_PLACEHOLDER),
+        "--extIP={0}".format(nat_exit_ip),
         "--sync=full",
         "--isSingleNode=true",
         "--logLevel={0}".format(verbosity_level),

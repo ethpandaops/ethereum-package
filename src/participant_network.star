@@ -146,6 +146,7 @@ def launch_participant_network(
         persistent,
         network_id,
         num_participants,
+        nat_exit_ip,
     )
 
     # Launch all consensus layer clients

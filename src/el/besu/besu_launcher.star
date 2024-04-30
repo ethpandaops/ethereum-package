@@ -79,6 +79,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -128,6 +129,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
+        nat_exit_ip,
     )
 
     service = plan.add_service(service_name, config)
@@ -189,7 +191,7 @@ def get_config(
         "--rpc-ws-port={0}".format(WS_PORT_NUM),
         "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--p2p-enabled=true",
-        "--p2p-host=" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--p2p-host=" + nat_exit_ip,
         "--p2p-port={0}".format(DISCOVERY_PORT_NUM),
         "--engine-rpc-enabled=true",
         "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,

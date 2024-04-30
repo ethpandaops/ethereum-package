@@ -76,6 +76,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -171,6 +172,7 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     cmd = [
         "--log=" + log_level,
@@ -183,7 +185,7 @@ def get_config(
         "--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
         "--JsonRpc.EngineHost=0.0.0.0",
         "--JsonRpc.EnginePort={0}".format(ENGINE_RPC_PORT_NUM),
-        "--Network.ExternalIp={0}".format(constants.PRIVATE_IP_ADDRESS_PLACEHOLDER),
+        "--Network.ExternalIp={0}".format(nat_exit_ip),
         "--Network.DiscoveryPort={0}".format(DISCOVERY_PORT_NUM),
         "--Network.P2PPort={0}".format(DISCOVERY_PORT_NUM),
         "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
