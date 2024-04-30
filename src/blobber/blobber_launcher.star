@@ -1,5 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 input_parser = import_module("../package_io/input_parser.star")
+constants = import_module("../package_io/constants.star")
 cl_context = import_module("../cl/cl_context.star")
 
 blobber_context = import_module("../blobber/blobber_context.star")

@@ -175,6 +175,7 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     cmd = [
         "besu",

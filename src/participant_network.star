@@ -182,6 +182,7 @@ def launch_participant_network(
         validator_data,
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
+        nat_exit_ip,
     )
 
     ethereum_metrics_exporter_context = None

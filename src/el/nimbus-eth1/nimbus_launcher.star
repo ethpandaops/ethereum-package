@@ -130,6 +130,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
+        nat_exit_ip,
     )
 
     service = plan.add_service(service_name, config)
@@ -246,7 +247,7 @@ def get_config(
         ports=USED_PORTS,
         cmd=cmd,
         files=files,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,

@@ -90,7 +90,7 @@ def launch(
     node_selectors,
     use_separate_vc=True,
     keymanager_enabled=False,
-    nat_exit_ip,
+    nat_exit_ip=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
 ):
     beacon_service_name = "{0}".format(service_name)
 
