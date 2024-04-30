@@ -29,8 +29,6 @@ BEACON_MIN_MEMORY = 1024
 
 BEACON_METRICS_PATH = "/metrics"
 
-VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
-
 MIN_PEERS = 1
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
@@ -239,11 +237,11 @@ def get_beacon_config(
     validator_secrets_dirpath = ""
     if node_keystore_files:
         validator_keys_dirpath = shared_utils.path_join(
-            VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
             node_keystore_files.teku_keys_relative_dirpath,
         )
         validator_secrets_dirpath = shared_utils.path_join(
-            VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
             node_keystore_files.teku_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
@@ -380,7 +378,7 @@ def get_beacon_config(
     if node_keystore_files != None and not use_separate_vc:
         cmd.extend(validator_default_cmd)
         files[
-            VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
 
         if keymanager_enabled:

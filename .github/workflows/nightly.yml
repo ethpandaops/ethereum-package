@@ -49,4 +49,17 @@ jobs:
         with:
           args: "The nightly test for ${{matrix.file_name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-
+  assertoor-mix-assert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+      - name: Kurtosis Assertoor GitHub Action
+        uses: ethpandaops/kurtosis-assertoor-github-action@v1
+        with:
+          ethereum_package_branch: ${{ steps.extract_branch.outputs.branch }}
+          ethereum_package_args: .github/tests/mix-assert.yaml

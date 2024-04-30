@@ -1,7 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-VALIDATOR_CLIENT_KEYS_MOUNTPOINT = "/keystores"
 
 VALIDATOR_HTTP_PORT_NUM = 5056
 VALIDATOR_HTTP_PORT_ID = "vc-http"

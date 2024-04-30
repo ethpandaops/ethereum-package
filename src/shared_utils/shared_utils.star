@@ -82,7 +82,7 @@ def get_devnet_enodes(plan, filename):
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         run="""
-with open("/network-configs/network-configs/bootnode.txt") as bootnode_file:
+with open("/network-configs/bootnode.txt") as bootnode_file:
     bootnodes = []
     for line in bootnode_file:
         line = line.strip()
@@ -99,7 +99,7 @@ def get_devnet_enrs_list(plan, filename):
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         run="""
-with open("/network-configs/network-configs/bootstrap_nodes.txt") as bootnode_file:
+with open("/network-configs/bootstrap_nodes.txt") as bootnode_file:
     bootnodes = []
     for line in bootnode_file:
         line = line.strip()
@@ -118,7 +118,7 @@ def read_genesis_timestamp_from_config(plan, filename):
         packages=["PyYAML"],
         run="""
 import yaml
-with open("/network-configs/network-configs/config.yaml", "r") as f:
+with open("/network-configs/config.yaml", "r") as f:
     yaml_data = yaml.safe_load(f)
 
 min_genesis_time = int(yaml_data.get("MIN_GENESIS_TIME", 0))
@@ -137,7 +137,7 @@ def read_genesis_network_id_from_config(plan, filename):
         packages=["PyYAML"],
         run="""
 import yaml
-with open("/network-configs/network-configs/config.yaml", "r") as f:
+with open("/network-configs/config.yaml", "r") as f:
     yaml_data = yaml.safe_load(f)
 network_id = int(yaml_data.get("DEPOSIT_NETWORK_ID", 0))
 print(network_id, end="")

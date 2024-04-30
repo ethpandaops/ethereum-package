@@ -6,7 +6,7 @@ logging:
 chain:
   name: {{ .Network }}
 {{ if not .PublicNetwork }}
-  configPath: "/network-configs/network-configs/config.yaml"
+  configPath: "/network-configs/config.yaml"
 {{ end }}
   displayName: "{{ .Network }}"
 

@@ -2,7 +2,7 @@ shared_utils = import_module("../../shared_utils/shared_utils.star")
 keystore_files_module = import_module("./keystore_files.star")
 keystores_result = import_module("./generate_keystores_result.star")
 
-NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores"
+NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores/"
 
 # Prysm keystores are encrypted with a password
 PRYSM_PASSWORD = "password"
@@ -102,11 +102,9 @@ def generate_validator_keystores(plan, mnemonic, participants):
             start_index,
             stop_index,
         )
-        teku_permissions_cmd = (
-            "chmod 0777 -R " + output_dirpath + "/" + TEKU_KEYS_DIRNAME
-        )
+        teku_permissions_cmd = "chmod 0777 -R " + output_dirpath + TEKU_KEYS_DIRNAME
         raw_secret_permissions_cmd = (
-            "chmod 0600 -R " + output_dirpath + "/" + RAW_SECRETS_DIRNAME
+            "chmod 0600 -R " + output_dirpath + RAW_SECRETS_DIRNAME
         )
         all_sub_command_strs.append(generate_keystores_cmd)
         all_sub_command_strs.append(teku_permissions_cmd)
