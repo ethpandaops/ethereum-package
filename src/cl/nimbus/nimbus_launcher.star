@@ -42,7 +42,6 @@ VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/nimbus/validator-keys"
 
 
 # ---------------------------------- Used Ports ----------------------------------
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 BEACON_USED_PORTS = {
     BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
         BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
@@ -103,6 +102,7 @@ def launch(
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
+    nat_exit_ip,
 ):
     beacon_service_name = "{0}".format(service_name)
 
@@ -163,6 +163,7 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
+        nat_exit_ip,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -242,6 +243,7 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -278,7 +280,7 @@ def get_beacon_config(
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
-        "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + nat_exit_ip,
         "--enr-auto-update=false",
         "--history={0}".format("archive" if constants.ARCHIVE_MODE else "prune"),
         "--rest",
@@ -364,7 +366,7 @@ def get_beacon_config(
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
         ),

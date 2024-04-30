@@ -10,8 +10,6 @@ BLOBBER_BEACON_PORT_UDP_ID = "discovery-udp"
 BLOBBER_VALIDATOR_PROXY_PORT_NUM = 5000
 BLOBBER_VALIDATOR_PROXY_PORT_ID = "http"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
 DEFAULT_BLOBBER_IMAGE = "ethpandaops/blobber:1.1.0"
 
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
@@ -76,7 +74,8 @@ def get_config(
         "--cl={0}".format(beacon_http_url),
         "--validator-key-folder={0}".format(validator_root_dirpath),
         "--enable-unsafe-mode",
-        "--external-ip={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
+        # Does this get affected by public ip address changes?
+        "--external-ip={0}".format(constants.PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--validator-proxy-port-start={0}".format(BLOBBER_VALIDATOR_PROXY_PORT_NUM),
     ]
 
@@ -90,7 +89,7 @@ def get_config(
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid
         },
         cmd=cmd,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,

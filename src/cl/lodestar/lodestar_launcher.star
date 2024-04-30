@@ -25,8 +25,6 @@ BEACON_MIN_MEMORY = 256
 
 METRICS_PATH = "/metrics"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
 BEACON_USED_PORTS = {
     TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
         DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
@@ -81,6 +79,7 @@ def launch(
     node_selectors,
     use_separate_vc=True,
     keymanager_enabled=False,
+    nat_exit_ip=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -136,6 +135,7 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
+        nat_exit_ip,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -234,6 +234,7 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
+    nat_exit_ip,
 ):
     el_client_rpc_url_str = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -269,7 +270,7 @@ def get_beacon_config(
         "--rest.namespace=*",
         "--rest.port={0}".format(HTTP_PORT_NUM),
         "--nat=true",
-        "--enr.ip=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--enr.ip=" + nat_exit_ip,
         "--enr.tcp={0}".format(DISCOVERY_PORT_NUM),
         "--enr.udp={0}".format(DISCOVERY_PORT_NUM),
         # Set per Pari's recommendation to reduce noise in the logs
@@ -352,7 +353,7 @@ def get_beacon_config(
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
         ),

@@ -8,9 +8,6 @@ SNOOPER_BEACON_RPC_PORT_NUM = 8562
 SNOOPER_BEACON_RPC_PORT_ID = "http"
 SNOOPER_BINARY_COMMAND = "./json_rpc_snoop"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
-
 SNOOPER_USED_PORTS = {
     SNOOPER_BEACON_RPC_PORT_ID: shared_utils.new_port_spec(
         SNOOPER_BEACON_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, wait="5s"
@@ -51,7 +48,6 @@ def get_config(service_name, cl_context, node_selectors):
         image=constants.DEFAULT_SNOOPER_IMAGE,
         ports=SNOOPER_USED_PORTS,
         cmd=cmd,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,

@@ -31,6 +31,7 @@ def launch(
     validator_data,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
+    nat_exit_ip,
 ):
     plan.print("Launching CL network")
 
@@ -175,6 +176,7 @@ def launch(
                 node_selectors,
                 participant.use_separate_vc,
                 participant.keymanager_enabled,
+                nat_exit_ip,
             )
         else:
             boot_cl_client_ctx = all_cl_contexts
@@ -208,6 +210,7 @@ def launch(
                 node_selectors,
                 participant.use_separate_vc,
                 participant.keymanager_enabled,
+                nat_exit_ip,
             )
 
         # Add participant cl additional prometheus labels
