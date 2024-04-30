@@ -147,6 +147,9 @@ def input_parser(plan, input_args):
             result.get("mev_type"),
         )
 
+    if result["nat_exit_ip"] == "auto":
+        result["nat_exit_ip"] = get_public_ip(plan)
+
     return struct(
         participants=[
             struct(
@@ -880,3 +883,10 @@ def deep_copy_participant(participant):
         else:
             part[k] = v
     return part
+
+
+def get_public_ip(plan):
+    response = plan.run_sh(
+        run = "curl https://ident.me",   
+    )
+    return response.output
