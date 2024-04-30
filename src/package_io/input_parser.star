@@ -887,6 +887,6 @@ def deep_copy_participant(participant):
 
 def get_public_ip(plan):
     response = plan.run_sh(
-        run = "curl https://ident.me",   
+        run="curl -s https://ident.me",
     )
     return response.output
