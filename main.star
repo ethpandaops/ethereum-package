@@ -271,6 +271,7 @@ def run(plan, args={}):
                 "mev-rs",
                 network_params.network,
                 beacon_uri,
+                el_cl_data_files_artifact_uuid,
                 global_node_selectors,
             )
         else:
@@ -299,12 +300,10 @@ def run(plan, args={}):
                 )
             )
             if args_with_right_defaults.participants[index].validator_count != 0:
-                plan.print("made it outside")
                 if (
                     args_with_right_defaults.mev_type == "flashbots"
                     or args_with_right_defaults.mev_type == "mock"
                 ):
-                    plan.print("made it inside")
                     mev_boost_launcher = flashbots_mev_boost.new_mev_boost_launcher(
                         MEV_BOOST_SHOULD_CHECK_RELAY,
                         mev_endpoints,
@@ -342,8 +341,7 @@ def run(plan, args={}):
                         mev_boost_service_name,
                         network_params.network,
                         mev_endpoints,
-                        mev_params.mev_boost_image,
-                        mev_params.mev_boost_args,
+                        el_cl_data_files_artifact_uuid,
                         global_node_selectors,
                     )
                 else:

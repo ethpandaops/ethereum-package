@@ -27,10 +27,15 @@ def launch(
     service_name,
     network,
     relays,
-    mev_boost_image,
-    mev_boost_args,
+    el_cl_genesis_data,
     global_node_selectors,
 ):
+    network = (
+        network
+        if network in constants.PUBLIC_NETWORKS
+        else constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+    )
+
     template_data = new_config_template_data(
         network,
         input_parser.MEV_BOOST_PORT,
@@ -63,6 +68,7 @@ def launch(
         mev_boost_launcher,
         config_file_path,
         config_files_artifact_name,
+        el_cl_genesis_data,
         global_node_selectors,
     )
 
@@ -77,6 +83,7 @@ def get_config(
     mev_boost_launcher,
     config_file_path,
     config_file,
+    el_cl_genesis_data,
     node_selectors,
 ):
     return ServiceConfig(
@@ -88,6 +95,7 @@ def get_config(
         ],
         files={
             MEV_BOOST_MOUNT_DIRPATH_ON_SERVICE: config_file,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
         },
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,

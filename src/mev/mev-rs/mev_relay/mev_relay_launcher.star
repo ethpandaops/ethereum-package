@@ -28,9 +28,16 @@ def launch_mev_relay(
     service_name,
     network,
     beacon_uri,
+    el_cl_genesis_data,
     global_node_selectors,
 ):
     node_selectors = global_node_selectors
+
+    network = (
+        network
+        if network in constants.PUBLIC_NETWORKS
+        else constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+    )
 
     relay_template_data = new_relay_config_template_data(
         network,
@@ -71,6 +78,8 @@ def launch_mev_relay(
             ],
             files={
                 MEV_RELAY_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+                constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+
             },
             ports=USED_PORTS,
             min_cpu=MIN_CPU,
@@ -78,6 +87,9 @@ def launch_mev_relay(
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=node_selectors,
+            env_vars={
+                "RUST_BACKTRACE":"1"
+            }
         ),
     )
 
