@@ -919,6 +919,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         parsed_arguments_dict["participants"].append(mev_participant)
     return parsed_arguments_dict
 
+
 def deep_copy_participant(participant):
     part = {}
     for k, v in participant.items():
