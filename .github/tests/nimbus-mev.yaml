@@ -1,4 +1,4 @@
 participants:
   - el_type: geth
     cl_type: nimbus
-mev_type: full
+mev_type: flashbots

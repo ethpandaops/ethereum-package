@@ -665,7 +665,8 @@ persistent: false
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
-# "full" - mev-boost, relays, flooder and builder are all spun up
+# "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
+# "mev-rs" - mev-boost, relays and builder are all spun up, powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -830,7 +831,7 @@ participants:
   - el_type: besu
     cl_type: prysm
     count: 2
-mev_type: full
+mev_type: flashbots
 network_params:
   deneb_fork_epoch: 1
 additional_services: []

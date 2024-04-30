@@ -81,6 +81,15 @@ def launch(
             ),
             "launch_method": reth.launch,
         },
+        constants.EL_TYPE.rethbuilder: {
+            "launcher": reth.new_reth_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+                builder=True,
+            ),
+            "launch_method": reth.launch,
+        },
         constants.EL_TYPE.ethereumjs: {
             "launcher": ethereumjs.new_ethereumjs_launcher(
                 el_cl_data,

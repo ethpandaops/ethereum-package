@@ -1,0 +1,25 @@
+network ="{{ .Network }}"
+
+[builder]
+# number of milliseconds to submit bids ahead of the target slot
+bidding_deadline_ms = 1000
+# amount of value to bid as a fraction of the payload's revenue
+bid_percent = 0.9
+# amount to add to the bid on top of the payload's revenue,
+# currently sourced from the builder's wallet authoring the payment transaction
+subsidy_gwei = 100000000 # 0.1 eth
+
+[builder.auctioneer]
+# builder BLS secret key
+secret_key = "{{ .SecretKey }}"
+# list of relays to connect to
+relays = [
+    "https://{{ .PublicKey }}@{{ .RelayIP }}:{{ .RelayPort }}",
+]
+[builder.builder]
+# address to collect transaction fees
+fee_recipient = "{{ .FeeRecipient }}"
+# [optional] extra data to write into built execution payload
+extra_data = "{{ .ExtraData }}"
+# wallet seed for builder to author payment transactions
+execution_mnemonic = "{{ .Mnemonic }}"

@@ -32,16 +32,12 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:latest",
 }
 
-MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.27"
-
-MEV_BOOST_RELAY_IMAGE_NON_ZERO_CAPELLA = "flashbots/mev-boost-relay:0.26"
-
 # Placeholder value for the deneb fork epoch if electra is being run
 # TODO: This is a hack, and should be removed once we electra is rebased on deneb
 HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
 
 # MEV Params
-FLASHBOTS_MEV_BOOST_PORT = 18550
+MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
 
 # Minimum number of validators required for a network to be valid is 64
@@ -72,8 +68,7 @@ def input_parser(plan, input_args):
     result = parse_network_params(input_args)
 
     # add default eth2 input params
-    result["mev_type"] = None
-    result["mev_params"] = get_default_mev_params()
+    result["mev_params"] = get_default_mev_params(result.get("mev_type"))
     if (
         result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
@@ -139,11 +134,11 @@ def input_parser(plan, input_args):
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
 
-    if result.get("mev_type") in ("mock", "full"):
+    if result.get("mev_type") in ("mock", "flashbots", "mev-rs"):
         result = enrich_mev_extra_params(
             result,
             MEV_BOOST_SERVICE_NAME_PREFIX,
-            FLASHBOTS_MEV_BOOST_PORT,
+            MEV_BOOST_PORT,
             result.get("mev_type"),
         )
 
@@ -239,6 +234,7 @@ def input_parser(plan, input_args):
             mev_relay_image=result["mev_params"]["mev_relay_image"],
             mev_builder_image=result["mev_params"]["mev_builder_image"],
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
+            mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
@@ -254,7 +250,9 @@ def input_parser(plan, input_args):
             mev_flood_seconds_per_bundle=result["mev_params"][
                 "mev_flood_seconds_per_bundle"
             ],
-        ),
+        )
+        if result["mev_params"]
+        else None,
         tx_spammer_params=struct(
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
@@ -693,24 +691,49 @@ def default_participant():
     }
 
 
-def get_default_mev_params():
+def get_default_mev_params(mev_type):
+    mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
+    mev_builder_image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+    mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+    mev_builder_extra_data = None
+    mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
+    mev_boost_args = ["mev-boost", "--relay-check"]
+    mev_relay_api_extra_args = []
+    mev_relay_housekeeper_extra_args = []
+    mev_relay_website_extra_args = []
+    mev_builder_extra_args = []
+    mev_flood_image = "flashbots/mev-flood"
+    mev_flood_extra_args = []
+    mev_flood_seconds_per_bundle = 15
+    mev_builder_prometheus_config = {
+        "scrape_interval": "15s",
+        "labels": None,
+    }
+
+    if mev_type == "mev-rs":
+        mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE
+        mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE
+        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+        mev_builder_extra_data = "0x68656C6C6F20776F726C640A"  # "hello world\n"
+        mev_builder_extra_args = ["--mev-builder-config=" + "/config/config.toml"]
+        mev_boost_image = constants.DEFAULT_MEV_RS_IMAGE
+
+
     return {
-        "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
-        "mev_builder_image": "flashbots/builder:latest",
-        "mev_builder_cl_image": "sigp/lighthouse:latest",
-        "mev_boost_image": "flashbots/mev-boost",
-        "mev_boost_args": ["mev-boost", "--relay-check"],
-        "mev_relay_api_extra_args": [],
-        "mev_relay_housekeeper_extra_args": [],
-        "mev_relay_website_extra_args": [],
-        "mev_builder_extra_args": [],
-        "mev_flood_image": "flashbots/mev-flood",
-        "mev_flood_extra_args": [],
-        "mev_flood_seconds_per_bundle": 15,
-        "mev_builder_prometheus_config": {
-            "scrape_interval": "15s",
-            "labels": None,
-        },
+        "mev_relay_image": mev_relay_image,
+        "mev_builder_image": mev_builder_image,
+        "mev_builder_cl_image": mev_builder_cl_image,
+        "mev_builder_extra_data": mev_builder_extra_data,
+        "mev_builder_extra_args": mev_builder_extra_args,
+        "mev_boost_image": mev_boost_image,
+        "mev_boost_args": mev_boost_args,
+        "mev_relay_api_extra_args": mev_relay_api_extra_args,
+        "mev_relay_housekeeper_extra_args": mev_relay_housekeeper_extra_args,
+        "mev_relay_website_extra_args": mev_relay_website_extra_args,
+        "mev_flood_image": mev_flood_image,
+        "mev_flood_extra_args": mev_flood_extra_args,
+        "mev_flood_seconds_per_bundle": mev_flood_seconds_per_bundle,
+        "mev_builder_prometheus_config": mev_builder_prometheus_config,
     }
 
 
@@ -820,7 +843,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     index_str = shared_utils.zfill_custom(
         num_participants + 1, len(str(num_participants + 1))
     )
-    if mev_type == "full":
+    if mev_type == "flashbots":
         mev_participant = default_participant()
         mev_participant["el_type"] = mev_participant["el_type"] + "-builder"
         mev_participant.update(
@@ -867,8 +890,27 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 
         parsed_arguments_dict["participants"].append(mev_participant)
 
-    return parsed_arguments_dict
+    if mev_type == "mev-rs":
+        mev_participant = default_participant()
+        mev_participant["el_type"] = mev_participant[constants.EL_TYPE.rethbuilder]
+        mev_participant.update(
+            {
+                "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
+                "cl_image": parsed_arguments_dict["mev_params"]["mev_builder_cl_image"],
+                "cl_extra_params": [
+                    "--always-prepare-payload",
+                    "--prepare-payload-lookahead",
+                    "12000",
+                    "--disable-peer-scoring",
+                ],
+                "el_extra_params": parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
+                "validator_count": 0,
+            }
+        )
 
+    parsed_arguments_dict["participants"].append(mev_participant)
+
+    return parsed_arguments_dict
 
 def deep_copy_participant(participant):
     part = {}

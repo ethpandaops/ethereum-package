@@ -1,7 +1,8 @@
+constants = import_module("../../../package_io/constants.star")
+
 MOCK_MEV_IMAGE = "ethpandaops/mock-builder:latest"
 MOCK_MEV_SERVICE_NAME = "mock-mev"
 MOCK_MEV_BUILDER_PORT = 18550
-DEFAULT_MOCK_MEV_PUB_KEY = "0x95fde78acd5f6886ddaf5d0056610167c513d09c1c0efabbc7cdcc69beea113779c4a81e2d24daafc5387dbf6ac5fe48"
 
 # The min/max CPU/memory that mev-mock-builder can use
 MIN_CPU = 100
@@ -42,5 +43,5 @@ def launch_mock_mev(
         ),
     )
     return "http://{0}@{1}:{2}".format(
-        DEFAULT_MOCK_MEV_PUB_KEY, mock_builder.ip_address, MOCK_MEV_BUILDER_PORT
+        constants.DEFAULT_MEV_PUBKEY, mock_builder.ip_address, MOCK_MEV_BUILDER_PORT
     )

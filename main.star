@@ -31,12 +31,21 @@ full_beaconchain_explorer = import_module(
 blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
-mev_boost = import_module("./src/mev/mev_boost/mev_boost_launcher.star")
-mock_mev = import_module("./src/mev/mock_mev/mock_mev_launcher.star")
-mev_relay = import_module("./src/mev/mev_relay/mev_relay_launcher.star")
-mev_flood = import_module("./src/mev/mev_flood/mev_flood_launcher.star")
+mev_rs_mev_boost = import_module("./src/mev/mev-rs/mev_boost/mev_boost_launcher.star")
+mev_rs_mev_relay = import_module("./src/mev/mev-rs/mev_relay/mev_relay_launcher.star")
+mev_rs_mev_builder = import_module(
+    "./src/el/reth/reth_launcher.star"
+)
+flashbots_mev_boost = import_module(
+    "./src/mev/flashbots/mev_boost/mev_boost_launcher.star"
+)
+flashbots_mev_relay = import_module(
+    "./src/mev/flashbots/mev_relay/mev_relay_launcher.star"
+)
+mock_mev = import_module("./src/mev/flashbots/mock_mev/mock_mev_launcher.star")
+mev_flood = import_module("./src/mev/flashbots/mev_flood/mev_flood_launcher.star")
 mev_custom_flood = import_module(
-    "./src/mev/mev_custom_flood/mev_custom_flood_launcher.star"
+    "./src/mev/flashbots/mev_custom_flood/mev_custom_flood_launcher.star"
 )
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
 assertoor = import_module("./src/assertoor/assertoor_launcher.star")
@@ -49,8 +58,6 @@ FIRST_NODE_FINALIZATION_FACT = "cl-boot-finalization-fact"
 HTTP_PORT_ID_FOR_FACT = "http"
 
 MEV_BOOST_SHOULD_CHECK_RELAY = True
-MOCK_MEV_TYPE = "mock"
-FULL_MEV_TYPE = "full"
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
 
@@ -178,7 +185,7 @@ def run(plan, args={}):
     # otherwise dummy relays spinup if chosen
     elif (
         args_with_right_defaults.mev_type
-        and args_with_right_defaults.mev_type == MOCK_MEV_TYPE
+        and args_with_right_defaults.mev_type == "mock"
     ):
         el_uri = "{0}:{1}".format(
             all_el_contexts[0].ip_addr,
@@ -198,59 +205,87 @@ def run(plan, args={}):
         mev_endpoints.append(endpoint)
     elif (
         args_with_right_defaults.mev_type
-        and args_with_right_defaults.mev_type == FULL_MEV_TYPE
+        and args_with_right_defaults.mev_type == "flashbots"
+        or args_with_right_defaults.mev_type == "mev-rs"
     ):
         builder_uri = "http://{0}:{1}".format(
             all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
         )
+        beacon_uri = all_cl_contexts[-1].beacon_http_url
         beacon_uris = ",".join(
             ["{0}".format(context.beacon_http_url) for context in all_cl_contexts]
         )
 
-        first_cl_client = all_cl_contexts[0]
-        first_client_beacon_name = first_cl_client.beacon_service_name
-        contract_owner, normal_user = genesis_constants.PRE_FUNDED_ACCOUNTS[6:8]
-        mev_flood.launch_mev_flood(
-            plan,
-            mev_params.mev_flood_image,
-            fuzz_target,
-            contract_owner.private_key,
-            normal_user.private_key,
-            global_node_selectors,
-        )
-        epoch_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v2/beacon/blocks/head",
-            port_id=HTTP_PORT_ID_FOR_FACT,
-            extract={"epoch": ".data.message.body.attestations[0].data.target.epoch"},
-        )
-        plan.wait(
-            recipe=epoch_recipe,
-            field="extract.epoch",
-            assertion=">=",
-            target_value=str(network_params.deneb_fork_epoch),
-            timeout="20m",
-            service_name=first_client_beacon_name,
-        )
-        endpoint = mev_relay.launch_mev_relay(
-            plan,
-            mev_params,
-            network_params.network_id,
-            beacon_uris,
-            genesis_validators_root,
-            builder_uri,
-            network_params.seconds_per_slot,
-            persistent,
-            global_node_selectors,
-        )
-        mev_flood.spam_in_background(
-            plan,
-            fuzz_target,
-            mev_params.mev_flood_extra_args,
-            mev_params.mev_flood_seconds_per_bundle,
-            contract_owner.private_key,
-            normal_user.private_key,
-        )
-        mev_endpoints.append(endpoint)
+        # first_cl_client = all_cl_contexts[0]
+        # first_client_beacon_name = first_cl_client.beacon_service_name
+        # contract_owner, normal_user = genesis_constants.PRE_FUNDED_ACCOUNTS[6:8]
+        # mev_flood.launch_mev_flood(
+        #     plan,
+        #     mev_params.mev_flood_image,
+        #     fuzz_target,
+        #     contract_owner.private_key,
+        #     normal_user.private_key,
+        #     global_node_selectors,
+        # )
+        # epoch_recipe = GetHttpRequestRecipe(
+        #     endpoint="/eth/v2/beacon/blocks/head",
+        #     port_id=HTTP_PORT_ID_FOR_FACT,
+        #     extract={"epoch": ".data.message.body.attestations[0].data.target.epoch"},
+        # )
+        # plan.wait(
+        #     recipe=epoch_recipe,
+        #     field="extract.epoch",
+        #     assertion=">=",
+        #     target_value=str(network_params.deneb_fork_epoch),
+        #     timeout="20m",
+        #     service_name=first_client_beacon_name,
+        # )
+        if args_with_right_defaults.mev_type == "flashbots":
+            endpoint = flashbots_mev_relay.launch_mev_relay(
+                plan,
+                mev_params,
+                network_params.network_id,
+                beacon_uris,
+                genesis_validators_root,
+                builder_uri,
+                network_params.seconds_per_slot,
+                persistent,
+                global_node_selectors,
+            )
+        elif args_with_right_defaults.mev_type == "mev-rs":
+            endpoint, relay_ip_address, relay_port = mev_rs_mev_relay.launch_mev_relay(
+                plan,
+                "mev-rs",
+                network_params.network,
+                beacon_uri,
+                global_node_selectors,
+            )
+            mev_rs__builder_config_file = mev_rs_mev_builder.new_builder_config(
+                plan,
+                "mev-rs",
+                network_params.network,
+                relay_ip_address,
+                relay_port,
+                el_cl_data_files_artifact_uuid,
+                jwt_file,
+                constants.VALIDATING_REWARDS_ACCOUNT,
+                network_params.preregistered_validator_keys_mnemonic,
+                args_with_right_defaults.mev_params.mev_builder_extra_data,
+                global_node_selectors,
+            )
+        else:
+            fail("Invalid MEV type")
+
+        # mev_flood.spam_in_background(
+        #     plan,
+        #     fuzz_target,
+        #     mev_params.mev_flood_extra_args,
+        #     mev_params.mev_flood_seconds_per_bundle,
+        #     contract_owner.private_key,
+        #     normal_user.private_key,
+        # )
+    mev_endpoints.append(endpoint)
+    plan.print("MEV endpoints: {0}".format(mev_endpoints))
 
     # spin up the mev boost contexts if some endpoints for relays have been passed
     all_mevboost_contexts = []
@@ -259,26 +294,60 @@ def run(plan, args={}):
             index_str = shared_utils.zfill_custom(
                 index + 1, len(str(len(all_participants)))
             )
+            plan.print(
+                "args_with_right_defaults.mev_type {0}".format(
+                    args_with_right_defaults.mev_type
+                )
+            )
             if args_with_right_defaults.participants[index].validator_count != 0:
-                mev_boost_launcher = mev_boost.new_mev_boost_launcher(
-                    MEV_BOOST_SHOULD_CHECK_RELAY,
-                    mev_endpoints,
-                )
-                mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                    input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
-                    index_str,
-                    participant.cl_type,
-                    participant.el_type,
-                )
-                mev_boost_context = mev_boost.launch(
-                    plan,
-                    mev_boost_launcher,
-                    mev_boost_service_name,
-                    network_params.network_id,
-                    mev_params.mev_boost_image,
-                    mev_params.mev_boost_args,
-                    global_node_selectors,
-                )
+                if (
+                    args_with_right_defaults.mev_type == "flashbots"
+                    or args_with_right_defaults.mev_type == "mock"
+                ):
+                    plan.print("made it inside")
+                    mev_boost_launcher = flashbots_mev_boost.new_mev_boost_launcher(
+                        MEV_BOOST_SHOULD_CHECK_RELAY,
+                        mev_endpoints,
+                    )
+                    mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
+                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        index_str,
+                        participant.cl_type,
+                        participant.el_type,
+                    )
+                    mev_boost_context = flashbots_mev_boost.launch(
+                        plan,
+                        mev_boost_launcher,
+                        mev_boost_service_name,
+                        network_params.network_id,
+                        mev_params.mev_boost_image,
+                        mev_params.mev_boost_args,
+                        global_node_selectors,
+                    )
+                elif args_with_right_defaults.mev_type == "mev-rs":
+                    plan.print("Launching mev-rs mev boost")
+                    mev_boost_launcher = mev_rs_mev_boost.new_mev_boost_launcher(
+                        MEV_BOOST_SHOULD_CHECK_RELAY,
+                        mev_endpoints,
+                    )
+                    mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
+                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        index_str,
+                        participant.cl_type,
+                        participant.el_type,
+                    )
+                    mev_boost_context = mev_rs_mev_boost.launch(
+                        plan,
+                        mev_boost_launcher,
+                        mev_boost_service_name,
+                        network_params.network,
+                        mev_endpoints,
+                        mev_params.mev_boost_image,
+                        mev_params.mev_boost_args,
+                        global_node_selectors,
+                    )
+                else:
+                    fail("Invalid MEV type")
                 all_mevboost_contexts.append(mev_boost_context)
 
     if len(args_with_right_defaults.additional_services) == 0:

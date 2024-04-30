@@ -82,3 +82,13 @@ KEYMANAGER_P12_PATH_FILEPATH = (
 )
 
 SHADOWFORK_FILEPATH = "/network-configs/latest_block.json"
+
+MEV_RS_MEV_BOOST_CONFIG_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_boost/config.toml.tmpl"
+)
+MEV_RS_MEV_RELAY_CONFIG_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_relay/config.toml.tmpl"
+)
+MEV_RS_MEV_BUILDER_CONFIG_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_builder/config.toml.tmpl"
+)

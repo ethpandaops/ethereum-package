@@ -4,6 +4,7 @@ el_context = import_module("../../el/el_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
+mev_rs_builder = import_module("../../mev/mev-rs/mev_builder/mev_builder.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -130,6 +131,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
+        launcher.builder,
     )
 
     service = plan.add_service(service_name, config)
@@ -175,6 +177,7 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
+    builder,
 ):
     init_datadir_cmd_str = "reth init --datadir={0} --chain={1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -209,6 +212,7 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
     ]
+
     if network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
             cmd.append(
@@ -254,6 +258,9 @@ def get_config(
             size=el_volume_size,
         )
 
+    if builder:
+        files[mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE]= mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
+
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
@@ -278,9 +285,10 @@ def get_config(
     )
 
 
-def new_reth_launcher(el_cl_genesis_data, jwt_file, network):
+def new_reth_launcher(el_cl_genesis_data, jwt_file, network, builder=False):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
+        builder=builder,
     )

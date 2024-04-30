@@ -1,4 +1,4 @@
-mev_type: full
+mev_type: flashbots
 additional_services:
   - tx_spammer
   - blob_spammer

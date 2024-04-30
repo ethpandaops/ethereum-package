@@ -1,9 +1,6 @@
 redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
-constants = import_module("../../package_io/constants.star")
-
-DUMMY_SECRET_KEY = "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
-DUMMY_PUB_KEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
+constants = import_module("../../../package_io/constants.star")
 
 MEV_RELAY_WEBSITE = "mev-relay-website"
 MEV_RELAY_ENDPOINT = "mev-relay-api"
@@ -129,7 +126,7 @@ def launch_mev_relay(
                 "--db",
                 postgres_url,
                 "--secret-key",
-                DUMMY_SECRET_KEY,
+                constants.DEFAULT_MEV_SECRET_KEY,
                 "--listen-addr",
                 "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT),
                 "--redis-uri",
@@ -168,7 +165,9 @@ def launch_mev_relay(
                 "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT),
                 "--redis-uri",
                 redis_url,
-                "https://{0}@{1}".format(DUMMY_PUB_KEY, MEV_RELAY_ENDPOINT),
+                "https://{0}@{1}".format(
+                    constants.DEFAULT_MEV_PUBKEY, MEV_RELAY_ENDPOINT
+                ),
             ]
             + mev_params.mev_relay_website_extra_args,
             ports={
@@ -188,5 +187,5 @@ def launch_mev_relay(
     )
 
     return "http://{0}@{1}:{2}".format(
-        DUMMY_PUB_KEY, api.ip_address, MEV_RELAY_ENDPOINT_PORT
+        constants.DEFAULT_MEV_PUBKEY, api.ip_address, MEV_RELAY_ENDPOINT_PORT
     )
