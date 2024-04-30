@@ -27,9 +27,6 @@ UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 METRICS_PORT_ID = "metrics"
 
-
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
 USED_PORTS = {
     WS_RPC_PORT_ID: shared_utils.new_port_spec(
         WS_RPC_PORT_NUM,
@@ -201,7 +198,7 @@ def get_config(
         "--http.vhosts=*",
         "--ws",
         "--allow-insecure-unlock",
-        "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--http",
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
@@ -261,7 +258,7 @@ def get_config(
         cmd=[command_arg_str],
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,

@@ -8,6 +8,7 @@ def new_el_context(
     engine_rpc_port_num,
     service_name="",
     el_metrics_info=None,
+    nat_exit_ip=None,
 ):
     return struct(
         service_name=service_name,
@@ -19,4 +20,5 @@ def new_el_context(
         ws_port_num=ws_port_num,
         engine_rpc_port_num=engine_rpc_port_num,
         el_metrics_info=el_metrics_info,
+        nat_exit_ip=nat_exit_ip,
     )

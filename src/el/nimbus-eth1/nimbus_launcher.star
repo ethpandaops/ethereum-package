@@ -27,8 +27,6 @@ METRICS_PATH = "/metrics"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nimbus/execution-data"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
 USED_PORTS = {
     WS_RPC_PORT_ID: shared_utils.new_port_spec(
         WS_RPC_PORT_NUM,
@@ -193,7 +191,7 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
-        "--nat=extip:{0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
+        "--nat=extip:{0}".format(constants.PRIVATE_IP_ADDRESS_PLACEHOLDER),
     ]
     if (
         network not in constants.PUBLIC_NETWORKS

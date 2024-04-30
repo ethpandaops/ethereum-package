@@ -29,8 +29,6 @@ METRICS_PATH = "/metrics"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/reth/execution-data"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
 USED_PORTS = {
     RPC_PORT_ID: shared_utils.new_port_spec(
         RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL
@@ -203,7 +201,7 @@ def get_config(
         "--ws.port={0}".format(WS_PORT_NUM),
         "--ws.api=net,eth",
         "--ws.origins=*",
-        "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",

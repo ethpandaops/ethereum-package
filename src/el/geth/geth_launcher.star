@@ -36,8 +36,6 @@ METRICS_PATH = "/debug/metrics/prometheus"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
 USED_PORTS = {
     RPC_PORT_ID: shared_utils.new_port_spec(
         RPC_PORT_NUM,
@@ -271,7 +269,7 @@ def get_config(
         "--ws.api=admin,engine,net,eth,web3,debug",
         "--ws.origins=*",
         "--allow-insecure-unlock",
-        "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--verbosity=" + verbosity_level,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
@@ -356,7 +354,7 @@ def get_config(
         cmd=[command_str],
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,

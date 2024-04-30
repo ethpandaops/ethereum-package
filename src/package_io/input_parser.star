@@ -303,6 +303,7 @@ def input_parser(plan, input_args):
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
         keymanager_enabled=result["keymanager_enabled"],
+        nat_exit_ip=result["nat_exit_ip"],
     )
 
 
@@ -611,6 +612,7 @@ def default_input_args():
         "global_tolerations": [],
         "global_node_selectors": {},
         "keymanager_enabled": False,
+        "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     }
 
 

@@ -30,8 +30,6 @@ METRICS_PATH = "/metrics"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/ethereumjs/execution-data"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-
 USED_PORTS = {
     RPC_PORT_ID: shared_utils.new_port_spec(
         RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL
@@ -192,7 +190,7 @@ def get_config(
         "--wsEnginePort={0}".format(WS_PORT_ENGINE_NUM),
         "--wsEngineAddr=0.0.0.0",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--extIP={0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
+        "--extIP={0}".format(constants.PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--sync=full",
         "--isSingleNode=true",
         "--logLevel={0}".format(verbosity_level),
@@ -246,7 +244,7 @@ def get_config(
         cmd=cmd,
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,
