@@ -9,7 +9,9 @@ MEV_BOOST_MOUNT_DIRPATH_ON_SERVICE = "/config"
 MEV_BOOST_FILES_ARTIFACT_NAME = "mev-rs-mev-boost-config"
 
 USED_PORTS = {
-    "api": shared_utils.new_port_spec(input_parser.MEV_BOOST_PORT, "TCP", wait="5s")
+    "http": shared_utils.new_port_spec(
+        input_parser.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL
+    )
 }
 
 # The min/max CPU/memory that mev-boost can use

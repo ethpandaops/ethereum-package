@@ -99,6 +99,20 @@ def run(plan, args={}):
 
     plan.print("Read the prometheus, grafana templates")
 
+    if args_with_right_defaults.mev_type == "mev-rs":
+        plan.print("Generating mev-rs builder config file")
+        mev_rs__builder_config_file = mev_rs_mev_builder.new_builder_config(
+            plan,
+            "mev-rs",
+            network_params.network,
+            # relay_ip_address,
+            # relay_port,
+            constants.VALIDATING_REWARDS_ACCOUNT,
+            network_params.preregistered_validator_keys_mnemonic,
+            args_with_right_defaults.mev_params.mev_builder_extra_data,
+            global_node_selectors,
+        )
+
     plan.print(
         "Launching participant network with {0} participants and the following network params {1}".format(
             num_participants, network_params
@@ -259,19 +273,6 @@ def run(plan, args={}):
                 beacon_uri,
                 global_node_selectors,
             )
-            mev_rs__builder_config_file = mev_rs_mev_builder.new_builder_config(
-                plan,
-                "mev-rs",
-                network_params.network,
-                relay_ip_address,
-                relay_port,
-                el_cl_data_files_artifact_uuid,
-                jwt_file,
-                constants.VALIDATING_REWARDS_ACCOUNT,
-                network_params.preregistered_validator_keys_mnemonic,
-                args_with_right_defaults.mev_params.mev_builder_extra_data,
-                global_node_selectors,
-            )
         else:
             fail("Invalid MEV type")
 
@@ -293,11 +294,12 @@ def run(plan, args={}):
                 index + 1, len(str(len(all_participants)))
             )
             plan.print(
-                "args_with_right_defaults.mev_type {0}".format(
-                    args_with_right_defaults.mev_type
+                "args_with_right_defaults.participants[index].validator_count {0}".format(
+                   args_with_right_defaults.participants[index].validator_count
                 )
             )
             if args_with_right_defaults.participants[index].validator_count != 0:
+                plan.print("made it outside")
                 if (
                     args_with_right_defaults.mev_type == "flashbots"
                     or args_with_right_defaults.mev_type == "mock"

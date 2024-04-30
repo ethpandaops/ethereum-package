@@ -14,7 +14,7 @@ subsidy_gwei = 100000000 # 0.1 eth
 secret_key = "{{ .SecretKey }}"
 # list of relays to connect to
 relays = [
-    "https://{{ .PublicKey }}@{{ .RelayIP }}:{{ .RelayPort }}",
+  "http://{{ .PublicKey }}@{{ .Relay }}:{{ .RelayPort }}",
 ]
 [builder.builder]
 # address to collect transaction fees

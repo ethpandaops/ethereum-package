@@ -179,13 +179,8 @@ def get_config(
     node_selectors,
     builder,
 ):
-    init_datadir_cmd_str = "reth init --datadir={0} --chain={1}".format(
-        EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-    )
-
     cmd = [
-        "reth",
+        "/usr/local/bin/mev build" if builder else "reth",
         "node",
         "-{0}".format(verbosity_level),
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -237,15 +232,6 @@ def get_config(
         cmd.extend([param for param in extra_params])
 
     cmd_str = " ".join(cmd)
-    if network not in constants.PUBLIC_NETWORKS:
-        subcommand_strs = [
-            init_datadir_cmd_str,
-            cmd_str,
-        ]
-    else:
-        subcommand_strs = [cmd_str]
-
-    command_str = " && ".join(subcommand_strs)
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
@@ -266,7 +252,7 @@ def get_config(
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
-        cmd=[command_str],
+        cmd=[cmd_str],
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,

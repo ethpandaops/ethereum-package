@@ -2,6 +2,7 @@ shared_utils = import_module("../../../shared_utils/shared_utils.star")
 input_parser = import_module("../../../package_io/input_parser.star")
 static_files = import_module("../../../static_files/static_files.star")
 constants = import_module("../../../package_io/constants.star")
+mev_rs_relay = import_module("../mev_relay/mev_relay_launcher.star")
 
 # MEV Builder flags
 
@@ -17,10 +18,6 @@ def new_builder_config(
     plan,
     service_name,
     network,
-    relay_ip_address,
-    relay_port,
-    el_cl_genesis_data,
-    jwt_file,
     fee_recipient,
     mnemonic,
     extra_data,
@@ -28,8 +25,6 @@ def new_builder_config(
 ):
     builder_template_data = new_builder_config_template_data(
         network,
-        relay_ip_address,
-        relay_port,
         constants.DEFAULT_MEV_PUBKEY,
         constants.DEFAULT_MEV_SECRET_KEY,
         mnemonic,
@@ -62,8 +57,6 @@ def new_builder_config(
 
 def new_builder_config_template_data(
     network,
-    relay_ip_address,
-    relay_port,
     pubkey,
     secret,
     mnemonic,
@@ -72,8 +65,8 @@ def new_builder_config_template_data(
 ):
     return {
         "Network": network,
-        "RelayIP": relay_ip_address,
-        "RelayPort": relay_port,
+        "Relay": "mev-rs-mev-relay",
+        "RelayPort": mev_rs_relay.MEV_RELAY_ENDPOINT_PORT,
         "PublicKey": pubkey,
         "SecretKey": secret,
         "Mnemonic": mnemonic,
