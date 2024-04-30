@@ -40,7 +40,7 @@ def launch_participant_network(
     global_node_selectors,
     keymanager_enabled,
     parallel_keystore_generation=False,
-    nat_exit_ip,
+    nat_exit_ip=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
 ):
     network_id = network_params.network_id
     latest_block = ""
