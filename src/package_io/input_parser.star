@@ -896,7 +896,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         )
 
         parsed_arguments_dict["participants"].append(mev_participant)
-        return parsed_arguments_dict
+
     if mev_type == "mev-rs":
         mev_participant = default_participant()
         mev_participant["el_type"] = "reth-builder"
@@ -917,8 +917,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             }
         )
         parsed_arguments_dict["participants"].append(mev_participant)
-        return parsed_arguments_dict
-
+    return parsed_arguments_dict
 
 def deep_copy_participant(participant):
     part = {}

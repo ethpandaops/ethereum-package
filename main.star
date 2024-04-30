@@ -295,7 +295,7 @@ def run(plan, args={}):
             )
             plan.print(
                 "args_with_right_defaults.participants[index].validator_count {0}".format(
-                   args_with_right_defaults.participants[index].validator_count
+                    args_with_right_defaults.participants[index].validator_count
                 )
             )
             if args_with_right_defaults.participants[index].validator_count != 0:
