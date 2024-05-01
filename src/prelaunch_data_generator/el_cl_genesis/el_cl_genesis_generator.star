@@ -34,7 +34,7 @@ def generate_el_cl_genesis_data(
     shadowfork_file = ""
     if latest_block != "":
         files[SHADOWFORK_FILEPATH] = latest_block
-        shadowfork_file = SHADOWFORK_FILEPATH + "/shadowfork/latest_block.json"
+        shadowfork_file = SHADOWFORK_FILEPATH + "/latest_block.json"
 
     template_data = new_env_file_for_el_cl_genesis_data(
         genesis_unix_timestamp,
