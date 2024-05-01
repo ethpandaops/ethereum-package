@@ -77,7 +77,9 @@ def input_parser(plan, input_args):
     result = parse_network_params(input_args)
 
     # add default eth2 input params
-    result["mev_params"] = get_default_mev_params(result.get("mev_type"), result["network_params"]["preset"])
+    result["mev_params"] = get_default_mev_params(
+        result.get("mev_type"), result["network_params"]["preset"]
+    )
     if (
         result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
@@ -734,7 +736,9 @@ def get_default_mev_params(mev_type, preset):
         mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE
         mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE
         if preset == "minimal":
-            mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[constants.CL_TYPE.lighthouse]
+            mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[
+                constants.CL_TYPE.lighthouse
+            ]
         else:
             mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
         mev_builder_extra_data = "0x68656C6C6F20776F726C640A"  # "hello world\n"
