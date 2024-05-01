@@ -86,7 +86,7 @@ def launch(
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
-    nat_exit_ip,
+    port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -141,7 +141,7 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
-        nat_exit_ip,
+        port_publisher,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -219,7 +219,7 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
-    nat_exit_ip,
+    port_publisher,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -242,7 +242,7 @@ def get_beacon_config(
         "--grpc-gateway-host=0.0.0.0",
         "--grpc-gateway-corsdomain=*",
         "--grpc-gateway-port={0}".format(HTTP_PORT_NUM),
-        "--p2p-host-ip=" + nat_exit_ip,
+        "--p2p-host-ip=" + port_publisher.nat_exit_ip,
         "--p2p-tcp-port={0}".format(DISCOVERY_TCP_PORT_NUM),
         "--p2p-udp-port={0}".format(DISCOVERY_UDP_PORT_NUM),
         "--min-sync-peers={0}".format(MIN_PEERS),

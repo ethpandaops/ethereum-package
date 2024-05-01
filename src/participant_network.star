@@ -40,7 +40,7 @@ def launch_participant_network(
     global_node_selectors,
     keymanager_enabled,
     parallel_keystore_generation,
-    nat_exit_ip,
+    port_publisher,
 ):
     network_id = network_params.network_id
     latest_block = ""
@@ -146,7 +146,7 @@ def launch_participant_network(
         persistent,
         network_id,
         num_participants,
-        nat_exit_ip,
+        port_publisher,
     )
 
     # Launch all consensus layer clients
@@ -182,7 +182,7 @@ def launch_participant_network(
         validator_data,
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
-        nat_exit_ip,
+        port_publisher,
     )
 
     ethereum_metrics_exporter_context = None

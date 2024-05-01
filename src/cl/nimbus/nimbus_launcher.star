@@ -102,7 +102,7 @@ def launch(
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
-    nat_exit_ip,
+    port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
 
@@ -163,7 +163,7 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
-        nat_exit_ip,
+        port_publisher,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -243,7 +243,7 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
-    nat_exit_ip,
+    port_publisher,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -280,7 +280,7 @@ def get_beacon_config(
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
-        "--nat=extip:" + nat_exit_ip,
+        "--nat=extip:" + port_publisher.nat_exit_ip,
         "--enr-auto-update=false",
         "--history={0}".format("archive" if constants.ARCHIVE_MODE else "prune"),
         "--rest",

@@ -79,7 +79,7 @@ def launch(
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
-    nat_exit_ip,
+    port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -135,7 +135,7 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
-        nat_exit_ip,
+        port_publisher,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -234,7 +234,7 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
-    nat_exit_ip,
+    port_publisher,
 ):
     el_client_rpc_url_str = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -270,7 +270,7 @@ def get_beacon_config(
         "--rest.namespace=*",
         "--rest.port={0}".format(HTTP_PORT_NUM),
         "--nat=true",
-        "--enr.ip=" + nat_exit_ip,
+        "--enr.ip=" + port_publisher.nat_exit_ip,
         "--enr.tcp={0}".format(DISCOVERY_PORT_NUM),
         "--enr.udp={0}".format(DISCOVERY_PORT_NUM),
         # Set per Pari's recommendation to reduce noise in the logs

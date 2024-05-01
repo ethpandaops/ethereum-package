@@ -79,7 +79,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
-    nat_exit_ip,
+    port_publisher,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -129,7 +129,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
-        nat_exit_ip,
+        port_publisher,
     )
 
     service = plan.add_service(service_name, config)
@@ -175,7 +175,7 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
-    nat_exit_ip,
+    port_publisher,
 ):
     init_datadir_cmd_str = "reth init --datadir={0} --chain={1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -204,7 +204,7 @@ def get_config(
         "--ws.port={0}".format(WS_PORT_NUM),
         "--ws.api=net,eth",
         "--ws.origins=*",
-        "--nat=extip:" + nat_exit_ip,
+        "--nat=extip:" + port_publisher.nat_exit_ip,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",

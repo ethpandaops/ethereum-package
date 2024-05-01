@@ -88,7 +88,7 @@ def launch(
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
-    nat_exit_ip,
+    port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -150,7 +150,7 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
-        nat_exit_ip,
+        port_publisher,
     )
 
     beacon_service = plan.add_service(service_name, config)
@@ -232,7 +232,7 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
-    nat_exit_ip,
+    port_publisher,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -272,7 +272,7 @@ def get_beacon_config(
         # Set per Pari's recommendation, to reduce noise in the logs
         "--p2p-subscribe-all-subnets-enabled=true",
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
-        "--p2p-advertised-ip=" + nat_exit_ip,
+        "--p2p-advertised-ip=" + port_publisher.nat_exit_ip,
         "--p2p-discovery-site-local-addresses-enabled=true",
         "--rest-api-enabled=true",
         "--rest-api-docs-enabled=true",

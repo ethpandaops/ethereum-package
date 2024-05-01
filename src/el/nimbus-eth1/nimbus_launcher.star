@@ -80,7 +80,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
-    nat_exit_ip,
+    port_publisher,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -130,7 +130,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
-        nat_exit_ip,
+        port_publisher,
     )
 
     service = plan.add_service(service_name, config)
@@ -176,7 +176,7 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
-    nat_exit_ip,
+    port_publisher,
 ):
     cmd = [
         "--log-level={0}".format(verbosity_level),
@@ -194,7 +194,7 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
-        "--nat=extip:{0}".format(nat_exit_ip),
+        "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
     ]
     if (
         network not in constants.PUBLIC_NETWORKS

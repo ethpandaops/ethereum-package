@@ -138,4 +138,4 @@ xatu_sentry_params:
 global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false
-nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+port_publisher: KURTOSIS_IP_ADDR_PLACEHOLDER

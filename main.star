@@ -115,7 +115,7 @@ def run(plan, args={}):
         global_node_selectors,
         keymanager_enabled,
         parallel_keystore_generation,
-        args_with_right_defaults.nat_exit_ip,
+        args_with_right_defaults.port_publisher,
     )
 
     plan.print(
