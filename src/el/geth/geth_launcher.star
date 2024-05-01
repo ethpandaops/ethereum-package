@@ -37,7 +37,7 @@ METRICS_PATH = "/debug/metrics/prometheus"
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
 
-def get_used_ports(disovery_port=DISCOVERY_PORT_NUM):
+def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
     used_ports = {
         RPC_PORT_ID: shared_utils.new_port_spec(
             RPC_PORT_NUM,

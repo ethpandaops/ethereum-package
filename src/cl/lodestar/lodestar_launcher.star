@@ -258,7 +258,7 @@ def get_beacon_config(
         )
 
     public_ports = {}
-    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    discovery_port = DISCOVERY_PORT_NUM
     if port_publisher.public_port_start:
         discovery_port = port_publisher.cl_start + len(bootnode_contexts)
         public_ports = {

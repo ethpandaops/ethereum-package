@@ -42,7 +42,7 @@ VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/nimbus/validator-keys"
 
 
 # ---------------------------------- Used Ports ----------------------------------
-def get_used_ports(disovery_port):
+def get_used_ports(discovery_port):
     used_ports = {
         BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
             discovery_port, shared_utils.TCP_PROTOCOL

@@ -316,7 +316,12 @@ def input_parser(plan, input_args):
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
         keymanager_enabled=result["keymanager_enabled"],
-        port_publisher=result["port_publisher"],
+        port_publisher=struct(
+            public_port_start=result["port_publisher"]["public_port_start"],
+            nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
+            el_start=result["port_publisher"]["el_start"],
+            cl_start=result["port_publisher"]["cl_start"],
+        ),
     )
 
 
@@ -628,6 +633,8 @@ def default_input_args():
         "port_publisher": {
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
             "public_port_start": None,
+            "el_start": None,
+            "cl_start": None,
         },
     }
 
