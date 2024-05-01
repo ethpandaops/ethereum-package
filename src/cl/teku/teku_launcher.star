@@ -31,20 +31,23 @@ BEACON_METRICS_PATH = "/metrics"
 
 MIN_PEERS = 1
 
-BEACON_USED_PORTS = {
-    BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-        BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
-        BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
+
+def get_used_ports(discovery_port):
+    used_ports = {
+        BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+            BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
+            BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return used_ports
 
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
@@ -256,6 +259,21 @@ def get_beacon_config(
             el_context.ip_addr,
             el_context.engine_rpc_port_num,
         )
+
+    public_ports = {}
+    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.cl_start + len(bootnode_contexts)
+        public_ports = {
+            BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
@@ -274,6 +292,7 @@ def get_beacon_config(
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
         "--p2p-advertised-ip=" + port_publisher.nat_exit_ip,
         "--p2p-discovery-site-local-addresses-enabled=true",
+        "--p2p-port={0}".format(discovery_port),
         "--rest-api-enabled=true",
         "--rest-api-docs-enabled=true",
         "--rest-api-interface=0.0.0.0",
@@ -375,7 +394,7 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
     ports = {}
-    ports.update(BEACON_USED_PORTS)
+    ports.update(used_ports)
     if node_keystore_files != None and not use_separate_vc:
         cmd.extend(validator_default_cmd)
         files[
@@ -396,6 +415,7 @@ def get_beacon_config(
     return ServiceConfig(
         image=image,
         ports=ports,
+        public_ports=public_ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

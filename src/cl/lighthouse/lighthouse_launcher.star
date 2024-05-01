@@ -32,24 +32,28 @@ BEACON_MIN_MEMORY = 256
 
 METRICS_PATH = "/metrics"
 
-BEACON_USED_PORTS = {
-    BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-        BEACON_HTTP_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-    BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
-        BEACON_METRICS_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-}
+
+def get_used_ports(discovery_port):
+    beacon_used_ports = {
+        BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+            BEACON_HTTP_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
+            BEACON_METRICS_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+    }
+    return beacon_used_ports
+
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
@@ -256,6 +260,20 @@ def get_beacon_config(
             el_context.engine_rpc_port_num,
         )
 
+    public_ports = {}
+    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.cl_start + len(boot_cl_client_ctxs)
+        public_ports = {
+            BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     # NOTE: If connecting to the merge devnet remotely we DON'T want the following flags; when they're not set, the node's external IP address is auto-detected
     #  from the peers it communicates with but when they're set they basically say "override the autodetection and
     #  use what I specify instead." This requires having a know external IP address and port, which we definitely won't
@@ -271,13 +289,13 @@ def get_beacon_config(
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv REMOVE THESE WHEN CONNECTING TO EXTERNAL NET vvvvvvvvvvvvvvvvvvvvv
         "--disable-enr-auto-update",
-        "--enr-address=" + port_publishe.nat_exit_ip,
-        "--enr-udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--enr-tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--enr-address=" + port_publisher.nat_exit_ip,
+        "--enr-udp-port={0}".format(discovery_port),
+        "--enr-tcp-port={0}".format(discovery_port),
         # ^^^^^^^^^^^^^^^^^^^ REMOVE THESE WHEN CONNECTING TO EXTERNAL NET ^^^^^^^^^^^^^^^^^^^^^
         "--listen-address=0.0.0.0",
         "--port={0}".format(
-            BEACON_DISCOVERY_PORT_NUM
+            discovery_port
         ),  # NOTE: Remove for connecting to external net!
         "--http",
         "--http-address=0.0.0.0",
@@ -369,7 +387,8 @@ def get_beacon_config(
     env.update(extra_env_vars)
     return ServiceConfig(
         image=image,
-        ports=BEACON_USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         files=files,
         env_vars=env,

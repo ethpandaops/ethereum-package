@@ -31,21 +31,27 @@ METRICS_PATH = "/metrics"
 
 MIN_PEERS = 1
 
-BEACON_NODE_USED_PORTS = {
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_TCP_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_UDP_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-        HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    BEACON_MONITORING_PORT_ID: shared_utils.new_port_spec(
-        BEACON_MONITORING_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
+
+def get_used_ports(discovery_port):
+    beacon_used_ports = {
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        RPC_PORT_ID: shared_utils.new_port_spec(
+            RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+            HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_MONITORING_PORT_ID: shared_utils.new_port_spec(
+            BEACON_MONITORING_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return used_ports
+
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
@@ -233,6 +239,20 @@ def get_beacon_config(
             el_context.engine_rpc_port_num,
         )
 
+    public_ports = {}
+    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.cl_start + len(bootnode_contexts)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
@@ -243,8 +263,8 @@ def get_beacon_config(
         "--grpc-gateway-corsdomain=*",
         "--grpc-gateway-port={0}".format(HTTP_PORT_NUM),
         "--p2p-host-ip=" + port_publisher.nat_exit_ip,
-        "--p2p-tcp-port={0}".format(DISCOVERY_TCP_PORT_NUM),
-        "--p2p-udp-port={0}".format(DISCOVERY_UDP_PORT_NUM),
+        "--p2p-tcp-port={0}".format(discovery_port),
+        "--p2p-udp-port={0}".format(discovery_port),
         "--min-sync-peers={0}".format(MIN_PEERS),
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
@@ -332,7 +352,8 @@ def get_beacon_config(
 
     return ServiceConfig(
         image=beacon_image,
-        ports=BEACON_NODE_USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

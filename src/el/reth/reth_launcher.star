@@ -39,10 +39,10 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
         ),
         WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
         TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
+            discovery_port, shared_utils.TCP_PROTOCOL
         ),
         UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
+            discovery_port, shared_utils.UDP_PROTOCOL
         ),
         ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
             ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL

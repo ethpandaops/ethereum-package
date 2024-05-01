@@ -25,20 +25,24 @@ BEACON_MIN_MEMORY = 256
 
 METRICS_PATH = "/metrics"
 
-BEACON_USED_PORTS = {
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-        HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
+
+def get_used_ports(discovery_port):
+    beacon_used_ports = {
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+            HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        METRICS_PORT_ID: shared_utils.new_port_spec(
+            METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return beacon_used_ports
+
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
@@ -253,11 +257,25 @@ def get_beacon_config(
             el_context.engine_rpc_port_num,
         )
 
+    public_ports = {}
+    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.cl_start + len(bootnode_contexts)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "beacon",
         "--logLevel=" + log_level,
-        "--port={0}".format(DISCOVERY_PORT_NUM),
-        "--discoveryPort={0}".format(DISCOVERY_PORT_NUM),
+        "--port={0}".format(discovery_port),
+        "--discoveryPort={0}".format(discovery_port),
         "--dataDir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
@@ -271,8 +289,8 @@ def get_beacon_config(
         "--rest.port={0}".format(HTTP_PORT_NUM),
         "--nat=true",
         "--enr.ip=" + port_publisher.nat_exit_ip,
-        "--enr.tcp={0}".format(DISCOVERY_PORT_NUM),
-        "--enr.udp={0}".format(DISCOVERY_PORT_NUM),
+        "--enr.tcp={0}".format(discovery_port),
+        "--enr.udp={0}".format(discovery_port),
         # Set per Pari's recommendation to reduce noise in the logs
         "--subscribeAllSubnets=true",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
@@ -349,7 +367,8 @@ def get_beacon_config(
         )
     return ServiceConfig(
         image=image,
-        ports=BEACON_USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
