@@ -278,7 +278,8 @@ def get_config(
 
     return ServiceConfig(
         image=image,
-        ports=USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=[command_str],
         files=files,
         entrypoint=ENTRYPOINT_ARGS,

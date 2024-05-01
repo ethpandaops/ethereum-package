@@ -263,7 +263,8 @@ def get_config(
 
     return ServiceConfig(
         image=image,
-        ports=USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         files=files,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
