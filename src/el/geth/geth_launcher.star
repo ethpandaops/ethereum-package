@@ -302,6 +302,7 @@ def get_config(
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port),
+        "--port={0}".format(discovery_port),
     ]
 
     if BUILDER_IMAGE_STR in image:

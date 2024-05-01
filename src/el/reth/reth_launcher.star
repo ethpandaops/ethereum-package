@@ -230,6 +230,7 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port),
+        "--port={0}".format(discovery_port),
     ]
     if network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
