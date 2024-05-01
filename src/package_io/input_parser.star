@@ -319,8 +319,8 @@ def input_parser(plan, input_args):
         port_publisher=struct(
             public_port_start=result["port_publisher"]["public_port_start"],
             nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
-            el_start=result["port_publisher"]["el_start"],
-            cl_start=result["port_publisher"]["cl_start"],
+            el_start=result["port_publisher"].get("el_start"),
+            cl_start=result["port_publisher"].get("cl_start"),
         ),
     )
 
