@@ -79,7 +79,6 @@ def launch_mev_relay(
             files={
                 MEV_RELAY_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
-
             },
             ports=USED_PORTS,
             min_cpu=MIN_CPU,
@@ -87,9 +86,7 @@ def launch_mev_relay(
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=node_selectors,
-            env_vars={
-                "RUST_BACKTRACE":"1"
-            }
+            env_vars={"RUST_BACKTRACE": "1"},
         ),
     )
 
