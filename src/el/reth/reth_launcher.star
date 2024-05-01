@@ -186,7 +186,6 @@ def get_config(
     builder,
     port_publisher,
 ):
-
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
     if port_publisher.public_port_start:
