@@ -263,7 +263,9 @@ def get_beacon_config(
     public_ports = {}
     discovery_port = BEACON_DISCOVERY_PORT_NUM
     if port_publisher.public_port_start:
-        discovery_port = port_publisher.cl_start + len(boot_cl_client_ctxs)
+        discovery_port = port_publisher.cl_start
+        if boot_cl_client_ctxs and len(boot_cl_client_ctxs) > 0:
+            discovery_port = discovery_port + len(boot_cl_client_ctxs)
         public_ports = {
             BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
                 discovery_port, shared_utils.TCP_PROTOCOL
