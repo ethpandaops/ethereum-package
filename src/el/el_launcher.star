@@ -23,6 +23,7 @@ def launch(
     persistent,
     network_id,
     num_participants,
+    port_publisher,
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -156,6 +157,7 @@ def launch(
             participant.el_volume_size,
             tolerations,
             node_selectors,
+            port_publisher,
         )
         # Add participant el additional prometheus metrics
         for metrics_info in el_context.el_metrics_info:

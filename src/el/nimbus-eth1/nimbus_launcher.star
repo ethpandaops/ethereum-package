@@ -27,31 +27,33 @@ METRICS_PATH = "/metrics"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nimbus/execution-data"
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
-USED_PORTS = {
-    WS_RPC_PORT_ID: shared_utils.new_port_spec(
-        WS_RPC_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM,
-        shared_utils.UDP_PROTOCOL,
-    ),
-    ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-        ENGINE_RPC_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-    ),
-    METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-    ),
-}
+def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
+    used_ports = {
+        WS_RPC_PORT_ID: shared_utils.new_port_spec(
+            WS_RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port,
+            shared_utils.TCP_PROTOCOL,
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port,
+            shared_utils.UDP_PROTOCOL,
+        ),
+        ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
+            ENGINE_RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+        ),
+        METRICS_PORT_ID: shared_utils.new_port_spec(
+            METRICS_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+        ),
+    }
+    return used_ports
+
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "ERROR",
@@ -82,6 +84,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -131,6 +134,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
+        port_publisher,
     )
 
     service = plan.add_service(service_name, config)
@@ -176,7 +180,22 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
+    public_ports = {}
+    discovery_port = DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.el_start + len(existing_el_clients)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "--log-level={0}".format(verbosity_level),
         "--data-dir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -193,7 +212,8 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
-        "--nat=extip:{0}".format(PRIVATE_IP_ADDRESS_PLACEHOLDER),
+        "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
+        "--tcp-port={0}".format(discovery_port),
     ]
     if (
         network not in constants.PUBLIC_NETWORKS
@@ -243,10 +263,11 @@ def get_config(
 
     return ServiceConfig(
         image=image,
-        ports=USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         files=files,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,

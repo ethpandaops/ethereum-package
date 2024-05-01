@@ -753,6 +753,17 @@ global_node_selectors: {}
 # This will open up http ports to your validator services!
 # Defaults to false
 keymanager_enabled: false
+
+# Global paarameter to set the exit ip address of services and public ports
+port_publisher:
+  # if you have a service that you want to expose on a specific interfact; set that IP here
+  # if you set it to auto it gets the public ip from ident.me and sets it
+  # Defaults to constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+  # The default value just means its the IP address of the container in which the service is running
+  nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+  # The start value gets used as a seed for TCP and UDP discovery ports for el/cl client
+  # Defaults to None - no public ports
+  public_port_start: None
 ```
 
 #### Example configurations

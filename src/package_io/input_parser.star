@@ -70,6 +70,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "tx_spammer_params",
     "custom_flood_params",
     "xatu_sentry_params",
+    "port_publisher",
 )
 
 
@@ -141,6 +142,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["xatu_sentry_params"]:
                 sub_value = input_args["xatu_sentry_params"][sub_attr]
                 result["xatu_sentry_params"][sub_attr] = sub_value
+        elif attr == "port_publisher":
+            for sub_attr in input_args["port_publisher"]:
+                sub_value = input_args["port_publisher"][sub_attr]
+                result["port_publisher"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -160,6 +165,14 @@ def input_parser(plan, input_args):
                 result.get("mev_type")
             )
         )
+
+    if result["port_publisher"]["nat_exit_ip"] == "auto":
+        result["port_publisher"]["nat_exit_ip"] = get_public_ip(plan)
+
+    if result["port_publisher"]["public_port_start"] != None:
+        start = result["port_publisher"]["public_port_start"]
+        result["port_publisher"]["el_start"] = start
+        result["port_publisher"]["cl_start"] = start + len(result["participants"])
 
     return struct(
         participants=[
@@ -320,6 +333,12 @@ def input_parser(plan, input_args):
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
         keymanager_enabled=result["keymanager_enabled"],
+        port_publisher=struct(
+            public_port_start=result["port_publisher"]["public_port_start"],
+            nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
+            el_start=result["port_publisher"].get("el_start"),
+            cl_start=result["port_publisher"].get("cl_start"),
+        ),
     )
 
 
@@ -628,6 +647,10 @@ def default_input_args():
         "global_tolerations": [],
         "global_node_selectors": {},
         "keymanager_enabled": False,
+        "port_publisher": {
+            "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+            "public_port_start": None,
+        },
     }
 
 
@@ -947,3 +970,10 @@ def deep_copy_participant(participant):
         else:
             part[k] = v
     return part
+
+
+def get_public_ip(plan):
+    response = plan.run_sh(
+        run="curl -s https://ident.me",
+    )
+    return response.output
