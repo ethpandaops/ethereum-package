@@ -65,7 +65,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "tx_spammer_params",
     "custom_flood_params",
     "xatu_sentry_params",
-    "port_publisher"
+    "port_publisher",
 )
 
 
@@ -159,7 +159,6 @@ def input_parser(plan, input_args):
         start = result["port_publisher"]["public_port_start"]
         result["port_publisher"]["el_start"] = start
         result["port_publisher"]["cl_start"] = start + len(result["participants"])
-
 
     return struct(
         participants=[

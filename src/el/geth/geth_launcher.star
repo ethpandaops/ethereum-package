@@ -36,8 +36,9 @@ METRICS_PATH = "/debug/metrics/prometheus"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
-def get_used_ports(disovery_port = DISCOVERY_PORT_NUM):
-    USED_PORTS = {
+
+def get_used_ports(disovery_port=DISCOVERY_PORT_NUM):
+    used_ports = {
         RPC_PORT_ID: shared_utils.new_port_spec(
             RPC_PORT_NUM,
             shared_utils.TCP_PROTOCOL,
@@ -58,6 +59,8 @@ def get_used_ports(disovery_port = DISCOVERY_PORT_NUM):
             METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
         ),
     }
+    return used_ports
+
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
@@ -243,11 +246,10 @@ def get_config(
                 discovery_port, shared_utils.TCP_PROTOCOL
             ),
             UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                discvoery_port, shared_utils.UDP_PROTOCOL
+                discovery_port, shared_utils.UDP_PROTOCOL
             ),
         }
-    used_ports = get_used_ports(discovery)
-
+    used_ports = get_used_ports(discovery_port)
 
     cmd = [
         "geth",
@@ -299,7 +301,7 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--discovery.port={0}".format(discovery_port)
+        "--discovery.port={0}".format(discovery_port),
     ]
 
     if BUILDER_IMAGE_STR in image:

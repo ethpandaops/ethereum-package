@@ -29,24 +29,30 @@ UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 METRICS_PORT_ID = "metrics"
 
-USED_PORTS = {
-    RPC_PORT_ID: shared_utils.new_port_spec(
-        RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL
-    ),
-    WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-        ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
+
+def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
+    used_ports = {
+        RPC_PORT_ID: shared_utils.new_port_spec(
+            RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
+        ),
+        ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
+            ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        METRICS_PORT_ID: shared_utils.new_port_spec(
+            METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return used_ports
+
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "ERROR",
@@ -175,6 +181,20 @@ def get_config(
     node_selectors,
     port_publisher,
 ):
+    public_ports = {}
+    discovery_port = DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.el_start + len(existing_el_clients)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "--log=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -187,8 +207,8 @@ def get_config(
         "--JsonRpc.EngineHost=0.0.0.0",
         "--JsonRpc.EnginePort={0}".format(ENGINE_RPC_PORT_NUM),
         "--Network.ExternalIp={0}".format(port_publisher.nat_exit_ip),
-        "--Network.DiscoveryPort={0}".format(DISCOVERY_PORT_NUM),
-        "--Network.P2PPort={0}".format(DISCOVERY_PORT_NUM),
+        "--Network.DiscoveryPort={0}".format(discovery_port),
+        "--Network.P2PPort={0}".format(discovery_port),
         "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
@@ -251,7 +271,8 @@ def get_config(
 
     return ServiceConfig(
         image=image,
-        ports=USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         files=files,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

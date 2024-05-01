@@ -30,25 +30,31 @@ METRICS_PATH = "/metrics"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/ethereumjs/execution-data"
 
-USED_PORTS = {
-    RPC_PORT_ID: shared_utils.new_port_spec(
-        RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL
-    ),
-    WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    WS_PORT_ENGINE_ID: shared_utils.new_port_spec(
-        WS_PORT_ENGINE_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-        ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    # METRICS_PORT_ID: shared_utils.new_port_spec(METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL)
-}
+
+def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
+    used_ports = {
+        RPC_PORT_ID: shared_utils.new_port_spec(
+            RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+        WS_PORT_ENGINE_ID: shared_utils.new_port_spec(
+            WS_PORT_ENGINE_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
+        ),
+        ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
+            ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        # METRICS_PORT_ID: shared_utils.new_port_spec(METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL)
+    }
+    return used_ports
+
 
 ENTRYPOINT_ARGS = []
 
@@ -177,9 +183,23 @@ def get_config(
     node_selectors,
     port_publisher,
 ):
+    public_ports = {}
+    discovery_port = DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.el_start + len(existing_el_clients)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "--dataDir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--port={0}".format(DISCOVERY_PORT_NUM),
+        "--port={0}".format(discovery_port),
         "--rpc",
         "--rpcAddr=0.0.0.0",
         "--rpcPort={0}".format(RPC_PORT_NUM),
@@ -243,7 +263,8 @@ def get_config(
         )
     return ServiceConfig(
         image=image,
-        ports=USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         files=files,
         entrypoint=ENTRYPOINT_ARGS,
