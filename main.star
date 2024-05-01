@@ -229,30 +229,30 @@ def run(plan, args={}):
             ["{0}".format(context.beacon_http_url) for context in all_cl_contexts]
         )
 
-        # first_cl_client = all_cl_contexts[0]
-        # first_client_beacon_name = first_cl_client.beacon_service_name
-        # contract_owner, normal_user = genesis_constants.PRE_FUNDED_ACCOUNTS[6:8]
-        # mev_flood.launch_mev_flood(
-        #     plan,
-        #     mev_params.mev_flood_image,
-        #     fuzz_target,
-        #     contract_owner.private_key,
-        #     normal_user.private_key,
-        #     global_node_selectors,
-        # )
-        # epoch_recipe = GetHttpRequestRecipe(
-        #     endpoint="/eth/v2/beacon/blocks/head",
-        #     port_id=HTTP_PORT_ID_FOR_FACT,
-        #     extract={"epoch": ".data.message.body.attestations[0].data.target.epoch"},
-        # )
-        # plan.wait(
-        #     recipe=epoch_recipe,
-        #     field="extract.epoch",
-        #     assertion=">=",
-        #     target_value=str(network_params.deneb_fork_epoch),
-        #     timeout="20m",
-        #     service_name=first_client_beacon_name,
-        # )
+        first_cl_client = all_cl_contexts[0]
+        first_client_beacon_name = first_cl_client.beacon_service_name
+        contract_owner, normal_user = genesis_constants.PRE_FUNDED_ACCOUNTS[6:8]
+        mev_flood.launch_mev_flood(
+            plan,
+            mev_params.mev_flood_image,
+            fuzz_target,
+            contract_owner.private_key,
+            normal_user.private_key,
+            global_node_selectors,
+        )
+        epoch_recipe = GetHttpRequestRecipe(
+            endpoint="/eth/v2/beacon/blocks/head",
+            port_id=HTTP_PORT_ID_FOR_FACT,
+            extract={"epoch": ".data.message.body.attestations[0].data.target.epoch"},
+        )
+        plan.wait(
+            recipe=epoch_recipe,
+            field="extract.epoch",
+            assertion=">=",
+            target_value=str(network_params.deneb_fork_epoch),
+            timeout="20m",
+            service_name=first_client_beacon_name,
+        )
         if args_with_right_defaults.mev_type == "flashbots":
             endpoint = flashbots_mev_relay.launch_mev_relay(
                 plan,
@@ -277,14 +277,14 @@ def run(plan, args={}):
         else:
             fail("Invalid MEV type")
 
-        # mev_flood.spam_in_background(
-        #     plan,
-        #     fuzz_target,
-        #     mev_params.mev_flood_extra_args,
-        #     mev_params.mev_flood_seconds_per_bundle,
-        #     contract_owner.private_key,
-        #     normal_user.private_key,
-        # )
+        mev_flood.spam_in_background(
+            plan,
+            fuzz_target,
+            mev_params.mev_flood_extra_args,
+            mev_params.mev_flood_seconds_per_bundle,
+            contract_owner.private_key,
+            normal_user.private_key,
+        )
         mev_endpoints.append(endpoint)
 
     # spin up the mev boost contexts if some endpoints for relays have been passed

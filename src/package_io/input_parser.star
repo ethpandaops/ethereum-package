@@ -23,6 +23,15 @@ DEFAULT_CL_IMAGES = {
     "grandine": "ethpandaops/grandine:develop",
 }
 
+DEFAULT_CL_IMAGES_MINIMAL = {
+    "lighthouse": "ethpandaops/lighthouse:unstable-minimal",
+    "teku": "consensys/teku:latest",
+    "nimbus": "ethpandaops/nimbus-eth2:unstable-minimal",
+    "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
+    "lodestar": "chainsafe/lodestar:next",
+    "grandine": "ethpandaops/grandine:develop-minimal",
+}
+
 DEFAULT_VC_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "lodestar": "chainsafe/lodestar:next",
@@ -68,7 +77,7 @@ def input_parser(plan, input_args):
     result = parse_network_params(input_args)
 
     # add default eth2 input params
-    result["mev_params"] = get_default_mev_params(result.get("mev_type"))
+    result["mev_params"] = get_default_mev_params(result.get("mev_type"), result["network_params"]["preset"])
     if (
         result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
@@ -699,10 +708,13 @@ def default_participant():
     }
 
 
-def get_default_mev_params(mev_type):
+def get_default_mev_params(mev_type, preset):
     mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
     mev_builder_image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
-    mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+    if preset == "minimal":
+        mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[constants.CL_TYPE.lighthouse]
+    else:
+        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
     mev_builder_extra_data = None
     mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
     mev_boost_args = ["mev-boost", "--relay-check"]
@@ -721,7 +733,10 @@ def get_default_mev_params(mev_type):
     if mev_type == "mev-rs":
         mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE
         mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE
-        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+        if preset == "minimal":
+            mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[constants.CL_TYPE.lighthouse]
+        else:
+            mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
         mev_builder_extra_data = "0x68656C6C6F20776F726C640A"  # "hello world\n"
         mev_builder_extra_args = ["--mev-builder-config=" + "/config/config.toml"]
         mev_boost_image = constants.DEFAULT_MEV_RS_IMAGE
