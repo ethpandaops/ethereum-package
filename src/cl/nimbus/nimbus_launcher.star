@@ -42,25 +42,27 @@ VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/nimbus/validator-keys"
 
 
 # ---------------------------------- Used Ports ----------------------------------
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-BEACON_USED_PORTS = {
-    BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        BEACON_DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-        BEACON_HTTP_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-    BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
-        BEACON_METRICS_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    ),
-}
+def get_used_ports(discovery_port):
+    used_ports = {
+        BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+            BEACON_HTTP_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
+            BEACON_METRICS_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+    }
+    return used_ports
+
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "ERROR",
@@ -103,6 +105,7 @@ def launch(
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
+    port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
 
@@ -163,6 +166,7 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
+        port_publisher,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -242,6 +246,7 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -266,11 +271,27 @@ def get_beacon_config(
             el_context.engine_rpc_port_num,
         )
 
+    public_ports = {}
+    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.cl_start
+        if bootnode_contexts and len(bootnode_contexts) > 0:
+            discovery_port = discovery_port + len(bootnode_contexts)
+        public_ports = {
+            BEACON_TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            BEACON_UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "--non-interactive=true",
         "--log-level=" + log_level,
-        "--udp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--tcp-port={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--udp-port={0}".format(discovery_port),
+        "--tcp-port={0}".format(discovery_port),
         "--network={0}".format(
             network
             if network in constants.PUBLIC_NETWORKS
@@ -278,7 +299,7 @@ def get_beacon_config(
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
-        "--nat=extip:" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + port_publisher.nat_exit_ip,
         "--enr-auto-update=false",
         "--history={0}".format("archive" if constants.ARCHIVE_MODE else "prune"),
         "--rest",
@@ -340,7 +361,7 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
     }
     ports = {}
-    ports.update(BEACON_USED_PORTS)
+    ports.update(used_ports)
     if node_keystore_files != None and not use_separate_vc:
         cmd.extend(validator_default_cmd)
         files[
@@ -360,11 +381,12 @@ def get_beacon_config(
 
     return ServiceConfig(
         image=image,
-        ports=ports,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
         ),

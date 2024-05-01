@@ -29,26 +29,31 @@ UDP_DISCOVERY_PORT_ID = "udp-discovery"
 ENGINE_HTTP_RPC_PORT_ID = "engine-rpc"
 METRICS_PORT_ID = "metrics"
 JAVA_OPTS = {"JAVA_OPTS": "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"}
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
-USED_PORTS = {
-    RPC_PORT_ID: shared_utils.new_port_spec(
-        RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL
-    ),
-    WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    ENGINE_HTTP_RPC_PORT_ID: shared_utils.new_port_spec(
-        ENGINE_HTTP_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    METRICS_PORT_ID: shared_utils.new_port_spec(
-        METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
+
+def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
+    used_ports = {
+        RPC_PORT_ID: shared_utils.new_port_spec(
+            RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        ),
+        WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        ENGINE_HTTP_RPC_PORT_ID: shared_utils.new_port_spec(
+            ENGINE_HTTP_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        METRICS_PORT_ID: shared_utils.new_port_spec(
+            METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return used_ports
+
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
@@ -80,6 +85,7 @@ def launch(
     el_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -129,6 +135,7 @@ def launch(
         el_volume_size,
         tolerations,
         node_selectors,
+        port_publisher,
     )
 
     service = plan.add_service(service_name, config)
@@ -174,7 +181,22 @@ def get_config(
     el_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
+    public_ports = {}
+    discovery_port = DISCOVERY_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.el_start + len(existing_el_clients)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "besu",
         "--logging=" + log_level,
@@ -190,8 +212,8 @@ def get_config(
         "--rpc-ws-port={0}".format(WS_PORT_NUM),
         "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--p2p-enabled=true",
-        "--p2p-host=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--p2p-port={0}".format(DISCOVERY_PORT_NUM),
+        "--p2p-host=" + port_publisher.nat_exit_ip,
+        "--p2p-port={0}".format(discovery_port),
         "--engine-rpc-enabled=true",
         "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--engine-host-allowlist=*",
@@ -255,12 +277,13 @@ def get_config(
         )
     return ServiceConfig(
         image=image,
-        ports=USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=[cmd_str],
         files=files,
         env_vars=extra_env_vars,
         entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=el_min_cpu,
         max_cpu=el_max_cpu,
         min_memory=el_min_mem,

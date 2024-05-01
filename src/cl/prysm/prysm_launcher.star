@@ -31,23 +31,27 @@ METRICS_PATH = "/metrics"
 
 MIN_PEERS = 1
 
-PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
-BEACON_NODE_USED_PORTS = {
-    TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_TCP_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-        DISCOVERY_UDP_PORT_NUM, shared_utils.UDP_PROTOCOL
-    ),
-    RPC_PORT_ID: shared_utils.new_port_spec(RPC_PORT_NUM, shared_utils.TCP_PROTOCOL),
-    BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-        HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-    BEACON_MONITORING_PORT_ID: shared_utils.new_port_spec(
-        BEACON_MONITORING_PORT_NUM, shared_utils.TCP_PROTOCOL
-    ),
-}
+def get_used_ports(discovery_port):
+    used_ports = {
+        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.TCP_PROTOCOL
+        ),
+        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+            discovery_port, shared_utils.UDP_PROTOCOL
+        ),
+        RPC_PORT_ID: shared_utils.new_port_spec(
+            RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
+            HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        BEACON_MONITORING_PORT_ID: shared_utils.new_port_spec(
+            BEACON_MONITORING_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+    }
+    return used_ports
+
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
@@ -86,8 +90,9 @@ def launch(
     participant_tolerations,
     global_tolerations,
     node_selectors,
-    use_separate_vc=True,
-    keymanager_enabled=False,
+    use_separate_vc,
+    keymanager_enabled,
+    port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -142,6 +147,7 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
+        port_publisher,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -219,6 +225,7 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
+    port_publisher,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -232,6 +239,22 @@ def get_beacon_config(
             el_context.engine_rpc_port_num,
         )
 
+    public_ports = {}
+    discovery_port = DISCOVERY_TCP_PORT_NUM
+    if port_publisher.public_port_start:
+        discovery_port = port_publisher.cl_start
+        if bootnode_contexts and len(bootnode_contexts) > 0:
+            discovery_port = discovery_port + len(bootnode_contexts)
+        public_ports = {
+            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.TCP_PROTOCOL
+            ),
+            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                discovery_port, shared_utils.UDP_PROTOCOL
+            ),
+        }
+    used_ports = get_used_ports(discovery_port)
+
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
@@ -241,9 +264,9 @@ def get_beacon_config(
         "--grpc-gateway-host=0.0.0.0",
         "--grpc-gateway-corsdomain=*",
         "--grpc-gateway-port={0}".format(HTTP_PORT_NUM),
-        "--p2p-host-ip=" + PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--p2p-tcp-port={0}".format(DISCOVERY_TCP_PORT_NUM),
-        "--p2p-udp-port={0}".format(DISCOVERY_UDP_PORT_NUM),
+        "--p2p-host-ip=" + port_publisher.nat_exit_ip,
+        "--p2p-tcp-port={0}".format(discovery_port),
+        "--p2p-udp-port={0}".format(discovery_port),
         "--min-sync-peers={0}".format(MIN_PEERS),
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
@@ -331,11 +354,12 @@ def get_beacon_config(
 
     return ServiceConfig(
         image=beacon_image,
-        ports=BEACON_NODE_USED_PORTS,
+        ports=used_ports,
+        public_ports=public_ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
         ),

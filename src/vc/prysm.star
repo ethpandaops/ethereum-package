@@ -92,7 +92,6 @@ def get_config(
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,
-        private_ip_address_placeholder=vc_shared.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         min_cpu=vc_min_cpu,
         max_cpu=vc_max_cpu,
         min_memory=vc_min_mem,

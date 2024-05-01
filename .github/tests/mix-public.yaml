@@ -14,3 +14,5 @@ participants:
   - el_type: ethereumjs
     cl_type: grandine
 additional_services: []
+port_publisher:
+  public_port_start: 50000
