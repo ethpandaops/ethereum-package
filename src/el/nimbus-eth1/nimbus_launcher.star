@@ -54,6 +54,7 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
     }
     return used_ports
 
+
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "ERROR",
     constants.GLOBAL_LOG_LEVEL.warn: "WARN",
@@ -181,7 +182,6 @@ def get_config(
     node_selectors,
     port_publisher,
 ):
-
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
     if port_publisher.public_port_start:
@@ -213,7 +213,7 @@ def get_config(
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
-        "--tcp-port={0}".format(discovery_port),        
+        "--tcp-port={0}".format(discovery_port),
     ]
     if (
         network not in constants.PUBLIC_NETWORKS

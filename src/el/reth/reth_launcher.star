@@ -29,10 +29,13 @@ METRICS_PATH = "/metrics"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/reth/execution-data"
 
+
 def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
     used_ports = {
         RPC_PORT_ID: shared_utils.new_port_spec(
-            RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, shared_utils.HTTP_APPLICATION_PROTOCOL
+            RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
         WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
         TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
@@ -49,6 +52,7 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
         ),
     }
     return used_ports
+
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
@@ -196,7 +200,7 @@ def get_config(
                 discovery_port, shared_utils.UDP_PROTOCOL
             ),
         }
-    used_ports = get_used_ports(discovery_port)    
+    used_ports = get_used_ports(discovery_port)
 
     cmd = [
         "reth",
@@ -225,7 +229,7 @@ def get_config(
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",
         "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
-        "--discovery.port={0}".format(discovery_port)
+        "--discovery.port={0}".format(discovery_port),
     ]
     if network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
