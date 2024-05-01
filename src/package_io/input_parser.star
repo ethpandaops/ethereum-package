@@ -633,8 +633,6 @@ def default_input_args():
         "port_publisher": {
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
             "public_port_start": None,
-            "el_start": None,
-            "cl_start": None,
         },
     }
 
