@@ -3,21 +3,14 @@ participants:
     cl_type: teku
   - el_type: geth
     cl_type: prysm
-    cl_extra_params: [--minimal-config=true]
-    cl_image: ethpandaops/prysm-beacon-chain:develop-minimal
   - el_type: erigon
     cl_type: nimbus
-    cl_image: ethpandaops/nimbus-eth2:unstable-minimal
   - el_type: besu
     cl_type: lighthouse
-    cl_image: ethpandaops/lighthouse:unstable-minimal
   - el_type: reth
     cl_type: lodestar
-    cl_extra_env_vars: { LODESTAR_PRESET: minimal }
-    vc_extra_env_vars: { LODESTAR_PRESET: minimal }
   - el_type: geth
     cl_type: grandine
-    cl_image: ethpandaops/grandine:develop-minimal
 network_params:
   preset: minimal
   seconds_per_slot: 6

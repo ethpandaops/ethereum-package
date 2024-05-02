@@ -38,13 +38,13 @@ def launch(
     cl_launchers = {
         constants.CL_TYPE.lighthouse: {
             "launcher": lighthouse.new_lighthouse_launcher(
-                el_cl_data, jwt_file, network_params.network
+                el_cl_data, jwt_file, network_params
             ),
             "launch_method": lighthouse.launch,
         },
         constants.CL_TYPE.lodestar: {
             "launcher": lodestar.new_lodestar_launcher(
-                el_cl_data, jwt_file, network_params.network
+                el_cl_data, jwt_file, network_params
             ),
             "launch_method": lodestar.launch,
         },
@@ -52,7 +52,7 @@ def launch(
             "launcher": nimbus.new_nimbus_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
+                network_params,
                 keymanager_file,
             ),
             "launch_method": nimbus.launch,
@@ -61,7 +61,7 @@ def launch(
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
+                network_params,
                 prysm_password_relative_filepath,
                 prysm_password_artifact_uuid,
             ),
@@ -71,7 +71,7 @@ def launch(
             "launcher": teku.new_teku_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
+                network_params,
                 keymanager_file,
             ),
             "launch_method": teku.launch,
@@ -80,7 +80,7 @@ def launch(
             "launcher": grandine.new_grandine_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
+                network_params,
             ),
             "launch_method": grandine.launch,
         },

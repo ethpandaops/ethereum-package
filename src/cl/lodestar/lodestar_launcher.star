@@ -140,6 +140,7 @@ def launch(
         tolerations,
         node_selectors,
         port_publisher,
+        launcher.preset,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -239,6 +240,7 @@ def get_beacon_config(
     tolerations,
     node_selectors,
     port_publisher,
+    preset,
 ):
     el_client_rpc_url_str = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -367,6 +369,10 @@ def get_beacon_config(
             persistent_key="data-{0}".format(service_name),
             size=cl_volume_size,
         )
+
+    if preset == "minimal":
+        extra_env_vars["LODESTAR_PRESET"] = "minimal"
+
     return ServiceConfig(
         image=image,
         ports=used_ports,
@@ -394,9 +400,10 @@ def get_beacon_config(
     )
 
 
-def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network):
+def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network_params):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
+        network=network_params.network,
+        preset=network_params.preset,
     )

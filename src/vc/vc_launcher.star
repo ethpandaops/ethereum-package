@@ -46,6 +46,7 @@ def launch(
     global_tolerations,
     node_selectors,
     keymanager_enabled,
+    preset,
     network,  # TODO: remove when deneb rebase is done
     electra_fork_epoch,  # TODO: remove when deneb rebase is done
 ):
@@ -116,6 +117,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            preset=preset,
         )
     elif vc_type == constants.VC_TYPE.teku:
         config = teku.get_config(

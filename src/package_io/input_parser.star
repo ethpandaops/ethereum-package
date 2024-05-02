@@ -41,6 +41,15 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:latest",
 }
 
+DEFAULT_VC_IMAGES_MINIMAL = {
+    "lighthouse": "ethpandaops/lighthouse:unstable-minimal",
+    "lodestar": "chainsafe/lodestar:next",
+    "nimbus": "ethpandaops/nimbus-validator-client:unstable-minimal",
+    "prysm": "ethpandaops/prysm-validator:develop-minimal",
+    "teku": "consensys/teku:latest",
+    "grandine": "ethpandaops/grandine:develop-minimal",
+}
+
 # Placeholder value for the deneb fork epoch if electra is being run
 # TODO: This is a hack, and should be removed once we electra is rebased on deneb
 HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
@@ -408,7 +417,10 @@ def parse_network_params(input_args):
 
         cl_image = participant["cl_image"]
         if cl_image == "":
-            default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
+            if result["network_params"]["preset"] == "minimal":
+                default_image = DEFAULT_CL_IMAGES_MINIMAL.get(cl_type, "")
+            else:
+                default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
@@ -442,7 +454,10 @@ def parse_network_params(input_args):
         if vc_image == "":
             if cl_image == "" or vc_type != cl_type:
                 # If the validator client image is also empty, default to the image for the chosen CL client
-                default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
+                if result["network_params"]["preset"] == "minimal":
+                    default_image = DEFAULT_VC_IMAGES_MINIMAL.get(vc_type, "")
+                else:
+                    default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
             else:
                 if cl_type == "prysm":
                     default_image = cl_image.replace("beacon-chain", "validator")
@@ -756,13 +771,15 @@ def get_default_mev_params(mev_type, preset):
     }
 
     if mev_type == "mev-rs":
-        mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE
-        mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE
         if preset == "minimal":
+            mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
+            mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
             mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[
                 constants.CL_TYPE.lighthouse
             ]
         else:
+            mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE
+            mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE
             mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
         mev_builder_extra_data = "0x68656C6C6F20776F726C640A"  # "hello world\n"
         mev_builder_extra_args = ["--mev-builder-config=" + "/config/config.toml"]
