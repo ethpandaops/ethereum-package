@@ -353,6 +353,8 @@ def input_parser(plan, input_args):
 
 def parse_network_params(input_args):
     result = default_input_args()
+    if result["network_params"]["preset"] == "minimal":
+        result["network_params"] = default_minimal_network_params()
     for attr in input_args:
         value = input_args[attr]
         # if its insterted we use the value inserted
@@ -670,7 +672,6 @@ def default_input_args():
 
 
 def default_network_params():
-    # this is temporary till we get params working
     return {
         "network": "kurtosis",
         "network_id": "3151908",
@@ -689,6 +690,28 @@ def default_network_params():
         "electra_fork_epoch": 500,
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
         "preset": "mainnet",
+    }
+
+
+def default_minimal_network_params():
+    return {
+        "network": "kurtosis",
+        "network_id": "3151908",
+        "deposit_contract_address": "0x4242424242424242424242424242424242424242",
+        "seconds_per_slot": 6,
+        "num_validator_keys_per_node": 64,
+        "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "preregistered_validator_count": 0,
+        "genesis_delay": 20,
+        "max_churn": 4,
+        "ejection_balance": 16000000000,
+        "eth1_follow_distance": 16,
+        "min_validator_withdrawability_delay": 256,
+        "shard_committee_period": 64,
+        "deneb_fork_epoch": 0,
+        "electra_fork_epoch": 500,
+        "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
+        "preset": "minimal",
     }
 
 
