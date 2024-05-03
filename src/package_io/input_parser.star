@@ -19,35 +19,35 @@ DEFAULT_CL_IMAGES = {
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
-    "lodestar": "chainsafe/lodestar:next",
-    "grandine": "ethpandaops/grandine:develop",
+    "lodestar": "chainsafe/lodestar:latest",
+    "grandine": "ethpandaops/grandine:master",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
     "lighthouse": "ethpandaops/lighthouse:stable-minimal",
     "teku": "consensys/teku:latest",
-    "nimbus": "ethpandaops/nimbus-eth2:unstable-minimal",
+    "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
-    "lodestar": "chainsafe/lodestar:next",
-    "grandine": "ethpandaops/grandine:develop-minimal",
+    "lodestar": "chainsafe/lodestar:latest",
+    "grandine": "ethpandaops/grandine:master-minimal",
 }
 
 DEFAULT_VC_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "lodestar": "chainsafe/lodestar:next",
+    "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
     "teku": "consensys/teku:latest",
-    "grandine": "sifrai/grandine:latest",
+    "grandine": "ethpandaops/grandine:master",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:unstable-minimal",
-    "lodestar": "chainsafe/lodestar:next",
-    "nimbus": "ethpandaops/nimbus-validator-client:unstable-minimal",
+    "lighthouse": "ethpandaops/lighthouse:stable-minimal",
+    "lodestar": "chainsafe/lodestar:latest",
+    "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
     "teku": "consensys/teku:latest",
-    "grandine": "ethpandaops/grandine:develop-minimal",
+    "grandine": "ethpandaops/grandine:master-minimal",
 }
 
 # Placeholder value for the deneb fork epoch if electra is being run
