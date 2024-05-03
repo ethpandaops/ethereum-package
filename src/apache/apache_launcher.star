@@ -27,15 +27,34 @@ USED_PORTS = {
 def launch_apache(
     plan,
     el_cl_genesis_data,
+    participant_contexts,
+    participant_configs,
     global_node_selectors,
 ):
     config_files_artifact_name = plan.upload_files(
         src=static_files.APACHE_CONFIG_FILEPATH, name="apache-config"
     )
 
+    all_enrs=[]
+    all_enodes=[]
+    for index, participant in enumerate(participant_contexts):
+        _, cl_client, el_client, _ = shared_utils.get_client_names(
+            participant, index, participant_contexts, participant_configs
+        )
+        all_enrs.append(cl_client.enr)
+        all_enodes.append(el_client.enode)
+
+
+    enr_list = "\n".join(all_enrs)
+    enode_list = "\n".join(all_enodes)
+
+    plan.print(enr_list)
+
     config = get_config(
         config_files_artifact_name,
         el_cl_genesis_data,
+        enr_list,
+        enode_list,
         global_node_selectors,
     )
 
@@ -45,6 +64,8 @@ def launch_apache(
 def get_config(
     config_files_artifact_name,
     el_cl_genesis_data,
+    enr_list,
+    enode_list,
     node_selectors,
 ):
     files = {
@@ -57,6 +78,13 @@ def get_config(
         "AddType application/octet-stream .tar",
         ">>",
         "/usr/local/apache2/conf/httpd.conf",
+        "&&",
+        "echo",
+        "-e",
+        enr_list,
+        ">",
+        "/network-configs/enrs.txt",
+        # "cat <<EOT > /network-configs/enodes.txt\n" + enode_list + "\nEOT",
         "&&",
         "tar",
         "-czvf",

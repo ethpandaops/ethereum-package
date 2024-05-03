@@ -492,6 +492,8 @@ def run(plan, args={}):
             apache.launch_apache(
                 plan,
                 el_cl_data_files_artifact_uuid,
+                all_participants,
+                args_with_right_defaults.participants,
                 global_node_selectors,
             )
             plan.print("Successfully launched apache")
