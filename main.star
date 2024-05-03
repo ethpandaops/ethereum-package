@@ -269,7 +269,7 @@ def run(plan, args={}):
         elif args_with_right_defaults.mev_type == "mev-rs":
             endpoint, relay_ip_address, relay_port = mev_rs_mev_relay.launch_mev_relay(
                 plan,
-                "mev-rs",
+                mev_params,
                 network_params.network,
                 beacon_uri,
                 el_cl_data_files_artifact_uuid,
@@ -341,6 +341,7 @@ def run(plan, args={}):
                         mev_boost_launcher,
                         mev_boost_service_name,
                         network_params.network,
+                        mev_params,
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
                         global_node_selectors,

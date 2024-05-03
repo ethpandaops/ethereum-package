@@ -26,6 +26,7 @@ def launch(
     mev_boost_launcher,
     service_name,
     network,
+    mev_params,
     relays,
     el_cl_genesis_data,
     global_node_selectors,
@@ -35,7 +36,7 @@ def launch(
         if network in constants.PUBLIC_NETWORKS
         else constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
     )
-
+    image = mev_params.mev_boost_image
     template_data = new_config_template_data(
         network,
         input_parser.MEV_BOOST_PORT,
@@ -66,6 +67,7 @@ def launch(
 
     config = get_config(
         mev_boost_launcher,
+        image,
         config_file_path,
         config_files_artifact_name,
         el_cl_genesis_data,
@@ -81,13 +83,14 @@ def launch(
 
 def get_config(
     mev_boost_launcher,
+    image,
     config_file_path,
     config_file,
     el_cl_genesis_data,
     node_selectors,
 ):
     return ServiceConfig(
-        image=constants.DEFAULT_MEV_RS_IMAGE,
+        image=image,
         ports=USED_PORTS,
         cmd=[
             "boost",

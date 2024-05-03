@@ -25,14 +25,14 @@ MAX_MEMORY = 256
 
 def launch_mev_relay(
     plan,
-    service_name,
+    mev_params,
     network,
     beacon_uri,
     el_cl_genesis_data,
     global_node_selectors,
 ):
     node_selectors = global_node_selectors
-
+    image = mev_params.mev_relay_image
     network = (
         network
         if network in constants.PUBLIC_NETWORKS
@@ -69,9 +69,9 @@ def launch_mev_relay(
     )
 
     mev_relay_service = plan.add_service(
-        name=service_name + "-mev-relay",
+        name="mev-rs-relay",
         config=ServiceConfig(
-            image=constants.DEFAULT_MEV_RS_IMAGE,
+            image=image,
             cmd=[
                 "relay",
                 config_file_path,
