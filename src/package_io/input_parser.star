@@ -84,7 +84,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 
 
 def input_parser(plan, input_args):
-    result = parse_network_params(input_args)
+    result = parse_network_params(plan, input_args)
 
     # add default eth2 input params
     result["mev_params"] = get_default_mev_params(
@@ -351,9 +351,9 @@ def input_parser(plan, input_args):
     )
 
 
-def parse_network_params(input_args):
+def parse_network_params(plan, input_args):
     result = default_input_args()
-    if result["network_params"]["preset"] == "minimal":
+    if input_args["network_params"]["preset"] == "minimal":
         result["network_params"] = default_minimal_network_params()
     for attr in input_args:
         value = input_args[attr]

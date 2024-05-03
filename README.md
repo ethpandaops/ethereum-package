@@ -36,6 +36,7 @@ v_max_mem -> vc_max_mem
 ### Global flags
 ```
 global_client_log_level -> global_log_level
+mev_type: full -> mev_type: flashbots # new rename as of 3 May 2024
 ```
 
 To help you with the transition, we have added a script that will automatically update your `yaml` file to the new format. You can run the following command to update your network_params.yaml file:

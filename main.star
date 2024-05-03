@@ -105,8 +105,6 @@ def run(plan, args={}):
             plan,
             "mev-rs",
             network_params.network,
-            # relay_ip_address,
-            # relay_port,
             constants.VALIDATING_REWARDS_ACCOUNT,
             network_params.preregistered_validator_keys_mnemonic,
             args_with_right_defaults.mev_params.mev_builder_extra_data,

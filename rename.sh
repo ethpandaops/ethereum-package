@@ -74,6 +74,8 @@ replacements=(
     vc_max_mem
     global_client_log_level
     global_log_level
+    full
+    flashbots
 )
 
 # Perform replacements
