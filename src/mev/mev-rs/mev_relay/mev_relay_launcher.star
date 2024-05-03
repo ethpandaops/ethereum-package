@@ -5,7 +5,7 @@ constants = import_module("../../../package_io/constants.star")
 
 MEV_RELAY_CONFIG_FILENAME = "config.toml"
 MEV_RELAY_MOUNT_DIRPATH_ON_SERVICE = "/config"
-MEV_RELAY_FILES_ARTIFACT_NAME = "mev-rs-mev-relay-config"
+MEV_RELAY_FILES_ARTIFACT_NAME = "mev-rs-relay-config"
 
 MEV_RELAY_ENDPOINT_PORT = 28545
 

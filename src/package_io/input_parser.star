@@ -24,7 +24,7 @@ DEFAULT_CL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:unstable-minimal",
+    "lighthouse": "ethpandaops/lighthouse:stable-minimal",
     "teku": "consensys/teku:latest",
     "nimbus": "ethpandaops/nimbus-eth2:unstable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",

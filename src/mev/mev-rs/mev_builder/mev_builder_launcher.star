@@ -65,7 +65,7 @@ def new_builder_config_template_data(
 ):
     return {
         "Network": network,
-        "Relay": "mev-rs-mev-relay",
+        "Relay": "mev-rs-relay",
         "RelayPort": mev_rs_relay.MEV_RELAY_ENDPOINT_PORT,
         "PublicKey": pubkey,
         "SecretKey": secret,
