@@ -355,6 +355,8 @@ def parse_network_params(plan, input_args):
     result = default_input_args()
     if input_args["network_params"]["preset"] == "minimal":
         result["network_params"] = default_minimal_network_params()
+    else:
+        result["network_params"] = default_mainnet_network_params()
     for attr in input_args:
         value = input_args[attr]
         # if its insterted we use the value inserted
