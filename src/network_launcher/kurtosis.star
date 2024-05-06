@@ -56,6 +56,11 @@ def launch(plan, network_params, participants, parallel_keystore_generation):
         ethereum_genesis_generator_image = (
             constants.ETHEREUM_GENESIS_GENERATOR.capella_genesis
         )
+    # we are running in deneb genesis, but only one fork is allowed to be active at a time
+    elif network_params.electra_fork_epoch == network_params.eip7594_fork_epoch:
+        fail(
+            "Unsupported fork epoch configuration, need to define either electra_fork_epoch or eip7594_fork_epoch"
+        )
     # we are running deneb genesis - default behavior
     elif network_params.deneb_fork_epoch == 0:
         ethereum_genesis_generator_image = (

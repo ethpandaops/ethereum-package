@@ -508,9 +508,14 @@ network_params:
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
 
-  # The epoch at which the deneb/electra forks are set to occur.
+  # The epoch at which the deneb/electra/eip7594(peerdas) forks are set to occur. Note: PeerDAS and Electra clients are currently
+  # working on forks. So set either one of the below forks.
   deneb_fork_epoch: 0
   electra_fork_epoch: 500
+  eip7594_fork_epoch: 1000
+
+  # The fork version to set if the eip7594 fork is active
+  eip7594_fork_version: "0x70000038"
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/

@@ -267,6 +267,8 @@ def input_parser(plan, input_args):
             eth1_follow_distance=result["network_params"]["eth1_follow_distance"],
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
+            eip7594_fork_epoch=result["network_params"]["eip7594_fork_epoch"],
+            eip7594_fork_version=result["network_params"]["eip7594_fork_version"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
@@ -692,6 +694,8 @@ def default_network_params():
         "shard_committee_period": 256,
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 500,
+        "eip7594_fork_epoch": 1000,
+        "eip7594_fork_version": "0x70000038",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
         "preset": "mainnet",
     }
@@ -714,6 +718,8 @@ def default_minimal_network_params():
         "shard_committee_period": 64,
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 500,
+        "eip7594_fork_epoch": 1000,
+        "eip7594_fork_version": "0x70000038",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
         "preset": "minimal",
     }
