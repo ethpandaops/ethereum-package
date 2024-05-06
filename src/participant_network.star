@@ -342,8 +342,6 @@ def launch_participant_network(
             preset=network_params.preset,
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
-            eip7594_fork_epoch=network_params.eip7594_fork_epoch,
-            eip7594_fork_version=network_params.eip7594_fork_version,
         )
         all_vc_contexts.append(vc_context)
 
