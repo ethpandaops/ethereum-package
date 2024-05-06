@@ -1,5 +1,32 @@
 # Changelog
 
+## [3.0.0](https://github.com/kurtosis-tech/ethereum-package/compare/2.2.0...3.0.0) (2024-05-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* add mev-rs relay/builder/boost ([#586](https://github.com/kurtosis-tech/ethereum-package/issues/586))
+* upcoming file path change in kurtosis upstream ([#582](https://github.com/kurtosis-tech/ethereum-package/issues/582))
+
+### Features
+
+* add apache file server ([#581](https://github.com/kurtosis-tech/ethereum-package/issues/581)) ([205256a](https://github.com/kurtosis-tech/ethereum-package/commit/205256a6d79303719973655b459e803d9b8e311f))
+* add enr/enode to apache ([#589](https://github.com/kurtosis-tech/ethereum-package/issues/589)) ([b789e17](https://github.com/kurtosis-tech/ethereum-package/commit/b789e1705f076ec6aa01ceffbf5fbeebb02d8c0f))
+* add execution client urls to dora config ([#588](https://github.com/kurtosis-tech/ethereum-package/issues/588)) ([2a20d5a](https://github.com/kurtosis-tech/ethereum-package/commit/2a20d5ad7d2bf8f9a9eb2b619681b438810176d2))
+* add mev-rs relay/builder/boost ([#586](https://github.com/kurtosis-tech/ethereum-package/issues/586)) ([525a8fb](https://github.com/kurtosis-tech/ethereum-package/commit/525a8fb3d794f8030a574f55f3a7e719c1b58dca))
+* Add peerdas support ([#591](https://github.com/kurtosis-tech/ethereum-package/issues/591)) ([14296ca](https://github.com/kurtosis-tech/ethereum-package/commit/14296cab11d8c7a9572cf57a37980e1d93285cad))
+* add snooper urls to assertoor config ([#571](https://github.com/kurtosis-tech/ethereum-package/issues/571)) ([87f383f](https://github.com/kurtosis-tech/ethereum-package/commit/87f383fbc7f9e28d383853fcb7cd491abe13a0cc))
+* allow setting exit ip address ([#584](https://github.com/kurtosis-tech/ethereum-package/issues/584)) ([aabc942](https://github.com/kurtosis-tech/ethereum-package/commit/aabc942c4e8534288f28cdbb1e9e55f2613f383c))
+
+
+### Bug Fixes
+
+* non-existent field access on error message ([#577](https://github.com/kurtosis-tech/ethereum-package/issues/577)) ([8515d27](https://github.com/kurtosis-tech/ethereum-package/commit/8515d276056a47f9e6a77dd498f823042bff1a8f))
+* participant redefining global flag ([#573](https://github.com/kurtosis-tech/ethereum-package/issues/573)) ([9139f4b](https://github.com/kurtosis-tech/ethereum-package/commit/9139f4b4c77bc43477740972512171d7f28bfa84))
+* path for shadowforks post kt update ([#585](https://github.com/kurtosis-tech/ethereum-package/issues/585)) ([e0622a7](https://github.com/kurtosis-tech/ethereum-package/commit/e0622a77305732e01ee0fce183fda15c3dcd2dad))
+* remove erigon's --chain parameter ([#575](https://github.com/kurtosis-tech/ethereum-package/issues/575)) ([02b9c50](https://github.com/kurtosis-tech/ethereum-package/commit/02b9c50495f9b8cce0b0df502f19b37c0cb21ffd))
+* upcoming file path change in kurtosis upstream ([#582](https://github.com/kurtosis-tech/ethereum-package/issues/582)) ([8d7c4f9](https://github.com/kurtosis-tech/ethereum-package/commit/8d7c4f9c1feba07511c22d006b5121b45893f642))
+
 ## [2.2.0](https://github.com/kurtosis-tech/ethereum-package/compare/2.1.0...2.2.0) (2024-04-19)
 
 
