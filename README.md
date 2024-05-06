@@ -511,8 +511,8 @@ network_params:
   # The epoch at which the deneb/electra/eip7594(peerdas) forks are set to occur. Note: PeerDAS and Electra clients are currently
   # working on forks. So set either one of the below forks.
   deneb_fork_epoch: 0
-  electra_fork_epoch: 500
-  eip7594_fork_epoch: 1000
+  electra_fork_epoch: 100000000
+  eip7594_fork_epoch: 100000001
 
   # The fork version to set if the eip7594 fork is active
   eip7594_fork_version: "0x70000038"
