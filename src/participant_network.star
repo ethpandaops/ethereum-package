@@ -101,6 +101,7 @@ def launch_participant_network(
             network_params.eth1_follow_distance,
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
+            network_params.eip7594_fork_epoch,
             latest_block.files_artifacts[0] if latest_block != "" else "",
             network_params.min_validator_withdrawability_delay,
             network_params.shard_committee_period,
@@ -340,6 +341,7 @@ def launch_participant_network(
             preset=network_params.preset,
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
+            eip7594_fork_epoch=network_params.eip7594_fork_epoch,
         )
         all_vc_contexts.append(vc_context)
 
