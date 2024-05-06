@@ -159,7 +159,11 @@ def input_parser(plan, input_args):
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
 
-    if result.get("mev_type") in ("mock", "flashbots", "mev-rs"):
+    if result.get("mev_type") in (
+        constants.MOCK_MEV_TYPE,
+        constants.FLASHBOTS_MEV_TYPE,
+        constants.MEV_RS_MEV_TYPE,
+    ):
         result = enrich_mev_extra_params(
             result,
             MEV_BOOST_SERVICE_NAME_PREFIX,
@@ -793,7 +797,7 @@ def get_default_mev_params(mev_type, preset):
         "labels": None,
     }
 
-    if mev_type == "mev-rs":
+    if mev_type == constants.MEV_RS_MEV_TYPE:
         if preset == "minimal":
             mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
             mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
@@ -933,7 +937,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     index_str = shared_utils.zfill_custom(
         num_participants + 1, len(str(num_participants + 1))
     )
-    if mev_type == "flashbots":
+    if mev_type == constants.FLASHBOTS_MEV_TYPE:
         mev_participant = default_participant()
         mev_participant["el_type"] = "geth-builder"
         mev_participant.update(
@@ -980,7 +984,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 
         parsed_arguments_dict["participants"].append(mev_participant)
 
-    if mev_type == "mev-rs":
+    if mev_type == constants.MEV_RS_MEV_TYPE:
         mev_participant = default_participant()
         mev_participant["el_type"] = "reth-builder"
         mev_participant.update(
