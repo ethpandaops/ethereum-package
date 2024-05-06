@@ -95,7 +95,7 @@ def get_config(
 
     if network_params.preset == "minimal":
         IMAGE_NAME = "ethpandaops/dora:minimal-preset"
-    elif network_params.eip7594_fork_epoch != None:
+    elif network_params.eip7594_fork_epoch < 100000000:
         IMAGE_NAME = "ethpandaops/dora:peer-das"
     else:
         IMAGE_NAME = "ethpandaops/dora:latest"
