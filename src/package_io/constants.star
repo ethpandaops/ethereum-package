@@ -62,6 +62,10 @@ KEYMANAGER_MOUNT_PATH_ON_CONTAINER = (
     KEYMANAGER_MOUNT_PATH_ON_CLIENTS + "/keymanager.txt"
 )
 
+MOCK_MEV_TYPE = "mock"
+FLASHBOTS_MEV_TYPE = "flashbots"
+MEV_RS_MEV_TYPE = "mev-rs"
+
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.27"
 DEFAULT_FLASHBOTS_BUILDER_IMAGE = "flashbots/builder:latest"

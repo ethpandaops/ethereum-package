@@ -99,11 +99,11 @@ def run(plan, args={}):
 
     plan.print("Read the prometheus, grafana templates")
 
-    if args_with_right_defaults.mev_type == "mev-rs":
+    if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
         plan.print("Generating mev-rs builder config file")
         mev_rs__builder_config_file = mev_rs_mev_builder.new_builder_config(
             plan,
-            "mev-rs",
+            constants.MEV_RS_MEV_TYPE,
             network_params.network,
             constants.VALIDATING_REWARDS_ACCOUNT,
             network_params.preregistered_validator_keys_mnemonic,
@@ -198,7 +198,7 @@ def run(plan, args={}):
     # otherwise dummy relays spinup if chosen
     elif (
         args_with_right_defaults.mev_type
-        and args_with_right_defaults.mev_type == "mock"
+        and args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE
     ):
         el_uri = "{0}:{1}".format(
             all_el_contexts[0].ip_addr,
@@ -217,8 +217,8 @@ def run(plan, args={}):
         )
         mev_endpoints.append(endpoint)
     elif args_with_right_defaults.mev_type and (
-        args_with_right_defaults.mev_type == "flashbots"
-        or args_with_right_defaults.mev_type == "mev-rs"
+        args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
+        or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
     ):
         builder_uri = "http://{0}:{1}".format(
             all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
@@ -252,7 +252,7 @@ def run(plan, args={}):
             timeout="20m",
             service_name=first_client_beacon_name,
         )
-        if args_with_right_defaults.mev_type == "flashbots":
+        if args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE:
             endpoint = flashbots_mev_relay.launch_mev_relay(
                 plan,
                 mev_params,
@@ -264,7 +264,7 @@ def run(plan, args={}):
                 persistent,
                 global_node_selectors,
             )
-        elif args_with_right_defaults.mev_type == "mev-rs":
+        elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
             endpoint, relay_ip_address, relay_port = mev_rs_mev_relay.launch_mev_relay(
                 plan,
                 mev_params,
@@ -300,8 +300,8 @@ def run(plan, args={}):
             )
             if args_with_right_defaults.participants[index].validator_count != 0:
                 if (
-                    args_with_right_defaults.mev_type == "flashbots"
-                    or args_with_right_defaults.mev_type == "mock"
+                    args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
+                    or args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE
                 ):
                     mev_boost_launcher = flashbots_mev_boost.new_mev_boost_launcher(
                         MEV_BOOST_SHOULD_CHECK_RELAY,
@@ -322,7 +322,7 @@ def run(plan, args={}):
                         mev_params.mev_boost_args,
                         global_node_selectors,
                     )
-                elif args_with_right_defaults.mev_type == "mev-rs":
+                elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
                     plan.print("Launching mev-rs mev boost")
                     mev_boost_launcher = mev_rs_mev_boost.new_mev_boost_launcher(
                         MEV_BOOST_SHOULD_CHECK_RELAY,
