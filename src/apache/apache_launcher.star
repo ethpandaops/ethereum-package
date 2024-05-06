@@ -6,6 +6,8 @@ HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 80
 
 APACHE_CONFIG_FILENAME = "index.html"
+APACHE_ENR_FILENAME = "boot_enr.txt"
+APACHE_ENODE_FILENAME = "bootnode.txt"
 
 APACHE_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/usr/local/apache2/htdocs/"
 
@@ -45,16 +47,28 @@ def launch_apache(
         all_enodes.append(el_client.enode)
 
 
-    enr_list = "\n".join(all_enrs)
-    enode_list = "\n".join(all_enodes)
+    template_data = new_config_template_data(
+        all_enrs,
+        all_enodes,
+    )
 
-    plan.print(enr_list)
+    template_and_data = shared_utils.new_template_and_data(
+        static_files.APACHE_ENR_FILEPATH,
+        template_data,
+    )
+
+    template_and_data_by_rel_dest_filepath = {}
+    template_and_data_by_rel_dest_filepath[APACHE_ENR_FILENAME] = template_and_data
+    template_and_data_by_rel_dest_filepath[APACHE_ENODE_FILENAME] = template_and_data
+
+    bootstrap_info_files_artifact_name = plan.render_templates(
+        template_and_data_by_rel_dest_filepath, "bootstrap-info"
+    )
 
     config = get_config(
         config_files_artifact_name,
         el_cl_genesis_data,
-        enr_list,
-        enode_list,
+        bootstrap_info_files_artifact_name,
         global_node_selectors,
     )
 
@@ -64,35 +78,30 @@ def launch_apache(
 def get_config(
     config_files_artifact_name,
     el_cl_genesis_data,
-    enr_list,
-    enode_list,
+    bootstrap_info_files_artifact_name,
     node_selectors,
 ):
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/boot": bootstrap_info_files_artifact_name,
         APACHE_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
     }
 
     cmd = [
-        "echo",
-        "AddType application/octet-stream .tar",
-        ">>",
-        "/usr/local/apache2/conf/httpd.conf",
-        "&&",
-        "echo",
-        "-e",
-        enr_list,
-        ">",
-        "/network-configs/enrs.txt",
+        # "echo",
+        # "AddType application/octet-stream .tar",
+        # ">>",
+        # "/usr/local/apache2/conf/httpd.conf",
+        # "&&",
         # "cat <<EOT > /network-configs/enodes.txt\n" + enode_list + "\nEOT",
-        "&&",
-        "tar",
-        "-czvf",
-        "/usr/local/apache2/htdocs/network-config.tar",
-        "-C",
-        "/network-configs/",
-        ".",
-        "&&",
+        # "&&",
+        # "tar",
+        # "-czvf",
+        # "/usr/local/apache2/htdocs/network-config.tar",
+        # "-C",
+        # "/network-configs/",
+        # ".",
+        # "&&",
         "httpd-foreground",
     ]
 
@@ -110,3 +119,9 @@ def get_config(
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
     )
+
+def new_config_template_data(cl_client_info, el_client_info):
+    return {
+        "CLClientInfo": cl_client_info,
+        "ELClientInfo": el_client_info,
+    }
