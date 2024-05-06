@@ -267,7 +267,7 @@ def input_parser(plan, input_args):
             eth1_follow_distance=result["network_params"]["eth1_follow_distance"],
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
-            peerdas_fork_epoch=result["network_params"]["eip7594_fork_epoch"],
+            eip7594_fork_epoch =result["network_params"]["eip7594_fork_epoch"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
