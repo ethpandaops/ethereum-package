@@ -45,6 +45,15 @@ beaconapi:
   redisCacheAddr: ""
   redisCachePrefix: ""
 
+executionapi:
+  endpoints:
+{{ range $clClient := .ELClientInfo }}
+    - url: "{{ $clClient.Execution_HTTP_URL }}"
+      name: "{{ $clClient.FullName }}"
+      archive: true
+{{- end }}
+  depositLogBatchSize: 1000
+
 # indexer keeps track of the latest epochs in memory.
 indexer:
   # max number of epochs to keep in memory
