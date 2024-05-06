@@ -131,6 +131,7 @@ def new_cl_client_info(beacon_http_url, full_name):
         "FullName": full_name,
     }
 
+
 def new_el_client_info(execution_http_url, full_name):
     return {
         "Execution_HTTP_URL": execution_http_url,
