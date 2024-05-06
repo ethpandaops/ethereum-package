@@ -422,10 +422,10 @@ def get_beacon_config(
 def new_grandine_launcher(
     el_cl_genesis_data,
     jwt_file,
-    network,
+    network_params,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
+        network=network_params.network,
     )

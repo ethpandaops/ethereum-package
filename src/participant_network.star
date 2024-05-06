@@ -337,6 +337,7 @@ def launch_participant_network(
             global_tolerations=global_tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=participant.keymanager_enabled,
+            preset=network_params.preset,
             network=network_params.network,
             electra_fork_epoch=network_params.electra_fork_epoch,
         )

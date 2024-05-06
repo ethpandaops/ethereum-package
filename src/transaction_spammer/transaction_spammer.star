@@ -33,11 +33,7 @@ def get_config(
     electra_fork_epoch,
     node_selectors,
 ):
-    # Temp hack to use the old tx-fuzz image until we can get the new one working
-    if electra_fork_epoch != None:
-        tx_spammer_image = "ethpandaops/tx-fuzz:kaustinen-281adbc"
-    else:
-        tx_spammer_image = "ethpandaops/tx-fuzz:master"
+    tx_spammer_image = "ethpandaops/tx-fuzz:master"
 
     cmd = [
         "spam",

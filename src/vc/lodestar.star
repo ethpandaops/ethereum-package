@@ -33,6 +33,7 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    preset,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -92,6 +93,9 @@ def get_config(
         files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+
+    if preset == "minimal":
+        extra_env_vars["LODESTAR_PRESET"] = "minimal"
 
     return ServiceConfig(
         image=image,

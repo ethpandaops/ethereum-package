@@ -19,29 +19,43 @@ DEFAULT_CL_IMAGES = {
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
-    "lodestar": "chainsafe/lodestar:next",
-    "grandine": "ethpandaops/grandine:develop",
+    "lodestar": "chainsafe/lodestar:latest",
+    "grandine": "ethpandaops/grandine:master",
+}
+
+DEFAULT_CL_IMAGES_MINIMAL = {
+    "lighthouse": "ethpandaops/lighthouse:stable-minimal",
+    "teku": "consensys/teku:latest",
+    "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
+    "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
+    "lodestar": "chainsafe/lodestar:latest",
+    "grandine": "ethpandaops/grandine:master-minimal",
 }
 
 DEFAULT_VC_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "lodestar": "chainsafe/lodestar:next",
+    "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
     "teku": "consensys/teku:latest",
-    "grandine": "sifrai/grandine:latest",
+    "grandine": "ethpandaops/grandine:master",
 }
 
-MEV_BOOST_RELAY_DEFAULT_IMAGE = "flashbots/mev-boost-relay:0.27"
-
-MEV_BOOST_RELAY_IMAGE_NON_ZERO_CAPELLA = "flashbots/mev-boost-relay:0.26"
+DEFAULT_VC_IMAGES_MINIMAL = {
+    "lighthouse": "ethpandaops/lighthouse:stable-minimal",
+    "lodestar": "chainsafe/lodestar:latest",
+    "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
+    "prysm": "ethpandaops/prysm-validator:develop-minimal",
+    "teku": "consensys/teku:latest",
+    "grandine": "ethpandaops/grandine:master-minimal",
+}
 
 # Placeholder value for the deneb fork epoch if electra is being run
 # TODO: This is a hack, and should be removed once we electra is rebased on deneb
 HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
 
 # MEV Params
-FLASHBOTS_MEV_BOOST_PORT = 18550
+MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
 
 # Minimum number of validators required for a network to be valid is 64
@@ -70,11 +84,12 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 
 
 def input_parser(plan, input_args):
-    result = parse_network_params(input_args)
+    result = parse_network_params(plan, input_args)
 
     # add default eth2 input params
-    result["mev_type"] = None
-    result["mev_params"] = get_default_mev_params()
+    result["mev_params"] = get_default_mev_params(
+        result.get("mev_type"), result["network_params"]["preset"]
+    )
     if (
         result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
@@ -144,12 +159,24 @@ def input_parser(plan, input_args):
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
 
-    if result.get("mev_type") in ("mock", "full"):
+    if result.get("mev_type") in (
+        constants.MOCK_MEV_TYPE,
+        constants.FLASHBOTS_MEV_TYPE,
+        constants.MEV_RS_MEV_TYPE,
+    ):
         result = enrich_mev_extra_params(
             result,
             MEV_BOOST_SERVICE_NAME_PREFIX,
-            FLASHBOTS_MEV_BOOST_PORT,
+            MEV_BOOST_PORT,
             result.get("mev_type"),
+        )
+    elif result.get("mev_type") == None:
+        pass
+    else:
+        fail(
+            "Unsupported MEV type: {0}, please use 'mock', 'flashbots' or 'mev-rs' type".format(
+                result.get("mev_type")
+            )
         )
 
     if result["port_publisher"]["nat_exit_ip"] == "auto":
@@ -252,6 +279,7 @@ def input_parser(plan, input_args):
             mev_relay_image=result["mev_params"]["mev_relay_image"],
             mev_builder_image=result["mev_params"]["mev_builder_image"],
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
+            mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
@@ -267,7 +295,9 @@ def input_parser(plan, input_args):
             mev_flood_seconds_per_bundle=result["mev_params"][
                 "mev_flood_seconds_per_bundle"
             ],
-        ),
+        )
+        if result["mev_params"]
+        else None,
         tx_spammer_params=struct(
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
@@ -325,8 +355,10 @@ def input_parser(plan, input_args):
     )
 
 
-def parse_network_params(input_args):
+def parse_network_params(plan, input_args):
     result = default_input_args()
+    if input_args.get("network_params", {}).get("preset") == "minimal":
+        result["network_params"] = default_minimal_network_params()
     for attr in input_args:
         value = input_args[attr]
         # if its insterted we use the value inserted
@@ -391,7 +423,10 @@ def parse_network_params(input_args):
 
         cl_image = participant["cl_image"]
         if cl_image == "":
-            default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
+            if result["network_params"]["preset"] == "minimal":
+                default_image = DEFAULT_CL_IMAGES_MINIMAL.get(cl_type, "")
+            else:
+                default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
@@ -425,7 +460,10 @@ def parse_network_params(input_args):
         if vc_image == "":
             if cl_image == "" or vc_type != cl_type:
                 # If the validator client image is also empty, default to the image for the chosen CL client
-                default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
+                if result["network_params"]["preset"] == "minimal":
+                    default_image = DEFAULT_VC_IMAGES_MINIMAL.get(vc_type, "")
+                else:
+                    default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
             else:
                 if cl_type == "prysm":
                     default_image = cl_image.replace("beacon-chain", "validator")
@@ -638,7 +676,6 @@ def default_input_args():
 
 
 def default_network_params():
-    # this is temporary till we get params working
     return {
         "network": "kurtosis",
         "network_id": "3151908",
@@ -657,6 +694,28 @@ def default_network_params():
         "electra_fork_epoch": 500,
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
         "preset": "mainnet",
+    }
+
+
+def default_minimal_network_params():
+    return {
+        "network": "kurtosis",
+        "network_id": "3151908",
+        "deposit_contract_address": "0x4242424242424242424242424242424242424242",
+        "seconds_per_slot": 6,
+        "num_validator_keys_per_node": 64,
+        "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "preregistered_validator_count": 0,
+        "genesis_delay": 20,
+        "max_churn": 4,
+        "ejection_balance": 16000000000,
+        "eth1_follow_distance": 16,
+        "min_validator_withdrawability_delay": 256,
+        "shard_committee_period": 64,
+        "deneb_fork_epoch": 0,
+        "electra_fork_epoch": 500,
+        "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
+        "preset": "minimal",
     }
 
 
@@ -716,24 +775,59 @@ def default_participant():
     }
 
 
-def get_default_mev_params():
+def get_default_mev_params(mev_type, preset):
+    mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
+    mev_builder_image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+    if preset == "minimal":
+        mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[constants.CL_TYPE.lighthouse]
+    else:
+        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+    mev_builder_extra_data = None
+    mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
+    mev_boost_args = ["mev-boost", "--relay-check"]
+    mev_relay_api_extra_args = []
+    mev_relay_housekeeper_extra_args = []
+    mev_relay_website_extra_args = []
+    mev_builder_extra_args = []
+    mev_flood_image = "flashbots/mev-flood"
+    mev_flood_extra_args = []
+    mev_flood_seconds_per_bundle = 15
+    mev_builder_prometheus_config = {
+        "scrape_interval": "15s",
+        "labels": None,
+    }
+
+    if mev_type == constants.MEV_RS_MEV_TYPE:
+        if preset == "minimal":
+            mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
+            mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
+            mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[
+                constants.CL_TYPE.lighthouse
+            ]
+            mev_boost_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
+        else:
+            mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE
+            mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE
+            mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+            mev_boost_image = constants.DEFAULT_MEV_RS_IMAGE
+        mev_builder_extra_data = "0x68656C6C6F20776F726C640A"  # "hello world\n"
+        mev_builder_extra_args = ["--mev-builder-config=" + "/config/config.toml"]
+
     return {
-        "mev_relay_image": MEV_BOOST_RELAY_DEFAULT_IMAGE,
-        "mev_builder_image": "flashbots/builder:latest",
-        "mev_builder_cl_image": "sigp/lighthouse:latest",
-        "mev_boost_image": "flashbots/mev-boost",
-        "mev_boost_args": ["mev-boost", "--relay-check"],
-        "mev_relay_api_extra_args": [],
-        "mev_relay_housekeeper_extra_args": [],
-        "mev_relay_website_extra_args": [],
-        "mev_builder_extra_args": [],
-        "mev_flood_image": "flashbots/mev-flood",
-        "mev_flood_extra_args": [],
-        "mev_flood_seconds_per_bundle": 15,
-        "mev_builder_prometheus_config": {
-            "scrape_interval": "15s",
-            "labels": None,
-        },
+        "mev_relay_image": mev_relay_image,
+        "mev_builder_image": mev_builder_image,
+        "mev_builder_cl_image": mev_builder_cl_image,
+        "mev_builder_extra_data": mev_builder_extra_data,
+        "mev_builder_extra_args": mev_builder_extra_args,
+        "mev_boost_image": mev_boost_image,
+        "mev_boost_args": mev_boost_args,
+        "mev_relay_api_extra_args": mev_relay_api_extra_args,
+        "mev_relay_housekeeper_extra_args": mev_relay_housekeeper_extra_args,
+        "mev_relay_website_extra_args": mev_relay_website_extra_args,
+        "mev_flood_image": mev_flood_image,
+        "mev_flood_extra_args": mev_flood_extra_args,
+        "mev_flood_seconds_per_bundle": mev_flood_seconds_per_bundle,
+        "mev_builder_prometheus_config": mev_builder_prometheus_config,
     }
 
 
@@ -843,9 +937,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     index_str = shared_utils.zfill_custom(
         num_participants + 1, len(str(num_participants + 1))
     )
-    if mev_type == "full":
+    if mev_type == constants.FLASHBOTS_MEV_TYPE:
         mev_participant = default_participant()
-        mev_participant["el_type"] = mev_participant["el_type"] + "-builder"
+        mev_participant["el_type"] = "geth-builder"
         mev_participant.update(
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
@@ -890,6 +984,26 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 
         parsed_arguments_dict["participants"].append(mev_participant)
 
+    if mev_type == constants.MEV_RS_MEV_TYPE:
+        mev_participant = default_participant()
+        mev_participant["el_type"] = "reth-builder"
+        mev_participant.update(
+            {
+                "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
+                "cl_image": parsed_arguments_dict["mev_params"]["mev_builder_cl_image"],
+                "cl_extra_params": [
+                    "--always-prepare-payload",
+                    "--prepare-payload-lookahead",
+                    "12000",
+                    "--disable-peer-scoring",
+                ],
+                "el_extra_params": parsed_arguments_dict["mev_params"][
+                    "mev_builder_extra_args"
+                ],
+                "validator_count": 0,
+            }
+        )
+        parsed_arguments_dict["participants"].append(mev_participant)
     return parsed_arguments_dict
 
 

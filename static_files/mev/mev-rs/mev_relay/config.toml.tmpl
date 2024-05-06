@@ -1,0 +1,10 @@
+network = "{{ .Network }}"
+
+[relay]
+host = "0.0.0.0"
+port = {{ .Port }}
+beacon_node_url = "{{ .BeaconNodeURL }}"
+secret_key = "{{ .SecretKey }}"
+accepted_builders = [
+    "{{ .PublicKey }}",
+]

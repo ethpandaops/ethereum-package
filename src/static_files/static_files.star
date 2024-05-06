@@ -77,8 +77,16 @@ CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH = (
 
 JWT_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/jwt/jwtsecret"
 KEYMANAGER_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/keymanager/keymanager.txt"
-KEYMANAGER_P12_PATH_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/keymanager/validator_keystore.p12"
-)
+
 
 SHADOWFORK_FILEPATH = "/network-configs/latest_block.json"
+
+MEV_RS_MEV_BOOST_CONFIG_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_boost/config.toml.tmpl"
+)
+MEV_RS_MEV_RELAY_CONFIG_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_relay/config.toml.tmpl"
+)
+MEV_RS_MEV_BUILDER_CONFIG_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_builder/config.toml.tmpl"
+)

@@ -148,6 +148,7 @@ def launch(
         tolerations,
         node_selectors,
         port_publisher,
+        launcher.preset,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -226,6 +227,7 @@ def get_beacon_config(
     tolerations,
     node_selectors,
     port_publisher,
+    preset,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -281,6 +283,9 @@ def get_beacon_config(
         "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM)
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
+
+    if preset == "minimal":
+        cmd.append("--minimal-config=true")
 
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append("--p2p-static-id=true")
@@ -382,14 +387,15 @@ def get_beacon_config(
 def new_prysm_launcher(
     el_cl_genesis_data,
     jwt_file,
-    network,
+    network_params,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
+        network=network_params.network,
+        preset=network_params.preset,
         prysm_password_artifact_uuid=prysm_password_artifact_uuid,
         prysm_password_relative_filepath=prysm_password_relative_filepath,
     )

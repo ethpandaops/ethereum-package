@@ -407,10 +407,10 @@ def get_beacon_config(
     )
 
 
-def new_nimbus_launcher(el_cl_genesis_data, jwt_file, network, keymanager_file):
+def new_nimbus_launcher(el_cl_genesis_data, jwt_file, network_params, keymanager_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
+        network=network_params.network,
         keymanager_file=keymanager_file,
     )
