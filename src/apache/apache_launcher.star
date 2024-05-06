@@ -6,8 +6,9 @@ HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 80
 
 APACHE_CONFIG_FILENAME = "index.html"
-APACHE_ENR_FILENAME = "boot_enr.txt"
+APACHE_ENR_FILENAME = "boot_enr.yaml"
 APACHE_ENODE_FILENAME = "bootnode.txt"
+APACHE_ENR_LIST_FILENAME = "bootstrap_nodes.txt"
 
 APACHE_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/usr/local/apache2/htdocs/"
 
@@ -37,29 +38,43 @@ def launch_apache(
         src=static_files.APACHE_CONFIG_FILEPATH, name="apache-config"
     )
 
-    all_enrs=[]
-    all_enodes=[]
+    all_cl_client_info = []
+    all_el_client_info = []
     for index, participant in enumerate(participant_contexts):
         _, cl_client, el_client, _ = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
-        all_enrs.append(cl_client.enr)
-        all_enodes.append(el_client.enode)
-
+        all_cl_client_info.append(new_cl_client_info(cl_client.enr))
+        all_el_client_info.append(new_el_client_info(el_client.enode))
 
     template_data = new_config_template_data(
-        all_enrs,
-        all_enodes,
+        all_cl_client_info,
+        all_el_client_info,
     )
 
-    template_and_data = shared_utils.new_template_and_data(
-        static_files.APACHE_ENR_FILEPATH,
+    enr_template_and_data = shared_utils.new_template_and_data(
+        read_file(static_files.APACHE_ENR_FILEPATH),
+        template_data,
+    )
+
+    enr_list_template_and_data = shared_utils.new_template_and_data(
+        read_file(static_files.APACHE_ENR_LIST_FILEPATH),
+        template_data,
+    )
+
+    enode_template_and_data = shared_utils.new_template_and_data(
+        read_file(static_files.APACHE_ENODE_FILEPATH),
         template_data,
     )
 
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[APACHE_ENR_FILENAME] = template_and_data
-    template_and_data_by_rel_dest_filepath[APACHE_ENODE_FILENAME] = template_and_data
+    template_and_data_by_rel_dest_filepath[APACHE_ENR_FILENAME] = enr_template_and_data
+    template_and_data_by_rel_dest_filepath[
+        APACHE_ENR_LIST_FILENAME
+    ] = enr_list_template_and_data
+    template_and_data_by_rel_dest_filepath[
+        APACHE_ENODE_FILENAME
+    ] = enode_template_and_data
 
     bootstrap_info_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "bootstrap-info"
@@ -83,25 +98,36 @@ def get_config(
 ):
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/boot": bootstrap_info_files_artifact_name,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        + "/boot": bootstrap_info_files_artifact_name,
         APACHE_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
     }
 
     cmd = [
-        # "echo",
-        # "AddType application/octet-stream .tar",
-        # ">>",
-        # "/usr/local/apache2/conf/httpd.conf",
-        # "&&",
-        # "cat <<EOT > /network-configs/enodes.txt\n" + enode_list + "\nEOT",
-        # "&&",
-        # "tar",
-        # "-czvf",
-        # "/usr/local/apache2/htdocs/network-config.tar",
-        # "-C",
-        # "/network-configs/",
-        # ".",
-        # "&&",
+        "echo",
+        "AddType application/octet-stream .tar",
+        ">>",
+        "/usr/local/apache2/conf/httpd.conf",
+        "&&",
+        "mv",
+        "/network-configs/boot/" + APACHE_ENR_FILENAME,
+        "/network-configs/" + APACHE_ENR_FILENAME,
+        "&&",
+        "mv",
+        "/network-configs/boot/" + APACHE_ENODE_FILENAME,
+        "/network-configs/" + APACHE_ENODE_FILENAME,
+        "&&",
+        "mv",
+        "/network-configs/boot/" + APACHE_ENR_LIST_FILENAME,
+        "/network-configs/" + APACHE_ENR_LIST_FILENAME,
+        "&&",
+        "tar",
+        "-czvf",
+        "/usr/local/apache2/htdocs/network-config.tar",
+        "-C",
+        "/network-configs/",
+        ".",
+        "&&",
         "httpd-foreground",
     ]
 
@@ -120,8 +146,21 @@ def get_config(
         node_selectors=node_selectors,
     )
 
-def new_config_template_data(cl_client_info, el_client_info):
+
+def new_config_template_data(cl_client, el_client):
     return {
-        "CLClientInfo": cl_client_info,
-        "ELClientInfo": el_client_info,
+        "CLClient": cl_client,
+        "ELClient": el_client,
+    }
+
+
+def new_cl_client_info(enr):
+    return {
+        "Enr": enr,
+    }
+
+
+def new_el_client_info(enode):
+    return {
+        "Enode": enode,
     }
