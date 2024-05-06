@@ -695,7 +695,7 @@ def default_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 500,
         "eip7594_fork_epoch": 1000,
-        "eip7594_fork_version": 0x70000038,
+        "eip7594_fork_version": "0x70000038",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
         "preset": "mainnet",
     }
@@ -719,7 +719,7 @@ def default_minimal_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 500,
         "eip7594_fork_epoch": 1000,
-        "eip7594_fork_version": 0x70000038,
+        "eip7594_fork_version": "0x70000038",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
         "preset": "minimal",
     }

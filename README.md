@@ -515,7 +515,7 @@ network_params:
   eip7594_fork_epoch: 1000
 
   # The fork version to set if the eip7594 fork is active
-  eip7594_fork_version: 0x70000038
+  eip7594_fork_version: "0x70000038"
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
