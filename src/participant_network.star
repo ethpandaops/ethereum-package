@@ -102,7 +102,7 @@ def launch_participant_network(
             network_params.deneb_fork_epoch,
             network_params.electra_fork_epoch,
             network_params.eip7594_fork_epoch,
-            network_params.eip_7594_fork_version,
+            network_params.eip7594_fork_version,
             latest_block.files_artifacts[0] if latest_block != "" else "",
             network_params.min_validator_withdrawability_delay,
             network_params.shard_committee_period,
