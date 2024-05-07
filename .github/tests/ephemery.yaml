@@ -3,6 +3,7 @@ participants:
     cl_type: teku
   - el_type: nethermind
     cl_type: prysm
+    cl_image: gcr.io/prysmaticlabs/prysm/beacon-chain:stable
   - el_type: erigon
     cl_type: nimbus
   - el_type: besu
@@ -12,5 +13,5 @@ participants:
   - el_type: ethereumjs
     cl_type: teku
 network_params:
-  network: "ephemery"
+  network: ephemery
 additional_services: []
