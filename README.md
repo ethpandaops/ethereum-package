@@ -208,253 +208,253 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 ```yaml
 # Specification of the participants in the network
 participants:
-# EL(Execution Layer) Specific flags
-  # The type of EL client that should be started
-  # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1
-- el_type: geth
+  # EL(Execution Layer) Specific flags
+    # The type of EL client that should be started
+    # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1
+  - el_type: geth
 
-  # The Docker image that should be used for the EL client; leave blank to use the default for the client type
-  # Defaults by client:
-  # - geth: ethereum/client-go:latest
-  # - erigon: thorax/erigon:devel
-  # - nethermind: nethermind/nethermind:latest
-  # - besu: hyperledger/besu:develop
-  # - reth: ghcr.io/paradigmxyz/reth
-  # - ethereumjs: ethpandaops/ethereumjs:master
-  # - nimbus-eth1: ethpandaops/nimbus-eth1:master
-  el_image: ""
+    # The Docker image that should be used for the EL client; leave blank to use the default for the client type
+    # Defaults by client:
+    # - geth: ethereum/client-go:latest
+    # - erigon: thorax/erigon:devel
+    # - nethermind: nethermind/nethermind:latest
+    # - besu: hyperledger/besu:develop
+    # - reth: ghcr.io/paradigmxyz/reth
+    # - ethereumjs: ethpandaops/ethereumjs:master
+    # - nimbus-eth1: ethpandaops/nimbus-eth1:master
+    el_image: ""
 
-  # The log level string that this participant's EL client should log at
-  # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-  # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
-  # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-  # over a specific participant's logging
-  el_log_level: ""
+    # The log level string that this participant's EL client should log at
+    # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+    # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
+    # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+    # over a specific participant's logging
+    el_log_level: ""
 
-  # A list of optional extra env_vars the el container should spin up with
-  el_extra_env_vars: {}
+    # A list of optional extra env_vars the el container should spin up with
+    el_extra_env_vars: {}
 
-  # A list of optional extra labels the el container should spin up with
-  # Example; el_extra_labels: {"ethereum-package.partition": "1"}
-  el_extra_labels: {}
+    # A list of optional extra labels the el container should spin up with
+    # Example; el_extra_labels: {"ethereum-package.partition": "1"}
+    el_extra_labels: {}
 
-  # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
-  el_extra_params: []
+    # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
+    el_extra_params: []
 
-  # A list of tolerations that will be passed to the EL client container
-  # Only works with Kubernetes
-  # Example: el_tolerations:
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-  #   toleration_seconds: 3600
-  # Defaults to empty
-  el_tolerations: []
+    # A list of tolerations that will be passed to the EL client container
+    # Only works with Kubernetes
+    # Example: el_tolerations:
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+    #   toleration_seconds: 3600
+    # Defaults to empty
+    el_tolerations: []
 
-  # Persistent storage size for the EL client container (in MB)
-  # Defaults to 0, which means that the default size for the client will be used
-  # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
-  el_volume_size: 0
+    # Persistent storage size for the EL client container (in MB)
+    # Defaults to 0, which means that the default size for the client will be used
+    # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+    el_volume_size: 0
 
-  # Resource management for el containers
-  # CPU is milicores
-  # RAM is in MB
-  # Defaults are set per client
-  el_min_cpu: 0
-  el_max_cpu: 0
-  el_min_mem: 0
-  el_max_mem: 0
+    # Resource management for el containers
+    # CPU is milicores
+    # RAM is in MB
+    # Defaults are set per client
+    el_min_cpu: 0
+    el_max_cpu: 0
+    el_min_mem: 0
+    el_max_mem: 0
 
-# CL(Consensus Layer) Specific flags
-  # The type of CL client that should be started
-  # Valid values are nimbus, lighthouse, lodestar, teku, prysm, and grandine
-  cl_type: lighthouse
+  # CL(Consensus Layer) Specific flags
+    # The type of CL client that should be started
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, and grandine
+    cl_type: lighthouse
 
-  # The Docker image that should be used for the CL client; leave blank to use the default for the client type
-  # Defaults by client:
-  # - lighthouse: sigp/lighthouse:latest
-  # - teku: consensys/teku:latest
-  # - nimbus: statusim/nimbus-eth2:multiarch-latest
-  # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
-  # - lodestar: chainsafe/lodestar:next
-  # - grandine: ethpandaops/grandine:develop
-  cl_image: ""
+    # The Docker image that should be used for the CL client; leave blank to use the default for the client type
+    # Defaults by client:
+    # - lighthouse: sigp/lighthouse:latest
+    # - teku: consensys/teku:latest
+    # - nimbus: statusim/nimbus-eth2:multiarch-latest
+    # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
+    # - lodestar: chainsafe/lodestar:next
+    # - grandine: ethpandaops/grandine:develop
+    cl_image: ""
 
-  # The log level string that this participant's CL client should log at
-  # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-  # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
-  # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-  # over a specific participant's logging
-  cl_log_level: ""
+    # The log level string that this participant's CL client should log at
+    # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+    # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
+    # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+    # over a specific participant's logging
+    cl_log_level: ""
 
-  # A list of optional extra env_vars the cl container should spin up with
-  cl_extra_env_vars: {}
+    # A list of optional extra env_vars the cl container should spin up with
+    cl_extra_env_vars: {}
 
-  # A list of optional extra labels that will be passed to the CL client Beacon container.
-  # Example; cl_extra_labels: {"ethereum-package.partition": "1"}
-  cl_extra_labels: {}
+    # A list of optional extra labels that will be passed to the CL client Beacon container.
+    # Example; cl_extra_labels: {"ethereum-package.partition": "1"}
+    cl_extra_labels: {}
 
-  # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
-  # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
-  cl_extra_params: []
+    # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
+    # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
+    cl_extra_params: []
 
-  # A list of tolerations that will be passed to the CL client container
-  # Only works with Kubernetes
-  # Example: el_tolerations:
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-  #   toleration_seconds: 3600
-  # Defaults to empty
-  cl_tolerations: []
+    # A list of tolerations that will be passed to the CL client container
+    # Only works with Kubernetes
+    # Example: el_tolerations:
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+    #   toleration_seconds: 3600
+    # Defaults to empty
+    cl_tolerations: []
 
-  # Persistent storage size for the CL client container (in MB)
-  # Defaults to 0, which means that the default size for the client will be used
-  # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
-  cl_volume_size: 0
+    # Persistent storage size for the CL client container (in MB)
+    # Defaults to 0, which means that the default size for the client will be used
+    # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+    cl_volume_size: 0
 
-  # Resource management for cl containers
-  # CPU is milicores
-  # RAM is in MB
-  # Defaults are set per client
-  cl_min_cpu: 0
-  cl_max_cpu: 0
-  cl_min_mem: 0
-  cl_max_mem: 0
+    # Resource management for cl containers
+    # CPU is milicores
+    # RAM is in MB
+    # Defaults are set per client
+    cl_min_cpu: 0
+    cl_max_cpu: 0
+    cl_min_mem: 0
+    cl_max_mem: 0
 
-  # Whether to use a separate validator client attached to the CL client.
-  # Defaults to false for clients that can run both in one process (Teku, Nimbus)
-  use_separate_vc: false
+    # Whether to use a separate validator client attached to the CL client.
+    # Defaults to false for clients that can run both in one process (Teku, Nimbus)
+    use_separate_vc: false
 
-# VC (Validator Client) Specific flags
-  # The type of validator client that should be used
-  # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
-  # ( The prysm validator only works with a prysm CL client )
-  # Defaults to matching the chosen CL client (cl_type)
-  vc_type: ""
+  # VC (Validator Client) Specific flags
+    # The type of validator client that should be used
+    # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+    # ( The prysm validator only works with a prysm CL client )
+    # Defaults to matching the chosen CL client (cl_type)
+    vc_type: ""
 
-  # The Docker image that should be used for the separate validator client
-  # Defaults by client:
-  # - lighthouse: sigp/lighthouse:latest
-  # - lodestar: chainsafe/lodestar:latest
-  # - nimbus: statusim/nimbus-validator-client:multiarch-latest
-  # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
-  # - teku: consensys/teku:latest
-  vc_image: ""
+    # The Docker image that should be used for the separate validator client
+    # Defaults by client:
+    # - lighthouse: sigp/lighthouse:latest
+    # - lodestar: chainsafe/lodestar:latest
+    # - nimbus: statusim/nimbus-validator-client:multiarch-latest
+    # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
+    # - teku: consensys/teku:latest
+    vc_image: ""
 
-  # The log level string that this participant's CL client should log at
-  # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
-  # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
-  # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
-  # over a specific participant's logging
-  vc_log_level: ""
+    # The log level string that this participant's CL client should log at
+    # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
+    # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
+    # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
+    # over a specific participant's logging
+    vc_log_level: ""
 
-  # A list of optional extra env_vars the vc container should spin up with
-  vc_extra_env_vars: {}
+    # A list of optional extra env_vars the vc container should spin up with
+    vc_extra_env_vars: {}
 
-  # A list of optional extra labels that will be passed to the CL client validator container.
-  # Example; vc_extra_labels: {"ethereum-package.partition": "1"}
-  vc_extra_labels: {}
+    # A list of optional extra labels that will be passed to the CL client validator container.
+    # Example; vc_extra_labels: {"ethereum-package.partition": "1"}
+    vc_extra_labels: {}
 
-  # A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
-  # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
-  vc_extra_params: []
+    # A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
+    # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
+    vc_extra_params: []
 
-  # A list of tolerations that will be passed to the validator container
-  # Only works with Kubernetes
-  # Example: el_tolerations:
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-  #   toleration_seconds: 3600
-  # Defaults to empty
-  vc_tolerations: []
+    # A list of tolerations that will be passed to the validator container
+    # Only works with Kubernetes
+    # Example: el_tolerations:
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+    #   toleration_seconds: 3600
+    # Defaults to empty
+    vc_tolerations: []
 
-  # Resource management for vc containers
-  # CPU is milicores
-  # RAM is in MB
-  # Defaults are set per client
-  vc_min_cpu: 0
-  vc_max_cpu: 0
-  vc_min_mem: 0
-  vc_max_mem: 0
+    # Resource management for vc containers
+    # CPU is milicores
+    # RAM is in MB
+    # Defaults are set per client
+    vc_min_cpu: 0
+    vc_max_cpu: 0
+    vc_min_mem: 0
+    vc_max_mem: 0
 
-  # Count of the number of validators you want to run for a given participant
-  # Default to null, which means that the number of validators will be using the
-  # network parameter num_validator_keys_per_node
-  validator_count: null
+    # Count of the number of validators you want to run for a given participant
+    # Default to null, which means that the number of validators will be using the
+    # network parameter num_validator_keys_per_node
+    validator_count: null
 
-#Participant specific flags
-  # Node selector
-  # Only works with Kubernetes
-  # Example: node_selectors: { "disktype": "ssd" }
-  # Defaults to empty
-  node_selectors: {}
+  # Participant specific flags
+    # Node selector
+    # Only works with Kubernetes
+    # Example: node_selectors: { "disktype": "ssd" }
+    # Defaults to empty
+    node_selectors: {}
 
-  # A list of tolerations that will be passed to the EL/CL/validator containers
-  # This is to be used when you don't want to specify the tolerations for each container separately
-  # Only works with Kubernetes
-  # Example: tolerations:
-  # - key: "key"
-  #   operator: "Equal"
-  #   value: "value"
-  #   effect: "NoSchedule"
-  #   toleration_seconds: 3600
-  # Defaults to empty
-  tolerations: []
+    # A list of tolerations that will be passed to the EL/CL/validator containers
+    # This is to be used when you don't want to specify the tolerations for each container separately
+    # Only works with Kubernetes
+    # Example: tolerations:
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+    #   toleration_seconds: 3600
+    # Defaults to empty
+    tolerations: []
 
-  # Count of nodes to spin up for this participant
-  # Default to 1
-  count: 1
+    # Count of nodes to spin up for this participant
+    # Default to 1
+    count: 1
 
-  # Snooper can be enabled with the `snooper_enabled` flag per client or globally
-  # Defaults null and then set to global snooper default (false)
-  snooper_enabled: null
+    # Snooper can be enabled with the `snooper_enabled` flag per client or globally
+    # Defaults null and then set to global snooper default (false)
+    snooper_enabled: null
 
-  # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
-  # Defaults null and then set to global ethereum_metrics_exporter_enabled (false)
-  ethereum_metrics_exporter_enabled: null
+    # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
+    # Defaults null and then set to global ethereum_metrics_exporter_enabled (false)
+    ethereum_metrics_exporter_enabled: null
 
-  # Enables Xatu Sentry for this participant. Can be set globally.
-  # Defaults null and then set to global xatu_sentry_enabled (false)
-  xatu_sentry_enabled: null
+    # Enables Xatu Sentry for this participant. Can be set globally.
+    # Defaults null and then set to global xatu_sentry_enabled (false)
+    xatu_sentry_enabled: null
 
-  # Prometheus additional configuration for a given participant prometheus target.
-  # Execution, beacon and validator client targets on prometheus will include this
-  # configuration.
-  prometheus_config:
-    # Scrape interval to be used. Default to 15 seconds
-    scrape_interval: 15s
-    # Additional labels to be added. Default to empty
-    labels: {}
+    # Prometheus additional configuration for a given participant prometheus target.
+    # Execution, beacon and validator client targets on prometheus will include this
+    # configuration.
+    prometheus_config:
+      # Scrape interval to be used. Default to 15 seconds
+      scrape_interval: 15s
+      # Additional labels to be added. Default to empty
+      labels: {}
 
-  # Blobber can be enabled with the `blobber_enabled` flag per client or globally
-  # Defaults to false
-  blobber_enabled: false
+    # Blobber can be enabled with the `blobber_enabled` flag per client or globally
+    # Defaults to false
+    blobber_enabled: false
 
-  # Blobber extra params can be passed in to the blobber container
-  # Defaults to empty
-  blobber_extra_params: []
+    # Blobber extra params can be passed in to the blobber container
+    # Defaults to empty
+    blobber_extra_params: []
 
-  # A set of parameters the node needs to reach an external block building network
-  # If `null` then the builder infrastructure will not be instantiated
-  # Example:
-  #
-  # "relay_endpoints": [
-  #  "https:#0xdeadbeefcafa@relay.example.com",
-  #  "https:#0xdeadbeefcafb@relay.example.com",
-  #  "https:#0xdeadbeefcafc@relay.example.com",
-  #  "https:#0xdeadbeefcafd@relay.example.com"
-  # ]
-  builder_network_params: null
+    # A set of parameters the node needs to reach an external block building network
+    # If `null` then the builder infrastructure will not be instantiated
+    # Example:
+    #
+    # "relay_endpoints": [
+    #  "https:#0xdeadbeefcafa@relay.example.com",
+    #  "https:#0xdeadbeefcafb@relay.example.com",
+    #  "https:#0xdeadbeefcafc@relay.example.com",
+    #  "https:#0xdeadbeefcafd@relay.example.com"
+    # ]
+    builder_network_params: null
 
-  # Participant flag for keymanager api
-  # This will open up http ports to your validator services!
-  # Defaults null and then set to default global keymanager_enabled (false)
-  keymanager_enabled: null
+    # Participant flag for keymanager api
+    # This will open up http ports to your validator services!
+    # Defaults null and then set to default global keymanager_enabled (false)
+    keymanager_enabled: null
 
 # Default configuration parameters for the network
 network_params:
