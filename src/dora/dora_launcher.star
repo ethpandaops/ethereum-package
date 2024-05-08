@@ -93,12 +93,12 @@ def get_config(
         DORA_CONFIG_FILENAME,
     )
 
-    if network_params.preset == "minimal":
-        IMAGE_NAME = "ethpandaops/dora:minimal-preset"
-    elif network_params.eip7594_fork_epoch < 100000000:
+    if network_params.eip7594_fork_epoch < 100000000:
         IMAGE_NAME = "ethpandaops/dora:peer-das"
+    elif network_params.electra_fork_epoch < 100000000:
+        IMAGE_NAME = "ethpandaops/dora:electra-support"
     else:
-        IMAGE_NAME = "ethpandaops/dora:latest"
+        IMAGE_NAME = "ethpandaops/dora:master" # TODO: revert to latest after next dora release
 
     return ServiceConfig(
         image=IMAGE_NAME,
