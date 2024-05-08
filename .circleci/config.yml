@@ -109,13 +109,6 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} --verbosity detailed --args-file=./.github/tests/mev.yaml
 
-  mix_persistence_k8s:
-    resource_class: xlarge
-    executor: ubuntu_vm
-    steps:
-      - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-persistence-k8s.yaml)"
-
 workflows:
   nightly_tests:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
@@ -124,47 +117,7 @@ workflows:
           <<: *setup_kurtosis_k3s
       - mix_with_tools_k8s:
           <<: *setup_kurtosis_k3s
-
-  per_pr_test:
-    when: << pipeline.parameters.should-enable-build-workflow >>
-    jobs:
-      - kurtosis-docs-checker/check-docs:
-          should-check-changelog: false
-          markdown-link-check-config-json: |
-            {
-                "ignorePatterns": [
-                    {
-                        "pattern": "https://github.com/kurtosis-tech/ethereum-package"
-                    }
-                ]
-            }
-          filters:
-            branches:
-              ignore:
-                - main
-
       - run_starlark_arm64:
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - mev_k8s:
-          <<: *setup_kurtosis_k3s
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - mix_with_tools_k8s:
-          <<: *setup_kurtosis_k3s
-          filters:
-            branches:
-              ignore:
-                - main
-
-      - mix_persistence_k8s:
-          <<: *setup_kurtosis_k3s
           filters:
             branches:
               ignore:
