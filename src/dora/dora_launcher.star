@@ -98,7 +98,9 @@ def get_config(
     elif network_params.electra_fork_epoch < 100000000:
         IMAGE_NAME = "ethpandaops/dora:electra-support"
     else:
-        IMAGE_NAME = "ethpandaops/dora:master" # TODO: revert to latest after next dora release
+        IMAGE_NAME = (
+            "ethpandaops/dora:master"  # TODO: revert to latest after next dora release
+        )
 
     return ServiceConfig(
         image=IMAGE_NAME,
