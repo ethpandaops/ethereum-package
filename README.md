@@ -36,6 +36,7 @@ v_max_mem -> vc_max_mem
 ### Global flags
 ```
 global_client_log_level -> global_log_level
+mev_type: full -> mev_type: flashbots # new rename as of 3 May 2024
 ```
 
 To help you with the transition, we have added a script that will automatically update your `yaml` file to the new format. You can run the following command to update your network_params.yaml file:
@@ -189,6 +190,15 @@ For example, to retrieve the Execution Layer (EL) genesis data, run:
 
 ```bash
 kurtosis files download my-testnet el-genesis-data ~/Downloads
+```
+
+# Basic file sharing
+
+Apache is included in the package to allow for basic file sharing. The Apache service is started when additional services are enabled. It will expose the network-configs directory, which might needed if you want to share the network config publicly.
+
+```yaml
+additional_services:
+  - apache
 ```
 
 ## Configuration
@@ -401,16 +411,16 @@ participants:
     count: 1
 
     # Snooper can be enabled with the `snooper_enabled` flag per client or globally
-    # Defaults to false
-    snooper_enabled: false
+    # Defaults null and then set to global snooper default (false)
+    snooper_enabled: null
 
     # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
-    # Defaults to false
-    ethereum_metrics_exporter_enabled: false
+    # Defaults null and then set to global ethereum_metrics_exporter_enabled (false)
+    ethereum_metrics_exporter_enabled: null
 
     # Enables Xatu Sentry for this participant. Can be set globally.
-    # Defaults to false
-    xatu_sentry_enabled: false
+    # Defaults null and then set to global xatu_sentry_enabled (false)
+    xatu_sentry_enabled: null
 
     # Prometheus additional configuration for a given participant prometheus target.
     # Execution, beacon and validator client targets on prometheus will include this
@@ -443,8 +453,8 @@ participants:
 
     # Participant flag for keymanager api
     # This will open up http ports to your validator services!
-    # Defaults to false
-    keymanager_enabled: false
+    # Defaults null and then set to default global keymanager_enabled (false)
+    keymanager_enabled: null
 
 # Default configuration parameters for the network
 network_params:
@@ -498,9 +508,14 @@ network_params:
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
 
-  # The epoch at which the deneb/electra forks are set to occur.
+  # The epoch at which the deneb/electra/eip7594(peerdas) forks are set to occur. Note: PeerDAS and Electra clients are currently
+  # working on forks. So set either one of the below forks.
   deneb_fork_epoch: 0
-  electra_fork_epoch: 500
+  electra_fork_epoch: 100000000
+  eip7594_fork_epoch: 100000001
+
+  # The fork version to set if the eip7594 fork is active
+  eip7594_fork_version: "0x70000038"
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
@@ -544,6 +559,7 @@ additional_services:
   - blobscan
   - dugtrio
   - blutgang
+  - apache
 
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
@@ -655,7 +671,8 @@ persistent: false
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
-# "full" - mev-boost, relays, flooder and builder are all spun up
+# "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
+# "mev-rs" - mev-boost, relays and builder are all spun up, powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -742,6 +759,17 @@ global_node_selectors: {}
 # This will open up http ports to your validator services!
 # Defaults to false
 keymanager_enabled: false
+
+# Global paarameter to set the exit ip address of services and public ports
+port_publisher:
+  # if you have a service that you want to expose on a specific interfact; set that IP here
+  # if you set it to auto it gets the public ip from ident.me and sets it
+  # Defaults to constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
+  # The default value just means its the IP address of the container in which the service is running
+  nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+  # The start value gets used as a seed for TCP and UDP discovery ports for el/cl client
+  # Defaults to None - no public ports
+  public_port_start: None
 ```
 
 #### Example configurations
@@ -820,7 +848,7 @@ participants:
   - el_type: besu
     cl_type: prysm
     count: 2
-mev_type: full
+mev_type: flashbots
 network_params:
   deneb_fork_epoch: 1
 additional_services: []
