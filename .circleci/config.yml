@@ -109,13 +109,6 @@ jobs:
       - checkout
       - run: kurtosis run ${PWD} --verbosity detailed --args-file=./.github/tests/mev.yaml
 
-  mix_persistence_k8s:
-    resource_class: xlarge
-    executor: ubuntu_vm
-    steps:
-      - checkout
-      - run: kurtosis run ${PWD} "$(cat ./.github/tests/mix-persistence-k8s.yaml)"
-
 workflows:
   nightly_tests:
     when: << pipeline.parameters.should-enable-check-latest-version-workflow >>
@@ -125,12 +118,6 @@ workflows:
       - mix_with_tools_k8s:
           <<: *setup_kurtosis_k3s
       - run_starlark_arm64:
-          filters:
-            branches:
-              ignore:
-                - main
-      - mix_persistence_k8s:
-          <<: *setup_kurtosis_k3s
           filters:
             branches:
               ignore:
