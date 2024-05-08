@@ -208,7 +208,7 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 ```yaml
 # Specification of the participants in the network
 participants:
-    # EL(Execution Layer) Specific flags
+  # EL(Execution Layer) Specific flags
     # The type of EL client that should be started
     # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1
   - el_type: geth
@@ -387,7 +387,7 @@ participants:
     # network parameter num_validator_keys_per_node
     validator_count: null
 
-  #Participant specific flags
+  # Participant specific flags
     # Node selector
     # Only works with Kubernetes
     # Example: node_selectors: { "disktype": "ssd" }
