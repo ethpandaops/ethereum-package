@@ -86,6 +86,9 @@ DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
 EIP7594_FORK_VERSION = "0x70000038"
 
+DEFAULT_ELECTRA_FORK_EPOCH = 100000000
+DEFAULT_EIP7594_FORK_EPOCH = 100000001
+
 ETHEREUM_GENESIS_GENERATOR = struct(
     capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Deprecated (no support for minimal config)
     deneb_genesis="ethpandaops/ethereum-genesis-generator:3.1.1",  # Default

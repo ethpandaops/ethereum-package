@@ -32,6 +32,7 @@ BEACON_MIN_MEMORY = 256
 
 METRICS_PATH = "/metrics"
 
+ENTRYPOINT_ARGS = ["sh", "-c"]
 
 def get_used_ports(discovery_port):
     beacon_used_ports = {
@@ -152,6 +153,7 @@ def launch(
         tolerations,
         node_selectors,
         port_publisher,
+        launcher.eip7594_fork_epoch,  # temporary place holder for peerdas
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -247,6 +249,7 @@ def get_beacon_config(
     tolerations,
     node_selectors,
     port_publisher,
+    eip7594_fork_epoch,  # temporary place holder for peerdas
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -275,6 +278,11 @@ def get_beacon_config(
             ),
         }
     used_ports = get_used_ports(discovery_port)
+
+    peer_das_cmd_str = "echo 'PEER_DAS_EPOCH: {0}' >> {1}".format(
+        eip7594_fork_epoch,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS + "/config.yaml",
+    )
 
     # NOTE: If connecting to the merge devnet remotely we DON'T want the following flags; when they're not set, the node's external IP address is auto-detected
     #  from the peers it communicates with but when they're set they basically say "override the autodetection and
@@ -387,6 +395,15 @@ def get_beacon_config(
         )
     env = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
     env.update(extra_env_vars)
+
+    if (
+        eip7594_fork_epoch != constants.DEFAULT_EIP7594_FORK_EPOCH
+    ):  # TODO: cleanup this when peerdas is ready
+        cmd_str = " ".join(cmd)
+        peer_das_with_command = [peer_das_cmd_str, cmd_str]
+        command_str = " && ".join(peer_das_with_command)
+        cmd = [command_str]
+
     return ServiceConfig(
         image=image,
         ports=used_ports,
@@ -394,6 +411,7 @@ def get_beacon_config(
         cmd=cmd,
         files=files,
         env_vars=env,
+        entrypoint=ENTRYPOINT_ARGS,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
             BEACON_HTTP_PORT_ID
@@ -411,6 +429,7 @@ def get_beacon_config(
         ),
         tolerations=tolerations,
         node_selectors=node_selectors,
+        user=User(uid=0, gid=0),
     )
 
 
@@ -419,4 +438,5 @@ def new_lighthouse_launcher(el_cl_genesis_data, jwt_file, network_params):
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network_params.network,
+        eip7594_fork_epoch=network_params.eip7594_fork_epoch,  # temporary place holder for peerdas
     )
