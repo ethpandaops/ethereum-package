@@ -7,6 +7,10 @@ participants:
     el_image: nethermindeth/nethermind:pectra
     cl_type: lodestar
     cl_image: ethpandaops/lodestar:electra-fork
+  - el_type: ethereumjs
+    el_image: ethpandaops/ethereumjs:master
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:electra-fork
 network_params:
   electra_fork_epoch: 1
 additional_services:
