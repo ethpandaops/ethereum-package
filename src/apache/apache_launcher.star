@@ -121,6 +121,8 @@ def get_config(
         "/network-configs/boot/" + APACHE_ENR_LIST_FILENAME,
         "/network-configs/" + APACHE_ENR_LIST_FILENAME,
         "&&",
+        "cp -R /network-configs /usr/local/apache2/htdocs/",
+        "&&",
         "tar",
         "-czvf",
         "/usr/local/apache2/htdocs/network-config.tar",
