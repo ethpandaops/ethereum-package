@@ -375,7 +375,7 @@ def get_beacon_config(
         labels=shared_utils.label_maker(
             constants.CL_TYPE.prysm,
             constants.CLIENT_TYPES.cl,
-            beacon_image,
+            # beacon_image,
             el_context.client_name,
             extra_labels,
         ),

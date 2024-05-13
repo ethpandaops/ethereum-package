@@ -1,0 +1,13 @@
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:kaustinen-with-shapella
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:verkle-trees-capella
+    count: 2
+  - el_type: geth
+    el_image: ethpandaops/geth:kaustinen-with-shapella
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:g11tech-verge
+network_params:
+  network: verkle-gen-devnet-6
+
