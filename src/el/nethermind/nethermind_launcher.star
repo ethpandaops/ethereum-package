@@ -284,7 +284,7 @@ def get_config(
         labels=shared_utils.label_maker(
             constants.EL_TYPE.nethermind,
             constants.CLIENT_TYPES.el,
-            image,
+            # image,
             cl_client_name,
             extra_labels,
         ),
