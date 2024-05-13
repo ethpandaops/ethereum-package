@@ -137,6 +137,7 @@ xatu_sentry_params:
     - voluntary_exit
     - contribution_and_proof
     - blob_sidecar
+apache_port: 40000
 global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false

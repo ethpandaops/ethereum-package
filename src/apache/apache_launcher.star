@@ -4,7 +4,6 @@ constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "apache"
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 80
-
 APACHE_CONFIG_FILENAME = "index.html"
 APACHE_ENR_FILENAME = "boot_enr.yaml"
 APACHE_ENODE_FILENAME = "bootnode.txt"
@@ -30,6 +29,7 @@ USED_PORTS = {
 def launch_apache(
     plan,
     el_cl_genesis_data,
+    apache_port,
     participant_contexts,
     participant_configs,
     global_node_selectors,
@@ -80,9 +80,14 @@ def launch_apache(
         template_and_data_by_rel_dest_filepath, "bootstrap-info"
     )
 
+    public_ports = {
+        HTTP_PORT_ID: shared_utils.new_port_spec(apache_port, shared_utils.TCP_PROTOCOL)
+    }
+
     config = get_config(
         config_files_artifact_name,
         el_cl_genesis_data,
+        public_ports,
         bootstrap_info_files_artifact_name,
         global_node_selectors,
     )
@@ -93,6 +98,7 @@ def launch_apache(
 def get_config(
     config_files_artifact_name,
     el_cl_genesis_data,
+    public_ports,
     bootstrap_info_files_artifact_name,
     node_selectors,
 ):
@@ -139,6 +145,7 @@ def get_config(
         image="httpd:latest",
         ports=USED_PORTS,
         cmd=[cmd_str],
+        public_ports=public_ports,
         entrypoint=["sh", "-c"],
         files=files,
         min_cpu=MIN_CPU,

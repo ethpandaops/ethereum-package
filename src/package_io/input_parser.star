@@ -306,6 +306,7 @@ def input_parser(plan, input_args):
         goomy_blob_params=struct(
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
+        apache_port=result["apache_port"],
         assertoor_params=struct(
             image=result["assertoor_params"]["image"],
             run_stability_check=result["assertoor_params"]["run_stability_check"],
@@ -667,6 +668,7 @@ def default_input_args():
         "persistent": False,
         "mev_type": None,
         "xatu_sentry_enabled": False,
+        "apache_port": 40000,
         "global_tolerations": [],
         "global_node_selectors": {},
         "keymanager_enabled": False,
