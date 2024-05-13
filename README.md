@@ -738,6 +738,11 @@ xatu_sentry_params:
     - contribution_and_proof
     - blob_sidecar
 
+# Apache params
+# Apache public port to port forward to local machine
+# Default to port 40000, only set if apache additional service is activated
+apache_port: 40000
+
 # Global tolerations that will be passed to all containers (unless overridden by a more specific toleration)
 # Only works with Kubernetes
 # Example: tolerations:

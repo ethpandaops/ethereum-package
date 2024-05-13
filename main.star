@@ -79,6 +79,7 @@ def run(plan, args={}):
     global_tolerations = args_with_right_defaults.global_tolerations
     global_node_selectors = args_with_right_defaults.global_node_selectors
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
+    apache_port = args_with_right_defaults.apache_port
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -492,6 +493,7 @@ def run(plan, args={}):
             apache.launch_apache(
                 plan,
                 el_cl_data_files_artifact_uuid,
+                apache_port,
                 all_participants,
                 args_with_right_defaults.participants,
                 global_node_selectors,
