@@ -64,10 +64,12 @@ KEYMANAGER_MOUNT_PATH_ON_CONTAINER = (
 
 MOCK_MEV_TYPE = "mock"
 FLASHBOTS_MEV_TYPE = "flashbots"
+MODIFIED_FLASHBOTS_MEV_TYPE = "modified-flashbots"
 MEV_RS_MEV_TYPE = "mev-rs"
 
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.27"
+MODIFIED_FLASHBOTS_RELAY_IMAGE = "hoprnet/modified-mev-relayer"
 DEFAULT_FLASHBOTS_BUILDER_IMAGE = "flashbots/builder:latest"
 DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
 DEFAULT_MEV_RS_IMAGE = "ethpandaops/mev-rs:main"

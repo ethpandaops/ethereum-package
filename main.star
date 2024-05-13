@@ -218,6 +218,7 @@ def run(plan, args={}):
         mev_endpoints.append(endpoint)
     elif args_with_right_defaults.mev_type and (
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
+        or args_with_right_defaults.mev_type == constants.MODIFIED_FLASHBOTS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
     ):
         builder_uri = "http://{0}:{1}".format(
@@ -253,6 +254,18 @@ def run(plan, args={}):
             service_name=first_client_beacon_name,
         )
         if args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE:
+            endpoint = flashbots_mev_relay.launch_mev_relay(
+                plan,
+                mev_params,
+                network_params.network_id,
+                beacon_uris,
+                genesis_validators_root,
+                builder_uri,
+                network_params.seconds_per_slot,
+                persistent,
+                global_node_selectors,
+            )
+        elif args_with_right_defaults.mev_type == constants.MODIFIED_FLASHBOTS_MEV_TYPE:
             endpoint = flashbots_mev_relay.launch_mev_relay(
                 plan,
                 mev_params,
@@ -301,6 +314,7 @@ def run(plan, args={}):
             if args_with_right_defaults.participants[index].validator_count != 0:
                 if (
                     args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
+                    or args_with_right_defaults.mev_type == constants.MODIFIED_FLASHBOTS_MEV_TYPE
                     or args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE
                 ):
                     mev_boost_launcher = flashbots_mev_boost.new_mev_boost_launcher(

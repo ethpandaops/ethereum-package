@@ -69,7 +69,8 @@ def get_config(
             "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(input_parser.MEV_BOOST_PORT),
             # maybe this is breaking; this isn't verifyign the bid and not sending it to the validator
             "SKIP_RELAY_SIGNATURE_CHECK": "1",
-            "RELAYS": mev_boost_launcher.relay_end_points[0],
+            # "RELAYS": mev_boost_launcher.relay_end_points[0],
+            "RELAYS": ",".join(mev_boost_launcher.relay_end_points),
         },
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,

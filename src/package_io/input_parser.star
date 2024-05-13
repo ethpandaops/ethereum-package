@@ -162,6 +162,7 @@ def input_parser(plan, input_args):
     if result.get("mev_type") in (
         constants.MOCK_MEV_TYPE,
         constants.FLASHBOTS_MEV_TYPE,
+        constants.MODIFIED_FLASHBOTS_MEV_TYPE,
         constants.MEV_RS_MEV_TYPE,
     ):
         result = enrich_mev_extra_params(
@@ -803,6 +804,8 @@ def get_default_mev_params(mev_type, preset):
         "labels": None,
     }
 
+    if mev_type == constants.MODIFIED_FLASHBOTS_MEV_TYPE:
+        mev_relay_image = constants.MODIFIED_FLASHBOTS_RELAY_IMAGE
     if mev_type == constants.MEV_RS_MEV_TYPE:
         if preset == "minimal":
             mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
