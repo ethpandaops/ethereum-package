@@ -97,6 +97,7 @@ def launch_participant_network(
             total_number_of_validator_keys,
             network_params.genesis_delay,
             network_params.max_per_epoch_activation_churn_limit,
+            network_params.churn_limit_quotient,
             network_params.ejection_balance,
             network_params.eth1_follow_distance,
             network_params.deneb_fork_epoch,
