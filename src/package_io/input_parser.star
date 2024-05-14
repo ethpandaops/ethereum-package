@@ -668,7 +668,7 @@ def default_input_args():
         "persistent": False,
         "mev_type": None,
         "xatu_sentry_enabled": False,
-        "apache_port": 40000,
+        "apache_port": None,
         "global_tolerations": [],
         "global_node_selectors": {},
         "keymanager_enabled": False,

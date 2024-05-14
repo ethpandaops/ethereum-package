@@ -79,10 +79,13 @@ def launch_apache(
     bootstrap_info_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "bootstrap-info"
     )
-
-    public_ports = {
-        HTTP_PORT_ID: shared_utils.new_port_spec(apache_port, shared_utils.TCP_PROTOCOL)
-    }
+    public_ports = {}
+    if apache_port != None:
+        public_ports = {
+            HTTP_PORT_ID: shared_utils.new_port_spec(
+                apache_port, shared_utils.TCP_PROTOCOL
+            )
+        }
 
     config = get_config(
         config_files_artifact_name,
