@@ -489,7 +489,11 @@ network_params:
   # Max churn rate for the network introduced by
   # EIP-7514 https:#eips.ethereum.org/EIPS/eip-7514
   # Defaults to 8
-  max_churn: 8
+  max_per_epoch_activation_churn_limit: 8
+
+  # Churn limit quotient for the network
+  # Defaults to 65536
+  churn_limit_quotient: 65536
 
   # Ejection balance
   # Defaults to 16ETH
