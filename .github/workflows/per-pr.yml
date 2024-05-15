@@ -21,6 +21,17 @@ jobs:
           sudo apt install kurtosis-cli
           kurtosis analytics disable
 
+      - name: Get Repository Name
+        id: repo
+        run: |
+          REPOSITORY_NAME="${{ github.event.pull_request.head.repo.full_name }}"
+          echo "::set-output name=repository_name::$REPOSITORY_NAME"
+    
+      - name: Update kurtosis.yml
+        run: |
+          REPOSITORY_NAME="${{ steps.repo.outputs.repository_name }}"
+          sed -i "s|name: .*|name: \"$REPOSITORY_NAME\"|" kurtosis.yml          
+
       - name: Run Starlark
         run: kurtosis run ${{ github.workspace }}
 
