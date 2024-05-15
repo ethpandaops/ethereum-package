@@ -207,6 +207,7 @@ def get_config(
         "--rpc-http-port={0}".format(RPC_PORT_NUM),
         "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--rpc-http-cors-origins=*",
+        "--rpc-http-max-active-connections=300",
         "--rpc-ws-enabled=true",
         "--rpc-ws-host=0.0.0.0",
         "--rpc-ws-port={0}".format(WS_PORT_NUM),
@@ -225,6 +226,7 @@ def get_config(
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
+        "--min-gas-price=1000000000",
     ]
     if (
         network not in constants.PUBLIC_NETWORKS
