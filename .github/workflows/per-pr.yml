@@ -75,7 +75,8 @@ jobs:
       - name: Extract package & branch name
         shell: bash
         run: |
-          echo "package=${{ github.event.pull_request.head.repo.html_url }}" >> $GITHUB_OUTPUT
+          package_url="${{ github.event.pull_request.head.repo.html_url }}"
+          echo "package=$(echo "$package_url" | sed -E 's/^\s*.*:\/\///g')" >> $GITHUB_OUTPUT
           echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
         id: extract_branch
       - name: Kurtosis Assertoor GitHub Action
