@@ -75,7 +75,7 @@ jobs:
       - name: Extract package & branch name
         shell: bash
         run: |
-          echo "branch=refs/pull/${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.sha }}" >> $GITHUB_OUTPUT
         id: extract_branch
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@v1
