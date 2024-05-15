@@ -72,16 +72,15 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Extract branch name
+      - name: Extract package & branch name
         shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        run: |
+          echo "package=${{ github.event.pull_request.head.repo.html_url }}" >> $GITHUB_OUTPUT
+          echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
         id: extract_branch
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@v1
         with:
+          ethereum_package_url: ${{ steps.extract_branch.outputs.package }}
           ethereum_package_branch: ${{ steps.extract_branch.outputs.branch }}
           ethereum_package_args: .github/tests/mix-assert.yaml
