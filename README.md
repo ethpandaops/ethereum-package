@@ -456,6 +456,16 @@ participants:
     # Defaults null and then set to default global keymanager_enabled (false)
     keymanager_enabled: null
 
+# Participants matrix creates a participant for each combination of EL and CL clients
+# Each EL/CL item can provide the same parameters as a standard participant
+participants_matrix: {}
+  # el:
+  #   - el_type: geth
+  # cl:
+  #   - cl_type: prysm
+  #   - cl_type: lighthouse
+
+
 # Default configuration parameters for the network
 network_params:
   # Network name, used to enable syncing of alternative networks
