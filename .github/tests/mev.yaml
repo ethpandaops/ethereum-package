@@ -1,6 +1,6 @@
 participants:
-- el_type: geth
-  cl_type: lighthouse
+  - el_type: geth
+    cl_type: lighthouse
 mev_type: flashbots
 additional_services:
   - tx_spammer

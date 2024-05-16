@@ -456,14 +456,18 @@ participants:
     # Defaults null and then set to default global keymanager_enabled (false)
     keymanager_enabled: null
 
-# Participants matrix creates a participant for each combination of EL and CL clients
-# Each EL/CL item can provide the same parameters as a standard participant
+# Participants matrix creates a participant for each combination of EL, CL and VC clients
+# Each EL/CL/VC item can provide the same parameters as a standard participant
 participants_matrix: {}
   # el:
   #   - el_type: geth
+  #   - el_type: besu
   # cl:
   #   - cl_type: prysm
   #   - cl_type: lighthouse
+  # vc:
+  #   - vc_type: prysm
+  #   - vc_type: lighthouse
 
 
 # Default configuration parameters for the network
