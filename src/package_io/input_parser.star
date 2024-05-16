@@ -952,6 +952,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             participant["cl_extra_params"].append(
                 "--builder-endpoint={0}".format(mev_url)
             )
+            participant["cl_extra_params"].append(
+                "--validators-builder-registration-default-enabled=true"
+            )
         if participant["cl_type"] == "prysm":
             participant["vc_extra_params"].append("--enable-builder")
             participant["cl_extra_params"].append(
