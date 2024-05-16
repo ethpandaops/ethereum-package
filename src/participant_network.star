@@ -310,7 +310,7 @@ def launch_participant_network(
             )
         all_snooper_beacon_contexts.append(snooper_beacon_context)
         full_name = (
-            "{0}-{1}-{2}".format(index_str, el_type, cl_type) + "-{0}".format(vc_type)
+            "{0}-{1}-{2}-{3}".format(index_str, el_type, cl_type, vc_type)
             if participant.cl_type != participant.vc_type
             else "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         )
@@ -319,7 +319,7 @@ def launch_participant_network(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
             keymanager_file=keymanager_file,
-            service_name="vc-{0}-{1}-{2}".format(index_str, vc_type, el_type),
+            service_name="vc-{0}".format(full_name),
             vc_type=vc_type,
             image=participant.vc_image,
             participant_log_level=participant.vc_log_level,

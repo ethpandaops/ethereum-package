@@ -22,7 +22,7 @@ jobs:
           kurtosis analytics disable
 
       - name: Run Starlark
-        run: kurtosis run ${{ github.workspace }}
+        run: kurtosis run ${{ github.workspace }} --args-file network_params.yaml
 
   run_with_args:
     strategy:
