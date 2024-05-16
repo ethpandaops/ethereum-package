@@ -528,6 +528,15 @@ network_params:
   # The snapshots are taken with https://github.com/ethpandaops/snapshotter
   network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
 
+  # The number of data column sidecar subnets used in the gossipsub protocol
+  data_column_sidecar_subnet_count: 32
+  # Number of DataColumn random samples a node queries per slot
+  samples_per_slot: 8
+  # Minimum number of subnets an honest node custodies and serves samples from
+  custody_requirement: 1
+  # Suggested minimum peer count
+  target_number_of_peers: 70
+
   # Preset for the network
   # Default: "mainnet"
   # Options: "mainnet", "minimal"

@@ -278,6 +278,12 @@ def input_parser(plan, input_args):
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
+            data_column_sidecar_subnet_count=result["network_params"][
+                "data_column_sidecar_subnet_count"
+            ],
+            samples_per_slot=result["network_params"]["samples_per_slot"],
+            custody_requirement=result["network_params"]["custody_requirement"],
+            target_number_of_peers=result["network_params"]["target_number_of_peers"],
             preset=result["network_params"]["preset"],
         ),
         mev_params=struct(
@@ -703,6 +709,10 @@ def default_network_params():
         "eip7594_fork_epoch": 100000001,
         "eip7594_fork_version": "0x70000038",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
+        "data_column_sidecar_subnet_count": 32,
+        "samples_per_slot": 8,
+        "custody_requirement": 1,
+        "target_number_of_peers": 70,
         "preset": "mainnet",
     }
 
@@ -728,6 +738,10 @@ def default_minimal_network_params():
         "eip7594_fork_epoch": 100000001,
         "eip7594_fork_version": "0x70000038",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
+        "data_column_sidecar_subnet_count": 32,
+        "samples_per_slot": 8,
+        "custody_requirement": 1,
+        "target_number_of_peers": 70,
         "preset": "minimal",
     }
 
