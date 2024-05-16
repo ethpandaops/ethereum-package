@@ -41,7 +41,9 @@ def get_used_ports(discovery_port):
             discovery_port, shared_utils.UDP_PROTOCOL
         ),
         BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-            BEACON_HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
+            BEACON_HTTP_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
         BEACON_METRICS_PORT_ID: shared_utils.new_port_spec(
             BEACON_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
