@@ -797,11 +797,13 @@ def default_participant():
         "keymanager_enabled": None,
     }
 
+
 def get_default_dora_params():
     return {
         "image": "",
         "env": {},
     }
+
 
 def get_default_mev_params(mev_type, preset):
     mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
