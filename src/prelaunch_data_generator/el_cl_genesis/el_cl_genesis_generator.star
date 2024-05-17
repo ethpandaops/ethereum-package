@@ -31,6 +31,10 @@ def generate_el_cl_genesis_data(
     latest_block,
     min_validator_withdrawability_delay,
     shard_committee_period,
+    data_column_sidecar_subnet_count,
+    samples_per_slot,
+    custody_requirement,
+    target_number_of_peers,
     preset,
 ):
     files = {}
@@ -58,6 +62,10 @@ def generate_el_cl_genesis_data(
         shadowfork_file,
         min_validator_withdrawability_delay,
         shard_committee_period,
+        data_column_sidecar_subnet_count,
+        samples_per_slot,
+        custody_requirement,
+        target_number_of_peers,
         preset,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
@@ -141,6 +149,10 @@ def new_env_file_for_el_cl_genesis_data(
     shadowfork_file,
     min_validator_withdrawability_delay,
     shard_committee_period,
+    data_column_sidecar_subnet_count,
+    samples_per_slot,
+    custody_requirement,
+    target_number_of_peers,
     preset,
 ):
     return {
@@ -167,5 +179,9 @@ def new_env_file_for_el_cl_genesis_data(
         "ShadowForkFile": shadowfork_file,
         "MinValidatorWithdrawabilityDelay": min_validator_withdrawability_delay,
         "ShardCommitteePeriod": shard_committee_period,
+        "DataColumnSidecarSubnetCount": data_column_sidecar_subnet_count,
+        "SamplesPerSlot": samples_per_slot,
+        "CustodyRequirement": custody_requirement,
+        "TargetNumberOfPeers": target_number_of_peers,
         "Preset": preset,
     }

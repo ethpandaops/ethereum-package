@@ -456,6 +456,20 @@ participants:
     # Defaults null and then set to default global keymanager_enabled (false)
     keymanager_enabled: null
 
+# Participants matrix creates a participant for each combination of EL, CL and VC clients
+# Each EL/CL/VC item can provide the same parameters as a standard participant
+participants_matrix: {}
+  # el:
+  #   - el_type: geth
+  #   - el_type: besu
+  # cl:
+  #   - cl_type: prysm
+  #   - cl_type: lighthouse
+  # vc:
+  #   - vc_type: prysm
+  #   - vc_type: lighthouse
+
+
 # Default configuration parameters for the network
 network_params:
   # Network name, used to enable syncing of alternative networks
@@ -527,6 +541,15 @@ network_params:
   # network_snapshot_url_base = "http://10.10.101.21:10000/snapshots/"
   # The snapshots are taken with https://github.com/ethpandaops/snapshotter
   network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
+
+  # The number of data column sidecar subnets used in the gossipsub protocol
+  data_column_sidecar_subnet_count: 32
+  # Number of DataColumn random samples a node queries per slot
+  samples_per_slot: 8
+  # Minimum number of subnets an honest node custodies and serves samples from
+  custody_requirement: 1
+  # Suggested minimum peer count
+  target_number_of_peers: 70
 
   # Preset for the network
   # Default: "mainnet"

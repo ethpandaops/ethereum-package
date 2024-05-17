@@ -284,6 +284,12 @@ def input_parser(plan, input_args):
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
+            data_column_sidecar_subnet_count=result["network_params"][
+                "data_column_sidecar_subnet_count"
+            ],
+            samples_per_slot=result["network_params"]["samples_per_slot"],
+            custody_requirement=result["network_params"]["custody_requirement"],
+            target_number_of_peers=result["network_params"]["target_number_of_peers"],
             preset=result["network_params"]["preset"],
         ),
         mev_params=struct(
@@ -375,6 +381,42 @@ def parse_network_params(plan, input_args):
     result = default_input_args()
     if input_args.get("network_params", {}).get("preset") == "minimal":
         result["network_params"] = default_minimal_network_params()
+
+    # Ensure we handle matrix participants before standard participants are handled.
+    if "participants_matrix" in input_args:
+        participants_matrix = []
+        participants = []
+
+        el_matrix = []
+        if "el" in input_args["participants_matrix"]:
+            el_matrix = input_args["participants_matrix"]["el"]
+        cl_matrix = []
+        if "cl" in input_args["participants_matrix"]:
+            cl_matrix = input_args["participants_matrix"]["cl"]
+        vc_matrix = []
+        if "vc" in input_args["participants_matrix"]:
+            vc_matrix = input_args["participants_matrix"]["vc"]
+
+        participants = []
+
+        for el in el_matrix:
+            for cl in cl_matrix:
+                participant = {k: v for k, v in el.items()}
+                for k, v in cl.items():
+                    participant[k] = v
+
+                participants.append(participant)
+
+        for index, participant in enumerate(participants):
+            for vc in vc_matrix:
+                for k, v in vc.items():
+                    participants[index][k] = v
+
+        if "participants" in input_args:
+            input_args["participants"].extend(participants)
+        else:
+            input_args["participants"] = participants
+
     for attr in input_args:
         value = input_args[attr]
         # if its insterted we use the value inserted
@@ -668,9 +710,11 @@ def get_client_node_selectors(participant_node_selectors, global_node_selectors)
 
 def default_input_args():
     network_params = default_network_params()
-    participants = [default_participant()]
+    participants = []
+    participants_matrix = []
     return {
         "participants": participants,
+        "participants_matrix": participants_matrix,
         "network_params": network_params,
         "wait_for_finalization": False,
         "global_log_level": "info",
@@ -713,6 +757,10 @@ def default_network_params():
         "eip7594_fork_epoch": 100000001,
         "eip7594_fork_version": "0x70000038",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
+        "data_column_sidecar_subnet_count": 32,
+        "samples_per_slot": 8,
+        "custody_requirement": 1,
+        "target_number_of_peers": 70,
         "preset": "mainnet",
     }
 
@@ -738,6 +786,10 @@ def default_minimal_network_params():
         "eip7594_fork_epoch": 100000001,
         "eip7594_fork_version": "0x70000038",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/",
+        "data_column_sidecar_subnet_count": 32,
+        "samples_per_slot": 8,
+        "custody_requirement": 1,
+        "target_number_of_peers": 70,
         "preset": "minimal",
     }
 
@@ -954,6 +1006,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             )
             participant["cl_extra_params"].append(
                 "--builder-endpoint={0}".format(mev_url)
+            )
+            participant["cl_extra_params"].append(
+                "--validators-builder-registration-default-enabled=true"
             )
         if participant["cl_type"] == "prysm":
             participant["vc_extra_params"].append("--enable-builder")
