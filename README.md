@@ -586,6 +586,7 @@ additional_services:
   - blobscan
   - dugtrio
   - blutgang
+  - forky
   - apache
 
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
