@@ -565,6 +565,12 @@ additional_services:
   - blutgang
   - apache
 
+# Configuration place for dora the explorer - https:#github.com/ethpandaops/dora
+dora_params:
+  # Dora docker image to use
+  # Leave blank to use the default image according to your network params
+  image: ""
+
 # Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour

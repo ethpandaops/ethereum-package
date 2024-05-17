@@ -74,6 +74,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
     "mev_params",
+    "dora_params",
     "assertoor_params",
     "goomy_blob_params",
     "tx_spammer_params",
@@ -87,6 +88,7 @@ def input_parser(plan, input_args):
     result = parse_network_params(plan, input_args)
 
     # add default eth2 input params
+    result["dora_params"] = get_default_dora_params()
     result["mev_params"] = get_default_mev_params(
         result.get("mev_type"), result["network_params"]["preset"]
     )
@@ -127,6 +129,10 @@ def input_parser(plan, input_args):
         if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
             result[attr] = value
         # custom eth2 attributes config
+        elif attr == "dora_params":
+            for sub_attr in input_args["dora_params"]:
+                sub_value = input_args["dora_params"][sub_attr]
+                result["dora_params"][sub_attr] = sub_value
         elif attr == "mev_params":
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
@@ -303,6 +309,10 @@ def input_parser(plan, input_args):
         )
         if result["mev_params"]
         else None,
+        dora_params=struct(
+            image=result["dora_params"]["image"],
+            env=result["dora_params"]["env"],
+        ),
         tx_spammer_params=struct(
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
@@ -787,6 +797,11 @@ def default_participant():
         "keymanager_enabled": None,
     }
 
+def get_default_dora_params():
+    return {
+        "image": "",
+        "env": {},
+    }
 
 def get_default_mev_params(mev_type, preset):
     mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
