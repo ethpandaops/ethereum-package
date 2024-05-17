@@ -34,6 +34,7 @@ def launch_dora(
     participant_configs,
     el_cl_data_files_artifact_uuid,
     network_params,
+    dora_params,
     global_node_selectors,
 ):
     all_cl_client_info = []
@@ -76,6 +77,7 @@ def launch_dora(
         config_files_artifact_name,
         el_cl_data_files_artifact_uuid,
         network_params,
+        dora_params,
         global_node_selectors,
     )
 
@@ -86,6 +88,7 @@ def get_config(
     config_files_artifact_name,
     el_cl_data_files_artifact_uuid,
     network_params,
+    dora_params,
     node_selectors,
 ):
     config_file_path = shared_utils.path_join(
@@ -93,7 +96,9 @@ def get_config(
         DORA_CONFIG_FILENAME,
     )
 
-    if network_params.eip7594_fork_epoch < 100000000:
+    if dora_params.image != "":
+        IMAGE_NAME = dora_params.image
+    elif network_params.eip7594_fork_epoch < 100000000:
         IMAGE_NAME = "ethpandaops/dora:peer-das"
     elif network_params.electra_fork_epoch < 100000000:
         IMAGE_NAME = "ethpandaops/dora:electra-support"
@@ -111,6 +116,7 @@ def get_config(
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
         cmd=["-config", config_file_path],
+        env_vars=dora_params.env,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,

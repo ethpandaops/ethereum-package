@@ -440,6 +440,7 @@ def run(plan, args={}):
         elif additional_service == "dora":
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
+            dora_params = args_with_right_defaults.dora_params
             dora.launch_dora(
                 plan,
                 dora_config_template,
@@ -447,6 +448,7 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 el_cl_data_files_artifact_uuid,
                 network_params,
+                dora_params,
                 global_node_selectors,
             )
             plan.print("Successfully launched dora")

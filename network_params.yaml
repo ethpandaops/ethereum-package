@@ -87,6 +87,8 @@ additional_services:
   - beacon_metrics_gazer
   - dora
   - prometheus_grafana
+dora_params:
+  image: ""
 tx_spammer_params:
   tx_spammer_extra_args: []
 goomy_blob_params:
