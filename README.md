@@ -586,6 +586,7 @@ additional_services:
   - blobscan
   - dugtrio
   - blutgang
+  - forky
   - apache
 
 # Configuration place for dora the explorer - https:#github.com/ethpandaops/dora
