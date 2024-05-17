@@ -60,11 +60,13 @@ def launch_forky(
         )
 
     template_data = new_config_template_data(
-        network_params.network, 
+        network_params.network,
         network_params.seconds_per_slot,
         final_genesis_timestamp,
         network_params.preset,
-        HTTP_PORT_NUMBER, all_cl_client_info, all_el_client_info
+        HTTP_PORT_NUMBER,
+        all_cl_client_info,
+        all_el_client_info,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -117,7 +119,15 @@ def get_config(
     )
 
 
-def new_config_template_data(network, seconds_per_slot, final_genesis_timestamp, preset, listen_port_num, cl_client_info, el_client_info):
+def new_config_template_data(
+    network,
+    seconds_per_slot,
+    final_genesis_timestamp,
+    preset,
+    listen_port_num,
+    cl_client_info,
+    el_client_info,
+):
     return {
         "Network": network,
         "SecondsPerSlot": seconds_per_slot,

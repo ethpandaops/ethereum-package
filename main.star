@@ -491,7 +491,9 @@ def run(plan, args={}):
             plan.print("Successfully launched blobscan")
         elif additional_service == "forky":
             plan.print("Launching forky")
-            forky_config_template = read_file(static_files.FORKY_CONFIG_TEMPLATE_FILEPATH)
+            forky_config_template = read_file(
+                static_files.FORKY_CONFIG_TEMPLATE_FILEPATH
+            )
             forky.launch_forky(
                 plan,
                 forky_config_template,
