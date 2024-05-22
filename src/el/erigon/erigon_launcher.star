@@ -206,9 +206,9 @@ def get_config(
 
     cmd = [
         "erigon",
-        "--chain={0}".format(
-             network if network in constants.PUBLIC_NETWORKS else "dev"
-        ),
+        # "--chain={0}".format(
+        #      network if network in constants.PUBLIC_NETWORKS else "dev"
+        # ),
         "{0}".format(
             "--override.cancun=" + str(cancun_time)
             if constants.NETWORK_NAME.shadowfork in network
