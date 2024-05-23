@@ -296,7 +296,12 @@ def launch_participant_network(
 
             vc_keystores = None
             if participant.validator_count != 0:
-                vc_keystores = preregistered_validator_keys_for_nodes[index]
+                if participant.vc_count == 1:
+                    vc_keystores = preregistered_validator_keys_for_nodes[index]
+                else:
+                    vc_keystores = preregistered_validator_keys_for_nodes[
+                        index + sub_index
+                    ]
 
             vc_context = None
             snooper_beacon_context = None
