@@ -87,8 +87,8 @@ def generate_validator_keystores(plan, mnemonic, participants):
     running_total_validator_count = 0
 
     for idx, participant in enumerate(participants):
+        output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
         if participant.validator_count == 0:
-            output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
             all_output_dirpaths.append(output_dirpath)
             continue
 
@@ -121,16 +121,14 @@ def generate_validator_keystores(plan, mnemonic, participants):
             all_output_dirpaths.append(output_dirpath)
             all_sub_command_strs.append(generate_keystores_cmd)
 
-        running_total_validator_count += participant.validator_count
+            teku_permissions_cmd = "chmod 0777 -R " + output_dirpath + TEKU_KEYS_DIRNAME
+            raw_secret_permissions_cmd = (
+                "chmod 0600 -R " + output_dirpath + RAW_SECRETS_DIRNAME
+            )
+            all_sub_command_strs.append(teku_permissions_cmd)
+            all_sub_command_strs.append(raw_secret_permissions_cmd)
 
-    # Append permissions commands for each output directory
-    for output_dirpath in all_output_dirpaths:
-        teku_permissions_cmd = "chmod 0777 -R " + output_dirpath + TEKU_KEYS_DIRNAME
-        raw_secret_permissions_cmd = (
-            "chmod 0600 -R " + output_dirpath + RAW_SECRETS_DIRNAME
-        )
-        all_sub_command_strs.append(teku_permissions_cmd)
-        all_sub_command_strs.append(raw_secret_permissions_cmd)
+        running_total_validator_count += participant.validator_count
 
     command_str = " && ".join(all_sub_command_strs)
 
