@@ -99,7 +99,7 @@ def get_config(
         labels=shared_utils.label_maker(
             constants.VC_TYPE.prysm,
             constants.CLIENT_TYPES.validator,
-            # image,
+            image,
             cl_context.client_name,
             extra_labels,
         ),
