@@ -65,9 +65,7 @@ def zfill_custom(value, width):
     return ("0" * (width - len(str(value)))) + str(value)
 
 
-def label_maker(
-    client, client_type, connected_client, extra_labels
-):  # add image back later
+def label_maker(client, client_type, image, connected_client, extra_labels):
     labels = {
         "ethereum-package.client": client,
         "ethereum-package.client-type": client_type,
