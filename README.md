@@ -444,10 +444,10 @@ participants:
     # Example:
     #
     # "relay_endpoints": [
-    #  "https:#0xdeadbeefcafa@relay.example.com",
-    #  "https:#0xdeadbeefcafb@relay.example.com",
-    #  "https:#0xdeadbeefcafc@relay.example.com",
-    #  "https:#0xdeadbeefcafd@relay.example.com"
+    #  "https://0xdeadbeefcafa@relay.example.com",
+    #  "https://0xdeadbeefcafb@relay.example.com",
+    #  "https://0xdeadbeefcafc@relay.example.com",
+    #  "https://0xdeadbeefcafd@relay.example.com"
     # ]
     builder_network_params: null
 
@@ -479,7 +479,7 @@ network_params:
   network: "kurtosis"
 
   # The network ID of the network.
-  network_id: 3151908
+  network_id: "3151908"
 
   # The address of the staking contract address on the Eth1 chain
   deposit_contract_address: "0x4242424242424242424242424242424242424242"
@@ -501,7 +501,7 @@ network_params:
   genesis_delay: 20
 
   # Max churn rate for the network introduced by
-  # EIP-7514 https:#eips.ethereum.org/EIPS/eip-7514
+  # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
   # Defaults to 8
   max_per_epoch_activation_churn_limit: 8
 
@@ -512,7 +512,7 @@ network_params:
   # Ejection balance
   # Defaults to 16ETH
   # 16000000000 gwei
-  ejection_balance: 16000000000,
+  ejection_balance: 16000000000
 
   # ETH1 follow distance
   # Defaults to 2048
@@ -589,7 +589,7 @@ additional_services:
   - forky
   - apache
 
-# Configuration place for dora the explorer - https:#github.com/ethpandaops/dora
+# Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
   # Dora docker image to use
   # Leave blank to use the default image according to your network params
@@ -598,17 +598,17 @@ dora_params:
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 
-# Configuration place for transaction spammer - https:#github.com/MariusVanDerWijden/tx-fuzz
+# Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
   tx_spammer_extra_args: []
 
-# Configuration place for goomy the blob spammer - https:#github.com/ethpandaops/goomy-blob
+# Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
 goomy_blob_params:
   # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
   goomy_blob_args: []
 
-# Configuration place for the assertoor testing tool - https:#github.com/ethpandaops/assertoor
+# Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use
   # Leave blank to use the default image according to your network params
@@ -811,7 +811,7 @@ port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   # The start value gets used as a seed for TCP and UDP discovery ports for el/cl client
   # Defaults to None - no public ports
-  public_port_start: None
+  public_port_start: null
 ```
 
 #### Example configurations
