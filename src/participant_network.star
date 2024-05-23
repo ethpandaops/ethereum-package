@@ -311,7 +311,7 @@ def launch_participant_network(
                     index_str,
                     cl_type,
                     vc_type,
-                    "-" + sub_index if participant.vc_count != 1 else "",
+                    "-" + str(sub_index) if participant.vc_count != 1 else "",
                 )
                 snooper_beacon_context = beacon_snooper.launch(
                     plan,
