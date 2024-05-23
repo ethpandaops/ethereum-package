@@ -71,7 +71,7 @@ def label_maker(
     labels = {
         "ethereum-package.client": client,
         "ethereum-package.client-type": client_type,
-        # "ethereum-package.client-image": image.replace("/", "-").replace(":", "-"),
+        "ethereum-package.client-image": image.replace("/", "-").replace(":", "-"),
         "ethereum-package.connected-client": connected_client,
     }
     labels.update(extra_labels)  # Add extra_labels to the labels dictionary
