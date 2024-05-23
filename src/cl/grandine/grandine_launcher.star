@@ -409,7 +409,7 @@ def get_beacon_config(
         labels=shared_utils.label_maker(
             constants.CL_TYPE.grandine,
             constants.CLIENT_TYPES.cl,
-            # image,
+            image,
             el_context.client_name,
             extra_labels,
         ),
