@@ -538,6 +538,11 @@ def parse_network_params(plan, input_args):
                 )
             participant["vc_image"] = default_image
 
+        if result["parallel_keystore_generation"] and participant["vc_count"] != 1:
+            fail(
+                "parallel_keystore_generation is only supported for 1 validator client per participant (for now)"
+            )
+
         # If the num validator keys per node is not divisible by vc_count of a participant, fail
         if (
             result["network_params"]["num_validator_keys_per_node"]

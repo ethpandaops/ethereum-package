@@ -239,7 +239,7 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     finished_files_to_verify = []
     running_total_validator_count = 0
     for idx, participant in enumerate(participants):
-        output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx)
+        output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
         if participant.validator_count == 0:
             all_generation_commands.append(None)
             all_output_dirpaths.append(None)
