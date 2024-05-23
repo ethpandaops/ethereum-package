@@ -378,7 +378,7 @@ def input_parser(plan, input_args):
 
 
 def parse_network_params(plan, input_args):
-    result = default_input_args()
+    result = default_input_args(input_args)
     if input_args.get("network_params", {}).get("preset") == "minimal":
         result["network_params"] = default_minimal_network_params()
 
@@ -396,8 +396,6 @@ def parse_network_params(plan, input_args):
         vc_matrix = []
         if "vc" in input_args["participants_matrix"]:
             vc_matrix = input_args["participants_matrix"]["vc"]
-
-        participants = []
 
         for el in el_matrix:
             for cl in cl_matrix:
@@ -708,9 +706,13 @@ def get_client_node_selectors(participant_node_selectors, global_node_selectors)
     return node_selectors
 
 
-def default_input_args():
+def default_input_args(input_args):
     network_params = default_network_params()
-    participants = []
+    if "participants_matrix" not in input_args:
+        participants = [default_participant()]
+    else:
+        participants = []
+
     participants_matrix = []
     return {
         "participants": participants,
