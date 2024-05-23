@@ -69,7 +69,9 @@ def label_maker(client, client_type, image, connected_client, extra_labels):
     labels = {
         "ethereum-package.client": client,
         "ethereum-package.client-type": client_type,
-        "ethereum-package.client-image": image.replace("/", "-").replace(":", "-"),
+        "ethereum-package.client-image": image.replace("/", "-")
+        .replace(":", "_")
+        .split("@")[0],  # drop the sha256 part of the image from the label
         "ethereum-package.connected-client": connected_client,
     }
     labels.update(extra_labels)  # Add extra_labels to the labels dictionary
