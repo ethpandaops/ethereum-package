@@ -36,6 +36,7 @@ def generate_el_cl_genesis_data(
     custody_requirement,
     target_number_of_peers,
     preset,
+    additional_preloaded_contracts,
 ):
     files = {}
     shadowfork_file = ""
@@ -67,6 +68,7 @@ def generate_el_cl_genesis_data(
         custody_requirement,
         target_number_of_peers,
         preset,
+        additional_preloaded_contracts,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
         genesis_generation_config_yml_template, template_data
@@ -154,6 +156,7 @@ def new_env_file_for_el_cl_genesis_data(
     custody_requirement,
     target_number_of_peers,
     preset,
+    additional_preloaded_contracts,
 ):
     return {
         "UnixTimestamp": genesis_unix_timestamp,
@@ -184,4 +187,5 @@ def new_env_file_for_el_cl_genesis_data(
         "CustodyRequirement": custody_requirement,
         "TargetNumberOfPeers": target_number_of_peers,
         "Preset": preset,
+        "AdditionalPreloadedContracts": additional_preloaded_contracts,
     }
