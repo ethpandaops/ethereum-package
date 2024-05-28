@@ -396,7 +396,6 @@ def launch_participant_network(
         else:
             vc_context = None
 
-
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
             snooper_beacon_context = all_snooper_beacon_contexts[index]
