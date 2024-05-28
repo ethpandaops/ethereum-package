@@ -210,150 +210,177 @@ def launch_participant_network(
         cl_type = participant.cl_type
         vc_type = participant.vc_type
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
-        el_context = all_el_contexts[index]
-        cl_context = all_cl_contexts[index]
+        for sub_index in range(participant.vc_count):
+            el_context = all_el_contexts[index]
+            cl_context = all_cl_contexts[index]
 
-        node_selectors = input_parser.get_client_node_selectors(
-            participant.node_selectors,
-            global_node_selectors,
-        )
-        if participant.ethereum_metrics_exporter_enabled:
-            pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
+            node_selectors = input_parser.get_client_node_selectors(
+                participant.node_selectors,
+                global_node_selectors,
+            )
+            if participant.ethereum_metrics_exporter_enabled:
+                pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
-            ethereum_metrics_exporter_service_name = (
-                "ethereum-metrics-exporter-{0}".format(pair_name)
+                ethereum_metrics_exporter_service_name = (
+                    "ethereum-metrics-exporter-{0}".format(pair_name)
+                )
+
+                ethereum_metrics_exporter_context = ethereum_metrics_exporter.launch(
+                    plan,
+                    pair_name,
+                    ethereum_metrics_exporter_service_name,
+                    el_context,
+                    cl_context,
+                    node_selectors,
+                )
+                plan.print(
+                    "Successfully added {0} ethereum metrics exporter participants".format(
+                        ethereum_metrics_exporter_context
+                    )
+                )
+
+            all_ethereum_metrics_exporter_contexts.append(
+                ethereum_metrics_exporter_context
             )
 
-            ethereum_metrics_exporter_context = ethereum_metrics_exporter.launch(
-                plan,
-                pair_name,
-                ethereum_metrics_exporter_service_name,
-                el_context,
-                cl_context,
-                node_selectors,
-            )
+            xatu_sentry_context = None
+
+            if participant.xatu_sentry_enabled:
+                pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
+
+                xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
+
+                xatu_sentry_context = xatu_sentry.launch(
+                    plan,
+                    xatu_sentry_service_name,
+                    cl_context,
+                    xatu_sentry_params,
+                    network_params,
+                    pair_name,
+                    node_selectors,
+                )
+                plan.print(
+                    "Successfully added {0} xatu sentry participants".format(
+                        xatu_sentry_context
+                    )
+                )
+
+            all_xatu_sentry_contexts.append(xatu_sentry_context)
+
             plan.print(
-                "Successfully added {0} ethereum metrics exporter participants".format(
-                    ethereum_metrics_exporter_context
+                "Successfully added {0} CL participants".format(num_participants)
+            )
+
+            plan.print("Start adding validators for participant #{0}".format(index_str))
+            if participant.use_separate_vc == None:
+                # This should only be the case for the MEV participant,
+                # the regular participants default to False/True
+                all_vc_contexts.append(None)
+                all_snooper_beacon_contexts.append(None)
+                continue
+
+            if (
+                cl_type in _cls_that_need_separate_vc
+                and not participant.use_separate_vc
+            ):
+                fail("{0} needs a separate validator client!".format(cl_type))
+
+            if not participant.use_separate_vc:
+                all_vc_contexts.append(None)
+                all_snooper_beacon_contexts.append(None)
+                continue
+
+            plan.print(
+                "Using separate validator client for participant #{0}".format(index_str)
+            )
+
+            vc_keystores = None
+            if participant.validator_count != 0:
+                if participant.vc_count == 1:
+                    vc_keystores = preregistered_validator_keys_for_nodes[index]
+                else:
+                    vc_keystores = preregistered_validator_keys_for_nodes[
+                        index + sub_index
+                    ]
+
+            vc_context = None
+            snooper_beacon_context = None
+
+            if participant.snooper_enabled:
+                snooper_service_name = "snooper-beacon-{0}-{1}-{2}{3}".format(
+                    index_str,
+                    cl_type,
+                    vc_type,
+                    "-" + str(sub_index) if participant.vc_count != 1 else "",
+                )
+                snooper_beacon_context = beacon_snooper.launch(
+                    plan,
+                    snooper_service_name,
+                    cl_context,
+                    node_selectors,
+                )
+                plan.print(
+                    "Successfully added {0} snooper participants".format(
+                        snooper_beacon_context
+                    )
+                )
+            all_snooper_beacon_contexts.append(snooper_beacon_context)
+            full_name = (
+                "{0}-{1}-{2}-{3}{4}".format(
+                    index_str,
+                    el_type,
+                    cl_type,
+                    vc_type,
+                    "-" + str(sub_index) if participant.vc_count != 1 else "",
+                )
+                if participant.cl_type != participant.vc_type
+                else "{0}-{1}-{2}{3}".format(
+                    index_str,
+                    el_type,
+                    cl_type,
+                    "-" + str(sub_index) if participant.vc_count != 1 else "",
                 )
             )
 
-        all_ethereum_metrics_exporter_contexts.append(ethereum_metrics_exporter_context)
-
-        xatu_sentry_context = None
-
-        if participant.xatu_sentry_enabled:
-            pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
-
-            xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
-
-            xatu_sentry_context = xatu_sentry.launch(
-                plan,
-                xatu_sentry_service_name,
-                cl_context,
-                xatu_sentry_params,
-                network_params,
-                pair_name,
-                node_selectors,
+            vc_context = vc.launch(
+                plan=plan,
+                launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
+                keymanager_file=keymanager_file,
+                service_name="vc-{0}".format(full_name),
+                vc_type=vc_type,
+                image=participant.vc_image,
+                participant_log_level=participant.vc_log_level,
+                global_log_level=global_log_level,
+                cl_context=cl_context,
+                el_context=el_context,
+                full_name=full_name,
+                snooper_enabled=participant.snooper_enabled,
+                snooper_beacon_context=snooper_beacon_context,
+                node_keystore_files=vc_keystores,
+                vc_min_cpu=participant.vc_min_cpu,
+                vc_max_cpu=participant.vc_max_cpu,
+                vc_min_mem=participant.vc_min_mem,
+                vc_max_mem=participant.vc_max_mem,
+                extra_params=participant.vc_extra_params,
+                extra_env_vars=participant.vc_extra_env_vars,
+                extra_labels=participant.vc_extra_labels,
+                prysm_password_relative_filepath=prysm_password_relative_filepath,
+                prysm_password_artifact_uuid=prysm_password_artifact_uuid,
+                vc_tolerations=participant.vc_tolerations,
+                participant_tolerations=participant.tolerations,
+                global_tolerations=global_tolerations,
+                node_selectors=node_selectors,
+                keymanager_enabled=participant.keymanager_enabled,
+                preset=network_params.preset,
+                network=network_params.network,
+                electra_fork_epoch=network_params.electra_fork_epoch,
             )
-            plan.print(
-                "Successfully added {0} xatu sentry participants".format(
-                    xatu_sentry_context
-                )
-            )
+            all_vc_contexts.append(vc_context)
 
-        all_xatu_sentry_contexts.append(xatu_sentry_context)
+            if vc_context and vc_context.metrics_info:
+                vc_context.metrics_info["config"] = participant.prometheus_config
 
-        plan.print("Successfully added {0} CL participants".format(num_participants))
-
-        plan.print("Start adding validators for participant #{0}".format(index_str))
-        if participant.use_separate_vc == None:
-            # This should only be the case for the MEV participant,
-            # the regular participants default to False/True
-            all_vc_contexts.append(None)
-            all_snooper_beacon_contexts.append(None)
-            continue
-
-        if cl_type in _cls_that_need_separate_vc and not participant.use_separate_vc:
-            fail("{0} needs a separate validator client!".format(cl_type))
-
-        if not participant.use_separate_vc:
-            all_vc_contexts.append(None)
-            all_snooper_beacon_contexts.append(None)
-            continue
-
-        plan.print(
-            "Using separate validator client for participant #{0}".format(index_str)
-        )
-
-        vc_keystores = None
-        if participant.validator_count != 0:
-            vc_keystores = preregistered_validator_keys_for_nodes[index]
-
-        vc_context = None
-        snooper_beacon_context = None
-
-        if participant.snooper_enabled:
-            snooper_service_name = "snooper-beacon-{0}-{1}-{2}".format(
-                index_str, cl_type, vc_type
-            )
-            snooper_beacon_context = beacon_snooper.launch(
-                plan,
-                snooper_service_name,
-                cl_context,
-                node_selectors,
-            )
-            plan.print(
-                "Successfully added {0} snooper participants".format(
-                    snooper_beacon_context
-                )
-            )
-        all_snooper_beacon_contexts.append(snooper_beacon_context)
-        full_name = (
-            "{0}-{1}-{2}-{3}".format(index_str, el_type, cl_type, vc_type)
-            if participant.cl_type != participant.vc_type
-            else "{0}-{1}-{2}".format(index_str, el_type, cl_type)
-        )
-
-        vc_context = vc.launch(
-            plan=plan,
-            launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
-            keymanager_file=keymanager_file,
-            service_name="vc-{0}".format(full_name),
-            vc_type=vc_type,
-            image=participant.vc_image,
-            participant_log_level=participant.vc_log_level,
-            global_log_level=global_log_level,
-            cl_context=cl_context,
-            el_context=el_context,
-            full_name=full_name,
-            snooper_enabled=participant.snooper_enabled,
-            snooper_beacon_context=snooper_beacon_context,
-            node_keystore_files=vc_keystores,
-            vc_min_cpu=participant.vc_min_cpu,
-            vc_max_cpu=participant.vc_max_cpu,
-            vc_min_mem=participant.vc_min_mem,
-            vc_max_mem=participant.vc_max_mem,
-            extra_params=participant.vc_extra_params,
-            extra_env_vars=participant.vc_extra_env_vars,
-            extra_labels=participant.vc_extra_labels,
-            prysm_password_relative_filepath=prysm_password_relative_filepath,
-            prysm_password_artifact_uuid=prysm_password_artifact_uuid,
-            vc_tolerations=participant.vc_tolerations,
-            participant_tolerations=participant.tolerations,
-            global_tolerations=global_tolerations,
-            node_selectors=node_selectors,
-            keymanager_enabled=participant.keymanager_enabled,
-            preset=network_params.preset,
-            network=network_params.network,
-            electra_fork_epoch=network_params.electra_fork_epoch,
-        )
-        all_vc_contexts.append(vc_context)
-
-        if vc_context and vc_context.metrics_info:
-            vc_context.metrics_info["config"] = participant.prometheus_config
-
-    all_participants = []
+        all_participants = []
 
     for index, participant in enumerate(participants):
         el_type = participant.el_type
@@ -364,7 +391,10 @@ def launch_participant_network(
 
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
-        vc_context = all_vc_contexts[index]
+        if participant.vc_count != 0:
+            vc_context = all_vc_contexts[index]
+        else:
+            vc_context = None
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]

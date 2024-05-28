@@ -2,7 +2,7 @@ shared_utils = import_module("../../shared_utils/shared_utils.star")
 keystore_files_module = import_module("./keystore_files.star")
 keystores_result = import_module("./generate_keystores_result.star")
 
-NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores/"
+NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR = "/node-{0}-keystores{1}/"
 
 # Prysm keystores are encrypted with a password
 PRYSM_PASSWORD = "password"
@@ -85,31 +85,50 @@ def generate_validator_keystores(plan, mnemonic, participants):
     all_output_dirpaths = []
     all_sub_command_strs = []
     running_total_validator_count = 0
+
     for idx, participant in enumerate(participants):
-        output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx)
+        output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
         if participant.validator_count == 0:
             all_output_dirpaths.append(output_dirpath)
             continue
-        start_index = running_total_validator_count
-        running_total_validator_count += participant.validator_count
-        stop_index = start_index + participant.validator_count
 
-        generate_keystores_cmd = '{0} keystores --insecure --prysm-pass {1} --out-loc {2} --source-mnemonic "{3}" --source-min {4} --source-max {5}'.format(
-            KEYSTORES_GENERATION_TOOL_NAME,
-            PRYSM_PASSWORD,
-            output_dirpath,
-            mnemonic,
-            start_index,
-            stop_index,
-        )
-        teku_permissions_cmd = "chmod 0777 -R " + output_dirpath + TEKU_KEYS_DIRNAME
-        raw_secret_permissions_cmd = (
-            "chmod 0600 -R " + output_dirpath + RAW_SECRETS_DIRNAME
-        )
-        all_sub_command_strs.append(generate_keystores_cmd)
-        all_sub_command_strs.append(teku_permissions_cmd)
-        all_sub_command_strs.append(raw_secret_permissions_cmd)
-        all_output_dirpaths.append(output_dirpath)
+        for i in range(participant.vc_count):
+            output_dirpath = (
+                NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "-" + str(i))
+                if participant.vc_count != 1
+                else NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
+            )
+
+            start_index = running_total_validator_count + i * (
+                participant.validator_count // participant.vc_count
+            )
+            stop_index = start_index + (
+                participant.validator_count // participant.vc_count
+            )
+
+            # Adjust stop_index for the last partition to include all remaining validators
+            if i == participant.vc_count - 1:
+                stop_index = running_total_validator_count + participant.validator_count
+
+            generate_keystores_cmd = '{0} keystores --insecure --prysm-pass {1} --out-loc {2} --source-mnemonic "{3}" --source-min {4} --source-max {5}'.format(
+                KEYSTORES_GENERATION_TOOL_NAME,
+                PRYSM_PASSWORD,
+                output_dirpath,
+                mnemonic,
+                start_index,
+                stop_index,
+            )
+            all_output_dirpaths.append(output_dirpath)
+            all_sub_command_strs.append(generate_keystores_cmd)
+
+            teku_permissions_cmd = "chmod 0777 -R " + output_dirpath + TEKU_KEYS_DIRNAME
+            raw_secret_permissions_cmd = (
+                "chmod 0600 -R " + output_dirpath + RAW_SECRETS_DIRNAME
+            )
+            all_sub_command_strs.append(teku_permissions_cmd)
+            all_sub_command_strs.append(raw_secret_permissions_cmd)
+
+        running_total_validator_count += participant.validator_count
 
     command_str = " && ".join(all_sub_command_strs)
 
@@ -124,39 +143,57 @@ def generate_validator_keystores(plan, mnemonic, participants):
     keystore_files = []
     running_total_validator_count = 0
     for idx, participant in enumerate(participants):
-        output_dirpath = all_output_dirpaths[idx]
         if participant.validator_count == 0:
             keystore_files.append(None)
             continue
-        padded_idx = shared_utils.zfill_custom(idx + 1, len(str(len(participants))))
-        keystore_start_index = running_total_validator_count
+
+        for i in range(participant.vc_count):
+            output_dirpath = (
+                NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "-" + str(i))
+                if participant.vc_count != 1
+                else NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
+            )
+            padded_idx = shared_utils.zfill_custom(idx + 1, len(str(len(participants))))
+
+            keystore_start_index = running_total_validator_count + i * (
+                participant.validator_count // participant.vc_count
+            )
+            keystore_stop_index = keystore_start_index + (
+                participant.validator_count // participant.vc_count
+            )
+
+            if i == participant.vc_count - 1:
+                keystore_stop_index = (
+                    running_total_validator_count + participant.validator_count
+                )
+
+            artifact_name = "{0}-{1}-{2}-{3}-{4}-{5}".format(
+                padded_idx,
+                participant.cl_type,
+                participant.el_type,
+                keystore_start_index,
+                keystore_stop_index - 1,
+                i,
+            )
+            artifact_name = plan.store_service_files(
+                service_name, output_dirpath, name=artifact_name
+            )
+
+            base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
+            to_add = keystore_files_module.new_keystore_files(
+                artifact_name,
+                shared_utils.path_join(base_dirname_in_artifact),
+                shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
+                shared_utils.path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
+                shared_utils.path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),
+                shared_utils.path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
+                shared_utils.path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
+                shared_utils.path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
+            )
+
+            keystore_files.append(to_add)
+
         running_total_validator_count += participant.validator_count
-        keystore_stop_index = (keystore_start_index + participant.validator_count) - 1
-        artifact_name = "{0}-{1}-{2}-{3}-{4}".format(
-            padded_idx,
-            participant.cl_type,
-            participant.el_type,
-            keystore_start_index,
-            keystore_stop_index,
-        )
-        artifact_name = plan.store_service_files(
-            service_name, output_dirpath, name=artifact_name
-        )
-
-        # This is necessary because the way Kurtosis currently implements artifact-storing is
-        base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
-        to_add = keystore_files_module.new_keystore_files(
-            artifact_name,
-            shared_utils.path_join(base_dirname_in_artifact),
-            shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
-            shared_utils.path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
-            shared_utils.path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),
-            shared_utils.path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
-            shared_utils.path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
-            shared_utils.path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
-        )
-
-        keystore_files.append(to_add)
 
     write_prysm_password_file_cmd = [
         "sh",
@@ -187,8 +224,6 @@ def generate_validator_keystores(plan, mnemonic, participants):
         keystore_files,
     )
 
-    # TODO replace this with a task so that we can get the container removed
-    # we are removing  a call to remove_service for idempotency
     return result
 
 
@@ -204,7 +239,7 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
     finished_files_to_verify = []
     running_total_validator_count = 0
     for idx, participant in enumerate(participants):
-        output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx)
+        output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
         if participant.validator_count == 0:
             all_generation_commands.append(None)
             all_output_dirpaths.append(None)
