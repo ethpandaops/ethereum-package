@@ -214,6 +214,7 @@ def input_parser(plan, input_args):
                 vc_type=participant["vc_type"],
                 vc_image=participant["vc_image"],
                 vc_log_level=participant["vc_log_level"],
+                vc_count=participant["vc_count"],
                 vc_tolerations=participant["vc_tolerations"],
                 cl_extra_params=participant["cl_extra_params"],
                 cl_extra_labels=participant["cl_extra_labels"],
@@ -538,6 +539,30 @@ def parse_network_params(plan, input_args):
                 )
             participant["vc_image"] = default_image
 
+        if result["parallel_keystore_generation"] and participant["vc_count"] != 1:
+            fail(
+                "parallel_keystore_generation is only supported for 1 validator client per participant (for now)"
+            )
+
+        # If the num validator keys per node is not divisible by vc_count of a participant, fail
+        if (
+            participant["vc_count"] > 0
+            and result["network_params"]["num_validator_keys_per_node"]
+            % participant["vc_count"]
+            != 0
+        ):
+            fail(
+                "num_validator_keys_per_node: {0} is not divisible by vc_count: {1} for participant: {2}".format(
+                    result["network_params"]["num_validator_keys_per_node"],
+                    participant["vc_count"],
+                    str(index + 1)
+                    + "-"
+                    + participant["el_type"]
+                    + "-"
+                    + participant["cl_type"],
+                )
+            )
+
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == None:
             participant["snooper_enabled"] = result["snooper_enabled"]
@@ -829,6 +854,7 @@ def default_participant():
         "vc_type": "",
         "vc_image": "",
         "vc_log_level": "",
+        "vc_count": 1,
         "vc_extra_env_vars": {},
         "vc_extra_labels": {},
         "vc_extra_params": [],
@@ -1034,6 +1060,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
                 "cl_image": parsed_arguments_dict["mev_params"]["mev_builder_cl_image"],
+                "cl_log_level": parsed_arguments_dict["global_log_level"],
                 "cl_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
@@ -1081,6 +1108,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
                 "cl_image": parsed_arguments_dict["mev_params"]["mev_builder_cl_image"],
+                "cl_log_level": parsed_arguments_dict["global_log_level"],
                 "cl_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
