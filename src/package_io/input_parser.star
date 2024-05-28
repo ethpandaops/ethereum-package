@@ -1057,6 +1057,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
                 "cl_image": parsed_arguments_dict["mev_params"]["mev_builder_cl_image"],
+                "cl_log_level": parsed_arguments_dict["global_log_level"],
                 "cl_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
@@ -1104,6 +1105,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
                 "cl_image": parsed_arguments_dict["mev_params"]["mev_builder_cl_image"],
+                "cl_log_level": parsed_arguments_dict["global_log_level"],
                 "cl_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
