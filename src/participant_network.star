@@ -391,7 +391,10 @@ def launch_participant_network(
 
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
-        vc_context = all_vc_contexts[index]
+        if participant.vc_count != 0:
+            vc_context = all_vc_contexts[index]
+        else:
+            vc_context = None
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]

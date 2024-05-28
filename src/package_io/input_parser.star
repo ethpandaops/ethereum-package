@@ -545,7 +545,8 @@ def parse_network_params(plan, input_args):
 
         # If the num validator keys per node is not divisible by vc_count of a participant, fail
         if (
-            result["network_params"]["num_validator_keys_per_node"]
+            participant["vc_count"] > 0
+            and result["network_params"]["num_validator_keys_per_node"]
             % participant["vc_count"]
             != 0
         ):
