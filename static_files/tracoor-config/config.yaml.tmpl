@@ -1,0 +1,41 @@
+server:
+  logging: "debug"
+  addr: ":8081"
+  metricsAddr: ":9091"
+  pprofAddr: ":6060"
+  preStopSleepSeconds: 1
+  ntpServer: time.google.com
+
+
+  services:
+    indexer:
+      retention:
+        beaconStates: 30m
+        beaconBlocks: 30m
+        beaconBadBlocks: 30m
+        beaconBadBlobs: 30m
+        executionBlockTrace: 30m
+        executionBadBlocks: 30m
+
+agent:
+  logging: "info"
+  metricsAddr: ":9092"
+  pprofAddr: ":6065"
+
+  name: kurtosis-agent
+
+  ethereum:
+    beacon:
+      nodeAddress: {{ .CLClientInfo.Beacon_HTTP_URL }}
+    execution:
+      nodeAddress: {{ .ELClientInfo.Execution_HTTP_URL }}
+      traceDisableMemory: true
+      traceDisableStack: true
+      traceDisableStorage: true
+
+  indexer:
+    address: tracoor-server:8081
+
+common:
+  store:
+    type: sqlite

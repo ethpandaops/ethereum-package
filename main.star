@@ -25,6 +25,7 @@ dugtrio = import_module("./src/dugtrio/dugtrio_launcher.star")
 blutgang = import_module("./src/blutgang/blutgang_launcher.star")
 blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 forky = import_module("./src/forky/forky_launcher.star")
+tracoor = import_module("./src/tracoor/tracoor_launcher.star")
 apache = import_module("./src/apache/apache_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
@@ -507,6 +508,22 @@ def run(plan, args={}):
                 final_genesis_timestamp,
             )
             plan.print("Successfully launched forky")
+        elif additional_service == "tracoor":
+            plan.print("Launching tracoor")
+            tracoor_config_template = read_file(
+                static_files.TRACOOR_CONFIG_TEMPLATE_FILEPATH
+            )
+            tracoor.launch_tracoor(
+                plan,
+                tracoor_config_template,
+                all_participants,
+                args_with_right_defaults.participants,
+                el_cl_data_files_artifact_uuid,
+                network_params,
+                global_node_selectors,
+                final_genesis_timestamp,
+            )
+            plan.print("Successfully launched tracoor")
         elif additional_service == "apache":
             plan.print("Launching apache")
             apache.launch_apache(

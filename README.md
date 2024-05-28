@@ -588,6 +588,7 @@ additional_services:
   - blutgang
   - forky
   - apache
+  - tracoor
 
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
