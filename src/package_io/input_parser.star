@@ -792,7 +792,7 @@ def default_network_params():
         "custody_requirement": 1,
         "target_number_of_peers": 70,
         "preset": "mainnet",
-        "additional_preloaded_contracts": "{}",
+        "additional_preloaded_contracts": {},
     }
 
 
@@ -822,7 +822,7 @@ def default_minimal_network_params():
         "custody_requirement": 1,
         "target_number_of_peers": 70,
         "preset": "minimal",
-        "additional_preloaded_contracts": "{}",
+        "additional_preloaded_contracts": {},
     }
 
 

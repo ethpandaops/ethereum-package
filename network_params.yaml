@@ -81,7 +81,7 @@ network_params:
   samples_per_slot: 8
   custody_requirement: 1
   target_number_of_peers: 70
-  additional_preloaded_contracts: '{}'
+  additional_preloaded_contracts: {}
 additional_services:
   - tx_spammer
   - blob_spammer

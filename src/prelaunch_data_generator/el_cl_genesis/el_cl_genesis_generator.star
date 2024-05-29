@@ -187,5 +187,5 @@ def new_env_file_for_el_cl_genesis_data(
         "CustodyRequirement": custody_requirement,
         "TargetNumberOfPeers": target_number_of_peers,
         "Preset": preset,
-        "AdditionalPreloadedContracts": additional_preloaded_contracts,
+        "AdditionalPreloadedContracts": json.encode(additional_preloaded_contracts),
     }
