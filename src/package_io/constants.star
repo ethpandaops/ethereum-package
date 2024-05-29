@@ -380,7 +380,7 @@ RAM_CPU_OVERRIDES = {
         "geth_max_cpu": 1000,  # 1 core
         "erigon_max_mem": 1024,  # 1GB
         "erigon_max_cpu": 1000,  # 1 core
-        "nethermind_max_mem": 1024,  # 1GB
+        "nethermind_max_mem": 2048,  # 2GB
         "nethermind_max_cpu": 1000,  # 1 core
         "besu_max_mem": 1024,  # 1GB
         "besu_max_cpu": 1000,  # 1 core
