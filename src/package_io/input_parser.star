@@ -33,7 +33,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
 }
 
 DEFAULT_VC_IMAGES = {
-    "lighthouse": "sigp/lighthouse:latest",
+    "lighthouse": "sigp/lighthouse:latest-unstable",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
