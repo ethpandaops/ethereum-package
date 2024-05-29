@@ -292,7 +292,9 @@ def input_parser(plan, input_args):
             custody_requirement=result["network_params"]["custody_requirement"],
             target_number_of_peers=result["network_params"]["target_number_of_peers"],
             preset=result["network_params"]["preset"],
-            additional_preloaded_contracts=result["network_params"]["additional_preloaded_contracts"],
+            additional_preloaded_contracts=result["network_params"][
+                "additional_preloaded_contracts"
+            ],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -820,7 +822,7 @@ def default_minimal_network_params():
         "custody_requirement": 1,
         "target_number_of_peers": 70,
         "preset": "minimal",
-        "additional_preloaded_contracts": "{}"
+        "additional_preloaded_contracts": "{}",
     }
 
 
