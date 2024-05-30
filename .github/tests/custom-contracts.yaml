@@ -3,8 +3,8 @@ participants:
     cl_type: teku
   - el_type: nethermind
     cl_type: prysm
-  - el_type: erigon
-    cl_type: nimbus
+  # - el_type: erigon # not yet working
+  #   cl_type: nimbus
   - el_type: besu
     cl_type: lighthouse
   - el_type: reth
@@ -13,5 +13,5 @@ participants:
     cl_type: teku
 network_params:
   network: kurtosis
-  additional_preloaded_contracts: {"0x123463a4B065722E99115D6c222f267d9cABb524": {"balance": "2ETH","code": "0x1234","storage": {},"nonce": 0,"secretKey": "0x"}}
+  additional_preloaded_contracts: '{"0x123463a4B065722E99115D6c222f267d9cABb524": {"balance": "2ETH","code": "0x1234","storage": {},"nonce": 0}}'
 additional_services: []
