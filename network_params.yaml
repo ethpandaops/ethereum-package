@@ -14,7 +14,7 @@ participants:
     el_max_mem: 0
 # CL
     cl_type: lighthouse
-    cl_image: sigp/lighthouse:latest
+    cl_image: sigp/lighthouse:latest-unstable
     cl_log_level: ""
     cl_extra_env_vars: {}
     cl_extra_labels: {}
@@ -28,7 +28,7 @@ participants:
     use_separate_vc: true
 # Validator
     vc_type: lighthouse
-    vc_image: sigp/lighthouse:latest
+    vc_image: sigp/lighthouse:latest-unstable
     vc_log_level: ""
     vc_count: 1
     vc_extra_env_vars: {}
