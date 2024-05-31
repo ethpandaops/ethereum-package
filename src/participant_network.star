@@ -211,7 +211,9 @@ def launch_participant_network(
         vc_type = participant.vc_type
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
         for sub_index in range(participant.vc_count):
-            vc_index_str = shared_utils.zfill_custom(sub_index + 1, len(str(participant.vc_count)))
+            vc_index_str = shared_utils.zfill_custom(
+                sub_index + 1, len(str(participant.vc_count))
+            )
             el_context = all_el_contexts[index]
             cl_context = all_cl_contexts[index]
 
