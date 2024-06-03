@@ -1,11 +1,11 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 
-IMAGE_NAME = "ethpandaops/tracoor:latest"
+IMAGE_NAME = "ethpandaops/tracoor:0.0.1-single"
 SERVICE_NAME = "tracoor"
 
 HTTP_PORT_ID = "http"
-HTTP_PORT_NUMBER = 9090
+HTTP_PORT_NUMBER = 8081
 
 TRACOOR_CONFIG_FILENAME = "tracoor-config.yaml"
 
@@ -36,32 +36,31 @@ def launch_tracoor(
     global_node_selectors,
     final_genesis_timestamp,
 ):
-    all_cl_client_info = []
-    all_el_client_info = []
+    all_client_info = []
     for index, participant in enumerate(participant_contexts):
         full_name, cl_client, el_client, _ = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
-        all_cl_client_info.append(
-            new_cl_client_info(
-                cl_client.beacon_http_url,
-                full_name,
-            )
-        )
-        all_el_client_info.append(
-            new_el_client_info(
-                "http://{0}:{1}".format(
-                    el_client.ip_addr,
-                    el_client.rpc_port_num,
-                ),
-                full_name,
-            )
+
+        beacon = new_cl_client_info(cl_client.beacon_http_url, full_name)
+        execution = new_el_client_info(
+            "http://{0}:{1}".format(
+                el_client.ip_addr,
+                el_client.rpc_port_num,
+            ),
+            full_name,
         )
 
+        client_info = {
+            "Beacon": beacon,
+            "Execution": execution,
+            "Network": network_params.network,
+        }
+        all_client_info.append(client_info)
+    plan.print(network_params.network)
     template_data = new_config_template_data(
         HTTP_PORT_NUMBER,
-        all_cl_client_info,
-        all_el_client_info,
+        all_client_info,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -101,7 +100,10 @@ def get_config(
         files={
             TRACOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
-        cmd=["--config", config_file_path],
+        cmd=[
+            "single",
+            "--single-config={0}".format(config_file_path),
+        ],
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
@@ -112,13 +114,11 @@ def get_config(
 
 def new_config_template_data(
     listen_port_num,
-    cl_client_info,
-    el_client_info,
+    client_info,
 ):
     return {
         "ListenPortNum": listen_port_num,
-        "CLClientInfo": cl_client_info[0],
-        "ELClientInfo": el_client_info[0],
+        "ParticipantClientInfo": client_info,
     }
 
 

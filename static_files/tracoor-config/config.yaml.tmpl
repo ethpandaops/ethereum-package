@@ -1,41 +1,38 @@
 server:
-  logging: "debug"
-  addr: ":8081"
+  addr: "0.0.0.0:{{ .ListenPortNum }}"
   metricsAddr: ":9091"
   pprofAddr: ":6060"
   preStopSleepSeconds: 1
   ntpServer: time.google.com
 
+  persistence:
+    dsn: "file:/data/tracoor.db?parseTime=True"
+    driver_name: sqlite
 
   services:
     indexer:
       retention:
         beaconStates: 30m
+        executionBlockTraces: 30m
         beaconBlocks: 30m
-        beaconBadBlocks: 30m
-        beaconBadBlobs: 30m
-        executionBlockTrace: 30m
-        executionBadBlocks: 30m
 
-agent:
-  logging: "info"
-  metricsAddr: ":9092"
-  pprofAddr: ":6065"
+agents:
+{{- range $client := .ParticipantClientInfo }}
+  - name: "{{ $client.Beacon.FullName }}"
+    ethereum:
+      overrideNetworkName: "{{ $client.Network }}"
+      beacon:
+        nodeAddress: "{{ $client.Beacon.Beacon_HTTP_URL }}"
+      execution:
+        nodeAddress: "{{ $client.Execution.Execution_HTTP_URL }}"
+{{- end }}
 
-  name: kurtosis-agent
-
-  ethereum:
-    beacon:
-      nodeAddress: {{ .CLClientInfo.Beacon_HTTP_URL }}
-    execution:
-      nodeAddress: {{ .ELClientInfo.Execution_HTTP_URL }}
-      traceDisableMemory: true
-      traceDisableStack: true
-      traceDisableStorage: true
-
+shared:
+  metricsAddr: ":9091"
+  logging: "debug"
   indexer:
-    address: tracoor-server:8081
-
-common:
+    address: 0.0.0.0:8081
   store:
-    type: sqlite
+    type: fs
+    config:
+      base_path: "/data/tracoor"
