@@ -149,6 +149,8 @@ def launch(
         service_name, METRICS_PATH, metric_url
     )
 
+    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+
     return el_context.new_el_context(
         "reth",
         "",  # reth has no enr
@@ -157,6 +159,7 @@ def launch(
         RPC_PORT_NUM,
         WS_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
+        http_url,
         service_name,
         [reth_metrics_info],
     )

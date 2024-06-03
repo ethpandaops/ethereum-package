@@ -6,6 +6,7 @@ def new_el_context(
     rpc_port_num,
     ws_port_num,
     engine_rpc_port_num,
+    rpc_http_url,
     service_name="",
     el_metrics_info=None,
 ):
@@ -18,5 +19,6 @@ def new_el_context(
         rpc_port_num=rpc_port_num,
         ws_port_num=ws_port_num,
         engine_rpc_port_num=engine_rpc_port_num,
+        rpc_http_url=rpc_http_url,
         el_metrics_info=el_metrics_info,
     )
