@@ -618,6 +618,7 @@ def run(plan, args={}):
         if ("blockscout" in args_with_right_defaults.additional_services) == False
         else blockscout_sc_verif_url,
         all_participants=all_participants,
+        pre_funded_accounts=genesis_constants.PRE_FUNDED_ACCOUNTS,
         final_genesis_timestamp=final_genesis_timestamp,
         genesis_validators_root=genesis_validators_root,
     )
