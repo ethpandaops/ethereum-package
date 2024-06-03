@@ -999,21 +999,22 @@ For more details, including a guide and architecture of the `mev-boost` infrastr
 
 ## Pre-funded accounts at Genesis
 
-This package comes with [seven prefunded keys for testing](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
+This package comes with [20 prefunded keys for testing](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
 
 Here's a table of where the keys are used
 
 | Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                     |
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
-| 0             | mev_custom_flood    |                  | ✅              | As the receiver of balance |
+| 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 4              | goomy_blob         | ✅                |                 | As the sender of blobs     |
+| 4             | goomy_blob          | ✅                |                 | As the sender of blobs     |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |
 | 7             | mev_flood           | ✅                |                 | As the user_key            |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
+| 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
 
 ## Developing On This Package
 
