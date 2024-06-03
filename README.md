@@ -344,6 +344,10 @@ participants:
     # - teku: consensys/teku:latest
     vc_image: ""
 
+    # The number of validator clients to run for this participant
+    # Defaults to 1
+    vc_count: 1
+
     # The log level string that this participant's CL client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
     # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
