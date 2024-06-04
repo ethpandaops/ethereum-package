@@ -343,7 +343,10 @@ def get_config(
             cmd.append("--override.overlay-stride=10000")
             cmd.append("--override.blockproof=true")
             cmd.append("--clear.verkle.costs=true")
-    elif network not in constants.PUBLIC_NETWORKS:
+    elif (
+        network not in constants.PUBLIC_NETWORKS
+        or constants.NETWORK_NAME.shadowfork not in network
+    ):
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
