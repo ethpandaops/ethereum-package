@@ -619,6 +619,7 @@ def run(plan, args={}):
         else blockscout_sc_verif_url,
         all_participants=all_participants,
         pre_funded_accounts=genesis_constants.PRE_FUNDED_ACCOUNTS,
+        network_params=network_params,
         final_genesis_timestamp=final_genesis_timestamp,
         genesis_validators_root=genesis_validators_root,
     )
