@@ -1,12 +1,13 @@
 server:
-  addr: "0.0.0.0:{{ .ListenPortNum }}"
+  addr: ":8081"
   metricsAddr: ":9091"
   pprofAddr: ":6060"
+  gatewayAddr: ":{{ .ListenPortNum }}"
   preStopSleepSeconds: 1
   ntpServer: time.google.com
 
   persistence:
-    dsn: "file:/tmp/tracoor.db?parseTime=True"
+    dsn: "file:/tmp/tracoor.db"
     driver_name: sqlite
 
   services:

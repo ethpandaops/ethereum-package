@@ -1,11 +1,11 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 
-IMAGE_NAME = "ethpandaops/tracoor:0.0.1-single"
+IMAGE_NAME = "ethpandaops/tracoor:0.0.18"
 SERVICE_NAME = "tracoor"
 
 HTTP_PORT_ID = "http"
-HTTP_PORT_NUMBER = 8081
+HTTP_PORT_NUMBER = 7007
 
 TRACOOR_CONFIG_FILENAME = "tracoor-config.yaml"
 
