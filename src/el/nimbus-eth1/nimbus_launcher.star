@@ -218,9 +218,7 @@ def get_config(
         "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
         "--tcp-port={0}".format(discovery_port),
     ]
-    if (
-        network not in constants.PUBLIC_NETWORKS
-    ):
+    if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--custom-network="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
