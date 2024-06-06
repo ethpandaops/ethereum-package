@@ -312,6 +312,7 @@ def run(plan, args={}):
                 tx_spammer_params,
                 network_params.electra_fork_epoch,
                 global_node_selectors,
+                network_params
             )
             plan.print("Successfully launched transaction spammer")
         elif additional_service == "blob_spammer":

@@ -15,6 +15,7 @@ def launch_transaction_spammer(
     tx_spammer_params,
     electra_fork_epoch,
     global_node_selectors,
+    network_params
 ):
     config = get_config(
         prefunded_addresses,
@@ -22,6 +23,7 @@ def launch_transaction_spammer(
         tx_spammer_params.tx_spammer_extra_args,
         electra_fork_epoch,
         global_node_selectors,
+        network_params
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -32,17 +34,19 @@ def get_config(
     tx_spammer_extra_args,
     electra_fork_epoch,
     node_selectors,
+    network_params,
 ):
     # Temp hack to use the old tx-fuzz image until we can get the new one working
     if electra_fork_epoch != None:
-        tx_spammer_image = "ethpandaops/tx-fuzz:kaustinen-281adbc"
+        tx_spammer_image = "ghcr.io/chainbound/tx-fuzz:0.1.0"
     else:
-        tx_spammer_image = "ethpandaops/tx-fuzz:master"
+        tx_spammer_image = "ghcr.io/chainbound/tx-fuzz:0.1.0"
 
     cmd = [
         "spam",
         "--rpc={}".format(el_uri),
         "--sk={0}".format(prefunded_addresses[3].private_key),
+        "--slot-time={}".format(network_params.seconds_per_slot),
     ]
 
     if len(tx_spammer_extra_args) > 0:
