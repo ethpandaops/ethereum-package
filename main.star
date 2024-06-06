@@ -288,7 +288,8 @@ def run(plan, args={}):
                     plan,
                     mev_params,
                     global_node_selectors,
-                    mev_boost_context
+                    mev_boost_context,
+                    all_cl_contexts[0].beacon_http_url
                 )
 
     if len(args_with_right_defaults.additional_services) == 0:

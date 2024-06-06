@@ -17,7 +17,8 @@ def launch_mev_sidecar(
     plan,
     mev_params,
     node_selectors,
-    mev_boost_context
+    mev_boost_context,
+    beacon_client_url
 ):
     image = mev_params.mev_sidecar_image
 
@@ -38,6 +39,8 @@ def launch_mev_sidecar(
                 "18d1c5302e734fd6fbfaa51828d42c4c6d3cbe020c42bab7dd15a2799cf00b82",
                 "--mevboost-url",
                 mev_boost_context_util.mev_boost_endpoint(mev_boost_context),
+                "--beacon-client-url",
+                beacon_client_url
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
