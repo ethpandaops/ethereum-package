@@ -345,7 +345,7 @@ def get_config(
             cmd.append("--clear.verkle.costs=true")
     elif (
         network not in constants.PUBLIC_NETWORKS
-        or constants.NETWORK_NAME.shadowfork not in network
+        and constants.NETWORK_NAME.shadowfork not in network
     ):
         cmd.append(
             "--bootnodes="
