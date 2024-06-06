@@ -1,6 +1,7 @@
 redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 constants = import_module("../../package_io/constants.star")
+mev_boost_context_util = import_module("../mev_boost/mev_boost_context.star")
 
 MEV_SIDECAR_ENDPOINT = "mev-sidecar-api"
 
@@ -36,7 +37,7 @@ def launch_mev_sidecar(
                 # Random private key for testing, generated with `openssl rand -hex 32`
                 "0x18d1c5302e734fd6fbfaa51828d42c4c6d3cbe020c42bab7dd15a2799cf00b82",
                 "--mevboost-url",
-                str(mev_boost_endpoint(mev_boost_context)),
+                mev_boost_context_util.mev_boost_endpoint(mev_boost_context),
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
