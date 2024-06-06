@@ -254,13 +254,6 @@ def run(plan, args={}):
         )
         mev_endpoints.append(endpoint)
 
-        # add mev-sidecar
-        mev_sidecar.launch_mev_sidecar(
-            plan,
-            mev_params,
-            global_node_selectors
-        )
-
     # spin up the mev boost contexts if some endpoints for relays have been passed
     all_mevboost_contexts = []
     if mev_endpoints:
@@ -289,6 +282,14 @@ def run(plan, args={}):
                     global_node_selectors,
                 )
                 all_mevboost_contexts.append(mev_boost_context)
+
+                # add mev-sidecar
+                mev_sidecar.launch_mev_sidecar(
+                    plan,
+                    mev_params,
+                    global_node_selectors,
+                    mev_boost_context
+                )
 
     if len(args_with_right_defaults.additional_services) == 0:
         output = struct(

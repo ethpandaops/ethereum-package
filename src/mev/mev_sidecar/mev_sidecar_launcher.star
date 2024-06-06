@@ -16,6 +16,7 @@ def launch_mev_sidecar(
     plan,
     mev_params,
     node_selectors,
+    mev_boost_context
 ):
     image = mev_params.mev_sidecar_image
 
@@ -31,6 +32,11 @@ def launch_mev_sidecar(
                 "/bolt-sidecar",
                 "--port",
                 str(MEV_SIDECAR_ENDPOINT_PORT),
+                "--private-key",
+                # Random private key for testing, generated with `openssl rand -hex 32`
+                "0x18d1c5302e734fd6fbfaa51828d42c4c6d3cbe020c42bab7dd15a2799cf00b82",
+                "--mevboost-url",
+                str(mev_boost_endpoint(mev_boost_context)),
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
