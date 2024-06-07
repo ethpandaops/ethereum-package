@@ -31,6 +31,7 @@ def launch(
     mev_boost_image,
     mev_boost_args,
     global_node_selectors,
+    network_params,
 ):
     config = get_config(
         mev_boost_launcher,
@@ -38,6 +39,7 @@ def launch(
         mev_boost_image,
         mev_boost_args,
         global_node_selectors,
+        network_params,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
@@ -53,6 +55,7 @@ def get_config(
     mev_boost_image,
     mev_boost_args,
     node_selectors,
+    network_params,
 ):
     command = mev_boost_args
 
@@ -72,6 +75,7 @@ def get_config(
             # maybe this is breaking; this isn't verifyign the bid and not sending it to the validator
             "SKIP_RELAY_SIGNATURE_CHECK": "1",
             "RELAYS": mev_boost_launcher.relay_end_points[0],
+            "SLOT_SEC": str(network_params.seconds_per_slot)
         },
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,

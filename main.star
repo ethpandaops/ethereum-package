@@ -280,6 +280,7 @@ def run(plan, args={}):
                     mev_params.mev_boost_image,
                     mev_params.mev_boost_args,
                     global_node_selectors,
+                    network_params,
                 )
                 all_mevboost_contexts.append(mev_boost_context)
 
