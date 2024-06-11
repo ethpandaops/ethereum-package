@@ -74,14 +74,14 @@ Optional features (enabled via flags or parameter files at runtime):
 
 ## Quickstart
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/new/?editor=code#https://github.com/kurtosis-tech/ethereum-package)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/new/?editor=code#https://github.com/ethpandaops/ethereum-package)
 
 1. [Install Docker & start the Docker Daemon if you haven't done so already][docker-installation]
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
 
    ```bash
-   kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package
+   kurtosis run --enclave my-testnet github.com/ethpandaops/ethereum-package
    ```
 
 #### Run with your own configuration
@@ -89,7 +89,7 @@ Optional features (enabled via flags or parameter files at runtime):
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 
 ```bash
-kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package --args-file network_params.yaml
+kurtosis run --enclave my-testnet github.com/ethpandaops/ethereum-package --args-file network_params.yaml
 ```
 
 Where `network_params.yaml` contains the parameters for your network in your home directory.
@@ -969,7 +969,7 @@ Consensus Layer (CL) nodes - Validator:
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
 
 ```
-kurtosis run github.com/kurtosis-tech/ethereum-package '{"mev_type": "full"}'
+kurtosis run github.com/ethpandaops/ethereum-package '{"mev_type": "full"}'
 ```
 
 Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
@@ -999,7 +999,7 @@ For more details, including a guide and architecture of the `mev-boost` infrastr
 
 ## Pre-funded accounts at Genesis
 
-This package comes with [20 prefunded keys for testing](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
+This package comes with [20 prefunded keys for testing](https://github.com/ethpandaops/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
 
 Here's a table of where the keys are used
 
