@@ -933,7 +933,7 @@ snooper_enabled: true
 | Lighthouse BN | ✅            | ❌       | ✅      | ✅          | ✅
 | Prysm BN      | ✅            | ✅       | ✅      | ✅          | ✅
 | Teku BN       | ✅            | ✅       | ✅      | ✅          | ✅
-| Lodestar BN   | ✅            | ❌       | ✅      | ✅          | ❌
+| Lodestar BN   | ✅            | ✅       | ✅      | ✅          | ✅
 | Nimbus BN     | ✅            | ❌       | ✅      | ❌          | ✅
 | Grandine BN   | ✅            | ✅       | ✅      | ✅          | ✅
 
