@@ -27,6 +27,7 @@ additional_services:
   - dugtrio
   - blutgang
   - apache
+  - tracoor
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true

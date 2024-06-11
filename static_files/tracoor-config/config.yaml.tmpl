@@ -1,0 +1,39 @@
+server:
+  addr: ":8081"
+  metricsAddr: ":9091"
+  pprofAddr: ":6060"
+  gatewayAddr: ":{{ .ListenPortNum }}"
+  preStopSleepSeconds: 1
+  ntpServer: time.google.com
+
+  persistence:
+    dsn: "file:/tmp/tracoor.db"
+    driver_name: sqlite
+
+  services:
+    indexer:
+      retention:
+        beaconStates: 30m
+        executionBlockTraces: 30m
+        beaconBlocks: 30m
+
+agents:
+{{- range $client := .ParticipantClientInfo }}
+  - name: "{{ $client.Beacon.FullName }}"
+    ethereum:
+      overrideNetworkName: "{{ $client.Network }}"
+      beacon:
+        nodeAddress: "{{ $client.Beacon.Beacon_HTTP_URL }}"
+      execution:
+        nodeAddress: "{{ $client.Execution.Execution_HTTP_URL }}"
+{{- end }}
+
+shared:
+  metricsAddr: ":9091"
+  logging: "debug"
+  indexer:
+    address: 0.0.0.0:8081
+  store:
+    type: fs
+    config:
+      base_path: "/data/tracoor"

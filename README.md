@@ -564,6 +564,15 @@ network_params:
   # For an example of minimal preset, please refer to [minimal.yaml](.github/tests/minimal.yaml)
   preset: "mainnet"
 
+  # Preloaded contracts for the chain
+  additional_preloaded_contracts: {}
+  # example: To set a contract code at a certain address:
+  #  "0x123463a4B065722E99115D6c222f267d9cABb524":
+  #    balance: "1ETH"
+  #    code: "0x1234"
+  #    storage: {}
+  #    nonce: 0
+  #    secretKey: "0x"
 
 # Global parameters for the network
 
@@ -592,6 +601,7 @@ additional_services:
   - blutgang
   - forky
   - apache
+  - tracoor
 
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
