@@ -88,7 +88,7 @@ EIP7594_FORK_VERSION = "0x70000038"
 
 ETHEREUM_GENESIS_GENERATOR = struct(
     capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Deprecated (no support for minimal config)
-    deneb_genesis="ethpandaops/ethereum-genesis-generator:3.1.6",  # Default
+    deneb_genesis="ethpandaops/ethereum-genesis-generator:3.2.1",  # Default
     verkle_support_genesis="ethpandaops/ethereum-genesis-generator:3.0.0-rc.19",  # soon to be deneb genesis, waiting for rebase
     verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )
@@ -380,7 +380,7 @@ RAM_CPU_OVERRIDES = {
         "geth_max_cpu": 1000,  # 1 core
         "erigon_max_mem": 1024,  # 1GB
         "erigon_max_cpu": 1000,  # 1 core
-        "nethermind_max_mem": 1024,  # 1GB
+        "nethermind_max_mem": 2048,  # 2GB
         "nethermind_max_cpu": 1000,  # 1 core
         "besu_max_mem": 1024,  # 1GB
         "besu_max_cpu": 1000,  # 1 core

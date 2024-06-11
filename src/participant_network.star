@@ -112,6 +112,7 @@ def launch_participant_network(
             network_params.custody_requirement,
             network_params.target_number_of_peers,
             network_params.preset,
+            network_params.additional_preloaded_contracts,
         )
     elif network_params.network in constants.PUBLIC_NETWORKS:
         # We are running a public network
