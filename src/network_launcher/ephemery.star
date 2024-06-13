@@ -6,6 +6,7 @@ el_cl_genesis_data = import_module(
 
 def launch(plan, cancun_time, prague_time):
     el_cl_genesis_data_uuid = plan.run_sh(
+        name="fetch_ephemery_genesis_data",
         description="Creating network configs",
         run="mkdir -p /network-configs/ && \
             curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && \

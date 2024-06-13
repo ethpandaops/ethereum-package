@@ -8,6 +8,7 @@ constants = import_module("../package_io/constants.star")
 def launch(plan, network, cancun_time, prague_time):
     # We are running a public network
     dummy_genesis_data = plan.run_sh(
+        name="dummy_genesis_data",
         description="Creating network configs folder",
         run="mkdir /network-configs",
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
