@@ -1,49 +1,9 @@
 # Important recent update notes - temporary note
-There are many participant fields that have been renamed to be more consistent with the rest of the package. The following fields have been renamed:
-### EL Flags
-```
-el_client_type -> el_type
-el_client_image -> el_image
-el_client_log_level -> el_log_level
-el_client_volume_size -> el_volume_size
-```
-### CL Flags
-```
-cl_client_type -> cl_type
-cl_client_image -> cl_image
-cl_client_volume_size -> cl_volume_size
-cl_client_log_level -> cl_log_level
-beacon_extra_params -> cl_extra_params
-beacon_extra_labels -> cl_extra_labels
-bn_min_cpu -> cl_min_cpu
-bn_max_cpu -> cl_max_cpu
-bn_min_mem -> cl_min_mem
-bn_max_mem -> cl_max_mem
-use_separate_validator_client -> use_separate_vc
-```
-### Validator flags
-```
-validator_client_type -> vc_type
-validator_tolerations -> vc_tolerations
-validator_client_image -> vc_image
-validator_extra_params -> vc_extra_params
-validator_extra_labels -> vc_extra_labels
-v_min_cpu -> vc_min_cpu
-v_max_cpu -> vc_max_cpu
-v_min_mem -> vc_min_mem
-v_max_mem -> vc_max_mem
-```
-### Global flags
-```
-global_client_log_level -> global_log_level
-mev_type: full -> mev_type: flashbots # new rename as of 3 May 2024
-```
+The `ethereum-package` has been moved to the [ethpandaops organization](https://github.com/ethpandaops/).
 
-To help you with the transition, we have added a script that will automatically update your `yaml` file to the new format. You can run the following command to update your network_params.yaml file:
-```bash
-./rename.sh example.yaml
-```
+The new repository is located at [github.com/ethpandaops/ethereum-package](https://github.com/ethpandaops/ethereum-package). For all your references please replace `kurtosis-tech` with `ethpandaops`.
 
+If you would like to use the latest release of the package, released by kurtosis-tech, please refer to using the tag [v3.1.0](https://github.com/kurtosis-tech/ethereum-package/releases/tag/3.1.0).
 
 # Ethereum Package
 
@@ -74,14 +34,14 @@ Optional features (enabled via flags or parameter files at runtime):
 
 ## Quickstart
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/new/?editor=code#https://github.com/kurtosis-tech/ethereum-package)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/new/?editor=code#https://github.com/ethpandaops/ethereum-package)
 
 1. [Install Docker & start the Docker Daemon if you haven't done so already][docker-installation]
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
 
    ```bash
-   kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package
+   kurtosis run --enclave my-testnet github.com/ethpandaops/ethereum-package
    ```
 
 #### Run with your own configuration
@@ -89,7 +49,7 @@ Optional features (enabled via flags or parameter files at runtime):
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 
 ```bash
-kurtosis run --enclave my-testnet github.com/kurtosis-tech/ethereum-package --args-file network_params.yaml
+kurtosis run --enclave my-testnet github.com/ethpandaops/ethereum-package --args-file network_params.yaml
 ```
 
 Where `network_params.yaml` contains the parameters for your network in your home directory.
@@ -978,7 +938,7 @@ Consensus Layer (CL) nodes - Validator:
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
 
 ```
-kurtosis run github.com/kurtosis-tech/ethereum-package '{"mev_type": "full"}'
+kurtosis run github.com/ethpandaops/ethereum-package '{"mev_type": "full"}'
 ```
 
 Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
@@ -1008,7 +968,7 @@ For more details, including a guide and architecture of the `mev-boost` infrastr
 
 ## Pre-funded accounts at Genesis
 
-This package comes with [20 prefunded keys for testing](https://github.com/kurtosis-tech/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
+This package comes with [20 prefunded keys for testing](https://github.com/ethpandaops/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
 
 Here's a table of where the keys are used
 
