@@ -143,7 +143,7 @@ def launch(
 
     enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
 
-    # TODO: Passing empty string for metrics_url for now https://github.com/kurtosis-tech/ethereum-package/issues/127
+    # TODO: Passing empty string for metrics_url for now https://github.com/ethpandaops/ethereum-package/issues/127
     # metrics_url = "http://{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     ethjs_metrics_info = None
 
