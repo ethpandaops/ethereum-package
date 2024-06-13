@@ -1,5 +1,25 @@
 # Changelog
 
+## [4.0.0](https://github.com/ethpandaops/ethereum-package/compare/3.1.0...v4.0.0) (2024-06-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate from kurtosis-tech to ethpandaops repository ([#663](https://github.com/ethpandaops/ethereum-package/issues/663))
+
+### Features
+
+* add names to run-sh ([#666](https://github.com/ethpandaops/ethereum-package/issues/666)) ([6b447b7](https://github.com/ethpandaops/ethereum-package/commit/6b447b7254ce1e9d7a2383eb1a0b9435bbabf237))
+* Adding arbitrary contract definition ([#646](https://github.com/ethpandaops/ethereum-package/issues/646)) ([cb58b65](https://github.com/ethpandaops/ethereum-package/commit/cb58b65911828b333c2aabf9052e30d79a8a55aa))
+* migrate from kurtosis-tech to ethpandaops repository ([#663](https://github.com/ethpandaops/ethereum-package/issues/663)) ([d980fee](https://github.com/ethpandaops/ethereum-package/commit/d980feedac0fbe6a18a6b699f62d3f3275657b16))
+* update Lodestar BN &lt;&gt; VC compatibility ([#664](https://github.com/ethpandaops/ethereum-package/issues/664)) ([7f365da](https://github.com/ethpandaops/ethereum-package/commit/7f365da6607bd863b12170ed475b77f4fafcc146))
+
+
+### Bug Fixes
+
+* permissions on autorelease ([#671](https://github.com/ethpandaops/ethereum-package/issues/671)) ([fcaa2c2](https://github.com/ethpandaops/ethereum-package/commit/fcaa2c23301c0f7012301fe019a75b0fa369961b))
+* update release please ([#670](https://github.com/ethpandaops/ethereum-package/issues/670)) ([fa53672](https://github.com/ethpandaops/ethereum-package/commit/fa536729886fa911ce4778b6d4097e2fb69a6c06))
+
 ## [3.1.0](https://github.com/kurtosis-tech/ethereum-package/compare/3.0.0...3.1.0) (2024-06-07)
 
 
