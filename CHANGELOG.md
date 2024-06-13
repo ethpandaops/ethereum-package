@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.2.0](https://github.com/kurtosis-tech/ethereum-package/compare/3.1.0...3.2.0) (2024-06-13)
+
+
+### Features
+
+* Adding arbitrary contract definition ([#646](https://github.com/kurtosis-tech/ethereum-package/issues/646)) ([cb58b65](https://github.com/kurtosis-tech/ethereum-package/commit/cb58b65911828b333c2aabf9052e30d79a8a55aa))
+* update Lodestar BN &lt;&gt; VC compatibility ([#664](https://github.com/kurtosis-tech/ethereum-package/issues/664)) ([7f365da](https://github.com/kurtosis-tech/ethereum-package/commit/7f365da6607bd863b12170ed475b77f4fafcc146))
+
 ## [3.1.0](https://github.com/kurtosis-tech/ethereum-package/compare/3.0.0...3.1.0) (2024-06-07)
 
 
