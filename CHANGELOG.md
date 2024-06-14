@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.1.0](https://github.com/ethpandaops/ethereum-package/compare/4.0.0...v4.1.0) (2024-06-14)
+
+
+### Features
+
+* use CDN URL for data snapshots used for shadow forks ([#676](https://github.com/ethpandaops/ethereum-package/issues/676)) ([91dc68c](https://github.com/ethpandaops/ethereum-package/commit/91dc68c9e709729e2a8c2fa59f48d8901eb49bb5))
+
+
+### Bug Fixes
+
+* besu bonsai log disable ([#673](https://github.com/ethpandaops/ethereum-package/issues/673)) ([955f19f](https://github.com/ethpandaops/ethereum-package/commit/955f19f8a79eda7d3d645c0c3d3a822705f10a7d))
+
 ## [4.0.0](https://github.com/ethpandaops/ethereum-package/compare/3.1.0...v4.0.0) (2024-06-13)
 
 
