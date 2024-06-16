@@ -153,5 +153,16 @@ global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false
 port_publisher:
-  public_port_start: null
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+  cl:
+    enabled: false
+    public_port_start: 32000
+  el:
+    enabled: false
+    public_port_start: 33000
+  vc:
+    enabled: false
+    public_port_start: 34000
+  additional_services:
+    enabled: false
+    public_port_start: 35000
