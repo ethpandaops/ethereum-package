@@ -225,7 +225,7 @@ def get_config(
             + "/chainspec.json"
         )
         cmd.append("--config=" + network.split("-")[0])
-        cmd.append("--Init.BaseDbPath=nethermind_db/" + network.split("-")[0])
+        cmd.append("--Init.BaseDbPath=" + network.split("-")[0])
     elif network not in constants.PUBLIC_NETWORKS:
         cmd.append("--config=none.cfg")
         cmd.append(
