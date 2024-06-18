@@ -15,7 +15,7 @@ participants:
     cl_image: ethpandaops/teku:nashatyrev-das
 
   - cl_type: nimbus
-    cl_image: ethpandaops/nimbus-eth2:kzgpeerdas
+    cl_image: ethpandaops/nimbus-eth2:wip-peerdas
 
   - cl_type: grandine
     cl_image: ethpandaops/grandine:das
