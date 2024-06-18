@@ -191,6 +191,7 @@ def run(plan, args={}):
         )
 
     mev_endpoints = []
+    mev_endpoint_names = []
     # passed external relays get priority
     # perhaps add mev_type External or remove this
     if (
@@ -198,6 +199,8 @@ def run(plan, args={}):
         and participant.builder_network_params != None
     ):
         mev_endpoints = participant.builder_network_params.relay_end_points
+        for idx, mev_endpoint in enumerate(mev_endpoints):
+            mev_endpoint_names.append("relay-{0}".format(idx + 1))
     # otherwise dummy relays spinup if chosen
     elif (
         args_with_right_defaults.mev_type
@@ -219,6 +222,7 @@ def run(plan, args={}):
             global_node_selectors,
         )
         mev_endpoints.append(endpoint)
+        mev_endpoint_names.append(constants.MOCK_MEV_TYPE)
     elif args_with_right_defaults.mev_type and (
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
@@ -288,6 +292,7 @@ def run(plan, args={}):
             normal_user.private_key,
         )
         mev_endpoints.append(endpoint)
+        mev_endpoint_names.append(args_with_right_defaults.mev_type)
 
     # spin up the mev boost contexts if some endpoints for relays have been passed
     all_mevboost_contexts = []
@@ -451,6 +456,8 @@ def run(plan, args={}):
                 network_params,
                 dora_params,
                 global_node_selectors,
+                mev_endpoints,
+                mev_endpoint_names,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "dugtrio":

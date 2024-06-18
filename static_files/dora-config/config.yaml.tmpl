@@ -68,6 +68,16 @@ indexer:
   # number of seconds to wait between each epoch (don't overload CL client)
   syncEpochCooldown: 1
 
+mevIndexer:
+  # list of mev relays to crawl mev blocks from
+  relays: {{ if not .MEVRelayInfo }}[]{{ end }}
+{{ range $relay := .MEVRelayInfo }}
+    - index: {{ $relay.Index }}
+      name: "{{ $relay.Name }}"
+      url: "{{ $relay.Url }}"
+{{- end }}
+  refreshInterval: 5m
+
 database:
   engine: "sqlite"
   sqlite:
