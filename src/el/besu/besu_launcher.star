@@ -232,7 +232,6 @@ def get_config(
     ]
     if (
         network not in constants.PUBLIC_NETWORKS
-        or constants.NETWORK_NAME.shadowfork in network
     ):
         cmd.append(
             "--genesis-file="
