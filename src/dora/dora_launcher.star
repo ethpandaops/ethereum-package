@@ -120,7 +120,7 @@ def get_config(
         IMAGE_NAME = "ethpandaops/dora:electra-support"
     else:
         IMAGE_NAME = (
-            "ethpandaops/dora:master"  # TODO: revert to latest after next dora release
+            "ethpandaops/dora:latest"
         )
 
     return ServiceConfig(
