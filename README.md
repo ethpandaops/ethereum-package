@@ -538,6 +538,10 @@ network_params:
   #    nonce: 0
   #    secretKey: "0x"
 
+  # Repository override for devnet networks
+  # Default: ethpandaops
+  devnet_repo: ethpandaops
+
 # Global parameters for the network
 
 # By default includes

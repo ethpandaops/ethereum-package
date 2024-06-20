@@ -119,7 +119,13 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_devnet.launch(plan, network_params.network, cancun_time, prague_time)
+        ) = launch_devnet.launch(
+            plan,
+            network_params.network,
+            cancun_time,
+            prague_time,
+            network_params.devnet_repo,
+        )
 
     # Launch all execution layer clients
     all_el_contexts = el_client_launcher.launch(

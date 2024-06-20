@@ -296,6 +296,7 @@ def input_parser(plan, input_args):
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
             ],
+            devnet_repo=result["network_params"]["devnet_repo"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -795,6 +796,7 @@ def default_network_params():
         "target_number_of_peers": 70,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
+        "devnet_repo": "ethpandaops",
     }
 
 
