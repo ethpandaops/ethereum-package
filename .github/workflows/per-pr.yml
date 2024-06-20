@@ -34,6 +34,7 @@ jobs:
             "./.github/tests/mix-with-tools.yaml",
             "./.github/tests/mix-persistence.yaml",
             "./.github/tests/mix-public.yaml",
+            "./.github/tests/minimal.yaml",
             "./network_params.yaml"
           ]
     runs-on: ubuntu-latest
