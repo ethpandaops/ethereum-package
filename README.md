@@ -499,12 +499,16 @@ network_params:
   # The fork version to set if the eip7594 fork is active
   eip7594_fork_version: "0x70000038"
 
+  # EOF activation fork epoch (EL only fork)
+  # Defaults to null
+  eof_activation_fork_epoch: null
+
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
-  # Defaults to "https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
+  # Defaults to "https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/
   # If you have a local snapshot, you can set this to the local url:
   # network_snapshot_url_base = "http://10.10.101.21:10000/snapshots/"
   # The snapshots are taken with https://github.com/ethpandaops/snapshotter
-  network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.digitaloceanspaces.com/
+  network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/
 
   # The number of data column sidecar subnets used in the gossipsub protocol
   data_column_sidecar_subnet_count: 32
@@ -533,6 +537,10 @@ network_params:
   #    storage: {}
   #    nonce: 0
   #    secretKey: "0x"
+
+  # Repository override for devnet networks
+  # Default: ethpandaops
+  devnet_repo: ethpandaops
 
 # Global parameters for the network
 

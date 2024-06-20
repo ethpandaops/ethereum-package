@@ -13,6 +13,10 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4
+      - name: Run Release Please
+        uses: googleapis/release-please-action@v3
         with:
+          token: ${{ secrets.PAT }}
           release-type: simple
+          include-v-in-tag: false
+          package-name: ethereum-package
