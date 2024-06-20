@@ -827,6 +827,7 @@ def default_minimal_network_params():
         "target_number_of_peers": 70,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
+        "devnet_repo": "ethpandaops",
     }
 
 
