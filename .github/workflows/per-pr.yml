@@ -9,7 +9,9 @@ concurrency:
 
 jobs:
   run_starlark:
-    runs-on: ubuntu-latest
+    runs-on:
+      - ubuntu-latest
+      - self-hosted-ghr-size-l-x64
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
