@@ -14,8 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Release Please
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v3
         with:
           token: ${{ secrets.PAT }}
-          config-file: .github/workflows/release-please-config.json
-          manifest-file: .github/workflows/.release-please-manifest.json
+          release-type: simple
+          include-v-in-tag: false
+          package-name: optimism-package
