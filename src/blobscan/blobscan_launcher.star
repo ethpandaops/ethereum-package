@@ -134,7 +134,7 @@ def get_api_config(
             assertion="==",
             target_value=200,
             interval="5s",
-            timeout="5s",
+            timeout="120s",
         ),
         min_cpu=API_MIN_CPU,
         max_cpu=API_MAX_CPU,
