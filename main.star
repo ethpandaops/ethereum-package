@@ -638,9 +638,6 @@ def run(plan, args={}):
 
     output = struct(
         grafana_info=grafana_info,
-        blockscout_sc_verif_url=None
-        if ("blockscout" in args_with_right_defaults.additional_services) == False
-        else blockscout_sc_verif_url,
         all_participants=all_participants,
         pre_funded_accounts=genesis_constants.PRE_FUNDED_ACCOUNTS,
         network_params=network_params,
