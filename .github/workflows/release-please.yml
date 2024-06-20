@@ -19,4 +19,4 @@ jobs:
           token: ${{ secrets.PAT }}
           release-type: simple
           include-v-in-tag: false
-          package-name: optimism-package
+          package-name: ethereum-package
