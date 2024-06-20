@@ -231,9 +231,7 @@ def get_config(
         "--min-gas-price=1000000000",
         "--bonsai-limit-trie-logs-enabled=false",
     ]
-    if (
-        network not in constants.PUBLIC_NETWORKS
-    ):
+    if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--genesis-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
