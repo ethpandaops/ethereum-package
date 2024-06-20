@@ -39,7 +39,9 @@ jobs:
             "./.github/tests/minimal.yaml",
             "./network_params.yaml"
           ]
-    runs-on: ubuntu-latest
+    runs-on:
+      - ubuntu-latest
+      - self-hosted-ghr-size-l-x64
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -55,7 +57,9 @@ jobs:
         run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on:
+      - ubuntu-latest
+      - self-hosted-ghr-size-s-x64
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -71,7 +75,9 @@ jobs:
         run: kurtosis lint ${{ github.workspace }}
 
   assertoor:
-    runs-on: ubuntu-latest
+    runs-on:
+      - ubuntu-latest
+      - self-hosted-ghr-size-l-x64
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
