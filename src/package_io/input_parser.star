@@ -279,6 +279,7 @@ def input_parser(plan, input_args):
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
             eip7594_fork_epoch=result["network_params"]["eip7594_fork_epoch"],
             eip7594_fork_version=result["network_params"]["eip7594_fork_version"],
+            eof_activation_epoch=result["network_params"]["eof_activation_epoch"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
@@ -786,6 +787,7 @@ def default_network_params():
         "electra_fork_epoch": 100000000,
         "eip7594_fork_epoch": 100000001,
         "eip7594_fork_version": "0x70000038",
+        "eof_activation_epoch": "",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/",
         "data_column_sidecar_subnet_count": 32,
         "samples_per_slot": 8,
