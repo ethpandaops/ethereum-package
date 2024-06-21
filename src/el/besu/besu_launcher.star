@@ -237,7 +237,6 @@ def get_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/besu.json"
         )
-        cmd.append("--bonsai-limit-trie-logs-enabled=false")
     else:
         cmd.append("--network=" + network)
 
