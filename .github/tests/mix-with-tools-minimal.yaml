@@ -22,7 +22,7 @@ additional_services:
   - prometheus_grafana
   - goomy_blob
   - custom_flood
-  - blobscan
+  #- blobscan
   - blockscout
   - dugtrio
   - blutgang
