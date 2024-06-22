@@ -49,6 +49,8 @@ def launch(
     preset,
     network,  # TODO: remove when deneb rebase is done
     electra_fork_epoch,  # TODO: remove when deneb rebase is done
+    port_publisher,
+    vc_index,
 ):
     if node_keystore_files == None:
         return None
@@ -94,6 +96,8 @@ def launch(
             keymanager_enabled=keymanager_enabled,
             network=network,  # TODO: remove when deneb rebase is done
             electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
+            port_publisher=port_publisher,
+            vc_index=vc_index,
         )
     elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(
@@ -118,6 +122,8 @@ def launch(
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
             preset=preset,
+            port_publisher=port_publisher,
+            vc_index=vc_index,
         )
     elif vc_type == constants.VC_TYPE.teku:
         config = teku.get_config(
@@ -139,6 +145,8 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            port_publisher=port_publisher,
+            vc_index=vc_index,
         )
     elif vc_type == constants.VC_TYPE.nimbus:
         config = nimbus.get_config(
@@ -160,6 +168,8 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            port_publisher=port_publisher,
+            vc_index=vc_index,
         )
     elif vc_type == constants.VC_TYPE.prysm:
         config = prysm.get_config(
@@ -183,6 +193,8 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            port_publisher=port_publisher,
+            vc_index=vc_index,
         )
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
@@ -191,20 +203,12 @@ def launch(
 
     validator_service = plan.add_service(service_name, config)
 
-    validator_metrics_port = validator_service.ports[
-        vc_shared.VALIDATOR_CLIENT_METRICS_PORT_ID
-    ]
+    validator_metrics_port = validator_service.ports[constants.METRICS_PORT_ID]
     validator_metrics_url = "{0}:{1}".format(
         validator_service.ip_address, validator_metrics_port.number
     )
     validator_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, vc_shared.METRICS_PATH, validator_metrics_url
-    )
-
-    validator_http_port = (
-        validator_service.ports[vc_shared.VALIDATOR_HTTP_PORT_ID]
-        if keymanager_enabled
-        else None
     )
 
     return vc_context.new_vc_context(
