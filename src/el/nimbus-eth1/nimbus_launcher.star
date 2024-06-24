@@ -2,6 +2,7 @@ shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../../package_io/input_parser.star")
 el_context = import_module("../../el/el_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
+el_shared = import_module("../el_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
@@ -14,46 +15,11 @@ METRICS_PORT_NUM = 9001
 EXECUTION_MIN_CPU = 100
 EXECUTION_MIN_MEMORY = 256
 
-# Port IDs
-WS_RPC_PORT_ID = "ws-rpc"
-TCP_DISCOVERY_PORT_ID = "tcp-discovery"
-UDP_DISCOVERY_PORT_ID = "udp-discovery"
-ENGINE_RPC_PORT_ID = "engine-rpc"
-METRICS_PORT_ID = "metrics"
-
 # Paths
 METRICS_PATH = "/metrics"
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nimbus/execution-data"
-
-
-def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
-    used_ports = {
-        WS_RPC_PORT_ID: shared_utils.new_port_spec(
-            WS_RPC_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
-        ),
-        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port,
-            shared_utils.TCP_PROTOCOL,
-        ),
-        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port,
-            shared_utils.UDP_PROTOCOL,
-        ),
-        ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-            ENGINE_RPC_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-        ),
-        METRICS_PORT_ID: shared_utils.new_port_spec(
-            METRICS_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-        ),
-    }
-    return used_ports
-
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "ERROR",
@@ -85,6 +51,7 @@ def launch(
     tolerations,
     node_selectors,
     port_publisher,
+    participant_index,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -135,11 +102,14 @@ def launch(
         tolerations,
         node_selectors,
         port_publisher,
+        participant_index,
     )
 
     service = plan.add_service(service_name, config)
 
-    enode = el_admin_node_info.get_enode_for_node(plan, service_name, WS_RPC_PORT_ID)
+    enode = el_admin_node_info.get_enode_for_node(
+        plan, service_name, constants.WS_RPC_PORT_ID
+    )
 
     metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     nimbus_metrics_info = node_metrics.new_node_metrics_info(
@@ -186,20 +156,33 @@ def get_config(
     tolerations,
     node_selectors,
     port_publisher,
+    participant_index,
 ):
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
-    if port_publisher.public_port_start:
-        discovery_port = port_publisher.el_start + len(existing_el_clients)
-        public_ports = {
-            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                discovery_port, shared_utils.TCP_PROTOCOL
-            ),
-            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                discovery_port, shared_utils.UDP_PROTOCOL
-            ),
+    if port_publisher.el_enabled:
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "el", port_publisher, participant_index
+        )
+        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+            public_ports_for_component
+        )
+        additional_public_port_assignments = {
+            constants.WS_RPC_PORT_ID: public_ports_for_component[2],
+            constants.METRICS_PORT_ID: public_ports_for_component[3],
         }
-    used_ports = get_used_ports(discovery_port)
+        public_ports.update(
+            shared_utils.get_port_specs(additional_public_port_assignments)
+        )
+
+    used_port_assignments = {
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.WS_RPC_PORT_ID: WS_RPC_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+    }
+    used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         "--log-level={0}".format(verbosity_level),
