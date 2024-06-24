@@ -92,6 +92,8 @@ def launch(
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
     port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -147,6 +149,8 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
+        checkpoint_sync_enabled,
+        checkpoint_sync_url,
         port_publisher,
         launcher.preset,
     )
@@ -226,6 +230,8 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
     port_publisher,
     preset,
 ):
@@ -284,6 +290,30 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
+    # If checkpoint sync is enabled, add the checkpoint sync url
+    if checkpoint_sync_enabled:
+        if checkpoint_sync_url:
+            cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
+        else:
+            if network in ["mainnet", "ephemery"]:
+                cmd.append(
+                    "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
+                )
+                cmd.append(
+                    "--genesis-beacon-api-url=" + constants.CHECKPOINT_SYNC_URL[network]
+                )
+            else:
+                cmd.append(
+                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
+                )
+                cmd.append(
+                    "--genesis-beacon-api-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
+                        network
+                    )
+                )
+
     if preset == "minimal":
         cmd.append("--minimal-config=true")
 
@@ -312,26 +342,11 @@ def get_beacon_config(
                 "--genesis-beacon-api-url=" + constants.CHECKPOINT_SYNC_URL[network]
             )
             cmd.append(
-                "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
-            )
-            cmd.append(
                 "--bootstrap-node="
                 + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
                 + "/boot_enr.yaml"
             )
         else:  # Devnets
-            # TODO Remove once checkpoint sync is working for verkle
-            if constants.NETWORK_NAME.verkle not in network:
-                cmd.append(
-                    "--genesis-beacon-api-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
-                )
-                cmd.append(
-                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
-                )
             cmd.append(
                 "--bootstrap-node="
                 + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
@@ -339,8 +354,6 @@ def get_beacon_config(
             )
     else:  # Public network
         cmd.append("--{}".format(network))
-        cmd.append("--genesis-beacon-api-url=" + constants.CHECKPOINT_SYNC_URL[network])
-        cmd.append("--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network])
 
     if len(extra_params) > 0:
         # we do the for loop as otherwise its a proto repeated array

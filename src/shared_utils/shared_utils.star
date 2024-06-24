@@ -94,7 +94,7 @@ def get_devnet_enodes(plan, filename):
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         run="""
-with open("/network-configs/bootnode.txt") as bootnode_file:
+with open("/network-configs/enodes.txt") as bootnode_file:
     bootnodes = []
     for line in bootnode_file:
         line = line.strip()
@@ -211,7 +211,7 @@ def calculate_devnet_url(network, repo):
         devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
     )
 
-    return "github.com/{0}/{1}-devnets/network-configs/{2}{3}-{4}".format(
+    return "github.com/{0}/{1}-devnets/network-configs/{2}{3}-{4}/metadata".format(
         repo, devnet_category, devnet_subname, network_type, devnet_number
     )
 

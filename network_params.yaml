@@ -82,6 +82,8 @@ network_params:
   custody_requirement: 1
   target_number_of_peers: 70
   additional_preloaded_contracts: {}
+  devnet_repo: ethpandaops
+  checkpoint_sync_enabled: false
 additional_services:
   - tx_spammer
   - blob_spammer

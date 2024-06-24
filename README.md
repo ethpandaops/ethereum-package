@@ -784,6 +784,12 @@ global_node_selectors: {}
 # Defaults to false
 keymanager_enabled: false
 
+# Global flag to enable checkpoint sync across the network
+checkpoint_sync_enabled: false
+
+# Global flag to set checkpoint sync url
+checkpoint_sync_url: ""
+
 # Global paarameter to set the exit ip address of services and public ports
 port_publisher:
   # if you have a service that you want to expose on a specific interfact; set that IP here
