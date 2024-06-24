@@ -105,6 +105,8 @@ def launch(
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
     port_publisher,
 ):
     beacon_service_name = "{0}".format(service_name)
@@ -166,6 +168,8 @@ def launch(
         cl_volume_size,
         tolerations,
         node_selectors,
+        checkpoint_sync_enabled,
+        checkpoint_sync_url,
         port_publisher,
     )
 
@@ -246,6 +250,8 @@ def get_beacon_config(
     cl_volume_size,
     tolerations,
     node_selectors,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
     port_publisher,
 ):
     validator_keys_dirpath = ""
