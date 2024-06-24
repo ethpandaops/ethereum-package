@@ -110,9 +110,9 @@ PUBLIC_NETWORKS = (
 )
 
 NETWORK_ID = {
-    "mainnet": 1,
-    "sepolia": 11155111,
-    "holesky": 17000,
+    "mainnet": "1",
+    "sepolia": "11155111",
+    "holesky": "17000",
 }
 
 CHECKPOINT_SYNC_URL = {

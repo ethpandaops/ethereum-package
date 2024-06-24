@@ -229,7 +229,7 @@ def get_config(
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--min-gas-price=1000000000",
-        "--bonsai-limit-trie-logs-enabled=false" if "verkle" not in network else "" ,
+        "--bonsai-limit-trie-logs-enabled=false" if "verkle" not in network else "",
     ]
     if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
