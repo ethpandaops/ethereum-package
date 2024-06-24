@@ -6,7 +6,7 @@ genesis_constants = import_module(
 
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
-    "erigon": "ethpandaops/erigon:main",
+    "erigon": "ethpandaops/erigon:main-6d80c0f",
     "nethermind": "nethermindeth/nethermind:master",
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
@@ -374,6 +374,8 @@ def input_parser(plan, input_args):
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
         keymanager_enabled=result["keymanager_enabled"],
+        checkpoint_sync_enabled=result["checkpoint_sync_enabled"],
+        checkpoint_sync_url=result["checkpoint_sync_url"],
         port_publisher=struct(
             public_port_start=result["port_publisher"]["public_port_start"],
             nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
@@ -761,6 +763,8 @@ def default_input_args(input_args):
         "global_tolerations": [],
         "global_node_selectors": {},
         "keymanager_enabled": False,
+        "checkpoint_sync_enabled": False,
+        "checkpoint_sync_url": "",
         "port_publisher": {
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
             "public_port_start": None,

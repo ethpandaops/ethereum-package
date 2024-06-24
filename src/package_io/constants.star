@@ -117,8 +117,6 @@ NETWORK_ID = {
 
 CHECKPOINT_SYNC_URL = {
     "mainnet": "https://beaconstate.info",
-    "sepolia": "https://checkpoint-sync.sepolia.ethpandaops.io",
-    "holesky": "https://checkpoint-sync.holesky.ethpandaops.io",
     "ephemery": "https://checkpointz.bordel.wtf/",
 }
 

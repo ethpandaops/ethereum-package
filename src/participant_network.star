@@ -40,6 +40,8 @@ def launch_participant_network(
     global_node_selectors,
     keymanager_enabled,
     parallel_keystore_generation,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
     port_publisher,
 ):
     network_id = network_params.network_id
@@ -176,6 +178,8 @@ def launch_participant_network(
         validator_data,
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
+        checkpoint_sync_enabled,
+        checkpoint_sync_url,
         port_publisher,
     )
 
