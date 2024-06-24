@@ -49,6 +49,9 @@ mev_custom_flood = import_module(
 )
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
 assertoor = import_module("./src/assertoor/assertoor_launcher.star")
+syn_flood = import_module(
+    "./src/syn_flood.star"
+)
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -554,6 +557,13 @@ def run(plan, args={}):
                 args_with_right_defaults.custom_flood_params,
                 global_node_selectors,
             )
+        elif additional_service == "syn_flood":
+            plan.print("Launching syn flood tool")
+            syn_flood.add_syn_flood(
+                plan,
+                global_node_selectors,
+            )
+            plan.print("Successfully launched syn flood tool")
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:
