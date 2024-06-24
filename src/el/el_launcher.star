@@ -156,6 +156,7 @@ def launch(
             tolerations,
             node_selectors,
             port_publisher,
+            index,
         )
         # Add participant el additional prometheus metrics
         for metrics_info in el_context.el_metrics_info:
