@@ -9,6 +9,7 @@ MEV_RELAY_HOUSEKEEPER = "mev-relay-housekeeper"
 
 MEV_RELAY_ENDPOINT_PORT = 9062
 MEV_RELAY_WEBSITE_PORT = 9060
+MEV_RELAY_POSTGRES_PORT = 5432
 
 NETWORK_ID_TO_NAME = {
     "1": "mainnet",
@@ -197,4 +198,8 @@ def launch_mev_relay(
     mev_relay_endpoint="http://{0}@{1}:{2}".format(
         constants.DEFAULT_MEV_PUBKEY, api.ip_address, MEV_RELAY_ENDPOINT_PORT
     )
-    return (mev_relay_endpoint, api_prometheus)
+
+    postgres_endpoint="{0}:{1}".format(
+        postgres.service.ip_address, MEV_RELAY_POSTGRES_PORT
+    )
+    return (mev_relay_endpoint, api_prometheus, postgres_endpoint)

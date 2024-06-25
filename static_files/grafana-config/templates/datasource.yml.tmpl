@@ -11,3 +11,17 @@ datasources:
     basicAuth: false
     isDefault: true
     editable: true
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    orgId: 1
+    url: {{ .PostgresURL }} # This should be in the format: "hostname:port"
+    user: {{ .PostgresUser }}
+    database: {{ .PostgresDatabase }}
+    secureJsonData:
+      password: {{ .PostgresPassword }}
+    jsonData:
+      sslmode: "disable"
+    basicAuth: false
+    isDefault: false
+    editable: true

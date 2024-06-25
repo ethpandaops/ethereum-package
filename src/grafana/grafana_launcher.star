@@ -50,6 +50,7 @@ def launch_grafana(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
+    mev_relay_postgres_private_url,
     global_node_selectors,
     additional_dashboards=[],
 ):
@@ -62,6 +63,7 @@ def launch_grafana(
         datasource_config_template,
         dashboard_providers_config_template,
         prometheus_private_url,
+        mev_relay_postgres_private_url,
         additional_dashboards=additional_dashboards,
     )
 
@@ -85,9 +87,10 @@ def get_grafana_config_dir_artifact_uuid(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
+    mev_relay_postgres_private_url,
     additional_dashboards=[],
 ):
-    datasource_data = new_datasource_config_template_data(prometheus_private_url)
+    datasource_data = new_datasource_config_template_data(prometheus_private_url, mev_relay_postgres_private_url)
     datasource_template_and_data = shared_utils.new_template_and_data(
         datasource_config_template, datasource_data
     )
@@ -153,8 +156,14 @@ def get_config(
     )
 
 
-def new_datasource_config_template_data(prometheus_url):
-    return {"PrometheusURL": prometheus_url}
+def new_datasource_config_template_data(prometheus_url, postgres_url):
+    return {
+        "PrometheusURL": prometheus_url,
+        "PostgresURL": postgres_url,
+        "PostgresDatabase": "postgres",
+        "PostgresUser": "postgres",
+        "PostgresPassword": "postgres"
+    }
 
 
 def new_dashboard_providers_config_template_data(dashboards_dirpath):

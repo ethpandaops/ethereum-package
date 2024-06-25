@@ -64,7 +64,6 @@ KEYMANAGER_MOUNT_PATH_ON_CONTAINER = (
 
 MOCK_MEV_TYPE = "mock"
 FLASHBOTS_MEV_TYPE = "flashbots"
-MODIFIED_FLASHBOTS_MEV_TYPE = "modified-flashbots"
 MEV_RS_MEV_TYPE = "mev-rs"
 
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
