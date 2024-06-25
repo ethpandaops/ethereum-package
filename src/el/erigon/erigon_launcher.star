@@ -209,11 +209,6 @@ def get_config(
 
     cmd = [
         "erigon",
-        "{0}".format(
-            "--override.cancun=" + str(cancun_time)
-            if constants.NETWORK_NAME.shadowfork in network
-            else ""
-        ),
         "--networkid={0}".format(networkid),
         "--log.console.verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
