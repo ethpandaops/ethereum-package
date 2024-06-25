@@ -8,17 +8,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run_starlark:
+  login_dockerhub:
     runs-on: self-hosted-ghr-size-l-x64
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+  run_starlark:
+    needs:
+      - login_dockerhub
+    runs-on: self-hosted-ghr-size-l-x64
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
       - name: Setup Kurtosis
         run: |
           echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
@@ -30,6 +35,8 @@ jobs:
         run: kurtosis run ${{ github.workspace }} --args-file network_params.yaml
 
   run_with_args:
+    needs:
+      - login_dockerhub
     strategy:
       matrix:
         file_name:
@@ -79,6 +86,8 @@ jobs:
         run: kurtosis lint ${{ github.workspace }}
 
   assertoor:
+    needs:
+      - login_dockerhub
     runs-on: self-hosted-ghr-size-l-x64
     timeout-minutes: 30
     steps:
