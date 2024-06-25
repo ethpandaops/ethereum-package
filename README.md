@@ -538,6 +538,10 @@ network_params:
   #    nonce: 0
   #    secretKey: "0x"
 
+  # Repository override for devnet networks
+  # Default: ethpandaops
+  devnet_repo: ethpandaops
+
 # Global parameters for the network
 
 # By default includes
@@ -779,6 +783,12 @@ global_node_selectors: {}
 # This will open up http ports to your validator services!
 # Defaults to false
 keymanager_enabled: false
+
+# Global flag to enable checkpoint sync across the network
+checkpoint_sync_enabled: false
+
+# Global flag to set checkpoint sync url
+checkpoint_sync_url: ""
 
 # Global paarameter to set the exit ip address of services and public ports
 port_publisher:

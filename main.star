@@ -137,6 +137,8 @@ def run(plan, args={}):
         global_node_selectors,
         keymanager_enabled,
         parallel_keystore_generation,
+        args_with_right_defaults.checkpoint_sync_enabled,
+        args_with_right_defaults.checkpoint_sync_url,
         args_with_right_defaults.port_publisher,
     )
 
@@ -359,6 +361,8 @@ def run(plan, args={}):
     if len(args_with_right_defaults.additional_services) == 0:
         output = struct(
             all_participants=all_participants,
+            pre_funded_accounts=genesis_constants.PRE_FUNDED_ACCOUNTS,
+            network_params=network_params,
             final_genesis_timestamp=final_genesis_timestamp,
             genesis_validators_root=genesis_validators_root,
         )

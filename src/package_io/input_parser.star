@@ -296,6 +296,7 @@ def input_parser(plan, input_args):
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
             ],
+            devnet_repo=result["network_params"]["devnet_repo"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -373,6 +374,8 @@ def input_parser(plan, input_args):
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
         keymanager_enabled=result["keymanager_enabled"],
+        checkpoint_sync_enabled=result["checkpoint_sync_enabled"],
+        checkpoint_sync_url=result["checkpoint_sync_url"],
         port_publisher=struct(
             public_port_start=result["port_publisher"]["public_port_start"],
             nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
@@ -760,6 +763,8 @@ def default_input_args(input_args):
         "global_tolerations": [],
         "global_node_selectors": {},
         "keymanager_enabled": False,
+        "checkpoint_sync_enabled": False,
+        "checkpoint_sync_url": "",
         "port_publisher": {
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
             "public_port_start": None,
@@ -795,6 +800,7 @@ def default_network_params():
         "target_number_of_peers": 70,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
+        "devnet_repo": "ethpandaops",
     }
 
 
@@ -818,6 +824,7 @@ def default_minimal_network_params():
         "electra_fork_epoch": 100000000,
         "eip7594_fork_epoch": 100000001,
         "eip7594_fork_version": "0x70000038",
+        "eof_activation_epoch": "",
         "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/",
         "data_column_sidecar_subnet_count": 32,
         "samples_per_slot": 8,
@@ -825,6 +832,7 @@ def default_minimal_network_params():
         "target_number_of_peers": 70,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
+        "devnet_repo": "ethpandaops",
     }
 
 

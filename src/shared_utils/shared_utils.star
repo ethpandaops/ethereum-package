@@ -94,7 +94,7 @@ def get_devnet_enodes(plan, filename):
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
         run="""
-with open("/network-configs/bootnode.txt") as bootnode_file:
+with open("/network-configs/enodes.txt") as bootnode_file:
     bootnodes = []
     for line in bootnode_file:
         line = line.strip()
@@ -192,7 +192,7 @@ print(int(time.time()+padding), end="")
     return result.output
 
 
-def calculate_devnet_url(network):
+def calculate_devnet_url(network, repo):
     sf_suffix_mapping = {"hsf": "-hsf-", "gsf": "-gsf-", "ssf": "-ssf-"}
     shadowfork = "sf-" in network
 
@@ -211,8 +211,8 @@ def calculate_devnet_url(network):
         devnet_name.split("-")[1] + "-" if len(devnet_name.split("-")) > 1 else ""
     )
 
-    return "github.com/ethpandaops/{0}-devnets/network-configs/{1}{2}-{3}".format(
-        devnet_category, devnet_subname, network_type, devnet_number
+    return "github.com/{0}/{1}-devnets/network-configs/{2}{3}-{4}/metadata".format(
+        repo, devnet_category, devnet_subname, network_type, devnet_number
     )
 
 

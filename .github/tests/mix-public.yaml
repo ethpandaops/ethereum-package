@@ -15,4 +15,4 @@ participants:
     cl_type: grandine
 additional_services: []
 port_publisher:
-  public_port_start: 50000
+  public_port_start: 30000
