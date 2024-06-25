@@ -25,6 +25,9 @@ jobs:
           sudo apt install kurtosis-cli
           kurtosis analytics disable
 
+      - name: debug
+        run: cat ~/.docker/config.json
+
       - name: Run Starlark
         run: kurtosis run ${{ github.workspace }} --args-file network_params.yaml
 
