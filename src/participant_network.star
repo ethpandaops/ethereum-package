@@ -50,6 +50,7 @@ def launch_participant_network(
     cancun_time = 0
     prague_time = 0
     shadowfork_block = "latest"
+    total_number_of_validator_keys = 0
     if (
         constants.NETWORK_NAME.shadowfork in network_params.network
         and ("verkle" in network_params.network)
