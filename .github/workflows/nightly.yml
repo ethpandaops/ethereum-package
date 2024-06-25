@@ -38,9 +38,6 @@ jobs:
           sudo apt install kurtosis-cli
           kurtosis analytics disable
 
-      - name: debug
-        run: cat ~/.docker/config.json
-
       - name: Run Starlark
         run: |
           if [ "${{ matrix.file_name }}" != "./.github/tests/mix-with-tools-mev.yaml" ]; then
