@@ -148,12 +148,12 @@ def launch_participant_network(
     # Launch all consensus layer clients
     prysm_password_relative_filepath = (
         validator_data.prysm_password_relative_filepath
-        if network_params.network == constants.NETWORK_NAME.kurtosis
+        if total_number_of_validator_keys > 0
         else None
     )
     prysm_password_artifact_uuid = (
         validator_data.prysm_password_artifact_uuid
-        if network_params.network == constants.NETWORK_NAME.kurtosis
+        if total_number_of_validator_keys > 0
         else None
     )
 
