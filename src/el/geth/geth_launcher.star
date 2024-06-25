@@ -143,7 +143,6 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
-        launcher.cancun_time,
         launcher.prague_time,
         persistent,
         el_volume_size,
@@ -197,7 +196,6 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
-    cancun_time,
     prague_time,
     persistent,
     el_volume_size,
@@ -226,7 +224,7 @@ def get_config(
                     constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
                 )
             )
-    elif constants.NETWORK_NAME.shadowfork in network:
+    elif constants.NETWORK_NAME.shadowfork in network:  # shadowfork
         init_datadir_cmd_str = "echo shadowfork"
 
     elif gcmode_archive:  # Disable path based storage scheme archive mode
@@ -235,7 +233,7 @@ def get_config(
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
     else:
-        init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
+        init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
@@ -259,16 +257,10 @@ def get_config(
         # Disable path based storage scheme for electra fork and verkle
         # TODO: REMOVE Once geth default db is path based, and builder rebased
         "{0}".format(
-            "--state.scheme=path"
-            if "verkle" not in network and not gcmode_archive
-            else ""
+            "--state.scheme=hash" if "verkle" in network or gcmode_archive else ""
         ),
         # Override prague fork timestamp for electra fork
         "{0}".format("--cache.preimages" if "verkle" in network else ""),
-        # Override prague fork timestamp
-        "{0}".format(
-            "--override.prague=" + str(prague_time) if "verkle-gen" in network else ""
-        ),
         "{0}".format(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
         ),
@@ -331,13 +323,13 @@ def get_config(
                     ]
                 )
             )
-        if (
-            constants.NETWORK_NAME.shadowfork in network and "verkle" in network
-        ):  # verkle shadowfork
+        if constants.NETWORK_NAME.shadowfork in network:  # shadowfork
             cmd.append("--override.prague=" + str(prague_time))
-            cmd.append("--override.overlay-stride=10000")
-            cmd.append("--override.blockproof=true")
-            cmd.append("--clear.verkle.costs=true")
+            if "verkle" in network:  # verkle-shadowfork
+                cmd.append("--override.overlay-stride=10000")
+                cmd.append("--override.blockproof=true")
+                cmd.append("--clear.verkle.costs=true")
+
     elif (
         network not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in network
@@ -402,7 +394,6 @@ def new_geth_launcher(
     jwt_file,
     network,
     networkid,
-    cancun_time,
     prague_time,
 ):
     return struct(
@@ -410,6 +401,5 @@ def new_geth_launcher(
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
-        cancun_time=cancun_time,
         prague_time=prague_time,
     )
