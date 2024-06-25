@@ -257,7 +257,7 @@ def run(plan, args={}):
             service_name=first_client_beacon_name,
         )
         if args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE:
-            endpoint = flashbots_mev_relay.launch_mev_relay(
+            endpoint, mev_relay_api_prometheus_job = flashbots_mev_relay.launch_mev_relay(
                 plan,
                 mev_params,
                 network_params.network_id,
@@ -268,8 +268,12 @@ def run(plan, args={}):
                 persistent,
                 global_node_selectors,
             )
+            # add prometheus metrics to the list
+            prometheus_additional_metrics_jobs.append(
+                mev_relay_api_prometheus_job
+            )
         elif args_with_right_defaults.mev_type == constants.MODIFIED_FLASHBOTS_MEV_TYPE:
-            endpoint = flashbots_mev_relay.launch_mev_relay(
+            endpoint, mev_relay_api_prometheus_job = flashbots_mev_relay.launch_mev_relay(
                 plan,
                 mev_params,
                 network_params.network_id,
@@ -279,6 +283,10 @@ def run(plan, args={}):
                 network_params.seconds_per_slot,
                 persistent,
                 global_node_selectors,
+            )
+            # add prometheus metrics to the list
+            prometheus_additional_metrics_jobs.append(
+                mev_relay_api_prometheus_job
             )
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
             endpoint, relay_ip_address, relay_port = mev_rs_mev_relay.launch_mev_relay(

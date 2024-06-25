@@ -1,5 +1,6 @@
 redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+prometheus = import_module("../../../prometheus/prometheus_launcher.star")
 constants = import_module("../../../package_io/constants.star")
 
 MEV_RELAY_WEBSITE = "mev-relay-website"
@@ -90,7 +91,7 @@ def launch_mev_relay(
 
     redis_url = "{}:{}".format(redis.hostname, redis.port_number)
     postgres_url = postgres.url + "?sslmode=disable"
-    plan.add_service(
+    housekeeper = plan.add_service(
         name=MEV_RELAY_HOUSEKEEPER,
         config=ServiceConfig(
             image=image,
@@ -151,6 +152,13 @@ def launch_mev_relay(
         ),
     )
 
+    api_prometheus = prometheus.new_metrics_job(
+        job_name=MEV_RELAY_ENDPOINT,
+        endpoint="{0}:{1}".format(api.ip_address, MEV_RELAY_ENDPOINT_PORT),
+        metrics_path="/metrics",
+        labels={"service": MEV_RELAY_ENDPOINT},
+    )
+
     plan.add_service(
         name=MEV_RELAY_WEBSITE,
         config=ServiceConfig(
@@ -186,6 +194,7 @@ def launch_mev_relay(
         ),
     )
 
-    return "http://{0}@{1}:{2}".format(
+    mev_relay_endpoint="http://{0}@{1}:{2}".format(
         constants.DEFAULT_MEV_PUBKEY, api.ip_address, MEV_RELAY_ENDPOINT_PORT
     )
+    return (mev_relay_endpoint, api_prometheus)
