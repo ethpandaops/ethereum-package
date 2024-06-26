@@ -128,7 +128,7 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
-        launcher.cancun_time,
+        launcher.prague_time,
         persistent,
         el_volume_size,
         tolerations,
@@ -181,7 +181,7 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
-    cancun_time,
+    prague_time,
     persistent,
     el_volume_size,
     tolerations,
@@ -209,6 +209,11 @@ def get_config(
 
     cmd = [
         "erigon",
+        "{0}".format(
+            "--override.prague=" + str(prague_time)
+            if constants.NETWORK_NAME.shadowfork in network
+            else ""
+        ),
         "--networkid={0}".format(networkid),
         "--log.console.verbosity=" + verbosity_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -300,11 +305,11 @@ def get_config(
     )
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid, cancun_time):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid, prague_time):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
-        cancun_time=cancun_time,
+        prague_time=prague_time,
     )

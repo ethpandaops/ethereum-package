@@ -26,7 +26,9 @@ jobs:
           kurtosis analytics disable
 
       - name: Run Starlark
-        run: kurtosis run ${{ github.workspace }} --args-file network_params.yaml
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          kurtosis run ${{ github.workspace }} --args-file network_params.yaml
 
   run_with_args:
     strategy:
@@ -58,7 +60,9 @@ jobs:
           kurtosis analytics disable
 
       - name: Run Starlark
-        run: kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
 
   lint:
     runs-on: self-hosted-ghr-size-s-x64

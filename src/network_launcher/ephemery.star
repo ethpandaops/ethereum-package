@@ -4,7 +4,7 @@ el_cl_genesis_data = import_module(
 )
 
 
-def launch(plan, cancun_time, prague_time):
+def launch(plan, prague_time):
     el_cl_genesis_data_uuid = plan.run_sh(
         name="fetch_ephemery_genesis_data",
         description="Creating network configs",
@@ -19,7 +19,6 @@ def launch(plan, cancun_time, prague_time):
     el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
         el_cl_genesis_data_uuid.files_artifacts[0],
         genesis_validators_root,
-        cancun_time,
         prague_time,
     )
     final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
