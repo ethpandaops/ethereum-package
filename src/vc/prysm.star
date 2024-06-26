@@ -5,10 +5,10 @@ vc_shared = import_module("./shared.star")
 PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-password"
 PRYSM_BEACON_RPC_PORT = 4000
 VALIDATOR_GRPC_PORT_NUM = 7500
-VALDIATOR_GRPC_PORT_ID = "grpc"
+
 
 EXTRA_PORTS = {
-    VALDIATOR_GRPC_PORT_ID: shared_utils.new_port_spec(
+    constants.VALDIATOR_GRPC_PORT_ID: shared_utils.new_port_spec(
         VALIDATOR_GRPC_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -37,6 +37,8 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    port_publisher,
+    vc_index,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
@@ -90,6 +92,24 @@ def get_config(
         PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER: prysm_password_artifact_uuid,
     }
 
+    public_ports = {}
+    public_keymanager_port_assignment = {}
+    public_gprc_port_assignment = {}
+    if port_publisher.vc_enabled:
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "vc", port_publisher, vc_index
+        )
+        public_port_assignments = {
+            constants.METRICS_PORT_ID: public_ports_for_component[0]
+        }
+        public_keymanager_port_assignment = {
+            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]
+        }
+        public_gprc_port_assignment = {
+            constants.VALDIATOR_GRPC_PORT_ID: public_ports_for_component[2]
+        }
+        public_ports = shared_utils.get_port_specs(public_port_assignments)
+
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
@@ -98,10 +118,15 @@ def get_config(
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
         ports.update(EXTRA_PORTS)
+        public_ports.update(
+            shared_utils.get_port_specs(public_keymanager_port_assignment)
+        )
+        public_ports.update(shared_utils.get_port_specs(public_gprc_port_assignment))
 
     return ServiceConfig(
         image=image,
         ports=ports,
+        public_ports=public_ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

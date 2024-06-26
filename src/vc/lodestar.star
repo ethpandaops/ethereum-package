@@ -34,6 +34,8 @@ def get_config(
     node_selectors,
     keymanager_enabled,
     preset,
+    port_publisher,
+    vc_index,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -86,6 +88,20 @@ def get_config(
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
     }
 
+    public_ports = {}
+    public_keymanager_port_assignment = {}
+    if port_publisher.vc_enabled:
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "vc", port_publisher, vc_index
+        )
+        public_port_assignments = {
+            constants.METRICS_PORT_ID: public_ports_for_component[0]
+        }
+        public_keymanager_port_assignment = {
+            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]
+        }
+        public_ports = shared_utils.get_port_specs(public_port_assignments)
+
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
@@ -93,6 +109,9 @@ def get_config(
         files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
+        public_ports.update(
+            shared_utils.get_port_specs(public_keymanager_port_assignment)
+        )
 
     if preset == "minimal":
         extra_env_vars["LODESTAR_PRESET"] = "minimal"
@@ -100,6 +119,7 @@ def get_config(
     return ServiceConfig(
         image=image,
         ports=ports,
+        public_ports=public_ports,
         cmd=cmd,
         env_vars=extra_env_vars,
         files=files,

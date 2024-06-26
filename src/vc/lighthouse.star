@@ -38,7 +38,7 @@ def get_config(
     network,
     electra_fork_epoch,
     port_publisher,
-    vc_index
+    vc_index,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -97,21 +97,26 @@ def get_config(
     public_ports = {}
     public_keymanager_port_assignment = {}
     if port_publisher.vc_enabled:
-        public_ports_for_component = shared_utils.get_public_ports_for_component("vc", port_publisher, vc_index)
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "vc", port_publisher, vc_index
+        )
         public_port_assignments = {
             constants.METRICS_PORT_ID: public_ports_for_component[0]
         }
-        public_keymanager_port_assignment = {constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]}
+        public_keymanager_port_assignment = {
+            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]
+        }
         public_ports = shared_utils.get_port_specs(public_port_assignments)
-    
+
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
     if keymanager_enabled:
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
-        public_ports.update(shared_utils.get_port_specs(public_keymanager_port_assignment))
-    
+        public_ports.update(
+            shared_utils.get_port_specs(public_keymanager_port_assignment)
+        )
 
     return ServiceConfig(
         image=image,
