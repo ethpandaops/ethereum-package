@@ -4,7 +4,6 @@ constants = import_module("../package_io/constants.star")
 IMAGE_NAME = "ethpandaops/tracoor:0.0.18"
 SERVICE_NAME = "tracoor"
 
-HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 7007
 
 TRACOOR_CONFIG_FILENAME = "tracoor-config.yaml"
@@ -18,7 +17,7 @@ MIN_MEMORY = 128
 MAX_MEMORY = 2048
 
 USED_PORTS = {
-    HTTP_PORT_ID: shared_utils.new_port_spec(
+    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -35,6 +34,8 @@ def launch_tracoor(
     network_params,
     global_node_selectors,
     final_genesis_timestamp,
+    port_publisher,
+    additional_service_index,
 ):
     all_client_info = []
     for index, participant in enumerate(participant_contexts):
@@ -78,6 +79,8 @@ def launch_tracoor(
         el_cl_data_files_artifact_uuid,
         network_params,
         global_node_selectors,
+        port_publisher,
+        additional_service_index,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -88,15 +91,25 @@ def get_config(
     el_cl_data_files_artifact_uuid,
     network_params,
     node_selectors,
+    port_publisher,
+    additional_service_index,
 ):
     config_file_path = shared_utils.path_join(
         TRACOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         TRACOOR_CONFIG_FILENAME,
     )
 
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        0,
+    )
+
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
+        public_ports=public_ports,
         files={
             TRACOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },

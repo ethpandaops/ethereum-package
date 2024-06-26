@@ -1,11 +1,10 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 prometheus = import_module("../prometheus/prometheus_launcher.star")
-
+constants = import_module("../package_io/constants.star")
 
 SERVICE_NAME = "beacon-metrics-gazer"
 IMAGE_NAME = "ethpandaops/beacon-metrics-gazer:master"
 
-HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 8080
 
 METRICS_PATH = "/metrics"
@@ -17,7 +16,7 @@ BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
 
 USED_PORTS = {
-    HTTP_PORT_ID: shared_utils.new_port_spec(
+    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -36,10 +35,14 @@ def launch_beacon_metrics_gazer(
     cl_contexts,
     network_params,
     global_node_selectors,
+    port_publisher,
+    additional_service_index,
 ):
     config = get_config(
         cl_contexts[0].beacon_http_url,
         global_node_selectors,
+        port_publisher,
+        additional_service_index,
     )
 
     beacon_metrics_gazer_service = plan.add_service(SERVICE_NAME, config)
@@ -56,14 +59,28 @@ def launch_beacon_metrics_gazer(
     )
 
 
-def get_config(beacon_http_url, node_selectors):
+def get_config(
+    beacon_http_url,
+    node_selectors,
+    port_publisher,
+    additional_service_index,
+):
     config_file_path = shared_utils.path_join(
         BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         BEACON_METRICS_GAZER_CONFIG_FILENAME,
     )
+
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        0,
+    )
+
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
+        public_ports=public_ports,
         files={
             BEACON_METRICS_GAZER_CONFIG_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
         },
