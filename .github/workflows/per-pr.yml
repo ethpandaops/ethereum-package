@@ -11,9 +11,13 @@ jobs:
   run_starlark:
     runs-on: self-hosted-ghr-size-l-x64
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Checkout Repository
         uses: actions/checkout@v4
-
       - name: Setup Kurtosis
         run: |
           echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
@@ -39,9 +43,13 @@ jobs:
           ]
     runs-on: self-hosted-ghr-size-l-x64
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Checkout Repository
         uses: actions/checkout@v4
-
       - name: Setup Kurtosis
         run: |
           echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
@@ -57,7 +65,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
       - name: Setup Kurtosis
         run: |
           echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
@@ -72,6 +79,11 @@ jobs:
     runs-on: self-hosted-ghr-size-l-x64
     timeout-minutes: 30
     steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Kurtosis Assertoor GitHub Action

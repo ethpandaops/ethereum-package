@@ -229,12 +229,9 @@ def get_config(
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--min-gas-price=1000000000",
-        "--bonsai-limit-trie-logs-enabled=false",
+        "--bonsai-limit-trie-logs-enabled=false" if "verkle" not in network else "",
     ]
-    if (
-        network not in constants.PUBLIC_NETWORKS
-        or constants.NETWORK_NAME.shadowfork in network
-    ):
+    if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--genesis-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
@@ -254,7 +251,10 @@ def get_config(
                     ]
                 )
             )
-    elif network not in constants.PUBLIC_NETWORKS:
+    elif (
+        network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network
+    ):
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(

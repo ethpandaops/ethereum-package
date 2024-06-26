@@ -218,10 +218,7 @@ def get_config(
         "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
         "--tcp-port={0}".format(discovery_port),
     ]
-    if (
-        network not in constants.PUBLIC_NETWORKS
-        or constants.NETWORK_NAME.shadowfork in network
-    ):
+    if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--custom-network="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
@@ -241,7 +238,10 @@ def get_config(
                     ]
                 )
             )
-    elif network not in constants.PUBLIC_NETWORKS:
+    elif (
+        network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network
+    ):
         cmd.append(
             "--bootstrap-node="
             + shared_utils.get_devnet_enodes(

@@ -218,20 +218,21 @@ def get_config(
         "--Metrics.ExposeHost=0.0.0.0",
     ]
 
-    if network not in constants.PUBLIC_NETWORKS:
+    if constants.NETWORK_NAME.shadowfork in network:
+        cmd.append(
+            "--Init.ChainSpecPath="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/chainspec.json"
+        )
+        cmd.append("--config=" + network.split("-")[0])
+        cmd.append("--Init.BaseDbPath=" + network.split("-")[0])
+    elif network not in constants.PUBLIC_NETWORKS:
         cmd.append("--config=none.cfg")
         cmd.append(
             "--Init.ChainSpecPath="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/chainspec.json"
         )
-    elif constants.NETWORK_NAME.shadowfork in network:
-        cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
-        )
-        cmd.append("--config=" + network)
     else:
         cmd.append("--config=" + network)
 
@@ -249,7 +250,10 @@ def get_config(
                     ]
                 )
             )
-    elif network not in constants.PUBLIC_NETWORKS:
+    elif (
+        network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network
+    ):
         cmd.append(
             "--Discovery.Bootnodes="
             + shared_utils.get_devnet_enodes(
