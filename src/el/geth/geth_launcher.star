@@ -163,6 +163,7 @@ def launch(
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
         "geth",
@@ -173,6 +174,7 @@ def launch(
         WS_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
         http_url,
+        ws_url,
         service_name,
         [geth_metrics_info],
     )
