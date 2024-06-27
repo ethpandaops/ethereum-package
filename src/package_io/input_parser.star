@@ -3,7 +3,7 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 genesis_constants = import_module(
     "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
-mev_sidecar = import_module("../mev_sidecar/mev_sidecar_launcher.star")
+mev_sidecar = import_module("../mev/mev_sidecar/mev_sidecar_launcher.star")
 
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",

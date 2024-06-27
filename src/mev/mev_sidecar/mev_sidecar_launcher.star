@@ -18,7 +18,7 @@ def launch_mev_sidecar(
     mev_params,
     node_selectors,
     mev_boost_context,
-    beacon_client_url,
+    beacon_api_url,
     execution_api_url,
     engine_api_url
 ):
@@ -43,9 +43,9 @@ def launch_mev_sidecar(
                 mev_boost_context_util.mev_boost_endpoint(mev_boost_context),
                 "--mevboost-proxy-port",
                 mev_boost_context.port + 1,
-                "--beacon-client-url",
-                beacon_client_url,
-                "--execution-api",
+                "--beacon-api-url",
+                beacon_api_url,
+                "--execution-api-url",
                 execution_api_url,
                 "--engine-api-url",
                 engine_api_url
