@@ -295,7 +295,7 @@ def run(plan, args={}):
                         all_el_contexts[0].ip_addr,
                         all_el_contexts[0].rpc_port_num,
                     ),
-                    'http://{0}:{1}'".format(
+                    "http://{0}:{1}".format(
                         all_el_contexts[0].ip_addr,
                         all_el_contexts[0].engine_rpc_port_num
                     )
