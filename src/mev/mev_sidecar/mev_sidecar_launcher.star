@@ -6,6 +6,7 @@ mev_boost_context_util = import_module("../mev_boost/mev_boost_context.star")
 MEV_SIDECAR_ENDPOINT = "mev-sidecar-api"
 
 MEV_SIDECAR_ENDPOINT_PORT = 9061
+MEV_SIDECAR_BOOST_PROXY_PORT = 9062
 
 # The min/max CPU/memory that mev-sidecar can use
 MEV_SIDECAR_MIN_CPU = 100
@@ -42,7 +43,7 @@ def launch_mev_sidecar(
                 "--mevboost-url",
                 mev_boost_context_util.mev_boost_endpoint(mev_boost_context),
                 "--mevboost-proxy-port",
-                str(mev_boost_context.port + 1),
+                str(MEV_SIDECAR_BOOST_PROXY_PORT),
                 "--beacon-api-url",
                 beacon_api_url,
                 "--execution-api-url",
@@ -54,7 +55,10 @@ def launch_mev_sidecar(
             ports={
                 "api": PortSpec(
                     number=MEV_SIDECAR_ENDPOINT_PORT, transport_protocol="TCP"
-                )
+                ),
+                "mevboost-proxy": PortSpec(
+                    number=MEV_SIDECAR_BOOST_PROXY_PORT, transport_protocol="TCP"
+                ),
             },
             env_vars=env_vars,
             min_cpu=MEV_SIDECAR_MIN_CPU,

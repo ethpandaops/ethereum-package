@@ -144,7 +144,7 @@ def input_parser(plan, input_args):
         result = enrich_mev_extra_params(
             result,
             MEV_BOOST_SERVICE_NAME_PREFIX,
-            mev_sidecar.MEV_SIDECAR_ENDPOINT_PORT,
+            mev_sidecar.MEV_SIDECAR_BOOST_PROXY_PORT,
             result.get("mev_type"),
         )
 
@@ -802,6 +802,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         #     participant["el_type"],
         #     mev_port,
         # )
+
+        # connection: beacon node -> mev-boost
         mev_url = "http://mev-sidecar-api:{0}".format(mev_port)
 
         if participant["cl_type"] == "lighthouse":
