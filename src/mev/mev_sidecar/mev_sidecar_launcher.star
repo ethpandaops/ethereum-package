@@ -42,7 +42,7 @@ def launch_mev_sidecar(
                 "--mevboost-url",
                 mev_boost_context_util.mev_boost_endpoint(mev_boost_context),
                 "--mevboost-proxy-port",
-                mev_boost_context.port + 1,
+                str(mev_boost_context.port + 1),
                 "--beacon-api-url",
                 beacon_api_url,
                 "--execution-api-url",
