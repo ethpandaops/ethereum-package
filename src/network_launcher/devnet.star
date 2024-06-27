@@ -12,7 +12,7 @@ def launch(plan, network, prague_time, repo):
         name="el_cl_genesis",
     )
     el_cl_genesis_data_uuid = plan.run_sh(
-        name="move_genesis_data",
+        name="move-genesis-data",
         description="Creating network configs",
         run="mkdir -p /network-configs/ && mv /opt/* /network-configs/",
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
