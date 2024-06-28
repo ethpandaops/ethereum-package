@@ -16,7 +16,7 @@ jobs:
       matrix:
         payload:
           - { name: "minimal", file: "./.github/tests/minimal.yaml" }
-          - { name: "network_params", file: "./network_params.yaml" }
+          - { name: "network-params", file: "./network_params.yaml" }
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
