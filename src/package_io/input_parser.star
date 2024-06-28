@@ -795,6 +795,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         index_str = shared_utils.zfill_custom(
             index + 1, len(str(len(parsed_arguments_dict["participants"])))
         )
+
         # mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
         #     MEV_BOOST_SERVICE_NAME_PREFIX,
         #     index_str,

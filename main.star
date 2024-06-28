@@ -298,7 +298,8 @@ def run(plan, args={}):
                     "http://{0}:{1}".format(
                         all_el_contexts[0].ip_addr,
                         all_el_contexts[0].engine_rpc_port_num
-                    )
+                    ),
+                    raw_jwt_secret,
                 )
 
     if len(args_with_right_defaults.additional_services) == 0:
