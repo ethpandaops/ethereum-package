@@ -14,11 +14,9 @@ jobs:
   run_k8s_test:
     strategy:
       matrix:
-        file_name:
-          [
-            "./.github/tests/minimal.yaml",
-            "./network_params.yaml"
-          ]
+        payload:
+          - { name: "minimal", file: "./.github/tests/minimal.yaml" }
+          - { name: "network_params", file: "./network_params.yaml" }
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -43,8 +41,8 @@ jobs:
           kubernetes_cluster: "minikube"
           kubernetes_storage_class: "standard"
           ethereum_package_branch: "${{ github.head_ref || github.ref_name }}"
-          ethereum_package_args: "${{ matrix.file_name }}"
-          enclave_name: "ethereum-package-${{ matrix.file_name }}-${{ github.run_id }}"
+          ethereum_package_args: "${{ matrix.payload.file }}"
+          enclave_name: "ethereum-package-${{ matrix.payload.name }}-${{ github.run_id }}"
           persistent_logs: "true"
 
       - name: Notify
@@ -53,4 +51,4 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          args: "The k8s nightly/per PR test for ${{matrix.file_name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          args: "The k8s nightly/per PR test for ${{matrix.payload.name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
