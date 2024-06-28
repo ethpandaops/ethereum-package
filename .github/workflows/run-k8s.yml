@@ -44,7 +44,7 @@ jobs:
           kubernetes_storage_class: "standard"
           ethereum_package_branch: "${{ github.head_ref || github.ref_name }}"
           ethereum_package_args: "${{ matrix.file_name }}"
-          enclave_name: "ethereum-package-${{ github.job }}"
+          enclave_name: "ethereum-package-${{ matrix.file_name }}-${{ github.run_id }}"
           persistent_logs: "true"
 
       - name: Notify
