@@ -37,7 +37,7 @@ jobs:
         kubernetes_cluster: "minikube"
         kubernetes_storage_class: "standard"
         ethereum_package_branch: "${{ github.head_ref || github.ref_name }}"
-        ethereum_package_args: "./.github/test/mix-with-tools.yaml"
+        ethereum_package_args: "./.github/tests/mix-with-tools.yaml"
         enclave_name: "ethereum-package-${{ github.run_id }}"
         persistent_logs: "true"
 
