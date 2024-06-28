@@ -44,7 +44,7 @@ jobs:
           kubernetes_storage_class: "standard"
           ethereum_package_branch: "${{ github.head_ref || github.ref_name }}"
           ethereum_package_args: "${{ matrix.file_name }}"
-          enclave_name: "ethereum-package-${{ github.run_id }}"
+          enclave_name: "ethereum-package-${{ github.job }}"
           persistent_logs: "true"
 
       - name: Notify
@@ -53,4 +53,4 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          args: "The nightly test for ${{matrix.file_name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          args: "The k8s nightly/per PR test for ${{matrix.file_name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
