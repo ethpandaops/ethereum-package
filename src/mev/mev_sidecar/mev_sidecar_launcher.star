@@ -27,7 +27,7 @@ def launch_mev_sidecar(
     image = mev_params.mev_sidecar_image
 
     env_vars = {
-        "RUST_LOG": "trace",
+        "RUST_LOG": "bolt_sidecar=trace",
     }
 
     api = plan.add_service(
