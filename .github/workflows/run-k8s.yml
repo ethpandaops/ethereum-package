@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  run_test:
+  run_k8s_test:
     strategy:
       matrix:
         file_name:
@@ -19,39 +19,38 @@ jobs:
             "./.github/tests/minimal.yaml",
             "./network_params.yaml"
           ]
-    name: "Run k8s test"
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-    - name: Setup minikube
-      id: minikube
-      uses: medyagh/setup-minikube@latest
-    - name: Get kubeconfig
-      id: kubeconfig
-      shell: bash
-      run: |
-        cat ~/.kube/config > kubeconfig
-        echo "kubeconfig=$(cat kubeconfig | base64 -w 0)" >> $GITHUB_OUTPUT
-    # run kurtosis test and assertoor
-    - name: Run kurtosis testnet
-      id: testnet
-      uses: ethpandaops/kurtosis-assertoor-github-action@v1
-      with:
-        kurtosis_extra_args: "--image-download always --non-blocking-tasks --verbosity DETAILED"
-        kurtosis_backend: "kubernetes"
-        kubernetes_config: "${{ steps.kubeconfig.outputs.kubeconfig }}"
-        kubernetes_cluster: "minikube"
-        kubernetes_storage_class: "standard"
-        ethereum_package_branch: "${{ github.head_ref || github.ref_name }}"
-        ethereum_package_args: "${{ matrix.file_name }}"
-        enclave_name: "ethereum-package-${{ github.run_id }}"
-        persistent_logs: "true"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup minikube
+        id: minikube
+        uses: medyagh/setup-minikube@latest
+      - name: Get kubeconfig
+        id: kubeconfig
+        shell: bash
+        run: |
+          cat ~/.kube/config > kubeconfig
+          echo "kubeconfig=$(cat kubeconfig | base64 -w 0)" >> $GITHUB_OUTPUT
+      # run kurtosis test and assertoor
+      - name: Run kurtosis testnet
+        id: testnet
+        uses: ethpandaops/kurtosis-assertoor-github-action@v1
+        with:
+          kurtosis_extra_args: "--image-download always --non-blocking-tasks --verbosity DETAILED"
+          kurtosis_backend: "kubernetes"
+          kubernetes_config: "${{ steps.kubeconfig.outputs.kubeconfig }}"
+          kubernetes_cluster: "minikube"
+          kubernetes_storage_class: "standard"
+          ethereum_package_branch: "${{ github.head_ref || github.ref_name }}"
+          ethereum_package_args: "${{ matrix.file_name }}"
+          enclave_name: "ethereum-package-${{ github.run_id }}"
+          persistent_logs: "true"
 
-    - name: Notify
-      if: cancelled() || failure()
-      uses: Ilshidur/action-discord@master
-      env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      with:
-        args: "The nightly test for ${{matrix.file_name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      - name: Notify
+        if: cancelled() || failure()
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: "The nightly test for ${{matrix.file_name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
