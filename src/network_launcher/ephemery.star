@@ -8,10 +8,15 @@ def launch(plan, prague_time):
     el_cl_genesis_data_uuid = plan.run_sh(
         name="fetch-ephemery-genesis-data",
         description="Creating network configs",
-        run="mkdir -p /network-configs/ && \
-            curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && \
-            tar xvzf latest.tar.gz -C /network-configs && \
-            cat /network-configs/genesis_validators_root.txt",
+        run="sh -c '\
+            mkdir -p /network-configs/ ;\
+            mkdir -p /ephemery-release ;\
+            release=$(curl --silent https://api.github.com/repos/ephemery-testnet/ephemery-genesis/releases/latest | jq -r .tag_name) ;\
+            curl -Lo network-config.tar.gz https://github.com/ephemery-testnet/ephemery-genesis/releases/download/$release/network-config.tar.gz ;\
+            tar xzf network-config.tar.gz -C /ephemery-release ;\
+            mv /ephemery-release/metadata/* /network-configs/ ;\
+            cat /network-configs/genesis_validators_root.txt ;\
+        '",
         image="badouralix/curl-jq",
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
     )
