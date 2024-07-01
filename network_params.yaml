@@ -154,10 +154,10 @@ global_node_selectors: {}
 keymanager_enabled: false
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  cl:
+  el:
     enabled: false
     public_port_start: 32000
-  el:
+  cl:
     enabled: false
     public_port_start: 33000
   vc:

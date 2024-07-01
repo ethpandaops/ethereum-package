@@ -1007,8 +1007,8 @@ def get_default_custom_flood_params():
 def get_port_publisher_params(parameter_type, input_args=None):
     port_publisher_parameters = {
         "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
-        "cl": {"enabled": False, "public_port_start": 32000},
-        "el": {"enabled": False, "public_port_start": 33000},
+        "el": {"enabled": False, "public_port_start": 32000},
+        "cl": {"enabled": False, "public_port_start": 33000},
         "vc": {"enabled": False, "public_port_start": 34000},
         "additional_services": {"enabled": False, "public_port_start": 35000},
     }

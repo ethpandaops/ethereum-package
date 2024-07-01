@@ -15,4 +15,15 @@ participants:
     cl_type: grandine
 additional_services: []
 port_publisher:
-  public_port_start: 30000
+  el:
+    enabled: true
+    public_port_start: 32000
+  cl:
+    enabled: true
+    public_port_start: 33000
+  vc:
+    enabled: true
+    public_port_start: 34000
+  additional_services:
+    enabled: true
+    public_port_start: 35000
