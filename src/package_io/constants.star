@@ -41,6 +41,19 @@ CLIENT_TYPES = struct(
     validator="validator",
 )
 
+TCP_DISCOVERY_PORT_ID = "tcp-discovery"
+UDP_DISCOVERY_PORT_ID = "udp-discovery"
+RPC_PORT_ID = "rpc"
+WS_RPC_PORT_ID = "ws-rpc"
+HTTP_PORT_ID = "http"
+VALIDATOR_HTTP_PORT_ID = "http-validator"
+METRICS_PORT_ID = "metrics"
+ENGINE_RPC_PORT_ID = "engine-rpc"
+ENGINE_WS_PORT_ID = "engine-ws"
+ADMIN_PORT_ID = "admin"
+LITTLE_BIGTABLE_PORT_ID = "littlebigtable"
+VALDIATOR_GRPC_PORT_ID = "grpc"
+
 VALIDATING_REWARDS_ACCOUNT = "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
 MAX_ENR_ENTRIES = 20
 MAX_ENODE_ENTRIES = 20

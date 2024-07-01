@@ -193,6 +193,7 @@ def launch_participant_network(
         constants.CL_TYPE.lighthouse,
     ]
 
+    current_vc_index = 0
     for index, participant in enumerate(participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
@@ -365,11 +366,14 @@ def launch_participant_network(
                 preset=network_params.preset,
                 network=network_params.network,
                 electra_fork_epoch=network_params.electra_fork_epoch,
+                port_publisher=port_publisher,
+                vc_index=current_vc_index,
             )
             all_vc_contexts.append(vc_context)
 
             if vc_context and vc_context.metrics_info:
                 vc_context.metrics_info["config"] = participant.prometheus_config
+            current_vc_index += 1
 
         all_participants = []
 

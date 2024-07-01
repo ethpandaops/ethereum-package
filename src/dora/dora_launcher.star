@@ -2,7 +2,6 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "dora"
 
-HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 8080
 
 DORA_CONFIG_FILENAME = "dora-config.yaml"
@@ -19,7 +18,7 @@ MIN_MEMORY = 128
 MAX_MEMORY = 2048
 
 USED_PORTS = {
-    HTTP_PORT_ID: shared_utils.new_port_spec(
+    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -38,6 +37,8 @@ def launch_dora(
     global_node_selectors,
     mev_endpoints,
     mev_endpoint_names,
+    port_publisher,
+    additional_service_index,
 ):
     all_cl_client_info = []
     all_el_client_info = []
@@ -95,6 +96,8 @@ def launch_dora(
         network_params,
         dora_params,
         global_node_selectors,
+        port_publisher,
+        additional_service_index,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -106,10 +109,19 @@ def get_config(
     network_params,
     dora_params,
     node_selectors,
+    port_publisher,
+    additional_service_index,
 ):
     config_file_path = shared_utils.path_join(
         DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         DORA_CONFIG_FILENAME,
+    )
+
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        0,
     )
 
     if dora_params.image != "":
@@ -124,6 +136,7 @@ def get_config(
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
+        public_ports=public_ports,
         files={
             DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,

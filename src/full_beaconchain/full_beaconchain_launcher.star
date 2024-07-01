@@ -13,21 +13,10 @@ POSTGRES_PASSWORD = "pass"
 REDIS_PORT_ID = "redis"
 REDIS_PORT_NUMBER = 6379
 
-FRONTEND_PORT_ID = "http"
 FRONTEND_PORT_NUMBER = 8080
-
-LITTLE_BIGTABLE_PORT_ID = "littlebigtable"
 LITTLE_BIGTABLE_PORT_NUMBER = 9000
 
 FULL_BEACONCHAIN_CONFIG_FILENAME = "beaconchain-config.yml"
-
-USED_PORTS = {
-    FRONTEND_PORT_ID: shared_utils.new_port_spec(
-        FRONTEND_PORT_NUMBER,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
-}
 
 # The min/max CPU/memory that postgres can use
 POSTGRES_MIN_CPU = 10
@@ -98,6 +87,8 @@ def launch_full_beacon(
     el_contexts,
     persistent,
     global_node_selectors,
+    port_publisher,
+    additional_service_index,
 ):
     node_selectors = global_node_selectors
     postgres_output = postgres.run(
@@ -127,18 +118,8 @@ def launch_full_beacon(
     # TODO perhaps create a new service for the littlebigtable
     little_bigtable = plan.add_service(
         name="beaconchain-littlebigtable",
-        config=ServiceConfig(
-            image="gobitfly/little_bigtable:latest",
-            ports={
-                LITTLE_BIGTABLE_PORT_ID: PortSpec(
-                    LITTLE_BIGTABLE_PORT_NUMBER, application_protocol="tcp"
-                )
-            },
-            min_cpu=LITTLE_BIGTABLE_MIN_CPU,
-            max_cpu=LITTLE_BIGTABLE_MAX_CPU,
-            min_memory=LITTLE_BIGTABLE_MIN_MEMORY,
-            max_memory=LITTLE_BIGTABLE_MAX_MEMORY,
-            node_selectors=node_selectors,
+        config=get_little_bigtable_config(
+            node_selectors, port_publisher, additional_service_index
         ),
     )
 
@@ -329,28 +310,68 @@ def launch_full_beacon(
 
     frontend = plan.add_service(
         name="beaconchain-frontend",
-        config=ServiceConfig(
-            image=IMAGE_NAME,
-            files=files,
-            entrypoint=["./explorer"],
-            cmd=[
-                "-config",
-                "/app/config/beaconchain-config.yml",
-            ],
-            env_vars={
-                "FRONTEND_ENABLED": "TRUE",
-            },
-            ports={
-                FRONTEND_PORT_ID: PortSpec(
-                    FRONTEND_PORT_NUMBER, application_protocol="http"
-                ),
-            },
-            min_cpu=FRONTEND_MIN_CPU,
-            max_cpu=FRONTEND_MAX_CPU,
-            min_memory=FRONTEND_MIN_MEMORY,
-            max_memory=FRONTEND_MAX_MEMORY,
-            node_selectors=node_selectors,
+        config=get_frontend_config(
+            files, node_selectors, port_publisher, additional_service_index
         ),
+    )
+
+
+def get_little_bigtable_config(
+    node_selectors, port_publisher, additional_service_index
+):
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.LITTLE_BIGTABLE_PORT_ID,
+        additional_service_index,
+        0,
+    )
+    return ServiceConfig(
+        image="gobitfly/little_bigtable:latest",
+        ports={
+            constants.LITTLE_BIGTABLE_PORT_ID: PortSpec(
+                LITTLE_BIGTABLE_PORT_NUMBER, application_protocol="tcp"
+            )
+        },
+        public_ports=public_ports,
+        min_cpu=LITTLE_BIGTABLE_MIN_CPU,
+        max_cpu=LITTLE_BIGTABLE_MAX_CPU,
+        min_memory=LITTLE_BIGTABLE_MIN_MEMORY,
+        max_memory=LITTLE_BIGTABLE_MAX_MEMORY,
+        node_selectors=node_selectors,
+    )
+
+
+def get_frontend_config(
+    files, node_selectors, port_publisher, additional_service_index
+):
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        1,
+    )
+    return ServiceConfig(
+        image=IMAGE_NAME,
+        files=files,
+        entrypoint=["./explorer"],
+        cmd=[
+            "-config",
+            "/app/config/beaconchain-config.yml",
+        ],
+        env_vars={
+            "FRONTEND_ENABLED": "TRUE",
+        },
+        ports={
+            constants.HTTP_PORT_ID: PortSpec(
+                FRONTEND_PORT_NUMBER, application_protocol="http"
+            ),
+        },
+        public_ports=public_ports,
+        min_cpu=FRONTEND_MIN_CPU,
+        max_cpu=FRONTEND_MAX_CPU,
+        min_memory=FRONTEND_MIN_MEMORY,
+        max_memory=FRONTEND_MAX_MEMORY,
+        node_selectors=node_selectors,
     )
 
 

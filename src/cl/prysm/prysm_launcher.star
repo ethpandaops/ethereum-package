@@ -1,19 +1,13 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../../package_io/input_parser.star")
 cl_context = import_module("../../cl/cl_context.star")
-node_metrics = import_module("../../node_metrics_info.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
+cl_shared = import_module("../cl_shared.star")
+node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
-
-# Port IDs
-TCP_DISCOVERY_PORT_ID = "tcp-discovery"
-UDP_DISCOVERY_PORT_ID = "udp-discovery"
-RPC_PORT_ID = "rpc"
-BEACON_HTTP_PORT_ID = "http"
-BEACON_MONITORING_PORT_ID = "monitoring"
 
 # Port nums
 DISCOVERY_TCP_PORT_NUM = 13000
@@ -28,30 +22,7 @@ BEACON_MIN_MEMORY = 256
 
 METRICS_PATH = "/metrics"
 
-
 MIN_PEERS = 1
-
-
-def get_used_ports(discovery_port):
-    used_ports = {
-        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port, shared_utils.TCP_PROTOCOL
-        ),
-        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port, shared_utils.UDP_PROTOCOL
-        ),
-        RPC_PORT_ID: shared_utils.new_port_spec(
-            RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
-        ),
-        BEACON_HTTP_PORT_ID: shared_utils.new_port_spec(
-            HTTP_PORT_NUM, shared_utils.TCP_PROTOCOL
-        ),
-        BEACON_MONITORING_PORT_ID: shared_utils.new_port_spec(
-            BEACON_MONITORING_PORT_NUM, shared_utils.TCP_PROTOCOL
-        ),
-    }
-    return used_ports
-
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
@@ -95,6 +66,7 @@ def launch(
     checkpoint_sync_enabled,
     checkpoint_sync_url,
     port_publisher,
+    participant_index,
 ):
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
@@ -153,11 +125,12 @@ def launch(
         checkpoint_sync_url,
         port_publisher,
         launcher.preset,
+        participant_index,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
 
-    beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
+    beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
 
     beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, HTTP_PORT_NUM)
     beacon_grpc_url = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
@@ -165,7 +138,7 @@ def launch(
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
     beacon_node_identity_recipe = GetHttpRequestRecipe(
         endpoint="/eth/v1/node/identity",
-        port_id=BEACON_HTTP_PORT_ID,
+        port_id=constants.HTTP_PORT_ID,
         extract={
             "enr": ".data.enr",
             "multiaddr": ".data.p2p_addresses[0]",
@@ -179,7 +152,7 @@ def launch(
     beacon_multiaddr = response["extract.multiaddr"]
     beacon_peer_id = response["extract.peer_id"]
 
-    beacon_metrics_port = beacon_service.ports[BEACON_MONITORING_PORT_ID]
+    beacon_metrics_port = beacon_service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(
         beacon_service.ip_address, beacon_metrics_port.number
     )
@@ -234,6 +207,7 @@ def get_beacon_config(
     checkpoint_sync_url,
     port_publisher,
     preset,
+    participant_index,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if snooper_enabled:
@@ -249,19 +223,27 @@ def get_beacon_config(
 
     public_ports = {}
     discovery_port = DISCOVERY_TCP_PORT_NUM
-    if port_publisher.public_port_start:
-        discovery_port = port_publisher.cl_start
-        if bootnode_contexts and len(bootnode_contexts) > 0:
-            discovery_port = discovery_port + len(bootnode_contexts)
-        public_ports = {
-            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                discovery_port, shared_utils.TCP_PROTOCOL
-            ),
-            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                discovery_port, shared_utils.UDP_PROTOCOL
-            ),
-        }
-    used_ports = get_used_ports(discovery_port)
+    if port_publisher.cl_enabled:
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "cl", port_publisher, participant_index
+        )
+        public_ports, discovery_port = cl_shared.get_general_cl_public_port_specs(
+            public_ports_for_component
+        )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.RPC_PORT_ID: public_ports_for_component[3]}
+            )
+        )
+
+    used_port_assignments = {
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.HTTP_PORT_ID: HTTP_PORT_NUM,
+        constants.METRICS_PORT_ID: BEACON_MONITORING_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+    }
+    used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
@@ -379,7 +361,7 @@ def get_beacon_config(
         files=files,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         ready_conditions=cl_node_ready_conditions.get_ready_conditions(
-            BEACON_HTTP_PORT_ID
+            constants.HTTP_PORT_ID
         ),
         min_cpu=cl_min_cpu,
         max_cpu=cl_max_cpu,

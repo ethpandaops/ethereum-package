@@ -6,6 +6,11 @@ HTTP_APPLICATION_PROTOCOL = "http"
 NOT_PROVIDED_APPLICATION_PROTOCOL = ""
 NOT_PROVIDED_WAIT = "not-provided-wait"
 
+MAX_PORTS_PER_CL_NODE = 4
+MAX_PORTS_PER_EL_NODE = 5
+MAX_PORTS_PER_VC_NODE = 3
+MAX_PORTS_PER_ADDITIONAL_SERVICE = 2
+
 
 def new_template_and_data(template, template_data_json):
     return struct(template=template, data=template_data_json)
@@ -231,3 +236,85 @@ def get_client_names(participant, index, participant_contexts, participant_confi
         )
     )
     return full_name, cl_client, el_client, participant_config
+
+
+def get_public_ports_for_component(
+    component, port_publisher_params, participant_index=None
+):
+    public_port_range = ()
+    if component == "cl":
+        public_port_range = __get_port_range(
+            port_publisher_params.cl_public_port_start,
+            MAX_PORTS_PER_CL_NODE,
+            participant_index,
+        )
+    elif component == "el":
+        public_port_range = __get_port_range(
+            port_publisher_params.el_public_port_start,
+            MAX_PORTS_PER_EL_NODE,
+            participant_index,
+        )
+    elif component == "vc":
+        public_port_range = __get_port_range(
+            port_publisher_params.vc_public_port_start,
+            MAX_PORTS_PER_VC_NODE,
+            participant_index,
+        )
+    elif component == "additional_services":
+        public_port_range = __get_port_range(
+            port_publisher_params.additional_services_public_port_start,
+            MAX_PORTS_PER_ADDITIONAL_SERVICE,
+            participant_index,
+        )
+    return [port for port in range(public_port_range[0], public_port_range[1], 1)]
+
+
+def __get_port_range(port_start, max_ports_per_component, participant_index):
+    public_port_start = 32000
+    public_port_end = 32001
+    if participant_index == 0:
+        public_port_start = port_start
+        public_port_end = public_port_start + max_ports_per_component
+    else:
+        public_port_start = port_start + (max_ports_per_component * participant_index)
+        public_port_end = public_port_start + max_ports_per_component
+    return (public_port_start, public_port_end)
+
+
+def get_port_specs(port_assignments):
+    ports = {}
+    for port_id, port in port_assignments.items():
+        if port_id in [
+            constants.TCP_DISCOVERY_PORT_ID,
+            constants.RPC_PORT_ID,
+            constants.ENGINE_RPC_PORT_ID,
+            constants.ENGINE_WS_PORT_ID,
+            constants.WS_RPC_PORT_ID,
+            constants.LITTLE_BIGTABLE_PORT_ID,
+        ]:
+            ports.update({port_id: new_port_spec(port, TCP_PROTOCOL)})
+        elif port_id == constants.UDP_DISCOVERY_PORT_ID:
+            ports.update({port_id: new_port_spec(port, UDP_PROTOCOL)})
+        elif port_id in [
+            constants.HTTP_PORT_ID,
+            constants.METRICS_PORT_ID,
+            constants.VALIDATOR_HTTP_PORT_ID,
+            constants.ADMIN_PORT_ID,
+            constants.VALDIATOR_GRPC_PORT_ID,
+        ]:
+            ports.update(
+                {port_id: new_port_spec(port, TCP_PROTOCOL, HTTP_APPLICATION_PROTOCOL)}
+            )
+    return ports
+
+
+def get_additional_service_standard_public_port(
+    port_publisher, port_id, additional_service_index, port_index
+):
+    public_ports = {}
+    if port_publisher.additional_services_enabled:
+        public_ports_for_component = get_public_ports_for_component(
+            "additional_services", port_publisher, additional_service_index
+        )
+        public_ports = get_port_specs({port_id: public_ports_for_component[port_index]})
+    return public_ports
