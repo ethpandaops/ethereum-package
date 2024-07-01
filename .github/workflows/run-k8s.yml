@@ -37,9 +37,9 @@ jobs:
         id: branch
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "branch_name=''" >> $GITHUB_ENV
+            echo 'branch_name=""' >> $GITHUB_ENV
           else
-            echo "branch_name=main" >> $GITHUB_ENV
+            echo 'branch_name=main' >> $GITHUB_ENV
           fi
 
       # run kurtosis test and assertoor
