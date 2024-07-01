@@ -33,15 +33,6 @@ jobs:
           cat ~/.kube/config > kubeconfig
           echo "kubeconfig=$(cat kubeconfig | base64 -w 0)" >> $GITHUB_OUTPUT
 
-      - name: Determine Branch
-        id: branch
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo 'branch_name=""' >> $GITHUB_ENV
-          else
-            echo 'branch_name=main' >> $GITHUB_ENV
-          fi
-
       # run kurtosis test and assertoor
       - name: Run kurtosis testnet
         id: testnet
@@ -52,14 +43,23 @@ jobs:
           kubernetes_config: "${{ steps.kubeconfig.outputs.kubeconfig }}"
           kubernetes_cluster: "minikube"
           kubernetes_storage_class: "standard"
-          ethereum_package_branch: "${{ env.branch_name }}"
+          ethereum_package_branch: ""
           ethereum_package_args: "${{ matrix.payload.file }}"
           ethereum_package_url: "$GITHUB_WORKSPACE"
           enclave_name: "ethereum-package-${{ matrix.payload.name }}-${{ github.run_id }}"
           persistent_logs: "true"
 
+      - name: Check if Discord Webhook is Set
+        id: check_discord_webhook
+        run: |
+          if [ -z "${{ secrets.DISCORD_WEBHOOK }}" ]; then
+            echo "discord_webhook_set=false" >> $GITHUB_ENV
+          else
+            echo "discord_webhook_set=true" >> $GITHUB_ENV
+          fi
+
       - name: Notify
-        if: cancelled() || failure()
+        if: (cancelled() || failure()) && env.discord_webhook_set == 'true'
         uses: Ilshidur/action-discord@master
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
