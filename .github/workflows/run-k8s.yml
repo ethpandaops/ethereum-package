@@ -4,7 +4,7 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-  - cron: '0 2 * * *'
+    - cron: '0 2 * * *'
 
 concurrency:
   group: "scheduled-test"
@@ -21,15 +21,27 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
       - name: Setup minikube
         id: minikube
         uses: medyagh/setup-minikube@latest
+
       - name: Get kubeconfig
         id: kubeconfig
         shell: bash
         run: |
           cat ~/.kube/config > kubeconfig
           echo "kubeconfig=$(cat kubeconfig | base64 -w 0)" >> $GITHUB_OUTPUT
+
+      - name: Determine Branch
+        id: branch
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "branch_name=''" >> $GITHUB_ENV
+          else
+            echo "branch_name=main" >> $GITHUB_ENV
+          fi
+
       # run kurtosis test and assertoor
       - name: Run kurtosis testnet
         id: testnet
@@ -40,8 +52,9 @@ jobs:
           kubernetes_config: "${{ steps.kubeconfig.outputs.kubeconfig }}"
           kubernetes_cluster: "minikube"
           kubernetes_storage_class: "standard"
-          ethereum_package_branch: "${{ github.head_ref || github.ref_name }}"
+          ethereum_package_branch: "${{ env.branch_name }}"
           ethereum_package_args: "${{ matrix.payload.file }}"
+          ethereum_package_url: "$GITHUB_WORKSPACE"
           enclave_name: "ethereum-package-${{ matrix.payload.name }}-${{ github.run_id }}"
           persistent_logs: "true"
 
@@ -51,4 +64,4 @@ jobs:
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
-          args: "The k8s nightly/per PR test for ${{matrix.payload.name}} on ethereum-package has failed find it here ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          args: "The k8s nightly/per PR test for ${{matrix.payload.name}} on ethereum-package has failed. Find it here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
