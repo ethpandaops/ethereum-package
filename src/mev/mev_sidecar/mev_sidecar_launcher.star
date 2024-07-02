@@ -23,6 +23,7 @@ def launch_mev_sidecar(
     execution_api_url,
     engine_api_url,
     raw_jwt_secret,
+    seconds_per_slot,
 ):
     image = mev_params.mev_sidecar_image
 
@@ -56,7 +57,9 @@ def launch_mev_sidecar(
                 "--jwt-hex",
                 raw_jwt_secret,
                 "--commitment-deadline",
-                str(100)
+                str(100),
+                "--slot-time-in-seconds",
+                str(seconds_per_slot)
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={

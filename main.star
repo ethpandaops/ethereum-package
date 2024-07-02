@@ -300,6 +300,7 @@ def run(plan, args={}):
                         all_el_contexts[0].engine_rpc_port_num
                     ),
                     raw_jwt_secret,
+                    network_params.seconds_per_slot
                 )
 
     if len(args_with_right_defaults.additional_services) == 0:
