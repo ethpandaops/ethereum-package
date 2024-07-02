@@ -51,8 +51,10 @@ jobs:
 
       - name: Check if Discord Webhook is Set
         id: check_discord_webhook
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          if [ -z "${{ secrets.DISCORD_WEBHOOK }}" ]; then
+          if [ -z "$DISCORD_WEBHOOK" ]; then
             echo "discord_webhook_set=false" >> $GITHUB_ENV
           else
             echo "discord_webhook_set=true" >> $GITHUB_ENV
