@@ -55,6 +55,8 @@ def launch_mev_sidecar(
                 "0x0000000000000000000000000000000000000000",
                 "--jwt-hex",
                 raw_jwt_secret,
+                "--commitment-deadline",
+                str(100)
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
