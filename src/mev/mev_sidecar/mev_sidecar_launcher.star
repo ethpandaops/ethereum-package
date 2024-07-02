@@ -58,8 +58,8 @@ def launch_mev_sidecar(
                 raw_jwt_secret,
                 "--commitment-deadline",
                 str(100),
-                "--slot-time-in-seconds",
-                str(seconds_per_slot)
+                "--chain",
+                "kurtosis",
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
