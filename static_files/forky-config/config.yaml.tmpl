@@ -25,7 +25,7 @@ forky:
       type: "beacon_node"
       config:
         address: "{{ $clClient.Beacon_HTTP_URL }}"
-        polling_interval: "{{ .SecondsPerSlot }}s"
+        polling_interval: "{{ $.SecondsPerSlot }}s"
 {{- end }}
 
   ethereum:

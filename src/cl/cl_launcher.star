@@ -181,6 +181,7 @@ def launch(
                 checkpoint_sync_enabled,
                 checkpoint_sync_url,
                 port_publisher,
+                index,
             )
         else:
             boot_cl_client_ctx = all_cl_contexts
@@ -217,6 +218,7 @@ def launch(
                 checkpoint_sync_enabled,
                 checkpoint_sync_url,
                 port_publisher,
+                index,
             )
 
         # Add participant cl additional prometheus labels

@@ -370,7 +370,9 @@ def run(plan, args={}):
         return output
 
     launch_prometheus_grafana = False
-    for additional_service in args_with_right_defaults.additional_services:
+    for index, additional_service in enumerate(
+        args_with_right_defaults.additional_services
+    ):
         if additional_service == "tx_spammer":
             plan.print("Launching transaction spammer")
             tx_spammer_params = args_with_right_defaults.tx_spammer_params
@@ -421,6 +423,8 @@ def run(plan, args={}):
                 el_forkmon_config_template,
                 all_el_contexts,
                 global_node_selectors,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched execution layer forkmon")
         elif additional_service == "beacon_metrics_gazer":
@@ -431,6 +435,8 @@ def run(plan, args={}):
                     all_cl_contexts,
                     network_params,
                     global_node_selectors,
+                    args_with_right_defaults.port_publisher,
+                    index,
                 )
             )
             launch_prometheus_grafana = True
@@ -445,6 +451,8 @@ def run(plan, args={}):
                 all_el_contexts,
                 persistent,
                 global_node_selectors,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched blockscout")
         elif additional_service == "dora":
@@ -462,6 +470,8 @@ def run(plan, args={}):
                 global_node_selectors,
                 mev_endpoints,
                 mev_endpoint_names,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "dugtrio":
@@ -476,6 +486,8 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 network_params,
                 global_node_selectors,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched dugtrio")
         elif additional_service == "blutgang":
@@ -490,6 +502,8 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 network_params,
                 global_node_selectors,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched blutgang")
         elif additional_service == "blobscan":
@@ -501,6 +515,8 @@ def run(plan, args={}):
                 network_params.network_id,
                 persistent,
                 global_node_selectors,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched blobscan")
         elif additional_service == "forky":
@@ -517,6 +533,8 @@ def run(plan, args={}):
                 network_params,
                 global_node_selectors,
                 final_genesis_timestamp,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched forky")
         elif additional_service == "tracoor":
@@ -533,6 +551,8 @@ def run(plan, args={}):
                 network_params,
                 global_node_selectors,
                 final_genesis_timestamp,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched tracoor")
         elif additional_service == "apache":
@@ -559,6 +579,8 @@ def run(plan, args={}):
                 all_el_contexts,
                 persistent,
                 global_node_selectors,
+                args_with_right_defaults.port_publisher,
+                index,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
         elif additional_service == "prometheus_grafana":
