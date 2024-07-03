@@ -26,7 +26,6 @@ def launch(
     global_node_selectors,
     global_tolerations,
     persistent,
-    network_id,
     num_participants,
     validator_data,
     prysm_password_relative_filepath,

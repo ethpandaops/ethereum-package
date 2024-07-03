@@ -170,7 +170,6 @@ def launch_participant_network(
         global_node_selectors,
         global_tolerations,
         persistent,
-        network_id,
         num_participants,
         validator_data,
         prysm_password_relative_filepath,
@@ -426,4 +425,5 @@ def launch_participant_network(
         final_genesis_timestamp,
         el_cl_data.genesis_validators_root,
         el_cl_data.files_artifact_uuid,
+        network_id,
     )

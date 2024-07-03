@@ -124,6 +124,7 @@ def run(plan, args={}):
         final_genesis_timestamp,
         genesis_validators_root,
         el_cl_data_files_artifact_uuid,
+        network_id,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults.participants,
@@ -265,7 +266,7 @@ def run(plan, args={}):
             endpoint = flashbots_mev_relay.launch_mev_relay(
                 plan,
                 mev_params,
-                network_params.network_id,
+                network_id,
                 beacon_uris,
                 genesis_validators_root,
                 builder_uri,
@@ -327,7 +328,7 @@ def run(plan, args={}):
                         plan,
                         mev_boost_launcher,
                         mev_boost_service_name,
-                        network_params.network_id,
+                        network_id,
                         mev_params.mev_boost_image,
                         mev_params.mev_boost_args,
                         global_node_selectors,
@@ -512,7 +513,7 @@ def run(plan, args={}):
                 plan,
                 all_cl_contexts,
                 all_el_contexts,
-                network_params.network_id,
+                network_id,
                 persistent,
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
@@ -670,6 +671,7 @@ def run(plan, args={}):
         all_participants=all_participants,
         pre_funded_accounts=genesis_constants.PRE_FUNDED_ACCOUNTS,
         network_params=network_params,
+        network_id=network_id,
         final_genesis_timestamp=final_genesis_timestamp,
         genesis_validators_root=genesis_validators_root,
     )
