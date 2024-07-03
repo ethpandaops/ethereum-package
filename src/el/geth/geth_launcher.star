@@ -219,7 +219,7 @@ def get_config(
         )
         additional_public_port_assignments = {
             constants.RPC_PORT_ID: public_ports_for_component[2],
-            constants.WS_RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[3],
             constants.METRICS_PORT_ID: public_ports_for_component[4],
         }
         public_ports.update(
@@ -231,7 +231,7 @@ def get_config(
         constants.UDP_DISCOVERY_PORT_ID: discovery_port,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
-        constants.WS_RPC_PORT_ID: WS_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
         constants.METRICS_PORT_ID: METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
