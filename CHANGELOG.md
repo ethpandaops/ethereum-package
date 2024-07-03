@@ -1,5 +1,34 @@
 # Changelog
 
+## [4.1.0](https://github.com/ethpandaops/ethereum-package/compare/4.0.0...4.1.0) (2024-07-03)
+
+
+### Features
+
+* add back k8s tests ([#699](https://github.com/ethpandaops/ethereum-package/issues/699)) ([d621cf0](https://github.com/ethpandaops/ethereum-package/commit/d621cf0a4936c40778e492bb307fef990477aa52))
+* add checkpoint_enabled and checkpoint_url flags ([#689](https://github.com/ethpandaops/ethereum-package/issues/689)) ([b8cd2b4](https://github.com/ethpandaops/ethereum-package/commit/b8cd2b4574d4f8defa343532a7725b9ae3be692b))
+* add eof support ([#682](https://github.com/ethpandaops/ethereum-package/issues/682)) ([cb203ff](https://github.com/ethpandaops/ethereum-package/commit/cb203ff1e9929529570f4dc59b7b3cb6022ff670))
+* add mev relays to dora config ([#679](https://github.com/ethpandaops/ethereum-package/issues/679)) ([293001a](https://github.com/ethpandaops/ethereum-package/commit/293001a1e116e7e727d19ed42ba3e7113171f561))
+* Add static ports ([#677](https://github.com/ethpandaops/ethereum-package/issues/677)) ([4f054d0](https://github.com/ethpandaops/ethereum-package/commit/4f054d0566c1a8a8f90a5436d022cd5fe36d7c3c))
+* add ws_url to el_context ([#696](https://github.com/ethpandaops/ethereum-package/issues/696)) ([26fea61](https://github.com/ethpandaops/ethereum-package/commit/26fea619789253f73c1f53eb9478347bb908387a))
+* introduce devnet_repo override ([#686](https://github.com/ethpandaops/ethereum-package/issues/686)) ([9952361](https://github.com/ethpandaops/ethereum-package/commit/99523611622dbbefc2a523e6b011e63487b1cbf7))
+* use CDN URL for data snapshots used for shadow forks ([#676](https://github.com/ethpandaops/ethereum-package/issues/676)) ([91dc68c](https://github.com/ethpandaops/ethereum-package/commit/91dc68c9e709729e2a8c2fa59f48d8901eb49bb5))
+
+
+### Bug Fixes
+
+* besu bonsai log disable ([#673](https://github.com/ethpandaops/ethereum-package/issues/673)) ([955f19f](https://github.com/ethpandaops/ethereum-package/commit/955f19f8a79eda7d3d645c0c3d3a822705f10a7d))
+* blockscout bad return ([#685](https://github.com/ethpandaops/ethereum-package/issues/685)) ([e80870b](https://github.com/ethpandaops/ethereum-package/commit/e80870b3f955d5e350e3b14ab8ea2e49fa8d2f48))
+* bump peerdas images ([#678](https://github.com/ethpandaops/ethereum-package/issues/678)) ([1acc201](https://github.com/ethpandaops/ethereum-package/commit/1acc201cbb7314c593963e042796e4d93ceaf960))
+* DNS-1035 label ([#697](https://github.com/ethpandaops/ethereum-package/issues/697)) ([440fb31](https://github.com/ethpandaops/ethereum-package/commit/440fb319084fc8ea16f961410162d35290deeb22))
+* ephemery genesis loader ([#700](https://github.com/ethpandaops/ethereum-package/issues/700)) ([0235063](https://github.com/ethpandaops/ethereum-package/commit/023506362d489124d88f1d2b15408f08fbdd173e))
+* ignore bootnodes if in shadowfork ([#660](https://github.com/ethpandaops/ethereum-package/issues/660)) ([cda5dda](https://github.com/ethpandaops/ethereum-package/commit/cda5ddac51e4ce2228f2a4da1d242b2fcb7eeccd))
+* minimal eof ([#687](https://github.com/ethpandaops/ethereum-package/issues/687)) ([26a7618](https://github.com/ethpandaops/ethereum-package/commit/26a76187cd65114640764cc4eefc4a6c7517b57a))
+* release please manifest ([#675](https://github.com/ethpandaops/ethereum-package/issues/675)) ([75ed7e1](https://github.com/ethpandaops/ethereum-package/commit/75ed7e18309d1d3884e222abcd097366649288cc))
+* remove docker login ([#701](https://github.com/ethpandaops/ethereum-package/issues/701)) ([ede5962](https://github.com/ethpandaops/ethereum-package/commit/ede596266d2a0fe8af0e1bf21c6a09e4685b67a5))
+* return empty services ([#688](https://github.com/ethpandaops/ethereum-package/issues/688)) ([6571a70](https://github.com/ethpandaops/ethereum-package/commit/6571a70bccb310957d531daea6685f641469b546))
+* return the correct network_id ([#705](https://github.com/ethpandaops/ethereum-package/issues/705)) ([7c592f6](https://github.com/ethpandaops/ethereum-package/commit/7c592f6741718c20bdce4bd3bd6035b3ce37f38d))
+
 ## [4.0.0](https://github.com/ethpandaops/ethereum-package/compare/3.1.0...v4.0.0) (2024-06-13)
 
 
