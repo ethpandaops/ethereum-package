@@ -270,8 +270,6 @@ def get_public_ports_for_component(
 
 
 def __get_port_range(port_start, max_ports_per_component, participant_index):
-    public_port_start = 32000
-    public_port_end = 32001
     if participant_index == 0:
         public_port_start = port_start
         public_port_end = public_port_start + max_ports_per_component
@@ -291,6 +289,7 @@ def get_port_specs(port_assignments):
             constants.ENGINE_WS_PORT_ID,
             constants.WS_RPC_PORT_ID,
             constants.LITTLE_BIGTABLE_PORT_ID,
+            constants.WS_PORT_ID,
         ]:
             ports.update({port_id: new_port_spec(port, TCP_PROTOCOL)})
         elif port_id == constants.UDP_DISCOVERY_PORT_ID:
