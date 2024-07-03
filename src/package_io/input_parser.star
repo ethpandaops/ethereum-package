@@ -110,6 +110,7 @@ def input_parser(plan, input_args):
     result["parallel_keystore_generation"] = False
     result["global_tolerations"] = []
     result["global_node_selectors"] = {}
+    result["port_publisher"] = get_port_publisher_params("default")
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -158,9 +159,7 @@ def input_parser(plan, input_args):
                 sub_value = input_args["xatu_sentry_params"][sub_attr]
                 result["xatu_sentry_params"][sub_attr] = sub_value
         elif attr == "port_publisher":
-            for sub_attr in input_args["port_publisher"]:
-                sub_value = input_args["port_publisher"][sub_attr]
-                result["port_publisher"][sub_attr] = sub_value
+            result["port_publisher"] = get_port_publisher_params("user", input_args)
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -187,11 +186,6 @@ def input_parser(plan, input_args):
 
     if result["port_publisher"]["nat_exit_ip"] == "auto":
         result["port_publisher"]["nat_exit_ip"] = get_public_ip(plan)
-
-    if result["port_publisher"]["public_port_start"] != None:
-        start = result["port_publisher"]["public_port_start"]
-        result["port_publisher"]["el_start"] = start
-        result["port_publisher"]["cl_start"] = start + len(result["participants"])
 
     return struct(
         participants=[
@@ -377,10 +371,19 @@ def input_parser(plan, input_args):
         checkpoint_sync_enabled=result["checkpoint_sync_enabled"],
         checkpoint_sync_url=result["checkpoint_sync_url"],
         port_publisher=struct(
-            public_port_start=result["port_publisher"]["public_port_start"],
             nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
-            el_start=result["port_publisher"].get("el_start"),
-            cl_start=result["port_publisher"].get("cl_start"),
+            cl_enabled=result["port_publisher"]["cl"]["enabled"],
+            cl_public_port_start=result["port_publisher"]["cl"]["public_port_start"],
+            el_enabled=result["port_publisher"]["el"]["enabled"],
+            el_public_port_start=result["port_publisher"]["el"]["public_port_start"],
+            vc_enabled=result["port_publisher"]["vc"]["enabled"],
+            vc_public_port_start=result["port_publisher"]["vc"]["public_port_start"],
+            additional_services_enabled=result["port_publisher"]["additional_services"][
+                "enabled"
+            ],
+            additional_services_public_port_start=result["port_publisher"][
+                "additional_services"
+            ]["public_port_start"],
         ),
     )
 
@@ -999,6 +1002,30 @@ def get_default_xatu_sentry_params():
 def get_default_custom_flood_params():
     # this is a simple script that increases the balance of the coinbase address at a cadence
     return {"interval_between_transactions": 1}
+
+
+def get_port_publisher_params(parameter_type, input_args=None):
+    port_publisher_parameters = {
+        "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        "el": {"enabled": False, "public_port_start": 32000},
+        "cl": {"enabled": False, "public_port_start": 33000},
+        "vc": {"enabled": False, "public_port_start": 34000},
+        "additional_services": {"enabled": False, "public_port_start": 35000},
+    }
+    if parameter_type == "default":
+        return port_publisher_parameters
+    else:
+        for setting in input_args["port_publisher"]:
+            if setting == "nat_exit_ip":
+                nat_exit_ip_value = input_args["port_publisher"][setting]
+                port_publisher_parameters[setting] = nat_exit_ip_value
+            else:
+                for sub_setting in input_args["port_publisher"][setting]:
+                    sub_setting_value = input_args["port_publisher"][setting][
+                        sub_setting
+                    ]
+                    port_publisher_parameters[setting][sub_setting] = sub_setting_value
+        return port_publisher_parameters
 
 
 def enrich_disable_peer_scoring(parsed_arguments_dict):

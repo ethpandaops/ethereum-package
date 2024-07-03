@@ -7,7 +7,6 @@ IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.6.0
 
 SERVICE_NAME_BLOCKSCOUT = "blockscout"
 
-HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 4000
 HTTP_PORT_NUMBER_VERIF = 8050
 
@@ -22,7 +21,7 @@ BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
 
 USED_PORTS = {
-    HTTP_PORT_ID: shared_utils.new_port_spec(
+    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -30,7 +29,7 @@ USED_PORTS = {
 }
 
 VERIF_USED_PORTS = {
-    HTTP_PORT_ID: shared_utils.new_port_spec(
+    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER_VERIF,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
@@ -43,6 +42,8 @@ def launch_blockscout(
     el_contexts,
     persistent,
     global_node_selectors,
+    port_publisher,
+    additional_service_index,
 ):
     postgres_output = postgres.run(
         plan,
@@ -59,7 +60,11 @@ def launch_blockscout(
     )
     el_client_name = el_context.client_name
 
-    config_verif = get_config_verif(global_node_selectors)
+    config_verif = get_config_verif(
+        global_node_selectors,
+        port_publisher,
+        additional_service_index,
+    )
     verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)
     verif_service = plan.add_service(verif_service_name, config_verif)
     verif_url = "http://{}:{}/api".format(
@@ -72,6 +77,8 @@ def launch_blockscout(
         verif_url,
         el_client_name,
         global_node_selectors,
+        port_publisher,
+        additional_service_index,
     )
     blockscout_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)
     plan.print(blockscout_service)
@@ -83,10 +90,18 @@ def launch_blockscout(
     return blockscout_url
 
 
-def get_config_verif(node_selectors):
+def get_config_verif(node_selectors, port_publisher, additional_service_index):
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        0,
+    )
+
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT_VERIF,
         ports=VERIF_USED_PORTS,
+        public_ports=public_ports,
         env_vars={
             "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR": "0.0.0.0:{}".format(
                 HTTP_PORT_NUMBER_VERIF
@@ -101,7 +116,13 @@ def get_config_verif(node_selectors):
 
 
 def get_config_backend(
-    postgres_output, el_client_rpc_url, verif_url, el_client_name, node_selectors
+    postgres_output,
+    el_client_rpc_url,
+    verif_url,
+    el_client_name,
+    node_selectors,
+    port_publisher,
+    additional_service_index,
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
@@ -112,9 +133,17 @@ def get_config_backend(
         database=postgres_output.database,
     )
 
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        1,
+    )
+
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT,
         ports=USED_PORTS,
+        public_ports=public_ports,
         cmd=[
             "/bin/sh",
             "-c",

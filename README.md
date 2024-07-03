@@ -797,9 +797,34 @@ port_publisher:
   # Defaults to constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
   # The default value just means its the IP address of the container in which the service is running
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  # The start value gets used as a seed for TCP and UDP discovery ports for el/cl client
-  # Defaults to None - no public ports
-  public_port_start: null
+  # Execution Layer public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 32000
+  # You can't run multiple enclaves on the same port settings
+  el:
+    enabled: false
+    public_port_start: 32000
+  # Consensus Layer public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 33000
+  # You can't run multiple enclaves on the same port settings
+  cl:
+    enabled: false
+    public_port_start: 33000
+  # Validator client public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 34000
+  # You can't run multiple enclaves on the same port settings
+  vc:
+    enabled: false
+    public_port_start: 34000
+  # Additional services public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 35000
+  # You can't run multiple enclaves on the same port settings
+  additional_services:
+    enabled: false
+    public_port_start: 35000
 ```
 
 #### Example configurations

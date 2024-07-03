@@ -41,8 +41,19 @@ jobs:
             echo "Skipping ./.github/tests/mix-with-tools-mev.yaml"
           fi
 
+      - name: Check if Discord Webhook is Set
+        id: check_discord_webhook
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "discord_webhook_set=false" >> $GITHUB_ENV
+          else
+            echo "discord_webhook_set=true" >> $GITHUB_ENV
+          fi
+
       - name: Notify
-        if: cancelled() || failure()
+        if: (cancelled() || failure()) && env.discord_webhook_set == 'true'
         uses: Ilshidur/action-discord@master
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -54,12 +65,11 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@v1
         with:
-          ethereum_package_branch: ${{ steps.extract_branch.outputs.branch }}
+          kurtosis_extra_args: "--image-download always --non-blocking-tasks --verbosity DETAILED"
+          ethereum_package_branch: ""
           ethereum_package_args: .github/tests/mix-assert.yaml
+          ethereum_package_url: "$GITHUB_WORKSPACE"
+          persistent_logs: "true"
