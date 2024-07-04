@@ -933,7 +933,7 @@ snooper_enabled: true
 | Prysm BN      | ✅            | ✅       | ✅      | ✅          | ✅
 | Teku BN       | ✅            | ✅       | ✅      | ✅          | ✅
 | Lodestar BN   | ✅            | ✅       | ✅      | ✅          | ✅
-| Nimbus BN     | ✅            | ❌       | ✅      | ❌          | ✅
+| Nimbus BN     | ✅            | ✅       | ✅      | ✅          | ✅
 | Grandine BN   | ✅            | ✅       | ✅      | ✅          | ✅
 
 ## Custom labels for Docker and Kubernetes
