@@ -61,14 +61,7 @@ MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
 # Minimum number of validators required for a network to be valid is 64
 MIN_VALIDATORS = 64
 
-DEFAULT_ADDITIONAL_SERVICES = [
-    "tx_spammer",
-    "blob_spammer",
-    "el_forkmon",
-    "beacon_metrics_gazer",
-    "dora",
-    "prometheus_grafana",
-]
+DEFAULT_ADDITIONAL_SERVICES = []
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",

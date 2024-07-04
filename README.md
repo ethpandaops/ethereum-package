@@ -550,7 +550,7 @@ network_params:
 # - A prometheus will be started, coupled with grafana
 # - A beacon metrics gazer will be launched
 # - A light beacon chain explorer will be launched
-# - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
+# - Default: []
 additional_services:
   - assertoor
   - broadcaster
