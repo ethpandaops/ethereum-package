@@ -107,4 +107,9 @@ PRE_FUNDED_ACCOUNTS = [
         "0xD8F3183DEF51A987222D845be228e0Bbb932C222",
         "c5114526e042343c6d1899cad05e1c00ba588314de9b96929914ee0df18d46b2",
     ),
+    # m/44'/60'/0'/0/20
+    new_prefunded_account(
+        "0xafF0CA253b97e54440965855cec0A8a2E2399896",
+        "4b9f63ecf84210c5366c66d68fa1f5da1fa4f634fad6dfc86178e4d79ff9e59",
+    ),
 ]

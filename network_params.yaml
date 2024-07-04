@@ -84,13 +84,7 @@ network_params:
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   checkpoint_sync_enabled: false
-additional_services:
-  - tx_spammer
-  - blob_spammer
-  - el_forkmon
-  - beacon_metrics_gazer
-  - dora
-  - prometheus_grafana
+additional_services: []
 dora_params:
   image: ""
 tx_spammer_params:

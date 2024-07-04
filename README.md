@@ -550,7 +550,7 @@ network_params:
 # - A prometheus will be started, coupled with grafana
 # - A beacon metrics gazer will be launched
 # - A light beacon chain explorer will be launched
-# - Default: ["tx_spammer", "blob_spammer", "el_forkmon", "beacon_metrics_gazer", "dora"," "prometheus_grafana"]
+# - Default: []
 additional_services:
   - assertoor
   - broadcaster
@@ -1007,7 +1007,7 @@ For more details, including a guide and architecture of the `mev-boost` infrastr
 
 ## Pre-funded accounts at Genesis
 
-This package comes with [20 prefunded keys for testing](https://github.com/ethpandaops/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
+This package comes with [21 prefunded keys for testing](https://github.com/ethpandaops/ethereum-package/blob/main/src/prelaunch_data_generator/genesis_constants/genesis_constants.star).
 
 Here's a table of where the keys are used
 

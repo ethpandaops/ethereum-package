@@ -61,14 +61,7 @@ MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
 # Minimum number of validators required for a network to be valid is 64
 MIN_VALIDATORS = 64
 
-DEFAULT_ADDITIONAL_SERVICES = [
-    "tx_spammer",
-    "blob_spammer",
-    "el_forkmon",
-    "beacon_metrics_gazer",
-    "dora",
-    "prometheus_grafana",
-]
+DEFAULT_ADDITIONAL_SERVICES = []
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
@@ -782,7 +775,7 @@ def default_network_params():
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
         "seconds_per_slot": 12,
         "num_validator_keys_per_node": 64,
-        "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
         "max_per_epoch_activation_churn_limit": 8,
@@ -814,7 +807,7 @@ def default_minimal_network_params():
         "deposit_contract_address": "0x4242424242424242424242424242424242424242",
         "seconds_per_slot": 6,
         "num_validator_keys_per_node": 64,
-        "preregistered_validator_keys_mnemonic": "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+        "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
         "max_per_epoch_activation_churn_limit": 4,
