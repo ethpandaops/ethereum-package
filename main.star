@@ -51,6 +51,9 @@ mev_custom_flood = import_module(
 )
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
 assertoor = import_module("./src/assertoor/assertoor_launcher.star")
+get_prefunded_accounts = import_module(
+    "./src/prefunded_accounts/get_prefunded_accounts.star"
+)
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -82,6 +85,15 @@ def run(plan, args={}):
     global_node_selectors = args_with_right_defaults.global_node_selectors
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
     apache_port = args_with_right_defaults.apache_port
+
+    prefunded_accounts = genesis_constants.PRE_FUNDED_ACCOUNTS
+    if (
+        network_params.preregistered_validator_keys_mnemonic
+        != constants.DEFAULT_MNEMONIC
+    ):
+        prefunded_accounts = get_prefunded_accounts.get_accounts(
+            plan, network_params.preregistered_validator_keys_mnemonic
+        )
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -240,7 +252,7 @@ def run(plan, args={}):
 
         first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
-        contract_owner, normal_user = genesis_constants.PRE_FUNDED_ACCOUNTS[6:8]
+        contract_owner, normal_user = prefunded_accounts[6:8]
         mev_flood.launch_mev_flood(
             plan,
             mev_params.mev_flood_image,
@@ -362,8 +374,9 @@ def run(plan, args={}):
     if len(args_with_right_defaults.additional_services) == 0:
         output = struct(
             all_participants=all_participants,
-            pre_funded_accounts=genesis_constants.PRE_FUNDED_ACCOUNTS,
+            pre_funded_accounts=prefunded_accounts,
             network_params=network_params,
+            network_id=network_id,
             final_genesis_timestamp=final_genesis_timestamp,
             genesis_validators_root=genesis_validators_root,
         )
@@ -379,7 +392,7 @@ def run(plan, args={}):
             tx_spammer_params = args_with_right_defaults.tx_spammer_params
             transaction_spammer.launch_transaction_spammer(
                 plan,
-                genesis_constants.PRE_FUNDED_ACCOUNTS,
+                prefunded_accounts,
                 fuzz_target,
                 tx_spammer_params,
                 network_params.electra_fork_epoch,
@@ -390,7 +403,7 @@ def run(plan, args={}):
             plan.print("Launching Blob spammer")
             blob_spammer.launch_blob_spammer(
                 plan,
-                genesis_constants.PRE_FUNDED_ACCOUNTS,
+                prefunded_accounts,
                 fuzz_target,
                 all_cl_contexts[0],
                 network_params.deneb_fork_epoch,
@@ -404,7 +417,7 @@ def run(plan, args={}):
             goomy_blob_params = args_with_right_defaults.goomy_blob_params
             goomy_blob.launch_goomy_blob(
                 plan,
-                genesis_constants.PRE_FUNDED_ACCOUNTS,
+                prefunded_accounts,
                 all_el_contexts,
                 all_cl_contexts[0],
                 network_params.seconds_per_slot,
@@ -606,8 +619,8 @@ def run(plan, args={}):
         elif additional_service == "custom_flood":
             mev_custom_flood.spam_in_background(
                 plan,
-                genesis_constants.PRE_FUNDED_ACCOUNTS[-1].private_key,
-                genesis_constants.PRE_FUNDED_ACCOUNTS[0].address,
+                prefunded_accounts[-1].private_key,
+                prefunded_accounts[0].address,
                 fuzz_target,
                 args_with_right_defaults.custom_flood_params,
                 global_node_selectors,
@@ -669,7 +682,7 @@ def run(plan, args={}):
         if ("blockscout" in args_with_right_defaults.additional_services) == False
         else blockscout_sc_verif_url,
         all_participants=all_participants,
-        pre_funded_accounts=genesis_constants.PRE_FUNDED_ACCOUNTS,
+        pre_funded_accounts=prefunded_accounts,
         network_params=network_params,
         network_id=network_id,
         final_genesis_timestamp=final_genesis_timestamp,
