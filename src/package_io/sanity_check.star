@@ -212,16 +212,14 @@ def sanity_check(plan, input_args):
                 fail("Invalid additional service {0}".format(additional_services))
 
     for param in input_args.keys():
-        combined_keys = (
+        combined_root_params = (
             PARTICIPANT_CATEGORIES.keys()
             + SUBCATEGORY_PARAMS.keys()
             + ADDITIONAL_CATEGORY_PARAMS.keys()
         )
-        combined_keys.append("additional_services")
+        combined_root_params.append("additional_services")
 
-        if param not in combined_keys:
+        if param not in combined_root_params:
             fail("Invalid parameter {0}".format(param))
-        else:
-            plan.print("Valid parameter {0}".format(param))
 
     plan.print("Sanity check passed")
