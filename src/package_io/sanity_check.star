@@ -50,11 +50,54 @@ PARTICIPANT_CATEGORIES = {
         "builder_network_params",
         "keymanager_enabled",
     ],
-    "participants_matrix": [
-        "el",
-        "cl",
-        "vc",
-    ],
+}
+
+PARTICIPANT_MATRIX_PARAMS = {
+    "participants_matrix": {
+        "el": [
+            "el_type",
+            "el_image",
+            "el_log_level",
+            "el_extra_env_vars",
+            "el_extra_labels",
+            "el_extra_params",
+            "el_tolerations",
+            "el_volume_size",
+            "el_min_cpu",
+            "el_max_cpu",
+            "el_min_mem",
+            "el_max_mem",
+        ],
+        "cl": [
+            "cl_type",
+            "cl_image",
+            "cl_log_level",
+            "cl_extra_env_vars",
+            "cl_extra_labels",
+            "cl_extra_params",
+            "cl_tolerations",
+            "cl_volume_size",
+            "cl_min_cpu",
+            "cl_max_cpu",
+            "cl_min_mem",
+            "cl_max_mem",
+            "use_separate_vc",
+        ],
+        "vc": [
+            "vc_type",
+            "vc_image",
+            "vc_count",
+            "vc_log_level",
+            "vc_extra_env_vars",
+            "vc_extra_labels",
+            "vc_extra_params",
+            "vc_tolerations",
+            "vc_min_cpu",
+            "vc_max_cpu",
+            "vc_min_mem",
+            "vc_max_mem",
+        ],
+    },
 }
 
 SUBCATEGORY_PARAMS = {
@@ -185,41 +228,83 @@ def deep_validate_params(plan, input_args, category, allowed_params):
         for item in input_args[category]:
             for param in item.keys():
                 if param not in allowed_params:
-                    fail("Invalid parameter {0} for {1}".format(param, category))
+                    fail(
+                        "Invalid parameter {0} for {1}. Allowed fields: {2}".format(
+                            param, category, allowed_params
+                        )
+                    )
 
 
 def validate_params(plan, input_args, category, allowed_params):
     if category in input_args:
         for param in input_args[category].keys():
             if param not in allowed_params:
-                fail("Invalid parameter {0} for {1}".format(param, category))
+                fail(
+                    "Invalid parameter {0} for {1}. Allowed fields: {2}".format(
+                        param, category, allowed_params
+                    )
+                )
 
 
 def sanity_check(plan, input_args):
-    for participant in PARTICIPANT_CATEGORIES.keys():
-        deep_validate_params(
-            plan, input_args, participant, PARTICIPANT_CATEGORIES[participant]
-        )
+    # Checks participants
+    deep_validate_params(
+        plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
+    )
+    # Checks participants_matrix
+    if "participants_matrix" in input_args:
+        for sub_matrix_participant in input_args["participants_matrix"]:
+            if (
+                sub_matrix_participant
+                not in PARTICIPANT_MATRIX_PARAMS["participants_matrix"]
+            ):
+                fail(
+                    "Invalid parameter {0} for participants_matrix, allowed fields: {1}".format(
+                        sub_matrix_participant,
+                        PARTICIPANT_MATRIX_PARAMS["participants_matrix"].keys(),
+                    )
+                )
+            else:
+                deep_validate_params(
+                    plan,
+                    input_args["participants_matrix"],
+                    sub_matrix_participant,
+                    PARTICIPANT_MATRIX_PARAMS["participants_matrix"][
+                        sub_matrix_participant
+                    ],
+                )
 
+    # Checks additional services
+    if "additional_services" in input_args:
+        for additional_services in input_args["additional_services"]:
+            if additional_services not in ADDITIONAL_SERVICES_PARAMS:
+                fail(
+                    "Invalid additional_services {0}, allowed fields: {1}".format(
+                        additional_services, ADDITIONAL_SERVICES_PARAMS
+                    )
+                )
+
+    # Checks subcategories
     for subcategories in SUBCATEGORY_PARAMS.keys():
         validate_params(
             plan, input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
         )
-
-    if "additional_services" in input_args:
-        for additional_services in input_args["additional_services"]:
-            if additional_services not in ADDITIONAL_SERVICES_PARAMS:
-                fail("Invalid additional service {0}".format(additional_services))
-
+    # Checks everything else
     for param in input_args.keys():
         combined_root_params = (
             PARTICIPANT_CATEGORIES.keys()
+            + PARTICIPANT_MATRIX_PARAMS.keys()
             + SUBCATEGORY_PARAMS.keys()
             + ADDITIONAL_CATEGORY_PARAMS.keys()
         )
         combined_root_params.append("additional_services")
 
         if param not in combined_root_params:
-            fail("Invalid parameter {0}".format(param))
+            fail(
+                "Invalid parameter {0}, allowed fields {1}".format(
+                    param, combined_root_params
+                )
+            )
 
+    # If everything passes, print a message
     plan.print("Sanity check passed")
