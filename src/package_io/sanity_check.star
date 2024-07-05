@@ -130,7 +130,7 @@ SUBCATEGORY_PARAMS = {
         "xatu_server_headers",
         "beacon_subscriptions",
     ],
-    "port_publisher_params": [
+    "port_publisher": [
         "nat_exit_ip",
         "el",
         "cl",
@@ -211,8 +211,17 @@ def sanity_check(plan, input_args):
             if additional_services not in ADDITIONAL_SERVICES_PARAMS:
                 fail("Invalid additional service {0}".format(additional_services))
 
-    for additional_categories in ADDITIONAL_CATEGORY_PARAMS.keys():
-        if additional_categories not in input_args:
-            fail("Invalid category {0}".format(additional_categories))
+    for param in input_args.keys():
+        combined_keys = (
+            PARTICIPANT_CATEGORIES.keys()
+            + SUBCATEGORY_PARAMS.keys()
+            + ADDITIONAL_CATEGORY_PARAMS.keys()
+        )
+        combined_keys.append("additional_services")
+
+        if param not in combined_keys:
+            fail("Invalid parameter {0}".format(param))
+        else:
+            plan.print("Valid parameter {0}".format(param))
 
     plan.print("Sanity check passed")

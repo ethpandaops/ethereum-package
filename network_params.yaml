@@ -83,7 +83,6 @@ network_params:
   target_number_of_peers: 70
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
-  checkpoint_sync_enabled: false
 additional_services: []
 dora_params:
   image: ""
@@ -146,6 +145,8 @@ apache_port: 40000
 global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false
+checkpoint_sync_enabled: false
+checkpoint_sync_url: ""
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:
