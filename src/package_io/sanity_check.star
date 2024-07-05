@@ -77,7 +77,7 @@ SUBCATEGORY_PARAMS = {
         "electra_fork_epoch",
         "eip7594_fork_epoch",
         "eip7594_fork_version",
-        "eof_activation_fork_epoch",
+        "eof_activation_epoch",
         "network_sync_base_url",
         "data_column_sidecar_subnet_count",
         "samples_per_slot",
