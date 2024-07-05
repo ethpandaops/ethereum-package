@@ -286,7 +286,7 @@ participants:
 
     # Whether to use a separate validator client attached to the CL client.
     # Defaults to false for clients that can run both in one process (Teku, Nimbus)
-    use_separate_vc: false
+    use_separate_vc: true
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
