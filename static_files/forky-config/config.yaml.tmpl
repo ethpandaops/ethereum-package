@@ -1,0 +1,37 @@
+listen_addr: ":8080"
+log_level: "info"
+metrics:
+  enabled: false
+
+http:
+  edge_cache:
+    enabled: true
+    frame_ttl: 1440m
+
+forky:
+  retention_period: "30m"
+
+  store:
+    type: memory
+    config: {}
+
+  indexer:
+    dsn: "file::memory:?cache=shared"
+    driver_name: sqlite
+
+  sources:
+{{ range $clClient := .CLClientInfo }}
+    - name: "{{ $clClient.FullName }}"
+      type: "beacon_node"
+      config:
+        address: "{{ $clClient.Beacon_HTTP_URL }}"
+        polling_interval: "{{ $.SecondsPerSlot }}s"
+{{- end }}
+
+  ethereum:
+    network:
+      name: "{{ .Network }}"
+      spec:
+        seconds_per_slot: {{ .SecondsPerSlot }}
+        slots_per_epoch: {{ if eq .Preset "minimal" }}8{{ else }}32{{ end }}
+        genesis_time: {{ .FinalGenesisTimestamp }}

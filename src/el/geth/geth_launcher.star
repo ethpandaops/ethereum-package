@@ -5,7 +5,7 @@ el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 genesis_constants = import_module(
     "../../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
-
+el_shared = import_module("../el_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
@@ -19,15 +19,6 @@ METRICS_PORT_NUM = 9001
 EXECUTION_MIN_CPU = 300
 EXECUTION_MIN_MEMORY = 512
 
-# Port IDs
-RPC_PORT_ID = "rpc"
-WS_PORT_ID = "ws"
-TCP_DISCOVERY_PORT_ID = "tcp-discovery"
-UDP_DISCOVERY_PORT_ID = "udp-discovery"
-ENGINE_RPC_PORT_ID = "engine-rpc"
-ENGINE_WS_PORT_ID = "engineWs"
-METRICS_PORT_ID = "metrics"
-
 # TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
 NUM_MINING_THREADS = 1
 
@@ -35,32 +26,6 @@ METRICS_PATH = "/debug/metrics/prometheus"
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
-
-
-def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
-    used_ports = {
-        RPC_PORT_ID: shared_utils.new_port_spec(
-            RPC_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
-        ),
-        WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
-        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port, shared_utils.TCP_PROTOCOL
-        ),
-        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port, shared_utils.UDP_PROTOCOL
-        ),
-        ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-            ENGINE_RPC_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-        ),
-        METRICS_PORT_ID: shared_utils.new_port_spec(
-            METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-        ),
-    }
-    return used_ports
-
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
@@ -97,6 +62,7 @@ def launch(
     tolerations,
     node_selectors,
     port_publisher,
+    participant_index,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -143,25 +109,28 @@ def launch(
         extra_params,
         extra_env_vars,
         extra_labels,
-        launcher.cancun_time,
         launcher.prague_time,
         persistent,
         el_volume_size,
         tolerations,
         node_selectors,
         port_publisher,
+        participant_index,
     )
 
     service = plan.add_service(service_name, config)
 
     enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, RPC_PORT_ID
+        plan, service_name, constants.RPC_PORT_ID
     )
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     geth_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
+
+    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
         "geth",
@@ -171,6 +140,8 @@ def launch(
         RPC_PORT_NUM,
         WS_PORT_NUM,
         ENGINE_RPC_PORT_NUM,
+        http_url,
+        ws_url,
         service_name,
         [geth_metrics_info],
     )
@@ -194,13 +165,13 @@ def get_config(
     extra_params,
     extra_env_vars,
     extra_labels,
-    cancun_time,
     prague_time,
     persistent,
     el_volume_size,
     tolerations,
     node_selectors,
     port_publisher,
+    participant_index,
 ):
     if "--gcmode=archive" in extra_params or "--gcmode archive" in extra_params:
         gcmode_archive = True
@@ -223,7 +194,7 @@ def get_config(
                     constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
                 )
             )
-    elif constants.NETWORK_NAME.shadowfork in network:
+    elif constants.NETWORK_NAME.shadowfork in network:  # shadowfork
         init_datadir_cmd_str = "echo shadowfork"
 
     elif gcmode_archive:  # Disable path based storage scheme archive mode
@@ -232,47 +203,50 @@ def get_config(
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
     else:
-        init_datadir_cmd_str = "geth init --state.scheme=path --datadir={0} {1}".format(
+        init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         )
 
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
-    if port_publisher.public_port_start:
-        discovery_port = port_publisher.el_start + len(existing_el_clients)
-        public_ports = {
-            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                discovery_port, shared_utils.TCP_PROTOCOL
-            ),
-            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                discovery_port, shared_utils.UDP_PROTOCOL
-            ),
+    if port_publisher.el_enabled:
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "el", port_publisher, participant_index
+        )
+        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+            public_ports_for_component
+        )
+        additional_public_port_assignments = {
+            constants.RPC_PORT_ID: public_ports_for_component[2],
+            constants.WS_PORT_ID: public_ports_for_component[3],
+            constants.METRICS_PORT_ID: public_ports_for_component[4],
         }
-    used_ports = get_used_ports(discovery_port)
+        public_ports.update(
+            shared_utils.get_port_specs(additional_public_port_assignments)
+        )
+
+    used_port_assignments = {
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+    }
+    used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         "geth",
         # Disable path based storage scheme for electra fork and verkle
         # TODO: REMOVE Once geth default db is path based, and builder rebased
         "{0}".format(
-            "--state.scheme=path"
-            if "verkle" not in network and not gcmode_archive
-            else ""
+            "--state.scheme=hash" if "verkle" in network or gcmode_archive else ""
         ),
         # Override prague fork timestamp for electra fork
         "{0}".format("--cache.preimages" if "verkle" in network else ""),
-        # Override prague fork timestamp
-        "{0}".format(
-            "--override.prague=" + str(prague_time) if "verkle-gen" in network else ""
-        ),
         "{0}".format(
             "--{}".format(network) if network in constants.PUBLIC_NETWORKS else ""
-        ),
-        "{0}".format(
-            "--override.cancun=" + str(cancun_time)
-            if constants.NETWORK_NAME.shadowfork in network
-            else ""
         ),
         "--networkid={0}".format(networkid),
         "--verbosity=" + verbosity_level,
@@ -333,14 +307,17 @@ def get_config(
                     ]
                 )
             )
-        if (
-            constants.NETWORK_NAME.shadowfork in network and "verkle" in network
-        ):  # verkle shadowfork
+        if constants.NETWORK_NAME.shadowfork in network:  # shadowfork
             cmd.append("--override.prague=" + str(prague_time))
-            cmd.append("--override.overlay-stride=10000")
-            cmd.append("--override.blockproof=true")
-            cmd.append("--clear.verkle.costs=true")
-    elif network not in constants.PUBLIC_NETWORKS:
+            if "verkle" in network:  # verkle-shadowfork
+                cmd.append("--override.overlay-stride=10000")
+                cmd.append("--override.blockproof=true")
+                cmd.append("--clear.verkle.costs=true")
+
+    elif (
+        network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network
+    ):
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
@@ -401,7 +378,6 @@ def new_geth_launcher(
     jwt_file,
     network,
     networkid,
-    cancun_time,
     prague_time,
 ):
     return struct(
@@ -409,6 +385,5 @@ def new_geth_launcher(
         jwt_file=jwt_file,
         network=network,
         networkid=networkid,
-        cancun_time=cancun_time,
         prague_time=prague_time,
     )

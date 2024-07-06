@@ -1,0 +1,18 @@
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:lightclient-prague-devnet-0
+    cl_type: grandine
+    cl_image: ethpandaops/grandine:feature-electra
+  - el_type: nethermind
+    el_image: nethermindeth/nethermind:pectra
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:electra-fork
+  - el_type: ethereumjs
+    el_image: ethpandaops/ethereumjs:master
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:electra-fork
+network_params:
+  electra_fork_epoch: 1
+additional_services:
+  - dora
+snooper_enabled: true

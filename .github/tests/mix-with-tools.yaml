@@ -22,11 +22,12 @@ additional_services:
   - prometheus_grafana
   - goomy_blob
   - custom_flood
-  - blobscan
+#  - blobscan
   - blockscout
   - dugtrio
   - blutgang
   - apache
+  - tracoor
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true

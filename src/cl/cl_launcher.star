@@ -26,11 +26,12 @@ def launch(
     global_node_selectors,
     global_tolerations,
     persistent,
-    network_id,
     num_participants,
     validator_data,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
+    checkpoint_sync_enabled,
+    checkpoint_sync_url,
     port_publisher,
 ):
     plan.print("Launching CL network")
@@ -119,7 +120,7 @@ def launch(
 
         cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
-        if participant.validator_count != 0:
+        if participant.validator_count != 0 and participant.vc_count != 0:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
                 index
             ]
@@ -176,7 +177,10 @@ def launch(
                 node_selectors,
                 participant.use_separate_vc,
                 participant.keymanager_enabled,
+                checkpoint_sync_enabled,
+                checkpoint_sync_url,
                 port_publisher,
+                index,
             )
         else:
             boot_cl_client_ctx = all_cl_contexts
@@ -210,7 +214,10 @@ def launch(
                 node_selectors,
                 participant.use_separate_vc,
                 participant.keymanager_enabled,
+                checkpoint_sync_enabled,
+                checkpoint_sync_url,
                 port_publisher,
+                index,
             )
 
         # Add participant cl additional prometheus labels

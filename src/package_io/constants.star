@@ -41,6 +41,20 @@ CLIENT_TYPES = struct(
     validator="validator",
 )
 
+TCP_DISCOVERY_PORT_ID = "tcp-discovery"
+UDP_DISCOVERY_PORT_ID = "udp-discovery"
+RPC_PORT_ID = "rpc"
+WS_RPC_PORT_ID = "ws-rpc"
+WS_PORT_ID = "ws"
+HTTP_PORT_ID = "http"
+VALIDATOR_HTTP_PORT_ID = "http-validator"
+METRICS_PORT_ID = "metrics"
+ENGINE_RPC_PORT_ID = "engine-rpc"
+ENGINE_WS_PORT_ID = "engine-ws"
+ADMIN_PORT_ID = "admin"
+LITTLE_BIGTABLE_PORT_ID = "littlebigtable"
+VALDIATOR_GRPC_PORT_ID = "grpc"
+
 VALIDATING_REWARDS_ACCOUNT = "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
 MAX_ENR_ENTRIES = 20
 MAX_ENODE_ENTRIES = 20
@@ -78,6 +92,8 @@ DEFAULT_MEV_SECRET_KEY = (
     "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
 )
 
+DEFAULT_MNEMONIC = "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete"
+
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 GENESIS_FORK_VERSION = "0x10000038"
@@ -89,7 +105,7 @@ EIP7594_FORK_VERSION = "0x70000038"
 
 ETHEREUM_GENESIS_GENERATOR = struct(
     capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Deprecated (no support for minimal config)
-    deneb_genesis="ethpandaops/ethereum-genesis-generator:3.1.0",  # Default
+    deneb_genesis="ethpandaops/ethereum-genesis-generator:3.3.5",  # Default
     verkle_support_genesis="ethpandaops/ethereum-genesis-generator:3.0.0-rc.19",  # soon to be deneb genesis, waiting for rebase
     verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )
@@ -111,15 +127,13 @@ PUBLIC_NETWORKS = (
 )
 
 NETWORK_ID = {
-    "mainnet": 1,
-    "sepolia": 11155111,
-    "holesky": 17000,
+    "mainnet": "1",
+    "sepolia": "11155111",
+    "holesky": "17000",
 }
 
 CHECKPOINT_SYNC_URL = {
     "mainnet": "https://beaconstate.info",
-    "sepolia": "https://checkpoint-sync.sepolia.ethpandaops.io",
-    "holesky": "https://checkpoint-sync.holesky.ethpandaops.io",
     "ephemery": "https://checkpointz.bordel.wtf/",
 }
 
@@ -381,7 +395,7 @@ RAM_CPU_OVERRIDES = {
         "geth_max_cpu": 1000,  # 1 core
         "erigon_max_mem": 1024,  # 1GB
         "erigon_max_cpu": 1000,  # 1 core
-        "nethermind_max_mem": 1024,  # 1GB
+        "nethermind_max_mem": 2048,  # 2GB
         "nethermind_max_cpu": 1000,  # 1 core
         "besu_max_mem": 1024,  # 1GB
         "besu_max_cpu": 1000,  # 1 core

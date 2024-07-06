@@ -2,8 +2,10 @@ shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../../package_io/input_parser.star")
 el_context = import_module("../../el/el_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
+el_shared = import_module("../el_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
+
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/besu/execution-data"
 
@@ -21,39 +23,7 @@ EXECUTION_MAX_CPU = 1000
 EXECUTION_MIN_MEMORY = 512
 EXECUTION_MAX_MEMORY = 2048
 
-# Port IDs
-RPC_PORT_ID = "rpc"
-WS_PORT_ID = "ws"
-TCP_DISCOVERY_PORT_ID = "tcp-discovery"
-UDP_DISCOVERY_PORT_ID = "udp-discovery"
-ENGINE_HTTP_RPC_PORT_ID = "engine-rpc"
-METRICS_PORT_ID = "metrics"
 JAVA_OPTS = {"JAVA_OPTS": "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"}
-
-
-def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
-    used_ports = {
-        RPC_PORT_ID: shared_utils.new_port_spec(
-            RPC_PORT_NUM,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
-        ),
-        WS_PORT_ID: shared_utils.new_port_spec(WS_PORT_NUM, shared_utils.TCP_PROTOCOL),
-        TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port, shared_utils.TCP_PROTOCOL
-        ),
-        UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-            discovery_port, shared_utils.UDP_PROTOCOL
-        ),
-        ENGINE_HTTP_RPC_PORT_ID: shared_utils.new_port_spec(
-            ENGINE_HTTP_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
-        ),
-        METRICS_PORT_ID: shared_utils.new_port_spec(
-            METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL
-        ),
-    }
-    return used_ports
-
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
@@ -86,6 +56,7 @@ def launch(
     tolerations,
     node_selectors,
     port_publisher,
+    participant_index,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
@@ -136,16 +107,21 @@ def launch(
         tolerations,
         node_selectors,
         port_publisher,
+        participant_index,
     )
 
     service = plan.add_service(service_name, config)
 
-    enode = el_admin_node_info.get_enode_for_node(plan, service_name, RPC_PORT_ID)
+    enode = el_admin_node_info.get_enode_for_node(
+        plan, service_name, constants.RPC_PORT_ID
+    )
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     besu_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
+    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
         "besu",
@@ -155,6 +131,8 @@ def launch(
         RPC_PORT_NUM,
         WS_PORT_NUM,
         ENGINE_HTTP_RPC_PORT_NUM,
+        http_url,
+        ws_url,
         service_name,
         [besu_metrics_info],
     )
@@ -182,20 +160,35 @@ def get_config(
     tolerations,
     node_selectors,
     port_publisher,
+    participant_index,
 ):
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
-    if port_publisher.public_port_start:
-        discovery_port = port_publisher.el_start + len(existing_el_clients)
-        public_ports = {
-            TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                discovery_port, shared_utils.TCP_PROTOCOL
-            ),
-            UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                discovery_port, shared_utils.UDP_PROTOCOL
-            ),
+    if port_publisher.el_enabled:
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "el", port_publisher, participant_index
+        )
+        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+            public_ports_for_component
+        )
+        additional_public_port_assignments = {
+            constants.RPC_PORT_ID: public_ports_for_component[2],
+            constants.WS_PORT_ID: public_ports_for_component[3],
+            constants.METRICS_PORT_ID: public_ports_for_component[4],
         }
-    used_ports = get_used_ports(discovery_port)
+        public_ports.update(
+            shared_utils.get_port_specs(additional_public_port_assignments)
+        )
+
+    used_port_assignments = {
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_HTTP_RPC_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+    }
+    used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         "besu",
@@ -207,6 +200,7 @@ def get_config(
         "--rpc-http-port={0}".format(RPC_PORT_NUM),
         "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--rpc-http-cors-origins=*",
+        "--rpc-http-max-active-connections=300",
         "--rpc-ws-enabled=true",
         "--rpc-ws-host=0.0.0.0",
         "--rpc-ws-port={0}".format(WS_PORT_NUM),
@@ -225,11 +219,10 @@ def get_config(
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
+        "--min-gas-price=1000000000",
+        "--bonsai-limit-trie-logs-enabled=false" if "verkle" not in network else "",
     ]
-    if (
-        network not in constants.PUBLIC_NETWORKS
-        or constants.NETWORK_NAME.shadowfork in network
-    ):
+    if network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--genesis-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
@@ -249,7 +242,10 @@ def get_config(
                     ]
                 )
             )
-    elif network not in constants.PUBLIC_NETWORKS:
+    elif (
+        network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network
+    ):
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(

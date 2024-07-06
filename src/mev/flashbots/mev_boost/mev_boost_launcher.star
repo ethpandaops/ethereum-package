@@ -62,7 +62,7 @@ def get_config(
         cmd=command,
         env_vars={
             # TODO(maybe) remove the hardcoding
-            # This is set to match this file https://github.com/kurtosis-tech/ethereum-package/blob/main/static_files/genesis-generation-config/cl/config.yaml.tmpl#L11
+            # This is set to match this file https://github.com/ethpandaops/ethereum-package/blob/main/static_files/genesis-generation-config/cl/config.yaml.tmpl#L11
             # latest-notes
             # does this need genesis time to be set as well
             "GENESIS_FORK_VERSION": "0x10000038",

@@ -4,14 +4,15 @@ el_cl_genesis_data = import_module(
 )
 
 
-def launch(plan, network, cancun_time, prague_time):
+def launch(plan, network, prague_time, repo):
     # We are running a devnet
-    url = shared_utils.calculate_devnet_url(network)
+    url = shared_utils.calculate_devnet_url(network, repo)
     el_cl_genesis_uuid = plan.upload_files(
         src=url,
         name="el_cl_genesis",
     )
     el_cl_genesis_data_uuid = plan.run_sh(
+        name="move-genesis-data",
         description="Creating network configs",
         run="mkdir -p /network-configs/ && mv /opt/* /network-configs/",
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
@@ -22,7 +23,6 @@ def launch(plan, network, cancun_time, prague_time):
     el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
         el_cl_genesis_data_uuid.files_artifacts[0],
         genesis_validators_root,
-        cancun_time,
         prague_time,
     )
     final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(

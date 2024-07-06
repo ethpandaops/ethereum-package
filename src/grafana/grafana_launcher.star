@@ -211,6 +211,7 @@ def merge_dashboards_artifacts(
         ] = additional_dashboard_data[GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY]
 
     result = plan.run_sh(
+        name="merge-grafana-dashboards",
         description="Merging grafana dashboards artifacts",
         run="find "
         + GRAFANA_ADDITIONAL_DASHBOARDS_FILEPATH_ON_SERVICE

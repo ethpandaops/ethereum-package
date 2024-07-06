@@ -15,6 +15,7 @@ def shadowfork_prep(
     # overload the network name to remove the shadowfork suffix
     if constants.NETWORK_NAME.ephemery in base_network:
         chain_id = plan.run_sh(
+            name="fetch-chain-id",
             description="Fetching the chain id",
             run="curl -s https://ephemery.dev/latest/config.yaml | yq .DEPOSIT_CHAIN_ID | tr -d '\n'",
             image="linuxserver/yq",
@@ -25,6 +26,7 @@ def shadowfork_prep(
             base_network
         ]  # overload the network id to match the network name
     latest_block = plan.run_sh(
+        name="fetch-latest-block",
         description="Fetching the latest block",
         run="mkdir -p /shadowfork && \
             curl -o /shadowfork/latest_block.json "

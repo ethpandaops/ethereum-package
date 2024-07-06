@@ -4,7 +4,6 @@ participants:
   - el_type: nethermind
     cl_type: prysm
   - el_type: erigon
-    el_image: ethpandaops/erigon:devel-d754b29 # this is a temp fix, till upstream is fixed
     cl_type: lighthouse
   - el_type: besu
     cl_type: lighthouse
@@ -15,3 +14,4 @@ participants:
 network_params:
   network: sepolia
 additional_services: []
+checkpoint_sync_enabled: true

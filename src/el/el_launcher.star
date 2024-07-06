@@ -32,7 +32,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_id,
-                el_cl_data.cancun_time,
                 el_cl_data.prague_time,
             ),
             "launch_method": geth.launch,
@@ -43,7 +42,6 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_id,
-                el_cl_data.cancun_time,
                 el_cl_data.prague_time,
             ),
             "launch_method": geth.launch,
@@ -62,7 +60,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 network_id,
-                el_cl_data.cancun_time,
+                el_cl_data.prague_time,
             ),
             "launch_method": erigon.launch,
         },
@@ -158,6 +156,7 @@ def launch(
             tolerations,
             node_selectors,
             port_publisher,
+            index,
         )
         # Add participant el additional prometheus metrics
         for metrics_info in el_context.el_metrics_info:

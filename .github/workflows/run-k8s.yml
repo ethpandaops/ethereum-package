@@ -1,0 +1,69 @@
+name: Run k8s test
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+
+concurrency:
+  group: "scheduled-test"
+  cancel-in-progress: false
+
+jobs:
+  run_k8s_test:
+    strategy:
+      matrix:
+        payload:
+          - { name: "minimal", file: "./.github/tests/minimal.yaml" }
+          - { name: "network-params", file: "./network_params.yaml" }
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup minikube
+        id: minikube
+        uses: medyagh/setup-minikube@latest
+
+      - name: Get kubeconfig
+        id: kubeconfig
+        shell: bash
+        run: |
+          cat ~/.kube/config > kubeconfig
+          echo "kubeconfig=$(cat kubeconfig | base64 -w 0)" >> $GITHUB_OUTPUT
+
+      # run kurtosis test and assertoor
+      - name: Run kurtosis testnet
+        id: testnet
+        uses: ethpandaops/kurtosis-assertoor-github-action@v1
+        with:
+          kurtosis_extra_args: "--image-download always --non-blocking-tasks --verbosity DETAILED"
+          kurtosis_backend: "kubernetes"
+          kubernetes_config: "${{ steps.kubeconfig.outputs.kubeconfig }}"
+          kubernetes_cluster: "minikube"
+          kubernetes_storage_class: "standard"
+          ethereum_package_branch: ""
+          ethereum_package_args: "${{ matrix.payload.file }}"
+          ethereum_package_url: "$GITHUB_WORKSPACE"
+          enclave_name: "ethereum-package-${{ matrix.payload.name }}-${{ github.run_id }}"
+          persistent_logs: "true"
+
+      - name: Check if Discord Webhook is Set
+        id: check_discord_webhook
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK" ]; then
+            echo "discord_webhook_set=false" >> $GITHUB_ENV
+          else
+            echo "discord_webhook_set=true" >> $GITHUB_ENV
+          fi
+
+      - name: Notify
+        if: (cancelled() || failure()) && env.discord_webhook_set == 'true'
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: "The k8s nightly/per PR test for ${{matrix.payload.name}} on ethereum-package has failed. Find it here: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

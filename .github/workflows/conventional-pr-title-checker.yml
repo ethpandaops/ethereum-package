@@ -15,8 +15,8 @@ concurrency:
 
 jobs:
   title_check:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted-ghr-size-s-x64
     steps:
-      - uses: aslafy-z/conventional-pr-title-action@v3
+      - uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

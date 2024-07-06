@@ -12,5 +12,6 @@ participants:
   - el_type: ethereumjs
     cl_type: teku
 network_params:
-  deneb_fork_epoch: 1
+  network: kurtosis
+  additional_preloaded_contracts: '{"0x123463a4B065722E99115D6c222f267d9cABb524": {"balance": "2ETH","code": "0x1234","storage": {}}}'
 additional_services: []

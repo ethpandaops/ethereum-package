@@ -11,8 +11,6 @@ participants:
     el_image: ethpandaops/geth:master
     cl_type: lodestar
     count: 1
-network_params:
-  deneb_fork_epoch: 1
 additional_services:
   - dora
   - blob_spammer
