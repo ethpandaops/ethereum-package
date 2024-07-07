@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -111,7 +111,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.1.0",
       "targets": [
         {
           "datasource": {
@@ -241,7 +241,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.1.0",
       "targets": [
         {
           "datasource": {
@@ -288,14 +288,42 @@
       "type": "table"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "",
       "gridPos": {
-        "h": 1,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 22
       },
+      "id": 12,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# Data from Beacon node\n\nFrom a standard lighthouse beacon client, we can collect information like: epoch, headslot, and peer connection on the networking layer.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "11.1.0",
+      "title": "Data collected from beacon node",
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
       "id": 5,
-      "title": "Beacon node",
+      "panels": [],
+      "title": "Lighthouse beacon",
       "type": "row"
     },
     {
@@ -303,6 +331,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "Collect peers and their associated multiaddresses from libp2p layer, extracted from `peer-manager` of `lighthouse_network` crate",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -346,10 +375,10 @@
         ]
       },
       "gridPos": {
-        "h": 7,
+        "h": 11,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 27
       },
       "id": 3,
       "options": {
@@ -365,7 +394,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.1.0",
       "targets": [
         {
           "datasource": {
@@ -385,7 +414,7 @@
           "useBackend": false
         }
       ],
-      "title": "Panel Title",
+      "title": "Peer ID to multiaddress",
       "transformations": [
         {
           "id": "groupBy",
@@ -399,6 +428,21 @@
                 "aggregations": [],
                 "operation": "groupby"
               }
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "multiaddress": 1,
+              "peer_id": 0
+            },
+            "renameByName": {
+              "multiaddress": "Multiaddress",
+              "peer_id": "Peer ID"
             }
           }
         }
@@ -434,7 +478,7 @@
         "h": 7,
         "w": 4,
         "x": 12,
-        "y": 23
+        "y": 27
       },
       "id": 8,
       "options": {
@@ -442,6 +486,7 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -453,7 +498,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.1.0",
       "targets": [
         {
           "datasource": {
@@ -507,7 +552,7 @@
         "h": 7,
         "w": 4,
         "x": 16,
-        "y": 23
+        "y": 27
       },
       "id": 6,
       "options": {
@@ -515,6 +560,7 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -526,7 +572,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.1.0",
       "targets": [
         {
           "datasource": {
@@ -581,10 +627,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 11,
         "w": 12,
         "x": 0,
-        "y": 30
+        "y": 38
       },
       "id": 7,
       "options": {
@@ -599,7 +645,7 @@
         },
         "showHeader": true
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.1.0",
       "targets": [
         {
           "datasource": {
@@ -663,7 +709,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 49
       },
       "id": 4,
       "panels": [],
@@ -734,7 +780,7 @@
         "h": 18,
         "w": 9,
         "x": 0,
-        "y": 41
+        "y": 50
       },
       "id": 1,
       "options": {
@@ -837,7 +883,7 @@
         "h": 18,
         "w": 15,
         "x": 9,
-        "y": 41
+        "y": 50
       },
       "id": 2,
       "options": {
@@ -858,7 +904,7 @@
           }
         ]
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.1.0",
       "targets": [
         {
           "datasource": {
@@ -934,7 +980,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 59
+        "y": 68
       },
       "id": 9,
       "options": {
@@ -955,7 +1001,7 @@
           }
         ]
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.1.0",
       "targets": [
         {
           "datasource": {
@@ -999,11 +1045,10 @@
     "from": "now-6h",
     "to": "now"
   },
-  "timeRangeUpdatedDuringEditOrView": false,
   "timepicker": {},
   "timezone": "browser",
   "title": "MEV-Relayer",
   "uid": "bdptbajsec4jka",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }
