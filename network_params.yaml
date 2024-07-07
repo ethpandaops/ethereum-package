@@ -14,39 +14,38 @@ participants:
     el_max_mem: 0
 # CL
     cl_type: lighthouse
-    cl_image: sigp/lighthouse:latest-unstable
-    cl_log_level: ""
+    cl_image: hoprnet/metaclear-lighthouse:c9805b43f
+    cl_log_level: "debug"
     cl_extra_env_vars: {}
     cl_extra_labels: {}
-    cl_extra_params: []
+    cl_extra_params: [] #"--validator-monitor-auto"
     cl_tolerations: []
     cl_volume_size: 0
     cl_min_cpu: 0
     cl_max_cpu: 0
     cl_min_mem: 0
-    cl_max_mem: 0
+    cl_max_mem: 0 #300
     use_separate_vc: true
 # Validator
     vc_type: lighthouse
-    vc_image: sigp/lighthouse:latest-unstable
-    vc_log_level: ""
-    vc_count: 1
+    vc_image: hoprnet/metaclear-lighthouse:c9805b43f
+    vc_log_level: "debug"
     vc_extra_env_vars: {}
     vc_extra_labels: {}
     vc_extra_params: []
     vc_tolerations: []
     vc_min_cpu: 0
-    vc_max_cpu: 0
+    vc_max_cpu: 0 #200
     vc_min_mem: 0
-    vc_max_mem: 0
+    vc_max_mem: 0 #384
     validator_count: null
 # participant specific
     node_selectors: {}
     tolerations: []
     count: 2
-    snooper_enabled: false
-    ethereum_metrics_exporter_enabled: false
-    xatu_sentry_enabled: false
+    snooper_enabled: true
+    ethereum_metrics_exporter_enabled: true
+    xatu_sentry_enabled: true
     prometheus_config:
       scrape_interval: 15s
       labels: {}
@@ -84,7 +83,15 @@ network_params:
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   checkpoint_sync_enabled: false
-additional_services: []
+additional_services:
+  - tx_spammer
+  - blob_spammer
+  - custom_flood
+  - el_forkmon
+  - beacon_metrics_gazer
+  - dora
+  - prometheus_grafana
+  - syn_flood
 dora_params:
   image: ""
 tx_spammer_params:
@@ -108,11 +115,11 @@ parallel_keystore_generation: false
 disable_peer_scoring: false
 grafana_additional_dashboards: []
 persistent: false
-mev_type: null
+mev_type: flashbots
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay
+  mev_relay_image: hoprnet/metaclear-mev-relayer:1edd2e6
   mev_builder_image: ethpandaops/flashbots-builder:main
-  mev_builder_cl_image: sigp/lighthouse:latest
+  mev_builder_cl_image: hoprnet/metaclear-lighthouse:c9805b43f
   mev_boost_image: flashbots/mev-boost
   mev_boost_args: ["mev-boost", "--relay-check"]
   mev_relay_api_extra_args: []
@@ -129,7 +136,7 @@ mev_params:
     interval_between_transactions: 1
 xatu_sentry_enabled: false
 xatu_sentry_params:
-  xatu_sentry_image: ethpandaops/xatu-sentry
+  xatu_sentry_image: ethpandaops/xatu:latest
   xatu_server_addr: localhost:8000
   xatu_server_tls: false
   xatu_server_headers: {}
