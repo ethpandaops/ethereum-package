@@ -1,5 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+redis = import_module("github.com/kurtosis-tech/redis-package/main.star")
 constants = import_module("../package_io/constants.star")
 
 WEB_SERVICE_NAME = "blobscan-web"
@@ -51,6 +52,12 @@ POSTGRES_MAX_CPU = 1000
 POSTGRES_MIN_MEMORY = 32
 POSTGRES_MAX_MEMORY = 1024
 
+# The min/max CPU/memory that redis can use
+REDIS_MIN_CPU = 10
+REDIS_MAX_CPU = 1000
+REDIS_MIN_MEMORY = 32
+REDIS_MAX_MEMORY = 1024
+
 
 def launch_blobscan(
     plan,
@@ -64,9 +71,7 @@ def launch_blobscan(
 ):
     node_selectors = global_node_selectors
     beacon_node_rpc_uri = "{0}".format(cl_contexts[0].beacon_http_url)
-    execution_node_rpc_uri = "http://{0}:{1}".format(
-        el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
-    )
+    execution_node_rpc_uri = "{0}".format(el_contexts[0].rpc_http_url)
 
     postgres_output = postgres.run(
         plan,
@@ -78,9 +83,22 @@ def launch_blobscan(
         persistent=persistent,
         node_selectors=node_selectors,
     )
+
+    redis_output = redis.run(
+        plan,
+        service_name="blobscan-redis",
+        min_cpu=REDIS_MIN_CPU,
+        max_cpu=REDIS_MAX_CPU,
+        min_memory=REDIS_MIN_MEMORY,
+        max_memory=REDIS_MAX_MEMORY,
+        node_selectors=node_selectors,
+    )
+
     api_config = get_api_config(
         postgres_output.url,
+        redis_output.url,
         beacon_node_rpc_uri,
+        execution_node_rpc_uri,
         chain_id,
         node_selectors,
         port_publisher,
@@ -95,6 +113,7 @@ def launch_blobscan(
     web_config = get_web_config(
         postgres_output.url,
         beacon_node_rpc_uri,
+        execution_node_rpc_uri,
         chain_id,
         node_selectors,
         port_publisher,
@@ -112,8 +131,10 @@ def launch_blobscan(
 
 
 def get_api_config(
-    database_url,
+    postgres_url,
+    redis_url,
     beacon_node_rpc,
+    execution_node_rpc,
     chain_id,
     node_selectors,
     port_publisher,
@@ -134,10 +155,13 @@ def get_api_config(
         public_ports=public_ports,
         env_vars={
             "BEACON_NODE_ENDPOINT": beacon_node_rpc,
+            "EXECUTION_NODE_ENDPOINT": execution_node_rpc,
             "CHAIN_ID": chain_id,
-            "DATABASE_URL": database_url,
+            "DATABASE_URL": postgres_url,
+            "REDIS_URI": redis_url,
             "SECRET_KEY": "supersecret",
             "BLOBSCAN_API_PORT": str(API_HTTP_PORT_NUMBER),
+            "POSTGRES_STORAGE_ENABLED": "true",
         },
         cmd=["api"],
         ready_conditions=ReadyCondition(
@@ -160,8 +184,9 @@ def get_api_config(
 
 
 def get_web_config(
-    database_url,
+    postgres_url,
     beacon_node_rpc,
+    execution_node_rpc,
     chain_id,
     node_selectors,
     port_publisher,
@@ -184,10 +209,12 @@ def get_web_config(
         ports=WEB_PORTS,
         public_ports=public_ports,
         env_vars={
-            "DATABASE_URL": database_url,
+            "DATABASE_URL": postgres_url,
             "SECRET_KEY": "supersecret",
+            "NETWQORK_NAME": "Kurtosis-Devnet",
             "NEXT_PUBLIC_NETWORK_NAME": "devnet",
             "BEACON_NODE_ENDPOINT": beacon_node_rpc,
+            "EXECUTION_NODE_ENDPOINT": execution_node_rpc,
             "CHAIN_ID": chain_id,
         },
         cmd=["web"],
