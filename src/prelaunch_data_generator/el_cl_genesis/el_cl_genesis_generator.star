@@ -47,7 +47,6 @@ def generate_el_cl_genesis_data(
     files[GENESIS_VALUES_PATH] = genesis_generation_config_artifact_name
 
     genesis = plan.run_sh(
-        name="run-generate-genesis",
         description="Creating genesis",
         run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/",
         image=image,
@@ -63,7 +62,6 @@ def generate_el_cl_genesis_data(
     )
 
     genesis_validators_root = plan.run_sh(
-        name="read-genesis-validators-root",
         description="Reading genesis validators root",
         run="cat /data/genesis_validators_root.txt",
         files={"/data": genesis.files_artifacts[1]},
@@ -71,7 +69,6 @@ def generate_el_cl_genesis_data(
     )
 
     prague_time = plan.run_sh(
-        name="read-prague-time",
         description="Reading prague time from genesis",
         run="jq .config.pragueTime /data/genesis.json | tr -d '\n'",
         image="badouralix/curl-jq",
