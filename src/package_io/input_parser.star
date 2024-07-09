@@ -4,6 +4,8 @@ genesis_constants = import_module(
     "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
 
+sanity_check = import_module("./sanity_check.star")
+
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
     "erigon": "ethpandaops/erigon:main",
@@ -78,6 +80,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 
 
 def input_parser(plan, input_args):
+    sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
 
     # add default eth2 input params

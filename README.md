@@ -286,7 +286,7 @@ participants:
 
     # Whether to use a separate validator client attached to the CL client.
     # Defaults to false for clients that can run both in one process (Teku, Nimbus)
-    use_separate_vc: false
+    use_separate_vc: true
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
@@ -501,7 +501,7 @@ network_params:
 
   # EOF activation fork epoch (EL only fork)
   # Defaults to null
-  eof_activation_fork_epoch: null
+  eof_activation_epoch: null
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/
