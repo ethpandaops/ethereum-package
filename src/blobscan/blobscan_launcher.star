@@ -6,7 +6,7 @@ constants = import_module("../package_io/constants.star")
 WEB_SERVICE_NAME = "blobscan-web"
 API_SERVICE_NAME = "blobscan-api"
 INDEXER_SERVICE_NAME = "blobscan-indexer"
-
+SECRET_KEY = "supersecure"
 WEB_HTTP_PORT_NUMBER = 3000
 API_HTTP_PORT_NUMBER = 3001
 
@@ -63,7 +63,8 @@ def launch_blobscan(
     plan,
     cl_contexts,
     el_contexts,
-    chain_id,
+    network_id,
+    network_params,
     persistent,
     global_node_selectors,
     port_publisher,
@@ -91,15 +92,15 @@ def launch_blobscan(
         max_cpu=REDIS_MAX_CPU,
         min_memory=REDIS_MIN_MEMORY,
         max_memory=REDIS_MAX_MEMORY,
+        persistent=persistent,
         node_selectors=node_selectors,
     )
 
     api_config = get_api_config(
+        network_id,
         postgres_output.url,
+        network_params.network,
         redis_output.url,
-        beacon_node_rpc_uri,
-        execution_node_rpc_uri,
-        chain_id,
         node_selectors,
         port_publisher,
         additional_service_index,
@@ -112,9 +113,9 @@ def launch_blobscan(
 
     web_config = get_web_config(
         postgres_output.url,
+        network_params.network,
         beacon_node_rpc_uri,
         execution_node_rpc_uri,
-        chain_id,
         node_selectors,
         port_publisher,
         additional_service_index,
@@ -123,19 +124,19 @@ def launch_blobscan(
 
     indexer_config = get_indexer_config(
         beacon_node_rpc_uri,
-        execution_node_rpc_uri,
         blobscan_api_url,
+        execution_node_rpc_uri,
+        network_params.network,
         node_selectors,
     )
     plan.add_service(INDEXER_SERVICE_NAME, indexer_config)
 
 
 def get_api_config(
+    network_id,
     postgres_url,
+    network_name,
     redis_url,
-    beacon_node_rpc,
-    execution_node_rpc,
-    chain_id,
     node_selectors,
     port_publisher,
     additional_service_index,
@@ -154,14 +155,16 @@ def get_api_config(
         ports=API_PORTS,
         public_ports=public_ports,
         env_vars={
-            "BEACON_NODE_ENDPOINT": beacon_node_rpc,
-            "EXECUTION_NODE_ENDPOINT": execution_node_rpc,
-            "CHAIN_ID": chain_id,
+            "CHAIN_ID": network_id,
             "DATABASE_URL": postgres_url,
+            "NETWORK_NAME": network_name,
             "REDIS_URI": redis_url,
-            "SECRET_KEY": "supersecret",
+            "SECRET_KEY": SECRET_KEY,
             "BLOBSCAN_API_PORT": str(API_HTTP_PORT_NUMBER),
             "POSTGRES_STORAGE_ENABLED": "true",
+            "NETWORK_NAME": network_name
+            if network_name in constants.PUBLIC_NETWORKS
+            else "devnet",
         },
         cmd=["api"],
         ready_conditions=ReadyCondition(
@@ -185,9 +188,9 @@ def get_api_config(
 
 def get_web_config(
     postgres_url,
+    network_name,
     beacon_node_rpc,
     execution_node_rpc,
-    chain_id,
     node_selectors,
     port_publisher,
     additional_service_index,
@@ -210,12 +213,11 @@ def get_web_config(
         public_ports=public_ports,
         env_vars={
             "DATABASE_URL": postgres_url,
-            "SECRET_KEY": "supersecret",
-            "NETWQORK_NAME": "Kurtosis-Devnet",
-            "NEXT_PUBLIC_NETWORK_NAME": "devnet",
-            "BEACON_NODE_ENDPOINT": beacon_node_rpc,
+            "NEXT_PUBLIC_NETWORK_NAME": network_name
+            if network_name in constants.PUBLIC_NETWORKS
+            else "devnet",
+            "NEXT_BEACON_NODE_ENDPOINT": beacon_node_rpc,
             "EXECUTION_NODE_ENDPOINT": execution_node_rpc,
-            "CHAIN_ID": chain_id,
         },
         cmd=["web"],
         min_cpu=WEB_MIN_CPU,
@@ -228,8 +230,9 @@ def get_web_config(
 
 def get_indexer_config(
     beacon_node_rpc,
-    execution_node_rpc,
     blobscan_api_url,
+    execution_node_rpc,
+    network_name,
     node_selectors,
 ):
     IMAGE_NAME = "blossomlabs/blobscan-indexer:master"
@@ -237,10 +240,13 @@ def get_indexer_config(
     return ServiceConfig(
         image=IMAGE_NAME,
         env_vars={
-            "SECRET_KEY": "supersecret",
+            "BEACON_NODE_ENDPOINT": beacon_node_rpc,
             "BLOBSCAN_API_ENDPOINT": blobscan_api_url,
             "EXECUTION_NODE_ENDPOINT": execution_node_rpc,
-            "BEACON_NODE_ENDPOINT": beacon_node_rpc,
+            "NETWORK_NAME": network_name
+            if network_name in constants.PUBLIC_NETWORKS
+            else "devnet",
+            "SECRET_KEY": SECRET_KEY,
         },
         entrypoint=ENTRYPOINT_ARGS,
         cmd=[" && ".join(["sleep 90", "/app/blob-indexer"])],
