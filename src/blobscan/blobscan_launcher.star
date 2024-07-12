@@ -157,7 +157,6 @@ def get_api_config(
         env_vars={
             "CHAIN_ID": network_id,
             "DATABASE_URL": postgres_url,
-            "NETWORK_NAME": network_name,
             "REDIS_URI": redis_url,
             "SECRET_KEY": SECRET_KEY,
             "BLOBSCAN_API_PORT": str(API_HTTP_PORT_NUMBER),
