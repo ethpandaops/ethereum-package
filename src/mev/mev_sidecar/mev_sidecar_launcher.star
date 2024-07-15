@@ -36,7 +36,6 @@ def launch_mev_sidecar(
         config=ServiceConfig(
             image=image,
             cmd=[
-                "/bolt-sidecar",
                 "--port",
                 str(MEV_SIDECAR_ENDPOINT_PORT),
                 "--private-key",
@@ -60,6 +59,8 @@ def launch_mev_sidecar(
                 str(100),
                 "--chain",
                 "kurtosis",
+                "--validator-indexes",
+                "0..64"
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
