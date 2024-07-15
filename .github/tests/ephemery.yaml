@@ -12,6 +12,8 @@ participants:
     cl_type: lodestar
   - el_type: ethereumjs
     cl_type: teku
+  - el_type: besu
+    cl_type: grandine
 network_params:
   network: ephemery
 additional_services: []

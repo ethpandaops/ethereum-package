@@ -11,4 +11,6 @@ participants:
     cl_type: lighthouse
   - el_type: nimbus
     cl_type: lodestar
+  - el_type: nimbus
+    cl_type: grandine
 additional_services: []
