@@ -280,8 +280,6 @@ def get_beacon_config(
             "ARCHIVE" if constants.ARCHIVE_MODE else "PRUNE"
         ),
         "--p2p-enabled=true",
-        # Set per Pari's recommendation, to reduce noise in the logs
-        "--p2p-subscribe-all-subnets-enabled=true",
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
         "--p2p-advertised-ip=" + port_publisher.nat_exit_ip,
         "--p2p-discovery-site-local-addresses-enabled=true",
