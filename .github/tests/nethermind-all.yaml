@@ -9,4 +9,6 @@ participants:
     cl_type: lighthouse
   - el_type: nethermind
     cl_type: lodestar
+  - el_type: nethermind
+    cl_type: grandine
 additional_services: []
