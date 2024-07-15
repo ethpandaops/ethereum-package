@@ -262,7 +262,6 @@ def get_beacon_config(
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # Set per Pari's recommendation to reduce noise
-        "--subscribe-all-subnets=true",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--enable-debug-rpc-endpoints=true",
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
