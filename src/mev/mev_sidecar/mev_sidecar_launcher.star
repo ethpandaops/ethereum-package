@@ -61,6 +61,8 @@ def launch_mev_sidecar(
                 "kurtosis",
                 "--validator-indexes",
                 "0..64"
+                "--commitment-deadline",
+                "100"
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
