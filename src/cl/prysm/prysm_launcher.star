@@ -236,6 +236,11 @@ def get_beacon_config(
                 {constants.RPC_PORT_ID: public_ports_for_component[3]}
             )
         )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.PROFILING_PORT_ID: public_ports_for_component[4]}
+            )
+        )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port,
