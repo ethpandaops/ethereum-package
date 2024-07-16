@@ -290,6 +290,7 @@ def get_port_specs(port_assignments):
             constants.WS_RPC_PORT_ID,
             constants.LITTLE_BIGTABLE_PORT_ID,
             constants.WS_PORT_ID,
+            constants.PROFILING_PORT_ID,
         ]:
             ports.update({port_id: new_port_spec(port, TCP_PROTOCOL)})
         elif port_id == constants.UDP_DISCOVERY_PORT_ID:
