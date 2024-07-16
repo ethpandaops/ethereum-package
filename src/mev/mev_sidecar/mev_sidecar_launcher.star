@@ -60,9 +60,9 @@ def launch_mev_sidecar(
                 "--chain",
                 "kurtosis",
                 "--validator-indexes",
-                "0..64"
-                "--commitment-deadline",
-                "100"
+                "0..64",
+                "--slot-time",
+                str(seconds_per_slot),
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
