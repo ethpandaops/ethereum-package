@@ -6,7 +6,7 @@ HTTP_APPLICATION_PROTOCOL = "http"
 NOT_PROVIDED_APPLICATION_PROTOCOL = ""
 NOT_PROVIDED_WAIT = "not-provided-wait"
 
-MAX_PORTS_PER_CL_NODE = 4
+MAX_PORTS_PER_CL_NODE = 5
 MAX_PORTS_PER_EL_NODE = 5
 MAX_PORTS_PER_VC_NODE = 3
 MAX_PORTS_PER_ADDITIONAL_SERVICE = 2
@@ -290,6 +290,7 @@ def get_port_specs(port_assignments):
             constants.WS_RPC_PORT_ID,
             constants.LITTLE_BIGTABLE_PORT_ID,
             constants.WS_PORT_ID,
+            constants.PROFILING_PORT_ID,
         ]:
             ports.update({port_id: new_port_spec(port, TCP_PROTOCOL)})
         elif port_id == constants.UDP_DISCOVERY_PORT_ID:
