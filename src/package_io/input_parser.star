@@ -23,6 +23,7 @@ DEFAULT_CL_IMAGES = {
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "ethpandaops/grandine:master",
+    "caplin": "ethpandaops/erigon:main",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -32,6 +33,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "ethpandaops/grandine:master-minimal",
+    "caplin": "ethpandaops/erigon:main",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -41,6 +43,7 @@ DEFAULT_VC_IMAGES = {
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
     "teku": "consensys/teku:latest",
     "grandine": "ethpandaops/grandine:master",
+    "caplin": "ethpandaops/erigon:main",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -50,6 +53,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
     "teku": "consensys/teku:latest",
     "grandine": "ethpandaops/grandine:master-minimal",
+    "caplin": "ethpandaops/erigon:main",
 }
 
 # Placeholder value for the deneb fork epoch if electra is being run
@@ -507,6 +511,7 @@ def parse_network_params(plan, input_args):
                     constants.CL_TYPE.nimbus,
                     constants.CL_TYPE.teku,
                     constants.CL_TYPE.grandine,
+                    constants.CL_TYPE.caplin,
                 )
                 and vc_type == ""
             ):
@@ -1036,6 +1041,8 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
             participant["cl_extra_params"].append("--disablePeerScoring")
         if participant["cl_type"] == "grandine":
             participant["cl_extra_params"].append("--disable-peer-scoring")
+        #if participant["cl_type"] == "caplin":
+            # TODO: caplin doesn't have a flag for peer scoring
     return parsed_arguments_dict
 
 
@@ -1083,6 +1090,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             )
         if participant["cl_type"] == "grandine":
             participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
+
+        if participant["cl_type"] == "caplin":
+            participant["cl_extra_params"].append("--mev-relay-url={0}".format(mev_url))
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
