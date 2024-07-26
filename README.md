@@ -464,6 +464,9 @@ network_params:
   # How long you want the network to wait before starting up
   genesis_delay: 20
 
+  # The gas limit of the network set at genesis
+  genesis_gas_limit: 30000000
+
   # Max churn rate for the network introduced by
   # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
   # Defaults to 8
