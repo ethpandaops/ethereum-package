@@ -103,6 +103,7 @@ def new_env_file_for_el_cl_genesis_data(
         "PreregisteredValidatorKeysMnemonic": network_params.preregistered_validator_keys_mnemonic,
         "NumValidatorKeysToPreregister": total_num_validator_keys_to_preregister,
         "GenesisDelay": network_params.genesis_delay,
+        "GenesisGasLimit": network_params.genesis_gas_limit,
         "MaxPerEpochActivationChurnLimit": network_params.max_per_epoch_activation_churn_limit,
         "ChurnLimitQuotient": network_params.churn_limit_quotient,
         "EjectionBalance": network_params.ejection_balance,

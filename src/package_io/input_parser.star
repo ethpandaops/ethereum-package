@@ -259,6 +259,7 @@ def input_parser(plan, input_args):
             ],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
             genesis_delay=result["network_params"]["genesis_delay"],
+            genesis_gas_limit=result["network_params"]["genesis_gas_limit"],
             max_per_epoch_activation_churn_limit=result["network_params"][
                 "max_per_epoch_activation_churn_limit"
             ],
@@ -781,6 +782,7 @@ def default_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
+        "genesis_gas_limit": 25000000,
         "max_per_epoch_activation_churn_limit": 8,
         "churn_limit_quotient": 65536,
         "ejection_balance": 16000000000,
@@ -813,6 +815,7 @@ def default_minimal_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
+        "genesis_gas_limit": 25000000,
         "max_per_epoch_activation_churn_limit": 4,
         "churn_limit_quotient": 32,
         "ejection_balance": 16000000000,
