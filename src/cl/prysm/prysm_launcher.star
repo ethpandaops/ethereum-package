@@ -15,6 +15,7 @@ DISCOVERY_UDP_PORT_NUM = 12000
 RPC_PORT_NUM = 4000
 HTTP_PORT_NUM = 3500
 BEACON_MONITORING_PORT_NUM = 8080
+PROFILING_PORT_NUM = 6060
 
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 100
@@ -235,6 +236,11 @@ def get_beacon_config(
                 {constants.RPC_PORT_ID: public_ports_for_component[3]}
             )
         )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.PROFILING_PORT_ID: public_ports_for_component[4]}
+            )
+        )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port,
@@ -242,6 +248,7 @@ def get_beacon_config(
         constants.HTTP_PORT_ID: HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_MONITORING_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.PROFILING_PORT_ID: PROFILING_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -266,8 +273,11 @@ def get_beacon_config(
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
-        "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM)
-        # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
+        "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM),
+        # vvvvvvvvv PROFILING CONFIG vvvvvvvvvvvvvvvvvvvvv
+        "--pprof",
+        "--pprofaddr=0.0.0.0",
+        "--pprofport={0}".format(PROFILING_PORT_NUM),
     ]
 
     # If checkpoint sync is enabled, add the checkpoint sync url
