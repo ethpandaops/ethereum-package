@@ -215,8 +215,6 @@ def get_web_config(
             "NEXT_PUBLIC_NETWORK_NAME": network_name
             if network_name in constants.PUBLIC_NETWORKS
             else "devnet",
-            "NEXT_BEACON_NODE_ENDPOINT": beacon_node_rpc,
-            "EXECUTION_NODE_ENDPOINT": execution_node_rpc,
         },
         cmd=["web"],
         min_cpu=WEB_MIN_CPU,
