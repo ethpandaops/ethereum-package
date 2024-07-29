@@ -294,8 +294,6 @@ def get_beacon_config(
         "--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT,
         "--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        # Set per Paris' recommendation to reduce noise in the logs
-        "--subscribe-all-subnets",
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics-address=0.0.0.0",

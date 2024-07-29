@@ -296,8 +296,6 @@ def get_beacon_config(
         # https://discord.com/channels/641364059387854899/674288681737256970/922890280120750170
         # https://github.com/status-im/nimbus-eth2/issues/2451
         "--doppelganger-detection=false",
-        # Set per Pari's recommendation to reduce noise in the logs
-        "--subscribe-all-subnets=true",
         # Nimbus can handle a max of 256 threads, if the host has more then nimbus crashes. Setting it to 4 so it doesn't crash on build servers
         "--num-threads=4",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,

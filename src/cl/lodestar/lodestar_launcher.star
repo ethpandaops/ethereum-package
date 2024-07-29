@@ -283,8 +283,6 @@ def get_beacon_config(
         "--enr.ip=" + port_publisher.nat_exit_ip,
         "--enr.tcp={0}".format(discovery_port),
         "--enr.udp={0}".format(discovery_port),
-        # Set per Pari's recommendation to reduce noise in the logs
-        "--subscribeAllSubnets=true",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
