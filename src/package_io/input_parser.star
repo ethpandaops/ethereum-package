@@ -1057,33 +1057,38 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         )
 
         if participant["cl_type"] == "lighthouse":
-            participant["vc_extra_params"].append("--builder-proposals")
             participant["cl_extra_params"].append("--builder={0}".format(mev_url))
+        if participant["vc_type"] == "lighthouse":
+            participant["vc_extra_params"].append("--builder-proposals")
         if participant["cl_type"] == "lodestar":
-            participant["vc_extra_params"].append("--builder")
             participant["cl_extra_params"].append("--builder")
             participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
+        if participant["vc_type"] == "lodestar":
+            participant["vc_extra_params"].append("--builder")
         if participant["cl_type"] == "nimbus":
-            participant["vc_extra_params"].append("--payload-builder=true")
             participant["cl_extra_params"].append("--payload-builder=true")
             participant["cl_extra_params"].append(
                 "--payload-builder-url={0}".format(mev_url)
             )
+        if participant["vc_type"] == "nimbus":
+            participant["vc_extra_params"].append("--payload-builder=true")
         if participant["cl_type"] == "teku":
-            participant["vc_extra_params"].append(
-                "--validators-builder-registration-default-enabled=true"
-            )
             participant["cl_extra_params"].append(
                 "--builder-endpoint={0}".format(mev_url)
             )
             participant["cl_extra_params"].append(
                 "--validators-builder-registration-default-enabled=true"
             )
+        if participant["vc_type"] == "teku":
+            participant["vc_extra_params"].append(
+                "--validators-builder-registration-default-enabled=true"
+            )
         if participant["cl_type"] == "prysm":
-            participant["vc_extra_params"].append("--enable-builder")
             participant["cl_extra_params"].append(
                 "--http-mev-relay={0}".format(mev_url)
             )
+        if participant["vc_type"] == "prysm":
+            participant["vc_extra_params"].append("--enable-builder")
         if participant["cl_type"] == "grandine":
             participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
 
