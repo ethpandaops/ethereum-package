@@ -215,6 +215,8 @@ def get_web_config(
             "NEXT_PUBLIC_NETWORK_NAME": network_name
             if network_name in constants.PUBLIC_NETWORKS
             else "devnet",
+            "SECRET_KEY": SECRET_KEY,
+            "POSTGRES_STORAGE_ENABLED": "true",
         },
         cmd=["web"],
         min_cpu=WEB_MIN_CPU,
