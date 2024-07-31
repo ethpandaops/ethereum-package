@@ -527,6 +527,7 @@ def run(plan, args={}):
                 all_cl_contexts,
                 all_el_contexts,
                 network_id,
+                network_params,
                 persistent,
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
