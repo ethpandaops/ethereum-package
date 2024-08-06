@@ -77,7 +77,7 @@ network_params:
   electra_fork_epoch: 100000000
   eip7594_fork_epoch: 100000001
   eip7594_fork_version: "0x70000038"
-  network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/
+  network_sync_base_url: https://snapshots.ethpandaops.io/
   data_column_sidecar_subnet_count: 32
   samples_per_slot: 8
   custody_requirement: 1
