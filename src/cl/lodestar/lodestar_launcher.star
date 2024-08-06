@@ -269,6 +269,7 @@ def get_beacon_config(
         "--port={0}".format(discovery_port),
         "--discoveryPort={0}".format(discovery_port),
         "--dataDir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        "--chain.persistInvalidSszObjects=true",
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
         "--discv5=true",
