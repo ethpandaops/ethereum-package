@@ -141,7 +141,7 @@ def get_api_config(
     port_publisher,
     additional_service_index,
 ):
-    IMAGE_NAME = "blossomlabs/blobscan:stable"
+    IMAGE_NAME = "blossomlabs/blobscan-api:latest"
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
@@ -165,7 +165,6 @@ def get_api_config(
             if network_name in constants.PUBLIC_NETWORKS
             else "devnet",
         },
-        cmd=["api"],
         ready_conditions=ReadyCondition(
             recipe=GetHttpRequestRecipe(
                 port_id="http",
@@ -197,7 +196,7 @@ def get_web_config(
     # TODO: https://github.com/kurtosis-tech/kurtosis/issues/1861
     # Configure NEXT_PUBLIC_BEACON_BASE_URL and NEXT_PUBLIC_EXPLORER_BASE env vars
     # once retrieving external URLs from services are supported in Kurtosis.
-    IMAGE_NAME = "blossomlabs/blobscan:stable"
+    IMAGE_NAME = "blossomlabs/blobscan-web:latest"
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
@@ -218,7 +217,6 @@ def get_web_config(
             "SECRET_KEY": SECRET_KEY,
             "POSTGRES_STORAGE_ENABLED": "true",
         },
-        cmd=["web"],
         min_cpu=WEB_MIN_CPU,
         max_cpu=WEB_MAX_CPU,
         min_memory=WEB_MIN_MEMORY,
