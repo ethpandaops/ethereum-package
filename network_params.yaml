@@ -93,8 +93,8 @@ goomy_blob_params:
   goomy_blob_args: []
 assertoor_params:
   image: ""
-  run_stability_check: true
-  run_block_proposal_check: true
+  run_stability_check: false
+  run_block_proposal_check: false
   run_transaction_test: false
   run_blob_transaction_test: false
   run_opcodes_transaction_test: false

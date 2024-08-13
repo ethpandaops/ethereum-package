@@ -607,12 +607,12 @@ assertoor_params:
   # - >= 80% correct head votes
   # - no reorgs with distance > 2 blocks
   # - no more than 2 reorgs per epoch
-  run_stability_check: true
+  run_stability_check: false
 
   # Check block propöosals
   # This check monitors the chain and succeeds if:
   # - all client pairs have proposed a block
-  run_block_proposal_check: true
+  run_block_proposal_check: false
 
   # Run normal transaction test
   # This test generates random EOA transactions and checks inclusion with/from all client pairs
