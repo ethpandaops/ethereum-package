@@ -969,8 +969,8 @@ def get_default_goomy_blob_params():
 def get_default_assertoor_params():
     return {
         "image": "",
-        "run_stability_check": True,
-        "run_block_proposal_check": True,
+        "run_stability_check": False,
+        "run_block_proposal_check": False,
         "run_lifecycle_test": False,
         "run_transaction_test": False,
         "run_blob_transaction_test": False,
