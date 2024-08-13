@@ -81,7 +81,7 @@ network_params:
   data_column_sidecar_subnet_count: 32
   samples_per_slot: 8
   custody_requirement: 1
-  target_number_of_peers: 70
+  max_blobs_per_block: 6
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
 additional_services: []

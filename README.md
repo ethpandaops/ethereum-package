@@ -519,8 +519,8 @@ network_params:
   samples_per_slot: 8
   # Minimum number of subnets an honest node custodies and serves samples from
   custody_requirement: 1
-  # Suggested minimum peer count
-  target_number_of_peers: 70
+  # Maximum number of blobs per block
+  max_blobs_per_block: 6
 
   # Preset for the network
   # Default: "mainnet"
