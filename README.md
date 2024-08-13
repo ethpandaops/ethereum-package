@@ -514,13 +514,13 @@ network_params:
   network_sync_base_url: https://snapshots.ethpandaops.io/
 
   # The number of data column sidecar subnets used in the gossipsub protocol
-  data_column_sidecar_subnet_count: 32
+  data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
   # Minimum number of subnets an honest node custodies and serves samples from
-  custody_requirement: 1
-  # Suggested minimum peer count
-  target_number_of_peers: 70
+  custody_requirement: 4
+  # Maximum number of blobs per block
+  max_blobs_per_block: 6
 
   # Preset for the network
   # Default: "mainnet"
