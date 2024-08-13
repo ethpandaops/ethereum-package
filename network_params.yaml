@@ -78,9 +78,9 @@ network_params:
   eip7594_fork_epoch: 100000001
   eip7594_fork_version: "0x70000038"
   network_sync_base_url: https://snapshots.ethpandaops.io/
-  data_column_sidecar_subnet_count: 32
+  data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
-  custody_requirement: 1
+  custody_requirement: 4
   max_blobs_per_block: 6
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
