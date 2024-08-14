@@ -504,7 +504,7 @@ network_params:
 
   # EOF activation fork epoch (EL only fork)
   # Defaults to null
-  eof_activation_epoch: null
+  eof_activation_epoch: ""
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
