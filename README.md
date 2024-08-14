@@ -503,7 +503,7 @@ network_params:
   eip7594_fork_version: "0x70000038"
 
   # EOF activation fork epoch (EL only fork)
-  # Defaults to null
+  # Defaults to None
   eof_activation_epoch: ""
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
