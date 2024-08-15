@@ -500,7 +500,7 @@ network_params:
   eip7594_fork_epoch: 100000001
 
   # The fork version to set if the eip7594 fork is active
-  eip7594_fork_version: "0x70000038"
+  eip7594_fork_version: "0x60000038"
 
   # EOF activation fork epoch (EL only fork)
   # Defaults to None

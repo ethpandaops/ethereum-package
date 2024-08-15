@@ -1,7 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 
-IMAGE_NAME = "ethpandaops/tracoor:0.0.18"
+IMAGE_NAME = "ethpandaops/tracoor:latest"
 SERVICE_NAME = "tracoor"
 
 HTTP_PORT_NUMBER = 7007
