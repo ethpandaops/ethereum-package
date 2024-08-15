@@ -126,8 +126,6 @@ def get_config(
 
     if dora_params.image != "":
         IMAGE_NAME = dora_params.image
-    elif network_params.eip7594_fork_epoch < 100000000:
-        IMAGE_NAME = "ethpandaops/dora:peer-das"
     elif network_params.electra_fork_epoch < 100000000:
         IMAGE_NAME = "ethpandaops/dora:electra-support"
     else:
