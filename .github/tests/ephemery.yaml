@@ -16,4 +16,3 @@ participants:
     cl_type: grandine
 network_params:
   network: ephemery
-additional_services: []

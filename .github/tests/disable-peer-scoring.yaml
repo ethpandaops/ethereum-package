@@ -11,5 +11,4 @@ participants:
     cl_type: prysm
   - el_type: ethereumjs
     cl_type: teku
-additional_services: []
 disable_peer_scoring: true

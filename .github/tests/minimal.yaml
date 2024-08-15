@@ -13,5 +13,3 @@ participants:
     cl_type: grandine
 network_params:
   preset: minimal
-  seconds_per_slot: 6
-additional_services: []

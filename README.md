@@ -238,7 +238,7 @@ participants:
     # - nimbus: statusim/nimbus-eth2:multiarch-latest
     # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
     # - lodestar: chainsafe/lodestar:next
-    # - grandine: ethpandaops/grandine:develop
+    # - grandine: sifrai/grandine:stable
     cl_image: ""
 
     # The log level string that this participant's CL client should log at
@@ -857,7 +857,6 @@ participants:
     cl_image: sigp/lighthouse:latest
 network_params:
   deneb_fork_epoch: 0
-additional_services: []
 wait_for_finalization: false
 wait_for_verifications: false
 global_log_level: info
@@ -888,7 +887,6 @@ participants:
     cl_image: ''
     count: 2
 mev_type: mock
-additional_services: []
 ```
 
 </details>
@@ -909,8 +907,6 @@ participants:
 mev_type: flashbots
 network_params:
   deneb_fork_epoch: 1
-additional_services: []
-
 ```
 
 </details>

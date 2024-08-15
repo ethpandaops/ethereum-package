@@ -9,6 +9,5 @@ participants:
     cl_type: lighthouse
   - el_type: geth
     cl_type: lodestar
-additional_services: []
 network_params:
   preregistered_validator_count: 400
