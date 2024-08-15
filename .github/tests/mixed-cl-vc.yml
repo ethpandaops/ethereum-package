@@ -7,4 +7,3 @@ participants:
     cl_type: nimbus
     use_separate_vc: true
     vc_type: lighthouse
-additional_services: []

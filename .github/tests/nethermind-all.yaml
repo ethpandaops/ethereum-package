@@ -11,4 +11,3 @@ participants:
     cl_type: lodestar
   - el_type: nethermind
     cl_type: grandine
-additional_services: []

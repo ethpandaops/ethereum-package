@@ -18,4 +18,3 @@ participants:
   - el_type: ethereumjs
     cl_type: nimbus
     use_separate_vc: true
-additional_services: []

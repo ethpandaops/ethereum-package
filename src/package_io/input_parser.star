@@ -22,7 +22,7 @@ DEFAULT_CL_IMAGES = {
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
     "lodestar": "chainsafe/lodestar:latest",
-    "grandine": "ethpandaops/grandine:master",
+    "grandine": "sifrai/grandine:stable",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -40,7 +40,7 @@ DEFAULT_VC_IMAGES = {
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
     "teku": "consensys/teku:latest",
-    "grandine": "ethpandaops/grandine:master",
+    "grandine": "sifrai/grandine:stable",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
