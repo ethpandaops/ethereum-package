@@ -103,6 +103,7 @@ def new_env_file_for_el_cl_genesis_data(
         "PreregisteredValidatorKeysMnemonic": network_params.preregistered_validator_keys_mnemonic,
         "NumValidatorKeysToPreregister": total_num_validator_keys_to_preregister,
         "GenesisDelay": network_params.genesis_delay,
+        "GenesisGasLimit": network_params.genesis_gaslimit,
         "MaxPerEpochActivationChurnLimit": network_params.max_per_epoch_activation_churn_limit,
         "ChurnLimitQuotient": network_params.churn_limit_quotient,
         "EjectionBalance": network_params.ejection_balance,
@@ -123,7 +124,7 @@ def new_env_file_for_el_cl_genesis_data(
         "DataColumnSidecarSubnetCount": network_params.data_column_sidecar_subnet_count,
         "SamplesPerSlot": network_params.samples_per_slot,
         "CustodyRequirement": network_params.custody_requirement,
-        "TargetNumberOfPeers": network_params.target_number_of_peers,
+        "MaxBlobsPerBlock": network_params.max_blobs_per_block,
         "Preset": network_params.preset,
         "AdditionalPreloadedContracts": json.encode(
             network_params.additional_preloaded_contracts

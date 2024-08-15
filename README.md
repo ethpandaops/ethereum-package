@@ -238,7 +238,7 @@ participants:
     # - nimbus: statusim/nimbus-eth2:multiarch-latest
     # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
     # - lodestar: chainsafe/lodestar:next
-    # - grandine: ethpandaops/grandine:develop
+    # - grandine: sifrai/grandine:stable
     cl_image: ""
 
     # The log level string that this participant's CL client should log at
@@ -464,6 +464,9 @@ network_params:
   # How long you want the network to wait before starting up
   genesis_delay: 20
 
+  # The gas limit of the network set at genesis
+  genesis_gaslimit: 30000000
+
   # Max churn rate for the network introduced by
   # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
   # Defaults to 8
@@ -500,24 +503,24 @@ network_params:
   eip7594_fork_version: "0x70000038"
 
   # EOF activation fork epoch (EL only fork)
-  # Defaults to null
-  eof_activation_epoch: null
+  # Defaults to None
+  eof_activation_epoch: ""
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
-  # Defaults to "https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/
+  # Defaults to "https://snapshots.ethpandaops.io/"
   # If you have a local snapshot, you can set this to the local url:
   # network_snapshot_url_base = "http://10.10.101.21:10000/snapshots/"
   # The snapshots are taken with https://github.com/ethpandaops/snapshotter
-  network_sync_base_url: https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/
+  network_sync_base_url: https://snapshots.ethpandaops.io/
 
   # The number of data column sidecar subnets used in the gossipsub protocol
-  data_column_sidecar_subnet_count: 32
+  data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
   # Minimum number of subnets an honest node custodies and serves samples from
-  custody_requirement: 1
-  # Suggested minimum peer count
-  target_number_of_peers: 70
+  custody_requirement: 4
+  # Maximum number of blobs per block
+  max_blobs_per_block: 6
 
   # Preset for the network
   # Default: "mainnet"
@@ -604,12 +607,12 @@ assertoor_params:
   # - >= 80% correct head votes
   # - no reorgs with distance > 2 blocks
   # - no more than 2 reorgs per epoch
-  run_stability_check: true
+  run_stability_check: false
 
   # Check block propöosals
   # This check monitors the chain and succeeds if:
   # - all client pairs have proposed a block
-  run_block_proposal_check: true
+  run_block_proposal_check: false
 
   # Run normal transaction test
   # This test generates random EOA transactions and checks inclusion with/from all client pairs
@@ -854,7 +857,6 @@ participants:
     cl_image: sigp/lighthouse:latest
 network_params:
   deneb_fork_epoch: 0
-additional_services: []
 wait_for_finalization: false
 wait_for_verifications: false
 global_log_level: info
@@ -885,7 +887,6 @@ participants:
     cl_image: ''
     count: 2
 mev_type: mock
-additional_services: []
 ```
 
 </details>
@@ -906,8 +907,6 @@ participants:
 mev_type: flashbots
 network_params:
   deneb_fork_epoch: 1
-additional_services: []
-
 ```
 
 </details>

@@ -13,5 +13,4 @@ participants:
     cl_type: nimbus
 network_params:
   network: sepolia
-additional_services: []
 checkpoint_sync_enabled: true

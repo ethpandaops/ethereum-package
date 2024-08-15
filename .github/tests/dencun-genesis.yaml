@@ -13,4 +13,3 @@ participants:
     cl_type: teku
 network_params:
   deneb_fork_epoch: 0
-additional_services: []

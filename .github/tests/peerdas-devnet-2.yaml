@@ -6,5 +6,5 @@ participants:
   - cl_type: teku
     cl_image: ethpandaops/teku:nashatyrev-das
 network_params:
-  network: peerdas-devnet-1
+  network: peerdas-devnet-2
 snooper_enabled: true

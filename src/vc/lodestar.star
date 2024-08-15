@@ -68,6 +68,7 @@ def get_config(
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
         "--useProduceBlockV3",
+        "--disableKeystoresThreadPool",
     ]
 
     keymanager_api_cmd = [

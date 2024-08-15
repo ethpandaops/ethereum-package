@@ -10,7 +10,7 @@ DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
     "erigon": "ethpandaops/erigon:main",
     "nethermind": "nethermindeth/nethermind:master",
-    "besu": "hyperledger/besu:latest",
+    "besu": "ethpandaops/besu:main",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "ethpandaops/nimbus-eth1:master",
@@ -22,7 +22,7 @@ DEFAULT_CL_IMAGES = {
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
     "lodestar": "chainsafe/lodestar:latest",
-    "grandine": "ethpandaops/grandine:master",
+    "grandine": "sifrai/grandine:stable",
     "caplin": "ethpandaops/erigon:main",
 }
 
@@ -42,7 +42,7 @@ DEFAULT_VC_IMAGES = {
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
     "teku": "consensys/teku:latest",
-    "grandine": "ethpandaops/grandine:master",
+    "grandine": "sifrai/grandine:stable",
     "caplin": "ethpandaops/erigon:main",
 }
 
@@ -263,6 +263,7 @@ def input_parser(plan, input_args):
             ],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
             genesis_delay=result["network_params"]["genesis_delay"],
+            genesis_gaslimit=result["network_params"]["genesis_gaslimit"],
             max_per_epoch_activation_churn_limit=result["network_params"][
                 "max_per_epoch_activation_churn_limit"
             ],
@@ -285,7 +286,7 @@ def input_parser(plan, input_args):
             ],
             samples_per_slot=result["network_params"]["samples_per_slot"],
             custody_requirement=result["network_params"]["custody_requirement"],
-            target_number_of_peers=result["network_params"]["target_number_of_peers"],
+            max_blobs_per_block=result["network_params"]["max_blobs_per_block"],
             preset=result["network_params"]["preset"],
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
@@ -786,6 +787,7 @@ def default_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
+        "genesis_gaslimit": 30000000,
         "max_per_epoch_activation_churn_limit": 8,
         "churn_limit_quotient": 65536,
         "ejection_balance": 16000000000,
@@ -797,11 +799,11 @@ def default_network_params():
         "eip7594_fork_epoch": 100000001,
         "eip7594_fork_version": "0x70000038",
         "eof_activation_epoch": "",
-        "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/",
-        "data_column_sidecar_subnet_count": 32,
+        "network_sync_base_url": "https://snapshots.ethpandaops.io/",
+        "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
-        "custody_requirement": 1,
-        "target_number_of_peers": 70,
+        "custody_requirement": 4,
+        "max_blobs_per_block": 6,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -818,6 +820,7 @@ def default_minimal_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
+        "genesis_gaslimit": 30000000,
         "max_per_epoch_activation_churn_limit": 4,
         "churn_limit_quotient": 32,
         "ejection_balance": 16000000000,
@@ -829,11 +832,11 @@ def default_minimal_network_params():
         "eip7594_fork_epoch": 100000001,
         "eip7594_fork_version": "0x70000038",
         "eof_activation_epoch": "",
-        "network_sync_base_url": "https://ethpandaops-ethereum-node-snapshots.ams3.cdn.digitaloceanspaces.com/",
-        "data_column_sidecar_subnet_count": 32,
+        "network_sync_base_url": "https://snapshots.ethpandaops.io/",
+        "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
-        "custody_requirement": 1,
-        "target_number_of_peers": 70,
+        "custody_requirement": 4,
+        "max_blobs_per_block": 6,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -971,8 +974,8 @@ def get_default_goomy_blob_params():
 def get_default_assertoor_params():
     return {
         "image": "",
-        "run_stability_check": True,
-        "run_block_proposal_check": True,
+        "run_stability_check": False,
+        "run_block_proposal_check": False,
         "run_lifecycle_test": False,
         "run_transaction_test": False,
         "run_blob_transaction_test": False,
@@ -1061,33 +1064,38 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         )
 
         if participant["cl_type"] == "lighthouse":
-            participant["vc_extra_params"].append("--builder-proposals")
             participant["cl_extra_params"].append("--builder={0}".format(mev_url))
+        if participant["vc_type"] == "lighthouse":
+            participant["vc_extra_params"].append("--builder-proposals")
         if participant["cl_type"] == "lodestar":
-            participant["vc_extra_params"].append("--builder")
             participant["cl_extra_params"].append("--builder")
             participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
+        if participant["vc_type"] == "lodestar":
+            participant["vc_extra_params"].append("--builder")
         if participant["cl_type"] == "nimbus":
-            participant["vc_extra_params"].append("--payload-builder=true")
             participant["cl_extra_params"].append("--payload-builder=true")
             participant["cl_extra_params"].append(
                 "--payload-builder-url={0}".format(mev_url)
             )
+        if participant["vc_type"] == "nimbus":
+            participant["vc_extra_params"].append("--payload-builder=true")
         if participant["cl_type"] == "teku":
-            participant["vc_extra_params"].append(
-                "--validators-builder-registration-default-enabled=true"
-            )
             participant["cl_extra_params"].append(
                 "--builder-endpoint={0}".format(mev_url)
             )
             participant["cl_extra_params"].append(
                 "--validators-builder-registration-default-enabled=true"
             )
+        if participant["vc_type"] == "teku":
+            participant["vc_extra_params"].append(
+                "--validators-builder-registration-default-enabled=true"
+            )
         if participant["cl_type"] == "prysm":
-            participant["vc_extra_params"].append("--enable-builder")
             participant["cl_extra_params"].append(
                 "--http-mev-relay={0}".format(mev_url)
             )
+        if participant["vc_type"] == "prysm":
+            participant["vc_extra_params"].append("--enable-builder")
         if participant["cl_type"] == "grandine":
             participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
 
