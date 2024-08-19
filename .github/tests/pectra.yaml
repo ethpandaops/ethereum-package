@@ -1,43 +1,38 @@
 participants_matrix:
   el:
-    # - el_type: nethermind
-    #   el_image: nethermindeth/nethermind:pectra-fix
+    - el_type: nethermind
+      el_image: nethermindeth/nethermind:pectra
     - el_type: geth
-      el_image: ethpandaops/geth:lightclient-prague-devnet-1-37c4b03
-    # - el_type: ethereumjs
-    #   el_image: ethpandaops/ethereumjs:master-b543d2f
-    # - el_type: erigon
-    #   el_image: ethpandaops/erigon:main-faa564e
-    # - el_type: reth
-    #   el_image: ethpandaops/reth:onbjerg-devnet-2-36bc13d
-    # - el_type: besu
-    #   el_image: ethpandaops/besu:main-ec8429f
+      el_image: ethpandaops/geth:prague-devnet-2
+    - el_type: ethereumjs
+      el_image: ethpandaops/ethereumjs:master
+    - el_type: erigon
+      el_image: thorax/erigon:docker_pectra
+    - el_type: reth
+      el_image: ethpandaops/reth:onbjerg-devnet-2
+    - el_type: besu
+      el_image: ethpandaops/besu:main
   cl:
     - cl_type: lighthouse
-      cl_image: ethpandaops/lighthouse:electra-devnet-1-ba28217
+      cl_image: ethpandaops/lighthouse:electra-devnet-1-51d51f5
     - cl_type: teku
       cl_image: ethpandaops/teku:master
     - cl_type: nimbus
-      cl_image: ethpandaops/nimbus-eth2:unstable-minimal
-#      cl_image: ethpandaops/nimbus-eth2:unstable-c0fc0f4
+      cl_image: ethpandaops/nimbus-eth2:unstable
     - cl_type: lodestar
       cl_image: ethpandaops/lodestar:electra-fork-rebasejul30
     - cl_type: grandine
-      cl_image: ethpandaops/grandine:electra-minimal
-      #cl_image: ethpandaops/grandine:electra-5a2ffe2
+      cl_image: ethpandaops/grandine:electra
     - cl_type: prysm
-    #  cl_image: ethpandaops/prysm-beacon-chain:develop-e0785a8
-      cl_image: ethpandaops/prysm-beacon-chain:develop-minimal
+      cl_image: ethpandaops/prysm-beacon-chain:develop
 network_params:
   electra_fork_epoch: 1
   min_validator_withdrawability_delay: 1
   shard_committee_period: 1
-  preset: minimal
+  churn_limit_quotient: 16
 additional_services:
   - dora
   - assertoor
-dora_params:
-  image: "ethpandaops/dora:indexer-reimplementation"
 
 snooper_enabled: true
 assertoor_params:
