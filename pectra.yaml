@@ -1,0 +1,25 @@
+participants_matrix:
+  el:
+    - el_type: geth
+      el_image: lightclient/go-ethereum:prague-devnet-1
+  cl:
+    - cl_type: teku
+      cl_image: ethpandaops/teku:master
+network_params:
+  electra_fork_epoch: 1
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  churn_limit_quotient: 16
+  preset: minimal
+additional_services:
+  - dora
+  - apache
+  - assertoor
+snooper_enabled: true
+assertoor_params:
+  image: parithoshj/ass:v17
+  run_stability_check: false
+  run_block_proposal_check: false
+  tests:
+    - { file: "https://raw.githubusercontent.com/ethpandaops/assertoor-test/master/assertoor-tests/pectra-dev/wait-for-slot.yaml", id: "wait1", config: { slot: 34 }}
+    - { file: "https://raw.githubusercontent.com/ethpandaops/assertoor-test/bf68e225c0c7e173e2e09f7d721c0f6ddfa7f64d/assertoor-tests/pectra-dev/blockhash-test-with-rpc-call.yaml"}
