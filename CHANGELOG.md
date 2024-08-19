@@ -1,5 +1,39 @@
 # Changelog
 
+## [4.2.0](https://github.com/ethpandaops/ethereum-package/compare/4.1.0...4.2.0) (2024-08-19)
+
+
+### Features
+
+* add customizable configuraiton for prometheus retention ([#745](https://github.com/ethpandaops/ethereum-package/issues/745)) ([6c02dfe](https://github.com/ethpandaops/ethereum-package/commit/6c02dfee67e239650f9f21786ff5c976770a733b))
+* add genesis_gaslimit param configuration ([#726](https://github.com/ethpandaops/ethereum-package/issues/726)) ([a4ba9a6](https://github.com/ethpandaops/ethereum-package/commit/a4ba9a65852411db43dbcf3c727c9ad52040e482))
+* Add Lighthouse PeerDAS Dashboard ([#736](https://github.com/ethpandaops/ethereum-package/issues/736)) ([ffbfde2](https://github.com/ethpandaops/ethereum-package/commit/ffbfde23f2e58350145ab48d0dbce5e245385ab5))
+* add peerdas-electra-support ([#740](https://github.com/ethpandaops/ethereum-package/issues/740)) ([663e7e6](https://github.com/ethpandaops/ethereum-package/commit/663e7e654b81fb623a1fa486ccf7092ba2e39d80))
+* add profiling for prysm ([#722](https://github.com/ethpandaops/ethereum-package/issues/722)) ([7dc6660](https://github.com/ethpandaops/ethereum-package/commit/7dc66606f5d5f86d4ef394bc70fe2e936cd55c75))
+* add sanity check ([#710](https://github.com/ethpandaops/ethereum-package/issues/710)) ([b824cac](https://github.com/ethpandaops/ethereum-package/commit/b824cac89ca2c78604c82544888a89c0c1d3aa80))
+* enable dora pprof ([#743](https://github.com/ethpandaops/ethereum-package/issues/743)) ([2b7be9a](https://github.com/ethpandaops/ethereum-package/commit/2b7be9a27c516b17322e8028c23813620bfc6afe))
+* generate keys if not default key is used ([#707](https://github.com/ethpandaops/ethereum-package/issues/707)) ([2d1cab5](https://github.com/ethpandaops/ethereum-package/commit/2d1cab5317dac62524601f392a4a62a7c3a88b80))
+* lodestar persists invalid ssz objects by default ([#730](https://github.com/ethpandaops/ethereum-package/issues/730)) ([5a45991](https://github.com/ethpandaops/ethereum-package/commit/5a459914327e33c426e82df62af6336970857f08))
+* update egg config parameters ([#737](https://github.com/ethpandaops/ethereum-package/issues/737)) ([78c2bc7](https://github.com/ethpandaops/ethereum-package/commit/78c2bc77caaf814cf360499b6b61337ea7eb7099))
+
+
+### Bug Fixes
+
+* add debug ns to nethermind ([#732](https://github.com/ethpandaops/ethereum-package/issues/732)) ([372bb52](https://github.com/ethpandaops/ethereum-package/commit/372bb521525948bc0a97a1999e6d233cb2792626))
+* allow vc properties in participants_matrix.cl ([#715](https://github.com/ethpandaops/ethereum-package/issues/715)) ([c8b9b19](https://github.com/ethpandaops/ethereum-package/commit/c8b9b19c045f6075fa02f9abf8f761a5a8056ba3))
+* besu devnet schedule ([#734](https://github.com/ethpandaops/ethereum-package/issues/734)) ([28b67cd](https://github.com/ethpandaops/ethereum-package/commit/28b67cd17a6f0abf80c46821465872d4006f9277))
+* blobscan redis dependency ([#712](https://github.com/ethpandaops/ethereum-package/issues/712)) ([0ed1c9c](https://github.com/ethpandaops/ethereum-package/commit/0ed1c9c8e974f7c6900f68679602d95cfcb17831))
+* change churn limit default for pectra tests ([#747](https://github.com/ethpandaops/ethereum-package/issues/747)) ([8109054](https://github.com/ethpandaops/ethereum-package/commit/8109054e20121092ad5ad3eebbf1a16a20677887))
+* correctly apply extra params if builder is enabled ([#725](https://github.com/ethpandaops/ethereum-package/issues/725)) ([a94caf0](https://github.com/ethpandaops/ethereum-package/commit/a94caf02c327347a7e6b4ed2f99badb787a25dc7))
+* disable all assertoor tests by default ([#738](https://github.com/ethpandaops/ethereum-package/issues/738)) ([2961f96](https://github.com/ethpandaops/ethereum-package/commit/2961f969402b3f3dbf6f584e74644cf32cfd7902))
+* lodestar vc faster startup ([#721](https://github.com/ethpandaops/ethereum-package/issues/721)) ([225e3d8](https://github.com/ethpandaops/ethereum-package/commit/225e3d80fe0389f6a22c88a56075ad86a1ae2b00))
+* readme eof ([#739](https://github.com/ethpandaops/ethereum-package/issues/739)) ([7f94f6e](https://github.com/ethpandaops/ethereum-package/commit/7f94f6e2fefe21e11edb7cf5dc827e3f486afe98))
+* remove custom peerdas images for dora & assertoor ([#741](https://github.com/ethpandaops/ethereum-package/issues/741)) ([a19398d](https://github.com/ethpandaops/ethereum-package/commit/a19398decc892ba6749284495891184de987cab0))
+* remove subscribe all subnet nimbus ([#719](https://github.com/ethpandaops/ethereum-package/issues/719)) ([ef92f8f](https://github.com/ethpandaops/ethereum-package/commit/ef92f8f45e4e32d0e2b9711ca9671ff5d1bcab00))
+* remove subscribe-all-subnets from default prysm config ([#717](https://github.com/ethpandaops/ethereum-package/issues/717)) ([6348c0b](https://github.com/ethpandaops/ethereum-package/commit/6348c0b4c0b8a03a27cdf8a5fa8615b0ab323d7b))
+* remove subscribe-all-subnets lighthouse/lodestar/teku ([#720](https://github.com/ethpandaops/ethereum-package/issues/720)) ([cdb20e1](https://github.com/ethpandaops/ethereum-package/commit/cdb20e18110e3c85817adc7e970d4b4cbd445feb))
+* update snapshots URL ([#731](https://github.com/ethpandaops/ethereum-package/issues/731)) ([f9269ad](https://github.com/ethpandaops/ethereum-package/commit/f9269ad7e7bc04fae486b340f8d189d3b965f4b2))
+
 ## [4.1.0](https://github.com/ethpandaops/ethereum-package/compare/4.0.0...4.1.0) (2024-07-03)
 
 
