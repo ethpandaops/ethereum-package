@@ -163,6 +163,10 @@ SUBCATEGORY_PARAMS = {
         "run_lifecycle_test",
         "tests",
     ],
+    "prometheus_params": [
+        "storage_tsdb_retention_time",
+        "storage_tsdb_retention_size",
+    ],
     "mev_params": [
         "mev_relay_image",
         "mev_builder_image",
