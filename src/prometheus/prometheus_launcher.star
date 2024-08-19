@@ -1,5 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-prometheus = import_module("github.com/kurtosis-tech/prometheus-package/main.star")
+prometheus = import_module(
+    "github.com/kurtosis-tech/prometheus-package/main.star"
+)
 
 EXECUTION_CLIENT_TYPE = "execution"
 BEACON_CLIENT_TYPE = "beacon"
@@ -28,6 +30,8 @@ def launch_prometheus(
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
     global_node_selectors,
+    storage_tsdb_retention_time,
+    storage_tsdb_retention_size,
 ):
     metrics_jobs = get_metrics_jobs(
         el_contexts,
@@ -46,6 +50,8 @@ def launch_prometheus(
         MIN_MEMORY,
         MAX_MEMORY,
         node_selectors=global_node_selectors,
+        storage_tsdb_retention_time=storage_tsdb_retention_time,
+        storage_tsdb_retention_size=storage_tsdb_retention_size,
     )
 
     return prometheus_url
