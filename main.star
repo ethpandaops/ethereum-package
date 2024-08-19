@@ -478,7 +478,6 @@ def run(plan, args={}):
                 dora_config_template,
                 all_participants,
                 args_with_right_defaults.participants,
-                el_cl_data_files_artifact_uuid,
                 network_params,
                 dora_params,
                 global_node_selectors,
