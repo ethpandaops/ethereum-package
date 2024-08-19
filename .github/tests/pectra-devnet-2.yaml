@@ -1,0 +1,26 @@
+participants:
+  - el_type: nethermind
+    el_image: nethermindeth/nethermind:pectra
+    cl_type: teku
+    cl_image: ethpandaops/teku:master
+  - el_type: nethermind
+    el_image: nethermindeth/nethermind:pectra
+    cl_type: nimbus
+    cl_image: ethpandaops/nimbus-eth2:unstable
+  - el_type: nethermind
+    el_image: nethermindeth/nethermind:pectra
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:electra-fork
+network_params:
+  electra_fork_epoch: 1
+additional_services:
+  - dora
+  - assertoor
+snooper_enabled: true
+assertoor_params:
+  run_stability_check: false
+  run_block_proposal_check: false
+  tests:
+    - { file: "https://raw.githubusercontent.com/ethpandaops/assertoor-test/master/assertoor-tests/pectra-dev/wait-for-slot.yaml", config: { slot: 43 }}
+    - https://raw.githubusercontent.com/ethpandaops/assertoor-test/master/assertoor-tests/pectra-dev/el-triggered-exit.yaml
+    - https://raw.githubusercontent.com/ethpandaops/assertoor-test/master/assertoor-tests/pectra-dev/massive-deposit.yaml

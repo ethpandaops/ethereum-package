@@ -784,7 +784,7 @@ def default_network_params():
         "genesis_delay": 20,
         "genesis_gaslimit": 30000000,
         "max_per_epoch_activation_churn_limit": 8,
-        "churn_limit_quotient": 65536,
+        "churn_limit_quotient": 16,
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,

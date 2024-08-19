@@ -473,8 +473,9 @@ network_params:
   max_per_epoch_activation_churn_limit: 8
 
   # Churn limit quotient for the network
-  # Defaults to 65536
-  churn_limit_quotient: 65536
+  # This value is different from mainnet to support maxEB testing in smaller networks
+  # Defaults to 16
+  churn_limit_quotient: 16
 
   # Ejection balance
   # Defaults to 16ETH
