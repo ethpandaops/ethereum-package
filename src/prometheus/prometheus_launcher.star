@@ -1,7 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-prometheus = import_module(
-    "github.com/kurtosis-tech/prometheus-package/main.star"
-)
+prometheus = import_module("github.com/kurtosis-tech/prometheus-package/main.star")
 
 EXECUTION_CLIENT_TYPE = "execution"
 BEACON_CLIENT_TYPE = "beacon"
