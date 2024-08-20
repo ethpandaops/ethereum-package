@@ -31,7 +31,6 @@ def launch_dora(
     config_template,
     participant_contexts,
     participant_configs,
-    el_cl_data_files_artifact_uuid,
     network_params,
     dora_params,
     global_node_selectors,
@@ -89,10 +88,8 @@ def launch_dora(
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "dora-config"
     )
-    el_cl_data_files_artifact_uuid = el_cl_data_files_artifact_uuid
     config = get_config(
         config_files_artifact_name,
-        el_cl_data_files_artifact_uuid,
         network_params,
         dora_params,
         global_node_selectors,
@@ -105,7 +102,6 @@ def launch_dora(
 
 def get_config(
     config_files_artifact_name,
-    el_cl_data_files_artifact_uuid,
     network_params,
     dora_params,
     node_selectors,
@@ -126,8 +122,6 @@ def get_config(
 
     if dora_params.image != "":
         IMAGE_NAME = dora_params.image
-    elif network_params.electra_fork_epoch < 100000000:
-        IMAGE_NAME = "ethpandaops/dora:electra-support"
     else:
         IMAGE_NAME = "ethpandaops/dora:latest"
 
@@ -138,7 +132,6 @@ def get_config(
         files={
             DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
         cmd=["-config", config_file_path],
         env_vars=dora_params.env,

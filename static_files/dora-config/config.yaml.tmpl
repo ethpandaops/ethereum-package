@@ -4,10 +4,6 @@ logging:
 
 # Chain network configuration
 chain:
-  name: {{ .Network }}
-{{ if not .PublicNetwork }}
-  configPath: "/network-configs/config.yaml"
-{{ end }}
   displayName: "{{ .Network }}"
 
 # HTTP Server configuration
@@ -60,14 +56,20 @@ indexer:
   # max number of epochs to keep in memory
   inMemoryEpochs: 8
 
-  # number of epochs to wait before storing unfinalized blocks to db
-  cachePersistenceDelay: 8
+  # disable synchronizing historic data
+  disableSynchronizer: false
 
-  # disable synchronizing and everything that writes to the db (indexer just maintains local cache)
-  disableIndexWriter: false
+  # reset synchronization state to this epoch on startup - only use to resync database, comment out afterwards
+  #resyncFromEpoch: 0
 
-  # number of seconds to wait between each epoch (don't overload CL client)
+  # force re-synchronization of epochs that are already present in DB - only use to fix missing data after schema upgrades
+  #resyncForceUpdate: true
+
+  # number of seconds to pause the synchronization between each epoch (don't overload CL client)
   syncEpochCooldown: 1
+
+  # maximum number of parallel beacon state requests (might cause high memory usage)
+  maxParallelValidatorSetRequests: 2
 
 mevIndexer:
   # list of mev relays to crawl mev blocks from
