@@ -101,6 +101,7 @@ def input_parser(plan, input_args):
     result["disable_peer_scoring"] = False
     result["goomy_blob_params"] = get_default_goomy_blob_params()
     result["assertoor_params"] = get_default_assertoor_params()
+    result["prometheus_params"] = get_default_prometheus_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
     result["parallel_keystore_generation"] = False
@@ -321,6 +322,14 @@ def input_parser(plan, input_args):
         ),
         goomy_blob_params=struct(
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
+        ),
+        prometheus_params=struct(
+            storage_tsdb_retention_time=result["prometheus_params"][
+                "storage_tsdb_retention_time"
+            ],
+            storage_tsdb_retention_size=result["prometheus_params"][
+                "storage_tsdb_retention_size"
+            ],
         ),
         apache_port=result["apache_port"],
         assertoor_params=struct(
@@ -922,6 +931,8 @@ def get_default_mev_params(mev_type, preset):
     mev_builder_prometheus_config = {
         "scrape_interval": "15s",
         "labels": None,
+        "storage_tsdb_retention_time": "1d",
+        "storage_tsdb_retention_size": "512MB",
     }
 
     if mev_type == constants.MEV_RS_MEV_TYPE:
@@ -976,6 +987,13 @@ def get_default_assertoor_params():
         "run_blob_transaction_test": False,
         "run_opcodes_transaction_test": False,
         "tests": [],
+    }
+
+
+def get_default_prometheus_params():
+    return {
+        "storage_tsdb_retention_time": "1d",
+        "storage_tsdb_retention_size": "512MB",
     }
 
 

@@ -638,6 +638,8 @@ def run(plan, args={}):
             all_ethereum_metrics_exporter_contexts,
             all_xatu_sentry_contexts,
             global_node_selectors,
+            args_with_right_defaults.prometheus_params.storage_tsdb_retention_time,
+            args_with_right_defaults.prometheus_params.storage_tsdb_retention_size,
         )
 
         plan.print("Launching grafana...")
