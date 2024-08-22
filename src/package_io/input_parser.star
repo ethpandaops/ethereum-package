@@ -856,7 +856,6 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "el_extra_params": [
                     "--builder",
                     "--builder.remote_relay_endpoint=http://mev-relay-api:9062",
-                    "--builder.mev_sidecar_endpoint=http://mev-sidecar-api:9061",
                     "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth-builder:4000".format(
                         index_str
                     ),
