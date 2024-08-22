@@ -28,6 +28,7 @@ def launch_prometheus(
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
     global_node_selectors,
+    mev_sidecar_context,
 ):
     metrics_jobs = get_metrics_jobs(
         el_contexts,
@@ -36,6 +37,7 @@ def launch_prometheus(
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
         xatu_sentry_contexts,
+        mev_sidecar_context,
     )
     prometheus_url = prometheus.run(
         plan,
@@ -58,6 +60,7 @@ def get_metrics_jobs(
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
+    mev_sidecar_context,
 ):
     metrics_jobs = []
     # Adding execution clients metrics jobs
@@ -186,6 +189,20 @@ def get_metrics_jobs(
         if job == None:
             continue
         metrics_jobs.append(job)
+
+    # Adding mev-sidecar metrics job
+    if mev_sidecar_context != None:
+        metrics_jobs.append(
+            new_metrics_job(
+                job_name="mev-sidecar",
+                endpoint="{}:{}".format(
+                    mev_sidecar_context.ip_addr,
+                    mev_sidecar_context.metrics_port_num,
+                ),
+                metrics_path="/metrics",
+                labels={},
+            )
+        )
 
     return metrics_jobs
 

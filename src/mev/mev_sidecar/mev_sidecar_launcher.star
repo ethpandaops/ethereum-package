@@ -88,6 +88,7 @@ def launch_mev_sidecar(
         ),
     )
 
-    return "http://{0}:{1}".format(
-        api.ip_address, MEV_SIDECAR_ENDPOINT_PORT
+    return struct(
+        ip_addr=api.ip_address,
+        metrics_port_num=MEV_SIDECAR_METRICS_PORT,
     )
