@@ -3,6 +3,7 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 genesis_constants = import_module(
     "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
+mev_sidecar = import_module("../mev/mev_sidecar/mev_sidecar_launcher.star")
 
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
@@ -143,7 +144,7 @@ def input_parser(plan, input_args):
         result = enrich_mev_extra_params(
             result,
             MEV_BOOST_SERVICE_NAME_PREFIX,
-            FLASHBOTS_MEV_BOOST_PORT,
+            mev_sidecar.MEV_SIDECAR_BOOST_PROXY_PORT,
             result.get("mev_type"),
         )
 
@@ -794,13 +795,17 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         index_str = shared_utils.zfill_custom(
             index + 1, len(str(len(parsed_arguments_dict["participants"])))
         )
-        mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
-            MEV_BOOST_SERVICE_NAME_PREFIX,
-            index_str,
-            participant["cl_type"],
-            participant["el_type"],
-            mev_port,
-        )
+
+        # mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
+        #     MEV_BOOST_SERVICE_NAME_PREFIX,
+        #     index_str,
+        #     participant["cl_type"],
+        #     participant["el_type"],
+        #     mev_port,
+        # )
+
+        # connection: beacon node -> mev-boost
+        mev_url = "http://mev-sidecar-api:{0}".format(mev_port)
 
         if participant["cl_type"] == "lighthouse":
             participant["vc_extra_params"].append("--builder-proposals")

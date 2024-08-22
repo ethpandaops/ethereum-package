@@ -290,7 +290,17 @@ def run(plan, args={}):
                     mev_params,
                     global_node_selectors,
                     mev_boost_context,
-                    all_cl_contexts[0].beacon_http_url
+                    all_cl_contexts[0].beacon_http_url,
+                    "http://{0}:{1}".format(
+                        all_el_contexts[0].ip_addr,
+                        all_el_contexts[0].rpc_port_num,
+                    ),
+                    "http://{0}:{1}".format(
+                        all_el_contexts[0].ip_addr,
+                        all_el_contexts[0].engine_rpc_port_num
+                    ),
+                    raw_jwt_secret,
+                    network_params.seconds_per_slot
                 )
 
     if len(args_with_right_defaults.additional_services) == 0:

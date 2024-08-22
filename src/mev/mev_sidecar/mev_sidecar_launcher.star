@@ -6,6 +6,7 @@ mev_boost_context_util = import_module("../mev_boost/mev_boost_context.star")
 MEV_SIDECAR_ENDPOINT = "mev-sidecar-api"
 
 MEV_SIDECAR_ENDPOINT_PORT = 9061
+MEV_SIDECAR_BOOST_PROXY_PORT = 9062
 
 # The min/max CPU/memory that mev-sidecar can use
 MEV_SIDECAR_MIN_CPU = 100
@@ -18,12 +19,16 @@ def launch_mev_sidecar(
     mev_params,
     node_selectors,
     mev_boost_context,
-    beacon_client_url
+    beacon_api_url,
+    execution_api_url,
+    engine_api_url,
+    raw_jwt_secret,
+    seconds_per_slot,
 ):
     image = mev_params.mev_sidecar_image
 
     env_vars = {
-        "RUST_LOG": "info",
+        "RUST_LOG": "bolt_sidecar=trace",
     }
 
     api = plan.add_service(
@@ -31,7 +36,6 @@ def launch_mev_sidecar(
         config=ServiceConfig(
             image=image,
             cmd=[
-                "/bolt-sidecar",
                 "--port",
                 str(MEV_SIDECAR_ENDPOINT_PORT),
                 "--private-key",
@@ -39,14 +43,35 @@ def launch_mev_sidecar(
                 "18d1c5302e734fd6fbfaa51828d42c4c6d3cbe020c42bab7dd15a2799cf00b82",
                 "--mevboost-url",
                 mev_boost_context_util.mev_boost_endpoint(mev_boost_context),
-                "--beacon-client-url",
-                beacon_client_url
+                "--mevboost-proxy-port",
+                str(MEV_SIDECAR_BOOST_PROXY_PORT),
+                "--beacon-api-url",
+                beacon_api_url,
+                "--execution-api-url",
+                execution_api_url,
+                "--engine-api-url",
+                engine_api_url,
+                "--fee-recipient",
+                "0x0000000000000000000000000000000000000000",
+                "--jwt-hex",
+                raw_jwt_secret,
+                "--commitment-deadline",
+                str(100),
+                "--chain",
+                "kurtosis",
+                "--validator-indexes",
+                "0..64",
+                "--slot-time",
+                str(seconds_per_slot),
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
                 "api": PortSpec(
                     number=MEV_SIDECAR_ENDPOINT_PORT, transport_protocol="TCP"
-                )
+                ),
+                "mevboost-proxy": PortSpec(
+                    number=MEV_SIDECAR_BOOST_PROXY_PORT, transport_protocol="TCP"
+                ),
             },
             env_vars=env_vars,
             min_cpu=MEV_SIDECAR_MIN_CPU,
