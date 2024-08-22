@@ -7,6 +7,7 @@ MEV_SIDECAR_ENDPOINT = "mev-sidecar-api"
 
 MEV_SIDECAR_ENDPOINT_PORT = 9061
 MEV_SIDECAR_BOOST_PROXY_PORT = 9062
+MEV_SIDECAR_METRICS_PORT = 9063
 
 # The min/max CPU/memory that mev-sidecar can use
 MEV_SIDECAR_MIN_CPU = 100
@@ -63,6 +64,8 @@ def launch_mev_sidecar(
                 "0..64",
                 "--slot-time",
                 str(seconds_per_slot),
+                "--metrics-port",
+                str(MEV_SIDECAR_METRICS_PORT),
             ],
             # + mev_params.mev_relay_api_extra_args,
             ports={
@@ -71,6 +74,9 @@ def launch_mev_sidecar(
                 ),
                 "mevboost-proxy": PortSpec(
                     number=MEV_SIDECAR_BOOST_PROXY_PORT, transport_protocol="TCP"
+                ),
+                "metrics": PortSpec(
+                    number=MEV_SIDECAR_METRICS_PORT, transport_protocol="TCP"
                 ),
             },
             env_vars=env_vars,
