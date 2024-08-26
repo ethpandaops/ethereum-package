@@ -289,6 +289,7 @@ def input_parser(plan, input_args):
                 "additional_preloaded_contracts"
             ],
             devnet_repo=result["network_params"]["devnet_repo"],
+            prefunded_accounts=result["network_params"]["prefunded_accounts"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -811,6 +812,7 @@ def default_network_params():
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
+        "prefunded_accounts": {},
     }
 
 
@@ -844,6 +846,7 @@ def default_minimal_network_params():
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
+        "prefunded_accounts": {},
     }
 
 

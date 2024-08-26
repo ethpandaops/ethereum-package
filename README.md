@@ -533,17 +533,31 @@ network_params:
 
   # Preloaded contracts for the chain
   additional_preloaded_contracts: {}
-  # example: To set a contract code at a certain address:
+  # Example:
+  # additional_preloaded_contracts: '{
   #  "0x123463a4B065722E99115D6c222f267d9cABb524":
-  #    balance: "1ETH"
-  #    code: "0x1234"
-  #    storage: {}
-  #    nonce: 0
-  #    secretKey: "0x"
+  #   {
+  #     balance: "1ETH",
+  #     code: "0x1234",
+  #     storage: {},
+  #     nonce: 0,
+  #     secretKey: "0x",
+  #   }
+  # }'
 
   # Repository override for devnet networks
   # Default: ethpandaops
   devnet_repo: ethpandaops
+
+  # A number of prefunded accounts to be created
+  # Defaults to no prefunded accounts
+  # Example:
+  # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}}'
+  # 10ETH to the account 0x25941dC771bB64514Fc8abBce970307Fb9d477e9
+  # To prefund multiple accounts, separate them with a comma
+  #
+  # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}, "0x4107be99052d895e3ee461C685b042Aa975ab5c0": {"balance": "1ETH"}}'
+  prefunded_accounts: {}
 
 # Global parameters for the network
 
