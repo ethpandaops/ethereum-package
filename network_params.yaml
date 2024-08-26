@@ -85,6 +85,7 @@ network_params:
   max_blobs_per_block: 6
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
+  prefunded_accounts: {}
 additional_services: []
 dora_params:
   image: ""

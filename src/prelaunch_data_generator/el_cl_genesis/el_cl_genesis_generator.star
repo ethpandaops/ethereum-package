@@ -129,4 +129,5 @@ def new_env_file_for_el_cl_genesis_data(
         "AdditionalPreloadedContracts": json.encode(
             network_params.additional_preloaded_contracts
         ),
+        "PrefundedAccounts": network_params.prefunded_accounts,
     }

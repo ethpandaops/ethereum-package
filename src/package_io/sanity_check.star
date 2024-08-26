@@ -142,6 +142,7 @@ SUBCATEGORY_PARAMS = {
         "preset",
         "additional_preloaded_contracts",
         "devnet_repo",
+        "prefunded_accounts",
     ],
     "dora_params": [
         "image",
