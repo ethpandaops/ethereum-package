@@ -203,7 +203,7 @@ def get_config(
         if (
             electra_fork_epoch == 0 or constants.NETWORK_NAME.verkle + "-gen" in network
         ):  # verkle-gen
-            init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
+            init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.verkle={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
                 prague_time,
                 constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
@@ -250,7 +250,7 @@ def get_config(
         ),
         # Override prague fork timestamp if electra_fork_epoch == 0
         "{0}".format(
-            "--override.prague=" + str(prague_time)
+            "--override.verkle=" + str(prague_time)
             if electra_fork_epoch == 0 or "verkle-gen" in network
             else ""
         ),
@@ -322,7 +322,7 @@ def get_config(
         if (
             constants.NETWORK_NAME.shadowfork in network and "verkle" in network
         ):  # verkle shadowfork
-            cmd.append("--override.prague=" + str(prague_time))
+            cmd.append("--override.verkle=" + str(prague_time))
             cmd.append("--override.overlay-stride=10000")
             cmd.append("--override.blockproof=true")
             cmd.append("--clear.verkle.costs=true")
