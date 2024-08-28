@@ -52,19 +52,14 @@ def get_config(
         goomy_args = "combined -b 2 -t 2 --max-pending 3"
     goomy_cli_args.append(goomy_args)
 
+    cmd = "./blob-spammer -p {0} {1}".format(
+        prefunded_addresses[4].private_key, " ".join(goomy_cli_args)
+    )
+
     return ServiceConfig(
         image=IMAGE_NAME,
         entrypoint=ENTRYPOINT_ARGS,
-        cmd=[
-            " && ".join(
-                [
-                    "./blob-spammer -p {0} {1}".format(
-                        prefunded_addresses[4].private_key,
-                        " ".join(goomy_cli_args),
-                    ),
-                ]
-            )
-        ],
+        cmd=[cmd],
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
