@@ -1,0 +1,25 @@
+participants_matrix:
+  el:
+    - el_type: nethermind
+      el_image: nethermindeth/nethermind:pectra-fix
+    - el_type: geth
+      el_image: ethpandaops/geth:lightclient-prague-devnet-1-37c4b03
+    - el_type: ethereumjs
+      el_image: ethpandaops/ethereumjs:master-b543d2f
+    - el_type: erigon
+      el_image: ethpandaops/erigon:main-faa564e
+    - el_type: reth
+      el_image: ethpandaops/reth:onbjerg-devnet-2-36bc13d
+    - el_type: besu
+      el_image: ethpandaops/besu:main-ec8429f
+  cl:
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:electra-devnet-1-ba28217
+network_params:
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+additional_services:
+  - dora
+  - apache
+snooper_enabled: true
+persistent: true
