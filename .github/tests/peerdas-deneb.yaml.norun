@@ -1,0 +1,55 @@
+participants:
+# Supernodes
+  - cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:peerDAS
+    cl_extra_params: [--subscribe-all-subnets, --pprof]
+    cl_max_mem: 4096
+    count: 2
+  # - cl_type: lighthouse
+  #   cl_image: ethpandaops/lighthouse:unstable
+  #   cl_extra_params: [--subscribe-all-data-column-subnets]
+  #- cl_type: teku
+  #  cl_image: ethpandaops/teku:nashatyrev-das
+  #   cl_extra_params: [--p2p-subscribe-all-custody-subnets-enabled]
+  # - cl_type: nimbus
+  #   cl_image: ethpandaops/nimbus-eth2:pdsync-minimal
+  #   cl_extra_params: [--subscribe-all-subnets=true, --sync-light-client=no ]
+  #   count: 2
+  # - cl_type: lodestar
+  #   cl_image: ethpandaops/lodestar:peerDAS
+  #   cl_extra_params: [--persistNetworkIdentity, --supernode]
+# # Non supernodes
+  - cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:peerDAS
+    cl_max_mem: 4096
+  # - cl_type: lighthouse
+  #   cl_image: ethpandaops/lighthouse:unstable
+  #- cl_type: teku
+  #  cl_image: ethpandaops/teku:nashatyrev-das
+  # - cl_type: nimbus
+  #   cl_image: ethpandaops/nimbus-eth2:pdsync-minimal
+  #   cl_extra_params: [--sync-light-client=no]
+  # - cl_type: lodestar
+  #   cl_image: ethpandaops/lodestar:peerDAS
+  #   cl_extra_params: [--persistNetworkIdentity]
+network_params:
+  eip7594_fork_epoch: 0
+  eip7594_fork_version: "0x50000038"
+  #preset: minimal
+snooper_enabled: true
+global_log_level: debug
+additional_services:
+  - dora
+  - goomy_blob
+  - prometheus_grafana
+  - assertoor
+dora_params:
+  image: ethpandaops/dora:peerdas-as-deneb
+ethereum_metrics_exporter_enabled: true
+assertoor_params:
+  run_stability_check: false
+  run_block_proposal_check: false
+  tests:
+    - { file: "https://raw.githubusercontent.com/ethpandaops/assertoor-test/master/assertoor-tests/block-proposal-check.yaml" }
+    - { file: "https://raw.githubusercontent.com/ethpandaops/assertoor-test/master/assertoor-tests/blob-transactions-test.yaml" }
+    - { file: "https://raw.githubusercontent.com/ethpandaops/assertoor-test/master/assertoor-tests/stability-check.yaml" }

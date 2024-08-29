@@ -1,6 +1,6 @@
 participants:
   - el_type: geth
-    el_image: ethpandaops/geth:t8n-verkle-exec-rebased
+    el_image: ethpandaops/geth:kaustinen-with-shapella
     el_extra_params:
       - "--override.blockproof=true"
       - "--override.overlay-stride=100"
@@ -9,7 +9,7 @@ participants:
     cl_image: ethpandaops/lighthouse:verkle-trees-capella-2ffb8a9
     count: 2
   - el_type: geth
-    el_image: ethpandaops/geth:t8n-verkle-exec-rebased
+    el_image: ethpandaops/geth:kaustinen-with-shapella
     el_extra_params:
       - "--override.blockproof=true"
       - "--override.overlay-stride=100"

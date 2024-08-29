@@ -134,7 +134,9 @@ NETWORK_ID = {
 
 CHECKPOINT_SYNC_URL = {
     "mainnet": "https://beaconstate.info",
-    "ephemery": "https://checkpointz.bordel.wtf/",
+    "ephemery": "https://checkpoint-sync.ephemery.ethpandaops.io/",
+    "sepolia": "https://checkpoint-sync.sepolia.ethpandaops.io/",
+    "holesky": "https://checkpoint-sync.holesky.ethpandaops.io/",
 }
 
 GENESIS_VALIDATORS_ROOT = {

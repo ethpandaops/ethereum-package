@@ -172,13 +172,13 @@ def launch(
     nodes_metrics_info = [beacon_node_metrics_info]
 
     return cl_context.new_cl_context(
-        "teku",
-        beacon_node_enr,
-        beacon_service.ip_address,
-        beacon_http_port.number,
-        beacon_http_url,
-        nodes_metrics_info,
-        beacon_service_name,
+        client_name="teku",
+        enr=beacon_node_enr,
+        ip_addr=beacon_service.ip_address,
+        http_port=beacon_http_port.number,
+        beacon_http_url=beacon_http_url,
+        cl_nodes_metrics_info=nodes_metrics_info,
+        beacon_service_name=beacon_service_name,
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
         snooper_enabled=snooper_enabled,
@@ -327,15 +327,16 @@ def get_beacon_config(
         if checkpoint_sync_url:
             cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
         else:
-            if network in ["mainnet", "ephemery"]:
+            if (
+                network in constants.PUBLIC_NETWORKS
+                or network == constants.NETWORK_NAME.ephemery
+            ):
                 cmd.append(
                     "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
                 )
             else:
-                cmd.append(
-                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
+                fail(
+                    "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
                 )
 
     if network not in constants.PUBLIC_NETWORKS:
