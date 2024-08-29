@@ -4,7 +4,7 @@ el_cl_genesis_data = import_module(
 )
 
 
-def launch(plan, cancun_time, prague_time):
+def launch(plan, cancun_time, verkle_time):
     el_cl_genesis_data_uuid = plan.run_sh(
         run="mkdir -p /network-configs/ && \
             curl -o latest.tar.gz https://ephemery.dev/latest.tar.gz && \
@@ -18,7 +18,7 @@ def launch(plan, cancun_time, prague_time):
         el_cl_genesis_data_uuid.files_artifacts[0],
         genesis_validators_root,
         cancun_time,
-        prague_time,
+        verkle_time,
     )
     final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
         plan, el_cl_genesis_data_uuid.files_artifacts[0]

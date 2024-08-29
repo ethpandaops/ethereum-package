@@ -96,8 +96,8 @@ def generate_el_cl_genesis_data(
         files={"/data": genesis.files_artifacts[0]},
     )
 
-    prague_time = plan.run_sh(
-        run="jq .config.pragueTime /data/genesis.json | tr -d '\n'",
+    verkle_time = plan.run_sh(
+        run="jq .config.verkleTime /data/genesis.json | tr -d '\n'",
         image="badouralix/curl-jq",
         files={"/data": genesis.files_artifacts[0]},
     )
@@ -106,7 +106,7 @@ def generate_el_cl_genesis_data(
         genesis.files_artifacts[0],
         genesis_validators_root.output,
         cancun_time.output,
-        prague_time.output,
+        verkle_time.output,
     )
 
     return result

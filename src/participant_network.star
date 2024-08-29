@@ -43,7 +43,7 @@ def launch_participant_network(
     latest_block = ""
     num_participants = len(participants)
     cancun_time = 0
-    prague_time = 0
+    verkle_time = 0
     shadowfork_block = "latest"
     if (
         constants.NETWORK_NAME.shadowfork in network_params.network
@@ -111,7 +111,7 @@ def launch_participant_network(
             network_id,
             validator_data,
         ) = launch_public_network.launch(
-            plan, network_params.network, cancun_time, prague_time
+            plan, network_params.network, cancun_time, verkle_time
         )
     elif network_params.network == constants.NETWORK_NAME.ephemery:
         # We are running an ephemery network
@@ -120,7 +120,7 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_ephemery.launch(plan, cancun_time, prague_time)
+        ) = launch_ephemery.launch(plan, cancun_time, verkle_time)
     else:
         # We are running a devnet
         (
@@ -128,7 +128,7 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_devnet.launch(plan, network_params.network, cancun_time, prague_time)
+        ) = launch_devnet.launch(plan, network_params.network, cancun_time, verkle_time)
 
     # Launch all execution layer clients
     all_el_contexts = el_client_launcher.launch(

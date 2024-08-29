@@ -138,7 +138,7 @@ def launch(
         launcher.capella_fork_epoch,
         launcher.electra_fork_epoch,
         launcher.cancun_time,
-        launcher.prague_time,
+        launcher.verkle_time,
         persistent,
         el_volume_size,
         tolerations,
@@ -190,7 +190,7 @@ def get_config(
     capella_fork_epoch,
     electra_fork_epoch,
     cancun_time,
-    prague_time,
+    verkle_time,
     persistent,
     el_volume_size,
     tolerations,
@@ -205,7 +205,7 @@ def get_config(
         ):  # verkle-gen
             init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.verkle={1} init {2}".format(
                 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-                prague_time,
+                verkle_time,
                 constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
             )
         else:  # verkle
@@ -250,7 +250,7 @@ def get_config(
         ),
         # Override prague fork timestamp if electra_fork_epoch == 0
         "{0}".format(
-            "--override.verkle=" + str(prague_time)
+            "--override.verkle=" + str(verkle_time)
             if electra_fork_epoch == 0 or "verkle-gen" in network
             else ""
         ),
@@ -322,7 +322,7 @@ def get_config(
         if (
             constants.NETWORK_NAME.shadowfork in network and "verkle" in network
         ):  # verkle shadowfork
-            cmd.append("--override.verkle=" + str(prague_time))
+            cmd.append("--override.verkle=" + str(verkle_time))
             cmd.append("--override.overlay-stride=10000")
             cmd.append("--override.blockproof=true")
             cmd.append("--clear.verkle.costs=true")
@@ -388,7 +388,7 @@ def new_geth_launcher(
     networkid,
     capella_fork_epoch,
     cancun_time,
-    prague_time,
+    verkle_time,
     electra_fork_epoch=None,
 ):
     return struct(
@@ -398,6 +398,6 @@ def new_geth_launcher(
         networkid=networkid,
         capella_fork_epoch=capella_fork_epoch,
         cancun_time=cancun_time,
-        prague_time=prague_time,
+        verkle_time=verkle_time,
         electra_fork_epoch=electra_fork_epoch,
     )

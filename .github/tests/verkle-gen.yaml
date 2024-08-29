@@ -1,12 +1,12 @@
 participants:
   - el_type: geth
-    el_image: ethpandaops/geth:kaustinen-with-shapella
+    el_image: ethpandaops/geth:gballet-kaustinen-with-shapella
     # el_extra_params:
       # - "--override.blockproof=true"
       # - "--override.overlay-stride=100"
     el_max_mem: 4000
     cl_type: lodestar
-    cl_image: ethpandaops/lodestar:g11tech-verge-815364b
+    cl_image: ethpandaops/lodestar:g11tech-verge-b55dc6d
     count: 2
 network_params:
   electra_fork_epoch: 0

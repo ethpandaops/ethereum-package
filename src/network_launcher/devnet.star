@@ -4,7 +4,7 @@ el_cl_genesis_data = import_module(
 )
 
 
-def launch(plan, network, cancun_time, prague_time):
+def launch(plan, network, cancun_time, verkle_time):
     # We are running a devnet
     url = shared_utils.calculate_devnet_url(network)
     el_cl_genesis_uuid = plan.upload_files(
@@ -22,7 +22,7 @@ def launch(plan, network, cancun_time, prague_time):
         el_cl_genesis_data_uuid.files_artifacts[0],
         genesis_validators_root,
         cancun_time,
-        prague_time,
+        verkle_time,
     )
     final_genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
         plan, el_cl_genesis_data_uuid.files_artifacts[0]
