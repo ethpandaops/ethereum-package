@@ -184,17 +184,17 @@ def launch(
     )
     nodes_metrics_info = [beacon_node_metrics_info]
     return cl_context.new_cl_context(
-        "lighthouse",
-        beacon_node_enr,
-        beacon_service.ip_address,
-        beacon_http_port.number,
-        beacon_http_url,
-        nodes_metrics_info,
-        beacon_service_name,
-        beacon_multiaddr,
-        beacon_peer_id,
-        snooper_enabled,
-        snooper_engine_context,
+        client_name="lighthouse",
+        enr=beacon_node_enr,
+        ip_addr=beacon_service.ip_address,
+        http_port=beacon_http_port.number,
+        beacon_http_url=beacon_http_url,
+        cl_nodes_metrics_info=nodes_metrics_info,
+        beacon_service_name=beacon_service_name,
+        multiaddr=beacon_multiaddr,
+        peer_id=beacon_peer_id,
+        snooper_enabled=snooper_enabled,
+        snooper_engine_context=snooper_engine_context,
         validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
         if node_keystore_files
         else "",

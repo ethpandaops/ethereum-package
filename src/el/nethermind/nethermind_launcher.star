@@ -119,18 +119,16 @@ def launch(
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        "nethermind",
-        "",  # nethermind has no ENR in the eth2-merge-kurtosis-module either
-        # Nethermind node info endpoint doesn't return ENR field https://docs.nethermind.io/nethermind/ethereum-client/json-rpc/admin
-        enode,
-        service.ip_address,
-        RPC_PORT_NUM,
-        WS_PORT_NUM,
-        ENGINE_RPC_PORT_NUM,
-        http_url,
-        ws_url,
-        service_name,
-        [nethermind_metrics_info],
+        client_name="nethermind",
+        enode=enode,
+        ip_addr=service.ip_address,
+        rpc_port_num=RPC_PORT_NUM,
+        ws_port_num=WS_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        service_name=service_name,
+        el_metrics_info=[nethermind_metrics_info],
     )
 
 

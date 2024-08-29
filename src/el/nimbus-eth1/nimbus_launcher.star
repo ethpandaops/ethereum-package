@@ -120,17 +120,16 @@ def launch(
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_RPC_PORT_NUM)
 
     return el_context.new_el_context(
-        "nimbus",
-        "",  # nimbus has no enr
-        enode,
-        service.ip_address,
-        WS_RPC_PORT_NUM,
-        WS_RPC_PORT_NUM,
-        ENGINE_RPC_PORT_NUM,
-        http_url,
-        ws_url,
-        service_name,
-        [nimbus_metrics_info],
+        client_name="nimbus",
+        enode=enode,
+        ip_addr=service.ip_address,
+        rpc_port_num=constants.RPC_PORT_NUM,
+        ws_port_num=constants.WS_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        service_name=service_name,
+        el_metrics_info=[nimbus_metrics_info],
     )
 
 
