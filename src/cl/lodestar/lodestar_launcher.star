@@ -297,15 +297,13 @@ def get_beacon_config(
         if checkpoint_sync_url:
             cmd.append("--checkpointSyncUrl=" + checkpoint_sync_url)
         else:
-            if network in ["mainnet", "ephemery"]:
+            if network in constants.PUBLIC_NETWORKS:
                 cmd.append(
-                    "--checkpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network]
+                    "--ccheckpointSyncUrl=" + constants.CHECKPOINT_SYNC_URL[network]
                 )
             else:
-                cmd.append(
-                    "--checkpointSyncUrl=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
+                fail(
+                    "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
                 )
 
     if network not in constants.PUBLIC_NETWORKS:

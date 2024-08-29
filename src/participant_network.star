@@ -96,14 +96,6 @@ def launch_participant_network(
             total_number_of_validator_keys,
             latest_block.files_artifacts[0] if latest_block != "" else "",
         )
-    elif network_params.network in constants.PUBLIC_NETWORKS:
-        # We are running a public network
-        (
-            el_cl_data,
-            final_genesis_timestamp,
-            network_id,
-            validator_data,
-        ) = launch_public_network.launch(plan, network_params.network, prague_time)
     elif network_params.network == constants.NETWORK_NAME.ephemery:
         # We are running an ephemery network
         (
@@ -112,6 +104,17 @@ def launch_participant_network(
             network_id,
             validator_data,
         ) = launch_ephemery.launch(plan, prague_time)
+    elif (
+        network_params.network in constants.PUBLIC_NETWORKS
+        and network_params.network != constants.NETWORK_NAME.ephemery
+    ):
+        # We are running a public network
+        (
+            el_cl_data,
+            final_genesis_timestamp,
+            network_id,
+            validator_data,
+        ) = launch_public_network.launch(plan, network_params.network, prague_time)
     else:
         # We are running a devnet
         (
