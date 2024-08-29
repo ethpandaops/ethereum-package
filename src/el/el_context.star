@@ -12,7 +12,6 @@ def new_el_context(
     el_metrics_info=None,
 ):
     return struct(
-        service_name=service_name,
         client_name=client_name,
         enode=enode,
         ip_addr=ip_addr,
