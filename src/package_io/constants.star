@@ -124,7 +124,6 @@ PUBLIC_NETWORKS = (
     "mainnet",
     "sepolia",
     "holesky",
-    "ephemery",
 )
 
 NETWORK_ID = {

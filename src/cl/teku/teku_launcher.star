@@ -327,7 +327,10 @@ def get_beacon_config(
         if checkpoint_sync_url:
             cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
         else:
-            if network in constants.PUBLIC_NETWORKS:
+            if (
+                network in constants.PUBLIC_NETWORKS
+                or network == constants.NETWORK_NAME.ephemery
+            ):
                 cmd.append(
                     "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
                 )

@@ -288,7 +288,10 @@ def get_beacon_config(
                 "--genesis-beacon-api-url=" + constants.CHECKPOINT_SYNC_URL[network]
             )
         else:
-            if network in constants.PUBLIC_NETWORKS:
+            if (
+                network in constants.PUBLIC_NETWORKS
+                or network == constants.NETWORK_NAME.ephemery
+            ):
                 cmd.append(
                     "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
                 )
