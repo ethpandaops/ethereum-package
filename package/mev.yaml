@@ -1,0 +1,22 @@
+participants:
+  - el_type: reth
+    el_image: 192.168.45.152:80/dh/ethpandaops/reth:devnet-0
+    cl_type: lighthouse
+    cl_image: 192.168.45.152:80/dh/ethpandaops/lighthouse:ef-tests-electra
+  - el_type: reth
+    el_image: 192.168.45.152:80/dh/ethpandaops/reth:devnet-0
+    cl_type: lighthouse
+    cl_image: 192.168.45.152:80/dh/ethpandaops/lighthouse:ef-tests-electra
+    count: 2
+network_params:
+  electra_fork_epoch: 1
+additional_services:
+  - dora
+  - tx_spammer
+  - goomy_blob
+mev_type: mev-rs
+mev_params:
+  mev_relay_image: 192.168.45.152:80/dh/ralexstokes/mev-rs:electra-devnet-0
+  mev_builder_image: 192.168.45.152:80/dh/ralexstokes/mev-rs:electra-devnet-0
+  mev_boost_image: 192.168.45.152:80/dh/ralexstokes/mev-rs:electra-devnet-0
+  mev_builder_cl_image: 192.168.45.152:80/dh/ethpandaops/lighthouse:ef-tests-electra

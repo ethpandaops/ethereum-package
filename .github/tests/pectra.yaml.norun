@@ -1,30 +1,14 @@
 participants_matrix:
   el:
-    - el_type: nethermind
-      el_image: nethermindeth/nethermind:pectra
-    - el_type: geth
-      el_image: ethpandaops/geth:prague-devnet-2
-    - el_type: ethereumjs
-      el_image: ethpandaops/ethereumjs:master
-    - el_type: erigon
-      el_image: thorax/erigon:docker_pectra
-    - el_type: reth
-      el_image: ethpandaops/reth:onbjerg-devnet-2
-    - el_type: besu
-      el_image: ethpandaops/besu:main
+     - el_type: reth
+       el_image: ethpandaops/reth:onbjerg-devnet-3
+     - el_type: nethermind
+       el_image: nethermindeth/nethermind:pectra
+     - el_type: erigon
+       el_image: ethpandaops/erigon:docker_pectra
   cl:
-    - cl_type: lighthouse
-      cl_image: ethpandaops/lighthouse:electra-devnet-1-51d51f5
-    - cl_type: teku
-      cl_image: ethpandaops/teku:master
     - cl_type: nimbus
       cl_image: ethpandaops/nimbus-eth2:unstable
-    - cl_type: lodestar
-      cl_image: ethpandaops/lodestar:electra-fork-rebasejul30
-    - cl_type: grandine
-      cl_image: ethpandaops/grandine:electra
-    - cl_type: prysm
-      cl_image: ethpandaops/prysm-beacon-chain:develop
 network_params:
   electra_fork_epoch: 1
   min_validator_withdrawability_delay: 1
