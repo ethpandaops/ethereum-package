@@ -28,26 +28,44 @@ tasks:
         walletPrivkey: "walletPrivkey"
         mnemonic: "validatorMnemonic"
 
-    - name: run_task_options
-      title: "Check deposit inclusion"
+    - name: run_task_background
+      title: "Check deposit inclusion with all client pairs"
       config:
-        ignoreFailure: true
-        task:
-          name: run_task_matrix
-          title: "Check deposit inclusion with all client pairs"
-          timeout: 48h
-          configVars:
-            matrixValues: "validatorPairNames"
+        onBackgroundComplete: succeed
+        backgroundTask:
+          name: run_tasks
+          title: "Await end of next deposit voting period"
           config:
-            runConcurrent: true
-            matrixVar: "validatorPairName"
-            task:
-              name: check_consensus_block_proposals
-              title: "Wait for block proposal with deposits from ${validatorPairName}"
-              configVars:
-                validatorNamePattern: "validatorPairName"
+            tasks:
+            - name: check_consensus_validator_status
+              title: "Wait for inclusion of the last deposit"
               config:
-                minDepositCount: 1
+                validatorPubKey: 0xa4a6121cb76eaf63e520615368a21d504c6f7363b5045f965e3587f623a6f7f1ce32af63ce3c535e75cd831db27c5abd
+                validatorStatus:
+                - pending_initialized
+                - pending_queued
+                - active_ongoing
+        foregroundTask:
+          name: run_task_options
+          title: "Check deposit inclusion"
+          config:
+            ignoreFailure: true
+            task:
+              name: run_task_matrix
+              title: "Check deposit inclusion with all client pairs"
+              timeout: 48h
+              configVars:
+                matrixValues: "validatorPairNames"
+              config:
+                runConcurrent: true
+                matrixVar: "validatorPairName"
+                task:
+                  name: check_consensus_block_proposals
+                  title: "Wait for block proposal with deposits from ${validatorPairName}"
+                  configVars:
+                    validatorNamePattern: "validatorPairName"
+                  config:
+                    minDepositCount: 1
     
 # due to the deposits we should reach un-finality soon.
 - name: check_consensus_validator_status
