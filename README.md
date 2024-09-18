@@ -3,6 +3,9 @@
 1. [Install Docker & start the Docker Daemon if you haven't done so already][docker-installation]
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
+
 ```bash
+git clone https://github.com/whereasjovially/ethereum-package.git
+cd ethereum-package
 kurtosis run --enclave interstate-devnet ./ --args-file network_params.yaml
 ```
