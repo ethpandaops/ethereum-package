@@ -17,12 +17,6 @@ DISCOVERY_PORT_NUM = 30303
 ENGINE_HTTP_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 
-# The min/max CPU/memory that the execution node can use
-EXECUTION_MIN_CPU = 100
-EXECUTION_MAX_CPU = 1000
-EXECUTION_MIN_MEMORY = 512
-EXECUTION_MAX_MEMORY = 2048
-
 JAVA_OPTS = {"JAVA_OPTS": "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"}
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
@@ -60,27 +54,6 @@ def launch(
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
-    network_name = shared_utils.get_network_name(launcher.network)
-
-    el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
-    el_max_cpu = (
-        int(el_max_cpu)
-        if int(el_max_cpu) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["besu_max_cpu"]
-    )
-    el_min_mem = int(el_min_mem) if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
-    el_max_mem = (
-        int(el_max_mem)
-        if int(el_max_mem) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["besu_max_mem"]
-    )
-
-    el_volume_size = (
-        el_volume_size
-        if int(el_volume_size) > 0
-        else constants.VOLUME_SIZE[network_name]["besu_volume_size"]
     )
 
     cl_client_name = service_name.split("-")[3]
@@ -270,30 +243,37 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=el_volume_size,
         )
-    return ServiceConfig(
-        image=image,
-        ports=used_ports,
-        public_ports=public_ports,
-        cmd=[cmd_str],
-        files=files,
-        env_vars=extra_env_vars,
-        entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        min_cpu=el_min_cpu,
-        max_cpu=el_max_cpu,
-        min_memory=el_min_mem,
-        max_memory=el_max_mem,
-        labels=shared_utils.label_maker(
+
+    config_args = {
+        "image": image,
+        "ports": used_ports,
+        "public_ports": public_ports,
+        "cmd": [cmd_str],
+        "files": files,
+        "entrypoint": ENTRYPOINT_ARGS,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "env_vars": extra_env_vars,
+        "labels": shared_utils.label_maker(
             constants.EL_TYPE.besu,
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,
             extra_labels,
         ),
-        user=User(uid=0, gid=0),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
+        "user": User(uid=0, gid=0),
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if el_min_cpu > 0:
+        config_args["min_cpu"] = el_min_cpu
+    if el_max_cpu > 0:
+        config_args["max_cpu"] = el_max_cpu
+    if el_min_mem > 0:
+        config_args["min_memory"] = el_min_mem
+    if el_max_mem > 0:
+        config_args["max_memory"] = el_max_mem
+    return ServiceConfig(**config_args)
 
 
 def new_besu_launcher(el_cl_genesis_data, jwt_file, network):

@@ -220,7 +220,7 @@ participants:
     # Resource management for el containers
     # CPU is milicores
     # RAM is in MB
-    # Defaults are set per client
+    # Defaults to 0, which results in no resource limits
     el_min_cpu: 0
     el_max_cpu: 0
     el_min_mem: 0
@@ -278,7 +278,7 @@ participants:
     # Resource management for cl containers
     # CPU is milicores
     # RAM is in MB
-    # Defaults are set per client
+    # Defaults to 0, which results in no resource limits
     cl_min_cpu: 0
     cl_max_cpu: 0
     cl_min_mem: 0
@@ -340,7 +340,7 @@ participants:
     # Resource management for vc containers
     # CPU is milicores
     # RAM is in MB
-    # Defaults are set per client
+    # Defaults to 0, which results in no resource limits
     vc_min_cpu: 0
     vc_max_cpu: 0
     vc_min_mem: 0

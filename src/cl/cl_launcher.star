@@ -95,13 +95,33 @@ def launch(
         or constants.NETWORK_NAME.shadowfork in network_params.network
         else None
     )
-
+    network_name = shared_utils.get_network_name(network_params.network)
     for index, participant in enumerate(participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
         node_selectors = input_parser.get_client_node_selectors(
             participant.node_selectors,
             global_node_selectors,
+        )
+
+        tolerations = input_parser.get_client_tolerations(
+            participant.cl_tolerations, participant.tolerations, global_tolerations
+        )
+
+        (
+            cl_min_cpu,
+            cl_max_cpu,
+            cl_min_mem,
+            cl_max_mem,
+            cl_volume_size,
+        ) = shared_utils.get_cpu_mem_resource_limits(
+            participant.cl_min_cpu,
+            participant.cl_max_cpu,
+            participant.cl_min_mem,
+            participant.cl_max_mem,
+            participant.cl_volume_size,
+            network_name,
+            participant.cl_type,
         )
 
         if cl_type not in cl_launchers:
@@ -158,10 +178,10 @@ def launch(
                 el_context,
                 full_name,
                 new_cl_node_validator_keystores,
-                participant.cl_min_cpu,
-                participant.cl_max_cpu,
-                participant.cl_min_mem,
-                participant.cl_max_mem,
+                cl_min_cpu,
+                cl_max_cpu,
+                cl_min_mem,
+                cl_max_mem,
                 participant.snooper_enabled,
                 snooper_engine_context,
                 participant.blobber_enabled,
@@ -171,9 +191,7 @@ def launch(
                 participant.cl_extra_labels,
                 persistent,
                 participant.cl_volume_size,
-                participant.cl_tolerations,
-                participant.tolerations,
-                global_tolerations,
+                tolerations,
                 node_selectors,
                 participant.use_separate_vc,
                 participant.keymanager_enabled,
@@ -195,10 +213,10 @@ def launch(
                 el_context,
                 full_name,
                 new_cl_node_validator_keystores,
-                participant.cl_min_cpu,
-                participant.cl_max_cpu,
-                participant.cl_min_mem,
-                participant.cl_max_mem,
+                cl_min_cpu,
+                cl_max_cpu,
+                cl_min_mem,
+                cl_max_mem,
                 participant.snooper_enabled,
                 snooper_engine_context,
                 participant.blobber_enabled,
@@ -208,9 +226,7 @@ def launch(
                 participant.cl_extra_labels,
                 persistent,
                 participant.cl_volume_size,
-                participant.cl_tolerations,
-                participant.tolerations,
-                global_tolerations,
+                tolerations,
                 node_selectors,
                 participant.use_separate_vc,
                 participant.keymanager_enabled,
