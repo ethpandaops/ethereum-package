@@ -11,5 +11,5 @@ kurtosis run --enclave interstate-devnet ./ --args-file network_params.yaml
 
 If you don't want clone
 ```bash
-kurtosis run --enclave github.com/whereasjovially/ethereum-package ./ --args-file network_params.yaml
+kurtosis run --enclave interstate-devnet github.com/whereasjovially/ethereum-package --args-file network_params.yaml
 ```
