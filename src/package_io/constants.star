@@ -1,5 +1,4 @@
 EL_TYPE = struct(
-    geth_builder="geth-builder",
     geth="geth",
     erigon="erigon",
     nethermind="nethermind",
