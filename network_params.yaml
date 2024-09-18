@@ -86,7 +86,7 @@ network_params:
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   prefunded_accounts: {}
-additional_services: [assertoor, blockscout, tx_spammer, blob_spammer, prometheus_grafana, blobscan, full_beaconchain_explorer, dora, beacon_metrics_gazer]
+additional_services: [ tx_spammer, prometheus_grafana, dora ]
 dora_params:
   image: ""
 tx_spammer_params:
