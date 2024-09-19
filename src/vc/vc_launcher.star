@@ -9,12 +9,7 @@ nimbus = import_module("./nimbus.star")
 prysm = import_module("./prysm.star")
 teku = import_module("./teku.star")
 vc_shared = import_module("./shared.star")
-
-# The defaults for min/max CPU/memory that the validator client can use
-MIN_CPU = 50
-MAX_CPU = 300
-MIN_MEMORY = 128
-MAX_MEMORY = 512
+shared_utils = import_module("../shared_utils/shared_utils.star")
 
 
 def launch(
@@ -24,7 +19,6 @@ def launch(
     service_name,
     vc_type,
     image,
-    participant_log_level,
     global_log_level,
     cl_context,
     el_context,
@@ -32,20 +26,11 @@ def launch(
     snooper_enabled,
     snooper_beacon_context,
     node_keystore_files,
-    vc_min_cpu,
-    vc_max_cpu,
-    vc_min_mem,
-    vc_max_mem,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
+    participant,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
-    vc_tolerations,
-    participant_tolerations,
     global_tolerations,
     node_selectors,
-    keymanager_enabled,
     preset,
     network,  # TODO: remove when deneb rebase is done
     electra_fork_epoch,  # TODO: remove when deneb rebase is done
@@ -56,7 +41,7 @@ def launch(
         return None
 
     tolerations = input_parser.get_client_tolerations(
-        vc_tolerations, participant_tolerations, global_tolerations
+        participant.vc_tolerations, participant.tolerations, global_tolerations
     )
 
     if snooper_enabled:
@@ -68,11 +53,27 @@ def launch(
         beacon_http_url = "{0}".format(
             cl_context.beacon_http_url,
         )
-    vc_min_cpu = int(vc_min_cpu) if int(vc_min_cpu) > 0 else MIN_CPU
-    vc_max_cpu = int(vc_max_cpu) if int(vc_max_cpu) > 0 else MAX_CPU
-    vc_min_mem = int(vc_min_mem) if int(vc_min_mem) > 0 else MIN_MEMORY
-    vc_max_mem = int(vc_max_mem) if int(vc_max_mem) > 0 else MAX_MEMORY
 
+    (
+        vc_min_cpu,
+        vc_max_cpu,
+        vc_min_mem,
+        vc_max_mem,
+        _,
+    ) = shared_utils.get_cpu_mem_resource_limits(
+        participant.vc_min_cpu,
+        participant.vc_max_cpu,
+        participant.vc_min_mem,
+        participant.vc_max_mem,
+        0,
+        network,
+        vc_type,
+    )
+    extra_params = participant.vc_extra_params
+    extra_env_vars = participant.vc_extra_env_vars
+    extra_labels = participant.vc_extra_labels
+    participant_log_level = participant.vc_log_level
+    keymanager_enabled = participant.keymanager_enabled
     if vc_type == constants.VC_TYPE.lighthouse:
         config = lighthouse.get_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
