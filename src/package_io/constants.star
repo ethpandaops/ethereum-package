@@ -105,7 +105,7 @@ EIP7594_FORK_VERSION = "0x70000038"
 
 ETHEREUM_GENESIS_GENERATOR = struct(
     capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Deprecated (no support for minimal config)
-    deneb_genesis="ethpandaops/ethereum-genesis-generator:3.3.7",  # Default
+    deneb_genesis="nethswitchboard/ethereum-genesis-generator:e2e",  # Customised for Taiko Preconf
     verkle_support_genesis="ethpandaops/ethereum-genesis-generator:3.0.0-rc.19",  # soon to be deneb genesis, waiting for rebase
     verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )

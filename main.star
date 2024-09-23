@@ -55,6 +55,10 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 
+# Preconf AVS
+taiko_contract_deployer = import_module("./src/contracts/taiko.star")
+taiko_
+
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
 GRAFANA_DASHBOARD_PATH_URL = "/d/QdTOwy-nz/eth2-merge-kurtosis-module-dashboard?orgId=1"
@@ -625,6 +629,44 @@ def run(plan, args={}):
                 args_with_right_defaults.custom_flood_params,
                 global_node_selectors,
             )
+        elif additional_service == "taiko_stack":
+            plan.print("Launching taiko")
+            # Deploy taiko smart contracts
+            taiko_contract_deployer.deploy(
+                plan,
+                network_params,
+                fuzz_target,
+            )
+            # Launch taiko stack
+            # taiko_stack.launch(
+
+            # )
+            plan.print("Successfully launched taiko")
+        elif additional_service == "preconf_avs":
+            plan.print("Launching preconfirmation AVS")
+            # Deploy EigenLayer MVP
+            # eigenlayer_mvp_contract_deployer.deploy(
+            #     plan,
+            #     network_params,
+            #     fuzz_target,
+            # )
+            # Deploy AVS smart contracts
+            # avs_contract_deployer.deploy(
+            #     plan,
+            #     network_params,
+            #     fuzz_target,
+            #     final_genesis_timestamp,
+            # )
+            # Deploy Sequencer
+            # sequencer_contract_deployer.deploy(
+            #     plan,
+            #     network_params,
+            #     fuzz_target,
+            # )
+            # Launch Preconf AVS
+            # preconf_avs.launch(
+
+            # )
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:
