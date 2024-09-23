@@ -164,6 +164,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 1000000,  # 1TB
         "besu_volume_size": 1000000,  # 1TB
         "reth_volume_size": 3000000,  # 3TB
+        "reth-builder_volume_size": 3000000,  # 3TB
         "ethereumjs_volume_size": 1000000,  # 1TB
         "nimbus_eth1_volume_size": 1000000,  # 1TB
         "prysm_volume_size": 500000,  # 500GB
@@ -179,6 +180,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 300000,  # 300GB
         "besu_volume_size": 300000,  # 300GB
         "reth_volume_size": 500000,  # 500GB
+        "reth-builder_volume_size": 500000,  # 500GB
         "ethereumjs_volume_size": 300000,  # 300GB
         "nimbus_eth1_volume_size": 300000,  # 300GB
         "prysm_volume_size": 150000,  # 150GB
@@ -194,6 +196,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 100000,  # 100GB
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
+        "reth-builder_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
@@ -209,6 +212,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 100000,  # 100GB
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
+        "reth-builder_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
@@ -224,6 +228,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 3000,  # 3GB
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
+        "reth-builder_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
@@ -239,6 +244,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 3000,  # 3GB
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
+        "reth-builder_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
