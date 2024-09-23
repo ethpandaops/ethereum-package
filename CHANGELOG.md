@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.3.0](https://github.com/ethpandaops/ethereum-package/compare/4.2.0...4.3.0) (2024-09-23)
+
+
+### Features
+
+* add prefunded accounts ([#752](https://github.com/ethpandaops/ethereum-package/issues/752)) ([1be7efa](https://github.com/ethpandaops/ethereum-package/commit/1be7efa028d5b72837a9c4b5de5b70e102e2f166))
+* dora - show more infos about all peers on client pages ([#760](https://github.com/ethpandaops/ethereum-package/issues/760)) ([c77d95f](https://github.com/ethpandaops/ethereum-package/commit/c77d95fe21deb9dd09481998d2e39f46b148f146))
+
+
+### Bug Fixes
+
+* `metrics-host-allowlist` for Teku ([#765](https://github.com/ethpandaops/ethereum-package/issues/765)) ([ad75fcc](https://github.com/ethpandaops/ethereum-package/commit/ad75fcce4aa3dcd0064a6d538462587e430478a0))
+* built in validator lifecycle test for assertoor ([#763](https://github.com/ethpandaops/ethereum-package/issues/763)) ([6f868cc](https://github.com/ethpandaops/ethereum-package/commit/6f868ccf26abf341a83bc96569dea0fa890f90f7))
+* explicitly set client contexts ([#755](https://github.com/ethpandaops/ethereum-package/issues/755)) ([94dc531](https://github.com/ethpandaops/ethereum-package/commit/94dc531e332f4fd4466a9473dfec328a3a681b01))
+* no default resource limits ([#768](https://github.com/ethpandaops/ethereum-package/issues/768)) ([4c4831b](https://github.com/ethpandaops/ethereum-package/commit/4c4831bc509ae580f68b85c2c5b469d454586def))
+* prysm gRPC removal - use http server instead for keymanager ([#761](https://github.com/ethpandaops/ethereum-package/issues/761)) ([ba91174](https://github.com/ethpandaops/ethereum-package/commit/ba911745b5e6cdc0216c5394394605d274ce70ef))
+* remove epoch checker for goomy ([#754](https://github.com/ethpandaops/ethereum-package/issues/754)) ([f124bbf](https://github.com/ethpandaops/ethereum-package/commit/f124bbf96847ec08d3aa7e8b65df336ef6722475))
+* remove exp RPC API namespace flag from nimbus-eth1 configuration ([#767](https://github.com/ethpandaops/ethereum-package/issues/767)) ([8fec454](https://github.com/ethpandaops/ethereum-package/commit/8fec454f7af0733277336fc3f06376442b7b4fa4))
+* reth-builder volume claim ([#771](https://github.com/ethpandaops/ethereum-package/issues/771)) ([4570328](https://github.com/ethpandaops/ethereum-package/commit/4570328e47b6ef5a59a47635f6c58acd3f8ad2d1))
+* update dora config for latest release & remove custom images ([#748](https://github.com/ethpandaops/ethereum-package/issues/748)) ([a433c50](https://github.com/ethpandaops/ethereum-package/commit/a433c50e1c61dd20a6c28dcebfde704c136ddb69))
+
 ## [4.2.0](https://github.com/ethpandaops/ethereum-package/compare/4.1.0...4.2.0) (2024-08-19)
 
 

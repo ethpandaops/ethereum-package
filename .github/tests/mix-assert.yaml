@@ -3,7 +3,7 @@ participants:
     cl_type: teku
   - el_type: nethermind
     cl_type: prysm
-  - el_type: erigon
+  - el_type: geth # temp remove erigon till they fix their bugs
     cl_type: nimbus
   - el_type: besu
     cl_type: lighthouse
