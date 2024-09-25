@@ -478,7 +478,6 @@ def run(plan, args={}):
                 dora_config_template,
                 all_participants,
                 args_with_right_defaults.participants,
-                el_cl_data_files_artifact_uuid,
                 network_params,
                 dora_params,
                 global_node_selectors,
@@ -639,6 +638,8 @@ def run(plan, args={}):
             all_ethereum_metrics_exporter_contexts,
             all_xatu_sentry_contexts,
             global_node_selectors,
+            args_with_right_defaults.prometheus_params.storage_tsdb_retention_time,
+            args_with_right_defaults.prometheus_params.storage_tsdb_retention_size,
         )
 
         plan.print("Launching grafana...")

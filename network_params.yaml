@@ -76,14 +76,16 @@ network_params:
   deneb_fork_epoch: 0
   electra_fork_epoch: 100000000
   eip7594_fork_epoch: 100000001
-  eip7594_fork_version: "0x70000038"
+  eip7594_fork_version: "0x60000038"
   network_sync_base_url: https://snapshots.ethpandaops.io/
-  data_column_sidecar_subnet_count: 32
+  eof_activation_epoch: ""
+  data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
-  custody_requirement: 1
-  target_number_of_peers: 70
+  custody_requirement: 4
+  max_blobs_per_block: 6
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
+  prefunded_accounts: {}
 additional_services: []
 dora_params:
   image: ""
@@ -93,8 +95,8 @@ goomy_blob_params:
   goomy_blob_args: []
 assertoor_params:
   image: ""
-  run_stability_check: true
-  run_block_proposal_check: true
+  run_stability_check: false
+  run_block_proposal_check: false
   run_transaction_test: false
   run_blob_transaction_test: false
   run_opcodes_transaction_test: false

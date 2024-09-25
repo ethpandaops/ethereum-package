@@ -15,10 +15,6 @@ DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 
-# The min/max CPU/memory that the execution node can use
-EXECUTION_MIN_CPU = 300
-EXECUTION_MIN_MEMORY = 512
-
 # TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
 NUM_MINING_THREADS = 1
 
@@ -68,27 +64,6 @@ def launch(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    network_name = shared_utils.get_network_name(launcher.network)
-
-    el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
-    el_max_cpu = (
-        int(el_max_cpu)
-        if int(el_max_cpu) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["geth_max_cpu"]
-    )
-    el_min_mem = int(el_min_mem) if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
-    el_max_mem = (
-        int(el_max_mem)
-        if int(el_max_mem) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["geth_max_mem"]
-    )
-
-    el_volume_size = (
-        el_volume_size
-        if int(el_volume_size) > 0
-        else constants.VOLUME_SIZE[network_name]["geth_volume_size"]
-    )
-
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
@@ -133,17 +108,17 @@ def launch(
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        "geth",
-        enr,
-        enode,
-        service.ip_address,
-        RPC_PORT_NUM,
-        WS_PORT_NUM,
-        ENGINE_RPC_PORT_NUM,
-        http_url,
-        ws_url,
-        service_name,
-        [geth_metrics_info],
+        client_name="geth",
+        enode=enode,
+        ip_addr=service.ip_address,
+        rpc_port_num=RPC_PORT_NUM,
+        ws_port_num=WS_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        enr=enr,
+        service_name=service_name,
+        el_metrics_info=[geth_metrics_info],
     )
 
 
@@ -348,29 +323,35 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=el_volume_size,
         )
-    return ServiceConfig(
-        image=image,
-        ports=used_ports,
-        public_ports=public_ports,
-        cmd=[command_str],
-        files=files,
-        entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        min_cpu=el_min_cpu,
-        max_cpu=el_max_cpu,
-        min_memory=el_min_mem,
-        max_memory=el_max_mem,
-        env_vars=extra_env_vars,
-        labels=shared_utils.label_maker(
+    config_args = {
+        "image": image,
+        "ports": used_ports,
+        "public_ports": public_ports,
+        "cmd": [command_str],
+        "files": files,
+        "entrypoint": ENTRYPOINT_ARGS,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "env_vars": extra_env_vars,
+        "labels": shared_utils.label_maker(
             constants.EL_TYPE.geth,
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,
             extra_labels,
         ),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if el_min_cpu > 0:
+        config_args["min_cpu"] = el_min_cpu
+    if el_max_cpu > 0:
+        config_args["max_cpu"] = el_max_cpu
+    if el_min_mem > 0:
+        config_args["min_memory"] = el_min_mem
+    if el_max_mem > 0:
+        config_args["max_memory"] = el_max_mem
+    return ServiceConfig(**config_args)
 
 
 def new_geth_launcher(

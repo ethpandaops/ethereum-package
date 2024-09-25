@@ -16,4 +16,4 @@ participants:
     cl_type: grandine
 network_params:
   network: ephemery
-additional_services: []
+checkpoint_sync_enabled: true

@@ -11,10 +11,6 @@ DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 
-# The min/max CPU/memory that the execution node can use
-EXECUTION_MIN_CPU = 100
-EXECUTION_MIN_MEMORY = 256
-
 # Paths
 METRICS_PATH = "/metrics"
 
@@ -55,27 +51,6 @@ def launch(
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
-    network_name = shared_utils.get_network_name(launcher.network)
-
-    el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
-    el_max_cpu = (
-        int(el_max_cpu)
-        if int(el_max_cpu) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["nimbus_eth1_max_cpu"]
-    )
-    el_min_mem = int(el_min_mem) if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
-    el_max_mem = (
-        int(el_max_mem)
-        if int(el_max_mem) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["nimbus_eth1_max_mem"]
-    )
-
-    el_volume_size = (
-        el_volume_size
-        if int(el_volume_size) > 0
-        else constants.VOLUME_SIZE[network_name]["nimbus_eth1_volume_size"]
     )
 
     cl_client_name = service_name.split("-")[3]
@@ -120,17 +95,16 @@ def launch(
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_RPC_PORT_NUM)
 
     return el_context.new_el_context(
-        "nimbus",
-        "",  # nimbus has no enr
-        enode,
-        service.ip_address,
-        WS_RPC_PORT_NUM,
-        WS_RPC_PORT_NUM,
-        ENGINE_RPC_PORT_NUM,
-        http_url,
-        ws_url,
-        service_name,
-        [nimbus_metrics_info],
+        client_name="nimbus",
+        enode=enode,
+        ip_addr=service.ip_address,
+        rpc_port_num=WS_RPC_PORT_NUM,
+        ws_port_num=WS_RPC_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        service_name=service_name,
+        el_metrics_info=[nimbus_metrics_info],
     )
 
 
@@ -190,9 +164,9 @@ def get_config(
         "--http-port={0}".format(WS_RPC_PORT_NUM),
         "--http-address=0.0.0.0",
         "--rpc",
-        "--rpc-api=eth,debug,exp",
+        "--rpc-api=eth,debug",
         "--ws",
-        "--ws-api=eth,debug,exp",
+        "--ws-api=eth,debug",
         "--engine-api",
         "--engine-api-address=0.0.0.0",
         "--engine-api-port={0}".format(ENGINE_RPC_PORT_NUM),
@@ -249,28 +223,34 @@ def get_config(
             size=el_volume_size,
         )
 
-    return ServiceConfig(
-        image=image,
-        ports=used_ports,
-        public_ports=public_ports,
-        cmd=cmd,
-        files=files,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        min_cpu=el_min_cpu,
-        max_cpu=el_max_cpu,
-        min_memory=el_min_mem,
-        max_memory=el_max_mem,
-        env_vars=extra_env_vars,
-        labels=shared_utils.label_maker(
+    config_args = {
+        "image": image,
+        "ports": used_ports,
+        "public_ports": public_ports,
+        "cmd": cmd,
+        "files": files,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "env_vars": extra_env_vars,
+        "labels": shared_utils.label_maker(
             constants.EL_TYPE.nimbus,
             constants.CLIENT_TYPES.el,
             image,
             cl_client_name,
             extra_labels,
         ),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if el_min_cpu > 0:
+        config_args["min_cpu"] = el_min_cpu
+    if el_max_cpu > 0:
+        config_args["max_cpu"] = el_max_cpu
+    if el_min_mem > 0:
+        config_args["min_memory"] = el_min_mem
+    if el_max_mem > 0:
+        config_args["max_memory"] = el_max_mem
+    return ServiceConfig(**config_args)
 
 
 def new_nimbus_launcher(el_cl_genesis_data, jwt_file, network):

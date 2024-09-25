@@ -138,10 +138,11 @@ SUBCATEGORY_PARAMS = {
         "data_column_sidecar_subnet_count",
         "samples_per_slot",
         "custody_requirement",
-        "target_number_of_peers",
+        "max_blobs_per_block",
         "preset",
         "additional_preloaded_contracts",
         "devnet_repo",
+        "prefunded_accounts",
     ],
     "dora_params": [
         "image",
@@ -162,6 +163,10 @@ SUBCATEGORY_PARAMS = {
         "run_opcodes_transaction_test",
         "run_lifecycle_test",
         "tests",
+    ],
+    "prometheus_params": [
+        "storage_tsdb_retention_time",
+        "storage_tsdb_retention_size",
     ],
     "mev_params": [
         "mev_relay_image",

@@ -220,7 +220,7 @@ participants:
     # Resource management for el containers
     # CPU is milicores
     # RAM is in MB
-    # Defaults are set per client
+    # Defaults to 0, which results in no resource limits
     el_min_cpu: 0
     el_max_cpu: 0
     el_min_mem: 0
@@ -238,7 +238,7 @@ participants:
     # - nimbus: statusim/nimbus-eth2:multiarch-latest
     # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
     # - lodestar: chainsafe/lodestar:next
-    # - grandine: ethpandaops/grandine:develop
+    # - grandine: sifrai/grandine:stable
     cl_image: ""
 
     # The log level string that this participant's CL client should log at
@@ -278,7 +278,7 @@ participants:
     # Resource management for cl containers
     # CPU is milicores
     # RAM is in MB
-    # Defaults are set per client
+    # Defaults to 0, which results in no resource limits
     cl_min_cpu: 0
     cl_max_cpu: 0
     cl_min_mem: 0
@@ -340,7 +340,7 @@ participants:
     # Resource management for vc containers
     # CPU is milicores
     # RAM is in MB
-    # Defaults are set per client
+    # Defaults to 0, which results in no resource limits
     vc_min_cpu: 0
     vc_max_cpu: 0
     vc_min_mem: 0
@@ -500,11 +500,11 @@ network_params:
   eip7594_fork_epoch: 100000001
 
   # The fork version to set if the eip7594 fork is active
-  eip7594_fork_version: "0x70000038"
+  eip7594_fork_version: "0x60000038"
 
   # EOF activation fork epoch (EL only fork)
-  # Defaults to null
-  eof_activation_epoch: null
+  # Defaults to None
+  eof_activation_epoch: ""
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
@@ -514,13 +514,13 @@ network_params:
   network_sync_base_url: https://snapshots.ethpandaops.io/
 
   # The number of data column sidecar subnets used in the gossipsub protocol
-  data_column_sidecar_subnet_count: 32
+  data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
   # Minimum number of subnets an honest node custodies and serves samples from
-  custody_requirement: 1
-  # Suggested minimum peer count
-  target_number_of_peers: 70
+  custody_requirement: 4
+  # Maximum number of blobs per block
+  max_blobs_per_block: 6
 
   # Preset for the network
   # Default: "mainnet"
@@ -533,17 +533,31 @@ network_params:
 
   # Preloaded contracts for the chain
   additional_preloaded_contracts: {}
-  # example: To set a contract code at a certain address:
+  # Example:
+  # additional_preloaded_contracts: '{
   #  "0x123463a4B065722E99115D6c222f267d9cABb524":
-  #    balance: "1ETH"
-  #    code: "0x1234"
-  #    storage: {}
-  #    nonce: 0
-  #    secretKey: "0x"
+  #   {
+  #     balance: "1ETH",
+  #     code: "0x1234",
+  #     storage: {},
+  #     nonce: 0,
+  #     secretKey: "0x",
+  #   }
+  # }'
 
   # Repository override for devnet networks
   # Default: ethpandaops
   devnet_repo: ethpandaops
+
+  # A number of prefunded accounts to be created
+  # Defaults to no prefunded accounts
+  # Example:
+  # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}}'
+  # 10ETH to the account 0x25941dC771bB64514Fc8abBce970307Fb9d477e9
+  # To prefund multiple accounts, separate them with a comma
+  #
+  # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}, "0x4107be99052d895e3ee461C685b042Aa975ab5c0": {"balance": "1ETH"}}'
+  prefunded_accounts: {}
 
 # Global parameters for the network
 
@@ -607,12 +621,12 @@ assertoor_params:
   # - >= 80% correct head votes
   # - no reorgs with distance > 2 blocks
   # - no more than 2 reorgs per epoch
-  run_stability_check: true
+  run_stability_check: false
 
   # Check block propöosals
   # This check monitors the chain and succeeds if:
   # - all client pairs have proposed a block
-  run_block_proposal_check: true
+  run_block_proposal_check: false
 
   # Run normal transaction test
   # This test generates random EOA transactions and checks inclusion with/from all client pairs
@@ -857,7 +871,6 @@ participants:
     cl_image: sigp/lighthouse:latest
 network_params:
   deneb_fork_epoch: 0
-additional_services: []
 wait_for_finalization: false
 wait_for_verifications: false
 global_log_level: info
@@ -888,7 +901,6 @@ participants:
     cl_image: ''
     count: 2
 mev_type: mock
-additional_services: []
 ```
 
 </details>
@@ -909,8 +921,6 @@ participants:
 mev_type: flashbots
 network_params:
   deneb_fork_epoch: 1
-additional_services: []
-
 ```
 
 </details>

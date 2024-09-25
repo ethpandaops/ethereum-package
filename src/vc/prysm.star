@@ -4,16 +4,6 @@ vc_shared = import_module("./shared.star")
 
 PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-password"
 PRYSM_BEACON_RPC_PORT = 4000
-VALIDATOR_GRPC_PORT_NUM = 7500
-
-
-EXTRA_PORTS = {
-    constants.VALDIATOR_GRPC_PORT_ID: shared_utils.new_port_spec(
-        VALIDATOR_GRPC_PORT_NUM,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
-}
 
 
 def get_config(
@@ -67,10 +57,8 @@ def get_config(
 
     keymanager_api_cmd = [
         "--rpc",
-        "--rpc-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--rpc-host=0.0.0.0",
-        "--grpc-gateway-port={0}".format(VALIDATOR_GRPC_PORT_NUM),
-        "--grpc-gateway-host=0.0.0.0",
+        "--http-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--http-host=0.0.0.0",
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
@@ -117,30 +105,39 @@ def get_config(
         files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
-        ports.update(EXTRA_PORTS)
         public_ports.update(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
         public_ports.update(shared_utils.get_port_specs(public_gprc_port_assignment))
 
-    return ServiceConfig(
-        image=image,
-        ports=ports,
-        public_ports=public_ports,
-        cmd=cmd,
-        env_vars=extra_env_vars,
-        files=files,
-        min_cpu=vc_min_cpu,
-        max_cpu=vc_max_cpu,
-        min_memory=vc_min_mem,
-        max_memory=vc_max_mem,
-        labels=shared_utils.label_maker(
-            constants.VC_TYPE.prysm,
+    config_args = {
+        "image": image,
+        "ports": ports,
+        "public_ports": public_ports,
+        "cmd": cmd,
+        "files": files,
+        "env_vars": extra_env_vars,
+        "labels": shared_utils.label_maker(
+            constants.CL_TYPE.prysm,
             constants.CLIENT_TYPES.validator,
             image,
             cl_context.client_name,
             extra_labels,
         ),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if vc_min_cpu > 0:
+        config_args["min_cpu"] = vc_min_cpu
+
+    if vc_max_cpu > 0:
+        config_args["max_cpu"] = vc_max_cpu
+
+    if vc_min_mem > 0:
+        config_args["min_memory"] = vc_min_mem
+
+    if vc_max_mem > 0:
+        config_args["max_memory"] = vc_max_mem
+
+    return ServiceConfig(**config_args)

@@ -13,7 +13,6 @@ participants:
     cl_type: teku
   - el_type: ethereumjs
     cl_type: grandine
-additional_services: []
 port_publisher:
   el:
     enabled: true

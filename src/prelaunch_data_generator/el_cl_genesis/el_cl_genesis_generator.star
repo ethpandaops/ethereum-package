@@ -124,9 +124,10 @@ def new_env_file_for_el_cl_genesis_data(
         "DataColumnSidecarSubnetCount": network_params.data_column_sidecar_subnet_count,
         "SamplesPerSlot": network_params.samples_per_slot,
         "CustodyRequirement": network_params.custody_requirement,
-        "TargetNumberOfPeers": network_params.target_number_of_peers,
+        "MaxBlobsPerBlock": network_params.max_blobs_per_block,
         "Preset": network_params.preset,
         "AdditionalPreloadedContracts": json.encode(
             network_params.additional_preloaded_contracts
         ),
+        "PrefundedAccounts": json.encode(network_params.prefunded_accounts),
     }

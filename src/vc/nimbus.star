@@ -90,25 +90,35 @@ def get_config(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
 
-    return ServiceConfig(
-        image=image,
-        ports=ports,
-        public_ports=public_ports,
-        cmd=cmd,
-        env_vars=extra_env_vars,
-        files=files,
-        min_cpu=vc_min_cpu,
-        max_cpu=vc_max_cpu,
-        min_memory=vc_min_mem,
-        max_memory=vc_max_mem,
-        labels=shared_utils.label_maker(
-            constants.VC_TYPE.nimbus,
+    config_args = {
+        "image": image,
+        "ports": ports,
+        "public_ports": public_ports,
+        "cmd": cmd,
+        "files": files,
+        "env_vars": extra_env_vars,
+        "labels": shared_utils.label_maker(
+            constants.CL_TYPE.nimbus,
             constants.CLIENT_TYPES.validator,
             image,
             cl_context.client_name,
             extra_labels,
         ),
-        user=User(uid=0, gid=0),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+        "user": User(uid=0, gid=0),
+    }
+
+    if vc_min_cpu > 0:
+        config_args["min_cpu"] = vc_min_cpu
+
+    if vc_max_cpu > 0:
+        config_args["max_cpu"] = vc_max_cpu
+
+    if vc_min_mem > 0:
+        config_args["min_memory"] = vc_min_mem
+
+    if vc_max_mem > 0:
+        config_args["max_memory"] = vc_max_mem
+
+    return ServiceConfig(**config_args)

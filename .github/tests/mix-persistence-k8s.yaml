@@ -13,5 +13,4 @@ participants:
     cl_type: lodestar
   - el_type: ethereumjs
     cl_type: nimbus
-additional_services: []
 persistent: true

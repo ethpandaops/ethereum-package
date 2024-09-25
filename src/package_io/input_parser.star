@@ -10,7 +10,7 @@ DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
     "erigon": "ethpandaops/erigon:main",
     "nethermind": "nethermindeth/nethermind:master",
-    "besu": "ethpandaops/besu:devnets-fix",
+    "besu": "ethpandaops/besu:main",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "ethpandaops/nimbus-eth1:master",
@@ -22,7 +22,7 @@ DEFAULT_CL_IMAGES = {
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
     "lodestar": "chainsafe/lodestar:latest",
-    "grandine": "ethpandaops/grandine:master",
+    "grandine": "sifrai/grandine:stable",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -40,7 +40,7 @@ DEFAULT_VC_IMAGES = {
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
     "teku": "consensys/teku:latest",
-    "grandine": "ethpandaops/grandine:master",
+    "grandine": "sifrai/grandine:stable",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -101,6 +101,7 @@ def input_parser(plan, input_args):
     result["disable_peer_scoring"] = False
     result["goomy_blob_params"] = get_default_goomy_blob_params()
     result["assertoor_params"] = get_default_assertoor_params()
+    result["prometheus_params"] = get_default_prometheus_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
     result["parallel_keystore_generation"] = False
@@ -282,12 +283,13 @@ def input_parser(plan, input_args):
             ],
             samples_per_slot=result["network_params"]["samples_per_slot"],
             custody_requirement=result["network_params"]["custody_requirement"],
-            target_number_of_peers=result["network_params"]["target_number_of_peers"],
+            max_blobs_per_block=result["network_params"]["max_blobs_per_block"],
             preset=result["network_params"]["preset"],
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
             ],
             devnet_repo=result["network_params"]["devnet_repo"],
+            prefunded_accounts=result["network_params"]["prefunded_accounts"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -321,6 +323,14 @@ def input_parser(plan, input_args):
         ),
         goomy_blob_params=struct(
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
+        ),
+        prometheus_params=struct(
+            storage_tsdb_retention_time=result["prometheus_params"][
+                "storage_tsdb_retention_time"
+            ],
+            storage_tsdb_retention_size=result["prometheus_params"][
+                "storage_tsdb_retention_size"
+            ],
         ),
         apache_port=result["apache_port"],
         assertoor_params=struct(
@@ -792,16 +802,17 @@ def default_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 100000000,
         "eip7594_fork_epoch": 100000001,
-        "eip7594_fork_version": "0x70000038",
+        "eip7594_fork_version": "0x60000038",
         "eof_activation_epoch": "",
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
-        "data_column_sidecar_subnet_count": 32,
+        "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
-        "custody_requirement": 1,
-        "target_number_of_peers": 70,
+        "custody_requirement": 4,
+        "max_blobs_per_block": 6,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
+        "prefunded_accounts": {},
     }
 
 
@@ -825,16 +836,17 @@ def default_minimal_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 100000000,
         "eip7594_fork_epoch": 100000001,
-        "eip7594_fork_version": "0x70000038",
+        "eip7594_fork_version": "0x60000038",
         "eof_activation_epoch": "",
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
-        "data_column_sidecar_subnet_count": 32,
+        "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
-        "custody_requirement": 1,
-        "target_number_of_peers": 70,
+        "custody_requirement": 4,
+        "max_blobs_per_block": 6,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
+        "prefunded_accounts": {},
     }
 
 
@@ -922,6 +934,8 @@ def get_default_mev_params(mev_type, preset):
     mev_builder_prometheus_config = {
         "scrape_interval": "15s",
         "labels": None,
+        "storage_tsdb_retention_time": "1d",
+        "storage_tsdb_retention_size": "512MB",
     }
 
     if mev_type == constants.MEV_RS_MEV_TYPE:
@@ -969,13 +983,20 @@ def get_default_goomy_blob_params():
 def get_default_assertoor_params():
     return {
         "image": "",
-        "run_stability_check": True,
-        "run_block_proposal_check": True,
+        "run_stability_check": False,
+        "run_block_proposal_check": False,
         "run_lifecycle_test": False,
         "run_transaction_test": False,
         "run_blob_transaction_test": False,
         "run_opcodes_transaction_test": False,
         "tests": [],
+    }
+
+
+def get_default_prometheus_params():
+    return {
+        "storage_tsdb_retention_time": "1d",
+        "storage_tsdb_retention_size": "512MB",
     }
 
 
@@ -1098,7 +1119,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     )
     if mev_type == constants.FLASHBOTS_MEV_TYPE:
         mev_participant = default_participant()
-        mev_participant["el_type"] = "geth-builder"
+        mev_participant["el_type"] = "geth"
         mev_participant.update(
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],

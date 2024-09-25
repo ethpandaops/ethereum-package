@@ -17,10 +17,6 @@ HTTP_PORT_NUM = 3500
 BEACON_MONITORING_PORT_NUM = 8080
 PROFILING_PORT_NUM = 6060
 
-# The min/max CPU/memory that the beacon node can use
-BEACON_MIN_CPU = 100
-BEACON_MIN_MEMORY = 256
-
 METRICS_PATH = "/metrics"
 
 MIN_PEERS = 1
@@ -58,9 +54,7 @@ def launch(
     extra_labels,
     persistent,
     cl_volume_size,
-    cl_tolerations,
-    participant_tolerations,
-    global_tolerations,
+    tolerations,
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
@@ -72,31 +66,6 @@ def launch(
     beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
-    tolerations = input_parser.get_client_tolerations(
-        cl_tolerations, participant_tolerations, global_tolerations
-    )
-
-    network_name = shared_utils.get_network_name(launcher.network)
-
-    cl_min_cpu = int(cl_min_cpu) if int(cl_min_cpu) > 0 else BEACON_MIN_CPU
-    cl_max_cpu = (
-        int(cl_max_cpu)
-        if int(cl_max_cpu) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["prysm_max_cpu"]
-    )
-    cl_min_mem = int(cl_min_mem) if int(cl_min_mem) > 0 else BEACON_MIN_MEMORY
-    cl_max_mem = (
-        int(cl_max_mem)
-        if int(cl_max_mem) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["prysm_max_mem"]
-    )
-
-    cl_volume_size = (
-        int(cl_volume_size)
-        if int(cl_volume_size) > 0
-        else constants.VOLUME_SIZE[network_name]["prysm_volume_size"]
     )
 
     beacon_config = get_beacon_config(
@@ -163,18 +132,18 @@ def launch(
     nodes_metrics_info = [beacon_node_metrics_info]
 
     return cl_context.new_cl_context(
-        "prysm",
-        beacon_node_enr,
-        beacon_service.ip_address,
-        beacon_http_port.number,
-        beacon_http_url,
-        nodes_metrics_info,
-        beacon_service_name,
-        beacon_grpc_url,
-        beacon_multiaddr,
-        beacon_peer_id,
-        snooper_enabled,
-        snooper_engine_context,
+        client_name="prysm",
+        enr=beacon_node_enr,
+        ip_addr=beacon_service.ip_address,
+        http_port=beacon_http_port.number,
+        beacon_http_url=beacon_http_url,
+        cl_nodes_metrics_info=nodes_metrics_info,
+        beacon_service_name=beacon_service_name,
+        beacon_grpc_url=beacon_grpc_url,
+        multiaddr=beacon_multiaddr,
+        peer_id=beacon_peer_id,
+        snooper_enabled=snooper_enabled,
+        snooper_engine_context=snooper_engine_context,
         validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
         if node_keystore_files
         else "",
@@ -284,8 +253,14 @@ def get_beacon_config(
     if checkpoint_sync_enabled:
         if checkpoint_sync_url:
             cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
+            cmd.append(
+                "--genesis-beacon-api-url=" + constants.CHECKPOINT_SYNC_URL[network]
+            )
         else:
-            if network in ["mainnet", "ephemery"]:
+            if (
+                network in constants.PUBLIC_NETWORKS
+                or network == constants.NETWORK_NAME.ephemery
+            ):
                 cmd.append(
                     "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
                 )
@@ -293,15 +268,8 @@ def get_beacon_config(
                     "--genesis-beacon-api-url=" + constants.CHECKPOINT_SYNC_URL[network]
                 )
             else:
-                cmd.append(
-                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
-                )
-                cmd.append(
-                    "--genesis-beacon-api-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
+                fail(
+                    "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
                 )
 
     if preset == "minimal":
@@ -360,31 +328,41 @@ def get_beacon_config(
             size=cl_volume_size,
         )
 
-    return ServiceConfig(
-        image=beacon_image,
-        ports=used_ports,
-        public_ports=public_ports,
-        cmd=cmd,
-        env_vars=extra_env_vars,
-        files=files,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+    config_args = {
+        "image": beacon_image,
+        "ports": used_ports,
+        "public_ports": public_ports,
+        "cmd": cmd,
+        "files": files,
+        "env_vars": extra_env_vars,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         ),
-        min_cpu=cl_min_cpu,
-        max_cpu=cl_max_cpu,
-        min_memory=cl_min_mem,
-        max_memory=cl_max_mem,
-        labels=shared_utils.label_maker(
+        "labels": shared_utils.label_maker(
             constants.CL_TYPE.prysm,
             constants.CLIENT_TYPES.cl,
             beacon_image,
             el_context.client_name,
             extra_labels,
         ),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if cl_min_cpu > 0:
+        config_args["min_cpu"] = cl_min_cpu
+
+    if cl_max_cpu > 0:
+        config_args["max_cpu"] = cl_max_cpu
+
+    if cl_min_mem > 0:
+        config_args["min_memory"] = cl_min_mem
+
+    if cl_max_mem > 0:
+        config_args["max_memory"] = cl_max_mem
+
+    return ServiceConfig(**config_args)
 
 
 def new_prysm_launcher(
