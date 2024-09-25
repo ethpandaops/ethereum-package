@@ -10,7 +10,7 @@ DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
     "erigon": "ethpandaops/erigon:main",
     "nethermind": "nethermindeth/nethermind:master",
-    "besu": "ethpandaops/besu:main",
+    "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "ethpandaops/nimbus-eth1:master",
