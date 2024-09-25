@@ -33,6 +33,7 @@ full_beaconchain_explorer = import_module(
 blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
+cadvisor = import_module("./src/cadvisor/cadvisor_launcher.star")
 mev_rs_mev_boost = import_module("./src/mev/mev-rs/mev_boost/mev_boost_launcher.star")
 mev_rs_mev_relay = import_module("./src/mev/mev-rs/mev_relay/mev_relay_launcher.star")
 mev_rs_mev_builder = import_module(
@@ -625,6 +626,15 @@ def run(plan, args={}):
                 args_with_right_defaults.custom_flood_params,
                 global_node_selectors,
             )
+        elif additional_service == "cadvisor":
+            plan.print("Launching cadvisor")
+            cadvisor.launch_cadvisor(
+                plan,
+                args_with_right_defaults.port_publisher,
+                index,
+                global_node_selectors,
+            )
+            plan.print("Successfully launched cadvisor")
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:
