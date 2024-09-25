@@ -46,7 +46,6 @@ def launch_grafana(
     prometheus_private_url,
     global_node_selectors,
     grafana_params,
-    additional_dashboards=[],
 ):
     (
         grafana_config_artifacts_uuid,
@@ -57,7 +56,7 @@ def launch_grafana(
         datasource_config_template,
         dashboard_providers_config_template,
         prometheus_private_url,
-        additional_dashboards=additional_dashboards,
+        additional_dashboards=grafana_params.additional_dashboards,
     )
 
     merged_dashboards_artifact_name = merge_dashboards_artifacts(

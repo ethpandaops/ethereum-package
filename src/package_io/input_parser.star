@@ -95,7 +95,6 @@ def input_parser(plan, input_args):
         result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     else:
         result["additional_services"] = []
-    result["grafana_additional_dashboards"] = []
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
@@ -339,6 +338,9 @@ def input_parser(plan, input_args):
             max_mem=result["prometheus_params"]["max_mem"],
         ),
         grafana_params=struct(
+            grafana_additional_dashboards=result["grafana_params"][
+                "grafana_additional_dashboards"
+            ],
             min_cpu=result["grafana_params"]["min_cpu"],
             max_cpu=result["grafana_params"]["max_cpu"],
             min_mem=result["grafana_params"]["min_mem"],
@@ -374,7 +376,6 @@ def input_parser(plan, input_args):
         ethereum_metrics_exporter_enabled=result["ethereum_metrics_exporter_enabled"],
         xatu_sentry_enabled=result["xatu_sentry_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
-        grafana_additional_dashboards=result["grafana_additional_dashboards"],
         disable_peer_scoring=result["disable_peer_scoring"],
         persistent=result["persistent"],
         xatu_sentry_params=struct(
@@ -1022,6 +1023,7 @@ def get_default_prometheus_params():
 
 def get_default_grafana_params():
     return {
+        "grafana_additional_dashboards": [],
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,

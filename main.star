@@ -649,7 +649,6 @@ def run(plan, args={}):
             prometheus_private_url,
             global_node_selectors,
             args_with_right_defaults.grafana_params,
-            additional_dashboards=args_with_right_defaults.grafana_additional_dashboards,
         )
         plan.print("Successfully launched grafana")
 

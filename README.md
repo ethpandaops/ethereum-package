@@ -621,6 +621,8 @@ prometheus_params:
 
 # Configuration place for grafana
 grafana_params:
+  # A list of locators for grafana dashboards to be loaded be the grafana service
+  grafana_additional_dashboards: []
   # Resource management for grafana container
   # CPU is milicores
   # RAM is in MB
@@ -716,9 +718,6 @@ parallel_keystore_generation: false
 # Disable peer scoring to prevent nodes impacted by faults from being permanently ejected from the network
 # Default to false
 disable_peer_scoring: false
-
-# A list of locators for grafana dashboards to be loaded be the grafana service
-grafana_additional_dashboards: []
 
 # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
 # Note this requires Kurtosis greater than 0.85.49 to work
