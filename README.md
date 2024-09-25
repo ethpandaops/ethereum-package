@@ -619,6 +619,16 @@ prometheus_params:
   min_mem: 128
   max_mem: 2048
 
+# Configuration place for grafana
+grafana_params:
+  # Resource management for grafana container
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use

@@ -38,12 +38,6 @@ USED_PORTS = {
     )
 }
 
-# The min/max CPU/memory that grafana can use
-MIN_CPU = 10
-MAX_CPU = 1000
-MIN_MEMORY = 128
-MAX_MEMORY = 2048
-
 
 def launch_grafana(
     plan,
@@ -51,6 +45,7 @@ def launch_grafana(
     dashboard_providers_config_template,
     prometheus_private_url,
     global_node_selectors,
+    grafana_params,
     additional_dashboards=[],
 ):
     (
@@ -75,6 +70,7 @@ def launch_grafana(
         grafana_config_artifacts_uuid,
         merged_dashboards_artifact_name,
         global_node_selectors,
+        grafana_params,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -130,6 +126,7 @@ def get_config(
     grafana_config_artifacts_name,
     grafana_dashboards_artifacts_name,
     node_selectors,
+    grafana_params,
 ):
     return ServiceConfig(
         image=IMAGE_NAME,
@@ -145,10 +142,10 @@ def get_config(
             GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
             GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
         },
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
+        min_cpu=grafana_params.min_cpu,
+        max_cpu=grafana_params.max_cpu,
+        min_memory=grafana_params.min_memory,
+        max_memory=grafana_params.max_memory,
         node_selectors=node_selectors,
     )
 

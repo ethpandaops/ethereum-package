@@ -12,6 +12,7 @@ METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
 PROMETHEUS_DEFAULT_SCRAPE_INTERVAL = "15s"
 
+
 def launch_prometheus(
     plan,
     el_contexts,

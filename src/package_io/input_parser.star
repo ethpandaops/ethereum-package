@@ -100,6 +100,8 @@ def input_parser(plan, input_args):
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
     result["goomy_blob_params"] = get_default_goomy_blob_params()
+    result["prometheus_params"] = get_default_prometheus_params()
+    result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
     result["prometheus_params"] = get_default_prometheus_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
@@ -335,6 +337,12 @@ def input_parser(plan, input_args):
             max_cpu=result["prometheus_params"]["max_cpu"],
             min_mem=result["prometheus_params"]["min_mem"],
             max_mem=result["prometheus_params"]["max_mem"],
+        ),
+        grafana_params=struct(
+            min_cpu=result["grafana_params"]["min_cpu"],
+            max_cpu=result["grafana_params"]["max_cpu"],
+            min_mem=result["grafana_params"]["min_mem"],
+            max_mem=result["grafana_params"]["max_mem"],
         ),
         apache_port=result["apache_port"],
         assertoor_params=struct(
@@ -1005,6 +1013,15 @@ def get_default_prometheus_params():
     return {
         "storage_tsdb_retention_time": "1d",
         "storage_tsdb_retention_size": "512MB",
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
+    }
+
+
+def get_default_grafana_params():
+    return {
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
