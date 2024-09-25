@@ -338,9 +338,7 @@ def input_parser(plan, input_args):
             max_mem=result["prometheus_params"]["max_mem"],
         ),
         grafana_params=struct(
-            grafana_additional_dashboards=result["grafana_params"][
-                "grafana_additional_dashboards"
-            ],
+            additional_dashboards=result["grafana_params"]["additional_dashboards"],
             min_cpu=result["grafana_params"]["min_cpu"],
             max_cpu=result["grafana_params"]["max_cpu"],
             min_mem=result["grafana_params"]["min_mem"],
@@ -1023,7 +1021,7 @@ def get_default_prometheus_params():
 
 def get_default_grafana_params():
     return {
-        "grafana_additional_dashboards": [],
+        "additional_dashboards": [],
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,

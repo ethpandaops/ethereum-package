@@ -622,7 +622,7 @@ prometheus_params:
 # Configuration place for grafana
 grafana_params:
   # A list of locators for grafana dashboards to be loaded be the grafana service
-  grafana_additional_dashboards: []
+  additional_dashboards: []
   # Resource management for grafana container
   # CPU is milicores
   # RAM is in MB

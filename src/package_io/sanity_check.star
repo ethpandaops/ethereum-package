@@ -163,7 +163,7 @@ SUBCATEGORY_PARAMS = {
         "storage_tsdb_retention_size",
     ],
     "grafana_params": [
-        "grafana_additional_dashboards",
+        "additional_dashboards",
         "min_cpu",
         "max_cpu",
         "min_mem",
