@@ -331,6 +331,10 @@ def input_parser(plan, input_args):
             storage_tsdb_retention_size=result["prometheus_params"][
                 "storage_tsdb_retention_size"
             ],
+            min_cpu=result["prometheus_params"]["min_cpu"],
+            max_cpu=result["prometheus_params"]["max_cpu"],
+            min_mem=result["prometheus_params"]["min_mem"],
+            max_mem=result["prometheus_params"]["max_mem"],
         ),
         apache_port=result["apache_port"],
         assertoor_params=struct(
@@ -936,6 +940,10 @@ def get_default_mev_params(mev_type, preset):
         "labels": None,
         "storage_tsdb_retention_time": "1d",
         "storage_tsdb_retention_size": "512MB",
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
     }
 
     if mev_type == constants.MEV_RS_MEV_TYPE:
@@ -997,6 +1005,10 @@ def get_default_prometheus_params():
     return {
         "storage_tsdb_retention_time": "1d",
         "storage_tsdb_retention_size": "512MB",
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
     }
 
 

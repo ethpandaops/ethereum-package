@@ -12,13 +12,6 @@ METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
 PROMETHEUS_DEFAULT_SCRAPE_INTERVAL = "15s"
 
-# The min/max CPU/memory that prometheus can use
-MIN_CPU = 10
-MAX_CPU = 1000
-MIN_MEMORY = 128
-MAX_MEMORY = 2048
-
-
 def launch_prometheus(
     plan,
     el_contexts,
@@ -28,8 +21,7 @@ def launch_prometheus(
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
     global_node_selectors,
-    storage_tsdb_retention_time,
-    storage_tsdb_retention_size,
+    prometheus_params,
 ):
     metrics_jobs = get_metrics_jobs(
         el_contexts,
@@ -43,13 +35,13 @@ def launch_prometheus(
         plan,
         metrics_jobs,
         "prometheus",
-        MIN_CPU,
-        MAX_CPU,
-        MIN_MEMORY,
-        MAX_MEMORY,
+        min_cpu=prometheus_params.min_cpu,
+        max_cpu=prometheus_params.max_cpu,
+        min_memory=prometheus_params.min_memory,
+        max_memory=prometheus_params.max_memory,
         node_selectors=global_node_selectors,
-        storage_tsdb_retention_time=storage_tsdb_retention_time,
-        storage_tsdb_retention_size=storage_tsdb_retention_size,
+        storage_tsdb_retention_time=prometheus_params.storage_tsdb_retention_time,
+        storage_tsdb_retention_size=prometheus_params.storage_tsdb_retention_size,
     )
 
     return prometheus_url

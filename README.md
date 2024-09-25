@@ -607,6 +607,18 @@ goomy_blob_params:
   # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
   goomy_blob_args: []
 
+# Configuration place for prometheus
+prometheus_params:
+  storage_tsdb_retention_time: "1d"
+  storage_tsdb_retention_size: "512MB"
+  # Resource management for prometheus container
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use
