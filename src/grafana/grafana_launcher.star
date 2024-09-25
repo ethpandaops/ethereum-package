@@ -144,8 +144,8 @@ def get_config(
         },
         min_cpu=grafana_params.min_cpu,
         max_cpu=grafana_params.max_cpu,
-        min_memory=grafana_params.min_memory,
-        max_memory=grafana_params.max_memory,
+        min_memory=grafana_params.min_mem,
+        max_memory=grafana_params.max_mem,
         node_selectors=node_selectors,
     )
 
