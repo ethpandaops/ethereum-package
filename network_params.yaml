@@ -93,6 +93,19 @@ tx_spammer_params:
   tx_spammer_extra_args: []
 goomy_blob_params:
   goomy_blob_args: []
+prometheus_params:
+  storage_tsdb_retention_time: "1d"
+  storage_tsdb_retention_size: "512MB"
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+grafana_params:
+  additional_dashboards: []
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
 assertoor_params:
   image: ""
   run_stability_check: false
@@ -108,7 +121,6 @@ snooper_enabled: false
 ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 disable_peer_scoring: false
-grafana_additional_dashboards: []
 persistent: false
 mev_type: null
 mev_params:
