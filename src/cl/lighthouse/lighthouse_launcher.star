@@ -60,9 +60,7 @@ def launch(
     extra_labels,
     persistent,
     cl_volume_size,
-    cl_tolerations,
-    participant_tolerations,
-    global_tolerations,
+    tolerations,
     node_selectors,
     use_separate_vc,
     keymanager_enabled,
@@ -75,31 +73,6 @@ def launch(
 
     log_level = input_parser.get_client_log_level_or_default(
         participant_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
-    tolerations = input_parser.get_client_tolerations(
-        cl_tolerations, participant_tolerations, global_tolerations
-    )
-
-    network_name = shared_utils.get_network_name(launcher.network)
-
-    cl_min_cpu = int(cl_min_cpu) if int(cl_min_cpu) > 0 else BEACON_MIN_CPU
-    cl_max_cpu = (
-        int(cl_max_cpu)
-        if int(cl_max_cpu) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["lighthouse_max_cpu"]
-    )
-    cl_min_mem = int(cl_min_mem) if int(cl_min_mem) > 0 else BEACON_MIN_MEMORY
-    cl_max_mem = (
-        int(cl_max_mem)
-        if int(cl_max_mem) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["lighthouse_max_mem"]
-    )
-
-    cl_volume_size = (
-        int(cl_volume_size)
-        if int(cl_volume_size) > 0
-        else constants.VOLUME_SIZE[network_name]["lighthouse_volume_size"]
     )
 
     # Launch Beacon node
@@ -184,17 +157,17 @@ def launch(
     )
     nodes_metrics_info = [beacon_node_metrics_info]
     return cl_context.new_cl_context(
-        "lighthouse",
-        beacon_node_enr,
-        beacon_service.ip_address,
-        beacon_http_port.number,
-        beacon_http_url,
-        nodes_metrics_info,
-        beacon_service_name,
-        beacon_multiaddr,
-        beacon_peer_id,
-        snooper_enabled,
-        snooper_engine_context,
+        client_name="lighthouse",
+        enr=beacon_node_enr,
+        ip_addr=beacon_service.ip_address,
+        http_port=beacon_http_port.number,
+        beacon_http_url=beacon_http_url,
+        cl_nodes_metrics_info=nodes_metrics_info,
+        beacon_service_name=beacon_service_name,
+        multiaddr=beacon_multiaddr,
+        peer_id=beacon_peer_id,
+        snooper_enabled=snooper_enabled,
+        snooper_engine_context=snooper_engine_context,
         validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
         if node_keystore_files
         else "",
@@ -310,15 +283,16 @@ def get_beacon_config(
         if checkpoint_sync_url:
             cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
         else:
-            if network in ["mainnet", "ephemery"]:
+            if (
+                network in constants.PUBLIC_NETWORKS
+                or network == constants.NETWORK_NAME.ephemery
+            ):
                 cmd.append(
                     "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
                 )
             else:
-                cmd.append(
-                    "--checkpoint-sync-url=https://checkpoint-sync.{0}.ethpandaops.io".format(
-                        network
-                    )
+                fail(
+                    "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
                 )
 
     if network not in constants.PUBLIC_NETWORKS:
@@ -373,31 +347,41 @@ def get_beacon_config(
         )
     env = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
     env.update(extra_env_vars)
-    return ServiceConfig(
-        image=image,
-        ports=used_ports,
-        public_ports=public_ports,
-        cmd=cmd,
-        files=files,
-        env_vars=env,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        ready_conditions=cl_node_ready_conditions.get_ready_conditions(
+    config_args = {
+        "image": image,
+        "ports": used_ports,
+        "public_ports": public_ports,
+        "cmd": cmd,
+        "files": files,
+        "env_vars": env,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         ),
-        min_cpu=cl_min_cpu,
-        max_cpu=cl_max_cpu,
-        min_memory=cl_min_mem,
-        max_memory=cl_max_mem,
-        labels=shared_utils.label_maker(
+        "labels": shared_utils.label_maker(
             constants.CL_TYPE.lighthouse,
             constants.CLIENT_TYPES.cl,
             image,
             el_context.client_name,
             extra_labels,
         ),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if cl_min_cpu > 0:
+        config_args["min_cpu"] = cl_min_cpu
+
+    if cl_max_cpu > 0:
+        config_args["max_cpu"] = cl_max_cpu
+
+    if cl_min_mem > 0:
+        config_args["min_memory"] = cl_min_mem
+
+    if cl_max_mem > 0:
+        config_args["max_memory"] = cl_max_mem
+
+    return ServiceConfig(**config_args)
 
 
 def new_lighthouse_launcher(el_cl_genesis_data, jwt_file, network_params):

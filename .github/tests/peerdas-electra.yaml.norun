@@ -11,7 +11,7 @@ participants:
     cl_image: ethpandaops/teku:nashatyrev-das
     cl_extra_params: [--p2p-subscribe-all-custody-subnets-enabled]
   - cl_type: nimbus
-    cl_image: ethpandaops/nimbus-eth2:peerdas-p2p
+    cl_image: ethpandaops/nimbus-eth2:peerdas-p2p-minimal
     cl_extra_params: [--subscribe-all-subnets=true]
 # Non supernodes
   - cl_type: prysm
@@ -22,13 +22,14 @@ participants:
   - cl_type: teku
     cl_image: ethpandaops/teku:nashatyrev-das
   - cl_type: nimbus
-    cl_image: ethpandaops/nimbus-eth2:peerdas-p2p
+    cl_image: ethpandaops/nimbus-eth2:peerdas-p2p-minimal
   - cl_type: lodestar
     cl_image: ethpandaops/lodestar:peerDAS
     cl_extra_params: [--persistNetworkIdentity]
 network_params:
-  eip7594_fork_epoch: 0
-  eip7594_fork_version: "0x50000038"
+  electra_fork_epoch: 1
+  eip7594_fork_epoch: 1
+  eip7594_fork_version: "0x60000038"
   preset: minimal
 snooper_enabled: true
 global_log_level: debug

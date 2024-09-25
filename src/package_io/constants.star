@@ -1,5 +1,4 @@
 EL_TYPE = struct(
-    geth_builder="geth-builder",
     geth="geth",
     erigon="erigon",
     nethermind="nethermind",
@@ -135,7 +134,9 @@ NETWORK_ID = {
 
 CHECKPOINT_SYNC_URL = {
     "mainnet": "https://beaconstate.info",
-    "ephemery": "https://checkpointz.bordel.wtf/",
+    "ephemery": "https://checkpoint-sync.ephemery.ethpandaops.io/",
+    "sepolia": "https://checkpoint-sync.sepolia.ethpandaops.io/",
+    "holesky": "https://checkpoint-sync.holesky.ethpandaops.io/",
 }
 
 GENESIS_VALIDATORS_ROOT = {
@@ -164,6 +165,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 1000000,  # 1TB
         "besu_volume_size": 1000000,  # 1TB
         "reth_volume_size": 3000000,  # 3TB
+        "reth-builder_volume_size": 3000000,  # 3TB
         "ethereumjs_volume_size": 1000000,  # 1TB
         "nimbus_eth1_volume_size": 1000000,  # 1TB
         "prysm_volume_size": 500000,  # 500GB
@@ -180,6 +182,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 300000,  # 300GB
         "besu_volume_size": 300000,  # 300GB
         "reth_volume_size": 500000,  # 500GB
+        "reth-builder_volume_size": 500000,  # 500GB
         "ethereumjs_volume_size": 300000,  # 300GB
         "nimbus_eth1_volume_size": 300000,  # 300GB
         "prysm_volume_size": 150000,  # 150GB
@@ -196,6 +199,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 100000,  # 100GB
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
+        "reth-builder_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
@@ -212,6 +216,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 100000,  # 100GB
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
+        "reth-builder_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
@@ -228,6 +233,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 3000,  # 3GB
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
+        "reth-builder_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
@@ -244,6 +250,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 3000,  # 3GB
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
+        "reth-builder_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
@@ -253,188 +260,5 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 1000,  # 1GB
         "grandine_volume_size": 1000,  # 1GB
         "caplin_volume_size": 1000,  # 1GB
-    },
-}
-
-RAM_CPU_OVERRIDES = {
-    "mainnet": {
-        "geth_max_mem": 16384,  # 16GB
-        "geth_max_cpu": 4000,  # 4 cores
-        "erigon_max_mem": 16384,  # 16GB
-        "erigon_max_cpu": 4000,  # 4 cores
-        "nethermind_max_mem": 16384,  # 16GB
-        "nethermind_max_cpu": 4000,  # 4 cores
-        "besu_max_mem": 16384,  # 16GB
-        "besu_max_cpu": 4000,  # 4 cores
-        "reth_max_mem": 16384,  # 16GB
-        "reth_max_cpu": 4000,  # 4 cores
-        "ethereumjs_max_mem": 16384,  # 16GB
-        "ethereumjs_max_cpu": 4000,  # 4 cores
-        "nimbus_eth1_max_mem": 16384,  # 16GB
-        "nimbus_eth1_max_cpu": 4000,  # 4 cores
-        "prysm_max_mem": 16384,  # 16GB
-        "prysm_max_cpu": 4000,  # 4 cores
-        "lighthouse_max_mem": 16384,  # 16GB
-        "lighthouse_max_cpu": 4000,  # 4 cores
-        "teku_max_mem": 16384,  # 16GB
-        "teku_max_cpu": 4000,  # 4 cores
-        "nimbus_max_mem": 16384,  # 16GB
-        "nimbus_max_cpu": 4000,  # 4 cores
-        "lodestar_max_mem": 16384,  # 16GB
-        "lodestar_max_cpu": 4000,  # 4 cores
-        "grandine_max_mem": 16384,  # 16GB
-        "grandine_max_cpu": 4000,  # 4 cores
-        "caplin_max_mem": 16384,  # 16GB
-        "caplin_max_cpu": 4000,  # 4 cores
-    },
-    "sepolia": {
-        "geth_max_mem": 4096,  # 4GB
-        "geth_max_cpu": 1000,  # 1 core
-        "erigon_max_mem": 4096,  # 4GB
-        "erigon_max_cpu": 1000,  # 1 core
-        "nethermind_max_mem": 4096,  # 4GB
-        "nethermind_max_cpu": 1000,  # 1 core
-        "besu_max_mem": 4096,  # 4GB
-        "besu_max_cpu": 1000,  # 1 core
-        "reth_max_mem": 4096,  # 4GB
-        "reth_max_cpu": 1000,  # 1 core
-        "ethereumjs_max_mem": 4096,  # 4GB
-        "ethereumjs_max_cpu": 1000,  # 1 core
-        "nimbus_eth1_max_mem": 4096,  # 4GB
-        "nimbus_eth1_max_cpu": 1000,  # 1 core
-        "prysm_max_mem": 4096,  # 4GB
-        "prysm_max_cpu": 1000,  # 1 core
-        "lighthouse_max_mem": 4096,  # 4GB
-        "lighthouse_max_cpu": 1000,  # 1 core
-        "teku_max_mem": 4096,  # 4GB
-        "teku_max_cpu": 1000,  # 1 core
-        "nimbus_max_mem": 4096,  # 4GB
-        "nimbus_max_cpu": 1000,  # 1 core
-        "lodestar_max_mem": 4096,  # 4GB
-        "lodestar_max_cpu": 1000,  # 1 core
-        "grandine_max_mem": 4096,  # 4GB
-        "grandine_max_cpu": 1000,  # 1 core
-        "caplin_max_mem": 4096,  # 4GB
-        "caplin_max_cpu": 1000,  # 1 core
-    },
-    "holesky": {
-        "geth_max_mem": 8192,  # 8GB
-        "geth_max_cpu": 2000,  # 2 cores
-        "erigon_max_mem": 8192,  # 8GB
-        "erigon_max_cpu": 2000,  # 2 cores
-        "nethermind_max_mem": 8192,  # 8GB
-        "nethermind_max_cpu": 2000,  # 2 cores
-        "besu_max_mem": 8192,  # 8GB
-        "besu_max_cpu": 2000,  # 2 cores
-        "reth_max_mem": 8192,  # 8GB
-        "reth_max_cpu": 2000,  # 2 cores
-        "ethereumjs_max_mem": 8192,  # 8GB
-        "ethereumjs_max_cpu": 2000,  # 2 cores
-        "nimbus_eth1_max_mem": 8192,  # 8GB
-        "nimbus_eth1_max_cpu": 2000,  # 2 cores
-        "prysm_max_mem": 8192,  # 8GB
-        "prysm_max_cpu": 2000,  # 2 cores
-        "lighthouse_max_mem": 8192,  # 8GB
-        "lighthouse_max_cpu": 2000,  # 2 cores
-        "teku_max_mem": 8192,  # 8GB
-        "teku_max_cpu": 2000,  # 2 cores
-        "nimbus_max_mem": 8192,  # 8GB
-        "nimbus_max_cpu": 2000,  # 2 cores
-        "lodestar_max_mem": 8192,  # 8GB
-        "lodestar_max_cpu": 2000,  # 2 cores
-        "grandine_max_mem": 8192,  # 8GB
-        "grandine_max_cpu": 2000,  # 2 cores
-        "caplin_max_mem": 8192,  # 8GB
-        "caplin_max_cpu": 2000,  # 2 cores
-    },
-    "devnets": {
-        "geth_max_mem": 4096,  # 4GB
-        "geth_max_cpu": 1000,  # 1 core
-        "erigon_max_mem": 4096,  # 4GB
-        "erigon_max_cpu": 1000,  # 1 core
-        "nethermind_max_mem": 4096,  # 4GB
-        "nethermind_max_cpu": 1000,  # 1 core
-        "besu_max_mem": 4096,  # 4GB
-        "besu_max_cpu": 1000,  # 1 core
-        "reth_max_mem": 4096,  # 4GB
-        "reth_max_cpu": 1000,  # 1 core
-        "ethereumjs_max_mem": 4096,  # 4GB
-        "ethereumjs_max_cpu": 1000,  # 1 core
-        "nimbus_eth1_max_mem": 4096,  # 4GB
-        "nimbus_eth1_max_cpu": 1000,  # 1 core
-        "prysm_max_mem": 4096,  # 4GB
-        "prysm_max_cpu": 1000,  # 1 core
-        "lighthouse_max_mem": 4096,  # 4GB
-        "lighthouse_max_cpu": 1000,  # 1 core
-        "teku_max_mem": 4096,  # 4GB
-        "teku_max_cpu": 1000,  # 1 core
-        "nimbus_max_mem": 4096,  # 4GB
-        "nimbus_max_cpu": 1000,  # 1 core
-        "lodestar_max_mem": 4096,  # 4GB
-        "lodestar_max_cpu": 1000,  # 1 core
-        "grandine_max_mem": 4096,  # 4GB
-        "grandine_max_cpu": 1000,  # 1 core
-        "caplin_max_mem": 4096,  # 4GB
-        "caplin_max_cpu": 1000,  # 1 core
-    },
-    "ephemery": {
-        "geth_max_mem": 1024,  # 1GB
-        "geth_max_cpu": 1000,  # 1 core
-        "erigon_max_mem": 1024,  # 1GB
-        "erigon_max_cpu": 1000,  # 1 core
-        "nethermind_max_mem": 1024,  # 1GB
-        "nethermind_max_cpu": 1000,  # 1 core
-        "besu_max_mem": 1024,  # 1GB
-        "besu_max_cpu": 1000,  # 1 core
-        "reth_max_mem": 1024,  # 1GB
-        "reth_max_cpu": 1000,  # 1 core
-        "ethereumjs_max_mem": 1024,  # 1GB
-        "ethereumjs_max_cpu": 1000,  # 1 core
-        "nimbus_eth1_max_mem": 1024,  # 1GB
-        "nimbus_eth1_max_cpu": 1000,  # 1 core
-        "prysm_max_mem": 1024,  # 1GB
-        "prysm_max_cpu": 1000,  # 1 core
-        "lighthouse_max_mem": 1024,  # 1GB
-        "lighthouse_max_cpu": 1000,  # 1 core
-        "teku_max_mem": 1024,  # 1GB
-        "teku_max_cpu": 1000,  # 1 core
-        "nimbus_max_mem": 1024,  # 1GB
-        "nimbus_max_cpu": 1000,  # 1 core
-        "lodestar_max_mem": 1024,  # 1GB
-        "lodestar_max_cpu": 1000,  # 1 core
-        "grandine_max_mem": 1024,  # 1GB
-        "grandine_max_cpu": 1000,  # 1 core
-        "caplin_max_mem": 1024,  # 1GB
-        "caplin_max_cpu": 1000,  # 1 core
-    },
-    "kurtosis": {
-        "geth_max_mem": 1024,  # 1GB
-        "geth_max_cpu": 1000,  # 1 core
-        "erigon_max_mem": 1024,  # 1GB
-        "erigon_max_cpu": 1000,  # 1 core
-        "nethermind_max_mem": 2048,  # 2GB
-        "nethermind_max_cpu": 1000,  # 1 core
-        "besu_max_mem": 1024,  # 1GB
-        "besu_max_cpu": 1000,  # 1 core
-        "reth_max_mem": 1024,  # 1GB
-        "reth_max_cpu": 1000,  # 1 core
-        "ethereumjs_max_mem": 1024,  # 1GB
-        "ethereumjs_max_cpu": 1000,  # 1 core
-        "nimbus_eth1_max_mem": 1024,  # 1GB
-        "nimbus_eth1_max_cpu": 1000,  # 1 core
-        "prysm_max_mem": 1024,  # 1GB
-        "prysm_max_cpu": 1000,  # 1 core
-        "lighthouse_max_mem": 1024,  # 1GB
-        "lighthouse_max_cpu": 1000,  # 1 core
-        "teku_max_mem": 2048,  # 2GB
-        "teku_max_cpu": 1000,  # 1 core
-        "nimbus_max_mem": 1024,  # 1GB
-        "nimbus_max_cpu": 1000,  # 1 core
-        "lodestar_max_mem": 2048,  # 2GB
-        "lodestar_max_cpu": 1000,  # 1 core
-        "grandine_max_mem": 2048,  # 2GB
-        "grandine_max_cpu": 1000,  # 1 core
-        "caplin_max_mem": 2048,  # 2GB
-        "caplin_max_cpu": 1000,  # 1 core
     },
 }

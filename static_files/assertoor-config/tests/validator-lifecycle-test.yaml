@@ -1,9 +1,10 @@
+id: validator-lifecycle-test
 name: "Validator Lifecycle Test"
 timeout: 72h
 config:
-  #walletPrivkey: ""
+  walletPrivkey: ""
   validatorMnemonic: "trial jeans seat abstract runway cupboard please elevator club file arrow lounge crash sun thumb clock duty priority key fence funny trick diary album"
-  #validatorPairNames: []
+  validatorPairNames: []
 tasks:
 - name: check_clients_are_healthy
   title: "Check if at least one client is ready"
@@ -20,31 +21,51 @@ tasks:
       config:
         limitTotal: 300
         limitPerSlot: 20
+        limitPending: 50
         depositContract: "0x4242424242424242424242424242424242424242"
+        awaitReceipt: true
       configVars:
         walletPrivkey: "walletPrivkey"
         mnemonic: "validatorMnemonic"
 
-    - name: run_task_options
-      title: "Check deposit inclusion"
+    - name: run_task_background
+      title: "Check deposit inclusion with all client pairs"
       config:
-        ignoreFailure: true
-        task:
-          name: run_task_matrix
-          title: "Check deposit inclusion with all client pairs"
-          timeout: 48h
-          configVars:
-            matrixValues: "validatorPairNames"
+        onBackgroundComplete: succeed
+        backgroundTask:
+          name: run_tasks
+          title: "Await end of next deposit voting period"
           config:
-            runConcurrent: true
-            matrixVar: "validatorPairName"
-            task:
-              name: check_consensus_block_proposals
-              title: "Wait for block proposal with deposits from ${validatorPairName}"
-              configVars:
-                validatorNamePattern: "validatorPairName"
+            tasks:
+            - name: check_consensus_validator_status
+              title: "Wait for inclusion of the last deposit"
               config:
-                minDepositCount: 1
+                validatorPubKey: 0xa4a6121cb76eaf63e520615368a21d504c6f7363b5045f965e3587f623a6f7f1ce32af63ce3c535e75cd831db27c5abd
+                validatorStatus:
+                - pending_initialized
+                - pending_queued
+                - active_ongoing
+        foregroundTask:
+          name: run_task_options
+          title: "Check deposit inclusion"
+          config:
+            ignoreFailure: true
+            task:
+              name: run_task_matrix
+              title: "Check deposit inclusion with all client pairs"
+              timeout: 48h
+              configVars:
+                matrixValues: "validatorPairNames"
+              config:
+                runConcurrent: true
+                matrixVar: "validatorPairName"
+                task:
+                  name: check_consensus_block_proposals
+                  title: "Wait for block proposal with deposits from ${validatorPairName}"
+                  configVars:
+                    validatorNamePattern: "validatorPairName"
+                  config:
+                    minDepositCount: 1
     
 # due to the deposits we should reach un-finality soon.
 - name: check_consensus_validator_status
@@ -196,12 +217,16 @@ tasks:
             minProposerSlashingCount: 1
 
 # exit 150 validators and wait for finality
-- name: generate_exits
-  title: "Exit 150 Validators"
+- name: run_task_options
+  title: "Exit 150 validators"
   config:
-    indexCount: 150
-  configVars:
-    mnemonic: "validatorMnemonic"
+    task:
+      name: generate_exits
+      title: "Exit 150 Validators"
+      config:
+        indexCount: 150
+      configVars:
+        mnemonic: "validatorMnemonic"
 - name: check_consensus_finality
   title: "Wait for consensus chain finality"
   timeout: 18h
@@ -236,7 +261,7 @@ tasks:
         matrixVar: "validatorPairName"
         task:
           name: check_consensus_block_proposals
-          title: "Wait for block proposal with deposits from ${validatorPairName}"
+          title: "Wait for block proposal with BLS changes from ${validatorPairName}"
           configVars:
             validatorNamePattern: "validatorPairName"
           config:
@@ -269,7 +294,7 @@ tasks:
         matrixVar: "validatorPairName"
         task:
           name: check_consensus_block_proposals
-          title: "Wait for block proposal with deposits from ${validatorPairName}"
+          title: "Wait for block proposal with exits from ${validatorPairName}"
           configVars:
             validatorNamePattern: "validatorPairName"
           config:
@@ -344,10 +369,26 @@ tasks:
             minProposerSlashingCount: 1
 
 cleanupTasks:
-- name: generate_exits
-  title: "Exit all test validators"
+- name: run_task_options
+  title: "Exit all validators"
   config:
-    limitTotal: 300
-    indexCount: 300
-  configVars:
-    mnemonic: "validatorMnemonic"
+    task:
+      name: generate_exits
+      title: "Exit all test validators"
+      config:
+        limitTotal: 300
+        indexCount: 300
+      configVars:
+        mnemonic: "validatorMnemonic"
+- name: run_task_options
+  title: "Withdraw all funds"
+  config:
+    task:
+      name: generate_bls_changes
+      title: "Generate BLS changes for all validators"
+      config:
+        limitTotal: 300
+        indexCount: 300
+        targetAddress: 0x65D08a056c17Ae13370565B04cF77D2AfA1cB9FA
+      configVars:
+        mnemonic: "validatorMnemonic"
