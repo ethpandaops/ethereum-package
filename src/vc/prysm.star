@@ -66,7 +66,7 @@ def get_config(
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
-        cmd.extend([param for param in participant.vc_participant.vc_extra_params])
+        cmd.extend([param for param in participant.vc_extra_params])
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
