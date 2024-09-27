@@ -46,11 +46,6 @@ def launch(
     el_context,
     full_name,
     node_keystore_files,
-    cl_min_cpu,
-    cl_max_cpu,
-    cl_min_mem,
-    cl_max_mem,
-    cl_volume_size,
     snooper_engine_context,
     persistent,
     tolerations,
@@ -74,11 +69,6 @@ def launch(
         el_context,
         full_name,
         node_keystore_files,
-        cl_min_cpu,
-        cl_max_cpu,
-        cl_min_mem,
-        cl_max_mem,
-        cl_volume_size,
         snooper_engine_context,
         persistent,
         tolerations,
@@ -168,11 +158,6 @@ def get_beacon_config(
     el_context,
     full_name,
     node_keystore_files,
-    cl_min_cpu,
-    cl_max_cpu,
-    cl_min_mem,
-    cl_max_mem,
-    cl_volume_size,
     snooper_engine_context,
     persistent,
     tolerations,
@@ -331,7 +316,11 @@ def get_beacon_config(
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
-            size=cl_volume_size,
+            size=int(participant.cl_volume_size)
+            if int(participant.cl_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.CL_TYPE.lighthouse + "_volume_size"
+            ],
         )
     env_vars = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
     env_vars.update(participant.cl_extra_env_vars)
@@ -357,18 +346,14 @@ def get_beacon_config(
         "node_selectors": node_selectors,
     }
 
-    if cl_min_cpu > 0:
-        config_args["min_cpu"] = cl_min_cpu
-
-    if cl_max_cpu > 0:
-        config_args["max_cpu"] = cl_max_cpu
-
-    if cl_min_mem > 0:
-        config_args["min_memory"] = cl_min_mem
-
-    if cl_max_mem > 0:
-        config_args["max_memory"] = cl_max_mem
-
+    if int(participant.cl_min_cpu) > 0:
+        config_args["min_cpu"] = int(participant.cl_min_cpu)
+    if int(participant.cl_max_cpu) > 0:
+        config_args["max_cpu"] = int(participant.cl_max_cpu)
+    if int(participant.cl_min_mem) > 0:
+        config_args["min_memory"] = int(participant.cl_min_mem)
+    if int(participant.cl_max_mem) > 0:
+        config_args["max_memory"] = int(participant.cl_max_mem)
     return ServiceConfig(**config_args)
 
 

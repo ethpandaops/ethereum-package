@@ -106,22 +106,6 @@ def launch(
             participant.cl_tolerations, participant.tolerations, global_tolerations
         )
 
-        (
-            cl_min_cpu,
-            cl_max_cpu,
-            cl_min_mem,
-            cl_max_mem,
-            cl_volume_size,
-        ) = shared_utils.get_cpu_mem_resource_limits(
-            participant.cl_min_cpu,
-            participant.cl_max_cpu,
-            participant.cl_min_mem,
-            participant.cl_max_mem,
-            participant.cl_volume_size,
-            network_name,
-            participant.cl_type,
-        )
-
         if cl_type not in cl_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
@@ -175,11 +159,6 @@ def launch(
                 el_context,
                 full_name,
                 new_cl_node_validator_keystores,
-                cl_min_cpu,
-                cl_max_cpu,
-                cl_min_mem,
-                cl_max_mem,
-                cl_volume_size,
                 snooper_engine_context,
                 persistent,
                 tolerations,
@@ -201,11 +180,6 @@ def launch(
                 el_context,
                 full_name,
                 new_cl_node_validator_keystores,
-                cl_min_cpu,
-                cl_max_cpu,
-                cl_min_mem,
-                cl_max_mem,
-                cl_volume_size,
                 snooper_engine_context,
                 persistent,
                 tolerations,

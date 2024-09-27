@@ -7,6 +7,7 @@ PRYSM_BEACON_RPC_PORT = 4000
 
 
 def get_config(
+    participant,
     el_cl_genesis_data,
     keymanager_file,
     image,
@@ -15,13 +16,6 @@ def get_config(
     el_context,
     full_name,
     node_keystore_files,
-    vc_min_cpu,
-    vc_max_cpu,
-    vc_min_mem,
-    vc_max_mem,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
     tolerations,
@@ -70,9 +64,9 @@ def get_config(
         cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
         cmd.append("--beacon-rest-api-provider=" + cl_context.beacon_grpc_url)
 
-    if len(extra_params) > 0:
+    if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
-        cmd.extend([param for param in extra_params])
+        cmd.extend([param for param in participant.vc_participant.vc_extra_params])
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
@@ -116,28 +110,24 @@ def get_config(
         "public_ports": public_ports,
         "cmd": cmd,
         "files": files,
-        "env_vars": extra_env_vars,
+        "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
             constants.CL_TYPE.prysm,
             constants.CLIENT_TYPES.validator,
             image,
             cl_context.client_name,
-            extra_labels,
+            participant.vc_extra_labels,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
 
-    if vc_min_cpu > 0:
-        config_args["min_cpu"] = vc_min_cpu
-
-    if vc_max_cpu > 0:
-        config_args["max_cpu"] = vc_max_cpu
-
-    if vc_min_mem > 0:
-        config_args["min_memory"] = vc_min_mem
-
-    if vc_max_mem > 0:
-        config_args["max_memory"] = vc_max_mem
-
+    if participant.vc_min_cpu > 0:
+        config_args["min_cpu"] = participant.vc_min_cpu
+    if participant.vc_max_cpu > 0:
+        config_args["max_cpu"] = participant.vc_max_cpu
+    if participant.vc_min_mem > 0:
+        config_args["min_memory"] = participant.vc_min_mem
+    if participant.vc_max_mem > 0:
+        config_args["max_memory"] = participant.vc_max_mem
     return ServiceConfig(**config_args)

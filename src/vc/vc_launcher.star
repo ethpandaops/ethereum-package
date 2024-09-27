@@ -54,44 +54,18 @@ def launch(
             cl_context.beacon_http_url,
         )
 
-    (
-        vc_min_cpu,
-        vc_max_cpu,
-        vc_min_mem,
-        vc_max_mem,
-        _,
-    ) = shared_utils.get_cpu_mem_resource_limits(
-        participant.vc_min_cpu,
-        participant.vc_max_cpu,
-        participant.vc_min_mem,
-        participant.vc_max_mem,
-        0,
-        network,
-        vc_type,
-    )
-    extra_params = participant.vc_extra_params
-    extra_env_vars = participant.vc_extra_env_vars
-    extra_labels = participant.vc_extra_labels
-    participant_log_level = participant.vc_log_level
     keymanager_enabled = participant.keymanager_enabled
     if vc_type == constants.VC_TYPE.lighthouse:
         config = lighthouse.get_config(
+            participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
-            participant_log_level=participant_log_level,
             global_log_level=global_log_level,
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
             full_name=full_name,
             node_keystore_files=node_keystore_files,
-            vc_min_cpu=vc_min_cpu,
-            vc_max_cpu=vc_max_cpu,
-            vc_min_mem=vc_min_mem,
-            vc_max_mem=vc_max_mem,
-            extra_params=extra_params,
-            extra_env_vars=extra_env_vars,
-            extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
@@ -102,23 +76,16 @@ def launch(
         )
     elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(
+            participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
-            participant_log_level=participant_log_level,
             global_log_level=global_log_level,
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
             full_name=full_name,
             node_keystore_files=node_keystore_files,
-            vc_min_cpu=vc_min_cpu,
-            vc_max_cpu=vc_max_cpu,
-            vc_min_mem=vc_min_mem,
-            vc_max_mem=vc_max_mem,
-            extra_params=extra_params,
-            extra_env_vars=extra_env_vars,
-            extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
@@ -128,6 +95,7 @@ def launch(
         )
     elif vc_type == constants.VC_TYPE.teku:
         config = teku.get_config(
+            participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
@@ -136,13 +104,6 @@ def launch(
             el_context=el_context,
             full_name=full_name,
             node_keystore_files=node_keystore_files,
-            vc_min_cpu=vc_min_cpu,
-            vc_max_cpu=vc_max_cpu,
-            vc_min_mem=vc_min_mem,
-            vc_max_mem=vc_max_mem,
-            extra_params=extra_params,
-            extra_env_vars=extra_env_vars,
-            extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
@@ -151,6 +112,7 @@ def launch(
         )
     elif vc_type == constants.VC_TYPE.nimbus:
         config = nimbus.get_config(
+            participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
@@ -159,13 +121,6 @@ def launch(
             el_context=el_context,
             full_name=full_name,
             node_keystore_files=node_keystore_files,
-            vc_min_cpu=vc_min_cpu,
-            vc_max_cpu=vc_max_cpu,
-            vc_min_mem=vc_min_mem,
-            vc_max_mem=vc_max_mem,
-            extra_params=extra_params,
-            extra_env_vars=extra_env_vars,
-            extra_labels=extra_labels,
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
@@ -174,6 +129,7 @@ def launch(
         )
     elif vc_type == constants.VC_TYPE.prysm:
         config = prysm.get_config(
+            participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
@@ -182,13 +138,6 @@ def launch(
             el_context=el_context,
             full_name=full_name,
             node_keystore_files=node_keystore_files,
-            vc_min_cpu=vc_min_cpu,
-            vc_max_cpu=vc_max_cpu,
-            vc_min_mem=vc_min_mem,
-            vc_max_mem=vc_max_mem,
-            extra_params=extra_params,
-            extra_env_vars=extra_env_vars,
-            extra_labels=extra_labels,
             prysm_password_relative_filepath=prysm_password_relative_filepath,
             prysm_password_artifact_uuid=prysm_password_artifact_uuid,
             tolerations=tolerations,
