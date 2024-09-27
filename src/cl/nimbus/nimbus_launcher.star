@@ -251,11 +251,11 @@ def get_beacon_config(
     ]
 
     supernode_cmd = [
-        "--subscribe-all-subnets=true",
+        "--subscribe-all-subnets",
     ]
 
     if participant.supernode:
-        cmd.append(supernode_cmd)
+        cmd.extend(supernode_cmd)
 
     if launcher.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
