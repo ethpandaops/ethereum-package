@@ -24,6 +24,7 @@ PARTICIPANT_CATEGORIES = {
         "cl_max_cpu",
         "cl_min_mem",
         "cl_max_mem",
+        "supernode",
         "use_separate_vc",
         "vc_type",
         "vc_image",

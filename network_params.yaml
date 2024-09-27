@@ -25,6 +25,7 @@ participants:
     cl_max_cpu: 0
     cl_min_mem: 0
     cl_max_mem: 0
+    supernode: false
     use_separate_vc: true
 # Validator
     vc_type: lighthouse
