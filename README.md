@@ -284,6 +284,12 @@ participants:
     cl_min_mem: 0
     cl_max_mem: 0
 
+    # Whether to act as a supernode for the network
+    # Supernodes will subscribe to all subnet topics
+    # This flag should only be used with peerdas
+    # Defaults to false
+    supernode: false
+
     # Whether to use a separate validator client attached to the CL client.
     # Defaults to false for clients that can run both in one process (Teku, Nimbus)
     use_separate_vc: true
