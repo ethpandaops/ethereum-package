@@ -110,22 +110,6 @@ def launch(
             participant.el_tolerations, participant.tolerations, global_tolerations
         )
 
-        (
-            el_min_cpu,
-            el_max_cpu,
-            el_min_mem,
-            el_max_mem,
-            el_volume_size,
-        ) = shared_utils.get_cpu_mem_resource_limits(
-            participant.el_min_cpu,
-            participant.el_max_cpu,
-            participant.el_min_mem,
-            participant.el_max_mem,
-            participant.el_volume_size,
-            network_name,
-            participant.el_type,
-        )
-
         if el_type not in el_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
@@ -147,19 +131,10 @@ def launch(
             plan,
             el_launcher,
             el_service_name,
-            participant.el_image,
-            participant.el_log_level,
+            participant,
             global_log_level,
             all_el_contexts,
-            el_min_cpu,
-            el_max_cpu,
-            el_min_mem,
-            el_max_mem,
-            participant.el_extra_params,
-            participant.el_extra_env_vars,
-            participant.el_extra_labels,
             persistent,
-            el_volume_size,
             tolerations,
             node_selectors,
             port_publisher,

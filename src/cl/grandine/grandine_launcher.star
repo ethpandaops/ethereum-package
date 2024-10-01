@@ -33,68 +33,38 @@ VERBOSITY_LEVELS = {
 def launch(
     plan,
     launcher,
-    service_name,
-    image,
-    participant_log_level,
+    beacon_service_name,
+    participant,
     global_log_level,
-    bootnode_context,
+    bootnode_contexts,
     el_context,
     full_name,
     node_keystore_files,
-    cl_min_cpu,
-    cl_max_cpu,
-    cl_min_mem,
-    cl_max_mem,
-    snooper_enabled,
     snooper_engine_context,
-    blobber_enabled,
-    blobber_extra_params,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
     persistent,
-    cl_volume_size,
     tolerations,
     node_selectors,
-    use_separate_vc,
-    keymanager_enabled,
     checkpoint_sync_enabled,
     checkpoint_sync_url,
     port_publisher,
     participant_index,
 ):
-    beacon_service_name = "{0}".format(service_name)
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, VERBOSITY_LEVELS
+        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
-
-    extra_params = [param for param in extra_params]
 
     config = get_beacon_config(
         plan,
-        launcher.el_cl_genesis_data,
-        launcher.jwt_file,
-        launcher.network,
-        keymanager_enabled,
-        image,
+        launcher,
         beacon_service_name,
-        bootnode_context,
+        participant,
+        log_level,
+        bootnode_contexts,
         el_context,
         full_name,
-        log_level,
         node_keystore_files,
-        cl_min_cpu,
-        cl_max_cpu,
-        cl_min_mem,
-        cl_max_mem,
-        snooper_enabled,
         snooper_engine_context,
-        extra_params,
-        extra_env_vars,
-        extra_labels,
-        use_separate_vc,
         persistent,
-        cl_volume_size,
         tolerations,
         node_selectors,
         checkpoint_sync_enabled,
@@ -103,7 +73,7 @@ def launch(
         participant_index,
     )
 
-    beacon_service = plan.add_service(service_name, config)
+    beacon_service = plan.add_service(beacon_service_name, config)
 
     beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(
@@ -125,14 +95,14 @@ def launch(
         },
     )
     response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=service_name
+        recipe=beacon_node_identity_recipe, service_name=beacon_service_name
     )
     beacon_node_enr = response["extract.enr"]
     beacon_multiaddr = response["extract.multiaddr"]
     beacon_peer_id = response["extract.peer_id"]
 
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, BEACON_METRICS_PATH, beacon_metrics_url
+        beacon_service_name, BEACON_METRICS_PATH, beacon_metrics_url
     )
     nodes_metrics_info = [beacon_node_metrics_info]
     return cl_context.new_cl_context(
@@ -145,7 +115,7 @@ def launch(
         beacon_service_name=beacon_service_name,
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
-        snooper_enabled=snooper_enabled,
+        snooper_enabled=participant.snooper_enabled,
         snooper_engine_context=snooper_engine_context,
         validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
         if node_keystore_files
@@ -155,29 +125,16 @@ def launch(
 
 def get_beacon_config(
     plan,
-    el_cl_genesis_data,
-    jwt_file,
-    network,
-    keymanager_enabled,
-    image,
-    service_name,
+    launcher,
+    beacon_service_name,
+    participant,
+    log_level,
     bootnode_contexts,
     el_context,
     full_name,
-    log_level,
     node_keystore_files,
-    cl_min_cpu,
-    cl_max_cpu,
-    cl_min_mem,
-    cl_max_mem,
-    snooper_enabled,
     snooper_engine_context,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
-    use_separate_vc,
     persistent,
-    cl_volume_size,
     tolerations,
     node_selectors,
     checkpoint_sync_enabled,
@@ -197,7 +154,7 @@ def get_beacon_config(
             node_keystore_files.teku_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if snooper_enabled:
+    if participant.snooper_enabled:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
             snooper_engine_context.ip_addr,
             snooper_engine_context.engine_rpc_port_num,
@@ -232,7 +189,9 @@ def get_beacon_config(
 
     cmd = [
         "--network={0}".format(
-            network if network in constants.PUBLIC_NETWORKS else "custom"
+            launcher.network
+            if launcher.network in constants.PUBLIC_NETWORKS
+            else "custom"
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--http-address=0.0.0.0",
@@ -270,31 +229,39 @@ def get_beacon_config(
         # "--validator-api-bearer-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER, Not yet supported
     ]
 
+    supernode_cmd = [
+        "--subscribe-all-data-column-subnets",
+    ]
+
+    if participant.supernode:
+        cmd.extend(supernode_cmd)
+
     # If checkpoint sync is enabled, add the checkpoint sync url
     if checkpoint_sync_enabled:
         if checkpoint_sync_url:
             cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
         else:
             if (
-                network in constants.PUBLIC_NETWORKS
-                or network == constants.NETWORK_NAME.ephemery
+                launcher.network in constants.PUBLIC_NETWORKS
+                or launcher.network == constants.NETWORK_NAME.ephemery
             ):
                 cmd.append(
-                    "--checkpoint-sync-url=" + constants.CHECKPOINT_SYNC_URL[network]
+                    "--checkpoint-sync-url="
+                    + constants.CHECKPOINT_SYNC_URL[launcher.network]
                 )
             else:
                 fail(
                     "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
                 )
 
-    if network not in constants.PUBLIC_NETWORKS:
+    if launcher.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--configuration-directory="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         )
         if (
-            network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in network
+            launcher.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in launcher.network
         ):
             if bootnode_contexts != None:
                 cmd.append(
@@ -306,44 +273,44 @@ def get_beacon_config(
                         ]
                     )
                 )
-        elif network == constants.NETWORK_NAME.ephemery:
+        elif launcher.network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
-                    plan, el_cl_genesis_data.files_artifact_uuid
+                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
             )
-        elif constants.NETWORK_NAME.shadowfork in network:
+        elif constants.NETWORK_NAME.shadowfork in launcher.network:
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
-                    plan, el_cl_genesis_data.files_artifact_uuid
+                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
             )
         else:  # Devnets
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
-                    plan, el_cl_genesis_data.files_artifact_uuid
+                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
             )
 
-    if len(extra_params) > 0:
-        # we do the list comprehension as the default extra_params is a proto repeated string
-        cmd.extend([param for param in extra_params])
+    if len(participant.cl_extra_params) > 0:
+        # we do the list comprehension as the default participant.extra_params is a proto repeated string
+        cmd.extend([param for param in participant.cl_extra_params])
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
-    if node_keystore_files != None and not use_separate_vc:
+    if node_keystore_files != None and not participant.use_separate_vc:
         cmd.extend(validator_default_cmd)
         files[
             constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
 
-        if keymanager_enabled:
+        if participant.keymanager_enabled:
             cmd.extend(keymanager_api_cmd)
             used_ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
             public_ports.update(
@@ -352,16 +319,20 @@ def get_beacon_config(
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=cl_volume_size,
+            persistent_key="data-{0}".format(beacon_service_name),
+            size=int(participant.cl_volume_size)
+            if int(participant.cl_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.CL_TYPE.grandine + "_volume_size"
+            ],
         )
     config_args = {
-        "image": image,
+        "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
         "cmd": cmd,
         "files": files,
-        "env_vars": extra_env_vars,
+        "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
@@ -369,27 +340,23 @@ def get_beacon_config(
         "labels": shared_utils.label_maker(
             constants.CL_TYPE.grandine,
             constants.CLIENT_TYPES.cl,
-            image,
+            participant.cl_image,
             el_context.client_name,
-            extra_labels,
+            participant.cl_extra_labels,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
         "user": User(uid=0, gid=0),
     }
 
-    if cl_min_cpu > 0:
-        config_args["min_cpu"] = cl_min_cpu
-
-    if cl_max_cpu > 0:
-        config_args["max_cpu"] = cl_max_cpu
-
-    if cl_min_mem > 0:
-        config_args["min_memory"] = cl_min_mem
-
-    if cl_max_mem > 0:
-        config_args["max_memory"] = cl_max_mem
-
+    if int(participant.cl_min_cpu) > 0:
+        config_args["min_cpu"] = int(participant.cl_min_cpu)
+    if int(participant.cl_max_cpu) > 0:
+        config_args["max_cpu"] = int(participant.cl_max_cpu)
+    if int(participant.cl_min_mem) > 0:
+        config_args["min_memory"] = int(participant.cl_min_mem)
+    if int(participant.cl_max_mem) > 0:
+        config_args["max_memory"] = int(participant.cl_max_mem)
     return ServiceConfig(**config_args)
 
 
