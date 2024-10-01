@@ -961,6 +961,9 @@ participants:
     cl_type: lighthouse
     count: 2
 snooper_enabled: true
+additional_services:
+  - prometheus_grafana
+ethereum_metrics_exporter_enabled: true
 ```
 
 </details>
