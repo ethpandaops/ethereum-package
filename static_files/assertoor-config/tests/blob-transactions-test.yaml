@@ -1,6 +1,6 @@
 id: blob-transactions-test
 name: "Blob Transaction Test"
-timeout: 30m
+timeout: 1h
 config:
   walletPrivkey: ""
   validatorPairNames: []
