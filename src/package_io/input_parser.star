@@ -1150,7 +1150,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     )
     if mev_type == constants.FLASHBOTS_MEV_TYPE:
         mev_participant = default_participant()
-        mev_participant["el_type"] = "geth"
+        mev_participant["el_type"] = "reth"
         mev_participant.update(
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
@@ -1162,31 +1162,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "12000",
                     "--disable-peer-scoring",
                 ],
-                # TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
-                "el_extra_params": [
-                    "--builder",
-                    "--builder.remote_relay_endpoint=http://mev-relay-api:9062",
-                    "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth-builder:4000".format(
-                        index_str
-                    ),
-                    "--builder.bellatrix_fork_version={0}".format(
-                        constants.BELLATRIX_FORK_VERSION
-                    ),
-                    "--builder.genesis_fork_version={0}".format(
-                        constants.GENESIS_FORK_VERSION
-                    ),
-                    "--builder.genesis_validators_root={0}".format(
-                        constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
-                    ),
-                    '--miner.extradata="Illuminate Dmocratize Dstribute"',
-                    "--builder.algotype=greedy",
-                    "--metrics.builder",
-                ]
-                + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
-                "el_extra_env_vars": {
-                    "BUILDER_TX_SIGNING_KEY": "0x"
-                    + genesis_constants.PRE_FUNDED_ACCOUNTS[0].private_key
-                },
+                "el_extra_params": parsed_arguments_dict["mev_params"][
+                    "mev_builder_extra_args"
+                ],
                 "validator_count": 0,
                 "prometheus_config": parsed_arguments_dict["mev_params"][
                     "mev_builder_prometheus_config"
@@ -1198,7 +1176,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 
     if mev_type == constants.MEV_RS_MEV_TYPE:
         mev_participant = default_participant()
-        mev_participant["el_type"] = "reth-builder"
+        mev_participant["el_type"] = constants.EL_TYPE.reth
         mev_participant.update(
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],

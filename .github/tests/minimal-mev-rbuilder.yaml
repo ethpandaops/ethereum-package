@@ -1,0 +1,10 @@
+participants:
+  - el_type: geth
+    cl_type: teku
+network_params:
+  preset: minimal
+additional_services:
+  - dora
+  - tx_spammer
+mev_type: flashbots
+

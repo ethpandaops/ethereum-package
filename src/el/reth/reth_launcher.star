@@ -6,6 +6,10 @@ el_shared = import_module("../el_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 mev_rs_builder = import_module("../../mev/mev-rs/mev_builder/mev_builder_launcher.star")
+lighthouse = import_module("../../cl/lighthouse/lighthouse_launcher.star")
+flashbots_rbuilder = import_module(
+    "../../mev/flashbots/mev_builder/mev_builder_launcher.star"
+)
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -135,7 +139,9 @@ def get_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
-        "/usr/local/bin/mev build" if launcher.builder else "reth",
+        "{0}".format(
+            "/usr/local/bin/mev" if launcher.builder == "mev-rs" else "/app/reth"
+        ),
         "node",
         "-{0}".format(log_level),
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -208,19 +214,41 @@ def get_config(
             ],
         )
 
-    if launcher.builder:
+    env_vars = {
+        "RETH_CMD": cmd_str,
+    }
+
+    env_vars = env_vars | participant.el_extra_env_vars
+    image = participant.el_image
+    rbuilder_cmd = []
+    if launcher.builder == "mev-rs":
         files[
             mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
+    elif launcher.builder == "flashbots":
+        files[
+            flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
+        ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME
+        env_vars.update(
+            {
+                "RBUILDER_CONFIG": flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER,
+                "CL_ENDPOINT": "http://cl-{0}-{1}-{2}:{3}".format(
+                    participant_index,
+                    cl_client_name,
+                    constants.EL_TYPE.reth,
+                    lighthouse.BEACON_HTTP_PORT_NUM,
+                ),
+            }
+        )
+        image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
 
-    env_vars = participant.el_extra_env_vars
     config_args = {
-        "image": participant.el_image,
+        "image": image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": [cmd_str],
+        "cmd": ["./app/entrypoint.sh"],
         "files": files,
-        "entrypoint": ENTRYPOINT_ARGS,
+        # "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": shared_utils.label_maker(

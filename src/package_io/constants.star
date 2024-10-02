@@ -4,7 +4,6 @@ EL_TYPE = struct(
     nethermind="nethermind",
     besu="besu",
     reth="reth",
-    reth_builder="reth-builder",
     ethereumjs="ethereumjs",
     nimbus="nimbus",
 )
@@ -82,7 +81,7 @@ MEV_RS_MEV_TYPE = "mev-rs"
 
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.27"
-DEFAULT_FLASHBOTS_BUILDER_IMAGE = "flashbots/builder:latest"
+DEFAULT_FLASHBOTS_BUILDER_IMAGE = "bbusa/rbuilder:latest"
 DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
 DEFAULT_MEV_RS_IMAGE = "ethpandaops/mev-rs:main"
 DEFAULT_MEV_RS_IMAGE_MINIMAL = "ethpandaops/mev-rs:main-minimal"
@@ -164,7 +163,6 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 1000000,  # 1TB
         "besu_volume_size": 1000000,  # 1TB
         "reth_volume_size": 3000000,  # 3TB
-        "reth-builder_volume_size": 3000000,  # 3TB
         "ethereumjs_volume_size": 1000000,  # 1TB
         "nimbus_eth1_volume_size": 1000000,  # 1TB
         "prysm_volume_size": 500000,  # 500GB
@@ -180,7 +178,6 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 300000,  # 300GB
         "besu_volume_size": 300000,  # 300GB
         "reth_volume_size": 500000,  # 500GB
-        "reth-builder_volume_size": 500000,  # 500GB
         "ethereumjs_volume_size": 300000,  # 300GB
         "nimbus_eth1_volume_size": 300000,  # 300GB
         "prysm_volume_size": 150000,  # 150GB
@@ -196,7 +193,6 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 100000,  # 100GB
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
-        "reth-builder_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
@@ -212,7 +208,6 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 100000,  # 100GB
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
-        "reth-builder_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
@@ -228,7 +223,6 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 3000,  # 3GB
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
-        "reth-builder_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
@@ -244,7 +238,6 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 3000,  # 3GB
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
-        "reth-builder_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
