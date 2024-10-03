@@ -68,7 +68,15 @@ def launch(
                 el_cl_data,
                 jwt_file,
                 network_params.network,
-                builder=mev_builder_type,
+            ),
+            "launch_method": reth.launch,
+        },
+        constants.EL_TYPE.reth_builder: {
+            "launcher": reth.new_reth_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+                builder_type=mev_builder_type,
             ),
             "launch_method": reth.launch,
         },

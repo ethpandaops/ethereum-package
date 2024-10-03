@@ -1,5 +1,5 @@
 participants:
-  - el_type: geth
+  - el_type: reth
     cl_type: teku
 network_params:
   preset: minimal

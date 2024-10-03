@@ -16,14 +16,13 @@ WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
-
+RBUILDER_PORT_NUM = 8645
 # Paths
 METRICS_PATH = "/metrics"
 
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/reth/execution-data"
 
-ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "v",
@@ -136,11 +135,15 @@ def get_config(
         constants.WS_PORT_ID: WS_PORT_NUM,
         constants.METRICS_PORT_ID: METRICS_PORT_NUM,
     }
+
+    if launcher.builder_type == "flashbots":
+        used_port_assignments[constants.RBUILDER_PORT_ID] = RBUILDER_PORT_NUM
+
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         "{0}".format(
-            "/usr/local/bin/mev" if launcher.builder == "mev-rs" else "/app/reth"
+            "/usr/local/bin/mev" if launcher.builder_type == "mev-rs" else "reth"
         ),
         "node",
         "-{0}".format(log_level),
@@ -217,15 +220,15 @@ def get_config(
     env_vars = {
         "RETH_CMD": cmd_str,
     }
-
+    entrypoint_args = ["sh", "-c"]
     env_vars = env_vars | participant.el_extra_env_vars
     image = participant.el_image
     rbuilder_cmd = []
-    if launcher.builder == "mev-rs":
+    if launcher.builder_type == "mev-rs":
         files[
             mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
-    elif launcher.builder == "flashbots":
+    elif launcher.builder_type == "flashbots":
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME
@@ -241,14 +244,16 @@ def get_config(
             }
         )
         image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+        cmd_str = "./app/entrypoint.sh"
+        entrypoint_args = []
 
     config_args = {
         "image": image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": ["./app/entrypoint.sh"],
+        "cmd": [cmd_str],
         "files": files,
-        # "entrypoint": ENTRYPOINT_ARGS,
+        "entrypoint": entrypoint_args,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": shared_utils.label_maker(
@@ -273,10 +278,10 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_reth_launcher(el_cl_genesis_data, jwt_file, network, builder=False):
+def new_reth_launcher(el_cl_genesis_data, jwt_file, network, builder_type=False):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
-        builder=builder,
+        builder_type=builder_type,
     )
