@@ -8,3 +8,5 @@ additional_services:
   - tx_spammer
 mev_type: flashbots
 
+mev_params:
+  mev_relay_image: flashbots/mev-boost-relay
