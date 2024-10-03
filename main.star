@@ -638,8 +638,7 @@ def run(plan, args={}):
             all_ethereum_metrics_exporter_contexts,
             all_xatu_sentry_contexts,
             global_node_selectors,
-            args_with_right_defaults.prometheus_params.storage_tsdb_retention_time,
-            args_with_right_defaults.prometheus_params.storage_tsdb_retention_size,
+            args_with_right_defaults.prometheus_params,
         )
 
         plan.print("Launching grafana...")
@@ -649,7 +648,7 @@ def run(plan, args={}):
             grafana_dashboards_config_template,
             prometheus_private_url,
             global_node_selectors,
-            additional_dashboards=args_with_right_defaults.grafana_additional_dashboards,
+            args_with_right_defaults.grafana_params,
         )
         plan.print("Successfully launched grafana")
 

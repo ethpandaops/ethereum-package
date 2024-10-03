@@ -220,7 +220,7 @@ participants:
     # Resource management for el containers
     # CPU is milicores
     # RAM is in MB
-    # Defaults are set per client
+    # Defaults to 0, which results in no resource limits
     el_min_cpu: 0
     el_max_cpu: 0
     el_min_mem: 0
@@ -278,11 +278,17 @@ participants:
     # Resource management for cl containers
     # CPU is milicores
     # RAM is in MB
-    # Defaults are set per client
+    # Defaults to 0, which results in no resource limits
     cl_min_cpu: 0
     cl_max_cpu: 0
     cl_min_mem: 0
     cl_max_mem: 0
+
+    # Whether to act as a supernode for the network
+    # Supernodes will subscribe to all subnet topics
+    # This flag should only be used with peerdas
+    # Defaults to false
+    supernode: false
 
     # Whether to use a separate validator client attached to the CL client.
     # Defaults to false for clients that can run both in one process (Teku, Nimbus)
@@ -340,7 +346,7 @@ participants:
     # Resource management for vc containers
     # CPU is milicores
     # RAM is in MB
-    # Defaults are set per client
+    # Defaults to 0, which results in no resource limits
     vc_min_cpu: 0
     vc_max_cpu: 0
     vc_min_mem: 0
@@ -533,17 +539,31 @@ network_params:
 
   # Preloaded contracts for the chain
   additional_preloaded_contracts: {}
-  # example: To set a contract code at a certain address:
+  # Example:
+  # additional_preloaded_contracts: '{
   #  "0x123463a4B065722E99115D6c222f267d9cABb524":
-  #    balance: "1ETH"
-  #    code: "0x1234"
-  #    storage: {}
-  #    nonce: 0
-  #    secretKey: "0x"
+  #   {
+  #     balance: "1ETH",
+  #     code: "0x1234",
+  #     storage: {},
+  #     nonce: 0,
+  #     secretKey: "0x",
+  #   }
+  # }'
 
   # Repository override for devnet networks
   # Default: ethpandaops
   devnet_repo: ethpandaops
+
+  # A number of prefunded accounts to be created
+  # Defaults to no prefunded accounts
+  # Example:
+  # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}}'
+  # 10ETH to the account 0x25941dC771bB64514Fc8abBce970307Fb9d477e9
+  # To prefund multiple accounts, separate them with a comma
+  #
+  # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}, "0x4107be99052d895e3ee461C685b042Aa975ab5c0": {"balance": "1ETH"}}'
+  prefunded_accounts: {}
 
 # Global parameters for the network
 
@@ -592,6 +612,30 @@ tx_spammer_params:
 goomy_blob_params:
   # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
   goomy_blob_args: []
+
+# Configuration place for prometheus
+prometheus_params:
+  storage_tsdb_retention_time: "1d"
+  storage_tsdb_retention_size: "512MB"
+  # Resource management for prometheus container
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+
+# Configuration place for grafana
+grafana_params:
+  # A list of locators for grafana dashboards to be loaded be the grafana service
+  additional_dashboards: []
+  # Resource management for grafana container
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
@@ -680,9 +724,6 @@ parallel_keystore_generation: false
 # Disable peer scoring to prevent nodes impacted by faults from being permanently ejected from the network
 # Default to false
 disable_peer_scoring: false
-
-# A list of locators for grafana dashboards to be loaded be the grafana service
-grafana_additional_dashboards: []
 
 # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
 # Note this requires Kurtosis greater than 0.85.49 to work
@@ -920,6 +961,9 @@ participants:
     cl_type: lighthouse
     count: 2
 snooper_enabled: true
+additional_services:
+  - prometheus_grafana
+ethereum_metrics_exporter_enabled: true
 ```
 
 </details>

@@ -52,29 +52,14 @@ def get_config(
         goomy_args = "combined -b 2 -t 2 --max-pending 3"
     goomy_cli_args.append(goomy_args)
 
+    cmd = "./blob-spammer -p {0} {1}".format(
+        prefunded_addresses[4].private_key, " ".join(goomy_cli_args)
+    )
+
     return ServiceConfig(
         image=IMAGE_NAME,
         entrypoint=ENTRYPOINT_ARGS,
-        cmd=[
-            " && ".join(
-                [
-                    "apt-get update",
-                    "apt-get install -y curl jq",
-                    'current_epoch=$(curl -s {0}/eth/v2/beacon/blocks/head | jq -r ".version")'.format(
-                        cl_context.beacon_http_url,
-                    ),
-                    'while [ $current_epoch != "deneb" ]; do echo "waiting for deneb, current epoch is $current_epoch"; current_epoch=$(curl -s {0}/eth/v2/beacon/blocks/head | jq -r ".version"); sleep {1}; done'.format(
-                        cl_context.beacon_http_url,
-                        seconds_per_slot,
-                    ),
-                    'echo "sleep is over, starting to send blob transactions"',
-                    "./blob-spammer -p {0} {1}".format(
-                        prefunded_addresses[4].private_key,
-                        " ".join(goomy_cli_args),
-                    ),
-                ]
-            )
-        ],
+        cmd=[cmd],
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,

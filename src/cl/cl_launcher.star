@@ -63,8 +63,6 @@ def launch(
                 el_cl_data,
                 jwt_file,
                 network_params,
-                prysm_password_relative_filepath,
-                prysm_password_artifact_uuid,
             ),
             "launch_method": prysm.launch,
         },
@@ -95,13 +93,17 @@ def launch(
         or constants.NETWORK_NAME.shadowfork in network_params.network
         else None
     )
-
+    network_name = shared_utils.get_network_name(network_params.network)
     for index, participant in enumerate(participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
         node_selectors = input_parser.get_client_node_selectors(
             participant.node_selectors,
             global_node_selectors,
+        )
+
+        tolerations = input_parser.get_client_tolerations(
+            participant.cl_tolerations, participant.tolerations, global_tolerations
         )
 
         if cl_type not in cl_launchers:
@@ -151,32 +153,16 @@ def launch(
                 plan,
                 cl_launcher,
                 cl_service_name,
-                participant.cl_image,
-                participant.cl_log_level,
+                participant,
                 global_log_level,
                 cl_context_BOOTNODE,
                 el_context,
                 full_name,
                 new_cl_node_validator_keystores,
-                participant.cl_min_cpu,
-                participant.cl_max_cpu,
-                participant.cl_min_mem,
-                participant.cl_max_mem,
-                participant.snooper_enabled,
                 snooper_engine_context,
-                participant.blobber_enabled,
-                participant.blobber_extra_params,
-                participant.cl_extra_params,
-                participant.cl_extra_env_vars,
-                participant.cl_extra_labels,
                 persistent,
-                participant.cl_volume_size,
-                participant.cl_tolerations,
-                participant.tolerations,
-                global_tolerations,
+                tolerations,
                 node_selectors,
-                participant.use_separate_vc,
-                participant.keymanager_enabled,
                 checkpoint_sync_enabled,
                 checkpoint_sync_url,
                 port_publisher,
@@ -188,32 +174,16 @@ def launch(
                 plan,
                 cl_launcher,
                 cl_service_name,
-                participant.cl_image,
-                participant.cl_log_level,
+                participant,
                 global_log_level,
                 boot_cl_client_ctx,
                 el_context,
                 full_name,
                 new_cl_node_validator_keystores,
-                participant.cl_min_cpu,
-                participant.cl_max_cpu,
-                participant.cl_min_mem,
-                participant.cl_max_mem,
-                participant.snooper_enabled,
                 snooper_engine_context,
-                participant.blobber_enabled,
-                participant.blobber_extra_params,
-                participant.cl_extra_params,
-                participant.cl_extra_env_vars,
-                participant.cl_extra_labels,
                 persistent,
-                participant.cl_volume_size,
-                participant.cl_tolerations,
-                participant.tolerations,
-                global_tolerations,
+                tolerations,
                 node_selectors,
-                participant.use_separate_vc,
-                participant.keymanager_enabled,
                 checkpoint_sync_enabled,
                 checkpoint_sync_url,
                 port_publisher,

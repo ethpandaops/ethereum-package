@@ -1,4 +1,4 @@
-
+id: stability-check
 name: "Check chain stability"
 timeout: 2h
 tasks:
