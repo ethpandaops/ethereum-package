@@ -51,8 +51,8 @@ def get_config(
 
     keymanager_api_cmd = [
         "--rpc",
-        "--http-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--http-host=0.0.0.0",
+        "--grpc-gateway-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
+        "--grpc-gateway-host=0.0.0.0",
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
@@ -76,7 +76,6 @@ def get_config(
 
     public_ports = {}
     public_keymanager_port_assignment = {}
-    public_gprc_port_assignment = {}
     if port_publisher.vc_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "vc", port_publisher, vc_index
@@ -86,9 +85,6 @@ def get_config(
         }
         public_keymanager_port_assignment = {
             constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]
-        }
-        public_gprc_port_assignment = {
-            constants.VALDIATOR_GRPC_PORT_ID: public_ports_for_component[2]
         }
         public_ports = shared_utils.get_port_specs(public_port_assignments)
 
@@ -102,7 +98,6 @@ def get_config(
         public_ports.update(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
-        public_ports.update(shared_utils.get_port_specs(public_gprc_port_assignment))
 
     config_args = {
         "image": image,
