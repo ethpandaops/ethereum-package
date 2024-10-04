@@ -100,6 +100,7 @@ def get_metrics_jobs(
                 "service": context.beacon_service_name,
                 "client_type": BEACON_CLIENT_TYPE,
                 "client_name": context.client_name,
+                "supernode": str(context.supernode),
             }
             additional_config = beacon_metrics_info[METRICS_INFO_ADDITIONAL_CONFIG_KEY]
             if additional_config != None:
