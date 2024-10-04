@@ -124,6 +124,7 @@ def launch(
         validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
         if node_keystore_files
         else "",
+        supernode=participant.supernode,
     )
 
 
@@ -358,11 +359,12 @@ def get_beacon_config(
             constants.HTTP_PORT_ID
         ),
         "labels": shared_utils.label_maker(
-            constants.CL_TYPE.teku,
-            constants.CLIENT_TYPES.cl,
-            participant.cl_image,
-            el_context.client_name,
-            participant.cl_extra_labels,
+            client=constants.CL_TYPE.teku,
+            client_type=constants.CLIENT_TYPES.cl,
+            image=participant.cl_image,
+            connected_client=el_context.client_name,
+            extra_labels=participant.cl_extra_labels,
+            supernode=participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,

@@ -1,8 +1,9 @@
+id: block-proposal-check
 name: "Every client pair proposed a block"
 timeout: 2h
 disable: false
 config:
-  #validatorPairNames: []
+  validatorPairNames: []
 tasks:
 - name: check_clients_are_healthy
   title: "Check if at least one client is ready"

@@ -1,7 +1,8 @@
+id: all-opcodes-test
 name: "All-Opcodes Transaction Test"
 timeout: 1h
 config:
-  #walletPrivkey: ""
+  walletPrivkey: ""
 tasks:
 - name: check_clients_are_healthy
   title: "Check if at least one client is ready"
@@ -188,7 +189,7 @@ tasks:
     privateKey: "walletPrivkey"
 # check precompiles
 - name: generate_transaction
-  title: "Call precompiles test contract: test1() ecrecover"
+  title: "Call precompiles test contract: test1()"
   config:
     feeCap: 5000000000 # 5 gwei
     gasLimit: 200000
@@ -199,7 +200,7 @@ tasks:
     targetAddress: "precompilesTestContractAddr"
     privateKey: "walletPrivkey"
 - name: generate_transaction
-  title: "Call precompiles test contract: test2() sha256"
+  title: "Call precompiles test contract: test2()"
   config:
     feeCap: 5000000000 # 5 gwei
     gasLimit: 200000
@@ -210,7 +211,7 @@ tasks:
     targetAddress: "precompilesTestContractAddr"
     privateKey: "walletPrivkey"
 - name: generate_transaction
-  title: "Call precompiles test contract: test3() ripemd160"
+  title: "Call precompiles test contract: test3()"
   config:
     feeCap: 5000000000 # 5 gwei
     gasLimit: 200000
@@ -221,7 +222,7 @@ tasks:
     targetAddress: "precompilesTestContractAddr"
     privateKey: "walletPrivkey"
 - name: generate_transaction
-  title: "Call precompiles test contract: test4() identity"
+  title: "Call precompiles test contract: test4()"
   config:
     feeCap: 5000000000 # 5 gwei
     gasLimit: 200000
@@ -232,7 +233,7 @@ tasks:
     targetAddress: "precompilesTestContractAddr"
     privateKey: "walletPrivkey"
 - name: generate_transaction
-  title: "Call precompiles test contract: test5() modExp"
+  title: "Call precompiles test contract: test5()"
   config:
     feeCap: 5000000000 # 5 gwei
     gasLimit: 200000
@@ -243,7 +244,7 @@ tasks:
     targetAddress: "precompilesTestContractAddr"
     privateKey: "walletPrivkey"
 - name: generate_transaction
-  title: "Call precompiles test contract: test9() blake2F"
+  title: "Call precompiles test contract: test9()"
   config:
     feeCap: 5000000000 # 5 gwei
     gasLimit: 200000
