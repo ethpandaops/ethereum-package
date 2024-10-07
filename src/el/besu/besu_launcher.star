@@ -17,12 +17,6 @@ DISCOVERY_PORT_NUM = 30303
 ENGINE_HTTP_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 
-# The min/max CPU/memory that the execution node can use
-EXECUTION_MIN_CPU = 100
-EXECUTION_MAX_CPU = 1000
-EXECUTION_MIN_MEMORY = 512
-EXECUTION_MAX_MEMORY = 2048
-
 JAVA_OPTS = {"JAVA_OPTS": "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"}
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
@@ -40,70 +34,30 @@ def launch(
     plan,
     launcher,
     service_name,
-    image,
-    participant_log_level,
+    participant,
     global_log_level,
     existing_el_clients,
-    el_min_cpu,
-    el_max_cpu,
-    el_min_mem,
-    el_max_mem,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
     persistent,
-    el_volume_size,
     tolerations,
     node_selectors,
     port_publisher,
     participant_index,
 ):
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
-    network_name = shared_utils.get_network_name(launcher.network)
-
-    el_min_cpu = int(el_min_cpu) if int(el_min_cpu) > 0 else EXECUTION_MIN_CPU
-    el_max_cpu = (
-        int(el_max_cpu)
-        if int(el_max_cpu) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["besu_max_cpu"]
-    )
-    el_min_mem = int(el_min_mem) if int(el_min_mem) > 0 else EXECUTION_MIN_MEMORY
-    el_max_mem = (
-        int(el_max_mem)
-        if int(el_max_mem) > 0
-        else constants.RAM_CPU_OVERRIDES[network_name]["besu_max_mem"]
-    )
-
-    el_volume_size = (
-        el_volume_size
-        if int(el_volume_size) > 0
-        else constants.VOLUME_SIZE[network_name]["besu_volume_size"]
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
         plan,
-        launcher.el_cl_genesis_data,
-        launcher.jwt_file,
-        launcher.network,
-        image,
+        launcher,
+        participant,
         service_name,
         existing_el_clients,
         cl_client_name,
         log_level,
-        el_min_cpu,
-        el_max_cpu,
-        el_min_mem,
-        el_max_mem,
-        extra_params,
-        extra_env_vars,
-        extra_labels,
         persistent,
-        el_volume_size,
         tolerations,
         node_selectors,
         port_publisher,
@@ -124,39 +78,28 @@ def launch(
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        "besu",
-        "",  # besu has no ENR
-        enode,
-        service.ip_address,
-        RPC_PORT_NUM,
-        WS_PORT_NUM,
-        ENGINE_HTTP_RPC_PORT_NUM,
-        http_url,
-        ws_url,
-        service_name,
-        [besu_metrics_info],
+        client_name="besu",
+        enode=enode,
+        ip_addr=service.ip_address,
+        rpc_port_num=RPC_PORT_NUM,
+        ws_port_num=WS_PORT_NUM,
+        engine_rpc_port_num=ENGINE_HTTP_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        service_name=service_name,
+        el_metrics_info=[besu_metrics_info],
     )
 
 
 def get_config(
     plan,
-    el_cl_genesis_data,
-    jwt_file,
-    network,
-    image,
+    launcher,
+    participant,
     service_name,
     existing_el_clients,
     cl_client_name,
     log_level,
-    el_min_cpu,
-    el_max_cpu,
-    el_min_mem,
-    el_max_mem,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
     persistent,
-    el_volume_size,
     tolerations,
     node_selectors,
     port_publisher,
@@ -214,24 +157,26 @@ def get_config(
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
         "--data-storage-format={0}".format(
-            "VERKLE" if "verkle-gen" in network else "BONSAI"
+            "VERKLE" if "verkle-gen" in launcher.network else "BONSAI"
         ),
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--min-gas-price=1000000000",
-        "--bonsai-limit-trie-logs-enabled=false" if "verkle" not in network else "",
+        "--bonsai-limit-trie-logs-enabled=false"
+        if "verkle" not in launcher.network
+        else "",
     ]
-    if network not in constants.PUBLIC_NETWORKS:
+    if launcher.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--genesis-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/besu.json"
         )
     else:
-        cmd.append("--network=" + network)
+        cmd.append("--network=" + launcher.network)
 
-    if network == constants.NETWORK_NAME.kurtosis:
+    if launcher.network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -243,58 +188,70 @@ def get_config(
                 )
             )
     elif (
-        network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in network
+        launcher.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in launcher.network
     ):
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
-                plan, el_cl_genesis_data.files_artifact_uuid
+                plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
         )
 
-    if len(extra_params) > 0:
+    if len(participant.el_extra_params) > 0:
         # we do this as extra_params isn't a normal [] but a proto repeated array
-        cmd.extend([param for param in extra_params])
+        cmd.extend([param for param in participant.el_extra_params])
 
     cmd_str = " ".join(cmd)
 
-    extra_env_vars = extra_env_vars | JAVA_OPTS
+    env_vars = participant.el_extra_env_vars | JAVA_OPTS
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
     if persistent:
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
-            size=el_volume_size,
+            size=int(participant.el_volume_size)
+            if int(participant.el_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.EL_TYPE.besu + "_volume_size"
+            ],
         )
-    return ServiceConfig(
-        image=image,
-        ports=used_ports,
-        public_ports=public_ports,
-        cmd=[cmd_str],
-        files=files,
-        env_vars=extra_env_vars,
-        entrypoint=ENTRYPOINT_ARGS,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        min_cpu=el_min_cpu,
-        max_cpu=el_max_cpu,
-        min_memory=el_min_mem,
-        max_memory=el_max_mem,
-        labels=shared_utils.label_maker(
-            constants.EL_TYPE.besu,
-            constants.CLIENT_TYPES.el,
-            image,
-            cl_client_name,
-            extra_labels,
+
+    config_args = {
+        "image": participant.el_image,
+        "ports": used_ports,
+        "public_ports": public_ports,
+        "cmd": [cmd_str],
+        "files": files,
+        "entrypoint": ENTRYPOINT_ARGS,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "env_vars": env_vars,
+        "labels": shared_utils.label_maker(
+            client=constants.EL_TYPE.besu,
+            client_type=constants.CLIENT_TYPES.el,
+            image=participant.el_image,
+            connected_client=cl_client_name,
+            extra_labels=participant.el_extra_labels,
+            supernode=participant.supernode,
         ),
-        user=User(uid=0, gid=0),
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-    )
+        "user": User(uid=0, gid=0),
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if participant.el_min_cpu > 0:
+        config_args["min_cpu"] = participant.el_min_cpu
+    if participant.el_max_cpu > 0:
+        config_args["max_cpu"] = participant.el_max_cpu
+    if participant.el_min_mem > 0:
+        config_args["min_memory"] = participant.el_min_mem
+    if participant.el_max_mem > 0:
+        config_args["max_memory"] = participant.el_max_mem
+    return ServiceConfig(**config_args)
 
 
 def new_besu_launcher(el_cl_genesis_data, jwt_file, network):

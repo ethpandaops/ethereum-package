@@ -24,6 +24,7 @@ PARTICIPANT_CATEGORIES = {
         "cl_max_cpu",
         "cl_min_mem",
         "cl_max_mem",
+        "supernode",
         "use_separate_vc",
         "vc_type",
         "vc_image",
@@ -142,6 +143,7 @@ SUBCATEGORY_PARAMS = {
         "preset",
         "additional_preloaded_contracts",
         "devnet_repo",
+        "prefunded_accounts",
     ],
     "dora_params": [
         "image",
@@ -153,6 +155,21 @@ SUBCATEGORY_PARAMS = {
     "goomy_blob_params": [
         "goomy_blob_args",
     ],
+    "prometheus_params": [
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "storage_tsdb_retention_time",
+        "storage_tsdb_retention_size",
+    ],
+    "grafana_params": [
+        "additional_dashboards",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+    ],
     "assertoor_params": [
         "image",
         "run_stability_check",
@@ -162,10 +179,6 @@ SUBCATEGORY_PARAMS = {
         "run_opcodes_transaction_test",
         "run_lifecycle_test",
         "tests",
-    ],
-    "prometheus_params": [
-        "storage_tsdb_retention_time",
-        "storage_tsdb_retention_size",
     ],
     "mev_params": [
         "mev_relay_image",
@@ -227,7 +240,6 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "ethereum_metrics_exporter_enabled": "",
     "parallel_keystore_generation": "",
     "disable_peer_scoring": "",
-    "grafana_additional_dashboards": "",
     "persistent": "",
     "mev_type": "",
     "xatu_sentry_enabled": "",

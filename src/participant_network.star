@@ -96,14 +96,6 @@ def launch_participant_network(
             total_number_of_validator_keys,
             latest_block.files_artifacts[0] if latest_block != "" else "",
         )
-    elif network_params.network in constants.PUBLIC_NETWORKS:
-        # We are running a public network
-        (
-            el_cl_data,
-            final_genesis_timestamp,
-            network_id,
-            validator_data,
-        ) = launch_public_network.launch(plan, network_params.network, prague_time)
     elif network_params.network == constants.NETWORK_NAME.ephemery:
         # We are running an ephemery network
         (
@@ -112,6 +104,17 @@ def launch_participant_network(
             network_id,
             validator_data,
         ) = launch_ephemery.launch(plan, prague_time)
+    elif (
+        network_params.network in constants.PUBLIC_NETWORKS
+        and network_params.network != constants.NETWORK_NAME.ephemery
+    ):
+        # We are running a public network
+        (
+            el_cl_data,
+            final_genesis_timestamp,
+            network_id,
+            validator_data,
+        ) = launch_public_network.launch(plan, network_params.network, prague_time)
     else:
         # We are running a devnet
         (
@@ -340,7 +343,6 @@ def launch_participant_network(
                 service_name="vc-{0}".format(full_name),
                 vc_type=vc_type,
                 image=participant.vc_image,
-                participant_log_level=participant.vc_log_level,
                 global_log_level=global_log_level,
                 cl_context=cl_context,
                 el_context=el_context,
@@ -348,20 +350,11 @@ def launch_participant_network(
                 snooper_enabled=participant.snooper_enabled,
                 snooper_beacon_context=snooper_beacon_context,
                 node_keystore_files=vc_keystores,
-                vc_min_cpu=participant.vc_min_cpu,
-                vc_max_cpu=participant.vc_max_cpu,
-                vc_min_mem=participant.vc_min_mem,
-                vc_max_mem=participant.vc_max_mem,
-                extra_params=participant.vc_extra_params,
-                extra_env_vars=participant.vc_extra_env_vars,
-                extra_labels=participant.vc_extra_labels,
+                participant=participant,
                 prysm_password_relative_filepath=prysm_password_relative_filepath,
                 prysm_password_artifact_uuid=prysm_password_artifact_uuid,
-                vc_tolerations=participant.vc_tolerations,
-                participant_tolerations=participant.tolerations,
                 global_tolerations=global_tolerations,
                 node_selectors=node_selectors,
-                keymanager_enabled=participant.keymanager_enabled,
                 preset=network_params.preset,
                 network=network_params.network,
                 electra_fork_epoch=network_params.electra_fork_epoch,
