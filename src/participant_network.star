@@ -161,6 +161,7 @@ def launch_participant_network(
         all_cl_contexts,
         all_snooper_engine_contexts,
         preregistered_validator_keys_for_nodes,
+        current_vc_index,
     ) = cl_client_launcher.launch(
         plan,
         network_params,
@@ -195,7 +196,6 @@ def launch_participant_network(
         constants.CL_TYPE.lighthouse,
     ]
 
-    current_vc_index = 0
     for index, participant in enumerate(participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
