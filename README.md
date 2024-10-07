@@ -284,6 +284,12 @@ participants:
     cl_min_mem: 0
     cl_max_mem: 0
 
+    # Whether to act as a supernode for the network
+    # Supernodes will subscribe to all subnet topics
+    # This flag should only be used with peerdas
+    # Defaults to false
+    supernode: false
+
     # Whether to use a separate validator client attached to the CL client.
     # Defaults to false for clients that can run both in one process (Teku, Nimbus)
     use_separate_vc: true
@@ -607,6 +613,30 @@ goomy_blob_params:
   # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
   goomy_blob_args: []
 
+# Configuration place for prometheus
+prometheus_params:
+  storage_tsdb_retention_time: "1d"
+  storage_tsdb_retention_size: "512MB"
+  # Resource management for prometheus container
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+
+# Configuration place for grafana
+grafana_params:
+  # A list of locators for grafana dashboards to be loaded be the grafana service
+  additional_dashboards: []
+  # Resource management for grafana container
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use
@@ -694,9 +724,6 @@ parallel_keystore_generation: false
 # Disable peer scoring to prevent nodes impacted by faults from being permanently ejected from the network
 # Default to false
 disable_peer_scoring: false
-
-# A list of locators for grafana dashboards to be loaded be the grafana service
-grafana_additional_dashboards: []
 
 # Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
 # Note this requires Kurtosis greater than 0.85.49 to work
@@ -934,6 +961,9 @@ participants:
     cl_type: lighthouse
     count: 2
 snooper_enabled: true
+additional_services:
+  - prometheus_grafana
+ethereum_metrics_exporter_enabled: true
 ```
 
 </details>

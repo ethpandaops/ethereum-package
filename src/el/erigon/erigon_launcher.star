@@ -31,51 +31,30 @@ def launch(
     plan,
     launcher,
     service_name,
-    image,
-    participant_log_level,
+    participant,
     global_log_level,
     existing_el_clients,
-    el_min_cpu,
-    el_max_cpu,
-    el_min_mem,
-    el_max_mem,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
     persistent,
-    el_volume_size,
     tolerations,
     node_selectors,
     port_publisher,
     participant_index,
 ):
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, VERBOSITY_LEVELS
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
         plan,
-        launcher.el_cl_genesis_data,
-        launcher.jwt_file,
-        launcher.network,
-        launcher.networkid,
-        image,
+        launcher,
+        participant,
         service_name,
         existing_el_clients,
         cl_client_name,
         log_level,
-        el_min_cpu,
-        el_max_cpu,
-        el_min_mem,
-        el_max_mem,
-        extra_params,
-        extra_env_vars,
-        extra_labels,
-        launcher.prague_time,
         persistent,
-        el_volume_size,
         tolerations,
         node_selectors,
         port_publisher,
@@ -113,25 +92,13 @@ def launch(
 
 def get_config(
     plan,
-    el_cl_genesis_data,
-    jwt_file,
-    network,
-    networkid,
-    image,
+    launcher,
+    participant,
     service_name,
     existing_el_clients,
     cl_client_name,
-    verbosity_level,
-    el_min_cpu,
-    el_max_cpu,
-    el_min_mem,
-    el_max_mem,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
-    prague_time,
+    log_level,
     persistent,
-    el_volume_size,
     tolerations,
     node_selectors,
     port_publisher,
@@ -171,12 +138,12 @@ def get_config(
     cmd = [
         "erigon",
         "{0}".format(
-            "--override.prague=" + str(prague_time)
-            if constants.NETWORK_NAME.shadowfork in network
+            "--override.prague=" + str(launcher.prague_time)
+            if constants.NETWORK_NAME.shadowfork in launcher.network
             else ""
         ),
-        "--networkid={0}".format(networkid),
-        "--log.console.verbosity=" + verbosity_level,
+        "--networkid={0}".format(launcher.networkid),
+        "--log.console.verbosity=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--port={0}".format(discovery_port),
         "--http.api=eth,erigon,engine,web3,net,debug,trace,txpool,admin",
@@ -195,21 +162,31 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--db.size.limit={0}MB".format(el_volume_size),
+        "--db.size.limit={0}MB".format(
+            int(participant.el_volume_size)
+            if int(participant.el_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.EL_TYPE.besu + "_volume_size"
+            ],
+        ),
     ]
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
     if persistent:
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
-            size=el_volume_size,
+            size=int(participant.el_volume_size)
+            if int(participant.el_volume_size) > 0
+            else constants.VOLUME_SIZE[launcher.network][
+                constants.EL_TYPE.besu + "_volume_size"
+            ],
         )
 
-    if network == constants.NETWORK_NAME.kurtosis:
+    if launcher.network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -221,54 +198,56 @@ def get_config(
                 )
             )
     elif (
-        network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in network
+        launcher.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in launcher.network
     ):
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
-                plan, el_cl_genesis_data.files_artifact_uuid
+                plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
         )
 
-    if len(extra_params) > 0:
-        cmd.extend([param for param in extra_params])
+    if len(participant.el_extra_params) > 0:
+        cmd.extend([param for param in participant.el_extra_params])
 
-    if network not in constants.PUBLIC_NETWORKS:
+    if launcher.network not in constants.PUBLIC_NETWORKS:
         command_arg = [init_datadir_cmd_str, " ".join(cmd)]
         command_arg_str = " && ".join(command_arg)
     else:
         command_arg_str = " ".join(cmd)
 
+    env_vars = participant.el_extra_env_vars
     config_args = {
-        "image": image,
+        "image": participant.el_image,
         "ports": used_ports,
         "public_ports": public_ports,
         "cmd": [command_arg_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "env_vars": extra_env_vars,
+        "env_vars": env_vars,
         "labels": shared_utils.label_maker(
-            constants.EL_TYPE.erigon,
-            constants.CLIENT_TYPES.el,
-            image,
-            cl_client_name,
-            extra_labels,
+            client=constants.EL_TYPE.erigon,
+            client_type=constants.CLIENT_TYPES.el,
+            image=participant.el_image,
+            connected_client=cl_client_name,
+            extra_labels=participant.el_extra_labels,
+            supernode=participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
         "user": User(uid=0, gid=0),
     }
 
-    if el_min_cpu > 0:
-        config_args["min_cpu"] = el_min_cpu
-    if el_max_cpu > 0:
-        config_args["max_cpu"] = el_max_cpu
-    if el_min_mem > 0:
-        config_args["min_memory"] = el_min_mem
-    if el_max_mem > 0:
-        config_args["max_memory"] = el_max_mem
+    if participant.el_min_cpu > 0:
+        config_args["min_cpu"] = participant.el_min_cpu
+    if participant.el_max_cpu > 0:
+        config_args["max_cpu"] = participant.el_max_cpu
+    if participant.el_min_mem > 0:
+        config_args["min_memory"] = participant.el_min_mem
+    if participant.el_max_mem > 0:
+        config_args["max_memory"] = participant.el_max_mem
     return ServiceConfig(**config_args)
 
 

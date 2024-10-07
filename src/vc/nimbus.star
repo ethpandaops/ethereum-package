@@ -4,6 +4,7 @@ vc_shared = import_module("./shared.star")
 
 
 def get_config(
+    participant,
     el_cl_genesis_data,
     image,
     keymanager_file,
@@ -12,13 +13,6 @@ def get_config(
     el_context,
     full_name,
     node_keystore_files,
-    vc_min_cpu,
-    vc_max_cpu,
-    vc_min_mem,
-    vc_max_mem,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
     tolerations,
     node_selectors,
     keymanager_enabled,
@@ -57,9 +51,9 @@ def get_config(
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
-    if len(extra_params) > 0:
+    if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
-        cmd.extend([param for param in extra_params])
+        cmd.extend([param for param in participant.vc_extra_params])
 
     files = {
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
@@ -96,29 +90,26 @@ def get_config(
         "public_ports": public_ports,
         "cmd": cmd,
         "files": files,
-        "env_vars": extra_env_vars,
+        "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
-            constants.CL_TYPE.nimbus,
-            constants.CLIENT_TYPES.validator,
-            image,
-            cl_context.client_name,
-            extra_labels,
+            client=constants.CL_TYPE.nimbus,
+            client_type=constants.CLIENT_TYPES.validator,
+            image=image,
+            connected_client=cl_context.client_name,
+            extra_labels=participant.vc_extra_labels,
+            supernode=participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
         "user": User(uid=0, gid=0),
     }
 
-    if vc_min_cpu > 0:
-        config_args["min_cpu"] = vc_min_cpu
-
-    if vc_max_cpu > 0:
-        config_args["max_cpu"] = vc_max_cpu
-
-    if vc_min_mem > 0:
-        config_args["min_memory"] = vc_min_mem
-
-    if vc_max_mem > 0:
-        config_args["max_memory"] = vc_max_mem
-
+    if participant.vc_min_cpu > 0:
+        config_args["min_cpu"] = participant.vc_min_cpu
+    if participant.vc_max_cpu > 0:
+        config_args["max_cpu"] = participant.vc_max_cpu
+    if participant.vc_min_mem > 0:
+        config_args["min_memory"] = participant.vc_min_mem
+    if participant.vc_max_mem > 0:
+        config_args["max_memory"] = participant.vc_max_mem
     return ServiceConfig(**config_args)
