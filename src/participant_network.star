@@ -161,7 +161,6 @@ def launch_participant_network(
         all_cl_contexts,
         all_snooper_engine_contexts,
         preregistered_validator_keys_for_nodes,
-        current_vc_index,
     ) = cl_client_launcher.launch(
         plan,
         network_params,
@@ -289,8 +288,8 @@ def launch_participant_network(
             )
 
             vc_keystores = None
-            if participant.validator_count != 0:
-                vc_keystores = preregistered_validator_keys_for_nodes[current_vc_index]
+            if participant.validator_count > 0:
+                vc_keystores = preregistered_validator_keys_for_nodes[index + sub_index]
 
             vc_context = None
             snooper_beacon_context = None
@@ -354,13 +353,12 @@ def launch_participant_network(
                 network=network_params.network,
                 electra_fork_epoch=network_params.electra_fork_epoch,
                 port_publisher=port_publisher,
-                vc_index=current_vc_index,
+                vc_index=vc_keystores,
             )
             all_vc_contexts.append(vc_context)
 
             if vc_context and vc_context.metrics_info:
                 vc_context.metrics_info["config"] = participant.prometheus_config
-            current_vc_index += 1
 
         all_participants = []
 

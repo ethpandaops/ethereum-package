@@ -84,7 +84,6 @@ def launch(
             "launch_method": grandine.launch,
         },
     }
-    current_vc_index = 0
     all_snooper_engine_contexts = []
     all_cl_contexts = []
     preregistered_validator_keys_for_nodes = (
@@ -122,15 +121,10 @@ def launch(
 
         cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
-        if (
-            participant.validator_count != 0
-            and participant.vc_count != 0
-            and participant.use_separate_vc == False
-        ):
+        if participant.validator_count > 0 and participant.use_separate_vc == False:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
                 index
             ]
-            current_vc_index += 1
 
         el_context = all_el_contexts[index]
 
@@ -205,5 +199,4 @@ def launch(
         all_cl_contexts,
         all_snooper_engine_contexts,
         preregistered_validator_keys_for_nodes,
-        current_vc_index,
     )
