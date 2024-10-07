@@ -41,6 +41,18 @@ participants:
     vc_min_mem: 0
     vc_max_mem: 0
     validator_count: null
+    use_remote_signer: false
+# Remote signer
+    remote_signer_type: web3signer
+    remote_signer_image: consensys/web3signer:latest
+    remote_signer_extra_env_vars: {}
+    remote_signer_extra_labels: {}
+    remote_signer_extra_params: []
+    remote_signer_tolerations: []
+    remote_signer_min_cpu: 0
+    remote_signer_max_cpu: 0
+    remote_signer_min_mem: 0
+    remote_signer_max_mem: 0
 # participant specific
     node_selectors: {}
     tolerations: []
@@ -174,6 +186,9 @@ port_publisher:
   vc:
     enabled: false
     public_port_start: 34000
-  additional_services:
+  remote_signer:
     enabled: false
     public_port_start: 35000
+  additional_services:
+    enabled: false
+    public_port_start: 36000
