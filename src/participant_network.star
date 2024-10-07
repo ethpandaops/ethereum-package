@@ -285,6 +285,7 @@ def launch_participant_network(
 
             if not participant.use_separate_vc:
                 all_vc_contexts.append(None)
+                all_remote_signer_contexts.append(None)
                 all_snooper_beacon_contexts.append(None)
                 continue
 
