@@ -352,7 +352,7 @@ def launch_participant_network(
                     global_tolerations=global_tolerations,
                     node_selectors=node_selectors,
                     port_publisher=port_publisher,
-                    remote_signer_index=current_vc_index,
+                    remote_signer_index=index + sub_index,
                 )
 
             all_remote_signer_contexts.append(remote_signer_context)
@@ -385,7 +385,7 @@ def launch_participant_network(
                 network=network_params.network,
                 electra_fork_epoch=network_params.electra_fork_epoch,
                 port_publisher=port_publisher,
-                vc_index=vc_keystores,
+                vc_index=index + sub_index,
             )
             all_vc_contexts.append(vc_context)
 
