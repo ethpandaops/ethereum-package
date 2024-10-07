@@ -2,8 +2,8 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
-IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout:6.6.0"
-IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.6.0"
+IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout:6.8.0"
+IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
 
 SERVICE_NAME_BLOCKSCOUT = "blockscout"
 
@@ -67,7 +67,7 @@ def launch_blockscout(
     )
     verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)
     verif_service = plan.add_service(verif_service_name, config_verif)
-    verif_url = "http://{}:{}/api".format(
+    verif_url = "http://{}:{}/".format(
         verif_service.hostname, verif_service.ports["http"].number
     )
 
