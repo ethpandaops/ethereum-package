@@ -11,6 +11,7 @@ def get_config(
     beacon_http_url,
     cl_context,
     el_context,
+    remote_signer_context,
     full_name,
     node_keystore_files,
     tolerations,
@@ -33,8 +34,6 @@ def get_config(
 
     cmd = [
         "--beacon-node=" + beacon_http_url,
-        "--validators-dir=" + validator_keys_dirpath,
-        "--secrets-dir=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
@@ -42,6 +41,20 @@ def get_config(
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         "--graffiti=" + full_name,
     ]
+
+    if remote_signer_context == None:
+        cmd.extend(
+            [
+                "--validators-dir=" + validator_keys_dirpath,
+                "--secrets-dir=" + validator_secrets_dirpath,
+            ]
+        )
+    else:
+        cmd.extend(
+            [
+                "--web3-signer-url={0}".format(remote_signer_context.http_url),
+            ]
+        )
 
     keymanager_api_cmd = [
         "--keymanager",
