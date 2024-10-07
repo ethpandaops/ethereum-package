@@ -290,12 +290,12 @@ def launch_participant_network(
 
             vc_keystores = None
             if participant.validator_count != 0:
-                if participant.vc_count == 1:
-                    vc_keystores = preregistered_validator_keys_for_nodes[index]
-                else:
-                    vc_keystores = preregistered_validator_keys_for_nodes[
-                        index + sub_index
-                    ]
+                vc_keystores = preregistered_validator_keys_for_nodes[current_vc_index]
+                plan.print(
+                    "index: {0}, subindex: {1}, vc_keystores: {2}, current_vc_index: {3}".format(
+                        index, sub_index, vc_keystores, current_vc_index
+                    )
+                )
 
             vc_context = None
             snooper_beacon_context = None

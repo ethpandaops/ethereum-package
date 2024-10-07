@@ -590,6 +590,18 @@ def parse_network_params(plan, input_args):
                     + participant["cl_type"],
                 )
             )
+        if participant["vc_count"] > 0 and participant["use_separate_vc"] != True:
+            fail(
+                "vc_count is set to {0} but use_separate_vc is set to {1} for participant: {2}. You have to use use_separate_vc = True for teku/nimbus if you want to set vc_count.".format(
+                    participant["vc_count"],
+                    participant["use_separate_vc"],
+                    str(index + 1)
+                    + "-"
+                    + participant["el_type"]
+                    + "-"
+                    + participant["cl_type"],
+                )
+            )
 
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == None:
