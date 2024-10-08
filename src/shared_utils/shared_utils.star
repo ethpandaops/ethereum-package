@@ -9,6 +9,7 @@ NOT_PROVIDED_WAIT = "not-provided-wait"
 MAX_PORTS_PER_CL_NODE = 5
 MAX_PORTS_PER_EL_NODE = 5
 MAX_PORTS_PER_VC_NODE = 3
+MAX_PORTS_PER_REMOTE_SIGNER_NODE = 2
 MAX_PORTS_PER_ADDITIONAL_SERVICE = 2
 
 
@@ -259,6 +260,12 @@ def get_public_ports_for_component(
         public_port_range = __get_port_range(
             port_publisher_params.vc_public_port_start,
             MAX_PORTS_PER_VC_NODE,
+            participant_index,
+        )
+    elif component == "remote-signer":
+        public_port_range = __get_port_range(
+            port_publisher_params.remote_signer_public_port_start,
+            MAX_PORTS_PER_REMOTE_SIGNER_NODE,
             participant_index,
         )
     elif component == "additional_services":

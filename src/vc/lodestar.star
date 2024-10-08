@@ -21,6 +21,7 @@ def get_config(
     beacon_http_url,
     cl_context,
     el_context,
+    remote_signer_context,
     full_name,
     node_keystore_files,
     tolerations,
@@ -51,8 +52,6 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--beaconNodes=" + beacon_http_url,
-        "--keystoresDir=" + validator_keys_dirpath,
-        "--secretsDir=" + validator_secrets_dirpath,
         "--suggestedFeeRecipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
@@ -63,6 +62,21 @@ def get_config(
         "--useProduceBlockV3",
         "--disableKeystoresThreadPool",
     ]
+
+    if remote_signer_context == None:
+        cmd.extend(
+            [
+                "--keystoresDir=" + validator_keys_dirpath,
+                "--secretsDir=" + validator_secrets_dirpath,
+            ]
+        )
+    else:
+        cmd.extend(
+            [
+                "--externalSigner.url={0}".format(remote_signer_context.http_url),
+                "--externalSigner.fetch",
+            ]
+        )
 
     keymanager_api_cmd = [
         "--keymanager",
