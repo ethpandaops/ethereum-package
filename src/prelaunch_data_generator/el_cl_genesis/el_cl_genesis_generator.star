@@ -118,6 +118,7 @@ def new_env_file_for_el_cl_genesis_data(
         "CapellaForkVersion": constants.CAPELLA_FORK_VERSION,
         "DenebForkVersion": constants.DENEB_FORK_VERSION,
         "ElectraForkVersion": constants.ELECTRA_FORK_VERSION,
+        "FuluForkVersion": constants.FULU_FORK_VERSION,
         "ShadowForkFile": shadowfork_file,
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
         "ShardCommitteePeriod": network_params.shard_committee_period,
