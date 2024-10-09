@@ -12,8 +12,8 @@ BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
 # Port nums
 DISCOVERY_TCP_PORT_NUM = 13000
 DISCOVERY_UDP_PORT_NUM = 12000
-RPC_PORT_NUM = 4000
-HTTP_PORT_NUM = 3500
+RPC_PORT_NUM = 3500
+BEACON_HTTP_PORT_NUM = 4000
 BEACON_MONITORING_PORT_NUM = 8080
 PROFILING_PORT_NUM = 6060
 
@@ -77,7 +77,7 @@ def launch(
 
     beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
 
-    beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, HTTP_PORT_NUM)
+    beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, BEACON_HTTP_PORT_NUM)
     beacon_grpc_url = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
 
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
@@ -180,7 +180,7 @@ def get_beacon_config(
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port,
-        constants.HTTP_PORT_ID: HTTP_PORT_NUM,
+        constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_MONITORING_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.PROFILING_PORT_ID: PROFILING_PORT_NUM,
@@ -193,9 +193,9 @@ def get_beacon_config(
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
         "--rpc-port={0}".format(RPC_PORT_NUM),
-        "--grpc-gateway-host=0.0.0.0",
-        "--grpc-gateway-corsdomain=*",
-        "--grpc-gateway-port={0}".format(HTTP_PORT_NUM),
+        "--http-host=0.0.0.0",
+        "--http-cors-domain=*",
+        "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--p2p-host-ip=" + port_publisher.nat_exit_ip,
         "--p2p-tcp-port={0}".format(discovery_port),
         "--p2p-udp-port={0}".format(discovery_port),
