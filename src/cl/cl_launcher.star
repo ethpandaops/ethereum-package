@@ -122,9 +122,9 @@ def launch(
         cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
         if participant.validator_count > 0 and participant.use_separate_vc == False:
-            new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
-                index
-            ]
+            new_cl_node_validator_keystores = (
+                preregistered_validator_keys_for_nodes.locator[index][0]
+            )
 
         el_context = all_el_contexts[index]
 
