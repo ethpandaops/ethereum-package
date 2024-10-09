@@ -71,7 +71,9 @@ def zfill_custom(value, width):
     return ("0" * (width - len(str(value)))) + str(value)
 
 
-def label_maker(client, client_type, image, connected_client, extra_labels, supernode):
+def label_maker(
+    client, client_type, image, connected_client, extra_labels, supernode=False
+):
     # Extract sha256 hash if present
     sha256 = ""
     if "@sha256:" in image:
