@@ -6,7 +6,7 @@ participants:
     cl_image: ethpandaops/teku:master
 network_params:
   electra_fork_epoch: 1
-  eof_activation_epoch: 2
+  fulu_fork_epoch: 2
 additional_services:
   - dora
   - blockscout
