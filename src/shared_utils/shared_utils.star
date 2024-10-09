@@ -86,8 +86,10 @@ def label_maker(client, client_type, image, connected_client, extra_labels, supe
         .split("@")[0],  # drop the sha256 part of the image from the label
         "ethereum-package.sha256": sha256,
         "ethereum-package.connected-client": connected_client,
-        "ethereum-package.supernode": str(supernode),
     }
+
+    if supernode:
+        labels["ethereum-package.supernode"] = str(supernode)
 
     # Add extra_labels to the labels dictionary
     labels.update(extra_labels)
