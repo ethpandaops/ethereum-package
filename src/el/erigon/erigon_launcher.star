@@ -182,7 +182,7 @@ def get_config(
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
             else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.besu + "_volume_size"
+                constants.EL_TYPE.erigon + "_volume_size"
             ],
         )
 
