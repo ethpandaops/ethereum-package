@@ -178,7 +178,7 @@ def generate_validator_keystores(plan, mnemonic, participants):
             artifact_name = plan.store_service_files(
                 service_name, output_dirpath, name=artifact_name
             )
-
+            locator = {str(idx): i}
             base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
             to_add = keystore_files_module.new_keystore_files(
                 artifact_name,
@@ -189,6 +189,7 @@ def generate_validator_keystores(plan, mnemonic, participants):
                 shared_utils.path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
                 shared_utils.path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
                 shared_utils.path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
+                locator,
             )
 
             keystore_files.append(to_add)
