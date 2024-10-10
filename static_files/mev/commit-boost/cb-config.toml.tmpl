@@ -1,0 +1,10 @@
+chain = "{{ .Network }}"
+
+[pbs]
+port = {{ .Port }}
+
+{{ range $index, $relay := .Relays }}
+[[relays]]
+id = "mev_relay_{{$index}}"
+url = "{{ $relay }}"
+{{- end }}
