@@ -314,7 +314,7 @@ participants:
     # Defaults to 1
     vc_count: 1
 
-    # The log level string that this participant's CL client should log at
+    # The log level string that this participant's validator client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
     # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
     # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
@@ -324,11 +324,11 @@ participants:
     # A list of optional extra env_vars the vc container should spin up with
     vc_extra_env_vars: {}
 
-    # A list of optional extra labels that will be passed to the CL client validator container.
+    # A list of optional extra labels that will be passed to the validator client validator container.
     # Example; vc_extra_labels: {"ethereum-package.partition": "1"}
     vc_extra_labels: {}
 
-    # A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
+    # A list of optional extra params that will be passed to the validator client container for modifying its behaviour
     # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
     vc_extra_params: []
 
@@ -356,6 +356,51 @@ participants:
     # Default to null, which means that the number of validators will be using the
     # network parameter num_validator_keys_per_node
     validator_count: null
+
+    # Whether to use a remote signer instead of the vc directly handling keys
+    # Note Lighthouse VC does not support this flag
+    # Defaults to false
+    use_remote_signer: false
+
+  # Remote signer Specific flags
+    # The type of remote signer that should be used
+    # Valid values are web3signer
+    # Defaults to web3signer
+    remote_signer_type: "web3signer"
+
+    # The Docker image that should be used for the remote signer
+    # Defaults to "consensys/web3signer:latest"
+    remote_signer_image: "consensys/web3signer:latest"
+
+    # A list of optional extra env_vars the remote signer container should spin up with
+    remote_signer_extra_env_vars: {}
+
+    # A list of optional extra labels that will be passed to the remote signer container.
+    # Example; remote_signer_extra_labels: {"ethereum-package.partition": "1"}
+    remote_signer_extra_labels: {}
+
+    # A list of optional extra params that will be passed to the remote signer container for modifying its behaviour
+    remote_signer_extra_params: []
+
+    # A list of tolerations that will be passed to the remote signer container
+    # Only works with Kubernetes
+    # Example: remote_signer_tolerations:
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+    #   toleration_seconds: 3600
+    # Defaults to empty
+    remote_signer_tolerations: []
+
+    # Resource management for remote signer containers
+    # CPU is milicores
+    # RAM is in MB
+    # Defaults to 0, which results in no resource limits
+    remote_signer_min_cpu: 0
+    remote_signer_max_cpu: 0
+    remote_signer_min_mem: 0
+    remote_signer_max_mem: 0
 
   # Participant specific flags
     # Node selector
@@ -862,13 +907,20 @@ port_publisher:
   vc:
     enabled: false
     public_port_start: 34000
-  # Additional services public port exposed to your local machine
+  # remote signer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 35000
   # You can't run multiple enclaves on the same port settings
-  additional_services:
+  remote_signer:
     enabled: false
     public_port_start: 35000
+  # Additional services public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 36000
+  # You can't run multiple enclaves on the same port settings
+  additional_services:
+    enabled: false
+    public_port_start: 36000
 ```
 
 #### Example configurations
@@ -961,6 +1013,9 @@ participants:
     cl_type: lighthouse
     count: 2
 snooper_enabled: true
+additional_services:
+  - prometheus_grafana
+ethereum_metrics_exporter_enabled: true
 ```
 
 </details>

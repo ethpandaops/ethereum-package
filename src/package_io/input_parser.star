@@ -52,6 +52,10 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:master-minimal",
 }
 
+DEFAULT_REMOTE_SIGNER_IMAGES = {
+    "web3signer": "consensys/web3signer:latest",
+}
+
 # Placeholder value for the deneb fork epoch if electra is being run
 # TODO: This is a hack, and should be removed once we electra is rebased on deneb
 HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
@@ -213,6 +217,15 @@ def input_parser(plan, input_args):
                 vc_extra_params=participant["vc_extra_params"],
                 vc_extra_env_vars=participant["vc_extra_env_vars"],
                 vc_extra_labels=participant["vc_extra_labels"],
+                use_remote_signer=participant["use_remote_signer"],
+                remote_signer_type=participant["remote_signer_type"],
+                remote_signer_image=participant["remote_signer_image"],
+                remote_signer_tolerations=participant["remote_signer_tolerations"],
+                remote_signer_extra_env_vars=participant[
+                    "remote_signer_extra_env_vars"
+                ],
+                remote_signer_extra_params=participant["remote_signer_extra_params"],
+                remote_signer_extra_labels=participant["remote_signer_extra_labels"],
                 builder_network_params=participant["builder_network_params"],
                 supernode=participant["supernode"],
                 el_min_cpu=participant["el_min_cpu"],
@@ -227,6 +240,10 @@ def input_parser(plan, input_args):
                 vc_max_cpu=participant["vc_max_cpu"],
                 vc_min_mem=participant["vc_min_mem"],
                 vc_max_mem=participant["vc_max_mem"],
+                remote_signer_min_cpu=participant["remote_signer_min_cpu"],
+                remote_signer_max_cpu=participant["remote_signer_max_cpu"],
+                remote_signer_min_mem=participant["remote_signer_min_mem"],
+                remote_signer_max_mem=participant["remote_signer_max_mem"],
                 validator_count=participant["validator_count"],
                 tolerations=participant["tolerations"],
                 node_selectors=participant["node_selectors"],
@@ -397,6 +414,10 @@ def input_parser(plan, input_args):
             el_public_port_start=result["port_publisher"]["el"]["public_port_start"],
             vc_enabled=result["port_publisher"]["vc"]["enabled"],
             vc_public_port_start=result["port_publisher"]["vc"]["public_port_start"],
+            remote_signer_enabled=result["port_publisher"]["remote_signer"]["enabled"],
+            remote_signer_public_port_start=result["port_publisher"]["remote_signer"][
+                "public_port_start"
+            ],
             additional_services_enabled=result["port_publisher"]["additional_services"][
                 "enabled"
             ],
@@ -473,6 +494,7 @@ def parse_network_params(plan, input_args):
         el_type = participant["el_type"]
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
+        remote_signer_type = participant["remote_signer_type"]
 
         if (
             cl_type in (constants.CL_TYPE.nimbus)
@@ -537,6 +559,9 @@ def parse_network_params(plan, input_args):
             else:
                 participant["use_separate_vc"] = True
 
+        if participant["use_remote_signer"] and not participant["use_separate_vc"]:
+            fail("`use_remote_signer` requires `use_separate_vc`")
+
         if vc_type == "":
             # Defaults to matching the chosen CL client
             vc_type = cl_type
@@ -566,6 +591,12 @@ def parse_network_params(plan, input_args):
                     )
                 )
             participant["vc_image"] = default_image
+
+        remote_signer_image = participant["remote_signer_image"]
+        if remote_signer_image == "":
+            participant["remote_signer_image"] = DEFAULT_REMOTE_SIGNER_IMAGES.get(
+                remote_signer_type, ""
+            )
 
         if result["parallel_keystore_generation"] and participant["vc_count"] != 1:
             fail(
@@ -634,6 +665,9 @@ def parse_network_params(plan, input_args):
 
         vc_extra_params = participant.get("vc_extra_params", [])
         participant["vc_extra_params"] = vc_extra_params
+
+        remote_signer_extra_params = participant.get("remote_signer_extra_params", [])
+        participant["remote_signer_extra_params"] = remote_signer_extra_params
 
         total_participant_count += participant["count"]
 
@@ -784,6 +818,7 @@ def default_input_args(input_args):
         "apache_port": None,
         "global_tolerations": [],
         "global_node_selectors": {},
+        "use_remote_signer": False,
         "keymanager_enabled": False,
         "checkpoint_sync_enabled": False,
         "checkpoint_sync_url": "",
@@ -902,6 +937,17 @@ def default_participant():
         "vc_max_cpu": 0,
         "vc_min_mem": 0,
         "vc_max_mem": 0,
+        "use_remote_signer": None,
+        "remote_signer_type": "web3signer",
+        "remote_signer_image": "",
+        "remote_signer_extra_env_vars": {},
+        "remote_signer_extra_labels": {},
+        "remote_signer_extra_params": [],
+        "remote_signer_tolerations": [],
+        "remote_signer_min_cpu": 0,
+        "remote_signer_max_cpu": 0,
+        "remote_signer_min_mem": 0,
+        "remote_signer_max_mem": 0,
         "validator_count": None,
         "node_selectors": {},
         "tolerations": [],
@@ -1061,7 +1107,8 @@ def get_port_publisher_params(parameter_type, input_args=None):
         "el": {"enabled": False, "public_port_start": 32000},
         "cl": {"enabled": False, "public_port_start": 33000},
         "vc": {"enabled": False, "public_port_start": 34000},
-        "additional_services": {"enabled": False, "public_port_start": 35000},
+        "remote_signer": {"enabled": False, "public_port_start": 35000},
+        "additional_services": {"enabled": False, "public_port_start": 36000},
     }
     if parameter_type == "default":
         return port_publisher_parameters

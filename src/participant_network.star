@@ -23,6 +23,7 @@ launch_shadowfork = import_module("./network_launcher/shadowfork.star")
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
 vc = import_module("./vc/vc_launcher.star")
+remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
 
@@ -188,6 +189,7 @@ def launch_participant_network(
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     all_vc_contexts = []
+    all_remote_signer_contexts = []
     all_snooper_beacon_contexts = []
     # Some CL clients cannot run validator clients in the same process and need
     # a separate validator client
@@ -202,6 +204,7 @@ def launch_participant_network(
         el_type = participant.el_type
         cl_type = participant.cl_type
         vc_type = participant.vc_type
+        remote_signer_type = participant.remote_signer_type
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
         for sub_index in range(participant.vc_count):
             vc_index_str = shared_utils.zfill_custom(
@@ -272,6 +275,7 @@ def launch_participant_network(
                 # This should only be the case for the MEV participant,
                 # the regular participants default to False/True
                 all_vc_contexts.append(None)
+                all_remote_signer_contexts.append(None)
                 all_snooper_beacon_contexts.append(None)
                 continue
 
@@ -283,6 +287,7 @@ def launch_participant_network(
 
             if not participant.use_separate_vc:
                 all_vc_contexts.append(None)
+                all_remote_signer_contexts.append(None)
                 all_snooper_beacon_contexts.append(None)
                 continue
 
@@ -300,6 +305,7 @@ def launch_participant_network(
                     ]
 
             vc_context = None
+            remote_signer_context = None
             snooper_beacon_context = None
 
             if participant.snooper_enabled:
@@ -338,6 +344,31 @@ def launch_participant_network(
                 )
             )
 
+            if participant.use_remote_signer:
+                remote_signer_context = remote_signer.launch(
+                    plan=plan,
+                    launcher=remote_signer.new_remote_signer_launcher(
+                        el_cl_genesis_data=el_cl_data
+                    ),
+                    service_name="signer-{0}".format(full_name),
+                    remote_signer_type=remote_signer_type,
+                    image=participant.remote_signer_image,
+                    full_name="{0}-remote_signer".format(full_name),
+                    vc_type=vc_type,
+                    node_keystore_files=vc_keystores,
+                    participant=participant,
+                    global_tolerations=global_tolerations,
+                    node_selectors=node_selectors,
+                    port_publisher=port_publisher,
+                    remote_signer_index=current_vc_index,
+                )
+
+            all_remote_signer_contexts.append(remote_signer_context)
+            if remote_signer_context and remote_signer_context.metrics_info:
+                remote_signer_context.metrics_info[
+                    "config"
+                ] = participant.prometheus_config
+
             vc_context = vc.launch(
                 plan=plan,
                 launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
@@ -348,6 +379,7 @@ def launch_participant_network(
                 global_log_level=global_log_level,
                 cl_context=cl_context,
                 el_context=el_context,
+                remote_signer_context=remote_signer_context,
                 full_name=full_name,
                 snooper_enabled=participant.snooper_enabled,
                 snooper_beacon_context=snooper_beacon_context,
@@ -375,6 +407,7 @@ def launch_participant_network(
         el_type = participant.el_type
         cl_type = participant.cl_type
         vc_type = participant.vc_type
+        remote_signer_type = participant.remote_signer_type
         snooper_engine_context = None
         snooper_beacon_context = None
 
@@ -382,8 +415,10 @@ def launch_participant_network(
         cl_context = all_cl_contexts[index]
         if participant.vc_count != 0:
             vc_context = all_vc_contexts[index]
+            remote_signer_context = all_remote_signer_contexts[index]
         else:
             vc_context = None
+            remote_signer_context = None
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
@@ -404,9 +439,11 @@ def launch_participant_network(
             el_type,
             cl_type,
             vc_type,
+            remote_signer_type,
             el_context,
             cl_context,
             vc_context,
+            remote_signer_context,
             snooper_engine_context,
             snooper_beacon_context,
             ethereum_metrics_exporter_context,

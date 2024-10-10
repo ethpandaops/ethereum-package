@@ -26,6 +26,8 @@ VC_TYPE = struct(
     teku="teku",
 )
 
+REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
+
 GLOBAL_LOG_LEVEL = struct(
     info="info",
     error="error",
@@ -38,6 +40,7 @@ CLIENT_TYPES = struct(
     el="execution",
     cl="beacon",
     validator="validator",
+    remote_signer="remote-signer",
 )
 
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
