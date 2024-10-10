@@ -397,7 +397,6 @@ def run(plan, args={}):
                 prefunded_accounts,
                 fuzz_target,
                 tx_spammer_params,
-                network_params.electra_fork_epoch,
                 global_node_selectors,
             )
             plan.print("Successfully launched transaction spammer")

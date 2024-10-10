@@ -28,8 +28,6 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
-    network,
-    electra_fork_epoch,
     port_publisher,
     vc_index,
 ):
