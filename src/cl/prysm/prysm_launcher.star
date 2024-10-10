@@ -224,31 +224,9 @@ def get_beacon_config(
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
-    # If checkpoint sync is enabled, add the checkpoint sync url
     if checkpoint_sync_enabled:
-        if checkpoint_sync_url:
-            cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
-            cmd.append(
-                "--genesis-beacon-api-url="
-                + constants.CHECKPOINT_SYNC_URL[launcher.network]
-            )
-        else:
-            if (
-                launcher.network in constants.PUBLIC_NETWORKS
-                or launcher.network == constants.NETWORK_NAME.ephemery
-            ):
-                cmd.append(
-                    "--checkpoint-sync-url="
-                    + constants.CHECKPOINT_SYNC_URL[launcher.network]
-                )
-                cmd.append(
-                    "--genesis-beacon-api-url="
-                    + constants.CHECKPOINT_SYNC_URL[launcher.network]
-                )
-            else:
-                fail(
-                    "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
-                )
+        cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
+        cmd.append("--genesis-beacon-api-url=" + checkpoint_sync_url)
 
     if launcher.preset == "minimal":
         cmd.append("--minimal-config=true")
