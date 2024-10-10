@@ -26,6 +26,7 @@ additional_services:
   - blutgang
   - apache
   - tracoor
+  - cadvisor
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 mev_type: flashbots

@@ -255,6 +255,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "forky",
     "apache",
     "tracoor",
+    "cadvisor",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
