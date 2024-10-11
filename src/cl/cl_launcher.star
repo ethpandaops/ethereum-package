@@ -153,11 +153,6 @@ def launch(
                     network_params.network in constants.PUBLIC_NETWORKS
                     or network_params.network == constants.NETWORK_NAME.ephemery
                 ):
-                    plan.print(
-                        "we got here because network is public, {0}".format(
-                            network_params.network
-                        )
-                    )
                     checkpoint_sync_url = constants.CHECKPOINT_SYNC_URL[
                         network_params.network
                     ]
