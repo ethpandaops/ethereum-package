@@ -57,6 +57,7 @@ assertoor = import_module("./src/assertoor/assertoor_launcher.star")
 get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
+helix_relay = import_module("./src/mev/helix-relay/helix_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -420,6 +421,7 @@ def run(plan, args={}):
     for index, additional_service in enumerate(
         args_with_right_defaults.additional_services
     ):
+        plan.print("Launching {0} {1}".format(index, additional_service))
         if additional_service == "tx_spammer":
             plan.print("Launching transaction spammer")
             tx_spammer_params = args_with_right_defaults.tx_spammer_params
@@ -655,6 +657,22 @@ def run(plan, args={}):
                 prefunded_accounts[0].address,
                 fuzz_target,
                 args_with_right_defaults.custom_flood_params,
+                global_node_selectors,
+            )
+        elif additional_service == "helix_relay":
+            plan.print("Launching helix relay")
+            helix_relay_config_template = read_file(
+                static_files.HELIX_CONFIG_TEMPLATE_FILEPATH
+            )
+            helix_relay.launch_helix(
+                plan,
+                helix_relay_config_template,
+                final_genesis_timestamp,
+                genesis_validators_root,
+                all_cl_contexts,
+                all_el_contexts,
+                el_cl_data_files_artifact_uuid,
+                persistent,
                 global_node_selectors,
             )
         else:

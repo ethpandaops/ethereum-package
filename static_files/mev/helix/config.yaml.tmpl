@@ -1,0 +1,32 @@
+postgres:
+  hostname: "{{ .Hostname }}"
+  port: {{ .Port }}
+  db_name: "{{ .DbName }}"
+  user: "{{ .User }}"
+  password: "{{ .Password }}"
+  region: {{ .Region }}
+  region_name: "{{ .RegionName }}"
+redis:
+  url: "{{ .RedisUrl }}"
+broadcasters:
+  - !BeaconClient
+      url: {{ .BeaconClientUrl }}
+simulator:
+  url: {{ .SimulatorUrl }}
+beacon_clients:
+  - url: {{ .BeaconClientUrl }}
+relays: []
+network_config: !Custom 
+    dir_path: {{ .NetworkDirPath }}
+    genesis_validator_root: {{ .GenesisValidatorRoot }}
+    genesis_time: {{ .GenesisTime }}
+logging: !Console
+validator_preferences:
+  filtering: "regional"
+  trusted_builders: null
+  header_delay: true
+router_config: 
+  enabled_routes:
+    - route: !All
+      rate_limit: null
+target_get_payload_propagation_duration_ms: 1000
