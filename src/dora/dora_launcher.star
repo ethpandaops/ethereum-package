@@ -123,7 +123,7 @@ def get_config(
     if dora_params.image != "":
         IMAGE_NAME = dora_params.image
     else:
-        IMAGE_NAME = "ethpandaops/dora:latest"
+        IMAGE_NAME = "ethpandaops/dora:master"
 
     return ServiceConfig(
         image=IMAGE_NAME,
