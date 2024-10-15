@@ -8,6 +8,7 @@ def new_keystore_files(
     prysm_relative_dirpath,
     teku_keys_relative_dirpath,
     teku_secrets_relative_dirpath,
+    locator,
 ):
     return struct(
         files_artifact_uuid=files_artifact_uuid,
@@ -19,4 +20,5 @@ def new_keystore_files(
         prysm_relative_dirpath=prysm_relative_dirpath,
         teku_keys_relative_dirpath=teku_keys_relative_dirpath,
         teku_secrets_relative_dirpath=teku_secrets_relative_dirpath,
+        locator=locator,
     )
