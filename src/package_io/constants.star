@@ -26,6 +26,8 @@ VC_TYPE = struct(
     teku="teku",
 )
 
+REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
+
 GLOBAL_LOG_LEVEL = struct(
     info="info",
     error="error",
@@ -38,6 +40,7 @@ CLIENT_TYPES = struct(
     el="execution",
     cl="beacon",
     validator="validator",
+    remote_signer="remote-signer",
 )
 
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -100,11 +103,15 @@ BELLATRIX_FORK_VERSION = "0x30000038"
 CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
-EIP7594_FORK_VERSION = "0x70000038"
+ELECTRA_FORK_EPOCH = 100000000
+FULU_FORK_VERSION = "0x70000038"
+FULU_FORK_EPOCH = 100000001
+EIP7594_FORK_VERSION = "0x80000038"
+EIP7594_FORK_EPOCH = 100000002
 
 ETHEREUM_GENESIS_GENERATOR = struct(
     capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Deprecated (no support for minimal config)
-    deneb_genesis="ethpandaops/ethereum-genesis-generator:3.3.7",  # Default
+    deneb_genesis="ethpandaops/ethereum-genesis-generator:3.4.0",  # Default
     verkle_support_genesis="ethpandaops/ethereum-genesis-generator:3.0.0-rc.19",  # soon to be deneb genesis, waiting for rebase
     verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )

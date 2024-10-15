@@ -1,12 +1,13 @@
 participants:
   - el_type: besu
-    el_image: ethpandaops/besu:shemnon-eof-cancunEOF-fork
+    el_image: ethpandaops/besu:main
     count: 3
     cl_type: teku
     cl_image: ethpandaops/teku:master
 network_params:
   electra_fork_epoch: 1
-  eof_activation_epoch: 2
+  fulu_fork_epoch: 2
+  preset: minimal
 additional_services:
   - dora
   - blockscout
