@@ -72,8 +72,6 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
-            network=network,  # TODO: remove when deneb rebase is done
-            electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
             port_publisher=port_publisher,
             vc_index=vc_index,
         )
