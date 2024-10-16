@@ -168,12 +168,14 @@ def run(plan, args={}):
     all_el_contexts = []
     all_cl_contexts = []
     all_vc_contexts = []
+    all_remote_signer_contexts = []
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     for participant in all_participants:
         all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
         all_vc_contexts.append(participant.vc_context)
+        all_remote_signer_contexts.append(participant.remote_signer_context)
         all_ethereum_metrics_exporter_contexts.append(
             participant.ethereum_metrics_exporter_context
         )
@@ -426,7 +428,6 @@ def run(plan, args={}):
                 prefunded_accounts,
                 fuzz_target,
                 tx_spammer_params,
-                network_params.electra_fork_epoch,
                 global_node_selectors,
             )
             plan.print("Successfully launched transaction spammer")
@@ -665,6 +666,7 @@ def run(plan, args={}):
             all_el_contexts,
             all_cl_contexts,
             all_vc_contexts,
+            all_remote_signer_contexts,
             prometheus_additional_metrics_jobs,
             all_ethereum_metrics_exporter_contexts,
             all_xatu_sentry_contexts,

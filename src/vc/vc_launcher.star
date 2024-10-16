@@ -22,6 +22,7 @@ def launch(
     global_log_level,
     cl_context,
     el_context,
+    remote_signer_context,
     full_name,
     snooper_enabled,
     snooper_beacon_context,
@@ -56,6 +57,8 @@ def launch(
 
     keymanager_enabled = participant.keymanager_enabled
     if vc_type == constants.VC_TYPE.lighthouse:
+        if remote_signer_context != None:
+            fail("`use_remote_signer` flag not supported for lighthouse VC")
         config = lighthouse.get_config(
             participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
@@ -69,8 +72,6 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
-            network=network,  # TODO: remove when deneb rebase is done
-            electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
             port_publisher=port_publisher,
             vc_index=vc_index,
         )
@@ -84,6 +85,7 @@ def launch(
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
+            remote_signer_context=remote_signer_context,
             full_name=full_name,
             node_keystore_files=node_keystore_files,
             tolerations=tolerations,
@@ -102,6 +104,7 @@ def launch(
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
+            remote_signer_context=remote_signer_context,
             full_name=full_name,
             node_keystore_files=node_keystore_files,
             tolerations=tolerations,
@@ -119,6 +122,7 @@ def launch(
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
+            remote_signer_context=remote_signer_context,
             full_name=full_name,
             node_keystore_files=node_keystore_files,
             tolerations=tolerations,
@@ -136,6 +140,7 @@ def launch(
             beacon_http_url=beacon_http_url,
             cl_context=cl_context,
             el_context=el_context,
+            remote_signer_context=remote_signer_context,
             full_name=full_name,
             node_keystore_files=node_keystore_files,
             prysm_password_relative_filepath=prysm_password_relative_filepath,

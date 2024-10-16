@@ -14,6 +14,7 @@ def get_config(
     beacon_http_url,
     cl_context,
     el_context,
+    remote_signer_context,
     full_name,
     node_keystore_files,
     prysm_password_relative_filepath,
@@ -38,8 +39,6 @@ def get_config(
         "--chain-config-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--wallet-dir=" + validator_keys_dirpath,
-        "--wallet-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
@@ -48,6 +47,23 @@ def get_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
     ]
+
+    if remote_signer_context == None:
+        cmd.extend(
+            [
+                "--wallet-dir=" + validator_keys_dirpath,
+                "--wallet-password-file=" + validator_secrets_dirpath,
+            ]
+        )
+    else:
+        cmd.extend(
+            [
+                "--remote-signer-url={0}".format(remote_signer_context.http_url),
+                "--remote-signer-keys={0}/api/v1/eth2/publicKeys".format(
+                    remote_signer_context.http_url
+                ),
+            ]
+        )
 
     keymanager_api_cmd = [
         "--rpc",

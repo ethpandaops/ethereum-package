@@ -41,6 +41,18 @@ participants:
     vc_min_mem: 0
     vc_max_mem: 0
     validator_count: null
+    use_remote_signer: false
+# Remote signer
+    remote_signer_type: web3signer
+    remote_signer_image: consensys/web3signer:latest
+    remote_signer_extra_env_vars: {}
+    remote_signer_extra_labels: {}
+    remote_signer_extra_params: []
+    remote_signer_tolerations: []
+    remote_signer_min_cpu: 0
+    remote_signer_max_cpu: 0
+    remote_signer_min_mem: 0
+    remote_signer_max_mem: 0
 # participant specific
     node_selectors: {}
     tolerations: []
@@ -76,10 +88,10 @@ network_params:
   shard_committee_period: 256
   deneb_fork_epoch: 0
   electra_fork_epoch: 100000000
-  eip7594_fork_epoch: 100000001
+  fulu_fork_epoch: 100000001
+  eip7594_fork_epoch: 100000002
   eip7594_fork_version: "0x60000038"
   network_sync_base_url: https://snapshots.ethpandaops.io/
-  eof_activation_epoch: ""
   data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
   custody_requirement: 4
@@ -174,6 +186,9 @@ port_publisher:
   vc:
     enabled: false
     public_port_start: 34000
-  additional_services:
+  remote_signer:
     enabled: false
     public_port_start: 35000
+  additional_services:
+    enabled: false
+    public_port_start: 36000

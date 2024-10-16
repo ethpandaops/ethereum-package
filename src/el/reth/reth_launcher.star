@@ -204,7 +204,7 @@ def get_config(
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
             else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.besu + "_volume_size"
+                constants.EL_TYPE.reth + "_volume_size"
             ],
         )
 
@@ -224,7 +224,7 @@ def get_config(
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.EL_TYPE.besu,
+            client=constants.EL_TYPE.reth,
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image,
             connected_client=cl_client_name,
