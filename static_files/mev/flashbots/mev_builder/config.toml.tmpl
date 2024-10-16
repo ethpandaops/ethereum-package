@@ -13,7 +13,7 @@ relay_secret_key = "{{ .SecretKey }}"
 optimistic_relay_secret_key = "{{ .SecretKey }}"
 
 # cl_node_url can be a single value, array of values, or passed by an environment variables with values separated with a comma
-cl_node_url = "{{ .CLEndpoint }}"
+cl_node_url = ["{{ .CLEndpoint }}"]
 jsonrpc_server_port = 8645
 jsonrpc_server_ip = "0.0.0.0"
 el_node_ipc_path = "/tmp/reth.ipc"
