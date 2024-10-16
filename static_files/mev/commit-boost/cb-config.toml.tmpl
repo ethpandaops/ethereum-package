@@ -8,3 +8,7 @@ port = {{ .Port }}
 id = "mev_relay_{{$index}}"
 url = "{{ $relay }}"
 {{- end }}
+
+[logs]
+log_level = "debug"
+max_log_files = 7

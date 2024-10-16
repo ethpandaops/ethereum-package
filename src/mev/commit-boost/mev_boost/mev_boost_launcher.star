@@ -20,12 +20,6 @@ MAX_CPU = 500
 MIN_MEMORY = 16
 MAX_MEMORY = 256
 
-KNOWN_NETWORKS = (
-    "mainnet",
-    "holesky",
-)
-
-
 def launch(
     plan,
     mev_boost_launcher,
@@ -38,7 +32,7 @@ def launch(
 ):
     network = (
         network
-        if network in KNOWN_NETWORKS
+        if network in constants.PUBLIC_NETWORKS
         else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml"
     )
 

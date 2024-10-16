@@ -976,13 +976,7 @@ def get_default_mev_params(mev_type, preset):
         mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
         mev_builder_image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
         mev_boost_image = constants.DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE
-        if preset == "minimal":
-            mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[
-                constants.CL_TYPE.lighthouse
-            ]
-        else:
-            mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
-
+        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
         mev_builder_extra_data = (
             "0x436f6d6d69742d426f6f737420f09f93bb"  # Commit-Boost 📻
         )
