@@ -30,7 +30,7 @@ def new_builder_config(
     builder_template_data = new_builder_config_template_data(
         network_params,
         constants.DEFAULT_MEV_PUBKEY,
-        constants.DEFAULT_MEV_SECRET_KEY[2:], # drop the 0x prefix
+        constants.DEFAULT_MEV_SECRET_KEY[2:],  # drop the 0x prefix
         mnemonic,
         fee_recipient,
         extra_data,
@@ -75,7 +75,10 @@ def new_builder_config_template_data(
         else "/network-configs/genesis.json",
         "DataDir": "/data/reth/execution-data",
         "CLEndpoint": "http://cl-{0}-{1}-{2}:{3}".format(
-            num_of_participants, constants.CL_TYPE.lighthouse, constants.EL_TYPE.reth_builder, lighthouse.BEACON_HTTP_PORT_NUM
+            num_of_participants,
+            constants.CL_TYPE.lighthouse,
+            constants.EL_TYPE.reth_builder,
+            lighthouse.BEACON_HTTP_PORT_NUM,
         ),
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "Relay": "mev-relay-api",
