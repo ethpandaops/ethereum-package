@@ -31,7 +31,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "chainsafe/lodestar:latest",
-    "grandine": "ethpandaops/grandine:master-minimal",
+    "grandine": "ethpandaops/grandine:develop-minimal",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -49,7 +49,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
     "teku": "consensys/teku:latest",
-    "grandine": "ethpandaops/grandine:master-minimal",
+    "grandine": "ethpandaops/grandine:develop-minimal",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {

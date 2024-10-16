@@ -229,6 +229,7 @@ def get_config(
             mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
     elif launcher.builder_type == "flashbots":
+        cl_client_name = service_name.split("-")[4]
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME
@@ -236,9 +237,9 @@ def get_config(
             {
                 "RBUILDER_CONFIG": flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER,
                 "CL_ENDPOINT": "http://cl-{0}-{1}-{2}:{3}".format(
-                    participant_index,
+                    participant_index + 1,
                     cl_client_name,
-                    constants.EL_TYPE.reth,
+                    constants.EL_TYPE.reth_builder,
                     lighthouse.BEACON_HTTP_PORT_NUM,
                 ),
             }

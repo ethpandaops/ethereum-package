@@ -74,7 +74,7 @@ def new_builder_config_template_data(
         if network_params.network in constants.PUBLIC_NETWORKS
         else "/network-configs/genesis.json",
         "DataDir": "/data/reth/execution-data",
-        "CLEndpoint": "http://cl-{0}-lighthouse-reth:{1}".format(
+        "CLEndpoint": "http://cl-{0}-lighthouse-reth-builder:{1}".format(
             num_of_participants, lighthouse.BEACON_HTTP_PORT_NUM
         ),
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
