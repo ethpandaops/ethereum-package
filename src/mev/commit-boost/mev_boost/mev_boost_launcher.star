@@ -20,6 +20,7 @@ MAX_CPU = 500
 MIN_MEMORY = 16
 MAX_MEMORY = 256
 
+
 def launch(
     plan,
     mev_boost_launcher,
