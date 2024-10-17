@@ -1,0 +1,12 @@
+participants:
+  - el_type: reth
+    cl_type: teku
+network_params:
+  preset: minimal
+additional_services:
+  - dora
+  - tx_spammer
+mev_type: flashbots
+
+mev_params:
+  mev_relay_image: flashbots/mev-boost-relay

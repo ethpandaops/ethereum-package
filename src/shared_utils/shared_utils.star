@@ -313,6 +313,7 @@ def get_port_specs(port_assignments):
             constants.VALIDATOR_HTTP_PORT_ID,
             constants.ADMIN_PORT_ID,
             constants.VALDIATOR_GRPC_PORT_ID,
+            constants.RBUILDER_PORT_ID,
         ]:
             ports.update(
                 {port_id: new_port_spec(port, TCP_PROTOCOL, HTTP_APPLICATION_PROTOCOL)}
