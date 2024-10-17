@@ -153,6 +153,8 @@ def launch(
         )
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
+    #elif vc_type == constants.VC_TYPE.caplin:
+    #    fail("Caplin VC is not yet supported")
     else:
         fail("Unsupported vc_type: {0}".format(vc_type))
 
