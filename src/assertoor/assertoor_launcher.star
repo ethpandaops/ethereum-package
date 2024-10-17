@@ -121,7 +121,7 @@ def get_config(
 
     if assertoor_params.image != "":
         IMAGE_NAME = assertoor_params.image
-    elif network_params.electra_fork_epoch < 100000000:
+    elif network_params.electra_fork_epoch < constants.ELECTRA_FORK_EPOCH:
         IMAGE_NAME = "ethpandaops/assertoor:electra-support"
     else:
         IMAGE_NAME = "ethpandaops/assertoor:latest"
