@@ -200,8 +200,6 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.el_extra_params])
 
-    cmd_str = " ".join(cmd)
-
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
@@ -216,7 +214,7 @@ def get_config(
                 constants.EL_TYPE.reth + "_volume_size"
             ],
         )
-
+    cmd_str = " ".join(cmd)
     env_vars = {
         "RETH_CMD": cmd_str,
     }
@@ -230,9 +228,12 @@ def get_config(
         ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
     elif launcher.builder_type == "flashbots":
         cl_client_name = service_name.split("-")[4]
+        cmd.append("--engine.legacy")
+        cmd_str = " ".join(cmd)
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME
+        env_vars["RETH_CMD"] = cmd_str
         env_vars.update(
             {
                 "RBUILDER_CONFIG": flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER,

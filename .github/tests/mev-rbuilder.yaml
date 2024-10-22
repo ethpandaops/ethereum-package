@@ -1,8 +1,6 @@
 participants:
   - el_type: reth
     cl_type: teku
-network_params:
-  preset: minimal
 additional_services:
   - dora
   - tx_spammer
