@@ -270,15 +270,27 @@ def get_beacon_config(
                 )
             )
         else:  # Devnets
-            cmd.append(
-                "--bootnodes="
-                + shared_utils.get_devnet_enrs_list(
-                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
+            if bootnode_contexts != None:
+                cmd.append(
+                    "--bootnodes="
+                    + shared_utils.get_devnet_enrs_list(
+                        plan, launcher.el_cl_genesis_data.files_artifact_uuid
+                    )
+                    + ","
+                    + ",".join(
+                        [
+                            ctx.enr
+                            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
+                        ]
+                    )
                 )
-                + ",".join(
-                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+            else:
+                cmd.append(
+                    "--bootnodes="
+                    + shared_utils.get_devnet_enrs_list(
+                        plan, launcher.el_cl_genesis_data.files_artifact_uuid
+                    )
                 )
-            )
     else:  # Public testnet
         cmd.append("--network=" + launcher.network)
 
