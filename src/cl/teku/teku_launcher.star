@@ -297,6 +297,10 @@ def get_beacon_config(
                 + shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
+                + ","
+                + ",".join(
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
+                )
             )
 
     if len(participant.cl_extra_params) > 0:
