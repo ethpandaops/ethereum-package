@@ -41,6 +41,7 @@ DEFAULT_VC_IMAGES = {
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
     "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
+    "vouch": "attestant/vouch:latest",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -50,6 +51,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
     "teku": "consensys/teku:latest",
     "grandine": "ethpandaops/grandine:master-minimal",
+    "vouch": "attestant/vouch:latest",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
