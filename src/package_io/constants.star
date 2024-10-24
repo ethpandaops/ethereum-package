@@ -24,6 +24,7 @@ VC_TYPE = struct(
     nimbus="nimbus",
     prysm="prysm",
     teku="teku",
+    vouch="vouch"
 )
 
 REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
