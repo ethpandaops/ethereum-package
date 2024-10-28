@@ -131,6 +131,7 @@ def get_config(
     cmd = [
         "--log-level={0}".format(log_level),
         "--data-dir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        "--net-key={0}/nodekey".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
         "--http-port={0}".format(WS_RPC_PORT_NUM),
         "--http-address=0.0.0.0",
         "--rpc",
