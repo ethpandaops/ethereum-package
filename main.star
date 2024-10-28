@@ -366,7 +366,7 @@ def run(plan, args={}):
                         plan,
                         mev_boost_launcher,
                         mev_boost_service_name,
-                        network_id,
+                        final_genesis_timestamp,
                         mev_params.mev_boost_image,
                         mev_params.mev_boost_args,
                         global_node_selectors,

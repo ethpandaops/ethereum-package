@@ -102,7 +102,7 @@ def new_env_file_for_el_cl_genesis_data(
         "SecondsPerSlot": network_params.seconds_per_slot,
         "PreregisteredValidatorKeysMnemonic": network_params.preregistered_validator_keys_mnemonic,
         "NumValidatorKeysToPreregister": total_num_validator_keys_to_preregister,
-        "GenesisDelay": network_params.genesis_delay,
+        "GenesisDelay": 0,  # This delay is already precaculated in the final_genesis_timestamp
         "GenesisGasLimit": network_params.genesis_gaslimit,
         "MaxPerEpochActivationChurnLimit": network_params.max_per_epoch_activation_churn_limit,
         "ChurnLimitQuotient": network_params.churn_limit_quotient,
