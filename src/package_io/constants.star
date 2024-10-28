@@ -87,7 +87,7 @@ COMMIT_BOOST_MEV_TYPE = "commit-boost"
 
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.29.2a3"
-DEFAULT_FLASHBOTS_BUILDER_IMAGE = "bbusa/rbuilder:latest"
+DEFAULT_FLASHBOTS_BUILDER_IMAGE = "ethpandaops/rbuilder:develop"
 DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
 DEFAULT_MEV_RS_IMAGE = "ethpandaops/mev-rs:main"
 DEFAULT_MEV_RS_IMAGE_MINIMAL = "ethpandaops/mev-rs:main-minimal"

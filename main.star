@@ -265,12 +265,8 @@ def run(plan, args={}):
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
-        builder_uri = (
-            "http://{0}:{1}".format(
-                all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
-            )
-            if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
-            else "http://{0}:{1}".format(all_el_contexts[-1].ip_addr, 8645)
+        blocksim_uri = "http://{0}:{1}".format(
+            all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
         )
         beacon_uri = all_cl_contexts[-1].beacon_http_url
         beacon_uris = ",".join(
@@ -311,7 +307,7 @@ def run(plan, args={}):
                 network_id,
                 beacon_uris,
                 genesis_validators_root,
-                builder_uri,
+                blocksim_uri,
                 network_params.seconds_per_slot,
                 persistent,
                 global_node_selectors,

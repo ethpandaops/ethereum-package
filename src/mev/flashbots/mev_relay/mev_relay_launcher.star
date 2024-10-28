@@ -42,7 +42,7 @@ def launch_mev_relay(
     network_id,
     beacon_uris,
     validator_root,
-    builder_uri,
+    blocksim_uri,
     seconds_per_slot,
     persistent,
     global_node_selectors,
@@ -134,7 +134,7 @@ def launch_mev_relay(
                 "--beacon-uris",
                 beacon_uris,
                 "--blocksim",
-                builder_uri,
+                blocksim_uri,
             ]
             + mev_params.mev_relay_api_extra_args,
             ports={
