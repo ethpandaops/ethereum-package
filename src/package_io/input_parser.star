@@ -20,7 +20,7 @@ DEFAULT_CL_IMAGES = {
     "lighthouse": "ethpandaops/lighthouse:stable",
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
-    "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:latest",
+    "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
 }
@@ -38,7 +38,7 @@ DEFAULT_VC_IMAGES = {
     "lighthouse": "ethpandaops/lighthouse:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
-    "prysm": "gcr.io/prysmaticlabs/prysm/validator:latest",
+    "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
     "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
 }
@@ -170,6 +170,7 @@ def input_parser(plan, input_args):
         constants.MOCK_MEV_TYPE,
         constants.FLASHBOTS_MEV_TYPE,
         constants.MEV_RS_MEV_TYPE,
+        constants.COMMIT_BOOST_MEV_TYPE,
     ):
         result = enrich_mev_extra_params(
             result,
@@ -181,7 +182,7 @@ def input_parser(plan, input_args):
         pass
     else:
         fail(
-            "Unsupported MEV type: {0}, please use 'mock', 'flashbots' or 'mev-rs' type".format(
+            "Unsupported MEV type: {0}, please use 'mock', 'flashbots', 'mev-rs' or 'commit-boost' type".format(
                 result.get("mev_type")
             )
         )
@@ -288,9 +289,9 @@ def input_parser(plan, input_args):
             eth1_follow_distance=result["network_params"]["eth1_follow_distance"],
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
+            fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
             eip7594_fork_epoch=result["network_params"]["eip7594_fork_epoch"],
             eip7594_fork_version=result["network_params"]["eip7594_fork_version"],
-            eof_activation_epoch=result["network_params"]["eof_activation_epoch"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
@@ -859,10 +860,10 @@ def default_network_params():
         "min_validator_withdrawability_delay": 256,
         "shard_committee_period": 256,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": 100000000,
-        "eip7594_fork_epoch": 100000001,
+        "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
+        "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
+        "eip7594_fork_epoch": constants.EIP7594_FORK_EPOCH,
         "eip7594_fork_version": "0x60000038",
-        "eof_activation_epoch": "",
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
@@ -893,10 +894,10 @@ def default_minimal_network_params():
         "min_validator_withdrawability_delay": 256,
         "shard_committee_period": 64,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": 100000000,
-        "eip7594_fork_epoch": 100000001,
+        "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
+        "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
+        "eip7594_fork_epoch": constants.EIP7594_FORK_EPOCH,
         "eip7594_fork_version": "0x60000038",
-        "eof_activation_epoch": "",
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
@@ -1028,6 +1029,15 @@ def get_default_mev_params(mev_type, preset):
             mev_boost_image = constants.DEFAULT_MEV_RS_IMAGE
         mev_builder_extra_data = "0x68656C6C6F20776F726C640A"  # "hello world\n"
         mev_builder_extra_args = ["--mev-builder-config=" + "/config/config.toml"]
+
+    if mev_type == constants.COMMIT_BOOST_MEV_TYPE:
+        mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
+        mev_builder_image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+        mev_boost_image = constants.DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE
+        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+        mev_builder_extra_data = (
+            "0x436f6d6d69742d426f6f737420f09f93bb"  # Commit-Boost 📻
+        )
 
     return {
         "mev_relay_image": mev_relay_image,
@@ -1207,7 +1217,10 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     index_str = shared_utils.zfill_custom(
         num_participants + 1, len(str(num_participants + 1))
     )
-    if mev_type == constants.FLASHBOTS_MEV_TYPE:
+    if (
+        mev_type == constants.FLASHBOTS_MEV_TYPE
+        or mev_type == constants.COMMIT_BOOST_MEV_TYPE
+    ):
         mev_participant = default_participant()
         mev_participant["el_type"] = "geth"
         mev_participant.update(

@@ -33,6 +33,9 @@ full_beaconchain_explorer = import_module(
 blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
+commit_boost_mev_boost = import_module(
+    "./src/mev/commit-boost/mev_boost/mev_boost_launcher.star"
+)
 mev_rs_mev_boost = import_module("./src/mev/mev-rs/mev_boost/mev_boost_launcher.star")
 mev_rs_mev_relay = import_module("./src/mev/mev-rs/mev_relay/mev_relay_launcher.star")
 mev_rs_mev_builder = import_module(
@@ -243,6 +246,7 @@ def run(plan, args={}):
     elif args_with_right_defaults.mev_type and (
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
+        or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
         builder_uri = "http://{0}:{1}".format(
             all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
@@ -276,7 +280,10 @@ def run(plan, args={}):
             timeout="20m",
             service_name=first_client_beacon_name,
         )
-        if args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE:
+        if (
+            args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
+            or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
+        ):
             endpoint = flashbots_mev_relay.launch_mev_relay(
                 plan,
                 mev_params,
@@ -369,6 +376,30 @@ def run(plan, args={}):
                         el_cl_data_files_artifact_uuid,
                         global_node_selectors,
                     )
+                elif (
+                    args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
+                ):
+                    plan.print("Launching commit-boost PBS service")
+                    mev_boost_launcher = commit_boost_mev_boost.new_mev_boost_launcher(
+                        MEV_BOOST_SHOULD_CHECK_RELAY,
+                        mev_endpoints,
+                    )
+                    mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
+                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        index_str,
+                        participant.cl_type,
+                        participant.el_type,
+                    )
+                    mev_boost_context = commit_boost_mev_boost.launch(
+                        plan,
+                        mev_boost_launcher,
+                        mev_boost_service_name,
+                        network_params.network,
+                        mev_params,
+                        mev_endpoints,
+                        el_cl_data_files_artifact_uuid,
+                        global_node_selectors,
+                    )
                 else:
                     fail("Invalid MEV type")
                 all_mevboost_contexts.append(mev_boost_context)
@@ -397,7 +428,6 @@ def run(plan, args={}):
                 prefunded_accounts,
                 fuzz_target,
                 tx_spammer_params,
-                network_params.electra_fork_epoch,
                 global_node_selectors,
             )
             plan.print("Successfully launched transaction spammer")

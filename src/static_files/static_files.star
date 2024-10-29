@@ -96,3 +96,7 @@ MEV_RS_MEV_RELAY_CONFIG_FILEPATH = (
 MEV_RS_MEV_BUILDER_CONFIG_FILEPATH = (
     STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_builder/config.toml.tmpl"
 )
+
+COMMIT_BOOST_CONFIG_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/commit-boost/cb-config.toml.tmpl"
+)

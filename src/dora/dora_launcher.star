@@ -122,6 +122,8 @@ def get_config(
 
     if dora_params.image != "":
         IMAGE_NAME = dora_params.image
+    elif network_params.electra_fork_epoch < constants.ELECTRA_FORK_EPOCH:
+        IMAGE_NAME = "ethpandaops/dora:master"
     else:
         IMAGE_NAME = "ethpandaops/dora:latest"
 

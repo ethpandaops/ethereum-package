@@ -145,6 +145,21 @@ def launch(
                     snooper_engine_context
                 )
             )
+
+        if checkpoint_sync_enabled:
+            if checkpoint_sync_url == "":
+                if (
+                    network_params.network in constants.PUBLIC_NETWORKS
+                    or network_params.network == constants.NETWORK_NAME.ephemery
+                ):
+                    checkpoint_sync_url = constants.CHECKPOINT_SYNC_URL[
+                        network_params.network
+                    ]
+                else:
+                    fail(
+                        "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
+                    )
+
         all_snooper_engine_contexts.append(snooper_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         if index == 0:
