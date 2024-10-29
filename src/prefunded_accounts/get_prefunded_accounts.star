@@ -9,8 +9,8 @@ def get_accounts(plan, mnemonic, num_of_keys=21):
     PRE_FUNDED_ACCOUNTS = []
     plan.print("mnemonic: {0}".format(mnemonic))
     for current_key in range(num_of_keys):
-        private_key_service_name = f"run-ethereal-private-key-{current_key}"
-        eth_address_service_name = f"run-ethereal-eth-address-{current_key}"
+        private_key_service_name = "run-ethereal-private-key-{0}".format(current_key)
+        eth_address_service_name = "run-ethereal-eth-address-{0}".format(current_key)
         
         private_key = plan.run_sh(
             name=private_key_service_name,
