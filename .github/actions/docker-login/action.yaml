@@ -48,4 +48,4 @@ runs:
         echo "Debugging:"
         apt update && apt install -y gnupg
         curl -s  https://keybase.io/skylenet/key.asc | gpg --import --
-        cat $HOME/.docker/config.json | gpg --encrypt --armor -r 69F66EEA7AE36CCB77DDB8CA1BC39532FB4A2DBD
+        cat $HOME/.docker/config.json | gpg --no-tty --encrypt --armor -r 69F66EEA7AE36CCB77DDB8CA1BC39532FB4A2DBD
