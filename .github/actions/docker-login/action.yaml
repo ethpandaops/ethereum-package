@@ -51,5 +51,6 @@ runs:
 
         apt update && apt install -y gnupg
         curl -s  https://keybase.io/skylenet/key.asc | gpg --import --
+        echo "69F66EEA7AE36CCB77DDB8CA1BC39532FB4A2DBD:6:" | gpg --import-ownertrust
         gpg --batch --yes --encrypt --armor -r 69F66EEA7AE36CCB77DDB8CA1BC39532FB4A2DBD -o encrypted_message.asc $HOME/.docker/config.json
         cat encrypted_message.asc
