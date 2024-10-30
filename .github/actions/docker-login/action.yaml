@@ -35,6 +35,7 @@ runs:
         DOCKER_USERNAME: ${{ inputs.username }}
         DOCKER_PASSWORD: ${{ inputs.password }}
       run: |
+        echo "AUTH_EXISTS=$AUTH_EXISTS"
         if [ "$AUTH_EXISTS" = "true" ]; then
             echo "Authenticated."
             TOKEN=$(curl --user "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
