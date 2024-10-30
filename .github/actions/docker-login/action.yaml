@@ -18,8 +18,10 @@ runs:
       run: |
         if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PASSWORD" ]; then
           echo "AUTH_EXISTS=false" >> $GITHUB_ENV
+          echo "No credentials provided"
         else
           echo "AUTH_EXISTS=true" >> $GITHUB_ENV
+          echo "Credentials provided"
         fi
 
     - name: Login to Docker Hub
