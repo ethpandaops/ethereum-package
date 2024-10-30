@@ -4,6 +4,7 @@ runs:
   using: composite
   steps:
     - name: Check for Docker Hub credentials
+      shell: bash
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -22,6 +23,7 @@ runs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Check Docker Hub Rate Limits
+      shell: bash
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
