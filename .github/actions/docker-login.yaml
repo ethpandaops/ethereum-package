@@ -1,0 +1,39 @@
+name: Docker login
+descritpion: Log in to Docker Hub
+runs:
+  using: composite
+  steps:
+    - name: Check for Docker Hub credentials
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PASSWORD" ]; then
+          echo "secrets_exist=false" >> $GITHUB_ENV
+        else
+          echo "secrets_exist=true" >> $GITHUB_ENV
+        fi
+
+    - name: Login to Docker Hub
+      if: env.secrets_exist == 'true'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Inform authenticated status
+      if: env.secrets_exist == 'true'
+      run: echo "Logged into dockerhub"
+
+    - name: Inform unauthenticated status
+      if: env.secrets_exist == 'false'
+      run: echo "Not authenticated due to missing secrets $DOCKER_USERNAME and $DOCKER_PASSWORD"
+
+    - name: Check Docker Hub Rate Limits
+      if: env.secrets_exist == 'true'
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        TOKEN=$(curl --user "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+        curl --head -H "Authorization: Bearer $TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 | grep RateLimit
