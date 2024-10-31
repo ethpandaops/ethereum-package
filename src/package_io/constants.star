@@ -264,3 +264,6 @@ VOLUME_SIZE = {
         "grandine_volume_size": 1000,  # 1GB
     },
 }
+VOLUME_SIZE["mainnet-shadowfork"] = VOLUME_SIZE["mainnet"]
+VOLUME_SIZE["sepolia-shadowfork"] = VOLUME_SIZE["sepolia"]
+VOLUME_SIZE["holesky-shadowfork"] = VOLUME_SIZE["holesky"]
