@@ -48,7 +48,6 @@ jobs:
         uses: ./.github/actions/kurtosis-install
       - name: Run Starlark
         run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
 
   lint:
