@@ -11,18 +11,16 @@ jobs:
   run_starlark:
     runs-on: ubuntu-latest
     steps:
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-login
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Checkout Repository
-        uses: actions/checkout@v4
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
       - name: Run Starlark
         run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           kurtosis run ${{ github.workspace }} --args-file network_params.yaml
 
   run_with_args:
@@ -40,13 +38,12 @@ jobs:
           ]
     runs-on: ubuntu-latest
     steps:
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-login
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Checkout Repository
-        uses: actions/checkout@v4
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
       - name: Run Starlark
@@ -68,13 +65,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-login
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Checkout Repository
-        uses: actions/checkout@v4
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@v1
         with:
