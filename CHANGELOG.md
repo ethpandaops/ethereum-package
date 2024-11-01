@@ -1,5 +1,39 @@
 # Changelog
 
+## [4.4.0](https://github.com/ethpandaops/ethereum-package/compare/4.3.0...4.4.0) (2024-11-01)
+
+
+### Features
+
+* add checkpoint sync capabilities to nimbus ([#804](https://github.com/ethpandaops/ethereum-package/issues/804)) ([853417e](https://github.com/ethpandaops/ethereum-package/commit/853417efb5a79056bb6e8a1f37739747131066d5))
+* add commit-boost support ([#779](https://github.com/ethpandaops/ethereum-package/issues/779)) ([ebbbe83](https://github.com/ethpandaops/ethereum-package/commit/ebbbe8365730a79b98e6bf96b72a8f75a9744f1b))
+* add docker authentication ([#816](https://github.com/ethpandaops/ethereum-package/issues/816)) ([807f6aa](https://github.com/ethpandaops/ethereum-package/commit/807f6aa8a992d1868d2d0aed7f5857df3c5857e5))
+* add peerdas metrics dashboard ([#790](https://github.com/ethpandaops/ethereum-package/issues/790)) ([12b787d](https://github.com/ethpandaops/ethereum-package/commit/12b787dd7f1b7130dde369c1eb643dedde4ca03c))
+* add rbuilder remove old geth builder - flashbots ([#786](https://github.com/ethpandaops/ethereum-package/issues/786)) ([de95c61](https://github.com/ethpandaops/ethereum-package/commit/de95c61cf5d2243a3838d2104b5a4591a57e988f))
+* add resource configuration for prometheus and grafana ([#773](https://github.com/ethpandaops/ethereum-package/issues/773)) ([d296c26](https://github.com/ethpandaops/ethereum-package/commit/d296c265ab7e4e67c9c6774c665fe3b3184f9f13))
+* add supernode label to every container ([#788](https://github.com/ethpandaops/ethereum-package/issues/788)) ([43edfd5](https://github.com/ethpandaops/ethereum-package/commit/43edfd5a5bb597636dcbaa1d7f299868d27cdab2))
+* add support for fulu/osaka fusaka ([#798](https://github.com/ethpandaops/ethereum-package/issues/798)) ([0a9e445](https://github.com/ethpandaops/ethereum-package/commit/0a9e445b3cf8a8557bf03b454b0967bf51f6734f))
+* add support for remote signers - `use_remote_signer` ([#791](https://github.com/ethpandaops/ethereum-package/issues/791)) ([9f1b6e9](https://github.com/ethpandaops/ethereum-package/commit/9f1b6e953fec3fd172543ed8fad510523382c576))
+* enable one parameter supernode, refactor el,cl,vc ([#778](https://github.com/ethpandaops/ethereum-package/issues/778)) ([8513c06](https://github.com/ethpandaops/ethereum-package/commit/8513c06020812e33a61ecaee073a165d85ed7ce0))
+
+
+### Bug Fixes
+
+* add database config to assertoor ([#783](https://github.com/ethpandaops/ethereum-package/issues/783)) ([56532cf](https://github.com/ethpandaops/ethereum-package/commit/56532cf50fc56e5958b5839905f7f1b1081ad169))
+* add nimbus-eth1 net-key ([#811](https://github.com/ethpandaops/ethereum-package/issues/811)) ([c91bbbb](https://github.com/ethpandaops/ethereum-package/commit/c91bbbbe20d14712e3731e37bea46a9cf4c88da6))
+* delete unnecessary port assignment for prysm ([#810](https://github.com/ethpandaops/ethereum-package/issues/810)) ([47204c3](https://github.com/ethpandaops/ethereum-package/commit/47204c350117b2a7b1cfa4c38d3308bd5e90828e))
+* docker login to separate action yaml ([#819](https://github.com/ethpandaops/ethereum-package/issues/819)) ([2494022](https://github.com/ethpandaops/ethereum-package/commit/2494022122d3590f5dc1ec701a9fb7e081d5c0e6))
+* get volume size recommendations when in shadowfork mode ([#820](https://github.com/ethpandaops/ethereum-package/issues/820)) ([b1f27c6](https://github.com/ethpandaops/ethereum-package/commit/b1f27c649e61f29700baf9f204b89054e507c44a))
+* mixed up labels ([#799](https://github.com/ethpandaops/ethereum-package/issues/799)) ([e2c1528](https://github.com/ethpandaops/ethereum-package/commit/e2c1528834809db1f68f79133edc6016132d2f2f))
+* only set supernode if its true ([#796](https://github.com/ethpandaops/ethereum-package/issues/796)) ([2110a60](https://github.com/ethpandaops/ethereum-package/commit/2110a608205e06e1986c58efeeeefefd37df51eb))
+* prefund container suffixes for k8s ([#818](https://github.com/ethpandaops/ethereum-package/issues/818)) ([968cfbd](https://github.com/ethpandaops/ethereum-package/commit/968cfbdb702e5e277bec8704e5185055dedabe74))
+* remove deprecated http-allow-sync-stalled from LH ([#805](https://github.com/ethpandaops/ethereum-package/issues/805)) ([1825dbf](https://github.com/ethpandaops/ethereum-package/commit/1825dbfc6d58a6326f11fa5a9531b6867b0d5b77))
+* Remove not necessary "/api" (and bump verifier version) ([#792](https://github.com/ethpandaops/ethereum-package/issues/792)) ([befde97](https://github.com/ethpandaops/ethereum-package/commit/befde97ce72f133bd8b491fe2e4a40870af52f12))
+* set default for label-maker ([#797](https://github.com/ethpandaops/ethereum-package/issues/797)) ([5b2d234](https://github.com/ethpandaops/ethereum-package/commit/5b2d234217de686ac002b077d3047708d0a0a132))
+* swap http/grpc server ports and replace flags ([#802](https://github.com/ethpandaops/ethereum-package/issues/802)) ([8c6df26](https://github.com/ethpandaops/ethereum-package/commit/8c6df267a4d517e670425e0de4c18cff122500af))
+* update built in assertoor tests ([#782](https://github.com/ethpandaops/ethereum-package/issues/782)) ([d24fb2a](https://github.com/ethpandaops/ethereum-package/commit/d24fb2a2ec529bb17b386d3c99bcdf9dd2a94118))
+* update nethermind config option ([#824](https://github.com/ethpandaops/ethereum-package/issues/824)) ([08ce034](https://github.com/ethpandaops/ethereum-package/commit/08ce034e06ecdcc2885e3f5ecf721cf6df6caddd))
+
 ## [4.3.0](https://github.com/ethpandaops/ethereum-package/compare/4.2.0...4.3.0) (2024-09-23)
 
 
