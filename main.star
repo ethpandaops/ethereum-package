@@ -58,6 +58,7 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 helix_relay = import_module("./src/mev/helix-relay/helix_launcher.star")
+taiyi_preconfer = import_module("./src/mev/taiyi-preconfer/taiyi_preconfer_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -248,6 +249,7 @@ def run(plan, args={}):
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
+        or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
     ):
         builder_uri = "http://{0}:{1}".format(
             all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
@@ -305,6 +307,22 @@ def run(plan, args={}):
                 el_cl_data_files_artifact_uuid,
                 global_node_selectors,
             )
+        elif args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE:
+            plan.print("Launching helix relay")
+            helix_relay_config_template = read_file(
+                static_files.HELIX_CONFIG_TEMPLATE_FILEPATH
+            )
+            endpoint = helix_relay.launch_helix(
+                plan,
+                helix_relay_config_template,
+                final_genesis_timestamp,
+                genesis_validators_root,
+                all_cl_contexts,
+                all_el_contexts,
+                el_cl_data_files_artifact_uuid,
+                persistent,
+                global_node_selectors,
+            )
         else:
             fail("Invalid MEV type")
 
@@ -334,7 +352,8 @@ def run(plan, args={}):
             if args_with_right_defaults.participants[index].validator_count != 0:
                 if (
                     args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
-                    or args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE
+                    or args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE 
+                    or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
                 ):
                     mev_boost_launcher = flashbots_mev_boost.new_mev_boost_launcher(
                         MEV_BOOST_SHOULD_CHECK_RELAY,
@@ -665,6 +684,19 @@ def run(plan, args={}):
                 static_files.HELIX_CONFIG_TEMPLATE_FILEPATH
             )
             helix_relay.launch_helix(
+                plan,
+                helix_relay_config_template,
+                final_genesis_timestamp,
+                genesis_validators_root,
+                all_cl_contexts,
+                all_el_contexts,
+                el_cl_data_files_artifact_uuid,
+                persistent,
+                global_node_selectors,
+            )
+        elif additional_service == "taiyi_preconfer":
+            plan.print("Launching taiyi preconfer")
+            taiyi_preconfer.launch_taiyi_preconfer(
                 plan,
                 helix_relay_config_template,
                 final_genesis_timestamp,

@@ -171,6 +171,7 @@ def input_parser(plan, input_args):
         constants.FLASHBOTS_MEV_TYPE,
         constants.MEV_RS_MEV_TYPE,
         constants.COMMIT_BOOST_MEV_TYPE,
+        constants.HELIX_MEV_TYPE,
     ):
         result = enrich_mev_extra_params(
             result,

@@ -256,6 +256,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "apache",
     "tracoor",
     "helix_relay",
+    "taiyi_preconfer",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

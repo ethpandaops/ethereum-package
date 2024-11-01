@@ -4,15 +4,12 @@ constants = import_module("../../package_io/constants.star")
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 static_files = import_module("../../static_files/static_files.star")
 
-DUMMY_SECRET_KEY = "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
-DUMMY_PUB_KEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
-
 IMAGE = "lubann/helix:latest"
 
 HELIX_CONFIG_FILENAME = "helix-config.yml"
 HELIX_RELAY_ENDPOINT_PORT = 4040
 
-# pk 0xadc0fe12e62c14a505ea1e655dbe4d36fa505ed57b634ba37912153d29edd45c5bc5a77764e68b98c53e3f6f8ce9fa3b
+RELAY_PUB_KEY =  "0xadc0fe12e62c14a505ea1e655dbe4d36fa505ed57b634ba37912153d29edd45c5bc5a77764e68b98c53e3f6f8ce9fa3b"
 RELAY_KEY = "0x6b845831c99c6bf43364bee624447d39698465df5c07f2cc4dca6e0acfbe46cd"
 
 POSTGRES_PORT_ID = "postgres"
@@ -150,34 +147,6 @@ def launch_helix(
         ),
     )
 
-    return 
-def new_helix_config(
-    plan,
-    service_name,
-    network,
-    fee_recipient,
-    mnemonic,
-    extra_data,
-    global_node_selectors,
-):
-    return {}
-
-def new_helix_config_template_data(
-    hostname,
-    port,
-    db_name,
-    user,
-    password,
-    ssl_mode,
-    region,
-    region_name,
-    redis_url,
-    broadcast_url,
-    simulator_url,
-    beacon_client_url,
-    dir_path,
-    genesis_validator_root,
-    genesis_time,
-):
-    return {}
-    
+    return "http://{0}@{1}:{2}".format(
+        RELAY_PUB_KEY, api.ip_address, HELIX_RELAY_ENDPOINT_PORT
+    )
