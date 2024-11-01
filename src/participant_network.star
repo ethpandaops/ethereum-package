@@ -44,6 +44,7 @@ def launch_participant_network(
     checkpoint_sync_enabled,
     checkpoint_sync_url,
     port_publisher,
+    mev_builder_type,
 ):
     network_id = network_params.network_id
     latest_block = ""
@@ -144,6 +145,7 @@ def launch_participant_network(
         network_id,
         num_participants,
         port_publisher,
+        mev_builder_type,
     )
 
     # Launch all consensus layer clients

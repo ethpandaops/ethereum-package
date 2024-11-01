@@ -41,6 +41,10 @@ mev_rs_mev_relay = import_module("./src/mev/mev-rs/mev_relay/mev_relay_launcher.
 mev_rs_mev_builder = import_module(
     "./src/mev/mev-rs/mev_builder/mev_builder_launcher.star"
 )
+flashbots_mev_rbuilder = import_module(
+    "./src/mev/flashbots/mev_builder/mev_builder_launcher.star"
+)
+
 flashbots_mev_boost = import_module(
     "./src/mev/flashbots/mev_boost/mev_boost_launcher.star"
 )
@@ -119,13 +123,25 @@ def run(plan, args={}):
 
     if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
         plan.print("Generating mev-rs builder config file")
-        mev_rs__builder_config_file = mev_rs_mev_builder.new_builder_config(
+        mev_rs_builder_config_file = mev_rs_mev_builder.new_builder_config(
             plan,
             constants.MEV_RS_MEV_TYPE,
             network_params.network,
             constants.VALIDATING_REWARDS_ACCOUNT,
             network_params.preregistered_validator_keys_mnemonic,
             args_with_right_defaults.mev_params.mev_builder_extra_data,
+            global_node_selectors,
+        )
+    elif args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE:
+        plan.print("Generating flashbots builder config file")
+        flashbots_builder_config_file = flashbots_mev_rbuilder.new_builder_config(
+            plan,
+            constants.FLASHBOTS_MEV_TYPE,
+            network_params,
+            constants.VALIDATING_REWARDS_ACCOUNT,
+            network_params.preregistered_validator_keys_mnemonic,
+            args_with_right_defaults.mev_params.mev_builder_extra_data,
+            enumerate(args_with_right_defaults.participants),
             global_node_selectors,
         )
 
@@ -156,6 +172,7 @@ def run(plan, args={}):
         args_with_right_defaults.checkpoint_sync_enabled,
         args_with_right_defaults.checkpoint_sync_url,
         args_with_right_defaults.port_publisher,
+        args_with_right_defaults.mev_type,
     )
 
     plan.print(
@@ -248,7 +265,7 @@ def run(plan, args={}):
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
-        builder_uri = "http://{0}:{1}".format(
+        blocksim_uri = "http://{0}:{1}".format(
             all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
         )
         beacon_uri = all_cl_contexts[-1].beacon_http_url
@@ -290,7 +307,7 @@ def run(plan, args={}):
                 network_id,
                 beacon_uris,
                 genesis_validators_root,
-                builder_uri,
+                blocksim_uri,
                 network_params.seconds_per_slot,
                 persistent,
                 global_node_selectors,
@@ -349,7 +366,7 @@ def run(plan, args={}):
                         plan,
                         mev_boost_launcher,
                         mev_boost_service_name,
-                        network_id,
+                        final_genesis_timestamp,
                         mev_params.mev_boost_image,
                         mev_params.mev_boost_args,
                         global_node_selectors,

@@ -106,6 +106,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "vc_max_cpu",
             "vc_min_mem",
             "vc_max_mem",
+            "validator_count",
         ],
         "vc": [
             "vc_type",
@@ -120,6 +121,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "vc_max_cpu",
             "vc_min_mem",
             "vc_max_mem",
+            "validator_count",
         ],
         "remote_signer": [
             "remote_signer_type",
