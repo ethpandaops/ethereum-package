@@ -159,7 +159,7 @@ def get_config(
         cmd.append("--config=" + launcher.network.split("-")[0])
         cmd.append("--Init.BaseDbPath=" + launcher.network.split("-")[0])
     elif launcher.network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--config=none.cfg")
+        cmd.append("--config=none")
         cmd.append(
             "--Init.ChainSpecPath="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
