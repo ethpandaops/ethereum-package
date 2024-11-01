@@ -1,0 +1,16 @@
+participants:
+  - el_type: reth
+    cl_type: teku
+additional_services:
+  - dora
+  - tx_spammer
+mev_type: flashbots
+
+mev_params:
+  mev_relay_image: jtraglia/mev-boost-relay:electra
+  mev_boost_image: jtraglia/mev-boost:electra
+  mev_builder_image: ethpandaops/rbuilder:develop-1b578f5
+  mev_builder_cl_image: ethpandaops/lighthouse:pawan-electra-alpha7-0dd215c
+
+network_params:
+  electra_fork_epoch: 1
