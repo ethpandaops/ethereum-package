@@ -38,7 +38,6 @@ jobs:
         id: testnet
         uses: ethpandaops/kurtosis-assertoor-github-action@v1
         with:
-          kurtosis_version: "1.3.1"
           kurtosis_extra_args: "--image-download always --non-blocking-tasks --verbosity DETAILED"
           kurtosis_backend: "kubernetes"
           kubernetes_config: "${{ steps.kubeconfig.outputs.kubeconfig }}"
