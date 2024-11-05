@@ -353,7 +353,6 @@ def run(plan, args={}):
                 if (
                     args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
                     or args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE 
-                    or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
                 ):
                     mev_boost_launcher = flashbots_mev_boost.new_mev_boost_launcher(
                         MEV_BOOST_SHOULD_CHECK_RELAY,
@@ -398,6 +397,7 @@ def run(plan, args={}):
                     )
                 elif (
                     args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
+                    or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
                 ):
                     plan.print("Launching commit-boost PBS service")
                     mev_boost_launcher = commit_boost_mev_boost.new_mev_boost_launcher(
@@ -691,6 +691,7 @@ def run(plan, args={}):
                 all_cl_contexts,
                 all_el_contexts,
                 el_cl_data_files_artifact_uuid,
+                all_mevboost_contexts,
                 persistent,
                 global_node_selectors,
             )

@@ -12,6 +12,8 @@ HELIX_RELAY_ENDPOINT_PORT = 4040
 RELAY_PUB_KEY =  "0xadc0fe12e62c14a505ea1e655dbe4d36fa505ed57b634ba37912153d29edd45c5bc5a77764e68b98c53e3f6f8ce9fa3b"
 RELAY_KEY = "0x6b845831c99c6bf43364bee624447d39698465df5c07f2cc4dca6e0acfbe46cd"
 
+TAIYI_CORE_CONTRACT_ADDRESS = "0xA791D59427B2b7063050187769AC871B497F4b3C"
+
 POSTGRES_PORT_ID = "postgres"
 POSTGRES_PORT_NUMBER = 5432
 POSTGRES_DB = "db"
@@ -46,6 +48,7 @@ def launch_helix(
     cl_contexts,
     el_contexts,
     el_cl_data_files_artifact_uuid,
+    all_mevboost_contexts,
     persistent,
     global_node_selectors,
 ):
@@ -85,6 +88,13 @@ def launch_helix(
     beacon_client_url = "http://{0}:{1}".format(
         cl_contexts[0].ip_addr, cl_contexts[0].http_port
     )
+    execution_url = "http://{0}:{1}".format(
+        el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
+    )
+
+    relay_url = "http://{0}:{1}".format(
+        all_mevboost_contexts[0].private_ip_address, all_mevboost_contexts[0].port
+    )
 
     simulator_url = "http://{0}:{1}".format(
         el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
@@ -103,6 +113,9 @@ def launch_helix(
         "NetworkDirPath": network_dir_path,
         "GenesisValidatorRoot": genesis_validators_root,
         "GenesisTime": genesis_timestamp,
+        "RelayUrl": relay_url,
+        "ExecutionUrl": execution_url,
+        "DelegationContractAddress": TAIYI_CORE_CONTRACT_ADDRESS,
     }
 
     template_and_data = shared_utils.new_template_and_data(
