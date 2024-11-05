@@ -48,7 +48,6 @@ def launch_helix(
     cl_contexts,
     el_contexts,
     el_cl_data_files_artifact_uuid,
-    all_mevboost_contexts,
     persistent,
     global_node_selectors,
 ):
@@ -92,9 +91,9 @@ def launch_helix(
         el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
     )
 
-    relay_url = "http://{0}:{1}".format(
-        all_mevboost_contexts[0].private_ip_address, all_mevboost_contexts[0].port
-    )
+    # relay_url = "http://{0}:{1}".format(
+    #     all_mevboost_contexts[0].private_ip_address, all_mevboost_contexts[0].port
+    # )
 
     simulator_url = "http://{0}:{1}".format(
         el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
@@ -113,7 +112,7 @@ def launch_helix(
         "NetworkDirPath": network_dir_path,
         "GenesisValidatorRoot": genesis_validators_root,
         "GenesisTime": genesis_timestamp,
-        "RelayUrl": relay_url,
+        # "RelayUrl": relay_url,
         "ExecutionUrl": execution_url,
         "DelegationContractAddress": TAIYI_CORE_CONTRACT_ADDRESS,
     }
@@ -138,6 +137,7 @@ def launch_helix(
 
     env = {
         "RELAY_KEY": RELAY_KEY,
+        "RUST_LOG": "helix_api=debug,helix_common=debug,helix_beacon_client=debug,helix_database=debug,helix_datastore=debug,helix_housekeeper=debug,helix_utils=debug",
     }
     api = plan.add_service(
         name="helix-relay",

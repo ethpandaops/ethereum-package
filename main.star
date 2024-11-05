@@ -691,7 +691,6 @@ def run(plan, args={}):
                 all_cl_contexts,
                 all_el_contexts,
                 el_cl_data_files_artifact_uuid,
-                all_mevboost_contexts,
                 persistent,
                 global_node_selectors,
             )
