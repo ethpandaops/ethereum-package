@@ -73,6 +73,7 @@ def get_config(
         "--http-address=0.0.0.0",
         "--http-allow-origin=*",
         "--unencrypted-http-transport",
+        "--rpc.laddr tcp://0.0.0.0:{0}",
     ]
 
     if len(participant.vc_extra_params):
