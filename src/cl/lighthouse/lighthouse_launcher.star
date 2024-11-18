@@ -18,7 +18,7 @@ BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/lighthouse/beacon-data"
 
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
-BEACON_HTTP_PORT_NUM = 4000
+BEACON_HTTP_PORT_NUM = 4001
 BEACON_METRICS_PORT_NUM = 5054
 
 # The min/max CPU/memory that the beacon node can use
