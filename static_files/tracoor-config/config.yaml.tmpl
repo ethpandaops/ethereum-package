@@ -1,5 +1,5 @@
 server:
-  addr: ":8082"
+  addr: ":8081"
   metricsAddr: ":9091"
   pprofAddr: ":6060"
   gatewayAddr: ":{{ .ListenPortNum }}"
@@ -32,7 +32,7 @@ shared:
   metricsAddr: ":9091"
   logging: "debug"
   indexer:
-    address: 0.0.0.0:8082
+    address: 0.0.0.0:8081
   store:
     type: fs
     config:
