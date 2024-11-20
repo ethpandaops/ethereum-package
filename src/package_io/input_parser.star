@@ -41,6 +41,7 @@ DEFAULT_VC_IMAGES = {
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
     "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
+    "vero": "ghcr.io/serenita-org/vero:master",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -50,6 +51,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
     "teku": "consensys/teku:latest",
     "grandine": "ethpandaops/grandine:develop-minimal",
+    "vero": "ghcr.io/serenita-org/vero:master",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -1200,6 +1202,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             participant["vc_extra_params"].append("--enable-builder")
         if participant["cl_type"] == "grandine":
             participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
+
+        if participant["vc_type"] == "vero":
+            participant["vc_extra_params"].append("--use-external-builder")
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
