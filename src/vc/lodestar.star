@@ -133,7 +133,7 @@ def get_config(
         "files": files,
         "env_vars": env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.CL_TYPE.lodestar,
+            client=constants.VC_TYPE.lodestar,
             client_type=constants.CLIENT_TYPES.validator,
             image=image,
             connected_client=cl_context.client_name,
