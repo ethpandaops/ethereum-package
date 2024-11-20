@@ -159,9 +159,11 @@ def get_config(
         "--http.corsdomain=*",
         # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
         #  that users should NOT store private information in these Kurtosis nodes!
-        "--http.api=admin,net,eth,web3,debug,trace{0}".format(
-            ",flashbots" if launcher.builder_type == "flashbots" else ""
-        ),
+        # We need to re-add this once rbuilder reth image is rebased on 1.1.0
+        # "--http.api=admin,net,eth,web3,debug,trace{0}".format(
+        #     ",flashbots" if launcher.builder_type == "flashbots" else ""
+        # ),
+        "--http.api=admin,net,eth,web3,debug,trace",
         "--ws",
         "--ws.addr=0.0.0.0",
         "--ws.port={0}".format(WS_PORT_NUM),
