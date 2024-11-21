@@ -227,7 +227,7 @@ def get_config(
     elif launcher.builder_type == "flashbots":
         image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
         cl_client_name = service_name.split("-")[4]
-        cmd.append("--engine.legacy")
+        cmd.append("--engine.experimental")
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
