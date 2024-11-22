@@ -78,6 +78,8 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "dora_params",
     "docker_cache_params",
     "assertoor_params",
+    "prometheus_params",
+    "grafana_params",
     "goomy_blob_params",
     "tx_spammer_params",
     "custom_flood_params",
@@ -162,6 +164,14 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["assertoor_params"]:
                 sub_value = input_args["assertoor_params"][sub_attr]
                 result["assertoor_params"][sub_attr] = sub_value
+        elif attr == "prometheus_params":
+            for sub_attr in input_args["prometheus_params"]:
+                sub_value = input_args["prometheus_params"][sub_attr]
+                result["prometheus_params"][sub_attr] = sub_value
+        elif attr == "grafana_params":
+            for sub_attr in input_args["grafana_params"]:
+                sub_value = input_args["grafana_params"][sub_attr]
+                result["grafana_params"][sub_attr] = sub_value
         elif attr == "xatu_sentry_params":
             for sub_attr in input_args["xatu_sentry_params"]:
                 sub_value = input_args["xatu_sentry_params"][sub_attr]
