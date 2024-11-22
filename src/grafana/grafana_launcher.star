@@ -3,8 +3,6 @@ static_files = import_module("../static_files/static_files.star")
 
 SERVICE_NAME = "grafana"
 
-IMAGE_NAME = "grafana/grafana:latest-ubuntu"
-
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
 
@@ -128,7 +126,7 @@ def get_config(
     grafana_params,
 ):
     return ServiceConfig(
-        image=IMAGE_NAME,
+        image=grafana_params.image,
         ports=USED_PORTS,
         env_vars={
             CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
