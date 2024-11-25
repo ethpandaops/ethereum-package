@@ -368,5 +368,4 @@ def docker_cache_image_calc(docker_cache_params, image):
                 docker_cache_params.url + docker_cache_params.dockerhub_prefix + image
             )
 
-        else:
-            return image
+    return image
