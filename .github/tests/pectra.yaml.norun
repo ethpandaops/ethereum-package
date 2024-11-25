@@ -7,7 +7,7 @@ participants_matrix:
     - el_type: ethereumjs
       el_image: ethpandaops/ethereumjs:master
     - el_type: erigon
-      el_image: thorax/erigon:docker_pectra
+      el_image: erigontech/erigon:pectra_e2
     - el_type: reth
       el_image: ethpandaops/reth:onbjerg-devnet-2
     - el_type: besu
