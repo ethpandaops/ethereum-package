@@ -347,3 +347,26 @@ def get_cpu_mem_resource_limits(
         else constants.VOLUME_SIZE[network_name][client_type + "_volume_size"]
     )
     return min_cpu, max_cpu, min_mem, max_mem, volume_size
+
+
+def docker_cache_image_calc(docker_cache_params, image):
+    if docker_cache_params.enabled:
+        if "ghcr" in image:
+            return (
+                docker_cache_params.url
+                + docker_cache_params.github_prefix
+                + "/".join(image.split("/")[1:])
+            )
+        elif "gcr" in image:
+            return (
+                docker_cache_params.url
+                + docker_cache_params.gcr_prefix
+                + "/".join(image.split("/")[1:])
+            )
+        elif "/" in image:
+            return (
+                docker_cache_params.url + docker_cache_params.dockerhub_prefix + image
+            )
+
+        else:
+            return image

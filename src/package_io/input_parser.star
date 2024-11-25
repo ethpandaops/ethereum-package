@@ -1383,12 +1383,6 @@ def docker_cache_image_override(plan, result):
 
     for tooling_image_key in tooling_overridable_image:
         image_parts = tooling_image_key.split(".")
-        plan.print("Image parts: {0}".format(image_parts))
-        plan.print(
-            "result[image_parts[0]][image_parts[1]]: {0}".format(
-                result[image_parts[0]][image_parts[1]]
-            )
-        )
         if "ghcr" in result[image_parts[0]][image_parts[1]]:
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]

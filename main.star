@@ -92,6 +92,7 @@ def run(plan, args={}):
     global_node_selectors = args_with_right_defaults.global_node_selectors
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
     apache_port = args_with_right_defaults.apache_port
+    docker_cache_params = args_with_right_defaults.docker_cache_params
 
     prefunded_accounts = genesis_constants.PRE_FUNDED_ACCOUNTS
     if (
@@ -158,9 +159,8 @@ def run(plan, args={}):
         network_id,
     ) = participant_network.launch_participant_network(
         plan,
-        args_with_right_defaults.participants,
+        args_with_right_defaults,
         network_params,
-        args_with_right_defaults.global_log_level,
         jwt_file,
         keymanager_file,
         persistent,
@@ -169,10 +169,6 @@ def run(plan, args={}):
         global_node_selectors,
         keymanager_enabled,
         parallel_keystore_generation,
-        args_with_right_defaults.checkpoint_sync_enabled,
-        args_with_right_defaults.checkpoint_sync_url,
-        args_with_right_defaults.port_publisher,
-        args_with_right_defaults.mev_type,
     )
 
     plan.print(
@@ -459,6 +455,7 @@ def run(plan, args={}):
                 network_params.seconds_per_slot,
                 network_params.genesis_delay,
                 global_node_selectors,
+                args_with_right_defaults.tx_spammer_params,
             )
             plan.print("Successfully launched blob spammer")
         elif additional_service == "goomy_blob":
@@ -488,6 +485,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched execution layer forkmon")
         elif additional_service == "beacon_metrics_gazer":
@@ -500,6 +498,7 @@ def run(plan, args={}):
                     global_node_selectors,
                     args_with_right_defaults.port_publisher,
                     index,
+                    args_with_right_defaults.docker_cache_params,
                 )
             )
             launch_prometheus_grafana = True
@@ -516,6 +515,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched blockscout")
         elif additional_service == "dora":
@@ -550,6 +550,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched dugtrio")
         elif additional_service == "blutgang":
@@ -566,6 +567,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched blutgang")
         elif additional_service == "blobscan":
@@ -580,6 +582,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched blobscan")
         elif additional_service == "forky":
@@ -598,6 +601,7 @@ def run(plan, args={}):
                 final_genesis_timestamp,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched forky")
         elif additional_service == "tracoor":
@@ -616,6 +620,7 @@ def run(plan, args={}):
                 final_genesis_timestamp,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched tracoor")
         elif additional_service == "apache":
@@ -627,6 +632,7 @@ def run(plan, args={}):
                 all_participants,
                 args_with_right_defaults.participants,
                 global_node_selectors,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched apache")
         elif additional_service == "full_beaconchain_explorer":
@@ -673,6 +679,7 @@ def run(plan, args={}):
                 fuzz_target,
                 args_with_right_defaults.custom_flood_params,
                 global_node_selectors,
+                args_with_right_defaults.docker_cache_params,
             )
         else:
             fail("Invalid additional service %s" % (additional_service))

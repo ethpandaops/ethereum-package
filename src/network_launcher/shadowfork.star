@@ -35,7 +35,6 @@ def shadowfork_prep(
         + "/geth/"
         + shadowfork_block
         + "/_snapshot_eth_getBlockByNumber.json",
-        image="badouralix/curl-jq",
         store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
     )
 

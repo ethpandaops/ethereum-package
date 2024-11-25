@@ -4,6 +4,7 @@ postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
 IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout:6.8.0"
 IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
+POSTGRES_IMAGE = "library/postgres:alpine"
 
 SERVICE_NAME_BLOCKSCOUT = "blockscout"
 
@@ -44,6 +45,7 @@ def launch_blockscout(
     global_node_selectors,
     port_publisher,
     additional_service_index,
+    docker_cache_params,
 ):
     postgres_output = postgres.run(
         plan,
@@ -52,6 +54,7 @@ def launch_blockscout(
         extra_configs=["max_connections=1000"],
         persistent=persistent,
         node_selectors=global_node_selectors,
+        image=shared_utils.docker_cache_image_calc(docker_cache_params, POSTGRES_IMAGE),
     )
 
     el_context = el_contexts[0]
@@ -64,6 +67,7 @@ def launch_blockscout(
         global_node_selectors,
         port_publisher,
         additional_service_index,
+        docker_cache_params,
     )
     verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)
     verif_service = plan.add_service(verif_service_name, config_verif)
@@ -79,6 +83,7 @@ def launch_blockscout(
         global_node_selectors,
         port_publisher,
         additional_service_index,
+        docker_cache_params,
     )
     blockscout_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)
     plan.print(blockscout_service)
@@ -90,7 +95,9 @@ def launch_blockscout(
     return blockscout_url
 
 
-def get_config_verif(node_selectors, port_publisher, additional_service_index):
+def get_config_verif(
+    node_selectors, port_publisher, additional_service_index, docker_cache_params
+):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
         constants.HTTP_PORT_ID,
@@ -99,7 +106,10 @@ def get_config_verif(node_selectors, port_publisher, additional_service_index):
     )
 
     return ServiceConfig(
-        image=IMAGE_NAME_BLOCKSCOUT_VERIF,
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params,
+            IMAGE_NAME_BLOCKSCOUT_VERIF,
+        ),
         ports=VERIF_USED_PORTS,
         public_ports=public_ports,
         env_vars={
@@ -123,6 +133,7 @@ def get_config_backend(
     node_selectors,
     port_publisher,
     additional_service_index,
+    docker_cache_params,
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
@@ -141,7 +152,10 @@ def get_config_backend(
     )
 
     return ServiceConfig(
-        image=IMAGE_NAME_BLOCKSCOUT,
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params,
+            IMAGE_NAME_BLOCKSCOUT,
+        ),
         ports=USED_PORTS,
         public_ports=public_ports,
         cmd=[
