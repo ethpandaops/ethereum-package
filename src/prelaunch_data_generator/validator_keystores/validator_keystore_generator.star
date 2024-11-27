@@ -38,8 +38,9 @@ def launch_prelaunch_data_generator(
     plan,
     files_artifact_mountpoints,
     service_name_suffix,
+    docker_cache_params,
 ):
-    config = get_config(files_artifact_mountpoints)
+    config = get_config(files_artifact_mountpoints, docker_cache_params)
 
     service_name = "{0}{1}".format(
         SERVICE_NAME_PREFIX,
@@ -51,11 +52,9 @@ def launch_prelaunch_data_generator(
 
 
 def launch_prelaunch_data_generator_parallel(
-    plan, files_artifact_mountpoints, service_name_suffixes
+    plan, files_artifact_mountpoints, service_name_suffixes, docker_cache_params
 ):
-    config = get_config(
-        files_artifact_mountpoints,
-    )
+    config = get_config(files_artifact_mountpoints, docker_cache_params)
     service_names = [
         "{0}{1}".format(
             SERVICE_NAME_PREFIX,
@@ -68,9 +67,12 @@ def launch_prelaunch_data_generator_parallel(
     return service_names
 
 
-def get_config(files_artifact_mountpoints):
+def get_config(files_artifact_mountpoints, docker_cache_params):
     return ServiceConfig(
-        image=ETH_VAL_TOOLS_IMAGE,
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params,
+            ETH_VAL_TOOLS_IMAGE,
+        ),
         entrypoint=ENTRYPOINT_ARGS,
         files=files_artifact_mountpoints,
     )
@@ -79,8 +81,10 @@ def get_config(files_artifact_mountpoints):
 # Generates keystores for the given number of nodes from the given mnemonic, where each keystore contains approximately
 #
 # 	num_keys / num_nodes keys
-def generate_validator_keystores(plan, mnemonic, participants):
-    service_name = launch_prelaunch_data_generator(plan, {}, "cl-validator-keystore")
+def generate_validator_keystores(plan, mnemonic, participants, docker_cache_params):
+    service_name = launch_prelaunch_data_generator(
+        plan, {}, "cl-validator-keystore", docker_cache_params
+    )
 
     all_output_dirpaths = []
     all_sub_command_strs = []

@@ -175,7 +175,15 @@ SUBCATEGORY_PARAMS = {
         "image",
         "env",
     ],
+    "docker_cache_params": [
+        "enabled",
+        "url",
+        "dockerhub_prefix",
+        "github_prefix",
+        "google_prefix",
+    ],
     "tx_spammer_params": [
+        "image",
         "tx_spammer_extra_args",
     ],
     "goomy_blob_params": [
@@ -188,6 +196,7 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "storage_tsdb_retention_time",
         "storage_tsdb_retention_size",
+        "image",
     ],
     "grafana_params": [
         "additional_dashboards",
@@ -195,6 +204,7 @@ SUBCATEGORY_PARAMS = {
         "max_cpu",
         "min_mem",
         "max_mem",
+        "image",
     ],
     "assertoor_params": [
         "image",

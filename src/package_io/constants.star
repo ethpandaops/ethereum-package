@@ -113,6 +113,15 @@ FULU_FORK_EPOCH = 100000001
 EIP7594_FORK_VERSION = "0x80000038"
 EIP7594_FORK_EPOCH = 100000002
 
+MAX_LABEL_LENGTH = 63
+
+CONTAINER_REGISTRY = struct(
+    dockerhub="/",
+    ghcr="ghcr.io",
+    gcr="gcr.io",
+)
+
+
 ETHEREUM_GENESIS_GENERATOR = struct(
     capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Deprecated (no support for minimal config)
     deneb_genesis="ethpandaops/ethereum-genesis-generator:3.4.1",  # Default
