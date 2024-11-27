@@ -230,7 +230,7 @@ def get_config(
         "labels": shared_utils.label_maker(
             client=constants.EL_TYPE.erigon,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image,
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
             supernode=participant.supernode,

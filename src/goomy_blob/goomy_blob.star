@@ -1,5 +1,4 @@
 SERVICE_NAME = "goomy-blob-spammer"
-IMAGE_NAME = "ethpandaops/goomy-blob:master"
 
 ENTRYPOINT_ARGS = ["/bin/sh", "-c"]
 
@@ -24,7 +23,7 @@ def launch_goomy_blob(
         el_contexts,
         cl_context,
         seconds_per_slot,
-        goomy_blob_params.goomy_blob_args,
+        goomy_blob_params,
         global_node_selectors,
     )
     plan.add_service(SERVICE_NAME, config)
@@ -35,7 +34,7 @@ def get_config(
     el_contexts,
     cl_context,
     seconds_per_slot,
-    goomy_blob_args,
+    goomy_blob_params,
     node_selectors,
 ):
     goomy_cli_args = []
@@ -47,7 +46,7 @@ def get_config(
             )
         )
 
-    goomy_args = " ".join(goomy_blob_args)
+    goomy_args = " ".join(goomy_blob_params.goomy_blob_args)
     if goomy_args == "":
         goomy_args = "combined -b 2 -t 2 --max-pending 3"
     goomy_cli_args.append(goomy_args)
@@ -57,7 +56,7 @@ def get_config(
     )
 
     return ServiceConfig(
-        image=IMAGE_NAME,
+        image=goomy_blob_params.image,
         entrypoint=ENTRYPOINT_ARGS,
         cmd=[cmd],
         min_cpu=MIN_CPU,

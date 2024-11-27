@@ -36,6 +36,7 @@ def launch_tracoor(
     final_genesis_timestamp,
     port_publisher,
     additional_service_index,
+    docker_cache_params,
 ):
     all_client_info = []
     for index, participant in enumerate(participant_contexts):
@@ -81,6 +82,7 @@ def launch_tracoor(
         global_node_selectors,
         port_publisher,
         additional_service_index,
+        docker_cache_params,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -93,6 +95,7 @@ def get_config(
     node_selectors,
     port_publisher,
     additional_service_index,
+    docker_cache_params,
 ):
     config_file_path = shared_utils.path_join(
         TRACOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -107,7 +110,10 @@ def get_config(
     )
 
     return ServiceConfig(
-        image=IMAGE_NAME,
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params,
+            IMAGE_NAME,
+        ),
         ports=USED_PORTS,
         public_ports=public_ports,
         files={

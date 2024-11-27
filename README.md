@@ -169,7 +169,7 @@ participants:
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
     # Defaults by client:
     # - geth: ethereum/client-go:latest
-    # - erigon: thorax/erigon:devel
+    # - erigon: ethpandaops/erigon:main
     # - nethermind: nethermind/nethermind:latest
     # - besu: hyperledger/besu:develop
     # - reth: ghcr.io/paradigmxyz/reth
@@ -637,19 +637,24 @@ additional_services:
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
   # Dora docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
-
+  # Defaults to the latest image
+  image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
+  # TX Spammer docker image to use
+  # Defaults to the latest master image
+  image: "ethpandaops/tx-fuzz:master"
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
   tx_spammer_extra_args: []
 
 # Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
 goomy_blob_params:
+  # Goomy Blob docker image to use
+  # Defaults to the latest
+  image: "ethpandaops/goomy-blob:latest"
   # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
   goomy_blob_args: []
 
@@ -664,6 +669,9 @@ prometheus_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Prometheus docker image to use
+  # Defaults to the latest image
+  image: "prom/prometheus:latest"
 
 # Configuration place for grafana
 grafana_params:
@@ -676,12 +684,15 @@ grafana_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Grafana docker image to use
+  # Defaults to the latest image
+  image: "grafana/grafana:latest"
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
+  # Defaults to the latest image
+  image: "ethpandaops/assertoor:latest"
 
   # Check chain stability
   # This check monitors the chain and succeeds if:
@@ -770,6 +781,20 @@ disable_peer_scoring: false
 # Note Erigon, Besu, Teku persistence is not currently supported with docker.
 # Defaults to false
 persistent: false
+
+# Docker cache url enables all docker images to be pulled through a custom docker registry
+# Disabled by default
+# Defaults to empty cache url
+# Images pulled from dockerhub will be prefixed with "/dh/" by default (docker.io)
+# Images pulled from github registry will be prefixed with "/gh/" by default (ghcr.io)
+# Images pulled from google registory will be prefixed with "/gcr/" by default (gcr.io)
+# If you want to use a local image in combination with the cache, do not put "/" in your local image name
+docker_cache_params:
+  enabled: false
+  url: ""
+  dockerhub_prefix: "/dh/"
+  github_prefix: "/gh/"
+  google_prefix: "/gcr/"
 
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up

@@ -74,7 +74,6 @@ def generate_el_cl_genesis_data(
         name="read-prague-time",
         description="Reading prague time from genesis",
         run="jq .config.pragueTime /data/genesis.json | tr -d '\n'",
-        image="badouralix/curl-jq",
         files={"/data": genesis.files_artifacts[0]},
     )
 
