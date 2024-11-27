@@ -1356,7 +1356,9 @@ def docker_cache_image_override(plan, result):
         )
     for index, participant in enumerate(result["participants"]):
         for images in participant_overridable_image:
-            if "ghcr" in participant[images]:
+            if result["docker_cache_params"]["url"] in participant[images]:
+                break
+            elif "ghcr" in participant[images]:
                 participant[images] = (
                     result["docker_cache_params"]["url"]
                     + result["docker_cache_params"]["github_prefix"]
@@ -1383,7 +1385,12 @@ def docker_cache_image_override(plan, result):
 
     for tooling_image_key in tooling_overridable_image:
         image_parts = tooling_image_key.split(".")
-        if "ghcr" in result[image_parts[0]][image_parts[1]]:
+        if (
+            result["docker_cache_params"]["url"]
+            in result[image_parts[0]][image_parts[1]]
+        ):
+            break
+        elif "ghcr" in result[image_parts[0]][image_parts[1]]:
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["github_prefix"]

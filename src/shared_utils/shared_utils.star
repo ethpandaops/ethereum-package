@@ -350,6 +350,8 @@ def get_cpu_mem_resource_limits(
 
 def docker_cache_image_calc(docker_cache_params, image):
     if docker_cache_params.enabled:
+        if docker_cache_params.url in image:
+            return image
         if "ghcr" in image:
             return (
                 docker_cache_params.url
