@@ -121,7 +121,7 @@ def get_config(
         "labels": shared_utils.label_maker(
             client=constants.VC_TYPE.teku,
             client_type=constants.CLIENT_TYPES.validator,
-            image=image[constants.MAX_LABEL_LENGTH :],
+            image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
             extra_labels=participant.vc_extra_labels,
             supernode=participant.supernode,

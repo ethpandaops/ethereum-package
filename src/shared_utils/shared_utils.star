@@ -83,10 +83,9 @@ def label_maker(
     labels = {
         "ethereum-package.client": client,
         "ethereum-package.client-type": client_type,
-        "ethereum-package.client-image": image.replace("/", "-")
-        .replace(":", "_")
-        .replace(".", "-")
-        .split("@")[0],  # drop the sha256 part of the image from the label
+        "ethereum-package.client-image": ensure_alphanumeric_bounds(
+            image.replace("/", "-").replace(":", "_").replace(".", "-").split("@")[0]
+        ),  # drop the sha256 part of the image from the label
         "ethereum-package.sha256": sha256,
         "ethereum-package.connected-client": connected_client,
     }
@@ -369,3 +368,25 @@ def docker_cache_image_calc(docker_cache_params, image):
             )
 
     return image
+
+
+def is_alphanumeric(c):
+    return ("a" <= c and c <= "z") or ("A" <= c and c <= "Z") or ("0" <= c and c <= "9")
+
+
+def ensure_alphanumeric_bounds(s):
+    # Trim from the start
+    start = 0
+    for i in range(len(s)):
+        if is_alphanumeric(s[i]):
+            start = i
+            break
+
+    # Trim from the end
+    end = len(s)
+    for i in range(len(s) - 1, -1, -1):
+        if is_alphanumeric(s[i]):
+            end = i + 1
+            break
+
+    return s[start:end]
