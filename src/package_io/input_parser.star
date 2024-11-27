@@ -1358,19 +1358,19 @@ def docker_cache_image_override(plan, result):
         for images in participant_overridable_image:
             if result["docker_cache_params"]["url"] in participant[images]:
                 break
-            elif "ghcr" in participant[images]:
+            elif constants.CONTAINER_REGISTRY.ghcr in participant[images]:
                 participant[images] = (
                     result["docker_cache_params"]["url"]
                     + result["docker_cache_params"]["github_prefix"]
                     + "/".join(participant[images].split("/")[1:])
                 )
-            elif "gcr" in participant[images]:
+            elif constants.CONTAINER_REGISTRY.gcr in participant[images]:
                 participant[images] = (
                     result["docker_cache_params"]["url"]
                     + result["docker_cache_params"]["google_prefix"]
                     + "/".join(participant[images].split("/")[1:])
                 )
-            elif "/" in participant[images]:
+            elif constants.CONTAINER_REGISTRY.dockerhub in participant[images]:
                 participant[images] = (
                     result["docker_cache_params"]["url"]
                     + result["docker_cache_params"]["dockerhub_prefix"]
@@ -1390,19 +1390,24 @@ def docker_cache_image_override(plan, result):
             in result[image_parts[0]][image_parts[1]]
         ):
             break
-        elif "ghcr" in result[image_parts[0]][image_parts[1]]:
+        elif (
+            constants.CONTAINER_REGISTRY.ghcr in result[image_parts[0]][image_parts[1]]
+        ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["github_prefix"]
                 + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
             )
-        elif "gcr" in result[image_parts[0]][image_parts[1]]:
+        elif constants.CONTAINER_REGISTRY.gcr in result[image_parts[0]][image_parts[1]]:
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["google_prefix"]
                 + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
             )
-        elif "/" in result[image_parts[0]][image_parts[1]]:
+        elif (
+            constants.CONTAINER_REGISTRY.dockerhub
+            in result[image_parts[0]][image_parts[1]]
+        ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["dockerhub_prefix"]

@@ -352,19 +352,19 @@ def docker_cache_image_calc(docker_cache_params, image):
     if docker_cache_params.enabled:
         if docker_cache_params.url in image:
             return image
-        if "ghcr" in image:
+        if constants.CONTAINER_REGISTRY.ghcr in image:
             return (
                 docker_cache_params.url
                 + docker_cache_params.github_prefix
                 + "/".join(image.split("/")[1:])
             )
-        elif "gcr" in image:
+        elif constants.CONTAINER_REGISTRY.gcr in image:
             return (
                 docker_cache_params.url
                 + docker_cache_params.gcr_prefix
                 + "/".join(image.split("/")[1:])
             )
-        elif "/" in image:
+        elif constants.CONTAINER_REGISTRY.dockerhub in image:
             return (
                 docker_cache_params.url + docker_cache_params.dockerhub_prefix + image
             )
