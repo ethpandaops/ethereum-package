@@ -96,7 +96,7 @@ def launch_blockscout(
 
 
 def get_config_verif(
-    node_selectors, port_publisher, additional_service_index, docker_cache_params
+    node_selectors, port_publisher, additional_service_index, docker_cache_params, blockscout_params,
 ):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
@@ -105,6 +105,7 @@ def get_config_verif(
         0,
     )
 
+    IMAGE_NAME_BLOCKSCOUT_VERIF = IMAGE_NAME_BLOCKSCOUT_VERIF if blockscout_params.verif_image == "" else blockscout_params.verif_image
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params,
@@ -134,6 +135,7 @@ def get_config_backend(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    blockscout_params,
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
@@ -150,6 +152,8 @@ def get_config_backend(
         additional_service_index,
         1,
     )
+
+    IMAGE_NAME_BLOCKSCOUT = IMAGE_NAME_BLOCKSCOUT if blockscout_params.image == "" else blockscout_params.image
 
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
