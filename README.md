@@ -637,8 +637,8 @@ additional_services:
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
 blockscout_params:
   # blockscout docker image to use
-  # Defaults to the latest image
-  image: "blockscout/blockscout:latest"
+  # Defaults to blockscout/blockscout:6.8.0
+  image: "blockscout/blockscout:6.8.0"
   # blockscout smart contract verifier image to use
   # Defaults to ghcr.io/blockscout/smart-contract-verifier:v1.9.0
   verif_image: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"

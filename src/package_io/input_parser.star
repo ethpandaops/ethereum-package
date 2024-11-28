@@ -1010,7 +1010,7 @@ def default_participant():
 
 def get_default_blockscout_params():
     return {
-        "image": "blockscout/blockscout:latest",
+        "image": "blockscout/blockscout:6.8.0",
         "verif_image": "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",
     }
 
