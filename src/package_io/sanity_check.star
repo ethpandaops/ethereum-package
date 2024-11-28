@@ -174,7 +174,7 @@ SUBCATEGORY_PARAMS = {
     "blockscout_params": [
         "image",
         "verif_image",
-    ]
+    ],
     "dora_params": [
         "image",
         "env",
