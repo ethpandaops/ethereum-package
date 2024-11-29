@@ -40,6 +40,8 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--beacon-rpc-provider=" + cl_context.beacon_grpc_url,
+        "--beacon-rest-api-provider=" + beacon_http_url,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -71,13 +73,6 @@ def get_config(
         "--http-host=0.0.0.0",
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
-
-    cmd.extend(
-        [
-            "--beacon-rpc-provider=" + cl_context.beacon_grpc_url,
-            "--beacon-rest-api-provider=" + beacon_http_url,
-        ]
-    )
 
     if cl_context.client_name != constants.CL_TYPE.prysm:
         # Use Beacon API if a Prysm VC wants to connect to a non-Prysm BN
