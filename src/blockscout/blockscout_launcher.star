@@ -97,7 +97,11 @@ def launch_blockscout(
 
 
 def get_config_verif(
-    node_selectors, port_publisher, additional_service_index, docker_cache_params, blockscout_params,
+    node_selectors,
+    port_publisher,
+    additional_service_index,
+    docker_cache_params,
+    blockscout_params,
 ):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
