@@ -508,6 +508,7 @@ def run(plan, args={}):
             plan.print("Successfully launched beacon metrics gazer")
         elif additional_service == "blockscout":
             plan.print("Launching blockscout")
+            blockscout_params = args_with_right_defaults.blockscout_params
             blockscout_sc_verif_url = blockscout.launch_blockscout(
                 plan,
                 all_el_contexts,
@@ -516,6 +517,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                blockscout_params,
             )
             plan.print("Successfully launched blockscout")
         elif additional_service == "dora":
