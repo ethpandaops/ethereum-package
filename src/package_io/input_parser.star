@@ -75,6 +75,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
     "mev_params",
+    "blockscout_params",
     "dora_params",
     "docker_cache_params",
     "assertoor_params",
@@ -92,6 +93,7 @@ def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
     # add default eth2 input params
+    result["blockscout_params"] = get_default_blockscout_params()
     result["dora_params"] = get_default_dora_params()
     result["docker_cache_params"] = get_default_docker_cache_params()
     result["mev_params"] = get_default_mev_params(
@@ -136,6 +138,10 @@ def input_parser(plan, input_args):
         if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
             result[attr] = value
         # custom eth2 attributes config
+        elif attr == "blockscout_params":
+            for sub_attr in input_args["blockscout_params"]:
+                sub_value = input_args["blockscout_params"][sub_attr]
+                result["blockscout_params"][sub_attr] = sub_value
         elif attr == "dora_params":
             for sub_attr in input_args["dora_params"]:
                 sub_value = input_args["dora_params"][sub_attr]
@@ -355,6 +361,10 @@ def input_parser(plan, input_args):
         )
         if result["mev_params"]
         else None,
+        blockscout_params=struct(
+            image=result["blockscout_params"]["image"],
+            verif_image=result["blockscout_params"]["verif_image"],
+        ),
         dora_params=struct(
             image=result["dora_params"]["image"],
             env=result["dora_params"]["env"],
@@ -996,6 +1006,13 @@ def default_participant():
         "blobber_extra_params": [],
         "builder_network_params": None,
         "keymanager_enabled": None,
+    }
+
+
+def get_default_blockscout_params():
+    return {
+        "image": "blockscout/blockscout:6.8.0",
+        "verif_image": "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",
     }
 
 

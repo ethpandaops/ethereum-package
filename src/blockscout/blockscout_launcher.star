@@ -2,8 +2,6 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 
-IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout:6.8.0"
-IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
 POSTGRES_IMAGE = "library/postgres:alpine"
 
 SERVICE_NAME_BLOCKSCOUT = "blockscout"
@@ -46,6 +44,7 @@ def launch_blockscout(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    blockscout_params,
 ):
     postgres_output = postgres.run(
         plan,
@@ -68,6 +67,7 @@ def launch_blockscout(
         port_publisher,
         additional_service_index,
         docker_cache_params,
+        blockscout_params,
     )
     verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)
     verif_service = plan.add_service(verif_service_name, config_verif)
@@ -84,6 +84,7 @@ def launch_blockscout(
         port_publisher,
         additional_service_index,
         docker_cache_params,
+        blockscout_params,
     )
     blockscout_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)
     plan.print(blockscout_service)
@@ -96,7 +97,11 @@ def launch_blockscout(
 
 
 def get_config_verif(
-    node_selectors, port_publisher, additional_service_index, docker_cache_params
+    node_selectors,
+    port_publisher,
+    additional_service_index,
+    docker_cache_params,
+    blockscout_params,
 ):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
@@ -105,6 +110,7 @@ def get_config_verif(
         0,
     )
 
+    IMAGE_NAME_BLOCKSCOUT_VERIF = blockscout_params.verif_image
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params,
@@ -134,6 +140,7 @@ def get_config_backend(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    blockscout_params,
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
@@ -150,6 +157,8 @@ def get_config_backend(
         additional_service_index,
         1,
     )
+
+    IMAGE_NAME_BLOCKSCOUT = blockscout_params.image
 
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(

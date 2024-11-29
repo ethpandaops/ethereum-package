@@ -171,6 +171,10 @@ SUBCATEGORY_PARAMS = {
         "devnet_repo",
         "prefunded_accounts",
     ],
+    "blockscout_params": [
+        "image",
+        "verif_image",
+    ],
     "dora_params": [
         "image",
         "env",

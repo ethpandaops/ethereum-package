@@ -634,6 +634,15 @@ additional_services:
   - apache
   - tracoor
 
+# Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
+blockscout_params:
+  # blockscout docker image to use
+  # Defaults to blockscout/blockscout:6.8.0
+  image: "blockscout/blockscout:6.8.0"
+  # blockscout smart contract verifier image to use
+  # Defaults to ghcr.io/blockscout/smart-contract-verifier:v1.9.0
+  verif_image: "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
+
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
   # Dora docker image to use
