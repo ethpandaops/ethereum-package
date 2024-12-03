@@ -224,7 +224,9 @@ def get_config(
         files[
             mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
-    elif launcher.builder_type == "flashbots":
+    elif (
+        launcher.builder_type == "flashbots" or launcher.builder_type == "commit-boost"
+    ):
         image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
         cl_client_name = service_name.split("-")[4]
         cmd.append("--engine.experimental")
