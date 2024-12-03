@@ -364,6 +364,7 @@ def input_parser(plan, input_args):
         blockscout_params=struct(
             image=result["blockscout_params"]["image"],
             verif_image=result["blockscout_params"]["verif_image"],
+            frontend_image=result["blockscout_params"]["frontend_image"],
         ),
         dora_params=struct(
             image=result["dora_params"]["image"],
@@ -1011,8 +1012,9 @@ def default_participant():
 
 def get_default_blockscout_params():
     return {
-        "image": "blockscout/blockscout:6.8.0",
-        "verif_image": "ghcr.io/blockscout/smart-contract-verifier:v1.9.0",
+        "image": "blockscout/blockscout:latest",
+        "verif_image": "ghcr.io/blockscout/smart-contract-verifier:latest",
+        "frontend_image": "ghcr.io/blockscout/frontend:latest",
     }
 
 
