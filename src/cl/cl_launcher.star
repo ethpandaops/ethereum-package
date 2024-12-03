@@ -152,9 +152,9 @@ def launch(
                     network_params.network in constants.PUBLIC_NETWORKS
                     or network_params.network == constants.NETWORK_NAME.ephemery
                 ):
-                    args_with_right_defaults.checkpoint_sync_url = (
-                        constants.CHECKPOINT_SYNC_URL[network_params.network]
-                    )
+                    checkpoint_sync_url = constants.CHECKPOINT_SYNC_URL[
+                        network_params.network
+                    ]
                 else:
                     fail(
                         "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
@@ -178,7 +178,7 @@ def launch(
                 tolerations,
                 node_selectors,
                 args_with_right_defaults.checkpoint_sync_enabled,
-                args_with_right_defaults.checkpoint_sync_url,
+                checkpoint_sync_url,
                 args_with_right_defaults.port_publisher,
                 index,
             )
@@ -199,7 +199,7 @@ def launch(
                 tolerations,
                 node_selectors,
                 args_with_right_defaults.checkpoint_sync_enabled,
-                args_with_right_defaults.checkpoint_sync_url,
+                checkpoint_sync_url,
                 args_with_right_defaults.port_publisher,
                 index,
             )
