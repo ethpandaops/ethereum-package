@@ -160,7 +160,7 @@ def get_config(
             "--http.port={0}".format(RPC_PORT_NUM),
             "--http.addr=0.0.0.0",
             "--http.corsdomain=*",
-            "--http.api=admin,net,eth,web3,debug,trace{0}".format(
+            "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
                 ",flashbots" if launcher.builder_type == "flashbots" else ""
             ),
             "--ws",
