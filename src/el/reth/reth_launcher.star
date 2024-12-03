@@ -141,40 +141,42 @@ def get_config(
 
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
-    cmd = [
-        "{0}".format(
-            "/usr/local/bin/mev" if launcher.builder_type == "mev-rs" else "reth"
-        ),
-        "node",
-        "-{0}".format(log_level),
-        "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--chain={0}".format(
-            launcher.network
-            if launcher.network in constants.PUBLIC_NETWORKS
-            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
-        ),
-        "--http",
-        "--http.port={0}".format(RPC_PORT_NUM),
-        "--http.addr=0.0.0.0",
-        "--http.corsdomain=*",
-        # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
-        #  that users should NOT store private information in these Kurtosis nodes!
-        "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
-            ",flashbots" if launcher.builder_type == "flashbots" else ""
-        ),
-        "--ws",
-        "--ws.addr=0.0.0.0",
-        "--ws.port={0}".format(WS_PORT_NUM),
-        "--ws.api=net,eth",
-        "--ws.origins=*",
-        "--nat=extip:" + port_publisher.nat_exit_ip,
-        "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--authrpc.addr=0.0.0.0",
-        "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
-        "--discovery.port={0}".format(discovery_port),
-        "--port={0}".format(discovery_port),
-    ]
+    cmd = []
+
+    if launcher.builder_type == "mev-rs":
+        cmd.append("build")
+
+    cmd.extend(
+        [
+            "node",
+            "-{0}".format(log_level),
+            "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+            "--chain={0}".format(
+                launcher.network
+                if launcher.network in constants.PUBLIC_NETWORKS
+                else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+            ),
+            "--http",
+            "--http.port={0}".format(RPC_PORT_NUM),
+            "--http.addr=0.0.0.0",
+            "--http.corsdomain=*",
+            "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
+                ",flashbots" if launcher.builder_type == "flashbots" else ""
+            ),
+            "--ws",
+            "--ws.addr=0.0.0.0",
+            "--ws.port={0}".format(WS_PORT_NUM),
+            "--ws.api=net,eth",
+            "--ws.origins=*",
+            "--nat=extip:" + port_publisher.nat_exit_ip,
+            "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
+            "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+            "--authrpc.addr=0.0.0.0",
+            "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
+            "--discovery.port={0}".format(discovery_port),
+            "--port={0}".format(discovery_port),
+        ]
+    )
 
     if launcher.network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
@@ -216,29 +218,22 @@ def get_config(
                 constants.EL_TYPE.reth + "_volume_size"
             ],
         )
-    cmd_str = " ".join(cmd)
-    env_vars = {
-        "RETH_CMD": cmd_str,
-    }
-    entrypoint_args = ["sh", "-c"]
-    env_vars = env_vars | participant.el_extra_env_vars
+    env_vars = {}
     image = participant.el_image
-    rbuilder_cmd = []
     if launcher.builder_type == "mev-rs":
         files[
             mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
     elif launcher.builder_type == "flashbots":
+        image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
         cl_client_name = service_name.split("-")[4]
-        cmd.append("--engine.legacy")
-        cmd_str = " ".join(cmd)
+        cmd.append("--engine.experimental")
+        cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME
-        env_vars["RETH_CMD"] = cmd_str
         env_vars.update(
             {
-                "RBUILDER_CONFIG": flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER,
                 "CL_ENDPOINT": "http://cl-{0}-{1}-{2}:{3}".format(
                     participant_index + 1,
                     cl_client_name,
@@ -247,19 +242,15 @@ def get_config(
                 ),
             }
         )
-        image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
-        cmd_str = "./app/entrypoint.sh"
-        entrypoint_args = []
 
     config_args = {
         "image": image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": [cmd_str],
+        "cmd": cmd,
         "files": files,
-        "entrypoint": entrypoint_args,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "env_vars": env_vars,
+        "env_vars": env_vars | participant.el_extra_env_vars,
         "labels": shared_utils.label_maker(
             client=constants.EL_TYPE.reth,
             client_type=constants.CLIENT_TYPES.el,
