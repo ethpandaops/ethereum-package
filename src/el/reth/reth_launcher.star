@@ -141,42 +141,42 @@ def get_config(
 
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
-    cmd = [
-        # "{0}".format(
-        #     "/usr/local/bin/mev" if launcher.builder_type == "mev-rs" else ""
-        # ),
-        "node",
-        "-{0}".format(log_level),
-        "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--chain={0}".format(
-            launcher.network
-            if launcher.network in constants.PUBLIC_NETWORKS
-            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
-        ),
-        "--http",
-        "--http.port={0}".format(RPC_PORT_NUM),
-        "--http.addr=0.0.0.0",
-        "--http.corsdomain=*",
-        # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
-        #  that users should NOT store private information in these Kurtosis nodes!
-        # We need to re-add this once rbuilder reth image is rebased on 1.1.0
-        # "--http.api=admin,net,eth,web3,debug,trace{0}".format(
-        #     ",flashbots" if launcher.builder_type == "flashbots" else ""
-        # ),
-        "--http.api=admin,net,eth,web3,debug,trace",
-        "--ws",
-        "--ws.addr=0.0.0.0",
-        "--ws.port={0}".format(WS_PORT_NUM),
-        "--ws.api=net,eth",
-        "--ws.origins=*",
-        "--nat=extip:" + port_publisher.nat_exit_ip,
-        "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--authrpc.addr=0.0.0.0",
-        "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
-        "--discovery.port={0}".format(discovery_port),
-        "--port={0}".format(discovery_port),
-    ]
+    cmd = []
+
+    if launcher.builder_type == "mev-rs":
+        cmd.append("build")
+
+    cmd.extend(
+        [
+            "node",
+            "-{0}".format(log_level),
+            "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+            "--chain={0}".format(
+                launcher.network
+                if launcher.network in constants.PUBLIC_NETWORKS
+                else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+            ),
+            "--http",
+            "--http.port={0}".format(RPC_PORT_NUM),
+            "--http.addr=0.0.0.0",
+            "--http.corsdomain=*",
+            "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
+                ",flashbots" if launcher.builder_type == "flashbots" else ""
+            ),
+            "--ws",
+            "--ws.addr=0.0.0.0",
+            "--ws.port={0}".format(WS_PORT_NUM),
+            "--ws.api=net,eth",
+            "--ws.origins=*",
+            "--nat=extip:" + port_publisher.nat_exit_ip,
+            "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
+            "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+            "--authrpc.addr=0.0.0.0",
+            "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
+            "--discovery.port={0}".format(discovery_port),
+            "--port={0}".format(discovery_port),
+        ]
+    )
 
     if launcher.network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
