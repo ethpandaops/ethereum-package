@@ -145,7 +145,7 @@ def launch(
                     snooper_engine_context
                 )
             )
-
+        checkpoint_sync_url = args_with_right_defaults.checkpoint_sync_url
         if args_with_right_defaults.checkpoint_sync_enabled:
             if args_with_right_defaults.checkpoint_sync_url == "":
                 if (
