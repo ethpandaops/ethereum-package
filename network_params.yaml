@@ -31,7 +31,6 @@ participants:
     vc_type: lighthouse
     vc_image: sigp/lighthouse:latest-unstable
     vc_log_level: ""
-    vc_count: 1
     vc_extra_env_vars: {}
     vc_extra_labels: {}
     vc_extra_params: []

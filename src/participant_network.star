@@ -191,6 +191,9 @@ def launch_participant_network(
     ]
 
     current_vc_index = 0
+    if not args_with_right_defaults.participants:
+        fail("No participants configured")
+
     for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
@@ -199,38 +202,30 @@ def launch_participant_network(
         index_str = shared_utils.zfill_custom(
             index + 1, len(str(len(args_with_right_defaults.participants)))
         )
-        for sub_index in range(participant.vc_count):
-            vc_index_str = shared_utils.zfill_custom(
-                sub_index + 1, len(str(participant.vc_count))
+        el_context = all_el_contexts[index] if index < len(all_el_contexts) else None
+        cl_context = all_cl_contexts[index] if index < len(all_cl_contexts) else None
+
+        node_selectors = input_parser.get_client_node_selectors(
+            participant.node_selectors,
+            global_node_selectors,
+        )
+        if participant.ethereum_metrics_exporter_enabled:
+            pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
+
+            ethereum_metrics_exporter_service_name = (
+                "ethereum-metrics-exporter-{0}".format(pair_name)
             )
-            el_context = all_el_contexts[index]
-            cl_context = all_cl_contexts[index]
 
-            node_selectors = input_parser.get_client_node_selectors(
-                participant.node_selectors,
-                global_node_selectors,
+            ethereum_metrics_exporter_context = (
+                all_ethereum_metrics_exporter_contexts[index]
+                if index < len(all_ethereum_metrics_exporter_contexts)
+                else None
             )
-            if participant.ethereum_metrics_exporter_enabled:
-                pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
-
-                ethereum_metrics_exporter_service_name = (
-                    "ethereum-metrics-exporter-{0}".format(pair_name)
+            plan.print(
+                "Successfully added {0} ethereum metrics exporter participants".format(
+                    ethereum_metrics_exporter_context
                 )
-
-                ethereum_metrics_exporter_context = ethereum_metrics_exporter.launch(
-                    plan,
-                    pair_name,
-                    ethereum_metrics_exporter_service_name,
-                    el_context,
-                    cl_context,
-                    node_selectors,
-                    args_with_right_defaults.docker_cache_params,
-                )
-                plan.print(
-                    "Successfully added {0} ethereum metrics exporter participants".format(
-                        ethereum_metrics_exporter_context
-                    )
-                )
+            )
 
             all_ethereum_metrics_exporter_contexts.append(
                 ethereum_metrics_exporter_context
@@ -238,20 +233,14 @@ def launch_participant_network(
 
             xatu_sentry_context = None
 
-            if participant.xatu_sentry_enabled:
+            if participant.xatu_sentry_enabled and index < len(
+                all_xatu_sentry_contexts
+            ):
                 pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
                 xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
 
-                xatu_sentry_context = xatu_sentry.launch(
-                    plan,
-                    xatu_sentry_service_name,
-                    cl_context,
-                    xatu_sentry_params,
-                    network_params,
-                    pair_name,
-                    node_selectors,
-                )
+                xatu_sentry_context = all_xatu_sentry_contexts[index]
                 plan.print(
                     "Successfully added {0} xatu sentry participants".format(
                         xatu_sentry_context
@@ -291,23 +280,17 @@ def launch_participant_network(
 
             vc_keystores = None
             if participant.validator_count != 0:
-                if participant.vc_count == 1:
-                    vc_keystores = preregistered_validator_keys_for_nodes[index]
-                else:
-                    vc_keystores = preregistered_validator_keys_for_nodes[
-                        index + sub_index
-                    ]
+                vc_keystores = preregistered_validator_keys_for_nodes[index]
 
             vc_context = None
             remote_signer_context = None
             snooper_beacon_context = None
 
             if participant.snooper_enabled:
-                snooper_service_name = "snooper-beacon-{0}-{1}-{2}{3}".format(
+                snooper_service_name = "snooper-beacon-{0}-{1}-{2}".format(
                     index_str,
                     cl_type,
                     vc_type,
-                    "-" + vc_index_str if participant.vc_count != 1 else "",
                 )
                 snooper_beacon_context = beacon_snooper.launch(
                     plan,
@@ -323,19 +306,17 @@ def launch_participant_network(
                 )
             all_snooper_beacon_contexts.append(snooper_beacon_context)
             full_name = (
-                "{0}-{1}-{2}-{3}{4}".format(
+                "{0}-{1}-{2}-{3}".format(
                     index_str,
                     el_type,
                     cl_type,
                     vc_type,
-                    "-" + vc_index_str if participant.vc_count != 1 else "",
                 )
                 if participant.cl_type != participant.vc_type
-                else "{0}-{1}-{2}{3}".format(
+                else "{0}-{1}-{2}".format(
                     index_str,
                     el_type,
                     cl_type,
-                    "-" + vc_index_str if participant.vc_count != 1 else "",
                 )
             )
 
@@ -406,14 +387,15 @@ def launch_participant_network(
         snooper_engine_context = None
         snooper_beacon_context = None
 
-        el_context = all_el_contexts[index]
-        cl_context = all_cl_contexts[index]
-        if participant.vc_count != 0:
-            vc_context = all_vc_contexts[index]
-            remote_signer_context = all_remote_signer_contexts[index]
-        else:
-            vc_context = None
-            remote_signer_context = None
+        el_context = all_el_contexts[index] if index < len(all_el_contexts) else None
+        cl_context = all_cl_contexts[index] if index < len(all_cl_contexts) else None
+        vc_context = all_vc_contexts[index] if index < len(all_vc_contexts) else None
+
+        remote_signer_context = (
+            all_remote_signer_contexts[index]
+            if index < len(all_remote_signer_contexts)
+            else None
+        )
 
         if participant.snooper_enabled:
             snooper_engine_context = all_snooper_engine_contexts[index]
@@ -427,7 +409,7 @@ def launch_participant_network(
             ]
         xatu_sentry_context = None
 
-        if participant.xatu_sentry_enabled:
+        if participant.xatu_sentry_enabled and index < len(all_xatu_sentry_contexts):
             xatu_sentry_context = all_xatu_sentry_contexts[index]
 
         participant_entry = participant_module.new_participant(

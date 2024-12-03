@@ -120,7 +120,7 @@ def launch(
 
         cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
-        if participant.validator_count != 0 and participant.vc_count != 0:
+        if participant.validator_count != 0:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
                 index
             ]
