@@ -120,7 +120,7 @@ def launch(
 
         cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
-        if participant.validator_count != 0 and participant.vc_count != 0:
+        if participant.validator_count != 0:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
                 index
             ]
@@ -145,16 +145,16 @@ def launch(
                     snooper_engine_context
                 )
             )
-
+        checkpoint_sync_url = args_with_right_defaults.checkpoint_sync_url
         if args_with_right_defaults.checkpoint_sync_enabled:
             if args_with_right_defaults.checkpoint_sync_url == "":
                 if (
                     network_params.network in constants.PUBLIC_NETWORKS
                     or network_params.network == constants.NETWORK_NAME.ephemery
                 ):
-                    args_with_right_defaults.checkpoint_sync_url = (
-                        constants.CHECKPOINT_SYNC_URL[network_params.network]
-                    )
+                    checkpoint_sync_url = constants.CHECKPOINT_SYNC_URL[
+                        network_params.network
+                    ]
                 else:
                     fail(
                         "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
@@ -178,7 +178,7 @@ def launch(
                 tolerations,
                 node_selectors,
                 args_with_right_defaults.checkpoint_sync_enabled,
-                args_with_right_defaults.checkpoint_sync_url,
+                checkpoint_sync_url,
                 args_with_right_defaults.port_publisher,
                 index,
             )
@@ -199,7 +199,7 @@ def launch(
                 tolerations,
                 node_selectors,
                 args_with_right_defaults.checkpoint_sync_enabled,
-                args_with_right_defaults.checkpoint_sync_url,
+                checkpoint_sync_url,
                 args_with_right_defaults.port_publisher,
                 index,
             )

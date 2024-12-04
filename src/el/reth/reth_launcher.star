@@ -136,7 +136,10 @@ def get_config(
         constants.METRICS_PORT_ID: METRICS_PORT_NUM,
     }
 
-    if launcher.builder_type == "flashbots":
+    if (
+        launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
+        or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
+    ):
         used_port_assignments[constants.RBUILDER_PORT_ID] = RBUILDER_PORT_NUM
 
     used_ports = shared_utils.get_port_specs(used_port_assignments)
@@ -161,7 +164,10 @@ def get_config(
             "--http.addr=0.0.0.0",
             "--http.corsdomain=*",
             "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
-                ",flashbots" if launcher.builder_type == "flashbots" else ""
+                ",flashbots"
+                if launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
+                or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
+                else ""
             ),
             "--ws",
             "--ws.addr=0.0.0.0",
@@ -220,12 +226,15 @@ def get_config(
         )
     env_vars = {}
     image = participant.el_image
-    if launcher.builder_type == "mev-rs":
+    if launcher.builder_type == constants.MEV_RS_MEV_TYPE:
         files[
             mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
-    elif launcher.builder_type == "flashbots":
-        image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+    elif (
+        launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
+        or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
+    ):
+        image = launcher.mev_params.mev_builder_image
         cl_client_name = service_name.split("-")[4]
         cmd.append("--engine.experimental")
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
@@ -274,10 +283,13 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_reth_launcher(el_cl_genesis_data, jwt_file, network, builder_type=False):
+def new_reth_launcher(
+    el_cl_genesis_data, jwt_file, network, builder_type=False, mev_params=None
+):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
         builder_type=builder_type,
+        mev_params=mev_params,
     )

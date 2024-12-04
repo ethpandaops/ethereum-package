@@ -12,6 +12,5 @@ additional_services:
   - prometheus_grafana
 mev_params:
   mev_boost_image: ghcr.io/commit-boost/pbs:latest
-  mev_relay_image: flashbots/mev-boost-relay:latest
 network_params:
   seconds_per_slot: 3

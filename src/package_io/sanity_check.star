@@ -28,7 +28,6 @@ PARTICIPANT_CATEGORIES = {
         "use_separate_vc",
         "vc_type",
         "vc_image",
-        "vc_count",
         "vc_log_level",
         "vc_extra_env_vars",
         "vc_extra_labels",
@@ -96,7 +95,6 @@ PARTICIPANT_MATRIX_PARAMS = {
             "use_separate_vc",
             "vc_type",
             "vc_image",
-            "vc_count",
             "vc_log_level",
             "vc_extra_env_vars",
             "vc_extra_labels",
@@ -112,7 +110,6 @@ PARTICIPANT_MATRIX_PARAMS = {
         "vc": [
             "vc_type",
             "vc_image",
-            "vc_count",
             "vc_log_level",
             "vc_extra_env_vars",
             "vc_extra_labels",

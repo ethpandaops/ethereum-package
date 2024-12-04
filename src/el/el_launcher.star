@@ -25,6 +25,7 @@ def launch(
     num_participants,
     port_publisher,
     mev_builder_type,
+    mev_params,
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -77,6 +78,7 @@ def launch(
                 jwt_file,
                 network_params.network,
                 builder_type=mev_builder_type,
+                mev_params=mev_params,
             ),
             "launch_method": reth.launch,
         },
