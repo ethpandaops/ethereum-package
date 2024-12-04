@@ -20,4 +20,4 @@ network_params:
   deneb_fork_epoch: 4
   electra_fork_epoch: 5
   fulu_fork_epoch: 6
-  preset: minimal
+  genesis_delay: 120

@@ -20,4 +20,5 @@ network_params:
   deneb_fork_epoch: 2
   electra_fork_epoch: 3
   fulu_fork_epoch: 4
-  preset: minimal
+  genesis_delay: 120
+snooper_enabled: true
