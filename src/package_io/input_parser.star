@@ -31,7 +31,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "chainsafe/lodestar:latest",
-    "grandine": "ethpandaops/grandine:master-minimal",
+    "grandine": "ethpandaops/grandine:develop-minimal",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -41,6 +41,7 @@ DEFAULT_VC_IMAGES = {
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
     "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
+    "vero": "ghcr.io/serenita-org/vero:master",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -49,7 +50,8 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
     "teku": "consensys/teku:latest",
-    "grandine": "ethpandaops/grandine:master-minimal",
+    "grandine": "ethpandaops/grandine:develop-minimal",
+    "vero": "ghcr.io/serenita-org/vero:master",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -73,8 +75,12 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "network_params",
     "participants",
     "mev_params",
+    "blockscout_params",
     "dora_params",
+    "docker_cache_params",
     "assertoor_params",
+    "prometheus_params",
+    "grafana_params",
     "goomy_blob_params",
     "tx_spammer_params",
     "custom_flood_params",
@@ -86,9 +92,10 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
-
     # add default eth2 input params
+    result["blockscout_params"] = get_default_blockscout_params()
     result["dora_params"] = get_default_dora_params()
+    result["docker_cache_params"] = get_default_docker_cache_params()
     result["mev_params"] = get_default_mev_params(
         result.get("mev_type"), result["network_params"]["preset"]
     )
@@ -103,7 +110,6 @@ def input_parser(plan, input_args):
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
     result["goomy_blob_params"] = get_default_goomy_blob_params()
-    result["prometheus_params"] = get_default_prometheus_params()
     result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
     result["prometheus_params"] = get_default_prometheus_params()
@@ -132,10 +138,18 @@ def input_parser(plan, input_args):
         if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
             result[attr] = value
         # custom eth2 attributes config
+        elif attr == "blockscout_params":
+            for sub_attr in input_args["blockscout_params"]:
+                sub_value = input_args["blockscout_params"][sub_attr]
+                result["blockscout_params"][sub_attr] = sub_value
         elif attr == "dora_params":
             for sub_attr in input_args["dora_params"]:
                 sub_value = input_args["dora_params"][sub_attr]
                 result["dora_params"][sub_attr] = sub_value
+        elif attr == "docker_cache_params":
+            for sub_attr in input_args["docker_cache_params"]:
+                sub_value = input_args["docker_cache_params"][sub_attr]
+                result["docker_cache_params"][sub_attr] = sub_value
         elif attr == "mev_params":
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
@@ -156,6 +170,14 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["assertoor_params"]:
                 sub_value = input_args["assertoor_params"][sub_attr]
                 result["assertoor_params"][sub_attr] = sub_value
+        elif attr == "prometheus_params":
+            for sub_attr in input_args["prometheus_params"]:
+                sub_value = input_args["prometheus_params"][sub_attr]
+                result["prometheus_params"][sub_attr] = sub_value
+        elif attr == "grafana_params":
+            for sub_attr in input_args["grafana_params"]:
+                sub_value = input_args["grafana_params"][sub_attr]
+                result["grafana_params"][sub_attr] = sub_value
         elif attr == "xatu_sentry_params":
             for sub_attr in input_args["xatu_sentry_params"]:
                 sub_value = input_args["xatu_sentry_params"][sub_attr]
@@ -186,6 +208,11 @@ def input_parser(plan, input_args):
                 result.get("mev_type")
             )
         )
+
+    if result["docker_cache_params"]["enabled"]:
+        docker_cache_image_override(plan, result)
+    else:
+        plan.print("Docker cache is disabled")
 
     if result["port_publisher"]["nat_exit_ip"] == "auto":
         result["port_publisher"]["nat_exit_ip"] = get_public_ip(plan)
@@ -334,14 +361,28 @@ def input_parser(plan, input_args):
         )
         if result["mev_params"]
         else None,
+        blockscout_params=struct(
+            image=result["blockscout_params"]["image"],
+            verif_image=result["blockscout_params"]["verif_image"],
+            frontend_image=result["blockscout_params"]["frontend_image"],
+        ),
         dora_params=struct(
             image=result["dora_params"]["image"],
             env=result["dora_params"]["env"],
         ),
+        docker_cache_params=struct(
+            enabled=result["docker_cache_params"]["enabled"],
+            url=result["docker_cache_params"]["url"],
+            dockerhub_prefix=result["docker_cache_params"]["dockerhub_prefix"],
+            github_prefix=result["docker_cache_params"]["github_prefix"],
+            google_prefix=result["docker_cache_params"]["google_prefix"],
+        ),
         tx_spammer_params=struct(
+            image=result["tx_spammer_params"]["image"],
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
         goomy_blob_params=struct(
+            image=result["goomy_blob_params"]["image"],
             goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
         ),
         prometheus_params=struct(
@@ -355,6 +396,7 @@ def input_parser(plan, input_args):
             max_cpu=result["prometheus_params"]["max_cpu"],
             min_mem=result["prometheus_params"]["min_mem"],
             max_mem=result["prometheus_params"]["max_mem"],
+            image=result["prometheus_params"]["image"],
         ),
         grafana_params=struct(
             additional_dashboards=result["grafana_params"]["additional_dashboards"],
@@ -362,6 +404,7 @@ def input_parser(plan, input_args):
             max_cpu=result["grafana_params"]["max_cpu"],
             min_mem=result["grafana_params"]["min_mem"],
             max_mem=result["grafana_params"]["max_mem"],
+            image=result["grafana_params"]["image"],
         ),
         apache_port=result["apache_port"],
         assertoor_params=struct(
@@ -967,10 +1010,28 @@ def default_participant():
     }
 
 
+def get_default_blockscout_params():
+    return {
+        "image": "blockscout/blockscout:latest",
+        "verif_image": "ghcr.io/blockscout/smart-contract-verifier:latest",
+        "frontend_image": "ghcr.io/blockscout/frontend:latest",
+    }
+
+
 def get_default_dora_params():
     return {
-        "image": "",
+        "image": "ethpandaops/dora:latest",
         "env": {},
+    }
+
+
+def get_default_docker_cache_params():
+    return {
+        "enabled": False,
+        "url": "",
+        "dockerhub_prefix": "/dh/",
+        "github_prefix": "/gh/",
+        "google_prefix": "/gcr/",
     }
 
 
@@ -1046,16 +1107,19 @@ def get_default_mev_params(mev_type, preset):
 
 
 def get_default_tx_spammer_params():
-    return {"tx_spammer_extra_args": []}
+    return {
+        "image": "ethpandaops/tx-fuzz:master",
+        "tx_spammer_extra_args": [],
+    }
 
 
 def get_default_goomy_blob_params():
-    return {"goomy_blob_args": []}
+    return {"image": "ethpandaops/goomy-blob:master", "goomy_blob_args": []}
 
 
 def get_default_assertoor_params():
     return {
-        "image": "",
+        "image": "ethpandaops/assertoor:latest",
         "run_stability_check": False,
         "run_block_proposal_check": False,
         "run_lifecycle_test": False,
@@ -1074,6 +1138,7 @@ def get_default_prometheus_params():
         "max_cpu": 1000,
         "min_mem": 128,
         "max_mem": 2048,
+        "image": "prom/prometheus:latest",
     }
 
 
@@ -1084,6 +1149,7 @@ def get_default_grafana_params():
         "max_cpu": 1000,
         "min_mem": 128,
         "max_mem": 2048,
+        "image": "grafana/grafana:latest",
     }
 
 
@@ -1201,6 +1267,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if participant["cl_type"] == "grandine":
             participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
 
+        if participant["vc_type"] == "vero":
+            participant["vc_extra_params"].append("--use-external-builder")
+
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
         num_participants + 1, len(str(num_participants + 1))
@@ -1210,7 +1279,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         or mev_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
         mev_participant = default_participant()
-        mev_participant["el_type"] = "geth"
+        mev_participant["el_type"] = "reth-builder"
         mev_participant.update(
             {
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
@@ -1222,31 +1291,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "12000",
                     "--disable-peer-scoring",
                 ],
-                # TODO(maybe) make parts of this more passable like the mev-relay-endpoint & forks
-                "el_extra_params": [
-                    "--builder",
-                    "--builder.remote_relay_endpoint=http://mev-relay-api:9062",
-                    "--builder.beacon_endpoints=http://cl-{0}-lighthouse-geth-builder:4000".format(
-                        index_str
-                    ),
-                    "--builder.bellatrix_fork_version={0}".format(
-                        constants.BELLATRIX_FORK_VERSION
-                    ),
-                    "--builder.genesis_fork_version={0}".format(
-                        constants.GENESIS_FORK_VERSION
-                    ),
-                    "--builder.genesis_validators_root={0}".format(
-                        constants.GENESIS_VALIDATORS_ROOT_PLACEHOLDER
-                    ),
-                    '--miner.extradata="Illuminate Dmocratize Dstribute"',
-                    "--builder.algotype=greedy",
-                    "--metrics.builder",
-                ]
-                + parsed_arguments_dict["mev_params"]["mev_builder_extra_args"],
-                "el_extra_env_vars": {
-                    "BUILDER_TX_SIGNING_KEY": "0x"
-                    + genesis_constants.PRE_FUNDED_ACCOUNTS[0].private_key
-                },
+                "el_extra_params": parsed_arguments_dict["mev_params"][
+                    "mev_builder_extra_args"
+                ],
                 "validator_count": 0,
                 "prometheus_config": parsed_arguments_dict["mev_params"][
                     "mev_builder_prometheus_config"
@@ -1297,3 +1344,97 @@ def get_public_ip(plan):
         run="curl -s https://ident.me",
     )
     return response.output
+
+
+def docker_cache_image_override(plan, result):
+    plan.print("Docker cache is enabled, overriding image urls")
+    participant_overridable_image = [
+        "el_image",
+        "cl_image",
+        "vc_image",
+        "remote_signer_image",
+    ]
+    tooling_overridable_image = [
+        "dora_params.image",
+        "assertoor_params.image",
+        "mev_params.mev_relay_image",
+        "mev_params.mev_builder_image",
+        "mev_params.mev_builder_cl_image",
+        "mev_params.mev_boost_image",
+        "mev_params.mev_flood_image",
+        "xatu_sentry_params.xatu_sentry_image",
+        "tx_spammer_params.image",
+        "goomy_blob_params.image",
+        "prometheus_params.image",
+        "grafana_params.image",
+    ]
+
+    if result["docker_cache_params"]["url"] == "":
+        fail(
+            "docker_cache_params.url is empty or spaces, please provide a valid docker cache url, or disable the docker cache"
+        )
+    for index, participant in enumerate(result["participants"]):
+        for images in participant_overridable_image:
+            if result["docker_cache_params"]["url"] in participant[images]:
+                break
+            elif constants.CONTAINER_REGISTRY.ghcr in participant[images]:
+                participant[images] = (
+                    result["docker_cache_params"]["url"]
+                    + result["docker_cache_params"]["github_prefix"]
+                    + "/".join(participant[images].split("/")[1:])
+                )
+            elif constants.CONTAINER_REGISTRY.gcr in participant[images]:
+                participant[images] = (
+                    result["docker_cache_params"]["url"]
+                    + result["docker_cache_params"]["google_prefix"]
+                    + "/".join(participant[images].split("/")[1:])
+                )
+            elif constants.CONTAINER_REGISTRY.dockerhub in participant[images]:
+                participant[images] = (
+                    result["docker_cache_params"]["url"]
+                    + result["docker_cache_params"]["dockerhub_prefix"]
+                    + participant[images]
+                )
+            else:
+                plan.print(
+                    "Using local client image instead of docker cache for {0} for participant {1}".format(
+                        images, index + 1
+                    )
+                )
+
+    for tooling_image_key in tooling_overridable_image:
+        image_parts = tooling_image_key.split(".")
+        if (
+            result["docker_cache_params"]["url"]
+            in result[image_parts[0]][image_parts[1]]
+        ):
+            break
+        elif (
+            constants.CONTAINER_REGISTRY.ghcr in result[image_parts[0]][image_parts[1]]
+        ):
+            result[image_parts[0]][image_parts[1]] = (
+                result["docker_cache_params"]["url"]
+                + result["docker_cache_params"]["github_prefix"]
+                + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
+            )
+        elif constants.CONTAINER_REGISTRY.gcr in result[image_parts[0]][image_parts[1]]:
+            result[image_parts[0]][image_parts[1]] = (
+                result["docker_cache_params"]["url"]
+                + result["docker_cache_params"]["google_prefix"]
+                + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
+            )
+        elif (
+            constants.CONTAINER_REGISTRY.dockerhub
+            in result[image_parts[0]][image_parts[1]]
+        ):
+            result[image_parts[0]][image_parts[1]] = (
+                result["docker_cache_params"]["url"]
+                + result["docker_cache_params"]["dockerhub_prefix"]
+                + result[image_parts[0]][image_parts[1]]
+            )
+        else:
+            plan.print(
+                "Using local tooling image instead of docker cache for {0}".format(
+                    tooling_image_key
+                )
+            )

@@ -12,8 +12,8 @@ BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
 # Port nums
 DISCOVERY_TCP_PORT_NUM = 13000
 DISCOVERY_UDP_PORT_NUM = 12000
-RPC_PORT_NUM = 3500
-BEACON_HTTP_PORT_NUM = 4000
+BEACON_HTTP_PORT_NUM = 3500
+RPC_PORT_NUM = 4000
 BEACON_MONITORING_PORT_NUM = 8080
 PROFILING_PORT_NUM = 6060
 
@@ -303,7 +303,7 @@ def get_beacon_config(
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.prysm,
             client_type=constants.CLIENT_TYPES.cl,
-            image=participant.cl_image,
+            image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
             supernode=participant.supernode,

@@ -23,11 +23,15 @@ def launch(
     el_context,
     cl_context,
     node_selectors,
+    docker_cache_params,
 ):
     exporter_service = plan.add_service(
         ethereum_metrics_exporter_service_name,
         ServiceConfig(
-            image=DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE,
+            image=shared_utils.docker_cache_image_calc(
+                docker_cache_params,
+                DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE,
+            ),
             ports={
                 HTTP_PORT_ID: shared_utils.new_port_spec(
                     METRICS_PORT_NUMBER,

@@ -30,9 +30,8 @@ beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
 
 def launch_participant_network(
     plan,
-    participants,
+    args_with_right_defaults,
     network_params,
-    global_log_level,
     jwt_file,
     keymanager_file,
     persistent,
@@ -41,13 +40,10 @@ def launch_participant_network(
     global_node_selectors,
     keymanager_enabled,
     parallel_keystore_generation,
-    checkpoint_sync_enabled,
-    checkpoint_sync_url,
-    port_publisher,
 ):
     network_id = network_params.network_id
     latest_block = ""
-    num_participants = len(participants)
+    num_participants = len(args_with_right_defaults.participants)
     prague_time = 0
     shadowfork_block = "latest"
     total_number_of_validator_keys = 0
@@ -69,7 +65,7 @@ def launch_participant_network(
                 plan,
                 network_params,
                 shadowfork_block,
-                participants,
+                args_with_right_defaults.participants,
                 global_tolerations,
                 global_node_selectors,
             )
@@ -81,7 +77,7 @@ def launch_participant_network(
             final_genesis_timestamp,
             validator_data,
         ) = launch_kurtosis.launch(
-            plan, network_params, participants, parallel_keystore_generation
+            plan, network_params, args_with_right_defaults, parallel_keystore_generation
         )
 
         el_cl_genesis_config_template = read_file(
@@ -136,14 +132,15 @@ def launch_participant_network(
         network_params,
         el_cl_data,
         jwt_file,
-        participants,
-        global_log_level,
+        args_with_right_defaults.participants,
+        args_with_right_defaults.global_log_level,
         global_node_selectors,
         global_tolerations,
         persistent,
         network_id,
         num_participants,
-        port_publisher,
+        args_with_right_defaults.port_publisher,
+        args_with_right_defaults.mev_type,
     )
 
     # Launch all consensus layer clients
@@ -168,9 +165,8 @@ def launch_participant_network(
         el_cl_data,
         jwt_file,
         keymanager_file,
-        participants,
+        args_with_right_defaults,
         all_el_contexts,
-        global_log_level,
         global_node_selectors,
         global_tolerations,
         persistent,
@@ -178,9 +174,6 @@ def launch_participant_network(
         validator_data,
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
-        checkpoint_sync_enabled,
-        checkpoint_sync_url,
-        port_publisher,
     )
 
     ethereum_metrics_exporter_context = None
@@ -198,12 +191,14 @@ def launch_participant_network(
     ]
 
     current_vc_index = 0
-    for index, participant in enumerate(participants):
+    for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
         vc_type = participant.vc_type
         remote_signer_type = participant.remote_signer_type
-        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
+        index_str = shared_utils.zfill_custom(
+            index + 1, len(str(len(args_with_right_defaults.participants)))
+        )
         for sub_index in range(participant.vc_count):
             vc_index_str = shared_utils.zfill_custom(
                 sub_index + 1, len(str(participant.vc_count))
@@ -229,6 +224,7 @@ def launch_participant_network(
                     el_context,
                     cl_context,
                     node_selectors,
+                    args_with_right_defaults.docker_cache_params,
                 )
                 plan.print(
                     "Successfully added {0} ethereum metrics exporter participants".format(
@@ -318,6 +314,7 @@ def launch_participant_network(
                     snooper_service_name,
                     cl_context,
                     node_selectors,
+                    args_with_right_defaults.docker_cache_params,
                 )
                 plan.print(
                     "Successfully added {0} snooper participants".format(
@@ -357,7 +354,7 @@ def launch_participant_network(
                     participant=participant,
                     global_tolerations=global_tolerations,
                     node_selectors=node_selectors,
-                    port_publisher=port_publisher,
+                    port_publisher=args_with_right_defaults.port_publisher,
                     remote_signer_index=current_vc_index,
                 )
 
@@ -374,7 +371,7 @@ def launch_participant_network(
                 service_name="vc-{0}".format(full_name),
                 vc_type=vc_type,
                 image=participant.vc_image,
-                global_log_level=global_log_level,
+                global_log_level=args_with_right_defaults.global_log_level,
                 cl_context=cl_context,
                 el_context=el_context,
                 remote_signer_context=remote_signer_context,
@@ -390,7 +387,7 @@ def launch_participant_network(
                 preset=network_params.preset,
                 network=network_params.network,
                 electra_fork_epoch=network_params.electra_fork_epoch,
-                port_publisher=port_publisher,
+                port_publisher=args_with_right_defaults.port_publisher,
                 vc_index=current_vc_index,
             )
             all_vc_contexts.append(vc_context)
@@ -401,7 +398,7 @@ def launch_participant_network(
 
         all_participants = []
 
-    for index, participant in enumerate(participants):
+    for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
         vc_type = participant.vc_type

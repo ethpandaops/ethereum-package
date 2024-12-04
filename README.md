@@ -1,10 +1,3 @@
-# Important recent update notes - temporary note
-The `ethereum-package` has been moved to the [ethpandaops organization](https://github.com/ethpandaops/).
-
-The new repository is located at [github.com/ethpandaops/ethereum-package](https://github.com/ethpandaops/ethereum-package). For all your references please replace `kurtosis-tech` with `ethpandaops`.
-
-If you would like to use the latest release of the package, released by kurtosis-tech, please refer to using the tag [v3.1.0](https://github.com/kurtosis-tech/ethereum-package/releases/tag/3.1.0).
-
 # Ethereum Package
 
 ![Run of the Ethereum Network Package](run.gif)
@@ -176,7 +169,7 @@ participants:
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
     # Defaults by client:
     # - geth: ethereum/client-go:latest
-    # - erigon: thorax/erigon:devel
+    # - erigon: ethpandaops/erigon:main
     # - nethermind: nethermind/nethermind:latest
     # - besu: hyperledger/besu:develop
     # - reth: ghcr.io/paradigmxyz/reth
@@ -296,7 +289,7 @@ participants:
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
-    # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm and vero
     # ( The prysm validator only works with a prysm CL client )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
@@ -308,6 +301,7 @@ participants:
     # - nimbus: statusim/nimbus-validator-client:multiarch-latest
     # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
     # - teku: consensys/teku:latest
+    # - vero: ghcr.io/serenita-org/vero:master
     vc_image: ""
 
     # The number of validator clients to run for this participant
@@ -640,22 +634,39 @@ additional_services:
   - apache
   - tracoor
 
+# Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
+blockscout_params:
+  # blockscout docker image to use
+  # Defaults to blockscout/blockscout:latest
+  image: "blockscout/blockscout:latest"
+  # blockscout smart contract verifier image to use
+  # Defaults to ghcr.io/blockscout/smart-contract-verifier:latest
+  verif_image: "ghcr.io/blockscout/smart-contract-verifier:latest"
+  # Frontend image
+  # Defaults to ghcr.io/blockscout/frontend:latest
+  frontend_image: "ghcr.io/blockscout/frontend:latest"
+
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
   # Dora docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
-
+  # Defaults to the latest image
+  image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
+  # TX Spammer docker image to use
+  # Defaults to the latest master image
+  image: "ethpandaops/tx-fuzz:master"
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
   tx_spammer_extra_args: []
 
 # Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
 goomy_blob_params:
+  # Goomy Blob docker image to use
+  # Defaults to the latest
+  image: "ethpandaops/goomy-blob:latest"
   # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
   goomy_blob_args: []
 
@@ -670,6 +681,9 @@ prometheus_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Prometheus docker image to use
+  # Defaults to the latest image
+  image: "prom/prometheus:latest"
 
 # Configuration place for grafana
 grafana_params:
@@ -682,12 +696,15 @@ grafana_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Grafana docker image to use
+  # Defaults to the latest image
+  image: "grafana/grafana:latest"
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
+  # Defaults to the latest image
+  image: "ethpandaops/assertoor:latest"
 
   # Check chain stability
   # This check monitors the chain and succeeds if:
@@ -776,6 +793,20 @@ disable_peer_scoring: false
 # Note Erigon, Besu, Teku persistence is not currently supported with docker.
 # Defaults to false
 persistent: false
+
+# Docker cache url enables all docker images to be pulled through a custom docker registry
+# Disabled by default
+# Defaults to empty cache url
+# Images pulled from dockerhub will be prefixed with "/dh/" by default (docker.io)
+# Images pulled from github registry will be prefixed with "/gh/" by default (ghcr.io)
+# Images pulled from google registory will be prefixed with "/gcr/" by default (gcr.io)
+# If you want to use a local image in combination with the cache, do not put "/" in your local image name
+docker_cache_params:
+  enabled: false
+  url: ""
+  dockerhub_prefix: "/dh/"
+  github_prefix: "/gh/"
+  google_prefix: "/gcr/"
 
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up

@@ -120,12 +120,10 @@ def get_config(
         0,
     )
 
-    if dora_params.image != "":
-        IMAGE_NAME = dora_params.image
-    elif network_params.electra_fork_epoch < constants.ELECTRA_FORK_EPOCH:
+    IMAGE_NAME = dora_params.image
+
+    if network_params.electra_fork_epoch < constants.ELECTRA_FORK_EPOCH:
         IMAGE_NAME = "ethpandaops/dora:master"
-    else:
-        IMAGE_NAME = "ethpandaops/dora:latest"
 
     return ServiceConfig(
         image=IMAGE_NAME,
