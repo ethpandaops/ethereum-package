@@ -36,8 +36,10 @@ def generate_el_cl_genesis_data(
         genesis_generation_config_yml_template, template_data
     )
 
-    additional_contracts_template_data = new_additionsl_contracts_file_for_el_cl_genesis_data(
-        network_params,
+    additional_contracts_template_data = (
+        new_additionsl_contracts_file_for_el_cl_genesis_data(
+            network_params,
+        )
     )
     additional_contracts_template = shared_utils.new_template_and_data(
         genesis_additional_contracts_yml_template, additional_contracts_template_data
@@ -57,11 +59,7 @@ def generate_el_cl_genesis_data(
         genesis_values_and_dest_filepath, "genesis-el-cl-env-file"
     )
 
-    plan.print(
-        "Fulu EPOCH {0}".format(
-            network_params.fulu_fork_epoch
-        )
-    )
+    plan.print("Fulu EPOCH {0}".format(network_params.fulu_fork_epoch))
 
     files[GENESIS_VALUES_PATH] = genesis_generation_config_artifact_name
 
@@ -149,9 +147,12 @@ def new_env_file_for_el_cl_genesis_data(
         "CustodyRequirement": network_params.custody_requirement,
         "MaxBlobsPerBlock": network_params.max_blobs_per_block,
         "Preset": network_params.preset,
-        "AdditionalPreloadedContractsFile": GENESIS_VALUES_PATH + "/" + GENESIS_CONTRACTS_FILENAME,
+        "AdditionalPreloadedContractsFile": GENESIS_VALUES_PATH
+        + "/"
+        + GENESIS_CONTRACTS_FILENAME,
         "PrefundedAccounts": json.encode(network_params.prefunded_accounts),
     }
+
 
 def new_additionsl_contracts_file_for_el_cl_genesis_data(
     network_params,

@@ -68,7 +68,7 @@ def launch(
             args_with_right_defaults.docker_cache_params,
             constants.ETHEREUM_GENESIS_GENERATOR.verkle_genesis,
         )
-    
+
     return (
         total_number_of_validator_keys,
         ethereum_genesis_generator_image,
