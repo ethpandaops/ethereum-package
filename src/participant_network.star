@@ -141,6 +141,7 @@ def launch_participant_network(
         num_participants,
         args_with_right_defaults.port_publisher,
         args_with_right_defaults.mev_type,
+        args_with_right_defaults.mev_params,
     )
 
     # Launch all consensus layer clients
