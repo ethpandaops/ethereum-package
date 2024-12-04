@@ -12,6 +12,7 @@ BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
 # Port nums
 DISCOVERY_TCP_PORT_NUM = 13000
 DISCOVERY_UDP_PORT_NUM = 12000
+DISCOVERY_QUIC_PORT_NUM = 13000
 BEACON_HTTP_PORT_NUM = 3500
 RPC_PORT_NUM = 4000
 BEACON_MONITORING_PORT_NUM = 8080
@@ -161,6 +162,8 @@ def get_beacon_config(
 
     public_ports = {}
     discovery_port = DISCOVERY_TCP_PORT_NUM
+    discovery_port_udp = DISCOVERY_UDP_PORT_NUM
+    discovery_port_quic = DISCOVERY_QUIC_PORT_NUM
     if port_publisher.cl_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "cl", port_publisher, participant_index
@@ -181,7 +184,8 @@ def get_beacon_config(
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        # constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic, # TODO: Uncomment this when we have a stable release with this flag
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_MONITORING_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
@@ -200,7 +204,8 @@ def get_beacon_config(
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--p2p-host-ip=" + port_publisher.nat_exit_ip,
         "--p2p-tcp-port={0}".format(discovery_port),
-        "--p2p-udp-port={0}".format(discovery_port),
+        "--p2p-udp-port={0}".format(discovery_port_udp),
+        # "--p2p-quic-port={0}".format(discovery_port_quic) # TODO: Uncomment this when we have a stable release with this flag
         "--min-sync-peers={0}".format(MIN_PEERS),
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
