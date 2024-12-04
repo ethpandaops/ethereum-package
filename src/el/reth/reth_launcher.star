@@ -234,7 +234,7 @@ def get_config(
         launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
         or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
-        image = launcher.mev_params.builder_image
+        image = launcher.mev_params.mev_builder_image
         cl_client_name = service_name.split("-")[4]
         cmd.append("--engine.experimental")
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
