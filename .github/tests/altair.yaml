@@ -1,0 +1,23 @@
+participants:
+  - el_type: geth
+    cl_type: teku
+  - el_type: geth
+    cl_type: prysm
+  - el_type: geth
+    cl_type: nimbus
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: geth
+    cl_type: lodestar
+  - el_type: geth
+    cl_type: grandine
+additional_services:
+  - dora
+network_params:
+  altair_fork_epoch: 1
+  bellatrix_fork_epoch: 2
+  capella_fork_epoch: 3
+  deneb_fork_epoch: 4
+  electra_fork_epoch: 5
+  fulu_fork_epoch: 6
+  preset: minimal
