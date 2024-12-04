@@ -49,7 +49,7 @@ def generate_el_cl_genesis_data(
     genesis = plan.run_sh(
         name="run-generate-genesis",
         description="Creating genesis",
-        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/",
+        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed",
         image=image,
         files=files,
         store=[
