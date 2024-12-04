@@ -13,6 +13,7 @@ participants:
     cl_type: grandine
 additional_services:
   - assertoor
+  - dora
 assertoor_params:
   run_stability_check: false
   run_block_proposal_check: true

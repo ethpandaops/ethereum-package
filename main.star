@@ -133,7 +133,10 @@ def run(plan, args={}):
             args_with_right_defaults.mev_params.mev_builder_extra_data,
             global_node_selectors,
         )
-    elif args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE:
+    elif (
+        args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
+        or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
+    ):
         plan.print("Generating flashbots builder config file")
         flashbots_builder_config_file = flashbots_mev_rbuilder.new_builder_config(
             plan,
