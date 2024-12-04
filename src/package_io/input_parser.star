@@ -747,10 +747,6 @@ def parse_network_params(plan, input_args):
             + " is not supported, it can only be mainnet or minimal"
         )
 
-    if result["network_params"]["preset"] == "minimal":
-        if result["network_params"]["deneb_fork_epoch"] > 0:
-            fail("minimal preset only supports deneb genesis fork epoch")
-
     return result
 
 
