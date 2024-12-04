@@ -59,8 +59,6 @@ def generate_el_cl_genesis_data(
         genesis_values_and_dest_filepath, "genesis-el-cl-env-file"
     )
 
-    plan.print("Fulu EPOCH {0}".format(network_params.fulu_fork_epoch))
-
     files[GENESIS_VALUES_PATH] = genesis_generation_config_artifact_name
 
     genesis = plan.run_sh(
