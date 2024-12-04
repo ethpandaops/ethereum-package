@@ -6,6 +6,7 @@ constants = import_module("../../package_io/constants.star")
 
 GENESIS_VALUES_PATH = "/opt"
 GENESIS_VALUES_FILENAME = "values.env"
+GENESIS_CONTRACTS_FILENAME = "additional-contracts.json"
 SHADOWFORK_FILEPATH = "/shadowfork"
 
 
@@ -13,6 +14,7 @@ def generate_el_cl_genesis_data(
     plan,
     image,
     genesis_generation_config_yml_template,
+    genesis_additional_contracts_yml_template,
     genesis_unix_timestamp,
     network_params,
     total_num_validator_keys_to_preregister,
@@ -34,14 +36,31 @@ def generate_el_cl_genesis_data(
         genesis_generation_config_yml_template, template_data
     )
 
+    additional_contracts_template_data = new_additionsl_contracts_file_for_el_cl_genesis_data(
+        network_params,
+    )
+    additional_contracts_template = shared_utils.new_template_and_data(
+        genesis_additional_contracts_yml_template, additional_contracts_template_data
+    )
+
     genesis_values_and_dest_filepath = {}
 
     genesis_values_and_dest_filepath[
         GENESIS_VALUES_FILENAME
     ] = genesis_generation_template
 
+    genesis_values_and_dest_filepath[
+        GENESIS_CONTRACTS_FILENAME
+    ] = additional_contracts_template
+
     genesis_generation_config_artifact_name = plan.render_templates(
         genesis_values_and_dest_filepath, "genesis-el-cl-env-file"
+    )
+
+    plan.print(
+        "Fulu EPOCH {0}".format(
+            network_params.fulu_fork_epoch
+        )
     )
 
     files[GENESIS_VALUES_PATH] = genesis_generation_config_artifact_name
@@ -107,13 +126,13 @@ def new_env_file_for_el_cl_genesis_data(
         "ChurnLimitQuotient": network_params.churn_limit_quotient,
         "EjectionBalance": network_params.ejection_balance,
         "Eth1FollowDistance": network_params.eth1_follow_distance,
-        "AltairForkEpoch": network_params.altair_fork_epoch,
-        "BellatrixForkEpoch": network_params.bellatrix_fork_epoch,
-        "CapellaForkEpoch": network_params.capella_fork_epoch,
-        "DenebForkEpoch": network_params.deneb_fork_epoch,
-        "ElectraForkEpoch": network_params.electra_fork_epoch,
-        "FuluForkEpoch": network_params.fulu_fork_epoch,
-        "EIP7594ForkEpoch": network_params.eip7594_fork_epoch,
+        "AltairForkEpoch": "{0}".format(network_params.altair_fork_epoch),
+        "BellatrixForkEpoch": "{0}".format(network_params.bellatrix_fork_epoch),
+        "CapellaForkEpoch": "{0}".format(network_params.capella_fork_epoch),
+        "DenebForkEpoch": "{0}".format(network_params.deneb_fork_epoch),
+        "ElectraForkEpoch": "{0}".format(network_params.electra_fork_epoch),
+        "FuluForkEpoch": "{0}".format(network_params.fulu_fork_epoch),
+        "EIP7594ForkEpoch": "{0}".format(network_params.eip7594_fork_epoch),
         "EIP7594ForkVersion": network_params.eip7594_fork_version,
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
@@ -130,8 +149,15 @@ def new_env_file_for_el_cl_genesis_data(
         "CustodyRequirement": network_params.custody_requirement,
         "MaxBlobsPerBlock": network_params.max_blobs_per_block,
         "Preset": network_params.preset,
+        "AdditionalPreloadedContractsFile": GENESIS_VALUES_PATH + "/" + GENESIS_CONTRACTS_FILENAME,
+        "PrefundedAccounts": json.encode(network_params.prefunded_accounts),
+    }
+
+def new_additionsl_contracts_file_for_el_cl_genesis_data(
+    network_params,
+):
+    return {
         "AdditionalPreloadedContracts": json.encode(
             network_params.additional_preloaded_contracts
         ),
-        "PrefundedAccounts": json.encode(network_params.prefunded_accounts),
     }

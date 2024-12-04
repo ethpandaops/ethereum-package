@@ -553,16 +553,16 @@ network_params:
   deneb_fork_epoch: 0
 
   # Electra fork epoch
-  # Defaults to 100000000
-  electra_fork_epoch: 100000000
+  # Defaults to 18446744073709551615
+  electra_fork_epoch: 18446744073709551615
 
   # Fulu fork epoch
-  # Defaults to 100000001
-  fulu_fork_epoch: 100000001
+  # Defaults to 18446744073709551615
+  fulu_fork_epoch: 18446744073709551615
 
   # Eip7594 fork epoch
-  # Defaults to 100000002
-  eip7594_fork_epoch: 100000002
+  # Defaults to 18446744073709551615
+  eip7594_fork_epoch: 18446744073709551615
   # The fork version to set if the eip7594 fork is active
   eip7594_fork_version: "0x60000038"
 

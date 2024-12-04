@@ -108,11 +108,10 @@ BELLATRIX_FORK_VERSION = "0x30000038"
 CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
-ELECTRA_FORK_EPOCH = 100000000
 FULU_FORK_VERSION = "0x70000038"
-FULU_FORK_EPOCH = 100000001
 EIP7594_FORK_VERSION = "0x80000038"
-EIP7594_FORK_EPOCH = 100000002
+
+FAR_FUTURE_EPOCH = 18446744073709551615
 
 MAX_LABEL_LENGTH = 63
 
@@ -124,7 +123,7 @@ CONTAINER_REGISTRY = struct(
 
 
 ETHEREUM_GENESIS_GENERATOR = struct(
-    default_genesis_generator_image="ethpandaops/ethereum-genesis-generator:fix-default-issue-66a93b6",  # Default
+    default_genesis_generator_image="pk910/dev-images:genesis-generator-bash",  # Default
     verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )
 

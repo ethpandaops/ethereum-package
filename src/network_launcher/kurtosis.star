@@ -62,7 +62,7 @@ def launch(
         constants.ETHEREUM_GENESIS_GENERATOR.default_genesis_generator_image,
     )
     # we are running electra - experimental
-    if network_params.electra_fork_epoch != None:
+    if network_params.electra_fork_epoch != constants.FAR_FUTURE_EPOCH:
         if network_params.electra_fork_epoch == 0:
             ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
                 args_with_right_defaults.docker_cache_params,
