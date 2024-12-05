@@ -123,7 +123,7 @@ CONTAINER_REGISTRY = struct(
 
 
 ETHEREUM_GENESIS_GENERATOR = struct(
-    default_genesis_generator_image="pk910/dev-images:genesis-generator-bash",  # Default
+    default_genesis_generator_image="ethpandaops/ethereum-genesis-generator:pk910-bash-el-genesis-generator-8cf5b40",  # Default
     verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )
 
