@@ -438,6 +438,7 @@ def input_parser(plan, input_args):
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
+            tx_type=result["spamoor_params"]["tx_type"],
             throughput=result["spamoor_params"]["throughput"],
             max_pending=result["spamoor_params"]["max_pending"],
             max_wallets=result["spamoor_params"]["max_wallets"],
