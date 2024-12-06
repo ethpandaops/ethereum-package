@@ -234,7 +234,7 @@ def get_config(
         launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
         or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
-        image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+        image = launcher.mev_params.mev_builder_image
         cl_client_name = service_name.split("-")[4]
         cmd.append("--engine.experimental")
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
@@ -283,10 +283,13 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_reth_launcher(el_cl_genesis_data, jwt_file, network, builder_type=False):
+def new_reth_launcher(
+    el_cl_genesis_data, jwt_file, network, builder_type=False, mev_params=None
+):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
         builder_type=builder_type,
+        mev_params=mev_params,
     )
