@@ -1,5 +1,33 @@
 # Changelog
 
+## [5.0.0](https://github.com/ethpandaops/ethereum-package/compare/4.4.0...5.0.0) (2024-12-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove vc_count ([#844](https://github.com/ethpandaops/ethereum-package/issues/844))
+
+### Features
+
+* add spamoor ([#850](https://github.com/ethpandaops/ethereum-package/issues/850)) ([a01d772](https://github.com/ethpandaops/ethereum-package/commit/a01d77274ebf7790a610932e225b8415575df492))
+* add support for pull through cache ([#833](https://github.com/ethpandaops/ethereum-package/issues/833)) ([0b2a2ae](https://github.com/ethpandaops/ethereum-package/commit/0b2a2ae081652f5c7e7ef1da13744a40c7279f37))
+* add vero `vc_type` ([#827](https://github.com/ethpandaops/ethereum-package/issues/827)) ([c2af143](https://github.com/ethpandaops/ethereum-package/commit/c2af14377ccb118e1ba6b06f1ee8335113ff6e16))
+* Add-blockscout_params ([#838](https://github.com/ethpandaops/ethereum-package/issues/838)) ([777ec06](https://github.com/ethpandaops/ethereum-package/commit/777ec065efe9714acb2f6762ec21c6f5c1961f4a))
+* support older forks ([#846](https://github.com/ethpandaops/ethereum-package/issues/846)) ([d7e31e0](https://github.com/ethpandaops/ethereum-package/commit/d7e31e01ca6fff88c64ee3846d517e2f32d7bbcf))
+* update blockscout with new frontend ([#843](https://github.com/ethpandaops/ethereum-package/issues/843)) ([4f69962](https://github.com/ethpandaops/ethereum-package/commit/4f69962f440fc85c61e9ec2b812463d9ab965f7a))
+
+
+### Bug Fixes
+
+* add txpool to reth api ([#841](https://github.com/ethpandaops/ethereum-package/issues/841)) ([35ec958](https://github.com/ethpandaops/ethereum-package/commit/35ec9585a728d373f3e9ec8c84e9abcddfed82a1))
+* mev-builder custom image ([#847](https://github.com/ethpandaops/ethereum-package/issues/847)) ([bc89ad3](https://github.com/ethpandaops/ethereum-package/commit/bc89ad316b9b7b137382269138fc37e241a645d1))
+* **prysm:** run p2p-udp on different port as it might conflict with the new quic port ([#845](https://github.com/ethpandaops/ethereum-package/issues/845)) ([3bb88e0](https://github.com/ethpandaops/ethereum-package/commit/3bb88e04d2fa9f27418c013d656b02a714c20f4d))
+* rbuilder upstream repo with reth-rbuilder binary ([#828](https://github.com/ethpandaops/ethereum-package/issues/828)) ([55df658](https://github.com/ethpandaops/ethereum-package/commit/55df658f7757d29419aca7510830cf1d5c70d492))
+* remove vc_count ([#844](https://github.com/ethpandaops/ethereum-package/issues/844)) ([b61a128](https://github.com/ethpandaops/ethereum-package/commit/b61a128bf1d96e8dd11f028925dee9b70e37ac6f))
+* revert egg version ([#852](https://github.com/ethpandaops/ethereum-package/issues/852)) ([a182f30](https://github.com/ethpandaops/ethereum-package/commit/a182f3039b91c15cde5b0d0967666d336a9629ac))
+* sanity check for count ([#835](https://github.com/ethpandaops/ethereum-package/issues/835)) ([2633d15](https://github.com/ethpandaops/ethereum-package/commit/2633d15b9739520bb979887965a04382869d16d8))
+* Update Erigon docker image repo naming ([#834](https://github.com/ethpandaops/ethereum-package/issues/834)) ([ceb1444](https://github.com/ethpandaops/ethereum-package/commit/ceb14448b4e3b48b4cbf893bf5d95572bfd8949c))
+
 ## [4.4.0](https://github.com/ethpandaops/ethereum-package/compare/4.3.0...4.4.0) (2024-11-01)
 
 
