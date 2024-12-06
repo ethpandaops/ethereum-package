@@ -927,6 +927,27 @@ checkpoint_sync_enabled: false
 # Global flag to set checkpoint sync url
 checkpoint_sync_url: ""
 
+# Spamoor params
+spamoor_params:
+  # The image to use for spamoor
+  image: ethpandaops/spamoor:latest
+  # The type of transactions to send
+  # Valid values are eoatx, erctx, deploytx, depoy-destruct, blobs, gasburnertx
+  # Defaults to eoatx
+  tx_type: eoatx
+  # Throughput of spamoor
+  # Defaults to 1000
+  throughput: 1000
+  # Max pending transactions for spamoor
+  # Defaults to 1000
+  max_pending: 1000
+  # Max wallets for spamoor
+  # Defaults to 500
+  max_wallets: 500
+  # Extra parameters to send to spamoor
+  # Defaults to empty
+  spamoor_extra_args: []
+
 # Global paarameter to set the exit ip address of services and public ports
 port_publisher:
   # if you have a service that you want to expose on a specific interfact; set that IP here
@@ -1166,6 +1187,7 @@ Here's a table of where the keys are used
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
+| 13            | spamoor             | ✅                |                 | Spams transactions         |
 
 ## Developing On This Package
 

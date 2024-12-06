@@ -28,6 +28,7 @@ additional_services:
   - blutgang
   - apache
   - tracoor
+  - spamoor
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true
