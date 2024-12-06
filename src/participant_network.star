@@ -84,10 +84,15 @@ def launch_participant_network(
             static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
         )
 
+        el_cl_genesis_additional_contracts_template = read_file(
+            static_files.EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH
+        )
+
         el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
             plan,
             ethereum_genesis_generator_image,
             el_cl_genesis_config_template,
+            el_cl_genesis_additional_contracts_template,
             final_genesis_timestamp,
             network_params,
             total_number_of_validator_keys,
