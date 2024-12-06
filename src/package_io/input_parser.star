@@ -1168,6 +1168,7 @@ def get_default_xatu_sentry_params():
 def get_default_spamoor_params():
     return {
         "image": "ethpandaops/spamoor:latest",
+        "tx_type": "eoatx",
         "throughput": 1000,
         "max_pending": 1000,
         "max_wallets": 500,

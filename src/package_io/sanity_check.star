@@ -246,6 +246,7 @@ SUBCATEGORY_PARAMS = {
     ],
     "spamoor_params": [
         "image",
+        "tx_type",
         "throughput",
         "max_pending",
         "max_wallets",

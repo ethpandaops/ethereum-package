@@ -931,13 +931,21 @@ checkpoint_sync_url: ""
 spamoor_params:
   # The image to use for spamoor
   image: ethpandaops/spamoor:latest
+  # The type of transactions to send
+  # Valid values are eoatx, erctx, deploytx, depoy-destruct, blobs, gasburnertx
+  # Defaults to eoatx
+  tx_type: eoatx
   # Throughput of spamoor
+  # Defaults to 1000
   throughput: 1000
   # Max pending transactions for spamoor
+  # Defaults to 1000
   max_pending: 1000
   # Max wallets for spamoor
+  # Defaults to 500
   max_wallets: 500
   # Extra parameters to send to spamoor
+  # Defaults to empty
   spamoor_extra_args: []
 
 # Global paarameter to set the exit ip address of services and public ports

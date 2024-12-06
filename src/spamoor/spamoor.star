@@ -31,7 +31,7 @@ def get_config(
     node_selectors,
 ):
     cmd = [
-        "eoatx",
+        "{}".format(spamoor_params.tx_type),
         "--privkey={}".format(prefunded_addresses[13].private_key),
         "--rpchost={}".format(
             ",".join([el_context.rpc_http_url for el_context in all_el_contexts])
