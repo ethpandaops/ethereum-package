@@ -86,6 +86,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "custom_flood_params",
     "xatu_sentry_params",
     "port_publisher",
+    "spamoor_params",
 )
 
 
@@ -119,6 +120,7 @@ def input_parser(plan, input_args):
     result["global_tolerations"] = []
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
+    result["spamoor_params"] = get_default_spamoor_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -184,6 +186,10 @@ def input_parser(plan, input_args):
                 result["xatu_sentry_params"][sub_attr] = sub_value
         elif attr == "port_publisher":
             result["port_publisher"] = get_port_publisher_params("user", input_args)
+        elif attr == "spamoor_params":
+            for sub_attr in input_args["spamoor_params"]:
+                sub_value = input_args["spamoor_params"][sub_attr]
+                result["spamoor_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -429,6 +435,14 @@ def input_parser(plan, input_args):
             interval_between_transactions=result["custom_flood_params"][
                 "interval_between_transactions"
             ],
+        ),
+        spamoor_params=struct(
+            image=result["spamoor_params"]["image"],
+            tx_type=result["spamoor_params"]["tx_type"],
+            throughput=result["spamoor_params"]["throughput"],
+            max_pending=result["spamoor_params"]["max_pending"],
+            max_wallets=result["spamoor_params"]["max_wallets"],
+            spamoor_extra_args=result["spamoor_params"]["spamoor_extra_args"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -844,6 +858,7 @@ def default_input_args(input_args):
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
             "public_port_start": None,
         },
+        "spamoor_params": get_default_spamoor_params(),
     }
 
 
@@ -1151,6 +1166,17 @@ def get_default_xatu_sentry_params():
     }
 
 
+def get_default_spamoor_params():
+    return {
+        "image": "ethpandaops/spamoor:latest",
+        "tx_type": "eoatx",
+        "throughput": 1000,
+        "max_pending": 1000,
+        "max_wallets": 500,
+        "spamoor_extra_args": [],
+    }
+
+
 def get_default_custom_flood_params():
     # this is a simple script that increases the balance of the coinbase address at a cadence
     return {"interval_between_transactions": 1}
@@ -1346,6 +1372,7 @@ def docker_cache_image_override(plan, result):
         "goomy_blob_params.image",
         "prometheus_params.image",
         "grafana_params.image",
+        "spamoor_params.image",
     ]
 
     if result["docker_cache_params"]["url"] == "":
