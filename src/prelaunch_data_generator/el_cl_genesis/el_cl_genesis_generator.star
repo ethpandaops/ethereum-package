@@ -156,7 +156,5 @@ def new_additionsl_contracts_file_for_el_cl_genesis_data(
     network_params,
 ):
     return {
-        "AdditionalPreloadedContracts": json.encode(
-            network_params.additional_preloaded_contracts
-        ),
+        "AdditionalPreloadedContracts": network_params.additional_preloaded_contracts,
     }
