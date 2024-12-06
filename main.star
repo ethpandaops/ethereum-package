@@ -61,6 +61,7 @@ assertoor = import_module("./src/assertoor/assertoor_launcher.star")
 get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
+spamoor = import_module("./src/spamoor/spamoor.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -685,6 +686,15 @@ def run(plan, args={}):
                 args_with_right_defaults.custom_flood_params,
                 global_node_selectors,
                 args_with_right_defaults.docker_cache_params,
+            )
+        elif additional_service == "spamoor":
+            plan.print("Launching spamoor")
+            spamoor.launch_spamoor(
+                plan,
+                prefunded_accounts,
+                all_el_contexts,
+                args_with_right_defaults.spamoor_params,
+                global_node_selectors,
             )
         else:
             fail("Invalid additional service %s" % (additional_service))

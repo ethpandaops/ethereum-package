@@ -927,6 +927,19 @@ checkpoint_sync_enabled: false
 # Global flag to set checkpoint sync url
 checkpoint_sync_url: ""
 
+# Spamoor params
+spamoor_params:
+  # The image to use for spamoor
+  image: ethpandaops/spamoor:latest
+  # Throughput of spamoor
+  throughput: 1000
+  # Max pending transactions for spamoor
+  max_pending: 1000
+  # Max wallets for spamoor
+  max_wallets: 1000
+  # Extra parameters to send to spamoor
+  spamoor_extra_args: []
+
 # Global paarameter to set the exit ip address of services and public ports
 port_publisher:
   # if you have a service that you want to expose on a specific interfact; set that IP here
@@ -1166,6 +1179,7 @@ Here's a table of where the keys are used
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
+| 13            | spamoor             | ✅                |                 | Spams transactions         |
 
 ## Developing On This Package
 

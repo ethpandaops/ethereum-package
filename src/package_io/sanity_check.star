@@ -244,6 +244,13 @@ SUBCATEGORY_PARAMS = {
         "xatu_server_headers",
         "beacon_subscriptions",
     ],
+    "spamoor_params": [
+        "image",
+        "throughput",
+        "max_pending",
+        "max_wallets",
+        "spamoor_extra_args",
+    ],
     "port_publisher": [
         "nat_exit_ip",
         "el",
@@ -273,6 +280,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "forky",
     "apache",
     "tracoor",
+    "spamoor",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
