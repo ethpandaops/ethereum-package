@@ -580,8 +580,16 @@ network_params:
   samples_per_slot: 8
   # Minimum number of subnets an honest node custodies and serves samples from
   custody_requirement: 4
-  # Maximum number of blobs per block
-  max_blobs_per_block: 6
+
+  # Maximum number of blobs per block for Electra fork
+  max_blobs_per_block_electra: 9
+  # Target number of blobs per block for Electra fork
+  target_blobs_per_block_electra: 6
+
+  # Maximum number of blobs per block for EIP7594 fork
+  max_blobs_per_block_eip7594: 12
+  # Target number of blobs per block for EIP7594 fork
+  target_blobs_per_block_eip7594: 9
 
   # Preset for the network
   # Default: "mainnet"

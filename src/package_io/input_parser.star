@@ -338,7 +338,18 @@ def input_parser(plan, input_args):
             ],
             samples_per_slot=result["network_params"]["samples_per_slot"],
             custody_requirement=result["network_params"]["custody_requirement"],
-            max_blobs_per_block=result["network_params"]["max_blobs_per_block"],
+            max_blobs_per_block_electra=result["network_params"][
+                "max_blobs_per_block_electra"
+            ],
+            target_blobs_per_block_electra=result["network_params"][
+                "target_blobs_per_block_electra"
+            ],
+            max_blobs_per_block_eip7594=result["network_params"][
+                "max_blobs_per_block_eip7594"
+            ],
+            target_blobs_per_block_eip7594=result["network_params"][
+                "target_blobs_per_block_eip7594"
+            ],
             preset=result["network_params"]["preset"],
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
@@ -891,7 +902,10 @@ def default_network_params():
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
-        "max_blobs_per_block": 6,
+        "max_blobs_per_block_electra": 9,
+        "target_blobs_per_block_electra": 6,
+        "max_blobs_per_block_eip7594": 12,
+        "target_blobs_per_block_eip7594": 9,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -928,7 +942,10 @@ def default_minimal_network_params():
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
-        "max_blobs_per_block": 6,
+        "max_blobs_per_block_electra": 9,
+        "target_blobs_per_block_electra": 6,
+        "max_blobs_per_block_eip7594": 12,
+        "target_blobs_per_block_eip7594": 9,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
