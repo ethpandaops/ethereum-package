@@ -59,6 +59,7 @@ get_prefunded_accounts = import_module(
 )
 helix_relay = import_module("./src/mev/helix-relay/helix_launcher.star")
 taiyi_preconfer = import_module("./src/mev/taiyi-preconfer/taiyi_preconfer_launcher.star")
+rbuilder = import_module("./src/mev/rbuilder/rbuilder_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -323,6 +324,8 @@ def run(plan, args={}):
                 persistent,
                 global_node_selectors,
             )
+            helix_relay_url = endpoint
+
         else:
             fail("Invalid MEV type")
 
@@ -683,7 +686,7 @@ def run(plan, args={}):
             helix_relay_config_template = read_file(
                 static_files.HELIX_CONFIG_TEMPLATE_FILEPATH
             )
-            helix_relay.launch_helix(
+            helix_relay_url = helix_relay.launch_helix(
                 plan,
                 helix_relay_config_template,
                 final_genesis_timestamp,
@@ -693,6 +696,25 @@ def run(plan, args={}):
                 el_cl_data_files_artifact_uuid,
                 persistent,
                 global_node_selectors,
+            )
+        elif additional_service == "rbuilder":
+            plan.print("Launching rbuilder")
+            rbuilder_config_template = read_file(
+                static_files.RBUILDER_CONFIG_TEMPLATE_FILEPATH
+            )
+            rbuilder.launch_rbuilder(
+                plan, 
+                rbuilder_config_template,
+                helix_relay_url,
+                network_params, 
+                el_cl_data_files_artifact_uuid, 
+                genesis_validators_root, 
+                jwt_file,
+                all_el_contexts, 
+                all_cl_contexts, 
+                global_node_selectors, 
+                args_with_right_defaults.port_publisher, 
+                global_tolerations
             )
         elif additional_service == "taiyi_preconfer":
             plan.print("Launching taiyi preconfer")

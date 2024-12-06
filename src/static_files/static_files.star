@@ -104,3 +104,9 @@ COMMIT_BOOST_CONFIG_FILEPATH = (
 HELIX_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/mev/helix/config.yaml.tmpl"
 )
+RBUILDER_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/rbuilder/config.toml.tmpl"
+)
+RBUILDER_BLOCKLIST_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/rbuilder/blocklist.json"
+)

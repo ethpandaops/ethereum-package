@@ -257,6 +257,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "tracoor",
     "helix_relay",
     "taiyi_preconfer",
+    "rbuilder",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

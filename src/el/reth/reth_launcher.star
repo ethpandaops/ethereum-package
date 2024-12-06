@@ -148,6 +148,7 @@ def get_config(
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
+        "--ipcpath={0}/reth.ipc".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
         # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
         #  that users should NOT store private information in these Kurtosis nodes!
         "--http.api=admin,net,eth,web3,debug,trace",
