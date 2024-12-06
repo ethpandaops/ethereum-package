@@ -124,7 +124,7 @@ CONTAINER_REGISTRY = struct(
 
 
 ETHEREUM_GENESIS_GENERATOR = struct(
-    default_genesis_generator_image="ethpandaops/ethereum-genesis-generator:fix-default-issue-66a93b6",  # Default
+    default_genesis_generator_image="ethpandaops/ethereum-genesis-generator:v3.4.3",  # Default
     verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )
 
