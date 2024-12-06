@@ -936,7 +936,7 @@ spamoor_params:
   # Max pending transactions for spamoor
   max_pending: 1000
   # Max wallets for spamoor
-  max_wallets: 1000
+  max_wallets: 500
   # Extra parameters to send to spamoor
   spamoor_extra_args: []
 

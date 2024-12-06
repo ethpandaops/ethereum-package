@@ -1170,7 +1170,7 @@ def get_default_spamoor_params():
         "image": "ethpandaops/spamoor:latest",
         "throughput": 1000,
         "max_pending": 1000,
-        "max_wallets": 1000,
+        "max_wallets": 500,
         "spamoor_extra_args": [],
     }
 
