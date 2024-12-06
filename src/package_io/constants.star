@@ -103,6 +103,7 @@ DEFAULT_MNEMONIC = "giant issue aisle success illegal bike spike question tent b
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 GENESIS_FORK_VERSION = "0x10000038"
+ALTAIR_FORK_VERSION = "0x20000038"
 BELLATRIX_FORK_VERSION = "0x30000038"
 CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
@@ -123,9 +124,7 @@ CONTAINER_REGISTRY = struct(
 
 
 ETHEREUM_GENESIS_GENERATOR = struct(
-    capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Deprecated (no support for minimal config)
-    deneb_genesis="ethpandaops/ethereum-genesis-generator:3.4.1",  # Default
-    verkle_support_genesis="ethpandaops/ethereum-genesis-generator:3.0.0-rc.19",  # soon to be deneb genesis, waiting for rebase
+    default_genesis_generator_image="ethpandaops/ethereum-genesis-generator:3.4.3",  # Default
     verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )
 

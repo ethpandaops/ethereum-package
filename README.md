@@ -536,14 +536,33 @@ network_params:
 
   # The epoch at which the deneb/electra/eip7594(peerdas) forks are set to occur. Note: PeerDAS and Electra clients are currently
   # working on forks. So set either one of the below forks.
+  # Altair fork epoch
+  # Defaults to 0
+  altair_fork_epoch: 0
+
+  # Bellatrix fork epoch
+  # Defaults to 0
+  bellatrix_fork_epoch: 0
+
+  # Capella fork epoch
+  # Defaults to 0
+  capella_fork_epoch: 0
+
+  # Deneb fork epoch
+  # Defaults to 0
   deneb_fork_epoch: 0
 
+  # Electra fork epoch
+  # Defaults to 100000000
   electra_fork_epoch: 100000000
 
+  # Fulu fork epoch
+  # Defaults to 100000001
   fulu_fork_epoch: 100000001
 
+  # Eip7594 fork epoch
+  # Defaults to 100000002
   eip7594_fork_epoch: 100000002
-
   # The fork version to set if the eip7594 fork is active
   eip7594_fork_version: "0x60000038"
 
