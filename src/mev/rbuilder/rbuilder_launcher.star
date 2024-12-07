@@ -34,7 +34,7 @@ def launch_rbuilder(
     particitpant_p.update(
         {
         "el_type": "reth", 
-        "el_image": "ghcr.io/paradigmxyz/reth",
+        "el_image": "ghcr.io/paradigmxyz/reth:v1.1.1",
         "cl_image": "ethpandaops/lighthouse:stable",
         "use_separate_vc": False
         })

@@ -70,7 +70,7 @@ def launch_helix(
         user=POSTGRES_USER,
         database=POSTGRES_DB,
         service_name="helix-postgres",
-        persistent=persistent,
+        persistent=False,
         min_cpu=POSTGRES_MIN_CPU,
         max_cpu=POSTGRES_MAX_CPU,
         min_memory=POSTGRES_MIN_MEMORY,
