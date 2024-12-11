@@ -85,7 +85,7 @@ jobs:
         uses: ./.github/actions/kurtosis-install
       - name: Run L1
         run: |
-          kurtosis run ${{ github.workspace }} --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/refs/heads/main/.github/tests/external-l1/ethereum.yaml --verbosity detailed
+          kurtosis run --enclave test ${{ github.workspace }} --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/refs/heads/main/.github/tests/external-l1/ethereum.yaml --verbosity detailed
       - name: Run L2
         run: |
-          kurtosis run github.com/ethpandaops/optimism-package --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/refs/heads/main/.github/tests/external-l1/optimism.yaml --verbosity detailed
+          kurtosis run --enclave test github.com/ethpandaops/optimism-package --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/refs/heads/main/.github/tests/external-l1/optimism.yaml --verbosity detailed
