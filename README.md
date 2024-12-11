@@ -580,8 +580,16 @@ network_params:
   samples_per_slot: 8
   # Minimum number of subnets an honest node custodies and serves samples from
   custody_requirement: 4
-  # Maximum number of blobs per block
-  max_blobs_per_block: 6
+
+  # Maximum number of blobs per block for Electra fork
+  max_blobs_per_block_electra: 9
+  # Target number of blobs per block for Electra fork
+  target_blobs_per_block_electra: 6
+
+  # Maximum number of blobs per block for EIP7594 fork
+  max_blobs_per_block_eip7594: 12
+  # Target number of blobs per block for EIP7594 fork
+  target_blobs_per_block_eip7594: 9
 
   # Preset for the network
   # Default: "mainnet"
@@ -948,7 +956,7 @@ spamoor_params:
   # Defaults to empty
   spamoor_extra_args: []
 
-# Global paarameter to set the exit ip address of services and public ports
+# Global parameter to set the exit ip address of services and public ports
 port_publisher:
   # if you have a service that you want to expose on a specific interfact; set that IP here
   # if you set it to auto it gets the public ip from ident.me and sets it
