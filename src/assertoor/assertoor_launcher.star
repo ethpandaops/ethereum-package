@@ -121,9 +121,6 @@ def get_config(
 
     IMAGE_NAME = assertoor_params.image
 
-    if network_params.electra_fork_epoch < constants.ELECTRA_FORK_EPOCH:
-        IMAGE_NAME = "ethpandaops/assertoor:electra-support"
-
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
