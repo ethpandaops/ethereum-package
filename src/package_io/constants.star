@@ -111,8 +111,6 @@ ELECTRA_FORK_VERSION = "0x60000038"
 ELECTRA_FORK_EPOCH = 100000000
 FULU_FORK_VERSION = "0x70000038"
 FULU_FORK_EPOCH = 100000001
-EIP7594_FORK_VERSION = "0x80000038"
-EIP7594_FORK_EPOCH = 100000002
 
 MAX_LABEL_LENGTH = 63
 
@@ -124,7 +122,7 @@ CONTAINER_REGISTRY = struct(
 
 
 ETHEREUM_GENESIS_GENERATOR = struct(
-    default_genesis_generator_image="ethpandaops/ethereum-genesis-generator:3.4.4",  # Default
+    default_genesis_generator_image="ethpandaops/ethereum-genesis-generator:3.4.7",  # Default
     verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )
 

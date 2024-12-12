@@ -88,16 +88,14 @@ network_params:
   deneb_fork_epoch: 0
   electra_fork_epoch: 100000000
   fulu_fork_epoch: 100000001
-  eip7594_fork_epoch: 100000002
-  eip7594_fork_version: "0x60000038"
   network_sync_base_url: https://snapshots.ethpandaops.io/
   data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
   custody_requirement: 4
   max_blobs_per_block_electra: 9
   target_blobs_per_block_electra: 6
-  max_blobs_per_block_eip7594: 12
-  target_blobs_per_block_eip7594: 9
+  max_blobs_per_block_fulu: 12
+  target_blobs_per_block_fulu: 9
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   prefunded_accounts: {}

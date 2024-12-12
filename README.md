@@ -534,7 +534,7 @@ network_params:
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
 
-  # The epoch at which the deneb/electra/eip7594(peerdas) forks are set to occur. Note: PeerDAS and Electra clients are currently
+  # The epoch at which the deneb/electra/fulu forks are set to occur. Note: PeerDAS and Electra clients are currently
   # working on forks. So set either one of the below forks.
   # Altair fork epoch
   # Defaults to 0
@@ -560,12 +560,6 @@ network_params:
   # Defaults to 100000001
   fulu_fork_epoch: 100000001
 
-  # Eip7594 fork epoch
-  # Defaults to 100000002
-  eip7594_fork_epoch: 100000002
-  # The fork version to set if the eip7594 fork is active
-  eip7594_fork_version: "0x60000038"
-
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
@@ -586,10 +580,10 @@ network_params:
   # Target number of blobs per block for Electra fork
   target_blobs_per_block_electra: 6
 
-  # Maximum number of blobs per block for EIP7594 fork
-  max_blobs_per_block_eip7594: 12
-  # Target number of blobs per block for EIP7594 fork
-  target_blobs_per_block_eip7594: 9
+  # Maximum number of blobs per block for Fulu fork
+  max_blobs_per_block_fulu: 12
+  # Target number of blobs per block for Fulu fork
+  target_blobs_per_block_fulu: 9
 
   # Preset for the network
   # Default: "mainnet"
@@ -627,6 +621,13 @@ network_params:
   #
   # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}, "0x4107be99052d895e3ee461C685b042Aa975ab5c0": {"balance": "1ETH"}}'
   prefunded_accounts: {}
+
+  # Maximum size of gossip messages in bytes
+  # 10 * 2**20 (= 10485760, 10 MiB)
+  # Defaults to 10485760 (10MB)
+  gossip_max_size: 10485760
+
+
 
 # Global parameters for the network
 
