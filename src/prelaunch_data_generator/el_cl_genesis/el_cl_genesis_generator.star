@@ -113,8 +113,6 @@ def new_env_file_for_el_cl_genesis_data(
         "DenebForkEpoch": network_params.deneb_fork_epoch,
         "ElectraForkEpoch": network_params.electra_fork_epoch,
         "FuluForkEpoch": network_params.fulu_fork_epoch,
-        "EIP7594ForkEpoch": network_params.eip7594_fork_epoch,
-        "EIP7594ForkVersion": network_params.eip7594_fork_version,
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
         "BellatrixForkVersion": constants.BELLATRIX_FORK_VERSION,
@@ -130,8 +128,8 @@ def new_env_file_for_el_cl_genesis_data(
         "CustodyRequirement": network_params.custody_requirement,
         "MaxBlobsPerBlockElectra": network_params.max_blobs_per_block_electra,
         "TargetBlobsPerBlockElectra": network_params.target_blobs_per_block_electra,
-        "MaxBlobsPerBlockEIP7594": network_params.max_blobs_per_block_eip7594,
-        "TargetBlobsPerBlockEIP7594": network_params.target_blobs_per_block_eip7594,
+        "MaxBlobsPerBlockFulu": network_params.max_blobs_per_block_fulu,
+        "TargetBlobsPerBlockFulu": network_params.target_blobs_per_block_fulu,
         "Preset": network_params.preset,
         "AdditionalPreloadedContracts": json.encode(
             network_params.additional_preloaded_contracts

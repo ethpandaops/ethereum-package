@@ -325,8 +325,6 @@ def input_parser(plan, input_args):
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
-            eip7594_fork_epoch=result["network_params"]["eip7594_fork_epoch"],
-            eip7594_fork_version=result["network_params"]["eip7594_fork_version"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
@@ -344,11 +342,11 @@ def input_parser(plan, input_args):
             target_blobs_per_block_electra=result["network_params"][
                 "target_blobs_per_block_electra"
             ],
-            max_blobs_per_block_eip7594=result["network_params"][
-                "max_blobs_per_block_eip7594"
+            max_blobs_per_block_fulu=result["network_params"][
+                "max_blobs_per_block_fulu"
             ],
-            target_blobs_per_block_eip7594=result["network_params"][
-                "target_blobs_per_block_eip7594"
+            target_blobs_per_block_fulu=result["network_params"][
+                "target_blobs_per_block_fulu"
             ],
             preset=result["network_params"]["preset"],
             additional_preloaded_contracts=result["network_params"][
@@ -897,16 +895,14 @@ def default_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
         "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
-        "eip7594_fork_epoch": constants.EIP7594_FORK_EPOCH,
-        "eip7594_fork_version": "0x60000038",
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
-        "max_blobs_per_block_eip7594": 12,
-        "target_blobs_per_block_eip7594": 9,
+        "max_blobs_per_block_fulu": 12,
+        "target_blobs_per_block_fulu": 9,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -938,16 +934,14 @@ def default_minimal_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
         "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
-        "eip7594_fork_epoch": constants.EIP7594_FORK_EPOCH,
-        "eip7594_fork_version": "0x60000038",
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
-        "max_blobs_per_block_eip7594": 12,
-        "target_blobs_per_block_eip7594": 9,
+        "max_blobs_per_block_fulu": 12,
+        "target_blobs_per_block_fulu": 9,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
