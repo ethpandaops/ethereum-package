@@ -628,6 +628,13 @@ network_params:
   # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}, "0x4107be99052d895e3ee461C685b042Aa975ab5c0": {"balance": "1ETH"}}'
   prefunded_accounts: {}
 
+  # Maximum size of gossip messages in bytes
+  # 10 * 2**20 (= 10485760, 10 MiB)
+  # Defaults to 10485760 (10MB)
+  gossip_max_size: 10485760
+
+
+
 # Global parameters for the network
 
 # By default includes

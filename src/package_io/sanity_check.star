@@ -173,6 +173,7 @@ SUBCATEGORY_PARAMS = {
         "additional_preloaded_contracts",
         "devnet_repo",
         "prefunded_accounts",
+        "gossip_max_size",
     ],
     "blockscout_params": [
         "image",

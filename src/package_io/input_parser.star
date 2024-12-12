@@ -356,6 +356,7 @@ def input_parser(plan, input_args):
             ],
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
+            gossip_max_size=result["network_params"]["gossip_max_size"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -910,6 +911,7 @@ def default_network_params():
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
+        "gossip_max_size": 10485760,
     }
 
 
@@ -950,6 +952,7 @@ def default_minimal_network_params():
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
+        "gossip_max_size": 10485760,
     }
 
 
@@ -1096,7 +1099,7 @@ def get_default_mev_params(mev_type, preset):
         mev_boost_image = constants.DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE
         mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
         mev_builder_extra_data = (
-            "0x436f6d6d69742d426f6f737420f09f93bb"  # Commit-Boost 📻
+            "0x436F6D6D69742D426F6F737420F09F93BB"  # Commit-Boost 📻
         )
 
     return {
