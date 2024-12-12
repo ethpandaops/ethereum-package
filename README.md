@@ -534,7 +534,7 @@ network_params:
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
 
-  # The epoch at which the deneb/electra/eip7594(peerdas) forks are set to occur. Note: PeerDAS and Electra clients are currently
+  # The epoch at which the deneb/electra/fulu forks are set to occur. Note: PeerDAS and Electra clients are currently
   # working on forks. So set either one of the below forks.
   # Altair fork epoch
   # Defaults to 0
@@ -560,13 +560,6 @@ network_params:
   # Defaults to 18446744073709551615
   fulu_fork_epoch: 18446744073709551615
 
-  # Eip7594 fork epoch
-  # Defaults to 18446744073709551615
-  eip7594_fork_epoch: 18446744073709551615
-  # The fork version to set if the eip7594 fork is active
-  eip7594_fork_version: "0x60000038"
-
-
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
   # If you have a local snapshot, you can set this to the local url:
@@ -580,8 +573,16 @@ network_params:
   samples_per_slot: 8
   # Minimum number of subnets an honest node custodies and serves samples from
   custody_requirement: 4
-  # Maximum number of blobs per block
-  max_blobs_per_block: 6
+
+  # Maximum number of blobs per block for Electra fork
+  max_blobs_per_block_electra: 9
+  # Target number of blobs per block for Electra fork
+  target_blobs_per_block_electra: 6
+
+  # Maximum number of blobs per block for Fulu fork
+  max_blobs_per_block_fulu: 12
+  # Target number of blobs per block for Fulu fork
+  target_blobs_per_block_fulu: 9
 
   # Preset for the network
   # Default: "mainnet"
@@ -619,6 +620,13 @@ network_params:
   #
   # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}, "0x4107be99052d895e3ee461C685b042Aa975ab5c0": {"balance": "1ETH"}}'
   prefunded_accounts: {}
+
+  # Maximum size of gossip messages in bytes
+  # 10 * 2**20 (= 10485760, 10 MiB)
+  # Defaults to 10485760 (10MB)
+  gossip_max_size: 10485760
+
+
 
 # Global parameters for the network
 
@@ -948,7 +956,7 @@ spamoor_params:
   # Defaults to empty
   spamoor_extra_args: []
 
-# Global paarameter to set the exit ip address of services and public ports
+# Global parameter to set the exit ip address of services and public ports
 port_publisher:
   # if you have a service that you want to expose on a specific interfact; set that IP here
   # if you set it to auto it gets the public ip from ident.me and sets it

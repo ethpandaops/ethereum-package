@@ -325,8 +325,6 @@ def input_parser(plan, input_args):
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
-            eip7594_fork_epoch=result["network_params"]["eip7594_fork_epoch"],
-            eip7594_fork_version=result["network_params"]["eip7594_fork_version"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
@@ -338,13 +336,25 @@ def input_parser(plan, input_args):
             ],
             samples_per_slot=result["network_params"]["samples_per_slot"],
             custody_requirement=result["network_params"]["custody_requirement"],
-            max_blobs_per_block=result["network_params"]["max_blobs_per_block"],
+            max_blobs_per_block_electra=result["network_params"][
+                "max_blobs_per_block_electra"
+            ],
+            target_blobs_per_block_electra=result["network_params"][
+                "target_blobs_per_block_electra"
+            ],
+            max_blobs_per_block_fulu=result["network_params"][
+                "max_blobs_per_block_fulu"
+            ],
+            target_blobs_per_block_fulu=result["network_params"][
+                "target_blobs_per_block_fulu"
+            ],
             preset=result["network_params"]["preset"],
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
             ],
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
+            gossip_max_size=result["network_params"]["gossip_max_size"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -885,17 +895,19 @@ def default_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7594_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7594_fork_version": "0x60000038",
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
-        "max_blobs_per_block": 6,
+        "max_blobs_per_block_electra": 9,
+        "target_blobs_per_block_electra": 6,
+        "max_blobs_per_block_fulu": 12,
+        "target_blobs_per_block_fulu": 9,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
+        "gossip_max_size": 10485760,
     }
 
 
@@ -922,17 +934,19 @@ def default_minimal_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7594_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7594_fork_version": "0x60000038",
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
-        "max_blobs_per_block": 6,
+        "max_blobs_per_block_electra": 9,
+        "target_blobs_per_block_electra": 6,
+        "max_blobs_per_block_fulu": 12,
+        "target_blobs_per_block_fulu": 9,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
+        "gossip_max_size": 10485760,
     }
 
 
@@ -1079,7 +1093,7 @@ def get_default_mev_params(mev_type, preset):
         mev_boost_image = constants.DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE
         mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
         mev_builder_extra_data = (
-            "0x436f6d6d69742d426f6f737420f09f93bb"  # Commit-Boost 📻
+            "0x436F6D6D69742D426F6F737420F09F93BB"  # Commit-Boost 📻
         )
 
     return {
