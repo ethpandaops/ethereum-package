@@ -159,7 +159,7 @@ def new_additionsl_contracts_file_for_el_cl_genesis_data(
 ):
 
     additional_contracts_json = network_params.additional_preloaded_contracts
-    if additional_contracts_json != "string":
+    if type(additional_contracts_json) != "string":
         additional_contracts_json = json.encode(additional_contracts_json)
 
     return {
