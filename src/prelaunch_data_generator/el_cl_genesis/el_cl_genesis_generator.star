@@ -157,6 +157,11 @@ def new_env_file_for_el_cl_genesis_data(
 def new_additionsl_contracts_file_for_el_cl_genesis_data(
     network_params,
 ):
+
+    additional_contracts_json = network_params.additional_preloaded_contracts
+    if additional_contracts_json != "string":
+        additional_contracts_json = json.encode(additional_contracts_json)
+
     return {
-        "AdditionalPreloadedContracts": network_params.additional_preloaded_contracts,
+        "AdditionalPreloadedContracts": additional_contracts_json,
     }
