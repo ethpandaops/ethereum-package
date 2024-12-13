@@ -121,6 +121,10 @@ def get_config(
 
     IMAGE_NAME = assertoor_params.image
 
+    if assertoor_params.image == constants.DEFAULT_ASSERTOOR_IMAGE:
+        if network_params.fulu_fork_epoch < constants.FULU_FORK_EPOCH:
+            IMAGE_NAME = "ethpandaops/assertoor:fulu-support"
+
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,

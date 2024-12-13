@@ -956,6 +956,11 @@ spamoor_params:
   # Defaults to empty
   spamoor_extra_args: []
 
+# Ethereum genesis generator params
+ethereum_genesis_generator_params:
+  # The image to use for ethereum genesis generator
+  image: ethpandaops/ethereum-genesis-generator:3.4.7
+
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
   # if you have a service that you want to expose on a specific interfact; set that IP here

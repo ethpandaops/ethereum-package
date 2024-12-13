@@ -190,6 +190,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "ethereum_genesis_generator_params":
+            for sub_attr in input_args["ethereum_genesis_generator_params"]:
+                sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
+                result["ethereum_genesis_generator_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -476,6 +480,9 @@ def input_parser(plan, input_args):
         keymanager_enabled=result["keymanager_enabled"],
         checkpoint_sync_enabled=result["checkpoint_sync_enabled"],
         checkpoint_sync_url=result["checkpoint_sync_url"],
+        ethereum_genesis_generator_params=struct(
+            image=result["ethereum_genesis_generator_params"]["image"],
+        ),
         port_publisher=struct(
             nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
             cl_enabled=result["port_publisher"]["cl"]["enabled"],
@@ -864,6 +871,7 @@ def default_input_args(input_args):
         "keymanager_enabled": False,
         "checkpoint_sync_enabled": False,
         "checkpoint_sync_url": "",
+        "ethereum_genesis_generator_params": get_default_ethereum_genesis_generator_params(),
         "port_publisher": {
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
             "public_port_start": None,
@@ -1028,7 +1036,7 @@ def get_default_blockscout_params():
 
 def get_default_dora_params():
     return {
-        "image": "ethpandaops/dora:latest",
+        "image": constants.DEFAULT_DORA_IMAGE,
         "env": {},
     }
 
@@ -1127,7 +1135,7 @@ def get_default_goomy_blob_params():
 
 def get_default_assertoor_params():
     return {
-        "image": "ethpandaops/assertoor:latest",
+        "image": constants.DEFAULT_ASSERTOOR_IMAGE,
         "run_stability_check": False,
         "run_block_proposal_check": False,
         "run_lifecycle_test": False,
@@ -1387,6 +1395,7 @@ def docker_cache_image_override(plan, result):
         "prometheus_params.image",
         "grafana_params.image",
         "spamoor_params.image",
+        "ethereum_genesis_generator_params.image",
     ]
 
     if result["docker_cache_params"]["url"] == "":
@@ -1458,3 +1467,9 @@ def docker_cache_image_override(plan, result):
                     tooling_image_key
                 )
             )
+
+
+def get_default_ethereum_genesis_generator_params():
+    return {
+        "image": "ethpandaops/ethereum-genesis-generator:3.4.7",
+    }

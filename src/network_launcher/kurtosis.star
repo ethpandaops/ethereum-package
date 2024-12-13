@@ -59,15 +59,8 @@ def launch(
 
     ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
         args_with_right_defaults.docker_cache_params,
-        constants.ETHEREUM_GENESIS_GENERATOR.default_genesis_generator_image,
+        args_with_right_defaults.ethereum_genesis_generator_params.image,
     )
-
-    # TODO: remove this temporary verkle activation condition
-    if network_params.electra_fork_epoch == 0:
-        ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
-            args_with_right_defaults.docker_cache_params,
-            constants.ETHEREUM_GENESIS_GENERATOR.verkle_genesis,
-        )
 
     return (
         total_number_of_validator_keys,
