@@ -1471,5 +1471,5 @@ def docker_cache_image_override(plan, result):
 
 def get_default_ethereum_genesis_generator_params():
     return {
-        "image": DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE,
+        "image": constants.DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE,
     }
