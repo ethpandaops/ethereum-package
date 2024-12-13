@@ -254,6 +254,9 @@ SUBCATEGORY_PARAMS = {
         "max_wallets",
         "spamoor_extra_args",
     ],
+    "ethereum_genesis_generator_params": [
+        "image",
+    ],
     "port_publisher": [
         "nat_exit_ip",
         "el",

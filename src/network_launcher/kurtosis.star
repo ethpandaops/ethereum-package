@@ -59,19 +59,9 @@ def launch(
 
     ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
         args_with_right_defaults.docker_cache_params,
-        constants.ETHEREUM_GENESIS_GENERATOR.default_genesis_generator_image,
+        args_with_right_defaults.ethereum_genesis_generator_params.image,
     )
-    # we are running electra - experimental
-    if network_params.electra_fork_epoch != None:
-        if network_params.electra_fork_epoch == 0:
-            ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
-                args_with_right_defaults.docker_cache_params,
-                constants.ETHEREUM_GENESIS_GENERATOR.verkle_genesis,
-            )
-    else:
-        fail(
-            "Unsupported fork epoch configuration, need to define either deneb_fork_epoch or electra_fork_epoch"
-        )
+
     return (
         total_number_of_validator_keys,
         ethereum_genesis_generator_image,
