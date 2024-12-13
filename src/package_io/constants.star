@@ -88,6 +88,9 @@ COMMIT_BOOST_MEV_TYPE = "commit-boost"
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
+DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
+    "ethpandaops/ethereum-genesis-generator:3.4.7"
+)
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.29.2a3"
 DEFAULT_FLASHBOTS_BUILDER_IMAGE = "ethpandaops/reth-rbuilder:develop"
 DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
@@ -119,12 +122,6 @@ CONTAINER_REGISTRY = struct(
     dockerhub="/",
     ghcr="ghcr.io",
     gcr="gcr.io",
-)
-
-
-ETHEREUM_GENESIS_GENERATOR = struct(
-    default_genesis_generator_image="ethpandaops/ethereum-genesis-generator:3.4.7",  # Default
-    verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
 )
 
 NETWORK_NAME = struct(
