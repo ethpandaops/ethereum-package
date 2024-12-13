@@ -1028,7 +1028,7 @@ def get_default_blockscout_params():
 
 def get_default_dora_params():
     return {
-        "image": "ethpandaops/dora:latest",
+        "image": constants.DEFAULT_DORA_IMAGE,
         "env": {},
     }
 
@@ -1127,7 +1127,7 @@ def get_default_goomy_blob_params():
 
 def get_default_assertoor_params():
     return {
-        "image": "ethpandaops/assertoor:latest",
+        "image": constants.DEFAULT_ASSERTOOR_IMAGE,
         "run_stability_check": False,
         "run_block_proposal_check": False,
         "run_lifecycle_test": False,

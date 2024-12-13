@@ -120,7 +120,11 @@ def get_config(
         0,
     )
 
-    IMAGE_NAME = dora_params.image
+    if dora_params.image == constants.DEFAULT_DORA_IMAGE:
+        if network_params.fulu_fork_epoch < constants.FULU_FORK_EPOCH:
+            IMAGE_NAME = "ethpandaops/dora:fulu-support"
+    else:
+        IMAGE_NAME = dora_params.image
 
     return ServiceConfig(
         image=IMAGE_NAME,
