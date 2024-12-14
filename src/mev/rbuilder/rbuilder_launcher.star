@@ -12,11 +12,12 @@ lighthouse = import_module("../../cl/lighthouse/lighthouse_launcher.star")
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/reth/execution-data"
 RBUILDER_CONFIG_FILENAME = "rbuilder-config.toml"
 RBUILDER_BLOCKLIST_FILENAME = "blocklist.json"
-IMAGE = "lubann/rbuilder:taiyi"
+
 RBUILDER_MIN_MEMORY = 128
 RBUILDER_MAX_MEMORY = 1024
 def launch_rbuilder(
     plan,
+    rbuilder_params,
     config_template,
     helix_relay_url,
     network_params,
@@ -29,51 +30,33 @@ def launch_rbuilder(
     port_publisher,
     global_tolerations,
 ):
+
+    prague_time = plan.run_sh(
+        name="read-rbuilder-prague-time",
+        description="Reading prague time from genesis",
+        run="jq .config.pragueTime /data/genesis.json | tr -d '\n'",
+        image="badouralix/curl-jq",
+        files={"/data": el_cl_data_files_artifact_uuid},
+    )
+    plan.print("Rbuilder Prague time: {0}".format(prague_time))
     service_name = "rbuilder-el-reth-lighthouse"
     particitpant_p = input_parser.default_participant()
     particitpant_p.update(
         {
         "el_type": "reth", 
-        "el_image": "ghcr.io/paradigmxyz/reth:v1.1.1",
+        "el_image": rbuilder_params.rbuilder_image,
         "cl_image": "ethpandaops/lighthouse:stable",
-        "use_separate_vc": False
+        "use_separate_vc": False,
+        "el_extra_params": [
+            "--rbuilder.config=/app/config/rbuilder-config.toml", 
+            "--engine.legacy",
+        ],
+        "el_extra_env_vars": {"RUST_LOG":"rbuilder=debug,reth=info"},
+        "cl_extra_params": ["--always-prepare-payload", "--prepare-payload-lookahead=8000"]
         })
     participant = participant_struct(particitpant_p)
     
-    el_context = launch_rbuilder_reth(
-        plan, 
-        service_name,
-        participant, 
-        network_params, 
-        el_cl_data_files_artifact_uuid, 
-        jwt_file, 
-        genesis_validator_root, 
-        all_el_contexts,
-        node_selectors, 
-        port_publisher, 
-        global_tolerations
-    )
-    cl_context = launch_rbuilder_lighthouse(
-        plan, 
-        participant, 
-        network_params, 
-        el_cl_data_files_artifact_uuid, 
-        jwt_file, 
-        genesis_validator_root, 
-        all_cl_contexts, 
-        el_context, 
-        node_selectors, 
-        port_publisher, 
-        global_tolerations
-    )
 
-    beacon_client_url = "http://{0}:{1}".format(
-        cl_context.ip_addr, cl_context.http_port
-    )
-    all_cl_contexts.append(cl_context)
-    execution_url = "http://{0}:{1}".format(
-        el_context.ip_addr, el_context.rpc_port_num
-    )
     plan.print("Starting rbuilder with helix relay url: {0}".format(helix_relay_url))
     template_data = {
         "Chain": "{}/{}".format(constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,"genesis.json"),
@@ -104,39 +87,46 @@ def launch_rbuilder(
     )
 
 
-    files = {
+    additional_files = {
         "/app/config/": config_files_artifact_name,
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
     }
-    files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[network_params.network][
-                constants.EL_TYPE.reth + "_volume_size"
-            ],
-        )
-    env = {}
-    rbuilder = plan.add_service(
-        name="rbuilder",
-        config=ServiceConfig(
-            image=IMAGE,
-            files=files,
-            cmd=[
-                "run",
-                "/app/config/rbuilder-config.toml",
-            ],
-            env_vars=env,
-            min_memory=RBUILDER_MIN_MEMORY,
-            max_memory=RBUILDER_MAX_MEMORY,
-            node_selectors=node_selectors,
-        ),
+
+    el_context = launch_rbuilder_reth(
+        plan, 
+        service_name,
+        participant, 
+        prague_time,
+        network_params, 
+        el_cl_data_files_artifact_uuid, 
+        jwt_file, 
+        additional_files,
+        genesis_validator_root, 
+        all_el_contexts,
+        node_selectors, 
+        port_publisher, 
+        global_tolerations
     )
+    cl_context = launch_rbuilder_lighthouse(
+        plan, 
+        participant, 
+        prague_time,
+        network_params, 
+        el_cl_data_files_artifact_uuid, 
+        jwt_file, 
+        genesis_validator_root, 
+        all_cl_contexts, 
+        el_context, 
+        node_selectors, 
+        port_publisher, 
+        global_tolerations
+    )
+
     return 
 
 def launch_rbuilder_lighthouse(
     plan,
     participant,
+    prague_time,
     network_params,
     el_cl_data,
     jwt_file,
@@ -147,7 +137,6 @@ def launch_rbuilder_lighthouse(
     port_publisher,
     global_tolerations,
 ):
-    prague_time = 0
     el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
         el_cl_data,
         genesis_validator_root,
@@ -190,9 +179,11 @@ def launch_rbuilder_reth(
     plan,
     service_name,
     participant,
+    prague_time,
     network_params,
     el_cl_data,
     jwt_file,
+    additional_files,
     genesis_validator_root,
     all_el_contexts,
     node_selectors,
@@ -200,7 +191,6 @@ def launch_rbuilder_reth(
     global_tolerations,
 ):
     index = 1
-    prague_time = 0
     el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
         el_cl_data,
         genesis_validator_root,
@@ -210,6 +200,7 @@ def launch_rbuilder_reth(
         el_cl_data,
         jwt_file,
         network_params.network,
+        additional_files=additional_files
     )
             
     el_context = reth.launch(
@@ -219,7 +210,7 @@ def launch_rbuilder_reth(
         participant,
         "info",
         all_el_contexts,
-        True,
+        False,
         global_tolerations, #tolerations,
         node_selectors,
         port_publisher,

@@ -2,6 +2,10 @@ participants:
   - el_type: reth
     cl_type: lighthouse
     vc_extra_params: ["--prefer-builder-proposals"]
+    cl_extra_params: [
+      "--always-prepare-payload", 
+      "--prepare-payload-lookahead=8000",
+      ]
     count: 1
 mev_type: helix
 additional_services:
@@ -15,4 +19,7 @@ mev_params:
   mev_boost_image: ghcr.io/commit-boost/pbs:latest
 network_params:
   seconds_per_slot: 12
-persistent: true
+helix_params:
+  helix_image: "lubann/helix:latest"
+rbuilder_params:
+  rbuilder_image: "lubann/reth-rbuilder:latest"

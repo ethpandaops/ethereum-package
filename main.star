@@ -313,11 +313,14 @@ def run(plan, args={}):
             helix_relay_config_template = read_file(
                 static_files.HELIX_CONFIG_TEMPLATE_FILEPATH
             )
+            helix_params = args_with_right_defaults.helix_params
             endpoint = helix_relay.launch_helix(
                 plan,
+                helix_params,
                 helix_relay_config_template,
                 final_genesis_timestamp,
                 genesis_validators_root,
+                network_params,
                 all_cl_contexts,
                 all_el_contexts,
                 el_cl_data_files_artifact_uuid,
@@ -681,29 +684,15 @@ def run(plan, args={}):
                 args_with_right_defaults.custom_flood_params,
                 global_node_selectors,
             )
-        elif additional_service == "helix_relay":
-            plan.print("Launching helix relay")
-            helix_relay_config_template = read_file(
-                static_files.HELIX_CONFIG_TEMPLATE_FILEPATH
-            )
-            helix_relay_url = helix_relay.launch_helix(
-                plan,
-                helix_relay_config_template,
-                final_genesis_timestamp,
-                genesis_validators_root,
-                all_cl_contexts,
-                all_el_contexts,
-                el_cl_data_files_artifact_uuid,
-                persistent,
-                global_node_selectors,
-            )
         elif additional_service == "rbuilder":
             plan.print("Launching rbuilder")
             rbuilder_config_template = read_file(
                 static_files.RBUILDER_CONFIG_TEMPLATE_FILEPATH
             )
+            rbuilder_params = args_with_right_defaults.rbuilder_params
             rbuilder.launch_rbuilder(
                 plan, 
+                rbuilder_params,
                 rbuilder_config_template,
                 helix_relay_url,
                 network_params, 

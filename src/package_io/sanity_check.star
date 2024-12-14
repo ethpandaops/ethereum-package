@@ -193,6 +193,12 @@ SUBCATEGORY_PARAMS = {
         "min_mem",
         "max_mem",
     ],
+    "helix_params":[
+        "helix_image",
+    ],
+    "rbuilder_params": [
+        "rbuilder_image",
+    ],
     "assertoor_params": [
         "image",
         "run_stability_check",
@@ -255,7 +261,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "forky",
     "apache",
     "tracoor",
-    "helix_relay",
+    "helix",
     "taiyi_preconfer",
     "rbuilder",
 ]

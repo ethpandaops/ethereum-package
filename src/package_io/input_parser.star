@@ -113,6 +113,8 @@ def input_parser(plan, input_args):
     result["global_tolerations"] = []
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
+    result["helix_params"] = get_default_helix_params()
+    result["rbuilder_params"] = get_default_rbuilder_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -363,6 +365,12 @@ def input_parser(plan, input_args):
             max_cpu=result["grafana_params"]["max_cpu"],
             min_mem=result["grafana_params"]["min_mem"],
             max_mem=result["grafana_params"]["max_mem"],
+        ),
+        helix_params=struct(
+            helix_image=result["helix_params"]["helix_image"]
+        ),
+        rbuilder_params=struct(
+            rbuilder_image=result["rbuilder_params"]["rbuilder_image"]
         ),
         apache_port=result["apache_port"],
         assertoor_params=struct(
@@ -1087,6 +1095,15 @@ def get_default_grafana_params():
         "max_mem": 2048,
     }
 
+def get_default_helix_params():
+    return {
+        "helix_image": "lubann/helix:latest"
+    }
+
+def get_default_rbuilder_params():
+    return {
+        "rbuilder_image": "lubann/reth-rbuilder:latest"
+    }
 
 def get_default_xatu_sentry_params():
     return {

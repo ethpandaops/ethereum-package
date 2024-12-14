@@ -4,8 +4,6 @@ constants = import_module("../../package_io/constants.star")
 shared_utils = import_module("../../shared_utils/shared_utils.star")
 static_files = import_module("../../static_files/static_files.star")
 
-IMAGE = "lubann/helix:latest"
-
 HELIX_CONFIG_FILENAME = "helix-config.yml"
 HELIX_RELAY_ENDPOINT_PORT = 4040
 
@@ -42,9 +40,11 @@ REDIS_MAX_MEMORY = 1024
 
 def launch_helix(
     plan,
+    helix_params,
     config_template,
     genesis_timestamp,
     genesis_validators_root,
+    network_params,
     cl_contexts,
     el_contexts,
     el_cl_data_files_artifact_uuid,
@@ -142,7 +142,7 @@ def launch_helix(
     api = plan.add_service(
         name="helix-relay",
         config=ServiceConfig(
-            image=IMAGE,
+            image=helix_params.helix_image,
             files=files,
             cmd=[
                 "--config",

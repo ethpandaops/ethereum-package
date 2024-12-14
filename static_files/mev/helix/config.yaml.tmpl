@@ -11,8 +11,8 @@ redis:
 broadcasters:
   - !BeaconClient
       url: {{ .BeaconClientUrl }}
-simulator:
-  url: {{ .SimulatorUrl }}
+simulators:
+  - url: {{ .SimulatorUrl }}
 beacon_clients:
   - url: {{ .BeaconClientUrl }}
 relays: []

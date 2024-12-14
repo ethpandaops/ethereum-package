@@ -151,7 +151,7 @@ def get_config(
         "--ipcpath={0}/reth.ipc".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
         # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
         #  that users should NOT store private information in these Kurtosis nodes!
-        "--http.api=admin,net,eth,web3,debug,trace",
+        "--http.api=admin,net,eth,web3,debug,trace,flashbots",
         "--ws",
         "--ws.addr=0.0.0.0",
         "--ws.port={0}".format(WS_PORT_NUM),
@@ -214,6 +214,9 @@ def get_config(
             mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
 
+    if launcher.additional_files != {}:
+        files.update(launcher.additional_files)
+
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,
@@ -247,10 +250,11 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_reth_launcher(el_cl_genesis_data, jwt_file, network, builder=False):
+def new_reth_launcher(el_cl_genesis_data, jwt_file, network, builder=False, additional_files={}):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
         builder=builder,
+        additional_files=additional_files,
     )

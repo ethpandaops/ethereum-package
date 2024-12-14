@@ -128,6 +128,10 @@ assertoor_params:
   run_opcodes_transaction_test: false
   run_lifecycle_test: false
   tests: []
+helix_params:
+  helix_image: "lubann/helix"
+rbuilder_params:
+  rbuilder_image: "lubann/reth-rbuilder"
 wait_for_finalization: false
 global_log_level: info
 snooper_enabled: false
