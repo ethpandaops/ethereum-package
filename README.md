@@ -686,12 +686,12 @@ tx_spammer_params:
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
   tx_spammer_extra_args: []
 
-# Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
+# Configuration place for spammor as blob spammer - https://github.com/ethpandaops/spamoor
 goomy_blob_params:
-  # Goomy Blob docker image to use
+  # spamoor docker image to use
   # Defaults to the latest
-  image: "ethpandaops/goomy-blob:latest"
-  # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
+  image: "ethpandaops/spamoor:latest"
+  # A list of optional params that will be passed to the spamoor comamnd for modifying its behaviour
   goomy_blob_args: []
 
 # Configuration place for prometheus

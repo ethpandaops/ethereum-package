@@ -48,10 +48,10 @@ def get_config(
 
     goomy_args = " ".join(goomy_blob_params.goomy_blob_args)
     if goomy_args == "":
-        goomy_args = "combined -b 2 -t 2 --max-pending 3"
+        goomy_args = "blob-combined -b 2 -t 2 --max-pending 4 --max-wallets 100"
     goomy_cli_args.append(goomy_args)
 
-    cmd = "./blob-spammer -p {0} {1}".format(
+    cmd = "./spamoor -p {0} {1}".format(
         prefunded_addresses[4].private_key, " ".join(goomy_cli_args)
     )
 

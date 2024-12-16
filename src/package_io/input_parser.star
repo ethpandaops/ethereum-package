@@ -1130,7 +1130,7 @@ def get_default_tx_spammer_params():
 
 
 def get_default_goomy_blob_params():
-    return {"image": "ethpandaops/goomy-blob:master", "goomy_blob_args": []}
+    return {"image": "ethpandaops/spamoor:latest", "goomy_blob_args": []}
 
 
 def get_default_assertoor_params():
