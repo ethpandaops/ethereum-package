@@ -194,6 +194,7 @@ SUBCATEGORY_PARAMS = {
         "tx_spammer_extra_args",
     ],
     "goomy_blob_params": [
+        "image",
         "goomy_blob_args",
     ],
     "prometheus_params": [
