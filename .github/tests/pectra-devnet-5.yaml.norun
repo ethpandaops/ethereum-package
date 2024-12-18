@@ -1,6 +1,6 @@
 participants:
   - el_type: besu
-    el_image: siladu/besu:24.12-develop-8c5aabe
+    el_image: ethpandaops/besu:24.12-develop-8c5aabe
     cl_type: teku
     cl_image: consensys/teku:develop
     el_log_level: "DEBUG"
