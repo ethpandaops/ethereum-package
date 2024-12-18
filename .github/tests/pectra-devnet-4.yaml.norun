@@ -1,0 +1,18 @@
+participants:
+  - el_type: besu
+    el_image: siladu/besu:24.12-develop-8c5aabe
+    cl_type: teku
+    cl_image: consensys/teku:develop
+    el_log_level: "DEBUG"
+
+network_params:
+  electra_fork_epoch: 1
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  churn_limit_quotient: 16
+  num_validator_keys_per_node: 256
+additional_services:
+  - dora
+dora_params:
+  image: "ethpandaops/dora:master-latest"
+snooper_enabled: true
