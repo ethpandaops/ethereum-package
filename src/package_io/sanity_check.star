@@ -193,9 +193,6 @@ SUBCATEGORY_PARAMS = {
         "image",
         "tx_spammer_extra_args",
     ],
-    "goomy_blob_params": [
-        "goomy_blob_args",
-    ],
     "prometheus_params": [
         "min_cpu",
         "max_cpu",
@@ -248,8 +245,17 @@ SUBCATEGORY_PARAMS = {
     ],
     "spamoor_params": [
         "image",
-        "tx_type",
+        "scenario",
         "throughput",
+        "max_pending",
+        "max_wallets",
+        "spamoor_extra_args",
+    ],
+    "spamoor_blob_params": [
+        "image",
+        "scenario",
+        "throughput",
+        "max_blobs",
         "max_pending",
         "max_wallets",
         "spamoor_extra_args",
@@ -273,7 +279,6 @@ ADDITIONAL_SERVICES_PARAMS = [
     "tx_spammer",
     "blob_spammer",
     "custom_flood",
-    "goomy_blob",
     "el_forkmon",
     "blockscout",
     "beacon_metrics_gazer",
@@ -287,6 +292,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "apache",
     "tracoor",
     "spamoor",
+    "spamoor_blob",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

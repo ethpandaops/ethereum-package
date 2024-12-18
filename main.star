@@ -15,7 +15,7 @@ transaction_spammer = import_module(
     "./src/transaction_spammer/transaction_spammer.star"
 )
 blob_spammer = import_module("./src/blob_spammer/blob_spammer.star")
-goomy_blob = import_module("./src/goomy_blob/goomy_blob.star")
+spamoor_blob = import_module("./src/spamoor_blob/spamoor_blob.star")
 el_forkmon = import_module("./src/el_forkmon/el_forkmon_launcher.star")
 beacon_metrics_gazer = import_module(
     "./src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
@@ -462,19 +462,6 @@ def run(plan, args={}):
                 args_with_right_defaults.tx_spammer_params,
             )
             plan.print("Successfully launched blob spammer")
-        elif additional_service == "goomy_blob":
-            plan.print("Launching Goomy the blob spammer")
-            goomy_blob_params = args_with_right_defaults.goomy_blob_params
-            goomy_blob.launch_goomy_blob(
-                plan,
-                prefunded_accounts,
-                all_el_contexts,
-                all_cl_contexts[0],
-                network_params.seconds_per_slot,
-                goomy_blob_params,
-                global_node_selectors,
-            )
-            plan.print("Successfully launched goomy the blob spammer")
         # We need a way to do time.sleep
         # TODO add code that waits for CL genesis
         elif additional_service == "el_forkmon":
@@ -694,6 +681,15 @@ def run(plan, args={}):
                 prefunded_accounts,
                 all_el_contexts,
                 args_with_right_defaults.spamoor_params,
+                global_node_selectors,
+            )
+        elif additional_service == "spamoor_blob":
+            plan.print("Launching spamoor as blob spammer")
+            spamoor_blob.launch_spamoor_blob(
+                plan,
+                prefunded_accounts,
+                all_el_contexts,
+                args_with_right_defaults.spamoor_blob_params,
                 global_node_selectors,
             )
         else:
