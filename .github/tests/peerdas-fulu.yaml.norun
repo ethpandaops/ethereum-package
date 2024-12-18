@@ -34,7 +34,7 @@ snooper_enabled: true
 global_log_level: debug
 additional_services:
   - dora
-  - goomy_blob
+  - spamoor_blob
   - prometheus_grafana
   - assertoor
 ethereum_metrics_exporter_enabled: true
