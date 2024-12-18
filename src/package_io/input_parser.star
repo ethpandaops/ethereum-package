@@ -1471,5 +1471,5 @@ def docker_cache_image_override(plan, result):
 
 def get_default_ethereum_genesis_generator_params():
     return {
-        "image": "ethpandaops/ethereum-genesis-generator:3.4.7",
+        "image": "ethpandaops/ethereum-genesis-generator:3.5.0",
     }
