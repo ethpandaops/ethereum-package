@@ -81,12 +81,12 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "assertoor_params",
     "prometheus_params",
     "grafana_params",
-    "goomy_blob_params",
     "tx_spammer_params",
     "custom_flood_params",
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "spamoor_blob_params",
 )
 
 
@@ -110,7 +110,6 @@ def input_parser(plan, input_args):
     result["tx_spammer_params"] = get_default_tx_spammer_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
-    result["goomy_blob_params"] = get_default_goomy_blob_params()
     result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
     result["prometheus_params"] = get_default_prometheus_params()
@@ -121,6 +120,7 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
+    result["spamoor_blob_params"] = get_default_spamoor_blob_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -164,10 +164,6 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["custom_flood_params"]:
                 sub_value = input_args["custom_flood_params"][sub_attr]
                 result["custom_flood_params"][sub_attr] = sub_value
-        elif attr == "goomy_blob_params":
-            for sub_attr in input_args["goomy_blob_params"]:
-                sub_value = input_args["goomy_blob_params"][sub_attr]
-                result["goomy_blob_params"][sub_attr] = sub_value
         elif attr == "assertoor_params":
             for sub_attr in input_args["assertoor_params"]:
                 sub_value = input_args["assertoor_params"][sub_attr]
@@ -190,6 +186,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "spamoor_blob_params":
+            for sub_attr in input_args["spamoor_blob_params"]:
+                sub_value = input_args["spamoor_blob_params"][sub_attr]
+                result["spamoor_blob_params"][sub_attr] = sub_value
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
@@ -403,10 +403,6 @@ def input_parser(plan, input_args):
             image=result["tx_spammer_params"]["image"],
             tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
         ),
-        goomy_blob_params=struct(
-            image=result["goomy_blob_params"]["image"],
-            goomy_blob_args=result["goomy_blob_params"]["goomy_blob_args"],
-        ),
         prometheus_params=struct(
             storage_tsdb_retention_time=result["prometheus_params"][
                 "storage_tsdb_retention_time"
@@ -452,11 +448,20 @@ def input_parser(plan, input_args):
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
-            tx_type=result["spamoor_params"]["tx_type"],
+            scenario=result["spamoor_params"]["scenario"],
             throughput=result["spamoor_params"]["throughput"],
             max_pending=result["spamoor_params"]["max_pending"],
             max_wallets=result["spamoor_params"]["max_wallets"],
             spamoor_extra_args=result["spamoor_params"]["spamoor_extra_args"],
+        ),
+        spamoor_blob_params=struct(
+            image=result["spamoor_blob_params"]["image"],
+            scenario=result["spamoor_blob_params"]["scenario"],
+            throughput=result["spamoor_blob_params"]["throughput"],
+            max_blobs=result["spamoor_blob_params"]["max_blobs"],
+            max_pending=result["spamoor_blob_params"]["max_pending"],
+            max_wallets=result["spamoor_blob_params"]["max_wallets"],
+            spamoor_extra_args=result["spamoor_blob_params"]["spamoor_extra_args"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -1129,10 +1134,6 @@ def get_default_tx_spammer_params():
     }
 
 
-def get_default_goomy_blob_params():
-    return {"image": "ethpandaops/spamoor:latest", "goomy_blob_args": []}
-
-
 def get_default_assertoor_params():
     return {
         "image": constants.DEFAULT_ASSERTOOR_IMAGE,
@@ -1191,10 +1192,22 @@ def get_default_xatu_sentry_params():
 def get_default_spamoor_params():
     return {
         "image": "ethpandaops/spamoor:latest",
-        "tx_type": "eoatx",
+        "scenario": "eoatx",
         "throughput": 1000,
         "max_pending": 1000,
         "max_wallets": 500,
+        "spamoor_extra_args": [],
+    }
+
+
+def get_default_spamoor_blob_params():
+    return {
+        "image": "ethpandaops/spamoor:latest",
+        "scenario": "blob-combined",
+        "throughput": 3,
+        "max_blobs": 2,
+        "max_pending": 6,
+        "max_wallets": 29,
         "spamoor_extra_args": [],
     }
 
@@ -1391,10 +1404,10 @@ def docker_cache_image_override(plan, result):
         "mev_params.mev_flood_image",
         "xatu_sentry_params.xatu_sentry_image",
         "tx_spammer_params.image",
-        "goomy_blob_params.image",
         "prometheus_params.image",
         "grafana_params.image",
         "spamoor_params.image",
+        "spamoor_blob_params.image",
         "ethereum_genesis_generator_params.image",
     ]
 
