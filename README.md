@@ -553,13 +553,12 @@ network_params:
   deneb_fork_epoch: 0
 
   # Electra fork epoch
-  # Defaults to 100000000
-  electra_fork_epoch: 100000000
+  # Defaults to 18446744073709551615
+  electra_fork_epoch: 18446744073709551615
 
   # Fulu fork epoch
-  # Defaults to 100000001
-  fulu_fork_epoch: 100000001
-
+  # Defaults to 18446744073709551615
+  fulu_fork_epoch: 18446744073709551615
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"

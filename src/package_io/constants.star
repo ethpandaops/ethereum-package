@@ -88,9 +88,7 @@ COMMIT_BOOST_MEV_TYPE = "commit-boost"
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
-DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:3.4.7"
-)
+DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = "ethpandaops/ethereum-genesis-generator:pk910-bash-el-genesis-generator-99ffaaf"  # TODO: revert to 3.4.7
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.29.2a3"
 DEFAULT_FLASHBOTS_BUILDER_IMAGE = "ethpandaops/reth-rbuilder:develop"
 DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
@@ -112,9 +110,9 @@ BELLATRIX_FORK_VERSION = "0x30000038"
 CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
-ELECTRA_FORK_EPOCH = 100000000
 FULU_FORK_VERSION = "0x70000038"
-FULU_FORK_EPOCH = 100000001
+
+FAR_FUTURE_EPOCH = 18446744073709551615
 
 MAX_LABEL_LENGTH = 63
 

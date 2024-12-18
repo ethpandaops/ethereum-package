@@ -906,8 +906,8 @@ def default_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
-        "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
+        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
@@ -945,8 +945,8 @@ def default_minimal_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
-        "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
+        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
@@ -1484,5 +1484,5 @@ def docker_cache_image_override(plan, result):
 
 def get_default_ethereum_genesis_generator_params():
     return {
-        "image": "ethpandaops/ethereum-genesis-generator:3.4.7",
+        "image": constants.DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE,
     }
