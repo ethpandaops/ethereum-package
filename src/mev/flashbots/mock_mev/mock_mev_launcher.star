@@ -1,10 +1,10 @@
 constants = import_module("../../../package_io/constants.star")
 
-MOCK_MEV_IMAGE = "ethpandaops/mock-builder:latest"
+MOCK_MEV_IMAGE = "parithoshj/rustic-builder:v1"
 MOCK_MEV_SERVICE_NAME = "mock-mev"
-MOCK_MEV_BUILDER_PORT = 18550
+MOCK_MEV_BUILDER_PORT = 8560
 
-# The min/max CPU/memory that mev-mock-builder can use
+# The min/max CPU/memory that rustic-builder can use
 MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 128
@@ -29,10 +29,11 @@ def launch_mock_mev(
                 ),
             },
             cmd=[
+                "--execution-endpoint=http://{0}".format(el_uri),
+                "--beacon-node=http://{0}".format(beacon_uri),
                 "--jwt-secret={0}".format(jwt_secret),
-                "--el={0}".format(el_uri),
-                "--cl={0}".format(beacon_uri),
-                "--bid-multiplier=5",  # TODO: This could be customizable
+                "--port={0}".format(MOCK_MEV_BUILDER_PORT),
+                "--set-max-bid-value", 
                 "--log-level={0}".format(global_log_level),
             ],
             min_cpu=MIN_CPU,
