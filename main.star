@@ -254,7 +254,7 @@ def run(plan, args={}):
             plan,
             el_uri,
             beacon_uri,
-            raw_jwt_secret,
+            jwt_file,
             args_with_right_defaults.global_log_level,
             global_node_selectors,
         )

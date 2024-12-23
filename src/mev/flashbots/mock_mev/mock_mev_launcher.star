@@ -15,7 +15,7 @@ def launch_mock_mev(
     plan,
     el_uri,
     beacon_uri,
-    jwt_secret,
+    jwt_file,
     global_log_level,
     global_node_selectors,
 ):
@@ -31,11 +31,15 @@ def launch_mock_mev(
             cmd=[
                 "--execution-endpoint=http://{0}".format(el_uri),
                 "--beacon-node=http://{0}".format(beacon_uri),
-                "--jwt-secret={0}".format(jwt_secret),
+                "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
                 "--port={0}".format(MOCK_MEV_BUILDER_PORT),
+                "--address=0.0.0.0",
                 "--set-max-bid-value", 
                 "--log-level={0}".format(global_log_level),
             ],
+            files={
+                constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+            },
             min_cpu=MIN_CPU,
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
