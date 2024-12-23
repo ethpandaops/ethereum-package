@@ -380,6 +380,7 @@ def input_parser(plan, input_args):
             mev_flood_seconds_per_bundle=result["mev_params"][
                 "mev_flood_seconds_per_bundle"
             ],
+            mock_mev_image=result["mev_params"]["mock_mev_image"],
         )
         if result["mev_params"]
         else None,
@@ -1109,9 +1110,16 @@ def get_default_mev_params(mev_type, preset):
             "0x436F6D6D69742D426F6F737420F09F93BB"  # Commit-Boost 📻
         )
 
+    if mev_type == constants.MOCK_MEV_TYPE:
+        
+        mev_builder_image = constants.DEFAULT_MOCK_MEV_IMAGE
+        mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
+        
+
     return {
         "mev_relay_image": mev_relay_image,
         "mev_builder_image": mev_builder_image,
+        "mock_mev_image": mev_builder_image if mev_type == constants.MOCK_MEV_TYPE else None,
         "mev_builder_cl_image": mev_builder_cl_image,
         "mev_builder_extra_data": mev_builder_extra_data,
         "mev_builder_extra_args": mev_builder_extra_args,
@@ -1364,6 +1372,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             }
         )
         parsed_arguments_dict["participants"].append(mev_participant)
+    if mev_type == constants.MOCK_MEV_TYPE:
+        parsed_arguments_dict["mev_params"]["mock_mev_image"] = parsed_arguments_dict["mev_params"]["mock_mev_image"]
     return parsed_arguments_dict
 
 

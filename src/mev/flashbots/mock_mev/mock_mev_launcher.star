@@ -1,6 +1,7 @@
 constants = import_module("../../../package_io/constants.star")
 
-MOCK_MEV_IMAGE = "parithoshj/rustic-builder:v1"
+# Default image if none specified in mev_params
+
 MOCK_MEV_SERVICE_NAME = "mock-mev"
 MOCK_MEV_BUILDER_PORT = 8560
 
@@ -18,11 +19,12 @@ def launch_mock_mev(
     jwt_file,
     global_log_level,
     global_node_selectors,
-):
+    mev_params,
+):    
     mock_builder = plan.add_service(
         name=MOCK_MEV_SERVICE_NAME,
         config=ServiceConfig(
-            image=MOCK_MEV_IMAGE,
+            image=mev_params.mock_mev_image,
             ports={
                 "rest": PortSpec(
                     number=MOCK_MEV_BUILDER_PORT, transport_protocol="TCP"

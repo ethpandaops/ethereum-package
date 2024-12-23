@@ -257,6 +257,7 @@ def run(plan, args={}):
             jwt_file,
             args_with_right_defaults.global_log_level,
             global_node_selectors,
+            args_with_right_defaults.mev_params,
         )
         mev_endpoints.append(endpoint)
         mev_endpoint_names.append(constants.MOCK_MEV_TYPE)
