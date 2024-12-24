@@ -805,7 +805,7 @@ parallel_keystore_generation: false
 # Default to false
 disable_peer_scoring: false
 
-# Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+# Whether the environment should be persistent; this is WIP and is slowly being rolled out across services
 # Note this requires Kurtosis greater than 0.85.49 to work
 # Note Erigon, Besu, Teku persistence is not currently supported with docker.
 # Defaults to false
@@ -825,7 +825,7 @@ docker_cache_params:
   github_prefix: "/gh/"
   google_prefix: "/gcr/"
 
-# Supports three valeus
+# Supports three values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
@@ -976,7 +976,7 @@ spamoor_blob_params:
   # Max wallets for spamoor
   # Defaults to 20
   max_wallets: 20
-  # A list of optional params that will be passed to the spamoor comamnd for modifying its behaviour
+  # A list of optional params that will be passed to the spamoor command for modifying its behaviour
   spamoor_extra_args: []
 
 # Ethereum genesis generator params
@@ -986,7 +986,7 @@ ethereum_genesis_generator_params:
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
-  # if you have a service that you want to expose on a specific interfact; set that IP here
+  # if you have a service that you want to expose on a specific interface; set that IP here
   # if you set it to auto it gets the public ip from ident.me and sets it
   # Defaults to constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
   # The default value just means its the IP address of the container in which the service is running
