@@ -20,7 +20,7 @@ def launch_mock_mev(
     global_log_level,
     global_node_selectors,
     mev_params,
-):    
+):
     mock_builder = plan.add_service(
         name=MOCK_MEV_SERVICE_NAME,
         config=ServiceConfig(
@@ -36,7 +36,7 @@ def launch_mock_mev(
                 "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
                 "--port={0}".format(MOCK_MEV_BUILDER_PORT),
                 "--address=0.0.0.0",
-                "--set-max-bid-value", 
+                "--set-max-bid-value",
                 "--log-level={0}".format(global_log_level),
                 "--builder-secret-key=" + constants.DEFAULT_MEV_SECRET_KEY[2:],
             ],
