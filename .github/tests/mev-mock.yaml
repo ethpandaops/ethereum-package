@@ -8,4 +8,4 @@ additional_services:
   - spamoor_blob
   - tx_spammer
 mev_params:
-  mock_mev_image: "ethpandaops/rustic-builder:main-linux-arm64"
+  mock_mev_image: "ethpandaops/rustic-builder:main"
