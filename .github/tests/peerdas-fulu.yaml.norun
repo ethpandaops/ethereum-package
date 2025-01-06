@@ -28,14 +28,13 @@ participants:
     cl_extra_params: [--persistNetworkIdentity]
 network_params:
   electra_fork_epoch: 1
-  eip7594_fork_epoch: 1
-  eip7594_fork_version: "0x60000038"
+  fulu_fork_epoch: 2
   preset: minimal
 snooper_enabled: true
 global_log_level: debug
 additional_services:
   - dora
-  - goomy_blob
+  - spamoor_blob
   - prometheus_grafana
   - assertoor
 ethereum_metrics_exporter_enabled: true

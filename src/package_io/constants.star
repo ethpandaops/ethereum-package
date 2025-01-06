@@ -24,6 +24,7 @@ VC_TYPE = struct(
     nimbus="nimbus",
     prysm="prysm",
     teku="teku",
+    vero="vero",
 )
 
 REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
@@ -55,6 +56,7 @@ METRICS_PORT_ID = "metrics"
 ENGINE_RPC_PORT_ID = "engine-rpc"
 ENGINE_WS_PORT_ID = "engine-ws"
 ADMIN_PORT_ID = "admin"
+RBUILDER_PORT_ID = "rbuilder-rpc"
 LITTLE_BIGTABLE_PORT_ID = "littlebigtable"
 VALDIATOR_GRPC_PORT_ID = "grpc"
 
@@ -82,13 +84,19 @@ KEYMANAGER_MOUNT_PATH_ON_CONTAINER = (
 MOCK_MEV_TYPE = "mock"
 FLASHBOTS_MEV_TYPE = "flashbots"
 MEV_RS_MEV_TYPE = "mev-rs"
-
+COMMIT_BOOST_MEV_TYPE = "commit-boost"
+DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
+DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
-DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.27"
-DEFAULT_FLASHBOTS_BUILDER_IMAGE = "flashbots/builder:latest"
+DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
+    "ethpandaops/ethereum-genesis-generator:3.5.1"
+)
+DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.29.2a3"
+DEFAULT_FLASHBOTS_BUILDER_IMAGE = "ethpandaops/reth-rbuilder:develop"
 DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
 DEFAULT_MEV_RS_IMAGE = "ethpandaops/mev-rs:main"
 DEFAULT_MEV_RS_IMAGE_MINIMAL = "ethpandaops/mev-rs:main-minimal"
+DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE = "ghcr.io/commit-boost/pbs:latest"
 DEFAULT_MEV_PUBKEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
 DEFAULT_MEV_SECRET_KEY = (
     "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
@@ -99,17 +107,21 @@ DEFAULT_MNEMONIC = "giant issue aisle success illegal bike spike question tent b
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
 GENESIS_FORK_VERSION = "0x10000038"
+ALTAIR_FORK_VERSION = "0x20000038"
 BELLATRIX_FORK_VERSION = "0x30000038"
 CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
-EIP7594_FORK_VERSION = "0x70000038"
+ELECTRA_FORK_EPOCH = 100000000
+FULU_FORK_VERSION = "0x70000038"
+FULU_FORK_EPOCH = 100000001
 
-ETHEREUM_GENESIS_GENERATOR = struct(
-    capella_genesis="ethpandaops/ethereum-genesis-generator:2.0.12",  # Deprecated (no support for minimal config)
-    deneb_genesis="ethpandaops/ethereum-genesis-generator:3.3.7",  # Default
-    verkle_support_genesis="ethpandaops/ethereum-genesis-generator:3.0.0-rc.19",  # soon to be deneb genesis, waiting for rebase
-    verkle_genesis="ethpandaops/ethereum-genesis-generator:verkle-gen-v1.0.0",
+MAX_LABEL_LENGTH = 63
+
+CONTAINER_REGISTRY = struct(
+    dockerhub="/",
+    ghcr="ghcr.io",
+    gcr="gcr.io",
 )
 
 NETWORK_NAME = struct(
@@ -167,7 +179,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 1000000,  # 1TB
         "besu_volume_size": 1000000,  # 1TB
         "reth_volume_size": 3000000,  # 3TB
-        "reth-builder_volume_size": 3000000,  # 3TB
+        "reth_builder_volume_size": 3000000,  # 3TB
         "ethereumjs_volume_size": 1000000,  # 1TB
         "nimbus_eth1_volume_size": 1000000,  # 1TB
         "prysm_volume_size": 500000,  # 500GB
@@ -183,7 +195,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 300000,  # 300GB
         "besu_volume_size": 300000,  # 300GB
         "reth_volume_size": 500000,  # 500GB
-        "reth-builder_volume_size": 500000,  # 500GB
+        "reth_builder_volume_size": 500000,  # 500GB
         "ethereumjs_volume_size": 300000,  # 300GB
         "nimbus_eth1_volume_size": 300000,  # 300GB
         "prysm_volume_size": 150000,  # 150GB
@@ -199,7 +211,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 100000,  # 100GB
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
-        "reth-builder_volume_size": 200000,  # 200GB
+        "reth_builder_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
@@ -215,7 +227,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 100000,  # 100GB
         "besu_volume_size": 100000,  # 100GB
         "reth_volume_size": 200000,  # 200GB
-        "reth-builder_volume_size": 200000,  # 200GB
+        "reth_builder_volume_size": 200000,  # 200GB
         "ethereumjs_volume_size": 100000,  # 100GB
         "nimbus_eth1_volume_size": 100000,  # 100GB
         "prysm_volume_size": 100000,  # 100GB
@@ -231,7 +243,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 3000,  # 3GB
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
-        "reth-builder_volume_size": 3000,  # 3GB
+        "reth_builder_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
@@ -247,7 +259,7 @@ VOLUME_SIZE = {
         "nethermind_volume_size": 3000,  # 3GB
         "besu_volume_size": 3000,  # 3GB
         "reth_volume_size": 3000,  # 3GB
-        "reth-builder_volume_size": 3000,  # 3GB
+        "reth_builder_volume_size": 3000,  # 3GB
         "ethereumjs_volume_size": 3000,  # 3GB
         "nimbus_eth1_volume_size": 3000,  # 3GB
         "prysm_volume_size": 1000,  # 1GB
@@ -258,3 +270,6 @@ VOLUME_SIZE = {
         "grandine_volume_size": 1000,  # 1GB
     },
 }
+VOLUME_SIZE["mainnet-shadowfork"] = VOLUME_SIZE["mainnet"]
+VOLUME_SIZE["sepolia-shadowfork"] = VOLUME_SIZE["sepolia"]
+VOLUME_SIZE["holesky-shadowfork"] = VOLUME_SIZE["holesky"]

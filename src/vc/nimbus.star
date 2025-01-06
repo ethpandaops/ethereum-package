@@ -105,9 +105,9 @@ def get_config(
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.CL_TYPE.nimbus,
+            client=constants.VC_TYPE.nimbus,
             client_type=constants.CLIENT_TYPES.validator,
-            image=image,
+            image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
             extra_labels=participant.vc_extra_labels,
             supernode=participant.supernode,

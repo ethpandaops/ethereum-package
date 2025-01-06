@@ -1,10 +1,3 @@
-# Important recent update notes - temporary note
-The `ethereum-package` has been moved to the [ethpandaops organization](https://github.com/ethpandaops/).
-
-The new repository is located at [github.com/ethpandaops/ethereum-package](https://github.com/ethpandaops/ethereum-package). For all your references please replace `kurtosis-tech` with `ethpandaops`.
-
-If you would like to use the latest release of the package, released by kurtosis-tech, please refer to using the tag [v3.1.0](https://github.com/kurtosis-tech/ethereum-package/releases/tag/3.1.0).
-
 # Ethereum Package
 
 ![Run of the Ethereum Network Package](run.gif)
@@ -176,7 +169,7 @@ participants:
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
     # Defaults by client:
     # - geth: ethereum/client-go:latest
-    # - erigon: thorax/erigon:devel
+    # - erigon: ethpandaops/erigon:main
     # - nethermind: nethermind/nethermind:latest
     # - besu: hyperledger/besu:develop
     # - reth: ghcr.io/paradigmxyz/reth
@@ -296,7 +289,7 @@ participants:
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
-    # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm and vero
     # ( The prysm validator only works with a prysm CL client )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
@@ -308,11 +301,8 @@ participants:
     # - nimbus: statusim/nimbus-validator-client:multiarch-latest
     # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
     # - teku: consensys/teku:latest
+    # - vero: ghcr.io/serenita-org/vero:master
     vc_image: ""
-
-    # The number of validator clients to run for this participant
-    # Defaults to 1
-    vc_count: 1
 
     # The log level string that this participant's validator client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
@@ -544,18 +534,32 @@ network_params:
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
 
-  # The epoch at which the deneb/electra/eip7594(peerdas) forks are set to occur. Note: PeerDAS and Electra clients are currently
+  # The epoch at which the deneb/electra/fulu forks are set to occur. Note: PeerDAS and Electra clients are currently
   # working on forks. So set either one of the below forks.
+  # Altair fork epoch
+  # Defaults to 0
+  altair_fork_epoch: 0
+
+  # Bellatrix fork epoch
+  # Defaults to 0
+  bellatrix_fork_epoch: 0
+
+  # Capella fork epoch
+  # Defaults to 0
+  capella_fork_epoch: 0
+
+  # Deneb fork epoch
+  # Defaults to 0
   deneb_fork_epoch: 0
+
+  # Electra fork epoch
+  # Defaults to 100000000
   electra_fork_epoch: 100000000
-  eip7594_fork_epoch: 100000001
 
-  # The fork version to set if the eip7594 fork is active
-  eip7594_fork_version: "0x60000038"
+  # Fulu fork epoch
+  # Defaults to 100000001
+  fulu_fork_epoch: 100000001
 
-  # EOF activation fork epoch (EL only fork)
-  # Defaults to None
-  eof_activation_epoch: ""
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
@@ -570,8 +574,16 @@ network_params:
   samples_per_slot: 8
   # Minimum number of subnets an honest node custodies and serves samples from
   custody_requirement: 4
-  # Maximum number of blobs per block
-  max_blobs_per_block: 6
+
+  # Maximum number of blobs per block for Electra fork
+  max_blobs_per_block_electra: 9
+  # Target number of blobs per block for Electra fork
+  target_blobs_per_block_electra: 6
+
+  # Maximum number of blobs per block for Fulu fork
+  max_blobs_per_block_fulu: 12
+  # Target number of blobs per block for Fulu fork
+  target_blobs_per_block_fulu: 9
 
   # Preset for the network
   # Default: "mainnet"
@@ -610,6 +622,13 @@ network_params:
   # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}, "0x4107be99052d895e3ee461C685b042Aa975ab5c0": {"balance": "1ETH"}}'
   prefunded_accounts: {}
 
+  # Maximum size of gossip messages in bytes
+  # 10 * 2**20 (= 10485760, 10 MiB)
+  # Defaults to 10485760 (10MB)
+  gossip_max_size: 10485760
+
+
+
 # Global parameters for the network
 
 # By default includes
@@ -625,7 +644,8 @@ additional_services:
   - tx_spammer
   - blob_spammer
   - custom_flood
-  - goomy_blob
+  - spamoor
+  - spamoor_blob
   - el_forkmon
   - blockscout
   - beacon_metrics_gazer
@@ -639,24 +659,33 @@ additional_services:
   - apache
   - tracoor
 
+# Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
+blockscout_params:
+  # blockscout docker image to use
+  # Defaults to blockscout/blockscout:latest
+  image: "blockscout/blockscout:latest"
+  # blockscout smart contract verifier image to use
+  # Defaults to ghcr.io/blockscout/smart-contract-verifier:latest
+  verif_image: "ghcr.io/blockscout/smart-contract-verifier:latest"
+  # Frontend image
+  # Defaults to ghcr.io/blockscout/frontend:latest
+  frontend_image: "ghcr.io/blockscout/frontend:latest"
+
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
   # Dora docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
-
+  # Defaults to the latest image
+  image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
+  # TX Spammer docker image to use
+  # Defaults to the latest master image
+  image: "ethpandaops/tx-fuzz:master"
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
   tx_spammer_extra_args: []
-
-# Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
-goomy_blob_params:
-  # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
-  goomy_blob_args: []
 
 # Configuration place for prometheus
 prometheus_params:
@@ -669,6 +698,9 @@ prometheus_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Prometheus docker image to use
+  # Defaults to the latest image
+  image: "prom/prometheus:latest"
 
 # Configuration place for grafana
 grafana_params:
@@ -681,12 +713,15 @@ grafana_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Grafana docker image to use
+  # Defaults to the latest image
+  image: "grafana/grafana:latest"
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
+  # Defaults to the latest image
+  image: "ethpandaops/assertoor:latest"
 
   # Check chain stability
   # This check monitors the chain and succeeds if:
@@ -776,11 +811,26 @@ disable_peer_scoring: false
 # Defaults to false
 persistent: false
 
+# Docker cache url enables all docker images to be pulled through a custom docker registry
+# Disabled by default
+# Defaults to empty cache url
+# Images pulled from dockerhub will be prefixed with "/dh/" by default (docker.io)
+# Images pulled from github registry will be prefixed with "/gh/" by default (ghcr.io)
+# Images pulled from google registory will be prefixed with "/gcr/" by default (gcr.io)
+# If you want to use a local image in combination with the cache, do not put "/" in your local image name
+docker_cache_params:
+  enabled: false
+  url: ""
+  dockerhub_prefix: "/dh/"
+  github_prefix: "/gh/"
+  google_prefix: "/gcr/"
+
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
 # "mev-rs" - mev-boost, relays and builder are all spun up, powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
+# "commit-boost" - mev-boost, relays and builder are all spun up, powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -879,7 +929,62 @@ checkpoint_sync_enabled: false
 # Global flag to set checkpoint sync url
 checkpoint_sync_url: ""
 
-# Global paarameter to set the exit ip address of services and public ports
+# Configuration place for spamoor as transaction spammer
+spamoor_params:
+  # The image to use for spamoor
+  image: ethpandaops/spamoor:latest
+  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
+  # Valid scenarios are:
+  #  eoatx, erctx, deploytx, depoy-destruct, blobs, gasburnertx
+  # Defaults to eoatx
+  scenario: eoatx
+  # Throughput of spamoor
+  # Defaults to 1000
+  throughput: 1000
+  # Max pending transactions for spamoor
+  # Defaults to 1000
+  max_pending: 1000
+  # Max wallets for spamoor
+  # Defaults to 500
+  max_wallets: 500
+  # Extra parameters to send to spamoor
+  # Defaults to empty
+  spamoor_extra_args: []
+
+# Configuration place for spammor as blob spammer
+spamoor_blob_params:
+  # spamoor docker image to use
+  # Defaults to the latest
+  image: "ethpandaops/spamoor:latest"
+  # The spamoor blob scenario to use (see https://github.com/ethpandaops/spamoor)
+  # Valid blob scenarios are:
+  # - blobs (normal blob transactions only)
+  # - blob-combined (normal & special blobs with replacements)
+  # - blob-conflicting (conflicting blob & dynfee transactions)
+  # - blob-replacements (normal blobs with replacement blob transactions)
+  # Defaults to blob-combined
+  scenario: blob-combined
+  # Throughput of spamoor
+  # Defaults to 3
+  throughput: 3
+  # Maximum number of blobs per transaction
+  # Defaults to 2
+  max_blobs: 2
+  # Max pending blob transactions for spamoor
+  # Defaults to 6
+  max_pending: 6
+  # Max wallets for spamoor
+  # Defaults to 20
+  max_wallets: 20
+  # A list of optional params that will be passed to the spamoor comamnd for modifying its behaviour
+  spamoor_extra_args: []
+
+# Ethereum genesis generator params
+ethereum_genesis_generator_params:
+  # The image to use for ethereum genesis generator
+  image: ethpandaops/ethereum-genesis-generator:3.5.1
+
+# Global parameter to set the exit ip address of services and public ports
 port_publisher:
   # if you have a service that you want to expose on a specific interfact; set that IP here
   # if you set it to auto it gets the public ip from ident.me and sets it
@@ -1112,12 +1217,13 @@ Here's a table of where the keys are used
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 4             | goomy_blob          | ✅                |                 | As the sender of blobs     |
+| 4             | spamoor_blob        | ✅                |                 | As the sender of blobs     |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |
 | 7             | mev_flood           | ✅                |                 | As the user_key            |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
+| 13            | spamoor             | ✅                |                 | Spams transactions         |
 
 ## Developing On This Package
 

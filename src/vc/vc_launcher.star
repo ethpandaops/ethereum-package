@@ -8,6 +8,7 @@ lodestar = import_module("./lodestar.star")
 nimbus = import_module("./nimbus.star")
 prysm = import_module("./prysm.star")
 teku = import_module("./teku.star")
+vero = import_module("./vero.star")
 vc_shared = import_module("./shared.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
 
@@ -72,8 +73,6 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
-            network=network,  # TODO: remove when deneb rebase is done
-            electra_fork_epoch=electra_fork_epoch,  # TODO: remove when deneb rebase is done
             port_publisher=port_publisher,
             vc_index=vc_index,
         )
@@ -150,6 +149,24 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            port_publisher=port_publisher,
+            vc_index=vc_index,
+        )
+    elif vc_type == constants.VC_TYPE.vero:
+        if remote_signer_context == None:
+            fail("vero VC requires `use_remote_signer` to be true")
+        if keymanager_enabled:
+            fail("vero VC doesn't support the Keymanager API")
+        config = vero.get_config(
+            participant=participant,
+            image=image,
+            global_log_level=global_log_level,
+            beacon_http_url=beacon_http_url,
+            cl_context=cl_context,
+            remote_signer_context=remote_signer_context,
+            full_name=full_name,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
             port_publisher=port_publisher,
             vc_index=vc_index,
         )

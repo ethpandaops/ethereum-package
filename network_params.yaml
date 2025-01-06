@@ -31,7 +31,6 @@ participants:
     vc_type: lighthouse
     vc_image: sigp/lighthouse:latest-unstable
     vc_log_level: ""
-    vc_count: 1
     vc_extra_env_vars: {}
     vc_extra_labels: {}
     vc_extra_params: []
@@ -88,14 +87,15 @@ network_params:
   shard_committee_period: 256
   deneb_fork_epoch: 0
   electra_fork_epoch: 100000000
-  eip7594_fork_epoch: 100000001
-  eip7594_fork_version: "0x60000038"
+  fulu_fork_epoch: 100000001
   network_sync_base_url: https://snapshots.ethpandaops.io/
-  eof_activation_epoch: ""
   data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
   custody_requirement: 4
-  max_blobs_per_block: 6
+  max_blobs_per_block_electra: 9
+  target_blobs_per_block_electra: 6
+  max_blobs_per_block_fulu: 12
+  target_blobs_per_block_fulu: 9
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   prefunded_accounts: {}
@@ -104,8 +104,8 @@ dora_params:
   image: ""
 tx_spammer_params:
   tx_spammer_extra_args: []
-goomy_blob_params:
-  goomy_blob_args: []
+spamoor_blob_params:
+  spamoor_extra_args: []
 prometheus_params:
   storage_tsdb_retention_time: "1d"
   storage_tsdb_retention_size: "512MB"
@@ -175,6 +175,8 @@ global_node_selectors: {}
 keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
+ethereum_genesis_generator_params:
+  image: ethpandaops/ethereum-genesis-generator:3.5.1
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

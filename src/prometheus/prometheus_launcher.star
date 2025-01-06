@@ -46,6 +46,7 @@ def launch_prometheus(
         node_selectors=global_node_selectors,
         storage_tsdb_retention_time=prometheus_params.storage_tsdb_retention_time,
         storage_tsdb_retention_size=prometheus_params.storage_tsdb_retention_size,
+        image=prometheus_params.image,
     )
 
     return prometheus_url

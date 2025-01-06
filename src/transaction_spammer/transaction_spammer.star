@@ -13,14 +13,12 @@ def launch_transaction_spammer(
     prefunded_addresses,
     el_uri,
     tx_spammer_params,
-    electra_fork_epoch,
     global_node_selectors,
 ):
     config = get_config(
         prefunded_addresses,
         el_uri,
-        tx_spammer_params.tx_spammer_extra_args,
-        electra_fork_epoch,
+        tx_spammer_params,
         global_node_selectors,
     )
     plan.add_service(SERVICE_NAME, config)
@@ -29,23 +27,20 @@ def launch_transaction_spammer(
 def get_config(
     prefunded_addresses,
     el_uri,
-    tx_spammer_extra_args,
-    electra_fork_epoch,
+    tx_spammer_params,
     node_selectors,
 ):
-    tx_spammer_image = "ethpandaops/tx-fuzz:master"
-
     cmd = [
         "spam",
         "--rpc={}".format(el_uri),
         "--sk={0}".format(prefunded_addresses[3].private_key),
     ]
 
-    if len(tx_spammer_extra_args) > 0:
-        cmd.extend([param for param in tx_spammer_extra_args])
+    if len(tx_spammer_params.tx_spammer_extra_args) > 0:
+        cmd.extend([param for param in tx_spammer_params.tx_spammer_extra_args])
 
     return ServiceConfig(
-        image=tx_spammer_image,
+        image=tx_spammer_params.image,
         cmd=cmd,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,

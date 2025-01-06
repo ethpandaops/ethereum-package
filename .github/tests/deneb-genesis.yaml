@@ -12,4 +12,10 @@ participants:
   - el_type: ethereumjs
     cl_type: teku
 network_params:
+  altair_fork_epoch: 0
+  bellatrix_fork_epoch: 0
+  capella_fork_epoch: 0
   deneb_fork_epoch: 0
+  electra_fork_epoch: 1
+  fulu_fork_epoch: 2
+  genesis_delay: 120

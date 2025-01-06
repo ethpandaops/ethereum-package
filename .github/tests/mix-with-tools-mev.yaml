@@ -18,7 +18,7 @@ additional_services:
   - beacon_metrics_gazer
   - dora
   - prometheus_grafana
-  - goomy_blob
+  - spamoor_blob
   - custom_flood
   - blobscan
   - blockscout
@@ -26,6 +26,7 @@ additional_services:
   - blutgang
   - apache
   - tracoor
+  - spamoor
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 mev_type: flashbots

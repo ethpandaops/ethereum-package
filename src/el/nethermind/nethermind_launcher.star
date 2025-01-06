@@ -159,7 +159,7 @@ def get_config(
         cmd.append("--config=" + launcher.network.split("-")[0])
         cmd.append("--Init.BaseDbPath=" + launcher.network.split("-")[0])
     elif launcher.network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--config=none.cfg")
+        cmd.append("--config=none")
         cmd.append(
             "--Init.ChainSpecPath="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
@@ -208,7 +208,7 @@ def get_config(
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
             else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.besu + "_volume_size"
+                constants.EL_TYPE.nethermind + "_volume_size"
             ],
         )
     env_vars = participant.el_extra_env_vars
@@ -223,7 +223,7 @@ def get_config(
         "labels": shared_utils.label_maker(
             client=constants.EL_TYPE.nethermind,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image,
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
             supernode=participant.supernode,

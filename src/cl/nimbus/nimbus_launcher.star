@@ -22,7 +22,7 @@ BEACON_MIN_CPU = 50
 BEACON_MIN_MEMORY = 256
 
 DEFAULT_BEACON_IMAGE_ENTRYPOINT = ["nimbus_beacon_node"]
-
+BEACON_NODE_ENTRYPOINT = "/home/user/nimbus-eth2/build/nimbus_beacon_node"
 BEACON_METRICS_PATH = "/metrics"
 
 VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/data/nimbus/validator-keys"
@@ -203,7 +203,17 @@ def get_beacon_config(
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
+    nimbus_checkpoint_sync_subtask_str = "{0} trustedNodeSync --data-dir={1} --trusted-node-url={2} --network={3} --backfill=false".format(
+        BEACON_NODE_ENTRYPOINT,
+        BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
+        checkpoint_sync_url,
+        launcher.network
+        if launcher.network in constants.PUBLIC_NETWORKS
+        else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
+    )
+
     cmd = [
+        "{0}".format(BEACON_NODE_ENTRYPOINT),
         "--non-interactive=true",
         "--log-level=" + log_level,
         "--udp-port={0}".format(discovery_port),
@@ -306,13 +316,20 @@ def get_beacon_config(
             ],
         )
 
+    cmd_str = " ".join(cmd)
+    if checkpoint_sync_enabled:
+        command_str = " && ".join([nimbus_checkpoint_sync_subtask_str, cmd_str])
+    else:
+        command_str = cmd_str
+
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "cmd": [command_str],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
+        "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
@@ -320,7 +337,7 @@ def get_beacon_config(
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.nimbus,
             client_type=constants.CLIENT_TYPES.cl,
-            image=participant.cl_image,
+            image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
             supernode=participant.supernode,
