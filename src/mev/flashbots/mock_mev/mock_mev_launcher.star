@@ -38,6 +38,7 @@ def launch_mock_mev(
                 "--address=0.0.0.0",
                 "--set-max-bid-value", 
                 "--log-level={0}".format(global_log_level),
+                "--builder-secret-key=" + constants.DEFAULT_MEV_SECRET_KEY[2:],
             ],
             files={
                 constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
