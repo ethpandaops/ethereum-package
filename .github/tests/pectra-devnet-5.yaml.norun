@@ -1,24 +1,43 @@
-participants:
-  - el_type: besu
-    el_image: ethpandaops/besu:24.12-develop-b143a56
-    cl_type: teku
-    cl_image: consensys/teku:develop
-    el_log_level: "debug"
-    count: 3
+participants_matrix:
+  el:
+    - el_type: geth
+      el_image: ethpandaops/geth:prague-devnet-5-a193537
+    - el_type: reth
+      el_image: ethpandaops/reth:devnet5-766390d
+    - el_type: besu
+      el_image: ethpandaops/besu:pectra-devnet-5-interop-cb1357e
+  cl:
+    - cl_type: teku
+      cl_image: consensys/teku:develop
+    - cl_type: nimbus
+      cl_image: ethpandaops/nimbus-eth2:unstable-fb1c3ba
+    - cl_type: lodestar
+      cl_image: ethpandaops/lodestar:devnet-5-1c2b5ed
+    - cl_type: grandine
+      cl_image: ethpandaops/grandine:devnet5-db2c98f
+    - cl_type: prysm
+      cl_image: ethpandaops/prysm-beacon-chain:devnet5-ae44429
+      vc_image: ethpandaops/prysm-validator:devnet5-ae44429
+
 network_params:
   electra_fork_epoch: 1
   min_validator_withdrawability_delay: 1
   shard_committee_period: 1
   churn_limit_quotient: 16
-  num_validator_keys_per_node: 256
+  genesis_delay: 240
 additional_services:
   - dora
   - spamoor_blob
   - tx_spammer
+  - assertoor
 dora_params:
   image: "ethpandaops/dora:master-latest"
-snooper_enabled: true
 spamoor_blob_params:
   throughput: 10 
   max_blobs: 2  
   max_pending: 40 
+
+assertoor_params:
+  image: "ethpandaops/assertoor:master"
+  tests:
+    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/kurtosis/all.yaml

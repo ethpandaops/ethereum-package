@@ -1,6 +1,11 @@
 participants:
   - el_type: geth
     cl_type: lighthouse
-network_params:
-  seconds_per_slot: 3
+    count: 3
 mev_type: mock
+additional_services:
+  - dora
+  - spamoor_blob
+  - tx_spammer
+mev_params:
+  mock_mev_image: "ethpandaops/rustic-builder:main"
