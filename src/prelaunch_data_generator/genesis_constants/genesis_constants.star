@@ -110,6 +110,6 @@ PRE_FUNDED_ACCOUNTS = [
     # m/44'/60'/0'/0/20
     new_prefunded_account(
         "0xafF0CA253b97e54440965855cec0A8a2E2399896",
-        "4b9f63ecf84210c5366c66d68fa1f5da1fa4f634fad6dfc86178e4d79ff9e59",
+        "04b9f63ecf84210c5366c66d68fa1f5da1fa4f634fad6dfc86178e4d79ff9e59",
     ),
 ]
