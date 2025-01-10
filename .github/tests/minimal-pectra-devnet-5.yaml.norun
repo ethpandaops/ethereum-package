@@ -2,8 +2,6 @@ participants_matrix:
   el:
     - el_type: geth
       el_image: ethpandaops/geth:prague-devnet-5-a193537
-    - el_type: reth
-      el_image: ethpandaops/reth:devnet5-766390d
   cl:
     - cl_type: teku
       cl_image: consensys/teku:develop
@@ -11,8 +9,6 @@ participants_matrix:
       cl_image: ethpandaops/nimbus-eth2:unstable-minimal-046c379
     - cl_type: lodestar
       cl_image: ethpandaops/lodestar:devnet-5-1c2b5ed
-    - cl_type: grandine
-      cl_image: ethpandaops/grandine:devnet5-minimal-db2c98f
     - cl_type: prysm
       cl_image: ethpandaops/prysm-beacon-chain:devnet5-minimal-ae44429
       vc_image: ethpandaops/prysm-validator:devnet5-minimal-ae44429
