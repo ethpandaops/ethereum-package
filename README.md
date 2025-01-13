@@ -415,8 +415,10 @@ participants:
     # Default to 1
     count: 1
 
+    # Snooper local flag for a participant.
     # Snooper can be enabled with the `snooper_enabled` flag per client or globally
-    # Defaults null and then set to global snooper default (false)
+    # Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
+    # Default to null
     snooper_enabled: null
 
     # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
@@ -789,7 +791,9 @@ wait_for_finalization: false
 # This value will be overridden by participant-specific values
 global_log_level: "info"
 
-# EngineAPI Snooper global flags for all participants
+# Snooper global flag for all participants
+# Snooper can be enabled with the `snooper_enabled` flag per client or globally
+# Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
 # Default to false
 snooper_enabled: false
 
