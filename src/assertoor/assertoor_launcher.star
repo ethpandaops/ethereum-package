@@ -18,7 +18,7 @@ VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
 MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 128
-MAX_MEMORY = 2048
+MAX_MEMORY = 8192
 
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
