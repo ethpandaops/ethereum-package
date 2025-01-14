@@ -230,13 +230,13 @@ def get_config_frontend(
             blockscout_params.frontend_image,
         ),
         ports=FRONTEND_USED_PORTS,
+        public_ports=FRONTEND_USED_PORTS,
         env_vars={
             "NEXT_PUBLIC_API_PROTOCOL": "http",
             "NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL": "ws",
             "NEXT_PUBLIC_NETWORK_NAME": "Kurtosis",
             "NEXT_PUBLIC_NETWORK_ID": network_params.network_id,
             "NEXT_PUBLIC_NETWORK_RPC_URL": el_client_rpc_url,
-            "NEXT_PUBLIC_APP_HOST": "0.0.0.0",
             "NEXT_PUBLIC_API_HOST": blockscout_service.ip_address
             + ":"
             + str(blockscout_service.ports["http"].number),
@@ -247,6 +247,12 @@ def get_config_frontend(
             "NEXT_PUBLIC_HAS_BEACON_CHAIN": "true",
             "NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE": "validation",
             "NEXT_PUBLIC_NETWORK_ICON": "https://ethpandaops.io/logo.png",
+            # "NEXT_PUBLIC_APP_HOST": "0.0.0.0",
+            "NEXT_PUBLIC_APP_PROTOCOL": "http",
+            "NEXT_PUBLIC_APP_HOST": "127.0.0.1",
+            "NEXT_PUBLIC_APP_PORT": str(HTTP_PORT_NUMBER_FRONTEND),
+            "NEXT_PUBLIC_USE_NEXT_JS_PROXY": "true",
+            "PORT": str(HTTP_PORT_NUMBER_FRONTEND),
         },
         min_cpu=BLOCKSCOUT_MIN_CPU,
         max_cpu=BLOCKSCOUT_MAX_CPU,
