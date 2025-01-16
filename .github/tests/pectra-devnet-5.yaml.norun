@@ -7,7 +7,9 @@ participants_matrix:
     - el_type: erigon
       el_image: ethpandaops/erigon:pectra5-3d65c9b
     - el_type: nethermind
-      el_image: ethpandaops/nethermind:pectra-devnet-5-0a4dbd2
+      el_image: ethpandaops/nethermind:pectra-devnet-5-52b679a
+    - el_type: besu
+      el_image: ethpandaops/besu:main-1e7f6f6
   cl:
     - cl_type: lighthouse
       cl_image: ethpandaops/lighthouse:single_attestation-b6d80eb
