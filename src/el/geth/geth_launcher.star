@@ -205,11 +205,11 @@ def get_config(
         "--http.corsdomain=*",
         # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
         #  that users should NOT store private information in these Kurtosis nodes!
-        "--http.api=admin,engine,net,eth,web3,debug",
+        "--http.api=admin,engine,net,eth,web3,debug,txpool",
         "--ws",
         "--ws.addr=0.0.0.0",
         "--ws.port={0}".format(WS_PORT_NUM),
-        "--ws.api=admin,engine,net,eth,web3,debug",
+        "--ws.api=admin,engine,net,eth,web3,debug,txpool",
         "--ws.origins=*",
         "--allow-insecure-unlock",
         "--nat=extip:" + port_publisher.nat_exit_ip,

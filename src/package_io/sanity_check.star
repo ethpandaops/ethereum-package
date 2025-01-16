@@ -235,6 +235,7 @@ SUBCATEGORY_PARAMS = {
         "mev_flood_extra_args",
         "mev_flood_seconds_per_bundle",
         "custom_flood_params",
+        "mock_mev_image",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
