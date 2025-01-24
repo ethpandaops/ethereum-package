@@ -13,13 +13,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-login
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Setup Kurtosis
-        run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-          kurtosis analytics disable
-
+        uses: ./.github/actions/kurtosis-install
       - name: Run Starlark
         run: |
           kurtosis run ${{ github.workspace }} --args-file network_params.yaml
@@ -41,13 +40,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-login
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Setup Kurtosis
-        run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-          kurtosis analytics disable
-
+        uses: ./.github/actions/kurtosis-install
       - name: Run Starlark
         run: |
           kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
@@ -58,12 +56,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Setup Kurtosis
-        run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-          kurtosis analytics disable
-
+        uses: ./.github/actions/kurtosis-install
       - name: Kurtosis Lint
         run: kurtosis lint ${{ github.workspace }}
 
@@ -73,9 +66,26 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-login
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@v1
         with:
           ethereum_package_url: "."
           ethereum_package_branch: ""
           ethereum_package_args: .github/tests/mix-assert.yaml
+  check_optimism_package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup Kurtosis
+        uses: ./.github/actions/kurtosis-install
+      - name: Run L1
+        run: |
+          kurtosis run --enclave test ${{ github.workspace }} --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/refs/heads/main/.github/tests/external-l1/ethereum.yaml --verbosity detailed
+      - name: Run L2
+        run: |
+          kurtosis run --enclave test github.com/ethpandaops/optimism-package --args-file https://raw.githubusercontent.com/ethpandaops/optimism-package/refs/heads/main/.github/tests/external-l1/optimism.yaml --verbosity detailed

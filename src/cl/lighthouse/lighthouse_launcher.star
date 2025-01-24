@@ -224,7 +224,6 @@ def get_beacon_config(
         "--http",
         "--http-address=0.0.0.0",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
-        "--http-allow-sync-stalled",
         "--slots-per-restore-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         # NOTE: This comes from:
         #   https://github.com/sigp/lighthouse/blob/7c88f582d955537f7ffff9b2c879dcf5bf80ce13/scripts/local_testnet/beacon_node.sh
@@ -251,23 +250,8 @@ def get_beacon_config(
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
-    # If checkpoint sync is enabled, add the checkpoint sync url
     if checkpoint_sync_enabled:
-        if checkpoint_sync_url:
-            cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
-        else:
-            if (
-                launcher.network in constants.PUBLIC_NETWORKS
-                or launcher.network == constants.NETWORK_NAME.ephemery
-            ):
-                cmd.append(
-                    "--checkpoint-sync-url="
-                    + constants.CHECKPOINT_SYNC_URL[launcher.network]
-                )
-            else:
-                fail(
-                    "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
-                )
+        cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
 
     if launcher.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
@@ -339,7 +323,7 @@ def get_beacon_config(
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.lighthouse,
             client_type=constants.CLIENT_TYPES.cl,
-            image=participant.cl_image,
+            image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
             supernode=participant.supernode,

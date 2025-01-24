@@ -20,9 +20,8 @@ def launch(
     el_cl_data,
     jwt_file,
     keymanager_file,
-    participants,
+    args_with_right_defaults,
     all_el_contexts,
-    global_log_level,
     global_node_selectors,
     global_tolerations,
     persistent,
@@ -30,9 +29,6 @@ def launch(
     validator_data,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
-    checkpoint_sync_enabled,
-    checkpoint_sync_url,
-    port_publisher,
 ):
     plan.print("Launching CL network")
 
@@ -94,7 +90,7 @@ def launch(
         else None
     )
     network_name = shared_utils.get_network_name(network_params.network)
-    for index, participant in enumerate(participants):
+    for index, participant in enumerate(args_with_right_defaults.participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
         node_selectors = input_parser.get_client_node_selectors(
@@ -118,11 +114,13 @@ def launch(
             cl_launchers[cl_type]["launch_method"],
         )
 
-        index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
+        index_str = shared_utils.zfill_custom(
+            index + 1, len(str(len(args_with_right_defaults.participants)))
+        )
 
         cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
-        if participant.validator_count != 0 and participant.vc_count != 0:
+        if participant.validator_count != 0:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
                 index
             ]
@@ -140,12 +138,28 @@ def launch(
                 snooper_service_name,
                 el_context,
                 node_selectors,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print(
                 "Successfully added {0} snooper participants".format(
                     snooper_engine_context
                 )
             )
+        checkpoint_sync_url = args_with_right_defaults.checkpoint_sync_url
+        if args_with_right_defaults.checkpoint_sync_enabled:
+            if args_with_right_defaults.checkpoint_sync_url == "":
+                if (
+                    network_params.network in constants.PUBLIC_NETWORKS
+                    or network_params.network == constants.NETWORK_NAME.ephemery
+                ):
+                    checkpoint_sync_url = constants.CHECKPOINT_SYNC_URL[
+                        network_params.network
+                    ]
+                else:
+                    fail(
+                        "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
+                    )
+
         all_snooper_engine_contexts.append(snooper_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         if index == 0:
@@ -154,7 +168,7 @@ def launch(
                 cl_launcher,
                 cl_service_name,
                 participant,
-                global_log_level,
+                args_with_right_defaults.global_log_level,
                 cl_context_BOOTNODE,
                 el_context,
                 full_name,
@@ -163,9 +177,9 @@ def launch(
                 persistent,
                 tolerations,
                 node_selectors,
-                checkpoint_sync_enabled,
+                args_with_right_defaults.checkpoint_sync_enabled,
                 checkpoint_sync_url,
-                port_publisher,
+                args_with_right_defaults.port_publisher,
                 index,
             )
         else:
@@ -175,7 +189,7 @@ def launch(
                 cl_launcher,
                 cl_service_name,
                 participant,
-                global_log_level,
+                args_with_right_defaults.global_log_level,
                 boot_cl_client_ctx,
                 el_context,
                 full_name,
@@ -184,9 +198,9 @@ def launch(
                 persistent,
                 tolerations,
                 node_selectors,
-                checkpoint_sync_enabled,
+                args_with_right_defaults.checkpoint_sync_enabled,
                 checkpoint_sync_url,
-                port_publisher,
+                args_with_right_defaults.port_publisher,
                 index,
             )
 

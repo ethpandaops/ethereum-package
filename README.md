@@ -1,10 +1,3 @@
-# Important recent update notes - temporary note
-The `ethereum-package` has been moved to the [ethpandaops organization](https://github.com/ethpandaops/).
-
-The new repository is located at [github.com/ethpandaops/ethereum-package](https://github.com/ethpandaops/ethereum-package). For all your references please replace `kurtosis-tech` with `ethpandaops`.
-
-If you would like to use the latest release of the package, released by kurtosis-tech, please refer to using the tag [v3.1.0](https://github.com/kurtosis-tech/ethereum-package/releases/tag/3.1.0).
-
 # Ethereum Package
 
 ![Run of the Ethereum Network Package](run.gif)
@@ -176,7 +169,7 @@ participants:
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
     # Defaults by client:
     # - geth: ethereum/client-go:latest
-    # - erigon: thorax/erigon:devel
+    # - erigon: ethpandaops/erigon:main
     # - nethermind: nethermind/nethermind:latest
     # - besu: hyperledger/besu:develop
     # - reth: ghcr.io/paradigmxyz/reth
@@ -296,7 +289,7 @@ participants:
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
-    # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm and vero
     # ( The prysm validator only works with a prysm CL client )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
@@ -308,13 +301,10 @@ participants:
     # - nimbus: statusim/nimbus-validator-client:multiarch-latest
     # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
     # - teku: consensys/teku:latest
+    # - vero: ghcr.io/serenita-org/vero:master
     vc_image: ""
 
-    # The number of validator clients to run for this participant
-    # Defaults to 1
-    vc_count: 1
-
-    # The log level string that this participant's CL client should log at
+    # The log level string that this participant's validator client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
     # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
     # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
@@ -324,11 +314,11 @@ participants:
     # A list of optional extra env_vars the vc container should spin up with
     vc_extra_env_vars: {}
 
-    # A list of optional extra labels that will be passed to the CL client validator container.
+    # A list of optional extra labels that will be passed to the validator client validator container.
     # Example; vc_extra_labels: {"ethereum-package.partition": "1"}
     vc_extra_labels: {}
 
-    # A list of optional extra params that will be passed to the CL client validator container for modifying its behaviour
+    # A list of optional extra params that will be passed to the validator client container for modifying its behaviour
     # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
     vc_extra_params: []
 
@@ -357,6 +347,51 @@ participants:
     # network parameter num_validator_keys_per_node
     validator_count: null
 
+    # Whether to use a remote signer instead of the vc directly handling keys
+    # Note Lighthouse VC does not support this flag
+    # Defaults to false
+    use_remote_signer: false
+
+  # Remote signer Specific flags
+    # The type of remote signer that should be used
+    # Valid values are web3signer
+    # Defaults to web3signer
+    remote_signer_type: "web3signer"
+
+    # The Docker image that should be used for the remote signer
+    # Defaults to "consensys/web3signer:latest"
+    remote_signer_image: "consensys/web3signer:latest"
+
+    # A list of optional extra env_vars the remote signer container should spin up with
+    remote_signer_extra_env_vars: {}
+
+    # A list of optional extra labels that will be passed to the remote signer container.
+    # Example; remote_signer_extra_labels: {"ethereum-package.partition": "1"}
+    remote_signer_extra_labels: {}
+
+    # A list of optional extra params that will be passed to the remote signer container for modifying its behaviour
+    remote_signer_extra_params: []
+
+    # A list of tolerations that will be passed to the remote signer container
+    # Only works with Kubernetes
+    # Example: remote_signer_tolerations:
+    # - key: "key"
+    #   operator: "Equal"
+    #   value: "value"
+    #   effect: "NoSchedule"
+    #   toleration_seconds: 3600
+    # Defaults to empty
+    remote_signer_tolerations: []
+
+    # Resource management for remote signer containers
+    # CPU is milicores
+    # RAM is in MB
+    # Defaults to 0, which results in no resource limits
+    remote_signer_min_cpu: 0
+    remote_signer_max_cpu: 0
+    remote_signer_min_mem: 0
+    remote_signer_max_mem: 0
+
   # Participant specific flags
     # Node selector
     # Only works with Kubernetes
@@ -380,8 +415,10 @@ participants:
     # Default to 1
     count: 1
 
+    # Snooper local flag for a participant.
     # Snooper can be enabled with the `snooper_enabled` flag per client or globally
-    # Defaults null and then set to global snooper default (false)
+    # Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
+    # Default to null
     snooper_enabled: null
 
     # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
@@ -499,18 +536,32 @@ network_params:
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
 
-  # The epoch at which the deneb/electra/eip7594(peerdas) forks are set to occur. Note: PeerDAS and Electra clients are currently
+  # The epoch at which the deneb/electra/fulu forks are set to occur. Note: PeerDAS and Electra clients are currently
   # working on forks. So set either one of the below forks.
+  # Altair fork epoch
+  # Defaults to 0
+  altair_fork_epoch: 0
+
+  # Bellatrix fork epoch
+  # Defaults to 0
+  bellatrix_fork_epoch: 0
+
+  # Capella fork epoch
+  # Defaults to 0
+  capella_fork_epoch: 0
+
+  # Deneb fork epoch
+  # Defaults to 0
   deneb_fork_epoch: 0
+
+  # Electra fork epoch
+  # Defaults to 100000000
   electra_fork_epoch: 100000000
-  eip7594_fork_epoch: 100000001
 
-  # The fork version to set if the eip7594 fork is active
-  eip7594_fork_version: "0x60000038"
+  # Fulu fork epoch
+  # Defaults to 100000001
+  fulu_fork_epoch: 100000001
 
-  # EOF activation fork epoch (EL only fork)
-  # Defaults to None
-  eof_activation_epoch: ""
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
@@ -525,8 +576,16 @@ network_params:
   samples_per_slot: 8
   # Minimum number of subnets an honest node custodies and serves samples from
   custody_requirement: 4
-  # Maximum number of blobs per block
-  max_blobs_per_block: 6
+
+  # Maximum number of blobs per block for Electra fork
+  max_blobs_per_block_electra: 9
+  # Target number of blobs per block for Electra fork
+  target_blobs_per_block_electra: 6
+
+  # Maximum number of blobs per block for Fulu fork
+  max_blobs_per_block_fulu: 12
+  # Target number of blobs per block for Fulu fork
+  target_blobs_per_block_fulu: 9
 
   # Preset for the network
   # Default: "mainnet"
@@ -565,6 +624,13 @@ network_params:
   # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}, "0x4107be99052d895e3ee461C685b042Aa975ab5c0": {"balance": "1ETH"}}'
   prefunded_accounts: {}
 
+  # Maximum size of gossip messages in bytes
+  # 10 * 2**20 (= 10485760, 10 MiB)
+  # Defaults to 10485760 (10MB)
+  gossip_max_size: 10485760
+
+
+
 # Global parameters for the network
 
 # By default includes
@@ -580,7 +646,8 @@ additional_services:
   - tx_spammer
   - blob_spammer
   - custom_flood
-  - goomy_blob
+  - spamoor
+  - spamoor_blob
   - el_forkmon
   - blockscout
   - beacon_metrics_gazer
@@ -594,24 +661,33 @@ additional_services:
   - apache
   - tracoor
 
+# Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
+blockscout_params:
+  # blockscout docker image to use
+  # Defaults to blockscout/blockscout:latest
+  image: "blockscout/blockscout:latest"
+  # blockscout smart contract verifier image to use
+  # Defaults to ghcr.io/blockscout/smart-contract-verifier:latest
+  verif_image: "ghcr.io/blockscout/smart-contract-verifier:latest"
+  # Frontend image
+  # Defaults to ghcr.io/blockscout/frontend:latest
+  frontend_image: "ghcr.io/blockscout/frontend:latest"
+
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
   # Dora docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
-
+  # Defaults to the latest image
+  image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_spammer_params:
+  # TX Spammer docker image to use
+  # Defaults to the latest master image
+  image: "ethpandaops/tx-fuzz:master"
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
   tx_spammer_extra_args: []
-
-# Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
-goomy_blob_params:
-  # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
-  goomy_blob_args: []
 
 # Configuration place for prometheus
 prometheus_params:
@@ -624,6 +700,9 @@ prometheus_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Prometheus docker image to use
+  # Defaults to the latest image
+  image: "prom/prometheus:latest"
 
 # Configuration place for grafana
 grafana_params:
@@ -636,12 +715,15 @@ grafana_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Grafana docker image to use
+  # Defaults to the latest image
+  image: "grafana/grafana:latest"
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
+  # Defaults to the latest image
+  image: "ethpandaops/assertoor:latest"
 
   # Check chain stability
   # This check monitors the chain and succeeds if:
@@ -709,7 +791,9 @@ wait_for_finalization: false
 # This value will be overridden by participant-specific values
 global_log_level: "info"
 
-# EngineAPI Snooper global flags for all participants
+# Snooper global flag for all participants
+# Snooper can be enabled with the `snooper_enabled` flag per client or globally
+# Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
 # Default to false
 snooper_enabled: false
 
@@ -731,11 +815,26 @@ disable_peer_scoring: false
 # Defaults to false
 persistent: false
 
+# Docker cache url enables all docker images to be pulled through a custom docker registry
+# Disabled by default
+# Defaults to empty cache url
+# Images pulled from dockerhub will be prefixed with "/dh/" by default (docker.io)
+# Images pulled from github registry will be prefixed with "/gh/" by default (ghcr.io)
+# Images pulled from google registory will be prefixed with "/gcr/" by default (gcr.io)
+# If you want to use a local image in combination with the cache, do not put "/" in your local image name
+docker_cache_params:
+  enabled: false
+  url: ""
+  dockerhub_prefix: "/dh/"
+  github_prefix: "/gh/"
+  google_prefix: "/gcr/"
+
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
 # "mev-rs" - mev-boost, relays and builder are all spun up, powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
+# "commit-boost" - mev-boost, relays and builder are all spun up, powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -834,7 +933,62 @@ checkpoint_sync_enabled: false
 # Global flag to set checkpoint sync url
 checkpoint_sync_url: ""
 
-# Global paarameter to set the exit ip address of services and public ports
+# Configuration place for spamoor as transaction spammer
+spamoor_params:
+  # The image to use for spamoor
+  image: ethpandaops/spamoor:latest
+  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
+  # Valid scenarios are:
+  #  eoatx, erctx, deploytx, depoy-destruct, blobs, gasburnertx
+  # Defaults to eoatx
+  scenario: eoatx
+  # Throughput of spamoor
+  # Defaults to 1000
+  throughput: 1000
+  # Max pending transactions for spamoor
+  # Defaults to 1000
+  max_pending: 1000
+  # Max wallets for spamoor
+  # Defaults to 500
+  max_wallets: 500
+  # Extra parameters to send to spamoor
+  # Defaults to empty
+  spamoor_extra_args: []
+
+# Configuration place for spammor as blob spammer
+spamoor_blob_params:
+  # spamoor docker image to use
+  # Defaults to the latest
+  image: "ethpandaops/spamoor:latest"
+  # The spamoor blob scenario to use (see https://github.com/ethpandaops/spamoor)
+  # Valid blob scenarios are:
+  # - blobs (normal blob transactions only)
+  # - blob-combined (normal & special blobs with replacements)
+  # - blob-conflicting (conflicting blob & dynfee transactions)
+  # - blob-replacements (normal blobs with replacement blob transactions)
+  # Defaults to blob-combined
+  scenario: blob-combined
+  # Throughput of spamoor
+  # Defaults to 3
+  throughput: 3
+  # Maximum number of blobs per transaction
+  # Defaults to 2
+  max_blobs: 2
+  # Max pending blob transactions for spamoor
+  # Defaults to 6
+  max_pending: 6
+  # Max wallets for spamoor
+  # Defaults to 20
+  max_wallets: 20
+  # A list of optional params that will be passed to the spamoor comamnd for modifying its behaviour
+  spamoor_extra_args: []
+
+# Ethereum genesis generator params
+ethereum_genesis_generator_params:
+  # The image to use for ethereum genesis generator
+  image: ethpandaops/ethereum-genesis-generator:3.5.1
+
+# Global parameter to set the exit ip address of services and public ports
 port_publisher:
   # if you have a service that you want to expose on a specific interfact; set that IP here
   # if you set it to auto it gets the public ip from ident.me and sets it
@@ -862,13 +1016,20 @@ port_publisher:
   vc:
     enabled: false
     public_port_start: 34000
-  # Additional services public port exposed to your local machine
+  # remote signer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 35000
   # You can't run multiple enclaves on the same port settings
-  additional_services:
+  remote_signer:
     enabled: false
     public_port_start: 35000
+  # Additional services public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 36000
+  # You can't run multiple enclaves on the same port settings
+  additional_services:
+    enabled: false
+    public_port_start: 36000
 ```
 
 #### Example configurations
@@ -1060,12 +1221,13 @@ Here's a table of where the keys are used
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 4             | goomy_blob          | ✅                |                 | As the sender of blobs     |
+| 4             | spamoor_blob        | ✅                |                 | As the sender of blobs     |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |
 | 7             | mev_flood           | ✅                |                 | As the user_key            |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
+| 13            | spamoor             | ✅                |                 | Spams transactions         |
 
 ## Developing On This Package
 

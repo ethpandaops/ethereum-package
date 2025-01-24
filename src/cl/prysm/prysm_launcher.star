@@ -12,8 +12,9 @@ BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
 # Port nums
 DISCOVERY_TCP_PORT_NUM = 13000
 DISCOVERY_UDP_PORT_NUM = 12000
+DISCOVERY_QUIC_PORT_NUM = 13000
+BEACON_HTTP_PORT_NUM = 3500
 RPC_PORT_NUM = 4000
-HTTP_PORT_NUM = 3500
 BEACON_MONITORING_PORT_NUM = 8080
 PROFILING_PORT_NUM = 6060
 
@@ -77,7 +78,9 @@ def launch(
 
     beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
 
-    beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, HTTP_PORT_NUM)
+    beacon_http_url = "http://{0}:{1}".format(
+        beacon_service.ip_address, BEACON_HTTP_PORT_NUM
+    )
     beacon_grpc_url = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
 
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
@@ -159,6 +162,8 @@ def get_beacon_config(
 
     public_ports = {}
     discovery_port = DISCOVERY_TCP_PORT_NUM
+    discovery_port_udp = DISCOVERY_UDP_PORT_NUM
+    discovery_port_quic = DISCOVERY_QUIC_PORT_NUM
     if port_publisher.cl_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "cl", port_publisher, participant_index
@@ -179,8 +184,9 @@ def get_beacon_config(
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
-        constants.HTTP_PORT_ID: HTTP_PORT_NUM,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        # constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic, # TODO: Uncomment this when we have a stable release with this flag
+        constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_MONITORING_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.PROFILING_PORT_ID: PROFILING_PORT_NUM,
@@ -193,12 +199,13 @@ def get_beacon_config(
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
         "--rpc-port={0}".format(RPC_PORT_NUM),
-        "--grpc-gateway-host=0.0.0.0",
-        "--grpc-gateway-corsdomain=*",
-        "--grpc-gateway-port={0}".format(HTTP_PORT_NUM),
+        "--http-host=0.0.0.0",
+        "--http-cors-domain=*",
+        "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--p2p-host-ip=" + port_publisher.nat_exit_ip,
         "--p2p-tcp-port={0}".format(discovery_port),
-        "--p2p-udp-port={0}".format(discovery_port),
+        "--p2p-udp-port={0}".format(discovery_port_udp),
+        # "--p2p-quic-port={0}".format(discovery_port_quic) # TODO: Uncomment this when we have a stable release with this flag
         "--min-sync-peers={0}".format(MIN_PEERS),
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
@@ -222,31 +229,9 @@ def get_beacon_config(
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
-    # If checkpoint sync is enabled, add the checkpoint sync url
     if checkpoint_sync_enabled:
-        if checkpoint_sync_url:
-            cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
-            cmd.append(
-                "--genesis-beacon-api-url="
-                + constants.CHECKPOINT_SYNC_URL[launcher.network]
-            )
-        else:
-            if (
-                launcher.network in constants.PUBLIC_NETWORKS
-                or launcher.network == constants.NETWORK_NAME.ephemery
-            ):
-                cmd.append(
-                    "--checkpoint-sync-url="
-                    + constants.CHECKPOINT_SYNC_URL[launcher.network]
-                )
-                cmd.append(
-                    "--genesis-beacon-api-url="
-                    + constants.CHECKPOINT_SYNC_URL[launcher.network]
-                )
-            else:
-                fail(
-                    "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
-                )
+        cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
+        cmd.append("--genesis-beacon-api-url=" + checkpoint_sync_url)
 
     if launcher.preset == "minimal":
         cmd.append("--minimal-config=true")
@@ -323,7 +308,7 @@ def get_beacon_config(
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.prysm,
             client_type=constants.CLIENT_TYPES.cl,
-            image=participant.cl_image,
+            image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
             supernode=participant.supernode,

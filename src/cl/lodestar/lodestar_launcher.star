@@ -234,23 +234,8 @@ def get_beacon_config(
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
-    # If checkpoint sync is enabled, add the checkpoint sync url
     if checkpoint_sync_enabled:
-        if checkpoint_sync_url:
-            cmd.append("--checkpointSyncUrl=" + checkpoint_sync_url)
-        else:
-            if (
-                launcher.network in constants.PUBLIC_NETWORKS
-                or launcher.network == constants.NETWORK_NAME.ephemery
-            ):
-                cmd.append(
-                    "--checkpointSyncUrl="
-                    + constants.CHECKPOINT_SYNC_URL[launcher.network]
-                )
-            else:
-                fail(
-                    "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
-                )
+        cmd.append("--checkpointSyncUrl=" + checkpoint_sync_url)
 
     if launcher.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
@@ -331,7 +316,7 @@ def get_beacon_config(
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.lodestar,
             client_type=constants.CLIENT_TYPES.cl,
-            image=participant.cl_image,
+            image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
             supernode=participant.supernode,

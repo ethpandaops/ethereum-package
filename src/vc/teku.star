@@ -11,6 +11,7 @@ def get_config(
     beacon_http_url,
     cl_context,
     el_context,
+    remote_signer_context,
     full_name,
     node_keystore_files,
     tolerations,
@@ -37,10 +38,6 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--beacon-node-api-endpoint=" + beacon_http_url,
-        "--validator-keys={0}:{1}".format(
-            validator_keys_dirpath,
-            validator_secrets_dirpath,
-        ),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
         "--validators-graffiti=" + full_name,
@@ -50,6 +47,25 @@ def get_config(
         "--metrics-interface=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
     ]
+
+    if remote_signer_context == None:
+        cmd.extend(
+            [
+                "--validator-keys={0}:{1}".format(
+                    validator_keys_dirpath,
+                    validator_secrets_dirpath,
+                ),
+            ]
+        )
+    else:
+        cmd.extend(
+            [
+                "--validators-external-signer-url={0}".format(
+                    remote_signer_context.http_url
+                ),
+                "--validators-external-signer-public-keys=external-signer",
+            ]
+        )
 
     keymanager_api_cmd = [
         "--validator-api-enabled=true",
@@ -103,9 +119,9 @@ def get_config(
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.CL_TYPE.teku,
+            client=constants.VC_TYPE.teku,
             client_type=constants.CLIENT_TYPES.validator,
-            image=image,
+            image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
             extra_labels=participant.vc_extra_labels,
             supernode=participant.supernode,

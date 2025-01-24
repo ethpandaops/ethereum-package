@@ -200,7 +200,7 @@ def get_config(
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
             else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.besu + "_volume_size"
+                constants.EL_TYPE.ethereumjs + "_volume_size"
             ],
         )
     env_vars = participant.el_extra_env_vars
@@ -216,7 +216,7 @@ def get_config(
         "labels": shared_utils.label_maker(
             client=constants.EL_TYPE.ethereumjs,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image,
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
             supernode=participant.supernode,

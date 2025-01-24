@@ -1,0 +1,16 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+mev_type: commit-boost
+additional_services:
+  - tx_spammer
+  - blob_spammer
+  - custom_flood
+  - el_forkmon
+  - beacon_metrics_gazer
+  - dora
+  - prometheus_grafana
+mev_params:
+  mev_boost_image: ghcr.io/commit-boost/pbs:latest
+network_params:
+  seconds_per_slot: 3

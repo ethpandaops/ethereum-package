@@ -26,12 +26,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-login
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Setup Kurtosis
-        run: |
-          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-          sudo apt update
-          sudo apt install kurtosis-cli
-          kurtosis analytics disable
+        uses: ./.github/actions/kurtosis-install
 
       - name: Run Starlark
         run: |
@@ -65,6 +65,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - uses: ./.github/actions/docker-login
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@v1
         with:

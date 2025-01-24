@@ -6,11 +6,9 @@ additional_services:
   - tx_spammer
   - blob_spammer
   - custom_flood
-  - el_forkmon
+  - spamoor_blob
   - beacon_metrics_gazer
   - dora
   - prometheus_grafana
-mev_params:
-  mev_relay_image: flashbots/mev-boost-relay:latest
 network_params:
-  seconds_per_slot: 3
+  seconds_per_slot: 6

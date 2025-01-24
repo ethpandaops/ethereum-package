@@ -17,7 +17,6 @@ def launch(plan, prague_time):
             mv /ephemery-release/metadata/* /network-configs/ ;\
             cat /network-configs/genesis_validators_root.txt ;\
         '",
-        image="badouralix/curl-jq",
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
     )
     genesis_validators_root = el_cl_genesis_data_uuid.output
