@@ -159,6 +159,8 @@ SUBCATEGORY_PARAMS = {
         "deneb_fork_epoch",
         "electra_fork_epoch",
         "fulu_fork_epoch",
+        "eip7732_fork_epoch",
+        "eip7805_fork_epoch",
         "network_sync_base_url",
         "data_column_sidecar_subnet_count",
         "samples_per_slot",
