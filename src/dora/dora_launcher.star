@@ -1,8 +1,11 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
+prometheus = import_module("../prometheus/prometheus_launcher.star")
 constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "dora"
 
 HTTP_PORT_NUMBER = 8080
+
+METRICS_PATH = "/metrics"
 
 DORA_CONFIG_FILENAME = "dora-config.yaml"
 
@@ -97,7 +100,18 @@ def launch_dora(
         additional_service_index,
     )
 
-    plan.add_service(SERVICE_NAME, config)
+    dora_service = plan.add_service(SERVICE_NAME, config)
+
+    return prometheus.new_metrics_job(
+        job_name=SERVICE_NAME,
+        endpoint="{0}:{1}".format(
+            dora_service.ip_address, HTTP_PORT_NUMBER
+        ),
+        metrics_path=METRICS_PATH,
+        labels={
+            "service": SERVICE_NAME,
+        },
+    )
 
 
 def get_config(

@@ -516,7 +516,7 @@ def run(plan, args={}):
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
             dora_params = args_with_right_defaults.dora_params
-            dora.launch_dora(
+            dora_prometheus_metrics_job = dora.launch_dora(
                 plan,
                 dora_config_template,
                 all_participants,
@@ -528,6 +528,9 @@ def run(plan, args={}):
                 mev_endpoint_names,
                 args_with_right_defaults.port_publisher,
                 index,
+            )
+            prometheus_additional_metrics_jobs.append(
+                dora_prometheus_metrics_job
             )
             plan.print("Successfully launched dora")
         elif additional_service == "dugtrio":
