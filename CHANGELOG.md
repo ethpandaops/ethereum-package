@@ -1,5 +1,53 @@
 # Changelog
 
+## [5.0.0](https://github.com/ethpandaops/ethereum-package/compare/4.4.0...5.0.0) (2025-01-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove vc_count ([#844](https://github.com/ethpandaops/ethereum-package/issues/844))
+
+### Features
+
+* add custom image for egg ([#859](https://github.com/ethpandaops/ethereum-package/issues/859)) ([e60afbe](https://github.com/ethpandaops/ethereum-package/commit/e60afbeb7cefd1ee853c9bdca0041a6d4040fe78))
+* add gossip limit as a configuratable flag ([#856](https://github.com/ethpandaops/ethereum-package/issues/856)) ([56a3197](https://github.com/ethpandaops/ethereum-package/commit/56a3197f5385de7d8c1e768fe4b537603c86abcf))
+* add max,target blobs for future forks ([#851](https://github.com/ethpandaops/ethereum-package/issues/851)) ([1c33375](https://github.com/ethpandaops/ethereum-package/commit/1c333758f26ffc17dcfae92db68eda0bd8d2951b))
+* add op package per pr check ([#854](https://github.com/ethpandaops/ethereum-package/issues/854)) ([0e4e7aa](https://github.com/ethpandaops/ethereum-package/commit/0e4e7aa8da7dc7f4e2270efdc1acded484a31322))
+* add spamoor ([#850](https://github.com/ethpandaops/ethereum-package/issues/850)) ([a01d772](https://github.com/ethpandaops/ethereum-package/commit/a01d77274ebf7790a610932e225b8415575df492))
+* add support for pull through cache ([#833](https://github.com/ethpandaops/ethereum-package/issues/833)) ([0b2a2ae](https://github.com/ethpandaops/ethereum-package/commit/0b2a2ae081652f5c7e7ef1da13744a40c7279f37))
+* add vero `vc_type` ([#827](https://github.com/ethpandaops/ethereum-package/issues/827)) ([c2af143](https://github.com/ethpandaops/ethereum-package/commit/c2af14377ccb118e1ba6b06f1ee8335113ff6e16))
+* Add-blockscout_params ([#838](https://github.com/ethpandaops/ethereum-package/issues/838)) ([777ec06](https://github.com/ethpandaops/ethereum-package/commit/777ec065efe9714acb2f6762ec21c6f5c1961f4a))
+* Adding support for EIP-7732 and EIP-7805 ([#880](https://github.com/ethpandaops/ethereum-package/issues/880)) ([6b7a409](https://github.com/ethpandaops/ethereum-package/commit/6b7a409f2d78d50dfb66d8de7aededa080ab6230))
+* Adding support for new system contracts + updating devnet config ([#862](https://github.com/ethpandaops/ethereum-package/issues/862)) ([8ed275a](https://github.com/ethpandaops/ethereum-package/commit/8ed275a4ec4524b1df4b7cfe38a5f2374711760d))
+* Replacing mock builder ([#864](https://github.com/ethpandaops/ethereum-package/issues/864)) ([d3a0024](https://github.com/ethpandaops/ethereum-package/commit/d3a002494822c23bd7a0b677b738107c262ad0ff))
+* support older forks ([#846](https://github.com/ethpandaops/ethereum-package/issues/846)) ([d7e31e0](https://github.com/ethpandaops/ethereum-package/commit/d7e31e01ca6fff88c64ee3846d517e2f32d7bbcf))
+* update blockscout with new frontend ([#843](https://github.com/ethpandaops/ethereum-package/issues/843)) ([4f69962](https://github.com/ethpandaops/ethereum-package/commit/4f69962f440fc85c61e9ec2b812463d9ab965f7a))
+* Update devnet-5 example ([#863](https://github.com/ethpandaops/ethereum-package/issues/863)) ([04e13f3](https://github.com/ethpandaops/ethereum-package/commit/04e13f3bca8f14207b4b8f6014790c7b1b4affe7))
+
+
+### Bug Fixes
+
+* add fulu overrides automatically for assertoor and dora if fulu is active ([#858](https://github.com/ethpandaops/ethereum-package/issues/858)) ([d6bec16](https://github.com/ethpandaops/ethereum-package/commit/d6bec165b9bbb3e2a63cbafb063fd52197b23af9))
+* add txpool to reth api ([#841](https://github.com/ethpandaops/ethereum-package/issues/841)) ([35ec958](https://github.com/ethpandaops/ethereum-package/commit/35ec9585a728d373f3e9ec8c84e9abcddfed82a1))
+* bump assertoor memory limit to 8G ([#874](https://github.com/ethpandaops/ethereum-package/issues/874)) ([8ff3b11](https://github.com/ethpandaops/ethereum-package/commit/8ff3b1138d910cdbff1bc60764e9ddb596c3a551))
+* comment out optimism check from per-PR workflow ([#878](https://github.com/ethpandaops/ethereum-package/issues/878)) ([02323a3](https://github.com/ethpandaops/ethereum-package/commit/02323a3bf34089117ee303f114ac08267c34f9d0))
+* dora override ([#857](https://github.com/ethpandaops/ethereum-package/issues/857)) ([50ec581](https://github.com/ethpandaops/ethereum-package/commit/50ec58115674dced97f9159123ba7e2b044518d4))
+* Enable txpool on geth,besu and nethermind ([#868](https://github.com/ethpandaops/ethereum-package/issues/868)) ([f9d0b50](https://github.com/ethpandaops/ethereum-package/commit/f9d0b501a7a6543149d2ccd9b063f5beb34d30c9))
+* Fixes minimal runs with deneb state ([#871](https://github.com/ethpandaops/ethereum-package/issues/871)) ([2ca35e8](https://github.com/ethpandaops/ethereum-package/commit/2ca35e8eb74d8a78e5b6fed110d69b0e68308c76))
+* mev-builder custom image ([#847](https://github.com/ethpandaops/ethereum-package/issues/847)) ([bc89ad3](https://github.com/ethpandaops/ethereum-package/commit/bc89ad316b9b7b137382269138fc37e241a645d1))
+* Private key for account 20 ([#870](https://github.com/ethpandaops/ethereum-package/issues/870)) ([9782552](https://github.com/ethpandaops/ethereum-package/commit/9782552e6828019f07f177c524988c24b4da1e1f))
+* **prysm:** run p2p-udp on different port as it might conflict with the new quic port ([#845](https://github.com/ethpandaops/ethereum-package/issues/845)) ([3bb88e0](https://github.com/ethpandaops/ethereum-package/commit/3bb88e04d2fa9f27418c013d656b02a714c20f4d))
+* rbuilder upstream repo with reth-rbuilder binary ([#828](https://github.com/ethpandaops/ethereum-package/issues/828)) ([55df658](https://github.com/ethpandaops/ethereum-package/commit/55df658f7757d29419aca7510830cf1d5c70d492))
+* remove vc_count ([#844](https://github.com/ethpandaops/ethereum-package/issues/844)) ([b61a128](https://github.com/ethpandaops/ethereum-package/commit/b61a128bf1d96e8dd11f028925dee9b70e37ac6f))
+* replace goomy with spamoor ([#860](https://github.com/ethpandaops/ethereum-package/issues/860)) ([28f7b7d](https://github.com/ethpandaops/ethereum-package/commit/28f7b7d4849ceeab56ac648949b74a1aa0e28dee))
+* revert egg version ([#852](https://github.com/ethpandaops/ethereum-package/issues/852)) ([a182f30](https://github.com/ethpandaops/ethereum-package/commit/a182f3039b91c15cde5b0d0967666d336a9629ac))
+* sanity check for count ([#835](https://github.com/ethpandaops/ethereum-package/issues/835)) ([2633d15](https://github.com/ethpandaops/ethereum-package/commit/2633d15b9739520bb979887965a04382869d16d8))
+* Update Erigon docker image repo naming ([#834](https://github.com/ethpandaops/ethereum-package/issues/834)) ([ceb1444](https://github.com/ethpandaops/ethereum-package/commit/ceb14448b4e3b48b4cbf893bf5d95572bfd8949c))
+* Update ethereum-genesis-generator to fix eip7623 timestamp missing for Nethermind ([#875](https://github.com/ethpandaops/ethereum-package/issues/875)) ([1c1d698](https://github.com/ethpandaops/ethereum-package/commit/1c1d6988f9c1028ec9cdb22655b556977db901b1))
+* update kt config ([#876](https://github.com/ethpandaops/ethereum-package/issues/876)) ([1704194](https://github.com/ethpandaops/ethereum-package/commit/1704194121ba25e1e845f210f248b9b5993d24c2))
+* use default image for assertoor with electra enabled ([#855](https://github.com/ethpandaops/ethereum-package/issues/855)) ([3b51e5e](https://github.com/ethpandaops/ethereum-package/commit/3b51e5e280e9fc1c7dba890c4e8e795a75e525b2))
+* use writable path for assertoor db ([#877](https://github.com/ethpandaops/ethereum-package/issues/877)) ([a913455](https://github.com/ethpandaops/ethereum-package/commit/a913455bb3cdf9abb5dea8e27def320b5bf3ae75))
+
 ## [4.4.0](https://github.com/ethpandaops/ethereum-package/compare/4.3.0...4.4.0) (2024-11-01)
 
 
