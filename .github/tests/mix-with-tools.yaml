@@ -23,7 +23,6 @@ additional_services:
   - spamoor_blob
   - custom_flood
   - blobscan
-  - blockscout
   - dugtrio
   - blutgang
   - apache
