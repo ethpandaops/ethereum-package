@@ -89,7 +89,7 @@ DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:3.5.4"
+    "ethpandaops/ethereum-genesis-generator:3.6.0"
 )
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.29.2a3"
 DEFAULT_FLASHBOTS_BUILDER_IMAGE = "ethpandaops/reth-rbuilder:develop"
@@ -116,6 +116,11 @@ ELECTRA_FORK_VERSION = "0x60000038"
 ELECTRA_FORK_EPOCH = 100000000
 FULU_FORK_VERSION = "0x70000038"
 FULU_FORK_EPOCH = 100000001
+EIP7732_FORK_EPOCH = 100000002
+EIP7732_FORK_VERSION = "0x80000038"
+EIP7805_FORK_EPOCH = 100000003
+EIP7805_FORK_VERSION = "0x90000038"
+
 
 MAX_LABEL_LENGTH = 63
 
