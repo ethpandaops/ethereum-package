@@ -841,13 +841,13 @@ mev_type: null
 # Parameters if MEV is used
 mev_params:
   # The image to use for MEV boost relay
-  mev_relay_image: ethpandaops/mev-boost-relay
+  mev_relay_image: ethpandaops/mev-boost-relay:main
   # The image to use for the builder
   mev_builder_image: ethpandaops/flashbots-builder:main
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
   # The image to use for mev-boost
-  mev_boost_image: ethpandaops/mev-boost
+  mev_boost_image: ethpandaops/mev-boost:develop
   # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
   mev_boost_args: []
   # Extra parameters to send to the API
