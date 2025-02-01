@@ -415,8 +415,10 @@ participants:
     # Default to 1
     count: 1
 
+    # Snooper local flag for a participant.
     # Snooper can be enabled with the `snooper_enabled` flag per client or globally
-    # Defaults null and then set to global snooper default (false)
+    # Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
+    # Default to null
     snooper_enabled: null
 
     # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
@@ -643,7 +645,8 @@ additional_services:
   - tx_spammer
   - blob_spammer
   - custom_flood
-  - goomy_blob
+  - spamoor
+  - spamoor_blob
   - el_forkmon
   - blockscout
   - beacon_metrics_gazer
@@ -684,14 +687,6 @@ tx_spammer_params:
   image: "ethpandaops/tx-fuzz:master"
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
   tx_spammer_extra_args: []
-
-# Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
-goomy_blob_params:
-  # Goomy Blob docker image to use
-  # Defaults to the latest
-  image: "ethpandaops/goomy-blob:latest"
-  # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
-  goomy_blob_args: []
 
 # Configuration place for prometheus
 prometheus_params:
@@ -795,7 +790,9 @@ wait_for_finalization: false
 # This value will be overridden by participant-specific values
 global_log_level: "info"
 
-# EngineAPI Snooper global flags for all participants
+# Snooper global flag for all participants
+# Snooper can be enabled with the `snooper_enabled` flag per client or globally
+# Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
 # Default to false
 snooper_enabled: false
 
@@ -935,14 +932,15 @@ checkpoint_sync_enabled: false
 # Global flag to set checkpoint sync url
 checkpoint_sync_url: ""
 
-# Spamoor params
+# Configuration place for spamoor as transaction spammer
 spamoor_params:
   # The image to use for spamoor
   image: ethpandaops/spamoor:latest
-  # The type of transactions to send
-  # Valid values are eoatx, erctx, deploytx, depoy-destruct, blobs, gasburnertx
+  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
+  # Valid scenarios are:
+  #  eoatx, erctx, deploytx, depoy-destruct, blobs, gasburnertx
   # Defaults to eoatx
-  tx_type: eoatx
+  scenario: eoatx
   # Throughput of spamoor
   # Defaults to 1000
   throughput: 1000
@@ -956,10 +954,38 @@ spamoor_params:
   # Defaults to empty
   spamoor_extra_args: []
 
+# Configuration place for spammor as blob spammer
+spamoor_blob_params:
+  # spamoor docker image to use
+  # Defaults to the latest
+  image: "ethpandaops/spamoor:latest"
+  # The spamoor blob scenario to use (see https://github.com/ethpandaops/spamoor)
+  # Valid blob scenarios are:
+  # - blobs (normal blob transactions only)
+  # - blob-combined (normal & special blobs with replacements)
+  # - blob-conflicting (conflicting blob & dynfee transactions)
+  # - blob-replacements (normal blobs with replacement blob transactions)
+  # Defaults to blob-combined
+  scenario: blob-combined
+  # Throughput of spamoor
+  # Defaults to 3
+  throughput: 3
+  # Maximum number of blobs per transaction
+  # Defaults to 2
+  max_blobs: 2
+  # Max pending blob transactions for spamoor
+  # Defaults to 6
+  max_pending: 6
+  # Max wallets for spamoor
+  # Defaults to 20
+  max_wallets: 20
+  # A list of optional params that will be passed to the spamoor comamnd for modifying its behaviour
+  spamoor_extra_args: []
+
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:3.4.7
+  image: ethpandaops/ethereum-genesis-generator:3.5.1
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
@@ -1194,7 +1220,7 @@ Here's a table of where the keys are used
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 4             | goomy_blob          | ✅                |                 | As the sender of blobs     |
+| 4             | spamoor_blob        | ✅                |                 | As the sender of blobs     |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |
 | 7             | mev_flood           | ✅                |                 | As the user_key            |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |

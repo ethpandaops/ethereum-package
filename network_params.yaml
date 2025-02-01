@@ -104,8 +104,8 @@ dora_params:
   image: ""
 tx_spammer_params:
   tx_spammer_extra_args: []
-goomy_blob_params:
-  goomy_blob_args: []
+spamoor_blob_params:
+  spamoor_extra_args: []
 prometheus_params:
   storage_tsdb_retention_time: "1d"
   storage_tsdb_retention_size: "512MB"
@@ -176,8 +176,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:pk910-bash-el-genesis-generator-99ffaaf  # TODO: revert to 3.4.7
-
+  image: ethpandaops/ethereum-genesis-generator:pk910-bash-el-genesis-generator
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

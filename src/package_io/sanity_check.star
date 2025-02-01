@@ -159,6 +159,8 @@ SUBCATEGORY_PARAMS = {
         "deneb_fork_epoch",
         "electra_fork_epoch",
         "fulu_fork_epoch",
+        "eip7732_fork_epoch",
+        "eip7805_fork_epoch",
         "network_sync_base_url",
         "data_column_sidecar_subnet_count",
         "samples_per_slot",
@@ -192,9 +194,6 @@ SUBCATEGORY_PARAMS = {
     "tx_spammer_params": [
         "image",
         "tx_spammer_extra_args",
-    ],
-    "goomy_blob_params": [
-        "goomy_blob_args",
     ],
     "prometheus_params": [
         "min_cpu",
@@ -238,6 +237,7 @@ SUBCATEGORY_PARAMS = {
         "mev_flood_extra_args",
         "mev_flood_seconds_per_bundle",
         "custom_flood_params",
+        "mock_mev_image",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
@@ -248,8 +248,17 @@ SUBCATEGORY_PARAMS = {
     ],
     "spamoor_params": [
         "image",
-        "tx_type",
+        "scenario",
         "throughput",
+        "max_pending",
+        "max_wallets",
+        "spamoor_extra_args",
+    ],
+    "spamoor_blob_params": [
+        "image",
+        "scenario",
+        "throughput",
+        "max_blobs",
         "max_pending",
         "max_wallets",
         "spamoor_extra_args",
@@ -273,7 +282,6 @@ ADDITIONAL_SERVICES_PARAMS = [
     "tx_spammer",
     "blob_spammer",
     "custom_flood",
-    "goomy_blob",
     "el_forkmon",
     "blockscout",
     "beacon_metrics_gazer",
@@ -287,6 +295,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "apache",
     "tracoor",
     "spamoor",
+    "spamoor_blob",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

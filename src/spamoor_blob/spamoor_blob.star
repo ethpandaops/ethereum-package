@@ -1,5 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-SERVICE_NAME = "spamoor"
+SERVICE_NAME = "spamoor-blob"
 
 # The min/max CPU/memory that spamoor can use
 MIN_CPU = 100
@@ -8,7 +8,7 @@ MIN_MEMORY = 20
 MAX_MEMORY = 300
 
 
-def launch_spamoor(
+def launch_spamoor_blob(
     plan,
     prefunded_addresses,
     all_el_contexts,
@@ -32,7 +32,7 @@ def get_config(
 ):
     cmd = [
         "{}".format(spamoor_params.scenario),
-        "--privkey={}".format(prefunded_addresses[13].private_key),
+        "--privkey={}".format(prefunded_addresses[4].private_key),
         "--rpchost={}".format(
             ",".join([el_context.rpc_http_url for el_context in all_el_contexts])
         ),
@@ -40,6 +40,9 @@ def get_config(
 
     if spamoor_params.throughput != None:
         cmd.append("--throughput={}".format(spamoor_params.throughput))
+
+    if spamoor_params.max_blobs != None:
+        cmd.append("--sidecars={}".format(spamoor_params.max_blobs))
 
     if spamoor_params.max_pending != None:
         cmd.append("--max-pending={}".format(spamoor_params.max_pending))

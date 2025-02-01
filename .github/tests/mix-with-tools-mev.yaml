@@ -18,7 +18,7 @@ additional_services:
   - beacon_metrics_gazer
   - dora
   - prometheus_grafana
-  - goomy_blob
+  - spamoor_blob
   - custom_flood
   - blobscan
   - blockscout

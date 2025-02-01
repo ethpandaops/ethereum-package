@@ -88,13 +88,16 @@ COMMIT_BOOST_MEV_TYPE = "commit-boost"
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
-DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = "ethpandaops/ethereum-genesis-generator:pk910-bash-el-genesis-generator-99ffaaf"  # TODO: revert to 3.4.7
+DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
+    "ethpandaops/ethereum-genesis-generator:pk910-bash-el-genesis-generator"
+)
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "flashbots/mev-boost-relay:0.29.2a3"
 DEFAULT_FLASHBOTS_BUILDER_IMAGE = "ethpandaops/reth-rbuilder:develop"
 DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE = "flashbots/mev-boost"
 DEFAULT_MEV_RS_IMAGE = "ethpandaops/mev-rs:main"
 DEFAULT_MEV_RS_IMAGE_MINIMAL = "ethpandaops/mev-rs:main-minimal"
 DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE = "ghcr.io/commit-boost/pbs:latest"
+DEFAULT_MOCK_MEV_IMAGE = "ethpandaops/rustic-builder:main"
 DEFAULT_MEV_PUBKEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
 DEFAULT_MEV_SECRET_KEY = (
     "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
@@ -111,6 +114,8 @@ CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
 FULU_FORK_VERSION = "0x70000038"
+EIP7732_FORK_VERSION = "0x80000038"
+EIP7805_FORK_VERSION = "0x90000038"
 
 FAR_FUTURE_EPOCH = 18446744073709551615
 
