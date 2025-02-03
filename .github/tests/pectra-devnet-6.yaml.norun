@@ -4,12 +4,14 @@ participants_matrix:
       el_image: ethpandaops/geth:prague-devnet-6
     - el_type: reth
       el_image: ethpandaops/reth:main
-    - el_type: erigon
-      el_image: ethpandaops/erigon:pectra6
     - el_type: nethermind
       el_image: ethpandaops/nethermind:master
+    - el_type: erigon
+      el_image: ethpandaops/erigon:pectra6
     - el_type: besu
       el_image: ethpandaops/besu:main
+    - el_type: ethereumjs
+      el_image: ethpandaops/ethereumjs:eip7840
   cl:
     - cl_type: lighthouse
       cl_image: ethpandaops/lighthouse:unstable
@@ -48,9 +50,9 @@ global_log_level: debug
 assertoor_params:
   image: "ethpandaops/assertoor:master"
   tests:
-    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/kurtosis/all.yaml
+    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/execution-spec-tests.yaml
     - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/blockhash-test-with-rpc-call.yaml
     - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/eip7002-all.yaml
     - file: https://raw.githubusercontent.com/ethpandaops/assertoor/blob/master/playbooks/pectra-dev/eip7251-all.yaml
     - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/validator-lifecycle-test-v3.yaml
-    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/execution-spec-tests.yaml
+    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/kurtosis/all.yaml
