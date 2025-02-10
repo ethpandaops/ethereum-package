@@ -41,7 +41,7 @@ mev_params:
   mev_relay_image: jtraglia/mev-boost-relay:electra
   mev_boost_image: jtraglia/mev-boost:electra
   mev_builder_cl_image: ethpandaops/lighthouse:unstable-a1b7d61
-  mev_builder_image: ethpandaops/reth-rbuilder:devnet6-d7b1637
+  mev_builder_image: ethpandaops/reth-rbuilder:devnet6-fdeb4d6
 
 network_params:
   electra_fork_epoch: 1
