@@ -1,5 +1,5 @@
 name: Docker login
-descritpion: Log in to Docker Hub
+description: Log in to Docker Hub
 inputs:
   username:
      required: true
