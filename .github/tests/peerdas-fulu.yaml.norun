@@ -11,12 +11,11 @@ participants:
 
   # Prysm
   - cl_type: prysm
-    cl_image: ethpandaops/prysm-beacon-chain:peerDAS-ad11036
+    cl_image: ethpandaops/prysm-beacon-chain:peerDAS-01705d1
     cl_max_mem: 4096
     cl_extra_params:
       - --minimum-peers-per-subnet=1
       - --subscribe-all-subnets
-      - --log-format=json
       
   # Teku
   - cl_type: teku
@@ -30,6 +29,13 @@ participants:
     cl_max_mem: 4096
     cl_extra_params:
       - --subscribe-all-subnets
+      
+  # Nimbus
+  - cl_type: nimbus
+    cl_image: ethpandaops/nimbus-eth2:columns
+    cl_extra_params:
+      - --debug-peerdas-supernode=true
+      - --sync-light-client=no
 
   # Full nodes
   # -----------
@@ -41,11 +47,10 @@ participants:
 
   # Prysm
   - cl_type: prysm
-    cl_image: ethpandaops/prysm-beacon-chain:peerDAS-ad11036
+    cl_image: ethpandaops/prysm-beacon-chain:peerDAS-01705d1
     cl_max_mem: 4096
     cl_extra_params:
       - --minimum-peers-per-subnet=1
-      - --log-format=json
 
   # Teku
   - cl_type: teku
@@ -54,6 +59,13 @@ participants:
   # Grandine
   - cl_type: grandine
     cl_image: ethpandaops/grandine:peerdas-fulu
+    
+  # Nimbus
+  - cl_type: nimbus
+    cl_image: ethpandaops/nimbus-eth2:columns
+    cl_extra_params:
+      - --debug-peerdas-supernode=false
+      - --sync-light-client=no
 
 global_log_level: debug
 
@@ -70,4 +82,3 @@ snooper_enabled: false
 
 dora_params:
   image: ethpandaops/dora:fulu-support
-
