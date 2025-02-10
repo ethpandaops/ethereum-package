@@ -809,7 +809,7 @@ parallel_keystore_generation: false
 # Default to false
 disable_peer_scoring: false
 
-# Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+# Whether the environment should be persistent; this is WIP and is slowly being rolled out across services
 # Note this requires Kurtosis greater than 0.85.49 to work
 # Note Erigon, Besu, Teku persistence is not currently supported with docker.
 # Defaults to false
@@ -820,7 +820,7 @@ persistent: false
 # Defaults to empty cache url
 # Images pulled from dockerhub will be prefixed with "/dh/" by default (docker.io)
 # Images pulled from github registry will be prefixed with "/gh/" by default (ghcr.io)
-# Images pulled from google registory will be prefixed with "/gcr/" by default (gcr.io)
+# Images pulled from google registry will be prefixed with "/gcr/" by default (gcr.io)
 # If you want to use a local image in combination with the cache, do not put "/" in your local image name
 docker_cache_params:
   enabled: false
@@ -939,7 +939,7 @@ spamoor_params:
   image: ethpandaops/spamoor:latest
   # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
   # Valid scenarios are:
-  #  eoatx, erctx, deploytx, depoy-destruct, blobs, gasburnertx
+  #  eoatx, erctx, deploytx, deploy-destruct, blobs, gasburnertx
   # Defaults to eoatx
   scenario: eoatx
   # Throughput of spamoor
@@ -980,7 +980,7 @@ spamoor_blob_params:
   # Max wallets for spamoor
   # Defaults to 20
   max_wallets: 20
-  # A list of optional params that will be passed to the spamoor comamnd for modifying its behaviour
+  # A list of optional params that will be passed to the spamoor command for modifying its behaviour
   spamoor_extra_args: []
 
 # Ethereum genesis generator params
@@ -990,7 +990,7 @@ ethereum_genesis_generator_params:
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
-  # if you have a service that you want to expose on a specific interfact; set that IP here
+  # if you have a service that you want to expose on a specific interface; set that IP here
   # if you set it to auto it gets the public ip from ident.me and sets it
   # Defaults to constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
   # The default value just means its the IP address of the container in which the service is running
