@@ -841,13 +841,13 @@ mev_type: null
 # Parameters if MEV is used
 mev_params:
   # The image to use for MEV boost relay
-  mev_relay_image: flashbots/mev-boost-relay
+  mev_relay_image: ethpandaops/mev-boost-relay:main
   # The image to use for the builder
   mev_builder_image: ethpandaops/flashbots-builder:main
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
   # The image to use for mev-boost
-  mev_boost_image: flashbots/mev-boost
+  mev_boost_image: ethpandaops/mev-boost:develop
   # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
   mev_boost_args: []
   # Extra parameters to send to the API
@@ -986,7 +986,7 @@ spamoor_blob_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:3.5.1
+  image: ethpandaops/ethereum-genesis-generator:3.7.0
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:

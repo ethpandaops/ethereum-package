@@ -31,5 +31,5 @@ ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 mev_type: flashbots
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay:latest
+  mev_relay_image: ethpandaops/mev-boost-relay:main
 persistent: True
