@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.6.0](https://github.com/ethpandaops/ethereum-package/compare/4.5.0...4.6.0) (2025-02-13)
+
+
+### Features
+
+* use `eip7805-support` image for dora when eip7805 is scheduled for activation ([#900](https://github.com/ethpandaops/ethereum-package/issues/900)) ([9b3ee49](https://github.com/ethpandaops/ethereum-package/commit/9b3ee49c6086dcbdce833b68d8165f740273f23c))
+
+
+### Bug Fixes
+
+* decrease lighthouse mev --prepare-payload-lookahead from 12 to 8s ([#904](https://github.com/ethpandaops/ethereum-package/issues/904)) ([03bb449](https://github.com/ethpandaops/ethereum-package/commit/03bb449cfd327e55188fb1ff4407c4b75606b911))
+
 ## [4.5.0](https://github.com/ethpandaops/ethereum-package/compare/4.4.0...4.5.0) (2025-02-10)
 
 
