@@ -60,6 +60,8 @@ get_prefunded_accounts = import_module(
 helix_relay = import_module("./src/mev/helix-relay/helix_launcher.star")
 taiyi_preconfer = import_module("./src/mev/taiyi-preconfer/taiyi_preconfer_launcher.star")
 rbuilder = import_module("./src/mev/rbuilder/rbuilder_launcher.star")
+taiyi_boost = import_module("./src/mev/taiyi-boost/taiyi_boost_launcher.star")
+commit_boost_signer = import_module("./src/mev/taiyi-boost/commit_boost_signer_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -403,7 +405,6 @@ def run(plan, args={}):
                     )
                 elif (
                     args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
-                    or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
                 ):
                     plan.print("Launching commit-boost PBS service")
                     mev_boost_launcher = commit_boost_mev_boost.new_mev_boost_launcher(
@@ -425,6 +426,75 @@ def run(plan, args={}):
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
                         global_node_selectors,
+                    )
+                elif args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE:
+                    plan.print("Reading genesis timestamp from config")
+                    genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
+                        plan, el_cl_data_files_artifact_uuid
+                    )
+                    plan.print("genesis_timestamp: {0}".format(genesis_timestamp))
+                    plan.print("Launching commit-boost signer module")
+                    cb_signer_name = "{0}-{1}-{2}-{3}".format(
+                        "commit-boost-signer",
+                        index_str,
+                        participant.cl_type,
+                        participant.el_type,
+                    )
+                    cb_signer_url = commit_boost_signer.launch(
+                        plan,
+                        cb_signer_name,
+                        network_params.network,
+                        el_cl_data_files_artifact_uuid,
+                        global_node_selectors,
+                        genesis_timestamp,
+                        participant.cl_context.validator_keystore_files_artifact_uuid,
+                    )
+                    plan.print("Launching taiyi-boost service")
+                    taiyi_boost_launcher = taiyi_boost.new_mev_boost_launcher(
+                        MEV_BOOST_SHOULD_CHECK_RELAY,
+                        mev_endpoints,
+                    )
+                    taiyi_boost_service_name = "{0}-{1}-{2}-{3}".format(
+                        "taiyi-boost",
+                        index_str,
+                        participant.cl_type,
+                        participant.el_type,
+                    )
+                    taiyi_boost_context = taiyi_boost.launch(
+                        plan,
+                        taiyi_boost_launcher,
+                        taiyi_boost_service_name,
+                        network_params.network,
+                        mev_params,
+                        mev_endpoints,
+                        el_cl_data_files_artifact_uuid,
+                        global_node_selectors,
+                        genesis_timestamp,
+                        participant,
+                        raw_jwt_secret,
+                        cb_signer_url
+                    )
+                    plan.print("Launching commit-boost PBS to taiyi boost service")
+                    mev_boost_launcher = commit_boost_mev_boost.new_mev_boost_launcher(
+                        MEV_BOOST_SHOULD_CHECK_RELAY,
+                        mev_endpoints,
+                    )
+                    mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
+                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        index_str,
+                        participant.cl_type,
+                        participant.el_type,
+                    )
+                    mev_boost_context = commit_boost_mev_boost.launch(
+                        plan,
+                        mev_boost_launcher,
+                        mev_boost_service_name,
+                        network_params.network,
+                        mev_params,
+                        [taiyi_boost_context.url],
+                        el_cl_data_files_artifact_uuid,
+                        global_node_selectors,
+                        genesis_timestamp,
                     )
                 else:
                     fail("Invalid MEV type")

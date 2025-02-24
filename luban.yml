@@ -16,7 +16,7 @@ additional_services:
   - rbuilder
   # - blockscout
 mev_params:
-  mev_boost_image: ghcr.io/commit-boost/pbs:latest
+  mev_boost_image: ghcr.io/commit-boost/pbs:v0.6.0
 network_params:
   seconds_per_slot: 12
 helix_params:

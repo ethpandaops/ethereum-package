@@ -1,0 +1,16 @@
+chain = {{ .Chain }}
+
+
+[pbs]
+port = 18550
+host = "0.0.0.0"
+
+[signer.local.loader]
+format = "lighthouse"
+keys_path = "{{ .KeysPath }}"
+secrets_path = "{{ .SecretsPath }}"
+
+
+[[relays]]
+id = "mev_relay_0"
+url = "http://b2796db1455143b39c4b6104dddbaf3fdca059009b9df3f61c729bac81cadd355fcc3fc61f5185a4748eb3bf298c0ad9@localhost:18550"
