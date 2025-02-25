@@ -195,12 +195,12 @@ def get_config(
         "reec",
         # "-{0}".format(verbosity_level),
         # "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        # "--network={0}".format(
-        #     network
-        #     if network in constants.PUBLIC_NETWORKS
-        #     else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
-        # ),
-        # "--http",
+        "--network={0}".format(
+            network
+            if network in constants.PUBLIC_NETWORKS
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+        ),
+        "--http",
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
         # "--http.corsdomain=*",
