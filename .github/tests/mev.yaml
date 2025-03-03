@@ -1,7 +1,15 @@
 participants:
   - el_type: geth
+    el_extra_params: ["--miner.extradata=localGeth"]
     cl_type: lighthouse
+    
 mev_type: flashbots
+mev_params: 
+  mev_builder_extra_args: ["--engine.persistence-threshold=0", "--engine.memory-block-buffer-target=0"]
+  mev_builder_image: ethpandaops/reth-rbuilder:devnet6-fdeb4d6
+  mev_relay_image: ethpandaops/mev-boost-relay:electra
+  mev_boost_image: ethpandaops/mev-boost:electra
+  
 additional_services:
   - tx_spammer
   - blob_spammer

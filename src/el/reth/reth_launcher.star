@@ -236,7 +236,6 @@ def get_config(
     ):
         image = launcher.mev_params.mev_builder_image
         cl_client_name = service_name.split("-")[4]
-        cmd.append("--engine.experimental")
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
