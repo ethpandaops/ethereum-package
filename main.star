@@ -417,6 +417,7 @@ def run(plan, args={}):
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
                         global_node_selectors,
+                        final_genesis_timestamp,
                     )
                 else:
                     fail("Invalid MEV type")
