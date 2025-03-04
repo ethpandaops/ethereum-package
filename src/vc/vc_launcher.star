@@ -159,6 +159,7 @@ def launch(
             fail("vero VC doesn't support the Keymanager API")
         config = vero.get_config(
             participant=participant,
+            el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
             global_log_level=global_log_level,
             beacon_http_url=beacon_http_url,
