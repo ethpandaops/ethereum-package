@@ -1,5 +1,20 @@
 # Changelog
 
+## [4.6.0](https://github.com/ethpandaops/ethereum-package/compare/4.5.0...4.6.0) (2025-03-04)
+
+
+### Features
+
+* use `eip7805-support` image for dora when eip7805 is scheduled for activation ([#900](https://github.com/ethpandaops/ethereum-package/issues/900)) ([9b3ee49](https://github.com/ethpandaops/ethereum-package/commit/9b3ee49c6086dcbdce833b68d8165f740273f23c))
+
+
+### Bug Fixes
+
+* add milliseconds to histograms ([#879](https://github.com/ethpandaops/ethereum-package/issues/879)) ([53602f1](https://github.com/ethpandaops/ethereum-package/commit/53602f1b042d2c8a2a5c064ce087a5f00ae53f7f))
+* commit boost startup ([#906](https://github.com/ethpandaops/ethereum-package/issues/906)) ([040e622](https://github.com/ethpandaops/ethereum-package/commit/040e622cdf28e02721aa2e54904ee3d902485c18))
+* decrease lighthouse mev --prepare-payload-lookahead from 12 to 8s ([#904](https://github.com/ethpandaops/ethereum-package/issues/904)) ([03bb449](https://github.com/ethpandaops/ethereum-package/commit/03bb449cfd327e55188fb1ff4407c4b75606b911))
+* provide `--network-custom-config-path` to Vero ([#905](https://github.com/ethpandaops/ethereum-package/issues/905)) ([998063f](https://github.com/ethpandaops/ethereum-package/commit/998063fae8c68288dbc760e4a76bfdfa23ecd62b))
+
 ## [4.5.0](https://github.com/ethpandaops/ethereum-package/compare/4.4.0...4.5.0) (2025-02-10)
 
 
