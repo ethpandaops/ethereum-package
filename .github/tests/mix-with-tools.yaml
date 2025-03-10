@@ -22,7 +22,6 @@ additional_services:
   - prometheus_grafana
   - spamoor_blob
   - custom_flood
-  - blobscan
   - dugtrio
   - blutgang
   - apache
