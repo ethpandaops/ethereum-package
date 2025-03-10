@@ -6,10 +6,8 @@ participants:
   - el_type: erigon
     cl_type: nimbus
     cl_image: ethpandaops/nimbus-eth2:unstable-minimal
-  # TODO: Re-add lighthouse once its working with minimal preset
-  # - el_type: besu
-  #   cl_type: lighthouse
-  #   cl_image: sigp/lighthouse:v6.0.1
+  - el_type: besu
+    cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
   # TODO: Re-add grandine once its working with minimal preset

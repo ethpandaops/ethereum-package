@@ -224,7 +224,6 @@ def get_beacon_config(
         "--http",
         "--http-address=0.0.0.0",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
-        "--slots-per-restore-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         # NOTE: This comes from:
         #   https://github.com/sigp/lighthouse/blob/7c88f582d955537f7ffff9b2c879dcf5bf80ce13/scripts/local_testnet/beacon_node.sh
         # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
