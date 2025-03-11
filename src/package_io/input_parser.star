@@ -26,7 +26,7 @@ DEFAULT_CL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "teku": "consensys/teku:latest",
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
@@ -45,7 +45,7 @@ DEFAULT_VC_IMAGES = {
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
@@ -553,7 +553,7 @@ def parse_network_params(plan, input_args):
 
     for attr in input_args:
         value = input_args[attr]
-        # if its insterted we use the value inserted
+        # if its inserted we use the value inserted
         if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
             result[attr] = value
         elif attr == "network_params":
@@ -1342,7 +1342,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "cl_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
-                    "12000",
+                    "8000",
                     "--disable-peer-scoring",
                 ],
                 "el_extra_params": parsed_arguments_dict["mev_params"][
@@ -1368,7 +1368,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "cl_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
-                    "12000",
+                    "8000",
                     "--disable-peer-scoring",
                 ],
                 "el_extra_params": parsed_arguments_dict["mev_params"][

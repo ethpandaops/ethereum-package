@@ -1,16 +1,56 @@
 participants:
-  - el_type: reth
+  - el_type: geth
+    el_image: ethpandaops/geth:prague-devnet-6-c070db6
+    el_extra_params: ["--miner.extradata=pawanRocks"]
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable-95cec45
+  - el_type: geth
+    el_image: ethpandaops/geth:prague-devnet-6-c070db6
+    el_extra_params: ["--miner.extradata=TekuFromLocal"]
     cl_type: teku
+    cl_image: consensys/teku:develop
+  - el_type: geth
+    el_image: ethpandaops/geth:prague-devnet-6-c070db6
+    el_extra_params: ["--miner.extradata=lodestarFromLocal"]
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:unstable-7982031
+  - el_type: geth
+    el_image: ethpandaops/geth:prague-devnet-6-c070db6
+    el_extra_params: ["--miner.extradata=prysmFromLocal"]
+    cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:develop-910609a
+    vc_image: ethpandaops/prysm-validator:develop-910609a
+  - el_type: geth
+    el_image: ethpandaops/geth:prague-devnet-6-c070db6
+    el_extra_params: ["--miner.extradata=nimbusFromLocal"]
+    cl_type: nimbus
+    cl_image: ethpandaops/nimbus-eth2:unstable-dec1cd3
+  - el_type: geth
+    el_image: ethpandaops/geth:prague-devnet-6-c070db6
+    el_extra_params: ["--miner.extradata=grandineFromLocal"]
+    cl_type: grandine
+    cl_image: ethpandaops/grandine:devnet5-7ba51a4
+
 additional_services:
   - dora
   - tx_spammer
+  - spamoor_blob
 mev_type: flashbots
 
 mev_params:
   mev_relay_image: jtraglia/mev-boost-relay:electra
   mev_boost_image: jtraglia/mev-boost:electra
-  mev_builder_image: ethpandaops/rbuilder:develop-1b578f5
-  mev_builder_cl_image: ethpandaops/lighthouse:pawan-electra-alpha7-0dd215c
+  mev_builder_cl_image: ethpandaops/lighthouse:unstable-a1b7d61
+  mev_builder_image: ethpandaops/reth-rbuilder:devnet6-fdeb4d6
 
 network_params:
   electra_fork_epoch: 1
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  churn_limit_quotient: 16
+  genesis_delay: 120
+  
+spamoor_blob_params:
+  throughput: 10 
+  max_blobs: 2  
+  max_pending: 40 

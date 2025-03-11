@@ -137,10 +137,10 @@ disable_peer_scoring: false
 persistent: false
 mev_type: null
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay
+  mev_relay_image: ethpandaops/mev-boost-relay:main
   mev_builder_image: ethpandaops/flashbots-builder:main
   mev_builder_cl_image: sigp/lighthouse:latest
-  mev_boost_image: flashbots/mev-boost
+  mev_boost_image: ethpandaops/mev-boost:develop
   mev_boost_args: ["mev-boost", "--relay-check"]
   mev_relay_api_extra_args: []
   mev_relay_housekeeper_extra_args: []
@@ -176,7 +176,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:3.5.1
+  image: ethpandaops/ethereum-genesis-generator:3.7.0
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:
