@@ -627,7 +627,7 @@ network_params:
   # Maximum size of gossip messages in bytes
   # 10 * 2**20 (= 10485760, 10 MiB)
   # Defaults to 10485760 (10MB)
-  gossip_max_size: 10485760
+  max_payload_size: 10485760
 
 
 
@@ -986,7 +986,7 @@ spamoor_blob_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:3.7.0
+  image: ethpandaops/ethereum-genesis-generator:3.7.1
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
