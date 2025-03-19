@@ -3,11 +3,10 @@ participants:
     cl_type: lighthouse
 mev_type: commit-boost
 additional_services:
-  - tx_spammer
-  - blob_spammer
+  - tx_fuzz
+  - spamoor_blob
   - custom_flood
-  - el_forkmon
-  - beacon_metrics_gazer
+  - forkmon
   - dora
   - prometheus_grafana
 mev_params:
