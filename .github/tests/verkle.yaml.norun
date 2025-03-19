@@ -20,7 +20,7 @@ participants:
 network_params:
   electra_fork_epoch: 0
 additional_services:
-  - el_forkmon
-  - tx_spammer
+  - forkmon
+  - tx_fuzz
   - dora
 snooper_enabled: true

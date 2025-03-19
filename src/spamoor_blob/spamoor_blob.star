@@ -4,8 +4,8 @@ SERVICE_NAME = "spamoor-blob"
 # The min/max CPU/memory that spamoor can use
 MIN_CPU = 100
 MAX_CPU = 1000
-MIN_MEMORY = 20
-MAX_MEMORY = 300
+MIN_MEMORY = 100
+MAX_MEMORY = 1000
 
 
 def launch_spamoor_blob(

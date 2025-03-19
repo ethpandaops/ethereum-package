@@ -643,14 +643,12 @@ network_params:
 additional_services:
   - assertoor
   - broadcaster
-  - tx_spammer
-  - blob_spammer
+  - tx_fuzz
   - custom_flood
   - spamoor
   - spamoor_blob
-  - el_forkmon
+  - forkmon
   - blockscout
-  - beacon_metrics_gazer
   - dora
   - full_beaconchain_explorer
   - prometheus_grafana
@@ -682,12 +680,12 @@ dora_params:
   env: {}
 
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
-tx_spammer_params:
+tx_fuzz_params:
   # TX Spammer docker image to use
   # Defaults to the latest master image
   image: "ethpandaops/tx-fuzz:master"
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
-  tx_spammer_extra_args: []
+  tx_fuzz_extra_args: []
 
 # Configuration place for prometheus
 prometheus_params:
@@ -1114,7 +1112,7 @@ network_params:
 </details>
 
 <details>
-    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, transaction-spammer, EngineAPI snooper, and a testnet verifier)</summary>
+    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper, and a testnet verifier)</summary>
 
 ```yaml
 participants:
@@ -1219,7 +1217,6 @@ Here's a table of where the keys are used
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
-| 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
 | 4             | spamoor_blob        | ✅                |                 | As the sender of blobs     |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |

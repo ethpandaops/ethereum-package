@@ -10,7 +10,7 @@ participants:
     cl_type: prysm
   - el_type: besu
     cl_type: prysm
-  
+
   # Lighthouse nodes (32%)
   - el_type: geth
     cl_type: lighthouse
@@ -41,7 +41,7 @@ participants:
   - el_type: reth
     cl_type: lodestar
   - el_type: erigon
-    cl_type: grandine 
+    cl_type: grandine
 
 # Enable MEV via the flashbots stack
 mev_type: flashbots
@@ -49,7 +49,7 @@ mev_type: flashbots
 additional_services:
   - dora
   - spamoor_blob
-  - tx_spammer
+  - tx_fuzz
   - assertoor
 
-global_log_level: debug  
+global_log_level: debug

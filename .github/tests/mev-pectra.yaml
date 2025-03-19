@@ -33,7 +33,7 @@ participants:
 
 additional_services:
   - dora
-  - tx_spammer
+  - tx_fuzz
   - spamoor_blob
 mev_type: flashbots
 
@@ -49,8 +49,8 @@ network_params:
   shard_committee_period: 1
   churn_limit_quotient: 16
   genesis_delay: 120
-  
+
 spamoor_blob_params:
-  throughput: 10 
-  max_blobs: 2  
-  max_pending: 40 
+  throughput: 10
+  max_blobs: 2
+  max_pending: 40
