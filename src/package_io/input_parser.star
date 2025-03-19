@@ -1169,7 +1169,7 @@ def get_default_prometheus_params():
         "max_cpu": 1000,
         "min_mem": 128,
         "max_mem": 2048,
-        "image": "prom/prometheus:latest",
+        "image": "prom/prometheus:3.2.1",
     }
 
 
