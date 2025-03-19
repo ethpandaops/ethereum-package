@@ -11,15 +11,10 @@ validator_ranges = import_module(
     "./src/prelaunch_data_generator/validator_keystores/validator_ranges_generator.star"
 )
 
-transaction_spammer = import_module(
-    "./src/transaction_spammer/transaction_spammer.star"
-)
-blob_spammer = import_module("./src/blob_spammer/blob_spammer.star")
+tx_fuzz = import_module("./src/tx_fuzz/tx_fuzz.star")
 spamoor_blob = import_module("./src/spamoor_blob/spamoor_blob.star")
-el_forkmon = import_module("./src/el_forkmon/el_forkmon_launcher.star")
-beacon_metrics_gazer = import_module(
-    "./src/beacon_metrics_gazer/beacon_metrics_gazer_launcher.star"
-)
+forkmon = import_module("./src/forkmon/forkmon_launcher.star")
+
 dora = import_module("./src/dora/dora_launcher.star")
 dugtrio = import_module("./src/dugtrio/dugtrio_launcher.star")
 blutgang = import_module("./src/blutgang/blutgang_launcher.star")
@@ -417,6 +412,7 @@ def run(plan, args={}):
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
                         global_node_selectors,
+                        final_genesis_timestamp,
                     )
                 else:
                     fail("Invalid MEV type")
@@ -438,41 +434,27 @@ def run(plan, args={}):
     for index, additional_service in enumerate(
         args_with_right_defaults.additional_services
     ):
-        if additional_service == "tx_spammer":
-            plan.print("Launching transaction spammer")
-            tx_spammer_params = args_with_right_defaults.tx_spammer_params
-            transaction_spammer.launch_transaction_spammer(
+        if additional_service == "tx_fuzz":
+            plan.print("Launching tx-fuzz")
+            tx_fuzz_params = args_with_right_defaults.tx_fuzz_params
+            tx_fuzz.launch_tx_fuzz(
                 plan,
                 prefunded_accounts,
                 fuzz_target,
-                tx_spammer_params,
+                tx_fuzz_params,
                 global_node_selectors,
             )
-            plan.print("Successfully launched transaction spammer")
-        elif additional_service == "blob_spammer":
-            plan.print("Launching Blob spammer")
-            blob_spammer.launch_blob_spammer(
-                plan,
-                prefunded_accounts,
-                fuzz_target,
-                all_cl_contexts[0],
-                network_params.deneb_fork_epoch,
-                network_params.seconds_per_slot,
-                network_params.genesis_delay,
-                global_node_selectors,
-                args_with_right_defaults.tx_spammer_params,
-            )
-            plan.print("Successfully launched blob spammer")
+            plan.print("Successfully launched tx-fuzz")
         # We need a way to do time.sleep
         # TODO add code that waits for CL genesis
-        elif additional_service == "el_forkmon":
+        elif additional_service == "forkmon":
             plan.print("Launching el forkmon")
-            el_forkmon_config_template = read_file(
-                static_files.EL_FORKMON_CONFIG_TEMPLATE_FILEPATH
+            forkmon_config_template = read_file(
+                static_files.FORKMON_CONFIG_TEMPLATE_FILEPATH
             )
-            el_forkmon.launch_el_forkmon(
+            forkmon.launch_forkmon(
                 plan,
-                el_forkmon_config_template,
+                forkmon_config_template,
                 all_el_contexts,
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
@@ -480,24 +462,6 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched execution layer forkmon")
-        elif additional_service == "beacon_metrics_gazer":
-            plan.print("Launching beacon metrics gazer")
-            beacon_metrics_gazer_prometheus_metrics_job = (
-                beacon_metrics_gazer.launch_beacon_metrics_gazer(
-                    plan,
-                    all_cl_contexts,
-                    network_params,
-                    global_node_selectors,
-                    args_with_right_defaults.port_publisher,
-                    index,
-                    args_with_right_defaults.docker_cache_params,
-                )
-            )
-            launch_prometheus_grafana = True
-            prometheus_additional_metrics_jobs.append(
-                beacon_metrics_gazer_prometheus_metrics_job
-            )
-            plan.print("Successfully launched beacon metrics gazer")
         elif additional_service == "blockscout":
             plan.print("Launching blockscout")
             blockscout_sc_verif_url = blockscout.launch_blockscout(

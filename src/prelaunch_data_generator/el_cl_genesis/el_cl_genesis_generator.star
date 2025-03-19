@@ -113,6 +113,8 @@ def new_env_file_for_el_cl_genesis_data(
         "DenebForkEpoch": network_params.deneb_fork_epoch,
         "ElectraForkEpoch": network_params.electra_fork_epoch,
         "FuluForkEpoch": network_params.fulu_fork_epoch,
+        "Eip7732ForkEpoch": network_params.eip7732_fork_epoch,
+        "Eip7805ForkEpoch": network_params.eip7805_fork_epoch,
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
         "BellatrixForkVersion": constants.BELLATRIX_FORK_VERSION,
@@ -120,6 +122,8 @@ def new_env_file_for_el_cl_genesis_data(
         "DenebForkVersion": constants.DENEB_FORK_VERSION,
         "ElectraForkVersion": constants.ELECTRA_FORK_VERSION,
         "FuluForkVersion": constants.FULU_FORK_VERSION,
+        "Eip7732ForkVersion": constants.EIP7732_FORK_VERSION,
+        "Eip7805ForkVersion": constants.EIP7805_FORK_VERSION,
         "ShadowForkFile": shadowfork_file,
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
         "ShardCommitteePeriod": network_params.shard_committee_period,
@@ -135,5 +139,5 @@ def new_env_file_for_el_cl_genesis_data(
             network_params.additional_preloaded_contracts
         ),
         "PrefundedAccounts": json.encode(network_params.prefunded_accounts),
-        "GossipMaxSize": network_params.gossip_max_size,
+        "MaxPayloadSize": network_params.max_payload_size,
     }

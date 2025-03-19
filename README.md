@@ -627,7 +627,7 @@ network_params:
   # Maximum size of gossip messages in bytes
   # 10 * 2**20 (= 10485760, 10 MiB)
   # Defaults to 10485760 (10MB)
-  gossip_max_size: 10485760
+  max_payload_size: 10485760
 
 
 
@@ -643,14 +643,12 @@ network_params:
 additional_services:
   - assertoor
   - broadcaster
-  - tx_spammer
-  - blob_spammer
+  - tx_fuzz
   - custom_flood
   - spamoor
   - spamoor_blob
-  - el_forkmon
+  - forkmon
   - blockscout
-  - beacon_metrics_gazer
   - dora
   - full_beaconchain_explorer
   - prometheus_grafana
@@ -682,12 +680,12 @@ dora_params:
   env: {}
 
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
-tx_spammer_params:
+tx_fuzz_params:
   # TX Spammer docker image to use
   # Defaults to the latest master image
   image: "ethpandaops/tx-fuzz:master"
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
-  tx_spammer_extra_args: []
+  tx_fuzz_extra_args: []
 
 # Configuration place for prometheus
 prometheus_params:
@@ -809,7 +807,7 @@ parallel_keystore_generation: false
 # Default to false
 disable_peer_scoring: false
 
-# Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+# Whether the environment should be persistent; this is WIP and is slowly being rolled out across services
 # Note this requires Kurtosis greater than 0.85.49 to work
 # Note Erigon, Besu, Teku persistence is not currently supported with docker.
 # Defaults to false
@@ -820,7 +818,7 @@ persistent: false
 # Defaults to empty cache url
 # Images pulled from dockerhub will be prefixed with "/dh/" by default (docker.io)
 # Images pulled from github registry will be prefixed with "/gh/" by default (ghcr.io)
-# Images pulled from google registory will be prefixed with "/gcr/" by default (gcr.io)
+# Images pulled from google registry will be prefixed with "/gcr/" by default (gcr.io)
 # If you want to use a local image in combination with the cache, do not put "/" in your local image name
 docker_cache_params:
   enabled: false
@@ -841,13 +839,13 @@ mev_type: null
 # Parameters if MEV is used
 mev_params:
   # The image to use for MEV boost relay
-  mev_relay_image: flashbots/mev-boost-relay
+  mev_relay_image: ethpandaops/mev-boost-relay:main
   # The image to use for the builder
   mev_builder_image: ethpandaops/flashbots-builder:main
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
   # The image to use for mev-boost
-  mev_boost_image: flashbots/mev-boost
+  mev_boost_image: ethpandaops/mev-boost:develop
   # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
   mev_boost_args: []
   # Extra parameters to send to the API
@@ -939,7 +937,7 @@ spamoor_params:
   image: ethpandaops/spamoor:latest
   # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
   # Valid scenarios are:
-  #  eoatx, erctx, deploytx, depoy-destruct, blobs, gasburnertx
+  #  eoatx, erctx, deploytx, deploy-destruct, blobs, gasburnertx
   # Defaults to eoatx
   scenario: eoatx
   # Throughput of spamoor
@@ -980,17 +978,17 @@ spamoor_blob_params:
   # Max wallets for spamoor
   # Defaults to 20
   max_wallets: 20
-  # A list of optional params that will be passed to the spamoor comamnd for modifying its behaviour
+  # A list of optional params that will be passed to the spamoor command for modifying its behaviour
   spamoor_extra_args: []
 
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:3.5.1
+  image: ethpandaops/ethereum-genesis-generator:3.7.1
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
-  # if you have a service that you want to expose on a specific interfact; set that IP here
+  # if you have a service that you want to expose on a specific interface; set that IP here
   # if you set it to auto it gets the public ip from ident.me and sets it
   # Defaults to constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
   # The default value just means its the IP address of the container in which the service is running
@@ -1114,7 +1112,7 @@ network_params:
 </details>
 
 <details>
-    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, transaction-spammer, EngineAPI snooper, and a testnet verifier)</summary>
+    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper, and a testnet verifier)</summary>
 
 ```yaml
 participants:
@@ -1219,7 +1217,6 @@ Here's a table of where the keys are used
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
-| 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
 | 4             | spamoor_blob        | ✅                |                 | As the sender of blobs     |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |

@@ -26,7 +26,7 @@ DEFAULT_CL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "teku": "consensys/teku:latest",
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
@@ -45,7 +45,7 @@ DEFAULT_VC_IMAGES = {
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
@@ -81,7 +81,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "assertoor_params",
     "prometheus_params",
     "grafana_params",
-    "tx_spammer_params",
+    "tx_fuzz_params",
     "custom_flood_params",
     "xatu_sentry_params",
     "port_publisher",
@@ -107,7 +107,7 @@ def input_parser(plan, input_args):
         result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     else:
         result["additional_services"] = []
-    result["tx_spammer_params"] = get_default_tx_spammer_params()
+    result["tx_fuzz_params"] = get_default_tx_fuzz_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
     result["grafana_params"] = get_default_grafana_params()
@@ -156,10 +156,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
                 result["mev_params"][sub_attr] = sub_value
-        elif attr == "tx_spammer_params":
-            for sub_attr in input_args["tx_spammer_params"]:
-                sub_value = input_args["tx_spammer_params"][sub_attr]
-                result["tx_spammer_params"][sub_attr] = sub_value
+        elif attr == "tx_fuzz_params":
+            for sub_attr in input_args["tx_fuzz_params"]:
+                sub_value = input_args["tx_fuzz_params"][sub_attr]
+                result["tx_fuzz_params"][sub_attr] = sub_value
         elif attr == "custom_flood_params":
             for sub_attr in input_args["custom_flood_params"]:
                 sub_value = input_args["custom_flood_params"][sub_attr]
@@ -329,6 +329,8 @@ def input_parser(plan, input_args):
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
+            eip7732_fork_epoch=result["network_params"]["eip7732_fork_epoch"],
+            eip7805_fork_epoch=result["network_params"]["eip7805_fork_epoch"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
@@ -358,7 +360,7 @@ def input_parser(plan, input_args):
             ],
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
-            gossip_max_size=result["network_params"]["gossip_max_size"],
+            max_payload_size=result["network_params"]["max_payload_size"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -400,9 +402,9 @@ def input_parser(plan, input_args):
             github_prefix=result["docker_cache_params"]["github_prefix"],
             google_prefix=result["docker_cache_params"]["google_prefix"],
         ),
-        tx_spammer_params=struct(
-            image=result["tx_spammer_params"]["image"],
-            tx_spammer_extra_args=result["tx_spammer_params"]["tx_spammer_extra_args"],
+        tx_fuzz_params=struct(
+            image=result["tx_fuzz_params"]["image"],
+            tx_fuzz_extra_args=result["tx_fuzz_params"]["tx_fuzz_extra_args"],
         ),
         prometheus_params=struct(
             storage_tsdb_retention_time=result["prometheus_params"][
@@ -551,7 +553,7 @@ def parse_network_params(plan, input_args):
 
     for attr in input_args:
         value = input_args[attr]
-        # if its insterted we use the value inserted
+        # if its inserted we use the value inserted
         if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
             result[attr] = value
         elif attr == "network_params":
@@ -909,6 +911,8 @@ def default_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
         "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
+        "eip7732_fork_epoch": constants.EIP7732_FORK_EPOCH,
+        "eip7805_fork_epoch": constants.EIP7805_FORK_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
@@ -921,7 +925,7 @@ def default_network_params():
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
-        "gossip_max_size": 10485760,
+        "max_payload_size": 10485760,
     }
 
 
@@ -948,6 +952,8 @@ def default_minimal_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
         "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
+        "eip7732_fork_epoch": constants.EIP7732_FORK_EPOCH,
+        "eip7805_fork_epoch": constants.EIP7805_FORK_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
@@ -960,7 +966,7 @@ def default_minimal_network_params():
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
-        "gossip_max_size": 10485760,
+        "max_payload_size": 10485760,
     }
 
 
@@ -1135,10 +1141,10 @@ def get_default_mev_params(mev_type, preset):
     }
 
 
-def get_default_tx_spammer_params():
+def get_default_tx_fuzz_params():
     return {
         "image": "ethpandaops/tx-fuzz:master",
-        "tx_spammer_extra_args": [],
+        "tx_fuzz_extra_args": [],
     }
 
 
@@ -1163,7 +1169,7 @@ def get_default_prometheus_params():
         "max_cpu": 1000,
         "min_mem": 128,
         "max_mem": 2048,
-        "image": "prom/prometheus:latest",
+        "image": "prom/prometheus:v3.2.1",
     }
 
 
@@ -1336,7 +1342,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "cl_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
-                    "12000",
+                    "8000",
                     "--disable-peer-scoring",
                 ],
                 "el_extra_params": parsed_arguments_dict["mev_params"][
@@ -1362,7 +1368,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "cl_extra_params": [
                     "--always-prepare-payload",
                     "--prepare-payload-lookahead",
-                    "12000",
+                    "8000",
                     "--disable-peer-scoring",
                 ],
                 "el_extra_params": parsed_arguments_dict["mev_params"][
@@ -1415,7 +1421,7 @@ def docker_cache_image_override(plan, result):
         "mev_params.mev_boost_image",
         "mev_params.mev_flood_image",
         "xatu_sentry_params.xatu_sentry_image",
-        "tx_spammer_params.image",
+        "tx_fuzz_params.image",
         "prometheus_params.image",
         "grafana_params.image",
         "spamoor_params.image",

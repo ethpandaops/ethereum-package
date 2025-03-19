@@ -14,6 +14,7 @@ VERBOSITY_LEVELS = {
 
 def get_config(
     participant,
+    el_cl_genesis_data,
     image,
     global_log_level,
     beacon_http_url,
@@ -30,6 +31,10 @@ def get_config(
     )
 
     cmd = [
+        "--network=custom",
+        "--network-custom-config-path="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
         "--remote-signer-url={0}".format(remote_signer_context.http_url),
         "--beacon-node-urls=" + beacon_http_url,
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
@@ -42,6 +47,10 @@ def get_config(
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.vc_extra_params])
+
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+    }
 
     public_ports = {}
     if port_publisher.vc_enabled:
@@ -61,6 +70,7 @@ def get_config(
         "ports": ports,
         "public_ports": public_ports,
         "cmd": cmd,
+        "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
             client=constants.VC_TYPE.vero,
