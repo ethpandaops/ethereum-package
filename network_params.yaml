@@ -102,8 +102,8 @@ network_params:
 additional_services: []
 dora_params:
   image: ""
-tx_spammer_params:
-  tx_spammer_extra_args: []
+tx_fuzz_params:
+  tx_fuzz_extra_args: []
 spamoor_blob_params:
   spamoor_extra_args: []
 prometheus_params:

@@ -12,10 +12,8 @@ participants:
   - el_type: ethereumjs
     cl_type: teku
 additional_services:
-  - tx_spammer
-  - blob_spammer
-  - el_forkmon
-  - beacon_metrics_gazer
+  - tx_fuzz
+  - forkmon
   - dora
   - prometheus_grafana
   - spamoor_blob

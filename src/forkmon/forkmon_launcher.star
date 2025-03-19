@@ -6,9 +6,9 @@ IMAGE_NAME = "ethpandaops/execution-monitor:master"
 
 HTTP_PORT_NUMBER = 8080
 
-EL_FORKMON_CONFIG_FILENAME = "el-forkmon-config.toml"
+FORKMON_CONFIG_FILENAME = "el-forkmon-config.toml"
 
-EL_FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
+FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 USED_PORTS = {
     constants.HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -25,7 +25,7 @@ MIN_MEMORY = 32
 MAX_MEMORY = 256
 
 
-def launch_el_forkmon(
+def launch_forkmon(
     plan,
     config_template,
     el_contexts,
@@ -47,9 +47,7 @@ def launch_el_forkmon(
         config_template, template_data
     )
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        EL_FORKMON_CONFIG_FILENAME
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "el-forkmon-config"
@@ -74,7 +72,7 @@ def get_config(
     docker_cache_params,
 ):
     config_file_path = shared_utils.path_join(
-        EL_FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, EL_FORKMON_CONFIG_FILENAME
+        FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE, FORKMON_CONFIG_FILENAME
     )
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
@@ -92,7 +90,7 @@ def get_config(
         ports=USED_PORTS,
         public_ports=public_ports,
         files={
-            EL_FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+            FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
         cmd=[config_file_path],
         min_cpu=MIN_CPU,
