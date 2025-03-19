@@ -127,7 +127,7 @@ with open("/network-configs/bootstrap_nodes.txt") as bootnode_file:
     for line in bootnode_file:
         line = line.strip()
         bootnodes.append(line)
-print(",".join(bootnodes), end="")
+print(",".join(bootnodes[:5]), end="")
             """,
     )
     return enr_list.output
