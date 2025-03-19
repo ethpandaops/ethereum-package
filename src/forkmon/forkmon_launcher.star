@@ -1,12 +1,12 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 
-SERVICE_NAME = "el-forkmon"
+SERVICE_NAME = "forkmon"
 IMAGE_NAME = "ethpandaops/execution-monitor:master"
 
 HTTP_PORT_NUMBER = 8080
 
-FORKMON_CONFIG_FILENAME = "el-forkmon-config.toml"
+FORKMON_CONFIG_FILENAME = "forkmon-config.toml"
 
 FORKMON_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
@@ -18,7 +18,7 @@ USED_PORTS = {
     )
 }
 
-# The min/max CPU/memory that el-forkmon can use
+# The min/max CPU/memory that forkmon can use
 MIN_CPU = 10
 MAX_CPU = 100
 MIN_MEMORY = 32
@@ -50,7 +50,7 @@ def launch_forkmon(
     template_and_data_by_rel_dest_filepath[FORKMON_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "el-forkmon-config"
+        template_and_data_by_rel_dest_filepath, "forkmon-config"
     )
 
     config = get_config(
