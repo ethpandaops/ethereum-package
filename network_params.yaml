@@ -102,8 +102,8 @@ network_params:
 additional_services: []
 dora_params:
   image: ""
-tx_spammer_params:
-  tx_spammer_extra_args: []
+tx_fuzz_params:
+  tx_fuzz_extra_args: []
 spamoor_blob_params:
   spamoor_extra_args: []
 prometheus_params:
@@ -176,7 +176,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:3.7.0
+  image: ethpandaops/ethereum-genesis-generator:3.7.1
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

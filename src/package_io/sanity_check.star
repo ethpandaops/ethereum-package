@@ -173,7 +173,7 @@ SUBCATEGORY_PARAMS = {
         "additional_preloaded_contracts",
         "devnet_repo",
         "prefunded_accounts",
-        "gossip_max_size",
+        "max_payload_size",
     ],
     "blockscout_params": [
         "image",
@@ -191,9 +191,9 @@ SUBCATEGORY_PARAMS = {
         "github_prefix",
         "google_prefix",
     ],
-    "tx_spammer_params": [
+    "tx_fuzz_params": [
         "image",
-        "tx_spammer_extra_args",
+        "tx_fuzz_extra_args",
     ],
     "prometheus_params": [
         "min_cpu",
@@ -279,12 +279,10 @@ SUBCATEGORY_PARAMS = {
 ADDITIONAL_SERVICES_PARAMS = [
     "assertoor",
     "broadcaster",
-    "tx_spammer",
-    "blob_spammer",
+    "tx_fuzz",
     "custom_flood",
-    "el_forkmon",
+    "forkmon",
     "blockscout",
-    "beacon_metrics_gazer",
     "dora",
     "full_beaconchain_explorer",
     "prometheus_grafana",

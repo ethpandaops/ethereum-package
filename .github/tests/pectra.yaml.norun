@@ -5,7 +5,7 @@ participants_matrix:
     - el_type: reth
       el_image: ghcr.io/paradigmxyz/reth:v1.2.2
     - el_type: nethermind
-      el_image: nethermind/nethermind:1.31.4
+      el_image: nethermind/nethermind:1.31.6
     - el_type: erigon
       el_image: erigontech/erigon:v3.0.0-rc3
     - el_type: besu
@@ -35,7 +35,7 @@ additional_services:
   - dora
   - assertoor
 
-snooper_enabled: true
+snooper_enabled: false
 assertoor_params:
   run_stability_check: false
   run_block_proposal_check: false

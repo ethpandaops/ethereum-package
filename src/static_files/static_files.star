@@ -7,8 +7,8 @@ EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH = (
 )
 
 # EL Forkmon config
-EL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/el-forkmon-config/config.toml.tmpl"
+FORKMON_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/forkmon-config/config.toml.tmpl"
 )
 
 # Validator Ranges config
