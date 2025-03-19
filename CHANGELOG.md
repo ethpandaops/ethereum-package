@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.6.0](https://github.com/ethpandaops/ethereum-package/compare/4.5.0...4.6.0) (2025-03-19)
+
+
+### Features
+
+* use `eip7805-support` image for dora when eip7805 is scheduled for activation ([#900](https://github.com/ethpandaops/ethereum-package/issues/900)) ([9b3ee49](https://github.com/ethpandaops/ethereum-package/commit/9b3ee49c6086dcbdce833b68d8165f740273f23c))
+
+
+### Bug Fixes
+
+* add milliseconds to histograms ([#879](https://github.com/ethpandaops/ethereum-package/issues/879)) ([53602f1](https://github.com/ethpandaops/ethereum-package/commit/53602f1b042d2c8a2a5c064ce087a5f00ae53f7f))
+* commit boost startup ([#906](https://github.com/ethpandaops/ethereum-package/issues/906)) ([040e622](https://github.com/ethpandaops/ethereum-package/commit/040e622cdf28e02721aa2e54904ee3d902485c18))
+* decrease lighthouse mev --prepare-payload-lookahead from 12 to 8s ([#904](https://github.com/ethpandaops/ethereum-package/issues/904)) ([03bb449](https://github.com/ethpandaops/ethereum-package/commit/03bb449cfd327e55188fb1ff4407c4b75606b911))
+* lighthouse minimal image ([#915](https://github.com/ethpandaops/ethereum-package/issues/915)) ([c3ecee8](https://github.com/ethpandaops/ethereum-package/commit/c3ecee8148068d5270d9e549d042066d2eb8aec0))
+* prometheus shouldnt use latest ([#924](https://github.com/ethpandaops/ethereum-package/issues/924)) ([5cc99c8](https://github.com/ethpandaops/ethereum-package/commit/5cc99c8f30a758c77243a0f07c8f07462522436f))
+* provide `--network-custom-config-path` to Vero ([#905](https://github.com/ethpandaops/ethereum-package/issues/905)) ([998063f](https://github.com/ethpandaops/ethereum-package/commit/998063fae8c68288dbc760e4a76bfdfa23ecd62b))
+* Update config.toml.tmpl ([#919](https://github.com/ethpandaops/ethereum-package/issues/919)) ([8f8830f](https://github.com/ethpandaops/ethereum-package/commit/8f8830fd1992db4e5678c125bc400e310d5b6006))
+* update to latest spec ([a9058f5](https://github.com/ethpandaops/ethereum-package/commit/a9058f540c6d34584dae6f73a79fae33d9fa29d6))
+
 ## [4.5.0](https://github.com/ethpandaops/ethereum-package/compare/4.4.0...4.5.0) (2025-02-10)
 
 
