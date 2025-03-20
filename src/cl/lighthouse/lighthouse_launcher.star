@@ -252,11 +252,11 @@ def get_beacon_config(
     if checkpoint_sync_enabled:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
         if (
-            launcher.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network
+            launcher.network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in launcher.network_params.network
         ):
             if bootnode_contexts != None:
                 cmd.append(
@@ -268,7 +268,7 @@ def get_beacon_config(
                         ]
                     )
                 )
-        elif launcher.network == constants.NETWORK_NAME.ephemery:
+        elif launcher.network_params.network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -283,7 +283,7 @@ def get_beacon_config(
                 )
             )
     else:  # Public networks
-        cmd.append("--network=" + launcher.network)
+        cmd.append("--network=" + launcher.network_params.network)
 
     if len(participant.cl_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -296,6 +296,11 @@ def get_beacon_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+
+    if launcher.network_params.perfect_peerdas_enabled:
+        files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER + "/network"] = Directory(
+            artifact_names=["node-key-file-{0}".format(participant_index + 1)]
+        )
 
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = Directory(
@@ -346,5 +351,5 @@ def new_lighthouse_launcher(el_cl_genesis_data, jwt_file, network_params):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network_params.network,
+        network_params=network_params,
     )

@@ -116,6 +116,19 @@ def run(plan, args={}):
         name="keymanager_file",
     )
 
+    if network_params.perfect_peerdas_enabled:
+        plan.print("Uploading peerdas node keys")
+        for index, participant in enumerate(args_with_right_defaults.participants):
+            raw_node_key = (
+                static_files.PEERDAS_NODE_KEY_FILEPATH
+                + participant.cl_type
+                + "/node-key-file-{0}".format(index + 1)
+            )
+            node_key_file = plan.upload_files(
+                src=raw_node_key,
+                name="node-key-file-{0}".format(index + 1),
+            )
+
     plan.print("Read the prometheus, grafana templates")
 
     if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
