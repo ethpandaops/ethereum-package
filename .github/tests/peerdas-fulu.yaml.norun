@@ -11,15 +11,14 @@ participants:
 
   # Prysm
   - cl_type: prysm
-    cl_image: ethpandaops/prysm-beacon-chain:peerDAS-01705d1
+    cl_image: ethpandaops/prysm-beacon-chain:peerDAS
     cl_max_mem: 4096
     cl_extra_params:
-      - --minimum-peers-per-subnet=1
       - --subscribe-all-subnets
       
   # Teku
   - cl_type: teku
-    cl_image: ethpandaops/teku:das
+    cl_image: ethpandaops/teku:nashatyrev-das
     cl_max_mem: 4096
     cl_extra_params:
       - --p2p-subscribe-all-custody-subnets-enabled
@@ -28,7 +27,7 @@ participants:
     cl_image: ethpandaops/grandine:peerdas-fulu
     cl_max_mem: 4096
     cl_extra_params:
-      - --subscribe-all-subnets
+      - --subscribe-all-data-column-subnets
       
   # Nimbus
   - cl_type: nimbus
@@ -47,14 +46,13 @@ participants:
 
   # Prysm
   - cl_type: prysm
-    cl_image: ethpandaops/prysm-beacon-chain:peerDAS-01705d1
+    cl_image: ethpandaops/prysm-beacon-chain:peerDAS
     cl_max_mem: 4096
-    cl_extra_params:
-      - --minimum-peers-per-subnet=1
+
 
   # Teku
   - cl_type: teku
-    cl_image: ethpandaops/teku:das
+    cl_image: ethpandaops/teku:nashatyrev-das
 
   # Grandine
   - cl_type: grandine

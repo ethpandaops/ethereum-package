@@ -1,31 +1,31 @@
 participants_matrix:
   el:
     - el_type: geth
-      el_image: ethpandaops/geth:prague-devnet-6
+      el_image: ethereum/client-go:v1.15.5
     - el_type: reth
-      el_image: ethpandaops/reth:main
+      el_image: ghcr.io/paradigmxyz/reth:v1.2.2
     - el_type: nethermind
-      el_image: ethpandaops/nethermind:master
+      el_image: nethermind/nethermind:1.31.4
     - el_type: erigon
-      el_image: ethpandaops/erigon:pectra6
+      el_image: erigontech/erigon:v3.0.0-rc3
     - el_type: besu
-      el_image: ethpandaops/besu:main
+      el_image: hyperledger/besu:25.2.2
     - el_type: ethereumjs
       el_image: ethpandaops/ethereumjs:eip7840
   cl:
     - cl_type: lighthouse
-      cl_image: ethpandaops/lighthouse:unstable
+      cl_image: sigp/lighthouse:v7.0.0-beta.0
     - cl_type: teku
-      cl_image: consensys/teku:develop
+      cl_image: consensys/teku:25.2
     - cl_type: nimbus
-      cl_image: ethpandaops/nimbus-eth2:unstable
+      cl_image: statusim/nimbus-eth2:multiarch-v25.3.0
     - cl_type: lodestar
-      cl_image: ethpandaops/lodestar:unstable
+      cl_image: chainsafe/lodestar:v1.27.1
     - cl_type: grandine
-      cl_image: ethpandaops/grandine:devnet5
+      cl_image: sifrai/grandine:1.0.0
     - cl_type: prysm
-      cl_image: ethpandaops/prysm-beacon-chain:develop
-      vc_image: ethpandaops/prysm-validator:develop
+      cl_image: prysmaticlabs/prysm-beacon-chain:v5.3.0
+      vc_image: prysmaticlabs/prysm-validator:v5.3.0
 
 network_params:
   electra_fork_epoch: 1
