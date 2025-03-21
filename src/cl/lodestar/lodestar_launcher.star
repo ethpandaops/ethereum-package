@@ -9,7 +9,6 @@ constants = import_module("../../package_io/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/lodestar/beacon-data"
-
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_HTTP_PORT_NUM = 4000
@@ -288,8 +287,8 @@ def get_beacon_config(
     }
 
     if launcher.network_params.perfect_peerdas_enabled:
-        files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
-            artifact_names=["node-key-file-{0}".format(participant_index + 1)]
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = "node-key-file-{0}".format(
+            participant_index + 1
         )
 
     if persistent:

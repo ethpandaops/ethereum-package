@@ -15,7 +15,9 @@ RUST_FULL_BACKTRACE_KEYWORD = "full"
 
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/lighthouse/beacon-data"
-
+NODE_KEY_MOUNTPOINT_ON_CLIENTS = (
+    BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER + "/network"
+)
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_HTTP_PORT_NUM = 4000
@@ -298,8 +300,8 @@ def get_beacon_config(
     }
 
     if launcher.network_params.perfect_peerdas_enabled:
-        files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER + "/network"] = Directory(
-            artifact_names=["node-key-file-{0}".format(participant_index + 1)]
+        files[NODE_KEY_MOUNTPOINT_ON_CLIENTS] = "node-key-file-{0}".format(
+            participant_index + 1
         )
 
     if persistent:
