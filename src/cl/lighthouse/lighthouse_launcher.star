@@ -309,7 +309,7 @@ def get_beacon_config(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[launcher.network_params.network][
                 constants.CL_TYPE.lighthouse + "_volume_size"
             ],
         )
