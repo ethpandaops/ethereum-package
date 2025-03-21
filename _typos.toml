@@ -1,2 +1,2 @@
 [files]
-static_files/
+extend-exclude = ["static_files/"]
