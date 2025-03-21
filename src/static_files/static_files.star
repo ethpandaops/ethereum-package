@@ -110,3 +110,11 @@ RBUILDER_CONFIG_TEMPLATE_FILEPATH = (
 RBUILDER_BLOCKLIST_FILEPATH = (
     STATIC_FILES_DIRPATH + "/mev/rbuilder/blocklist.json"
 )
+
+TAIYI_BOOST_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/taiyi-boost/taiyi-boost-config.toml.tmpl"
+)
+
+COMMIT_BOOST_SIGNER_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/taiyi-boost/signer.toml.tmpl"
+)
