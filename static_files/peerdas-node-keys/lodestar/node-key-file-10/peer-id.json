@@ -1,0 +1,12 @@
+{
+  "id": "16Uiu2HAm6kbPbVeXR3PtGFKq4McCHhrRy6zt51QJFCCxYo5rW1cC",
+  "pubKey": "CAISIQKoSWbtij4hUt/x/avwqowuhfdNTmtweEPYDgsx7VJbEQ==",
+  "privKey": "CAISIFo+VXE16VzAU9kU3VCzOfUwlhqfnXJFYpI3YYCUBKim",
+  "extra": {
+    "type": "Secp256k1",
+    "pubKeyRaw": "AqhJZu2KPiFS3/H9q/CqjC6F901Oa3B4Q9gOCzHtUlsR",
+    "privKeyRaw": "Wj5VcTXpXMBT2RTdULM59TCWGp+dckVikjdhgJQEqKY=",
+    "pubKeyRawHex": "02a84966ed8a3e2152dff1fdabf0aa8c2e85f74d4e6b707843d80e0b31ed525b11",
+    "privKeyRawHex": "5a3e557135e95cc053d914dd50b339f530961a9f9d724562923761809404a8a6"
+  }
+}

@@ -174,6 +174,7 @@ SUBCATEGORY_PARAMS = {
         "devnet_repo",
         "prefunded_accounts",
         "max_payload_size",
+        "perfect_peerdas_enabled",
     ],
     "blockscout_params": [
         "image",
