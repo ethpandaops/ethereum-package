@@ -1,0 +1,21 @@
+name: Kurtosis install
+inputs:
+  version:
+    description: 'Version to install'
+    required: false
+    default: 'latest'
+runs:
+  using: composite
+  steps:
+    - name: Install
+      shell: bash
+      run: |
+        echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+        sudo apt update
+        if [ "${{ inputs.version }}" = "latest" ]; then
+          sudo apt install kurtosis-cli
+        else
+          sudo apt install kurtosis-cli=${{ inputs.version }}
+        fi
+        kurtosis analytics disable
+        echo "$(dirname $(which kurtosis))" >> $GITHUB_PATH

@@ -83,9 +83,9 @@ def label_maker(
     labels = {
         "ethereum-package.client": client,
         "ethereum-package.client-type": client_type,
-        "ethereum-package.client-image": image.replace("/", "-")
-        .replace(":", "_")
-        .split("@")[0],  # drop the sha256 part of the image from the label
+        "ethereum-package.client-image": ensure_alphanumeric_bounds(
+            image.replace("/", "-").replace(":", "_").replace(".", "-").split("@")[0]
+        ),  # drop the sha256 part of the image from the label
         "ethereum-package.sha256": sha256,
         "ethereum-package.connected-client": connected_client,
     }
@@ -313,6 +313,7 @@ def get_port_specs(port_assignments):
             constants.VALIDATOR_HTTP_PORT_ID,
             constants.ADMIN_PORT_ID,
             constants.VALDIATOR_GRPC_PORT_ID,
+            constants.RBUILDER_PORT_ID,
         ]:
             ports.update(
                 {port_id: new_port_spec(port, TCP_PROTOCOL, HTTP_APPLICATION_PROTOCOL)}
@@ -345,3 +346,49 @@ def get_cpu_mem_resource_limits(
         else constants.VOLUME_SIZE[network_name][client_type + "_volume_size"]
     )
     return min_cpu, max_cpu, min_mem, max_mem, volume_size
+
+
+def docker_cache_image_calc(docker_cache_params, image):
+    if docker_cache_params.enabled:
+        if docker_cache_params.url in image:
+            return image
+        if constants.CONTAINER_REGISTRY.ghcr in image:
+            return (
+                docker_cache_params.url
+                + docker_cache_params.github_prefix
+                + "/".join(image.split("/")[1:])
+            )
+        elif constants.CONTAINER_REGISTRY.gcr in image:
+            return (
+                docker_cache_params.url
+                + docker_cache_params.gcr_prefix
+                + "/".join(image.split("/")[1:])
+            )
+        elif constants.CONTAINER_REGISTRY.dockerhub in image:
+            return (
+                docker_cache_params.url + docker_cache_params.dockerhub_prefix + image
+            )
+
+    return image
+
+
+def is_alphanumeric(c):
+    return ("a" <= c and c <= "z") or ("A" <= c and c <= "Z") or ("0" <= c and c <= "9")
+
+
+def ensure_alphanumeric_bounds(s):
+    # Trim from the start
+    start = 0
+    for i in range(len(s)):
+        if is_alphanumeric(s[i]):
+            start = i
+            break
+
+    # Trim from the end
+    end = len(s)
+    for i in range(len(s) - 1, -1, -1):
+        if is_alphanumeric(s[i]):
+            end = i + 1
+            break
+
+    return s[start:end]

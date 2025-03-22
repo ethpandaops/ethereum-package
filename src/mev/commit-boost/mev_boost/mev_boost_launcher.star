@@ -30,7 +30,7 @@ def launch(
     relays,
     el_cl_genesis_data,
     global_node_selectors,
-    genesis_timestamp,
+    final_genesis_timestamp,
 ):
 
     network = (
@@ -41,15 +41,13 @@ def launch(
 
     image = mev_params.mev_boost_image
     template_data = new_config_template_data(
-        network,
-        input_parser.MEV_BOOST_PORT,
-        relays,
+        network, input_parser.MEV_BOOST_PORT, relays, final_genesis_timestamp
     )
 
-    mev_rs_boost_config_template = read_file(static_files.COMMIT_BOOST_CONFIG_FILEPATH)
+    commit_boost_config_template = read_file(static_files.COMMIT_BOOST_CONFIG_FILEPATH)
 
     template_and_data = shared_utils.new_template_and_data(
-        mev_rs_boost_config_template, template_data
+        commit_boost_config_template, template_data
     )
 
     template_and_data_by_rel_dest_filepath = {}
@@ -94,6 +92,7 @@ def get_config(
         cmd=[],
         env_vars={
             "CB_CONFIG": config_file_path,
+            "RUST_LOG": "debug",
         },
         files={
             CB_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_file,
@@ -113,9 +112,10 @@ def new_mev_boost_launcher(should_check_relay, relay_end_points):
     )
 
 
-def new_config_template_data(network, port, relays):
+def new_config_template_data(network, port, relays, final_genesis_timestamp):
     return {
         "Network": network,
         "Port": port,
         "Relays": relays,
+        "Timestamp": final_genesis_timestamp,
     }

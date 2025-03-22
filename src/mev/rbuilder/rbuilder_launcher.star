@@ -200,7 +200,6 @@ def launch_rbuilder_reth(
         el_cl_data,
         jwt_file,
         network_params.network,
-        additional_files=additional_files
     )
             
     el_context = reth.launch(

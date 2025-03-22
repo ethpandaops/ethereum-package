@@ -7,8 +7,8 @@ EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH = (
 )
 
 # EL Forkmon config
-EL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/el-forkmon-config/config.toml.tmpl"
+FORKMON_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/forkmon-config/config.toml.tmpl"
 )
 
 # Validator Ranges config
@@ -95,6 +95,10 @@ MEV_RS_MEV_RELAY_CONFIG_FILEPATH = (
 )
 MEV_RS_MEV_BUILDER_CONFIG_FILEPATH = (
     STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_builder/config.toml.tmpl"
+)
+
+FLASHBOTS_RBUILDER_CONFIG_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/flashbots/mev_builder/config.toml.tmpl"
 )
 
 COMMIT_BOOST_CONFIG_FILEPATH = (

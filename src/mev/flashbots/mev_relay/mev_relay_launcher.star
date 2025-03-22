@@ -42,7 +42,7 @@ def launch_mev_relay(
     network_id,
     beacon_uris,
     validator_root,
-    builder_uri,
+    blocksim_uri,
     seconds_per_slot,
     persistent,
     global_node_selectors,
@@ -82,6 +82,7 @@ def launch_mev_relay(
         "BELLATRIX_FORK_VERSION": constants.BELLATRIX_FORK_VERSION,
         "CAPELLA_FORK_VERSION": constants.CAPELLA_FORK_VERSION,
         "DENEB_FORK_VERSION": constants.DENEB_FORK_VERSION,
+        "ELECTRA_FORK_VERSION": constants.ELECTRA_FORK_VERSION,
         "GENESIS_VALIDATORS_ROOT": validator_root,
         "SEC_PER_SLOT": str(seconds_per_slot),
         "LOG_LEVEL": "debug",
@@ -134,7 +135,7 @@ def launch_mev_relay(
                 "--beacon-uris",
                 beacon_uris,
                 "--blocksim",
-                builder_uri,
+                blocksim_uri,
             ]
             + mev_params.mev_relay_api_extra_args,
             ports={

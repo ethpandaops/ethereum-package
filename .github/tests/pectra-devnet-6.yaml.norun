@@ -1,0 +1,58 @@
+participants_matrix:
+  el:
+    - el_type: geth
+      el_image: ethereum/client-go:v1.15.5
+    - el_type: reth
+      el_image: ghcr.io/paradigmxyz/reth:v1.2.2
+    - el_type: nethermind
+      el_image: nethermind/nethermind:1.31.4
+    - el_type: erigon
+      el_image: erigontech/erigon:v3.0.0-rc3
+    - el_type: besu
+      el_image: hyperledger/besu:25.2.2
+    - el_type: ethereumjs
+      el_image: ethpandaops/ethereumjs:eip7840
+  cl:
+    - cl_type: lighthouse
+      cl_image: sigp/lighthouse:v7.0.0-beta.0
+    - cl_type: teku
+      cl_image: consensys/teku:25.2
+    - cl_type: nimbus
+      cl_image: statusim/nimbus-eth2:multiarch-v25.3.0
+    - cl_type: lodestar
+      cl_image: chainsafe/lodestar:v1.27.1
+    - cl_type: grandine
+      cl_image: sifrai/grandine:1.0.0
+    - cl_type: prysm
+      cl_image: prysmaticlabs/prysm-beacon-chain:v5.3.0
+      vc_image: prysmaticlabs/prysm-validator:v5.3.0
+
+network_params:
+  electra_fork_epoch: 1
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  churn_limit_quotient: 16
+  genesis_delay: 240
+additional_services:
+  - dora
+  - spamoor_blob
+  - tx_fuzz
+  - assertoor
+dora_params:
+  image: "ethpandaops/dora:master-latest"
+spamoor_blob_params:
+  throughput: 10
+  max_blobs: 2
+  max_pending: 40
+
+global_log_level: debug
+
+assertoor_params:
+  image: "ethpandaops/assertoor:master"
+  tests:
+    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/execution-spec-tests.yaml
+    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/blockhash-test-with-rpc-call.yaml
+    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/eip7002-all.yaml
+    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/blob/master/playbooks/pectra-dev/eip7251-all.yaml
+    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/validator-lifecycle-test-v3.yaml
+    - file: https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/kurtosis/all.yaml
