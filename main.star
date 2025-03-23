@@ -328,17 +328,21 @@ def run(plan, args={}):
             helix_relay_config_template = read_file(
                 static_files.HELIX_CONFIG_TEMPLATE_FILEPATH
             )
+            helix_params = args_with_right_defaults.helix_params
             endpoint = helix_relay.launch_helix(
                 plan,
+                helix_params,
                 helix_relay_config_template,
                 final_genesis_timestamp,
                 genesis_validators_root,
+                network_params,
                 all_cl_contexts,
                 all_el_contexts,
                 el_cl_data_files_artifact_uuid,
                 persistent,
                 global_node_selectors,
             )
+            helix_relay_url = endpoint
         else:
             fail("Invalid MEV type")
 

@@ -36,7 +36,7 @@ def launch(
     network = (
         network
         if network in constants.PUBLIC_NETWORKS
-        else "{" + "genesis_time_secs = {}, path = \"{}\"".format(genesis_timestamp , constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml") + "}"
+        else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml"
     )
 
     image = mev_params.mev_boost_image
