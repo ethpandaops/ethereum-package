@@ -286,7 +286,7 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
-    if launcher.network_params.perfect_peerdas_enabled:
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = "node-key-file-{0}".format(
             participant_index + 1
         )

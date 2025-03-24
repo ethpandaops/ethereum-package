@@ -251,7 +251,7 @@ def get_beacon_config(
         "--p2p-subscribe-all-custody-subnets-enabled=true",
     ]
 
-    if launcher.network_params.perfect_peerdas_enabled:
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
         cmd.append(
             "--Xp2p-private-key-file-secp256k1="
             + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
@@ -315,7 +315,7 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
-    if launcher.network_params.perfect_peerdas_enabled:
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
         files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
             artifact_names=["node-key-file-{0}".format(participant_index + 1)]
         )

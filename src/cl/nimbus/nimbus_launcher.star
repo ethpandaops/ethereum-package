@@ -265,7 +265,7 @@ def get_beacon_config(
         "--subscribe-all-subnets",
     ]
 
-    if launcher.network_params.perfect_peerdas_enabled:
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
         cmd.append(
             "--netkey-file="
             + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
@@ -314,7 +314,7 @@ def get_beacon_config(
                 shared_utils.get_port_specs(validator_public_port_assignment)
             )
 
-    if launcher.network_params.perfect_peerdas_enabled:
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
         files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
             artifact_names=["node-key-file-{0}".format(participant_index + 1)]
         )
