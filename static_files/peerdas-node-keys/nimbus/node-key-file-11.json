@@ -1,0 +1,30 @@
+{
+  "crypto": {
+    "kdf": {
+      "function": "scrypt",
+      "params": {
+        "dklen": 32,
+        "n": 262144,
+        "p": 1,
+        "r": 8,
+        "salt": "b7de475c6dd3c10f7e0e3da5013dcb7ce7c99763bb26c95022510c9558532ec2"
+      },
+      "message": ""
+    },
+    "checksum": {
+      "function": "sha256",
+      "params": {},
+      "message": "46544a7c1208d9eef5f363aef78622476876b67ad8014dba230cb8546ebab2cc"
+    },
+    "cipher": {
+      "function": "aes-128-ctr",
+      "params": {
+        "iv": "23a82f564df4a763e37d152fe216f62c"
+      },
+      "message": "3b4e024250adbc993f0b02c04b33bcb2de4d8adb4a605aa2e60bd5619b147495b6a07c77"
+    }
+  },
+  "pubkey": "0802122102457af2a150e9c9e53df8dd2fe1e3b5d4c8d76e6bbf8934547124ed51634bfea2",
+  "uuid": "616f6ae6-dd9f-4b17-8e08-c3b64c16a67d",
+  "version": 1
+}
