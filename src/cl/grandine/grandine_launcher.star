@@ -9,6 +9,7 @@ vc_shared = import_module("../../vc/shared.star")
 #  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "grandine" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/grandine/grandine-beacon-data"
+NODE_KEY_MOUNTPOINT_ON_CLIENTS = BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER + "/testnet/network"
 
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
@@ -240,13 +241,6 @@ def get_beacon_config(
     if checkpoint_sync_enabled:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
 
-    if launcher.network_params.perfect_peerdas_enabled:
-        cmd.append(
-            "--libp2p-private-key-file="
-            + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
-            + "/node-key-file-{0}".format(participant_index + 1)
-        )
-
     if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--configuration-directory="
@@ -310,8 +304,8 @@ def get_beacon_config(
                 shared_utils.get_port_specs(validator_public_port_assignment)
             )
     if launcher.network_params.perfect_peerdas_enabled:
-        files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
-            artifact_names=["node-key-file-{0}".format(participant_index + 1)]
+        files[NODE_KEY_MOUNTPOINT_ON_CLIENTS] = "node-key-file-{0}".format(
+            participant_index + 1
         )
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(

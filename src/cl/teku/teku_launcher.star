@@ -253,7 +253,7 @@ def get_beacon_config(
 
     if launcher.network_params.perfect_peerdas_enabled:
         cmd.append(
-            "--p2p-private-key-file="
+            "--Xp2p-private-key-file-secp256k1="
             + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
             + "/node-key-file-{0}".format(participant_index + 1)
         )
