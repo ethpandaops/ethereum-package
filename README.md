@@ -1264,12 +1264,13 @@ When you're happy with your changes:
    * `leederek` (Kurtosis)
 1. Once everything works, merge!
 
-## Peerdas
+## PeerDAS
 
-In order to create a perfect peerdas network (where each node has a unique private key), we need to generate a set of private keys and then use them to create the nodes.
+We can use a set of pre-generated node keys to achieve a perfect column distribution on a 128-column network with an 8-column custody requirement.
+For this to work, we need a network of 16 nodes running, so each node would custody 8 unique columns.
 
 Here's a table of the private keys that can be used to create the nodes:
-| nodeId | privateKey | columns |
+| nodeId | sep256k1 privKey | columns |
 |--------|-------------|---------|
 | 0x9908...4159 | 0x86e8...4c8d | 17, 51, 52, 76, 103, 113, 117, 118 |
 | 0xacd4...84e1 | 0xe156...c0da | 24, 35, 78, 80, 101, 107, 114, 122 |
