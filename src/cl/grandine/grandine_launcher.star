@@ -9,7 +9,9 @@ vc_shared = import_module("../../vc/shared.star")
 #  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "grandine" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/grandine/grandine-beacon-data"
-NODE_KEY_MOUNTPOINT_ON_CLIENTS = BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER + "/testnet/network"
+NODE_KEY_MOUNTPOINT_ON_CLIENTS = (
+    BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER + "/testnet/network"
+)
 
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000

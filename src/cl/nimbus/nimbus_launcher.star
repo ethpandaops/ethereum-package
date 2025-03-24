@@ -269,7 +269,7 @@ def get_beacon_config(
         cmd.append(
             "--netkey-file="
             + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
-            + "/node-key-file-{0}".format(participant_index + 1)
+            + "/node-key-file-{0}.json".format(participant_index + 1)
         )
         cmd.append("--insecure-netkey-password=true")
 

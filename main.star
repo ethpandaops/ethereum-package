@@ -125,11 +125,20 @@ def run(plan, args={}):
                     + participant.cl_type
                     + "/node-key-file-{0}/peer-id.json".format(index + 1)
                 )
-            elif participant.cl_type == constants.CL_TYPE.lighthouse:
+            elif (
+                participant.cl_type == constants.CL_TYPE.lighthouse
+                or participant.cl_type == constants.CL_TYPE.grandine
+            ):
                 raw_node_key = (
                     static_files.PEERDAS_NODE_KEY_FILEPATH
                     + participant.cl_type
                     + "/node-key-file-{0}/key".format(index + 1)
+                )
+            elif participant.cl_type == constants.CL_TYPE.nimbus:
+                raw_node_key = (
+                    static_files.PEERDAS_NODE_KEY_FILEPATH
+                    + participant.cl_type
+                    + "/node-key-file-{0}.json".format(index + 1)
                 )
             else:
                 raw_node_key = (
