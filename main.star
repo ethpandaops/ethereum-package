@@ -417,7 +417,6 @@ def run(plan, args={}):
                     )
                 elif (
                     args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
-                    or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
                 ):
                     plan.print("Launching commit-boost PBS service")
                     mev_boost_launcher = commit_boost_mev_boost.new_mev_boost_launcher(
@@ -442,11 +441,7 @@ def run(plan, args={}):
                         final_genesis_timestamp,
                     )
                 elif args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE:
-                    plan.print("Reading genesis timestamp from config")
-                    genesis_timestamp = shared_utils.read_genesis_timestamp_from_config(
-                        plan, el_cl_data_files_artifact_uuid
-                    )
-                    plan.print("genesis_timestamp: {0}".format(genesis_timestamp))
+                    plan.print("final genesis timestamp: {0}".format(final_genesis_timestamp))
                     plan.print("Launching commit-boost signer module")
                     cb_signer_name = "{0}-{1}-{2}-{3}".format(
                         "commit-boost-signer",
@@ -460,7 +455,7 @@ def run(plan, args={}):
                         network_params.network,
                         el_cl_data_files_artifact_uuid,
                         global_node_selectors,
-                        genesis_timestamp,
+                        final_genesis_timestamp,
                         participant.cl_context.validator_keystore_files_artifact_uuid,
                     )
                     plan.print("Launching taiyi-boost service")
@@ -483,7 +478,7 @@ def run(plan, args={}):
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
                         global_node_selectors,
-                        genesis_timestamp,
+                        final_genesis_timestamp,
                         participant,
                         raw_jwt_secret,
                         cb_signer_url
@@ -508,7 +503,7 @@ def run(plan, args={}):
                         [taiyi_boost_context.url],
                         el_cl_data_files_artifact_uuid,
                         global_node_selectors,
-                        genesis_timestamp,
+                        final_genesis_timestamp,
                     )
                 else:
                     fail("Invalid MEV type")
