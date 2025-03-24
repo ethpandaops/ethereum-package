@@ -361,6 +361,7 @@ def input_parser(plan, input_args):
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
             max_payload_size=result["network_params"]["max_payload_size"],
+            perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -926,6 +927,7 @@ def default_network_params():
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
+        "perfect_peerdas_enabled": False,
     }
 
 
@@ -967,6 +969,7 @@ def default_minimal_network_params():
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
+        "perfect_peerdas_enabled": False,
     }
 
 

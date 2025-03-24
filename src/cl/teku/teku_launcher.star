@@ -196,8 +196,8 @@ def get_beacon_config(
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
         "--network={0}".format(
-            launcher.network
-            if launcher.network in constants.PUBLIC_NETWORKS
+            launcher.network_params.network
+            if launcher.network_params.network in constants.PUBLIC_NETWORKS
             else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml"
         ),
         "--data-path=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
@@ -251,21 +251,28 @@ def get_beacon_config(
         "--p2p-subscribe-all-custody-subnets-enabled=true",
     ]
 
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+        cmd.append(
+            "--Xp2p-private-key-file-secp256k1="
+            + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
+            + "/node-key-file-{0}".format(participant_index + 1)
+        )
+
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
     if checkpoint_sync_enabled:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--initial-state="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
         if (
-            launcher.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network
+            launcher.network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in launcher.network_params.network
         ):
             if bootnode_contexts != None:
                 cmd.append(
@@ -277,14 +284,14 @@ def get_beacon_config(
                         ]
                     )
                 )
-        elif launcher.network == constants.NETWORK_NAME.ephemery:
+        elif launcher.network_params.network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--p2p-discovery-bootnodes="
                 + shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
             )
-        elif constants.NETWORK_NAME.shadowfork in launcher.network:
+        elif constants.NETWORK_NAME.shadowfork in launcher.network_params.network:
             cmd.append(
                 "--p2p-discovery-bootnodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -308,6 +315,11 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+        files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
+            artifact_names=["node-key-file-{0}".format(participant_index + 1)]
+        )
+
     if node_keystore_files != None and not participant.use_separate_vc:
         cmd.extend(validator_default_cmd)
         files[
@@ -327,7 +339,7 @@ def get_beacon_config(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[launcher.network_params.network][
                 constants.CL_TYPE.teku + "_volume_size"
             ],
         )
@@ -371,6 +383,6 @@ def new_teku_launcher(el_cl_genesis_data, jwt_file, network_params, keymanager_f
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network_params.network,
+        network_params=network_params,
         keymanager_file=keymanager_file,
     )
