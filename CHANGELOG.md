@@ -1,5 +1,28 @@
 # Changelog
 
+## [5.0.0](https://github.com/ethpandaops/ethereum-package/compare/4.6.0...5.0.0) (2025-03-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename transaction spammer, remove beacon metrics gazer ([#923](https://github.com/ethpandaops/ethereum-package/issues/923))
+
+### Features
+
+* add perfect peerdas testing ([#928](https://github.com/ethpandaops/ethereum-package/issues/928)) ([7e9a17f](https://github.com/ethpandaops/ethereum-package/commit/7e9a17f2f71d3346bd3ea7cff7e7828061ff757e))
+* add validator custody ([#929](https://github.com/ethpandaops/ethereum-package/issues/929)) ([2ab3246](https://github.com/ethpandaops/ethereum-package/commit/2ab3246f8c214f16e59f4fa4b295addec11afa08))
+
+
+### Bug Fixes
+
+* Update tests ([#918](https://github.com/ethpandaops/ethereum-package/issues/918)) ([d8e035b](https://github.com/ethpandaops/ethereum-package/commit/d8e035b7a6e3e498b84b0edd77f0e526092a5fb1))
+* use next js proxy for blockscout frontend ([#873](https://github.com/ethpandaops/ethereum-package/issues/873)) ([151ff0a](https://github.com/ethpandaops/ethereum-package/commit/151ff0a1c865eb8365b7ec2f1ccfa0788d532d9f))
+
+
+### Code Refactoring
+
+* rename transaction spammer, remove beacon metrics gazer ([#923](https://github.com/ethpandaops/ethereum-package/issues/923)) ([96eeb99](https://github.com/ethpandaops/ethereum-package/commit/96eeb99bed7abc14dcec1eca5eae0f852eeb9fb0))
+
 ## [4.6.0](https://github.com/ethpandaops/ethereum-package/compare/4.5.0...4.6.0) (2025-03-19)
 
 
