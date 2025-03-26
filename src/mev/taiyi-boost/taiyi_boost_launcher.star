@@ -117,7 +117,7 @@ def get_config(
             "CB_CONFIG": config_file_path,
             "CB_SIGNER_JWT": "taiyi={}".format(TAIYI_JWT),
             "CB_SIGNER_URL": cb_signer_url,
-            "RUST_LOG": "debug",
+            "RUST_LOG": "debug,cb_signer=debug,cb_pbs=debug,cb_common=debug,cb_metrics=debug",
         },
         files={
             CB_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_file,
