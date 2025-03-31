@@ -860,6 +860,16 @@ def default_input_args(input_args):
         participants = []
 
     participants_matrix = []
+
+    if (
+        "network_params" in input_args
+        and "network" in input_args["network_params"]
+        and input_args["network_params"]["network"] in constants.PUBLIC_NETWORKS
+    ):
+        checkpoint_sync_enabled = True
+    else:
+        checkpoint_sync_enabled = False
+
     return {
         "participants": participants,
         "participants_matrix": participants_matrix,
@@ -878,7 +888,7 @@ def default_input_args(input_args):
         "global_node_selectors": {},
         "use_remote_signer": False,
         "keymanager_enabled": False,
-        "checkpoint_sync_enabled": False,
+        "checkpoint_sync_enabled": checkpoint_sync_enabled,
         "checkpoint_sync_url": "",
         "ethereum_genesis_generator_params": get_default_ethereum_genesis_generator_params(),
         "port_publisher": {
