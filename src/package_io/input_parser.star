@@ -861,7 +861,7 @@ def default_input_args(input_args):
 
     participants_matrix = []
 
-    if input_args["network_params"]["network"] in constants.PUBLIC_NETWORKS:
+    if "network_params" in input_args and "network" in input_args["network_params"] and input_args["network_params"]["network"] in constants.PUBLIC_NETWORKS:
         checkpoint_sync_enabled = True
     else:
         checkpoint_sync_enabled = False
