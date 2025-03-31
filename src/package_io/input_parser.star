@@ -521,7 +521,6 @@ def parse_network_params(plan, input_args):
 
     # Ensure we handle matrix participants before standard participants are handled.
     if "participants_matrix" in input_args:
-        participants_matrix = []
         participants = []
 
         el_matrix = []
