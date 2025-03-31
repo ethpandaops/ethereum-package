@@ -555,7 +555,7 @@ def parse_network_params(plan, input_args):
     for attr in input_args:
         value = input_args[attr]
         # if its inserted we use the value inserted
-        if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
+        if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT:
             result[attr] = value
         elif attr == "network_params":
             for sub_attr in input_args["network_params"]:
