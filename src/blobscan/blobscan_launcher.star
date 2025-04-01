@@ -171,6 +171,7 @@ def get_api_config(
         env_vars={
             "CHAIN_ID": network_id,
             "DATABASE_URL": postgres_url,
+            "DIRECT_URL": postgres_url,
             "REDIS_URI": redis_url,
             "SECRET_KEY": SECRET_KEY,
             "BLOBSCAN_API_PORT": str(API_HTTP_PORT_NUMBER),
@@ -229,6 +230,7 @@ def get_web_config(
         public_ports=public_ports,
         env_vars={
             "DATABASE_URL": postgres_url,
+            "DIRECT_URL": postgres_url,
             "NEXT_PUBLIC_NETWORK_NAME": network_name
             if network_name in constants.PUBLIC_NETWORKS
             else "devnet",
