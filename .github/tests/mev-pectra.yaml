@@ -1,35 +1,35 @@
 participants:
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.5
+    el_image: ethereum/client-go:v1.15.6
     el_extra_params: ["--miner.extradata=pawanRocks"]
     cl_type: lighthouse
-    cl_image: sigp/lighthouse:v7.0.0-beta.0
+    cl_image: sigp/lighthouse:v7.0.0-beta.4
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.5
+    el_image: ethereum/client-go:v1.15.6
     el_extra_params: ["--miner.extradata=TekuFromLocal"]
     cl_type: teku
-    cl_image: consensys/teku:25.2
+    cl_image: consensys/teku:25.3.0
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.5
+    el_image: ethereum/client-go:v1.15.6
     el_extra_params: ["--miner.extradata=lodestarFromLocal"]
     cl_type: lodestar
-    cl_image: chainsafe/lodestar:v1.27.1
+    cl_image: chainsafe/lodestar:v1.28.0
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.5
+    el_image: ethereum/client-go:v1.15.6
     el_extra_params: ["--miner.extradata=prysmFromLocal"]
     cl_type: prysm
-    cl_image: prysmaticlabs/prysm-beacon-chain:v5.3.0
-    vc_image: prysmaticlabs/prysm-validator:v5.3.0
+    cl_image: prysmaticlabs/prysm-beacon-chain:v5.3.2
+    vc_image: prysmaticlabs/prysm-validator:v5.3.2
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.5
+    el_image: ethereum/client-go:v1.15.6
     el_extra_params: ["--miner.extradata=nimbusFromLocal"]
     cl_type: nimbus
-    cl_image: statusim/nimbus-eth2:multiarch-v25.3.0
+    cl_image: statusim/nimbus-eth2:multiarch-v25.3.1
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.5
+    el_image: ethereum/client-go:v1.15.6
     el_extra_params: ["--miner.extradata=grandineFromLocal"]
     cl_type: grandine
-    cl_image: sifrai/grandine:1.0.0
+    cl_image: sifrai/grandine:1.0.1
 
 additional_services:
   - dora
@@ -39,9 +39,9 @@ mev_type: flashbots
 
 mev_params:
   mev_relay_image: flashbots/mev-boost-relay:0.30.0rc1
-  mev_boost_image: flashbots/mev-boost:1.9rc2
-  mev_builder_cl_image: sigp/lighthouse:v7.0.0-beta.0
-  mev_builder_image: ethpandaops/reth-rbuilder:develop-42872ec
+  mev_boost_image: flashbots/mev-boost:1.9rc3
+  mev_builder_cl_image: sigp/lighthouse:v7.0.0-beta.4
+  mev_builder_image: ethpandaops/reth-rbuilder:develop-8ffb4cf
 
 network_params:
   electra_fork_epoch: 1
