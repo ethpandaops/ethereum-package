@@ -1,0 +1,12 @@
+participants:
+  - el_type: geth
+    el_image: ethpandaops/nethermind:feature-peerdas
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:peerdas-devnet-6
+network_params:
+  fulu_fork_epoch: 1
+  network: hoodi-shadowfork
+additional_services:
+  - dora
+snooper_enabled: true
+persistent: true
