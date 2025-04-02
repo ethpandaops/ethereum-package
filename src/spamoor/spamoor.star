@@ -14,6 +14,7 @@ def launch_spamoor(
     all_el_contexts,
     spamoor_params,
     global_node_selectors,
+    idx,
 ):
     config = get_config(
         prefunded_addresses,
@@ -21,7 +22,7 @@ def launch_spamoor(
         spamoor_params,
         global_node_selectors,
     )
-    plan.add_service(SERVICE_NAME, config)
+    plan.add_service(SERVICE_NAME + "-" + str(idx), config)
 
 
 def get_config(
@@ -30,9 +31,10 @@ def get_config(
     spamoor_params,
     node_selectors,
 ):
+
     cmd = [
         "{}".format(spamoor_params.scenario),
-        "--privkey={}".format(prefunded_addresses[13].private_key),
+        "--privkey={}".format(prefunded_addresses),
         "--rpchost={}".format(
             ",".join([el_context.rpc_http_url for el_context in all_el_contexts])
         ),

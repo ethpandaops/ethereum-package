@@ -674,14 +674,29 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
         elif additional_service == "spamoor":
-            plan.print("Launching spamoor")
-            spamoor.launch_spamoor(
-                plan,
-                prefunded_accounts,
-                all_el_contexts,
-                args_with_right_defaults.spamoor_params,
-                global_node_selectors,
-            )
+            random_wallets = [ 
+                "7a20a0176771e8cb268b9a9ac68cd71546b34da46cc69b30fe32e8eb9b5b7f08",
+                "a00cdccd34f93b702f9083d4662f5d519adfb3d22dbaf0a1b9a41c5eae0413bd", 
+                "71ace1c7ab98757f87442f56eaa90ea51de835c46efb7d4f183905115fe46f14",
+                "f5641f22885b9a78e45fd591c90a5b97e98d9feab16bda5b7eae14c0943f85be",
+                "7e5ea8d6c3f02b35aa41ffad8cbfea3394e424af7809f8033179fbd554aa5097",
+                "420477241d886189ef8bef4e9606d4ca66dfb473952c941809673954a8e1e4aa",
+                "dc2b619b0f9f771f50f23041ec30b500a161d0d3bf7e92d1b4d9e31a0bab0c31",
+                "c6d2ab6af9f68580df79cfb778112d5c23dc3822fa6e050a85b9e8d957520540",
+                "45e3d45223bdbf6ce64cf6393bceb5d09b10124df48e43c1d9670e22a60eadd6",
+                "ec7280a243060c907d58a4808fc5dd261bda954004d4a22f8b08efac20ba9663"
+            ]
+            for i in range(10):
+                plan.print("Launching spamoor instance {0}".format(i+1))
+
+                spamoor.launch_spamoor(
+                    plan,
+                    random_wallets[i],
+                    all_el_contexts,
+                    args_with_right_defaults.spamoor_params,
+                    global_node_selectors,
+                    idx=i,
+                )
         elif additional_service == "spamoor_blob":
             plan.print("Launching spamoor as blob spammer")
             spamoor_blob.launch_spamoor_blob(
