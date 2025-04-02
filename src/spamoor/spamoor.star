@@ -5,7 +5,7 @@ SERVICE_NAME = "spamoor"
 MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 20
-MAX_MEMORY = 3000
+MAX_MEMORY = 1500
 
 
 def launch_spamoor(
