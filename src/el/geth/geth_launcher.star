@@ -121,26 +121,11 @@ def get_config(
         gcmode_archive = True
     else:
         gcmode_archive = False
-    # TODO: Remove this once electra fork has path based storage scheme implemented
-    if (
-        constants.NETWORK_NAME.verkle in launcher.network
-    ) and constants.NETWORK_NAME.shadowfork not in launcher.network:
-        if constants.NETWORK_NAME.verkle + "-gen" in launcher.network:  # verkle-gen
-            init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
-                EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-                launcher.prague_time,
-                constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-            )
-        else:  # verkle
-            init_datadir_cmd_str = (
-                "geth --datadir={0} --cache.preimages init {1}".format(
-                    EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-                    constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-                )
-            )
-    elif constants.NETWORK_NAME.shadowfork in launcher.network:  # shadowfork
+
+    if constants.NETWORK_NAME.shadowfork in launcher.network:  # shadowfork
         init_datadir_cmd_str = "echo shadowfork"
 
+    # TODO: Remove once archive mode works with path based storage scheme
     elif gcmode_archive:  # Disable path based storage scheme archive mode
         init_datadir_cmd_str = "geth init --state.scheme=hash --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -182,15 +167,8 @@ def get_config(
 
     cmd = [
         "geth",
-        # Disable path based storage scheme for electra fork and verkle
         # TODO: REMOVE Once geth default db is path based, and builder rebased
-        "{0}".format(
-            "--state.scheme=hash"
-            if "verkle" in launcher.network or gcmode_archive
-            else ""
-        ),
-        # Override prague fork timestamp for electra fork
-        "{0}".format("--cache.preimages" if "verkle" in launcher.network else ""),
+        "{0}".format("--state.scheme=hash" if gcmode_archive else ""),
         "{0}".format(
             "--{}".format(launcher.network)
             if launcher.network in constants.PUBLIC_NETWORKS
@@ -255,11 +233,8 @@ def get_config(
                 )
             )
         if constants.NETWORK_NAME.shadowfork in launcher.network:  # shadowfork
-            cmd.append("--override.prague=" + str(launcher.prague_time))
-            if "verkle" in launcher.network:  # verkle-shadowfork
-                cmd.append("--override.overlay-stride=10000")
-                cmd.append("--override.blockproof=true")
-                cmd.append("--clear.verkle.costs=true")
+            if launcher.prague_time:
+                cmd.append("--override.prague=" + str(launcher.prague_time))
 
     elif (
         launcher.network not in constants.PUBLIC_NETWORKS

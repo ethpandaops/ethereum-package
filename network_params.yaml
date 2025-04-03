@@ -86,7 +86,7 @@ network_params:
   min_validator_withdrawability_delay: 256
   shard_committee_period: 256
   deneb_fork_epoch: 0
-  electra_fork_epoch: 18446744073709551615
+  electra_fork_epoch: 0
   fulu_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
   data_column_sidecar_subnet_count: 128

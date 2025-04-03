@@ -5,8 +5,7 @@ participants:
     cl_type: teku
     cl_image: ethpandaops/teku:master
 network_params:
-  electra_fork_epoch: 1
-  fulu_fork_epoch: 2
+  fulu_fork_epoch: 1
   preset: minimal
 additional_services:
   - dora

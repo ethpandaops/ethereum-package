@@ -479,8 +479,6 @@ def run(plan, args={}):
                 global_node_selectors,
             )
             plan.print("Successfully launched tx-fuzz")
-        # We need a way to do time.sleep
-        # TODO add code that waits for CL genesis
         elif additional_service == "forkmon":
             plan.print("Launching el forkmon")
             forkmon_config_template = read_file(
