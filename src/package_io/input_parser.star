@@ -17,7 +17,7 @@ DEFAULT_EL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:stable",
@@ -35,7 +35,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
 }
 
 DEFAULT_VC_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
