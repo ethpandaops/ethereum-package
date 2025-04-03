@@ -555,13 +555,12 @@ network_params:
   deneb_fork_epoch: 0
 
   # Electra fork epoch
-  # Defaults to 100000000
-  electra_fork_epoch: 100000000
+  # Defaults to 18446744073709551615
+  electra_fork_epoch: 18446744073709551615
 
   # Fulu fork epoch
-  # Defaults to 100000001
-  fulu_fork_epoch: 100000001
-
+  # Defaults to 18446744073709551615
+  fulu_fork_epoch: 18446744073709551615
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
@@ -989,7 +988,7 @@ spamoor_blob_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:3.7.3
+  image: ethpandaops/ethereum-genesis-generator:4.0.0
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
