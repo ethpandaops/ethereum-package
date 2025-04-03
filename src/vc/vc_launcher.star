@@ -170,6 +170,7 @@ def launch(
             full_name=full_name,
             tolerations=tolerations,
             node_selectors=node_selectors,
+        )
     elif vc_type == constants.VC_TYPE.vouch:
         config = vouch.get_config(
             participant=participant,
