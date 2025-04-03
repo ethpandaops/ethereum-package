@@ -15,20 +15,20 @@ participants:
     cl_max_mem: 4096
     cl_extra_params:
       - --subscribe-all-subnets
-      
+
   # Teku
   - cl_type: teku
     cl_image: ethpandaops/teku:nashatyrev-das
     cl_max_mem: 4096
     cl_extra_params:
       - --p2p-subscribe-all-custody-subnets-enabled
-      
+
   - cl_type: grandine
     cl_image: ethpandaops/grandine:peerdas-fulu
     cl_max_mem: 4096
     cl_extra_params:
       - --subscribe-all-data-column-subnets
-      
+
   # Nimbus
   - cl_type: nimbus
     cl_image: ethpandaops/nimbus-eth2:columns
@@ -57,7 +57,7 @@ participants:
   # Grandine
   - cl_type: grandine
     cl_image: ethpandaops/grandine:peerdas-fulu
-    
+
   # Nimbus
   - cl_type: nimbus
     cl_image: ethpandaops/nimbus-eth2:columns
@@ -68,8 +68,7 @@ participants:
 global_log_level: debug
 
 network_params:
-  electra_fork_epoch: 1
-  fulu_fork_epoch: 2
+  fulu_fork_epoch: 1
 
 additional_services:
   - dora

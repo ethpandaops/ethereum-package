@@ -556,7 +556,7 @@ network_params:
 
   # Electra fork epoch
   # Defaults to 18446744073709551615
-  electra_fork_epoch: 18446744073709551615
+  electra_fork_epoch: 0
 
   # Fulu fork epoch
   # Defaults to 18446744073709551615
