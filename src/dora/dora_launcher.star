@@ -130,9 +130,9 @@ def get_config(
             env_vars["FRONTEND_SHOW_PEER_DAS_INFOS"] = "true"
             env_vars["FRONTEND_SHOW_SUBMIT_DEPOSIT"] = "true"
             env_vars["FRONTEND_SHOW_SUBMIT_EL_REQUESTS"] = "true"
-        if network_params.eip7732_fork_epoch < constants.EIP7732_FORK_EPOCH:
+        if network_params.eip7732_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = "ethpandaops/dora:eip7732-support"
-        if network_params.eip7805_fork_epoch < constants.EIP7805_FORK_EPOCH:
+        if network_params.eip7805_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = "ethpandaops/dora:eip7805-support"
 
     return ServiceConfig(
