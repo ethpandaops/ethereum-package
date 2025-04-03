@@ -5,6 +5,10 @@ STATIC_FILES_DIRPATH = "/static_files"
 EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/genesis-generation-config/el-cl/values.env.tmpl"
 )
+EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH
+    + "/genesis-generation-config/el-cl/additional-contracts.json.tmpl"
+)
 
 # EL Forkmon config
 FORKMON_CONFIG_TEMPLATE_FILEPATH = (

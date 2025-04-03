@@ -17,7 +17,7 @@ DEFAULT_EL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:stable",
@@ -35,7 +35,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
 }
 
 DEFAULT_VC_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
@@ -859,6 +859,16 @@ def default_input_args(input_args):
         participants = []
 
     participants_matrix = []
+
+    if (
+        "network_params" in input_args
+        and "network" in input_args["network_params"]
+        and input_args["network_params"]["network"] in constants.PUBLIC_NETWORKS
+    ):
+        checkpoint_sync_enabled = True
+    else:
+        checkpoint_sync_enabled = False
+
     return {
         "participants": participants,
         "participants_matrix": participants_matrix,
@@ -877,7 +887,7 @@ def default_input_args(input_args):
         "global_node_selectors": {},
         "use_remote_signer": False,
         "keymanager_enabled": False,
-        "checkpoint_sync_enabled": False,
+        "checkpoint_sync_enabled": checkpoint_sync_enabled,
         "checkpoint_sync_url": "",
         "ethereum_genesis_generator_params": get_default_ethereum_genesis_generator_params(),
         "port_publisher": {
@@ -909,10 +919,10 @@ def default_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
-        "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
-        "eip7732_fork_epoch": constants.EIP7732_FORK_EPOCH,
-        "eip7805_fork_epoch": constants.EIP7805_FORK_EPOCH,
+        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
@@ -951,10 +961,10 @@ def default_minimal_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
-        "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
-        "eip7732_fork_epoch": constants.EIP7732_FORK_EPOCH,
-        "eip7805_fork_epoch": constants.EIP7805_FORK_EPOCH,
+        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
