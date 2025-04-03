@@ -135,7 +135,7 @@ def get_config(
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--Init.WebSocketsEnabled=true",
         "--JsonRpc.Enabled=true",
-        "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin,debug",
+        "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin,debug,txpool",
         "--JsonRpc.Host=0.0.0.0",
         "--JsonRpc.Port={0}".format(RPC_PORT_NUM),
         "--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
@@ -159,7 +159,7 @@ def get_config(
         cmd.append("--config=" + launcher.network.split("-")[0])
         cmd.append("--Init.BaseDbPath=" + launcher.network.split("-")[0])
     elif launcher.network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--config=none.cfg")
+        cmd.append("--config=none")
         cmd.append(
             "--Init.ChainSpecPath="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
@@ -223,7 +223,7 @@ def get_config(
         "labels": shared_utils.label_maker(
             client=constants.EL_TYPE.nethermind,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image,
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
             supernode=participant.supernode,

@@ -176,7 +176,10 @@ def get_config(
     else:
         cmd.append("--network=" + launcher.network)
 
-    if launcher.network == constants.NETWORK_NAME.kurtosis:
+    if (
+        launcher.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in launcher.network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -233,7 +236,7 @@ def get_config(
         "labels": shared_utils.label_maker(
             client=constants.EL_TYPE.besu,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image,
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
             supernode=participant.supernode,

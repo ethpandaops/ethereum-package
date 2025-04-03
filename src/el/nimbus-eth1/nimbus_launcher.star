@@ -131,6 +131,7 @@ def get_config(
     cmd = [
         "--log-level={0}".format(log_level),
         "--data-dir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        "--net-key={0}/nodekey".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
         "--http-port={0}".format(WS_RPC_PORT_NUM),
         "--http-address=0.0.0.0",
         "--rpc",
@@ -156,7 +157,10 @@ def get_config(
     else:
         cmd.append("--network=" + launcher.network)
 
-    if launcher.network == constants.NETWORK_NAME.kurtosis:
+    if (
+        launcher.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in launcher.network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootstrap-node="
@@ -208,7 +212,7 @@ def get_config(
         "labels": shared_utils.label_maker(
             client=constants.EL_TYPE.nimbus,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image,
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
             supernode=participant.supernode,

@@ -1,6 +1,7 @@
 shared_utils = import_module("../../../shared_utils/shared_utils.star")
 mev_boost_context_module = import_module("../mev_boost/mev_boost_context.star")
 input_parser = import_module("../../../package_io/input_parser.star")
+constants = import_module("../../../package_io/constants.star")
 
 FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
@@ -14,6 +15,7 @@ NETWORK_ID_TO_NAME = {
     "1": "mainnet",
     "17000": "holesky",
     "11155111": "sepolia",
+    "560048": "hoodi",
 }
 
 # The min/max CPU/memory that mev-boost can use
@@ -27,14 +29,14 @@ def launch(
     plan,
     mev_boost_launcher,
     service_name,
-    network_id,
+    genesis_timestamp,
     mev_boost_image,
     mev_boost_args,
     global_node_selectors,
 ):
     config = get_config(
         mev_boost_launcher,
-        network_id,
+        genesis_timestamp,
         mev_boost_image,
         mev_boost_args,
         global_node_selectors,
@@ -49,7 +51,7 @@ def launch(
 
 def get_config(
     mev_boost_launcher,
-    network_id,
+    genesis_timestamp,
     mev_boost_image,
     mev_boost_args,
     node_selectors,
@@ -61,13 +63,9 @@ def get_config(
         ports=USED_PORTS,
         cmd=command,
         env_vars={
-            # TODO(maybe) remove the hardcoding
-            # This is set to match this file https://github.com/ethpandaops/ethereum-package/blob/main/static_files/genesis-generation-config/cl/config.yaml.tmpl#L11
-            # latest-notes
-            # does this need genesis time to be set as well
-            "GENESIS_FORK_VERSION": "0x10000038",
+            "GENESIS_FORK_VERSION": constants.GENESIS_FORK_VERSION,
+            "GENESIS_TIMESTAMP": "{0}".format(genesis_timestamp),
             "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(input_parser.MEV_BOOST_PORT),
-            # maybe this is breaking; this isn't verifyign the bid and not sending it to the validator
             "SKIP_RELAY_SIGNATURE_CHECK": "1",
             "RELAYS": mev_boost_launcher.relay_end_points[0],
         },

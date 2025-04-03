@@ -12,8 +12,9 @@ BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
 # Port nums
 DISCOVERY_TCP_PORT_NUM = 13000
 DISCOVERY_UDP_PORT_NUM = 12000
-RPC_PORT_NUM = 3500
-BEACON_HTTP_PORT_NUM = 4000
+DISCOVERY_QUIC_PORT_NUM = 13000
+BEACON_HTTP_PORT_NUM = 3500
+RPC_PORT_NUM = 4000
 BEACON_MONITORING_PORT_NUM = 8080
 PROFILING_PORT_NUM = 6060
 
@@ -161,6 +162,8 @@ def get_beacon_config(
 
     public_ports = {}
     discovery_port = DISCOVERY_TCP_PORT_NUM
+    discovery_port_udp = DISCOVERY_UDP_PORT_NUM
+    discovery_port_quic = DISCOVERY_QUIC_PORT_NUM
     if port_publisher.cl_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "cl", port_publisher, participant_index
@@ -181,7 +184,8 @@ def get_beacon_config(
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        # constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic, # TODO: Uncomment this when we have a stable release with this flag
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_MONITORING_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
@@ -200,13 +204,13 @@ def get_beacon_config(
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--p2p-host-ip=" + port_publisher.nat_exit_ip,
         "--p2p-tcp-port={0}".format(discovery_port),
-        "--p2p-udp-port={0}".format(discovery_port),
+        "--p2p-udp-port={0}".format(discovery_port_udp),
+        # "--p2p-quic-port={0}".format(discovery_port_quic) # TODO: Uncomment this when we have a stable release with this flag
         "--min-sync-peers={0}".format(MIN_PEERS),
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--enable-debug-rpc-endpoints=true",
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -221,6 +225,13 @@ def get_beacon_config(
         "--subscribe-all-subnets=true",
     ]
 
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+        cmd.append(
+            "--p2p-priv-key="
+            + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
+            + "/node-key-file-{0}".format(participant_index + 1)
+        )
+
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
@@ -228,10 +239,10 @@ def get_beacon_config(
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
         cmd.append("--genesis-beacon-api-url=" + checkpoint_sync_url)
 
-    if launcher.preset == "minimal":
+    if launcher.network_params.preset == "minimal":
         cmd.append("--minimal-config=true")
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--p2p-static-id=true")
         cmd.append(
             "--chain-config-file="
@@ -245,16 +256,16 @@ def get_beacon_config(
         )
         cmd.append("--contract-deployment-block=0")
         if (
-            launcher.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network
+            launcher.network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in launcher.network_params.network
         ):
             if bootnode_contexts != None:
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     cmd.append("--bootstrap-node=" + ctx.enr)
-        elif launcher.network == constants.NETWORK_NAME.ephemery:
+        elif launcher.network_params.network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--genesis-beacon-api-url="
-                + constants.CHECKPOINT_SYNC_URL[launcher.network]
+                + constants.CHECKPOINT_SYNC_URL[launcher.network_params.network]
             )
             cmd.append(
                 "--bootstrap-node="
@@ -268,7 +279,7 @@ def get_beacon_config(
                 + "/bootstrap_nodes.yaml"
             )
     else:  # Public network
-        cmd.append("--{}".format(launcher.network))
+        cmd.append("--{}".format(launcher.network_params.network))
 
     if len(participant.cl_extra_params) > 0:
         # we do the for loop as otherwise its a proto repeated array
@@ -278,13 +289,16 @@ def get_beacon_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
-
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+        files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
+            artifact_names=["node-key-file-{0}".format(participant_index + 1)]
+        )
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[launcher.network_params.network][
                 constants.CL_TYPE.prysm + "_volume_size"
             ],
         )
@@ -303,7 +317,7 @@ def get_beacon_config(
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.prysm,
             client_type=constants.CLIENT_TYPES.cl,
-            image=participant.cl_image,
+            image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
             supernode=participant.supernode,
@@ -331,6 +345,5 @@ def new_prysm_launcher(
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network_params.network,
-        preset=network_params.preset,
+        network_params=network_params,
     )

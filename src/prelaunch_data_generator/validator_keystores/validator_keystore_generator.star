@@ -38,8 +38,9 @@ def launch_prelaunch_data_generator(
     plan,
     files_artifact_mountpoints,
     service_name_suffix,
+    docker_cache_params,
 ):
-    config = get_config(files_artifact_mountpoints)
+    config = get_config(files_artifact_mountpoints, docker_cache_params)
 
     service_name = "{0}{1}".format(
         SERVICE_NAME_PREFIX,
@@ -51,11 +52,9 @@ def launch_prelaunch_data_generator(
 
 
 def launch_prelaunch_data_generator_parallel(
-    plan, files_artifact_mountpoints, service_name_suffixes
+    plan, files_artifact_mountpoints, service_name_suffixes, docker_cache_params
 ):
-    config = get_config(
-        files_artifact_mountpoints,
-    )
+    config = get_config(files_artifact_mountpoints, docker_cache_params)
     service_names = [
         "{0}{1}".format(
             SERVICE_NAME_PREFIX,
@@ -68,9 +67,12 @@ def launch_prelaunch_data_generator_parallel(
     return service_names
 
 
-def get_config(files_artifact_mountpoints):
+def get_config(files_artifact_mountpoints, docker_cache_params):
     return ServiceConfig(
-        image=ETH_VAL_TOOLS_IMAGE,
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params,
+            ETH_VAL_TOOLS_IMAGE,
+        ),
         entrypoint=ENTRYPOINT_ARGS,
         files=files_artifact_mountpoints,
     )
@@ -79,8 +81,10 @@ def get_config(files_artifact_mountpoints):
 # Generates keystores for the given number of nodes from the given mnemonic, where each keystore contains approximately
 #
 # 	num_keys / num_nodes keys
-def generate_validator_keystores(plan, mnemonic, participants):
-    service_name = launch_prelaunch_data_generator(plan, {}, "cl-validator-keystore")
+def generate_validator_keystores(plan, mnemonic, participants, docker_cache_params):
+    service_name = launch_prelaunch_data_generator(
+        plan, {}, "cl-validator-keystore", docker_cache_params
+    )
 
     all_output_dirpaths = []
     all_sub_command_strs = []
@@ -92,41 +96,26 @@ def generate_validator_keystores(plan, mnemonic, participants):
             all_output_dirpaths.append(output_dirpath)
             continue
 
-        for i in range(participant.vc_count):
-            output_dirpath = (
-                NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "-" + str(i))
-                if participant.vc_count != 1
-                else NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
-            )
+        start_index = running_total_validator_count
+        stop_index = start_index + participant.validator_count
 
-            start_index = running_total_validator_count + i * (
-                participant.validator_count // participant.vc_count
-            )
-            stop_index = start_index + (
-                participant.validator_count // participant.vc_count
-            )
+        generate_keystores_cmd = '{0} keystores --insecure --prysm-pass {1} --out-loc {2} --source-mnemonic "{3}" --source-min {4} --source-max {5}'.format(
+            KEYSTORES_GENERATION_TOOL_NAME,
+            PRYSM_PASSWORD,
+            output_dirpath,
+            mnemonic,
+            start_index,
+            stop_index,
+        )
+        all_output_dirpaths.append(output_dirpath)
+        all_sub_command_strs.append(generate_keystores_cmd)
 
-            # Adjust stop_index for the last partition to include all remaining validators
-            if i == participant.vc_count - 1:
-                stop_index = running_total_validator_count + participant.validator_count
-
-            generate_keystores_cmd = '{0} keystores --insecure --prysm-pass {1} --out-loc {2} --source-mnemonic "{3}" --source-min {4} --source-max {5}'.format(
-                KEYSTORES_GENERATION_TOOL_NAME,
-                PRYSM_PASSWORD,
-                output_dirpath,
-                mnemonic,
-                start_index,
-                stop_index,
-            )
-            all_output_dirpaths.append(output_dirpath)
-            all_sub_command_strs.append(generate_keystores_cmd)
-
-            teku_permissions_cmd = "chmod 0777 -R " + output_dirpath + TEKU_KEYS_DIRNAME
-            raw_secret_permissions_cmd = (
-                "chmod 0600 -R " + output_dirpath + RAW_SECRETS_DIRNAME
-            )
-            all_sub_command_strs.append(teku_permissions_cmd)
-            all_sub_command_strs.append(raw_secret_permissions_cmd)
+        teku_permissions_cmd = "chmod 0777 -R " + output_dirpath + TEKU_KEYS_DIRNAME
+        raw_secret_permissions_cmd = (
+            "chmod 0600 -R " + output_dirpath + RAW_SECRETS_DIRNAME
+        )
+        all_sub_command_strs.append(teku_permissions_cmd)
+        all_sub_command_strs.append(raw_secret_permissions_cmd)
 
         running_total_validator_count += participant.validator_count
 
@@ -147,51 +136,37 @@ def generate_validator_keystores(plan, mnemonic, participants):
             keystore_files.append(None)
             continue
 
-        for i in range(participant.vc_count):
-            output_dirpath = (
-                NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "-" + str(i))
-                if participant.vc_count != 1
-                else NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
-            )
-            padded_idx = shared_utils.zfill_custom(idx + 1, len(str(len(participants))))
+        output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
+        padded_idx = shared_utils.zfill_custom(idx + 1, len(str(len(participants))))
+        keystore_start_index = running_total_validator_count
+        keystore_stop_index = (
+            running_total_validator_count + participant.validator_count
+        )
 
-            keystore_start_index = running_total_validator_count + i * (
-                participant.validator_count // participant.vc_count
-            )
-            keystore_stop_index = keystore_start_index + (
-                participant.validator_count // participant.vc_count
-            )
+        artifact_name = "{0}-{1}-{2}-{3}-{4}".format(
+            padded_idx,
+            participant.cl_type,
+            participant.el_type,
+            keystore_start_index,
+            keystore_stop_index - 1,
+        )
+        artifact_name = plan.store_service_files(
+            service_name, output_dirpath, name=artifact_name
+        )
 
-            if i == participant.vc_count - 1:
-                keystore_stop_index = (
-                    running_total_validator_count + participant.validator_count
-                )
+        base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
+        to_add = keystore_files_module.new_keystore_files(
+            artifact_name,
+            shared_utils.path_join(base_dirname_in_artifact),
+            shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
+            shared_utils.path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
+            shared_utils.path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),
+            shared_utils.path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
+            shared_utils.path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
+            shared_utils.path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
+        )
 
-            artifact_name = "{0}-{1}-{2}-{3}-{4}-{5}".format(
-                padded_idx,
-                participant.cl_type,
-                participant.el_type,
-                keystore_start_index,
-                keystore_stop_index - 1,
-                i,
-            )
-            artifact_name = plan.store_service_files(
-                service_name, output_dirpath, name=artifact_name
-            )
-
-            base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
-            to_add = keystore_files_module.new_keystore_files(
-                artifact_name,
-                shared_utils.path_join(base_dirname_in_artifact),
-                shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_DIRNAME),
-                shared_utils.path_join(base_dirname_in_artifact, RAW_SECRETS_DIRNAME),
-                shared_utils.path_join(base_dirname_in_artifact, NIMBUS_KEYS_DIRNAME),
-                shared_utils.path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
-                shared_utils.path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
-                shared_utils.path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
-            )
-
-            keystore_files.append(to_add)
+        keystore_files.append(to_add)
 
         running_total_validator_count += participant.validator_count
 
@@ -228,11 +203,14 @@ def generate_validator_keystores(plan, mnemonic, participants):
 
 
 # this is like above but runs things in parallel - for large networks that run on k8s or gigantic dockers
-def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
+def generate_valdiator_keystores_in_parallel(
+    plan, mnemonic, participants, docker_cache_params
+):
     service_names = launch_prelaunch_data_generator_parallel(
         plan,
         {},
         ["cl-validator-keystore-" + str(idx) for idx in range(0, len(participants))],
+        docker_cache_params,
     )
     all_output_dirpaths = []
     all_generation_commands = []
@@ -296,9 +274,9 @@ def generate_valdiator_keystores_in_parallel(plan, mnemonic, participants):
             # no output dir path as validator count is 0
             continue
         generation_finished_filepath = finished_files_to_verify[idx]
-        verificaiton_command = ["ls", generation_finished_filepath]
+        verification_command = ["ls", generation_finished_filepath]
         plan.wait(
-            recipe=ExecRecipe(command=verificaiton_command),
+            recipe=ExecRecipe(command=verification_command),
             service_name=service_name,
             field="code",
             assertion="==",

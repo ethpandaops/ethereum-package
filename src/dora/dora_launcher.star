@@ -120,12 +120,20 @@ def get_config(
         0,
     )
 
-    if dora_params.image != "":
-        IMAGE_NAME = dora_params.image
-    elif network_params.electra_fork_epoch < constants.ELECTRA_FORK_EPOCH:
-        IMAGE_NAME = "ethpandaops/dora:master"
-    else:
-        IMAGE_NAME = "ethpandaops/dora:latest"
+    IMAGE_NAME = dora_params.image
+    env_vars = dora_params.env
+    if dora_params.image == constants.DEFAULT_DORA_IMAGE:
+        if network_params.fulu_fork_epoch < constants.FAR_FUTURE_EPOCH:
+            IMAGE_NAME = "ethpandaops/dora:fulu-support"
+            env_vars["FRONTEND_PPROF"] = "true"
+            env_vars["FRONTEND_SHOW_SENSITIVE_PEER_INFOS"] = "true"
+            env_vars["FRONTEND_SHOW_PEER_DAS_INFOS"] = "true"
+            env_vars["FRONTEND_SHOW_SUBMIT_DEPOSIT"] = "true"
+            env_vars["FRONTEND_SHOW_SUBMIT_EL_REQUESTS"] = "true"
+        if network_params.eip7732_fork_epoch < constants.FAR_FUTURE_EPOCH:
+            IMAGE_NAME = "ethpandaops/dora:eip7732-support"
+        if network_params.eip7805_fork_epoch < constants.FAR_FUTURE_EPOCH:
+            IMAGE_NAME = "ethpandaops/dora:eip7805-support"
 
     return ServiceConfig(
         image=IMAGE_NAME,
@@ -136,7 +144,7 @@ def get_config(
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
         },
         cmd=["-config", config_file_path],
-        env_vars=dora_params.env,
+        env_vars=env_vars,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
