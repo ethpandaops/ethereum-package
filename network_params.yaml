@@ -86,8 +86,8 @@ network_params:
   min_validator_withdrawability_delay: 256
   shard_committee_period: 256
   deneb_fork_epoch: 0
-  electra_fork_epoch: 100000000
-  fulu_fork_epoch: 100000001
+  electra_fork_epoch: 18446744073709551615
+  fulu_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
   data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
@@ -176,7 +176,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:3.7.3
+  image: ethpandaops/ethereum-genesis-generator:4.0.1
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

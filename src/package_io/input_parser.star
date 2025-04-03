@@ -17,7 +17,7 @@ DEFAULT_EL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:stable",
@@ -35,7 +35,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
 }
 
 DEFAULT_VC_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
@@ -521,7 +521,6 @@ def parse_network_params(plan, input_args):
 
     # Ensure we handle matrix participants before standard participants are handled.
     if "participants_matrix" in input_args:
-        participants_matrix = []
         participants = []
 
         el_matrix = []
@@ -555,7 +554,7 @@ def parse_network_params(plan, input_args):
     for attr in input_args:
         value = input_args[attr]
         # if its inserted we use the value inserted
-        if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT and attr in input_args:
+        if attr not in ATTR_TO_BE_SKIPPED_AT_ROOT:
             result[attr] = value
         elif attr == "network_params":
             for sub_attr in input_args["network_params"]:
@@ -920,10 +919,10 @@ def default_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
-        "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
-        "eip7732_fork_epoch": constants.EIP7732_FORK_EPOCH,
-        "eip7805_fork_epoch": constants.EIP7805_FORK_EPOCH,
+        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
@@ -962,10 +961,10 @@ def default_minimal_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.ELECTRA_FORK_EPOCH,
-        "fulu_fork_epoch": constants.FULU_FORK_EPOCH,
-        "eip7732_fork_epoch": constants.EIP7732_FORK_EPOCH,
-        "eip7805_fork_epoch": constants.EIP7805_FORK_EPOCH,
+        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
