@@ -207,8 +207,8 @@ def get_beacon_config(
         BEACON_NODE_ENTRYPOINT,
         BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         checkpoint_sync_url,
-        launcher.network
-        if launcher.network in constants.PUBLIC_NETWORKS
+        launcher.network_params.network
+        if launcher.network_params.network in constants.PUBLIC_NETWORKS
         else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
     )
 
@@ -219,8 +219,8 @@ def get_beacon_config(
         "--udp-port={0}".format(discovery_port),
         "--tcp-port={0}".format(discovery_port),
         "--network={0}".format(
-            launcher.network
-            if launcher.network in constants.PUBLIC_NETWORKS
+            launcher.network_params.network
+            if launcher.network_params.network in constants.PUBLIC_NETWORKS
             else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
@@ -265,18 +265,26 @@ def get_beacon_config(
         "--subscribe-all-subnets",
     ]
 
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+        cmd.append(
+            "--netkey-file="
+            + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
+            + "/node-key-file-{0}.json".format(participant_index + 1)
+        )
+        cmd.append("--insecure-netkey-password=true")
+
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootstrap-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/bootstrap_nodes.txt"
         )
         if (
-            launcher.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network
+            launcher.network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in launcher.network_params.network
         ):
             if bootnode_contexts == None:
                 cmd.append("--subscribe-all-subnets")
@@ -306,12 +314,17 @@ def get_beacon_config(
                 shared_utils.get_port_specs(validator_public_port_assignment)
             )
 
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+        files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
+            artifact_names=["node-key-file-{0}".format(participant_index + 1)]
+        )
+
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[launcher.network_params.network][
                 constants.CL_TYPE.nimbus + "_volume_size"
             ],
         )
@@ -362,6 +375,6 @@ def new_nimbus_launcher(el_cl_genesis_data, jwt_file, network_params, keymanager
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network_params.network,
+        network_params=network_params,
         keymanager_file=keymanager_file,
     )

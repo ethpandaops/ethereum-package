@@ -15,7 +15,9 @@ RUST_FULL_BACKTRACE_KEYWORD = "full"
 
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/lighthouse/beacon-data"
-
+NODE_KEY_MOUNTPOINT_ON_CLIENTS = (
+    BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER + "/beacon/network"
+)
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_HTTP_PORT_NUM = 4000
@@ -224,7 +226,6 @@ def get_beacon_config(
         "--http",
         "--http-address=0.0.0.0",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
-        "--slots-per-restore-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         # NOTE: This comes from:
         #   https://github.com/sigp/lighthouse/blob/7c88f582d955537f7ffff9b2c879dcf5bf80ce13/scripts/local_testnet/beacon_node.sh
         # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
@@ -253,11 +254,11 @@ def get_beacon_config(
     if checkpoint_sync_enabled:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
         if (
-            launcher.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network
+            launcher.network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in launcher.network_params.network
         ):
             if bootnode_contexts != None:
                 cmd.append(
@@ -269,7 +270,7 @@ def get_beacon_config(
                         ]
                     )
                 )
-        elif launcher.network == constants.NETWORK_NAME.ephemery:
+        elif launcher.network_params.network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--boot-nodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -284,7 +285,7 @@ def get_beacon_config(
                 )
             )
     else:  # Public networks
-        cmd.append("--network=" + launcher.network)
+        cmd.append("--network=" + launcher.network_params.network)
 
     if len(participant.cl_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -298,12 +299,17 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+        files[NODE_KEY_MOUNTPOINT_ON_CLIENTS] = "node-key-file-{0}".format(
+            participant_index + 1
+        )
+
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[launcher.network_params.network][
                 constants.CL_TYPE.lighthouse + "_volume_size"
             ],
         )
@@ -347,5 +353,5 @@ def new_lighthouse_launcher(el_cl_genesis_data, jwt_file, network_params):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network_params.network,
+        network_params=network_params,
     )

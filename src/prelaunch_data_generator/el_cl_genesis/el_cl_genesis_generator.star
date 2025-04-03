@@ -154,7 +154,7 @@ def new_env_file_for_el_cl_genesis_data(
         + "/"
         + GENESIS_CONTRACTS_FILENAME,
         "PrefundedAccounts": json.encode(network_params.prefunded_accounts),
-        "GossipMaxSize": network_params.gossip_max_size,
+        "MaxPayloadSize": network_params.max_payload_size,
     }
 
 

@@ -20,18 +20,17 @@ el_node_ipc_path = "/tmp/reth.ipc"
 extra_data = "🐼⚡🤖"
 genesis_fork_version = "{{ .GenesisForkVersion }}"
 
-dry_run = false
-dry_run_validation_url = "http://localhost:8545"
-
 ignore_cancellable_orders = true
 
-max_concurrent_seals = 4
-
-sbundle_mergeabe_signers = []
-# slot_delta_to_start_submits_ms is usually negative since we start bidding BEFORE the slot start
-# slot_delta_to_start_submits_ms = -5000
+sbundle_mergeable_signers = []
 live_builders = ["mp-ordering", "mgp-ordering"]
 watchdog_timeout_sec = 99999
+
+# For now, these must be set until a bug in upstream reth's
+# root hash calculations are fixed
+root_hash_use_sparse_trie=true
+root_hash_compare_sparse_trie=false
+
 [[relays]]
 name = "flashbots"
 url = "http://{{ .PublicKey }}@{{ .Relay }}:{{ .RelayPort }}"

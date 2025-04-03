@@ -1,16 +1,56 @@
 participants:
-  - el_type: reth
+  - el_type: geth
+    el_image: ethereum/client-go:v1.15.5
+    el_extra_params: ["--miner.extradata=pawanRocks"]
+    cl_type: lighthouse
+    cl_image: sigp/lighthouse:v7.0.0-beta.0
+  - el_type: geth
+    el_image: ethereum/client-go:v1.15.5
+    el_extra_params: ["--miner.extradata=TekuFromLocal"]
     cl_type: teku
+    cl_image: consensys/teku:25.2
+  - el_type: geth
+    el_image: ethereum/client-go:v1.15.5
+    el_extra_params: ["--miner.extradata=lodestarFromLocal"]
+    cl_type: lodestar
+    cl_image: chainsafe/lodestar:v1.27.1
+  - el_type: geth
+    el_image: ethereum/client-go:v1.15.5
+    el_extra_params: ["--miner.extradata=prysmFromLocal"]
+    cl_type: prysm
+    cl_image: prysmaticlabs/prysm-beacon-chain:v5.3.0
+    vc_image: prysmaticlabs/prysm-validator:v5.3.0
+  - el_type: geth
+    el_image: ethereum/client-go:v1.15.5
+    el_extra_params: ["--miner.extradata=nimbusFromLocal"]
+    cl_type: nimbus
+    cl_image: statusim/nimbus-eth2:multiarch-v25.3.0
+  - el_type: geth
+    el_image: ethereum/client-go:v1.15.5
+    el_extra_params: ["--miner.extradata=grandineFromLocal"]
+    cl_type: grandine
+    cl_image: sifrai/grandine:1.0.0
+
 additional_services:
   - dora
-  - tx_spammer
+  - tx_fuzz
+  - spamoor_blob
 mev_type: flashbots
 
 mev_params:
-  mev_relay_image: jtraglia/mev-boost-relay:electra
-  mev_boost_image: jtraglia/mev-boost:electra
-  mev_builder_image: ethpandaops/rbuilder:develop-1b578f5
-  mev_builder_cl_image: ethpandaops/lighthouse:pawan-electra-alpha7-0dd215c
+  mev_relay_image: flashbots/mev-boost-relay:0.30.0rc1
+  mev_boost_image: flashbots/mev-boost:1.9rc2
+  mev_builder_cl_image: sigp/lighthouse:v7.0.0-beta.0
+  mev_builder_image: ethpandaops/reth-rbuilder:develop-42872ec
 
 network_params:
   electra_fork_epoch: 1
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  churn_limit_quotient: 16
+  genesis_delay: 120
+
+spamoor_blob_params:
+  throughput: 10
+  max_blobs: 2
+  max_pending: 40

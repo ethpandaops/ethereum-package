@@ -9,7 +9,6 @@ constants = import_module("../../package_io/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/lodestar/beacon-data"
-
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_HTTP_PORT_NUM = 4000
@@ -237,7 +236,7 @@ def get_beacon_config(
     if checkpoint_sync_enabled:
         cmd.append("--checkpointSyncUrl=" + checkpoint_sync_url)
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--paramsFile="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
@@ -249,8 +248,8 @@ def get_beacon_config(
             + "/genesis.ssz"
         )
         if (
-            launcher.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network
+            launcher.network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in launcher.network_params.network
         ):
             if bootnode_contexts != None:
                 cmd.append(
@@ -262,7 +261,7 @@ def get_beacon_config(
                         ]
                     )
                 )
-        elif launcher.network == constants.NETWORK_NAME.ephemery:
+        elif launcher.network_params.network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--bootnodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -277,7 +276,7 @@ def get_beacon_config(
                 )
             )
     else:  # Public testnet
-        cmd.append("--network=" + launcher.network)
+        cmd.append("--network=" + launcher.network_params.network)
 
     if len(participant.cl_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -287,19 +286,24 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
+    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = "node-key-file-{0}".format(
+            participant_index + 1
+        )
+
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[launcher.network_params.network][
                 constants.CL_TYPE.lodestar + "_volume_size"
             ],
         )
 
     env_vars = participant.cl_extra_env_vars
 
-    if launcher.preset == "minimal":
+    if launcher.network_params.preset == "minimal":
         env_vars["LODESTAR_PRESET"] = "minimal"
 
     config_args = {
@@ -340,6 +344,5 @@ def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network_params):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network_params.network,
-        preset=network_params.preset,
+        network_params=network_params,
     )
