@@ -1,10 +1,12 @@
 participants:
   - el_type: geth
-    el_image: ethpandaops/nethermind:feature-peerdas
-    cl_type: lighthouse
-    cl_image: ethpandaops/lighthouse:peerdas-devnet-6
+  - el_type: nethermind
+  - el_type: besu
+  - el_type: reth
+  - el_type: erigon
 network_params:
-  fulu_fork_epoch: 1
+  electra_fork_epoch: 0
+  fulu_fork_epoch: 10
   network: hoodi-shadowfork
 additional_services:
   - dora

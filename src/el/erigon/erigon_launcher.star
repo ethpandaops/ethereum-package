@@ -159,6 +159,7 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.vhosts=*",
+        "--externalcl",
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
@@ -186,7 +187,10 @@ def get_config(
             ],
         )
 
-    if launcher.network == constants.NETWORK_NAME.kurtosis:
+    if (
+        launcher.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in launcher.network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
