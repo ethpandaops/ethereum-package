@@ -90,7 +90,9 @@ COMMIT_BOOST_MEV_TYPE = "commit-boost"
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
-DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = "bbusa/egg:latest"
+DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
+    "ethpandaops/ethereum-genesis-generator:3.7.3"
+)
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
 DEFAULT_FLASHBOTS_BUILDER_IMAGE = "ethpandaops/reth-rbuilder:develop"
 DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE = "ethpandaops/mev-boost:develop"
