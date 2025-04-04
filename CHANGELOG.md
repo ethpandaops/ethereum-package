@@ -1,5 +1,37 @@
 # Changelog
 
+## [5.0.0](https://github.com/ethpandaops/ethereum-package/compare/4.6.0...5.0.0) (2025-04-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename transaction spammer, remove beacon metrics gazer ([#923](https://github.com/ethpandaops/ethereum-package/issues/923))
+
+### Features
+
+* add fraction as a config param ([#944](https://github.com/ethpandaops/ethereum-package/issues/944)) ([ad5ed42](https://github.com/ethpandaops/ethereum-package/commit/ad5ed42f3b4ee97f1d6bfc8bd950ce76b9a37579))
+* add peerdas fulu support to nethermind ([#937](https://github.com/ethpandaops/ethereum-package/issues/937)) ([c187400](https://github.com/ethpandaops/ethereum-package/commit/c18740085c1980745b7df2340153474712257a4b))
+* add perfect peerdas testing ([#928](https://github.com/ethpandaops/ethereum-package/issues/928)) ([7e9a17f](https://github.com/ethpandaops/ethereum-package/commit/7e9a17f2f71d3346bd3ea7cff7e7828061ff757e))
+* add validator custody ([#929](https://github.com/ethpandaops/ethereum-package/issues/929)) ([2ab3246](https://github.com/ethpandaops/ethereum-package/commit/2ab3246f8c214f16e59f4fa4b295addec11afa08))
+* enable checkpoint sync for public networks ([#935](https://github.com/ethpandaops/ethereum-package/issues/935)) ([13dbe4d](https://github.com/ethpandaops/ethereum-package/commit/13dbe4d99a80f183dd7546955a0fe491e111abc8))
+* test new eth-beacon-genesis ([#938](https://github.com/ethpandaops/ethereum-package/issues/938)) ([7ae4061](https://github.com/ethpandaops/ethereum-package/commit/7ae406180239bc6b67c65023bd4782e596031b52))
+
+
+### Bug Fixes
+
+* add blobscan DIRECT_URL env var ([#936](https://github.com/ethpandaops/ethereum-package/issues/936)) ([084e08d](https://github.com/ethpandaops/ethereum-package/commit/084e08d459a288839e24d4ef1c4fd9aa0fc36b8e)), closes [#916](https://github.com/ethpandaops/ethereum-package/issues/916)
+* bump egg to v4.0.1 ([#939](https://github.com/ethpandaops/ethereum-package/issues/939)) ([4e3099c](https://github.com/ethpandaops/ethereum-package/commit/4e3099c9bf37c3c81c5d460cb43ca26b9f4d5d7f))
+* bump tests ([#942](https://github.com/ethpandaops/ethereum-package/issues/942)) ([09ce03f](https://github.com/ethpandaops/ethereum-package/commit/09ce03f87140f2b058ca3ce9c7007860a7ceb2fd))
+* osaka blob schedule chainspec ([#943](https://github.com/ethpandaops/ethereum-package/issues/943)) ([59ebc52](https://github.com/ethpandaops/ethereum-package/commit/59ebc524048024665e4902923c0edb24e9541f17))
+* Update tests ([#918](https://github.com/ethpandaops/ethereum-package/issues/918)) ([d8e035b](https://github.com/ethpandaops/ethereum-package/commit/d8e035b7a6e3e498b84b0edd77f0e526092a5fb1))
+* use next js proxy for blockscout frontend ([#873](https://github.com/ethpandaops/ethereum-package/issues/873)) ([151ff0a](https://github.com/ethpandaops/ethereum-package/commit/151ff0a1c865eb8365b7ec2f1ccfa0788d532d9f))
+* use separate file for additional contracts & fix disabled fork activation epoch ([#849](https://github.com/ethpandaops/ethereum-package/issues/849)) ([e8cd95d](https://github.com/ethpandaops/ethereum-package/commit/e8cd95d9a9cc7e7b1f14584fed6c56ac0b0a6bd3))
+
+
+### Code Refactoring
+
+* rename transaction spammer, remove beacon metrics gazer ([#923](https://github.com/ethpandaops/ethereum-package/issues/923)) ([96eeb99](https://github.com/ethpandaops/ethereum-package/commit/96eeb99bed7abc14dcec1eca5eae0f852eeb9fb0))
+
 ## [4.6.0](https://github.com/ethpandaops/ethereum-package/compare/4.5.0...4.6.0) (2025-03-19)
 
 
