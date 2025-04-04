@@ -169,6 +169,8 @@ SUBCATEGORY_PARAMS = {
         "target_blobs_per_block_electra",
         "max_blobs_per_block_fulu",
         "target_blobs_per_block_fulu",
+        "base_fee_update_fraction_electra",
+        "base_fee_update_fraction_fulu",
         "preset",
         "additional_preloaded_contracts",
         "devnet_repo",
