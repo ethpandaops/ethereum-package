@@ -348,11 +348,17 @@ def input_parser(plan, input_args):
             target_blobs_per_block_electra=result["network_params"][
                 "target_blobs_per_block_electra"
             ],
+            base_fee_update_fraction_electra=result["network_params"][
+                "base_fee_update_fraction_electra"
+            ],
             max_blobs_per_block_fulu=result["network_params"][
                 "max_blobs_per_block_fulu"
             ],
             target_blobs_per_block_fulu=result["network_params"][
                 "target_blobs_per_block_fulu"
+            ],
+            base_fee_update_fraction_fulu=result["network_params"][
+                "base_fee_update_fraction_fulu"
             ],
             preset=result["network_params"]["preset"],
             additional_preloaded_contracts=result["network_params"][
@@ -929,8 +935,10 @@ def default_network_params():
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
+        "base_fee_update_fraction_electra": 5007716,
         "max_blobs_per_block_fulu": 12,
         "target_blobs_per_block_fulu": 9,
+        "base_fee_update_fraction_fulu": 5007716,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -971,8 +979,10 @@ def default_minimal_network_params():
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
+        "base_fee_update_fraction_electra": 5007716,
         "max_blobs_per_block_fulu": 12,
         "target_blobs_per_block_fulu": 9,
+        "base_fee_update_fraction_fulu": 5007716,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",

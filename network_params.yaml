@@ -94,8 +94,10 @@ network_params:
   custody_requirement: 4
   max_blobs_per_block_electra: 9
   target_blobs_per_block_electra: 6
+  base_fee_update_fraction_electra: 5007716
   max_blobs_per_block_fulu: 12
   target_blobs_per_block_fulu: 9
+  base_fee_update_fraction_fulu: 5007716
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   prefunded_accounts: {}

@@ -147,8 +147,10 @@ def new_env_file_for_el_cl_genesis_data(
         "CustodyRequirement": network_params.custody_requirement,
         "MaxBlobsPerBlockElectra": network_params.max_blobs_per_block_electra,
         "TargetBlobsPerBlockElectra": network_params.target_blobs_per_block_electra,
+        "BaseFeeUpdateFractionElectra": network_params.base_fee_update_fraction_electra,
         "MaxBlobsPerBlockFulu": network_params.max_blobs_per_block_fulu,
         "TargetBlobsPerBlockFulu": network_params.target_blobs_per_block_fulu,
+        "BaseFeeUpdateFractionFulu": network_params.base_fee_update_fraction_fulu,
         "Preset": network_params.preset,
         "AdditionalPreloadedContractsFile": GENESIS_VALUES_PATH
         + "/"
