@@ -9,6 +9,8 @@ nimbus = import_module("./nimbus.star")
 prysm = import_module("./prysm.star")
 teku = import_module("./teku.star")
 vero = import_module("./vero.star")
+vouch = import_module("./vouch.star")
+
 vc_shared = import_module("./shared.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
 
@@ -168,6 +170,22 @@ def launch(
             full_name=full_name,
             tolerations=tolerations,
             node_selectors=node_selectors,
+        )
+    elif vc_type == constants.VC_TYPE.vouch:
+        config = vouch.get_config(
+            participant=participant,
+            el_cl_genesis_data=launcher.el_cl_genesis_data,
+            image=image,
+            keymanager_file=keymanager_file,
+            beacon_http_url=beacon_http_url,
+            cl_context=cl_context,
+            el_context=el_context,
+            remote_signer_context=remote_signer_context,
+            full_name=full_name,
+            node_keystore_files=node_keystore_files,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            keymanager_enabled=keymanager_enabled,
             port_publisher=port_publisher,
             vc_index=vc_index,
         )
