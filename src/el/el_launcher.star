@@ -9,6 +9,7 @@ nethermind = import_module("./nethermind/nethermind_launcher.star")
 reth = import_module("./reth/reth_launcher.star")
 ethereumjs = import_module("./ethereumjs/ethereumjs_launcher.star")
 nimbus_eth1 = import_module("./nimbus-eth1/nimbus_launcher.star")
+reec = import_module("./reec/reec_launcher.star")
 
 
 def launch(
@@ -98,7 +99,15 @@ def launch(
             ),
             "launch_method": nimbus_eth1.launch,
         },
+        constants.EL_TYPE.reec: {
+            "launcher": reec.new_ethrex_launcher(
+                el_cl_data,
+                jwt_file,
+                network_params.network,
+            ),
+            "launcher": reec.launch,
     }
+    },
 
     all_el_contexts = []
     network_name = shared_utils.get_network_name(network_params.network)
