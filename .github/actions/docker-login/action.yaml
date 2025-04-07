@@ -29,18 +29,9 @@ runs:
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
 
+    - name: Install regctl
+      uses: regclient/actions/regctl-installer@ce5fd131e371ffcdd7508b478cb223b3511a9183
+
     - name: Check Docker Hub Rate Limits
       shell: bash
-      env:
-        DOCKER_USERNAME: ${{ inputs.username }}
-        DOCKER_PASSWORD: ${{ inputs.password }}
-      run: |
-        if [ "$AUTH_EXISTS" = "true" ]; then
-            echo "Authenticated."
-            TOKEN=$(curl -s --user "${DOCKER_USERNAME}:${DOCKER_PASSWORD}" "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-        else
-            echo "Unauthenticated."
-            TOKEN=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-        fi
-        echo "Rate limits:"
-        curl -s --head -H "Authorization: Bearer $TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 | grep ratelimit
+      run: regctl image ratelimit ubuntu:latest

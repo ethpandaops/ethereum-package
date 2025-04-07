@@ -106,6 +106,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "vc_max_mem",
             "validator_count",
             "count",
+            "supernode",
         ],
         "vc": [
             "vc_type",
