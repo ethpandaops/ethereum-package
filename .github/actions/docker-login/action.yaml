@@ -31,14 +31,7 @@ runs:
 
     - name: Install regctl
       uses: regclient/actions/regctl-installer@ce5fd131e371ffcdd7508b478cb223b3511a9183
-    - name: regctl login
-      uses: regclient/actions/regctl-login@ce5fd131e371ffcdd7508b478cb223b3511a9183
-      with:
-        registry: docker.io
-        username: ${{ inputs.username }}
-        password: ${{ inputs.password }}
 
     - name: Check Docker Hub Rate Limits
       shell: bash
-      run: |
-        regctl image ratelimit ubuntu:latest
+      run: regctl image ratelimit ubuntu:latest
