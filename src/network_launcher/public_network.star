@@ -5,7 +5,7 @@ el_cl_genesis_data = import_module(
 constants = import_module("../package_io/constants.star")
 
 
-def launch(plan, network, prague_time):
+def launch(plan, network):
     # We are running a public network
     dummy_genesis_data = plan.run_sh(
         name="dummy-genesis-data",
@@ -16,7 +16,6 @@ def launch(plan, network, prague_time):
     el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
         dummy_genesis_data.files_artifacts[0],
         constants.GENESIS_VALIDATORS_ROOT[network],
-        prague_time,
     )
     final_genesis_timestamp = constants.GENESIS_TIME[network]
     network_id = constants.NETWORK_ID[network]
