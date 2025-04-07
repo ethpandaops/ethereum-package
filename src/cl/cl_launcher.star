@@ -155,6 +155,12 @@ def launch(
                     checkpoint_sync_url = constants.CHECKPOINT_SYNC_URL[
                         network_params.network
                     ]
+                elif "devnet" in network_params.network:
+                    checkpoint_sync_url = (
+                        "https://checkpoint-sync.{0}.ethpandaops.io/".format(
+                            network_params.network
+                        )
+                    )
                 else:
                     fail(
                         "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."

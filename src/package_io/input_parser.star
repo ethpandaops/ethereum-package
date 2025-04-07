@@ -869,7 +869,12 @@ def default_input_args(input_args):
     if (
         "network_params" in input_args
         and "network" in input_args["network_params"]
-        and input_args["network_params"]["network"] in constants.PUBLIC_NETWORKS
+        and (
+            input_args["network_params"]["network"] in constants.PUBLIC_NETWORKS
+            or input_args["network_params"]["network"]
+            == constants.NETWORK_NAME.ephemery
+            or "devnet" in input_args["network_params"]["network"]
+        )
     ):
         checkpoint_sync_enabled = True
     else:
