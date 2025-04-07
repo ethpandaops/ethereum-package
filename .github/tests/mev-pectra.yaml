@@ -38,10 +38,10 @@ additional_services:
 mev_type: flashbots
 
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay:0.30.0rc1
-  mev_boost_image: flashbots/mev-boost:1.9rc3
-  mev_builder_cl_image: sigp/lighthouse:v7.0.0-beta.4
-  mev_builder_image: ethpandaops/reth-rbuilder:develop-8ffb4cf
+  mev_relay_image: ethpandaops/mev-boost-relay:main-17ed054
+  mev_boost_image: ethpandaops/mev-boost:develop-79c3997
+  mev_builder_cl_image: sigp/lighthouse:v7.0.0-beta.5
+  mev_builder_image: ethpandaops/reth-rbuilder:develop-5a0732c
 
 network_params:
   electra_fork_epoch: 1
