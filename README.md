@@ -577,15 +577,19 @@ network_params:
   # Defaults to 4
   custody_requirement: 4
 
-  # Maximum number of blobs per block for Electra fork
+  # Maximum number of blobs per block for Electra fork (default 9)
   max_blobs_per_block_electra: 9
-  # Target number of blobs per block for Electra fork
+  # Target number of blobs per block for Electra fork (default 6)
   target_blobs_per_block_electra: 6
+  # Base fee update fraction for Electra fork (default 5007716)
+  base_fee_update_fraction_electra: 5007716
 
-  # Maximum number of blobs per block for Fulu fork
+  # Maximum number of blobs per block for Fulu fork (default 12)
   max_blobs_per_block_fulu: 12
-  # Target number of blobs per block for Fulu fork
+  # Target number of blobs per block for Fulu fork (default 9)
   target_blobs_per_block_fulu: 9
+  # Base fee update fraction for Fulu fork (default 5007716)
+  base_fee_update_fraction_fulu: 5007716
 
   # Preset for the network
   # Default: "mainnet"
@@ -988,7 +992,7 @@ spamoor_blob_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.0.1
+  image: ethpandaops/ethereum-genesis-generator:4.0.2
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
