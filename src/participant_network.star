@@ -44,7 +44,6 @@ def launch_participant_network(
     network_id = network_params.network_id
     latest_block = ""
     num_participants = len(args_with_right_defaults.participants)
-    prague_time = 0
     shadowfork_block = "latest"
     total_number_of_validator_keys = 0
     if (
@@ -105,7 +104,7 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_ephemery.launch(plan, prague_time)
+        ) = launch_ephemery.launch(plan)
     elif (
         network_params.network in constants.PUBLIC_NETWORKS
         and network_params.network != constants.NETWORK_NAME.ephemery
@@ -116,7 +115,7 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_public_network.launch(plan, network_params.network, prague_time)
+        ) = launch_public_network.launch(plan, network_params.network)
     else:
         # We are running a devnet
         (
@@ -127,7 +126,6 @@ def launch_participant_network(
         ) = launch_devnet.launch(
             plan,
             network_params.network,
-            prague_time,
             network_params.devnet_repo,
         )
 
@@ -444,4 +442,5 @@ def launch_participant_network(
         el_cl_data.genesis_validators_root,
         el_cl_data.files_artifact_uuid,
         network_id,
+        el_cl_data.osaka_time,
     )
