@@ -1232,7 +1232,7 @@ def get_default_xatu_sentry_params():
 
 def get_default_spamoor_params():
     return {
-        "image": "ethpandaops/spamoor:latest",
+        "image": constants.DEFAULT_SPAMOOR_IMAGE,
         "scenario": "eoatx",
         "throughput": 1000,
         "max_pending": 1000,
@@ -1243,7 +1243,7 @@ def get_default_spamoor_params():
 
 def get_default_spamoor_blob_params():
     return {
-        "image": "ethpandaops/spamoor:latest",
+        "image": constants.DEFAULT_SPAMOOR_BLOB_IMAGE,
         "scenario": "blob-combined",
         "throughput": 3,
         "max_blobs": 2,
