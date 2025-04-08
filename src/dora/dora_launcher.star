@@ -38,6 +38,7 @@ def launch_dora(
     mev_endpoint_names,
     port_publisher,
     additional_service_index,
+    global_log_level,
 ):
     all_cl_client_info = []
     all_el_client_info = []
@@ -77,6 +78,7 @@ def launch_dora(
         all_cl_client_info,
         all_el_client_info,
         mev_endpoint_info,
+        global_log_level,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -154,7 +156,12 @@ def get_config(
 
 
 def new_config_template_data(
-    network, listen_port_num, cl_client_info, el_client_info, mev_endpoint_info
+    network,
+    listen_port_num,
+    cl_client_info,
+    el_client_info,
+    mev_endpoint_info,
+    global_log_level,
 ):
     return {
         "Network": network,
@@ -163,6 +170,7 @@ def new_config_template_data(
         "ELClientInfo": el_client_info,
         "MEVRelayInfo": mev_endpoint_info,
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
+        "GlobalLogLevel": global_log_level,
     }
 
 

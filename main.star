@@ -527,6 +527,7 @@ def run(plan, args={}):
                 mev_endpoint_names,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "dugtrio":
