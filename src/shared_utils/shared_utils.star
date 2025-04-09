@@ -104,6 +104,7 @@ def get_devnet_enodes(plan, filename):
         description="Getting devnet enodes",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
+        image="python:3.12-alpine",
         run="""
 cat /network-configs/enodes.txt | tr -d ' ' | tr '\n' ','
         """,
@@ -116,6 +117,7 @@ def get_devnet_enrs_list(plan, filename):
         description="Creating devnet enrs list",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
+        image="python:3.12-alpine",
         run="""
 cat /network-configs/bootstrap_nodes.txt | tr -d ' ' | tr '\n' ','
         """,
