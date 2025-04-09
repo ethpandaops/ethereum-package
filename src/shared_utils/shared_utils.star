@@ -199,6 +199,7 @@ print(int(time.time()+padding), end="")
 """,
         args=[str(padding)],
         store=[StoreSpec(src="/tmp", name="final-genesis-timestamp")],
+        image="python:3.11.11-alpine"
     )
     return result.output
 
