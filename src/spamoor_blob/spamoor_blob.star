@@ -55,17 +55,36 @@ def get_config(
             cmd.append("--fulu-activation={}".format(osaka_time))
             cmd.append("--blob-v1-percent=100")
 
-    if spamoor_params.throughput != None:
-        cmd.append("--throughput={}".format(spamoor_params.throughput))
+    params = [
+        (
+            "--throughput",
+            spamoor_params.throughput,
+            constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT,
+        ),
+        (
+            "--sidecars",
+            spamoor_params.sidecars,
+            constants.SPAMOOR_BLOB_DEFAULT_SIDECARS,
+        ),
+        (
+            "--max-pending",
+            spamoor_params.max_pending,
+            constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT
+            * constants.SPAMOOR_BLOB_THROUGHPUT_MULTIPLIER,
+        ),
+        (
+            "--max-wallets",
+            spamoor_params.max_wallets,
+            constants.SPAMOOR_BLOB_DEFAULT_MAX_WALLETS,
+        ),
+    ]
 
-    if spamoor_params.max_blobs != None:
-        cmd.append("--sidecars={}".format(spamoor_params.max_blobs))
-
-    if spamoor_params.max_pending != None:
-        cmd.append("--max-pending={}".format(spamoor_params.max_pending))
-
-    if spamoor_params.max_wallets != None:
-        cmd.append("--max-wallets={}".format(spamoor_params.max_wallets))
+    for flag, param_value, default_value in params:
+        cmd.append(
+            "{}={}".format(
+                flag, param_value if param_value != default_value else default_value
+            )
+        )
 
     if len(spamoor_params.spamoor_extra_args) > 0:
         cmd.extend([param for param in spamoor_params.spamoor_extra_args])

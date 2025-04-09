@@ -28,7 +28,7 @@ dora_params:
   image: "ethpandaops/dora:master-latest"
 spamoor_blob_params:
   throughput: 10
-  max_blobs: 2
+  sidecars: 2
   max_pending: 40
 
 assertoor_params:
