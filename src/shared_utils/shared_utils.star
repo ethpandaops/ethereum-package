@@ -133,7 +133,7 @@ def read_genesis_timestamp_from_config(plan, filename):
         run="""
 MIN_GENESIS_TIME=$(yq e '.MIN_GENESIS_TIME // 0' /network-configs/config.yaml)
 GENESIS_DELAY=$(yq e '.GENESIS_DELAY // 0' /network-configs/config.yaml)
-echo $((MIN_GENESIS_TIME + GENESIS_DELAY))
+echo -n $((MIN_GENESIS_TIME + GENESIS_DELAY))
         """,
     )
     return value.output
