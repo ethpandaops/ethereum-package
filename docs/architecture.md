@@ -55,7 +55,7 @@ We'll explain these phases one by one.
 
 ### Generating EL and CL client data
 
-All EL clients require both a genesis file and a JWT secret. The exact format of the genesis file differs per client, so we first leverage [a Docker image containing tools for generating this genesis data][ethereum-genesis-generator] to create the actual files that the EL clients-to-be will need. This is accomplished by filling in a single genesis generation environment config files found in [`static_files`](../static_files/genesis-generation-config/el-cl/values.env.tmpl).
+All EL clients require both a genesis file and a JWT secret. The exact format of the genesis file differs per client, so we first leverage [a Docker image containing tools for generating this genesis data][ethereum-genesis-generator] to create the actual files that the EL clients-to-be will need. This is accomplished by filling in genesis generation environment config files found in [`static_files`](../static_files/genesis-generation-config/el-cl/values.env.tmpl).
 
 CL clients, like EL clients also have a genesis and config files that they need. This is created at the same time as the EL genesis files.
 
