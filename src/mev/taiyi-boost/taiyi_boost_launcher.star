@@ -27,6 +27,7 @@ MAX_MEMORY = 256
 
 def launch(
     plan,
+    taiyi_boost_params,
     mev_boost_launcher,
     service_name,
     network,

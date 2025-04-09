@@ -218,6 +218,9 @@ SUBCATEGORY_PARAMS = {
     "rbuilder_params": [
         "rbuilder_image",
     ],
+    "taiyi_boost_params": [
+        "taiyi_boost_image",
+    ],
     "assertoor_params": [
         "image",
         "run_stability_check",

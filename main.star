@@ -459,6 +459,7 @@ def run(plan, args={}):
                         participant.cl_context.validator_keystore_files_artifact_uuid,
                     )
                     plan.print("Launching taiyi-boost service")
+                    taiyi_boost_params = args_with_right_defaults.taiyi_boost_params
                     taiyi_boost_launcher = taiyi_boost.new_mev_boost_launcher(
                         MEV_BOOST_SHOULD_CHECK_RELAY,
                         mev_endpoints,
@@ -471,6 +472,7 @@ def run(plan, args={}):
                     )
                     taiyi_boost_context = taiyi_boost.launch(
                         plan,
+                        taiyi_boost_params,
                         taiyi_boost_launcher,
                         taiyi_boost_service_name,
                         network_params.network,

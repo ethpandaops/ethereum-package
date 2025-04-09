@@ -123,6 +123,7 @@ def input_parser(plan, input_args):
     result["spamoor_blob_params"] = get_default_spamoor_blob_params()
     result["helix_params"] = get_default_helix_params()
     result["rbuilder_params"] = get_default_rbuilder_params()
+    result["taiyi_boost_params"] = get_default_taiyi_boost_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -435,6 +436,9 @@ def input_parser(plan, input_args):
         ),
         rbuilder_params=struct(
             rbuilder_image=result["rbuilder_params"]["rbuilder_image"]
+        ),
+        taiyi_boost_params=struct(
+            taiyi_boost_image=result["taiyi_boost_params"]["taiyi_boost_image"]
         ),
         apache_port=result["apache_port"],
         assertoor_params=struct(
@@ -1201,6 +1205,11 @@ def get_default_helix_params():
 def get_default_rbuilder_params():
     return {
         "rbuilder_image": "lubann/reth-rbuilder:latest"
+    }
+
+def get_default_taiyi_boost_params():
+    return {
+        "taiyi_boost_image": "lubann/taiyi:latest"
     }
 
 def get_default_xatu_sentry_params():
