@@ -266,7 +266,7 @@ def get_beacon_config(
 
     if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
-            "--initial-state="
+            "--genesis-state="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
