@@ -106,6 +106,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "vc_max_mem",
             "validator_count",
             "count",
+            "supernode",
         ],
         "vc": [
             "vc_type",
@@ -261,7 +262,7 @@ SUBCATEGORY_PARAMS = {
         "image",
         "scenario",
         "throughput",
-        "max_blobs",
+        "sidecars",
         "max_pending",
         "max_wallets",
         "spamoor_extra_args",

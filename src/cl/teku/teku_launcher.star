@@ -224,8 +224,6 @@ def get_beacon_config(
         "--metrics-categories=BEACON,PROCESS,LIBP2P,JVM,NETWORK,PROCESS",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        # To enable syncing other networks too without checkpoint syncing
-        "--ignore-weak-subjectivity-period-enabled=true",
     ]
     validator_default_cmd = [
         "--validator-keys={0}:{1}".format(
@@ -263,6 +261,8 @@ def get_beacon_config(
 
     if checkpoint_sync_enabled:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
+    else:
+        cmd.append("--ignore-weak-subjectivity-period-enabled=true")
 
     if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(

@@ -464,7 +464,7 @@ def input_parser(plan, input_args):
             image=result["spamoor_blob_params"]["image"],
             scenario=result["spamoor_blob_params"]["scenario"],
             throughput=result["spamoor_blob_params"]["throughput"],
-            max_blobs=result["spamoor_blob_params"]["max_blobs"],
+            sidecars=result["spamoor_blob_params"]["sidecars"],
             max_pending=result["spamoor_blob_params"]["max_pending"],
             max_wallets=result["spamoor_blob_params"]["max_wallets"],
             spamoor_extra_args=result["spamoor_blob_params"]["spamoor_extra_args"],
@@ -865,7 +865,12 @@ def default_input_args(input_args):
     if (
         "network_params" in input_args
         and "network" in input_args["network_params"]
-        and input_args["network_params"]["network"] in constants.PUBLIC_NETWORKS
+        and (
+            input_args["network_params"]["network"] in constants.PUBLIC_NETWORKS
+            or input_args["network_params"]["network"]
+            == constants.NETWORK_NAME.ephemery
+            or "devnet" in input_args["network_params"]["network"]
+        )
     ):
         checkpoint_sync_enabled = True
     else:
@@ -1223,7 +1228,7 @@ def get_default_xatu_sentry_params():
 
 def get_default_spamoor_params():
     return {
-        "image": "ethpandaops/spamoor:latest",
+        "image": constants.DEFAULT_SPAMOOR_IMAGE,
         "scenario": "eoatx",
         "throughput": 1000,
         "max_pending": 1000,
@@ -1234,12 +1239,13 @@ def get_default_spamoor_params():
 
 def get_default_spamoor_blob_params():
     return {
-        "image": "ethpandaops/spamoor:latest",
+        "image": constants.DEFAULT_SPAMOOR_BLOB_IMAGE,
         "scenario": "blob-combined",
-        "throughput": 3,
-        "max_blobs": 2,
-        "max_pending": 6,
-        "max_wallets": 29,
+        "throughput": constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT,
+        "sidecars": constants.SPAMOOR_BLOB_DEFAULT_SIDECARS,
+        "max_pending": constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT
+        * constants.SPAMOOR_BLOB_THROUGHPUT_MULTIPLIER,
+        "max_wallets": constants.SPAMOOR_BLOB_DEFAULT_MAX_WALLETS,
         "spamoor_extra_args": [],
     }
 

@@ -190,6 +190,7 @@ def run(plan, args={}):
         genesis_validators_root,
         el_cl_data_files_artifact_uuid,
         network_id,
+        osaka_time,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults,
@@ -688,6 +689,8 @@ def run(plan, args={}):
                 all_el_contexts,
                 args_with_right_defaults.spamoor_blob_params,
                 global_node_selectors,
+                args_with_right_defaults.network_params,
+                osaka_time,
             )
         else:
             fail("Invalid additional service %s" % (additional_service))

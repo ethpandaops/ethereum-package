@@ -163,13 +163,6 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--db.size.limit={0}MB".format(
-            int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.besu + "_volume_size"
-            ],
-        ),
     ]
 
     files = {
@@ -178,6 +171,15 @@ def get_config(
     }
 
     if persistent:
+        cmd.append(
+            "--db.size.limit={0}MB".format(
+                int(participant.el_volume_size)
+                if int(participant.el_volume_size) > 0
+                else constants.VOLUME_SIZE[launcher.network][
+                    constants.EL_TYPE.erigon + "_volume_size"
+                ],
+            )
+        )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
