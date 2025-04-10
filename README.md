@@ -979,7 +979,7 @@ spamoor_blob_params:
   throughput: 3
   # Maximum number of blobs per transaction
   # Defaults to 2
-  max_blobs: 2
+  sidecars: 2
   # Max pending blob transactions for spamoor
   # Defaults to 6
   max_pending: 6
