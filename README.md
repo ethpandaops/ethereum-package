@@ -591,6 +591,15 @@ network_params:
   # Base fee update fraction for Fulu fork (default 5007716)
   base_fee_update_fraction_fulu: 5007716
 
+  # EIP-7732 fork epoch
+  # Defaults to 18446744073709551615
+  eip7732_fork_epoch: 18446744073709551615
+
+  # EIP-7805 fork epoch
+  # Defaults to 18446744073709551615
+  eip7805_fork_epoch: 18446744073709551615
+
+
   # Preset for the network
   # Default: "mainnet"
   # Options: "mainnet", "minimal"
@@ -979,7 +988,7 @@ spamoor_blob_params:
   throughput: 3
   # Maximum number of blobs per transaction
   # Defaults to 2
-  max_blobs: 2
+  sidecars: 2
   # Max pending blob transactions for spamoor
   # Defaults to 6
   max_pending: 6
@@ -992,7 +1001,7 @@ spamoor_blob_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.0.2
+  image: ethpandaops/ethereum-genesis-generator:4.0.3
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:

@@ -104,6 +104,7 @@ def get_devnet_enodes(plan, filename):
         description="Getting devnet enodes",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
+        image="python:3.12-alpine",
         run="""
 with open("/network-configs/enodes.txt") as bootnode_file:
     bootnodes = []
@@ -121,6 +122,7 @@ def get_devnet_enrs_list(plan, filename):
         description="Creating devnet enrs list",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
+        image="python:3.12-alpine",
         run="""
 with open("/network-configs/bootstrap_nodes.txt") as bootnode_file:
     bootnodes = []
@@ -138,6 +140,7 @@ def read_genesis_timestamp_from_config(plan, filename):
         description="Reading genesis timestamp from config",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
+        image="python:3.12-alpine",
         packages=["PyYAML"],
         run="""
 import yaml
@@ -157,6 +160,7 @@ def read_genesis_network_id_from_config(plan, filename):
         description="Reading genesis network id from config",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
+        image="python:3.12-alpine",
         packages=["PyYAML"],
         run="""
 import yaml
@@ -191,6 +195,7 @@ def get_network_name(network):
 def get_final_genesis_timestamp(plan, padding):
     result = plan.run_python(
         description="Getting final genesis timestamp",
+        image="python:3.12-alpine",
         run="""
 import time
 import sys

@@ -262,7 +262,7 @@ SUBCATEGORY_PARAMS = {
         "image",
         "scenario",
         "throughput",
-        "max_blobs",
+        "sidecars",
         "max_pending",
         "max_wallets",
         "spamoor_extra_args",
