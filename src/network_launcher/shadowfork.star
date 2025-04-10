@@ -18,7 +18,7 @@ def shadowfork_prep(
             name="fetch-chain-id",
             description="Fetching the chain id",
             run="curl -s https://ephemery.dev/latest/config.yaml | yq .DEPOSIT_CHAIN_ID | tr -d '\n'",
-            image="linuxserver/yq",
+            image=constants.DEFAULT_YQ_IMAGE,
         )
         network_id = chain_id.output
     else:

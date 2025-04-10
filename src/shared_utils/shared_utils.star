@@ -104,9 +104,7 @@ def get_devnet_enodes(plan, filename):
         description="Getting devnet enodes",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="""
-cat /network-configs/enodes.txt | tr -d ' ' | tr '\n' ','
-        """,
+        run="cat /network-configs/enodes.txt | tr -d ' ' | tr '\n' ','",
     )
     return enode_list.output
 
@@ -116,9 +114,7 @@ def get_devnet_enrs_list(plan, filename):
         description="Creating devnet enrs list",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="""
-cat /network-configs/bootstrap_nodes.txt | tr -d ' ' | tr '\n' ','
-        """,
+        run="cat /network-configs/bootstrap_nodes.txt | tr -d ' ' | tr '\n' ','",
     )
     return enr_list.output
 
@@ -128,11 +124,10 @@ def read_genesis_timestamp_from_config(plan, filename):
         description="Reading genesis timestamp from config",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="""
-MIN_GENESIS_TIME=$(yq e '.MIN_GENESIS_TIME // 0' /network-configs/config.yaml)
-GENESIS_DELAY=$(yq e '.GENESIS_DELAY // 0' /network-configs/config.yaml)
-echo -n $((MIN_GENESIS_TIME + GENESIS_DELAY))
-        """,
+        image=constants.DEFAULT_YQ_IMAGE,
+        run="MIN_GENESIS_TIME=$(cat /network-configs/config.yaml | yq .MIN_GENESIS_TIME | tr -d '\n') && \
+            GENESIS_DELAY=$(cat /network-configs/config.yaml | yq .GENESIS_DELAY | tr -d '\n') && \
+            echo -n $((MIN_GENESIS_TIME + GENESIS_DELAY))",
     )
     return value.output
 
@@ -142,9 +137,8 @@ def read_genesis_network_id_from_config(plan, filename):
         description="Reading genesis network id from config",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="""
-yq e '.DEPOSIT_NETWORK_ID // 0' /network-configs/config.yaml
-        """,
+        image=constants.DEFAULT_YQ_IMAGE,
+        run="cat /network-configs/config.yaml | yq .DEPOSIT_NETWORK_ID | tr -d '\n'",
     )
     return value.output
 
