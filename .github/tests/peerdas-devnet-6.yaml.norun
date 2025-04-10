@@ -2,10 +2,6 @@ participants_matrix:
   el:
     - el_type: geth
       el_image: ethpandaops/geth:marius-engine-getblobs-v2
-    - el_type: reth
-      el_image: ethpandaops/reth:rkrasiuk-peerdas
-    - el_type: nethermind
-      el_image: ethpandaops/nethermind:feature-peerdas
   cl:
     - cl_type: lighthouse
       cl_image: ethpandaops/lighthouse:peerdas-devnet-6
@@ -15,7 +11,12 @@ participants_matrix:
       cl_image: ethpandaops/grandine:hangleang-peerdas-devnet-6
     - cl_type: prysm
       cl_image: ethpandaops/prysm-beacon-chain:peerdas-devnet-6
+    - cl_type: teku
+      cl_image: ethpandaops/teku:master
+    - cl_type: lodestar
+      cl_image: ethpandaops/lodestar:unstable
+
 network_params:
-  network: peerdas-devnet-6
+  network: pectra-devnet-6
 additional_services:
   - dora

@@ -104,7 +104,7 @@ def get_devnet_enodes(plan, filename):
         description="Getting devnet enodes",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="cat /network-configs/enodes.txt | tr -d ' ' | tr '\n' ','",
+        run="cat /network-configs/enodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
     )
     return enode_list.output
 
