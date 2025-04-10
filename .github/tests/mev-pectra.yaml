@@ -1,4 +1,4 @@
-participants_matrix:
+participants:
   - el_type: geth
     el_image: ethereum/client-go:v1.15.7
     el_extra_params: ["--miner.extradata=pawanRocks"]
