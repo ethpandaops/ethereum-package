@@ -34,8 +34,6 @@ def launch(
     global_tolerations,
     node_selectors,
     preset,
-    network,  # TODO: remove when deneb rebase is done
-    electra_fork_epoch,  # TODO: remove when deneb rebase is done
     port_publisher,
     vc_index,
 ):
