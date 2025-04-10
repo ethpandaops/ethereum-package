@@ -240,6 +240,8 @@ def get_config(
         image = launcher.mev_params.mev_builder_image
         cl_client_name = service_name.split("-")[4]
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
+        cmd.append("--engine.persistence-threshold=0")
+        cmd.append("--engine.memory-block-buffer-target=0")
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME

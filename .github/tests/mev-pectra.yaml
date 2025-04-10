@@ -45,6 +45,7 @@ mev_params:
   mev_builder_cl_image: sigp/lighthouse:v7.0.0-beta.5
   mev_builder_image: ethpandaops/reth-rbuilder:develop-01c8071
 
+
 network_params:
   electra_fork_epoch: 1
   min_validator_withdrawability_delay: 1
