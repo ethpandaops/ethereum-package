@@ -88,7 +88,7 @@ def launch_mev_relay(
         "SEC_PER_SLOT": str(seconds_per_slot),
         "LOG_LEVEL": "debug",
         "DB_TABLE_PREFIX": "custom",
-        "ENABLE_BUILDER_CANCELLATIONS": "1"
+        "ENABLE_BUILDER_CANCELLATIONS": "1",
     }
 
     redis_url = "{}:{}".format(redis.hostname, redis.port_number)
