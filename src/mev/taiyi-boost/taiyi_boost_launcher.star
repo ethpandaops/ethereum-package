@@ -10,8 +10,6 @@ CB_CONFIG_FILENAME = "cb-config.toml"
 CB_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 CB_CONFIG_FILES_ARTIFACT_NAME = "commit-boost-config"
 
-IMAGE_NAME = "lubann/taiyi:latest"
-
 USED_PORTS = {
     "http": shared_utils.new_port_spec(
         input_parser.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL
@@ -54,7 +52,7 @@ def launch(
         else "{" + "genesis_time_secs = {}, path = \"{}\"".format(genesis_timestamp, constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml") + "}"
     )
 
-    image = IMAGE_NAME
+    image = taiyi_boost_params.taiyi_boost_image
     template_data = new_config_template_data(
         chain,
         network,
