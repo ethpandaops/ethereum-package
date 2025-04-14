@@ -458,11 +458,8 @@ def input_parser(plan, input_args):
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
-            scenario=result["spamoor_params"]["scenario"],
-            throughput=result["spamoor_params"]["throughput"],
-            max_pending=result["spamoor_params"]["max_pending"],
-            max_wallets=result["spamoor_params"]["max_wallets"],
-            spamoor_extra_args=result["spamoor_params"]["spamoor_extra_args"],
+            spammers=result["spamoor_params"]["spammers"],
+            extra_args=result["spamoor_params"]["extra_args"],
         ),
         spamoor_blob_params=struct(
             image=result["spamoor_blob_params"]["image"],
@@ -1233,11 +1230,8 @@ def get_default_xatu_sentry_params():
 def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
-        "scenario": "eoatx",
-        "throughput": 1000,
-        "max_pending": 1000,
-        "max_wallets": 500,
-        "spamoor_extra_args": [],
+        "extra_args": [],
+        "spammers": [],
     }
 
 

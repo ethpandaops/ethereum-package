@@ -952,23 +952,18 @@ checkpoint_sync_url: ""
 spamoor_params:
   # The image to use for spamoor
   image: ethpandaops/spamoor:latest
-  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
-  # Valid scenarios are:
-  #  eoatx, erctx, deploytx, deploy-destruct, blobs, gasburnertx
-  # Defaults to eoatx
-  scenario: eoatx
-  # Throughput of spamoor
-  # Defaults to 1000
-  throughput: 1000
-  # Max pending transactions for spamoor
-  # Defaults to 1000
-  max_pending: 1000
-  # Max wallets for spamoor
-  # Defaults to 500
-  max_wallets: 500
-  # Extra parameters to send to spamoor
-  # Defaults to empty
-  spamoor_extra_args: []
+  # A list of spammers to launch on startup
+  # example:
+  # - scenario: eoatx  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
+  #   name: "Optional name for this example spammer"
+  #   config:
+  #     throughput: 10  # 10 tx per block
+  # - scenario: erctx
+  #   config:
+  #     throughput: 10  # 10 tx per block
+  spammers: []
+  # A list of optional params that will be passed to the spamoor command for modifying its behaviour
+  extra_args: []
 
 # Configuration place for spammor as blob spammer
 spamoor_blob_params:

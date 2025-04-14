@@ -676,8 +676,12 @@ def run(plan, args={}):
             )
         elif additional_service == "spamoor":
             plan.print("Launching spamoor")
+            spamoor_config_template = read_file(
+                static_files.SPAMOOR_CONFIG_TEMPLATE_FILEPATH
+            )
             spamoor.launch_spamoor(
                 plan,
+                spamoor_config_template,
                 prefunded_accounts,
                 all_el_contexts,
                 args_with_right_defaults.spamoor_params,
