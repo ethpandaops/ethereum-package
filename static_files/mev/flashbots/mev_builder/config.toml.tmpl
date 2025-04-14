@@ -34,8 +34,9 @@ root_hash_compare_sparse_trie=false
 name = "flashbots"
 url = "http://{{ .PublicKey }}@{{ .Relay }}:{{ .RelayPort }}"
 priority = 0
-use_ssz_for_submit = false
+use_ssz_for_submit = true
 use_gzip_for_submit = false
+optimistic = false
 
 [[builders]]
 name = "mgp-ordering"

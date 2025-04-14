@@ -57,6 +57,7 @@ ENGINE_RPC_PORT_ID = "engine-rpc"
 ENGINE_WS_PORT_ID = "engine-ws"
 ADMIN_PORT_ID = "admin"
 RBUILDER_PORT_ID = "rbuilder-rpc"
+RBUILDER_METRICS_PORT_ID = "rbuilder-metric"
 LITTLE_BIGTABLE_PORT_ID = "littlebigtable"
 VALDIATOR_GRPC_PORT_ID = "grpc"
 
