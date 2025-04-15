@@ -32,40 +32,7 @@ def launch_spamoor(
     spamoor_params,
     global_node_selectors,
 ):
-    spammers = spamoor_params.spammers
-
-    if len(spammers) == 0:
-        # add default spammers
-        spammers.append(
-            {
-                "name": "EOA Spammer (Kurtosis Package)",
-                "description": "200 type-2 eoa transactions per slot, gas limit 20 gwei",
-                "scenario": "eoatx",
-                "config": {
-                    "throughput": 200,
-                    "max_pending": 400,
-                    "max_wallets": 200,
-                    "base_fee": 20,
-                },
-            }
-        )
-        spammers.append(
-            {
-                "name": "Blob Spammer (Kurtosis Package)",
-                "description": "3 type-4 blob transactions per slot with 1-2 sidecars each, gas/blobgas limit 20 gwei",
-                "scenario": "blob-combined",
-                "config": {
-                    "throughput": 3,
-                    "sidecars": 2,
-                    "max_pending": 6,
-                    "max_wallets": 20,
-                    "base_fee": 20,
-                    "blob_fee": 20,
-                },
-            }
-        )
-
-    template_data = new_config_template_data(spammers)
+    template_data = new_config_template_data(spamoor_params.spammers)
 
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
