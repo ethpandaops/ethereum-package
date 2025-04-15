@@ -683,7 +683,8 @@ def run(plan, args={}):
                 plan,
                 spamoor_config_template,
                 prefunded_accounts,
-                all_el_contexts,
+                all_participants,
+                args_with_right_defaults.participants,
                 args_with_right_defaults.spamoor_params,
                 global_node_selectors,
             )

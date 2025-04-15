@@ -27,13 +27,42 @@ def launch_spamoor(
     plan,
     config_template,
     prefunded_addresses,
-    all_el_contexts,
+    participant_contexts,
+    participant_configs,
     spamoor_params,
     global_node_selectors,
 ):
-    template_data = new_config_template_data(
-        spamoor_params.spammers,
-    )
+    spammers = spamoor_params.spammers
+
+    if len(spammers) == 0:
+        # add default spammers
+        spammers.append({
+            "name": "EOA Spammer (Kurtosis Package)",
+            "description": "200 type-2 eoa transactions per slot, gas limit 20 gwei",
+            "scenario": "eoatx",
+            "config": {
+                "throughput": 200,
+                "max_pending": 400,
+                "max_wallets": 200,
+                "base_fee": 20,
+            },
+        })
+        spammers.append({
+            "name": "Blob Spammer (Kurtosis Package)",
+            "description": "3 type-4 blob transactions per slot with 1-2 sidecars each, gas/blobgas limit 20 gwei",
+            "scenario": "blob-combined",
+            "config": {
+                "throughput": 3,
+                "sidecars": 2,
+                "max_pending": 6,
+                "max_wallets": 20,
+                "base_fee": 20,
+                "blob_fee": 20,
+            },
+        })
+
+
+    template_data = new_config_template_data(spammers)
 
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
@@ -48,7 +77,8 @@ def launch_spamoor(
     config = get_config(
         config_files_artifact_name,
         prefunded_addresses,
-        all_el_contexts,
+        participant_contexts,
+        participant_configs,
         spamoor_params,
         global_node_selectors,
     )
@@ -58,7 +88,8 @@ def launch_spamoor(
 def get_config(
     config_files_artifact_name,
     prefunded_addresses,
-    all_el_contexts,
+    participant_contexts,
+    participant_configs,
     spamoor_params,
     node_selectors,
 ):
@@ -67,10 +98,32 @@ def get_config(
         SPAMOOR_CONFIG_FILENAME,
     )
 
+    rpchosts = []
+    for index, participant in enumerate(participant_contexts):
+        (
+            full_name,
+            cl_client,
+            el_client,
+            participant_config,
+        ) = shared_utils.get_client_names(
+            participant, index, participant_contexts, participant_configs
+        )
+
+        rpchost = "http://{0}:{1}".format(
+            el_client.ip_addr,
+            el_client.rpc_port_num,
+        )
+        
+        if "builder" in full_name:
+            rpchost = "group(mevbuilder)" + rpchost
+        
+        rpchosts.append(rpchost)
+
+
     cmd = [
         "--privkey={}".format(prefunded_addresses[13].private_key),
         "--rpchost={}".format(
-            ",".join([el_context.rpc_http_url for el_context in all_el_contexts])
+            ",".join(rpchosts)
         ),
         "--startup-spammer={}".format(config_file_path),
     ]
