@@ -105,6 +105,7 @@ def get_config(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM

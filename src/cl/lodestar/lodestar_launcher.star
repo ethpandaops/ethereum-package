@@ -43,6 +43,7 @@ def launch(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -67,6 +68,7 @@ def launch(
         checkpoint_sync_url,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -161,6 +163,7 @@ def get_beacon_config(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     el_client_rpc_url_str = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -340,9 +343,8 @@ def get_beacon_config(
     return ServiceConfig(**config_args)
 
 
-def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network_params):
+def new_lodestar_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network_params=network_params,
     )

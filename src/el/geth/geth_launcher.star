@@ -232,7 +232,7 @@ def get_config(
     ]
 
     if network_params.gas_limit > 0:
-        cmd.append("--gaslimit={0}".format(network_params.gas_limit))
+        cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
 
     if BUILDER_IMAGE_STR in participant.el_image:
         for index, arg in enumerate(cmd):

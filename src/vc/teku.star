@@ -17,6 +17,7 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    network_params,
     port_publisher,
     vc_index,
 ):
@@ -47,6 +48,13 @@ def get_config(
         "--metrics-interface=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
     ]
+
+    if network_params.gas_limit > 0:
+        cmd.append(
+            "--validators-builder-registration-default-gas-limit={0}".format(
+                network_params.gas_limit
+            )
+        )
 
     if remote_signer_context == None:
         cmd.extend(
