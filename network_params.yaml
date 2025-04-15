@@ -106,8 +106,8 @@ dora_params:
   image: ""
 tx_fuzz_params:
   tx_fuzz_extra_args: []
-spamoor_blob_params:
-  spamoor_extra_args: []
+spamoor_params:
+  extra_args: []
 prometheus_params:
   storage_tsdb_retention_time: "1d"
   storage_tsdb_retention_size: "512MB"

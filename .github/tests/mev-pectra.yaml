@@ -35,7 +35,6 @@ participants:
 additional_services:
   - dora
   - tx_fuzz
-  - spamoor_blob
   - spamoor
 mev_type: flashbots
 
@@ -53,7 +52,10 @@ network_params:
   churn_limit_quotient: 16
   genesis_delay: 120
 
-spamoor_blob_params:
-  throughput: 10
-  sidecars: 2
-  max_pending: 40
+spamoor_params:
+  spammers:
+    - scenario: blob-combined
+      config:
+        throughput: 10
+        sidecars: 2
+        max_pending: 40

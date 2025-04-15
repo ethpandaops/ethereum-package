@@ -86,7 +86,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
-    "spamoor_blob_params",
 )
 
 
@@ -120,7 +119,6 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
-    result["spamoor_blob_params"] = get_default_spamoor_blob_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -186,10 +184,6 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
-        elif attr == "spamoor_blob_params":
-            for sub_attr in input_args["spamoor_blob_params"]:
-                sub_value = input_args["spamoor_blob_params"][sub_attr]
-                result["spamoor_blob_params"][sub_attr] = sub_value
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
@@ -460,15 +454,6 @@ def input_parser(plan, input_args):
             image=result["spamoor_params"]["image"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
-        ),
-        spamoor_blob_params=struct(
-            image=result["spamoor_blob_params"]["image"],
-            scenario=result["spamoor_blob_params"]["scenario"],
-            throughput=result["spamoor_blob_params"]["throughput"],
-            sidecars=result["spamoor_blob_params"]["sidecars"],
-            max_pending=result["spamoor_blob_params"]["max_pending"],
-            max_wallets=result["spamoor_blob_params"]["max_wallets"],
-            spamoor_extra_args=result["spamoor_blob_params"]["spamoor_extra_args"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -1232,19 +1217,6 @@ def get_default_spamoor_params():
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
         "extra_args": [],
         "spammers": [],
-    }
-
-
-def get_default_spamoor_blob_params():
-    return {
-        "image": constants.DEFAULT_SPAMOOR_BLOB_IMAGE,
-        "scenario": "blob-combined",
-        "throughput": constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT,
-        "sidecars": constants.SPAMOOR_BLOB_DEFAULT_SIDECARS,
-        "max_pending": constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT
-        * constants.SPAMOOR_BLOB_THROUGHPUT_MULTIPLIER,
-        "max_wallets": constants.SPAMOOR_BLOB_DEFAULT_MAX_WALLETS,
-        "spamoor_extra_args": [],
     }
 
 

@@ -16,7 +16,6 @@ additional_services:
   - forkmon
   - dora
   - prometheus_grafana
-  - spamoor_blob
   - custom_flood
   - blobscan
   - blockscout
