@@ -45,6 +45,7 @@ def launch(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -65,6 +66,7 @@ def launch(
         node_selectors,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     service = plan.add_service(service_name, config)
@@ -108,6 +110,7 @@ def get_config(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
@@ -155,8 +158,8 @@ def get_config(
             "-{0}".format(log_level),
             "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             "--chain={0}".format(
-                launcher.network
-                if launcher.network in constants.PUBLIC_NETWORKS
+                network_params.network
+                if network_params.network in constants.PUBLIC_NETWORKS
                 else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
             ),
             "--http",
@@ -184,9 +187,12 @@ def get_config(
         ]
     )
 
+    if network_params.gas_limit > 0:
+        cmd.append("--builder.gaslimit={0}".format(network_params.gas_limit))
+
     if (
-        launcher.network == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in launcher.network
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
         if len(existing_el_clients) > 0:
             cmd.append(
@@ -199,8 +205,8 @@ def get_config(
                 )
             )
     elif (
-        launcher.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in launcher.network
+        network_params.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
@@ -223,7 +229,7 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.EL_TYPE.reth + "_volume_size"
             ],
         )
@@ -288,12 +294,11 @@ def get_config(
 
 
 def new_reth_launcher(
-    el_cl_genesis_data, jwt_file, network, builder_type=False, mev_params=None
+    el_cl_genesis_data, jwt_file, builder_type=False, mev_params=None
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
         builder_type=builder_type,
         mev_params=mev_params,
     )

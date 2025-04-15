@@ -42,6 +42,7 @@ def launch(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -62,6 +63,7 @@ def launch(
         node_selectors,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     service = plan.add_service(service_name, config)
@@ -104,6 +106,7 @@ def get_config(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
@@ -157,28 +160,32 @@ def get_config(
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
         "--data-storage-format={0}".format(
-            "VERKLE" if "verkle-gen" in launcher.network else "BONSAI"
+            "VERKLE" if "verkle-gen" in network_params.network else "BONSAI"
         ),
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--min-gas-price=1000000000",
         "--bonsai-limit-trie-logs-enabled=false"
-        if "verkle" not in launcher.network
+        if "verkle" not in network_params.network
         else "",
     ]
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+
+    if network_params.gas_limit > 0:
+        cmd.append("--target-gas-limit={0}".format(network_params.gas_limit))
+
+    if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--genesis-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/besu.json"
         )
     else:
-        cmd.append("--network=" + launcher.network)
+        cmd.append("--network=" + network_params.network)
 
     if (
-        launcher.network == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in launcher.network
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
         if len(existing_el_clients) > 0:
             cmd.append(
@@ -191,8 +198,8 @@ def get_config(
                 )
             )
     elif (
-        launcher.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in launcher.network
+        network_params.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
@@ -219,7 +226,7 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.EL_TYPE.besu + "_volume_size"
             ],
         )
@@ -257,9 +264,8 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_besu_launcher(el_cl_genesis_data, jwt_file, network):
+def new_besu_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
     )
