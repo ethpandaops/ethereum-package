@@ -36,31 +36,34 @@ def launch_spamoor(
 
     if len(spammers) == 0:
         # add default spammers
-        spammers.append({
-            "name": "EOA Spammer (Kurtosis Package)",
-            "description": "200 type-2 eoa transactions per slot, gas limit 20 gwei",
-            "scenario": "eoatx",
-            "config": {
-                "throughput": 200,
-                "max_pending": 400,
-                "max_wallets": 200,
-                "base_fee": 20,
-            },
-        })
-        spammers.append({
-            "name": "Blob Spammer (Kurtosis Package)",
-            "description": "3 type-4 blob transactions per slot with 1-2 sidecars each, gas/blobgas limit 20 gwei",
-            "scenario": "blob-combined",
-            "config": {
-                "throughput": 3,
-                "sidecars": 2,
-                "max_pending": 6,
-                "max_wallets": 20,
-                "base_fee": 20,
-                "blob_fee": 20,
-            },
-        })
-
+        spammers.append(
+            {
+                "name": "EOA Spammer (Kurtosis Package)",
+                "description": "200 type-2 eoa transactions per slot, gas limit 20 gwei",
+                "scenario": "eoatx",
+                "config": {
+                    "throughput": 200,
+                    "max_pending": 400,
+                    "max_wallets": 200,
+                    "base_fee": 20,
+                },
+            }
+        )
+        spammers.append(
+            {
+                "name": "Blob Spammer (Kurtosis Package)",
+                "description": "3 type-4 blob transactions per slot with 1-2 sidecars each, gas/blobgas limit 20 gwei",
+                "scenario": "blob-combined",
+                "config": {
+                    "throughput": 3,
+                    "sidecars": 2,
+                    "max_pending": 6,
+                    "max_wallets": 20,
+                    "base_fee": 20,
+                    "blob_fee": 20,
+                },
+            }
+        )
 
     template_data = new_config_template_data(spammers)
 
@@ -113,18 +116,15 @@ def get_config(
             el_client.ip_addr,
             el_client.rpc_port_num,
         )
-        
+
         if "builder" in full_name:
             rpchost = "group(mevbuilder)" + rpchost
-        
-        rpchosts.append(rpchost)
 
+        rpchosts.append(rpchost)
 
     cmd = [
         "--privkey={}".format(prefunded_addresses[13].private_key),
-        "--rpchost={}".format(
-            ",".join(rpchosts)
-        ),
+        "--rpchost={}".format(",".join(rpchosts)),
         "--startup-spammer={}".format(config_file_path),
     ]
 
