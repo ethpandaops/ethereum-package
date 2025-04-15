@@ -151,6 +151,10 @@ def get_config(
         "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
         "--tcp-port={0}".format(discovery_port),
     ]
+
+    if network_params.gas_limit > 0:
+        cmd.append("--gas-limit={0}".format(network_params.gas_limit))
+
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--custom-network="
