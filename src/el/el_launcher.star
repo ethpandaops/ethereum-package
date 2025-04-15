@@ -32,7 +32,6 @@ def launch(
             "launcher": geth.new_geth_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
                 network_id,
                 el_cl_data.prague_time,
             ),
@@ -42,7 +41,6 @@ def launch(
             "launcher": besu.new_besu_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
             ),
             "launch_method": besu.launch,
         },
@@ -50,7 +48,6 @@ def launch(
             "launcher": erigon.new_erigon_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
                 network_id,
                 el_cl_data.prague_time,
             ),
@@ -60,7 +57,6 @@ def launch(
             "launcher": nethermind.new_nethermind_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
             ),
             "launch_method": nethermind.launch,
         },
@@ -68,7 +64,6 @@ def launch(
             "launcher": reth.new_reth_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
             ),
             "launch_method": reth.launch,
         },
@@ -76,7 +71,6 @@ def launch(
             "launcher": reth.new_reth_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
                 builder_type=mev_builder_type,
                 mev_params=mev_params,
             ),
@@ -86,7 +80,6 @@ def launch(
             "launcher": ethereumjs.new_ethereumjs_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
             ),
             "launch_method": ethereumjs.launch,
         },
@@ -94,7 +87,6 @@ def launch(
             "launcher": nimbus_eth1.new_nimbus_launcher(
                 el_cl_data,
                 jwt_file,
-                network_params.network,
             ),
             "launch_method": nimbus_eth1.launch,
         },
@@ -142,6 +134,7 @@ def launch(
             node_selectors,
             port_publisher,
             index,
+            network_params,
         )
         # Add participant el additional prometheus metrics
         for metrics_info in el_context.el_metrics_info:

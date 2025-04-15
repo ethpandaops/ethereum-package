@@ -508,7 +508,9 @@ network_params:
   genesis_delay: 20
 
   # The gas limit of the network set at genesis
-  genesis_gaslimit: 30000000
+  # Defaults to 36000000
+
+  genesis_gaslimit: 36000000
 
   # Max churn rate for the network introduced by
   # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
@@ -647,6 +649,15 @@ network_params:
   # Ensure that you set the number of validator keys per node to less than or equal to 8 so that validator custody is not affected
   # Defaults to false
   perfect_peerdas_enabled: false
+
+  # Gas limit for the network
+  # Default to 0
+  # If set to 0, the gas limit will be set to the default gas limit for the clients
+  # Set this value to gas limit in millionths of a gwei
+  # Example: gas_limit: 36000000
+  # This will override the gas limit for each EL client
+  # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
+  gas_limit: 0
 
 # Global parameters for the network
 

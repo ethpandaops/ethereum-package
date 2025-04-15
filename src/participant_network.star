@@ -372,9 +372,7 @@ def launch_participant_network(
             prysm_password_artifact_uuid=prysm_password_artifact_uuid,
             global_tolerations=global_tolerations,
             node_selectors=node_selectors,
-            preset=network_params.preset,
-            network=network_params.network,
-            electra_fork_epoch=network_params.electra_fork_epoch,
+            network_params=network_params,
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
         )
