@@ -84,7 +84,7 @@ def launch(
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        client_name="reth",
+        client_name="reth-builder" if launcher.builder_type else "reth",
         enode=enode,
         ip_addr=service.ip_address,
         rpc_port_num=RPC_PORT_NUM,
