@@ -88,7 +88,7 @@ def get_config(
     ]
 
     if network_params.gas_limit > 0:
-        cmd.append("--defaultGasLimite={0}".format(network_params.gas_limit))
+        cmd.append("--defaultGasLimit={0}".format(network_params.gas_limit))
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

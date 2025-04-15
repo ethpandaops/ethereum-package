@@ -508,9 +508,9 @@ network_params:
   genesis_delay: 20
 
   # The gas limit of the network set at genesis
-  # Defaults to 30000000
+  # Defaults to 36000000
 
-  genesis_gaslimit: 30000000
+  genesis_gaslimit: 36000000
 
   # Max churn rate for the network introduced by
   # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
