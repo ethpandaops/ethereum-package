@@ -78,6 +78,7 @@ def get_config(
 
     if network_params.gas_limit > 0:
         cmd.append("--gas-limit={0}".format(network_params.gas_limit))
+        cmd.append("--builder-proposals")
 
     if len(participant.vc_extra_params):
         cmd.extend([param for param in participant.vc_extra_params])

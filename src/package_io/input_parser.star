@@ -1319,7 +1319,10 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if participant["cl_type"] == "lighthouse":
             participant["cl_extra_params"].append("--builder={0}".format(mev_url))
         if participant["vc_type"] == "lighthouse":
-            participant["vc_extra_params"].append("--builder-proposals")
+            if (
+                parsed_arguments_dict["network_params"]["gas_limit"] == 0
+            ):  # if the gas limit is set we already enable builder-proposals
+                participant["vc_extra_params"].append("--builder-proposals")
         if participant["cl_type"] == "lodestar":
             participant["cl_extra_params"].append("--builder")
             participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
