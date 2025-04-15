@@ -20,7 +20,7 @@ PROFILING_PORT_NUM = 6060
 
 METRICS_PATH = "/metrics"
 
-MIN_PEERS = 1
+MIN_PEERS = 0
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
