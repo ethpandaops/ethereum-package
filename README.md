@@ -674,7 +674,6 @@ additional_services:
   - tx_fuzz
   - custom_flood
   - spamoor
-  - spamoor_blob
   - forkmon
   - blockscout
   - dora
@@ -963,51 +962,18 @@ checkpoint_sync_url: ""
 spamoor_params:
   # The image to use for spamoor
   image: ethpandaops/spamoor:latest
-  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
-  # Valid scenarios are:
-  #  eoatx, erctx, deploytx, deploy-destruct, blobs, gasburnertx
-  # Defaults to eoatx
-  scenario: eoatx
-  # Throughput of spamoor
-  # Defaults to 1000
-  throughput: 1000
-  # Max pending transactions for spamoor
-  # Defaults to 1000
-  max_pending: 1000
-  # Max wallets for spamoor
-  # Defaults to 500
-  max_wallets: 500
-  # Extra parameters to send to spamoor
-  # Defaults to empty
-  spamoor_extra_args: []
-
-# Configuration place for spammor as blob spammer
-spamoor_blob_params:
-  # spamoor docker image to use
-  # Defaults to the latest
-  image: "ethpandaops/spamoor:latest"
-  # The spamoor blob scenario to use (see https://github.com/ethpandaops/spamoor)
-  # Valid blob scenarios are:
-  # - blobs (normal blob transactions only)
-  # - blob-combined (normal & special blobs with replacements)
-  # - blob-conflicting (conflicting blob & dynfee transactions)
-  # - blob-replacements (normal blobs with replacement blob transactions)
-  # Defaults to blob-combined
-  scenario: blob-combined
-  # Throughput of spamoor
-  # Defaults to 3
-  throughput: 3
-  # Maximum number of blobs per transaction
-  # Defaults to 2
-  sidecars: 2
-  # Max pending blob transactions for spamoor
-  # Defaults to 6
-  max_pending: 6
-  # Max wallets for spamoor
-  # Defaults to 20
-  max_wallets: 20
+  # A list of spammers to launch on startup
+  # example:
+  # - scenario: eoatx  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
+  #   name: "Optional name for this example spammer"
+  #   config:
+  #     throughput: 10  # 10 tx per block
+  # - scenario: erctx
+  #   config:
+  #     throughput: 10  # 10 tx per block
+  spammers: []
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
-  spamoor_extra_args: []
+  extra_args: []
 
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
@@ -1246,7 +1212,6 @@ Here's a table of where the keys are used
 | 0             | Builder             | ✅                |                 | As coinbase                |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 4             | spamoor_blob        | ✅                |                 | As the sender of blobs     |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |
 | 7             | mev_flood           | ✅                |                 | As the user_key            |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |

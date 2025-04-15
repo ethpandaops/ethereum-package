@@ -48,7 +48,7 @@ mev_type: flashbots
 
 additional_services:
   - dora
-  - spamoor_blob
+  - spamoor
   - tx_fuzz
   - assertoor
 
