@@ -17,6 +17,7 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    network_params,
     port_publisher,
     vc_index,
 ):
@@ -63,6 +64,9 @@ def get_config(
         "--keymanager-allow-origin=*",
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
+
+    if network_params.gas_limit > 0:
+        cmd.append("--suggested-gas-limit={0}".format(network_params.gas_limit))
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

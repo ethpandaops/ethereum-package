@@ -178,6 +178,7 @@ SUBCATEGORY_PARAMS = {
         "prefunded_accounts",
         "max_payload_size",
         "perfect_peerdas_enabled",
+        "gas_limit",
     ],
     "blockscout_params": [
         "image",

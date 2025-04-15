@@ -362,6 +362,7 @@ def input_parser(plan, input_args):
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
             max_payload_size=result["network_params"]["max_payload_size"],
             perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
+            gas_limit=result["network_params"]["gas_limit"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -932,6 +933,7 @@ def default_network_params():
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
+        "gas_limit": 0,
     }
 
 
@@ -976,6 +978,7 @@ def default_minimal_network_params():
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
+        "gas_limit": 0,
     }
 
 
@@ -1308,7 +1311,10 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if participant["cl_type"] == "lighthouse":
             participant["cl_extra_params"].append("--builder={0}".format(mev_url))
         if participant["vc_type"] == "lighthouse":
-            participant["vc_extra_params"].append("--builder-proposals")
+            if (
+                parsed_arguments_dict["network_params"]["gas_limit"] == 0
+            ):  # if the gas limit is set we already enable builder-proposals
+                participant["vc_extra_params"].append("--builder-proposals")
         if participant["cl_type"] == "lodestar":
             participant["cl_extra_params"].append("--builder")
             participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
