@@ -86,7 +86,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
-    "spamoor_blob_params",
 )
 
 
@@ -120,7 +119,6 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
-    result["spamoor_blob_params"] = get_default_spamoor_blob_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -186,10 +184,6 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
-        elif attr == "spamoor_blob_params":
-            for sub_attr in input_args["spamoor_blob_params"]:
-                sub_value = input_args["spamoor_blob_params"][sub_attr]
-                result["spamoor_blob_params"][sub_attr] = sub_value
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
@@ -458,20 +452,8 @@ def input_parser(plan, input_args):
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
-            scenario=result["spamoor_params"]["scenario"],
-            throughput=result["spamoor_params"]["throughput"],
-            max_pending=result["spamoor_params"]["max_pending"],
-            max_wallets=result["spamoor_params"]["max_wallets"],
-            spamoor_extra_args=result["spamoor_params"]["spamoor_extra_args"],
-        ),
-        spamoor_blob_params=struct(
-            image=result["spamoor_blob_params"]["image"],
-            scenario=result["spamoor_blob_params"]["scenario"],
-            throughput=result["spamoor_blob_params"]["throughput"],
-            sidecars=result["spamoor_blob_params"]["sidecars"],
-            max_pending=result["spamoor_blob_params"]["max_pending"],
-            max_wallets=result["spamoor_blob_params"]["max_wallets"],
-            spamoor_extra_args=result["spamoor_blob_params"]["spamoor_extra_args"],
+            spammers=result["spamoor_params"]["spammers"],
+            extra_args=result["spamoor_params"]["extra_args"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -1233,24 +1215,34 @@ def get_default_xatu_sentry_params():
 def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
-        "scenario": "eoatx",
-        "throughput": 1000,
-        "max_pending": 1000,
-        "max_wallets": 500,
-        "spamoor_extra_args": [],
-    }
-
-
-def get_default_spamoor_blob_params():
-    return {
-        "image": constants.DEFAULT_SPAMOOR_BLOB_IMAGE,
-        "scenario": "blob-combined",
-        "throughput": constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT,
-        "sidecars": constants.SPAMOOR_BLOB_DEFAULT_SIDECARS,
-        "max_pending": constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT
-        * constants.SPAMOOR_BLOB_THROUGHPUT_MULTIPLIER,
-        "max_wallets": constants.SPAMOOR_BLOB_DEFAULT_MAX_WALLETS,
-        "spamoor_extra_args": [],
+        "extra_args": [],
+        "spammers": [
+            # default spammers
+            {
+                "name": "EOA Spammer (Kurtosis Package)",
+                "description": "200 type-2 eoa transactions per slot, gas limit 20 gwei",
+                "scenario": "eoatx",
+                "config": {
+                    "throughput": 200,
+                    "max_pending": 400,
+                    "max_wallets": 200,
+                    "base_fee": 20,
+                },
+            },
+            {
+                "name": "Blob Spammer (Kurtosis Package)",
+                "description": "3 type-4 blob transactions per slot with 1-2 sidecars each, gas/blobgas limit 20 gwei",
+                "scenario": "blob-combined",
+                "config": {
+                    "throughput": 3,
+                    "sidecars": 2,
+                    "max_pending": 6,
+                    "max_wallets": 20,
+                    "base_fee": 20,
+                    "blob_fee": 20,
+                },
+            },
+        ],
     }
 
 

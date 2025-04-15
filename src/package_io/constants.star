@@ -89,7 +89,6 @@ MEV_RS_MEV_TYPE = "mev-rs"
 COMMIT_BOOST_MEV_TYPE = "commit-boost"
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:latest"
-DEFAULT_SPAMOOR_BLOB_IMAGE = "ethpandaops/spamoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
@@ -305,8 +304,3 @@ VOLUME_SIZE["mainnet-shadowfork"] = VOLUME_SIZE["mainnet"]
 VOLUME_SIZE["sepolia-shadowfork"] = VOLUME_SIZE["sepolia"]
 VOLUME_SIZE["holesky-shadowfork"] = VOLUME_SIZE["holesky"]
 VOLUME_SIZE["hoodi-shadowfork"] = VOLUME_SIZE["hoodi"]
-
-SPAMOOR_BLOB_THROUGHPUT_MULTIPLIER = 2
-SPAMOOR_BLOB_DEFAULT_THROUGHPUT = 3
-SPAMOOR_BLOB_DEFAULT_SIDECARS = 2
-SPAMOOR_BLOB_DEFAULT_MAX_WALLETS = 29

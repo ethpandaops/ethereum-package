@@ -12,7 +12,7 @@ mev_params:
 additional_services:
   - tx_fuzz
   - custom_flood
-  - spamoor_blob
+  - spamoor
   - dora
   - prometheus_grafana
 network_params:
