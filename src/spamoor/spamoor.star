@@ -1,4 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
+constants = import_module("../package_io/constants.star")
 SERVICE_NAME = "spamoor"
 
 HTTP_PORT_ID = "http"
@@ -31,8 +32,24 @@ def launch_spamoor(
     participant_configs,
     spamoor_params,
     global_node_selectors,
+    network_params,
+    osaka_time,
 ):
-    template_data = new_config_template_data(spamoor_params.spammers)
+    spammers = []
+
+    for index, spammer in enumerate(spamoor_params.spammers):
+        if (
+            "peerdas" in network_params.network
+            or network_params.fulu_fork_epoch != constants.FAR_FUTURE_EPOCH
+        ) and "blob" in spammer["scenario"]:
+            if "config" not in spammer:
+                spammer["config"] = {}
+            spammer["config"]["fulu_activation"] = osaka_time
+
+        spammers.append(spammer)
+
+
+    template_data = new_config_template_data(spammers)
 
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
@@ -51,6 +68,7 @@ def launch_spamoor(
         participant_configs,
         spamoor_params,
         global_node_selectors,
+        network_params,
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -62,7 +80,16 @@ def get_config(
     participant_configs,
     spamoor_params,
     node_selectors,
+    network_params,
 ):
+    image_name = spamoor_params.image
+    if spamoor_params.image == constants.DEFAULT_SPAMOOR_IMAGE:
+        if (
+            "peerdas" in network_params.network
+            or network_params.fulu_fork_epoch != constants.FAR_FUTURE_EPOCH
+        ):
+            image_name = "ethpandaops/spamoor:blob-v1"
+
     config_file_path = shared_utils.path_join(
         SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         SPAMOOR_CONFIG_FILENAME,
@@ -96,7 +123,7 @@ def get_config(
     ]
 
     return ServiceConfig(
-        image=spamoor_params.image,
+        image=image_name,
         entrypoint=["./spamoor-daemon"],
         cmd=cmd,
         ports=USED_PORTS,
