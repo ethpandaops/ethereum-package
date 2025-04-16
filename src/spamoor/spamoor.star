@@ -63,7 +63,6 @@ def get_config(
     spamoor_params,
     node_selectors,
 ):
-
     config_file_path = shared_utils.path_join(
         SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         SPAMOOR_CONFIG_FILENAME,
