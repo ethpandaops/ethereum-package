@@ -48,7 +48,6 @@ def launch_spamoor(
 
         spammers.append(spammer)
 
-
     template_data = new_config_template_data(spammers)
 
     template_and_data = shared_utils.new_template_and_data(
