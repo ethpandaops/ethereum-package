@@ -39,8 +39,7 @@ participants:
 
 additional_services:
   - dora
-  # - tx_fuzz
-  # - spamoor_blob
+  - tx_fuzz
   - spamoor
 mev_type: flashbots
 
@@ -59,4 +58,3 @@ network_params:
   min_validator_withdrawability_delay: 1
   shard_committee_period: 1
   churn_limit_quotient: 16
-

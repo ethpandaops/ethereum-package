@@ -178,6 +178,7 @@ SUBCATEGORY_PARAMS = {
         "prefunded_accounts",
         "max_payload_size",
         "perfect_peerdas_enabled",
+        "gas_limit",
     ],
     "blockscout_params": [
         "image",
@@ -252,11 +253,8 @@ SUBCATEGORY_PARAMS = {
     ],
     "spamoor_params": [
         "image",
-        "scenario",
-        "throughput",
-        "max_pending",
-        "max_wallets",
-        "spamoor_extra_args",
+        "extra_args",
+        "spammers",
     ],
     "spamoor_blob_params": [
         "image",

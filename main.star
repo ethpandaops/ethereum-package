@@ -12,7 +12,6 @@ validator_ranges = import_module(
 )
 
 tx_fuzz = import_module("./src/tx_fuzz/tx_fuzz.star")
-spamoor_blob = import_module("./src/spamoor_blob/spamoor_blob.star")
 forkmon = import_module("./src/forkmon/forkmon_launcher.star")
 
 dora = import_module("./src/dora/dora_launcher.star")
@@ -664,23 +663,17 @@ def run(plan, args={}):
             )
         elif additional_service == "spamoor":
             plan.print("Launching spamoor")
+            spamoor_config_template = read_file(
+                static_files.SPAMOOR_CONFIG_TEMPLATE_FILEPATH
+            )
             spamoor.launch_spamoor(
                 plan,
+                spamoor_config_template,
                 prefunded_accounts,
-                all_el_contexts,
+                all_participants,
+                args_with_right_defaults.participants,
                 args_with_right_defaults.spamoor_params,
                 global_node_selectors,
-            )
-        elif additional_service == "spamoor_blob":
-            plan.print("Launching spamoor as blob spammer")
-            spamoor_blob.launch_spamoor_blob(
-                plan,
-                prefunded_accounts,
-                all_el_contexts,
-                args_with_right_defaults.spamoor_blob_params,
-                global_node_selectors,
-                args_with_right_defaults.network_params,
-                osaka_time,
             )
         else:
             fail("Invalid additional service %s" % (additional_service))
