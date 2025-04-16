@@ -289,7 +289,7 @@ participants:
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
-    # Valid values are nimbus, lighthouse, lodestar, teku, prysm and vero
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, vero and vouch
     # ( The prysm validator only works with a prysm CL client )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
@@ -302,6 +302,7 @@ participants:
     # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
     # - teku: consensys/teku:latest
     # - vero: ghcr.io/serenita-org/vero:master
+    # - vouch: attestant/vouch:latest
     vc_image: ""
 
     # The log level string that this participant's validator client should log at
