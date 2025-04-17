@@ -51,6 +51,4 @@ mev_params:
 
 network_params:
   electra_fork_epoch: 0
-  min_validator_withdrawability_delay: 1
-  shard_committee_period: 1
-  churn_limit_quotient: 16
+  prefunded_accounts: '{"0xb9e79D19f651a941757b35830232E7EFC77E1c79": {"balance": "1000ETH"}}'
