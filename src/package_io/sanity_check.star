@@ -256,15 +256,6 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "spammers",
     ],
-    "spamoor_blob_params": [
-        "image",
-        "scenario",
-        "throughput",
-        "sidecars",
-        "max_pending",
-        "max_wallets",
-        "spamoor_extra_args",
-    ],
     "ethereum_genesis_generator_params": [
         "image",
     ],
@@ -295,7 +286,6 @@ ADDITIONAL_SERVICES_PARAMS = [
     "apache",
     "tracoor",
     "spamoor",
-    "spamoor_blob",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
