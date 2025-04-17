@@ -3,7 +3,7 @@ participants:
     el_image: ethereum/client-go:v1.15.7
     el_extra_params: ["--miner.extradata=pawanRocks"]
     cl_type: lighthouse
-    cl_image: sigp/lighthouse:v7.0.0-beta.5
+    cl_image: sigp/lighthouse:v7.0.0-beta.7
 
   - el_type: geth
     el_image: ethereum/client-go:v1.15.7
@@ -46,8 +46,8 @@ mev_type: flashbots
 mev_params:
   mev_relay_image: flashbots/mev-boost-relay:0.30.0rc1
   mev_boost_image: flashbots/mev-boost:1.9rc3
-  mev_builder_cl_image: sigp/lighthouse:v7.0.0-beta.5
-  mev_builder_image: ethpandaops/reth-rbuilder:latest-1.3.8
+  mev_builder_cl_image: sigp/lighthouse:v7.0.0-beta.7
+  mev_builder_image: ethpandaops/reth-rbuilder:develop-8835bb1
 
 network_params:
   electra_fork_epoch: 0
