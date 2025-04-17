@@ -93,7 +93,7 @@ Once the Ethereum network is up and running, verification logic will be run to e
 [enclave-context]: https://docs.kurtosistech.com/kurtosis/core-lib-documentation#enclavecontext
 [main-function]: https://github.com/ethpandaops/ethereum-package/blob/main/main.star#22
 [package-io]: https://github.com/ethpandaops/ethereum-package/tree/main/src/package_io
-[participant-network]: https://github.com/ethpandaops/ethereum-package/tree/main/src/
+[participant-network]: https://github.com/ethpandaops/ethereum-package/tree/main/src/participant_network.star
 [ethereum-genesis-generator]: https://github.com/ethpandaops/ethereum-genesis-generator
 [static-files]: https://github.com/ethpandaops/ethereum-package/tree/main/static_files
 [testnet-verifier]: https://github.com/ethpandaops/ethereum-package/tree/main/src/testnet_verifier
