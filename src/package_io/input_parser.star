@@ -1451,7 +1451,6 @@ def docker_cache_image_override(plan, result):
         "prometheus_params.image",
         "grafana_params.image",
         "spamoor_params.image",
-        "spamoor_blob_params.image",
         "ethereum_genesis_generator_params.image",
     ]
 
