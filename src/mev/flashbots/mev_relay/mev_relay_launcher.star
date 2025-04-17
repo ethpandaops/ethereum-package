@@ -88,7 +88,6 @@ def launch_mev_relay(
         "SEC_PER_SLOT": str(seconds_per_slot),
         "LOG_LEVEL": "debug",
         "DB_TABLE_PREFIX": "custom",
-        "ENABLE_BUILDER_CANCELLATIONS": "1",
         "USE_SSZ_ENCODING_PUBLISH_BLOCK": "1",
     }
 
