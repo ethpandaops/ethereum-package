@@ -674,6 +674,8 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 args_with_right_defaults.spamoor_params,
                 global_node_selectors,
+                args_with_right_defaults.network_params,
+                osaka_time,
             )
         else:
             fail("Invalid additional service %s" % (additional_service))
