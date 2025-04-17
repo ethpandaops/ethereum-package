@@ -49,10 +49,6 @@ mev_params:
   mev_builder_cl_image: sigp/lighthouse:v7.0.0-beta.5
   mev_builder_image: ethpandaops/reth-rbuilder:latest-1.3.8
 
-spamoor_params:
-  throughput: 10
-
-
 network_params:
   electra_fork_epoch: 0
   min_validator_withdrawability_delay: 1
