@@ -90,6 +90,7 @@ network_params:
 additional_services: []
 dora_params:
   image: ""
+  env: {}
 tx_spammer_params:
   tx_spammer_extra_args: []
 goomy_blob_params:

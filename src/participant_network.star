@@ -26,6 +26,13 @@ vc = import_module("./vc/vc_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
 
+dora = import_module("./dora/dora_launcher.star")
+transaction_spammer = import_module("./transaction_spammer/transaction_spammer.star")
+goomy_blob = import_module("./goomy_blob/goomy_blob.star")
+prometheus = import_module("./prometheus/prometheus_launcher.star")
+grafana = import_module("./grafana/grafana_launcher.star")
+assertoor = import_module("./assertoor/assertoor_launcher.star")
+
 
 def launch_participant_network(
     plan,
@@ -412,6 +419,71 @@ def launch_participant_network(
         )
 
         all_participants.append(participant_entry)
+
+    # Launch additional services
+    for additional_service in network_params.additional_services:
+        if additional_service == "dora":
+            dora.launch_dora(
+                plan,
+                static_files.DORA_CONFIG_TEMPLATE_FILEPATH,
+                all_participants,
+                participants,
+                network_params,
+                network_params.dora_params,
+                global_node_selectors,
+                [],
+                [],
+                port_publisher,
+                len(all_participants),
+            )
+        elif additional_service == "tx_spammer":
+            transaction_spammer.launch_transaction_spammer(
+                plan,
+                [],
+                "",
+                network_params.tx_spammer_params,
+                network_params.electra_fork_epoch,
+                global_node_selectors,
+            )
+        elif additional_service == "goomy_blob":
+            goomy_blob.launch_goomy_blob(
+                plan,
+                [],
+                all_el_contexts,
+                all_cl_contexts[0],
+                network_params.seconds_per_slot,
+                network_params.goomy_blob_params,
+                global_node_selectors,
+            )
+        elif additional_service == "prometheus_grafana":
+            prometheus.launch_prometheus(
+                plan,
+                all_el_contexts,
+                all_cl_contexts,
+                all_vc_contexts,
+                [],
+                [],
+                global_node_selectors,
+                network_params.prometheus_params,
+            )
+            grafana.launch_grafana(
+                plan,
+                static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH,
+                static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH,
+                "",
+                global_node_selectors,
+                network_params.grafana_params,
+            )
+        elif additional_service == "assertoor":
+            assertoor.launch_assertoor(
+                plan,
+                static_files.ASSERTOOR_CONFIG_TEMPLATE_FILEPATH,
+                all_participants,
+                participants,
+                network_params,
+                network_params.assertoor_params,
+                global_node_selectors,
+            )
 
     return (
         all_participants,
