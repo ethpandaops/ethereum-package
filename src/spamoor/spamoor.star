@@ -34,7 +34,25 @@ def launch_spamoor(
     global_node_selectors,
     network_params,
     osaka_time,
+    new_param1=None,
+    new_param2=None,
 ):
+    # Validate new parameters
+    if new_param1 is not None and not isinstance(new_param1, str):
+        raise ValueError("new_param1 must be a string")
+    if new_param2 is not None and not isinstance(new_param2, int):
+        raise ValueError("new_param2 must be an integer")
+
+    # Provide default values for new parameters
+    if new_param1 is None:
+        new_param1 = "default_value1"
+    if new_param2 is None:
+        new_param2 = 42
+
+    # Log the values of new parameters
+    plan.print("new_param1: {}".format(new_param1))
+    plan.print("new_param2: {}".format(new_param2))
+
     spammers = []
 
     for index, spammer in enumerate(spamoor_params.spammers):
@@ -94,26 +112,16 @@ def get_config(
         SPAMOOR_CONFIG_FILENAME,
     )
 
-    rpchosts = []
-    for index, participant in enumerate(participant_contexts):
-        (
-            full_name,
-            cl_client,
-            el_client,
-            participant_config,
-        ) = shared_utils.get_client_names(
-            participant, index, participant_contexts, participant_configs
-        )
-
-        rpchost = "http://{0}:{1}".format(
-            el_client.ip_addr,
-            el_client.rpc_port_num,
-        )
-
-        if "builder" in full_name:
-            rpchost = "group(mevbuilder)" + rpchost
-
-        rpchosts.append(rpchost)
+    rpchosts = [
+        "http://{0}:{1}".format(el_client.ip_addr, el_client.rpc_port_num)
+        for index, participant in enumerate(participant_contexts)
+        for full_name, cl_client, el_client, participant_config in [
+            shared_utils.get_client_names(
+                participant, index, participant_contexts, participant_configs
+            )
+        ]
+        if "builder" not in full_name
+    ]
 
     cmd = [
         "--privkey={}".format(prefunded_addresses[13].private_key),
