@@ -121,6 +121,9 @@ def get_config(
         "--startup-spammer={}".format(config_file_path),
     ]
 
+    for index, extra_arg in enumerate(spamoor_params.extra_args):
+        cmd.append(extra_arg)
+
     return ServiceConfig(
         image=image_name,
         entrypoint=["./spamoor-daemon"],
