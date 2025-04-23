@@ -299,9 +299,6 @@ def run(plan, args={}):
             all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
         )
         beacon_uri = all_cl_contexts[-1].beacon_http_url
-        beacon_uris = ",".join(
-            ["{0}".format(context.beacon_http_url) for context in all_cl_contexts]
-        )
 
         first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
@@ -322,7 +319,7 @@ def run(plan, args={}):
                 plan,
                 mev_params,
                 network_id,
-                beacon_uris,
+                beacon_uri,
                 genesis_validators_root,
                 blocksim_uri,
                 network_params.seconds_per_slot,
