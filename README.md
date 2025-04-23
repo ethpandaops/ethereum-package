@@ -872,7 +872,7 @@ mev_params:
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
   # The subsidy to use for the builder (in ETH)
-  mev_builder_subsidy: "0"
+  mev_builder_subsidy: 0
   # The image to use for mev-boost
   mev_boost_image: ethpandaops/mev-boost:develop
   # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
