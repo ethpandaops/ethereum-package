@@ -173,7 +173,7 @@ def run(plan, args={}):
             network_params,
             constants.VALIDATING_REWARDS_ACCOUNT,
             network_params.preregistered_validator_keys_mnemonic,
-            args_with_right_defaults.mev_params.mev_builder_extra_data,
+            args_with_right_defaults.mev_params,
             enumerate(args_with_right_defaults.participants),
             global_node_selectors,
         )

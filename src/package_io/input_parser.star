@@ -213,6 +213,14 @@ def input_parser(plan, input_args):
             )
         )
 
+    if (
+        result["mev_params"].get("mev_builder_subsidy") != 0
+        and result["network_params"].get("prefunded_accounts") == {}
+    ):
+        fail(
+            'mev_builder_subsidy is not 0 but prefunded_accounts is empty, please provide a prefunded account for the builder. Example: prefunded_accounts: \'{"0xb9e79D19f651a941757b35830232E7EFC77E1c79": {"balance": "100000ETH"}}\''
+        )
+
     if result["docker_cache_params"]["enabled"]:
         docker_cache_image_override(plan, result)
     else:
@@ -369,6 +377,7 @@ def input_parser(plan, input_args):
             mev_builder_image=result["mev_params"]["mev_builder_image"],
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
+            mev_builder_subsidy=result["mev_params"]["mev_builder_subsidy"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
@@ -1083,6 +1092,7 @@ def get_default_mev_params(mev_type, preset):
     else:
         mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
     mev_builder_extra_data = None
+    mev_builder_subsidy = 0
     mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
     mev_boost_args = ["mev-boost", "--relay-check"]
     mev_relay_api_extra_args = []
@@ -1138,6 +1148,7 @@ def get_default_mev_params(mev_type, preset):
         "mock_mev_image": mev_builder_image
         if mev_type == constants.MOCK_MEV_TYPE
         else None,
+        "mev_builder_subsidy": mev_builder_subsidy,
         "mev_builder_cl_image": mev_builder_cl_image,
         "mev_builder_extra_data": mev_builder_extra_data,
         "mev_builder_extra_args": mev_builder_extra_args,
