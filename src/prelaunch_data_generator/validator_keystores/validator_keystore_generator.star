@@ -274,9 +274,9 @@ def generate_valdiator_keystores_in_parallel(
             # no output dir path as validator count is 0
             continue
         generation_finished_filepath = finished_files_to_verify[idx]
-        verificaiton_command = ["ls", generation_finished_filepath]
+        verification_command = ["ls", generation_finished_filepath]
         plan.wait(
-            recipe=ExecRecipe(command=verificaiton_command),
+            recipe=ExecRecipe(command=verification_command),
             service_name=service_name,
             field="code",
             assertion="==",

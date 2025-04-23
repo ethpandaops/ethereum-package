@@ -18,7 +18,7 @@ VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
 MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 128
-MAX_MEMORY = 2048
+MAX_MEMORY = 8192
 
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -122,7 +122,7 @@ def get_config(
     IMAGE_NAME = assertoor_params.image
 
     if assertoor_params.image == constants.DEFAULT_ASSERTOOR_IMAGE:
-        if network_params.fulu_fork_epoch < constants.FULU_FORK_EPOCH:
+        if network_params.fulu_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = "ethpandaops/assertoor:fulu-support"
 
     return ServiceConfig(

@@ -100,71 +100,45 @@ def label_maker(
 
 
 def get_devnet_enodes(plan, filename):
-    enode_list = plan.run_python(
+    enode_list = plan.run_sh(
         description="Getting devnet enodes",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="""
-with open("/network-configs/enodes.txt") as bootnode_file:
-    bootnodes = []
-    for line in bootnode_file:
-        line = line.strip()
-        bootnodes.append(line)
-print(",".join(bootnodes), end="")
-            """,
+        run="cat /network-configs/enodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
     )
     return enode_list.output
 
 
 def get_devnet_enrs_list(plan, filename):
-    enr_list = plan.run_python(
+    enr_list = plan.run_sh(
         description="Creating devnet enrs list",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="""
-with open("/network-configs/bootstrap_nodes.txt") as bootnode_file:
-    bootnodes = []
-    for line in bootnode_file:
-        line = line.strip()
-        bootnodes.append(line)
-print(",".join(bootnodes), end="")
-            """,
+        run="cat /network-configs/bootstrap_nodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
     )
     return enr_list.output
 
 
 def read_genesis_timestamp_from_config(plan, filename):
-    value = plan.run_python(
+    value = plan.run_sh(
         description="Reading genesis timestamp from config",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        packages=["PyYAML"],
-        run="""
-import yaml
-with open("/network-configs/config.yaml", "r") as f:
-    yaml_data = yaml.safe_load(f)
-
-min_genesis_time = int(yaml_data.get("MIN_GENESIS_TIME", 0))
-genesis_delay = int(yaml_data.get("GENESIS_DELAY", 0))
-print(min_genesis_time + genesis_delay, end="")
-        """,
+        image=constants.DEFAULT_YQ_IMAGE,
+        run="MIN_GENESIS_TIME=$(cat /network-configs/config.yaml | yq .MIN_GENESIS_TIME | tr -d '\n') && \
+            GENESIS_DELAY=$(cat /network-configs/config.yaml | yq .GENESIS_DELAY | tr -d '\n') && \
+            echo -n $((MIN_GENESIS_TIME + GENESIS_DELAY))",
     )
     return value.output
 
 
 def read_genesis_network_id_from_config(plan, filename):
-    value = plan.run_python(
+    value = plan.run_sh(
         description="Reading genesis network id from config",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        packages=["PyYAML"],
-        run="""
-import yaml
-with open("/network-configs/config.yaml", "r") as f:
-    yaml_data = yaml.safe_load(f)
-network_id = int(yaml_data.get("DEPOSIT_NETWORK_ID", 0))
-print(network_id, end="")
-        """,
+        image=constants.DEFAULT_YQ_IMAGE,
+        run="cat /network-configs/config.yaml | yq .DEPOSIT_NETWORK_ID | tr -d '\n'",
     )
     return value.output
 
@@ -189,15 +163,9 @@ def get_network_name(network):
 # time.now() runs everytime bringing non determinism
 # note that the timestamp it returns is a string
 def get_final_genesis_timestamp(plan, padding):
-    result = plan.run_python(
+    result = plan.run_sh(
         description="Getting final genesis timestamp",
-        run="""
-import time
-import sys
-padding = int(sys.argv[1])
-print(int(time.time()+padding), end="")
-""",
-        args=[str(padding)],
+        run="echo -n $(($(date +%s) + " + str(padding) + "))",
         store=[StoreSpec(src="/tmp", name="final-genesis-timestamp")],
     )
     return result.output

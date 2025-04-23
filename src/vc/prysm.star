@@ -22,6 +22,7 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    network_params,
     port_publisher,
     vc_index,
 ):
@@ -66,6 +67,9 @@ def get_config(
                 ),
             ]
         )
+
+    if network_params.gas_limit > 0:
+        cmd.append("--suggested-gas-limit={0}".format(network_params.gas_limit))
 
     keymanager_api_cmd = [
         "--rpc",

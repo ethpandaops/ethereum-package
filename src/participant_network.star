@@ -44,7 +44,6 @@ def launch_participant_network(
     network_id = network_params.network_id
     latest_block = ""
     num_participants = len(args_with_right_defaults.participants)
-    prague_time = 0
     shadowfork_block = "latest"
     total_number_of_validator_keys = 0
     if (
@@ -84,10 +83,15 @@ def launch_participant_network(
             static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
         )
 
+        el_cl_genesis_additional_contracts_template = read_file(
+            static_files.EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH
+        )
+
         el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
             plan,
             ethereum_genesis_generator_image,
             el_cl_genesis_config_template,
+            el_cl_genesis_additional_contracts_template,
             final_genesis_timestamp,
             network_params,
             total_number_of_validator_keys,
@@ -100,7 +104,7 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_ephemery.launch(plan, prague_time)
+        ) = launch_ephemery.launch(plan)
     elif (
         network_params.network in constants.PUBLIC_NETWORKS
         and network_params.network != constants.NETWORK_NAME.ephemery
@@ -111,7 +115,7 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_public_network.launch(plan, network_params.network, prague_time)
+        ) = launch_public_network.launch(plan, network_params.network)
     else:
         # We are running a devnet
         (
@@ -122,7 +126,6 @@ def launch_participant_network(
         ) = launch_devnet.launch(
             plan,
             network_params.network,
-            prague_time,
             network_params.devnet_repo,
         )
 
@@ -369,9 +372,7 @@ def launch_participant_network(
             prysm_password_artifact_uuid=prysm_password_artifact_uuid,
             global_tolerations=global_tolerations,
             node_selectors=node_selectors,
-            preset=network_params.preset,
-            network=network_params.network,
-            electra_fork_epoch=network_params.electra_fork_epoch,
+            network_params=network_params,
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
         )
@@ -439,4 +440,5 @@ def launch_participant_network(
         el_cl_data.genesis_validators_root,
         el_cl_data.files_artifact_uuid,
         network_id,
+        el_cl_data.osaka_time,
     )

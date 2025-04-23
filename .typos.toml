@@ -1,0 +1,12 @@
+[default]
+extend-ignore-re = [
+    # Ignore Ethereum Node Records (ENR)
+    "enr:-.*",
+    # Ignore blutgang config typo
+    "supress_rpc_check",
+]
+
+[files]
+extend-exclude = [
+  "CHANGELOG.md",
+]

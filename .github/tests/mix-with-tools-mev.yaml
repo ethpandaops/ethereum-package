@@ -12,13 +12,10 @@ participants:
   - el_type: ethereumjs
     cl_type: teku
 additional_services:
-  - tx_spammer
-  - blob_spammer
-  - el_forkmon
-  - beacon_metrics_gazer
+  - tx_fuzz
+  - forkmon
   - dora
   - prometheus_grafana
-  - spamoor_blob
   - custom_flood
   - blobscan
   - blockscout
@@ -31,5 +28,5 @@ ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 mev_type: flashbots
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay:latest
+  mev_relay_image: ethpandaops/mev-boost-relay:main
 persistent: True

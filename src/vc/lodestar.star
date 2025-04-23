@@ -27,7 +27,7 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
-    preset,
+    network_params,
     port_publisher,
     vc_index,
 ):
@@ -87,6 +87,9 @@ def get_config(
         "--keymanager.tokenFile=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
+    if network_params.gas_limit > 0:
+        cmd.append("--defaultGasLimit={0}".format(network_params.gas_limit))
+
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.vc_extra_params])
@@ -122,7 +125,7 @@ def get_config(
         )
 
     env_vars = participant.vc_extra_env_vars
-    if preset == "minimal":
+    if network_params.preset == "minimal":
         env_vars["LODESTAR_PRESET"] = "minimal"
 
     config_args = {

@@ -18,7 +18,7 @@ def shadowfork_prep(
             name="fetch-chain-id",
             description="Fetching the chain id",
             run="curl -s https://ephemery.dev/latest/config.yaml | yq .DEPOSIT_CHAIN_ID | tr -d '\n'",
-            image="linuxserver/yq",
+            image=constants.DEFAULT_YQ_IMAGE,
         )
         network_id = chain_id.output
     else:
@@ -29,12 +29,13 @@ def shadowfork_prep(
         name="fetch-latest-block",
         description="Fetching the latest block",
         run="mkdir -p /shadowfork && \
-            curl -o /shadowfork/latest_block.json "
+            curl -s -o /shadowfork/latest_block.json "
         + network_params.network_sync_base_url
         + base_network
         + "/geth/"
         + shadowfork_block
-        + "/_snapshot_eth_getBlockByNumber.json",
+        + "/_snapshot_eth_getBlockByNumber.json && \
+           cat /shadowfork/latest_block.json",
         store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
     )
 
@@ -107,4 +108,5 @@ def shadowfork_prep(
             interval="1s",
             timeout="6h",  # 6 hours should be enough for the biggest network
         )
+        plan.remove_service(name="shadowfork-{0}".format(el_service_name))
     return latest_block, network_id

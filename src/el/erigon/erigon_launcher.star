@@ -39,6 +39,7 @@ def launch(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -59,6 +60,7 @@ def launch(
         node_selectors,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     service = plan.add_service(service_name, config)
@@ -103,6 +105,7 @@ def get_config(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -139,7 +142,7 @@ def get_config(
         "erigon",
         "{0}".format(
             "--override.prague=" + str(launcher.prague_time)
-            if constants.NETWORK_NAME.shadowfork in launcher.network
+            if constants.NETWORK_NAME.shadowfork in network_params.network
             else ""
         ),
         "--networkid={0}".format(launcher.networkid),
@@ -159,17 +162,14 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.vhosts=*",
+        "--externalcl",
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--db.size.limit={0}MB".format(
-            int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.besu + "_volume_size"
-            ],
-        ),
     ]
+
+    if network_params.gas_limit > 0:
+        cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
@@ -177,16 +177,28 @@ def get_config(
     }
 
     if persistent:
+        cmd.append(
+            "--db.size.limit={0}MB".format(
+                int(participant.el_volume_size)
+                if int(participant.el_volume_size) > 0
+                else constants.VOLUME_SIZE[network_params.network][
+                    constants.EL_TYPE.erigon + "_volume_size"
+                ],
+            )
+        )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.EL_TYPE.erigon + "_volume_size"
             ],
         )
 
-    if launcher.network == constants.NETWORK_NAME.kurtosis:
+    if (
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -198,8 +210,8 @@ def get_config(
                 )
             )
     elif (
-        launcher.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in launcher.network
+        network_params.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
@@ -211,7 +223,7 @@ def get_config(
     if len(participant.el_extra_params) > 0:
         cmd.extend([param for param in participant.el_extra_params])
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if network_params.network not in constants.PUBLIC_NETWORKS:
         command_arg = [init_datadir_cmd_str, " ".join(cmd)]
         command_arg_str = " && ".join(command_arg)
     else:
@@ -251,11 +263,10 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid, prague_time):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, networkid, prague_time):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
         networkid=networkid,
         prague_time=prague_time,
     )

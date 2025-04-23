@@ -51,6 +51,7 @@ def launch(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -74,6 +75,7 @@ def launch(
         checkpoint_sync_url,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     beacon_service = plan.add_service(beacon_service_name, config)
@@ -146,6 +148,7 @@ def get_beacon_config(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -196,8 +199,8 @@ def get_beacon_config(
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
         "--network={0}".format(
-            launcher.network
-            if launcher.network in constants.PUBLIC_NETWORKS
+            network_params.network
+            if network_params.network in constants.PUBLIC_NETWORKS
             else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml"
         ),
         "--data-path=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
@@ -224,8 +227,6 @@ def get_beacon_config(
         "--metrics-categories=BEACON,PROCESS,LIBP2P,JVM,NETWORK,PROCESS",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        # To enable syncing other networks too without checkpoint syncing
-        "--ignore-weak-subjectivity-period-enabled=true",
     ]
     validator_default_cmd = [
         "--validator-keys={0}:{1}".format(
@@ -251,21 +252,30 @@ def get_beacon_config(
         "--p2p-subscribe-all-custody-subnets-enabled=true",
     ]
 
+    if network_params.perfect_peerdas_enabled and participant_index < 16:
+        cmd.append(
+            "--Xp2p-private-key-file-secp256k1="
+            + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
+            + "/node-key-file-{0}".format(participant_index + 1)
+        )
+
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
     if checkpoint_sync_enabled:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
+    else:
+        cmd.append("--ignore-weak-subjectivity-period-enabled=true")
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
-            "--initial-state="
+            "--genesis-state="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
         if (
-            launcher.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network
+            network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
             if bootnode_contexts != None:
                 cmd.append(
@@ -277,14 +287,14 @@ def get_beacon_config(
                         ]
                     )
                 )
-        elif launcher.network == constants.NETWORK_NAME.ephemery:
+        elif network_params.network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--p2p-discovery-bootnodes="
                 + shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
             )
-        elif constants.NETWORK_NAME.shadowfork in launcher.network:
+        elif constants.NETWORK_NAME.shadowfork in network_params.network:
             cmd.append(
                 "--p2p-discovery-bootnodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -308,6 +318,11 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
+    if network_params.perfect_peerdas_enabled and participant_index < 16:
+        files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
+            artifact_names=["node-key-file-{0}".format(participant_index + 1)]
+        )
+
     if node_keystore_files != None and not participant.use_separate_vc:
         cmd.extend(validator_default_cmd)
         files[
@@ -322,12 +337,19 @@ def get_beacon_config(
                 shared_utils.get_port_specs(validator_public_port_assignment)
             )
 
+        if network_params.gas_limit > 0:
+            cmd.append(
+                "--validators-builder-registration-default-gas-limit={0}".format(
+                    network_params.gas_limit
+                )
+            )
+
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.CL_TYPE.teku + "_volume_size"
             ],
         )
@@ -367,10 +389,9 @@ def get_beacon_config(
     return ServiceConfig(**config_args)
 
 
-def new_teku_launcher(el_cl_genesis_data, jwt_file, network_params, keymanager_file):
+def new_teku_launcher(el_cl_genesis_data, jwt_file, keymanager_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network_params.network,
         keymanager_file=keymanager_file,
     )

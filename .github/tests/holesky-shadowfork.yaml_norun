@@ -1,10 +1,10 @@
 participants:
   - el_type: geth
-    el_image: ethereum/client-go:v1.13.14
+    el_image: ethpandaops/geth:prague-devnet-5-f85cde7
     cl_type: teku
-    cl_image: consensys/teku:24.2.0
+    cl_image: consensys/teku:develop
 network_params:
-  dencun_fork_epoch: 0
+  electra_fork_epoch: 4
   network: holesky-shadowfork
 additional_services:
   - dora

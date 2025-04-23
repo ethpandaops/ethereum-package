@@ -69,7 +69,7 @@ participants:
 network_params:
   network: kurtosis
   network_id: "3151908"
-  deposit_contract_address: "0x4242424242424242424242424242424242424242"
+  deposit_contract_address: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
   seconds_per_slot: 12
   num_validator_keys_per_node: 64
   preregistered_validator_keys_mnemonic:
@@ -86,26 +86,28 @@ network_params:
   min_validator_withdrawability_delay: 256
   shard_committee_period: 256
   deneb_fork_epoch: 0
-  electra_fork_epoch: 100000000
-  fulu_fork_epoch: 100000001
+  electra_fork_epoch: 18446744073709551615
+  fulu_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
   data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
   custody_requirement: 4
   max_blobs_per_block_electra: 9
   target_blobs_per_block_electra: 6
+  base_fee_update_fraction_electra: 5007716
   max_blobs_per_block_fulu: 12
   target_blobs_per_block_fulu: 9
+  base_fee_update_fraction_fulu: 5007716
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   prefunded_accounts: {}
 additional_services: []
 dora_params:
   image: ""
-tx_spammer_params:
-  tx_spammer_extra_args: []
-spamoor_blob_params:
-  spamoor_extra_args: []
+tx_fuzz_params:
+  tx_fuzz_extra_args: []
+spamoor_params:
+  extra_args: []
 prometheus_params:
   storage_tsdb_retention_time: "1d"
   storage_tsdb_retention_size: "512MB"
@@ -137,10 +139,10 @@ disable_peer_scoring: false
 persistent: false
 mev_type: null
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay
+  mev_relay_image: ethpandaops/mev-boost-relay:main
   mev_builder_image: ethpandaops/flashbots-builder:main
   mev_builder_cl_image: sigp/lighthouse:latest
-  mev_boost_image: flashbots/mev-boost
+  mev_boost_image: ethpandaops/mev-boost:develop
   mev_boost_args: ["mev-boost", "--relay-check"]
   mev_relay_api_extra_args: []
   mev_relay_housekeeper_extra_args: []
@@ -176,7 +178,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:3.5.1
+  image: ethpandaops/ethereum-genesis-generator:4.0.3
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

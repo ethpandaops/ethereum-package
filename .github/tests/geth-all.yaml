@@ -12,5 +12,5 @@ participants:
   - el_type: geth
     cl_type: grandine
 additional_services:
-  - spamoor_blob
+  - spamoor
   - dora

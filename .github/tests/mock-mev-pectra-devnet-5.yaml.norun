@@ -29,14 +29,17 @@ network_params:
 
 additional_services:
   - dora
-  - spamoor_blob
-  - tx_spammer
+  - spamoor
+  - tx_fuzz
   - assertoor
 dora_params:
   image: "ethpandaops/dora:master-latest"
-spamoor_blob_params:
-  throughput: 10 
-  max_blobs: 2  
-  max_pending: 40 
+spamoor_params:
+  spammers:
+    - scenario: blob-combined
+      config:
+        throughput: 10
+        sidecars: 2
+        max_pending: 40
 
 global_log_level: debug
