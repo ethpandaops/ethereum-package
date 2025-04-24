@@ -30,6 +30,12 @@ participants:
     cl_type: nimbus
     cl_image: statusim/nimbus-eth2:multiarch-v25.4.0
 
+  - el_type: geth
+    el_image: ethereum/client-go:v1.15.9
+    el_extra_params: ["--miner.extradata=pawanRocks"]
+    cl_type: grandine
+    cl_image: sifrai/grandine:1.1.0
+
 additional_services:
   - dora
   - tx_fuzz
