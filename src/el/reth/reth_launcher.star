@@ -17,6 +17,8 @@ DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 RBUILDER_PORT_NUM = 8645
+RBUILDER_METRICS_PORT_NUM = 6060
+
 # Paths
 METRICS_PATH = "/metrics"
 
@@ -144,6 +146,9 @@ def get_config(
         or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
         used_port_assignments[constants.RBUILDER_PORT_ID] = RBUILDER_PORT_NUM
+        used_port_assignments[
+            constants.RBUILDER_METRICS_PORT_ID
+        ] = RBUILDER_METRICS_PORT_NUM
 
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -248,6 +253,9 @@ def get_config(
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
         cmd.append("--engine.persistence-threshold=0")
         cmd.append("--engine.memory-block-buffer-target=0")
+        cmd.append(
+            "--txpool.no-local-transactions-propagation"
+        )  # disable tx propagation so that builder will have juicy blocks
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME
