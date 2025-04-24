@@ -38,10 +38,10 @@ additional_services:
 mev_type: flashbots
 
 mev_params:
-  mev_relay_image: ethpandaops/mev-boost-relay:ssz-91648d3
+  mev_relay_image: ethpandaops/mev-boost-relay:main-47cc71d
   mev_boost_image: ethpandaops/mev-boost:develop-d65d507
   mev_builder_cl_image: sigp/lighthouse:v7.0.0
-  mev_builder_image: ethpandaops/reth-rbuilder:develop-8cd28c1
+  mev_builder_image: ethpandaops/reth-rbuilder:develop-4fc82b7
   mev_builder_subsidy: 1
 
 network_params:
