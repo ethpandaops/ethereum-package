@@ -6,13 +6,13 @@ participants:
     cl_image: sigp/lighthouse:v7.0.0
 
   - el_type: nethermind
-    el_image: ethpandaops/nethermind:master-7d85c4e
+    el_image: nethermindeth/nethermind:release-1.31.9-genesis-pectra
     el_extra_params: ["--Blocks.ExtraData=TekuFromLocal"]
     cl_type: teku
     cl_image: consensys/teku:25.4.0
 
   - el_type: reth
-    el_image: ethpandaops/reth:klkvr-fix-extra-data-a794613
+    el_image: ghcr.io/paradigmxyz/reth:v1.3.12
     el_extra_params: ["--builder.extradata=lodestarFromLocal"]
     cl_type: lodestar
     cl_image: chainsafe/lodestar:v1.29.0
@@ -39,9 +39,9 @@ mev_type: flashbots
 
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:ssz-91648d3
-  mev_boost_image: flashbots/mev-boost:1.9
+  mev_boost_image: ethpandaops/mev-boost:develop-d65d507
   mev_builder_cl_image: sigp/lighthouse:v7.0.0
-  mev_builder_image: ethpandaops/reth-rbuilder:bid-delay-b6caa4a
+  mev_builder_image: ethpandaops/reth-rbuilder:develop-8cd28c1
   mev_builder_subsidy: 1
 
 network_params:
@@ -59,3 +59,5 @@ assertoor_params:
         walletCount: 2  # number of wallets to send from for each request type
         throughputPerWallet: 2 # number of transactions per slot, type and wallet
         maxPendingPerWallet: 10 # max number of pending requests per type
+
+global_log_level: debug
