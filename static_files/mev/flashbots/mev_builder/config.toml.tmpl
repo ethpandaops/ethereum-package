@@ -24,12 +24,16 @@ ignore_cancellable_orders = true
 
 sbundle_mergeable_signers = []
 live_builders = ["mp-ordering", "mgp-ordering"]
-watchdog_timeout_sec = 99999
 
-# For now, these must be set until a bug in upstream reth's
-# root hash calculations are fixed
+enabled_relays = ["flashbots"]
+
 root_hash_use_sparse_trie=true
 root_hash_compare_sparse_trie=false
+
+{{- if ne (printf "%v" .Subsidy) "0" }}
+subsidy = "{{ .Subsidy }}"
+{{- end }}
+
 
 [[relays]]
 name = "flashbots"
@@ -37,6 +41,7 @@ url = "http://{{ .PublicKey }}@{{ .Relay }}:{{ .RelayPort }}"
 priority = 0
 use_ssz_for_submit = false
 use_gzip_for_submit = false
+
 
 [[builders]]
 name = "mgp-ordering"
@@ -53,3 +58,9 @@ discard_txs = true
 sorting = "max-profit"
 failed_order_retries = 1
 drop_failed_orders = true
+
+[[builders]]
+name = "parallel"
+algo = "parallel-builder"
+discard_txs = true
+num_threads = 25
