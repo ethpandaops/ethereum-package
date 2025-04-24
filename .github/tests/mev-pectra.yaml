@@ -59,5 +59,3 @@ assertoor_params:
         walletCount: 2  # number of wallets to send from for each request type
         throughputPerWallet: 2 # number of transactions per slot, type and wallet
         maxPendingPerWallet: 10 # max number of pending requests per type
-
-global_log_level: debug

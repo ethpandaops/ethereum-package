@@ -39,10 +39,9 @@ subsidy = "{{ .Subsidy }}"
 name = "flashbots"
 url = "http://{{ .PublicKey }}@{{ .Relay }}:{{ .RelayPort }}"
 priority = 0
-use_ssz_for_submit = true
+use_ssz_for_submit = false
 use_gzip_for_submit = false
-optimistic = false
-interval_between_submissions_ms = 500
+
 
 [[builders]]
 name = "mgp-ordering"

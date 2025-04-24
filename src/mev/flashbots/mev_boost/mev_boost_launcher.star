@@ -70,7 +70,7 @@ def get_config(
             "GENESIS_TIMESTAMP": "{0}".format(genesis_timestamp),
             "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(input_parser.MEV_BOOST_PORT),
             "SKIP_RELAY_SIGNATURE_CHECK": "1",
-            "RELAYS": "{0}?id={1}-{2}&skip_optimism=true".format(
+            "RELAYS": "{0}?id={1}-{2}".format(
                 mev_boost_launcher.relay_end_points[0],
                 participant.cl_type,
                 participant.el_type,
