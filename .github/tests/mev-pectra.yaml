@@ -28,7 +28,7 @@ participants:
     el_image: hyperledger/besu:25.4.1
     el_extra_params: ["--miner-extra-data=0x6E696D62757346726F6D4C6F63616C"]
     cl_type: nimbus
-    cl_image: ethpandaops/nimbus-eth2:rRa-0f19197
+    cl_image: statusim/nimbus-eth2:multiarch-v25.4.1
 
   - el_type: geth
     el_image: ethereum/client-go:v1.15.9
