@@ -868,7 +868,7 @@ mev_params:
   # The image to use for MEV boost relay
   mev_relay_image: ethpandaops/mev-boost-relay:main
   # The image to use for the builder
-  mev_builder_image: ethpandaops/flashbots-builder:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
   # The subsidy to use for the builder (in ETH)
