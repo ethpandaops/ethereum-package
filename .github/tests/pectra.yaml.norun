@@ -16,7 +16,7 @@ participants_matrix:
     - cl_type: teku
       cl_image: consensys/teku:25.4.1
     - cl_type: nimbus
-      cl_image: statusim/nimbus-eth2:multiarch-v25.4.0
+      cl_image: statusim/nimbus-eth2:multiarch-v25.4.1
     - cl_type: lodestar
       cl_image: chainsafe/lodestar:v1.29.0
     - cl_type: prysm
