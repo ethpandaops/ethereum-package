@@ -33,6 +33,7 @@ def launch(
     mev_boost_image,
     mev_boost_args,
     participant,
+    seconds_per_slot,
     global_node_selectors,
 ):
     config = get_config(
@@ -42,6 +43,7 @@ def launch(
         mev_boost_args,
         global_node_selectors,
         participant,
+        seconds_per_slot,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
@@ -58,6 +60,7 @@ def get_config(
     mev_boost_args,
     node_selectors,
     participant,
+    seconds_per_slot,
 ):
     command = mev_boost_args
 
@@ -70,6 +73,7 @@ def get_config(
             "GENESIS_TIMESTAMP": "{0}".format(genesis_timestamp),
             "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(input_parser.MEV_BOOST_PORT),
             "SKIP_RELAY_SIGNATURE_CHECK": "1",
+            "SLOT_SEC": str(seconds_per_slot),
             "RELAYS": "{0}?id={1}-{2}".format(
                 mev_boost_launcher.relay_end_points[0],
                 participant.cl_type,
