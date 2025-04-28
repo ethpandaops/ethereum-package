@@ -5,13 +5,25 @@ participants:
     cl_type: prysm
   - el_type: erigon
     cl_type: nimbus
-    cl_image: ethpandaops/nimbus-eth2:unstable-minimal
   - el_type: besu
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  # TODO: Re-add grandine once its working with minimal preset
-  # - el_type: geth
-  #   cl_type: grandine
+  - el_type: geth
+    cl_type: grandine
 network_params:
   preset: minimal
+  electra_fork_epoch: 1
+  prefunded_accounts: '{"0xb9e79D19f651a941757b35830232E7EFC77E1c79": {"balance": "100000ETH"}}'
+
+additional_services:
+  - dora
+  - spamoor
+
+mev_type: flashbots
+mev_params:
+  mev_relay_image: ethpandaops/mev-boost-relay:main-47cc71d
+  mev_boost_image: ethpandaops/mev-boost:develop-d65d507
+  mev_builder_cl_image: sigp/lighthouse:v7.0.0
+  mev_builder_image: ethpandaops/reth-rbuilder:develop-4fc82b7
+  mev_builder_subsidy: 1
