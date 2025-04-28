@@ -97,6 +97,7 @@ def run(plan, args={}):
         prefunded_accounts = get_prefunded_accounts.get_accounts(
             plan, network_params.preregistered_validator_keys_mnemonic
         )
+    accounts_stack = prefunded_accounts[:]
 
     grafana_datasource_config_template = read_file(
         static_files.GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH
@@ -302,7 +303,8 @@ def run(plan, args={}):
 
         first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
-        contract_owner, normal_user = prefunded_accounts[6:8]
+        contract_owner = accounts_stack.pop()
+        normal_user    = accounts_stack.pop()
         mev_flood.launch_mev_flood(
             plan,
             mev_params.mev_flood_image,
@@ -652,8 +654,8 @@ def run(plan, args={}):
         elif additional_service == "custom_flood":
             mev_custom_flood.spam_in_background(
                 plan,
-                prefunded_accounts[-1].private_key,
-                prefunded_accounts[0].address,
+                accounts_stack.pop().private_key,
+                accounts_stack.pop().address,
                 fuzz_target,
                 args_with_right_defaults.custom_flood_params,
                 global_node_selectors,
@@ -667,7 +669,7 @@ def run(plan, args={}):
             spamoor.launch_spamoor(
                 plan,
                 spamoor_config_template,
-                prefunded_accounts,
+                accounts_stack,
                 all_participants,
                 args_with_right_defaults.participants,
                 args_with_right_defaults.spamoor_params,
