@@ -125,7 +125,7 @@ def get_config(
     else:
         gcmode_archive = False
 
-    if constants.NETWORK_NAME.shadowfork in launcher.network:  # shadowfork
+    if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
         init_datadir_cmd_str = "echo shadowfork"
 
     # TODO: Remove once archive mode works with path based storage scheme
@@ -238,7 +238,7 @@ def get_config(
                     ]
                 )
             )
-        if constants.NETWORK_NAME.shadowfork in launcher.network:  # shadowfork
+        if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
             if launcher.prague_time:
                 cmd.append("--override.prague=" + str(launcher.prague_time))
 
