@@ -221,6 +221,14 @@ def input_parser(plan, input_args):
             'mev_builder_subsidy is not 0 but prefunded_accounts is empty, please provide a prefunded account for the builder. Example: prefunded_accounts: \'{"0xb9e79D19f651a941757b35830232E7EFC77E1c79": {"balance": "100000ETH"}}\''
         )
 
+    if result["network_params"].get("force_snapshot_sync") and not result["persistent"]:
+        fail(
+            "force_snapshot_sync is true but persistent is false, please set persistent to true, otherwise the snapshot won't be able to be kept for the run"
+        )
+    if "shadowfork" in result["network_params"]["network"] and not result["persistent"]:
+        fail(
+            "shadowfork networks require persistent to be true, otherwise the snapshot won't be able to be kept for the run"
+        )
     if result["docker_cache_params"]["enabled"]:
         docker_cache_image_override(plan, result)
     else:
