@@ -1,7 +1,7 @@
 participants_matrix:
   el:
     - el_type: geth
-      el_image: ethereum/client-go:v1.15.9
+      el_image: ethereum/client-go:v1.15.10
     - el_type: reth
       el_image: ghcr.io/paradigmxyz/reth:v1.3.12
     - el_type: nethermind
@@ -12,11 +12,11 @@ participants_matrix:
       el_image: hyperledger/besu:25.4.1
   cl:
     - cl_type: lighthouse
-      cl_image: sigp/lighthouse:v7.0.0
+      cl_image: sigp/lighthouse:v7.0.1
     - cl_type: teku
       cl_image: consensys/teku:25.4.1
     - cl_type: nimbus
-      cl_image: statusim/nimbus-eth2:multiarch-v25.4.0
+      cl_image: statusim/nimbus-eth2:multiarch-v25.4.1
     - cl_type: lodestar
       cl_image: chainsafe/lodestar:v1.29.0
     - cl_type: prysm

@@ -571,6 +571,11 @@ network_params:
   # The snapshots are taken with https://github.com/ethpandaops/snapshotter
   network_sync_base_url: https://snapshots.ethpandaops.io/
 
+  # Force network sync with a custom snapshot
+  # This enables quicker EL sync (use with caution)
+  # Defaults to false
+  force_snapshot_sync: false
+
   # The number of data column sidecar subnets used in the gossipsub protocol
   data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
@@ -980,7 +985,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.0.3
+  image: ethpandaops/ethereum-genesis-generator:4.0.4
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
