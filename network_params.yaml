@@ -89,6 +89,7 @@ network_params:
   electra_fork_epoch: 18446744073709551615
   fulu_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
+  force_snapshot_sync: false
   data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
   custody_requirement: 4

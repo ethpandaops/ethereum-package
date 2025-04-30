@@ -163,6 +163,7 @@ SUBCATEGORY_PARAMS = {
         "eip7732_fork_epoch",
         "eip7805_fork_epoch",
         "network_sync_base_url",
+        "force_snapshot_sync",
         "data_column_sidecar_subnet_count",
         "samples_per_slot",
         "custody_requirement",
