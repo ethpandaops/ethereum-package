@@ -12,7 +12,6 @@ validator_ranges = import_module(
 )
 
 tx_fuzz = import_module("./src/tx_fuzz/tx_fuzz.star")
-spamoor_blob = import_module("./src/spamoor_blob/spamoor_blob.star")
 forkmon = import_module("./src/forkmon/forkmon_launcher.star")
 
 dora = import_module("./src/dora/dora_launcher.star")
@@ -174,7 +173,7 @@ def run(plan, args={}):
             network_params,
             constants.VALIDATING_REWARDS_ACCOUNT,
             network_params.preregistered_validator_keys_mnemonic,
-            args_with_right_defaults.mev_params.mev_builder_extra_data,
+            args_with_right_defaults.mev_params,
             enumerate(args_with_right_defaults.participants),
             global_node_selectors,
         )
@@ -300,9 +299,6 @@ def run(plan, args={}):
             all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
         )
         beacon_uri = all_cl_contexts[-1].beacon_http_url
-        beacon_uris = ",".join(
-            ["{0}".format(context.beacon_http_url) for context in all_cl_contexts]
-        )
 
         first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
@@ -310,23 +306,10 @@ def run(plan, args={}):
         mev_flood.launch_mev_flood(
             plan,
             mev_params.mev_flood_image,
-            fuzz_target,
+            all_el_contexts[-1].rpc_http_url,  # Only spam builder
             contract_owner.private_key,
             normal_user.private_key,
             global_node_selectors,
-        )
-        epoch_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v2/beacon/blocks/head",
-            port_id=HTTP_PORT_ID_FOR_FACT,
-            extract={"epoch": ".data.message.body.attestations[0].data.target.epoch"},
-        )
-        plan.wait(
-            recipe=epoch_recipe,
-            field="extract.epoch",
-            assertion=">=",
-            target_value=str(network_params.deneb_fork_epoch),
-            timeout="20m",
-            service_name=first_client_beacon_name,
         )
         if (
             args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
@@ -336,7 +319,7 @@ def run(plan, args={}):
                 plan,
                 mev_params,
                 network_id,
-                beacon_uris,
+                beacon_uri,
                 genesis_validators_root,
                 blocksim_uri,
                 network_params.seconds_per_slot,
@@ -357,7 +340,7 @@ def run(plan, args={}):
 
         mev_flood.spam_in_background(
             plan,
-            fuzz_target,
+            all_el_contexts[-1].rpc_http_url,  # Only spam builder
             mev_params.mev_flood_extra_args,
             mev_params.mev_flood_seconds_per_bundle,
             contract_owner.private_key,
@@ -400,6 +383,8 @@ def run(plan, args={}):
                         final_genesis_timestamp,
                         mev_params.mev_boost_image,
                         mev_params.mev_boost_args,
+                        args_with_right_defaults.participants[index],
+                        network_params.seconds_per_slot,
                         global_node_selectors,
                     )
                 elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
@@ -674,20 +659,16 @@ def run(plan, args={}):
             )
         elif additional_service == "spamoor":
             plan.print("Launching spamoor")
+            spamoor_config_template = read_file(
+                static_files.SPAMOOR_CONFIG_TEMPLATE_FILEPATH
+            )
             spamoor.launch_spamoor(
                 plan,
+                spamoor_config_template,
                 prefunded_accounts,
-                all_el_contexts,
+                all_participants,
+                args_with_right_defaults.participants,
                 args_with_right_defaults.spamoor_params,
-                global_node_selectors,
-            )
-        elif additional_service == "spamoor_blob":
-            plan.print("Launching spamoor as blob spammer")
-            spamoor_blob.launch_spamoor_blob(
-                plan,
-                prefunded_accounts,
-                all_el_contexts,
-                args_with_right_defaults.spamoor_blob_params,
                 global_node_selectors,
                 args_with_right_defaults.network_params,
                 osaka_time,

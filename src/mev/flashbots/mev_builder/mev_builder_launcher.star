@@ -20,7 +20,7 @@ def new_builder_config(
     network_params,
     fee_recipient,
     mnemonic,
-    extra_data,
+    mev_params,
     participants,
     global_node_selectors,
 ):
@@ -33,8 +33,9 @@ def new_builder_config(
         constants.DEFAULT_MEV_SECRET_KEY[2:],  # drop the 0x prefix
         mnemonic,
         fee_recipient,
-        extra_data,
+        mev_params.mev_builder_extra_data,
         num_of_participants,
+        mev_params.mev_builder_subsidy,
     )
     flashbots_builder_config_template = read_file(
         static_files.FLASHBOTS_RBUILDER_CONFIG_FILEPATH
@@ -68,6 +69,7 @@ def new_builder_config_template_data(
     fee_recipient,
     extra_data,
     num_of_participants,
+    subsidy,
 ):
     return {
         "Network": network_params.network
@@ -88,4 +90,5 @@ def new_builder_config_template_data(
         "Mnemonic": mnemonic,
         "FeeRecipient": fee_recipient,
         "ExtraData": extra_data,
+        "Subsidy": subsidy,
     }

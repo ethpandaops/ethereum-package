@@ -49,6 +49,7 @@ def launch(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -69,6 +70,7 @@ def launch(
         node_selectors,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     service = plan.add_service(service_name, config)
@@ -113,6 +115,7 @@ def get_config(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     if (
         "--gcmode=archive" in participant.el_extra_params
@@ -170,8 +173,8 @@ def get_config(
         # TODO: REMOVE Once geth default db is path based, and builder rebased
         "{0}".format("--state.scheme=hash" if gcmode_archive else ""),
         "{0}".format(
-            "--{}".format(launcher.network)
-            if launcher.network in constants.PUBLIC_NETWORKS
+            "--{}".format(network_params.network)
+            if network_params.network in constants.PUBLIC_NETWORKS
             else ""
         ),
         "--networkid={0}".format(launcher.networkid),
@@ -204,6 +207,9 @@ def get_config(
         "--port={0}".format(discovery_port),
     ]
 
+    if network_params.gas_limit > 0:
+        cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
+
     if BUILDER_IMAGE_STR in participant.el_image:
         for index, arg in enumerate(cmd):
             if "--http.api" in arg:
@@ -219,8 +225,8 @@ def get_config(
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"
 
     if (
-        launcher.network == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in launcher.network
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
         if len(existing_el_clients) > 0:
             cmd.append(
@@ -237,8 +243,8 @@ def get_config(
                 cmd.append("--override.prague=" + str(launcher.prague_time))
 
     elif (
-        launcher.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in launcher.network
+        network_params.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
@@ -252,7 +258,7 @@ def get_config(
         cmd.extend([param for param in participant.el_extra_params])
 
     cmd_str = " ".join(cmd)
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if network_params.network not in constants.PUBLIC_NETWORKS:
         subcommand_strs = [
             init_datadir_cmd_str,
             cmd_str,
@@ -270,7 +276,7 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.EL_TYPE.geth + "_volume_size"
             ],
         )
@@ -310,14 +316,12 @@ def get_config(
 def new_geth_launcher(
     el_cl_genesis_data,
     jwt_file,
-    network,
     networkid,
     prague_time,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
         networkid=networkid,
         prague_time=prague_time,
     )

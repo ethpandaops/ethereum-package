@@ -7,7 +7,7 @@ ethereum_metrics_exporter_context = import_module(
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
 
-DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE = "ethpandaops/ethereum-metrics-exporter:0.22.0"
+DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE = "ethpandaops/ethereum-metrics-exporter:latest"
 
 # The min/max CPU/memory that ethereum-metrics-exporter can use
 MIN_CPU = 10

@@ -57,6 +57,7 @@ ENGINE_RPC_PORT_ID = "engine-rpc"
 ENGINE_WS_PORT_ID = "engine-ws"
 ADMIN_PORT_ID = "admin"
 RBUILDER_PORT_ID = "rbuilder-rpc"
+RBUILDER_METRICS_PORT_ID = "rbuilder-metric"
 LITTLE_BIGTABLE_PORT_ID = "littlebigtable"
 VALDIATOR_GRPC_PORT_ID = "grpc"
 
@@ -89,11 +90,10 @@ MEV_RS_MEV_TYPE = "mev-rs"
 COMMIT_BOOST_MEV_TYPE = "commit-boost"
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:latest"
-DEFAULT_SPAMOOR_BLOB_IMAGE = "ethpandaops/spamoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:4.0.3"
+    "ethpandaops/ethereum-genesis-generator:4.0.4"
 )
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
@@ -176,7 +176,7 @@ DEPOSIT_CONTRACT_ADDRESS = {
     "mainnet": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
     "sepolia": "0x7f02C3E3c98b133055B8B348B2Ac625669Ed295D",
     "holesky": "0x4242424242424242424242424242424242424242",
-    "ephemery": "0x4242424242424242424242424242424242424242",
+    "ephemery": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
     "hoodi": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
 }
 
@@ -305,8 +305,3 @@ VOLUME_SIZE["mainnet-shadowfork"] = VOLUME_SIZE["mainnet"]
 VOLUME_SIZE["sepolia-shadowfork"] = VOLUME_SIZE["sepolia"]
 VOLUME_SIZE["holesky-shadowfork"] = VOLUME_SIZE["holesky"]
 VOLUME_SIZE["hoodi-shadowfork"] = VOLUME_SIZE["hoodi"]
-
-SPAMOOR_BLOB_THROUGHPUT_MULTIPLIER = 2
-SPAMOOR_BLOB_DEFAULT_THROUGHPUT = 3
-SPAMOOR_BLOB_DEFAULT_SIDECARS = 2
-SPAMOOR_BLOB_DEFAULT_MAX_WALLETS = 29

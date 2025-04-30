@@ -5,7 +5,7 @@ participants:
 mev_type: mock
 additional_services:
   - dora
-  - spamoor_blob
+  - spamoor
   - tx_fuzz
 mev_params:
   mock_mev_image: "ethpandaops/rustic-builder:main"

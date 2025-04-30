@@ -17,7 +17,7 @@ DEFAULT_EL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:unstable",
+    "lighthouse": "sigp/lighthouse:latest",
     "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:stable",
@@ -26,7 +26,7 @@ DEFAULT_CL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:unstable",
+    "lighthouse": "ethpandaops/lighthouse:stable",
     "teku": "consensys/teku:latest",
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
@@ -35,7 +35,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
 }
 
 DEFAULT_VC_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:unstable",
+    "lighthouse": "sigp/lighthouse:latest",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
@@ -45,7 +45,7 @@ DEFAULT_VC_IMAGES = {
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:unstable",
+    "lighthouse": "ethpandaops/lighthouse:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
@@ -82,7 +82,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
-    "spamoor_blob_params",
 )
 
 
@@ -116,7 +115,6 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
-    result["spamoor_blob_params"] = get_default_spamoor_blob_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -182,10 +180,6 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
-        elif attr == "spamoor_blob_params":
-            for sub_attr in input_args["spamoor_blob_params"]:
-                sub_value = input_args["spamoor_blob_params"][sub_attr]
-                result["spamoor_blob_params"][sub_attr] = sub_value
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
@@ -215,6 +209,22 @@ def input_parser(plan, input_args):
             )
         )
 
+    if (
+        result["mev_params"].get("mev_builder_subsidy") != 0
+        and result["network_params"].get("prefunded_accounts") == {}
+    ):
+        fail(
+            'mev_builder_subsidy is not 0 but prefunded_accounts is empty, please provide a prefunded account for the builder. Example: prefunded_accounts: \'{"0xb9e79D19f651a941757b35830232E7EFC77E1c79": {"balance": "100000ETH"}}\''
+        )
+
+    if result["network_params"].get("force_snapshot_sync") and not result["persistent"]:
+        fail(
+            "network_params.force_snapshot_sync is enabled but persistent is false, please set persistent to true, otherwise the snapshot won't be able to be kept for the run"
+        )
+    if "shadowfork" in result["network_params"]["network"] and not result["persistent"]:
+        fail(
+            "shadowfork networks require persistent to be true, otherwise the snapshot won't be able to be kept for the run"
+        )
     if result["docker_cache_params"]["enabled"]:
         docker_cache_image_override(plan, result)
     else:
@@ -333,6 +343,7 @@ def input_parser(plan, input_args):
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
+            force_snapshot_sync=result["network_params"]["force_snapshot_sync"],
             data_column_sidecar_subnet_count=result["network_params"][
                 "data_column_sidecar_subnet_count"
             ],
@@ -364,12 +375,14 @@ def input_parser(plan, input_args):
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
             max_payload_size=result["network_params"]["max_payload_size"],
             perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
+            gas_limit=result["network_params"]["gas_limit"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
             mev_builder_image=result["mev_params"]["mev_builder_image"],
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
+            mev_builder_subsidy=result["mev_params"]["mev_builder_subsidy"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
@@ -454,20 +467,8 @@ def input_parser(plan, input_args):
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
-            scenario=result["spamoor_params"]["scenario"],
-            throughput=result["spamoor_params"]["throughput"],
-            max_pending=result["spamoor_params"]["max_pending"],
-            max_wallets=result["spamoor_params"]["max_wallets"],
-            spamoor_extra_args=result["spamoor_params"]["spamoor_extra_args"],
-        ),
-        spamoor_blob_params=struct(
-            image=result["spamoor_blob_params"]["image"],
-            scenario=result["spamoor_blob_params"]["scenario"],
-            throughput=result["spamoor_blob_params"]["throughput"],
-            sidecars=result["spamoor_blob_params"]["sidecars"],
-            max_pending=result["spamoor_blob_params"]["max_pending"],
-            max_wallets=result["spamoor_blob_params"]["max_wallets"],
-            spamoor_extra_args=result["spamoor_blob_params"]["spamoor_extra_args"],
+            spammers=result["spamoor_params"]["spammers"],
+            extra_args=result["spamoor_params"]["extra_args"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -909,7 +910,7 @@ def default_network_params():
     return {
         "network": "kurtosis",
         "network_id": "3151908",
-        "deposit_contract_address": "0x4242424242424242424242424242424242424242",
+        "deposit_contract_address": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
         "seconds_per_slot": 12,
         "num_validator_keys_per_node": 64,
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
@@ -931,6 +932,7 @@ def default_network_params():
         "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
+        "force_snapshot_sync": False,
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
@@ -946,6 +948,7 @@ def default_network_params():
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
+        "gas_limit": 0,
     }
 
 
@@ -953,7 +956,7 @@ def default_minimal_network_params():
     return {
         "network": "kurtosis",
         "network_id": "3151908",
-        "deposit_contract_address": "0x4242424242424242424242424242424242424242",
+        "deposit_contract_address": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
         "seconds_per_slot": 6,
         "num_validator_keys_per_node": 64,
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
@@ -975,6 +978,7 @@ def default_minimal_network_params():
         "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
+        "force_snapshot_sync": False,
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
@@ -990,6 +994,7 @@ def default_minimal_network_params():
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
+        "gas_limit": 0,
     }
 
 
@@ -1094,6 +1099,7 @@ def get_default_mev_params(mev_type, preset):
     else:
         mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
     mev_builder_extra_data = None
+    mev_builder_subsidy = 0
     mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
     mev_boost_args = ["mev-boost", "--relay-check"]
     mev_relay_api_extra_args = []
@@ -1149,6 +1155,7 @@ def get_default_mev_params(mev_type, preset):
         "mock_mev_image": mev_builder_image
         if mev_type == constants.MOCK_MEV_TYPE
         else None,
+        "mev_builder_subsidy": mev_builder_subsidy,
         "mev_builder_cl_image": mev_builder_cl_image,
         "mev_builder_extra_data": mev_builder_extra_data,
         "mev_builder_extra_args": mev_builder_extra_args,
@@ -1229,24 +1236,34 @@ def get_default_xatu_sentry_params():
 def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
-        "scenario": "eoatx",
-        "throughput": 1000,
-        "max_pending": 1000,
-        "max_wallets": 500,
-        "spamoor_extra_args": [],
-    }
-
-
-def get_default_spamoor_blob_params():
-    return {
-        "image": constants.DEFAULT_SPAMOOR_BLOB_IMAGE,
-        "scenario": "blob-combined",
-        "throughput": constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT,
-        "sidecars": constants.SPAMOOR_BLOB_DEFAULT_SIDECARS,
-        "max_pending": constants.SPAMOOR_BLOB_DEFAULT_THROUGHPUT
-        * constants.SPAMOOR_BLOB_THROUGHPUT_MULTIPLIER,
-        "max_wallets": constants.SPAMOOR_BLOB_DEFAULT_MAX_WALLETS,
-        "spamoor_extra_args": [],
+        "extra_args": [],
+        "spammers": [
+            # default spammers
+            {
+                "name": "EOA Spammer (Kurtosis Package)",
+                "description": "200 type-2 eoa transactions per slot, gas limit 20 gwei",
+                "scenario": "eoatx",
+                "config": {
+                    "throughput": 200,
+                    "max_pending": 400,
+                    "max_wallets": 200,
+                    "base_fee": 20,
+                },
+            },
+            {
+                "name": "Blob Spammer (Kurtosis Package)",
+                "description": "3 type-4 blob transactions per slot with 1-2 sidecars each, gas/blobgas limit 20 gwei",
+                "scenario": "blob-combined",
+                "config": {
+                    "throughput": 3,
+                    "sidecars": 2,
+                    "max_pending": 6,
+                    "max_wallets": 20,
+                    "base_fee": 20,
+                    "blob_fee": 20,
+                },
+            },
+        ],
     }
 
 
@@ -1312,7 +1329,10 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if participant["cl_type"] == "lighthouse":
             participant["cl_extra_params"].append("--builder={0}".format(mev_url))
         if participant["vc_type"] == "lighthouse":
-            participant["vc_extra_params"].append("--builder-proposals")
+            if (
+                parsed_arguments_dict["network_params"]["gas_limit"] == 0
+            ):  # if the gas limit is set we already enable builder-proposals
+                participant["vc_extra_params"].append("--builder-proposals")
         if participant["cl_type"] == "lodestar":
             participant["cl_extra_params"].append("--builder")
             participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
@@ -1449,7 +1469,6 @@ def docker_cache_image_override(plan, result):
         "prometheus_params.image",
         "grafana_params.image",
         "spamoor_params.image",
-        "spamoor_blob_params.image",
         "ethereum_genesis_generator_params.image",
     ]
 

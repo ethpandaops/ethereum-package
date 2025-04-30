@@ -64,6 +64,7 @@ def launch(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -87,6 +88,7 @@ def launch(
         checkpoint_sync_url,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -157,6 +159,7 @@ def get_beacon_config(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -207,8 +210,8 @@ def get_beacon_config(
         BEACON_NODE_ENTRYPOINT,
         BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         checkpoint_sync_url,
-        launcher.network_params.network
-        if launcher.network_params.network in constants.PUBLIC_NETWORKS
+        network_params.network
+        if network_params.network in constants.PUBLIC_NETWORKS
         else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER,
     )
 
@@ -219,8 +222,8 @@ def get_beacon_config(
         "--udp-port={0}".format(discovery_port),
         "--tcp-port={0}".format(discovery_port),
         "--network={0}".format(
-            launcher.network_params.network
-            if launcher.network_params.network in constants.PUBLIC_NETWORKS
+            network_params.network
+            if network_params.network in constants.PUBLIC_NETWORKS
             else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
@@ -265,7 +268,7 @@ def get_beacon_config(
         "--subscribe-all-subnets",
     ]
 
-    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+    if network_params.perfect_peerdas_enabled and participant_index < 16:
         cmd.append(
             "--netkey-file="
             + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
@@ -276,15 +279,15 @@ def get_beacon_config(
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
-    if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
+    if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootstrap-file="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/bootstrap_nodes.txt"
         )
         if (
-            launcher.network_params.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network_params.network
+            network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
             if bootnode_contexts == None:
                 cmd.append("--subscribe-all-subnets")
@@ -314,7 +317,10 @@ def get_beacon_config(
                 shared_utils.get_port_specs(validator_public_port_assignment)
             )
 
-    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+        if network_params.gas_limit > 0:
+            cmd.append("--suggested-gas-limit={0}".format(network_params.gas_limit))
+
+    if network_params.perfect_peerdas_enabled and participant_index < 16:
         files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
             artifact_names=["node-key-file-{0}".format(participant_index + 1)]
         )
@@ -324,7 +330,7 @@ def get_beacon_config(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network_params.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.CL_TYPE.nimbus + "_volume_size"
             ],
         )
@@ -371,10 +377,9 @@ def get_beacon_config(
     return ServiceConfig(**config_args)
 
 
-def new_nimbus_launcher(el_cl_genesis_data, jwt_file, network_params, keymanager_file):
+def new_nimbus_launcher(el_cl_genesis_data, jwt_file, keymanager_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network_params=network_params,
         keymanager_file=keymanager_file,
     )

@@ -115,7 +115,13 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_public_network.launch(plan, network_params.network)
+        ) = launch_public_network.launch(
+            plan,
+            args_with_right_defaults.participants,
+            network_params,
+            global_tolerations,
+            global_node_selectors,
+        )
     else:
         # We are running a devnet
         (
@@ -372,7 +378,7 @@ def launch_participant_network(
             prysm_password_artifact_uuid=prysm_password_artifact_uuid,
             global_tolerations=global_tolerations,
             node_selectors=node_selectors,
-            preset=network_params.preset,
+            network_params=network_params,
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
         )

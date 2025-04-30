@@ -489,7 +489,7 @@ network_params:
   network_id: "3151908"
 
   # The address of the staking contract address on the Eth1 chain
-  deposit_contract_address: "0x4242424242424242424242424242424242424242"
+  deposit_contract_address: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 
   # Number of seconds per slot on the Beacon chain
   seconds_per_slot: 12
@@ -508,7 +508,9 @@ network_params:
   genesis_delay: 20
 
   # The gas limit of the network set at genesis
-  genesis_gaslimit: 30000000
+  # Defaults to 36000000
+
+  genesis_gaslimit: 36000000
 
   # Max churn rate for the network introduced by
   # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
@@ -568,6 +570,11 @@ network_params:
   # network_snapshot_url_base = "http://10.10.101.21:10000/snapshots/"
   # The snapshots are taken with https://github.com/ethpandaops/snapshotter
   network_sync_base_url: https://snapshots.ethpandaops.io/
+
+  # Force network sync with a custom snapshot
+  # This enables quicker EL sync (use with caution)
+  # Defaults to false
+  force_snapshot_sync: false
 
   # The number of data column sidecar subnets used in the gossipsub protocol
   data_column_sidecar_subnet_count: 128
@@ -648,6 +655,15 @@ network_params:
   # Defaults to false
   perfect_peerdas_enabled: false
 
+  # Gas limit for the network
+  # Default to 0
+  # If set to 0, the gas limit will be set to the default gas limit for the clients
+  # Set this value to gas limit in millionths of a gwei
+  # Example: gas_limit: 36000000
+  # This will override the gas limit for each EL client
+  # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
+  gas_limit: 0
+
 # Global parameters for the network
 
 # By default includes
@@ -663,7 +679,6 @@ additional_services:
   - tx_fuzz
   - custom_flood
   - spamoor
-  - spamoor_blob
   - forkmon
   - blockscout
   - dora
@@ -858,9 +873,11 @@ mev_params:
   # The image to use for MEV boost relay
   mev_relay_image: ethpandaops/mev-boost-relay:main
   # The image to use for the builder
-  mev_builder_image: ethpandaops/flashbots-builder:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
+  # The subsidy to use for the builder (in ETH)
+  mev_builder_subsidy: 0
   # The image to use for mev-boost
   mev_boost_image: ethpandaops/mev-boost:develop
   # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
@@ -952,56 +969,23 @@ checkpoint_sync_url: ""
 spamoor_params:
   # The image to use for spamoor
   image: ethpandaops/spamoor:latest
-  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
-  # Valid scenarios are:
-  #  eoatx, erctx, deploytx, deploy-destruct, blobs, gasburnertx
-  # Defaults to eoatx
-  scenario: eoatx
-  # Throughput of spamoor
-  # Defaults to 1000
-  throughput: 1000
-  # Max pending transactions for spamoor
-  # Defaults to 1000
-  max_pending: 1000
-  # Max wallets for spamoor
-  # Defaults to 500
-  max_wallets: 500
-  # Extra parameters to send to spamoor
-  # Defaults to empty
-  spamoor_extra_args: []
-
-# Configuration place for spammor as blob spammer
-spamoor_blob_params:
-  # spamoor docker image to use
-  # Defaults to the latest
-  image: "ethpandaops/spamoor:latest"
-  # The spamoor blob scenario to use (see https://github.com/ethpandaops/spamoor)
-  # Valid blob scenarios are:
-  # - blobs (normal blob transactions only)
-  # - blob-combined (normal & special blobs with replacements)
-  # - blob-conflicting (conflicting blob & dynfee transactions)
-  # - blob-replacements (normal blobs with replacement blob transactions)
-  # Defaults to blob-combined
-  scenario: blob-combined
-  # Throughput of spamoor
-  # Defaults to 3
-  throughput: 3
-  # Maximum number of blobs per transaction
-  # Defaults to 2
-  sidecars: 2
-  # Max pending blob transactions for spamoor
-  # Defaults to 6
-  max_pending: 6
-  # Max wallets for spamoor
-  # Defaults to 20
-  max_wallets: 20
+  # A list of spammers to launch on startup
+  # example:
+  # - scenario: eoatx  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
+  #   name: "Optional name for this example spammer"
+  #   config:
+  #     throughput: 10  # 10 tx per block
+  # - scenario: erctx
+  #   config:
+  #     throughput: 10  # 10 tx per block
+  spammers: []
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
-  spamoor_extra_args: []
+  extra_args: []
 
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.0.3
+  image: ethpandaops/ethereum-genesis-generator:4.0.4
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
@@ -1235,7 +1219,6 @@ Here's a table of where the keys are used
 | 0             | Builder             | ✅                |                 | As coinbase                |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 4             | spamoor_blob        | ✅                |                 | As the sender of blobs     |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |
 | 7             | mev_flood           | ✅                |                 | As the user_key            |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |

@@ -33,7 +33,7 @@ def launch(
     prysm_password_artifact_uuid,
     global_tolerations,
     node_selectors,
-    preset,
+    network_params,
     port_publisher,
     vc_index,
 ):
@@ -71,6 +71,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
         )
@@ -90,7 +91,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
-            preset=preset,
+            network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
         )
@@ -109,6 +110,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
         )
@@ -127,6 +129,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
         )
@@ -147,6 +150,7 @@ def launch(
             tolerations=tolerations,
             node_selectors=node_selectors,
             keymanager_enabled=keymanager_enabled,
+            network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
         )

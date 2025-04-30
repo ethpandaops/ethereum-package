@@ -69,7 +69,7 @@ participants:
 network_params:
   network: kurtosis
   network_id: "3151908"
-  deposit_contract_address: "0x4242424242424242424242424242424242424242"
+  deposit_contract_address: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
   seconds_per_slot: 12
   num_validator_keys_per_node: 64
   preregistered_validator_keys_mnemonic:
@@ -89,6 +89,7 @@ network_params:
   electra_fork_epoch: 0
   fulu_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
+  force_snapshot_sync: false
   data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
   custody_requirement: 4
@@ -106,8 +107,8 @@ dora_params:
   image: ""
 tx_fuzz_params:
   tx_fuzz_extra_args: []
-spamoor_blob_params:
-  spamoor_extra_args: []
+spamoor_params:
+  extra_args: []
 prometheus_params:
   storage_tsdb_retention_time: "1d"
   storage_tsdb_retention_size: "512MB"
@@ -178,7 +179,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:4.0.3
+  image: ethpandaops/ethereum-genesis-generator:4.0.4
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

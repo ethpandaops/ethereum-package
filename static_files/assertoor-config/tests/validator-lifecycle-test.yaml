@@ -22,7 +22,7 @@ tasks:
         limitTotal: 300
         limitPerSlot: 20
         limitPending: 50
-        depositContract: "0x4242424242424242424242424242424242424242"
+        depositContract: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
         awaitReceipt: true
       configVars:
         walletPrivkey: "walletPrivkey"
@@ -66,7 +66,7 @@ tasks:
                     validatorNamePattern: "validatorPairName"
                   config:
                     minDepositCount: 1
-    
+
 # due to the deposits we should reach un-finality soon.
 - name: check_consensus_validator_status
   title: "Wait for the last deposit to become activated"

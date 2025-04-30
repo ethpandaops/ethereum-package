@@ -20,7 +20,7 @@ PROFILING_PORT_NUM = 6060
 
 METRICS_PATH = "/metrics"
 
-MIN_PEERS = 1
+MIN_PEERS = 0
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
@@ -49,6 +49,7 @@ def launch(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -72,6 +73,7 @@ def launch(
         checkpoint_sync_url,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -147,6 +149,7 @@ def get_beacon_config(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if participant.snooper_enabled:
@@ -225,7 +228,7 @@ def get_beacon_config(
         "--subscribe-all-subnets=true",
     ]
 
-    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+    if network_params.perfect_peerdas_enabled and participant_index < 16:
         cmd.append(
             "--p2p-priv-key="
             + constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS
@@ -239,10 +242,10 @@ def get_beacon_config(
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
         cmd.append("--genesis-beacon-api-url=" + checkpoint_sync_url)
 
-    if launcher.network_params.preset == "minimal":
+    if network_params.preset == "minimal":
         cmd.append("--minimal-config=true")
 
-    if launcher.network_params.network not in constants.PUBLIC_NETWORKS:
+    if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--p2p-static-id=true")
         cmd.append(
             "--chain-config-file="
@@ -256,16 +259,16 @@ def get_beacon_config(
         )
         cmd.append("--contract-deployment-block=0")
         if (
-            launcher.network_params.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network_params.network
+            network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
             if bootnode_contexts != None:
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     cmd.append("--bootstrap-node=" + ctx.enr)
-        elif launcher.network_params.network == constants.NETWORK_NAME.ephemery:
+        elif network_params.network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--genesis-beacon-api-url="
-                + constants.CHECKPOINT_SYNC_URL[launcher.network_params.network]
+                + constants.CHECKPOINT_SYNC_URL[network_params.network]
             )
             cmd.append(
                 "--bootstrap-node="
@@ -279,7 +282,7 @@ def get_beacon_config(
                 + "/bootstrap_nodes.yaml"
             )
     else:  # Public network
-        cmd.append("--{}".format(launcher.network_params.network))
+        cmd.append("--{}".format(network_params.network))
 
     if len(participant.cl_extra_params) > 0:
         # we do the for loop as otherwise its a proto repeated array
@@ -289,7 +292,7 @@ def get_beacon_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
-    if launcher.network_params.perfect_peerdas_enabled and participant_index < 16:
+    if network_params.perfect_peerdas_enabled and participant_index < 16:
         files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
             artifact_names=["node-key-file-{0}".format(participant_index + 1)]
         )
@@ -298,7 +301,7 @@ def get_beacon_config(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network_params.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.CL_TYPE.prysm + "_volume_size"
             ],
         )
@@ -340,10 +343,8 @@ def get_beacon_config(
 def new_prysm_launcher(
     el_cl_genesis_data,
     jwt_file,
-    network_params,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network_params=network_params,
     )

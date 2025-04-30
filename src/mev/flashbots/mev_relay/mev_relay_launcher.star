@@ -19,10 +19,10 @@ NETWORK_ID_TO_NAME = {
 LAUNCH_ADMINER = True
 
 # The min/max CPU/memory that mev-relay can use
-RELAY_MIN_CPU = 100
-RELAY_MAX_CPU = 1000
-RELAY_MIN_MEMORY = 128
-RELAY_MAX_MEMORY = 1024
+RELAY_MIN_CPU = 500
+RELAY_MAX_CPU = 3000
+RELAY_MIN_MEMORY = 256
+RELAY_MAX_MEMORY = 2048
 
 # The min/max CPU/memory that postgres can use
 POSTGRES_MIN_CPU = 10
@@ -31,8 +31,8 @@ POSTGRES_MIN_MEMORY = 32
 POSTGRES_MAX_MEMORY = 1024
 
 # The min/max CPU/memory that redis can use
-REDIS_MIN_CPU = 10
-REDIS_MAX_CPU = 1000
+REDIS_MIN_CPU = 500
+REDIS_MAX_CPU = 3000
 REDIS_MIN_MEMORY = 16
 REDIS_MAX_MEMORY = 1024
 
@@ -88,6 +88,7 @@ def launch_mev_relay(
         "SEC_PER_SLOT": str(seconds_per_slot),
         "LOG_LEVEL": "debug",
         "DB_TABLE_PREFIX": "custom",
+        "ENABLE_BUILDER_CANCELLATIONS": "1",
     }
 
     redis_url = "{}:{}".format(redis.hostname, redis.port_number)
@@ -170,6 +171,15 @@ def launch_mev_relay(
                 "https://{0}@{1}".format(
                     constants.DEFAULT_MEV_PUBKEY, MEV_RELAY_ENDPOINT
                 ),
+                "--show-config-details",
+                "--relay-url",
+                "http://{0}@{1}:{2}".format(
+                    constants.DEFAULT_MEV_PUBKEY,
+                    api.ip_address,
+                    MEV_RELAY_ENDPOINT_PORT,
+                ),
+                "--pubkey-override",
+                constants.DEFAULT_MEV_PUBKEY,
             ]
             + mev_params.mev_relay_website_extra_args,
             ports={

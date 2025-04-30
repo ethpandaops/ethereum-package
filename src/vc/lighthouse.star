@@ -28,6 +28,7 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    network_params,
     port_publisher,
     vc_index,
 ):
@@ -74,6 +75,10 @@ def get_config(
         "--http-allow-origin=*",
         "--unencrypted-http-transport",
     ]
+
+    if network_params.gas_limit > 0:
+        cmd.append("--gas-limit={0}".format(network_params.gas_limit))
+        cmd.append("--builder-proposals")
 
     if len(participant.vc_extra_params):
         cmd.extend([param for param in participant.vc_extra_params])
