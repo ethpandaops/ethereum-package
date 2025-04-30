@@ -115,7 +115,13 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_public_network.launch(plan, network_params.network)
+        ) = launch_public_network.launch(
+            plan,
+            args_with_right_defaults.participants,
+            network_params,
+            global_tolerations,
+            global_node_selectors,
+        )
     else:
         # We are running a devnet
         (
