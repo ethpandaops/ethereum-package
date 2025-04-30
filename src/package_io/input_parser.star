@@ -223,7 +223,7 @@ def input_parser(plan, input_args):
 
     if result["network_params"].get("force_snapshot_sync") and not result["persistent"]:
         fail(
-            "force_snapshot_sync is true but persistent is false, please set persistent to true, otherwise the snapshot won't be able to be kept for the run"
+            "network_params.force_snapshot_sync is enabled but persistent is false, please set persistent to true, otherwise the snapshot won't be able to be kept for the run"
         )
     if "shadowfork" in result["network_params"]["network"] and not result["persistent"]:
         fail(
