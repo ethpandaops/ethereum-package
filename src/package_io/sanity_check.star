@@ -255,6 +255,10 @@ SUBCATEGORY_PARAMS = {
     ],
     "spamoor_params": [
         "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
         "extra_args",
         "spammers",
     ],
