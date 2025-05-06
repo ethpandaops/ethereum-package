@@ -222,7 +222,11 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--syncmode=full" if network_params.network == "kurtosis" and not gcmode_archive else "--syncmode=snap" if not gcmode_archive else "--gcmode=archive",
+        "--syncmode=full"
+        if network_params.network == "kurtosis" and not gcmode_archive
+        else "--syncmode=snap"
+        if not gcmode_archive
+        else "--gcmode=archive",
         "--rpc.allow-unprotected-txs",
         "--metrics",
         "--metrics.addr=0.0.0.0",
