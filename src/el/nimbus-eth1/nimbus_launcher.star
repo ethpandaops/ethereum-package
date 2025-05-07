@@ -106,28 +106,51 @@ def get_config(
     network_params,
 ):
     public_ports = {}
-    discovery_port = DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "el", port_publisher, participant_index
         )
-        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+        public_ports = el_shared.get_general_el_public_port_specs(
             public_ports_for_component
         )
         additional_public_port_assignments = {
-            constants.WS_RPC_PORT_ID: public_ports_for_component[2],
-            constants.METRICS_PORT_ID: public_ports_for_component[3],
+            constants.WS_RPC_PORT_ID: public_ports_for_component[3],
         }
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    engine_rpc_port = (
+        public_ports_for_component[1]
+        if public_ports_for_component
+        else ENGINE_RPC_PORT_NUM
+    )
+    metrics_port = (
+        public_ports_for_component[2]
+        if public_ports_for_component
+        else METRICS_PORT_NUM
+    )
+    ws_rpc_port = (
+        public_ports_for_component[3] if public_ports_for_component else WS_RPC_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
-        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
-        constants.WS_RPC_PORT_ID: WS_RPC_PORT_NUM,
-        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        constants.ENGINE_RPC_PORT_ID: engine_rpc_port,
+        constants.WS_RPC_PORT_ID: ws_rpc_port,
+        constants.METRICS_PORT_ID: metrics_port,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -135,7 +158,7 @@ def get_config(
         "--log-level={0}".format(log_level),
         "--data-dir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--net-key={0}/nodekey".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
-        "--http-port={0}".format(WS_RPC_PORT_NUM),
+        "--http-port={0}".format(ws_rpc_port),
         "--http-address=0.0.0.0",
         "--rpc",
         "--rpc-api=eth,debug",
@@ -143,13 +166,14 @@ def get_config(
         "--ws-api=eth,debug",
         "--engine-api",
         "--engine-api-address=0.0.0.0",
-        "--engine-api-port={0}".format(ENGINE_RPC_PORT_NUM),
+        "--engine-api-port={0}".format(engine_rpc_port),
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--metrics",
         "--metrics-address=0.0.0.0",
-        "--metrics-port={0}".format(METRICS_PORT_NUM),
+        "--metrics-port={0}".format(metrics_port),
         "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
-        "--tcp-port={0}".format(discovery_port),
+        "--tcp-port={0}".format(discovery_port_tcp),
+        "--udp-port={0}".format(discovery_port_udp),
     ]
 
     if network_params.gas_limit > 0:

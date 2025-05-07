@@ -3,7 +3,6 @@ constants = import_module("../package_io/constants.star")
 
 
 def get_general_cl_public_port_specs(public_ports_for_component):
-    discovery_port = public_ports_for_component[0]
     public_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: public_ports_for_component[0],
         constants.UDP_DISCOVERY_PORT_ID: public_ports_for_component[1],
