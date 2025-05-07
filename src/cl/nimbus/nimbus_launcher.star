@@ -265,7 +265,7 @@ def get_beacon_config(
     ]
 
     supernode_cmd = [
-        "--subscribe-all-subnets",
+        "--debug-peerdas-supernode=true",
     ]
 
     if network_params.perfect_peerdas_enabled and participant_index < 16:
