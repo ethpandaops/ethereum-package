@@ -108,6 +108,10 @@ dora_params:
 tx_fuzz_params:
   tx_fuzz_extra_args: []
 spamoor_params:
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 20
+  max_mem: 300
   extra_args: []
 prometheus_params:
   storage_tsdb_retention_time: "1d"
