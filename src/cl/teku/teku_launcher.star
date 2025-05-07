@@ -197,22 +197,12 @@ def get_beacon_config(
         if public_ports_for_component
         else BEACON_DISCOVERY_PORT_NUM
     )
-    http_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else BEACON_HTTP_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[3]
-        if public_ports_for_component
-        else BEACON_METRICS_PORT_NUM
-    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.HTTP_PORT_ID: http_port,
-        constants.METRICS_PORT_ID: metrics_port,
+        constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
+        constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -236,7 +226,7 @@ def get_beacon_config(
         "--rest-api-enabled=true",
         "--rest-api-docs-enabled=true",
         "--rest-api-interface=0.0.0.0",
-        "--rest-api-port={0}".format(http_port),
+        "--rest-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
         "--ee-jwt-secret-file=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
@@ -246,7 +236,7 @@ def get_beacon_config(
         "--metrics-interface=0.0.0.0",
         "--metrics-host-allowlist=*",
         "--metrics-categories=BEACON,PROCESS,LIBP2P,JVM,NETWORK,PROCESS",
-        "--metrics-port={0}".format(metrics_port),
+        "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
     validator_default_cmd = [

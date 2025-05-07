@@ -202,22 +202,12 @@ def get_beacon_config(
         if public_ports_for_component
         else BEACON_DISCOVERY_PORT_NUM
     )
-    http_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else BEACON_HTTP_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[3]
-        if public_ports_for_component
-        else BEACON_METRICS_PORT_NUM
-    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.HTTP_PORT_ID: http_port,
-        constants.METRICS_PORT_ID: metrics_port,
+        constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
+        constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -237,7 +227,7 @@ def get_beacon_config(
         "--rest=true",
         "--rest.address=0.0.0.0",
         "--rest.namespace=*",
-        "--rest.port={0}".format(http_port),
+        "--rest.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--nat=true",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # ENR
@@ -249,7 +239,7 @@ def get_beacon_config(
         # Metrics
         "--metrics",
         "--metrics.address=0.0.0.0",
-        "--metrics.port={0}".format(metrics_port),
+        "--metrics.port={0}".format(BEACON_METRICS_PORT_NUM),
     ]
 
     supernode_cmd = [

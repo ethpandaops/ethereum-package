@@ -131,26 +131,13 @@ def get_config(
         if public_ports_for_component
         else DISCOVERY_PORT_NUM
     )
-    engine_rpc_port = (
-        public_ports_for_component[1]
-        if public_ports_for_component
-        else ENGINE_RPC_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else METRICS_PORT_NUM
-    )
-    ws_rpc_port = (
-        public_ports_for_component[3] if public_ports_for_component else WS_RPC_PORT_NUM
-    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.ENGINE_RPC_PORT_ID: engine_rpc_port,
-        constants.WS_RPC_PORT_ID: ws_rpc_port,
-        constants.METRICS_PORT_ID: metrics_port,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.WS_RPC_PORT_ID: WS_RPC_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -158,7 +145,7 @@ def get_config(
         "--log-level={0}".format(log_level),
         "--data-dir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--net-key={0}/nodekey".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
-        "--http-port={0}".format(ws_rpc_port),
+        "--http-port={0}".format(WS_RPC_PORT_NUM),
         "--http-address=0.0.0.0",
         "--rpc",
         "--rpc-api=eth,debug",
@@ -166,11 +153,11 @@ def get_config(
         "--ws-api=eth,debug",
         "--engine-api",
         "--engine-api-address=0.0.0.0",
-        "--engine-api-port={0}".format(engine_rpc_port),
+        "--engine-api-port={0}".format(ENGINE_RPC_PORT_NUM),
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--metrics",
         "--metrics-address=0.0.0.0",
-        "--metrics-port={0}".format(metrics_port),
+        "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
         "--tcp-port={0}".format(discovery_port_tcp),
         "--udp-port={0}".format(discovery_port_udp),

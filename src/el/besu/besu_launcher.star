@@ -118,8 +118,8 @@ def get_config(
             public_ports_for_component
         )
         additional_public_port_assignments = {
-            constants.RPC_PORT_ID: public_ports_for_component[2],
-            constants.WS_PORT_ID: public_ports_for_component[3],
+            constants.RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[4],
         }
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
@@ -135,30 +135,14 @@ def get_config(
         if public_ports_for_component
         else DISCOVERY_PORT_NUM
     )
-    engine_rpc_port = (
-        public_ports_for_component[1]
-        if public_ports_for_component
-        else ENGINE_HTTP_RPC_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else METRICS_PORT_NUM
-    )
-    rpc_port = (
-        public_ports_for_component[3] if public_ports_for_component else RPC_PORT_NUM
-    )
-    ws_port = (
-        public_ports_for_component[4] if public_ports_for_component else WS_PORT_NUM
-    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.ENGINE_RPC_PORT_ID: engine_rpc_port,
-        constants.METRICS_PORT_ID: metrics_port,
-        constants.RPC_PORT_ID: rpc_port,
-        constants.WS_PORT_ID: ws_port,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_HTTP_RPC_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -169,7 +153,7 @@ def get_config(
         "--host-allowlist=*",
         "--rpc-http-enabled=true",
         "--rpc-http-host=0.0.0.0",
-        "--rpc-http-port={0}".format(rpc_port),
+        "--rpc-http-port={0}".format(RPC_PORT_NUM),
         "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--rpc-http-cors-origins=*",
         "--rpc-http-max-active-connections=300",
@@ -183,14 +167,14 @@ def get_config(
         "--engine-rpc-enabled=true",
         "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--engine-host-allowlist=*",
-        "--engine-rpc-port={0}".format(engine_rpc_port),
+        "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "--sync-mode=FULL",
         "--data-storage-format={0}".format(
             "VERKLE" if "verkle-gen" in network_params.network else "BONSAI"
         ),
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
-        "--metrics-port={0}".format(metrics_port),
+        "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--min-gas-price=1000000000",
         "--bonsai-limit-trie-logs-enabled=false"
         if "verkle" not in network_params.network

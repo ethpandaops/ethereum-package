@@ -119,7 +119,7 @@ def get_config(
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "el", port_publisher, participant_index
         )
-        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+        public_ports = el_shared.get_general_el_public_port_specs(
             public_ports_for_component
         )
         additional_public_port_assignments = {
@@ -140,19 +140,6 @@ def get_config(
         if public_ports_for_component
         else DISCOVERY_PORT_NUM
     )
-    engine_rpc_port = (
-        public_ports_for_component[1]
-        if public_ports_for_component
-        else ENGINE_RPC_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else METRICS_PORT_NUM
-    )
-    ws_rpc_port = (
-        public_ports_for_component[3] if public_ports_for_component else WS_RPC_PORT_NUM
-    )
     torrent_port = (
         public_ports_for_component[4]
         if public_ports_for_component
@@ -162,9 +149,9 @@ def get_config(
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.ENGINE_RPC_PORT_ID: engine_rpc_port,
-        constants.WS_RPC_PORT_ID: ws_rpc_port,
-        constants.METRICS_PORT_ID: metrics_port,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.WS_RPC_PORT_ID: WS_RPC_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
         constants.TORRENT_PORT_ID: torrent_port,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
@@ -188,15 +175,15 @@ def get_config(
         "--http",
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
-        "--http.port={0}".format(ws_rpc_port),
+        "--http.port={0}".format(WS_RPC_PORT_NUM),
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",
-        "--authrpc.port={0}".format(engine_rpc_port),
+        "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.vhosts=*",
         "--externalcl",
         "--metrics",
         "--metrics.addr=0.0.0.0",
-        "--metrics.port={0}".format(metrics_port),
+        "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--torrent.port={0}".format(torrent_port),
     ]
 

@@ -185,6 +185,11 @@ def get_beacon_config(
         public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[4]}
+            )
+        )
 
     discovery_port_tcp = (
         public_ports_for_component[0]
@@ -196,16 +201,6 @@ def get_beacon_config(
         if public_ports_for_component
         else BEACON_DISCOVERY_PORT_NUM
     )
-    http_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else BEACON_HTTP_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[3]
-        if public_ports_for_component
-        else BEACON_METRICS_PORT_NUM
-    )
     discovery_port_quic = (
         public_ports_for_component[4]
         if public_ports_for_component
@@ -216,8 +211,8 @@ def get_beacon_config(
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
-        constants.HTTP_PORT_ID: http_port,
-        constants.METRICS_PORT_ID: metrics_port,
+        constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
+        constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -229,7 +224,7 @@ def get_beacon_config(
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--http-address=0.0.0.0",
-        "--http-port={0}".format(http_port),
+        "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--libp2p-port={0}".format(discovery_port_tcp),
         "--discovery-port={0}".format(discovery_port_tcp),
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
@@ -245,7 +240,7 @@ def get_beacon_config(
         # Metrics
         "--metrics",
         "--metrics-address=0.0.0.0",
-        "--metrics-port={0}".format(metrics_port),
+        "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
     ]
     validator_default_cmd = [
         "--keystore-dir=" + validator_keys_dirpath,

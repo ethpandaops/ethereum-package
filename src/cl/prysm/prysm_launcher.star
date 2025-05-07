@@ -172,9 +172,15 @@ def get_beacon_config(
         public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
+
         public_ports.update(
             shared_utils.get_port_specs(
                 {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[0]}
+            )
+        )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.UDP_DISCOVERY_PORT_ID: public_ports_for_component[1]}
             )
         )
         public_ports.update(
@@ -198,38 +204,20 @@ def get_beacon_config(
         if public_ports_for_component
         else DISCOVERY_UDP_PORT_NUM
     )
-    http_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else BEACON_HTTP_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[3]
-        if public_ports_for_component
-        else BEACON_MONITORING_PORT_NUM
-    )
     discovery_port_quic = (
         public_ports_for_component[0]
         if public_ports_for_component
         else DISCOVERY_QUIC_PORT_NUM
     )  # use the same port for quic and tcp
-    rpc_port = (
-        public_ports_for_component[5] if public_ports_for_component else RPC_PORT_NUM
-    )
-    profiling_port = (
-        public_ports_for_component[6]
-        if public_ports_for_component
-        else PROFILING_PORT_NUM
-    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.HTTP_PORT_ID: http_port,
-        constants.METRICS_PORT_ID: metrics_port,
+        constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
+        constants.METRICS_PORT_ID: BEACON_MONITORING_PORT_NUM,
         constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
-        constants.RPC_PORT_ID: rpc_port,
-        constants.PROFILING_PORT_ID: profiling_port,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.PROFILING_PORT_ID: PROFILING_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -238,10 +226,10 @@ def get_beacon_config(
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
-        "--rpc-port={0}".format(rpc_port),
+        "--rpc-port={0}".format(RPC_PORT_NUM),
         "--http-host=0.0.0.0",
         "--http-cors-domain=*",
-        "--http-port={0}".format(http_port),
+        "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--p2p-host-ip=" + port_publisher.nat_exit_ip,
         "--p2p-tcp-port={0}".format(discovery_port_tcp),
         "--p2p-udp-port={0}".format(discovery_port_udp),
@@ -254,11 +242,11 @@ def get_beacon_config(
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
-        "--monitoring-port={0}".format(metrics_port),
+        "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM),
         # vvvvvvvvv PROFILING CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--pprof",
         "--pprofaddr=0.0.0.0",
-        "--pprofport={0}".format(profiling_port),
+        "--pprofport={0}".format(PROFILING_PORT_NUM),
     ]
 
     supernode_cmd = [

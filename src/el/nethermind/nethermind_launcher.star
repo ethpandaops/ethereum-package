@@ -132,30 +132,14 @@ def get_config(
         if public_ports_for_component
         else DISCOVERY_PORT_NUM
     )
-    engine_rpc_port = (
-        public_ports_for_component[1]
-        if public_ports_for_component
-        else ENGINE_RPC_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else METRICS_PORT_NUM
-    )
-    rpc_port = (
-        public_ports_for_component[3] if public_ports_for_component else RPC_PORT_NUM
-    )
-    ws_port = (
-        public_ports_for_component[4] if public_ports_for_component else WS_PORT_NUM
-    )
 
     used_port_assignments = {
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
-        constants.ENGINE_RPC_PORT_ID: engine_rpc_port,
-        constants.RPC_PORT_ID: rpc_port,
-        constants.WS_PORT_ID: ws_port,
-        constants.METRICS_PORT_ID: metrics_port,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -166,16 +150,16 @@ def get_config(
         "--JsonRpc.Enabled=true",
         "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin,debug,txpool",
         "--JsonRpc.Host=0.0.0.0",
-        "--JsonRpc.Port={0}".format(rpc_port),
-        "--JsonRpc.WebSocketsPort={0}".format(ws_port),
+        "--JsonRpc.Port={0}".format(RPC_PORT_NUM),
+        "--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
         "--JsonRpc.EngineHost=0.0.0.0",
-        "--JsonRpc.EnginePort={0}".format(engine_rpc_port),
+        "--JsonRpc.EnginePort={0}".format(ENGINE_RPC_PORT_NUM),
         "--Network.ExternalIp={0}".format(port_publisher.nat_exit_ip),
         "--Network.DiscoveryPort={0}".format(discovery_port_tcp),
         "--Network.P2PPort={0}".format(discovery_port_tcp),
         "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--Metrics.Enabled=true",
-        "--Metrics.ExposePort={0}".format(metrics_port),
+        "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
         "--Metrics.ExposeHost=0.0.0.0",
     ]
 

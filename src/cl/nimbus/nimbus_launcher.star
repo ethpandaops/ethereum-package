@@ -208,22 +208,12 @@ def get_beacon_config(
         if public_ports_for_component
         else BEACON_DISCOVERY_PORT_NUM
     )
-    http_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else BEACON_HTTP_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[3]
-        if public_ports_for_component
-        else BEACON_METRICS_PORT_NUM
-    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.HTTP_PORT_ID: http_port,
-        constants.METRICS_PORT_ID: metrics_port,
+        constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
+        constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -255,7 +245,7 @@ def get_beacon_config(
         "--rest",
         "--rest-address=0.0.0.0",
         "--rest-allow-origin=*",
-        "--rest-port={0}".format(http_port),
+        "--rest-port={0}".format(BEACON_HTTP_PORT_NUM),
         # There's a bug where if we don't set this flag, the Nimbus nodes won't work:
         # https://discord.com/channels/641364059387854899/674288681737256970/922890280120750170
         # https://github.com/status-im/nimbus-eth2/issues/2451
@@ -266,7 +256,7 @@ def get_beacon_config(
         # Metrics
         "--metrics",
         "--metrics-address=0.0.0.0",
-        "--metrics-port={0}".format(metrics_port),
+        "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
     ]
 
     validator_default_cmd = [

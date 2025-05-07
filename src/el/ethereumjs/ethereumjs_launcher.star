@@ -135,36 +135,15 @@ def get_config(
         if public_ports_for_component
         else DISCOVERY_PORT_NUM
     )
-    engine_rpc_port = (
-        public_ports_for_component[1]
-        if public_ports_for_component
-        else ENGINE_RPC_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else METRICS_PORT_NUM
-    )
-    rpc_port = (
-        public_ports_for_component[3] if public_ports_for_component else RPC_PORT_NUM
-    )
-    ws_port = (
-        public_ports_for_component[4] if public_ports_for_component else WS_PORT_NUM
-    )
-    ws_engine_port = (
-        public_ports_for_component[5]
-        if public_ports_for_component
-        else WS_PORT_ENGINE_NUM
-    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.ENGINE_RPC_PORT_ID: engine_rpc_port,
-        constants.METRICS_PORT_ID: metrics_port,
-        constants.RPC_PORT_ID: rpc_port,
-        constants.WS_PORT_ID: ws_port,
-        constants.ENGINE_WS_PORT_ID: ws_engine_port,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
+        constants.ENGINE_WS_PORT_ID: WS_PORT_ENGINE_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -173,15 +152,15 @@ def get_config(
         "--port={0}".format(discovery_port_tcp),
         "--rpc",
         "--rpcAddr=0.0.0.0",
-        "--rpcPort={0}".format(rpc_port),
+        "--rpcPort={0}".format(RPC_PORT_NUM),
         "--rpcCors=*",
         "--rpcEngine",
         "--rpcEngineAddr=0.0.0.0",
-        "--rpcEnginePort={0}".format(engine_rpc_port),
+        "--rpcEnginePort={0}".format(ENGINE_RPC_PORT_NUM),
         "--ws",
         "--wsAddr=0.0.0.0",
-        "--wsPort={0}".format(ws_port),
-        "--wsEnginePort={0}".format(ws_engine_port),
+        "--wsPort={0}".format(WS_PORT_NUM),
+        "--wsEnginePort={0}".format(WS_PORT_ENGINE_NUM),
         "--wsEngineAddr=0.0.0.0",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--extIP={0}".format(port_publisher.nat_exit_ip),
@@ -189,7 +168,7 @@ def get_config(
         "--isSingleNode=true",
         "--logLevel={0}".format(log_level),
         "--prometheus",
-        "--prometheusPort={0}".format(metrics_port),
+        "--prometheusPort={0}".format(METRICS_PORT_NUM),
     ]
 
     if network_params.network not in constants.PUBLIC_NETWORKS:

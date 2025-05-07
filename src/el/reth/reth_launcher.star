@@ -141,30 +141,14 @@ def get_config(
         if public_ports_for_component
         else DISCOVERY_PORT_NUM
     )
-    engine_rpc_port = (
-        public_ports_for_component[1]
-        if public_ports_for_component
-        else ENGINE_RPC_PORT_NUM
-    )
-    metrics_port = (
-        public_ports_for_component[2]
-        if public_ports_for_component
-        else METRICS_PORT_NUM
-    )
-    rpc_port = (
-        public_ports_for_component[3] if public_ports_for_component else RPC_PORT_NUM
-    )
-    ws_port = (
-        public_ports_for_component[4] if public_ports_for_component else WS_PORT_NUM
-    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.ENGINE_RPC_PORT_ID: engine_rpc_port,
-        constants.RPC_PORT_ID: rpc_port,
-        constants.WS_PORT_ID: ws_port,
-        constants.METRICS_PORT_ID: metrics_port,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
     }
 
     if (
@@ -194,7 +178,7 @@ def get_config(
                 else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
             ),
             "--http",
-            "--http.port={0}".format(rpc_port),
+            "--http.port={0}".format(RPC_PORT_NUM),
             "--http.addr=0.0.0.0",
             "--http.corsdomain=*",
             "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
@@ -205,14 +189,14 @@ def get_config(
             ),
             "--ws",
             "--ws.addr=0.0.0.0",
-            "--ws.port={0}".format(ws_port),
+            "--ws.port={0}".format(WS_PORT_NUM),
             "--ws.api=net,eth",
             "--ws.origins=*",
             "--nat=extip:" + port_publisher.nat_exit_ip,
-            "--authrpc.port={0}".format(engine_rpc_port),
+            "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
             "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "--authrpc.addr=0.0.0.0",
-            "--metrics=0.0.0.0:{0}".format(metrics_port),
+            "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
             "--discovery.port={0}".format(discovery_port_udp),
             "--port={0}".format(discovery_port_tcp),
         ]
