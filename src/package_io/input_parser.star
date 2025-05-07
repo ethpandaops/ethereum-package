@@ -471,6 +471,10 @@ def input_parser(plan, input_args):
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
+            min_cpu=result["spamoor_params"]["min_cpu"],
+            max_cpu=result["spamoor_params"]["max_cpu"],
+            min_mem=result["spamoor_params"]["min_mem"],
+            max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
         ),
@@ -1240,6 +1244,10 @@ def get_default_xatu_sentry_params():
 def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 20,
+        "max_mem": 300,
         "extra_args": [],
         "spammers": [
             # default spammers
