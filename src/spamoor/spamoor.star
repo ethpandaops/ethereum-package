@@ -9,12 +9,6 @@ SPAMOOR_CONFIG_FILENAME = "startup-spammers.yaml"
 
 SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
-# The min/max CPU/memory that spamoor can use
-MIN_CPU = 100
-MAX_CPU = 1000
-MIN_MEMORY = 20
-MAX_MEMORY = 300
-
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
@@ -153,10 +147,10 @@ def get_config(
         entrypoint=["./spamoor-daemon"],
         cmd=cmd,
         ports=USED_PORTS,
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
+        min_cpu=spamoor_params.min_cpu,
+        max_cpu=spamoor_params.max_cpu,
+        min_memory=spamoor_params.min_mem,
+        max_memory=spamoor_params.max_mem,
         node_selectors=node_selectors,
         files={
             SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
