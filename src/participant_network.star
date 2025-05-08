@@ -44,7 +44,7 @@ def launch_participant_network(
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
     total_number_of_validator_keys = 0
-
+    latest_block = ""
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
