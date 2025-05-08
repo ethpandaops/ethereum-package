@@ -5,7 +5,6 @@ participants:
   - el_type: reth
   - el_type: erigon
 network_params:
-  electra_fork_epoch: 0
   fulu_fork_epoch: 10
   network: hoodi-shadowfork
 additional_services:
