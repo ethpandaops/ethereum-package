@@ -42,16 +42,8 @@ def launch_participant_network(
     parallel_keystore_generation,
 ):
     network_id = network_params.network_id
-    latest_block = ""
     num_participants = len(args_with_right_defaults.participants)
-    shadowfork_block = "latest"
     total_number_of_validator_keys = 0
-    if (
-        constants.NETWORK_NAME.shadowfork in network_params.network
-        and ("verkle" in network_params.network)
-        and ("holesky" in network_params.network)
-    ):
-        shadowfork_block = "793312"  # Hardcodes verkle shadowfork block for holesky
 
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
@@ -63,7 +55,6 @@ def launch_participant_network(
             latest_block, network_id = launch_shadowfork.shadowfork_prep(
                 plan,
                 network_params,
-                shadowfork_block,
                 args_with_right_defaults.participants,
                 global_tolerations,
                 global_node_selectors,
