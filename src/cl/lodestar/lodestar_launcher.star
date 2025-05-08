@@ -183,18 +183,29 @@ def get_beacon_config(
         )
 
     public_ports = {}
-    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.cl_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "cl", port_publisher, participant_index
         )
-        public_ports, discovery_port = cl_shared.get_general_cl_public_port_specs(
+        public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else BEACON_DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else BEACON_DISCOVERY_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -203,8 +214,8 @@ def get_beacon_config(
     cmd = [
         "beacon",
         "--logLevel=" + log_level,
-        "--port={0}".format(discovery_port),
-        "--discoveryPort={0}".format(discovery_port),
+        "--port={0}".format(discovery_port_tcp),
+        "--discoveryPort={0}".format(discovery_port_tcp),
         "--dataDir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--chain.persistInvalidSszObjects=true",
         "--eth1.depositContractDeployBlock=0",
@@ -218,15 +229,17 @@ def get_beacon_config(
         "--rest.namespace=*",
         "--rest.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--nat=true",
-        "--enr.ip=" + port_publisher.nat_exit_ip,
-        "--enr.tcp={0}".format(discovery_port),
-        "--enr.udp={0}".format(discovery_port),
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
+        # ENR
+        "--enr.ip=" + port_publisher.nat_exit_ip,
+        "--enr.tcp={0}".format(discovery_port_tcp),
+        "--enr.udp={0}".format(discovery_port_udp),
+        # QUIC
+        # coming soon
+        # Metrics
         "--metrics",
         "--metrics.address=0.0.0.0",
         "--metrics.port={0}".format(BEACON_METRICS_PORT_NUM),
-        # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
     supernode_cmd = [

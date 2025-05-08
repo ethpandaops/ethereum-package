@@ -557,8 +557,8 @@ network_params:
   deneb_fork_epoch: 0
 
   # Electra fork epoch
-  # Defaults to 18446744073709551615
-  electra_fork_epoch: 18446744073709551615
+  # Defaults to 0
+  electra_fork_epoch: 0
 
   # Fulu fork epoch
   # Defaults to 18446744073709551615
@@ -576,10 +576,17 @@ network_params:
   # Defaults to false
   force_snapshot_sync: false
 
+  # The block height of the shadowfork
+  # This is used to sync the network from a snapshot at a specific block height
+  # Defaults to "latest"
+  # Example: shadowfork_block_height: 240000
+  shadowfork_block_height: "latest"
+
   # The number of data column sidecar subnets used in the gossipsub protocol
   data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
+
   # Minimum number of subnets an honest node custodies and serves samples from
   # Defaults to 4
   custody_requirement: 4

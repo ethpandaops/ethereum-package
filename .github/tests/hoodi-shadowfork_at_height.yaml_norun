@@ -1,13 +1,9 @@
 participants:
   - el_type: geth
-  - el_type: nethermind
-  - el_type: besu
-  - el_type: reth
-  - el_type: erigon
 network_params:
   fulu_fork_epoch: 10
+  shadowfork_block_height: 240000
   network: hoodi-shadowfork
 additional_services:
   - dora
-snooper_enabled: true
 persistent: true

@@ -16,16 +16,16 @@ participants:
 port_publisher:
   el:
     enabled: true
-    public_port_start: 32000
+    public_port_start: 40000
   cl:
     enabled: true
-    public_port_start: 33000
+    public_port_start: 41000
   vc:
     enabled: true
-    public_port_start: 34000
+    public_port_start: 42000
   remote_signer:
     enabled: true
-    public_port_start: 35000
+    public_port_start: 43000
   additional_services:
     enabled: true
-    public_port_start: 36000
+    public_port_start: 44000

@@ -124,28 +124,11 @@ def get_config(
         gcmode_archive = True
     else:
         gcmode_archive = False
-    # TODO: Remove this once electra fork has path based storage scheme implemented
-    if (
-        constants.NETWORK_NAME.verkle in network_params.network
-    ) and constants.NETWORK_NAME.shadowfork not in network_params.network:
-        if (
-            constants.NETWORK_NAME.verkle + "-gen" in network_params.network
-        ):  # verkle-gen
-            init_datadir_cmd_str = "geth --datadir={0} --cache.preimages --override.prague={1} init {2}".format(
-                EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-                launcher.prague_time,
-                constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-            )
-        else:  # verkle
-            init_datadir_cmd_str = (
-                "geth --datadir={0} --cache.preimages init {1}".format(
-                    EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-                    constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-                )
-            )
-    elif constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
+
+    if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
         init_datadir_cmd_str = "echo shadowfork"
 
+    # TODO: Remove once archive mode works with path based storage scheme
     elif gcmode_archive:  # Disable path based storage scheme archive mode
         init_datadir_cmd_str = "geth init --state.scheme=hash --datadir={0} {1}".format(
             EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -158,26 +141,36 @@ def get_config(
         )
 
     public_ports = {}
-    discovery_port = DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "el", port_publisher, participant_index
         )
-        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+        public_ports = el_shared.get_general_el_public_port_specs(
             public_ports_for_component
         )
         additional_public_port_assignments = {
-            constants.RPC_PORT_ID: public_ports_for_component[2],
-            constants.WS_PORT_ID: public_ports_for_component[3],
-            constants.METRICS_PORT_ID: public_ports_for_component[4],
+            constants.RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[4],
         }
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.WS_PORT_ID: WS_PORT_NUM,
@@ -187,25 +180,23 @@ def get_config(
 
     cmd = [
         "geth",
-        # Disable path based storage scheme for electra fork and verkle
         # TODO: REMOVE Once geth default db is path based, and builder rebased
-        "{0}".format(
-            "--state.scheme=hash"
-            if "verkle" in network_params.network or gcmode_archive
-            else ""
-        ),
-        # Override prague fork timestamp for electra fork
-        "{0}".format("--cache.preimages" if "verkle" in network_params.network else ""),
+        "{0}".format("--state.scheme=hash" if gcmode_archive else ""),
         "{0}".format(
             "--{}".format(network_params.network)
             if network_params.network in constants.PUBLIC_NETWORKS
             else ""
         ),
-        "--networkid={0}".format(launcher.networkid),
+        "{0}".format(
+            "--networkid={0}".format(launcher.networkid)
+            if network_params.network not in constants.PUBLIC_NETWORKS
+            else ""
+        ),
         "--verbosity=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--http",
         "--http.addr=0.0.0.0",
+        "--http.port={0}".format(RPC_PORT_NUM),
         "--http.vhosts=*",
         "--http.corsdomain=*",
         # WARNING: The admin info endpoint is enabled so that we can easily get ENR/enode, which means
@@ -231,8 +222,8 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--discovery.port={0}".format(discovery_port),
-        "--port={0}".format(discovery_port),
+        "--discovery.port={0}".format(discovery_port_tcp),
+        "--port={0}".format(discovery_port_tcp),
     ]
 
     if network_params.gas_limit > 0:
@@ -267,11 +258,8 @@ def get_config(
                 )
             )
         if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            cmd.append("--override.prague=" + str(launcher.prague_time))
-            if "verkle" in network_params.network:  # verkle-shadowfork
-                cmd.append("--override.overlay-stride=10000")
-                cmd.append("--override.blockproof=true")
-                cmd.append("--clear.verkle.costs=true")
+            if launcher.prague_time:
+                cmd.append("--override.prague=" + str(launcher.prague_time))
 
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
