@@ -262,7 +262,6 @@ def get_beacon_config(
         # Enable this flag once we have https://github.com/sigp/lighthouse/issues/5054 fixed
         # "--allow-insecure-genesis-sync",
         "--enable-private-discovery",
-        "--target-peers={0}".format(constants.MIN_PEERS),
     ]
 
     supernode_cmd = [
