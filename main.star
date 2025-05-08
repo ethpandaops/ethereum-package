@@ -322,7 +322,7 @@ def run(plan, args={}):
                 beacon_uri,
                 genesis_validators_root,
                 blocksim_uri,
-                network_params.seconds_per_slot,
+                network_params,
                 persistent,
                 global_node_selectors,
             )

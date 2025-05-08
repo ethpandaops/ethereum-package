@@ -44,7 +44,7 @@ def launch_mev_relay(
     beacon_uris,
     validator_root,
     blocksim_uri,
-    seconds_per_slot,
+    network_params,
     persistent,
     global_node_selectors,
 ):
@@ -85,7 +85,8 @@ def launch_mev_relay(
         "DENEB_FORK_VERSION": constants.DENEB_FORK_VERSION,
         "ELECTRA_FORK_VERSION": constants.ELECTRA_FORK_VERSION,
         "GENESIS_VALIDATORS_ROOT": validator_root,
-        "SEC_PER_SLOT": str(seconds_per_slot),
+        "SEC_PER_SLOT": str(network_params.seconds_per_slot),
+        "SLOTS_PER_EPOCH": str(32) if network_params.preset == "mainnet" else str(8),
         "LOG_LEVEL": "debug",
         "DB_TABLE_PREFIX": "custom",
         "ENABLE_BUILDER_CANCELLATIONS": "1",
