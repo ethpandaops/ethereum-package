@@ -20,8 +20,6 @@ PROFILING_PORT_NUM = 6060
 
 METRICS_PATH = "/metrics"
 
-MIN_PEERS = 0
-
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
     constants.GLOBAL_LOG_LEVEL.warn: "warn",
@@ -234,7 +232,7 @@ def get_beacon_config(
         "--p2p-tcp-port={0}".format(discovery_port_tcp),
         "--p2p-udp-port={0}".format(discovery_port_udp),
         "--p2p-quic-port={0}".format(discovery_port_quic),
-        "--min-sync-peers={0}".format(MIN_PEERS),
+        "--min-sync-peers={0}".format(constants.MIN_PEERS),
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
