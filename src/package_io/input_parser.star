@@ -344,6 +344,7 @@ def input_parser(plan, input_args):
             shard_committee_period=result["network_params"]["shard_committee_period"],
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
             force_snapshot_sync=result["network_params"]["force_snapshot_sync"],
+            shadowfork_block_height=result["network_params"]["shadowfork_block_height"],
             data_column_sidecar_subnet_count=result["network_params"][
                 "data_column_sidecar_subnet_count"
             ],
@@ -937,6 +938,7 @@ def default_network_params():
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
+        "shadowfork_block_height": "latest",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
@@ -983,6 +985,7 @@ def default_minimal_network_params():
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
+        "shadowfork_block_height": "latest",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,

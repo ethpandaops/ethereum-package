@@ -6,7 +6,6 @@ input_parser = import_module("../package_io/input_parser.star")
 def shadowfork_prep(
     plan,
     network_params,
-    shadowfork_block,
     participants,
     global_tolerations,
     global_node_selectors,
@@ -33,7 +32,7 @@ def shadowfork_prep(
         + network_params.network_sync_base_url
         + base_network
         + "/geth/"
-        + shadowfork_block
+        + str(network_params.shadowfork_block_height)
         + "/_snapshot_eth_getBlockByNumber.json && \
            cat /shadowfork/latest_block.json",
         store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
@@ -68,7 +67,7 @@ def shadowfork_prep(
                     + "/"
                     + el_type
                     + "/"
-                    + shadowfork_block
+                    + str(network_params.shadowfork_block_height)
                     + "/snapshot.tar.zst"
                     + " | tar -I zstd -xvf - -C /data/"
                     + el_type
