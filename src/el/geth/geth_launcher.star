@@ -189,7 +189,7 @@ def get_config(
         ),
         "{0}".format(
             "--networkid={0}".format(launcher.networkid)
-            if network_params.network == constants.NETWORK_NAME.kurtosis
+            if network_params.network not in constants.PUBLIC_NETWORKS
             else ""
         ),
         "--verbosity=" + log_level,

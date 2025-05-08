@@ -1,10 +1,5 @@
 participants:
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.11
-
-
-  - el_type: geth
-    el_image: ethpandaops/geth:master-07d073b
     cl_type: teku
   - el_type: nethermind
     cl_type: prysm
