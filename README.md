@@ -586,6 +586,7 @@ network_params:
   data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
+
   # Minimum number of subnets an honest node custodies and serves samples from
   # Defaults to 4
   custody_requirement: 4
