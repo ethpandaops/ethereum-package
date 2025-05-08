@@ -187,7 +187,11 @@ def get_config(
             if network_params.network in constants.PUBLIC_NETWORKS
             else ""
         ),
-        "--networkid={0}".format(launcher.networkid),
+        "{0}".format(
+            "--networkid={0}".format(launcher.networkid)
+            if network_params.network == constants.NETWORK_NAME.kurtosis
+            else ""
+        ),
         "--verbosity=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--http",
