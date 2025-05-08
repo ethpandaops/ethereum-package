@@ -99,14 +99,6 @@ def get_config(
     node_selectors,
     network_params,
 ):
-    image_name = spamoor_params.image
-    if spamoor_params.image == constants.DEFAULT_SPAMOOR_IMAGE:
-        if (
-            "peerdas" in network_params.network
-            or network_params.fulu_fork_epoch != constants.FAR_FUTURE_EPOCH
-        ):
-            image_name = "ethpandaops/spamoor:blob-v1"
-
     config_file_path = shared_utils.path_join(
         SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         SPAMOOR_CONFIG_FILENAME,
@@ -143,7 +135,7 @@ def get_config(
         cmd.append(extra_arg)
 
     return ServiceConfig(
-        image=image_name,
+        image=spamoor_params.image,
         entrypoint=["./spamoor-daemon"],
         cmd=cmd,
         ports=USED_PORTS,
