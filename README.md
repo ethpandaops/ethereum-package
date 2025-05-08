@@ -969,6 +969,13 @@ checkpoint_sync_url: ""
 spamoor_params:
   # The image to use for spamoor
   image: ethpandaops/spamoor:latest
+  # Resource management for spamoor
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 20
+  max_mem: 300
   # A list of spammers to launch on startup
   # example:
   # - scenario: eoatx  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
