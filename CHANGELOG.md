@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/ethpandaops/ethereum-package/compare/5.0.0...5.0.1) (2025-05-08)
+
+
+### Bug Fixes
+
+* lighthouse target peers revert ([#1008](https://github.com/ethpandaops/ethereum-package/issues/1008)) ([c26e9f6](https://github.com/ethpandaops/ethereum-package/commit/c26e9f6d40b9c1c6f9ca1d4214f937f6846be1db))
+
 ## [5.0.0](https://github.com/ethpandaops/ethereum-package/compare/4.6.0...5.0.0) (2025-05-08)
 
 
