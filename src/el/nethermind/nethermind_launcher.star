@@ -106,26 +106,36 @@ def get_config(
     network_params,
 ):
     public_ports = {}
-    discovery_port = DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "el", port_publisher, participant_index
         )
-        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+        public_ports = el_shared.get_general_el_public_port_specs(
             public_ports_for_component
         )
         additional_public_port_assignments = {
-            constants.RPC_PORT_ID: public_ports_for_component[2],
-            constants.WS_PORT_ID: public_ports_for_component[3],
-            constants.METRICS_PORT_ID: public_ports_for_component[4],
+            constants.RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[4],
         }
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.WS_PORT_ID: WS_PORT_NUM,
@@ -145,8 +155,8 @@ def get_config(
         "--JsonRpc.EngineHost=0.0.0.0",
         "--JsonRpc.EnginePort={0}".format(ENGINE_RPC_PORT_NUM),
         "--Network.ExternalIp={0}".format(port_publisher.nat_exit_ip),
-        "--Network.DiscoveryPort={0}".format(discovery_port),
-        "--Network.P2PPort={0}".format(discovery_port),
+        "--Network.DiscoveryPort={0}".format(discovery_port_tcp),
+        "--Network.P2PPort={0}".format(discovery_port_tcp),
         "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
