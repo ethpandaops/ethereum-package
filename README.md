@@ -557,8 +557,8 @@ network_params:
   deneb_fork_epoch: 0
 
   # Electra fork epoch
-  # Defaults to 18446744073709551615
-  electra_fork_epoch: 18446744073709551615
+  # Defaults to 0
+  electra_fork_epoch: 0
 
   # Fulu fork epoch
   # Defaults to 18446744073709551615

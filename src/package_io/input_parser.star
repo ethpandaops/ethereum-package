@@ -58,10 +58,6 @@ DEFAULT_REMOTE_SIGNER_IMAGES = {
     "web3signer": "consensys/web3signer:latest",
 }
 
-# Placeholder value for the deneb fork epoch if electra is being run
-# TODO: This is a hack, and should be removed once we electra is rebased on deneb
-HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
-
 # MEV Params
 MEV_BOOST_PORT = 18550
 MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
@@ -935,7 +931,7 @@ def default_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "electra_fork_epoch": 0,
         "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
@@ -981,7 +977,7 @@ def default_minimal_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "electra_fork_epoch": 0,
         "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
