@@ -1119,11 +1119,11 @@ def get_default_mev_params(mev_type, preset):
     mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
     mev_boost_args = ["mev-boost", "--relay-check"]
     mev_relay_api_extra_args = []
-    mev_relay_api_extra_env_vars = []
+    mev_relay_api_extra_env_vars = {}
     mev_relay_housekeeper_extra_args = []
-    mev_relay_housekeeper_extra_env_vars = []
+    mev_relay_housekeeper_extra_env_vars = {}
     mev_relay_website_extra_args = []
-    mev_relay_website_extra_env_vars = []
+    mev_relay_website_extra_env_vars = {}
     mev_builder_extra_args = []
     mev_flood_image = "flashbots/mev-flood"
     mev_flood_extra_args = []
