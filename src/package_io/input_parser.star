@@ -387,11 +387,20 @@ def input_parser(plan, input_args):
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
+            mev_relay_api_extra_env_vars=result["mev_params"][
+                "mev_relay_api_extra_env_vars"
+            ],
             mev_relay_housekeeper_extra_args=result["mev_params"][
                 "mev_relay_housekeeper_extra_args"
             ],
+            mev_relay_housekeeper_extra_env_vars=result["mev_params"][
+                "mev_relay_housekeeper_extra_env_vars"
+            ],
             mev_relay_website_extra_args=result["mev_params"][
                 "mev_relay_website_extra_args"
+            ],
+            mev_relay_website_extra_env_vars=result["mev_params"][
+                "mev_relay_website_extra_env_vars"
             ],
             mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
             mev_flood_image=result["mev_params"]["mev_flood_image"],
@@ -1110,8 +1119,11 @@ def get_default_mev_params(mev_type, preset):
     mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
     mev_boost_args = ["mev-boost", "--relay-check"]
     mev_relay_api_extra_args = []
+    mev_relay_api_extra_env_vars = []
     mev_relay_housekeeper_extra_args = []
+    mev_relay_housekeeper_extra_env_vars = []
     mev_relay_website_extra_args = []
+    mev_relay_website_extra_env_vars = []
     mev_builder_extra_args = []
     mev_flood_image = "flashbots/mev-flood"
     mev_flood_extra_args = []
@@ -1169,8 +1181,11 @@ def get_default_mev_params(mev_type, preset):
         "mev_boost_image": mev_boost_image,
         "mev_boost_args": mev_boost_args,
         "mev_relay_api_extra_args": mev_relay_api_extra_args,
+        "mev_relay_api_extra_env_vars": mev_relay_api_extra_env_vars,
         "mev_relay_housekeeper_extra_args": mev_relay_housekeeper_extra_args,
+        "mev_relay_housekeeper_extra_env_vars": mev_relay_housekeeper_extra_env_vars,
         "mev_relay_website_extra_args": mev_relay_website_extra_args,
+        "mev_relay_website_extra_env_vars": mev_relay_website_extra_env_vars,
         "mev_flood_image": mev_flood_image,
         "mev_flood_extra_args": mev_flood_extra_args,
         "mev_flood_seconds_per_bundle": mev_flood_seconds_per_bundle,

@@ -891,10 +891,16 @@ mev_params:
   mev_boost_args: []
   # Extra parameters to send to the API
   mev_relay_api_extra_args: []
+  # Extra environment variables to send to the API
+  mev_relay_api_extra_env_vars: []
   # Extra parameters to send to the housekeeper
   mev_relay_housekeeper_extra_args: []
+  # Extra environment variables to send to the housekeeper
+  mev_relay_housekeeper_extra_env_vars: []
   # Extra parameters to send to the website
   mev_relay_website_extra_args: []
+  # Extra environment variables to send to the website
+  mev_relay_website_extra_env_vars: []
   # Extra parameters to send to the builder
   mev_builder_extra_args: []
   # Prometheus additional configuration for the mev builder participant.

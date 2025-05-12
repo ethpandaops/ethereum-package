@@ -110,7 +110,7 @@ def launch_mev_relay(
                 beacon_uris,
             ]
             + mev_params.mev_relay_housekeeper_extra_args,
-            env_vars=env_vars,
+            env_vars=env_vars + mev_params.mev_relay_housekeeper_extra_env_vars,
             min_cpu=RELAY_MIN_CPU,
             max_cpu=RELAY_MAX_CPU,
             min_memory=RELAY_MIN_MEMORY,
@@ -146,7 +146,7 @@ def launch_mev_relay(
                     number=MEV_RELAY_ENDPOINT_PORT, transport_protocol="TCP"
                 )
             },
-            env_vars=env_vars,
+            env_vars=env_vars + mev_params.mev_relay_api_extra_env_vars,
             min_cpu=RELAY_MIN_CPU,
             max_cpu=RELAY_MAX_CPU,
             min_memory=RELAY_MIN_MEMORY,
@@ -190,7 +190,7 @@ def launch_mev_relay(
                     application_protocol="http",
                 )
             },
-            env_vars=env_vars,
+            env_vars=env_vars + mev_params.mev_relay_website_extra_env_vars,
             min_cpu=RELAY_MIN_CPU,
             max_cpu=RELAY_MAX_CPU,
             min_memory=RELAY_MIN_MEMORY,
