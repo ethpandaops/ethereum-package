@@ -4,6 +4,7 @@ participants:
     el_extra_params: ["--miner.extradata=lighthouseFromLocal"]
     cl_type: lighthouse
     cl_image: ethpandaops/lighthouse:peerdas-devnet-7
+    supernode: true
 
   - el_type: nethermind
     el_image: ethpandaops/nethermind:feature-peerdas
@@ -26,7 +27,7 @@ participants:
 
   - el_type: nethermind
     el_image: ethpandaops/nethermind:feature-peerdas
-    el_extra_params: ["--miner-extra-data=0x6E696D62757346726F6D4C6F63616C"]
+    el_extra_params: ["--Blocks.ExtraData=nimbusFromLocal"]
     cl_type: nimbus
     cl_image: ethpandaops/nimbus-eth2:gbv2
 
