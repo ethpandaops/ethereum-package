@@ -53,6 +53,7 @@ network_params:
   min_validator_withdrawability_delay: 1
   shard_committee_period: 1
   churn_limit_quotient: 16
+  fulu_fork_epoch: 1
 
 assertoor_params:
   tests:
