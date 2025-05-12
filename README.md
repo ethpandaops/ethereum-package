@@ -920,6 +920,9 @@ mev_params:
   custom_flood_params:
     interval_between_transactions: 1
 
+  # Image to use for mock mev
+  mock_mev_image: ethpandaops/rustic-builder:main
+
 # Enables Xatu Sentry for all participants
 # Defaults to false
 xatu_sentry_enabled: false
