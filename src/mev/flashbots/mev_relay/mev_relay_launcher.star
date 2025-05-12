@@ -8,7 +8,7 @@ MEV_RELAY_HOUSEKEEPER = "mev-relay-housekeeper"
 
 MEV_RELAY_ENDPOINT_PORT = 9062
 MEV_RELAY_WEBSITE_PORT = 9060
-
+MEV_RELAY_PPROF_PORT = 6060
 NETWORK_ID_TO_NAME = {
     "1": "mainnet",
     "17000": "holesky",
@@ -110,7 +110,7 @@ def launch_mev_relay(
                 beacon_uris,
             ]
             + mev_params.mev_relay_housekeeper_extra_args,
-            env_vars=env_vars,
+            env_vars=env_vars | mev_params.mev_relay_housekeeper_extra_env_vars,
             min_cpu=RELAY_MIN_CPU,
             max_cpu=RELAY_MAX_CPU,
             min_memory=RELAY_MIN_MEMORY,
@@ -139,14 +139,19 @@ def launch_mev_relay(
                 beacon_uris,
                 "--blocksim",
                 blocksim_uri,
+                "--pprof-listen-addr",
+                "0.0.0.0:{0}".format(MEV_RELAY_PPROF_PORT),
             ]
             + mev_params.mev_relay_api_extra_args,
             ports={
                 "api": PortSpec(
                     number=MEV_RELAY_ENDPOINT_PORT, transport_protocol="TCP"
-                )
+                ),
+                "pprof": PortSpec(
+                    number=MEV_RELAY_PPROF_PORT, transport_protocol="TCP"
+                ),
             },
-            env_vars=env_vars,
+            env_vars=env_vars | mev_params.mev_relay_api_extra_env_vars,
             min_cpu=RELAY_MIN_CPU,
             max_cpu=RELAY_MAX_CPU,
             min_memory=RELAY_MIN_MEMORY,
@@ -190,7 +195,7 @@ def launch_mev_relay(
                     application_protocol="http",
                 )
             },
-            env_vars=env_vars,
+            env_vars=env_vars | mev_params.mev_relay_website_extra_env_vars,
             min_cpu=RELAY_MIN_CPU,
             max_cpu=RELAY_MAX_CPU,
             min_memory=RELAY_MIN_MEMORY,
