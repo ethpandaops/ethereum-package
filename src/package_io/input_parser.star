@@ -359,14 +359,65 @@ def input_parser(plan, input_args):
             base_fee_update_fraction_electra=result["network_params"][
                 "base_fee_update_fraction_electra"
             ],
-            max_blobs_per_block_fulu=result["network_params"][
-                "max_blobs_per_block_fulu"
+            bpo_1_epoch=result["network_params"][
+                "bpo_1_epoch"
             ],
-            target_blobs_per_block_fulu=result["network_params"][
-                "target_blobs_per_block_fulu"
+            bpo_1_max_blobs=result["network_params"][
+                "bpo_1_max_blobs"
             ],
-            base_fee_update_fraction_fulu=result["network_params"][
-                "base_fee_update_fraction_fulu"
+            bpo_1_target_blobs=result["network_params"][
+                "bpo_1_target_blobs"
+            ],
+            bpo_1_base_fee_update_fraction=result["network_params"][
+                "bpo_1_base_fee_update_fraction"
+            ],
+            bpo_2_epoch=result["network_params"][
+                "bpo_2_epoch"
+            ],
+            bpo_2_max_blobs=result["network_params"][
+                "bpo_2_max_blobs"
+            ],
+            bpo_2_target_blobs=result["network_params"][
+                "bpo_2_target_blobs"
+            ],
+            bpo_2_base_fee_update_fraction=result["network_params"][
+                "bpo_2_base_fee_update_fraction"
+            ],
+            bpo_3_epoch=result["network_params"][
+                "bpo_3_epoch"
+            ],
+            bpo_3_max_blobs=result["network_params"][
+                "bpo_3_max_blobs"
+            ],
+            bpo_3_target_blobs=result["network_params"][
+                "bpo_3_target_blobs"
+            ],
+            bpo_3_base_fee_update_fraction=result["network_params"][
+                "bpo_3_base_fee_update_fraction"
+            ],
+            bpo_4_epoch=result["network_params"][
+                "bpo_4_epoch"
+            ],
+            bpo_4_max_blobs=result["network_params"][
+                "bpo_4_max_blobs"
+            ],
+            bpo_4_target_blobs=result["network_params"][
+                "bpo_4_target_blobs"
+            ],
+            bpo_4_base_fee_update_fraction=result["network_params"][
+                "bpo_4_base_fee_update_fraction"
+            ],
+            bpo_5_epoch=result["network_params"][
+                "bpo_5_epoch"
+            ],
+            bpo_5_max_blobs=result["network_params"][
+                "bpo_5_max_blobs"
+            ],
+            bpo_5_target_blobs=result["network_params"][
+                "bpo_5_target_blobs"
+            ],
+            bpo_5_base_fee_update_fraction=result["network_params"][
+                "bpo_5_base_fee_update_fraction"
             ],
             preset=result["network_params"]["preset"],
             additional_preloaded_contracts=result["network_params"][
@@ -954,9 +1005,26 @@ def default_network_params():
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "base_fee_update_fraction_electra": 5007716,
-        "max_blobs_per_block_fulu": 12,
-        "target_blobs_per_block_fulu": 9,
-        "base_fee_update_fraction_fulu": 5007716,
+        "bpo_1_epoch": 18446744073709551615,
+        "bpo_1_max_blobs": 12,
+        "bpo_1_target_blobs": 9,
+        "bpo_1_base_fee_update_fraction": 5007716,
+        "bpo_2_epoch": 18446744073709551615,
+        "bpo_2_max_blobs": 12,
+        "bpo_2_target_blobs": 9,
+        "bpo_2_base_fee_update_fraction": 5007716,
+        "bpo_3_epoch": 18446744073709551615,
+        "bpo_3_max_blobs": 12,
+        "bpo_3_target_blobs": 9,
+        "bpo_3_base_fee_update_fraction": 5007716,
+        "bpo_4_epoch": 18446744073709551615,
+        "bpo_4_max_blobs": 12,
+        "bpo_4_target_blobs": 9,
+        "bpo_4_base_fee_update_fraction": 5007716,
+        "bpo_5_epoch": 18446744073709551615,
+        "bpo_5_max_blobs": 12,
+        "bpo_5_target_blobs": 9,
+        "bpo_5_base_fee_update_fraction": 5007716,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -1001,9 +1069,6 @@ def default_minimal_network_params():
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "base_fee_update_fraction_electra": 5007716,
-        "max_blobs_per_block_fulu": 12,
-        "target_blobs_per_block_fulu": 9,
-        "base_fee_update_fraction_fulu": 5007716,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -1011,6 +1076,26 @@ def default_minimal_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
+        "bpo_1_epoch": 18446744073709551615,
+        "bpo_1_max_blobs": 12,
+        "bpo_1_target_blobs": 9,
+        "bpo_1_base_fee_update_fraction": 5007716,
+        "bpo_2_epoch": 18446744073709551615,
+        "bpo_2_max_blobs": 12,
+        "bpo_2_target_blobs": 9,
+        "bpo_2_base_fee_update_fraction": 5007716,
+        "bpo_3_epoch": 18446744073709551615,
+        "bpo_3_max_blobs": 12,
+        "bpo_3_target_blobs": 9,
+        "bpo_3_base_fee_update_fraction": 5007716,
+        "bpo_4_epoch": 18446744073709551615,
+        "bpo_4_max_blobs": 12,
+        "bpo_4_target_blobs": 9,
+        "bpo_4_base_fee_update_fraction": 5007716,
+        "bpo_5_epoch": 18446744073709551615,
+        "bpo_5_max_blobs": 12,
+        "bpo_5_target_blobs": 9,
+        "bpo_5_base_fee_update_fraction": 5007716,
     }
 
 

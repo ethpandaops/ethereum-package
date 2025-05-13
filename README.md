@@ -598,13 +598,6 @@ network_params:
   # Base fee update fraction for Electra fork (default 5007716)
   base_fee_update_fraction_electra: 5007716
 
-  # Maximum number of blobs per block for Fulu fork (default 12)
-  max_blobs_per_block_fulu: 12
-  # Target number of blobs per block for Fulu fork (default 9)
-  target_blobs_per_block_fulu: 9
-  # Base fee update fraction for Fulu fork (default 5007716)
-  base_fee_update_fraction_fulu: 5007716
-
   # EIP-7732 fork epoch
   # Defaults to 18446744073709551615
   eip7732_fork_epoch: 18446744073709551615
@@ -670,6 +663,53 @@ network_params:
   # This will override the gas limit for each EL client
   # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
   gas_limit: 0
+
+  # BPO
+  # BPO1 epoch (default 18446744073709551615)
+  bpo_1_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO1 (default 12)
+  bpo_1_max_blobs: 12
+  # Target number of blobs per block for BPO1 (default 9)
+  bpo_1_target_blobs: 9
+  # Base fee update fraction for BPO1 (default 5007716)
+  bpo_1_base_fee_update_fraction: 5007716
+
+  # BPO2 epoch (default 18446744073709551615)
+  bpo_2_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO2 (default 12)
+  bpo_2_max_blobs: 12
+  # Target number of blobs per block for BPO2 (default 9)
+  bpo_2_target_blobs: 9
+  # Base fee update fraction for BPO2 (default 5007716)
+  bpo_2_base_fee_update_fraction: 5007716
+
+  # BPO3 epoch (default 18446744073709551615)
+  bpo_3_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO3 (default 12)
+  bpo_3_max_blobs: 12
+  # Target number of blobs per block for BPO3 (default 9)
+  bpo_3_target_blobs: 9
+  # Base fee update fraction for BPO3 (default 5007716)
+  bpo_3_base_fee_update_fraction: 5007716
+
+  # BPO4 epoch (default 18446744073709551615)
+  bpo_4_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO4 (default 12)
+  bpo_4_max_blobs: 12
+  # Target number of blobs per block for BPO4 (default 9)
+  bpo_4_target_blobs: 9
+  # Base fee update fraction for BPO4 (default 5007716)
+  bpo_4_base_fee_update_fraction: 5007716
+
+  # BPO5 epoch (default 18446744073709551615)
+  bpo_5_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO5 (default 12)
+  bpo_5_max_blobs: 12
+  # Target number of blobs per block for BPO5 (default 9)
+  bpo_5_target_blobs: 9
+  # Base fee update fraction for BPO5 (default 5007716)
+  bpo_5_base_fee_update_fraction: 5007716
+
 
 # Global parameters for the network
 

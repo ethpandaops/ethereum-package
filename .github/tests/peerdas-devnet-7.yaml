@@ -29,8 +29,8 @@ participants_matrix:
 
 network_params:
   fulu_fork_epoch: 1
-  max_blobs_per_block_fulu: 9
-  target_blobs_per_block_fulu: 6
+  bpo_1_max_blobs: 9
+  bpo_1_target_blobs: 6
 additional_services:
   - dora
   - spamoor
