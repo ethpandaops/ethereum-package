@@ -42,13 +42,13 @@ additional_services:
   - dora
   - tx_fuzz
   - spamoor
-#  - assertoor
+  - assertoor
 
 network_params:
   min_validator_withdrawability_delay: 1
   shard_committee_period: 1
   churn_limit_quotient: 16
-  #fulu_fork_epoch: 10
+  fulu_fork_epoch: 10
   genesis_delay: 120
   preset: minimal
 
