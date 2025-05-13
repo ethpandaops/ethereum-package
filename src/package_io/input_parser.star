@@ -359,63 +359,33 @@ def input_parser(plan, input_args):
             base_fee_update_fraction_electra=result["network_params"][
                 "base_fee_update_fraction_electra"
             ],
-            bpo_1_epoch=result["network_params"][
-                "bpo_1_epoch"
-            ],
-            bpo_1_max_blobs=result["network_params"][
-                "bpo_1_max_blobs"
-            ],
-            bpo_1_target_blobs=result["network_params"][
-                "bpo_1_target_blobs"
-            ],
+            bpo_1_epoch=result["network_params"]["bpo_1_epoch"],
+            bpo_1_max_blobs=result["network_params"]["bpo_1_max_blobs"],
+            bpo_1_target_blobs=result["network_params"]["bpo_1_target_blobs"],
             bpo_1_base_fee_update_fraction=result["network_params"][
                 "bpo_1_base_fee_update_fraction"
             ],
-            bpo_2_epoch=result["network_params"][
-                "bpo_2_epoch"
-            ],
-            bpo_2_max_blobs=result["network_params"][
-                "bpo_2_max_blobs"
-            ],
-            bpo_2_target_blobs=result["network_params"][
-                "bpo_2_target_blobs"
-            ],
+            bpo_2_epoch=result["network_params"]["bpo_2_epoch"],
+            bpo_2_max_blobs=result["network_params"]["bpo_2_max_blobs"],
+            bpo_2_target_blobs=result["network_params"]["bpo_2_target_blobs"],
             bpo_2_base_fee_update_fraction=result["network_params"][
                 "bpo_2_base_fee_update_fraction"
             ],
-            bpo_3_epoch=result["network_params"][
-                "bpo_3_epoch"
-            ],
-            bpo_3_max_blobs=result["network_params"][
-                "bpo_3_max_blobs"
-            ],
-            bpo_3_target_blobs=result["network_params"][
-                "bpo_3_target_blobs"
-            ],
+            bpo_3_epoch=result["network_params"]["bpo_3_epoch"],
+            bpo_3_max_blobs=result["network_params"]["bpo_3_max_blobs"],
+            bpo_3_target_blobs=result["network_params"]["bpo_3_target_blobs"],
             bpo_3_base_fee_update_fraction=result["network_params"][
                 "bpo_3_base_fee_update_fraction"
             ],
-            bpo_4_epoch=result["network_params"][
-                "bpo_4_epoch"
-            ],
-            bpo_4_max_blobs=result["network_params"][
-                "bpo_4_max_blobs"
-            ],
-            bpo_4_target_blobs=result["network_params"][
-                "bpo_4_target_blobs"
-            ],
+            bpo_4_epoch=result["network_params"]["bpo_4_epoch"],
+            bpo_4_max_blobs=result["network_params"]["bpo_4_max_blobs"],
+            bpo_4_target_blobs=result["network_params"]["bpo_4_target_blobs"],
             bpo_4_base_fee_update_fraction=result["network_params"][
                 "bpo_4_base_fee_update_fraction"
             ],
-            bpo_5_epoch=result["network_params"][
-                "bpo_5_epoch"
-            ],
-            bpo_5_max_blobs=result["network_params"][
-                "bpo_5_max_blobs"
-            ],
-            bpo_5_target_blobs=result["network_params"][
-                "bpo_5_target_blobs"
-            ],
+            bpo_5_epoch=result["network_params"]["bpo_5_epoch"],
+            bpo_5_max_blobs=result["network_params"]["bpo_5_max_blobs"],
+            bpo_5_target_blobs=result["network_params"]["bpo_5_target_blobs"],
             bpo_5_base_fee_update_fraction=result["network_params"][
                 "bpo_5_base_fee_update_fraction"
             ],
