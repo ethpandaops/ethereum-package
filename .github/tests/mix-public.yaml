@@ -11,6 +11,7 @@ participants:
     cl_type: lodestar
   - el_type: nimbus
     cl_type: teku
+    el_image: statusim/nimbus-eth1:master
   - el_type: ethereumjs
     cl_type: grandine
 port_publisher:
