@@ -1092,6 +1092,14 @@ port_publisher:
   additional_services:
     enabled: false
     public_port_start: 36000
+
+  # MEV public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 37000
+  # You can't run multiple enclaves on the same port settings
+  mev:
+    enabled: false
+    public_port_start: 37000
 ```
 
 #### Example configurations

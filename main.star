@@ -385,6 +385,8 @@ def run(plan, args={}):
                         mev_params.mev_boost_args,
                         args_with_right_defaults.participants[index],
                         network_params.seconds_per_slot,
+                        args_with_right_defaults.port_publisher,
+                        index,
                         global_node_selectors,
                     )
                 elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:

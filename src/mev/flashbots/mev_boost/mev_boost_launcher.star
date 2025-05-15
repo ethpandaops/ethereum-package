@@ -34,8 +34,17 @@ def launch(
     mev_boost_args,
     participant,
     seconds_per_slot,
+    port_publisher,
+    index,
     global_node_selectors,
 ):
+    public_ports = shared_utils.get_mev_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
+
     config = get_config(
         mev_boost_launcher,
         genesis_timestamp,

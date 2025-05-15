@@ -293,6 +293,7 @@ SUBCATEGORY_PARAMS = {
         "vc",
         "remote_signer",
         "additional_services",
+        "mev",
     ],
 }
 
