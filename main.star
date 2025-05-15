@@ -375,7 +375,7 @@ def run(plan, args={}):
                         mev_endpoints,
                     )
                     mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        constants.MEV_BOOST_SERVICE_NAME_PREFIX,
                         index_str,
                         participant.cl_type,
                         participant.el_type,
@@ -400,7 +400,7 @@ def run(plan, args={}):
                         mev_endpoints,
                     )
                     mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        constants.MEV_BOOST_SERVICE_NAME_PREFIX,
                         index_str,
                         participant.cl_type,
                         participant.el_type,
@@ -426,7 +426,7 @@ def run(plan, args={}):
                         mev_endpoints,
                     )
                     mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        constants.COMMIT_BOOST_SERVICE_NAME_PREFIX,
                         index_str,
                         participant.cl_type,
                         participant.el_type,
@@ -439,6 +439,8 @@ def run(plan, args={}):
                         mev_params,
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
+                        args_with_right_defaults.port_publisher,
+                        index,
                         global_node_selectors,
                         final_genesis_timestamp,
                     )

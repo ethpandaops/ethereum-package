@@ -30,3 +30,6 @@ port_publisher:
   additional_services:
     enabled: true
     public_port_start: 44000
+  mev:
+    enabled: true
+    public_port_start: 45000

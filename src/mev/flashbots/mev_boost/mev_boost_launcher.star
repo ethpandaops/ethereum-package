@@ -7,7 +7,7 @@ FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
 USED_PORTS = {
     "http": shared_utils.new_port_spec(
-        input_parser.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL, wait="5s"
+        constants.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL, wait="5s"
     )
 }
 
@@ -60,7 +60,7 @@ def launch(
 
     return (
         mev_boost_context_module.new_mev_boost_context(
-            mev_boost_service.ip_address, input_parser.MEV_BOOST_PORT
+            mev_boost_service.ip_address, constants.MEV_BOOST_PORT
         ),
     )
 
@@ -85,7 +85,7 @@ def get_config(
         env_vars={
             "GENESIS_FORK_VERSION": constants.GENESIS_FORK_VERSION,
             "GENESIS_TIMESTAMP": "{0}".format(genesis_timestamp),
-            "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(input_parser.MEV_BOOST_PORT),
+            "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(constants.MEV_BOOST_PORT),
             "SKIP_RELAY_SIGNATURE_CHECK": "1",
             "SLOT_SEC": str(seconds_per_slot),
             "RELAYS": "{0}?id={1}-{2}".format(

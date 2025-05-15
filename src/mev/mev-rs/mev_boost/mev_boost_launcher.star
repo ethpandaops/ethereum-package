@@ -10,7 +10,7 @@ MEV_BOOST_FILES_ARTIFACT_NAME = "mev-rs-mev-boost-config"
 
 USED_PORTS = {
     "http": shared_utils.new_port_spec(
-        input_parser.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL
+        constants.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL
     )
 }
 
@@ -48,7 +48,7 @@ def launch(
     image = mev_params.mev_boost_image
     template_data = new_config_template_data(
         network,
-        input_parser.MEV_BOOST_PORT,
+        constants.MEV_BOOST_PORT,
         relays,
     )
 
@@ -87,7 +87,7 @@ def launch(
     mev_boost_service = plan.add_service(service_name, config)
 
     return mev_boost_context_module.new_mev_boost_context(
-        mev_boost_service.ip_address, input_parser.MEV_BOOST_PORT
+        mev_boost_service.ip_address, constants.MEV_BOOST_PORT
     )
 
 

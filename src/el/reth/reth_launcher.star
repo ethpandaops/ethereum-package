@@ -127,6 +127,16 @@ def get_config(
             constants.RPC_PORT_ID: public_ports_for_component[3],
             constants.WS_PORT_ID: public_ports_for_component[4],
         }
+        if (
+            launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
+            or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
+        ):
+            additional_public_port_assignments[
+                constants.RBUILDER_PORT_ID
+            ] = public_ports_for_component[5]
+            additional_public_port_assignments[
+                constants.RBUILDER_METRICS_PORT_ID
+            ] = public_ports_for_component[6]
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
