@@ -96,12 +96,29 @@ network_params:
   max_blobs_per_block_electra: 9
   target_blobs_per_block_electra: 6
   base_fee_update_fraction_electra: 5007716
-  max_blobs_per_block_fulu: 12
-  target_blobs_per_block_fulu: 9
-  base_fee_update_fraction_fulu: 5007716
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   prefunded_accounts: {}
+  bpo_1_epoch: 18446744073709551615
+  bpo_1_max_blobs: 12
+  bpo_1_target_blobs: 9
+  bpo_1_base_fee_update_fraction: 5007716
+  bpo_2_epoch: 18446744073709551615
+  bpo_2_max_blobs: 12
+  bpo_2_target_blobs: 9
+  bpo_2_base_fee_update_fraction: 5007716
+  bpo_3_epoch: 18446744073709551615
+  bpo_3_max_blobs: 12
+  bpo_3_target_blobs: 9
+  bpo_3_base_fee_update_fraction: 5007716
+  bpo_4_epoch: 18446744073709551615
+  bpo_4_max_blobs: 12
+  bpo_4_target_blobs: 9
+  bpo_4_base_fee_update_fraction: 5007716
+  bpo_5_epoch: 18446744073709551615
+  bpo_5_max_blobs: 12
+  bpo_5_target_blobs: 9
+  bpo_5_base_fee_update_fraction: 5007716
 additional_services: []
 dora_params:
   image: ""
@@ -186,7 +203,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:4.0.6
+  image: ethpandaops/ethereum-genesis-generator:4.1.3
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

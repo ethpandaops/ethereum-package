@@ -29,6 +29,7 @@ participants_matrix:
 
 network_params:
   fulu_fork_epoch: 1
+  bpo_1_epoch: 1
   bpo_1_max_blobs: 9
   bpo_1_target_blobs: 6
 additional_services:
@@ -45,3 +46,4 @@ spamoor_params:
     - scenario: blobs
       config:
         throughput: 20
+
