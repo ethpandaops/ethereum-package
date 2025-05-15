@@ -60,7 +60,6 @@ DEFAULT_REMOTE_SIGNER_IMAGES = {
 
 # MEV Params
 MEV_BOOST_PORT = 18550
-MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
 
 # Minimum number of validators required for a network to be valid is 64
 MIN_VALIDATORS = 64
@@ -196,8 +195,8 @@ def input_parser(plan, input_args):
     ):
         result = enrich_mev_extra_params(
             result,
-            MEV_BOOST_SERVICE_NAME_PREFIX,
-            MEV_BOOST_PORT,
+            constants.MEV_BOOST_SERVICE_NAME_PREFIX,
+            constants.MEV_BOOST_PORT,
             result.get("mev_type"),
         )
     elif result.get("mev_type") == None:
@@ -548,6 +547,8 @@ def input_parser(plan, input_args):
             additional_services_public_port_start=result["port_publisher"][
                 "additional_services"
             ]["public_port_start"],
+            mev_enabled=result["port_publisher"]["mev"]["enabled"],
+            mev_public_port_start=result["port_publisher"]["mev"]["public_port_start"],
         ),
     )
 
@@ -1361,6 +1362,7 @@ def get_port_publisher_params(parameter_type, input_args=None):
         "vc": {"enabled": False, "public_port_start": 34000},
         "remote_signer": {"enabled": False, "public_port_start": 35000},
         "additional_services": {"enabled": False, "public_port_start": 36000},
+        "mev": {"enabled": False, "public_port_start": 37000},
     }
     if parameter_type == "default":
         return port_publisher_parameters
@@ -1400,7 +1402,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             index + 1, len(str(len(parsed_arguments_dict["participants"])))
         )
         mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
-            MEV_BOOST_SERVICE_NAME_PREFIX,
+            constants.MEV_BOOST_SERVICE_NAME_PREFIX,
             index_str,
             participant["cl_type"],
             participant["el_type"],

@@ -324,6 +324,8 @@ def run(plan, args={}):
                 blocksim_uri,
                 network_params,
                 persistent,
+                args_with_right_defaults.port_publisher,
+                num_participants,
                 global_node_selectors,
             )
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
@@ -333,6 +335,8 @@ def run(plan, args={}):
                 network_params.network,
                 beacon_uri,
                 el_cl_data_files_artifact_uuid,
+                args_with_right_defaults.port_publisher,
+                num_participants,
                 global_node_selectors,
             )
         else:
@@ -371,7 +375,7 @@ def run(plan, args={}):
                         mev_endpoints,
                     )
                     mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        constants.MEV_BOOST_SERVICE_NAME_PREFIX,
                         index_str,
                         participant.cl_type,
                         participant.el_type,
@@ -385,6 +389,8 @@ def run(plan, args={}):
                         mev_params.mev_boost_args,
                         args_with_right_defaults.participants[index],
                         network_params.seconds_per_slot,
+                        args_with_right_defaults.port_publisher,
+                        index,
                         global_node_selectors,
                     )
                 elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
@@ -394,7 +400,7 @@ def run(plan, args={}):
                         mev_endpoints,
                     )
                     mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        constants.MEV_BOOST_SERVICE_NAME_PREFIX,
                         index_str,
                         participant.cl_type,
                         participant.el_type,
@@ -407,6 +413,8 @@ def run(plan, args={}):
                         mev_params,
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
+                        args_with_right_defaults.port_publisher,
+                        index,
                         global_node_selectors,
                     )
                 elif (
@@ -418,7 +426,7 @@ def run(plan, args={}):
                         mev_endpoints,
                     )
                     mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        constants.COMMIT_BOOST_SERVICE_NAME_PREFIX,
                         index_str,
                         participant.cl_type,
                         participant.el_type,
@@ -431,6 +439,8 @@ def run(plan, args={}):
                         mev_params,
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
+                        args_with_right_defaults.port_publisher,
+                        index,
                         global_node_selectors,
                         final_genesis_timestamp,
                     )
@@ -454,7 +464,6 @@ def run(plan, args={}):
     for index, additional_service in enumerate(
         args_with_right_defaults.additional_services
     ):
-        plan.print("service: {0} index: {1}".format(additional_service, index))
         if additional_service == "tx_fuzz":
             plan.print("Launching tx-fuzz")
             tx_fuzz_params = args_with_right_defaults.tx_fuzz_params

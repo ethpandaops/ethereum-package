@@ -1,6 +1,7 @@
 redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 constants = import_module("../../../package_io/constants.star")
+shared_utils = import_module("../../../shared_utils/shared_utils.star")
 
 MEV_RELAY_WEBSITE = "mev-relay-website"
 MEV_RELAY_ENDPOINT = "mev-relay-api"
@@ -46,8 +47,17 @@ def launch_mev_relay(
     blocksim_uri,
     network_params,
     persistent,
+    port_publisher,
+    index,
     global_node_selectors,
 ):
+    public_ports = shared_utils.get_mev_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
+
     node_selectors = global_node_selectors
     redis = redis_module.run(
         plan,
@@ -144,13 +154,14 @@ def launch_mev_relay(
             ]
             + mev_params.mev_relay_api_extra_args,
             ports={
-                "api": PortSpec(
+                "http": PortSpec(
                     number=MEV_RELAY_ENDPOINT_PORT, transport_protocol="TCP"
                 ),
                 "pprof": PortSpec(
                     number=MEV_RELAY_PPROF_PORT, transport_protocol="TCP"
                 ),
             },
+            public_ports=public_ports,
             env_vars=env_vars | mev_params.mev_relay_api_extra_env_vars,
             min_cpu=RELAY_MIN_CPU,
             max_cpu=RELAY_MAX_CPU,
@@ -160,6 +171,12 @@ def launch_mev_relay(
         ),
     )
 
+    public_ports = shared_utils.get_mev_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        1,
+    )
     plan.add_service(
         name=MEV_RELAY_WEBSITE,
         config=ServiceConfig(
@@ -189,12 +206,13 @@ def launch_mev_relay(
             ]
             + mev_params.mev_relay_website_extra_args,
             ports={
-                "api": PortSpec(
+                "http": PortSpec(
                     number=MEV_RELAY_WEBSITE_PORT,
                     transport_protocol="TCP",
                     application_protocol="http",
                 )
             },
+            public_ports=public_ports,
             env_vars=env_vars | mev_params.mev_relay_website_extra_env_vars,
             min_cpu=RELAY_MIN_CPU,
             max_cpu=RELAY_MAX_CPU,
