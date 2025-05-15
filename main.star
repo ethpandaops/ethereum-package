@@ -324,6 +324,8 @@ def run(plan, args={}):
                 blocksim_uri,
                 network_params,
                 persistent,
+                args_with_right_defaults.port_publisher,
+                num_participants,
                 global_node_selectors,
             )
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
@@ -333,6 +335,8 @@ def run(plan, args={}):
                 network_params.network,
                 beacon_uri,
                 el_cl_data_files_artifact_uuid,
+                args_with_right_defaults.port_publisher,
+                num_participants,
                 global_node_selectors,
             )
         else:
@@ -409,6 +413,8 @@ def run(plan, args={}):
                         mev_params,
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
+                        args_with_right_defaults.port_publisher,
+                        index,
                         global_node_selectors,
                     )
                 elif (
@@ -456,7 +462,6 @@ def run(plan, args={}):
     for index, additional_service in enumerate(
         args_with_right_defaults.additional_services
     ):
-        plan.print("service: {0} index: {1}".format(additional_service, index))
         if additional_service == "tx_fuzz":
             plan.print("Launching tx-fuzz")
             tx_fuzz_params = args_with_right_defaults.tx_fuzz_params

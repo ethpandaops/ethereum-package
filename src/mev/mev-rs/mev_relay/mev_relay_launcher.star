@@ -29,6 +29,8 @@ def launch_mev_relay(
     network,
     beacon_uri,
     el_cl_genesis_data,
+    port_publisher,
+    index,
     global_node_selectors,
 ):
     node_selectors = global_node_selectors
@@ -39,6 +41,12 @@ def launch_mev_relay(
         else constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
     )
 
+    public_ports = shared_utils.get_mev_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
     relay_template_data = new_relay_config_template_data(
         network,
         MEV_RELAY_ENDPOINT_PORT,
@@ -81,6 +89,7 @@ def launch_mev_relay(
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
             },
             ports=USED_PORTS,
+            public_ports=public_ports,
             min_cpu=MIN_CPU,
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,

@@ -6,7 +6,7 @@ constants = import_module("../../../package_io/constants.star")
 FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
 USED_PORTS = {
-    "api": shared_utils.new_port_spec(
+    "http": shared_utils.new_port_spec(
         input_parser.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL, wait="5s"
     )
 }
@@ -53,12 +53,15 @@ def launch(
         global_node_selectors,
         participant,
         seconds_per_slot,
+        public_ports,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
 
-    return mev_boost_context_module.new_mev_boost_context(
-        mev_boost_service.ip_address, input_parser.MEV_BOOST_PORT
+    return (
+        mev_boost_context_module.new_mev_boost_context(
+            mev_boost_service.ip_address, input_parser.MEV_BOOST_PORT
+        ),
     )
 
 
@@ -70,12 +73,14 @@ def get_config(
     node_selectors,
     participant,
     seconds_per_slot,
+    public_ports,
 ):
     command = mev_boost_args
 
     return ServiceConfig(
         image=mev_boost_image,
         ports=USED_PORTS,
+        public_ports=public_ports,
         cmd=command,
         env_vars={
             "GENESIS_FORK_VERSION": constants.GENESIS_FORK_VERSION,

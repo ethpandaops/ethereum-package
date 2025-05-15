@@ -29,8 +29,17 @@ def launch(
     mev_params,
     relays,
     el_cl_genesis_data,
+    port_publisher,
+    index,
     global_node_selectors,
 ):
+    public_ports = shared_utils.get_mev_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
+
     network = (
         network
         if network in constants.PUBLIC_NETWORKS
@@ -72,6 +81,7 @@ def launch(
         config_files_artifact_name,
         el_cl_genesis_data,
         global_node_selectors,
+        public_ports,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
@@ -88,10 +98,12 @@ def get_config(
     config_file,
     el_cl_genesis_data,
     node_selectors,
+    public_ports,
 ):
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
+        public_ports=public_ports,
         cmd=[
             "boost",
             config_file_path,
