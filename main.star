@@ -456,6 +456,7 @@ def run(plan, args={}):
     for index, additional_service in enumerate(
         args_with_right_defaults.additional_services
     ):
+        plan.print("service: {0} index: {1}".format(additional_service, index))
         if additional_service == "tx_fuzz":
             plan.print("Launching tx-fuzz")
             tx_fuzz_params = args_with_right_defaults.tx_fuzz_params
@@ -609,6 +610,8 @@ def run(plan, args={}):
                 apache_port,
                 all_participants,
                 args_with_right_defaults.participants,
+                args_with_right_defaults.port_publisher,
+                index,
                 global_node_selectors,
                 args_with_right_defaults.docker_cache_params,
             )
@@ -646,6 +649,8 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 network_params,
                 assertoor_params,
+                args_with_right_defaults.port_publisher,
+                index,
                 global_node_selectors,
             )
             plan.print("Successfully launched assertoor")
@@ -692,8 +697,9 @@ def run(plan, args={}):
             all_xatu_sentry_contexts,
             global_node_selectors,
             args_with_right_defaults.prometheus_params,
+            args_with_right_defaults.port_publisher,
+            index,
         )
-
         plan.print("Launching grafana...")
         grafana.launch_grafana(
             plan,
@@ -702,6 +708,8 @@ def run(plan, args={}):
             prometheus_private_url,
             global_node_selectors,
             args_with_right_defaults.grafana_params,
+            args_with_right_defaults.port_publisher,
+            index + 1,
         )
         plan.print("Successfully launched grafana")
 

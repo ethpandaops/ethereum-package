@@ -36,12 +36,21 @@ def launch_assertoor(
     participant_configs,
     network_params,
     assertoor_params,
+    port_publisher,
+    index,
     global_node_selectors,
 ):
     all_client_info = []
     clients_with_validators = []
     clients_with_el_snooper = []
     clients_with_cl_snooper = []
+
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
 
     for index, participant in enumerate(participant_contexts):
         (
@@ -101,6 +110,7 @@ def launch_assertoor(
         tests_config_artifacts_name,
         network_params,
         assertoor_params,
+        public_ports,
         global_node_selectors,
     )
 
@@ -112,6 +122,7 @@ def get_config(
     tests_config_artifacts_name,
     network_params,
     assertoor_params,
+    public_ports,
     node_selectors,
 ):
     config_file_path = shared_utils.path_join(
@@ -128,6 +139,7 @@ def get_config(
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
+        public_ports=public_ports,
         files={
             ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             ASSERTOOR_TESTS_MOUNT_DIRPATH_ON_SERVICE: tests_config_artifacts_name,
