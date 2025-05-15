@@ -46,7 +46,6 @@ def launch_mev_relay(
     blocksim_uri,
     network_params,
     persistent,
-    port_publisher,
     global_node_selectors,
 ):
     node_selectors = global_node_selectors

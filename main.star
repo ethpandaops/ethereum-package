@@ -324,7 +324,6 @@ def run(plan, args={}):
                 blocksim_uri,
                 network_params,
                 persistent,
-                args_with_right_defaults.port_publisher,
                 global_node_selectors,
             )
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
@@ -334,7 +333,6 @@ def run(plan, args={}):
                 network_params.network,
                 beacon_uri,
                 el_cl_data_files_artifact_uuid,
-                args_with_right_defaults.port_publisher,
                 global_node_selectors,
             )
         else:
