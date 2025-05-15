@@ -1,7 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-prometheus = import_module(
-    "github.com/kurtosis-tech/prometheus-package/main.star@bbusa/add-public-ports"
-)
+prometheus = import_module("github.com/kurtosis-tech/prometheus-package/main.star")
 constants = import_module("../package_io/constants.star")
 
 EXECUTION_CLIENT_TYPE = "execution"
