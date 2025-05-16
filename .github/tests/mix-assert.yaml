@@ -17,3 +17,6 @@ additional_services:
 assertoor_params:
   run_stability_check: false
   run_block_proposal_check: true
+docker_cache_params:
+  enabled: true
+  url: "docker.ethquokkaops.io"
