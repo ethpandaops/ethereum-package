@@ -36,3 +36,18 @@ port_publisher:
   other:
     enabled: true
     public_port_start: 46000
+additional_services:
+  - tx_fuzz
+  - forkmon
+  - dora
+  - prometheus_grafana
+  - custom_flood
+  - blobscan
+  - dugtrio
+  - blutgang
+  - apache
+  - tracoor
+  - spamoor
+ethereum_metrics_exporter_enabled: true
+snooper_enabled: true
+keymanager_enabled: true

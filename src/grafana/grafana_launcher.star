@@ -68,9 +68,9 @@ def launch_grafana(
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
-        constants.HTTP_PORT_ID,
+        HTTP_PORT_ID,
         index,
-        0,
+        1,
     )
 
     config = get_config(

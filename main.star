@@ -643,6 +643,7 @@ def run(plan, args={}):
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
+            prometheus_grafana_index = index
         elif additional_service == "assertoor":
             plan.print("Launching assertoor")
             assertoor_config_template = read_file(
@@ -705,7 +706,7 @@ def run(plan, args={}):
             global_node_selectors,
             args_with_right_defaults.prometheus_params,
             args_with_right_defaults.port_publisher,
-            index,
+            prometheus_grafana_index,
         )
         plan.print("Launching grafana...")
         grafana.launch_grafana(
@@ -716,7 +717,7 @@ def run(plan, args={}):
             global_node_selectors,
             args_with_right_defaults.grafana_params,
             args_with_right_defaults.port_publisher,
-            index + 1,
+            prometheus_grafana_index,
         )
         plan.print("Successfully launched grafana")
 
