@@ -230,6 +230,7 @@ def launch_participant_network(
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
+                persistent,
             )
             global_other_index += 1
             plan.print(
