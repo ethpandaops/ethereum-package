@@ -3,7 +3,6 @@ static_files = import_module("../static_files/static_files.star")
 ethereum_metrics_exporter_context = import_module(
     "../ethereum_metrics_exporter/ethereum_metrics_exporter_context.star"
 )
-cl_shared = import_module("../cl/cl_shared.star")
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
 
