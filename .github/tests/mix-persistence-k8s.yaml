@@ -14,3 +14,6 @@ participants:
   - el_type: ethereumjs
     cl_type: nimbus
 persistent: true
+docker_cache_params:
+  enabled: true
+  url: "docker.ethquokkaops.io"

@@ -9,3 +9,6 @@ additional_services:
   - tx_fuzz
 mev_params:
   mock_mev_image: "ethpandaops/rustic-builder:main"
+docker_cache_params:
+  enabled: true
+  url: "docker.ethquokkaops.io"

@@ -3,7 +3,6 @@ static_files = import_module("../static_files/static_files.star")
 ethereum_metrics_exporter_context = import_module(
     "../ethereum_metrics_exporter/ethereum_metrics_exporter_context.star"
 )
-
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
 
@@ -23,8 +22,17 @@ def launch(
     el_context,
     cl_context,
     node_selectors,
+    port_publisher,
+    global_other_index,
     docker_cache_params,
 ):
+    public_ports = shared_utils.get_other_public_port(
+        port_publisher,
+        HTTP_PORT_ID,
+        global_other_index,
+        0,
+    )
+
     exporter_service = plan.add_service(
         ethereum_metrics_exporter_service_name,
         ServiceConfig(
@@ -39,6 +47,7 @@ def launch(
                     shared_utils.HTTP_APPLICATION_PROTOCOL,
                 )
             },
+            public_ports=public_ports,
             cmd=[
                 "--metrics-port",
                 str(METRICS_PORT_NUMBER),
