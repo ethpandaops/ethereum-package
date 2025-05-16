@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.1.0](https://github.com/ethpandaops/ethereum-package/compare/5.0.1...5.1.0) (2025-05-16)
+
+
+### Features
+
+* add bpo ([#1016](https://github.com/ethpandaops/ethereum-package/issues/1016)) ([37082b2](https://github.com/ethpandaops/ethereum-package/commit/37082b2253e3df3526cd96f48858d43bfadb9ebf))
+* add mev-fulu test ([#1014](https://github.com/ethpandaops/ethereum-package/issues/1014)) ([67a76e9](https://github.com/ethpandaops/ethereum-package/commit/67a76e9ce49d64092afd13cde54db943928c71ab))
+* add public ports for mev ([#1023](https://github.com/ethpandaops/ethereum-package/issues/1023)) ([5d89274](https://github.com/ethpandaops/ethereum-package/commit/5d89274b8c0189add903dd814261eccdc1ef869f))
+* add public ports for other tools ([#1025](https://github.com/ethpandaops/ethereum-package/issues/1025)) ([fa9d05e](https://github.com/ethpandaops/ethereum-package/commit/fa9d05ef4bbc55ec307f1e50e46f365c5d293b3d))
+* enable extra env vars to be set during runtime mev, enable pprof by default ([#1012](https://github.com/ethpandaops/ethereum-package/issues/1012)) ([94a7f22](https://github.com/ethpandaops/ethereum-package/commit/94a7f22c93f79a66d244fa6d9f179213afe6147e))
+
+
+### Bug Fixes
+
+* bump ethereum-genesis-generator to fix issues with large additional contracts ([#1019](https://github.com/ethpandaops/ethereum-package/issues/1019)) ([cb644af](https://github.com/ethpandaops/ethereum-package/commit/cb644aff035c6883575959ee50a64eef83615486))
+* only append blob schedule, if defined ([#1022](https://github.com/ethpandaops/ethereum-package/issues/1022)) ([43db03a](https://github.com/ethpandaops/ethereum-package/commit/43db03ac65e20398288d5c639a261153de0aa942))
+* revert prometheus branch ([#1024](https://github.com/ethpandaops/ethereum-package/issues/1024)) ([1559386](https://github.com/ethpandaops/ethereum-package/commit/1559386a3ca922bb11be2c2f011c083a052f6a55))
+* service ports ([#1021](https://github.com/ethpandaops/ethereum-package/issues/1021)) ([e83a1ad](https://github.com/ethpandaops/ethereum-package/commit/e83a1ad903eada1b2d193a305e43f1e33c41821f))
+
 ## [5.0.1](https://github.com/ethpandaops/ethereum-package/compare/5.0.0...5.0.1) (2025-05-08)
 
 
