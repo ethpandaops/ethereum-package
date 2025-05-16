@@ -1100,6 +1100,14 @@ port_publisher:
   mev:
     enabled: false
     public_port_start: 37000
+
+  # Other public port exposed to your local machine (like ethereum metrics exporter, snooper)
+  # Disabled by default
+  # Public port start defaults to 38000
+  # You can't run multiple enclaves on the same port settings
+  other:
+    enabled: false
+    public_port_start: 38000
 ```
 
 #### Example configurations

@@ -549,6 +549,10 @@ def input_parser(plan, input_args):
             ]["public_port_start"],
             mev_enabled=result["port_publisher"]["mev"]["enabled"],
             mev_public_port_start=result["port_publisher"]["mev"]["public_port_start"],
+            other_enabled=result["port_publisher"]["other"]["enabled"],
+            other_public_port_start=result["port_publisher"]["other"][
+                "public_port_start"
+            ],
         ),
     )
 
@@ -1363,6 +1367,7 @@ def get_port_publisher_params(parameter_type, input_args=None):
         "remote_signer": {"enabled": False, "public_port_start": 35000},
         "additional_services": {"enabled": False, "public_port_start": 36000},
         "mev": {"enabled": False, "public_port_start": 37000},
+        "other": {"enabled": False, "public_port_start": 38000},
     }
     if parameter_type == "default":
         return port_publisher_parameters

@@ -12,6 +12,7 @@ MAX_PORTS_PER_VC_NODE = 3
 MAX_PORTS_PER_REMOTE_SIGNER_NODE = 2
 MAX_PORTS_PER_ADDITIONAL_SERVICE = 2
 MAX_PORTS_PER_MEV_NODE = 2
+MAX_PORTS_PER_OTHER_NODE = 1
 
 
 def new_template_and_data(template, template_data_json):
@@ -253,6 +254,12 @@ def get_public_ports_for_component(
             MAX_PORTS_PER_MEV_NODE,
             participant_index,
         )
+    elif component == "other":
+        public_port_range = __get_port_range(
+            port_publisher_params.other_public_port_start,
+            MAX_PORTS_PER_OTHER_NODE,
+            participant_index,
+        )
     return [port for port in range(public_port_range[0], public_port_range[1], 1)]
 
 
@@ -316,6 +323,18 @@ def get_mev_public_port(port_publisher, port_id, additional_service_index, port_
     if port_publisher.mev_enabled:
         public_ports_for_component = get_public_ports_for_component(
             "mev", port_publisher, additional_service_index
+        )
+        public_ports = get_port_specs({port_id: public_ports_for_component[port_index]})
+    return public_ports
+
+
+def get_other_public_port(
+    port_publisher, port_id, additional_service_index, port_index
+):
+    public_ports = {}
+    if port_publisher.other_enabled:
+        public_ports_for_component = get_public_ports_for_component(
+            "other", port_publisher, additional_service_index
         )
         public_ports = get_port_specs({port_id: public_ports_for_component[port_index]})
     return public_ports

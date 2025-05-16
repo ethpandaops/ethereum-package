@@ -45,6 +45,7 @@ def launch_participant_network(
     num_participants = len(args_with_right_defaults.participants)
     total_number_of_validator_keys = 0
     latest_block = ""
+    global_other_index = 0
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
@@ -160,6 +161,7 @@ def launch_participant_network(
         all_cl_contexts,
         all_snooper_engine_contexts,
         preregistered_validator_keys_for_nodes,
+        global_other_index,
     ) = cl_client_launcher.launch(
         plan,
         network_params,
@@ -175,6 +177,7 @@ def launch_participant_network(
         validator_data,
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
+        global_other_index,
     )
 
     ethereum_metrics_exporter_context = None
@@ -224,8 +227,11 @@ def launch_participant_network(
                 el_context,
                 cl_context,
                 node_selectors,
+                args_with_right_defaults.port_publisher,
+                global_other_index,
                 args_with_right_defaults.docker_cache_params,
             )
+            global_other_index += 1
             plan.print(
                 "Successfully added {0} ethereum metrics exporter participants".format(
                     ethereum_metrics_exporter_context
@@ -303,8 +309,11 @@ def launch_participant_network(
                 snooper_service_name,
                 cl_context,
                 node_selectors,
+                args_with_right_defaults.port_publisher,
+                global_other_index,
                 args_with_right_defaults.docker_cache_params,
             )
+            global_other_index += 1
             plan.print(
                 "Successfully added {0} snooper participants".format(
                     snooper_beacon_context

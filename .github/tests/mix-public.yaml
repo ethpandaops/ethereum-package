@@ -33,3 +33,6 @@ port_publisher:
   mev:
     enabled: true
     public_port_start: 45000
+  other:
+    enabled: true
+    public_port_start: 46000
