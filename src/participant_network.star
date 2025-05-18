@@ -27,6 +27,7 @@ vc = import_module("./vc/vc_launcher.star")
 vc_shared = import_module("./vc/shared.star")
 vc_context_l = import_module("./vc/vc_context.star")
 node_metrics = import_module("./node_metrics_info.star")
+charon_launcher = import_module("./vc/charon_launcher.star")
 remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
@@ -583,6 +584,54 @@ def launch_participant_network(
         )
         if vc_service_config == None:
             continue
+
+        # Use the charon_launcher for Charon validator clients
+        if vc_type == constants.VC_TYPE.charon:
+            vc_context = charon_launcher.launch(
+                plan=plan,
+                launcher=charon_launcher.new_charon_launcher(el_cl_genesis_data=el_cl_data, jwt_file=jwt_file),
+                keymanager_file=keymanager_file,
+                service_name="vc-{0}".format(full_name),
+                image=participant.vc_image,
+                global_log_level=args_with_right_defaults.global_log_level,
+                cl_context=cl_context,
+                el_context=el_context,
+                full_name=full_name,
+                node_keystore_files=vc_keystores,
+                participant=participant,
+                global_tolerations=global_tolerations,
+                node_selectors=node_selectors,
+                network_params=network_params,
+                port_publisher=args_with_right_defaults.port_publisher,
+                vc_index=current_vc_index,
+                genesis_timestamp=final_genesis_timestamp,
+            )
+        else:
+            vc_context = vc.launch(
+                plan=plan,
+                launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
+                keymanager_file=keymanager_file,
+                service_name="vc-{0}".format(full_name),
+                vc_type=vc_type,
+                image=participant.vc_image,
+                global_log_level=args_with_right_defaults.global_log_level,
+                cl_context=cl_context,
+                el_context=el_context,
+                remote_signer_context=remote_signer_context,
+                full_name=full_name,
+                snooper_enabled=participant.snooper_enabled,
+                snooper_beacon_context=snooper_beacon_context,
+                node_keystore_files=vc_keystores,
+                participant=participant,
+                prysm_password_relative_filepath=prysm_password_relative_filepath,
+                prysm_password_artifact_uuid=prysm_password_artifact_uuid,
+                global_tolerations=global_tolerations,
+                node_selectors=node_selectors,
+                network_params=network_params,
+                port_publisher=args_with_right_defaults.port_publisher,
+                vc_index=current_vc_index,
+            )
+        all_vc_contexts.append(vc_context)
 
         vc_service_configs[service_name] = vc_service_config
         vc_service_info[service_name] = {
