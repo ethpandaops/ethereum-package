@@ -48,6 +48,7 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "charon": "obolnetwork/charon:latest",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -59,6 +60,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "charon": "obolnetwork/charon:latest",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -865,6 +867,9 @@ def input_parser(plan, input_args):
                 if participant["checkpoint_sync_enabled"] != None
                 else result["checkpoint_sync_enabled"],
                 skip_start=participant["skip_start"],
+                # Charon-specific parameters
+                charon_node_count=participant["charon_node_count"],
+                charon_validator_client=participant["charon_validator_client"],
             )
             for participant in result["participants"]
         ],
@@ -2110,6 +2115,9 @@ def default_participant():
         "vc_min_cpu": 0,
         "vc_max_cpu": 0,
         "vc_min_mem": 0,
+        # Charon-specific parameters
+        "charon_node_count": 3,
+        "charon_validator_client": "lighthouse",
         "vc_max_mem": 0,
         "vc_force_restart": False,
         "use_remote_signer": None,
@@ -2740,6 +2748,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         # SSE stream, so that CL must emit them on every slot.
         if mev_type == constants.BUILDOOR_MEV_TYPE and index == 0:
             apply_buildoor_payload_attributes_flags(participant)
+
+        if participant["vc_type"] == "charon":
+            participant["vc_extra_params"].append("--builder-api=true")
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
