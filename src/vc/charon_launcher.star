@@ -180,12 +180,22 @@ done
     )
 
     # Set the path to the formatted keys for the Charon cluster creation
-    charon_keys_dir = "/opt/charon/charon-keys"
+    # charon_keys_dir = "/opt/charon/charon-keys"
+
+    charon_service_name = service_name + "-charon-split-keys-" + str(vc_index)
+    CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/charon/"
+    persistent_key = "data-{0}".format(charon_service_name)
+
+    files = {}
+    files[CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key=persistent_key,
+    )
+    files["/opt/charon/charon-keys"] = charon_keys_artifact
 
     # Create a temporary service to run the Charon cluster creation
     # Use the Charon image for cluster creation with the direct command
     temp_service = plan.add_service(
-        name=service_name + "-charon-split-keys-" + str(vc_index),
+        name=charon_service_name,
         config=ServiceConfig(
             image=image,
             cmd=[
@@ -200,18 +210,26 @@ done
                 "--testnet-fork-version=0x10000038",
                 "--testnet-genesis-timestamp=" + str(genesis_time),
                 "--testnet-name=kurtosis-testnet",
-                "tail", "-f", "/dev/null",  # Keep the service running
+                "--cluster-dir=" + CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             ],
-            files={
-                "/opt/charon/charon-keys": charon_keys_artifact,
-            },
+            files=files,
+        ),
+    )
+
+    # Restart the temporary service but with busy box image and keep running
+    temp_service = plan.add_service(
+        name=charon_service_name+"-keep-running",
+        config=ServiceConfig(
+            image="busybox:latest",
+            cmd=["tail", "-f", "/dev/null"],  # Keep the service running
+            files=files,
         ),
     )
 
     # Store the Charon cluster files
     charon_cluster_files = plan.store_service_files(
         service_name=temp_service.name,
-        src="/opt/charon/",
+        src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         name="charon-cluster-files-" + str(vc_index),
     )
 
