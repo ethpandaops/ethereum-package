@@ -119,12 +119,17 @@ keystore_directories="%s/*"
 index=0
 echo "Processing keystores from ${keystore_directories}"
 
+# Create directory with proper permissions
+mkdir -p /opt/charon/charon-keys
+chmod 755 /opt/charon/charon-keys
+
 # Iterate over each directory
 for keystore_dir in $keystore_directories; do
     # Check if it's a directory
     if [ -d "$keystore_dir" ]; then
         # Copy 'voting-keystore.json' to 'charon-keys' with an indexed name
         cp "$keystore_dir/voting-keystore.json" "/opt/charon/charon-keys/keystore-${index}.json"
+        chmod 644 "/opt/charon/charon-keys/keystore-${index}.json"
 
         # Extract the directory name (pubkey) from the current keystore directory
         dir_name=$(basename "$keystore_dir")
@@ -132,6 +137,7 @@ for keystore_dir in $keystore_directories; do
         # Check if a file with the same name exists in the secrets directory and copy it
         if [ -f "%s/$dir_name" ]; then
             cp "%s/$dir_name" "/opt/charon/charon-keys/keystore-${index}.txt"
+            chmod 644 "/opt/charon/charon-keys/keystore-${index}.txt"
         else
             echo "No matching file found in secrets directory for '$dir_name'."
         fi
@@ -170,7 +176,7 @@ done
 
     # Store the formatted keys
     charon_keys_artifact = plan.store_service_files(
-        service_name=key_formatter_service.name, src="/opt/charon/charon-keys", name="charon-keys" + str(vc_index),
+        service_name=key_formatter_service.name, src="/opt/charon/charon-keys", name="charon-keys-" + str(vc_index),
     )
 
     # Set the path to the formatted keys for the Charon cluster creation
@@ -179,9 +185,9 @@ done
     # Create a temporary service to run the Charon cluster creation
     # Use the Charon image for cluster creation with the direct command
     temp_service = plan.add_service(
-        name=service_name + "-temp-" + str(vc_index),
+        name=service_name + "-charon-split-keys-" + str(vc_index),
         config=ServiceConfig(
-            image=image,  # We need to use the Charon image for cluster creation
+            image=image,
             cmd=[
                 "create", "cluster",
                 "--name=test",
@@ -194,6 +200,7 @@ done
                 "--testnet-fork-version=0x10000038",
                 "--testnet-genesis-timestamp=" + str(genesis_time),
                 "--testnet-name=kurtosis-testnet",
+                "tail", "-f", "/dev/null",  # Keep the service running
             ],
             files={
                 "/opt/charon/charon-keys": charon_keys_artifact,
@@ -204,85 +211,9 @@ done
     # Store the Charon cluster files
     charon_cluster_files = plan.store_service_files(
         service_name=temp_service.name,
-        src="/opt/charon/.charon",
-        name="charon-cluster-files" + str(vc_index),
+        src="/opt/charon/",
+        name="charon-cluster-files-" + str(vc_index),
     )
-
-    # Create a directory for Charon cluster files
-    # plan.exec(
-    #     service_name=temp_service.name,
-    #     recipe=ExecRecipe(
-    #         command=["mkdir", "-p", "/opt/charon/validator_keys"],
-    #     ),
-    # )
-
-    # Copy validator keys to the Charon cluster directory
-    # plan.exec(
-    #     service_name=temp_service.name,
-    #     recipe=ExecRecipe(
-    #         command=[
-    #             "cp",
-    #             "-r",
-    #             constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER + "/*",
-    #             "/opt/charon/validator_keys/",
-    #         ],
-    #     ),
-    # )
-
-    # Create Charon cluster
-    # plan.exec(
-    #     service_name=temp_service.name,
-    #     recipe=ExecRecipe(
-    #         command=[
-    #             "charon", "create", "cluster",
-    #             "--name=test",
-    #             "--nodes=" + str(charon_node_count),
-    #             "--fee-recipient-addresses=0x8943545177806ED17B9F23F0a21ee5948eCaa776",
-    #             "--withdrawal-addresses=0xBc7c960C1097ef1Af0FD32407701465f3c03e407",
-    #             "--split-existing-keys",
-    #             "--split-keys-dir=" + constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-    #             "--testnet-chain-id=3151908",
-    #             "--testnet-fork-version=0x10000038",
-    #             "--testnet-genesis-timestamp=" + str(genesis_time),
-    #             "--testnet-name=kurtosis-testnet",
-    #         ],
-    #     ),
-    # )
-
-    # add a split keys service instead of executing it in a temporary service
-    split_keys_service = plan.add_service(
-        name=service_name + "-split-keys" + str(vc_index),
-        config=ServiceConfig(
-            image=image,
-            cmd=[
-                "charon", "create", "cluster",
-                "--name=test",
-                "--nodes=" + str(charon_node_count),
-                "--fee-recipient-addresses=0x8943545177806ED17B9F23F0a21ee5948eCaa776",
-                "--withdrawal-addresses=0xBc7c960C1097ef1Af0FD32407701465f3c03e407",
-                "--split-existing-keys",
-                "--split-keys-dir=" + constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-                "--testnet-chain-id=3151908",
-                "--testnet-fork-version=0x10000038",
-                "--testnet-genesis-timestamp=" + str(genesis_time),
-                "--testnet-name=kurtosis-testnet",
-            ],
-            files={
-                constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: charon_cluster_files,
-            },
-        ),
-    )
-
-    # Store the Charon cluster files
-    # charon_cluster_files = plan.store_service_files(
-    #     temp_service.name, charon_keys_dir, name="charon-cluster-files"+str(vc_index),
-    # )
-
-    # We'll create the validator keys directory and copy the keys in the Charon service itself
-    # For now, we'll just create an empty directory structure
-
-    # We'll create a temporary service to run the Charon cluster creation
-    # For now, we'll skip this step and just create the Charon services directly
 
     # Launch Charon nodes
     charon_services = []
@@ -296,7 +227,6 @@ done
             "--testnet-genesis-timestamp=" + str(genesis_time),
             "--testnet-name=testnet",
             "--testnet-capella-hard-fork=0x40000038",
-            "--split-keys-dir=" + constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
         ]
 
         if len(participant.vc_extra_params) > 0:
