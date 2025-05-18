@@ -42,6 +42,9 @@ PARTICIPANT_CATEGORIES = {
         "remote_signer_type",
         "remote_signer_image",
         "remote_signer_extra_env_vars",
+        # Charon-specific parameters
+        "charon_node_count",
+        "charon_validator_client",
         "remote_signer_extra_labels",
         "remote_signer_extra_params",
         "remote_signer_tolerations",
@@ -121,6 +124,9 @@ PARTICIPANT_MATRIX_PARAMS = {
             "vc_min_mem",
             "vc_max_mem",
             "validator_count",
+            # Charon-specific parameters
+            "charon_node_count",
+            "charon_validator_client",
         ],
         "remote_signer": [
             "remote_signer_type",

@@ -23,6 +23,7 @@ launch_shadowfork = import_module("./network_launcher/shadowfork.star")
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
 vc = import_module("./vc/vc_launcher.star")
+charon_launcher = import_module("./vc/charon_launcher.star")
 remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
@@ -349,30 +350,52 @@ def launch_participant_network(
         if remote_signer_context and remote_signer_context.metrics_info:
             remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
-        vc_context = vc.launch(
-            plan=plan,
-            launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
-            keymanager_file=keymanager_file,
-            service_name="vc-{0}".format(full_name),
-            vc_type=vc_type,
-            image=participant.vc_image,
-            global_log_level=args_with_right_defaults.global_log_level,
-            cl_context=cl_context,
-            el_context=el_context,
-            remote_signer_context=remote_signer_context,
-            full_name=full_name,
-            snooper_enabled=participant.snooper_enabled,
-            snooper_beacon_context=snooper_beacon_context,
-            node_keystore_files=vc_keystores,
-            participant=participant,
-            prysm_password_relative_filepath=prysm_password_relative_filepath,
-            prysm_password_artifact_uuid=prysm_password_artifact_uuid,
-            global_tolerations=global_tolerations,
-            node_selectors=node_selectors,
-            network_params=network_params,
-            port_publisher=args_with_right_defaults.port_publisher,
-            vc_index=current_vc_index,
-        )
+        # Use the charon_launcher for Charon validator clients
+        if vc_type == constants.VC_TYPE.charon:
+            vc_context = charon_launcher.launch(
+                plan=plan,
+                launcher=charon_launcher.new_charon_launcher(el_cl_genesis_data=el_cl_data, jwt_file=jwt_file),
+                keymanager_file=keymanager_file,
+                service_name="vc-{0}".format(full_name),
+                image=participant.vc_image,
+                global_log_level=args_with_right_defaults.global_log_level,
+                cl_context=cl_context,
+                el_context=el_context,
+                full_name=full_name,
+                node_keystore_files=vc_keystores,
+                participant=participant,
+                global_tolerations=global_tolerations,
+                node_selectors=node_selectors,
+                network_params=network_params,
+                port_publisher=args_with_right_defaults.port_publisher,
+                vc_index=current_vc_index,
+                genesis_timestamp=final_genesis_timestamp,
+            )
+        else:
+            vc_context = vc.launch(
+                plan=plan,
+                launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
+                keymanager_file=keymanager_file,
+                service_name="vc-{0}".format(full_name),
+                vc_type=vc_type,
+                image=participant.vc_image,
+                global_log_level=args_with_right_defaults.global_log_level,
+                cl_context=cl_context,
+                el_context=el_context,
+                remote_signer_context=remote_signer_context,
+                full_name=full_name,
+                snooper_enabled=participant.snooper_enabled,
+                snooper_beacon_context=snooper_beacon_context,
+                node_keystore_files=vc_keystores,
+                participant=participant,
+                prysm_password_relative_filepath=prysm_password_relative_filepath,
+                prysm_password_artifact_uuid=prysm_password_artifact_uuid,
+                global_tolerations=global_tolerations,
+                node_selectors=node_selectors,
+                network_params=network_params,
+                port_publisher=args_with_right_defaults.port_publisher,
+                vc_index=current_vc_index,
+            )
         all_vc_contexts.append(vc_context)
 
         if vc_context and vc_context.metrics_info:

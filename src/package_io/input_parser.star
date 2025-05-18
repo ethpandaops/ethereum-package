@@ -42,6 +42,7 @@ DEFAULT_VC_IMAGES = {
     "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:master",
+    "charon": "obolnetwork/charon:latest",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -52,6 +53,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "teku": "consensys/teku:latest",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:master",
+    "charon": "obolnetwork/charon:latest",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -303,6 +305,9 @@ def input_parser(plan, input_args):
                 blobber_enabled=participant["blobber_enabled"],
                 blobber_extra_params=participant["blobber_extra_params"],
                 keymanager_enabled=participant["keymanager_enabled"],
+                # Charon-specific parameters
+                charon_node_count=participant["charon_node_count"],
+                charon_validator_client=participant["charon_validator_client"],
             )
             for participant in result["participants"]
         ],
@@ -1043,6 +1048,9 @@ def default_participant():
         "vc_min_cpu": 0,
         "vc_max_cpu": 0,
         "vc_min_mem": 0,
+        # Charon-specific parameters
+        "charon_node_count": 3,
+        "charon_validator_client": "lighthouse",
         "vc_max_mem": 0,
         "use_remote_signer": None,
         "remote_signer_type": "web3signer",
@@ -1378,6 +1386,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 
         if participant["vc_type"] == "vero":
             participant["vc_extra_params"].append("--use-external-builder")
+
+        if participant["vc_type"] == "charon":
+            participant["vc_extra_params"].append("--builder-api=true")
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
