@@ -78,20 +78,110 @@ def launch(
     #     files={},
     # )
 
+    # Get the raw validator keys directory path
     validator_keys_dirpath = ""
     if node_keystore_files:
-         validator_keys_dirpath = shared_utils.path_join(
+        validator_keys_dirpath = shared_utils.path_join(
             constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-            node_keystore_files.raw_keys_secrets_relative_dirpath,
-        )   
-    # join the validator keys directory path with the validator keys dirpath on the service container
-    # validator_keys_dirpath = shared_utils.path_
+            node_keystore_files.raw_keys_relative_dirpath,
+        )
+        validator_secrets_dirpath = shared_utils.path_join(
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            node_keystore_files.raw_secrets_relative_dirpath,
+        )
+
+    # Create a temporary service to format the validator keys for Charon
+    # Use busybox as a lightweight image for key formatting
+    key_formatter_service = plan.add_service(
+        name=service_name + "-key-formatter-" + str(vc_index),
+        config=ServiceConfig(
+            image="busybox:latest",
+            cmd=["tail", "-f", "/dev/null"],  # Keep the service running
+            files={
+                constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
+            },
+        ),
+    )
+
+    # Create a directory for Charon-formatted keys
+    plan.exec(
+        service_name=key_formatter_service.name,
+        recipe=ExecRecipe(
+            command=["mkdir", "-p", "/opt/charon/charon-keys"],
+        ),
+    )
+
+    # Create a script to format the validator keys for Charon
+    format_keys_script = """#!/bin/sh
+# Find all directories in the validator keys directory
+keystore_directories="%s/*"
+
+index=0
+echo "Processing keystores from ${keystore_directories}"
+
+# Iterate over each directory
+for keystore_dir in $keystore_directories; do
+    # Check if it's a directory
+    if [ -d "$keystore_dir" ]; then
+        # Copy 'voting-keystore.json' to 'charon-keys' with an indexed name
+        cp "$keystore_dir/voting-keystore.json" "/opt/charon/charon-keys/keystore-${index}.json"
+
+        # Extract the directory name (pubkey) from the current keystore directory
+        dir_name=$(basename "$keystore_dir")
+
+        # Check if a file with the same name exists in the secrets directory and copy it
+        if [ -f "%s/$dir_name" ]; then
+            cp "%s/$dir_name" "/opt/charon/charon-keys/keystore-${index}.txt"
+        else
+            echo "No matching file found in secrets directory for '$dir_name'."
+        fi
+
+        # Increment the index for the next iteration (busybox compatible)
+        index=$(($index + 1))
+    fi
+done
+""" % (validator_keys_dirpath, validator_secrets_dirpath, validator_secrets_dirpath)
+
+    # Save the script to the service
+    plan.exec(
+        service_name=key_formatter_service.name,
+        recipe=ExecRecipe(
+            command=[
+                "sh", "-c", "cat > /opt/charon/format_keys.sh << 'EOL'\n" + format_keys_script + "\nEOL"
+            ],
+        ),
+    )
+
+    # Make the script executable
+    plan.exec(
+        service_name=key_formatter_service.name,
+        recipe=ExecRecipe(
+            command=["chmod", "+x", "/opt/charon/format_keys.sh"],
+        ),
+    )
+
+    # Run the script to format the keys
+    plan.exec(
+        service_name=key_formatter_service.name,
+        recipe=ExecRecipe(
+            command=["/opt/charon/format_keys.sh"],
+        ),
+    )
+
+    # Store the formatted keys
+    charon_keys_artifact = plan.store_service_files(
+        service_name=key_formatter_service.name, src="/opt/charon/charon-keys", name="charon-keys" + str(vc_index),
+    )
+
+    # Set the path to the formatted keys for the Charon cluster creation
+    charon_keys_dir = "/opt/charon/charon-keys"
 
     # Create a temporary service to run the Charon cluster creation
+    # Use the Charon image for cluster creation with the direct command
     temp_service = plan.add_service(
-        name=service_name + "-temp",
+        name=service_name + "-temp-" + str(vc_index),
         config=ServiceConfig(
-            image=image,
+            image=image,  # We need to use the Charon image for cluster creation
             cmd=[
                 "create", "cluster",
                 "--name=test",
@@ -99,17 +189,23 @@ def launch(
                 "--fee-recipient-addresses=0x8943545177806ED17B9F23F0a21ee5948eCaa776",
                 "--withdrawal-addresses=0xBc7c960C1097ef1Af0FD32407701465f3c03e407",
                 "--split-existing-keys",
-                "--split-keys-dir=" + validator_keys_dirpath,
+                "--split-keys-dir=/opt/charon/charon-keys",
                 "--testnet-chain-id=3151908",
                 "--testnet-fork-version=0x10000038",
                 "--testnet-genesis-timestamp=" + str(genesis_time),
                 "--testnet-name=kurtosis-testnet",
             ],
             files={
-                constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-                constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
+                "/opt/charon/charon-keys": charon_keys_artifact,
             },
         ),
+    )
+
+    # Store the Charon cluster files
+    charon_cluster_files = plan.store_service_files(
+        service_name=temp_service.name,
+        src="/opt/charon/.charon",
+        name="charon-cluster-files" + str(vc_index),
     )
 
     # Create a directory for Charon cluster files
@@ -153,12 +249,33 @@ def launch(
     #     ),
     # )
 
+    # add a split keys service instead of executing it in a temporary service
+    split_keys_service = plan.add_service(
+        name=service_name + "-split-keys" + str(vc_index),
+        config=ServiceConfig(
+            image=image,
+            cmd=[
+                "charon", "create", "cluster",
+                "--name=test",
+                "--nodes=" + str(charon_node_count),
+                "--fee-recipient-addresses=0x8943545177806ED17B9F23F0a21ee5948eCaa776",
+                "--withdrawal-addresses=0xBc7c960C1097ef1Af0FD32407701465f3c03e407",
+                "--split-existing-keys",
+                "--split-keys-dir=" + constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+                "--testnet-chain-id=3151908",
+                "--testnet-fork-version=0x10000038",
+                "--testnet-genesis-timestamp=" + str(genesis_time),
+                "--testnet-name=kurtosis-testnet",
+            ],
+            files={
+                constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: charon_cluster_files,
+            },
+        ),
+    )
+
     # Store the Charon cluster files
     # charon_cluster_files = plan.store_service_files(
-    #     service_name=temp_service.name,
-    #     files={
-    #         ".charon": "/opt/charon/.charon",
-    #     },
+    #     temp_service.name, charon_keys_dir, name="charon-cluster-files"+str(vc_index),
     # )
 
     # We'll create the validator keys directory and copy the keys in the Charon service itself
@@ -207,7 +324,7 @@ def launch(
         # Files to mount
         files = {
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
+            "/opt/charon/.charon": charon_cluster_files,
         }
 
         # Ports configuration
