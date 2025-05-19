@@ -20,8 +20,8 @@ participants_matrix:
     - cl_type: lodestar
       cl_image: chainsafe/lodestar:v1.29.0
     - cl_type: prysm
-      cl_image: prysmaticlabs/prysm-beacon-chain:v6.0.0
-      vc_image: prysmaticlabs/prysm-validator:v6.0.0
+      cl_image: offchainlabs/prysm-beacon-chain:v6.0.0
+      vc_image: offchainlabs/prysm-validator:v6.0.0
 network_params:
   electra_fork_epoch: 1
   min_validator_withdrawability_delay: 1

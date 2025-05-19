@@ -20,7 +20,7 @@ DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "teku": "consensys/teku:develop",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
-    "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:stable",
+    "prysm": "gcr.io/offchainlabs/prysm/beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
 }
@@ -38,7 +38,7 @@ DEFAULT_VC_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
-    "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
+    "prysm": "gcr.io/offchainlabs/prysm/validator:stable",
     "teku": "consensys/teku:develop",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:master",
@@ -231,6 +231,18 @@ def input_parser(plan, input_args):
 
     if result["port_publisher"]["nat_exit_ip"] == "auto":
         result["port_publisher"]["nat_exit_ip"] = get_public_ip(plan)
+
+    if "prometheus_grafana" in result["additional_services"]:
+        plan.print(
+            "prometheus_grafana in no longer supported, please use 'prometheus' and 'grafana' instead in the additional_services field"
+        )
+        if (
+            "grafana" in result["additional_services"]
+            or "prometheus" in result["additional_services"]
+        ):
+            fail(
+                "Please do not define 'grafana' or 'prometheus' in the additional_services field when 'prometheus_grafana' is used to launch both"
+            )
 
     return struct(
         participants=[

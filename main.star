@@ -640,6 +640,36 @@ def run(plan, args={}):
                 index,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
+        elif additional_service == "grafana":
+            plan.print("Launching grafana...")
+            grafana.launch_grafana(
+                plan,
+                grafana_datasource_config_template,
+                grafana_dashboards_config_template,
+                prometheus_private_url,
+                global_node_selectors,
+                args_with_right_defaults.grafana_params,
+                args_with_right_defaults.port_publisher,
+                index,
+            )
+            plan.print("Successfully launched grafana")
+        elif additional_service == "prometheus":
+            plan.print("Launching prometheus...")
+            prometheus_private_url = prometheus.launch_prometheus(
+                plan,
+                all_el_contexts,
+                all_cl_contexts,
+                all_vc_contexts,
+                all_remote_signer_contexts,
+                prometheus_additional_metrics_jobs,
+                all_ethereum_metrics_exporter_contexts,
+                all_xatu_sentry_contexts,
+                global_node_selectors,
+                args_with_right_defaults.prometheus_params,
+                args_with_right_defaults.port_publisher,
+                index,
+            )
+            plan.print("Successfully launched prometheus")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
