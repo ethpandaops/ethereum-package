@@ -224,6 +224,9 @@ def get_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
+        "{0}".format(
+            "--txpool.pricelimit=0" if network_params.network == "kurtosis" else ""
+        ),
     ]
 
     if network_params.gas_limit > 0:
