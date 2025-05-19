@@ -730,7 +730,8 @@ additional_services:
   - blockscout
   - dora
   - full_beaconchain_explorer
-  - prometheus_grafana
+  - prometheus
+  - grafana
   - blobscan
   - dugtrio
   - blutgang

@@ -232,6 +232,13 @@ def input_parser(plan, input_args):
     if result["port_publisher"]["nat_exit_ip"] == "auto":
         result["port_publisher"]["nat_exit_ip"] = get_public_ip(plan)
 
+    if (
+        ("grafana" and "prometheus_grafana") or ("prometheus" and "prometheus_grafana")
+    ) in result["additional_services"]:
+        fail(
+            "Please only define one of 'grafana' or 'prometheus' in the additional_services field or use 'prometheus_grafana' to launch both but don't use both"
+        )
+
     return struct(
         participants=[
             struct(
