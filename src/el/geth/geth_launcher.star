@@ -214,7 +214,8 @@ def get_config(
         "--authrpc.vhosts=*",
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full"
-        if network_params.network == "kurtosis" and not gcmode_archive
+        if network_params.network == constants.NETWORK_NAME.kurtosis
+        and not gcmode_archive
         else "--syncmode=snap"
         if not gcmode_archive
         else "--gcmode=archive",
@@ -225,7 +226,9 @@ def get_config(
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
         "{0}".format(
-            "--txpool.pricelimit=0" if network_params.network == "kurtosis" else ""
+            "--txpool.pricelimit=0"
+            if network_params.network == constants.NETWORK_NAME.kurtosis
+            else ""
         ),
     ]
 
