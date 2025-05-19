@@ -73,7 +73,8 @@ network_params:
 additional_services:
   - dora
   - spamoor
-  - prometheus_grafana
+  - prometheus
+  - grafana
 
 snooper_enabled: false
 
