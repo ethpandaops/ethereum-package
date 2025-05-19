@@ -226,7 +226,7 @@ def get_config(
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
         "{0}".format(
-            "--txpool.pricelimit=0"
+            "--miner.gasprice=1"
             if network_params.network == constants.NETWORK_NAME.kurtosis
             else ""
         ),
