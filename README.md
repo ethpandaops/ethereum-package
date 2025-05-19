@@ -229,7 +229,7 @@ participants:
     # - lighthouse: sigp/lighthouse:latest
     # - teku: consensys/teku:latest
     # - nimbus: statusim/nimbus-eth2:multiarch-latest
-    # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
+    # - prysm: gcr.io/offchainlabs/prysm/beacon-chain:latest
     # - lodestar: chainsafe/lodestar:next
     # - grandine: sifrai/grandine:stable
     cl_image: ""
@@ -299,7 +299,7 @@ participants:
     # - lighthouse: sigp/lighthouse:latest
     # - lodestar: chainsafe/lodestar:latest
     # - nimbus: statusim/nimbus-validator-client:multiarch-latest
-    # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
+    # - prysm: gcr.io/offchainlabs/prysm/validator:latest
     # - teku: consensys/teku:latest
     # - vero: ghcr.io/serenita-org/vero:master
     vc_image: ""
