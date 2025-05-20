@@ -11,6 +11,3 @@ participants:
     cl_type: lodestar
   - el_type: geth
     cl_type: grandine
-additional_services:
-  - spamoor
-  - dora
