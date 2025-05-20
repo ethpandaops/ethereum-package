@@ -1,5 +1,86 @@
 # Changelog
 
+## [5.0.1](https://github.com/ethpandaops/ethereum-package/compare/5.0.0...5.0.1) (2025-05-08)
+
+
+### Bug Fixes
+
+* lighthouse target peers revert ([#1008](https://github.com/ethpandaops/ethereum-package/issues/1008)) ([c26e9f6](https://github.com/ethpandaops/ethereum-package/commit/c26e9f6d40b9c1c6f9ca1d4214f937f6846be1db))
+
+## [5.0.0](https://github.com/ethpandaops/ethereum-package/compare/4.6.0...5.0.0) (2025-05-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* refactor open ports + add quic support ([#1000](https://github.com/ethpandaops/ethereum-package/issues/1000))
+* launch spamoor daemon with web ui ([#964](https://github.com/ethpandaops/ethereum-package/issues/964))
+* rename max_blob to sidecar for spamoor-blob ([#959](https://github.com/ethpandaops/ethereum-package/issues/959))
+* rename transaction spammer, remove beacon metrics gazer ([#923](https://github.com/ethpandaops/ethereum-package/issues/923))
+
+### Features
+
+* add force snapshot syncing capability ([#993](https://github.com/ethpandaops/ethereum-package/issues/993)) ([28b6e95](https://github.com/ethpandaops/ethereum-package/commit/28b6e9566526c3b1fd565901164f36c66cbd5b63))
+* add fraction as a config param ([#944](https://github.com/ethpandaops/ethereum-package/issues/944)) ([ad5ed42](https://github.com/ethpandaops/ethereum-package/commit/ad5ed42f3b4ee97f1d6bfc8bd950ce76b9a37579))
+* add gas limit overrides ([#968](https://github.com/ethpandaops/ethereum-package/issues/968)) ([35a3667](https://github.com/ethpandaops/ethereum-package/commit/35a3667b91fdf8994854f0f9d417e7dfeb73cec9))
+* add params to configure spamoor resource limits ([#1001](https://github.com/ethpandaops/ethereum-package/issues/1001)) ([0c2945c](https://github.com/ethpandaops/ethereum-package/commit/0c2945c319eead7846c4774f20e1363666963583))
+* add peerdas fulu support to nethermind ([#937](https://github.com/ethpandaops/ethereum-package/issues/937)) ([c187400](https://github.com/ethpandaops/ethereum-package/commit/c18740085c1980745b7df2340153474712257a4b))
+* add perfect peerdas testing ([#928](https://github.com/ethpandaops/ethereum-package/issues/928)) ([7e9a17f](https://github.com/ethpandaops/ethereum-package/commit/7e9a17f2f71d3346bd3ea7cff7e7828061ff757e))
+* add shadowfork at block height ([#1006](https://github.com/ethpandaops/ethereum-package/issues/1006)) ([595d663](https://github.com/ethpandaops/ethereum-package/commit/595d66324d0de365534ba7458cd811f95252dac6))
+* add spammor_blob wrapper v1 to activate with fulu ([#948](https://github.com/ethpandaops/ethereum-package/issues/948)) ([8c35011](https://github.com/ethpandaops/ethereum-package/commit/8c35011c72b89bf718147a1d0ffca6a8fc18e372))
+* add validator custody ([#929](https://github.com/ethpandaops/ethereum-package/issues/929)) ([2ab3246](https://github.com/ethpandaops/ethereum-package/commit/2ab3246f8c214f16e59f4fa4b295addec11afa08))
+* enable checkpoint sync for ephemery and public devnets ([#949](https://github.com/ethpandaops/ethereum-package/issues/949)) ([423b8c1](https://github.com/ethpandaops/ethereum-package/commit/423b8c1d232678475010ff9ec315dd85c141361d))
+* enable checkpoint sync for public networks ([#935](https://github.com/ethpandaops/ethereum-package/issues/935)) ([13dbe4d](https://github.com/ethpandaops/ethereum-package/commit/13dbe4d99a80f183dd7546955a0fe491e111abc8))
+* launch spamoor daemon with web ui ([#964](https://github.com/ethpandaops/ethereum-package/issues/964)) ([dabce8c](https://github.com/ethpandaops/ethereum-package/commit/dabce8c5ae92e68ad2bb3d124f30c33b32d111c7))
+* make genesis electra ([#940](https://github.com/ethpandaops/ethereum-package/issues/940)) ([1d4e943](https://github.com/ethpandaops/ethereum-package/commit/1d4e943b19e29308cf02c40c3b57c1b7ba744b4d))
+* remove python dependency ([#958](https://github.com/ethpandaops/ethereum-package/issues/958)) ([96cc80e](https://github.com/ethpandaops/ethereum-package/commit/96cc80e6d26aaed4892b3dda390e3b9cf3ac5609))
+* rename max_blob to sidecar for spamoor-blob ([#959](https://github.com/ethpandaops/ethereum-package/issues/959)) ([8aa239e](https://github.com/ethpandaops/ethereum-package/commit/8aa239e86c4916e8faf6ccdeef0d1a6fec832016))
+* test new eth-beacon-genesis ([#938](https://github.com/ethpandaops/ethereum-package/issues/938)) ([7ae4061](https://github.com/ethpandaops/ethereum-package/commit/7ae406180239bc6b67c65023bd4782e596031b52))
+* Update pectra files ([#983](https://github.com/ethpandaops/ethereum-package/issues/983)) ([cf13b4b](https://github.com/ethpandaops/ethereum-package/commit/cf13b4b87030df42854a0bddd314bcda73168b6b))
+
+
+### Bug Fixes
+
+* able to override spamoor blob image ([#954](https://github.com/ethpandaops/ethereum-package/issues/954)) ([07ad4cf](https://github.com/ethpandaops/ethereum-package/commit/07ad4cf1482b76704e78172f59057f7edbea54ee))
+* add blobscan DIRECT_URL env var ([#936](https://github.com/ethpandaops/ethereum-package/issues/936)) ([084e08d](https://github.com/ethpandaops/ethereum-package/commit/084e08d459a288839e24d4ef1c4fd9aa0fc36b8e)), closes [#916](https://github.com/ethpandaops/ethereum-package/issues/916)
+* add missing flags to rbuilder ([#947](https://github.com/ethpandaops/ethereum-package/issues/947)) ([b710250](https://github.com/ethpandaops/ethereum-package/commit/b710250dac7c60a24f7b48896b9a459580ae20a2))
+* add sec per slot to mev boost ([#984](https://github.com/ethpandaops/ethereum-package/issues/984)) ([ee447ec](https://github.com/ethpandaops/ethereum-package/commit/ee447ecef14302898db4e1d67b02b0ee722818b9))
+* allow prysm to be forever-alone ([#969](https://github.com/ethpandaops/ethereum-package/issues/969)) ([6c82d40](https://github.com/ethpandaops/ethereum-package/commit/6c82d405cbb215d575979ec8408b10842c2bec0e))
+* bump egg to v4.0.1 ([#939](https://github.com/ethpandaops/ethereum-package/issues/939)) ([4e3099c](https://github.com/ethpandaops/ethereum-package/commit/4e3099c9bf37c3c81c5d460cb43ca26b9f4d5d7f))
+* bump eth metrics export and egg ([#991](https://github.com/ethpandaops/ethereum-package/issues/991)) ([1e65a6f](https://github.com/ethpandaops/ethereum-package/commit/1e65a6fc75c2b843d789f53f318f7bbbc6d51ba2))
+* bump mev relay mem limit ([#1003](https://github.com/ethpandaops/ethereum-package/issues/1003)) ([8e54d8d](https://github.com/ethpandaops/ethereum-package/commit/8e54d8db091700de2af52488be5f8ba36625c7ac))
+* bump tests ([#942](https://github.com/ethpandaops/ethereum-package/issues/942)) ([09ce03f](https://github.com/ethpandaops/ethereum-package/commit/09ce03f87140f2b058ca3ce9c7007860a7ceb2fd))
+* cancellations for mev_relay_launcher.star ([#961](https://github.com/ethpandaops/ethereum-package/issues/961)) ([6b8f5e4](https://github.com/ethpandaops/ethereum-package/commit/6b8f5e4a9c9559894511a3e8e53096e48fba103e))
+* change all deposit addresses to mainnet ([#981](https://github.com/ethpandaops/ethereum-package/issues/981)) ([d677e63](https://github.com/ethpandaops/ethereum-package/commit/d677e630f8e69137a3314df525e718f9dee6d286))
+* **ci:** make docker rate limits appear correctly ([#946](https://github.com/ethpandaops/ethereum-package/issues/946)) ([0d9550a](https://github.com/ethpandaops/ethereum-package/commit/0d9550a788f936d4189f6fafe3756f8371f6a23f))
+* cleanup spamoor blob ([#972](https://github.com/ethpandaops/ethereum-package/issues/972)) ([9f3a81e](https://github.com/ethpandaops/ethereum-package/commit/9f3a81e05bb04cfd6f8fca176d0b85e8ccc74928))
+* geth network id cant be set with public networks ([#1005](https://github.com/ethpandaops/ethereum-package/issues/1005)) ([09ded2a](https://github.com/ethpandaops/ethereum-package/commit/09ded2a501f4b6d04bf46df42912d74d045abbe8))
+* handle extra args for spamoor ([#975](https://github.com/ethpandaops/ethereum-package/issues/975)) ([12736e6](https://github.com/ethpandaops/ethereum-package/commit/12736e69c6d76395f94508cfab2de0ef155d27ae))
+* lighthouse to be able to run alone ([#1007](https://github.com/ethpandaops/ethereum-package/issues/1007)) ([4c75506](https://github.com/ethpandaops/ethereum-package/commit/4c75506efb0b3a93c91cc660a688e350b2808166))
+* make geth default to snap-sync ([#998](https://github.com/ethpandaops/ethereum-package/issues/998)) ([067ca8c](https://github.com/ethpandaops/ethereum-package/commit/067ca8cf4c374d658e1e530144de304d46a45663))
+* make mev work with minimal preset ([#992](https://github.com/ethpandaops/ethereum-package/issues/992)) ([ff3da12](https://github.com/ethpandaops/ethereum-package/commit/ff3da1210a17b6fcf874657a5e620dd949b6606e))
+* mev-pectra workflow ([#963](https://github.com/ethpandaops/ethereum-package/issues/963)) ([729ead8](https://github.com/ethpandaops/ethereum-package/commit/729ead846c3dac302bf6efd17ba842700bdb521c))
+* nimbus supernode flag ([#997](https://github.com/ethpandaops/ethereum-package/issues/997)) ([8518302](https://github.com/ethpandaops/ethereum-package/commit/85183028766167dc52bdca56a26d1b5e48a4d5b1))
+* osaka blob schedule chainspec ([#943](https://github.com/ethpandaops/ethereum-package/issues/943)) ([59ebc52](https://github.com/ethpandaops/ethereum-package/commit/59ebc524048024665e4902923c0edb24e9541f17))
+* public networks wont fetch prague and osaka time ([#950](https://github.com/ethpandaops/ethereum-package/issues/950)) ([7fe59a8](https://github.com/ethpandaops/ethereum-package/commit/7fe59a8999f19498da981c57fde327540ecfeff0))
+* python 3.11 bug, bump to 3.12 ([#957](https://github.com/ethpandaops/ethereum-package/issues/957)) ([83830d4](https://github.com/ethpandaops/ethereum-package/commit/83830d44823767af65eda7dfe6b26c87c536c4cf))
+* refactor open ports + add quic support ([#1000](https://github.com/ethpandaops/ethereum-package/issues/1000)) ([a9247f3](https://github.com/ethpandaops/ethereum-package/commit/a9247f32e62db707407482ed20a0ad8a3f3765c9))
+* reth-builder client name type ([#967](https://github.com/ethpandaops/ethereum-package/issues/967)) ([d27d959](https://github.com/ethpandaops/ethereum-package/commit/d27d959d0a6f2be74eb68c97ae3a1f9819d3ac2e))
+* set fulu specific properties for blob scenarios in spamoor ([#971](https://github.com/ethpandaops/ethereum-package/issues/971)) ([74e98f0](https://github.com/ethpandaops/ethereum-package/commit/74e98f0e4e2546e8603bdc2b7fc4668f0bde7cc4))
+* supernode bool in participant matrix ([#951](https://github.com/ethpandaops/ethereum-package/issues/951)) ([3a0a9a0](https://github.com/ethpandaops/ethereum-package/commit/3a0a9a00e94c42c8d5b99045eea64e8f53682d68))
+* teku initial state to genesis state ([#962](https://github.com/ethpandaops/ethereum-package/issues/962)) ([1ad949f](https://github.com/ethpandaops/ethereum-package/commit/1ad949f4f65a34f041bd90050ca407e370eee579))
+* update nimbus latest image ([#987](https://github.com/ethpandaops/ethereum-package/issues/987)) ([a5a1561](https://github.com/ethpandaops/ethereum-package/commit/a5a15619d89e5f193ef1d764f73259f425c4ffa2))
+* update prysm supernode flag ([#999](https://github.com/ethpandaops/ethereum-package/issues/999)) ([eed788c](https://github.com/ethpandaops/ethereum-package/commit/eed788c074b3342b71498f8b864a3f5495ef4f38))
+* Update tests ([#918](https://github.com/ethpandaops/ethereum-package/issues/918)) ([d8e035b](https://github.com/ethpandaops/ethereum-package/commit/d8e035b7a6e3e498b84b0edd77f0e526092a5fb1))
+* use latest spamoor instead of blob-v1 for peerdas ([#1004](https://github.com/ethpandaops/ethereum-package/issues/1004)) ([f2c19b1](https://github.com/ethpandaops/ethereum-package/commit/f2c19b105ccf5824f7fc7ae3bf615ab504fd4e26))
+* use next js proxy for blockscout frontend ([#873](https://github.com/ethpandaops/ethereum-package/issues/873)) ([151ff0a](https://github.com/ethpandaops/ethereum-package/commit/151ff0a1c865eb8365b7ec2f1ccfa0788d532d9f))
+* use separate file for additional contracts & fix disabled fork activation epoch ([#849](https://github.com/ethpandaops/ethereum-package/issues/849)) ([e8cd95d](https://github.com/ethpandaops/ethereum-package/commit/e8cd95d9a9cc7e7b1f14584fed6c56ac0b0a6bd3))
+* yeet trailing comma from enr list ([#965](https://github.com/ethpandaops/ethereum-package/issues/965)) ([63a6d50](https://github.com/ethpandaops/ethereum-package/commit/63a6d502d0a2d037ff083cb524f024c2d2e0b4db))
+
+
+### Code Refactoring
+
+* rename transaction spammer, remove beacon metrics gazer ([#923](https://github.com/ethpandaops/ethereum-package/issues/923)) ([96eeb99](https://github.com/ethpandaops/ethereum-package/commit/96eeb99bed7abc14dcec1eca5eae0f852eeb9fb0))
+
 ## [4.6.0](https://github.com/ethpandaops/ethereum-package/compare/4.5.0...4.6.0) (2025-03-19)
 
 

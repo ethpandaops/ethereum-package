@@ -9,12 +9,6 @@ SPAMOOR_CONFIG_FILENAME = "startup-spammers.yaml"
 
 SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
-# The min/max CPU/memory that spamoor can use
-MIN_CPU = 100
-MAX_CPU = 1000
-MIN_MEMORY = 20
-MAX_MEMORY = 300
-
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
@@ -33,6 +27,8 @@ def launch_spamoor(
     spamoor_params,
     global_node_selectors,
     network_params,
+    port_publisher,
+    additional_service_index,
     osaka_time,
 ):
     spammers = []
@@ -47,6 +43,30 @@ def launch_spamoor(
             spammer["config"]["fulu_activation"] = osaka_time
 
         spammers.append(spammer)
+
+    for index, participant in enumerate(participant_contexts):
+        (
+            full_name,
+            cl_client,
+            el_client,
+            participant_config,
+        ) = shared_utils.get_client_names(
+            participant, index, participant_contexts, participant_configs
+        )
+
+        if "builder" in full_name:
+            spammers.append(
+                {
+                    "scenario": "uniswap-swaps",
+                    "name": "Uniswap Swaps",
+                    "config": {
+                        "throughput": 100,
+                        "max_pending": 200,
+                        "max_wallets": 200,
+                        "client_group": "mevbuilder",
+                    },
+                }
+            )
 
     template_data = new_config_template_data(spammers)
 
@@ -68,6 +88,8 @@ def launch_spamoor(
         spamoor_params,
         global_node_selectors,
         network_params,
+        port_publisher,
+        additional_service_index,
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -80,15 +102,9 @@ def get_config(
     spamoor_params,
     node_selectors,
     network_params,
+    port_publisher,
+    additional_service_index,
 ):
-    image_name = spamoor_params.image
-    if spamoor_params.image == constants.DEFAULT_SPAMOOR_IMAGE:
-        if (
-            "peerdas" in network_params.network
-            or network_params.fulu_fork_epoch != constants.FAR_FUTURE_EPOCH
-        ):
-            image_name = "ethpandaops/spamoor:blob-v1"
-
     config_file_path = shared_utils.path_join(
         SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         SPAMOOR_CONFIG_FILENAME,
@@ -121,18 +137,26 @@ def get_config(
         "--startup-spammer={}".format(config_file_path),
     ]
 
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        0,
+    )
+
     for index, extra_arg in enumerate(spamoor_params.extra_args):
         cmd.append(extra_arg)
 
     return ServiceConfig(
-        image=image_name,
+        image=spamoor_params.image,
         entrypoint=["./spamoor-daemon"],
         cmd=cmd,
         ports=USED_PORTS,
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
+        public_ports=public_ports,
+        min_cpu=spamoor_params.min_cpu,
+        max_cpu=spamoor_params.max_cpu,
+        min_memory=spamoor_params.min_mem,
+        max_memory=spamoor_params.max_mem,
         node_selectors=node_selectors,
         files={
             SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,

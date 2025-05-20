@@ -174,7 +174,7 @@ def get_beacon_config(
         )
 
     public_ports = {}
-    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     validator_public_port_assignment = {}
     if port_publisher.cl_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
@@ -183,13 +183,24 @@ def get_beacon_config(
         validator_public_port_assignment = {
             constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[3]
         }
-        public_ports, discovery_port = cl_shared.get_general_cl_public_port_specs(
+        public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else BEACON_DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else BEACON_DISCOVERY_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -211,7 +222,7 @@ def get_beacon_config(
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
         "--p2p-advertised-ip=" + port_publisher.nat_exit_ip,
         "--p2p-discovery-site-local-addresses-enabled=true",
-        "--p2p-port={0}".format(discovery_port),
+        "--p2p-port={0}".format(discovery_port_tcp),
         "--rest-api-enabled=true",
         "--rest-api-docs-enabled=true",
         "--rest-api-interface=0.0.0.0",

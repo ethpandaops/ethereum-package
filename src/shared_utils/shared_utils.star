@@ -6,11 +6,13 @@ HTTP_APPLICATION_PROTOCOL = "http"
 NOT_PROVIDED_APPLICATION_PROTOCOL = ""
 NOT_PROVIDED_WAIT = "not-provided-wait"
 
-MAX_PORTS_PER_CL_NODE = 5
-MAX_PORTS_PER_EL_NODE = 5
+MAX_PORTS_PER_CL_NODE = 7
+MAX_PORTS_PER_EL_NODE = 7
 MAX_PORTS_PER_VC_NODE = 3
 MAX_PORTS_PER_REMOTE_SIGNER_NODE = 2
 MAX_PORTS_PER_ADDITIONAL_SERVICE = 2
+MAX_PORTS_PER_MEV_NODE = 2
+MAX_PORTS_PER_OTHER_NODE = 1
 
 
 def new_template_and_data(template, template_data_json):
@@ -246,6 +248,18 @@ def get_public_ports_for_component(
             MAX_PORTS_PER_ADDITIONAL_SERVICE,
             participant_index,
         )
+    elif component == "mev":
+        public_port_range = __get_port_range(
+            port_publisher_params.mev_public_port_start,
+            MAX_PORTS_PER_MEV_NODE,
+            participant_index,
+        )
+    elif component == "other":
+        public_port_range = __get_port_range(
+            port_publisher_params.other_public_port_start,
+            MAX_PORTS_PER_OTHER_NODE,
+            participant_index,
+        )
     return [port for port in range(public_port_range[0], public_port_range[1], 1)]
 
 
@@ -275,6 +289,8 @@ def get_port_specs(port_assignments):
             ports.update({port_id: new_port_spec(port, TCP_PROTOCOL)})
         elif port_id == constants.UDP_DISCOVERY_PORT_ID:
             ports.update({port_id: new_port_spec(port, UDP_PROTOCOL)})
+        elif port_id == constants.QUIC_DISCOVERY_PORT_ID:
+            ports.update({port_id: new_port_spec(port, UDP_PROTOCOL)})
         elif port_id in [
             constants.HTTP_PORT_ID,
             constants.METRICS_PORT_ID,
@@ -282,6 +298,7 @@ def get_port_specs(port_assignments):
             constants.ADMIN_PORT_ID,
             constants.VALDIATOR_GRPC_PORT_ID,
             constants.RBUILDER_PORT_ID,
+            constants.RBUILDER_METRICS_PORT_ID,
         ]:
             ports.update(
                 {port_id: new_port_spec(port, TCP_PROTOCOL, HTTP_APPLICATION_PROTOCOL)}
@@ -296,6 +313,28 @@ def get_additional_service_standard_public_port(
     if port_publisher.additional_services_enabled:
         public_ports_for_component = get_public_ports_for_component(
             "additional_services", port_publisher, additional_service_index
+        )
+        public_ports = get_port_specs({port_id: public_ports_for_component[port_index]})
+    return public_ports
+
+
+def get_mev_public_port(port_publisher, port_id, additional_service_index, port_index):
+    public_ports = {}
+    if port_publisher.mev_enabled:
+        public_ports_for_component = get_public_ports_for_component(
+            "mev", port_publisher, additional_service_index
+        )
+        public_ports = get_port_specs({port_id: public_ports_for_component[port_index]})
+    return public_ports
+
+
+def get_other_public_port(
+    port_publisher, port_id, additional_service_index, port_index
+):
+    public_ports = {}
+    if port_publisher.other_enabled:
+        public_ports_for_component = get_public_ports_for_component(
+            "other", port_publisher, additional_service_index
         )
         public_ports = get_port_specs({port_id: public_ports_for_component[port_index]})
     return public_ports

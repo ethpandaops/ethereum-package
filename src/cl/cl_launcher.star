@@ -29,6 +29,7 @@ def launch(
     validator_data,
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
+    global_other_index,
 ):
     plan.print("Launching CL network")
 
@@ -130,8 +131,11 @@ def launch(
                 snooper_service_name,
                 el_context,
                 node_selectors,
+                args_with_right_defaults.port_publisher,
+                global_other_index,
                 args_with_right_defaults.docker_cache_params,
             )
+            global_other_index += 1
             plan.print(
                 "Successfully added {0} snooper participants".format(
                     snooper_engine_context
@@ -214,4 +218,5 @@ def launch(
         all_cl_contexts,
         all_snooper_engine_contexts,
         preregistered_validator_keys_for_nodes,
+        global_other_index,
     )

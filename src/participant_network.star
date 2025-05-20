@@ -42,17 +42,10 @@ def launch_participant_network(
     parallel_keystore_generation,
 ):
     network_id = network_params.network_id
-    latest_block = ""
     num_participants = len(args_with_right_defaults.participants)
-    shadowfork_block = "latest"
     total_number_of_validator_keys = 0
-    if (
-        constants.NETWORK_NAME.shadowfork in network_params.network
-        and ("verkle" in network_params.network)
-        and ("holesky" in network_params.network)
-    ):
-        shadowfork_block = "793312"  # Hardcodes verkle shadowfork block for holesky
-
+    latest_block = ""
+    global_other_index = 0
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
@@ -63,7 +56,6 @@ def launch_participant_network(
             latest_block, network_id = launch_shadowfork.shadowfork_prep(
                 plan,
                 network_params,
-                shadowfork_block,
                 args_with_right_defaults.participants,
                 global_tolerations,
                 global_node_selectors,
@@ -115,7 +107,13 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_public_network.launch(plan, network_params.network)
+        ) = launch_public_network.launch(
+            plan,
+            args_with_right_defaults.participants,
+            network_params,
+            global_tolerations,
+            global_node_selectors,
+        )
     else:
         # We are running a devnet
         (
@@ -163,6 +161,7 @@ def launch_participant_network(
         all_cl_contexts,
         all_snooper_engine_contexts,
         preregistered_validator_keys_for_nodes,
+        global_other_index,
     ) = cl_client_launcher.launch(
         plan,
         network_params,
@@ -178,6 +177,7 @@ def launch_participant_network(
         validator_data,
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
+        global_other_index,
     )
 
     ethereum_metrics_exporter_context = None
@@ -227,8 +227,12 @@ def launch_participant_network(
                 el_context,
                 cl_context,
                 node_selectors,
+                args_with_right_defaults.port_publisher,
+                global_other_index,
                 args_with_right_defaults.docker_cache_params,
+                persistent,
             )
+            global_other_index += 1
             plan.print(
                 "Successfully added {0} ethereum metrics exporter participants".format(
                     ethereum_metrics_exporter_context
@@ -306,8 +310,11 @@ def launch_participant_network(
                 snooper_service_name,
                 cl_context,
                 node_selectors,
+                args_with_right_defaults.port_publisher,
+                global_other_index,
                 args_with_right_defaults.docker_cache_params,
             )
+            global_other_index += 1
             plan.print(
                 "Successfully added {0} snooper participants".format(
                     snooper_beacon_context

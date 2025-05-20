@@ -5,13 +5,14 @@ participants:
     cl_type: prysm
   - el_type: erigon
     cl_type: nimbus
-    cl_image: ethpandaops/nimbus-eth2:unstable-minimal
   - el_type: besu
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  # TODO: Re-add grandine once its working with minimal preset
-  # - el_type: geth
-  #   cl_type: grandine
+  - el_type: geth
+    cl_type: grandine
 network_params:
   preset: minimal
+docker_cache_params:
+  enabled: true
+  url: "docker.ethquokkaops.io"

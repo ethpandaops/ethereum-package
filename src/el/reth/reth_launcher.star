@@ -17,6 +17,8 @@ DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 RBUILDER_PORT_NUM = 8645
+RBUILDER_METRICS_PORT_NUM = 6060
+
 # Paths
 METRICS_PATH = "/metrics"
 
@@ -113,26 +115,46 @@ def get_config(
     network_params,
 ):
     public_ports = {}
-    discovery_port = DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "el", port_publisher, participant_index
         )
-        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+        public_ports = el_shared.get_general_el_public_port_specs(
             public_ports_for_component
         )
         additional_public_port_assignments = {
-            constants.RPC_PORT_ID: public_ports_for_component[2],
-            constants.WS_PORT_ID: public_ports_for_component[3],
-            constants.METRICS_PORT_ID: public_ports_for_component[4],
+            constants.RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[4],
         }
+        if (
+            launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
+            or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
+        ):
+            additional_public_port_assignments[
+                constants.RBUILDER_PORT_ID
+            ] = public_ports_for_component[5]
+            additional_public_port_assignments[
+                constants.RBUILDER_METRICS_PORT_ID
+            ] = public_ports_for_component[6]
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.WS_PORT_ID: WS_PORT_NUM,
@@ -144,6 +166,9 @@ def get_config(
         or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
         used_port_assignments[constants.RBUILDER_PORT_ID] = RBUILDER_PORT_NUM
+        used_port_assignments[
+            constants.RBUILDER_METRICS_PORT_ID
+        ] = RBUILDER_METRICS_PORT_NUM
 
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -182,8 +207,8 @@ def get_config(
             "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "--authrpc.addr=0.0.0.0",
             "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
-            "--discovery.port={0}".format(discovery_port),
-            "--port={0}".format(discovery_port),
+            "--discovery.port={0}".format(discovery_port_udp),
+            "--port={0}".format(discovery_port_tcp),
         ]
     )
 
@@ -248,6 +273,9 @@ def get_config(
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
         cmd.append("--engine.persistence-threshold=0")
         cmd.append("--engine.memory-block-buffer-target=0")
+        cmd.append(
+            "--txpool.no-local-transactions-propagation"
+        )  # disable tx propagation so that builder will have juicy blocks
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME

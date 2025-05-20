@@ -229,7 +229,7 @@ participants:
     # - lighthouse: sigp/lighthouse:latest
     # - teku: consensys/teku:latest
     # - nimbus: statusim/nimbus-eth2:multiarch-latest
-    # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
+    # - prysm: gcr.io/offchainlabs/prysm/beacon-chain:latest
     # - lodestar: chainsafe/lodestar:next
     # - grandine: sifrai/grandine:stable
     cl_image: ""
@@ -299,7 +299,7 @@ participants:
     # - lighthouse: sigp/lighthouse:latest
     # - lodestar: chainsafe/lodestar:latest
     # - nimbus: statusim/nimbus-validator-client:multiarch-latest
-    # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
+    # - prysm: gcr.io/offchainlabs/prysm/validator:latest
     # - teku: consensys/teku:latest
     # - vero: ghcr.io/serenita-org/vero:master
     vc_image: ""
@@ -557,8 +557,8 @@ network_params:
   deneb_fork_epoch: 0
 
   # Electra fork epoch
-  # Defaults to 18446744073709551615
-  electra_fork_epoch: 18446744073709551615
+  # Defaults to 0
+  electra_fork_epoch: 0
 
   # Fulu fork epoch
   # Defaults to 18446744073709551615
@@ -571,10 +571,22 @@ network_params:
   # The snapshots are taken with https://github.com/ethpandaops/snapshotter
   network_sync_base_url: https://snapshots.ethpandaops.io/
 
+  # Force network sync with a custom snapshot
+  # This enables quicker EL sync (use with caution)
+  # Defaults to false
+  force_snapshot_sync: false
+
+  # The block height of the shadowfork
+  # This is used to sync the network from a snapshot at a specific block height
+  # Defaults to "latest"
+  # Example: shadowfork_block_height: 240000
+  shadowfork_block_height: "latest"
+
   # The number of data column sidecar subnets used in the gossipsub protocol
   data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
+
   # Minimum number of subnets an honest node custodies and serves samples from
   # Defaults to 4
   custody_requirement: 4
@@ -585,13 +597,6 @@ network_params:
   target_blobs_per_block_electra: 6
   # Base fee update fraction for Electra fork (default 5007716)
   base_fee_update_fraction_electra: 5007716
-
-  # Maximum number of blobs per block for Fulu fork (default 12)
-  max_blobs_per_block_fulu: 12
-  # Target number of blobs per block for Fulu fork (default 9)
-  target_blobs_per_block_fulu: 9
-  # Base fee update fraction for Fulu fork (default 5007716)
-  base_fee_update_fraction_fulu: 5007716
 
   # EIP-7732 fork epoch
   # Defaults to 18446744073709551615
@@ -659,6 +664,53 @@ network_params:
   # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
   gas_limit: 0
 
+  # BPO
+  # BPO1 epoch (default 18446744073709551615)
+  bpo_1_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO1 (default 12)
+  bpo_1_max_blobs: 12
+  # Target number of blobs per block for BPO1 (default 9)
+  bpo_1_target_blobs: 9
+  # Base fee update fraction for BPO1 (default 5007716)
+  bpo_1_base_fee_update_fraction: 5007716
+
+  # BPO2 epoch (default 18446744073709551615)
+  bpo_2_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO2 (default 12)
+  bpo_2_max_blobs: 12
+  # Target number of blobs per block for BPO2 (default 9)
+  bpo_2_target_blobs: 9
+  # Base fee update fraction for BPO2 (default 5007716)
+  bpo_2_base_fee_update_fraction: 5007716
+
+  # BPO3 epoch (default 18446744073709551615)
+  bpo_3_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO3 (default 12)
+  bpo_3_max_blobs: 12
+  # Target number of blobs per block for BPO3 (default 9)
+  bpo_3_target_blobs: 9
+  # Base fee update fraction for BPO3 (default 5007716)
+  bpo_3_base_fee_update_fraction: 5007716
+
+  # BPO4 epoch (default 18446744073709551615)
+  bpo_4_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO4 (default 12)
+  bpo_4_max_blobs: 12
+  # Target number of blobs per block for BPO4 (default 9)
+  bpo_4_target_blobs: 9
+  # Base fee update fraction for BPO4 (default 5007716)
+  bpo_4_base_fee_update_fraction: 5007716
+
+  # BPO5 epoch (default 18446744073709551615)
+  bpo_5_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO5 (default 12)
+  bpo_5_max_blobs: 12
+  # Target number of blobs per block for BPO5 (default 9)
+  bpo_5_target_blobs: 9
+  # Base fee update fraction for BPO5 (default 5007716)
+  bpo_5_base_fee_update_fraction: 5007716
+
+
 # Global parameters for the network
 
 # By default includes
@@ -678,7 +730,8 @@ additional_services:
   - blockscout
   - dora
   - full_beaconchain_explorer
-  - prometheus_grafana
+  - prometheus
+  - grafana
   - blobscan
   - dugtrio
   - blutgang
@@ -868,19 +921,27 @@ mev_params:
   # The image to use for MEV boost relay
   mev_relay_image: ethpandaops/mev-boost-relay:main
   # The image to use for the builder
-  mev_builder_image: ethpandaops/flashbots-builder:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
+  # The subsidy to use for the builder (in ETH)
+  mev_builder_subsidy: 0
   # The image to use for mev-boost
   mev_boost_image: ethpandaops/mev-boost:develop
   # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
   mev_boost_args: []
   # Extra parameters to send to the API
   mev_relay_api_extra_args: []
+  # Extra environment variables to send to the API
+  mev_relay_api_extra_env_vars: {}
   # Extra parameters to send to the housekeeper
   mev_relay_housekeeper_extra_args: []
+  # Extra environment variables to send to the housekeeper
+  mev_relay_housekeeper_extra_env_vars: {}
   # Extra parameters to send to the website
   mev_relay_website_extra_args: []
+  # Extra environment variables to send to the website
+  mev_relay_website_extra_env_vars: {}
   # Extra parameters to send to the builder
   mev_builder_extra_args: []
   # Prometheus additional configuration for the mev builder participant.
@@ -899,6 +960,9 @@ mev_params:
   # Optional parameters to send to the custom_flood script that sends reliable payloads
   custom_flood_params:
     interval_between_transactions: 1
+
+  # Image to use for mock mev
+  mock_mev_image: ethpandaops/rustic-builder:main
 
 # Enables Xatu Sentry for all participants
 # Defaults to false
@@ -962,6 +1026,13 @@ checkpoint_sync_url: ""
 spamoor_params:
   # The image to use for spamoor
   image: ethpandaops/spamoor:latest
+  # Resource management for spamoor
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 20
+  max_mem: 300
   # A list of spammers to launch on startup
   # example:
   # - scenario: eoatx  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
@@ -978,7 +1049,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.0.3
+  image: ethpandaops/ethereum-genesis-generator:4.1.5
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
@@ -1022,6 +1093,22 @@ port_publisher:
   additional_services:
     enabled: false
     public_port_start: 36000
+
+  # MEV public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 37000
+  # You can't run multiple enclaves on the same port settings
+  mev:
+    enabled: false
+    public_port_start: 37000
+
+  # Other public port exposed to your local machine (like ethereum metrics exporter, snooper)
+  # Disabled by default
+  # Public port start defaults to 38000
+  # You can't run multiple enclaves on the same port settings
+  other:
+    enabled: false
+    public_port_start: 38000
 ```
 
 #### Example configurations
@@ -1106,7 +1193,7 @@ network_params:
 </details>
 
 <details>
-    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper, and a testnet verifier)</summary>
+    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper)</summary>
 
 ```yaml
 participants:
@@ -1115,7 +1202,9 @@ participants:
     count: 2
 snooper_enabled: true
 additional_services:
-  - prometheus_grafana
+  - prometheus
+  - grafana
+  - tx_fuzz
 ethereum_metrics_exporter_enabled: true
 ```
 

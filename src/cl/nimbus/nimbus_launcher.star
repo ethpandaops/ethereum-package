@@ -185,8 +185,8 @@ def get_beacon_config(
         )
 
     public_ports = {}
-    discovery_port = BEACON_DISCOVERY_PORT_NUM
     validator_public_port_assignment = {}
+    public_ports_for_component = None
     if port_publisher.cl_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "cl", port_publisher, participant_index
@@ -194,13 +194,24 @@ def get_beacon_config(
         validator_public_port_assignment = {
             constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[3]
         }
-        public_ports, discovery_port = cl_shared.get_general_cl_public_port_specs(
+        public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else BEACON_DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else BEACON_DISCOVERY_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -219,8 +230,8 @@ def get_beacon_config(
         "{0}".format(BEACON_NODE_ENTRYPOINT),
         "--non-interactive=true",
         "--log-level=" + log_level,
-        "--udp-port={0}".format(discovery_port),
-        "--tcp-port={0}".format(discovery_port),
+        "--udp-port={0}".format(discovery_port_udp),
+        "--tcp-port={0}".format(discovery_port_tcp),
         "--network={0}".format(
             network_params.network
             if network_params.network in constants.PUBLIC_NETWORKS
@@ -242,11 +253,10 @@ def get_beacon_config(
         # Nimbus can handle a max of 256 threads, if the host has more then nimbus crashes. Setting it to 4 so it doesn't crash on build servers
         "--num-threads=4",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
+        # Metrics
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
-        # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
     validator_default_cmd = [
@@ -265,7 +275,7 @@ def get_beacon_config(
     ]
 
     supernode_cmd = [
-        "--subscribe-all-subnets",
+        "--debug-peerdas-supernode=true",
     ]
 
     if network_params.perfect_peerdas_enabled and participant_index < 16:

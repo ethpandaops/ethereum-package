@@ -13,21 +13,21 @@ DEFAULT_EL_IMAGES = {
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
-    "nimbus": "ethpandaops/nimbus-eth1:master",
+    "nimbus": "statusim/nimbus-eth1:master",
 }
 
 DEFAULT_CL_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:unstable",
-    "teku": "consensys/teku:latest",
+    "lighthouse": "sigp/lighthouse:latest",
+    "teku": "consensys/teku:develop",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
-    "prysm": "gcr.io/prysmaticlabs/prysm/beacon-chain:stable",
+    "prysm": "gcr.io/offchainlabs/prysm/beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:unstable",
-    "teku": "consensys/teku:latest",
+    "lighthouse": "ethpandaops/lighthouse:stable",
+    "teku": "consensys/teku:develop",
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "chainsafe/lodestar:latest",
@@ -35,21 +35,21 @@ DEFAULT_CL_IMAGES_MINIMAL = {
 }
 
 DEFAULT_VC_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:unstable",
+    "lighthouse": "sigp/lighthouse:latest",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
-    "prysm": "gcr.io/prysmaticlabs/prysm/validator:stable",
-    "teku": "consensys/teku:latest",
+    "prysm": "gcr.io/offchainlabs/prysm/validator:stable",
+    "teku": "consensys/teku:develop",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:unstable",
+    "lighthouse": "ethpandaops/lighthouse:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
-    "teku": "consensys/teku:latest",
+    "teku": "consensys/teku:develop",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
@@ -58,13 +58,8 @@ DEFAULT_REMOTE_SIGNER_IMAGES = {
     "web3signer": "consensys/web3signer:latest",
 }
 
-# Placeholder value for the deneb fork epoch if electra is being run
-# TODO: This is a hack, and should be removed once we electra is rebased on deneb
-HIGH_DENEB_VALUE_FORK_VERKLE = 2000000000
-
 # MEV Params
 MEV_BOOST_PORT = 18550
-MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
 
 # Minimum number of validators required for a network to be valid is 64
 MIN_VALIDATORS = 64
@@ -200,8 +195,8 @@ def input_parser(plan, input_args):
     ):
         result = enrich_mev_extra_params(
             result,
-            MEV_BOOST_SERVICE_NAME_PREFIX,
-            MEV_BOOST_PORT,
+            constants.MEV_BOOST_SERVICE_NAME_PREFIX,
+            constants.MEV_BOOST_PORT,
             result.get("mev_type"),
         )
     elif result.get("mev_type") == None:
@@ -213,6 +208,22 @@ def input_parser(plan, input_args):
             )
         )
 
+    if (
+        result["mev_params"].get("mev_builder_subsidy") != 0
+        and result["network_params"].get("prefunded_accounts") == {}
+    ):
+        fail(
+            'mev_builder_subsidy is not 0 but prefunded_accounts is empty, please provide a prefunded account for the builder. Example: prefunded_accounts: \'{"0xb9e79D19f651a941757b35830232E7EFC77E1c79": {"balance": "100000ETH"}}\''
+        )
+
+    if result["network_params"].get("force_snapshot_sync") and not result["persistent"]:
+        fail(
+            "network_params.force_snapshot_sync is enabled but persistent is false, please set persistent to true, otherwise the snapshot won't be able to be kept for the run"
+        )
+    if "shadowfork" in result["network_params"]["network"] and not result["persistent"]:
+        fail(
+            "shadowfork networks require persistent to be true, otherwise the snapshot won't be able to be kept for the run"
+        )
     if result["docker_cache_params"]["enabled"]:
         docker_cache_image_override(plan, result)
     else:
@@ -220,6 +231,18 @@ def input_parser(plan, input_args):
 
     if result["port_publisher"]["nat_exit_ip"] == "auto":
         result["port_publisher"]["nat_exit_ip"] = get_public_ip(plan)
+
+    if "prometheus_grafana" in result["additional_services"]:
+        plan.print(
+            "prometheus_grafana in no longer supported, please use 'prometheus' and 'grafana' instead in the additional_services field"
+        )
+        if (
+            "grafana" in result["additional_services"]
+            or "prometheus" in result["additional_services"]
+        ):
+            fail(
+                "Please do not define 'grafana' or 'prometheus' in the additional_services field when 'prometheus_grafana' is used to launch both"
+            )
 
     return struct(
         participants=[
@@ -331,6 +354,8 @@ def input_parser(plan, input_args):
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
+            force_snapshot_sync=result["network_params"]["force_snapshot_sync"],
+            shadowfork_block_height=result["network_params"]["shadowfork_block_height"],
             data_column_sidecar_subnet_count=result["network_params"][
                 "data_column_sidecar_subnet_count"
             ],
@@ -345,14 +370,35 @@ def input_parser(plan, input_args):
             base_fee_update_fraction_electra=result["network_params"][
                 "base_fee_update_fraction_electra"
             ],
-            max_blobs_per_block_fulu=result["network_params"][
-                "max_blobs_per_block_fulu"
+            bpo_1_epoch=result["network_params"]["bpo_1_epoch"],
+            bpo_1_max_blobs=result["network_params"]["bpo_1_max_blobs"],
+            bpo_1_target_blobs=result["network_params"]["bpo_1_target_blobs"],
+            bpo_1_base_fee_update_fraction=result["network_params"][
+                "bpo_1_base_fee_update_fraction"
             ],
-            target_blobs_per_block_fulu=result["network_params"][
-                "target_blobs_per_block_fulu"
+            bpo_2_epoch=result["network_params"]["bpo_2_epoch"],
+            bpo_2_max_blobs=result["network_params"]["bpo_2_max_blobs"],
+            bpo_2_target_blobs=result["network_params"]["bpo_2_target_blobs"],
+            bpo_2_base_fee_update_fraction=result["network_params"][
+                "bpo_2_base_fee_update_fraction"
             ],
-            base_fee_update_fraction_fulu=result["network_params"][
-                "base_fee_update_fraction_fulu"
+            bpo_3_epoch=result["network_params"]["bpo_3_epoch"],
+            bpo_3_max_blobs=result["network_params"]["bpo_3_max_blobs"],
+            bpo_3_target_blobs=result["network_params"]["bpo_3_target_blobs"],
+            bpo_3_base_fee_update_fraction=result["network_params"][
+                "bpo_3_base_fee_update_fraction"
+            ],
+            bpo_4_epoch=result["network_params"]["bpo_4_epoch"],
+            bpo_4_max_blobs=result["network_params"]["bpo_4_max_blobs"],
+            bpo_4_target_blobs=result["network_params"]["bpo_4_target_blobs"],
+            bpo_4_base_fee_update_fraction=result["network_params"][
+                "bpo_4_base_fee_update_fraction"
+            ],
+            bpo_5_epoch=result["network_params"]["bpo_5_epoch"],
+            bpo_5_max_blobs=result["network_params"]["bpo_5_max_blobs"],
+            bpo_5_target_blobs=result["network_params"]["bpo_5_target_blobs"],
+            bpo_5_base_fee_update_fraction=result["network_params"][
+                "bpo_5_base_fee_update_fraction"
             ],
             preset=result["network_params"]["preset"],
             additional_preloaded_contracts=result["network_params"][
@@ -369,14 +415,24 @@ def input_parser(plan, input_args):
             mev_builder_image=result["mev_params"]["mev_builder_image"],
             mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
             mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
+            mev_builder_subsidy=result["mev_params"]["mev_builder_subsidy"],
             mev_boost_image=result["mev_params"]["mev_boost_image"],
             mev_boost_args=result["mev_params"]["mev_boost_args"],
             mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
+            mev_relay_api_extra_env_vars=result["mev_params"][
+                "mev_relay_api_extra_env_vars"
+            ],
             mev_relay_housekeeper_extra_args=result["mev_params"][
                 "mev_relay_housekeeper_extra_args"
             ],
+            mev_relay_housekeeper_extra_env_vars=result["mev_params"][
+                "mev_relay_housekeeper_extra_env_vars"
+            ],
             mev_relay_website_extra_args=result["mev_params"][
                 "mev_relay_website_extra_args"
+            ],
+            mev_relay_website_extra_env_vars=result["mev_params"][
+                "mev_relay_website_extra_env_vars"
             ],
             mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
             mev_flood_image=result["mev_params"]["mev_flood_image"],
@@ -453,6 +509,10 @@ def input_parser(plan, input_args):
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
+            min_cpu=result["spamoor_params"]["min_cpu"],
+            max_cpu=result["spamoor_params"]["max_cpu"],
+            min_mem=result["spamoor_params"]["min_mem"],
+            max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
         ),
@@ -499,6 +559,12 @@ def input_parser(plan, input_args):
             additional_services_public_port_start=result["port_publisher"][
                 "additional_services"
             ]["public_port_start"],
+            mev_enabled=result["port_publisher"]["mev"]["enabled"],
+            mev_public_port_start=result["port_publisher"]["mev"]["public_port_start"],
+            other_enabled=result["port_publisher"]["other"]["enabled"],
+            other_public_port_start=result["port_publisher"]["other"][
+                "public_port_start"
+            ],
         ),
     )
 
@@ -913,20 +979,39 @@ def default_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "electra_fork_epoch": 0,
         "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
+        "force_snapshot_sync": False,
+        "shadowfork_block_height": "latest",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "base_fee_update_fraction_electra": 5007716,
-        "max_blobs_per_block_fulu": 12,
-        "target_blobs_per_block_fulu": 9,
-        "base_fee_update_fraction_fulu": 5007716,
+        "bpo_1_epoch": 18446744073709551615,
+        "bpo_1_max_blobs": 12,
+        "bpo_1_target_blobs": 9,
+        "bpo_1_base_fee_update_fraction": 5007716,
+        "bpo_2_epoch": 18446744073709551615,
+        "bpo_2_max_blobs": 12,
+        "bpo_2_target_blobs": 9,
+        "bpo_2_base_fee_update_fraction": 5007716,
+        "bpo_3_epoch": 18446744073709551615,
+        "bpo_3_max_blobs": 12,
+        "bpo_3_target_blobs": 9,
+        "bpo_3_base_fee_update_fraction": 5007716,
+        "bpo_4_epoch": 18446744073709551615,
+        "bpo_4_max_blobs": 12,
+        "bpo_4_target_blobs": 9,
+        "bpo_4_base_fee_update_fraction": 5007716,
+        "bpo_5_epoch": 18446744073709551615,
+        "bpo_5_max_blobs": 12,
+        "bpo_5_target_blobs": 9,
+        "bpo_5_base_fee_update_fraction": 5007716,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -958,20 +1043,19 @@ def default_minimal_network_params():
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
-        "electra_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "electra_fork_epoch": 0,
         "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
+        "force_snapshot_sync": False,
+        "shadowfork_block_height": "latest",
         "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "base_fee_update_fraction_electra": 5007716,
-        "max_blobs_per_block_fulu": 12,
-        "target_blobs_per_block_fulu": 9,
-        "base_fee_update_fraction_fulu": 5007716,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -979,6 +1063,26 @@ def default_minimal_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
+        "bpo_1_epoch": 18446744073709551615,
+        "bpo_1_max_blobs": 12,
+        "bpo_1_target_blobs": 9,
+        "bpo_1_base_fee_update_fraction": 5007716,
+        "bpo_2_epoch": 18446744073709551615,
+        "bpo_2_max_blobs": 12,
+        "bpo_2_target_blobs": 9,
+        "bpo_2_base_fee_update_fraction": 5007716,
+        "bpo_3_epoch": 18446744073709551615,
+        "bpo_3_max_blobs": 12,
+        "bpo_3_target_blobs": 9,
+        "bpo_3_base_fee_update_fraction": 5007716,
+        "bpo_4_epoch": 18446744073709551615,
+        "bpo_4_max_blobs": 12,
+        "bpo_4_target_blobs": 9,
+        "bpo_4_base_fee_update_fraction": 5007716,
+        "bpo_5_epoch": 18446744073709551615,
+        "bpo_5_max_blobs": 12,
+        "bpo_5_target_blobs": 9,
+        "bpo_5_base_fee_update_fraction": 5007716,
     }
 
 
@@ -1083,11 +1187,15 @@ def get_default_mev_params(mev_type, preset):
     else:
         mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
     mev_builder_extra_data = None
+    mev_builder_subsidy = 0
     mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
     mev_boost_args = ["mev-boost", "--relay-check"]
     mev_relay_api_extra_args = []
+    mev_relay_api_extra_env_vars = {}
     mev_relay_housekeeper_extra_args = []
+    mev_relay_housekeeper_extra_env_vars = {}
     mev_relay_website_extra_args = []
+    mev_relay_website_extra_env_vars = {}
     mev_builder_extra_args = []
     mev_flood_image = "flashbots/mev-flood"
     mev_flood_extra_args = []
@@ -1138,14 +1246,18 @@ def get_default_mev_params(mev_type, preset):
         "mock_mev_image": mev_builder_image
         if mev_type == constants.MOCK_MEV_TYPE
         else None,
+        "mev_builder_subsidy": mev_builder_subsidy,
         "mev_builder_cl_image": mev_builder_cl_image,
         "mev_builder_extra_data": mev_builder_extra_data,
         "mev_builder_extra_args": mev_builder_extra_args,
         "mev_boost_image": mev_boost_image,
         "mev_boost_args": mev_boost_args,
         "mev_relay_api_extra_args": mev_relay_api_extra_args,
+        "mev_relay_api_extra_env_vars": mev_relay_api_extra_env_vars,
         "mev_relay_housekeeper_extra_args": mev_relay_housekeeper_extra_args,
+        "mev_relay_housekeeper_extra_env_vars": mev_relay_housekeeper_extra_env_vars,
         "mev_relay_website_extra_args": mev_relay_website_extra_args,
+        "mev_relay_website_extra_env_vars": mev_relay_website_extra_env_vars,
         "mev_flood_image": mev_flood_image,
         "mev_flood_extra_args": mev_flood_extra_args,
         "mev_flood_seconds_per_bundle": mev_flood_seconds_per_bundle,
@@ -1218,6 +1330,10 @@ def get_default_xatu_sentry_params():
 def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 20,
+        "max_mem": 300,
         "extra_args": [],
         "spammers": [
             # default spammers
@@ -1262,6 +1378,8 @@ def get_port_publisher_params(parameter_type, input_args=None):
         "vc": {"enabled": False, "public_port_start": 34000},
         "remote_signer": {"enabled": False, "public_port_start": 35000},
         "additional_services": {"enabled": False, "public_port_start": 36000},
+        "mev": {"enabled": False, "public_port_start": 37000},
+        "other": {"enabled": False, "public_port_start": 38000},
     }
     if parameter_type == "default":
         return port_publisher_parameters
@@ -1301,7 +1419,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             index + 1, len(str(len(parsed_arguments_dict["participants"])))
         )
         mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
-            MEV_BOOST_SERVICE_NAME_PREFIX,
+            constants.MEV_BOOST_SERVICE_NAME_PREFIX,
             index_str,
             participant["cl_type"],
             participant["el_type"],

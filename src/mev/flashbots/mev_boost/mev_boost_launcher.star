@@ -6,8 +6,8 @@ constants = import_module("../../../package_io/constants.star")
 FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
 USED_PORTS = {
-    "api": shared_utils.new_port_spec(
-        input_parser.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL, wait="5s"
+    "http": shared_utils.new_port_spec(
+        constants.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL, wait="5s"
     )
 }
 
@@ -32,20 +32,36 @@ def launch(
     genesis_timestamp,
     mev_boost_image,
     mev_boost_args,
+    participant,
+    seconds_per_slot,
+    port_publisher,
+    index,
     global_node_selectors,
 ):
+    public_ports = shared_utils.get_mev_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
+
     config = get_config(
         mev_boost_launcher,
         genesis_timestamp,
         mev_boost_image,
         mev_boost_args,
         global_node_selectors,
+        participant,
+        seconds_per_slot,
+        public_ports,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
 
-    return mev_boost_context_module.new_mev_boost_context(
-        mev_boost_service.ip_address, input_parser.MEV_BOOST_PORT
+    return (
+        mev_boost_context_module.new_mev_boost_context(
+            mev_boost_service.ip_address, constants.MEV_BOOST_PORT
+        ),
     )
 
 
@@ -55,19 +71,28 @@ def get_config(
     mev_boost_image,
     mev_boost_args,
     node_selectors,
+    participant,
+    seconds_per_slot,
+    public_ports,
 ):
     command = mev_boost_args
 
     return ServiceConfig(
         image=mev_boost_image,
         ports=USED_PORTS,
+        public_ports=public_ports,
         cmd=command,
         env_vars={
             "GENESIS_FORK_VERSION": constants.GENESIS_FORK_VERSION,
             "GENESIS_TIMESTAMP": "{0}".format(genesis_timestamp),
-            "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(input_parser.MEV_BOOST_PORT),
+            "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(constants.MEV_BOOST_PORT),
             "SKIP_RELAY_SIGNATURE_CHECK": "1",
-            "RELAYS": mev_boost_launcher.relay_end_points[0],
+            "SLOT_SEC": str(seconds_per_slot),
+            "RELAYS": "{0}?id={1}-{2}".format(
+                mev_boost_launcher.relay_end_points[0],
+                participant.cl_type,
+                participant.el_type,
+            ),
         },
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,

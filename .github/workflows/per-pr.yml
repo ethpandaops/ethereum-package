@@ -21,7 +21,7 @@ jobs:
         uses: ./.github/actions/kurtosis-install
       - name: Run Starlark
         run: |
-          kurtosis run ${{ github.workspace }} --args-file network_params.yaml
+          kurtosis run ${{ github.workspace }} --args-file network_params.yaml --verbosity detailed --image-download always
 
   run_with_args:
     strategy:
@@ -48,7 +48,7 @@ jobs:
         uses: ./.github/actions/kurtosis-install
       - name: Run Starlark
         run: |
-          kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }}
+          kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
 
   lint:
     runs-on: self-hosted-ghr-size-s-x64
