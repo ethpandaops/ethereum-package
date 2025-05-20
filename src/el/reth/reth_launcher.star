@@ -17,6 +17,8 @@ DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 RBUILDER_PORT_NUM = 8645
+RBUILDER_METRICS_PORT_NUM = 6060
+
 # Paths
 METRICS_PATH = "/metrics"
 
@@ -45,6 +47,7 @@ def launch(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -65,6 +68,7 @@ def launch(
         node_selectors,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     service = plan.add_service(service_name, config)
@@ -82,7 +86,7 @@ def launch(
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        client_name="reth",
+        client_name="reth-builder" if launcher.builder_type else "reth",
         enode=enode,
         ip_addr=service.ip_address,
         rpc_port_num=RPC_PORT_NUM,
@@ -108,28 +112,49 @@ def get_config(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     public_ports = {}
-    discovery_port = DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "el", port_publisher, participant_index
         )
-        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+        public_ports = el_shared.get_general_el_public_port_specs(
             public_ports_for_component
         )
         additional_public_port_assignments = {
-            constants.RPC_PORT_ID: public_ports_for_component[2],
-            constants.WS_PORT_ID: public_ports_for_component[3],
-            constants.METRICS_PORT_ID: public_ports_for_component[4],
+            constants.RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[4],
         }
+        if (
+            launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
+            or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
+        ):
+            additional_public_port_assignments[
+                constants.RBUILDER_PORT_ID
+            ] = public_ports_for_component[5]
+            additional_public_port_assignments[
+                constants.RBUILDER_METRICS_PORT_ID
+            ] = public_ports_for_component[6]
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.WS_PORT_ID: WS_PORT_NUM,
@@ -141,6 +166,9 @@ def get_config(
         or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
         used_port_assignments[constants.RBUILDER_PORT_ID] = RBUILDER_PORT_NUM
+        used_port_assignments[
+            constants.RBUILDER_METRICS_PORT_ID
+        ] = RBUILDER_METRICS_PORT_NUM
 
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -155,8 +183,8 @@ def get_config(
             "-{0}".format(log_level),
             "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             "--chain={0}".format(
-                launcher.network
-                if launcher.network in constants.PUBLIC_NETWORKS
+                network_params.network
+                if network_params.network in constants.PUBLIC_NETWORKS
                 else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
             ),
             "--http",
@@ -179,12 +207,18 @@ def get_config(
             "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "--authrpc.addr=0.0.0.0",
             "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
-            "--discovery.port={0}".format(discovery_port),
-            "--port={0}".format(discovery_port),
+            "--discovery.port={0}".format(discovery_port_udp),
+            "--port={0}".format(discovery_port_tcp),
         ]
     )
 
-    if launcher.network == constants.NETWORK_NAME.kurtosis:
+    if network_params.gas_limit > 0:
+        cmd.append("--builder.gaslimit={0}".format(network_params.gas_limit))
+
+    if (
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -196,8 +230,8 @@ def get_config(
                 )
             )
     elif (
-        launcher.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in launcher.network
+        network_params.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
@@ -220,7 +254,7 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.EL_TYPE.reth + "_volume_size"
             ],
         )
@@ -237,6 +271,11 @@ def get_config(
         image = launcher.mev_params.mev_builder_image
         cl_client_name = service_name.split("-")[4]
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)
+        cmd.append("--engine.persistence-threshold=0")
+        cmd.append("--engine.memory-block-buffer-target=0")
+        cmd.append(
+            "--txpool.no-local-transactions-propagation"
+        )  # disable tx propagation so that builder will have juicy blocks
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME
@@ -283,12 +322,11 @@ def get_config(
 
 
 def new_reth_launcher(
-    el_cl_genesis_data, jwt_file, network, builder_type=False, mev_params=None
+    el_cl_genesis_data, jwt_file, builder_type=False, mev_params=None
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
         builder_type=builder_type,
         mev_params=mev_params,
     )

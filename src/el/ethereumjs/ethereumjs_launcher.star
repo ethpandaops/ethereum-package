@@ -41,6 +41,7 @@ def launch(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -61,6 +62,7 @@ def launch(
         node_selectors,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     service = plan.add_service(service_name, config)
@@ -103,29 +105,42 @@ def get_config(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
 ):
     public_ports = {}
-    discovery_port = DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "el", port_publisher, participant_index
         )
-        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+        public_ports = el_shared.get_general_el_public_port_specs(
             public_ports_for_component
         )
         additional_public_port_assignments = {
-            constants.RPC_PORT_ID: public_ports_for_component[2],
-            constants.WS_PORT_ID: public_ports_for_component[3],
-            constants.ENGINE_WS_PORT_ID: public_ports_for_component[4],
+            constants.RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[4],
+            constants.ENGINE_WS_PORT_ID: public_ports_for_component[5],
         }
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.WS_PORT_ID: WS_PORT_NUM,
         constants.ENGINE_WS_PORT_ID: WS_PORT_ENGINE_NUM,
@@ -134,7 +149,7 @@ def get_config(
 
     cmd = [
         "--dataDir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--port={0}".format(discovery_port),
+        "--port={0}".format(discovery_port_tcp),
         "--rpc",
         "--rpcAddr=0.0.0.0",
         "--rpcPort={0}".format(RPC_PORT_NUM),
@@ -152,18 +167,23 @@ def get_config(
         "--sync=full",
         "--isSingleNode=true",
         "--logLevel={0}".format(log_level),
+        "--prometheus",
+        "--prometheusPort={0}".format(METRICS_PORT_NUM),
     ]
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--gethGenesis="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.json",
         )
     else:
-        cmd.append("--network=" + launcher.network)
+        cmd.append("--network=" + network_params.network)
 
-    if launcher.network == constants.NETWORK_NAME.kurtosis:
+    if (
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -175,8 +195,8 @@ def get_config(
                 )
             )
     elif (
-        launcher.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in launcher.network
+        network_params.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
@@ -199,7 +219,7 @@ def get_config(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.EL_TYPE.ethereumjs + "_volume_size"
             ],
         )
@@ -236,9 +256,8 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_ethereumjs_launcher(el_cl_genesis_data, jwt_file, network):
+def new_ethereumjs_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
     )

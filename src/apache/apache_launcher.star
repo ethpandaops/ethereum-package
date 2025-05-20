@@ -33,11 +33,20 @@ def launch_apache(
     apache_port,
     participant_contexts,
     participant_configs,
+    port_publisher,
+    index,
     global_node_selectors,
     docker_cache_params,
 ):
     config_files_artifact_name = plan.upload_files(
         src=static_files.APACHE_CONFIG_FILEPATH, name="apache-config"
+    )
+
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
     )
 
     all_cl_client_info = []
@@ -81,7 +90,7 @@ def launch_apache(
     bootstrap_info_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "bootstrap-info"
     )
-    public_ports = {}
+
     if apache_port != None:
         public_ports = {
             HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -154,8 +163,8 @@ def get_config(
             IMAGE_NAME,
         ),
         ports=USED_PORTS,
-        cmd=[cmd_str],
         public_ports=public_ports,
+        cmd=[cmd_str],
         entrypoint=["sh", "-c"],
         files=files,
         min_cpu=MIN_CPU,

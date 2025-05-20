@@ -15,13 +15,12 @@ participants:
 global_log_level: info
 
 network_params:
-  electra_fork_epoch: 1
-  fulu_fork_epoch: 2
+  fulu_fork_epoch: 1
   seconds_per_slot: 4
 
 additional_services:
   - dora
-  - tx_spammer
-  - spamoor_blob
+  - tx_fuzz
+  - spamoor
 
 snooper_enabled: true

@@ -2,21 +2,22 @@ participants:
   - el_type: geth
     el_extra_params: ["--miner.extradata=localGeth"]
     cl_type: lighthouse
-    
+
 mev_type: flashbots
-mev_params: 
-  mev_builder_extra_args: ["--engine.persistence-threshold=0", "--engine.memory-block-buffer-target=0"]
-  mev_builder_image: ethpandaops/reth-rbuilder:devnet6-fdeb4d6
-  mev_relay_image: ethpandaops/mev-boost-relay:electra
-  mev_boost_image: ethpandaops/mev-boost:electra
-  
+mev_params:
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
+  mev_relay_image: ethpandaops/mev-boost-relay:main
+  mev_boost_image: ethpandaops/mev-boost:develop
+
 additional_services:
-  - tx_spammer
-  - blob_spammer
+  - tx_fuzz
   - custom_flood
-  - spamoor_blob
-  - beacon_metrics_gazer
+  - spamoor
   - dora
-  - prometheus_grafana
+  - prometheus
+  - grafana
 network_params:
   seconds_per_slot: 6
+docker_cache_params:
+  enabled: true
+  url: "docker.ethquokkaops.io"

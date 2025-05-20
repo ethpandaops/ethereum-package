@@ -3,11 +3,15 @@ static_files = import_module("../static_files/static_files.star")
 ethereum_metrics_exporter_context = import_module(
     "../ethereum_metrics_exporter/ethereum_metrics_exporter_context.star"
 )
-
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
 
-DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE = "ethpandaops/ethereum-metrics-exporter:0.22.0"
+path_to_el_db = "/data/execution-db"
+path_to_cl_db = "/data/consensus-db"
+
+DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE = (
+    "ethpandaops/ethereum-metrics-exporter:debian-latest"
+)
 
 # The min/max CPU/memory that ethereum-metrics-exporter can use
 MIN_CPU = 10
@@ -23,8 +27,46 @@ def launch(
     el_context,
     cl_context,
     node_selectors,
+    port_publisher,
+    global_other_index,
     docker_cache_params,
+    persistent,
 ):
+    public_ports = shared_utils.get_other_public_port(
+        port_publisher,
+        HTTP_PORT_ID,
+        global_other_index,
+        0,
+    )
+    files = {}
+    cmd = [
+        "--metrics-port",
+        str(METRICS_PORT_NUMBER),
+        "--consensus-url",
+        "{0}".format(
+            cl_context.beacon_http_url,
+        ),
+        "--execution-url",
+        "http://{}:{}".format(
+            el_context.ip_addr,
+            el_context.rpc_port_num,
+        ),
+    ]
+
+    if persistent:
+        cmd.append("--monitored-directories")
+        cmd.append(path_to_cl_db)
+        cmd.append("--monitored-directories")
+        cmd.append(path_to_el_db)
+        cmd.append("--disk-usage-interval")
+        cmd.append("1m")
+
+        files[path_to_el_db] = Directory(
+            persistent_key="data-{0}".format(el_context.service_name),
+        )
+        files[path_to_cl_db] = Directory(
+            persistent_key="data-{0}".format(cl_context.beacon_service_name),
+        )
     exporter_service = plan.add_service(
         ethereum_metrics_exporter_service_name,
         ServiceConfig(
@@ -39,19 +81,9 @@ def launch(
                     shared_utils.HTTP_APPLICATION_PROTOCOL,
                 )
             },
-            cmd=[
-                "--metrics-port",
-                str(METRICS_PORT_NUMBER),
-                "--consensus-url",
-                "{0}".format(
-                    cl_context.beacon_http_url,
-                ),
-                "--execution-url",
-                "http://{}:{}".format(
-                    el_context.ip_addr,
-                    el_context.rpc_port_num,
-                ),
-            ],
+            public_ports=public_ports,
+            cmd=cmd,
+            files=files,
             min_cpu=MIN_CPU,
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
