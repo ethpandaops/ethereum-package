@@ -20,6 +20,7 @@ def launch_prometheus(
     el_contexts,
     cl_contexts,
     vc_contexts,
+    network_params,
     remote_signer_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
@@ -33,6 +34,7 @@ def launch_prometheus(
         el_contexts,
         cl_contexts,
         vc_contexts,
+        network_params,
         remote_signer_contexts,
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
@@ -68,6 +70,7 @@ def get_metrics_jobs(
     el_contexts,
     cl_contexts,
     vc_contexts,
+    network_params,
     remote_signer_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
@@ -199,6 +202,13 @@ def get_metrics_jobs(
                         "instance": context.pair_name,
                         "consensus_client": context.cl_name,
                         "execution_client": context.el_name,
+                        "network": network_params.network,
+                        "testnet": network_params.network,
+                        "chain_id": "{0}".format(
+                            network_params.network_id
+                            if network_params.network == constants.NETWORK_NAME.kurtosis
+                            else constants.NETWORK_ID[network_params.network]
+                        ),
                     },
                 )
             )
