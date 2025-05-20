@@ -9,7 +9,7 @@ METRICS_PORT_NUMBER = 9090
 path_to_el_db = "/data/execution-db"
 path_to_cl_db = "/data/consensus-db"
 
-DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE = "ethpandaops/ethereum-metrics-exporter:latest"
+DEFAULT_ETHEREUM_METRICS_EXPORTER_IMAGE = "ethpandaops/ethereum-metrics-exporter:debian-latest"
 
 # The min/max CPU/memory that ethereum-metrics-exporter can use
 MIN_CPU = 10
