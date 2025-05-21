@@ -743,7 +743,7 @@ additional_services:
 blockscout_params:
   # blockscout docker image to use
   # Defaults to blockscout/blockscout:latest
-  image: "blockscout/blockscout:latest"
+  image: "ghcr.io/blockscout/blockscout:latest"
   # blockscout smart contract verifier image to use
   # Defaults to ghcr.io/blockscout/smart-contract-verifier:latest
   verif_image: "ghcr.io/blockscout/smart-contract-verifier:latest"
