@@ -125,11 +125,8 @@ def get_config(
     if dora_params.image == constants.DEFAULT_DORA_IMAGE:
         if network_params.fulu_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = "ethpandaops/dora:fulu-support"
-            env_vars["FRONTEND_PPROF"] = "true"
             env_vars["FRONTEND_SHOW_SENSITIVE_PEER_INFOS"] = "true"
             env_vars["FRONTEND_SHOW_PEER_DAS_INFOS"] = "true"
-            env_vars["FRONTEND_SHOW_SUBMIT_DEPOSIT"] = "true"
-            env_vars["FRONTEND_SHOW_SUBMIT_EL_REQUESTS"] = "true"
         if network_params.eip7732_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = "ethpandaops/dora:eip7732-support"
         if network_params.eip7805_fork_epoch < constants.FAR_FUTURE_EPOCH:
@@ -158,6 +155,7 @@ def new_config_template_data(
 ):
     return {
         "Network": network,
+        "PublicRPC": el_client_info[0]["Execution_HTTP_URL"],
         "ListenPortNum": listen_port_num,
         "CLClientInfo": cl_client_info,
         "ELClientInfo": el_client_info,
