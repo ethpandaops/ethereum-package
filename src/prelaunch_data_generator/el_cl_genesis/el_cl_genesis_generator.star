@@ -184,7 +184,7 @@ def new_env_file_for_el_cl_genesis_data(
         "Bpo5BaseFeeUpdateFraction": network_params.bpo_5_base_fee_update_fraction,
         "WithdrawalType": network_params.withdrawal_type,
         "WithdrawalAddress": network_params.withdrawal_address,
-        "ValidatorBalance": network_params.validator_balance,
+        "ValidatorBalance": network_params.validator_balance * 10**9,
     }
 
 
