@@ -710,6 +710,18 @@ network_params:
   # Base fee update fraction for BPO5 (default 5007716)
   bpo_5_base_fee_update_fraction: 5007716
 
+  # Withdrawal type
+  # Default to 0x00
+  withdrawal_type: 0x00
+
+  # Withdrawal address
+  # Default to 0x8943545177806ED17B9F23F0a21ee5948eCaa776 - 0 address of mnemonic
+  withdrawal_address: 0x8943545177806ED17B9F23F0a21ee5948eCaa776
+
+  # Validator balance
+  # Default to 32 ETH
+  validator_balance: 32
+
 
 # Global parameters for the network
 
@@ -1049,7 +1061,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.1.5
+  image: ethpandaops/ethereum-genesis-generator:4.1.6
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:

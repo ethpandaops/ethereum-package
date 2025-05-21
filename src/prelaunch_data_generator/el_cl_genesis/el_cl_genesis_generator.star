@@ -182,6 +182,9 @@ def new_env_file_for_el_cl_genesis_data(
         "Bpo5MaxBlobs": network_params.bpo_5_max_blobs,
         "Bpo5TargetBlobs": network_params.bpo_5_target_blobs,
         "Bpo5BaseFeeUpdateFraction": network_params.bpo_5_base_fee_update_fraction,
+        "WithdrawalType": network_params.withdrawal_type,
+        "WithdrawalAddress": network_params.withdrawal_address,
+        "ValidatorBalance": network_params.validator_balance,
     }
 
 

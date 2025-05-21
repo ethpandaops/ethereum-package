@@ -198,6 +198,9 @@ SUBCATEGORY_PARAMS = {
         "bpo_5_max_blobs",
         "bpo_5_target_blobs",
         "bpo_5_base_fee_update_fraction",
+        "withdrawal_type",
+        "withdrawal_address",
+        "validator_balance",
     ],
     "blockscout_params": [
         "image",
