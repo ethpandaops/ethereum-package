@@ -409,6 +409,9 @@ def input_parser(plan, input_args):
             max_payload_size=result["network_params"]["max_payload_size"],
             perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
             gas_limit=result["network_params"]["gas_limit"],
+            withdrawal_type=result["network_params"]["withdrawal_type"],
+            withdrawal_address=result["network_params"]["withdrawal_address"],
+            validator_balance=result["network_params"]["validator_balance"],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -992,6 +995,13 @@ def default_network_params():
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "base_fee_update_fraction_electra": 5007716,
+        "preset": "mainnet",
+        "additional_preloaded_contracts": {},
+        "devnet_repo": "ethpandaops",
+        "prefunded_accounts": {},
+        "max_payload_size": 10485760,
+        "perfect_peerdas_enabled": False,
+        "gas_limit": 0,
         "bpo_1_epoch": 18446744073709551615,
         "bpo_1_max_blobs": 12,
         "bpo_1_target_blobs": 9,
@@ -1012,13 +1022,9 @@ def default_network_params():
         "bpo_5_max_blobs": 12,
         "bpo_5_target_blobs": 9,
         "bpo_5_base_fee_update_fraction": 5007716,
-        "preset": "mainnet",
-        "additional_preloaded_contracts": {},
-        "devnet_repo": "ethpandaops",
-        "prefunded_accounts": {},
-        "max_payload_size": 10485760,
-        "perfect_peerdas_enabled": False,
-        "gas_limit": 0,
+        "withdrawal_type": "0x00",
+        "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
+        "validator_balance": 32,
     }
 
 
@@ -1083,6 +1089,9 @@ def default_minimal_network_params():
         "bpo_5_max_blobs": 12,
         "bpo_5_target_blobs": 9,
         "bpo_5_base_fee_update_fraction": 5007716,
+        "withdrawal_type": "0x00",
+        "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
+        "validator_balance": 32,
     }
 
 
