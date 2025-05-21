@@ -1024,7 +1024,7 @@ def default_network_params():
         "bpo_5_base_fee_update_fraction": 5007716,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
-        "validator_balance": 32000000000,
+        "validator_balance": 32,
     }
 
 
@@ -1091,7 +1091,7 @@ def default_minimal_network_params():
         "bpo_5_base_fee_update_fraction": 5007716,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
-        "validator_balance": 32000000000,
+        "validator_balance": 32,
     }
 
 
