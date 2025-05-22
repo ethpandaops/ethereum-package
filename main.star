@@ -89,6 +89,7 @@ def run(plan, args={}):
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
     apache_port = args_with_right_defaults.apache_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
+    txpool_viz_params = args_with_right_defaults.txpool_viz_params
 
     prefunded_accounts = genesis_constants.PRE_FUNDED_ACCOUNTS
     if (
@@ -478,7 +479,7 @@ def run(plan, args={}):
             plan.print("Successfully launched tx-fuzz")
         elif additional_service == "txpool_viz":
             plan.print("Launching txpool-viz")
-            txpool_viz.launch_txpoolviz(plan, all_participants)
+            txpool_viz.launch_txpool_viz(plan, all_participants, txpool_viz_params)
         elif additional_service == "forkmon":
             plan.print("Launching el forkmon")
             forkmon_config_template = read_file(
