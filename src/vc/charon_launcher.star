@@ -13,7 +13,7 @@ CHARON_MONITORING_PORT = 3620
 CHARON_METRICS_PORT = 8080
 
 # Default Charon image
-DEFAULT_CHARON_IMAGE = "obolnetwork/charon:latest"
+DEFAULT_CHARON_IMAGE = "obolnetwork/charon:local"
 
 # Verbosity levels mapping
 VERBOSITY_LEVELS = {
@@ -183,7 +183,7 @@ done
     # charon_keys_dir = "/opt/charon/charon-keys"
 
     charon_service_name = service_name + "-charon-split-keys-" + str(vc_index)
-    CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/charon/"
+    CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/charon/.charon/cluster"
     persistent_key = "data-{0}".format(charon_service_name)
 
     files = {}
@@ -197,7 +197,8 @@ done
     temp_service = plan.add_service(
         name=charon_service_name,
         config=ServiceConfig(
-            image=image,
+            # image=image,
+            image="obolnetwork/charon:latest",
             cmd=[
                 "create", "cluster",
                 "--name=test",
@@ -213,6 +214,7 @@ done
                 "--cluster-dir=" + CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             ],
             files=files,
+            user = User(uid=0, gid=0),
         ),
     )
 
@@ -227,25 +229,43 @@ done
     )
 
     # Store the Charon cluster files
+    # First store the entire cluster directory to get all shared files
+    # For e
     charon_cluster_files = plan.store_service_files(
         service_name=temp_service.name,
         src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        name="charon-cluster-files-" + str(vc_index),
+        name="charon-cluster-files-" + str(vc_index)
     )
+
+    # Then store each node's files separately for individual access
+    charon_node_files = []
+    charon_lock = []
+    for i in range(charon_node_count):
+        charon_node_files.append(plan.store_service_files(
+            service_name=temp_service.name,
+            src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER + "/node" + str(i),
+            name="charon-node-files-" + str(i) + "-" + str(vc_index)
+        ))
+        # charon_lock.append(plan.store_service_files(
+        #     service_name=temp_service.name,
+        #     src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER + "node" + str(i) + "/cluster-lock.json",
+        #     name="charon-lock-" + str(i) + "-" + str(vc_index)
+        # ))
 
     # Launch Charon nodes
     charon_services = []
     for i in range(charon_node_count):
         node_name = service_name + "-charon-" + str(i)
 
-        cmd = [
-            "run",
-            "--testnet-chain-id=3151908",
-            "--testnet-fork-version=0x10000038",
-            "--testnet-genesis-timestamp=" + str(genesis_time),
-            "--testnet-name=testnet",
-            "--testnet-capella-hard-fork=0x40000038",
-        ]
+        cmd=["tail", "-f", "/dev/null"]
+
+        # cmd = [
+        #     "run",
+        #     "--testnet-chain-id=3151908",
+        #     "--testnet-fork-version=0x10000038",
+        #     "--testnet-genesis-timestamp=" + str(genesis_time),
+        #     "--testnet-name=testnet",
+        # ]
 
         if len(participant.vc_extra_params) > 0:
             cmd.extend([param for param in participant.vc_extra_params])
@@ -258,11 +278,15 @@ done
             "CHARON_VALIDATOR_API_ADDRESS": "0.0.0.0:" + str(CHARON_VALIDATOR_API_PORT),
             "CHARON_P2P_TCP_ADDRESS": "0.0.0.0:" + str(CHARON_P2P_TCP_PORT),
             "CHARON_MONITORING_ADDRESS": "0.0.0.0:" + str(CHARON_MONITORING_PORT),
-            "CHARON_PRIVATE_KEY_FILE": "/opt/charon/.charon/cluster/node" + str(i) + "/charon-enr-private-key",
-            "CHARON_LOCK_FILE": "/opt/charon/.charon/cluster/node" + str(i) + "/cluster-lock.json",
+            "CHARON_PRIVATE_KEY_FILE": "/opt/charon/.charon/node" + str(i) + "/charon-enr-private-key",
+            "CHARON_LOCK_FILE": "/opt/charon/.charon/node" + str(i) + "/cluster-lock.json",
             "CHARON_JAEGER_SERVICE": "node" + str(i),
             "CHARON_P2P_EXTERNAL_HOSTNAME": "node" + str(i),
             "CHARON_BEACON_NODE_ENDPOINTS": beacon_endpoints[i],
+            "CHARON_TESTNET_CHAIN_ID": "3151908",
+            "CHARON_TESTNET_FORK_VERSION": "0x10000038",
+            "CHARON_TESTNET_GENESIS_TIMESTAMP": str(genesis_time),
+            "CHARON_TESTNET_NAME": "kurtosis-testnet",
         }
 
         # Add any extra environment variables
@@ -270,10 +294,10 @@ done
             env_vars.update(participant.vc_extra_env_vars)
 
         # Files to mount
-        files = {
-            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-            "/opt/charon/.charon": charon_cluster_files,
-        }
+        # files = {
+        #     "/opt/charon/.charon/cluster": charon_node_files[i],
+        #     # "/opt/charon/.charon/cluster/cluster-lock.json": charon_lock[i],
+        # }
 
         # Ports configuration
         ports = {
@@ -291,18 +315,19 @@ done
                 transport_protocol="TCP",
                 application_protocol="http",
             ),
-            constants.METRICS_PORT_ID: PortSpec(
-                number=CHARON_METRICS_PORT,
-                transport_protocol="TCP",
-                application_protocol="http",
-            ),
+            # constants.METRICS_PORT_ID: PortSpec(
+            #     number=CHARON_METRICS_PORT,
+            #     transport_protocol="TCP",
+            #     application_protocol="http",
+            # ),
         }
 
         # Add the service
         charon_service = plan.add_service(
             name=node_name,
             config=ServiceConfig(
-                image=image,
+                # image=image,
+                image="obolnetwork/charon:local",
                 ports=ports,
                 cmd=cmd,
                 env_vars=env_vars,
@@ -316,30 +341,36 @@ done
                 ),
                 tolerations=tolerations,
                 node_selectors=node_selectors,
+                files={
+                    "/opt/charon/.charon/": Directory(
+                        persistent_key=persistent_key
+                    ),
+                },
+                user = User(uid=0, gid=0),
             ),
         )
         charon_services.append(charon_service)
 
     # Now launch the validator clients that will connect to Charon nodes
-    vc_services = []
-    for i in range(charon_node_count):
-        # Determine which validator client to use with Charon
-        vc_type = "lighthouse"  # Default
-        if hasattr(participant, "charon_validator_client"):
-            vc_type = participant.charon_validator_client
+    # vc_services = []
+    # for i in range(charon_node_count):
+    #     # Determine which validator client to use with Charon
+    #     vc_type = "lighthouse"  # Default
+    #     if hasattr(participant, "charon_validator_client"):
+    #         vc_type = participant.charon_validator_client
 
-        # For now, we'll skip launching the validator clients
-        # In a real implementation, we would need to launch validator clients that connect to the Charon nodes
+    #     # For now, we'll skip launching the validator clients
+    #     # In a real implementation, we would need to launch validator clients that connect to the Charon nodes
 
     # Return the first Charon service as the main service
-    validator_metrics_port = charon_services[0].ports[constants.METRICS_PORT_ID]
+    validator_metrics_port = charon_services[0].ports["monitoring"]
     validator_metrics_url = "{0}:{1}".format(
         charon_services[0].ip_address, validator_metrics_port.number
     )
     validator_node_metrics_info = node_metrics.new_node_metrics_info(
         charon_services[0].name, vc_shared.METRICS_PATH, validator_metrics_url
     )
-
+    
     return vc_context.new_vc_context(
         client_name=constants.VC_TYPE.charon,
         service_name=charon_services[0].name,
