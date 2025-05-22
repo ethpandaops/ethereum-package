@@ -257,9 +257,6 @@ def run(plan, args={}):
             broadcaster.PORT,
         )
 
-    if "txpool_viz" in args_with_right_defaults.additional_services:
-        txpool_viz.launch_txpoolviz(plan, args_with_right_defaults.participants)
-
     mev_endpoints = []
     mev_endpoint_names = []
     # passed external relays get priority
@@ -479,6 +476,9 @@ def run(plan, args={}):
                 global_node_selectors,
             )
             plan.print("Successfully launched tx-fuzz")
+        elif additional_service == "txpool_viz":
+            plan.print("Launching txpool-viz")
+            txpool_viz.launch_txpoolviz(plan, all_participants)
         elif additional_service == "forkmon":
             plan.print("Launching el forkmon")
             forkmon_config_template = read_file(
