@@ -1,0 +1,38 @@
+participants:
+  - el_type: geth
+    el_image: jihoonsg/geth-focil:6d6c343
+    cl_type: prysm
+    cl_image: jihoonsg/prysm-beacon-chain-focil:5f778b9
+    vc_type: prysm
+    vc_image: jihoonsg/prysm-validator-focil:5f778b9
+  - el_type: geth
+    el_image: jihoonsg/geth-focil:6d6c343
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:focil
+  - el_type: geth
+    el_image: jihoonsg/geth-focil:6d6c343
+    cl_type: teku
+    cl_image: ethpandaops/teku:focil
+network_params:
+  genesis_delay: 20
+  electra_fork_epoch: 0
+  eip7805_fork_epoch: 1
+  seconds_per_slot: 6
+  num_validator_keys_per_node: 256
+additional_services:
+  - txpool_viz
+port_publisher:
+  additional_services:
+    enabled: true
+    public_port_start: 65500
+spamoor_params:
+  spammers:
+    - scenario: eoatx
+      config:
+        throughput: 10
+    - scenario: uniswap-swaps
+      config:
+        throughput: 10
+    - scenario: blob-combined
+      config:
+        throughput: 5
