@@ -56,6 +56,7 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
+txpool_viz = import_module("./src/txpool_viz/txpool_viz.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -255,6 +256,9 @@ def run(plan, args={}):
             broadcaster_service.ip_address,
             broadcaster.PORT,
         )
+
+    if "txpool_viz" in args_with_right_defaults.additional_services:
+        txpool_viz.launch_txpoolviz(plan, args_with_right_defaults.participants)
 
     mev_endpoints = []
     mev_endpoint_names = []
