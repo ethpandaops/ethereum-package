@@ -758,6 +758,7 @@ additional_services:
   - forky
   - apache
   - tracoor
+  - txpool_viz
 
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
 blockscout_params:
@@ -1058,6 +1059,20 @@ spamoor_params:
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
   extra_args: []
 
+# Configuration for txpool_viz. A mempool visualizer.
+txpool_viz_params:
+  # The image to use for txpool_viz
+  image: punkhazardlabs/txpool-viz:latest
+  # Polling configuration for txpool_viz
+  polling:
+    interval: 0.1s # How often to poll for new mempool data (in seconds)
+    timeout: 5s # Timeout for polling requests (in seconds)
+  # Filters to apply to the mempool data
+  filters:
+    min_gas_price: 1gwei # Minimum gas price filter for transactions
+  focil_enabled: "true" # Enable or disable FOCIL (set to "true" to enable)
+  log_level: "info" # Logging level for txpool_viz (e.g., "info", "debug", "warn", "error")
+
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
@@ -1070,7 +1085,7 @@ port_publisher:
   # Set to "auto" to automatically detect public IP from ident.me
   # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (uses per-service settings)
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # Execution Layer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 32000
@@ -1083,7 +1098,7 @@ port_publisher:
     # Set to "auto" to automatically detect public IP from ident.me
     # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # Consensus Layer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 33000
@@ -1096,7 +1111,7 @@ port_publisher:
     # Set to "auto" to automatically detect public IP from ident.me
     # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # Validator client public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 34000
@@ -1109,7 +1124,7 @@ port_publisher:
     # Set to "auto" to automatically detect public IP from ident.me
     # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # remote signer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 35000
@@ -1122,7 +1137,7 @@ port_publisher:
     # Set to "auto" to automatically detect public IP from ident.me
     # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # Additional services public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 36000
