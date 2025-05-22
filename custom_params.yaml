@@ -21,6 +21,7 @@ network_params:
   num_validator_keys_per_node: 256
 additional_services:
   - txpool_viz
+  - spamoor
 port_publisher:
   additional_services:
     enabled: true
