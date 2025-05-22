@@ -306,6 +306,19 @@ SUBCATEGORY_PARAMS = {
         "mev",
         "other",
     ],
+    "txpool_viz_params": [
+        "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "extra_args",
+        "polling",
+        "filters",
+        "focil_enabled",
+        "log_level",
+        "env"
+    ]
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -327,6 +340,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "apache",
     "tracoor",
     "spamoor",
+    "txpool_viz"
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
