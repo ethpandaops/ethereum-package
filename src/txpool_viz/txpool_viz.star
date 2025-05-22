@@ -2,12 +2,8 @@ redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
 
-
-POSTGRES_PORT="postgres"
-REDIS_PORT="redis"
-TXPOOLVIZ_PORT_ID="http"
 HTTP_PORT_NUMBER= 8080
-
+TXPOOL_VIZ_SERVICE_NAME="txpool-viz"
 
 def launch_txpool_viz(
     plan,
@@ -16,7 +12,6 @@ def launch_txpool_viz(
 ):
     endpoint_list = []
     for index, participant in enumerate(network_participants):
-        plan.print(participant)
         # Extract the rpc and wss urls
         endpoint_list.append({
             "name": participant.el_context.el_metrics_info[0]["name"],
@@ -47,20 +42,21 @@ def launch_txpool_viz(
     config_json = json.encode(config)
 
     txpoolviz = plan.add_service(
-      name="txpool-viz",
+      name=TXPOOL_VIZ_SERVICE_NAME,
       config=ServiceConfig(
-        image="punkhazardlabs/txpool-viz:dev",
+        image="punkhazardlabs/txpool-viz:latest",
         ports= {
-          TXPOOLVIZ_PORT_ID: PortSpec(
-                HTTP_PORT_NUMBER,
-                shared_utils.TCP_PROTOCOL,
-                shared_utils.HTTP_APPLICATION_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL:  PortSpec(
+                number=HTTP_PORT_NUMBER,
+                application_protocol=shared_utils.HTTP_APPLICATION_PROTOCOL,
+                transport_protocol=shared_utils.TCP_PROTOCOL,
             ),
         },
         env_vars = {
           "POSTGRES_URL": postgres.url,
           "REDIS_URL": redis_url,
-          "CONFIG_JSON": config_json
+          "CONFIG_JSON": config_json,
+          "PORT": str(HTTP_PORT_NUMBER),
         },
       )
     )
