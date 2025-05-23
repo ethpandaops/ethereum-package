@@ -11,3 +11,5 @@ participants:
     cl_type: prysm
   - el_type: ethereumjs
     cl_type: prysm
+  - el_type: nimbus
+    cl_type: prysm
