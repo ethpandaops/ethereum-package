@@ -244,6 +244,22 @@ def input_parser(plan, input_args):
                 "Please do not define 'grafana' or 'prometheus' in the additional_services field when 'prometheus_grafana' is used to launch both"
             )
 
+    if (
+        "mev_type" == constants.MOCK_MEV_TYPE
+        and input_args["participants"][0]["cl_type"] != constants.CL_TYPE.lighthouse
+    ):
+        fail(
+            "Mock mev is only supported if the first participant is lighthouse client, please use a different client or set mev_type to 'flashbots', 'mev-rs' or 'commit-boost' or make the first participant lighthouse"
+        )
+
+    if (
+        result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH
+        and result["network_params"]["bpo_1_epoch"] < result["network_params"]["fulu_fork_epoch"]
+    ):
+        fail(
+            "Fulu fork must happen before BPO 1, please adjust the epochs accordingly."
+        )
+
     return struct(
         participants=[
             struct(
