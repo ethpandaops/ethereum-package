@@ -18,8 +18,6 @@ beacon_clients:
 relays: []
 execution_clients:
   url: {{ .ExecutionUrl }}
-onchain_delegation:
-  delegation_contract_address: {{ .DelegationContractAddress }}
 network_config: !Custom 
     dir_path: {{ .NetworkDirPath }}
     genesis_validator_root: {{ .GenesisValidatorRoot }}

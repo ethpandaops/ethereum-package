@@ -11,10 +11,12 @@ lighthouse = import_module("../../cl/lighthouse/lighthouse_launcher.star")
 
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/reth/execution-data"
 RBUILDER_CONFIG_FILENAME = "rbuilder-config.toml"
+RBUILDER_CONFIG_FILEPATH = "/app/config/"
 RBUILDER_BLOCKLIST_FILENAME = "blocklist.json"
 
 RBUILDER_MIN_MEMORY = 128
 RBUILDER_MAX_MEMORY = 1024
+
 def launch_rbuilder(
     plan,
     rbuilder_params,
@@ -45,13 +47,14 @@ def launch_rbuilder(
         {
         "el_type": "reth", 
         "el_image": rbuilder_params.rbuilder_image,
-        "cl_image": "ethpandaops/lighthouse:stable",
+        "cl_image": "sigp/lighthouse:v7.0.0",
         "use_separate_vc": False,
         "el_extra_params": [
-            "--rbuilder.config=/app/config/rbuilder-config.toml", 
-            "--engine.legacy",
+            "--rbuilder.config=/app/config/rbuilder-config.toml",
+            "--engine.persistence-threshold=0",
+            "--engine.memory-block-buffer-target=0",
         ],
-        "el_extra_env_vars": {"RUST_LOG":"rbuilder=debug,reth=info"},
+        "el_extra_env_vars": {"RUST_LOG":"rbuilder=trace,reth=info"},
         "cl_extra_params": ["--always-prepare-payload", "--prepare-payload-lookahead=8000"]
         })
     participant = participant_struct(particitpant_p)
@@ -63,6 +66,7 @@ def launch_rbuilder(
         "RethDatadir": EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "ClNodes": all_cl_contexts,
         "HelixRelayUrl": helix_relay_url,
+        "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
     }
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
@@ -81,11 +85,9 @@ def launch_rbuilder(
         RBUILDER_BLOCKLIST_FILENAME
     ] =  blocklist_data
 
-
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "rbuilder-config"
     )
-
 
     additional_files = {
         "/app/config/": config_files_artifact_name,
@@ -106,6 +108,7 @@ def launch_rbuilder(
         port_publisher, 
         global_tolerations
     )
+
     cl_context = launch_rbuilder_lighthouse(
         plan, 
         participant, 
@@ -122,6 +125,49 @@ def launch_rbuilder(
     )
 
     return 
+
+def launch_rbuilder_reth(
+    plan,
+    service_name,
+    participant,
+    prague_time,
+    network_params,
+    el_cl_data,
+    jwt_file,
+    additional_files,
+    genesis_validator_root,
+    all_el_contexts,
+    node_selectors,
+    port_publisher,
+    global_tolerations,
+):
+    index = 1
+    el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
+        el_cl_data,
+        genesis_validator_root,
+        prague_time,
+    )
+    launcher = reth.new_reth_launcher(
+        el_cl_data,
+        jwt_file,
+        network_params.network,
+        additional_files,
+    )
+            
+    el_context = reth.launch(
+        plan,
+        launcher,
+        "rbuilder-el-reth-lighthouse",
+        participant,
+        "info",
+        all_el_contexts,
+        False,
+        global_tolerations, #tolerations,
+        node_selectors,
+        port_publisher,
+        index,
+    )
+    return el_context
 
 def launch_rbuilder_lighthouse(
     plan,
@@ -174,48 +220,6 @@ def launch_rbuilder_lighthouse(
         index
     )
     return cl_context
-    
-def launch_rbuilder_reth(
-    plan,
-    service_name,
-    participant,
-    prague_time,
-    network_params,
-    el_cl_data,
-    jwt_file,
-    additional_files,
-    genesis_validator_root,
-    all_el_contexts,
-    node_selectors,
-    port_publisher,
-    global_tolerations,
-):
-    index = 1
-    el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
-        el_cl_data,
-        genesis_validator_root,
-        prague_time,
-    )
-    launcher = reth.new_reth_launcher(
-        el_cl_data,
-        jwt_file,
-        network_params.network,
-    )
-            
-    el_context = reth.launch(
-        plan,
-        launcher,
-        "rbuilder-el-reth-lighthouse",
-        participant,
-        "info",
-        all_el_contexts,
-        False,
-        global_tolerations, #tolerations,
-        node_selectors,
-        port_publisher,
-        index,
-    )
-    return el_context
 
 
 def participant_struct(participant):
@@ -238,7 +242,6 @@ def participant_struct(participant):
         vc_type=participant["vc_type"],
         vc_image=participant["vc_image"],
         vc_log_level=participant["vc_log_level"],
-        vc_count=participant["vc_count"],
         vc_tolerations=participant["vc_tolerations"],
         cl_extra_params=participant["cl_extra_params"],
         cl_extra_labels=participant["cl_extra_labels"],

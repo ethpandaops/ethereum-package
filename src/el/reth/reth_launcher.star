@@ -163,12 +163,7 @@ def get_config(
             "--http.port={0}".format(RPC_PORT_NUM),
             "--http.addr=0.0.0.0",
             "--http.corsdomain=*",
-            "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
-                ",flashbots"
-                if launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
-                or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
-                else ""
-            ),
+            "--http.api=admin,net,eth,web3,debug,txpool,trace,flashbots",
             "--ws",
             "--ws.addr=0.0.0.0",
             "--ws.port={0}".format(WS_PORT_NUM),
@@ -251,6 +246,8 @@ def get_config(
             }
         )
 
+    files.update(launcher.additional_files)
+
     config_args = {
         "image": image,
         "ports": used_ports,
@@ -282,11 +279,12 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_reth_launcher(el_cl_genesis_data, jwt_file, network, builder_type=False, mev_params=None):
+def new_reth_launcher(el_cl_genesis_data, jwt_file, network, additional_files, builder_type=False, mev_params=None):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         network=network,
+        additional_files=additional_files,
         builder_type=builder_type,
         mev_params=mev_params,
     )

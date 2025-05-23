@@ -329,6 +329,11 @@ def run(plan, args={}):
                 static_files.HELIX_CONFIG_TEMPLATE_FILEPATH
             )
             helix_params = args_with_right_defaults.helix_params
+
+            flashbots_enabled_rpc = "http://{0}:{1}".format(
+                all_el_contexts[1].ip_addr, all_el_contexts[1].rpc_port_num
+            )
+
             endpoint = helix_relay.launch_helix(
                 plan,
                 helix_params,
@@ -341,6 +346,7 @@ def run(plan, args={}):
                 el_cl_data_files_artifact_uuid,
                 persistent,
                 global_node_selectors,
+                flashbots_enabled_rpc,
             )
             helix_relay_url = endpoint
         else:
@@ -751,27 +757,27 @@ def run(plan, args={}):
                 args_with_right_defaults.spamoor_blob_params,
                 global_node_selectors,
             )
-        # elif additional_service == "rbuilder":
-        #     plan.print("Launching rbuilder")
-        #     rbuilder_config_template = read_file(
-        #         static_files.RBUILDER_CONFIG_TEMPLATE_FILEPATH
-        #     )
-        #     rbuilder_params = args_with_right_defaults.rbuilder_params
-        #     rbuilder.launch_rbuilder(
-        #         plan, 
-        #         rbuilder_params,
-        #         rbuilder_config_template,
-        #         helix_relay_url,
-        #         network_params, 
-        #         el_cl_data_files_artifact_uuid, 
-        #         genesis_validators_root, 
-        #         jwt_file,
-        #         all_el_contexts, 
-        #         all_cl_contexts, 
-        #         global_node_selectors, 
-        #         args_with_right_defaults.port_publisher, 
-        #         global_tolerations
-        #     )
+        elif additional_service == "rbuilder":
+            plan.print("Launching rbuilder")
+            rbuilder_config_template = read_file(
+                static_files.RBUILDER_CONFIG_TEMPLATE_FILEPATH
+            )
+            rbuilder_params = args_with_right_defaults.rbuilder_params
+            rbuilder.launch_rbuilder(
+                plan, 
+                rbuilder_params,
+                rbuilder_config_template,
+                helix_relay_url,
+                network_params, 
+                el_cl_data_files_artifact_uuid, 
+                genesis_validators_root, 
+                jwt_file,
+                all_el_contexts, 
+                all_cl_contexts, 
+                global_node_selectors, 
+                args_with_right_defaults.port_publisher, 
+                global_tolerations
+            )
         elif additional_service == "taiyi_preconfer":
             plan.print("Launching taiyi preconfer")
             taiyi_preconfer.launch_taiyi_preconfer(
