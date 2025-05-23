@@ -508,9 +508,9 @@ network_params:
   genesis_delay: 20
 
   # The gas limit of the network set at genesis
-  # Defaults to 36000000
+  # Defaults to 60000000
 
-  genesis_gaslimit: 36000000
+  genesis_gaslimit: 60000000
 
   # Max churn rate for the network introduced by
   # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
@@ -659,7 +659,7 @@ network_params:
   # Default to 0
   # If set to 0, the gas limit will be set to the default gas limit for the clients
   # Set this value to gas limit in millionths of a gwei
-  # Example: gas_limit: 36000000
+  # Example: gas_limit: 60000000
   # This will override the gas limit for each EL client
   # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
   gas_limit: 0
@@ -1061,7 +1061,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.1.7
+  image: ethpandaops/ethereum-genesis-generator:4.1.8
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:
