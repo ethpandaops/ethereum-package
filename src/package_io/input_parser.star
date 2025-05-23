@@ -254,7 +254,8 @@ def input_parser(plan, input_args):
 
     if (
         result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH
-        and result["network_params"]["bpo_1_epoch"] < result["network_params"]["fulu_fork_epoch"]
+        and result["network_params"]["bpo_1_epoch"]
+        < result["network_params"]["fulu_fork_epoch"]
     ):
         fail(
             "Fulu fork must happen before BPO 1, please adjust the epochs accordingly."
