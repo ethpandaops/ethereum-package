@@ -13,7 +13,7 @@ CHARON_MONITORING_PORT = 3620
 CHARON_METRICS_PORT = 8080
 
 # Default Charon image
-DEFAULT_CHARON_IMAGE = "obolnetwork/charon:local"
+DEFAULT_CHARON_IMAGE = "obolnetwork/charon:latest"
 
 # Verbosity levels mapping
 VERBOSITY_LEVELS = {
@@ -183,7 +183,7 @@ done
     # charon_keys_dir = "/opt/charon/charon-keys"
 
     charon_service_name = service_name + "-charon-split-keys-" + str(vc_index)
-    CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/charon/.charon/cluster"
+    CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/charon/"
     persistent_key = "data-{0}".format(charon_service_name)
 
     files = {}
@@ -197,8 +197,7 @@ done
     temp_service = plan.add_service(
         name=charon_service_name,
         config=ServiceConfig(
-            # image=image,
-            image="obolnetwork/charon:latest",
+            image=image,
             cmd=[
                 "create", "cluster",
                 "--name=test",
@@ -225,6 +224,21 @@ done
             image="busybox:latest",
             cmd=["tail", "-f", "/dev/null"],  # Keep the service running
             files=files,
+            user = User(uid=0, gid=0),
+        ),
+    )
+
+    plan.exec(
+        service_name=temp_service.name,
+        recipe=ExecRecipe(
+            command=["ls", "-laR", CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER],
+        ),
+    )
+
+    plan.exec(
+        service_name=temp_service.name,
+        recipe=ExecRecipe(
+            command=["find", CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER, "-name", "cluster-lock.json", "-exec", "chmod", "644", "{}", "+"],
         ),
     )
 
@@ -267,8 +281,8 @@ done
         #     "--testnet-name=testnet",
         # ]
 
-        if len(participant.vc_extra_params) > 0:
-            cmd.extend([param for param in participant.vc_extra_params])
+        # if len(participant.vc_extra_params) > 0:
+        #     cmd.extend([param for param in participant.vc_extra_params])
 
         env_vars = {
             "CHARON_LOG_LEVEL": "debug",
