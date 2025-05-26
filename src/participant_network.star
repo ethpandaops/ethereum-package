@@ -491,5 +491,4 @@ def launch_participant_network(
         el_cl_data.files_artifact_uuid,
         network_id,
         el_cl_data.osaka_time,
-        all_snooper_el_rpc_contexts,
     )
