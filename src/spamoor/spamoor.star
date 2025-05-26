@@ -25,7 +25,6 @@ def launch_spamoor(
     participant_contexts,
     participant_configs,
     spamoor_params,
-    snooper_context,
     global_node_selectors,
     network_params,
     port_publisher,
@@ -88,7 +87,6 @@ def launch_spamoor(
         participant_contexts,
         participant_configs,
         spamoor_params,
-        snooper_context,
         global_node_selectors,
         network_params,
         port_publisher,
@@ -104,7 +102,6 @@ def get_config(
     participant_contexts,
     participant_configs,
     spamoor_params,
-    snooper_context,
     node_selectors,
     network_params,
     port_publisher,
@@ -125,7 +122,7 @@ def get_config(
         ) = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
-        if snooper_context:
+        if participant.snooper_el_rpc_context:
             rpchost = "http://{0}:{1}".format(
                 participant.snooper_el_rpc_context.ip_addr,
                 participant.snooper_el_rpc_context.rpc_port_num,

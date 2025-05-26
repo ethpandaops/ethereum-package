@@ -190,7 +190,6 @@ def run(plan, args={}):
         el_cl_data_files_artifact_uuid,
         network_id,
         osaka_time,
-        snooper_el_rpc_contexts,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults,
@@ -716,7 +715,6 @@ def run(plan, args={}):
                 all_participants,
                 args_with_right_defaults.participants,
                 args_with_right_defaults.spamoor_params,
-                snooper_el_rpc_contexts,
                 global_node_selectors,
                 args_with_right_defaults.network_params,
                 args_with_right_defaults.port_publisher,
