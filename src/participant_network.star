@@ -346,6 +346,7 @@ def launch_participant_network(
                     snooper_beacon_context
                 )
             )
+            global_other_index += 1
 
         all_snooper_beacon_contexts.append(snooper_beacon_context)
 
