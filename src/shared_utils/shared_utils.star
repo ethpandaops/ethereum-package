@@ -3,6 +3,7 @@ constants = import_module("../package_io/constants.star")
 TCP_PROTOCOL = "TCP"
 UDP_PROTOCOL = "UDP"
 HTTP_APPLICATION_PROTOCOL = "http"
+WS_APPLICATION_PROTOCOL = "ws"
 NOT_PROVIDED_APPLICATION_PROTOCOL = ""
 NOT_PROVIDED_WAIT = "not-provided-wait"
 
@@ -293,7 +294,7 @@ def get_port_specs(port_assignments):
         ]:
             ports.update({port_id: new_port_spec(port, UDP_PROTOCOL)})
         elif port_id == constants.DEBUG_PORT_ID:
-            ports.update({port_id: new_port_spec(port, TCP_PROTOCOL, wait=None)})
+            ports.update({port_id: new_port_spec(port, TCP_PROTOCOL, WS_APPLICATION_PROTOCOL, wait=None)})
         elif port_id in [
             constants.HTTP_PORT_ID,
             constants.METRICS_PORT_ID,
