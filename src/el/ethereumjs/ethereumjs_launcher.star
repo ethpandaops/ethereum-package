@@ -175,7 +175,7 @@ def get_config(
         "--logLevel={0}".format(log_level),
         "--prometheus",
         "--prometheusPort={0}".format(METRICS_PORT_NUM),
-        "{}".format("--inspect=0.0.0.0:{1}".format(DEBUG_PORT_NUM) if "inspect" in participant.el_extra_params else ""),
+        "{}".format("--inspect=0.0.0.0:{1}".format(DEBUG_PORT_NUM) if "inspect" in participant.el_extra_env_vars else ""),
     ]
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
