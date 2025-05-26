@@ -81,6 +81,7 @@ def launch_spamoor(
     )
 
     config = get_config(
+        plan,
         config_files_artifact_name,
         prefunded_addresses,
         participant_contexts,
@@ -95,6 +96,7 @@ def launch_spamoor(
 
 
 def get_config(
+    plan,
     config_files_artifact_name,
     prefunded_addresses,
     participant_contexts,
@@ -120,11 +122,16 @@ def get_config(
         ) = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
-
-        rpchost = "http://{0}:{1}".format(
-            el_client.ip_addr,
-            el_client.rpc_port_num,
-        )
+        if participant.snooper_el_rpc_context:
+            rpchost = "http://{0}:{1}".format(
+                participant.snooper_el_rpc_context.ip_addr,
+                participant.snooper_el_rpc_context.rpc_port_num,
+            )
+        else:
+            rpchost = "http://{0}:{1}".format(
+                el_client.ip_addr,
+                el_client.rpc_port_num,
+            )
 
         if "builder" in full_name:
             rpchost = "group(mevbuilder)" + rpchost
