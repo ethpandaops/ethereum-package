@@ -295,7 +295,13 @@ def get_port_specs(port_assignments):
         ]:
             ports.update({port_id: new_port_spec(port, UDP_PROTOCOL)})
         elif port_id == constants.DEBUG_PORT_ID:
-            ports.update({port_id: new_port_spec(port, TCP_PROTOCOL, WS_APPLICATION_PROTOCOL, wait=None)})
+            ports.update(
+                {
+                    port_id: new_port_spec(
+                        port, TCP_PROTOCOL, WS_APPLICATION_PROTOCOL, wait=None
+                    )
+                }
+            )
         elif port_id in [
             constants.HTTP_PORT_ID,
             constants.METRICS_PORT_ID,
