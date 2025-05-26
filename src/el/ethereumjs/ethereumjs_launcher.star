@@ -14,6 +14,8 @@ ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 DEBUG_PORT_NUM = 9229
 
+DEBUG_PORT_ID = "debug"
+
 METRICS_PATH = "/metrics"
 
 # The dirpath of the execution data directory on the client container
@@ -123,8 +125,10 @@ def get_config(
             constants.ENGINE_WS_PORT_ID: public_ports_for_component[5],
         }
 
-        if "inspect" in participant.el_extra_params:
-            additional_public_port_assignments[constants.DEBUG_PORT_ID] = public_ports_for_component[6]
+        if "inspect" in participant.el_extra_env_vars.get("NODE_OPTIONS", ""):
+            additional_public_port_assignments[
+                DEBUG_PORT_ID
+            ] = public_ports_for_component[6]
 
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
@@ -149,8 +153,11 @@ def get_config(
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.WS_PORT_ID: WS_PORT_NUM,
         constants.ENGINE_WS_PORT_ID: WS_PORT_ENGINE_NUM,
-        constants.DEBUG_PORT_ID: DEBUG_PORT_NUM,
     }
+
+    if "inspect" in participant.el_extra_env_vars.get("NODE_OPTIONS", ""):
+        used_port_assignments[DEBUG_PORT_ID] = DEBUG_PORT_NUM
+
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
@@ -175,7 +182,11 @@ def get_config(
         "--logLevel={0}".format(log_level),
         "--prometheus",
         "--prometheusPort={0}".format(METRICS_PORT_NUM),
-        "{}".format("--inspect=0.0.0.0:{1}".format(DEBUG_PORT_NUM) if "inspect" in participant.el_extra_env_vars else ""),
+        "{}".format(
+            "--inspect=0.0.0.0:{0}".format(DEBUG_PORT_NUM)
+            if "inspect" in participant.el_extra_env_vars.get("NODE_OPTIONS", "")
+            else ""
+        ),
     ]
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
