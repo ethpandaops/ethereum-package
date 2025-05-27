@@ -96,7 +96,7 @@ KEYMANAGER_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/keymanager/keymanager.txt"
 
 PEERDAS_NODE_KEY_FILEPATH = STATIC_FILES_DIRPATH + "/peerdas-node-keys/"
 
-SHADOWFORK_FILEPATH = "/network-configs/latest_block.json"
+SHADOWFORK_FILEPATH = "/network-configs/latest_block"
 
 MEV_RS_MEV_BOOST_CONFIG_FILEPATH = (
     STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_boost/config.toml.tmpl"
