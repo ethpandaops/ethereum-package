@@ -1680,7 +1680,7 @@ def get_txpool_viz_params(input_args):
     filters_args = input_args.get("txpool_viz_params", {}).get("filters", {})
 
     polling_config = {
-        "interval": polling_args.get("interval", "3s"),
+        "interval": polling_args.get("interval", "0.5s"),
         "timeout": polling_args.get("timeout", "3s"),
     }
 
@@ -1690,9 +1690,12 @@ def get_txpool_viz_params(input_args):
 
     focil_enabled = filters_args.get("focil_enabled", "false")
 
+    log_level = filters_args.get("log_level", "info")
+
     return {
         "polling": polling_config,
         "filters": filters_config,
-        "focil_enabled": focil_enabled
+        "focil_enabled": focil_enabled,
+        "log_level": log_level
     }
 

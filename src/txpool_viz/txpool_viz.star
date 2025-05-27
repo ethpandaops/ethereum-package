@@ -57,6 +57,7 @@ def launch_txpool_viz(
           "REDIS_URL": redis_url,
           "CONFIG_JSON": config_json,
           "PORT": str(HTTP_PORT_NUMBER),
+          "ENV": "prod" # Default for Kurtosis
         },
       )
     )
@@ -64,31 +65,13 @@ def launch_txpool_viz(
 def create_config(
     endpoint_list,
     network_participants,
-    txpoolviz_params
+    config
 ):
-    config = {}
-
-    # endpoints list
+    # add endpoints
     config["endpoints"] = endpoint_list
 
-    if txpoolviz_params["focil_enabled"] == "true":
+    # add beacon sse if focil_enabled?
+    if config["focil_enabled"] == "true":
         config["beacon_sse_url"] = network_participants[0].cl_context.beacon_http_url
-
-    # polling config
-    polling_config = {}
-    polling_config["interval"] = getattr(
-        txpoolviz_params, "polling_interval", "3s" # 3s default
-    )
-    polling_config["timeout"] = getattr(
-        txpoolviz_params, "polling_timeout", "3s" # 3s default
-    )
-    config["polling"] = polling_config
-
-    # filters config
-    filters_config = {}
-    filters_config["min_gas_price"] = getattr(
-        txpoolviz_params, "min_gas_price", "1gwei" # 1gwei default
-    )
-    config["filters"] = filters_config
 
     return config

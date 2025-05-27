@@ -302,7 +302,8 @@ SUBCATEGORY_PARAMS = {
     "txpool_viz_params": [
         "polling",
         "filters",
-        "focil_enabled"
+        "focil_enabled",
+        "log_level"
     ]
 }
 
