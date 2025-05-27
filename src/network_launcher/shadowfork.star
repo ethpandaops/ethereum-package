@@ -24,16 +24,18 @@ def shadowfork_prep(
         network_id = constants.NETWORK_ID[
             base_network
         ]  # overload the network id to match the network name
+
     latest_block = plan.run_sh(
         name="fetch-latest-block",
         description="Fetching the latest block",
         run="mkdir -p /shadowfork && \
             curl -s -o /shadowfork/latest_block.json "
         + network_params.network_sync_base_url
+        + "/"
         + base_network
-        + "/geth/"
-        + str(network_params.shadowfork_block_height)
-        + "/_snapshot_eth_getBlockByNumber.json && \
+        + "/"
+        + network_params.shadowfork_block_height
+        + " && \
            cat /shadowfork/latest_block.json",
         store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
     )
@@ -67,7 +69,7 @@ def shadowfork_prep(
                     + "/"
                     + el_type
                     + "/"
-                    + str(network_params.shadowfork_block_height)
+                    + latest_block.output
                     + "/snapshot.tar.zst"
                     + " | tar -I zstd -xvf - -C /data/"
                     + el_type
