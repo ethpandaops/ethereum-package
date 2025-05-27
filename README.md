@@ -579,7 +579,7 @@ network_params:
   # The block height of the shadowfork
   # This is used to sync the network from a snapshot at a specific block height
   # Defaults to "latest"
-  # Example: shadowfork_block_height: 240000
+  # Example: shadowfork_block_height: 340000 for hoodi
   shadowfork_block_height: "latest"
 
   # The number of data column sidecar subnets used in the gossipsub protocol

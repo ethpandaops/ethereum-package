@@ -24,21 +24,21 @@ def shadowfork_prep(
         network_id = constants.NETWORK_ID[
             base_network
         ]  # overload the network id to match the network name
-
-    latest_block = plan.run_sh(
-        name="fetch-latest-block",
-        description="Fetching the latest block",
-        run="mkdir -p /shadowfork && \
-            curl -s -o /shadowfork/latest_block.json "
-        + network_params.network_sync_base_url
-        + "/"
-        + base_network
-        + "/"
-        + network_params.shadowfork_block_height
-        + " && \
-           cat /shadowfork/latest_block.json",
-        store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
-    )
+    latest_block = ""
+    if network_params.shadowfork_block_height == "latest":
+        latest_block = plan.run_sh(
+            name="fetch-latest-block",
+            description="Fetching the latest block",
+            run="mkdir -p /shadowfork && \
+                curl -s -o /shadowfork/latest_block.json "
+            + network_params.network_sync_base_url
+            + base_network
+            + "/geth/"
+            + str(network_params.shadowfork_block_height)
+            + " && \
+            cat /shadowfork/latest_block.json",
+            store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
+        )
 
     for index, participant in enumerate(participants):
         tolerations = input_parser.get_client_tolerations(
@@ -56,7 +56,11 @@ def shadowfork_prep(
 
         # Zero-pad the index using the calculated zfill value
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
-
+        block_height = (
+            latest_block.output
+            if network_params.shadowfork_block_height == "latest"
+            else network_params.shadowfork_block_height
+        )
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
         shadowfork_data = plan.add_service(
             name="shadowfork-{0}".format(el_service_name),
@@ -69,7 +73,7 @@ def shadowfork_prep(
                     + "/"
                     + el_type
                     + "/"
-                    + latest_block.output
+                    + str(block_height)
                     + "/snapshot.tar.zst"
                     + " | tar -I zstd -xvf - -C /data/"
                     + el_type
