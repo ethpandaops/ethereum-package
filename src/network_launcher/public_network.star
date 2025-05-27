@@ -34,13 +34,13 @@ def launch(
                     name="fetch-latest-block",
                     description="Fetching the latest block",
                     run="mkdir -p /shadowfork && \
-                        curl -s -o /shadowfork/latest_block.json "
+                        curl -s -o /shadowfork/latest_block "
                     + network_params.network_sync_base_url
                     + network_params.network
                     + "/geth/"
                     + str(network_params.shadowfork_block_height)
                     + " && \
-                    cat /shadowfork/latest_block.json",
+                    cat /shadowfork/latest_block | tr -d '\n'",
                     store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
                 )
 
