@@ -287,13 +287,13 @@ def get_port_specs(port_assignments):
             constants.WS_PORT_ID,
             constants.PROFILING_PORT_ID,
         ]:
-            ports.update({port_id: new_port_spec(port, TCP_PROTOCOL)})
+            ports.update({port_id: new_port_spec(port, TCP_PROTOCOL, wait=None)})
         elif port_id in [
             constants.UDP_DISCOVERY_PORT_ID,
             constants.QUIC_DISCOVERY_PORT_ID,
             constants.TORRENT_PORT_ID,
         ]:
-            ports.update({port_id: new_port_spec(port, UDP_PROTOCOL)})
+            ports.update({port_id: new_port_spec(port, UDP_PROTOCOL, wait=None)})
         elif port_id == constants.DEBUG_PORT_ID:
             ports.update(
                 {
@@ -312,7 +312,7 @@ def get_port_specs(port_assignments):
             constants.RBUILDER_METRICS_PORT_ID,
         ]:
             ports.update(
-                {port_id: new_port_spec(port, TCP_PROTOCOL, HTTP_APPLICATION_PROTOCOL)}
+                {port_id: new_port_spec(port, TCP_PROTOCOL, HTTP_APPLICATION_PROTOCOL, wait=None)}
             )
         else:
             fail("Unknown port id: {}".format(port_id))
