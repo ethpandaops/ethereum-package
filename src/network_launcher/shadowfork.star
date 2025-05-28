@@ -24,19 +24,43 @@ def shadowfork_prep(
         network_id = constants.NETWORK_ID[
             base_network
         ]  # overload the network id to match the network name
-    latest_block = ""
+
+    # Fetch block data and determine block height
     if network_params.shadowfork_block_height == "latest":
         latest_block = plan.run_sh(
-            name="fetch-latest-block",
-            description="Fetching the latest block",
+            name="fetch-latest-block-data",
+            description="Fetching the latest block data",
             run="mkdir -p /shadowfork && \
-                curl -s -o /shadowfork/latest_block "
+            BASE_URL='"
             + network_params.network_sync_base_url
             + base_network
-            + "/geth/"
+            + '\' && \
+            LATEST_BLOCK=$(curl -s "${BASE_URL}/geth/latest") && \
+            echo "Latest block number: $LATEST_BLOCK" && \
+            echo $LATEST_BLOCK > /shadowfork/block_height.txt && \
+            URL="${BASE_URL}/geth/$LATEST_BLOCK/_snapshot_eth_getBlockByNumber.json" && \
+            echo "Fetching from URL: $URL" && \
+            curl -s -f -o /shadowfork/latest_block.json "$URL" || { echo "Curl failed with exit code $?"; exit 1; } && \
+            cat /shadowfork/latest_block.json',
+            store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
+        )
+    else:
+        latest_block = plan.run_sh(
+            name="fetch-block-data",
+            description="Fetching block data for specific block",
+            run="mkdir -p /shadowfork && \
+            BLOCK_HEIGHT='"
             + str(network_params.shadowfork_block_height)
-            + " && \
-            cat /shadowfork/latest_block | tr -d '\n'",
+            + "' && \
+            echo $BLOCK_HEIGHT > /shadowfork/block_height.txt && \
+            BASE_URL='"
+            + network_params.network_sync_base_url
+            + base_network
+            + '\' && \
+            URL="${BASE_URL}/geth/$BLOCK_HEIGHT/_snapshot_eth_getBlockByNumber.json" && \
+            echo "Fetching from URL: $URL" && \
+            curl -s -f -o /shadowfork/latest_block.json "$URL" || { echo "Curl failed with exit code $?"; exit 1; } && \
+            cat /shadowfork/latest_block.json',
             store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
         )
 
@@ -56,25 +80,22 @@ def shadowfork_prep(
 
         # Zero-pad the index using the calculated zfill value
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
-        block_height = (
-            latest_block.output
-            if network_params.shadowfork_block_height == "latest"
-            else network_params.shadowfork_block_height
-        )
+
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
-        shadowfork_data = plan.add_service(
+        plan.add_service(
             name="shadowfork-{0}".format(el_service_name),
             config=ServiceConfig(
                 image="alpine:3.19.1",
                 cmd=[
-                    "apk add --no-cache curl tar zstd && curl -s -L "
+                    "apk add --no-cache curl tar zstd && "
+                    + "BLOCK_HEIGHT=$(cat /shared/block_height.txt) && "
+                    + 'echo "Using block height: $BLOCK_HEIGHT" && '
+                    + "curl -s -L "
                     + network_params.network_sync_base_url
                     + base_network
                     + "/"
                     + el_type
-                    + "/"
-                    + str(block_height)
-                    + "/snapshot.tar.zst"
+                    + "/$BLOCK_HEIGHT/snapshot.tar.zst"
                     + " | tar -I zstd -xvf - -C /data/"
                     + el_type
                     + "/execution-data"
@@ -91,6 +112,7 @@ def shadowfork_prep(
                             el_type + "_volume_size"
                         ],
                     ),
+                    "/shared": "latest_blocks",
                 },
                 tolerations=tolerations,
                 node_selectors=node_selectors,

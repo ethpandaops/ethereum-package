@@ -10,6 +10,41 @@ def launch(
     plan, participants, network_params, global_tolerations, global_node_selectors
 ):
     if network_params.force_snapshot_sync:
+        # Fetch block data and determine block height
+        if network_params.shadowfork_block_height == "latest":
+            latest_block = plan.run_sh(
+                name="fetch-latest-block-data",
+                description="Fetching the latest block data for public network",
+                run="mkdir -p /blocks && \
+                BASE_URL='"
+                + network_params.network_sync_base_url
+                + network_params.network
+                + '\' && \
+                LATEST_BLOCK=$(curl -s "${BASE_URL}/geth/latest") && \
+                echo "Latest block number: $LATEST_BLOCK" && \
+                echo $LATEST_BLOCK > /blocks/block_height.txt && \
+                curl -s -o /blocks/latest_block "${BASE_URL}/geth/$LATEST_BLOCK" && \
+                cat /blocks/latest_block | tr -d \'\n\'',
+                store=[StoreSpec(src="/blocks", name="latest")],
+            )
+        else:
+            latest_block = plan.run_sh(
+                name="fetch-block-data",
+                description="Fetching block data for specific block",
+                run="mkdir -p /blocks && \
+                BLOCK_HEIGHT='"
+                + str(network_params.shadowfork_block_height)
+                + "' && \
+                echo $BLOCK_HEIGHT > /blocks/block_height.txt && \
+                BASE_URL='"
+                + network_params.network_sync_base_url
+                + network_params.network
+                + "' && \
+                curl -s -o /blocks/latest_block \"${BASE_URL}/geth/$BLOCK_HEIGHT\" && \
+                cat /blocks/latest_block | tr -d '\n'",
+                store=[StoreSpec(src="/blocks", name="latest")],
+            )
+
         for index, participant in enumerate(participants):
             tolerations = input_parser.get_client_tolerations(
                 participant.el_tolerations,
@@ -28,41 +63,22 @@ def launch(
             index_str = shared_utils.zfill_custom(
                 index + 1, len(str(len(participants)))
             )
-            latest_block = ""
-            if network_params.shadowfork_block_height == "latest":
-                latest_block = plan.run_sh(
-                    name="fetch-latest-block",
-                    description="Fetching the latest block",
-                    run="mkdir -p /shadowfork && \
-                        curl -s -o /shadowfork/latest_block "
-                    + network_params.network_sync_base_url
-                    + network_params.network
-                    + "/geth/"
-                    + str(network_params.shadowfork_block_height)
-                    + " && \
-                    cat /shadowfork/latest_block | tr -d '\n'",
-                    store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
-                )
 
-            block_height = (
-                latest_block.output
-                if network_params.shadowfork_block_height == "latest"
-                else network_params.shadowfork_block_height
-            )
             el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
             el_data = plan.add_service(
                 name="snapshot-{0}".format(el_service_name),
                 config=ServiceConfig(
                     image="alpine:3.19.1",
                     cmd=[
-                        "apk add --no-cache curl tar zstd && curl -s -L "
+                        "apk add --no-cache curl tar zstd && "
+                        + "BLOCK_HEIGHT=$(cat /shared/block_height.txt) && "
+                        + 'echo "Using block height: $BLOCK_HEIGHT" && '
+                        + "curl -s -L "
                         + network_params.network_sync_base_url
                         + network_params.network
                         + "/"
                         + el_type
-                        + "/"
-                        + str(block_height)
-                        + "/snapshot.tar.zst"
+                        + "/$BLOCK_HEIGHT/snapshot.tar.zst"
                         + " | tar -I zstd -xvf - -C /data/"
                         + el_type
                         + "/execution-data"
@@ -79,6 +95,7 @@ def launch(
                                 el_type + "_volume_size"
                             ],
                         ),
+                        "/shared": "latest",
                     },
                     tolerations=tolerations,
                     node_selectors=node_selectors,
