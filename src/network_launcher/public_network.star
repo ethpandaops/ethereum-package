@@ -22,9 +22,7 @@ def launch(
                 + '\' && \
                 LATEST_BLOCK=$(curl -s "${BASE_URL}/geth/latest") && \
                 echo "Latest block number: $LATEST_BLOCK" && \
-                echo $LATEST_BLOCK > /blocks/block_height.txt && \
-                curl -s -o /blocks/latest_block "${BASE_URL}/geth/$LATEST_BLOCK" && \
-                cat /blocks/latest_block | tr -d \'\n\'',
+                echo $LATEST_BLOCK > /blocks/block_height.txt',
                 store=[StoreSpec(src="/blocks", name="latest")],
             )
         else:
