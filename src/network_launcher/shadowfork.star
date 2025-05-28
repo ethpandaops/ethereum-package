@@ -28,7 +28,7 @@ def shadowfork_prep(
     # Fetch block data and determine block height
     if network_params.shadowfork_block_height == "latest":
         latest_block = plan.run_sh(
-            name="fetch-latest-block-data",
+            name="fetch-latest-block-data-sf",
             description="Fetching the latest block data",
             run="mkdir -p /shadowfork && \
             BASE_URL='"
@@ -46,7 +46,7 @@ def shadowfork_prep(
         )
     else:
         latest_block = plan.run_sh(
-            name="fetch-block-data",
+            name="fetch-block-data-sf",
             description="Fetching block data for specific block",
             run="mkdir -p /shadowfork && \
             BLOCK_HEIGHT='"

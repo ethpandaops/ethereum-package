@@ -13,7 +13,7 @@ def launch(
         # Fetch block data and determine block height
         if network_params.shadowfork_block_height == "latest":
             latest_block = plan.run_sh(
-                name="fetch-latest-block-data",
+                name="fetch-latest-block-data-public",
                 description="Fetching the latest block data for public network",
                 run="mkdir -p /blocks && \
                 BASE_URL='"
@@ -29,19 +29,12 @@ def launch(
             )
         else:
             latest_block = plan.run_sh(
-                name="fetch-block-data",
+                name="fetch-specific-block-data-public",
                 description="Fetching block data for specific block",
                 run="mkdir -p /blocks && \
-                BLOCK_HEIGHT='"
+                echo "
                 + str(network_params.shadowfork_block_height)
-                + "' && \
-                echo $BLOCK_HEIGHT > /blocks/block_height.txt && \
-                BASE_URL='"
-                + network_params.network_sync_base_url
-                + network_params.network
-                + "' && \
-                curl -s -o /blocks/latest_block \"${BASE_URL}/geth/$BLOCK_HEIGHT\" && \
-                cat /blocks/latest_block | tr -d '\n'",
+                + " > /blocks/block_height.txt",
                 store=[StoreSpec(src="/blocks", name="latest")],
             )
 
