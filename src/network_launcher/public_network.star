@@ -30,7 +30,9 @@ def launch(
                 name="fetch-specific-block-data-public",
                 description="Fetching block data for specific block",
                 run="mkdir -p /blocks && \
-                echo "
+                echo Specific block number: "
+                + str(network_params.shadowfork_block_height)
+                + " && echo "
                 + str(network_params.shadowfork_block_height)
                 + " > /blocks/block_height.txt",
                 store=[StoreSpec(src="/blocks", name="latest")],
