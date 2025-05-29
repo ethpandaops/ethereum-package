@@ -479,7 +479,16 @@ def run(plan, args={}):
             plan.print("Successfully launched tx-fuzz")
         elif additional_service == "txpool_viz":
             plan.print("Launching txpool-viz")
-            txpool_viz.launch_txpool_viz(plan, all_participants, txpool_viz_params)
+            txpool_viz_config_template = read_file(
+                static_files.TXPOOL_VIZ_CONFIG_TEMPLATE_FILEPATH
+            )
+            txpool_viz.launch_txpool_viz(
+                plan,
+                txpool_viz_config_template,
+                all_participants,
+                txpool_viz_params,
+                global_node_selectors
+            )
         elif additional_service == "forkmon":
             plan.print("Launching el forkmon")
             forkmon_config_template = read_file(

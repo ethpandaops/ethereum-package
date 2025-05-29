@@ -5,27 +5,54 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 HTTP_PORT_NUMBER= 8080
 TXPOOL_VIZ_SERVICE_NAME="txpool-viz"
 
+TXPOOL_VIZ_CONFIG_FILENAME = "config.yaml"
+TXPOOL_VIZ_CONFIG_PATH="/cfg/"
+
+# The min/max CPU/memory that txpool-viz can use
+# To be benchmarked
+MIN_CPU = 100
+MAX_CPU = 1000
+MIN_MEMORY = 128
+MAX_MEMORY = 2048
+
 def launch_txpool_viz(
     plan,
+    config_template,
     network_participants,
     txpoolviz_params,
+    global_node_selectors
 ):
     endpoint_list = []
-    for index, participant in enumerate(network_participants):
-        # Extract the rpc and wss urls
+    for participant in network_participants:
+        el_metrics_info = participant.el_context.el_metrics_info
         endpoint_list.append({
-            "name": participant.el_context.el_metrics_info[0]["name"],
-            "rpc_url": participant.el_context.rpc_http_url,
-            "socket": participant.el_context.ws_url
+            "Name": el_metrics_info[0]["name"] if el_metrics_info else "unknown",
+            "RPCUrl": participant.el_context.rpc_http_url,
+            "Socket": participant.el_context.ws_url
         })
 
-    config = create_config(
-        endpoint_list,
-        network_participants,
-        txpoolviz_params
+    txpoolviz_params["endpoints"] = endpoint_list
+
+
+    # add beacon sse if focil_enabled?
+    if txpoolviz_params["focil_enabled"] == "true":
+        txpoolviz_params["beacon_sse_url"] = network_participants[0].cl_context.beacon_http_url
+
+    # // config data & template
+    template_data = txpool_viz_config_template_data(txpoolviz_params)
+
+    template_and_data = shared_utils.new_template_and_data(
+        config_template, template_data
     )
 
-    # add postgres server
+    file_config = {}
+    file_config[TXPOOL_VIZ_CONFIG_FILENAME] = template_and_data
+
+    config_files_artifact_name = plan.render_templates(
+        config=file_config,
+        name="txpool-viz-config",
+    )
+
     postgres = postgres_module.run(
         plan,
         service_name="txpool-viz-postgres",
@@ -39,12 +66,20 @@ def launch_txpool_viz(
 
     redis_url = "redis://" + redis.hostname + ":" + str(redis.port_number) + "/0"
 
-    config_json = json.encode(config)
+    environment_variables = {
+          "POSTGRES_URL": postgres.url,
+          "REDIS_URL": redis_url,
+          "PORT": str(HTTP_PORT_NUMBER),
+          "ENV": "prod" # Default for Kurtosis
+        }
 
-    txpoolviz = plan.add_service(
-      name=TXPOOL_VIZ_SERVICE_NAME,
-      config=ServiceConfig(
-        image="punkhazardlabs/txpool-viz:latest",
+    service_config = get_service_config(environment_variables, txpoolviz_params, global_node_selectors, config_files_artifact_name)
+
+    txpoolviz = plan.add_service(TXPOOL_VIZ_SERVICE_NAME, config=service_config)
+
+def get_service_config(environment_variables, txpool_viz_params, node_selectors, files_artifact):
+    return ServiceConfig(
+        image="punkhazardlabs/txpool-viz:dev",
         ports= {
             shared_utils.HTTP_APPLICATION_PROTOCOL:  PortSpec(
                 number=HTTP_PORT_NUMBER,
@@ -52,26 +87,26 @@ def launch_txpool_viz(
                 transport_protocol=shared_utils.TCP_PROTOCOL,
             ),
         },
-        env_vars = {
-          "POSTGRES_URL": postgres.url,
-          "REDIS_URL": redis_url,
-          "CONFIG_JSON": config_json,
-          "PORT": str(HTTP_PORT_NUMBER),
-          "ENV": "prod" # Default for Kurtosis
+        env_vars = environment_variables,
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
+        files = {
+           TXPOOL_VIZ_CONFIG_PATH : files_artifact
         },
+        node_selectors=node_selectors,
       )
-    )
 
-def create_config(
-    endpoint_list,
-    network_participants,
-    config
-):
-    # add endpoints
-    config["endpoints"] = endpoint_list
+def txpool_viz_config_template_data(config):
+    cfg = {
+        "Endpoints": config["endpoints"],
+        "Polling": config["polling"],
+        "Filters": config["filters"],
+        "LogLevel": config["log_level"],
+    }
 
-    # add beacon sse if focil_enabled?
     if config["focil_enabled"] == "true":
-        config["beacon_sse_url"] = network_participants[0].cl_context.beacon_http_url
+        cfg["BeaconSSEUrl"] = config["beacon_sse_url"]
 
-    return config
+    return cfg
