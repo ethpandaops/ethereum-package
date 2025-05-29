@@ -69,14 +69,15 @@ def launch(
         # Just use the same beacon node for all Charon nodes
         beacon_endpoints.append(cl_context.beacon_http_url)
 
-    # Use the genesis timestamp passed from the participant_network
-    genesis_time = genesis_timestamp
+    # Fetch the actual genesis timestamp from the beacon node
+    genesis_response = plan.run_sh(
+        name="get-genesis-timestamp",
+        description="Get the genesis timestamp from the beacon node",
+        run="curl -s " + cl_context.beacon_http_url + "/eth/v1/beacon/genesis | jq -r '.data.genesis_time' | tr -d '\\n'",
+    )
 
-    # Create a temporary directory for Charon cluster files
-    # charon_cluster_dir = plan.store_service_files(
-    #     service_name=service_name + "-charon-cluster-files",
-    #     files={},
-    # )
+    # Extract the genesis timestamp from the response
+    genesis_time = genesis_response.output
 
     # Get the raw validator keys directory path
     validator_keys_dirpath = ""
@@ -228,17 +229,11 @@ done
         ),
     )
 
+    # Wait a moment for files to be fully written
     plan.exec(
         service_name=temp_service.name,
         recipe=ExecRecipe(
-            command=["ls", "-laR", CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER],
-        ),
-    )
-
-    plan.exec(
-        service_name=temp_service.name,
-        recipe=ExecRecipe(
-            command=["find", CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER, "-name", "cluster-lock.json", "-exec", "chmod", "644", "{}", "+"],
+            command=["sleep", "2"],
         ),
     )
 
@@ -260,18 +255,13 @@ done
             src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER + "/node" + str(i),
             name="charon-node-files-" + str(i) + "-" + str(vc_index)
         ))
-        # charon_lock.append(plan.store_service_files(
-        #     service_name=temp_service.name,
-        #     src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER + "node" + str(i) + "/cluster-lock.json",
-        #     name="charon-lock-" + str(i) + "-" + str(vc_index)
-        # ))
 
     # Launch Charon nodes
     charon_services = []
     for i in range(charon_node_count):
         node_name = service_name + "-charon-" + str(i)
 
-        cmd=["tail", "-f", "/dev/null"]
+        # cmd=["tail", "-f", "/dev/null"]
 
         # cmd = [
         #     "run",
@@ -336,12 +326,21 @@ done
             # ),
         }
 
+        # Charon run command
+        cmd = [
+            "run",
+            "--testnet-chain-id=3151908",
+            "--testnet-fork-version=0x10000038",
+            "--testnet-genesis-timestamp=" + str(genesis_time),
+            "--testnet-name=kurtosis-testnet",
+        ]
+
         # Add the service
         charon_service = plan.add_service(
             name=node_name,
             config=ServiceConfig(
                 # image=image,
-                image="obolnetwork/charon:local",
+                image="obolnetwork/charon:latest",
                 ports=ports,
                 cmd=cmd,
                 env_vars=env_vars,
@@ -366,15 +365,48 @@ done
         charon_services.append(charon_service)
 
     # Now launch the validator clients that will connect to Charon nodes
-    # vc_services = []
-    # for i in range(charon_node_count):
-    #     # Determine which validator client to use with Charon
-    #     vc_type = "lighthouse"  # Default
-    #     if hasattr(participant, "charon_validator_client"):
-    #         vc_type = participant.charon_validator_client
+    vc_services = []
+    for i in range(charon_node_count):
+        # Determine which validator client to use with Charon
+        vc_type = "lighthouse"  # Default
+        if hasattr(participant, "charon_validator_client"):
+            vc_type = participant.charon_validator_client
 
-    #     # For now, we'll skip launching the validator clients
-    #     # In a real implementation, we would need to launch validator clients that connect to the Charon nodes
+        # Create VC service name
+        vc_service_name = service_name + "-vc-" + str(i) + "-" + vc_type
+
+        # Get the Charon node's validator API URL
+        charon_validator_api_url = "http://{0}:{1}".format(
+            charon_services[i].ip_address,
+            CHARON_VALIDATOR_API_PORT
+        )
+
+        # Create validator keys directory for this specific node
+        validator_keys_for_node = plan.store_service_files(
+            service_name=temp_service.name,
+            src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER + "/node" + str(i) + "/validator_keys",
+            name="validator-keys-node-" + str(i) + "-" + str(vc_index)
+        )
+
+        # Launch the validator client based on type
+        if vc_type == "lighthouse":
+            vc_service = launch_lighthouse_vc(
+                plan=plan,
+                vc_service_name=vc_service_name,
+                charon_validator_api_url=charon_validator_api_url,
+                validator_keys_artifact=validator_keys_for_node,
+                launcher=launcher,
+                participant=participant,
+                tolerations=tolerations,
+                node_selectors=node_selectors,
+                full_name=full_name + "-node" + str(i),
+                vc_index=vc_index,
+                node_index=i
+            )
+            vc_services.append(vc_service)
+        else:
+            # For now, only lighthouse is supported
+            fail("Only lighthouse validator client is currently supported with Charon")
 
     # Return the first Charon service as the main service
     validator_metrics_port = charon_services[0].ports["monitoring"]
@@ -384,12 +416,122 @@ done
     validator_node_metrics_info = node_metrics.new_node_metrics_info(
         charon_services[0].name, vc_shared.METRICS_PATH, validator_metrics_url
     )
-    
+
     return vc_context.new_vc_context(
         client_name=constants.VC_TYPE.charon,
         service_name=charon_services[0].name,
         metrics_info=validator_node_metrics_info,
     )
+
+def launch_lighthouse_vc(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    validator_keys_artifact,
+    launcher,
+    participant,
+    tolerations,
+    node_selectors,
+    full_name,
+    vc_index,
+    node_index
+):
+    """
+    Launch a Lighthouse validator client that connects to a Charon node
+    Uses the two-stage approach: import keys, then run validator
+    """
+
+    # Create the startup script that implements the two-stage approach
+    startup_script = """#!/bin/bash
+set -e
+
+# Install required packages
+apt-get update && apt-get install -y curl jq wget
+
+# Wait for Charon node to be available
+# while ! curl "${LIGHTHOUSE_BEACON_NODE_ADDRESS}/eth/v1/node/health" 2>/dev/null; do
+#   echo "Waiting for ${LIGHTHOUSE_BEACON_NODE_ADDRESS} to become available..."
+#   sleep 5
+# done
+
+echo "Charon node is available, proceeding with key import..."
+
+# Stage 1: Import validator keys
+for f in /opt/charon/keys/keystore-*.json; do
+  if [ -f "$f" ]; then
+    echo "Importing key ${f}"
+    lighthouse account validator import \\
+      --reuse-password \\
+      --keystore "${f}" \\
+      --password-file "${f//json/txt}" \\
+      --testnet-dir "/opt/lighthouse/network-configs"
+  fi
+done
+
+echo "Starting lighthouse validator client for node""" + str(node_index) + """"
+# Stage 2: Run the validator client
+exec lighthouse validator \\
+  --beacon-nodes ${LIGHTHOUSE_BEACON_NODE_ADDRESS} \\
+  --suggested-fee-recipient """ + constants.VALIDATING_REWARDS_ACCOUNT + """ \\
+  --metrics \\
+  --metrics-address "0.0.0.0" \\
+  --metrics-allow-origin "*" \\
+  --metrics-port """ + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """ \\
+  --use-long-timeouts \\
+  --testnet-dir "/opt/lighthouse/network-configs" \\
+  --builder-proposals \\
+  --distributed \\
+  --debug-level "debug"
+"""
+
+    # Environment variables
+    env_vars = {
+        "LIGHTHOUSE_BEACON_NODE_ADDRESS": charon_validator_api_url,
+        "NODE": "node" + str(node_index),
+        "RUST_BACKTRACE": "full"
+    }
+    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+        env_vars.update(participant.vc_extra_env_vars)
+
+    # Files to mount
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        "/opt/charon/keys": validator_keys_artifact,
+        "/opt/lighthouse/network-configs": launcher.el_cl_genesis_data.files_artifact_uuid,
+    }
+
+    # Ports configuration
+    ports = {
+        constants.METRICS_PORT_ID: PortSpec(
+            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
+            transport_protocol="TCP",
+            application_protocol="http",
+        ),
+    }
+
+    # Create the service with the startup script
+    vc_service = plan.add_service(
+        name=vc_service_name,
+        config=ServiceConfig(
+            image="sigp/lighthouse:latest",
+            ports=ports,
+            cmd=["bash", "-c", startup_script],
+            env_vars=env_vars,
+            files=files,
+            labels=shared_utils.label_maker(
+                client=constants.VC_TYPE.lighthouse,
+                client_type=constants.CLIENT_TYPES.validator,
+                image="sigp/lighthouse:latest"[-constants.MAX_LABEL_LENGTH:],
+                connected_client="charon-node-" + str(node_index),
+                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
+                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+            ),
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+        ),
+    )
+
+    return vc_service
 
 def new_charon_launcher(el_cl_genesis_data, jwt_file):
     return struct(
