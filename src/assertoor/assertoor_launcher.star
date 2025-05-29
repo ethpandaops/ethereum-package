@@ -66,7 +66,7 @@ def launch_assertoor(
             cl_client.beacon_http_url,
             el_client.ip_addr,
             el_client.rpc_port_num,
-            participant.snooper_engine_context,
+            participant.snooper_el_engine_context,
             participant.snooper_beacon_context,
             full_name,
         )
@@ -75,7 +75,7 @@ def launch_assertoor(
 
         if participant_config.validator_count != 0:
             clients_with_validators.append(client_info)
-        if participant.snooper_engine_context != None:
+        if participant.snooper_el_engine_context != None:
             clients_with_el_snooper.append(client_info)
         if participant.snooper_beacon_context != None:
             clients_with_cl_snooper.append(client_info)

@@ -78,7 +78,7 @@ network_params:
     very lucky have athlete"
   preregistered_validator_count: 0
   genesis_delay: 20
-  genesis_gaslimit: 30000000
+  genesis_gaslimit: 60000000
   max_per_epoch_activation_churn_limit: 8
   churn_limit_quotient: 65536
   ejection_balance: 16000000000
@@ -119,6 +119,10 @@ network_params:
   bpo_5_max_blobs: 12
   bpo_5_target_blobs: 9
   bpo_5_base_fee_update_fraction: 5007716
+  withdrawal_type: "0x00"
+  withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
+  validator_balance: 32
+
 additional_services: []
 dora_params:
   image: ""
@@ -203,7 +207,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:4.1.5
+  image: ethpandaops/ethereum-genesis-generator:4.1.8
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

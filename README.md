@@ -508,9 +508,9 @@ network_params:
   genesis_delay: 20
 
   # The gas limit of the network set at genesis
-  # Defaults to 36000000
+  # Defaults to 60000000
 
-  genesis_gaslimit: 36000000
+  genesis_gaslimit: 60000000
 
   # Max churn rate for the network introduced by
   # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
@@ -579,7 +579,7 @@ network_params:
   # The block height of the shadowfork
   # This is used to sync the network from a snapshot at a specific block height
   # Defaults to "latest"
-  # Example: shadowfork_block_height: 240000
+  # Example: shadowfork_block_height: 340000 for hoodi
   shadowfork_block_height: "latest"
 
   # The number of data column sidecar subnets used in the gossipsub protocol
@@ -659,7 +659,7 @@ network_params:
   # Default to 0
   # If set to 0, the gas limit will be set to the default gas limit for the clients
   # Set this value to gas limit in millionths of a gwei
-  # Example: gas_limit: 36000000
+  # Example: gas_limit: 60000000
   # This will override the gas limit for each EL client
   # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
   gas_limit: 0
@@ -710,6 +710,18 @@ network_params:
   # Base fee update fraction for BPO5 (default 5007716)
   bpo_5_base_fee_update_fraction: 5007716
 
+  # Withdrawal type
+  # Default to "0x00"
+  withdrawal_type: "0x00"
+
+  # Withdrawal address
+  # Default to "0x8943545177806ED17B9F23F0a21ee5948eCaa776" - 0 address of mnemonic
+  withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
+
+  # Validator balance
+  # Default to 32 ETH
+  validator_balance: 32
+
 
 # Global parameters for the network
 
@@ -742,8 +754,8 @@ additional_services:
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
 blockscout_params:
   # blockscout docker image to use
-  # Defaults to blockscout/blockscout:latest
-  image: "blockscout/blockscout:latest"
+  # Defaults to ghcr.io/blockscout/blockscout:latest
+  image: "ghcr.io/blockscout/blockscout:latest"
   # blockscout smart contract verifier image to use
   # Defaults to ghcr.io/blockscout/smart-contract-verifier:latest
   verif_image: "ghcr.io/blockscout/smart-contract-verifier:latest"
@@ -1049,7 +1061,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.1.5
+  image: ethpandaops/ethereum-genesis-generator:4.1.8
 
 # Global parameter to set the exit ip address of services and public ports
 port_publisher:

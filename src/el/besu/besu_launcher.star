@@ -168,7 +168,11 @@ def get_config(
         "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--engine-host-allowlist=*",
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
-        "--sync-mode=FULL",
+        "{0}".format(
+            "--sync-mode=FULL"
+            if network_params.network in constants.NETWORK_NAME.kurtosis
+            else "--sync-mode=SNAP"
+        ),
         "--data-storage-format={0}".format(
             "VERKLE" if "verkle-gen" in network_params.network else "BONSAI"
         ),

@@ -10,6 +10,34 @@ def launch(
     plan, participants, network_params, global_tolerations, global_node_selectors
 ):
     if network_params.force_snapshot_sync:
+        # Fetch block data and determine block height
+        if network_params.shadowfork_block_height == "latest":
+            latest_block = plan.run_sh(
+                name="fetch-latest-block-data-public",
+                description="Fetching the latest block data for public network",
+                run="mkdir -p /blocks && \
+                BASE_URL='"
+                + network_params.network_sync_base_url
+                + network_params.network
+                + '\' && \
+                LATEST_BLOCK=$(curl -s "${BASE_URL}/geth/latest") && \
+                echo "Latest block number: $LATEST_BLOCK" && \
+                echo $LATEST_BLOCK > /blocks/block_height.txt',
+                store=[StoreSpec(src="/blocks", name="latest")],
+            )
+        else:
+            latest_block = plan.run_sh(
+                name="fetch-specific-block-data-public",
+                description="Fetching block data for specific block",
+                run="mkdir -p /blocks && \
+                echo Specific block number: "
+                + str(network_params.shadowfork_block_height)
+                + " && echo "
+                + str(network_params.shadowfork_block_height)
+                + " > /blocks/block_height.txt",
+                store=[StoreSpec(src="/blocks", name="latest")],
+            )
+
         for index, participant in enumerate(participants):
             tolerations = input_parser.get_client_tolerations(
                 participant.el_tolerations,
@@ -35,13 +63,15 @@ def launch(
                 config=ServiceConfig(
                     image="alpine:3.19.1",
                     cmd=[
-                        "apk add --no-cache curl tar zstd && curl -s -L "
+                        "apk add --no-cache curl tar zstd && "
+                        + "BLOCK_HEIGHT=$(cat /shared/block_height.txt) && "
+                        + 'echo "Using block height: $BLOCK_HEIGHT" && '
+                        + "curl -s -L "
                         + network_params.network_sync_base_url
                         + network_params.network
                         + "/"
                         + el_type
-                        + "/latest"
-                        + "/snapshot.tar.zst"
+                        + "/$BLOCK_HEIGHT/snapshot.tar.zst"
                         + " | tar -I zstd -xvf - -C /data/"
                         + el_type
                         + "/execution-data"
@@ -58,6 +88,7 @@ def launch(
                                 el_type + "_volume_size"
                             ],
                         ),
+                        "/shared": "latest",
                     },
                     tolerations=tolerations,
                     node_selectors=node_selectors,
