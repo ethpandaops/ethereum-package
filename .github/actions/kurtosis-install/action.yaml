@@ -19,3 +19,13 @@ runs:
         fi
         kurtosis analytics disable
         echo "$(dirname $(which kurtosis))" >> $GITHUB_PATH
+    - name: Pull images
+      shell: bash
+      run: |
+        docker pull docker.ethquokkaops.io/kurtosistech/engine:latest
+        docker pull docker.ethquokkaops.io/kurtosistech/files-artifacts-expander:latest
+        docker pull docker.ethquokkaops.io/kurtosistech/core:latest
+
+        docker tag docker.ethquokkaops.io/kurtosistech/engine:latest kurtosistech/engine:latest
+        docker tag docker.ethquokkaops.io/kurtosistech/engine:latest kurtosistech/files-artifacts-expander:latest
+        docker tag docker.ethquokkaops.io/kurtosistech/engine:latest kurtosistech/core:latest
