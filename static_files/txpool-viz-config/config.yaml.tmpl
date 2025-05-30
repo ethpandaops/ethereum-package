@@ -1,0 +1,19 @@
+endpoints:
+{{- range $endpoint := .Endpoints }}
+  - name: {{ $endpoint.Name }}
+    rpc_url: "{{ $endpoint.RPCUrl }}"
+    socket: "{{ $endpoint.Socket }}"
+{{- end }}
+
+{{- if .BeaconSSEUrl }}
+beacon_sse_url: "{{ .BeaconSSEUrl }}"
+{{- end }}
+
+polling:
+  interval: {{ .Polling.interval }}
+  timeout: {{ .Polling.timeout }}
+
+filters:
+  min_gas_price: {{ .Filters.min_gas_price }}
+
+log_level: "{{ .LogLevel }}"

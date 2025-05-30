@@ -299,6 +299,12 @@ SUBCATEGORY_PARAMS = {
         "mev",
         "other",
     ],
+    "txpool_viz_params": [
+        "polling",
+        "filters",
+        "focil_enabled",
+        "log_level"
+    ]
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -320,6 +326,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "apache",
     "tracoor",
     "spamoor",
+    "txpool_viz"
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
