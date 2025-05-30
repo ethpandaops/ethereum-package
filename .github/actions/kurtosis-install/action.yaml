@@ -28,16 +28,10 @@ runs:
         # Extract tool versions from Kurtosis source code with fallbacks
         echo "Fetching tool versions from Kurtosis source..."
 
-        TRAEFIK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/reverse_proxy_functions/implementations/traefik/consts.go | grep 'containerImage = "traefik:' | sed 's/.*traefik:\([^"]*\)".*/\1/' || echo "2.10.6")
-        VECTOR_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_aggregator_functions/implementations/vector/consts.go | grep 'containerImage = "timberio/vector:' | sed 's/.*timberio\/vector:\([^"]*\)".*/\1/' || echo "0.45.0-debian")
-        FLUENTBIT_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/consts.go | grep 'containerImage = "fluent/fluent-bit:' | sed 's/.*fluent\/fluent-bit:\([^"]*\)".*/\1/' || echo "4.0.0")
-        ALPINE_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/fluentbit_configuration_creator.go | grep 'configuratorContainerImage = "alpine:' | sed 's/.*alpine:\([^"]*\)".*/\1/' || echo "3.17")
-
-        # Ensure variables are not empty
-        TRAEFIK_VERSION=${TRAEFIK_VERSION:-2.10.6}
-        VECTOR_VERSION=${VECTOR_VERSION:-0.31.0-debian}
-        FLUENTBIT_VERSION=${FLUENTBIT_VERSION:-1.9.7}
-        ALPINE_VERSION=${ALPINE_VERSION:-3.17}
+        TRAEFIK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/reverse_proxy_functions/implementations/traefik/consts.go | grep 'containerImage.*=.*"traefik:' | sed 's/.*traefik:\([^"]*\)".*/\1/')
+        VECTOR_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_aggregator_functions/implementations/vector/consts.go | grep 'containerImage.*=.*"timberio/vector:' | sed 's/.*timberio\/vector:\([^"]*\)".*/\1/')
+        FLUENTBIT_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/consts.go | grep 'containerImage.*=.*"fluent/fluent-bit:' | sed 's/.*fluent\/fluent-bit:\([^"]*\)".*/\1/')
+        ALPINE_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/fluentbit_configuration_creator.go | grep 'configuratorContainerImage.*=.*"alpine:' | sed 's/.*alpine:\([^"]*\)".*/\1/')
 
         echo "TRAEFIK_VERSION=$TRAEFIK_VERSION" >> $GITHUB_ENV
         echo "VECTOR_VERSION=$VECTOR_VERSION" >> $GITHUB_ENV
