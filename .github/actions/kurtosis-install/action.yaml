@@ -47,15 +47,22 @@ runs:
     - name: Pull images
       shell: bash
       run: |
-        docker pull docker.ethquokkaops.io/dh/kurtosistech/engine:$KURTOSIS_VERSION
-        docker pull docker.ethquokkaops.io/dh/kurtosistech/files-artifacts-expander:$KURTOSIS_VERSION
-        docker pull docker.ethquokkaops.io/dh/kurtosistech/core:$KURTOSIS_VERSION
-        docker pull docker.ethquokkaops.io/dh/timberio/vector:$VECTOR_VERSION
-        docker pull docker.ethquokkaops.io/dh/fluent/fluent-bit:$FLUENTBIT_VERSION
-        docker pull docker.ethquokkaops.io/dh/alpine:$ALPINE_VERSION
-        docker pull docker.ethquokkaops.io/dh/traefik:$TRAEFIK_VERSION
-        docker pull docker.ethquokkaops.io/dh/badouralix/curl-jq
+        # Pull images in parallel
+        echo "Starting parallel docker pulls..."
+        docker pull docker.ethquokkaops.io/dh/kurtosistech/engine:$KURTOSIS_VERSION &
+        docker pull docker.ethquokkaops.io/dh/kurtosistech/files-artifacts-expander:$KURTOSIS_VERSION &
+        docker pull docker.ethquokkaops.io/dh/kurtosistech/core:$KURTOSIS_VERSION &
+        docker pull docker.ethquokkaops.io/dh/timberio/vector:$VECTOR_VERSION &
+        docker pull docker.ethquokkaops.io/dh/fluent/fluent-bit:$FLUENTBIT_VERSION &
+        docker pull docker.ethquokkaops.io/dh/alpine:$ALPINE_VERSION &
+        docker pull docker.ethquokkaops.io/dh/traefik:$TRAEFIK_VERSION &
+        docker pull docker.ethquokkaops.io/dh/badouralix/curl-jq &
 
+        # Wait for all pulls to complete
+        wait
+        echo "All docker pulls completed"
+
+        # Tag images sequentially (fast operation)
         docker tag docker.ethquokkaops.io/dh/kurtosistech/engine:$KURTOSIS_VERSION kurtosistech/engine:$KURTOSIS_VERSION
         docker tag docker.ethquokkaops.io/dh/kurtosistech/files-artifacts-expander:$KURTOSIS_VERSION kurtosistech/files-artifacts-expander:$KURTOSIS_VERSION
         docker tag docker.ethquokkaops.io/dh/kurtosistech/core:$KURTOSIS_VERSION kurtosistech/core:$KURTOSIS_VERSION
