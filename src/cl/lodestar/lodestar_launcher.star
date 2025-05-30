@@ -9,7 +9,6 @@ constants = import_module("../../package_io/constants.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/lodestar/beacon-data"
-
 # Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_HTTP_PORT_NUM = 4000
@@ -36,7 +35,7 @@ def launch(
     el_context,
     full_name,
     node_keystore_files,
-    snooper_engine_context,
+    snooper_el_engine_context,
     persistent,
     tolerations,
     node_selectors,
@@ -44,6 +43,7 @@ def launch(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -60,7 +60,7 @@ def launch(
         el_context,
         full_name,
         node_keystore_files,
-        snooper_engine_context,
+        snooper_el_engine_context,
         persistent,
         tolerations,
         node_selectors,
@@ -68,6 +68,7 @@ def launch(
         checkpoint_sync_url,
         port_publisher,
         participant_index,
+        network_params,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -136,7 +137,7 @@ def launch(
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
         snooper_enabled=participant.snooper_enabled,
-        snooper_engine_context=snooper_engine_context,
+        snooper_el_engine_context=snooper_el_engine_context,
         validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
         if node_keystore_files
         else "",
@@ -154,7 +155,7 @@ def get_beacon_config(
     el_context,
     full_name,
     node_keystore_files,
-    snooper_engine_context,
+    snooper_el_engine_context,
     persistent,
     tolerations,
     node_selectors,
@@ -162,6 +163,7 @@ def get_beacon_config(
     checkpoint_sync_url,
     port_publisher,
     participant_index,
+    network_params,
 ):
     el_client_rpc_url_str = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -171,8 +173,8 @@ def get_beacon_config(
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if participant.snooper_enabled:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_engine_context.ip_addr,
-            snooper_engine_context.engine_rpc_port_num,
+            snooper_el_engine_context.ip_addr,
+            snooper_el_engine_context.engine_rpc_port_num,
         )
     else:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
@@ -181,18 +183,29 @@ def get_beacon_config(
         )
 
     public_ports = {}
-    discovery_port = BEACON_DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.cl_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "cl", port_publisher, participant_index
         )
-        public_ports, discovery_port = cl_shared.get_general_cl_public_port_specs(
+        public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else BEACON_DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else BEACON_DISCOVERY_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -201,8 +214,8 @@ def get_beacon_config(
     cmd = [
         "beacon",
         "--logLevel=" + log_level,
-        "--port={0}".format(discovery_port),
-        "--discoveryPort={0}".format(discovery_port),
+        "--port={0}".format(discovery_port_tcp),
+        "--discoveryPort={0}".format(discovery_port_tcp),
         "--dataDir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--chain.persistInvalidSszObjects=true",
         "--eth1.depositContractDeployBlock=0",
@@ -216,15 +229,17 @@ def get_beacon_config(
         "--rest.namespace=*",
         "--rest.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--nat=true",
-        "--enr.ip=" + port_publisher.nat_exit_ip,
-        "--enr.tcp={0}".format(discovery_port),
-        "--enr.udp={0}".format(discovery_port),
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
+        # ENR
+        "--enr.ip=" + port_publisher.nat_exit_ip,
+        "--enr.tcp={0}".format(discovery_port_tcp),
+        "--enr.udp={0}".format(discovery_port_udp),
+        # QUIC
+        # coming soon
+        # Metrics
         "--metrics",
         "--metrics.address=0.0.0.0",
         "--metrics.port={0}".format(BEACON_METRICS_PORT_NUM),
-        # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
     supernode_cmd = [
@@ -237,7 +252,7 @@ def get_beacon_config(
     if checkpoint_sync_enabled:
         cmd.append("--checkpointSyncUrl=" + checkpoint_sync_url)
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
+    if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--paramsFile="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
@@ -249,8 +264,8 @@ def get_beacon_config(
             + "/genesis.ssz"
         )
         if (
-            launcher.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in launcher.network
+            network_params.network == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
             if bootnode_contexts != None:
                 cmd.append(
@@ -262,7 +277,7 @@ def get_beacon_config(
                         ]
                     )
                 )
-        elif launcher.network == constants.NETWORK_NAME.ephemery:
+        elif network_params.network == constants.NETWORK_NAME.ephemery:
             cmd.append(
                 "--bootnodes="
                 + shared_utils.get_devnet_enrs_list(
@@ -277,7 +292,7 @@ def get_beacon_config(
                 )
             )
     else:  # Public testnet
-        cmd.append("--network=" + launcher.network)
+        cmd.append("--network=" + network_params.network)
 
     if len(participant.cl_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -287,19 +302,24 @@ def get_beacon_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
+    if network_params.perfect_peerdas_enabled and participant_index < 16:
+        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = "node-key-file-{0}".format(
+            participant_index + 1
+        )
+
     if persistent:
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[network_params.network][
                 constants.CL_TYPE.lodestar + "_volume_size"
             ],
         )
 
     env_vars = participant.cl_extra_env_vars
 
-    if launcher.preset == "minimal":
+    if network_params.preset == "minimal":
         env_vars["LODESTAR_PRESET"] = "minimal"
 
     config_args = {
@@ -316,7 +336,7 @@ def get_beacon_config(
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.lodestar,
             client_type=constants.CLIENT_TYPES.cl,
-            image=participant.cl_image,
+            image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
             supernode=participant.supernode,
@@ -336,10 +356,8 @@ def get_beacon_config(
     return ServiceConfig(**config_args)
 
 
-def new_lodestar_launcher(el_cl_genesis_data, jwt_file, network_params):
+def new_lodestar_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network_params.network,
-        preset=network_params.preset,
     )

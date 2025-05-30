@@ -17,6 +17,7 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    network_params,
     port_publisher,
     vc_index,
 ):
@@ -64,6 +65,9 @@ def get_config(
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
+    if network_params.gas_limit > 0:
+        cmd.append("--suggested-gas-limit={0}".format(network_params.gas_limit))
+
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.vc_extra_params])
@@ -105,9 +109,9 @@ def get_config(
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.CL_TYPE.nimbus,
+            client=constants.VC_TYPE.nimbus,
             client_type=constants.CLIENT_TYPES.validator,
-            image=image,
+            image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
             extra_labels=participant.vc_extra_labels,
             supernode=participant.supernode,

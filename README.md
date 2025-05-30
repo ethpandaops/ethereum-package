@@ -1,10 +1,3 @@
-# Important recent update notes - temporary note
-The `ethereum-package` has been moved to the [ethpandaops organization](https://github.com/ethpandaops/).
-
-The new repository is located at [github.com/ethpandaops/ethereum-package](https://github.com/ethpandaops/ethereum-package). For all your references please replace `kurtosis-tech` with `ethpandaops`.
-
-If you would like to use the latest release of the package, released by kurtosis-tech, please refer to using the tag [v3.1.0](https://github.com/kurtosis-tech/ethereum-package/releases/tag/3.1.0).
-
 # Ethereum Package
 
 ![Run of the Ethereum Network Package](run.gif)
@@ -176,7 +169,7 @@ participants:
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
     # Defaults by client:
     # - geth: ethereum/client-go:latest
-    # - erigon: thorax/erigon:devel
+    # - erigon: ethpandaops/erigon:main
     # - nethermind: nethermind/nethermind:latest
     # - besu: hyperledger/besu:develop
     # - reth: ghcr.io/paradigmxyz/reth
@@ -236,7 +229,7 @@ participants:
     # - lighthouse: sigp/lighthouse:latest
     # - teku: consensys/teku:latest
     # - nimbus: statusim/nimbus-eth2:multiarch-latest
-    # - prysm: gcr.io/prysmaticlabs/prysm/beacon-chain:latest
+    # - prysm: gcr.io/offchainlabs/prysm/beacon-chain:latest
     # - lodestar: chainsafe/lodestar:next
     # - grandine: sifrai/grandine:stable
     cl_image: ""
@@ -296,7 +289,7 @@ participants:
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
-    # Valid values are nimbus, lighthouse, lodestar, teku, and prysm
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm and vero
     # ( The prysm validator only works with a prysm CL client )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
@@ -306,13 +299,10 @@ participants:
     # - lighthouse: sigp/lighthouse:latest
     # - lodestar: chainsafe/lodestar:latest
     # - nimbus: statusim/nimbus-validator-client:multiarch-latest
-    # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
+    # - prysm: gcr.io/offchainlabs/prysm/validator:latest
     # - teku: consensys/teku:latest
+    # - vero: ghcr.io/serenita-org/vero:master
     vc_image: ""
-
-    # The number of validator clients to run for this participant
-    # Defaults to 1
-    vc_count: 1
 
     # The log level string that this participant's validator client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
@@ -425,8 +415,10 @@ participants:
     # Default to 1
     count: 1
 
+    # Snooper local flag for a participant.
     # Snooper can be enabled with the `snooper_enabled` flag per client or globally
-    # Defaults null and then set to global snooper default (false)
+    # Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
+    # Default to null
     snooper_enabled: null
 
     # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
@@ -489,7 +481,7 @@ participants_matrix: {}
 network_params:
   # Network name, used to enable syncing of alternative networks
   # Defaults to "kurtosis"
-  # You can sync any public network by setting this to the network name (e.g. "mainnet", "sepolia", "holesky")
+  # You can sync any public network by setting this to the network name (e.g. "mainnet", "sepolia", "holesky", "hoodi")
   # You can sync any devnet by setting this to the network name (e.g. "dencun-devnet-12", "verkle-gen-devnet-2")
   network: "kurtosis"
 
@@ -497,7 +489,7 @@ network_params:
   network_id: "3151908"
 
   # The address of the staking contract address on the Eth1 chain
-  deposit_contract_address: "0x4242424242424242424242424242424242424242"
+  deposit_contract_address: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
 
   # Number of seconds per slot on the Beacon chain
   seconds_per_slot: 12
@@ -516,7 +508,9 @@ network_params:
   genesis_delay: 20
 
   # The gas limit of the network set at genesis
-  genesis_gaslimit: 30000000
+  # Defaults to 60000000
+
+  genesis_gaslimit: 60000000
 
   # Max churn rate for the network introduced by
   # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
@@ -544,19 +538,31 @@ network_params:
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
 
-  # The epoch at which the deneb/electra/eip7594(peerdas) forks are set to occur. Note: PeerDAS and Electra clients are currently
+  # The epoch at which the deneb/electra/fulu forks are set to occur. Note: PeerDAS and Electra clients are currently
   # working on forks. So set either one of the below forks.
+  # Altair fork epoch
+  # Defaults to 0
+  altair_fork_epoch: 0
+
+  # Bellatrix fork epoch
+  # Defaults to 0
+  bellatrix_fork_epoch: 0
+
+  # Capella fork epoch
+  # Defaults to 0
+  capella_fork_epoch: 0
+
+  # Deneb fork epoch
+  # Defaults to 0
   deneb_fork_epoch: 0
 
-  electra_fork_epoch: 100000000
+  # Electra fork epoch
+  # Defaults to 0
+  electra_fork_epoch: 0
 
-  fulu_fork_epoch: 100000001
-
-  eip7594_fork_epoch: 100000002
-
-  # The fork version to set if the eip7594 fork is active
-  eip7594_fork_version: "0x60000038"
-
+  # Fulu fork epoch
+  # Defaults to 18446744073709551615
+  fulu_fork_epoch: 18446744073709551615
 
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
@@ -565,14 +571,41 @@ network_params:
   # The snapshots are taken with https://github.com/ethpandaops/snapshotter
   network_sync_base_url: https://snapshots.ethpandaops.io/
 
+  # Force network sync with a custom snapshot
+  # This enables quicker EL sync (use with caution)
+  # Defaults to false
+  force_snapshot_sync: false
+
+  # The block height of the shadowfork
+  # This is used to sync the network from a snapshot at a specific block height
+  # Defaults to "latest"
+  # Example: shadowfork_block_height: 340000 for hoodi
+  shadowfork_block_height: "latest"
+
   # The number of data column sidecar subnets used in the gossipsub protocol
   data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
+
   # Minimum number of subnets an honest node custodies and serves samples from
+  # Defaults to 4
   custody_requirement: 4
-  # Maximum number of blobs per block
-  max_blobs_per_block: 6
+
+  # Maximum number of blobs per block for Electra fork (default 9)
+  max_blobs_per_block_electra: 9
+  # Target number of blobs per block for Electra fork (default 6)
+  target_blobs_per_block_electra: 6
+  # Base fee update fraction for Electra fork (default 5007716)
+  base_fee_update_fraction_electra: 5007716
+
+  # EIP-7732 fork epoch
+  # Defaults to 18446744073709551615
+  eip7732_fork_epoch: 18446744073709551615
+
+  # EIP-7805 fork epoch
+  # Defaults to 18446744073709551615
+  eip7805_fork_epoch: 18446744073709551615
+
 
   # Preset for the network
   # Default: "mainnet"
@@ -611,6 +644,85 @@ network_params:
   # prefunded_accounts: '{"0x25941dC771bB64514Fc8abBce970307Fb9d477e9": {"balance": "10ETH"}, "0x4107be99052d895e3ee461C685b042Aa975ab5c0": {"balance": "1ETH"}}'
   prefunded_accounts: {}
 
+  # Maximum size of gossip messages in bytes
+  # 10 * 2**20 (= 10485760, 10 MiB)
+  # Defaults to 10485760 (10MB)
+  max_payload_size: 10485760
+
+  # Enable Perfect PeerDAS
+  # This flag is meant to be used with 16 nodes where each node gets 8 unique columns
+  # Ensure that you set the number of validator keys per node to less than or equal to 8 so that validator custody is not affected
+  # Defaults to false
+  perfect_peerdas_enabled: false
+
+  # Gas limit for the network
+  # Default to 0
+  # If set to 0, the gas limit will be set to the default gas limit for the clients
+  # Set this value to gas limit in millionths of a gwei
+  # Example: gas_limit: 60000000
+  # This will override the gas limit for each EL client
+  # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
+  gas_limit: 0
+
+  # BPO
+  # BPO1 epoch (default 18446744073709551615)
+  bpo_1_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO1 (default 12)
+  bpo_1_max_blobs: 12
+  # Target number of blobs per block for BPO1 (default 9)
+  bpo_1_target_blobs: 9
+  # Base fee update fraction for BPO1 (default 5007716)
+  bpo_1_base_fee_update_fraction: 5007716
+
+  # BPO2 epoch (default 18446744073709551615)
+  bpo_2_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO2 (default 12)
+  bpo_2_max_blobs: 12
+  # Target number of blobs per block for BPO2 (default 9)
+  bpo_2_target_blobs: 9
+  # Base fee update fraction for BPO2 (default 5007716)
+  bpo_2_base_fee_update_fraction: 5007716
+
+  # BPO3 epoch (default 18446744073709551615)
+  bpo_3_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO3 (default 12)
+  bpo_3_max_blobs: 12
+  # Target number of blobs per block for BPO3 (default 9)
+  bpo_3_target_blobs: 9
+  # Base fee update fraction for BPO3 (default 5007716)
+  bpo_3_base_fee_update_fraction: 5007716
+
+  # BPO4 epoch (default 18446744073709551615)
+  bpo_4_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO4 (default 12)
+  bpo_4_max_blobs: 12
+  # Target number of blobs per block for BPO4 (default 9)
+  bpo_4_target_blobs: 9
+  # Base fee update fraction for BPO4 (default 5007716)
+  bpo_4_base_fee_update_fraction: 5007716
+
+  # BPO5 epoch (default 18446744073709551615)
+  bpo_5_epoch: 18446744073709551615
+  # Maximum number of blobs per block for BPO5 (default 12)
+  bpo_5_max_blobs: 12
+  # Target number of blobs per block for BPO5 (default 9)
+  bpo_5_target_blobs: 9
+  # Base fee update fraction for BPO5 (default 5007716)
+  bpo_5_base_fee_update_fraction: 5007716
+
+  # Withdrawal type
+  # Default to "0x00"
+  withdrawal_type: "0x00"
+
+  # Withdrawal address
+  # Default to "0x8943545177806ED17B9F23F0a21ee5948eCaa776" - 0 address of mnemonic
+  withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
+
+  # Validator balance
+  # Default to 32 ETH
+  validator_balance: 32
+
+
 # Global parameters for the network
 
 # By default includes
@@ -623,16 +735,15 @@ network_params:
 additional_services:
   - assertoor
   - broadcaster
-  - tx_spammer
-  - blob_spammer
+  - tx_fuzz
   - custom_flood
-  - goomy_blob
-  - el_forkmon
+  - spamoor
+  - forkmon
   - blockscout
-  - beacon_metrics_gazer
   - dora
   - full_beaconchain_explorer
-  - prometheus_grafana
+  - prometheus
+  - grafana
   - blobscan
   - dugtrio
   - blutgang
@@ -640,24 +751,33 @@ additional_services:
   - apache
   - tracoor
 
+# Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
+blockscout_params:
+  # blockscout docker image to use
+  # Defaults to ghcr.io/blockscout/blockscout:latest
+  image: "ghcr.io/blockscout/blockscout:latest"
+  # blockscout smart contract verifier image to use
+  # Defaults to ghcr.io/blockscout/smart-contract-verifier:latest
+  verif_image: "ghcr.io/blockscout/smart-contract-verifier:latest"
+  # Frontend image
+  # Defaults to ghcr.io/blockscout/frontend:latest
+  frontend_image: "ghcr.io/blockscout/frontend:latest"
+
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
   # Dora docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
-
+  # Defaults to the latest image
+  image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
-tx_spammer_params:
+tx_fuzz_params:
+  # TX Spammer docker image to use
+  # Defaults to the latest master image
+  image: "ethpandaops/tx-fuzz:master"
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
-  tx_spammer_extra_args: []
-
-# Configuration place for goomy the blob spammer - https://github.com/ethpandaops/goomy-blob
-goomy_blob_params:
-  # A list of optional params that will be passed to the blob-spammer comamnd for modifying its behaviour
-  goomy_blob_args: []
+  tx_fuzz_extra_args: []
 
 # Configuration place for prometheus
 prometheus_params:
@@ -670,6 +790,9 @@ prometheus_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Prometheus docker image to use
+  # Defaults to the latest image
+  image: "prom/prometheus:latest"
 
 # Configuration place for grafana
 grafana_params:
@@ -682,12 +805,15 @@ grafana_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # Grafana docker image to use
+  # Defaults to the latest image
+  image: "grafana/grafana:latest"
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
   # Assertoor docker image to use
-  # Leave blank to use the default image according to your network params
-  image: ""
+  # Defaults to the latest image
+  image: "ethpandaops/assertoor:latest"
 
   # Check chain stability
   # This check monitors the chain and succeeds if:
@@ -755,7 +881,9 @@ wait_for_finalization: false
 # This value will be overridden by participant-specific values
 global_log_level: "info"
 
-# EngineAPI Snooper global flags for all participants
+# Snooper global flag for all participants
+# Snooper can be enabled with the `snooper_enabled` flag per client or globally
+# Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
 # Default to false
 snooper_enabled: false
 
@@ -771,11 +899,25 @@ parallel_keystore_generation: false
 # Default to false
 disable_peer_scoring: false
 
-# Whether the environment should be persistent; this is WIP and is slowly being rolled out accross services
+# Whether the environment should be persistent; this is WIP and is slowly being rolled out across services
 # Note this requires Kurtosis greater than 0.85.49 to work
 # Note Erigon, Besu, Teku persistence is not currently supported with docker.
 # Defaults to false
 persistent: false
+
+# Docker cache url enables all docker images to be pulled through a custom docker registry
+# Disabled by default
+# Defaults to empty cache url
+# Images pulled from dockerhub will be prefixed with "/dh/" by default (docker.io)
+# Images pulled from github registry will be prefixed with "/gh/" by default (ghcr.io)
+# Images pulled from google registry will be prefixed with "/gcr/" by default (gcr.io)
+# If you want to use a local image in combination with the cache, do not put "/" in your local image name
+docker_cache_params:
+  enabled: false
+  url: ""
+  dockerhub_prefix: "/dh/"
+  github_prefix: "/gh/"
+  google_prefix: "/gcr/"
 
 # Supports three valeus
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
@@ -789,21 +931,29 @@ mev_type: null
 # Parameters if MEV is used
 mev_params:
   # The image to use for MEV boost relay
-  mev_relay_image: flashbots/mev-boost-relay
+  mev_relay_image: ethpandaops/mev-boost-relay:main
   # The image to use for the builder
-  mev_builder_image: ethpandaops/flashbots-builder:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
+  # The subsidy to use for the builder (in ETH)
+  mev_builder_subsidy: 0
   # The image to use for mev-boost
-  mev_boost_image: flashbots/mev-boost
+  mev_boost_image: ethpandaops/mev-boost:develop
   # Parameters for MEV Boost. This overrides all arguments of the mev-boost container
   mev_boost_args: []
   # Extra parameters to send to the API
   mev_relay_api_extra_args: []
+  # Extra environment variables to send to the API
+  mev_relay_api_extra_env_vars: {}
   # Extra parameters to send to the housekeeper
   mev_relay_housekeeper_extra_args: []
+  # Extra environment variables to send to the housekeeper
+  mev_relay_housekeeper_extra_env_vars: {}
   # Extra parameters to send to the website
   mev_relay_website_extra_args: []
+  # Extra environment variables to send to the website
+  mev_relay_website_extra_env_vars: {}
   # Extra parameters to send to the builder
   mev_builder_extra_args: []
   # Prometheus additional configuration for the mev builder participant.
@@ -822,6 +972,9 @@ mev_params:
   # Optional parameters to send to the custom_flood script that sends reliable payloads
   custom_flood_params:
     interval_between_transactions: 1
+
+  # Image to use for mock mev
+  mock_mev_image: ethpandaops/rustic-builder:main
 
 # Enables Xatu Sentry for all participants
 # Defaults to false
@@ -881,9 +1034,38 @@ checkpoint_sync_enabled: false
 # Global flag to set checkpoint sync url
 checkpoint_sync_url: ""
 
-# Global paarameter to set the exit ip address of services and public ports
+# Configuration place for spamoor as transaction spammer
+spamoor_params:
+  # The image to use for spamoor
+  image: ethpandaops/spamoor:latest
+  # Resource management for spamoor
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 20
+  max_mem: 300
+  # A list of spammers to launch on startup
+  # example:
+  # - scenario: eoatx  # The spamoor scenario to use (see https://github.com/ethpandaops/spamoor)
+  #   name: "Optional name for this example spammer"
+  #   config:
+  #     throughput: 10  # 10 tx per block
+  # - scenario: erctx
+  #   config:
+  #     throughput: 10  # 10 tx per block
+  spammers: []
+  # A list of optional params that will be passed to the spamoor command for modifying its behaviour
+  extra_args: []
+
+# Ethereum genesis generator params
+ethereum_genesis_generator_params:
+  # The image to use for ethereum genesis generator
+  image: ethpandaops/ethereum-genesis-generator:4.1.9
+
+# Global parameter to set the exit ip address of services and public ports
 port_publisher:
-  # if you have a service that you want to expose on a specific interfact; set that IP here
+  # if you have a service that you want to expose on a specific interface; set that IP here
   # if you set it to auto it gets the public ip from ident.me and sets it
   # Defaults to constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
   # The default value just means its the IP address of the container in which the service is running
@@ -923,6 +1105,22 @@ port_publisher:
   additional_services:
     enabled: false
     public_port_start: 36000
+
+  # MEV public port exposed to your local machine
+  # Disabled by default
+  # Public port start defaults to 37000
+  # You can't run multiple enclaves on the same port settings
+  mev:
+    enabled: false
+    public_port_start: 37000
+
+  # Other public port exposed to your local machine (like ethereum metrics exporter, snooper)
+  # Disabled by default
+  # Public port start defaults to 38000
+  # You can't run multiple enclaves on the same port settings
+  other:
+    enabled: false
+    public_port_start: 38000
 ```
 
 #### Example configurations
@@ -1007,7 +1205,7 @@ network_params:
 </details>
 
 <details>
-    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, transaction-spammer, EngineAPI snooper, and a testnet verifier)</summary>
+    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper)</summary>
 
 ```yaml
 participants:
@@ -1016,7 +1214,9 @@ participants:
     count: 2
 snooper_enabled: true
 additional_services:
-  - prometheus_grafana
+  - prometheus
+  - grafana
+  - tx_fuzz
 ethereum_metrics_exporter_enabled: true
 ```
 
@@ -1112,14 +1312,13 @@ Here's a table of where the keys are used
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
-| 1             | blob_spammer        | ✅                |                 | As the sender of blobs     |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 4             | goomy_blob          | ✅                |                 | As the sender of blobs     |
 | 6             | mev_flood           | ✅                |                 | As the contract owner      |
 | 7             | mev_flood           | ✅                |                 | As the user_key            |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
+| 13            | spamoor             | ✅                |                 | Spams transactions         |
 
 ## Developing On This Package
 
@@ -1153,6 +1352,33 @@ When you're happy with your changes:
    * `mieubrisse` (Kurtosis)
    * `leederek` (Kurtosis)
 1. Once everything works, merge!
+
+## PeerDAS
+
+We can use a set of pre-generated node keys to achieve a perfect column distribution on a 128-column network with an 8-column custody requirement.
+For this to work, we need a network of 16 nodes running, so each node would custody 8 unique columns.
+
+Here's a table of the private keys that can be used to create the nodes:
+| nodeId | sep256k1 privKey | columns |
+|--------|-------------|---------|
+| 0x9908...4159 | 0x86e8...4c8d | 17, 51, 52, 76, 103, 113, 117, 118 |
+| 0xacd4...84e1 | 0xe156...c0da | 24, 35, 78, 80, 101, 107, 114, 122 |
+| 0x3916...b3d | 0x932b...9dd5 | 16, 25, 57, 66, 69, 70, 77, 115 |
+| 0x95a8...373b | 0x6eca...ae2c | 9, 30, 82, 99, 105, 116, 123, 125 |
+| 0x4a53...c82 | 0x2e2e...df9b | 10, 14, 61, 85, 86, 90, 111, 126 |
+| 0x4722...8ff9 | 0x2ea0...32e9 | 2, 5, 18, 32, 33, 49, 83, 94 |
+| 0x912d...add3 | 0xc070...da04 | 3, 13, 48, 50, 74, 97, 119, 121 |
+| 0x93cd...3477 | 0xd915...e831 | 40, 42, 53, 58, 62, 87, 89, 120 |
+| 0x1e19...dd2a | 0x077c...89be | 41, 43, 47, 54, 56, 63, 92, 98 |
+| 0x8165...f316 | 0x5a3e...a8a6 | 8, 22, 38, 60, 79, 91, 93, 112 |
+| 0xe705...fe55 | 0xa10f...c636 | 6, 29, 44, 68, 75, 81, 109, 110 |
+| 0x1835...f044 | 0xbeb4...f299 | 0, 11, 26, 27, 34, 36, 39, 95 |
+| 0x4fb2...e3ce | 0x735e...4947 | 4, 15, 28, 55, 72, 73, 88, 108 |
+| 0xd1f9...50c9 | 0x75ba...167a | 7, 12, 31, 37, 45, 65, 71, 84 |
+| 0x024a...8dc5 | 0xd93a...e1a7 | 1, 19, 20, 21, 46, 64, 67, 124 |
+| 0x3f2b...0db3 | 0xbcde...0608 | 23, 59, 96, 100, 102, 104, 106, 127 |
+
+Private keys can be found in the `static_files/peerdas-node-keys` directory.
 
 <!------------------------ Only links below here -------------------------------->
 

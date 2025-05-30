@@ -17,19 +17,25 @@ CL_GENESIS_DATA_GENERATION_TIME = 5
 CL_NODE_STARTUP_TIME = 5
 
 
-def launch(plan, network_params, participants, parallel_keystore_generation):
-    num_participants = len(participants)
+def launch(
+    plan, network_params, args_with_right_defaults, parallel_keystore_generation
+):
+    num_participants = len(args_with_right_defaults.participants)
     plan.print("Generating cl validator key stores")
     validator_data = None
     if not parallel_keystore_generation:
         validator_data = validator_keystores.generate_validator_keystores(
-            plan, network_params.preregistered_validator_keys_mnemonic, participants
+            plan,
+            network_params.preregistered_validator_keys_mnemonic,
+            args_with_right_defaults.participants,
+            args_with_right_defaults.docker_cache_params,
         )
     else:
         validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
             plan,
             network_params.preregistered_validator_keys_mnemonic,
-            participants,
+            args_with_right_defaults.participants,
+            args_with_right_defaults.docker_cache_params,
         )
 
     plan.print(json.indent(json.encode(validator_data)))
@@ -46,35 +52,16 @@ def launch(plan, network_params, participants, parallel_keystore_generation):
     total_number_of_validator_keys = network_params.preregistered_validator_count
 
     if network_params.preregistered_validator_count == 0:
-        for participant in participants:
+        for participant in args_with_right_defaults.participants:
             total_number_of_validator_keys += participant.validator_count
 
     plan.print("Generating EL CL data")
 
-    # we are running capella genesis - deprecated
-    if network_params.deneb_fork_epoch > 0:
-        ethereum_genesis_generator_image = (
-            constants.ETHEREUM_GENESIS_GENERATOR.capella_genesis
-        )
-    # we are running deneb genesis - default behavior
-    elif network_params.deneb_fork_epoch == 0:
-        ethereum_genesis_generator_image = (
-            constants.ETHEREUM_GENESIS_GENERATOR.deneb_genesis
-        )
-    # we are running electra - experimental
-    elif network_params.electra_fork_epoch != None:
-        if network_params.electra_fork_epoch == 0:
-            ethereum_genesis_generator_image = (
-                constants.ETHEREUM_GENESIS_GENERATOR.verkle_genesis
-            )
-        else:
-            ethereum_genesis_generator_image = (
-                constants.ETHEREUM_GENESIS_GENERATOR.verkle_support_genesis
-            )
-    else:
-        fail(
-            "Unsupported fork epoch configuration, need to define either deneb_fork_epoch or electra_fork_epoch"
-        )
+    ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
+        args_with_right_defaults.docker_cache_params,
+        args_with_right_defaults.ethereum_genesis_generator_params.image,
+    )
+
     return (
         total_number_of_validator_keys,
         ethereum_genesis_generator_image,

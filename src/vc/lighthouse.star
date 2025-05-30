@@ -28,6 +28,7 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    network_params,
     port_publisher,
     vc_index,
 ):
@@ -76,6 +77,10 @@ def get_config(
         "--rpc.laddr tcp://0.0.0.0:{0}",
     ]
 
+    if network_params.gas_limit > 0:
+        cmd.append("--gas-limit={0}".format(network_params.gas_limit))
+        cmd.append("--builder-proposals")
+
     if len(participant.vc_extra_params):
         cmd.extend([param for param in participant.vc_extra_params])
 
@@ -118,9 +123,9 @@ def get_config(
         "files": files,
         "env_vars": env,
         "labels": shared_utils.label_maker(
-            client=constants.CL_TYPE.lighthouse,
+            client=constants.VC_TYPE.lighthouse,
             client_type=constants.CLIENT_TYPES.validator,
-            image=image,
+            image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
             extra_labels=participant.vc_extra_labels,
             supernode=participant.supernode,

@@ -1,9 +1,8 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
+constants = import_module("../package_io/constants.star")
 
 SERVICE_NAME = "grafana"
-
-IMAGE_NAME = "grafana/grafana:latest-ubuntu"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER_UINT16 = 3000
@@ -46,6 +45,8 @@ def launch_grafana(
     prometheus_private_url,
     global_node_selectors,
     grafana_params,
+    port_publisher,
+    index,
 ):
     (
         grafana_config_artifacts_uuid,
@@ -65,11 +66,19 @@ def launch_grafana(
         grafana_additional_dashboards_data,
     )
 
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        HTTP_PORT_ID,
+        index,
+        1,
+    )
+
     config = get_config(
         grafana_config_artifacts_uuid,
         merged_dashboards_artifact_name,
         global_node_selectors,
         grafana_params,
+        public_ports,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -126,9 +135,10 @@ def get_config(
     grafana_dashboards_artifacts_name,
     node_selectors,
     grafana_params,
+    public_ports,
 ):
     return ServiceConfig(
-        image=IMAGE_NAME,
+        image=grafana_params.image,
         ports=USED_PORTS,
         env_vars={
             CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
@@ -146,6 +156,7 @@ def get_config(
         min_memory=grafana_params.min_mem,
         max_memory=grafana_params.max_mem,
         node_selectors=node_selectors,
+        public_ports=public_ports,
     )
 
 

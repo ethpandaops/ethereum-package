@@ -5,10 +5,14 @@ STATIC_FILES_DIRPATH = "/static_files"
 EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/genesis-generation-config/el-cl/values.env.tmpl"
 )
+EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH
+    + "/genesis-generation-config/el-cl/additional-contracts.json.tmpl"
+)
 
 # EL Forkmon config
-EL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/el-forkmon-config/config.toml.tmpl"
+FORKMON_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/forkmon-config/config.toml.tmpl"
 )
 
 # Validator Ranges config
@@ -43,6 +47,12 @@ ASSERTOOR_CONFIG_TEMPLATE_FILEPATH = (
 )
 ASSERTOOR_TESTS_CONFIG_DIRPATH = (
     STATIC_FILES_DIRPATH + ASSERTOOR_CONFIG_DIRPATH + "/tests"
+)
+
+# spamoor config
+SPAMOOR_CONFIG_DIRPATH = "/spamoor-config"
+SPAMOOR_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + SPAMOOR_CONFIG_DIRPATH + "/startup-spammer.yaml.tmpl"
 )
 
 # xatu-sentry config
@@ -84,6 +94,7 @@ CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH = (
 JWT_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/jwt/jwtsecret"
 KEYMANAGER_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/keymanager/keymanager.txt"
 
+PEERDAS_NODE_KEY_FILEPATH = STATIC_FILES_DIRPATH + "/peerdas-node-keys/"
 
 SHADOWFORK_FILEPATH = "/network-configs/latest_block.json"
 

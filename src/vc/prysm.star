@@ -22,6 +22,7 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    network_params,
     port_publisher,
     vc_index,
 ):
@@ -40,6 +41,8 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--beacon-rpc-provider=" + cl_context.beacon_grpc_url,
+        "--beacon-rest-api-provider=" + beacon_http_url,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -65,6 +68,9 @@ def get_config(
             ]
         )
 
+    if network_params.gas_limit > 0:
+        cmd.append("--suggested-gas-limit={0}".format(network_params.gas_limit))
+
     keymanager_api_cmd = [
         "--rpc",
         "--http-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
@@ -73,12 +79,8 @@ def get_config(
     ]
 
     if cl_context.client_name != constants.CL_TYPE.prysm:
-        cmd.append("--beacon-rpc-provider=" + beacon_http_url)
-        cmd.append("--beacon-rest-api-provider=" + beacon_http_url)
+        # Use Beacon API if a Prysm VC wants to connect to a non-Prysm BN
         cmd.append("--enable-beacon-rest-api")
-    else:  # we are using Prysm CL
-        cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
-        cmd.append("--beacon-rest-api-provider=" + cl_context.beacon_grpc_url)
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -123,9 +125,9 @@ def get_config(
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.CL_TYPE.prysm,
+            client=constants.VC_TYPE.prysm,
             client_type=constants.CLIENT_TYPES.validator,
-            image=image,
+            image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
             extra_labels=participant.vc_extra_labels,
             supernode=participant.supernode,

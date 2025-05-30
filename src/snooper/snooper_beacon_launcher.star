@@ -21,10 +21,31 @@ MIN_MEMORY = 10
 MAX_MEMORY = 600
 
 
-def launch(plan, service_name, cl_context, node_selectors):
+def launch(
+    plan,
+    service_name,
+    cl_context,
+    node_selectors,
+    port_publisher,
+    global_other_index,
+    docker_cache_params,
+):
     snooper_service_name = "{0}".format(service_name)
 
-    snooper_config = get_config(service_name, cl_context, node_selectors)
+    public_ports = shared_utils.get_other_public_port(
+        port_publisher,
+        SNOOPER_BEACON_RPC_PORT_ID,
+        global_other_index,
+        0,
+    )
+
+    snooper_config = get_config(
+        service_name,
+        cl_context,
+        node_selectors,
+        docker_cache_params,
+        public_ports,
+    )
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
     snooper_http_port = snooper_service.ports[SNOOPER_BEACON_RPC_PORT_ID]
@@ -33,7 +54,13 @@ def launch(plan, service_name, cl_context, node_selectors):
     )
 
 
-def get_config(service_name, cl_context, node_selectors):
+def get_config(
+    service_name,
+    cl_context,
+    node_selectors,
+    docker_cache_params,
+    public_ports,
+):
     beacon_rpc_port_num = "{0}".format(
         cl_context.beacon_http_url,
     )
@@ -45,8 +72,11 @@ def get_config(service_name, cl_context, node_selectors):
     ]
 
     return ServiceConfig(
-        image=constants.DEFAULT_SNOOPER_IMAGE,
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params, constants.DEFAULT_SNOOPER_IMAGE
+        ),
         ports=SNOOPER_USED_PORTS,
+        public_ports=public_ports,
         cmd=cmd,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
