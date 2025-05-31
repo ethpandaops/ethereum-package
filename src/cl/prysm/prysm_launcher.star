@@ -49,16 +49,12 @@ def launch(
     participant_index,
     network_params,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     beacon_config = get_beacon_config(
         plan,
         launcher,
         beacon_service_name,
         participant,
-        log_level,
+        global_log_level,
         bootnode_contexts,
         el_context,
         full_name,
@@ -134,7 +130,7 @@ def get_beacon_config(
     launcher,
     beacon_service_name,
     participant,
-    log_level,
+    global_log_level,
     bootnode_contexts,
     el_context,
     full_name,
@@ -149,6 +145,10 @@ def get_beacon_config(
     participant_index,
     network_params,
 ):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if participant.snooper_enabled:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
