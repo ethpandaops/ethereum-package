@@ -229,6 +229,7 @@ def launch(
             )
 
             cl_participant_info[cl_service_name] = {
+                "client_name": cl_type,
                 "snooper_enabled": participant.snooper_enabled,
                 "snooper_el_engine_context": snooper_el_engine_context,
                 "validator_keystore_files_artifact_uuid": new_cl_node_validator_keystores.files_artifact_uuid if new_cl_node_validator_keystores else "",
@@ -264,7 +265,7 @@ def launch(
         nodes_metrics_info = [beacon_node_metrics_info]
 
         cl_context = cl_context_l.new_cl_context(
-            client_name="teku", 
+            client_name=cl_participant_info[beacon_service_name]["client_name"], 
             enr=beacon_node_enr, 
             ip_addr=beacon_service.ip_address, 
             http_port=beacon_http_port.number,  
