@@ -93,6 +93,7 @@ def launch(
     network_name = shared_utils.get_network_name(network_params.network)
 
     cl_service_configs = {}
+    cl_participant_info = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
@@ -227,7 +228,13 @@ def launch(
                 network_params,
             )
 
-        
+            cl_participant_info[cl_service_name] = {
+                "snooper_enabled": participant.snooper_enabled,
+                "snooper_el_engine_context": snooper_el_engine_context,
+                "validator_keystore_files_artifact_uuid": new_cl_node_validator_keystores.files_artifact_uuid if new_cl_node_validator_keystores else "",
+                "supernode": participant.supernode,
+            }
+
     # add rest of cl's in parallel
     cl_services = plan.add_services(cl_service_configs)
 
@@ -266,10 +273,10 @@ def launch(
             beacon_service_name=beacon_service_name, 
             multiaddr=beacon_multiaddr, 
             peer_id=beacon_peer_id, 
-            snooper_enabled=False,  # TODO: update
-            snooper_el_engine_context=None,  # TODO: update
-            validator_keystore_files_artifact_uuid="",  # TODO: update
-            supernode=False,  # TODO: update
+            snooper_enabled=cl_participant_info[beacon_service_name]["snooper_enabled"],
+            snooper_el_engine_context=cl_participant_info[beacon_service_name]["snooper_el_engine_context"],
+            validator_keystore_files_artifact_uuid=cl_participant_info[beacon_service_name]["validator_keystore_files_artifact_uuid"],
+            supernode=cl_participant_info[beacon_service_name]["supernode"],
         )
 
         all_cl_contexts.append(cl_context)
