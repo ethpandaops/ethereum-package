@@ -45,17 +45,13 @@ def launch(
     participant_index,
     network_params,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     # Launch Beacon node
     beacon_config = get_beacon_config(
         plan,
         launcher,
         beacon_service_name,
         participant,
-        log_level,
+        global_log_level,
         bootnode_contexts,
         el_context,
         full_name,
@@ -150,7 +146,7 @@ def get_beacon_config(
     launcher,
     beacon_service_name,
     participant,
-    log_level,
+    global_log_level,
     bootnode_contexts,
     el_context,
     full_name,
@@ -165,6 +161,10 @@ def get_beacon_config(
     participant_index,
     network_params,
 ):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     el_client_rpc_url_str = "http://{0}:{1}".format(
         el_context.ip_addr,
         el_context.rpc_port_num,

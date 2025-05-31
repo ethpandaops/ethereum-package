@@ -1,3 +1,5 @@
+node_metrics = import_module("../node_metrics_info.star")
+cl_context_l = import_module("./cl_context.star")
 lighthouse = import_module("./lighthouse/lighthouse_launcher.star")
 lodestar = import_module("./lodestar/lodestar_launcher.star")
 nimbus = import_module("./nimbus/nimbus_launcher.star")
@@ -37,10 +39,12 @@ def launch(
         constants.CL_TYPE.lighthouse: {
             "launcher": lighthouse.new_lighthouse_launcher(el_cl_data, jwt_file),
             "launch_method": lighthouse.launch,
+            "get_beacon_config": lighthouse.get_beacon_config,
         },
         constants.CL_TYPE.lodestar: {
             "launcher": lodestar.new_lodestar_launcher(el_cl_data, jwt_file),
             "launch_method": lodestar.launch,
+            "get_beacon_config": lodestar.get_beacon_config,
         },
         constants.CL_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(
@@ -49,6 +53,7 @@ def launch(
                 keymanager_file,
             ),
             "launch_method": nimbus.launch,
+            "get_beacon_config": nimbus.get_beacon_config,
         },
         constants.CL_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
@@ -56,6 +61,7 @@ def launch(
                 jwt_file,
             ),
             "launch_method": prysm.launch,
+            "get_beacon_config": prysm.get_beacon_config,
         },
         constants.CL_TYPE.teku: {
             "launcher": teku.new_teku_launcher(
@@ -64,6 +70,7 @@ def launch(
                 keymanager_file,
             ),
             "launch_method": teku.launch,
+            "get_beacon_config": teku.get_beacon_config,
         },
         constants.CL_TYPE.grandine: {
             "launcher": grandine.new_grandine_launcher(
@@ -71,6 +78,7 @@ def launch(
                 jwt_file,
             ),
             "launch_method": grandine.launch,
+            "get_beacon_config": teku.get_beacon_config,
         },
     }
 
@@ -83,6 +91,8 @@ def launch(
         else None
     )
     network_name = shared_utils.get_network_name(network_params.network)
+
+    cl_service_configs = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
@@ -102,9 +112,10 @@ def launch(
                 )
             )
 
-        cl_launcher, launch_method = (
+        cl_launcher, launch_method, get_beacon_config = (
             cl_launchers[cl_type]["launcher"],
             cl_launchers[cl_type]["launch_method"],
+            cl_launchers[cl_type]["get_beacon_config"],
         )
 
         index_str = shared_utils.zfill_custom(
@@ -185,9 +196,17 @@ def launch(
                 index,
                 network_params,
             )
+
+            all_cl_contexts.append(cl_context)
+
+            # Add participant cl additional prometheus labels
+            for metrics_info in cl_context.cl_nodes_metrics_info:
+                if metrics_info != None:
+                    metrics_info["config"] = participant.prometheus_config
         else:
             boot_cl_client_ctx = all_cl_contexts
-            cl_context = launch_method(
+
+            cl_service_configs[cl_service_name] = get_beacon_config(
                 plan,
                 cl_launcher,
                 cl_service_name,
@@ -208,12 +227,58 @@ def launch(
                 network_params,
             )
 
+        
+    # add rest of cl's in parallel
+    cl_services = plan.add_services(cl_service_configs)
+
+    for beacon_service_name, beacon_service in cl_services.items():
+        beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
+        beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, beacon_http_port.number) 
+        beacon_metrics_port = beacon_service.ports[constants.METRICS_PORT_ID]
+        beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
+
+        beacon_node_identity_recipe = GetHttpRequestRecipe(
+            endpoint="/eth/v1/node/identity",
+            port_id=constants.HTTP_PORT_ID,
+            extract={
+                "enr": ".data.enr",
+                "multiaddr": ".data.p2p_addresses[0]",
+                "peer_id": ".data.peer_id",
+            },
+        )
+
+        response = plan.request(recipe=beacon_node_identity_recipe, service_name=beacon_service_name)
+        beacon_node_enr = response["extract.enr"]
+        beacon_multiaddr = response["extract.multiaddr"]
+        beacon_peer_id = response["extract.peer_id"]
+
+        # TODO: variable or const for /metrics
+        beacon_node_metrics_info = node_metrics.new_node_metrics_info(beacon_service_name, "/metrics", beacon_metrics_url)
+        nodes_metrics_info = [beacon_node_metrics_info]
+
+        cl_context = cl_context_l.new_cl_context(
+            client_name="teku", 
+            enr=beacon_node_enr, 
+            ip_addr=beacon_service.ip_address, 
+            http_port=beacon_http_port.number,  
+            beacon_http_url=beacon_http_url, 
+            cl_nodes_metrics_info=nodes_metrics_info, 
+            beacon_service_name=beacon_service_name, 
+            multiaddr=beacon_multiaddr, 
+            peer_id=beacon_peer_id, 
+            snooper_enabled=False,  # TODO: update
+            snooper_el_engine_context=None,  # TODO: update
+            validator_keystore_files_artifact_uuid="",  # TODO: update
+            supernode=False,  # TODO: update
+        )
+
+        all_cl_contexts.append(cl_context)
+
         # Add participant cl additional prometheus labels
         for metrics_info in cl_context.cl_nodes_metrics_info:
             if metrics_info != None:
                 metrics_info["config"] = participant.prometheus_config
 
-        all_cl_contexts.append(cl_context)
     return (
         all_cl_contexts,
         all_snooper_el_engine_contexts,
