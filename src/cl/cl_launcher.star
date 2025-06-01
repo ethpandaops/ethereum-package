@@ -237,7 +237,9 @@ def launch(
             }
 
     # add rest of cl's in parallel
-    cl_services = plan.add_services(cl_service_configs)
+    cl_services = {}
+    if len(cl_service_configs) > 0:
+        cl_services = plan.add_services(cl_service_configs)
 
     for beacon_service_name, beacon_service in cl_services.items():
         beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
