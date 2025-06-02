@@ -1367,6 +1367,7 @@ def get_default_xatu_sentry_params():
         ],
     }
 
+
 def get_default_guardian_params():
     return {
         "image": constants.DEFAULT_GUARDIAN_IMAGE,
@@ -1376,6 +1377,8 @@ def get_default_guardian_params():
         "max_mem": 512,
         "extra_args": [],
     }
+
+
 def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,

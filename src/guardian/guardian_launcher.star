@@ -12,6 +12,7 @@ USED_PORTS = {
     )
 }
 
+
 def launch_guardian(
     plan,
     participant_contexts,
@@ -46,13 +47,21 @@ def launch_guardian(
         plan.add_service(service_name, config)
         guardian_services.append(service_name)
 
-        plan.print("Launched guardian instance {0} for beacon node {1} (ENR: {2})".format(
-            service_name,
-            full_name,
-            cl_client.enr[:50] + "..." if len(cl_client.enr) > 50 else cl_client.enr
-        ))
+        plan.print(
+            "Launched guardian instance {0} for beacon node {1} (ENR: {2})".format(
+                service_name,
+                full_name,
+                cl_client.enr[:50] + "..."
+                if len(cl_client.enr) > 50
+                else cl_client.enr,
+            )
+        )
 
-    plan.print("Successfully launched {0} DAS Guardian instances".format(len(guardian_services)))
+    plan.print(
+        "Successfully launched {0} DAS Guardian instances".format(
+            len(guardian_services)
+        )
+    )
     return guardian_services
 
 
@@ -65,12 +74,18 @@ def get_config(
     docker_cache_params,
 ):
     cmd = [
-        "--api.endpoint", beacon_api_url,
-        "--libp2p.host", "0.0.0.0",
-        "--libp2p.port", "9013",
-        "--node.key", node_enr,
-        "--connection.retries", "5",
-        "--connection.timeout", "30s"
+        "--api.endpoint",
+        beacon_api_url,
+        "--libp2p.host",
+        "0.0.0.0",
+        "--libp2p.port",
+        "9013",
+        "--node.key",
+        node_enr,
+        "--connection.retries",
+        "5",
+        "--connection.timeout",
+        "30s",
     ]
 
     if len(guardian_params.extra_args) > 0:
