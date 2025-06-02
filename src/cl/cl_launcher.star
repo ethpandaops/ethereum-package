@@ -78,7 +78,7 @@ def launch(
                 jwt_file,
             ),
             "launch_method": grandine.launch,
-            "get_beacon_config": teku.get_beacon_config,
+            "get_beacon_config": grandine.get_beacon_config,
         },
     }
 
