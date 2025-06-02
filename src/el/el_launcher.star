@@ -185,6 +185,7 @@ def launch(
 
     # Create contexts for each service
     for el_service_name, el_service in el_services.items():
+        # TODO: add context on why erigon uses ws-rpc port?
         if el_participant_info[el_service_name]["client_name"] == constants.EL_TYPE.erigon:
             enode, enr = el_admin_node_info.get_enode_enr_for_node(
                 plan, el_service_name, constants.WS_RPC_PORT_ID
