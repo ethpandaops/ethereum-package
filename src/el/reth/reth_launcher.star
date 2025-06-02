@@ -58,7 +58,7 @@ def launch(
         service_name,
         existing_el_clients,
         cl_client_name,
-        log_level,
+        global_log_level,
         persistent,
         tolerations,
         node_selectors,
@@ -325,6 +325,7 @@ def get_el_context(
     plan,
     service_name,
     service,
+    launcher,
 ):
     enode = el_admin_node_info.get_enode_for_node(
         plan, service_name, constants.RPC_PORT_ID

@@ -39,8 +39,7 @@ def launch(
             ),
             "launch_method": geth.launch,
             "get_config": geth.get_config,
-            "metrics_path": geth.METRICS_PATH,
-            "verbosity_levels": geth.VERBOSITY_LEVELS,
+            "get_el_context": geth.get_el_context,
         },
         constants.EL_TYPE.besu: {
             "launcher": besu.new_besu_launcher(
@@ -49,8 +48,7 @@ def launch(
             ),
             "launch_method": besu.launch,
             "get_config": besu.get_config,
-            "metrics_path": besu.METRICS_PATH,
-            "verbosity_levels": besu.VERBOSITY_LEVELS,
+            "get_el_context": besu.get_el_context,
         },
         constants.EL_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
@@ -61,8 +59,7 @@ def launch(
             ),
             "launch_method": erigon.launch,
             "get_config": erigon.get_config,
-            "metrics_path": erigon.METRICS_PATH,
-            "verbosity_levels": erigon.VERBOSITY_LEVELS,
+            "get_el_context": erigon.get_el_context,
         },
         constants.EL_TYPE.nethermind: {
             "launcher": nethermind.new_nethermind_launcher(
@@ -71,8 +68,7 @@ def launch(
             ),
             "launch_method": nethermind.launch,
             "get_config": nethermind.get_config,
-            "metrics_path": nethermind.METRICS_PATH,
-            "verbosity_levels": nethermind.VERBOSITY_LEVELS,
+            "get_el_context": nethermind.get_el_context,
         },
         constants.EL_TYPE.reth: {
             "launcher": reth.new_reth_launcher(
@@ -81,8 +77,7 @@ def launch(
             ),
             "launch_method": reth.launch,
             "get_config": reth.get_config,
-            "metrics_path": reth.METRICS_PATH,
-            "verbosity_levels": reth.VERBOSITY_LEVELS,
+            "get_el_context": reth.get_el_context,
         },
         constants.EL_TYPE.reth_builder: {
             "launcher": reth.new_reth_launcher(
@@ -93,8 +88,7 @@ def launch(
             ),
             "launch_method": reth.launch,
             "get_config": reth.get_config,
-            "metrics_path": reth.METRICS_PATH,
-            "verbosity_levels": reth.VERBOSITY_LEVELS,
+            "get_el_context": reth.get_el_context,
         },
         constants.EL_TYPE.ethereumjs: {
             "launcher": ethereumjs.new_ethereumjs_launcher(
@@ -103,8 +97,7 @@ def launch(
             ),
             "launch_method": ethereumjs.launch,
             "get_config": ethereumjs.get_config,
-            "metrics_path": ethereumjs.METRICS_PATH,
-            "verbosity_levels": ethereumjs.VERBOSITY_LEVELS,
+            "get_el_context": ethereumjs.get_el_context,
         },
         constants.EL_TYPE.nimbus: {
             "launcher": nimbus_eth1.new_nimbus_launcher(
@@ -194,6 +187,7 @@ def launch(
             el_participant_info[el_service_name] = {
                 "client_name": el_type,
                 "supernode": participant.supernode,
+                "el_launcher": el_launcher,
             }
 
     # Start remainder of EL services in parallel
@@ -207,6 +201,7 @@ def launch(
             plan,
             el_service_name,
             el_service,
+            launcher,
         )
 
         # Add participant el additional prometheus metrics
