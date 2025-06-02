@@ -194,7 +194,6 @@ def launch(
             el_participant_info[el_service_name] = {
                 "client_name": el_type,
                 "supernode": participant.supernode,
-                "metrics_path": metrics_path,
             }
 
     # Start remainder of EL services in parallel
@@ -207,6 +206,7 @@ def launch(
         el_context = get_el_context(
             plan,
             el_service_name,
+            el_service,
         )
 
         # Add participant el additional prometheus metrics

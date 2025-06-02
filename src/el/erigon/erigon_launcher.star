@@ -285,6 +285,7 @@ def get_config(
 def get_el_context(
     plan,
     service_name,
+    service,
 ):
     enode, enr = el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, constants.WS_RPC_PORT_ID
