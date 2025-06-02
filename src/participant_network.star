@@ -204,6 +204,7 @@ def launch_participant_network(
         fail("No participants configured")
 
     vc_service_configs = {}
+    vc_service_info = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
@@ -417,6 +418,9 @@ def launch_participant_network(
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
         )
+        vc_service_info[service_name] = {
+            "client_name": vc_type,
+        }
         current_vc_index += 1
 
     # add vc's in parallel to speed package execution
@@ -426,18 +430,11 @@ def launch_participant_network(
 
     all_vc_contexts = []
     for vc_service_name, vc_service in vc_services.items():
-        validator_metrics_port = vc_service.ports[constants.METRICS_PORT_ID]
-        validator_metrics_url = "{0}:{1}".format(
-            vc_service.ip_address, validator_metrics_port.number
-        )
-        validator_node_metrics_info = node_metrics.new_node_metrics_info(
-            vc_service_name, vc_shared.METRICS_PATH, validator_metrics_url
-        )
-
-        vc_context = vc_context_l.new_vc_context(
-            client_name=vc_type,
-            service_name=vc_service_name,
-            metrics_info=validator_node_metrics_info,
+        vc_context = vc.get_vc_context(
+            plan,
+            vc_service_name,
+            vc_service,
+            vc_service_info[vc_service_name]["client_name"],
         )
 
         if vc_context and vc_context.metrics_info:
