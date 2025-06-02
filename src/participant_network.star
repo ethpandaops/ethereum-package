@@ -419,7 +419,7 @@ def launch_participant_network(
         )
         current_vc_index += 1
 
-    # Launch all validator clients 
+    # add vc's in parallel to speed package execution
     vc_services = {}
     if len(all_vc_contexts) > 0:
         vc_services = plan.add_services(vc_service_configs)
