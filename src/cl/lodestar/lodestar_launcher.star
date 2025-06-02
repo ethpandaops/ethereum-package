@@ -308,7 +308,9 @@ def get_beacon_config(
         )
 
     if persistent:
-        volume_size_key = "devnets" if "devnet" in network_params.network else network_params.network
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)

@@ -205,7 +205,9 @@ def get_config(
                 ],
             )
         )
-        volume_size_key = "devnets" if "devnet" in network_params.network else network_params.network
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
