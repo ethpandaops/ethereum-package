@@ -1059,6 +1059,20 @@ spamoor_params:
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
   extra_args: []
 
+# Configuration place for guardian as DAS guardian
+guardian_params:
+  # The image to use for guardian
+  image: ethpandaops/eth-das-guardian:main
+  # Resource management for guardian
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 100
+  max_cpu: 500
+  min_mem: 128
+  max_mem: 512
+  # A list of optional params that will be passed to the guardian command for modifying its behaviour
+  extra_args: []
+
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator

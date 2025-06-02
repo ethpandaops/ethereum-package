@@ -81,6 +81,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "guardian_params",
 )
 
 
@@ -114,6 +115,7 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
+    result["guardian_params"] = get_default_guardian_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -179,6 +181,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "guardian_params":
+            for sub_attr in input_args["guardian_params"]:
+                sub_value = input_args["guardian_params"][sub_attr]
+                result["guardian_params"][sub_attr] = sub_value
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
@@ -535,6 +541,14 @@ def input_parser(plan, input_args):
             max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
+        ),
+        guardian_params=struct(
+            image=result["guardian_params"]["image"],
+            min_cpu=result["guardian_params"]["min_cpu"],
+            max_cpu=result["guardian_params"]["max_cpu"],
+            min_mem=result["guardian_params"]["min_mem"],
+            max_mem=result["guardian_params"]["max_mem"],
+            extra_args=result["guardian_params"]["extra_args"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -975,6 +989,7 @@ def default_input_args(input_args):
             "public_port_start": None,
         },
         "spamoor_params": get_default_spamoor_params(),
+        "guardian_params": get_default_guardian_params(),
     }
 
 
@@ -1352,7 +1367,15 @@ def get_default_xatu_sentry_params():
         ],
     }
 
-
+def get_default_guardian_params():
+    return {
+        "image": constants.DEFAULT_GUARDIAN_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 500,
+        "min_mem": 128,
+        "max_mem": 512,
+        "extra_args": [],
+    }
 def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
@@ -1596,6 +1619,7 @@ def docker_cache_image_override(plan, result):
         "grafana_params.image",
         "spamoor_params.image",
         "ethereum_genesis_generator_params.image",
+        "guardian_params.image",
     ]
 
     if result["docker_cache_params"]["url"] == "":

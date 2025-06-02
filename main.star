@@ -729,6 +729,7 @@ def run(plan, args={}):
                 all_participants,
                 args_with_right_defaults.participants,
                 network_params,
+                args_with_right_defaults.guardian_params,
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
                 index,

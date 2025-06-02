@@ -2,23 +2,22 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 
 SERVICE_NAME_PREFIX = "guardian"
-DEFAULT_IMAGE = "bbusa/das:latest"
+HTTP_PORT_NUMBER = 9013
 
-# The min/max CPU/memory that guardian can use
-MIN_CPU = 100
-MAX_CPU = 500
-MIN_MEMORY = 128
-MAX_MEMORY = 512
-
-# No ports needed as this is a one-shot scanning tool
-USED_PORTS = {}
-
+USED_PORTS = {
+    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
+        HTTP_PORT_NUMBER,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+    )
+}
 
 def launch_guardian(
     plan,
     participant_contexts,
     participant_configs,
     network_params,
+    guardian_params,
     global_node_selectors,
     port_publisher,
     additional_service_index,
@@ -33,12 +32,13 @@ def launch_guardian(
             participant, index, participant_contexts, participant_configs
         )
 
-        service_name = "{0}-{1}".format(SERVICE_NAME_PREFIX, index)
+        service_name = "{0}-{1}".format(SERVICE_NAME_PREFIX, index + 1)
 
         config = get_config(
             service_name,
             cl_client.beacon_http_url,
             cl_client.enr,
+            guardian_params,
             global_node_selectors,
             docker_cache_params,
         )
@@ -60,6 +60,7 @@ def get_config(
     service_name,
     beacon_api_url,
     node_enr,
+    guardian_params,
     node_selectors,
     docker_cache_params,
 ):
@@ -72,16 +73,16 @@ def get_config(
         "--connection.timeout", "30s"
     ]
 
+    if len(guardian_params.extra_args) > 0:
+        cmd.extend([param for param in guardian_params.extra_args])
+
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
-            docker_cache_params,
-            DEFAULT_IMAGE,
-        ),
+        image=guardian_params.image,
         ports=USED_PORTS,
         cmd=cmd,
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
+        min_cpu=guardian_params.min_cpu,
+        max_cpu=guardian_params.max_cpu,
+        min_memory=guardian_params.min_mem,
+        max_memory=guardian_params.max_mem,
         node_selectors=node_selectors,
     )
