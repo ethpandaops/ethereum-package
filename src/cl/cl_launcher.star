@@ -40,11 +40,13 @@ def launch(
             "launcher": lighthouse.new_lighthouse_launcher(el_cl_data, jwt_file),
             "launch_method": lighthouse.launch,
             "get_beacon_config": lighthouse.get_beacon_config,
+            "get_cl_context": lighthouse.get_cl_context,
         },
         constants.CL_TYPE.lodestar: {
             "launcher": lodestar.new_lodestar_launcher(el_cl_data, jwt_file),
             "launch_method": lodestar.launch,
             "get_beacon_config": lodestar.get_beacon_config,
+            "get_cl_context": lodestar.get_cl_context,
         },
         constants.CL_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(
@@ -54,6 +56,7 @@ def launch(
             ),
             "launch_method": nimbus.launch,
             "get_beacon_config": nimbus.get_beacon_config,
+            "get_cl_context": nimbus.get_cl_context,
         },
         constants.CL_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
@@ -62,6 +65,7 @@ def launch(
             ),
             "launch_method": prysm.launch,
             "get_beacon_config": prysm.get_beacon_config,
+            "get_cl_context": prysm.get_cl_context,
         },
         constants.CL_TYPE.teku: {
             "launcher": teku.new_teku_launcher(
@@ -71,6 +75,7 @@ def launch(
             ),
             "launch_method": teku.launch,
             "get_beacon_config": teku.get_beacon_config,
+            "get_cl_context": teku.get_cl_context,
         },
         constants.CL_TYPE.grandine: {
             "launcher": grandine.new_grandine_launcher(
@@ -79,6 +84,7 @@ def launch(
             ),
             "launch_method": grandine.launch,
             "get_beacon_config": grandine.get_beacon_config,
+            "get_cl_context": grandine.get_cl_context,
         },
     }
 
@@ -113,10 +119,11 @@ def launch(
                 )
             )
 
-        cl_launcher, launch_method, get_beacon_config = (
+        cl_launcher, launch_method, get_beacon_config, get_cl_context = (
             cl_launchers[cl_type]["launcher"],
             cl_launchers[cl_type]["launch_method"],
-            cl_launchers[cl_type]["get_beacon_config"],
+            cl_launchers[cl_type]["get_beacon_config"], 
+            cl_launchers[cl_type]["get_cl_context"],
         )
 
         index_str = shared_utils.zfill_custom(
@@ -229,11 +236,11 @@ def launch(
             )
 
             cl_participant_info[cl_service_name] = {
-                "client_name": cl_type,
-                "snooper_enabled": participant.snooper_enabled,
                 "snooper_el_engine_context": snooper_el_engine_context,
-                "validator_keystore_files_artifact_uuid": new_cl_node_validator_keystores.files_artifact_uuid if new_cl_node_validator_keystores else "",
-                "supernode": participant.supernode,
+                "new_cl_node_validator_keystores": new_cl_node_validator_keystores,
+                "participant": participant,
+                "node_selectors": node_selectors,
+                "get_cl_context": get_cl_context,
             }
 
     # add rest of cl's in parallel to speed package execution
@@ -242,46 +249,18 @@ def launch(
         cl_services = plan.add_services(cl_service_configs)
 
     for beacon_service_name, beacon_service in cl_services.items():
-        beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
-        beacon_http_url = "http://{0}:{1}".format(beacon_service.ip_address, beacon_http_port.number) 
-        beacon_metrics_port = beacon_service.ports[constants.METRICS_PORT_ID]
-        beacon_metrics_url = "{0}:{1}".format(beacon_service.ip_address, beacon_metrics_port.number)
+        get_cl_context = cl_participant_info[beacon_service_name]["get_cl_context"]
 
-        beacon_node_identity_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v1/node/identity",
-            port_id=constants.HTTP_PORT_ID,
-            extract={
-                "enr": ".data.enr",
-                "multiaddr": ".data.p2p_addresses[0]",
-                "peer_id": ".data.peer_id",
-            },
+        cl_context = get_cl_context(
+            plan,
+            beacon_service_name,
+            beacon_service,
+            cl_participant_info[beacon_service_name]["participant"],
+            cl_participant_info[beacon_service_name]["snooper_el_engine_context"],
+            cl_participant_info[beacon_service_name]["new_cl_node_validator_keystores"],
+            cl_participant_info[beacon_service_name]["node_selectors"],
         )
-
-        response = plan.request(recipe=beacon_node_identity_recipe, service_name=beacon_service_name)
-        beacon_node_enr = response["extract.enr"]
-        beacon_multiaddr = response["extract.multiaddr"]
-        beacon_peer_id = response["extract.peer_id"]
-
-        # TODO: variable or const for /metrics
-        beacon_node_metrics_info = node_metrics.new_node_metrics_info(beacon_service_name, "/metrics", beacon_metrics_url)
-        nodes_metrics_info = [beacon_node_metrics_info]
-
-        cl_context = cl_context_l.new_cl_context(
-            client_name=cl_participant_info[beacon_service_name]["client_name"], 
-            enr=beacon_node_enr, 
-            ip_addr=beacon_service.ip_address, 
-            http_port=beacon_http_port.number,  
-            beacon_http_url=beacon_http_url, 
-            cl_nodes_metrics_info=nodes_metrics_info, 
-            beacon_service_name=beacon_service_name, 
-            multiaddr=beacon_multiaddr, 
-            peer_id=beacon_peer_id, 
-            snooper_enabled=cl_participant_info[beacon_service_name]["snooper_enabled"],
-            snooper_el_engine_context=cl_participant_info[beacon_service_name]["snooper_el_engine_context"],
-            validator_keystore_files_artifact_uuid=cl_participant_info[beacon_service_name]["validator_keystore_files_artifact_uuid"],
-            supernode=cl_participant_info[beacon_service_name]["supernode"],
-        )
-
+        
         all_cl_contexts.append(cl_context)
 
         # Add participant cl additional prometheus labels
