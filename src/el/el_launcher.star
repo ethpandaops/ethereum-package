@@ -113,8 +113,7 @@ def launch(
             ),
             "launch_method": nimbus_eth1.launch,
             "get_config": nimbus_eth1.get_config,
-            "metrics_path": nimbus_eth1.METRICS_PATH,
-            "verbosity_levels": nimbus_eth1.VERBOSITY_LEVELS,
+            "get_el_context": nimbus_eth1.get_el_context,
         },
     }
 
@@ -141,12 +140,11 @@ def launch(
                 )
             )
 
-        el_launcher, launch_method, get_config, metrics_path, verbosity_levels = (
+        el_launcher, launch_method, get_config, get_el_context = (
             el_launchers[el_type]["launcher"],
             el_launchers[el_type]["launch_method"],
             el_launchers[el_type]["get_config"],
-            el_launchers[el_type]["metrics_path"],
-            el_launchers[el_type]["verbosity_levels"],
+            el_launchers[el_type]["get_el_context"],
         )
 
         # Zero-pad the index using the calculated zfill value
@@ -184,9 +182,7 @@ def launch(
                 el_service_name,
                 all_el_contexts,
                 cl_type,
-                input_parser.get_client_log_level_or_default(
-                    participant.el_log_level, global_log_level, verbosity_levels
-                ),
+                global_log_level,
                 persistent,
                 tolerations,
                 node_selectors,
@@ -208,52 +204,9 @@ def launch(
 
     # Create contexts for each service
     for el_service_name, el_service in el_services.items():
-        # TODO: add context on why erigon uses ws-rpc port?
-        if el_participant_info[el_service_name]["client_name"] == constants.EL_TYPE.erigon:
-            enode, enr = el_admin_node_info.get_enode_enr_for_node(
-                plan, el_service_name, constants.WS_RPC_PORT_ID
-            )
-        else:
-            enode, enr = el_admin_node_info.get_enode_enr_for_node(
-                plan, el_service_name, constants.RPC_PORT_ID
-            )
-
-        metrics_port = el_service.ports[constants.METRICS_PORT_ID]
-        metrics_url = "{0}:{1}".format(el_service.ip_address, metrics_port.number)
-        el_metrics_info = node_metrics.new_node_metrics_info(
-            el_service_name, el_participant_info[el_service_name]["metrics_path"], metrics_url
-        )
-
-        if constants.RPC_PORT_ID in el_service.ports:
-            rpc_port = el_service.ports[constants.RPC_PORT_ID]
-        else:
-            rpc_port = None
-
-        if constants.WS_PORT_ID in el_service.ports:
-            ws_port = el_service.ports[constants.WS_PORT_ID]
-        else:
-            ws_port = None
-
-        if constants.ENGINE_RPC_PORT_ID in el_service.ports:
-            engine_rpc_port = el_service.ports[constants.ENGINE_RPC_PORT_ID]
-        else:
-            engine_rpc_port = None
-
-        http_url = "http://{0}:{1}".format(el_service.ip_address, rpc_port.number) if rpc_port else None
-        ws_url = "ws://{0}:{1}".format(el_service.ip_address, ws_port.number) if ws_port else None
-
-        el_context = el_context_l.new_el_context(
-            client_name=el_participant_info[el_service_name]["client_name"],
-            enode=enode,
-            ip_addr=el_service.ip_address,
-            rpc_port_num=rpc_port.number if rpc_port else None,
-            ws_port_num=ws_port.number if ws_port else None,
-            engine_rpc_port_num=engine_rpc_port.number if engine_rpc_port else None,
-            rpc_http_url=http_url,
-            ws_url=ws_url,
-            enr=enr,
-            service_name=el_service_name,
-            el_metrics_info=[el_metrics_info],
+        el_context = get_el_context(
+            plan,
+            el_service_name,
         )
 
         # Add participant el additional prometheus metrics
