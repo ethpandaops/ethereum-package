@@ -23,6 +23,9 @@ launch_shadowfork = import_module("./network_launcher/shadowfork.star")
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
 vc = import_module("./vc/vc_launcher.star")
+vc_shared = import_module("./vc/shared.star")
+vc_context_l = import_module("./vc/vc_context.star")
+node_metrics = import_module("./node_metrics_info.star")
 remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
@@ -200,6 +203,7 @@ def launch_participant_network(
     if not args_with_right_defaults.participants:
         fail("No participants configured")
 
+    vc_service_configs = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
@@ -388,11 +392,12 @@ def launch_participant_network(
         if remote_signer_context and remote_signer_context.metrics_info:
             remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
-        vc_context = vc.launch(
+        service_name = "vc-{0}".format(full_name)
+        vc_service_configs[service_name] = vc.get_vc_config(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
             keymanager_file=keymanager_file,
-            service_name="vc-{0}".format(full_name),
+            service_name=service_name,
             vc_type=vc_type,
             image=participant.vc_image,
             global_log_level=args_with_right_defaults.global_log_level,
@@ -412,14 +417,35 @@ def launch_participant_network(
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
         )
-        all_vc_contexts.append(vc_context)
+        current_vc_index += 1
+
+    # Launch all validator clients 
+    vc_services = {}
+    if len(all_vc_contexts) > 0:
+        vc_services = plan.add_services(vc_service_configs)
+
+    all_vc_contexts = []
+    for vc_service_name, vc_service in vc_services.items():
+        validator_metrics_port = vc_service.ports[constants.METRICS_PORT_ID]
+        validator_metrics_url = "{0}:{1}".format(
+            vc_service.ip_address, validator_metrics_port.number
+        )
+        validator_node_metrics_info = node_metrics.new_node_metrics_info(
+            vc_service_name, vc_shared.METRICS_PATH, validator_metrics_url
+        )
+
+        vc_context = vc_context_l.new_vc_context(
+            client_name=vc_type,
+            service_name=vc_service_name,
+            metrics_info=validator_node_metrics_info,
+        )
 
         if vc_context and vc_context.metrics_info:
             vc_context.metrics_info["config"] = participant.prometheus_config
-        current_vc_index += 1
+
+        all_vc_contexts.append(vc_context)
 
     all_participants = []
-
     for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
