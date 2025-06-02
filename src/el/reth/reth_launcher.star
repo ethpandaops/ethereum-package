@@ -74,7 +74,7 @@ def launch(
         service_name,
         service,
         launcher,
-    )
+    )gi
 
 def get_config(
     plan,
