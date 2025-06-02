@@ -154,31 +154,54 @@ def launch(
 
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
-        el_service_configs[el_service_name] = get_config(
-            plan,
-            el_launcher,
-            participant,
-            el_service_name,
-            all_el_contexts,
-            cl_type,
-            input_parser.get_client_log_level_or_default(
-                participant.el_log_level, global_log_level, verbosity_levels
-            ),
-            persistent,
-            tolerations,
-            node_selectors,
-            port_publisher,
-            index,
-            network_params,
-        )
+        if index == 0:
+            el_context = launch_method(
+                plan,
+                el_launcher,
+                el_service_name,
+                participant,
+                global_log_level,
+                all_el_contexts,
+                persistent,
+                tolerations,
+                node_selectors,
+                port_publisher,
+                index,
+                network_params,
+            )
 
-        el_participant_info[el_service_name] = {
-            "client_name": el_type,
-            "supernode": participant.supernode,
-            "metrics_path": metrics_path,
-        }
+            # Add participant el additional prometheus metrics
+            for metrics_info in el_context.el_metrics_info:
+                if metrics_info != None:
+                    metrics_info["config"] = participant.prometheus_config
 
-    # Start all EL services in parallel
+            all_el_contexts.append(el_context)
+        else:
+            el_service_configs[el_service_name] = get_config(
+                plan,
+                el_launcher,
+                participant,
+                el_service_name,
+                all_el_contexts,
+                cl_type,
+                input_parser.get_client_log_level_or_default(
+                    participant.el_log_level, global_log_level, verbosity_levels
+                ),
+                persistent,
+                tolerations,
+                node_selectors,
+                port_publisher,
+                index,
+                network_params,
+            )
+
+            el_participant_info[el_service_name] = {
+                "client_name": el_type,
+                "supernode": participant.supernode,
+                "metrics_path": metrics_path,
+            }
+
+    # Start remainder of EL services in parallel
     el_services = {}
     if len(el_service_configs) > 0:
         el_services = plan.add_services(el_service_configs)
