@@ -182,3 +182,23 @@ def get_vc_config(
 
 def new_vc_launcher(el_cl_genesis_data):
     return struct(el_cl_genesis_data=el_cl_genesis_data)
+
+def get_vc_context(
+    plan,
+    service_name,
+    service,
+    client_name,
+):
+    validator_metrics_port = service.ports[constants.METRICS_PORT_ID]
+    validator_metrics_url = "{0}:{1}".format(
+        service.ip_address, validator_metrics_port.number
+    )
+    validator_node_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, vc_shared.METRICS_PATH, validator_metrics_url
+    )
+
+    return vc_context.new_vc_context(
+        client_name=client_name,
+        service_name=service_name,
+        metrics_info=validator_node_metrics_info,
+    )
