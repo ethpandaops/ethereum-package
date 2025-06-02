@@ -71,32 +71,12 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, constants.RPC_PORT_ID
+    return get_el_context(
+        plan,
+        service_name,
+        service,
+        launcher,
     )
-
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    geth_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metrics_url
-    )
-
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
-
-    return el_context.new_el_context(
-        client_name="geth",
-        enode=enode,
-        ip_addr=service.ip_address,
-        rpc_port_num=RPC_PORT_NUM,
-        ws_port_num=WS_PORT_NUM,
-        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
-        rpc_http_url=http_url,
-        ws_url=ws_url,
-        enr=enr,
-        service_name=service_name,
-        el_metrics_info=[geth_metrics_info],
-    )
-
 
 def get_config(
     plan,

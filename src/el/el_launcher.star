@@ -188,7 +188,7 @@ def launch(
                 "supernode": participant.supernode,
             }
 
-    # Start remainder of EL services in parallel
+    # add remainder of el's in parallel to speed package execution
     el_services = {}
     if len(el_service_configs) > 0:
         el_services = plan.add_services(el_service_configs)

@@ -236,7 +236,7 @@ def launch(
                 "supernode": participant.supernode,
             }
 
-    # add rest of cl's in parallel
+    # add rest of cl's in parallel to speed package execution
     cl_services = {}
     if len(cl_service_configs) > 0:
         cl_services = plan.add_services(cl_service_configs)
