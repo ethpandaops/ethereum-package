@@ -1,12 +1,17 @@
 endpoints:
-{{- range $endpoint := .Endpoints }}
-  - name: {{ $endpoint.Name }}
-    rpc_url: "{{ $endpoint.RPCUrl }}"
-    socket: "{{ $endpoint.Socket }}"
+{{- range .Endpoints }}
+  - name: {{ .Name }}
+    rpc_url: "{{ .RPCUrl }}"
+    socket: "{{ .Socket }}"
 {{- end }}
 
-{{- if .BeaconSSEUrl }}
-beacon_sse_url: "{{ .BeaconSSEUrl }}"
+{{- if eq .FocilEnabled "true" }}
+focil_enabled: true
+beacon_urls:
+{{- range .BeaconEndpoints }}
+  - name: {{ .Name }}
+    beacon_url: "{{ .BeaconUrl }}"
+{{- end }}
 {{- end }}
 
 polling:
@@ -14,6 +19,6 @@ polling:
   timeout: {{ .Polling.timeout }}
 
 filters:
-  min_gas_price: {{ .Filters.min_gas_price }}
+  min_gas_price: {{ .Filters.MinGasPrice }}
 
 log_level: "{{ .LogLevel }}"

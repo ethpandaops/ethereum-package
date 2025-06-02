@@ -31,12 +31,18 @@ def launch_txpool_viz(
             "Socket": participant.el_context.ws_url
         })
 
+    beacon_endpoints = []
+    for participant in network_participants:
+        beacon_endpoints.append({
+            "Name": participant.cl_context.beacon_service_name,
+            "BeaconUrl": participant.cl_context.beacon_http_url,
+        })
+
+
     txpoolviz_params["endpoints"] = endpoint_list
+    txpoolviz_params["beacon_endpoints"] = beacon_endpoints
 
-
-    # add beacon sse if focil_enabled?
-    if txpoolviz_params["focil_enabled"] == "true":
-        txpoolviz_params["beacon_sse_url"] = network_participants[0].cl_context.beacon_http_url
+    txpoolviz_params["endpoints"] = endpoint_list
 
     # // config data & template
     template_data = txpool_viz_config_template_data(txpoolviz_params)
@@ -107,6 +113,7 @@ def txpool_viz_config_template_data(config):
     }
 
     if config["focil_enabled"] == "true":
-        cfg["BeaconSSEUrl"] = config["beacon_sse_url"]
+        cfg["FocilEnabled"]= config["focil_enabled"]
+        cfg["BeaconEndpoints"] = config["beacon_endpoints"]
 
     return cfg
