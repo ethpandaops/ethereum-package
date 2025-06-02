@@ -99,6 +99,7 @@ def launch(
         node_selectors,
     )
 
+
 def get_beacon_config(
     plan,
     launcher,
@@ -350,6 +351,7 @@ def get_beacon_config(
         config_args["max_memory"] = int(participant.cl_max_mem)
     return ServiceConfig(**config_args)
 
+
 def get_cl_context(
     plan,
     service_name,
@@ -406,6 +408,7 @@ def get_cl_context(
         else "",
         supernode=participant.supernode,
     )
+
 
 def new_nimbus_launcher(el_cl_genesis_data, jwt_file, keymanager_file):
     return struct(

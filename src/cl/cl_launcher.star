@@ -122,7 +122,7 @@ def launch(
         cl_launcher, launch_method, get_beacon_config, get_cl_context = (
             cl_launchers[cl_type]["launcher"],
             cl_launchers[cl_type]["launch_method"],
-            cl_launchers[cl_type]["get_beacon_config"], 
+            cl_launchers[cl_type]["get_beacon_config"],
             cl_launchers[cl_type]["get_cl_context"],
         )
 
@@ -260,7 +260,7 @@ def launch(
             cl_participant_info[beacon_service_name]["new_cl_node_validator_keystores"],
             cl_participant_info[beacon_service_name]["node_selectors"],
         )
-        
+
         all_cl_contexts.append(cl_context)
 
         # Add participant cl additional prometheus labels

@@ -75,6 +75,7 @@ def launch(
         launcher,
     )
 
+
 def get_config(
     plan,
     launcher,
@@ -266,6 +267,7 @@ def get_config(
         config_args["max_memory"] = participant.el_max_mem
     return ServiceConfig(**config_args)
 
+
 # makes request to [service_name] for enode and returns a full el_context
 def get_el_context(
     plan,
@@ -296,6 +298,7 @@ def get_el_context(
         service_name=service_name,
         el_metrics_info=[besu_metrics_info],
     )
+
 
 def new_besu_launcher(el_cl_genesis_data, jwt_file):
     return struct(

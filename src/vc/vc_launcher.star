@@ -180,8 +180,10 @@ def get_vc_config(
 
     return config
 
+
 def new_vc_launcher(el_cl_genesis_data):
     return struct(el_cl_genesis_data=el_cl_genesis_data)
+
 
 def get_vc_context(
     plan,

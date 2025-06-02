@@ -344,6 +344,7 @@ def get_beacon_config(
         config_args["max_memory"] = int(participant.cl_max_mem)
     return ServiceConfig(**config_args)
 
+
 def get_cl_context(
     plan,
     service_name,
@@ -400,8 +401,6 @@ def get_cl_context(
         else "",
         supernode=participant.supernode,
     )
-
-
 
 
 def new_grandine_launcher(

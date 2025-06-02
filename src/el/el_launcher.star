@@ -13,6 +13,7 @@ reth = import_module("./reth/reth_launcher.star")
 ethereumjs = import_module("./ethereumjs/ethereumjs_launcher.star")
 nimbus_eth1 = import_module("./nimbus-eth1/nimbus_launcher.star")
 
+
 def launch(
     plan,
     network_params,
@@ -197,7 +198,7 @@ def launch(
     for el_service_name, el_service in el_services.items():
         el_type = el_participant_info[el_service_name]["client_name"]
         get_el_context = el_launchers[el_type]["get_el_context"]
-        
+
         el_context = get_el_context(
             plan,
             el_service_name,
