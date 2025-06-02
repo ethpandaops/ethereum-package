@@ -133,11 +133,10 @@ def launch(
                 )
             )
 
-        el_launcher, launch_method, get_config, get_el_context = (
+        el_launcher, launch_method, get_config = (
             el_launchers[el_type]["launcher"],
             el_launchers[el_type]["launch_method"],
             el_launchers[el_type]["get_config"],
-            el_launchers[el_type]["get_el_context"],
         )
 
         # Zero-pad the index using the calculated zfill value
@@ -187,7 +186,6 @@ def launch(
             el_participant_info[el_service_name] = {
                 "client_name": el_type,
                 "supernode": participant.supernode,
-                "el_launcher": el_launcher,
             }
 
     # Start remainder of EL services in parallel
@@ -197,11 +195,14 @@ def launch(
 
     # Create contexts for each service
     for el_service_name, el_service in el_services.items():
+        el_type = el_participant_info[el_service_name]["client_name"]
+        get_el_context = el_launchers[el_type]["get_el_context"]
+        
         el_context = get_el_context(
             plan,
             el_service_name,
             el_service,
-            launcher,
+            el_launchers[el_type]["launcher"],
         )
 
         # Add participant el additional prometheus metrics
