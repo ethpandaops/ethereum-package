@@ -67,6 +67,7 @@ def launch(
         launcher,
     )
 
+
 def get_config(
     plan,
     launcher,
@@ -239,6 +240,7 @@ def get_config(
         config_args["max_memory"] = participant.el_max_mem
     return ServiceConfig(**config_args)
 
+
 def get_el_context(
     plan,
     service_name,
@@ -269,6 +271,7 @@ def get_el_context(
         service_name=service_name,
         el_metrics_info=[nethermind_metrics_info],
     )
+
 
 def new_nethermind_launcher(el_cl_genesis_data, jwt_file):
     return struct(

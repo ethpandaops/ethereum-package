@@ -78,6 +78,7 @@ def launch(
         launcher,
     )
 
+
 def get_config(
     plan,
     launcher,
@@ -317,6 +318,7 @@ def get_config(
         config_args["max_memory"] = participant.el_max_mem
     return ServiceConfig(**config_args)
 
+
 # makes request to [service_name] for enode and enr and returns a full el_context
 def get_el_context(
     plan,
@@ -350,6 +352,7 @@ def get_el_context(
         el_metrics_info=[geth_metrics_info],
     )
 
+
 def new_geth_launcher(
     el_cl_genesis_data,
     jwt_file,
@@ -362,4 +365,3 @@ def new_geth_launcher(
         networkid=networkid,
         prague_time=prague_time,
     )
-
