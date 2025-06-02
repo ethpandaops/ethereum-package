@@ -750,6 +750,7 @@ additional_services:
   - forky
   - apache
   - tracoor
+  - guardian
 
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
 blockscout_params:

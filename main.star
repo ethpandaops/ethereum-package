@@ -56,6 +56,7 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
+guardian = import_module("./src/guardian/guardian_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -721,6 +722,19 @@ def run(plan, args={}):
                 index,
                 osaka_time,
             )
+        elif additional_service == "guardian":
+            plan.print("Launching guardian")
+            guardian.launch_guardian(
+                plan,
+                all_participants,
+                args_with_right_defaults.participants,
+                network_params,
+                global_node_selectors,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched guardian")
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:
