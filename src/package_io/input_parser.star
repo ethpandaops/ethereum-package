@@ -429,6 +429,9 @@ def input_parser(plan, input_args):
             withdrawal_type=result["network_params"]["withdrawal_type"],
             withdrawal_address=result["network_params"]["withdrawal_address"],
             validator_balance=result["network_params"]["validator_balance"],
+            min_epochs_for_data_column_sidecars_requests=result["network_params"][
+                "min_epochs_for_data_column_sidecars_requests"
+            ],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -1042,6 +1045,7 @@ def default_network_params():
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
+        "min_epochs_for_data_column_sidecars_requests": 4096,
     }
 
 
@@ -1109,6 +1113,7 @@ def default_minimal_network_params():
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
+        "min_epochs_for_data_column_sidecars_requests": 4096,
     }
 
 

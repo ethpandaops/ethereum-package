@@ -201,6 +201,7 @@ SUBCATEGORY_PARAMS = {
         "withdrawal_type",
         "withdrawal_address",
         "validator_balance",
+        "min_epochs_for_data_column_sidecars_requests",
     ],
     "blockscout_params": [
         "image",
