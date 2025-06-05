@@ -19,7 +19,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 8,
+  "id": 9,
   "links": [],
   "panels": [
     {
@@ -85,8 +85,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -119,7 +118,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -128,7 +127,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": " sum by(job)(increase(beacon_data_column_sidecar_processing_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
+          "expr": " sum by (job) (increase(beacon_data_column_sidecar_processing_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -190,8 +189,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -224,7 +222,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -232,7 +230,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum by(job) (increase(beacon_data_column_sidecar_processing_successes_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
+          "expr": "sum by (job) (increase(beacon_data_column_sidecar_processing_successes_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -294,8 +292,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -314,7 +311,7 @@
         "y": 1
       },
       "id": 15,
-      "interval": "2m",
+      "interval": "30s",
       "options": {
         "legend": {
           "calcs": [],
@@ -328,7 +325,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -397,8 +394,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -416,6 +412,7 @@
         "y": 1
       },
       "id": 35,
+      "interval": "30s",
       "options": {
         "legend": {
           "calcs": [],
@@ -429,7 +426,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -444,7 +441,445 @@
           "refId": "A"
         }
       ],
-      "title": "Full runtime of data column sidecars gossip verification",
+      "title": "Runtime of data column sidecars gossip verification",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "Total number of engine_getBlobsV2 requests to an execution layer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 7
+      },
+      "id": 50,
+      "interval": "30s",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (job) (increase(beacon_engine_getBlobsV2_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "engine_getBlobsV2 requests",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "Total number of engine_getBlobsV2 successful responses from an execution layer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "cl-2-lodestar-geth"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 7
+      },
+      "id": 56,
+      "interval": "30s",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (job) (increase(beacon_engine_getBlobsV2_responses_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "engine_getBlobsV2 responses",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "Count of engine_getBlobsV2 requests that did not receive an answer",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 12,
+        "y": 7
+      },
+      "id": 57,
+      "interval": "30s",
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by(job)(increase(beacon_engine_getBlobsV2_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))\n-\nsum by(job)(increase(beacon_engine_getBlobsV2_responses_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "engine_getBlobsV2 losses",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": " Full runtime of engine_getBlobsV2",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 18,
+        "y": 7
+      },
+      "id": 49,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "(\n    histogram_quantile(0.99, rate(beacon_engine_getBlobsV2_runtime_seconds_bucket{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__rate_interval]))\n)\nOR\n(\n  histogram_quantile(0.99, rate(beacon_engine_getBlobsV2_runtime_milliseconds_bucket{\n    client_name=~\"$client\",\n    job=~\"$job\",\n    supernode=~\"$nodes\"\n  }[$__rate_interval])) / 1000\n)\n",
+          "legendFormat": "{{job}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Runtime of engine_getBlobsV2",
       "type": "timeseries"
     },
     {
@@ -497,8 +932,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -511,9 +945,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
+        "w": 12,
         "x": 0,
-        "y": 7
+        "y": 13
       },
       "id": 14,
       "interval": "30s",
@@ -530,7 +964,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -599,8 +1033,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -613,11 +1046,12 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 6,
-        "y": 7
+        "w": 12,
+        "x": 12,
+        "y": 13
       },
       "id": 25,
+      "interval": "30s",
       "options": {
         "legend": {
           "calcs": [],
@@ -631,7 +1065,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -654,7 +1088,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
-      "description": "",
+      "description": "Time taken to compute data column sidecar, including cells and inclusion proof",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -698,8 +1132,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -712,9 +1145,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 12,
-        "y": 7
+        "w": 8,
+        "x": 0,
+        "y": 19
       },
       "id": 21,
       "options": {
@@ -730,7 +1163,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -744,7 +1177,7 @@
           "refId": "A"
         }
       ],
-      "title": "Time taken to compute data column sidecar, including cells, proofs and inclusion proof",
+      "title": "Time taken to compute data column sidecar",
       "type": "timeseries"
     },
     {
@@ -796,8 +1229,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -810,9 +1242,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 18,
-        "y": 7
+        "w": 8,
+        "x": 8,
+        "y": 19
       },
       "id": 22,
       "options": {
@@ -828,7 +1260,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -894,8 +1326,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -908,108 +1339,9 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 0,
-        "y": 13
-      },
-      "id": 23,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "(\n    histogram_quantile(0.99, rate(beacon_kzg_verification_data_column_single_seconds_bucket{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__rate_interval]))\n)\nOR\n(\n  histogram_quantile(0.99, rate(beacon_kzg_verification_data_column_single_milliseconds_bucket{\n    client_name=~\"$client\",\n    job=~\"$job\",\n    supernode=~\"$nodes\"\n  }[$__rate_interval])) / 1000\n)",
-          "hide": false,
-          "legendFormat": "{{job}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Runtime of single data column kzg verification",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "default": true,
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 20,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 6,
-        "y": 13
+        "w": 8,
+        "x": 16,
+        "y": 19
       },
       "id": 24,
       "options": {
@@ -1025,7 +1357,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -1048,22 +1380,177 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "Total number of custody groups for super nodes",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "fixedColor": "green",
+            "mode": "fixed"
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
-                "color": "red",
-                "value": 129
+                "color": "green",
+                "value": 128
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 0,
+        "y": 25
+      },
+      "id": 36,
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "beacon_custody_groups{client_name=~\"$client\", job=~\"$job\", supernode=\"True\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Custody groups (super nodes)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "Total number of custody groups for full nodes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "green",
+                "value": 128
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 25
+      },
+      "id": 53,
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "beacon_custody_groups{client_name=~\"$client\", job=~\"$job\", supernode=\"False\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Custody groups (full nodes)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "Total number of backfilled custody groups for super nodes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "green",
+                "value": 128
               }
             ]
           }
@@ -1074,11 +1561,11 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 13
+        "y": 25
       },
-      "id": 36,
+      "id": 54,
       "options": {
-        "displayMode": "gradient",
+        "displayMode": "lcd",
         "legend": {
           "calcs": [],
           "displayMode": "list",
@@ -1089,7 +1576,7 @@
         "minVizHeight": 16,
         "minVizWidth": 8,
         "namePlacement": "auto",
-        "orientation": "auto",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -1101,7 +1588,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -1109,13 +1596,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "beacon_custody_groups{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}",
-          "legendFormat": "{{job}}",
+          "expr": "beacon_custody_groups_backfilled{client_name=~\"$client\", job=~\"$job\", supernode=\"True\"}",
+          "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Total number of custody groups",
+      "title": "Backfilled custody groups (super nodes)",
       "type": "bargauge"
     },
     {
@@ -1124,23 +1611,23 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
-      "description": "\nTotal number of custody groups backfilled by a node",
+      "description": "Total number of backfilled custody groups for full nodes",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "fixedColor": "green",
+            "mode": "fixed"
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
-                "color": "red",
-                "value": 129
+                "color": "green",
+                "value": 128
               }
             ]
           }
@@ -1151,11 +1638,11 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 13
+        "y": 25
       },
-      "id": 48,
+      "id": 55,
       "options": {
-        "displayMode": "gradient",
+        "displayMode": "lcd",
         "legend": {
           "calcs": [],
           "displayMode": "list",
@@ -1166,7 +1653,7 @@
         "minVizHeight": 16,
         "minVizWidth": 8,
         "namePlacement": "auto",
-        "orientation": "auto",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -1178,7 +1665,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -1186,13 +1673,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "beacon_custody_groups_backfilled{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}",
-          "legendFormat": "{{job}}",
+          "expr": "beacon_custody_groups_backfilled{client_name=~\"$client\", job=~\"$job\", supernode=\"False\"}",
+          "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Total number of backfilled custody groups",
+      "title": "Backfilled custody groups (full nodes)",
       "type": "bargauge"
     },
     {
@@ -1201,7 +1688,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 31
       },
       "id": 26,
       "panels": [],
@@ -1256,8 +1743,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1272,7 +1758,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 20
+        "y": 32
       },
       "id": 27,
       "interval": "30s",
@@ -1289,7 +1775,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -1356,8 +1842,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1372,7 +1857,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 20
+        "y": 32
       },
       "id": 28,
       "interval": "30s",
@@ -1389,7 +1874,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -1456,8 +1941,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1472,7 +1956,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 20
+        "y": 32
       },
       "id": 32,
       "interval": "30s",
@@ -1489,7 +1973,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -1555,8 +2039,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1572,7 +2055,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 27
+        "y": 39
       },
       "id": 30,
       "interval": "30s",
@@ -1589,7 +2072,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -1656,8 +2139,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1673,7 +2155,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 27
+        "y": 39
       },
       "id": 39,
       "interval": "30s",
@@ -1690,7 +2172,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -1757,8 +2239,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1774,7 +2255,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 27
+        "y": 39
       },
       "id": 37,
       "interval": "30s",
@@ -1791,7 +2272,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -1815,7 +2296,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 46
       },
       "id": 38,
       "panels": [],
@@ -1887,7 +2368,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 35
+        "y": 47
       },
       "id": 40,
       "interval": "30s",
@@ -1899,11 +2380,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "desc"
         }
       },
-      "pluginVersion": "9.1.2",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1989,7 +2471,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 35
+        "y": 47
       },
       "id": 45,
       "interval": "30s",
@@ -2001,11 +2483,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "desc"
         }
       },
-      "pluginVersion": "9.1.2",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2091,7 +2574,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 35
+        "y": 47
       },
       "id": 42,
       "interval": "30s",
@@ -2103,11 +2586,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "desc"
         }
       },
-      "pluginVersion": "9.1.2",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2193,7 +2677,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 35
+        "y": 47
       },
       "id": 43,
       "interval": "30s",
@@ -2205,11 +2689,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "desc"
         }
       },
-      "pluginVersion": "9.1.2",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2296,7 +2781,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 41
+        "y": 53
       },
       "id": 44,
       "interval": "30s",
@@ -2308,11 +2793,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "desc"
         }
       },
-      "pluginVersion": "9.1.2",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2399,7 +2885,7 @@
         "h": 6,
         "w": 6,
         "x": 6,
-        "y": 41
+        "y": 53
       },
       "id": 41,
       "interval": "30s",
@@ -2411,11 +2897,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "desc"
         }
       },
-      "pluginVersion": "9.1.2",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2502,7 +2989,7 @@
         "h": 6,
         "w": 6,
         "x": 12,
-        "y": 41
+        "y": 53
       },
       "id": 46,
       "interval": "30s",
@@ -2514,11 +3001,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "desc"
         }
       },
-      "pluginVersion": "9.1.2",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2605,7 +3093,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 41
+        "y": 53
       },
       "id": 47,
       "interval": "30s",
@@ -2617,11 +3105,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "multi",
           "sort": "desc"
         }
       },
-      "pluginVersion": "9.1.2",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2645,7 +3134,7 @@
   ],
   "preload": false,
   "refresh": "5s",
-  "schemaVersion": 40,
+  "schemaVersion": 41,
   "tags": [],
   "templating": {
     "list": [
@@ -2755,13 +3244,12 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "PeerDAS metrics",
-  "uid": "ddr7j9b1mlszkm",
-  "version": 2,
-  "weekStart": ""
+  "uid": "ddr7j9b1mlszps",
+  "version": 2
 }
