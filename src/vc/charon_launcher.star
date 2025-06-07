@@ -449,9 +449,24 @@ done
                 node_index=i
             )
             vc_services.append(vc_service)
+        elif vc_type == "prysm":
+            vc_service = launch_prysm_vc(
+                plan=plan,
+                vc_service_name=vc_service_name,
+                charon_validator_api_url=charon_validator_api_url,
+                validator_keys_artifact=validator_keys_for_node,
+                launcher=launcher,
+                participant=participant,
+                tolerations=tolerations,
+                node_selectors=node_selectors,
+                full_name=full_name + "-node" + str(i),
+                vc_index=vc_index,
+                node_index=i
+            )
+            vc_services.append(vc_service)
         else:
-            # For now, only lighthouse, lodestar, teku, and nimbus are supported
-            fail("Only lighthouse, lodestar, teku, and nimbus validator clients are currently supported with Charon")
+            # For now, only lighthouse, lodestar, teku, nimbus, and prysm are supported
+            fail("Only lighthouse, lodestar, teku, nimbus, and prysm validator clients are currently supported with Charon")
 
     # Return the first Charon service as the main service
     validator_metrics_port = charon_services[0].ports["monitoring"]
@@ -1084,6 +1099,153 @@ exec "$NIMBUS_VC_PATH" \\
                 client=constants.VC_TYPE.nimbus,
                 client_type=constants.CLIENT_TYPES.validator,
                 image="statusim/nimbus-validator-client:multiarch-latest"[-constants.MAX_LABEL_LENGTH:],
+                connected_client="charon-node-" + str(node_index),
+                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
+                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+            ),
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            user=User(uid=0, gid=0),
+        ),
+    )
+
+    return vc_service
+
+def launch_prysm_vc(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    validator_keys_artifact,
+    launcher,
+    participant,
+    tolerations,
+    node_selectors,
+    full_name,
+    vc_index,
+    node_index
+):
+    """
+    Launch a Prysm validator client that connects to a Charon node
+    Uses script approach similar to kurtosis-charon/prysm/run.sh
+    """
+
+    # Create the run.sh script content based on kurtosis-charon/prysm/run.sh
+    run_script_content = """#!/usr/bin/env bash
+
+WALLET_DIR="/prysm-wallet"
+
+# Cleanup wallet directories if already exists.
+rm -rf $WALLET_DIR
+mkdir $WALLET_DIR
+
+# Refer: https://docs.prylabs.network/docs/install/install-with-script#step-5-run-a-validator-using-prysm
+# Running a prysm VC involves two steps which need to run in order:
+# 1. Import validator keys in a prysm wallet account.
+# 2. Run the validator client.
+WALLET_PASSWORD="prysm-validator-secret"
+echo $WALLET_PASSWORD > /wallet-password.txt
+/app/cmd/validator/validator wallet create --accept-terms-of-use --wallet-password-file=wallet-password.txt --keymanager-kind=direct --wallet-dir="$WALLET_DIR"
+
+tmpkeys="/home/validator_keys/tmpkeys"
+mkdir -p ${tmpkeys}
+
+for f in /home/charon/validator_keys/keystore-*.json; do
+    echo "Importing key ${f}"
+
+    # Copy keystore file to tmpkeys/ directory.
+    cp "${f}" "${tmpkeys}"
+
+    # Import keystore with password.
+    /app/cmd/validator/validator accounts import \\
+        --accept-terms-of-use=true \\
+        --wallet-dir="$WALLET_DIR" \\
+        --keys-dir="${tmpkeys}" \\
+        --account-password-file="${f//json/txt}" \\
+        --wallet-password-file=wallet-password.txt
+
+    # Delete tmpkeys/keystore-*.json file that was copied before.
+    filename="$(basename ${f})"
+    rm "${tmpkeys}/${filename}"
+done
+
+# Delete the tmpkeys/ directory since it's no longer needed.
+rm -r ${tmpkeys}
+
+echo "Imported all keys"
+
+# Now run prysm VC
+exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
+    --accept-terms-of-use=true \\
+    --datadir="/data/vc" \\
+    --wallet-password-file="/wallet-password.txt" \\
+    --enable-beacon-rest-api \\
+    --beacon-rest-api-provider="$BEACON_NODE_ADDRESS" \\
+    --beacon-rpc-provider="$BEACON_NODE_ADDRESS" \\
+    --beacon-rpc-gateway-provider="$BEACON_NODE_ADDRESS" \\
+    --chain-config-file="/opt/prysm/config.yaml" \\
+    --monitoring-host=0.0.0.0 \\
+    --monitoring-port=""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """ \\
+    --distributed
+"""
+
+    # Add extra params if specified
+    if hasattr(participant, "vc_extra_params") and len(participant.vc_extra_params) > 0:
+        extra_params = " \\\n    " + " \\\n    ".join(participant.vc_extra_params)
+        run_script_content = run_script_content.replace("--distributed", "--distributed" + extra_params)
+
+    # Create the script file artifact using render_templates
+    script_artifact = plan.render_templates(
+        config={
+            "run.sh": struct(
+                template=run_script_content,
+                data={},
+            ),
+        },
+        name="prysm-run-script-" + str(node_index) + "-" + str(vc_index),
+    )
+
+    # Debug: Print that the script artifact has been created
+    plan.print("Created Prysm run script artifact: prysm-run-script-" + str(node_index) + "-" + str(vc_index))
+    plan.print("You can download this script using: kurtosis files download <enclave> prysm-run-script-" + str(node_index) + "-" + str(vc_index))
+
+    # Environment variables
+    env_vars = {
+        "BEACON_NODE_ADDRESS": charon_validator_api_url,
+    }
+    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+        env_vars.update(participant.vc_extra_env_vars)
+
+    # Files to mount - Charon keys + standard genesis data + run script
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        "/home/charon/validator_keys": validator_keys_artifact,
+        "/opt/prysm": launcher.el_cl_genesis_data.files_artifact_uuid,
+        "/opt/charon": script_artifact,
+    }
+
+    # Ports configuration
+    ports = {
+        constants.METRICS_PORT_ID: PortSpec(
+            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
+            transport_protocol="TCP",
+            application_protocol="http",
+        ),
+    }
+
+    # Create the service - execute the script file
+    vc_service = plan.add_service(
+        name=vc_service_name,
+        config=ServiceConfig(
+            image="gcr.io/prysmaticlabs/prysm/validator:latest",
+            ports=ports,
+            cmd=["chmod +x /opt/charon/run.sh && /opt/charon/run.sh"],
+            entrypoint=["bash", "-c"],
+            env_vars=env_vars,
+            files=files,
+            labels=shared_utils.label_maker(
+                client=constants.VC_TYPE.prysm,
+                client_type=constants.CLIENT_TYPES.validator,
+                image="gcr.io/prysmaticlabs/prysm/validator:latest"[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
                 supernode=participant.supernode if hasattr(participant, "supernode") else False,
