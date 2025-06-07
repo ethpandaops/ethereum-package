@@ -233,7 +233,7 @@ done
     plan.exec(
         service_name=temp_service.name,
         recipe=ExecRecipe(
-            command=["sleep", "2"],
+            command=["sleep", "5"],
         ),
     )
 
@@ -404,9 +404,39 @@ done
                 node_index=i
             )
             vc_services.append(vc_service)
+        elif vc_type == "lodestar":
+            vc_service = launch_lodestar_vc(
+                plan=plan,
+                vc_service_name=vc_service_name,
+                charon_validator_api_url=charon_validator_api_url,
+                validator_keys_artifact=validator_keys_for_node,
+                launcher=launcher,
+                participant=participant,
+                tolerations=tolerations,
+                node_selectors=node_selectors,
+                full_name=full_name + "-node" + str(i),
+                vc_index=vc_index,
+                node_index=i
+            )
+            vc_services.append(vc_service)
+        elif vc_type == "teku":
+            vc_service = launch_teku_vc(
+                plan=plan,
+                vc_service_name=vc_service_name,
+                charon_validator_api_url=charon_validator_api_url,
+                validator_keys_artifact=validator_keys_for_node,
+                launcher=launcher,
+                participant=participant,
+                tolerations=tolerations,
+                node_selectors=node_selectors,
+                full_name=full_name + "-node" + str(i),
+                vc_index=vc_index,
+                node_index=i
+            )
+            vc_services.append(vc_service)
         else:
-            # For now, only lighthouse is supported
-            fail("Only lighthouse validator client is currently supported with Charon")
+            # For now, only lighthouse, lodestar, and teku are supported
+            fail("Only lighthouse, lodestar, and teku validator clients are currently supported with Charon")
 
     # Return the first Charon service as the main service
     validator_metrics_port = charon_services[0].ports["monitoring"]
@@ -528,6 +558,275 @@ exec lighthouse validator \\
             ),
             tolerations=tolerations,
             node_selectors=node_selectors,
+        ),
+    )
+
+    return vc_service
+
+def launch_lodestar_vc(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    validator_keys_artifact,
+    launcher,
+    participant,
+    tolerations,
+    node_selectors,
+    full_name,
+    vc_index,
+    node_index
+):
+    """
+    Launch a Lodestar validator client that connects to a Charon node
+    Uses Charon-specific key management with standard Lodestar parameters
+    """
+
+    # Create the run.sh script content (similar to kurtosis-charon/lodestar/run.sh)
+    run_script_content = """#!/bin/sh
+
+BUILDER_SELECTION="executiononly"
+
+# If the builder API is enabled, override the builder selection to signal Lodestar to always prefer proposing blinded blocks, but fall back on EL blocks if unavailable.
+if [ "$BUILDER_API_ENABLED" = "true" ]; then
+    BUILDER_SELECTION="builderalways"
+fi
+
+DATA_DIR="/opt/data"
+KEYSTORES_DIR="${DATA_DIR}/keystores"
+SECRETS_DIR="${DATA_DIR}/secrets"
+
+mkdir -p "${KEYSTORES_DIR}" "${SECRETS_DIR}"
+
+IMPORTED_COUNT=0
+EXISTING_COUNT=0
+
+for f in /home/charon/validator_keys/keystore-*.json; do
+    echo "Importing key ${f}"
+
+    # Extract pubkey from keystore file
+    PUBKEY="0x$(grep '"pubkey"' "$f" | awk -F'"' '{print $4}')"
+
+    PUBKEY_DIR="${KEYSTORES_DIR}/${PUBKEY}"
+
+    # Skip import if keystore already exists
+    if [ -d "${PUBKEY_DIR}" ]; then
+        EXISTING_COUNT=$((EXISTING_COUNT + 1))
+        continue
+    fi
+
+    mkdir -p "${PUBKEY_DIR}"
+    chown 1000:1000 "${PUBKEY_DIR}"
+
+    # Copy the keystore file to persisted keys backend
+    install -m 600 "$f" "${PUBKEY_DIR}/voting-keystore.json"
+    chown 1000:1000 "${PUBKEY_DIR}/voting-keystore.json"
+
+    # Copy the corresponding password file
+    PASSWORD_FILE="${f%.json}.txt"
+    install -m 600 "${PASSWORD_FILE}" "${SECRETS_DIR}/${PUBKEY}"
+
+    IMPORTED_COUNT=$((IMPORTED_COUNT + 1))
+done
+
+echo "Processed all keys imported=${IMPORTED_COUNT}, existing=${EXISTING_COUNT}, total=$(ls /home/charon/validator_keys/keystore-*.json | wc -l)"
+
+exec node /usr/app/packages/cli/bin/lodestar validator \\
+    --dataDir="$DATA_DIR" \\
+    --keystoresDir="$KEYSTORES_DIR" \\
+    --secretsDir="$SECRETS_DIR" \\
+    --metrics=true \\
+    --metrics.address="0.0.0.0" \\
+    --metrics.port=""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """ \\
+    --beaconNodes="$BEACON_NODE_ADDRESS" \\
+    --builder="$BUILDER_API_ENABLED" \\
+    --builder.selection="$BUILDER_SELECTION" \\
+    --distributed \\
+    --paramsFile="/opt/lodestar/config.yaml"
+"""
+
+    # Add extra params if specified
+    if hasattr(participant, "vc_extra_params") and len(participant.vc_extra_params) > 0:
+        extra_params = " \\\n    " + " \\\n    ".join(participant.vc_extra_params)
+        run_script_content += extra_params
+
+    # Create the script file artifact using render_templates
+    script_artifact = plan.render_templates(
+        config={
+            "run.sh": struct(
+                template=run_script_content,
+                data={},
+            ),
+        },
+        name="lodestar-run-script-" + str(node_index) + "-" + str(vc_index),
+    )
+
+    # Debug: Print that the script artifact has been created
+    plan.print("Created Lodestar run script artifact: lodestar-run-script-" + str(node_index) + "-" + str(vc_index))
+    plan.print("You can download this script using: kurtosis files download <enclave> lodestar-run-script-" + str(node_index) + "-" + str(vc_index))
+
+    # Environment variables
+    env_vars = {
+        "BEACON_NODE_ADDRESS": charon_validator_api_url,
+        "BUILDER_API_ENABLED": "true",
+        "NODE": "node" + str(node_index),
+    }
+    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+        env_vars.update(participant.vc_extra_env_vars)
+
+    # Files to mount - Charon keys + standard genesis data + run script
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        "/home/charon/validator_keys": validator_keys_artifact,
+        "/opt/lodestar": launcher.el_cl_genesis_data.files_artifact_uuid,
+        "/opt/charon": script_artifact,
+    }
+
+    # Ports configuration
+    ports = {
+        constants.METRICS_PORT_ID: PortSpec(
+            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
+            transport_protocol="TCP",
+            application_protocol="http",
+        ),
+    }
+
+    # Create the service - execute the script file
+    vc_service = plan.add_service(
+        name=vc_service_name,
+        config=ServiceConfig(
+            image="chainsafe/lodestar:latest",
+            ports=ports,
+            cmd=["chmod +x /opt/charon/run.sh && /opt/charon/run.sh"],
+            entrypoint=["sh", "-c"],
+            env_vars=env_vars,
+            files=files,
+            labels=shared_utils.label_maker(
+                client=constants.VC_TYPE.lodestar,
+                client_type=constants.CLIENT_TYPES.validator,
+                image="chainsafe/lodestar:latest"[-constants.MAX_LABEL_LENGTH:],
+                connected_client="charon-node-" + str(node_index),
+                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
+                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+            ),
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+        ),
+    )
+
+    return vc_service
+
+def launch_teku_vc(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    validator_keys_artifact,
+    launcher,
+    participant,
+    tolerations,
+    node_selectors,
+    full_name,
+    vc_index,
+    node_index
+):
+    """
+    Launch a Teku validator client that connects to a Charon node
+    Uses config file approach similar to compose.teku.yaml
+    """
+
+    # Create the teku-config.yaml content based on kurtosis-charon/teku/teku-config.yaml
+    teku_config_content = """metrics-enabled: true
+metrics-host-allowlist: "*"
+metrics-interface: "0.0.0.0"
+metrics-port: \"""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """\"
+validators-keystore-locking-enabled: false
+network: "/opt/teku/network-configs/config.yaml"
+validator-keys: "/opt/charon/validator_keys:/opt/charon/validator_keys"
+validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_ACCOUNT + """\"
+"""
+
+    # Create the config file artifact using render_templates
+    config_artifact = plan.render_templates(
+        config={
+            "teku-config.yaml": struct(
+                template=teku_config_content,
+                data={},
+            ),
+        },
+        name="teku-config-" + str(node_index) + "-" + str(vc_index),
+    )
+
+    # Debug: Print that the config artifact has been created
+    plan.print("Created Teku config artifact: teku-config-" + str(node_index) + "-" + str(vc_index))
+    plan.print("You can download this config using: kurtosis files download <enclave> teku-config-" + str(node_index) + "-" + str(vc_index))
+
+    # Teku validator command based on standard teku.star but with Charon-specific flags
+    cmd = [
+        "validator-client",
+        "--network=/opt/teku/network-configs/config.yaml",
+        "--beacon-node-api-endpoint=" + charon_validator_api_url,
+        "--config-file=/opt/charon/teku/teku-config.yaml",
+        "--validators-external-signer-slashing-protection-enabled=true",
+        "--validators-proposer-blinded-blocks-enabled=true",
+        "--validators-builder-registration-default-enabled=true",
+        "--Xobol-dvt-integration-enabled=true",
+        "--logging=DEBUG",
+        "--metrics-enabled=true",
+        "--metrics-host-allowlist=*",
+        "--metrics-interface=0.0.0.0",
+        "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
+    ]
+
+    # print the cmd
+    plan.print("cmd: " + str(cmd))
+
+    # Add extra params if specified
+    if hasattr(participant, "vc_extra_params") and len(participant.vc_extra_params) > 0:
+        cmd.extend([param for param in participant.vc_extra_params])
+
+    # Environment variables
+    env_vars = {}
+    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+        env_vars.update(participant.vc_extra_env_vars)
+
+    # Files to mount - Charon keys + standard genesis data + teku config
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        "/opt/charon/validator_keys": validator_keys_artifact,
+        "/opt/charon/teku": config_artifact,
+        "/opt/teku/network-configs": launcher.el_cl_genesis_data.files_artifact_uuid,
+    }
+
+    # Ports configuration
+    ports = {
+        constants.METRICS_PORT_ID: PortSpec(
+            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
+            transport_protocol="TCP",
+            application_protocol="http",
+        ),
+    }
+
+    # Create the service
+    vc_service = plan.add_service(
+        name=vc_service_name,
+        config=ServiceConfig(
+            image="consensys/teku:latest",
+            ports=ports,
+            cmd = cmd,
+            # cmd=["tail", "-f", "/dev/null"],
+            # entrypoint= ["sh", "-c"],
+            env_vars=env_vars,
+            files=files,
+            labels=shared_utils.label_maker(
+                client=constants.VC_TYPE.teku,
+                client_type=constants.CLIENT_TYPES.validator,
+                image="consensys/teku:latest"[-constants.MAX_LABEL_LENGTH:],
+                connected_client="charon-node-" + str(node_index),
+                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
+                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+            ),
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            user = User(uid=0, gid=0),
         ),
     )
 
