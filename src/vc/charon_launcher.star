@@ -434,9 +434,24 @@ done
                 node_index=i
             )
             vc_services.append(vc_service)
+        elif vc_type == "nimbus":
+            vc_service = launch_nimbus_vc(
+                plan=plan,
+                vc_service_name=vc_service_name,
+                charon_validator_api_url=charon_validator_api_url,
+                validator_keys_artifact=validator_keys_for_node,
+                launcher=launcher,
+                participant=participant,
+                tolerations=tolerations,
+                node_selectors=node_selectors,
+                full_name=full_name + "-node" + str(i),
+                vc_index=vc_index,
+                node_index=i
+            )
+            vc_services.append(vc_service)
         else:
-            # For now, only lighthouse, lodestar, and teku are supported
-            fail("Only lighthouse, lodestar, and teku validator clients are currently supported with Charon")
+            # For now, only lighthouse, lodestar, teku, and nimbus are supported
+            fail("Only lighthouse, lodestar, teku, and nimbus validator clients are currently supported with Charon")
 
     # Return the first Charon service as the main service
     validator_metrics_port = charon_services[0].ports["monitoring"]
@@ -827,6 +842,255 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
             tolerations=tolerations,
             node_selectors=node_selectors,
             user = User(uid=0, gid=0),
+        ),
+    )
+
+    return vc_service
+
+def launch_nimbus_vc(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    validator_keys_artifact,
+    launcher,
+    participant,
+    tolerations,
+    node_selectors,
+    full_name,
+    vc_index,
+    node_index
+):
+    """
+    Launch a Nimbus validator client that connects to a Charon node
+    Uses a two-service approach:
+    1. Key import service using nimbus-eth2 (beacon node) to import keys
+    2. Validator client service using nimbus-validator-client with imported keys
+    """
+
+    # Step 1: Create key import service using beacon node image
+    key_import_service_name = vc_service_name + "-key-import"
+
+    # Create the key import script
+    key_import_script = """#!/usr/bin/env bash
+
+# Cleanup nimbus directories if they already exist.
+rm -rf /home/user/data/${NODE}
+
+# Refer: https://nimbus.guide/keys.html
+# Running a nimbus VC involves two steps which need to run in order:
+# 1. Importing the validator keys
+# 2. And then actually running the VC
+tmpkeys="/home/validator_keys/tmpkeys"
+mkdir -p ${tmpkeys}
+
+for f in /home/validator_keys/keystore-*.json; do
+  echo "Importing key ${f}"
+
+  # Read password from keystore-*.txt into $password variable.
+  password=$(<"${f//json/txt}")
+  echo "Password length: ${#password}"
+
+  # Copy keystore file to tmpkeys/ directory.
+  cp "${f}" "${tmpkeys}"
+  echo "Copied ${f} to ${tmpkeys}"
+
+  # List files in tmpkeys before import
+  echo "Files in tmpkeys before import:"
+  ls -la "${tmpkeys}"
+
+  # Import keystore with the password.
+  echo "Running nimbus import command..."
+  echo "$password" | \\
+  /home/user/nimbus_beacon_node deposits import \\
+  --data-dir=/home/user/data/${NODE} \\
+  /home/validator_keys/tmpkeys
+
+  IMPORT_RESULT=$?
+  echo "Import command exit code: $IMPORT_RESULT"
+
+  # Check what was created
+  echo "Contents of data directory after import:"
+  ls -la /home/user/data/${NODE}/ || echo "Data directory does not exist"
+  if [ -d "/home/user/data/${NODE}/validators" ]; then
+    echo "Validators directory contents:"
+    ls -la /home/user/data/${NODE}/validators/
+  fi
+
+  # Delete tmpkeys/keystore-*.json file that was copied before.
+  filename="$(basename ${f})"
+  rm "${tmpkeys}/${filename}"
+  echo "Deleted ${tmpkeys}/${filename}"
+done
+
+# Delete the tmpkeys/ directory since it's no longer needed.
+rm -r ${tmpkeys}
+
+echo "Imported all keys successfully"
+echo "Key import process completed"
+
+# Create a completion marker file to signal that import is done
+echo "IMPORT_COMPLETE" > /home/user/data/import_complete.txt
+echo "Created completion marker file"
+
+# Keep the container running so we can extract the data
+tail -f /dev/null
+"""
+
+    # Create the key import script artifact
+    key_import_script_artifact = plan.render_templates(
+        config={
+            "import_keys.sh": struct(
+                template=key_import_script,
+                data={},
+            ),
+        },
+        name="nimbus-key-import-script-" + str(node_index) + "-" + str(vc_index),
+    )
+
+    # Environment variables for key import
+    import_env_vars = {
+        "NODE": "node" + str(node_index),
+    }
+
+    # Files to mount for key import
+    import_files = {
+        "/home/validator_keys": validator_keys_artifact,
+        "/home/user/scripts": key_import_script_artifact,
+    }
+
+    # Create the key import service
+    plan.print("Creating Nimbus key import service: " + key_import_service_name)
+    key_import_service = plan.add_service(
+        name=key_import_service_name,
+        config=ServiceConfig(
+            image="statusim/nimbus-eth2:multiarch-latest",
+            cmd=["chmod +x /home/user/scripts/import_keys.sh && /home/user/scripts/import_keys.sh"],
+            entrypoint=["bash", "-c"],
+            env_vars=import_env_vars,
+            files=import_files,
+            user=User(uid=0, gid=0),
+        ),
+    )
+
+    # Step 2: Wait for key import to complete and then extract the keys as an artifact
+    plan.print("Waiting for key import to complete...")
+
+    # Wait for the completion marker file to be created
+    plan.exec(
+        service_name=key_import_service_name,
+        recipe=ExecRecipe(
+            command=["bash", "-c", "while [ ! -f /home/user/data/import_complete.txt ]; do echo 'Waiting for import to complete...'; sleep 2; done; echo 'Import completed! Found completion marker.'"]
+        ),
+        description="Wait for key import completion",
+    )
+
+    # Store the imported keys from the key import service
+    # Note: The beacon node imports to /home/user/data/${NODE}, so we store that specific directory
+    imported_keys_artifact = plan.store_service_files(
+        service_name=key_import_service_name,
+        src="/home/user/data/node" + str(node_index),
+        name="nimbus-imported-keys-" + str(node_index) + "-" + str(vc_index),
+        description="Nimbus imported validator keys for node " + str(node_index),
+    )
+
+    # Step 3: Create the actual validator client service
+    # Create the VC run script
+    vc_run_script = """#!/usr/bin/env bash
+
+# Find the nimbus_validator_client binary
+if [ -f "/home/user/nimbus_validator_client" ]; then
+    NIMBUS_VC_PATH="/home/user/nimbus_validator_client"
+elif [ -f "/usr/bin/nimbus_validator_client" ]; then
+    NIMBUS_VC_PATH="/usr/bin/nimbus_validator_client"
+elif [ -f "/usr/local/bin/nimbus_validator_client" ]; then
+    NIMBUS_VC_PATH="/usr/local/bin/nimbus_validator_client"
+else
+    echo "Error: Could not find nimbus_validator_client binary"
+    echo "Available files in /home/user:"
+    ls -la /home/user/
+    exit 1
+fi
+
+echo "Using Nimbus VC binary at: $NIMBUS_VC_PATH"
+echo "Using imported keys from: /home/user/imported_data"
+
+# List what's available in the imported data
+echo "Contents of imported_data:"
+ls -la /home/user/imported_data/
+
+# Run nimbus validator client with imported keys
+exec "$NIMBUS_VC_PATH" \\
+  --data-dir="/home/user/imported_data" \\
+  --beacon-node="$BEACON_NODE_ADDRESS" \\
+  --doppelganger-detection=false \\
+  --metrics \\
+  --metrics-address=0.0.0.0 \\
+  --metrics-port=""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """ \\
+  --payload-builder=true \\
+  --distributed
+"""
+
+    # Add extra params if specified
+    if hasattr(participant, "vc_extra_params") and len(participant.vc_extra_params) > 0:
+        extra_params = " \\\n  " + " \\\n  ".join(participant.vc_extra_params)
+        vc_run_script = vc_run_script.replace("--distributed", "--distributed" + extra_params)
+
+    # Create the VC script artifact
+    vc_script_artifact = plan.render_templates(
+        config={
+            "run_vc.sh": struct(
+                template=vc_run_script,
+                data={},
+            ),
+        },
+        name="nimbus-vc-script-" + str(node_index) + "-" + str(vc_index),
+    )
+
+    # Environment variables for VC
+    vc_env_vars = {
+        "BEACON_NODE_ADDRESS": charon_validator_api_url,
+        "NODE": "node" + str(node_index),
+    }
+    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+        vc_env_vars.update(participant.vc_extra_env_vars)
+
+    # Files to mount for VC - imported keys + VC script
+    vc_files = {
+        "/home/user/imported_data": imported_keys_artifact,
+        "/home/user/scripts": vc_script_artifact,
+    }
+
+    # Ports configuration
+    ports = {
+        constants.METRICS_PORT_ID: PortSpec(
+            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
+            transport_protocol="TCP",
+            application_protocol="http",
+        ),
+    }
+
+    # Create the actual validator client service
+    plan.print("Creating Nimbus validator client service: " + vc_service_name)
+    vc_service = plan.add_service(
+        name=vc_service_name,
+        config=ServiceConfig(
+            image="statusim/nimbus-validator-client:multiarch-latest",
+            ports=ports,
+            cmd=["chmod +x /home/user/scripts/run_vc.sh && /home/user/scripts/run_vc.sh"],
+            entrypoint=["bash", "-c"],
+            env_vars=vc_env_vars,
+            files=vc_files,
+            labels=shared_utils.label_maker(
+                client=constants.VC_TYPE.nimbus,
+                client_type=constants.CLIENT_TYPES.validator,
+                image="statusim/nimbus-validator-client:multiarch-latest"[-constants.MAX_LABEL_LENGTH:],
+                connected_client="charon-node-" + str(node_index),
+                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
+                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+            ),
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            user=User(uid=0, gid=0),
         ),
     )
 
