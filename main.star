@@ -521,6 +521,7 @@ def run(plan, args={}):
                 mev_endpoint_names,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "dugtrio":
@@ -692,6 +693,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 global_node_selectors,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched assertoor")
         elif additional_service == "custom_flood":
