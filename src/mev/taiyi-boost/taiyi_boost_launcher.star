@@ -52,16 +52,14 @@ def launch(
         else "{" + "genesis_time_secs = {}, path = \"{}\"".format(genesis_timestamp, constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml") + "}"
     )
 
-    execution_api = participant.el_context.rpc_http_url
-    beacon_api = participant.cl_context.beacon_http_url
-    engine_api = "http://{0}:{1}".format(participant.el_context.ip_addr, participant.el_context.engine_rpc_port_num)
-
     image = taiyi_boost_params.taiyi_boost_image
     template_data = new_config_template_data(
         chain,
+        network,
         input_parser.MEV_BOOST_PORT,
         relays,
-        execution_api,
+        participant,
+        raw_jwt_secret
     )
 
     mev_rs_boost_config_template = read_file(static_files.TAIYI_BOOST_CONFIG_TEMPLATE_FILEPATH)
@@ -89,12 +87,7 @@ def launch(
         config_files_artifact_name,
         el_cl_genesis_data,
         global_node_selectors,
-        cb_signer_url,
-        execution_api,
-        beacon_api,
-        engine_api,
-        network,
-        raw_jwt_secret,
+        cb_signer_url
     )
 
     mev_boost_service = plan.add_service(service_name, config)
@@ -113,32 +106,12 @@ def get_config(
     el_cl_genesis_data,
     node_selectors,
     cb_signer_url,
-    execution_api,
-    beacon_api,
-    engine_url,
-    network,
-    jwt,
 ):
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
         entrypoint=["taiyi-boost"],
-        cmd=[
-                "--execution_api",
-                execution_api,
-                "--beacon_api",
-                beacon_api,
-                "--engine_api",
-                engine_url,
-                "--builder_private_key",
-                "0x6b845831c99c6bf43364bee624447d39698465df5c07f2cc4dca6e0acfbe46cd",
-                "--network",
-                network,
-                "--fee_recipient",
-                "0x2Cce2691cAC90Ac80dC551028FA00621d9c70a7F",
-                "--engine_jwt",
-                jwt,
-            ],
+        cmd=[],
         env_vars={
             "CB_CONFIG": config_file_path,
             "CB_SIGNER_JWT": "taiyi={}".format(TAIYI_JWT),
@@ -156,15 +129,24 @@ def get_config(
         node_selectors=node_selectors,
     )
 
+
 def new_mev_boost_launcher(should_check_relay, relay_end_points):
     return struct(
         should_check_relay=should_check_relay, relay_end_points=relay_end_points
     )
 
-def new_config_template_data(chain, port, relays, execution_api):
+
+def new_config_template_data(chain, network, port, relays, participant, raw_jwt_secret):
+    engine_api = "http://{0}:{1}".format(participant.el_context.ip_addr, participant.el_context.engine_rpc_port_num)
     return {
         "Chain": chain,
+        "Network": network,
         "Port": port,
         "Relays": relays,
-        "ExecutionApi": execution_api,
+        "EngineApi": engine_api,
+        "ExecutionApi": participant.el_context.rpc_http_url,
+        "BeaconApi": participant.cl_context.beacon_http_url,
+        "FeeRecipient": "0x2Cce2691cAC90Ac80dC551028FA00621d9c70a7F",
+        "BuilderPrivateKey": "0x6b845831c99c6bf43364bee624447d39698465df5c07f2cc4dca6e0acfbe46cd",
+        "EngineJwt": raw_jwt_secret,
     }

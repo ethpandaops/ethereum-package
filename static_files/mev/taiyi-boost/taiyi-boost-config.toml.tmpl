@@ -6,6 +6,17 @@ host = "0.0.0.0"
 
 rpc_url = "{{ .ExecutionApi }}"
 
+
+# taiyi-boost config
+engine_api="{{ .EngineApi }}"
+execution_api="{{ .ExecutionApi }}"
+beacon_api="{{ .BeaconApi }}"
+fee_recipient="{{ .FeeRecipient }}"
+builder_private_key="{{ .BuilderPrivateKey }}"
+engine_jwt="{{ .EngineJwt }}"
+network="{{ .Network }}"
+
+
 {{ range $index, $relay := .Relays }}
 [[relays]]
 id = "mev_relay_{{$index}}"
