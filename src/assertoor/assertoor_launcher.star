@@ -39,6 +39,7 @@ def launch_assertoor(
     port_publisher,
     index,
     global_node_selectors,
+    docker_cache_params,
 ):
     all_client_info = []
     clients_with_validators = []
@@ -112,6 +113,7 @@ def launch_assertoor(
         assertoor_params,
         public_ports,
         global_node_selectors,
+        docker_cache_params,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -124,6 +126,7 @@ def get_config(
     assertoor_params,
     public_ports,
     node_selectors,
+    docker_cache_params,
 ):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -132,10 +135,22 @@ def get_config(
 
     IMAGE_NAME = assertoor_params.image
 
-    if assertoor_params.image == constants.DEFAULT_ASSERTOOR_IMAGE:
+    default_assertoor_image = (
+        docker_cache_params.url
+        + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
+        + constants.DEFAULT_ASSERTOOR_IMAGE
+    )
+    if assertoor_params.image == default_assertoor_image:
         if network_params.fulu_fork_epoch < constants.FAR_FUTURE_EPOCH:
-            IMAGE_NAME = "ethpandaops/assertoor:fulu-support"
-
+            IMAGE_NAME = (
+                docker_cache_params.url
+                + (
+                    docker_cache_params.dockerhub_prefix
+                    if docker_cache_params.enabled
+                    else ""
+                )
+                + "ethpandaops/assertoor:fulu-support"
+            )
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
