@@ -203,12 +203,12 @@ done
                 "create", "cluster",
                 "--name=test",
                 "--nodes=" + str(charon_node_count),
-                "--fee-recipient-addresses=0x8943545177806ED17B9F23F0a21ee5948eCaa776",
-                "--withdrawal-addresses=0xBc7c960C1097ef1Af0FD32407701465f3c03e407",
+                "--fee-recipient-addresses=" + constants.CHARON_VALIDATING_REWARDS_ACCOUNT,
+                "--withdrawal-addresses=" + constants.CHARON_WITHDRAWAL_ADDRESS,
                 "--split-existing-keys",
                 "--split-keys-dir=/opt/charon/charon-keys",
-                "--testnet-chain-id=3151908",
-                "--testnet-fork-version=0x10000038",
+                "--testnet-chain-id=" + network_params.network_id,
+                "--testnet-fork-version=" + constants.GENESIS_FORK_VERSION,
                 "--testnet-genesis-timestamp=" + str(genesis_time),
                 "--testnet-name=kurtosis-testnet",
                 "--cluster-dir=" + CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -239,7 +239,6 @@ done
 
     # Store the Charon cluster files
     # First store the entire cluster directory to get all shared files
-    # For e
     charon_cluster_files = plan.store_service_files(
         service_name=temp_service.name,
         src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -265,8 +264,8 @@ done
 
         # cmd = [
         #     "run",
-        #     "--testnet-chain-id=3151908",
-        #     "--testnet-fork-version=0x10000038",
+        #     "--testnet-chain-id=" + network_params.network_id,
+        #     "--testnet-fork-version=" + constants.GENESIS_FORK_VERSION,
         #     "--testnet-genesis-timestamp=" + str(genesis_time),
         #     "--testnet-name=testnet",
         # ]
@@ -287,8 +286,8 @@ done
             "CHARON_JAEGER_SERVICE": "node" + str(i),
             "CHARON_P2P_EXTERNAL_HOSTNAME": "node" + str(i),
             "CHARON_BEACON_NODE_ENDPOINTS": beacon_endpoints[i],
-            "CHARON_TESTNET_CHAIN_ID": "3151908",
-            "CHARON_TESTNET_FORK_VERSION": "0x10000038",
+            "CHARON_TESTNET_CHAIN_ID": network_params.network_id,
+            "CHARON_TESTNET_FORK_VERSION": constants.GENESIS_FORK_VERSION,
             "CHARON_TESTNET_GENESIS_TIMESTAMP": str(genesis_time),
             "CHARON_TESTNET_NAME": "kurtosis-testnet",
         }
@@ -329,8 +328,8 @@ done
         # Charon run command
         cmd = [
             "run",
-            "--testnet-chain-id=3151908",
-            "--testnet-fork-version=0x10000038",
+            "--testnet-chain-id=" + network_params.network_id,
+            "--testnet-fork-version=" + constants.GENESIS_FORK_VERSION,
             "--testnet-genesis-timestamp=" + str(genesis_time),
             "--testnet-name=kurtosis-testnet",
         ]
@@ -339,8 +338,7 @@ done
         charon_service = plan.add_service(
             name=node_name,
             config=ServiceConfig(
-                # image=image,
-                image="obolnetwork/charon:latest",
+                image=image,
                 ports=ports,
                 cmd=cmd,
                 env_vars=env_vars,
@@ -611,7 +609,7 @@ def launch_lodestar_vc(
     Uses Charon-specific key management with standard Lodestar parameters
     """
 
-    # Create the run.sh script content (similar to kurtosis-charon/lodestar/run.sh)
+    # Create the run.sh script content
     run_script_content = """#!/bin/sh
 
 BUILDER_SELECTION="executiononly"
@@ -763,7 +761,7 @@ def launch_teku_vc(
     Uses config file approach similar to compose.teku.yaml
     """
 
-    # Create the teku-config.yaml content based on kurtosis-charon/teku/teku-config.yaml
+    # Create the teku-config.yaml content
     teku_config_content = """metrics-enabled: true
 metrics-host-allowlist: "*"
 metrics-interface: "0.0.0.0"
@@ -1129,7 +1127,7 @@ def launch_prysm_vc(
     Uses script approach similar to kurtosis-charon/prysm/run.sh
     """
 
-    # Create the run.sh script content based on kurtosis-charon/prysm/run.sh
+    # Create the run.sh script content
     run_script_content = """#!/usr/bin/env bash
 
 WALLET_DIR="/prysm-wallet"
