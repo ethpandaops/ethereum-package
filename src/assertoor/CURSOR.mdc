@@ -1,0 +1,16 @@
+---
+description: Assertoor - Ethereum network testing and validation orchestrator
+globs: 
+  - "*.star"
+alwaysApply: false
+---
+
+Assertoor launcher that orchestrates comprehensive Ethereum network testing across consensus and execution clients.
+
+## Key Integration Pattern
+- Connects to multiple client pairs via HTTP/RPC endpoints for cross-client validation
+- Supports execution/consensus snooper integration for enhanced monitoring capabilities
+
+## Important Constraints
+- Requires rendered configuration templates with client endpoints and test parameters
+- Test execution depends on validator availability and network readiness

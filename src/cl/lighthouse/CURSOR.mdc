@@ -1,0 +1,16 @@
+---
+description: Lighthouse - Ethereum consensus layer client launcher module
+globs: 
+  - "*.star"
+alwaysApply: false
+---
+
+Lighthouse consensus client launcher that configures and deploys Lighthouse beacon nodes with optional blobber sidecar.
+
+## Key Integration Pattern
+- Follows standardized consensus client launcher pattern with configurable service parameters
+- Supports snooper mode for execution client proxying and blobber sidecar for blob propagation
+
+## Important Constraints
+- Must coordinate with execution layer client via JWT-authenticated Engine API
+- Requires specific port assignments for discovery (TCP/UDP/QUIC), HTTP API, and metrics
