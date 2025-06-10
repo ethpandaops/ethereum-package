@@ -873,7 +873,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "(\n    histogram_quantile(0.99, rate(beacon_engine_getBlobsV2_runtime_seconds_bucket{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__rate_interval]))\n)\nOR\n(\n  histogram_quantile(0.99, rate(beacon_engine_getBlobsV2_runtime_milliseconds_bucket{\n    client_name=~\"$client\",\n    job=~\"$job\",\n    supernode=~\"$nodes\"\n  }[$__rate_interval])) / 1000\n)\n",
+          "expr": "(\n    histogram_quantile(0.99, rate(beacon_engine_getBlobsV2_request_duration_seconds_bucket{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__rate_interval]))\n)\nOR\n(\n  histogram_quantile(0.99, rate(beacon_engine_getBlobsV2_request_duration_milliseconds_bucket{\n    client_name=~\"$client\",\n    job=~\"$job\",\n    supernode=~\"$nodes\"\n  }[$__rate_interval])) / 1000\n)\n",
           "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
