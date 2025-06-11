@@ -172,8 +172,7 @@ def launch(
             node_selectors=node_selectors,
             port_publisher=port_publisher,
             vc_index=vc_index,
-        )
-    # Charon is now handled by charon_launcher.star
+        )    
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
     else:
