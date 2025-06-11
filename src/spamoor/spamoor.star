@@ -27,6 +27,8 @@ def launch_spamoor(
     spamoor_params,
     global_node_selectors,
     network_params,
+    port_publisher,
+    additional_service_index,
     osaka_time,
 ):
     spammers = []
@@ -79,6 +81,7 @@ def launch_spamoor(
     )
 
     config = get_config(
+        plan,
         config_files_artifact_name,
         prefunded_addresses,
         participant_contexts,
@@ -86,11 +89,14 @@ def launch_spamoor(
         spamoor_params,
         global_node_selectors,
         network_params,
+        port_publisher,
+        additional_service_index,
     )
     plan.add_service(SERVICE_NAME, config)
 
 
 def get_config(
+    plan,
     config_files_artifact_name,
     prefunded_addresses,
     participant_contexts,
@@ -98,6 +104,8 @@ def get_config(
     spamoor_params,
     node_selectors,
     network_params,
+    port_publisher,
+    additional_service_index,
 ):
     config_file_path = shared_utils.path_join(
         SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -114,11 +122,16 @@ def get_config(
         ) = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
-
-        rpchost = "http://{0}:{1}".format(
-            el_client.ip_addr,
-            el_client.rpc_port_num,
-        )
+        if participant.snooper_el_rpc_context:
+            rpchost = "http://{0}:{1}".format(
+                participant.snooper_el_rpc_context.ip_addr,
+                participant.snooper_el_rpc_context.rpc_port_num,
+            )
+        else:
+            rpchost = "http://{0}:{1}".format(
+                el_client.ip_addr,
+                el_client.rpc_port_num,
+            )
 
         if "builder" in full_name:
             rpchost = "group(mevbuilder)" + rpchost
@@ -131,6 +144,13 @@ def get_config(
         "--startup-spammer={}".format(config_file_path),
     ]
 
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        0,
+    )
+
     for index, extra_arg in enumerate(spamoor_params.extra_args):
         cmd.append(extra_arg)
 
@@ -139,6 +159,7 @@ def get_config(
         entrypoint=["./spamoor-daemon"],
         cmd=cmd,
         ports=USED_PORTS,
+        public_ports=public_ports,
         min_cpu=spamoor_params.min_cpu,
         max_cpu=spamoor_params.max_cpu,
         min_memory=spamoor_params.min_mem,

@@ -10,7 +10,7 @@ def new_cl_context(
     multiaddr="",
     peer_id="",
     snooper_enabled=False,
-    snooper_engine_context=None,
+    snooper_el_engine_context=None,
     validator_keystore_files_artifact_uuid="",
     supernode=False,
 ):
@@ -26,7 +26,7 @@ def new_cl_context(
         multiaddr=multiaddr,
         peer_id=peer_id,
         snooper_enabled=snooper_enabled,
-        snooper_engine_context=snooper_engine_context,
+        snooper_el_engine_context=snooper_el_engine_context,
         validator_keystore_files_artifact_uuid=validator_keystore_files_artifact_uuid,
         supernode=supernode,
     )

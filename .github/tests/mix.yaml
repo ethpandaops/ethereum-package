@@ -13,3 +13,6 @@ participants:
     cl_type: teku
   - el_type: ethereumjs
     cl_type: grandine
+docker_cache_params:
+  enabled: true
+  url: "docker.ethquokkaops.io"

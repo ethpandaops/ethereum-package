@@ -27,6 +27,7 @@ charon_launcher = import_module("./vc/charon_launcher.star")
 remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
+snooper_el_launcher = import_module("./snooper/snooper_el_launcher.star")
 
 
 def launch_participant_network(
@@ -46,6 +47,7 @@ def launch_participant_network(
     num_participants = len(args_with_right_defaults.participants)
     total_number_of_validator_keys = 0
     latest_block = ""
+    global_other_index = 0
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
@@ -159,8 +161,9 @@ def launch_participant_network(
 
     (
         all_cl_contexts,
-        all_snooper_engine_contexts,
+        all_snooper_el_engine_contexts,
         preregistered_validator_keys_for_nodes,
+        global_other_index,
     ) = cl_client_launcher.launch(
         plan,
         network_params,
@@ -176,6 +179,7 @@ def launch_participant_network(
         validator_data,
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
+        global_other_index,
     )
 
     ethereum_metrics_exporter_context = None
@@ -184,6 +188,7 @@ def launch_participant_network(
     all_vc_contexts = []
     all_remote_signer_contexts = []
     all_snooper_beacon_contexts = []
+    all_snooper_el_rpc_contexts = []
     # Some CL clients cannot run validator clients in the same process and need
     # a separate validator client
     _cls_that_need_separate_vc = [
@@ -225,8 +230,12 @@ def launch_participant_network(
                 el_context,
                 cl_context,
                 node_selectors,
+                args_with_right_defaults.port_publisher,
+                global_other_index,
                 args_with_right_defaults.docker_cache_params,
+                persistent,
             )
+            global_other_index += 1
             plan.print(
                 "Successfully added {0} ethereum metrics exporter participants".format(
                     ethereum_metrics_exporter_context
@@ -261,6 +270,30 @@ def launch_participant_network(
 
             all_xatu_sentry_contexts.append(xatu_sentry_context)
 
+        # Create snooper RPC context for all participants if snooper is enabled
+        snooper_el_rpc_context = None
+        if participant.snooper_enabled:
+            snooper_service_name = "snooper-rpc-{0}-{1}".format(
+                index_str,
+                el_type,
+            )
+            snooper_el_rpc_context = snooper_el_launcher.launch_snooper(
+                plan,
+                snooper_service_name,
+                el_context,
+                node_selectors,
+                args_with_right_defaults.port_publisher,
+                global_other_index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            global_other_index += 1
+            plan.print(
+                "Successfully added {0} snooper RPC participants".format(
+                    snooper_el_rpc_context
+                )
+            )
+
+        all_snooper_el_rpc_contexts.append(snooper_el_rpc_context)
         plan.print("Successfully added {0} CL participants".format(num_participants))
 
         plan.print("Start adding validators for participant #{0}".format(index_str))
@@ -292,6 +325,7 @@ def launch_participant_network(
         vc_context = None
         remote_signer_context = None
         snooper_beacon_context = None
+        snooper_el_rpc_context = None
 
         if participant.snooper_enabled:
             snooper_service_name = "snooper-beacon-{0}-{1}-{2}".format(
@@ -304,6 +338,8 @@ def launch_participant_network(
                 snooper_service_name,
                 cl_context,
                 node_selectors,
+                args_with_right_defaults.port_publisher,
+                global_other_index,
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print(
@@ -311,7 +347,10 @@ def launch_participant_network(
                     snooper_beacon_context
                 )
             )
+            global_other_index += 1
+
         all_snooper_beacon_contexts.append(snooper_beacon_context)
+
         full_name = (
             "{0}-{1}-{2}-{3}".format(
                 index_str,
@@ -409,8 +448,9 @@ def launch_participant_network(
         cl_type = participant.cl_type
         vc_type = participant.vc_type
         remote_signer_type = participant.remote_signer_type
-        snooper_engine_context = None
+        snooper_el_engine_context = None
         snooper_beacon_context = None
+        snooper_el_rpc_context = None
 
         el_context = all_el_contexts[index] if index < len(all_el_contexts) else None
         cl_context = all_cl_contexts[index] if index < len(all_cl_contexts) else None
@@ -423,8 +463,21 @@ def launch_participant_network(
         )
 
         if participant.snooper_enabled:
-            snooper_engine_context = all_snooper_engine_contexts[index]
-            snooper_beacon_context = all_snooper_beacon_contexts[index]
+            snooper_el_engine_context = (
+                all_snooper_el_engine_contexts[index]
+                if index < len(all_snooper_el_engine_contexts)
+                else None
+            )
+            snooper_beacon_context = (
+                all_snooper_beacon_contexts[index]
+                if index < len(all_snooper_beacon_contexts)
+                else None
+            )
+            snooper_el_rpc_context = (
+                all_snooper_el_rpc_contexts[index]
+                if index < len(all_snooper_el_rpc_contexts)
+                else None
+            )
 
         ethereum_metrics_exporter_context = None
 
@@ -446,8 +499,9 @@ def launch_participant_network(
             cl_context,
             vc_context,
             remote_signer_context,
-            snooper_engine_context,
+            snooper_el_engine_context,
             snooper_beacon_context,
+            snooper_el_rpc_context,
             ethereum_metrics_exporter_context,
             xatu_sentry_context,
         )

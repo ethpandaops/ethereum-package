@@ -7,3 +7,6 @@ participants:
     count: 1
 additional_services:
   - assertoor
+docker_cache_params:
+  enabled: true
+  url: "docker.ethquokkaops.io"

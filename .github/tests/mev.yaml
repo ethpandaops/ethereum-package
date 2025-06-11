@@ -14,6 +14,10 @@ additional_services:
   - custom_flood
   - spamoor
   - dora
-  - prometheus_grafana
+  - prometheus
+  - grafana
 network_params:
   seconds_per_slot: 6
+docker_cache_params:
+  enabled: true
+  url: "docker.ethquokkaops.io"

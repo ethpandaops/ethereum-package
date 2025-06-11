@@ -324,6 +324,8 @@ def run(plan, args={}):
                 blocksim_uri,
                 network_params,
                 persistent,
+                args_with_right_defaults.port_publisher,
+                num_participants,
                 global_node_selectors,
             )
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
@@ -333,6 +335,8 @@ def run(plan, args={}):
                 network_params.network,
                 beacon_uri,
                 el_cl_data_files_artifact_uuid,
+                args_with_right_defaults.port_publisher,
+                num_participants,
                 global_node_selectors,
             )
         else:
@@ -371,7 +375,7 @@ def run(plan, args={}):
                         mev_endpoints,
                     )
                     mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        constants.MEV_BOOST_SERVICE_NAME_PREFIX,
                         index_str,
                         participant.cl_type,
                         participant.el_type,
@@ -385,6 +389,8 @@ def run(plan, args={}):
                         mev_params.mev_boost_args,
                         args_with_right_defaults.participants[index],
                         network_params.seconds_per_slot,
+                        args_with_right_defaults.port_publisher,
+                        index,
                         global_node_selectors,
                     )
                 elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
@@ -394,7 +400,7 @@ def run(plan, args={}):
                         mev_endpoints,
                     )
                     mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        constants.MEV_BOOST_SERVICE_NAME_PREFIX,
                         index_str,
                         participant.cl_type,
                         participant.el_type,
@@ -407,6 +413,8 @@ def run(plan, args={}):
                         mev_params,
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
+                        args_with_right_defaults.port_publisher,
+                        index,
                         global_node_selectors,
                     )
                 elif (
@@ -418,7 +426,7 @@ def run(plan, args={}):
                         mev_endpoints,
                     )
                     mev_boost_service_name = "{0}-{1}-{2}-{3}".format(
-                        input_parser.MEV_BOOST_SERVICE_NAME_PREFIX,
+                        constants.COMMIT_BOOST_SERVICE_NAME_PREFIX,
                         index_str,
                         participant.cl_type,
                         participant.el_type,
@@ -431,6 +439,8 @@ def run(plan, args={}):
                         mev_params,
                         mev_endpoints,
                         el_cl_data_files_artifact_uuid,
+                        args_with_right_defaults.port_publisher,
+                        index,
                         global_node_selectors,
                         final_genesis_timestamp,
                     )
@@ -510,6 +520,7 @@ def run(plan, args={}):
                 mev_endpoint_names,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "dugtrio":
@@ -607,6 +618,8 @@ def run(plan, args={}):
                 apache_port,
                 all_participants,
                 args_with_right_defaults.participants,
+                args_with_right_defaults.port_publisher,
+                index,
                 global_node_selectors,
                 args_with_right_defaults.docker_cache_params,
             )
@@ -628,9 +641,41 @@ def run(plan, args={}):
                 index,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
+        elif additional_service == "grafana":
+            plan.print("Launching grafana...")
+            grafana.launch_grafana(
+                plan,
+                grafana_datasource_config_template,
+                grafana_dashboards_config_template,
+                prometheus_private_url,
+                global_node_selectors,
+                args_with_right_defaults.grafana_params,
+                args_with_right_defaults.port_publisher,
+                index,
+            )
+            plan.print("Successfully launched grafana")
+        elif additional_service == "prometheus":
+            plan.print("Launching prometheus...")
+            prometheus_private_url = prometheus.launch_prometheus(
+                plan,
+                all_el_contexts,
+                all_cl_contexts,
+                all_vc_contexts,
+                network_params,
+                all_remote_signer_contexts,
+                prometheus_additional_metrics_jobs,
+                all_ethereum_metrics_exporter_contexts,
+                all_xatu_sentry_contexts,
+                global_node_selectors,
+                args_with_right_defaults.prometheus_params,
+                args_with_right_defaults.port_publisher,
+                index,
+            )
+            plan.print("Successfully launched prometheus")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
+            prometheus_grafana_index = index
         elif additional_service == "assertoor":
             plan.print("Launching assertoor")
             assertoor_config_template = read_file(
@@ -644,7 +689,10 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 network_params,
                 assertoor_params,
+                args_with_right_defaults.port_publisher,
+                index,
                 global_node_selectors,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched assertoor")
         elif additional_service == "custom_flood":
@@ -671,6 +719,8 @@ def run(plan, args={}):
                 args_with_right_defaults.spamoor_params,
                 global_node_selectors,
                 args_with_right_defaults.network_params,
+                args_with_right_defaults.port_publisher,
+                index,
                 osaka_time,
             )
         else:
@@ -682,14 +732,16 @@ def run(plan, args={}):
             all_el_contexts,
             all_cl_contexts,
             all_vc_contexts,
+            network_params,
             all_remote_signer_contexts,
             prometheus_additional_metrics_jobs,
             all_ethereum_metrics_exporter_contexts,
             all_xatu_sentry_contexts,
             global_node_selectors,
             args_with_right_defaults.prometheus_params,
+            args_with_right_defaults.port_publisher,
+            prometheus_grafana_index,
         )
-
         plan.print("Launching grafana...")
         grafana.launch_grafana(
             plan,
@@ -698,6 +750,8 @@ def run(plan, args={}):
             prometheus_private_url,
             global_node_selectors,
             args_with_right_defaults.grafana_params,
+            args_with_right_defaults.port_publisher,
+            prometheus_grafana_index,
         )
         plan.print("Successfully launched grafana")
 

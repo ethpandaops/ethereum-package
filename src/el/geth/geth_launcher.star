@@ -214,7 +214,8 @@ def get_config(
         "--authrpc.vhosts=*",
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full"
-        if network_params.network == "kurtosis" and not gcmode_archive
+        if network_params.network == constants.NETWORK_NAME.kurtosis
+        and not gcmode_archive
         else "--syncmode=snap"
         if not gcmode_archive
         else "--gcmode=archive",
@@ -224,6 +225,11 @@ def get_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
+        "{0}".format(
+            "--miner.gasprice=1"
+            if network_params.network == constants.NETWORK_NAME.kurtosis
+            else ""
+        ),
     ]
 
     if network_params.gas_limit > 0:
@@ -291,11 +297,14 @@ def get_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
     if persistent:
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[network_params.network][
+            else constants.VOLUME_SIZE[volume_size_key][
                 constants.EL_TYPE.geth + "_volume_size"
             ],
         )

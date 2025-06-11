@@ -21,8 +21,8 @@ participants:
     el_image: erigontech/erigon:v3.0.2
     el_extra_params: ["--miner.extradata=prysmFromLocal"]
     cl_type: prysm
-    cl_image: prysmaticlabs/prysm-beacon-chain:v6.0.1
-    vc_image: prysmaticlabs/prysm-validator:v6.0.1
+    cl_image: offchainlabs/prysm-beacon-chain:v6.0.1
+    vc_image: offchainlabs/prysm-validator:v6.0.1
 
   - el_type: besu
     el_image: hyperledger/besu:25.4.1
@@ -44,7 +44,7 @@ additional_services:
 mev_type: flashbots
 
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay:0.30.1
+  mev_relay_image: flashbots/mev-boost-relay:0.30.2
   mev_boost_image: flashbots/mev-boost:1.9
   mev_builder_cl_image: sigp/lighthouse:v7.0.1
   mev_builder_image: ethpandaops/reth-rbuilder:v1.1.0

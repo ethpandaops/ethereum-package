@@ -127,6 +127,16 @@ def get_config(
             constants.RPC_PORT_ID: public_ports_for_component[3],
             constants.WS_PORT_ID: public_ports_for_component[4],
         }
+        if (
+            launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
+            or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
+        ):
+            additional_public_port_assignments[
+                constants.RBUILDER_PORT_ID
+            ] = public_ports_for_component[5]
+            additional_public_port_assignments[
+                constants.RBUILDER_METRICS_PORT_ID
+            ] = public_ports_for_component[6]
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
@@ -240,11 +250,14 @@ def get_config(
     }
 
     if persistent:
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[network_params.network][
+            else constants.VOLUME_SIZE[volume_size_key][
                 constants.EL_TYPE.reth + "_volume_size"
             ],
         )

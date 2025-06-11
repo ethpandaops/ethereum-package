@@ -12,6 +12,7 @@ WS_PORT_ENGINE_NUM = 8547
 DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
+DEBUG_PORT_NUM = 9229
 
 METRICS_PATH = "/metrics"
 
@@ -121,6 +122,12 @@ def get_config(
             constants.WS_PORT_ID: public_ports_for_component[4],
             constants.ENGINE_WS_PORT_ID: public_ports_for_component[5],
         }
+
+        if "--inspect" in participant.el_extra_env_vars.get("NODE_OPTIONS", ""):
+            additional_public_port_assignments[
+                constants.DEBUG_PORT_ID
+            ] = public_ports_for_component[6]
+
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
@@ -145,6 +152,10 @@ def get_config(
         constants.WS_PORT_ID: WS_PORT_NUM,
         constants.ENGINE_WS_PORT_ID: WS_PORT_ENGINE_NUM,
     }
+
+    if "--inspect" in participant.el_extra_env_vars.get("NODE_OPTIONS", ""):
+        used_port_assignments[constants.DEBUG_PORT_ID] = DEBUG_PORT_NUM
+
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
@@ -215,11 +226,14 @@ def get_config(
     }
 
     if persistent:
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[network_params.network][
+            else constants.VOLUME_SIZE[volume_size_key][
                 constants.EL_TYPE.ethereumjs + "_volume_size"
             ],
         )
