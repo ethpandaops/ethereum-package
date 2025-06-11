@@ -803,7 +803,7 @@ def input_parser(plan, input_args):
                 skip_start=participant["skip_start"],
                 # Charon-specific parameters
                 charon_node_count=participant["charon_node_count"],
-                charon_validator_client=participant["charon_validator_client"],
+                charon_params=participant["charon_params"],
             )
             for participant in result["participants"]
         ],
@@ -2027,7 +2027,10 @@ def default_participant():
         "vc_min_mem": 0,
         # Charon-specific parameters
         "charon_node_count": 3,
-        "charon_validator_client": "lighthouse",
+        "charon_params": {
+            "charon_vc": "lighthouse",
+            "charon_vc_image": DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse],
+        },
         "vc_max_mem": 0,
         "vc_force_restart": False,
         "use_remote_signer": None,
