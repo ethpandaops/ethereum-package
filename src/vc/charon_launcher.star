@@ -13,7 +13,7 @@ CHARON_MONITORING_PORT = 3620
 CHARON_METRICS_PORT = 8080
 
 # Default Charon image
-DEFAULT_CHARON_IMAGE = "obolnetwork/charon:latest"
+DEFAULT_CHARON_IMAGE = input_parser.DEFAULT_VC_IMAGES[constants.VC_TYPE.charon]
 
 # Verbosity levels mapping
 VERBOSITY_LEVELS = {
@@ -62,6 +62,24 @@ def launch(
     charon_node_count = 4
     if hasattr(participant, "charon_node_count") and participant.charon_node_count > 0:
         charon_node_count = participant.charon_node_count
+
+    # Get Charon validator client parameters
+    vc_type = constants.CL_TYPE.lighthouse # Default
+    vc_image = input_parser.DEFAULT_CL_IMAGES[vc_type]
+
+    # Extract charon_params (it's a dictionary, not a struct)
+    if hasattr(participant, "charon_params") and participant.charon_params != None:
+        charon_params = participant.charon_params
+        plan.print("DEBUG: charon_params is a dictionary: " + str(charon_params))
+
+        # Access dictionary keys
+        if "charon_vc" in charon_params and charon_params["charon_vc"] != None:
+            vc_type = charon_params["charon_vc"]
+            plan.print("DEBUG: Set vc_type to: " + str(vc_type))
+
+        if "charon_vc_image" in charon_params and charon_params["charon_vc_image"] != None:
+            vc_image = charon_params["charon_vc_image"]
+            plan.print("DEBUG: Set vc_image to: " + str(vc_image))
 
     # Get the beacon node endpoints for each Charon node
     beacon_endpoints = []
@@ -365,10 +383,7 @@ done
     # Now launch the validator clients that will connect to Charon nodes
     vc_services = []
     for i in range(charon_node_count):
-        # Determine which validator client to use with Charon
-        vc_type = "lighthouse"  # Default
-        if hasattr(participant, "charon_validator_client"):
-            vc_type = participant.charon_validator_client
+        # Use the vc_type and vc_image determined earlier
 
         # Create VC service name
         vc_service_name = service_name + "-vc-" + str(i) + "-" + vc_type
@@ -399,7 +414,8 @@ done
                 node_selectors=node_selectors,
                 full_name=full_name + "-node" + str(i),
                 vc_index=vc_index,
-                node_index=i
+                node_index=i,
+                vc_image=vc_image
             )
             vc_services.append(vc_service)
         elif vc_type == "lodestar":
@@ -414,7 +430,8 @@ done
                 node_selectors=node_selectors,
                 full_name=full_name + "-node" + str(i),
                 vc_index=vc_index,
-                node_index=i
+                node_index=i,
+                vc_image=vc_image
             )
             vc_services.append(vc_service)
         elif vc_type == "teku":
@@ -429,7 +446,8 @@ done
                 node_selectors=node_selectors,
                 full_name=full_name + "-node" + str(i),
                 vc_index=vc_index,
-                node_index=i
+                node_index=i,
+                vc_image=vc_image
             )
             vc_services.append(vc_service)
         elif vc_type == "nimbus":
@@ -444,7 +462,8 @@ done
                 node_selectors=node_selectors,
                 full_name=full_name + "-node" + str(i),
                 vc_index=vc_index,
-                node_index=i
+                node_index=i,
+                vc_image=vc_image
             )
             vc_services.append(vc_service)
         elif vc_type == "prysm":
@@ -459,7 +478,8 @@ done
                 node_selectors=node_selectors,
                 full_name=full_name + "-node" + str(i),
                 vc_index=vc_index,
-                node_index=i
+                node_index=i,
+                vc_image=vc_image
             )
             vc_services.append(vc_service)
         else:
@@ -492,7 +512,8 @@ def launch_lighthouse_vc(
     node_selectors,
     full_name,
     vc_index,
-    node_index
+    node_index,
+    vc_image
 ):
     """
     Launch a Lighthouse validator client that connects to a Charon node
@@ -571,7 +592,7 @@ exec lighthouse validator \\
     vc_service = plan.add_service(
         name=vc_service_name,
         config=ServiceConfig(
-            image="sigp/lighthouse:latest",
+            image=vc_image,
             ports=ports,
             cmd=["bash", "-c", startup_script],
             env_vars=env_vars,
@@ -579,7 +600,7 @@ exec lighthouse validator \\
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.lighthouse,
                 client_type=constants.CLIENT_TYPES.validator,
-                image="sigp/lighthouse:latest"[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
                 supernode=participant.supernode if hasattr(participant, "supernode") else False,
@@ -602,7 +623,8 @@ def launch_lodestar_vc(
     node_selectors,
     full_name,
     vc_index,
-    node_index
+    node_index,
+    vc_image
 ):
     """
     Launch a Lodestar validator client that connects to a Charon node
@@ -722,7 +744,7 @@ exec node /usr/app/packages/cli/bin/lodestar validator \\
     vc_service = plan.add_service(
         name=vc_service_name,
         config=ServiceConfig(
-            image="chainsafe/lodestar:latest",
+            image=vc_image,
             ports=ports,
             cmd=["chmod +x /opt/charon/run.sh && /opt/charon/run.sh"],
             entrypoint=["sh", "-c"],
@@ -731,7 +753,7 @@ exec node /usr/app/packages/cli/bin/lodestar validator \\
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.lodestar,
                 client_type=constants.CLIENT_TYPES.validator,
-                image="chainsafe/lodestar:latest"[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
                 supernode=participant.supernode if hasattr(participant, "supernode") else False,
@@ -754,7 +776,8 @@ def launch_teku_vc(
     node_selectors,
     full_name,
     vc_index,
-    node_index
+    node_index,
+    vc_image
 ):
     """
     Launch a Teku validator client that connects to a Charon node
@@ -837,7 +860,7 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
     vc_service = plan.add_service(
         name=vc_service_name,
         config=ServiceConfig(
-            image="consensys/teku:latest",
+            image=vc_image,
             ports=ports,
             cmd = cmd,
             # cmd=["tail", "-f", "/dev/null"],
@@ -847,7 +870,7 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.teku,
                 client_type=constants.CLIENT_TYPES.validator,
-                image="consensys/teku:latest"[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
                 supernode=participant.supernode if hasattr(participant, "supernode") else False,
@@ -871,7 +894,8 @@ def launch_nimbus_vc(
     node_selectors,
     full_name,
     vc_index,
-    node_index
+    node_index,
+    vc_image
 ):
     """
     Launch a Nimbus validator client that connects to a Charon node
@@ -1087,7 +1111,7 @@ exec "$NIMBUS_VC_PATH" \\
     vc_service = plan.add_service(
         name=vc_service_name,
         config=ServiceConfig(
-            image="statusim/nimbus-validator-client:multiarch-latest",
+            image=vc_image,
             ports=ports,
             cmd=["chmod +x /home/user/scripts/run_vc.sh && /home/user/scripts/run_vc.sh"],
             entrypoint=["bash", "-c"],
@@ -1096,7 +1120,7 @@ exec "$NIMBUS_VC_PATH" \\
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.nimbus,
                 client_type=constants.CLIENT_TYPES.validator,
-                image="statusim/nimbus-validator-client:multiarch-latest"[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
                 supernode=participant.supernode if hasattr(participant, "supernode") else False,
@@ -1120,7 +1144,8 @@ def launch_prysm_vc(
     node_selectors,
     full_name,
     vc_index,
-    node_index
+    node_index,
+    vc_image
 ):
     """
     Launch a Prysm validator client that connects to a Charon node
@@ -1234,7 +1259,7 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
     vc_service = plan.add_service(
         name=vc_service_name,
         config=ServiceConfig(
-            image="gcr.io/prysmaticlabs/prysm/validator:latest",
+            image=vc_image,
             ports=ports,
             cmd=["chmod +x /opt/charon/run.sh && /opt/charon/run.sh"],
             entrypoint=["bash", "-c"],
@@ -1243,7 +1268,7 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.prysm,
                 client_type=constants.CLIENT_TYPES.validator,
-                image="gcr.io/prysmaticlabs/prysm/validator:latest"[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
                 supernode=participant.supernode if hasattr(participant, "supernode") else False,
