@@ -28,10 +28,8 @@ participants:
     supernode: false
     use_separate_vc: true
     # Validator
-    # vc_type: lighthouse
-    # vc_image: sigp/lighthouse:latest-unstable
-    vc_type: charon
-    vc_image: obolnetwork/charon:latest
+    vc_type: lighthouse
+    vc_image: sigp/lighthouse:latest-unstable
     vc_log_level: ""
     vc_extra_env_vars: {}
     vc_extra_labels: {}
@@ -43,8 +41,6 @@ participants:
     vc_max_mem: 0
     validator_count: null
     use_remote_signer: false
-    charon_node_count: 4
-    charon_validator_client: lighthouse
     # Remote signer
     remote_signer_type: web3signer
     remote_signer_image: consensys/web3signer:latest
