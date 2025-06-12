@@ -127,11 +127,11 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": " sum by (job) (increase(beacon_data_column_sidecar_processing_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
+          "expr": " avg_over_time(increase(beacon_data_column_sidecar_processing_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval])[1m:]) / 2",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "__auto",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
@@ -230,11 +230,11 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum by (job) (increase(beacon_data_column_sidecar_processing_successes_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
+          "expr": " avg_over_time(increase(beacon_data_column_sidecar_processing_successes_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval])[1m:]) / 2",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "__auto",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
@@ -333,11 +333,11 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum by(job) (increase(beacon_data_column_sidecar_processing_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval])) - sum by(job) (increase(beacon_data_column_sidecar_processing_successes_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
+          "expr": " avg_over_time(increase(beacon_data_column_sidecar_processing_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval])[1m:]) / 2 -  avg_over_time(increase(beacon_data_column_sidecar_processing_successes_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval])[1m:]) / 2",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "__auto",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
@@ -401,7 +401,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -685,7 +686,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
-      "description": "Count of engine_getBlobsV2 requests that did not receive an answer",
+      "description": "Percentage of engine_getBlobsV2 requests that did not receive a successful (not null) response",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -772,7 +773,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by(job)(increase(beacon_engine_getBlobsV2_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))\n-\nsum by(job)(increase(beacon_engine_getBlobsV2_responses_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))",
+          "expr": "(sum by(job)(increase(beacon_engine_getBlobsV2_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))\n-\nsum by(job)(increase(beacon_engine_getBlobsV2_responses_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval]))) / sum by(job)(increase(beacon_engine_getBlobsV2_requests_total{client_name=~\"$client\", job=~\"$job\", supernode=~\"$nodes\"}[$__interval])) * 100",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -781,7 +782,7 @@
           "refId": "A"
         }
       ],
-      "title": "engine_getBlobsV2 losses",
+      "title": "Unsuccessful engine_getBlobsV2 request rate (%)",
       "type": "timeseries"
     },
     {
@@ -841,7 +842,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -1040,7 +1042,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -1139,7 +1142,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -1236,7 +1240,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -1333,7 +1338,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -1385,14 +1391,51 @@
         "defaults": {
           "color": {
             "fixedColor": "green",
-            "mode": "fixed"
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "red"
+              },
+              {
+                "color": "red",
+                "value": 127
               },
               {
                 "color": "green",
@@ -1411,28 +1454,17 @@
       },
       "id": 36,
       "options": {
-        "displayMode": "lcd",
         "legend": {
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
-        "maxVizHeight": 300,
-        "minVizHeight": 16,
-        "minVizWidth": 8,
-        "namePlacement": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "12.0.1",
       "targets": [
@@ -1443,13 +1475,14 @@
           },
           "editorMode": "code",
           "expr": "beacon_custody_groups{client_name=~\"$client\", job=~\"$job\", supernode=\"True\"}",
-          "legendFormat": "__auto",
+          "interval": "",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Custody groups (super nodes)",
-      "type": "bargauge"
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -1462,7 +1495,40 @@
         "defaults": {
           "color": {
             "fixedColor": "green",
-            "mode": "fixed"
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
@@ -1472,8 +1538,12 @@
                 "color": "green"
               },
               {
+                "color": "red",
+                "value": 3
+              },
+              {
                 "color": "green",
-                "value": 128
+                "value": 4
               }
             ]
           }
@@ -1488,28 +1558,17 @@
       },
       "id": 53,
       "options": {
-        "displayMode": "lcd",
         "legend": {
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
-        "maxVizHeight": 300,
-        "minVizHeight": 16,
-        "minVizWidth": 8,
-        "namePlacement": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "12.0.1",
       "targets": [
@@ -1520,13 +1579,14 @@
           },
           "editorMode": "code",
           "expr": "beacon_custody_groups{client_name=~\"$client\", job=~\"$job\", supernode=\"False\"}",
-          "legendFormat": "__auto",
+          "interval": "",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Custody groups (full nodes)",
-      "type": "bargauge"
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -1539,7 +1599,40 @@
         "defaults": {
           "color": {
             "fixedColor": "green",
-            "mode": "fixed"
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
@@ -1547,6 +1640,10 @@
             "steps": [
               {
                 "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 127
               },
               {
                 "color": "green",
@@ -1565,28 +1662,17 @@
       },
       "id": 54,
       "options": {
-        "displayMode": "lcd",
         "legend": {
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
-        "maxVizHeight": 300,
-        "minVizHeight": 16,
-        "minVizWidth": 8,
-        "namePlacement": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "12.0.1",
       "targets": [
@@ -1597,13 +1683,14 @@
           },
           "editorMode": "code",
           "expr": "beacon_custody_groups_backfilled{client_name=~\"$client\", job=~\"$job\", supernode=\"True\"}",
-          "legendFormat": "__auto",
+          "interval": "",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Backfilled custody groups (super nodes)",
-      "type": "bargauge"
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -1616,7 +1703,40 @@
         "defaults": {
           "color": {
             "fixedColor": "green",
-            "mode": "fixed"
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
           },
           "mappings": [],
           "thresholds": {
@@ -1626,8 +1746,12 @@
                 "color": "green"
               },
               {
+                "color": "red",
+                "value": 3
+              },
+              {
                 "color": "green",
-                "value": 128
+                "value": 4
               }
             ]
           }
@@ -1642,28 +1766,17 @@
       },
       "id": 55,
       "options": {
-        "displayMode": "lcd",
         "legend": {
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
-        "maxVizHeight": 300,
-        "minVizHeight": 16,
-        "minVizWidth": 8,
-        "namePlacement": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "pluginVersion": "12.0.1",
       "targets": [
@@ -1674,13 +1787,14 @@
           },
           "editorMode": "code",
           "expr": "beacon_custody_groups_backfilled{client_name=~\"$client\", job=~\"$job\", supernode=\"False\"}",
-          "legendFormat": "__auto",
+          "interval": "",
+          "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Backfilled custody groups (full nodes)",
-      "type": "bargauge"
+      "type": "timeseries"
     },
     {
       "collapsed": false,
@@ -2385,7 +2499,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -2488,7 +2602,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -2591,7 +2705,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -2694,7 +2808,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -2798,7 +2912,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -2902,7 +3016,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -3006,7 +3120,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -3110,7 +3224,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.5.2",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -3251,5 +3365,5 @@
   "timezone": "browser",
   "title": "PeerDAS metrics",
   "uid": "ddr7j9b1mlszps",
-  "version": 2
+  "version": 3
 }
