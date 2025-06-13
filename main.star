@@ -21,6 +21,7 @@ blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 forky = import_module("./src/forky/forky_launcher.star")
 tracoor = import_module("./src/tracoor/tracoor_launcher.star")
 apache = import_module("./src/apache/apache_launcher.star")
+nginx = import_module("./src/nginx/nginx_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
 )
@@ -87,6 +88,7 @@ def run(plan, args={}):
     global_node_selectors = args_with_right_defaults.global_node_selectors
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
     apache_port = args_with_right_defaults.apache_port
+    nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
 
     prefunded_accounts = genesis_constants.PRE_FUNDED_ACCOUNTS
@@ -624,6 +626,20 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched apache")
+        elif additional_service == "nginx":
+            plan.print("Launching nginx")
+            nginx.launch_nginx(
+                plan,
+                el_cl_data_files_artifact_uuid,
+                nginx_port,
+                all_participants,
+                args_with_right_defaults.participants,
+                args_with_right_defaults.port_publisher,
+                index,
+                global_node_selectors,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched nginx")
         elif additional_service == "full_beaconchain_explorer":
             plan.print("Launching full-beaconchain-explorer")
             full_beaconchain_explorer_config_template = read_file(

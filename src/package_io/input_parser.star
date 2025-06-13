@@ -515,6 +515,7 @@ def input_parser(plan, input_args):
             image=result["grafana_params"]["image"],
         ),
         apache_port=result["apache_port"],
+        nginx_port=result["nginx_port"],
         assertoor_params=struct(
             image=result["assertoor_params"]["image"],
             run_stability_check=result["assertoor_params"]["run_stability_check"],
@@ -972,6 +973,7 @@ def default_input_args(input_args):
         "mev_type": None,
         "xatu_sentry_enabled": False,
         "apache_port": None,
+        "nginx_port": None,
         "global_tolerations": [],
         "global_node_selectors": {},
         "use_remote_signer": False,
