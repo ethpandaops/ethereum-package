@@ -202,6 +202,7 @@ xatu_sentry_params:
     - contribution_and_proof
     - blob_sidecar
 apache_port: 40000
+nginx_port: 50000
 global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false
