@@ -1,0 +1,13 @@
+---
+description: Shared Utilities - Common helper functions and constants for the Ethereum package
+globs: 
+  - "*.star"
+alwaysApply: false
+---
+
+Shared utilities module providing common functionality across all Ethereum package components.
+
+- Maintain pure functions without side effects for all utility helpers
+- Use descriptive constant names following UPPER_SNAKE_CASE convention
+- Port allocation functions must respect component-specific ranges to avoid conflicts
+- Docker cache image calculations should preserve original registry fallback behavior

@@ -1,0 +1,16 @@
+---
+description: Prometheus metrics aggregation for Ethereum network monitoring
+globs: 
+  - "*.star"
+alwaysApply: false
+---
+
+Prometheus launcher that aggregates metrics from all Ethereum network components including execution clients, consensus clients, validators, and additional services.
+
+## Key Integration Pattern
+- Collects metrics endpoints from all deployed services via context objects
+- Configures Prometheus jobs with appropriate labels and scrape intervals for each service type
+
+## Important Constraints
+- All services must expose metrics endpoints before Prometheus configuration
+- Supports dynamic configuration of resource limits and retention policies

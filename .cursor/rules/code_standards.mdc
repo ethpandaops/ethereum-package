@@ -1,0 +1,105 @@
+---
+description: Ethereum Package Code Standards - Starlark and configuration standards
+globs:
+  - "**/*.star"
+  - "**/*.yaml"
+  - "**/*.yml"
+  - "**/Dockerfile"
+alwaysApply: false
+---
+
+# Ethereum Package Code Standards
+
+## Starlark Coding Conventions
+
+### File Organization
+- Use `.star` extension for all Starlark files
+- Import modules at the top of files using `import_module()`
+- Order imports: constants, then utilities, then specific modules
+- Group related imports together
+
+### Naming Conventions
+- **Functions**: Use `snake_case` (e.g., `launch_participant`, `get_network_params`)
+- **Variables**: Use `snake_case` for all variables
+- **Constants**: Use `UPPER_SNAKE_CASE` (e.g., `DEFAULT_MNEMONIC`, `HTTP_PORT_ID`)
+- **Module Names**: Use `snake_case` for module names
+- **Struct Fields**: Use `snake_case` for struct field names
+
+### Function Design
+- Return structs for complex data (using `struct()`)
+- Use keyword arguments for functions with many parameters
+- Provide sensible defaults where appropriate
+- Document complex functions with docstrings
+
+### Error Handling
+- Use `fail()` for critical errors that should stop execution
+- Validate inputs early in functions
+- Provide clear error messages
+
+### Common Patterns
+```starlark
+# Module imports
+constants = import_module("../package_io/constants.star")
+
+# Launcher pattern
+def new_launcher(config_data, jwt_file):
+    return struct(
+        config=config_data,
+        jwt=jwt_file,
+    )
+
+# Service launch pattern  
+def launch(plan, launcher, service_name, **kwargs):
+    config = launcher.config
+    # Launch implementation
+    return service_context
+```
+
+## YAML/Configuration Standards
+
+### Structure
+- Use 2-space indentation
+- Group related parameters together
+- Provide comments for complex configurations
+- Use meaningful defaults
+
+### Naming
+- Use `snake_case` for all configuration keys
+- Be consistent with naming across different services
+- Prefix service-specific configs appropriately
+
+### Documentation
+- Include inline comments for non-obvious parameters
+- Document valid values for enum-type parameters
+- Provide examples for complex configurations
+
+## Template Standards
+
+### Template Files
+- Store in `static_files/` directory
+- Use `.tmpl` extension for template files
+- Use clear placeholder syntax: `{{.VARIABLE_NAME}}`
+- Group related templates in subdirectories
+
+### Docker Standards
+- Prefer official images where available
+- Pin versions for production stability
+- Use descriptive image tags
+- Document any custom images in comments
+
+## Service Naming
+- Use descriptive service names: `<client>-<type>-<index>`
+- Examples: `geth-el-1`, `lighthouse-beacon-2`, `teku-validator-1`
+- Maintain consistency across the codebase
+
+## Port Management
+- Define port constants in constants.star
+- Use sequential port allocation
+- Document port usage in service definitions
+- Avoid hardcoded port numbers
+
+## Resource Limits
+- Always make CPU/memory limits configurable
+- Use 0 as "no limit" convention
+- Express CPU in millicores, memory in MB
+- Provide reasonable defaults based on client requirements
