@@ -88,7 +88,7 @@ def launch_nginx(
     ] = enode_template_and_data
 
     bootstrap_info_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "bootstrap-info"
+        template_and_data_by_rel_dest_filepath, "nginx-bootstrap-info"
     )
 
     if nginx_port != None:
@@ -147,7 +147,7 @@ def get_config(
         "/network-configs/",
         ".",
         "&&",
-        "nginx -g \"daemon off;\"",
+        'nginx -g "daemon off;"',
     ]
 
     cmd_str = " ".join(cmd)
