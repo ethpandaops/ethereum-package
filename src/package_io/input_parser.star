@@ -1382,9 +1382,9 @@ def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
         "min_cpu": 100,
-        "max_cpu": 1000,
-        "min_mem": 20,
-        "max_mem": 300,
+        "max_cpu": 2000,
+        "min_mem": 100,
+        "max_mem": 800,
         "extra_args": [],
         "spammers": [
             # default spammers

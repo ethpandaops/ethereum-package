@@ -726,9 +726,13 @@ def run(plan, args={}):
             spamoor_config_template = read_file(
                 static_files.SPAMOOR_CONFIG_TEMPLATE_FILEPATH
             )
+            spamoor_hosts_template = read_file(
+                static_files.SPAMOOR_HOSTS_TEMPLATE_FILEPATH
+            )
             spamoor.launch_spamoor(
                 plan,
                 spamoor_config_template,
+                spamoor_hosts_template,
                 prefunded_accounts,
                 all_participants,
                 args_with_right_defaults.participants,

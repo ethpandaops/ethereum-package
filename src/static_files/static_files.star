@@ -59,6 +59,9 @@ SPAMOOR_CONFIG_DIRPATH = "/spamoor-config"
 SPAMOOR_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + SPAMOOR_CONFIG_DIRPATH + "/startup-spammer.yaml.tmpl"
 )
+SPAMOOR_HOSTS_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + SPAMOOR_CONFIG_DIRPATH + "/rpc-hosts.txt.tmpl"
+)
 
 # xatu-sentry config
 XATU_SENTRY_CONFIG_DIRPATH = "/xatu-sentry-config"
