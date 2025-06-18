@@ -147,9 +147,7 @@ def get_config(
         "/network-configs/",
         ".",
         "&&",
-        "nginx",
-        "-g",
-        "daemon off;",
+        "nginx -g \"daemon off;\"",
     ]
 
     cmd_str = " ".join(cmd)
