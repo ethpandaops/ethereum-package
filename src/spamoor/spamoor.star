@@ -208,7 +208,6 @@ def new_hosts_template_data(
                 full_name,
             )
             + rpchost
-
         )
 
         if "builder" in full_name:
