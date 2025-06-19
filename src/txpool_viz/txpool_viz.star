@@ -9,11 +9,10 @@ TXPOOL_VIZ_CONFIG_FILENAME = "config.yaml"
 TXPOOL_VIZ_CONFIG_PATH="/cfg/"
 
 # The min/max CPU/memory that txpool-viz can use
-# To be benchmarked
 MIN_CPU = 100
-MAX_CPU = 1000
+MAX_CPU = 10000
 MIN_MEMORY = 128
-MAX_MEMORY = 2048
+MAX_MEMORY = 8192
 
 def launch_txpool_viz(
     plan,
