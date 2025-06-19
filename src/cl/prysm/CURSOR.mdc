@@ -1,0 +1,17 @@
+---
+description: Prysm - Consensus layer client launcher for Ethereum nodes
+globs: 
+  - "*.star"
+  - "**/*.star"
+alwaysApply: false
+---
+
+Prysm consensus layer client launcher that configures and deploys Prysm beacon nodes within the Ethereum package.
+
+## Key Integration Pattern
+Implements standardized consensus client interface with configurable network parameters, checkpoint sync, and monitoring endpoints.
+
+## Important Constraints
+- Must provide execution endpoint for engine API communication
+- Requires JWT authentication for secure EL-CL communication
+- Supports both mainnet and custom network configurations

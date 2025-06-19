@@ -1,0 +1,18 @@
+---
+description: Grandine - Ethereum consensus client launcher for the ethereum-package
+globs: 
+  - "*.star"
+  - "grandine_launcher.star"
+alwaysApply: false
+---
+
+Grandine consensus client launcher that configures and deploys Grandine beacon nodes as part of the ethereum-package infrastructure.
+
+## Key Integration Pattern
+- Implements the standard CL launcher interface with support for beacon node, validator client, and keymanager API configurations
+- Integrates with execution clients via Engine API using JWT authentication
+
+## Important Constraints
+- Runs as "grandine" user in container - cannot write to root directories
+- Supports checkpoint sync, perfect PeerDAS mode, and supernode configurations
+- Uses Teku-style keystore format for validator keys

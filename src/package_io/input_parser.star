@@ -9,7 +9,7 @@ sanity_check = import_module("./sanity_check.star")
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
     "erigon": "ethpandaops/erigon:main",
-    "nethermind": "nethermindeth/nethermind:master",
+    "nethermind": "ethpandaops/nethermind:devnet-0",
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
@@ -244,6 +244,23 @@ def input_parser(plan, input_args):
                 "Please do not define 'grafana' or 'prometheus' in the additional_services field when 'prometheus_grafana' is used to launch both"
             )
 
+    if (
+        "mev_type" == constants.MOCK_MEV_TYPE
+        and input_args["participants"][0]["cl_type"] != constants.CL_TYPE.lighthouse
+    ):
+        fail(
+            "Mock mev is only supported if the first participant is lighthouse client, please use a different client or set mev_type to 'flashbots', 'mev-rs' or 'commit-boost' or make the first participant lighthouse"
+        )
+
+    if (
+        result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH
+        and result["network_params"]["bpo_1_epoch"]
+        < result["network_params"]["fulu_fork_epoch"]
+    ):
+        fail(
+            "Fulu fork must happen before BPO 1, please adjust the epochs accordingly."
+        )
+
     return struct(
         participants=[
             struct(
@@ -370,33 +387,39 @@ def input_parser(plan, input_args):
             base_fee_update_fraction_electra=result["network_params"][
                 "base_fee_update_fraction_electra"
             ],
+            fulu_max_blobs_per_tx=result["network_params"]["fulu_max_blobs_per_tx"],
             bpo_1_epoch=result["network_params"]["bpo_1_epoch"],
             bpo_1_max_blobs=result["network_params"]["bpo_1_max_blobs"],
             bpo_1_target_blobs=result["network_params"]["bpo_1_target_blobs"],
+            bpo_1_max_blobs_per_tx=result["network_params"]["bpo_1_max_blobs_per_tx"],
             bpo_1_base_fee_update_fraction=result["network_params"][
                 "bpo_1_base_fee_update_fraction"
             ],
             bpo_2_epoch=result["network_params"]["bpo_2_epoch"],
             bpo_2_max_blobs=result["network_params"]["bpo_2_max_blobs"],
             bpo_2_target_blobs=result["network_params"]["bpo_2_target_blobs"],
+            bpo_2_max_blobs_per_tx=result["network_params"]["bpo_2_max_blobs_per_tx"],
             bpo_2_base_fee_update_fraction=result["network_params"][
                 "bpo_2_base_fee_update_fraction"
             ],
             bpo_3_epoch=result["network_params"]["bpo_3_epoch"],
             bpo_3_max_blobs=result["network_params"]["bpo_3_max_blobs"],
             bpo_3_target_blobs=result["network_params"]["bpo_3_target_blobs"],
+            bpo_3_max_blobs_per_tx=result["network_params"]["bpo_3_max_blobs_per_tx"],
             bpo_3_base_fee_update_fraction=result["network_params"][
                 "bpo_3_base_fee_update_fraction"
             ],
             bpo_4_epoch=result["network_params"]["bpo_4_epoch"],
             bpo_4_max_blobs=result["network_params"]["bpo_4_max_blobs"],
             bpo_4_target_blobs=result["network_params"]["bpo_4_target_blobs"],
+            bpo_4_max_blobs_per_tx=result["network_params"]["bpo_4_max_blobs_per_tx"],
             bpo_4_base_fee_update_fraction=result["network_params"][
                 "bpo_4_base_fee_update_fraction"
             ],
             bpo_5_epoch=result["network_params"]["bpo_5_epoch"],
             bpo_5_max_blobs=result["network_params"]["bpo_5_max_blobs"],
             bpo_5_target_blobs=result["network_params"]["bpo_5_target_blobs"],
+            bpo_5_max_blobs_per_tx=result["network_params"]["bpo_5_max_blobs_per_tx"],
             bpo_5_base_fee_update_fraction=result["network_params"][
                 "bpo_5_base_fee_update_fraction"
             ],
@@ -409,6 +432,12 @@ def input_parser(plan, input_args):
             max_payload_size=result["network_params"]["max_payload_size"],
             perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
             gas_limit=result["network_params"]["gas_limit"],
+            withdrawal_type=result["network_params"]["withdrawal_type"],
+            withdrawal_address=result["network_params"]["withdrawal_address"],
+            validator_balance=result["network_params"]["validator_balance"],
+            min_epochs_for_data_column_sidecars_requests=result["network_params"][
+                "min_epochs_for_data_column_sidecars_requests"
+            ],
         ),
         mev_params=struct(
             mev_relay_image=result["mev_params"]["mev_relay_image"],
@@ -968,7 +997,7 @@ def default_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
-        "genesis_gaslimit": 30000000,
+        "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 8,
         "churn_limit_quotient": 65536,
         "ejection_balance": 16000000000,
@@ -992,26 +1021,6 @@ def default_network_params():
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "base_fee_update_fraction_electra": 5007716,
-        "bpo_1_epoch": 18446744073709551615,
-        "bpo_1_max_blobs": 12,
-        "bpo_1_target_blobs": 9,
-        "bpo_1_base_fee_update_fraction": 5007716,
-        "bpo_2_epoch": 18446744073709551615,
-        "bpo_2_max_blobs": 12,
-        "bpo_2_target_blobs": 9,
-        "bpo_2_base_fee_update_fraction": 5007716,
-        "bpo_3_epoch": 18446744073709551615,
-        "bpo_3_max_blobs": 12,
-        "bpo_3_target_blobs": 9,
-        "bpo_3_base_fee_update_fraction": 5007716,
-        "bpo_4_epoch": 18446744073709551615,
-        "bpo_4_max_blobs": 12,
-        "bpo_4_target_blobs": 9,
-        "bpo_4_base_fee_update_fraction": 5007716,
-        "bpo_5_epoch": 18446744073709551615,
-        "bpo_5_max_blobs": 12,
-        "bpo_5_target_blobs": 9,
-        "bpo_5_base_fee_update_fraction": 5007716,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "devnet_repo": "ethpandaops",
@@ -1019,6 +1028,36 @@ def default_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
+        "fulu_max_blobs_per_tx": 0,
+        "bpo_1_epoch": 18446744073709551615,
+        "bpo_1_max_blobs": 12,
+        "bpo_1_target_blobs": 9,
+        "bpo_1_max_blobs_per_tx": 0,
+        "bpo_1_base_fee_update_fraction": 5007716,
+        "bpo_2_epoch": 18446744073709551615,
+        "bpo_2_max_blobs": 12,
+        "bpo_2_target_blobs": 9,
+        "bpo_2_max_blobs_per_tx": 0,
+        "bpo_2_base_fee_update_fraction": 5007716,
+        "bpo_3_epoch": 18446744073709551615,
+        "bpo_3_max_blobs": 12,
+        "bpo_3_target_blobs": 9,
+        "bpo_3_max_blobs_per_tx": 0,
+        "bpo_3_base_fee_update_fraction": 5007716,
+        "bpo_4_epoch": 18446744073709551615,
+        "bpo_4_max_blobs": 12,
+        "bpo_4_target_blobs": 9,
+        "bpo_4_max_blobs_per_tx": 0,
+        "bpo_4_base_fee_update_fraction": 5007716,
+        "bpo_5_epoch": 18446744073709551615,
+        "bpo_5_max_blobs": 12,
+        "bpo_5_target_blobs": 9,
+        "bpo_5_max_blobs_per_tx": 0,
+        "bpo_5_base_fee_update_fraction": 5007716,
+        "withdrawal_type": "0x00",
+        "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
+        "validator_balance": 32,
+        "min_epochs_for_data_column_sidecars_requests": 4096,
     }
 
 
@@ -1032,7 +1071,7 @@ def default_minimal_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
-        "genesis_gaslimit": 30000000,
+        "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 4,
         "churn_limit_quotient": 32,
         "ejection_balance": 16000000000,
@@ -1063,26 +1102,36 @@ def default_minimal_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
+        "fulu_max_blobs_per_tx": 0,
         "bpo_1_epoch": 18446744073709551615,
         "bpo_1_max_blobs": 12,
         "bpo_1_target_blobs": 9,
+        "bpo_1_max_blobs_per_tx": 0,
         "bpo_1_base_fee_update_fraction": 5007716,
         "bpo_2_epoch": 18446744073709551615,
         "bpo_2_max_blobs": 12,
         "bpo_2_target_blobs": 9,
+        "bpo_2_max_blobs_per_tx": 0,
         "bpo_2_base_fee_update_fraction": 5007716,
         "bpo_3_epoch": 18446744073709551615,
         "bpo_3_max_blobs": 12,
         "bpo_3_target_blobs": 9,
+        "bpo_3_max_blobs_per_tx": 0,
         "bpo_3_base_fee_update_fraction": 5007716,
         "bpo_4_epoch": 18446744073709551615,
         "bpo_4_max_blobs": 12,
         "bpo_4_target_blobs": 9,
+        "bpo_4_max_blobs_per_tx": 0,
         "bpo_4_base_fee_update_fraction": 5007716,
         "bpo_5_epoch": 18446744073709551615,
         "bpo_5_max_blobs": 12,
         "bpo_5_target_blobs": 9,
+        "bpo_5_max_blobs_per_tx": 0,
         "bpo_5_base_fee_update_fraction": 5007716,
+        "withdrawal_type": "0x00",
+        "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
+        "validator_balance": 32,
+        "min_epochs_for_data_column_sidecars_requests": 4096,
     }
 
 
@@ -1156,7 +1205,7 @@ def default_participant():
 
 def get_default_blockscout_params():
     return {
-        "image": "blockscout/blockscout:latest",
+        "image": "ghcr.io/blockscout/blockscout:latest",
         "verif_image": "ghcr.io/blockscout/smart-contract-verifier:latest",
         "frontend_image": "ghcr.io/blockscout/frontend:latest",
     }
@@ -1331,9 +1380,9 @@ def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
         "min_cpu": 100,
-        "max_cpu": 1000,
-        "min_mem": 20,
-        "max_mem": 300,
+        "max_cpu": 2000,
+        "min_mem": 100,
+        "max_mem": 800,
         "extra_args": [],
         "spammers": [
             # default spammers

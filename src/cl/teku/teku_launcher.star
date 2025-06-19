@@ -43,7 +43,7 @@ def launch(
     el_context,
     full_name,
     node_keystore_files,
-    snooper_engine_context,
+    snooper_el_engine_context,
     persistent,
     tolerations,
     node_selectors,
@@ -67,7 +67,7 @@ def launch(
         el_context,
         full_name,
         node_keystore_files,
-        snooper_engine_context,
+        snooper_el_engine_context,
         persistent,
         tolerations,
         node_selectors,
@@ -122,7 +122,7 @@ def launch(
         multiaddr=beacon_multiaddr,
         peer_id=beacon_peer_id,
         snooper_enabled=participant.snooper_enabled,
-        snooper_engine_context=snooper_engine_context,
+        snooper_el_engine_context=snooper_el_engine_context,
         validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
         if node_keystore_files
         else "",
@@ -140,7 +140,7 @@ def get_beacon_config(
     el_context,
     full_name,
     node_keystore_files,
-    snooper_engine_context,
+    snooper_el_engine_context,
     persistent,
     tolerations,
     node_selectors,
@@ -164,8 +164,8 @@ def get_beacon_config(
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if participant.snooper_enabled:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_engine_context.ip_addr,
-            snooper_engine_context.engine_rpc_port_num,
+            snooper_el_engine_context.ip_addr,
+            snooper_el_engine_context.engine_rpc_port_num,
         )
     else:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
@@ -356,11 +356,14 @@ def get_beacon_config(
             )
 
     if persistent:
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[network_params.network][
+            else constants.VOLUME_SIZE[volume_size_key][
                 constants.CL_TYPE.teku + "_volume_size"
             ],
         )

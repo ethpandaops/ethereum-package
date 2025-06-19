@@ -520,6 +520,7 @@ def run(plan, args={}):
                 mev_endpoint_names,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "dugtrio":
@@ -640,19 +641,6 @@ def run(plan, args={}):
                 index,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
-        elif additional_service == "grafana":
-            plan.print("Launching grafana...")
-            grafana.launch_grafana(
-                plan,
-                grafana_datasource_config_template,
-                grafana_dashboards_config_template,
-                prometheus_private_url,
-                global_node_selectors,
-                args_with_right_defaults.grafana_params,
-                args_with_right_defaults.port_publisher,
-                index,
-            )
-            plan.print("Successfully launched grafana")
         elif additional_service == "prometheus":
             plan.print("Launching prometheus...")
             prometheus_private_url = prometheus.launch_prometheus(
@@ -671,6 +659,19 @@ def run(plan, args={}):
                 index,
             )
             plan.print("Successfully launched prometheus")
+        elif additional_service == "grafana":
+            plan.print("Launching grafana...")
+            grafana.launch_grafana(
+                plan,
+                grafana_datasource_config_template,
+                grafana_dashboards_config_template,
+                prometheus_private_url,
+                global_node_selectors,
+                args_with_right_defaults.grafana_params,
+                args_with_right_defaults.port_publisher,
+                index,
+            )
+            plan.print("Successfully launched grafana")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
@@ -691,6 +692,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 global_node_selectors,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched assertoor")
         elif additional_service == "custom_flood":
@@ -708,9 +710,13 @@ def run(plan, args={}):
             spamoor_config_template = read_file(
                 static_files.SPAMOOR_CONFIG_TEMPLATE_FILEPATH
             )
+            spamoor_hosts_template = read_file(
+                static_files.SPAMOOR_HOSTS_TEMPLATE_FILEPATH
+            )
             spamoor.launch_spamoor(
                 plan,
                 spamoor_config_template,
+                spamoor_hosts_template,
                 prefunded_accounts,
                 all_participants,
                 args_with_right_defaults.participants,

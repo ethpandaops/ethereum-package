@@ -232,6 +232,7 @@ def get_config_frontend(
         ports=FRONTEND_USED_PORTS,
         public_ports=FRONTEND_USED_PORTS,
         env_vars={
+            "HOSTNAME": "0.0.0.0",
             "NEXT_PUBLIC_API_PROTOCOL": "http",
             "NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL": "ws",
             "NEXT_PUBLIC_NETWORK_NAME": "Kurtosis",
