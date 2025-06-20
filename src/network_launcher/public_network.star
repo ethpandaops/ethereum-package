@@ -113,7 +113,6 @@ def launch(
                 interval="1s",
                 timeout="6h",  # 6 hours should be enough for the biggest network
             )
-            plan.remove_service(name="snapshot-{0}".format(el_service_name))
 
     # We are running a public network
     dummy_genesis_data = plan.run_sh(
