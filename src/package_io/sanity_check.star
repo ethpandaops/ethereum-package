@@ -58,6 +58,7 @@ PARTICIPANT_CATEGORIES = {
         "prometheus_config",
         "blobber_enabled",
         "blobber_extra_params",
+        "blobber_image",
         "builder_network_params",
         "keymanager_enabled",
     ],
