@@ -98,6 +98,7 @@ def launch(
             beacon_http_url,
             participant.blobber_extra_params,
             node_selectors,
+            participant.blobber_image,
         )
 
         blobber_service = plan.add_service(blobber_service_name, blobber_config)
