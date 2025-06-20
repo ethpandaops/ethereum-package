@@ -16,6 +16,7 @@ SUCCESSFUL_EXEC_CMD_EXIT_CODE = 0
 
 RAW_KEYS_DIRNAME = "keys"
 RAW_SECRETS_DIRNAME = "secrets"
+RAW_KEYS_SECRETS_DIRNAME = "raw-keys-secrets"
 
 NIMBUS_KEYS_DIRNAME = "nimbus-keys"
 PRYSM_DIRNAME = "prysm"
@@ -119,6 +120,25 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
 
         running_total_validator_count += participant.validator_count
 
+        # add another folder which contains all the raw keys and secret
+        # create the folder
+        all_output_dirpaths.append(output_dirpath + RAW_KEYS_SECRETS_DIRNAME)
+        # copy 
+        all_sub_command_strs.append(
+            "cp -r "
+            + output_dirpath
+            + "keys/ "
+            + output_dirpath
+            + "raw-keys-secrets"
+        )
+        all_sub_command_strs.append(
+            "cp -r "
+            + output_dirpath
+            + "secrets/ "
+            + output_dirpath
+            + "raw-keys-secrets"
+        )
+
     command_str = " && ".join(all_sub_command_strs)
 
     command_result = plan.exec(
@@ -150,6 +170,8 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
             keystore_start_index,
             keystore_stop_index - 1,
         )
+
+        # copt the keys and secrets into a new directory and store the artifact
         artifact_name = plan.store_service_files(
             service_name, output_dirpath, name=artifact_name
         )
@@ -164,6 +186,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
             shared_utils.path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
+            shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_SECRETS_DIRNAME),
         )
 
         keystore_files.append(to_add)
