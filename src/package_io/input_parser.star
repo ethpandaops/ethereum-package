@@ -114,6 +114,7 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
+    result["txpool_viz_params"] = get_txpool_viz_params(input_args)
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -595,6 +596,7 @@ def input_parser(plan, input_args):
                 "public_port_start"
             ],
         ),
+        txpool_viz_params=result["txpool_viz_params"]
     )
 
 
@@ -1696,3 +1698,27 @@ def get_default_ethereum_genesis_generator_params():
     return {
         "image": constants.DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE,
     }
+def get_txpool_viz_params(input_args):
+    polling_args = input_args.get("txpool_viz_params", {}).get("polling", {})
+    filters_args = input_args.get("txpool_viz_params", {}).get("filters", {})
+
+    polling_config = {
+        "interval": polling_args.get("interval", "0.5s"),
+        "timeout": polling_args.get("timeout", "3s"),
+    }
+
+    filters_config = {
+        "min_gas_price": filters_args.get("min_gas_price", "1gwei"),
+    }
+
+    focil_enabled = filters_args.get("focil_enabled", "false")
+
+    log_level = filters_args.get("log_level", "info")
+
+    return {
+        "polling": polling_config,
+        "filters": filters_config,
+        "focil_enabled": focil_enabled,
+        "log_level": log_level
+    }
+
