@@ -142,6 +142,7 @@ def get_config(
             connected_client=cl_context.client_name,
             extra_labels=participant.vc_extra_labels,
             supernode=participant.supernode,
+            client_language=constants.CLIENT_LANGUAGES[constants.VC_TYPE.lodestar],
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
