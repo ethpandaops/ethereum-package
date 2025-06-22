@@ -165,6 +165,9 @@ def get_config(
             image=image,
             connected_client=vc_type,
             extra_labels=participant.remote_signer_extra_labels,
+            client_language=constants.CLIENT_LANGUAGES[
+                constants.REMOTE_SIGNER_TYPE.web3signer
+            ],
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
