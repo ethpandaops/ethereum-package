@@ -306,6 +306,29 @@ VOLUME_SIZE = {
         "grandine_volume_size": 100000,  # 100GB
     },
 }
+# Language mapping for client implementations
+CLIENT_LANGUAGES = {
+    # Execution Layer (EL) clients
+    "geth": "go",
+    "erigon": "go",
+    "nethermind": "csharp",
+    "besu": "java",
+    "reth": "rust",
+    "reth-builder": "rust",
+    "ethereumjs": "javascript",
+    "nimbus": "nim",
+    # Consensus Layer (CL) clients
+    "lighthouse": "rust",
+    "teku": "java",
+    "prysm": "go",
+    "lodestar": "javascript",
+    "grandine": "rust",
+    # Validator Clients (VC) - inherit from CL clients
+    "vero": "rust",
+    # Remote Signers
+    "web3signer": "java",
+}
+
 VOLUME_SIZE["mainnet-shadowfork"] = VOLUME_SIZE["mainnet"]
 VOLUME_SIZE["sepolia-shadowfork"] = VOLUME_SIZE["sepolia"]
 VOLUME_SIZE["holesky-shadowfork"] = VOLUME_SIZE["holesky"]
