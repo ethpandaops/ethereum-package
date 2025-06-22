@@ -75,13 +75,7 @@ def zfill_custom(value, width):
 
 
 def label_maker(
-    client,
-    client_type,
-    image,
-    connected_client,
-    extra_labels,
-    client_language,
-    supernode=False,
+    client, client_type, image, connected_client, extra_labels, supernode=False
 ):
     # Extract sha256 hash if present
     sha256 = ""
@@ -97,7 +91,6 @@ def label_maker(
         ),  # drop the sha256 part of the image from the label
         "ethereum-package.sha256": sha256,
         "ethereum-package.connected-client": connected_client,
-        "ethereum-package.client-language": client_language,
     }
 
     if supernode:

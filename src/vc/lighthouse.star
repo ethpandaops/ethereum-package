@@ -126,9 +126,15 @@ def get_config(
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=dict(
+                participant.vc_extra_labels,
+                **{
+                    constants.CLIENT_LANGUAGE_LABEL_KEY: constants.CLIENT_LANGUAGES[
+                        constants.VC_TYPE.lighthouse
+                    ]
+                }
+            ),
             supernode=participant.supernode,
-            client_language=constants.CLIENT_LANGUAGES[constants.VC_TYPE.lighthouse],
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,

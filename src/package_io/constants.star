@@ -329,6 +329,9 @@ CLIENT_LANGUAGES = {
     "web3signer": "java",
 }
 
+# Label key constant for client language
+CLIENT_LANGUAGE_LABEL_KEY = "ethereum-package.client-language"
+
 VOLUME_SIZE["mainnet-shadowfork"] = VOLUME_SIZE["mainnet"]
 VOLUME_SIZE["sepolia-shadowfork"] = VOLUME_SIZE["sepolia"]
 VOLUME_SIZE["holesky-shadowfork"] = VOLUME_SIZE["holesky"]

@@ -371,9 +371,15 @@ def get_beacon_config(
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
-            extra_labels=participant.cl_extra_labels,
+            extra_labels=dict(
+                participant.cl_extra_labels,
+                **{
+                    constants.CLIENT_LANGUAGE_LABEL_KEY: constants.CLIENT_LANGUAGES[
+                        constants.CL_TYPE.nimbus
+                    ]
+                }
+            ),
             supernode=participant.supernode,
-            client_language=constants.CLIENT_LANGUAGES[constants.CL_TYPE.nimbus],
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
