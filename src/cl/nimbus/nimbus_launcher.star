@@ -373,6 +373,7 @@ def get_beacon_config(
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
             supernode=participant.supernode,
+            client_language=constants.CLIENT_LANGUAGES[constants.CL_TYPE.nimbus],
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
