@@ -308,6 +308,7 @@ def get_config(
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
             supernode=participant.supernode,
+            client_language=constants.CLIENT_LANGUAGES[constants.EL_TYPE.reth],
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,

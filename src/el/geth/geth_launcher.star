@@ -324,6 +324,7 @@ def get_config(
             image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
+            client_language=constants.CLIENT_LANGUAGES[constants.EL_TYPE.geth],
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
