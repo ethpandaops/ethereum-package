@@ -164,14 +164,7 @@ def get_config(
             client_type=constants.CLIENT_TYPES.remote_signer,
             image=image,
             connected_client=vc_type,
-            extra_labels=dict(
-                participant.remote_signer_extra_labels,
-                **{
-                    constants.CLIENT_LANGUAGE_LABEL_KEY: constants.CLIENT_LANGUAGES[
-                        constants.REMOTE_SIGNER_TYPE.web3signer
-                    ]
-                }
-            ),
+            extra_labels=participant.remote_signer_extra_labels,
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

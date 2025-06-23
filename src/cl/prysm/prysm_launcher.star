@@ -348,14 +348,7 @@ def get_beacon_config(
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
-            extra_labels=dict(
-                participant.cl_extra_labels,
-                **{
-                    constants.CLIENT_LANGUAGE_LABEL_KEY: constants.CLIENT_LANGUAGES[
-                        constants.CL_TYPE.prysm
-                    ]
-                }
-            ),
+            extra_labels=participant.cl_extra_labels,
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

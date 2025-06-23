@@ -262,14 +262,7 @@ def get_config(
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
-            extra_labels=dict(
-                participant.el_extra_labels,
-                **{
-                    constants.CLIENT_LANGUAGE_LABEL_KEY: constants.CLIENT_LANGUAGES[
-                        constants.EL_TYPE.besu
-                    ]
-                }
-            ),
+            extra_labels=participant.el_extra_labels,
             supernode=participant.supernode,
         ),
         "user": User(uid=0, gid=0),
