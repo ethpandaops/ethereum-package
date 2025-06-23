@@ -25,6 +25,7 @@ def get_config(
     node_selectors,
     port_publisher,
     vc_index,
+    all_cl_contexts,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS

@@ -407,6 +407,7 @@ def launch_participant_network(
             prysm_password_relative_filepath=prysm_password_relative_filepath,
             prysm_password_artifact_uuid=prysm_password_artifact_uuid,
             global_tolerations=global_tolerations,
+            all_cl_contexts=all_cl_contexts,
             node_selectors=node_selectors,
             network_params=network_params,
             port_publisher=args_with_right_defaults.port_publisher,

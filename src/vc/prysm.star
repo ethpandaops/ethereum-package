@@ -25,6 +25,7 @@ def get_config(
     network_params,
     port_publisher,
     vc_index,
+    all_cl_contexts,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
@@ -35,6 +36,12 @@ def get_config(
         prysm_password_relative_filepath,
     )
 
+    # Build comma-separated list of all beacon HTTP URLs for redundancy
+    beacon_http_urls = []
+    for cl_ctx in all_cl_contexts:
+        beacon_http_urls.append(cl_ctx.beacon_http_url)
+    all_beacon_http_urls = ",".join(beacon_http_urls)
+
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--chain-config-file="
@@ -42,7 +49,7 @@ def get_config(
         + "/config.yaml",
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         "--beacon-rpc-provider=" + cl_context.beacon_grpc_url,
-        "--beacon-rest-api-provider=" + beacon_http_url,
+        "--beacon-rest-api-provider=" + all_beacon_http_urls,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",

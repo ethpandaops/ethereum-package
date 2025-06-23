@@ -20,6 +20,7 @@ def get_config(
     network_params,
     port_publisher,
     vc_index,
+    all_cl_contexts,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
