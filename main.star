@@ -202,6 +202,7 @@ def run(plan, args={}):
         global_node_selectors,
         keymanager_enabled,
         parallel_keystore_generation,
+        num_participants
     )
 
     plan.print(
