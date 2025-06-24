@@ -353,6 +353,7 @@ def get_beacon_config(
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
+        "tty_enabled": True,
     }
 
     if int(participant.cl_min_cpu) > 0:
