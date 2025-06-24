@@ -96,6 +96,10 @@ def label_maker(
     if supernode:
         labels["ethereum-package.supernode"] = str(supernode)
 
+    # Automatically add client language label if client is known
+    if client in constants.CLIENT_LANGUAGES:
+        labels[constants.CLIENT_LANGUAGE_LABEL_KEY] = constants.CLIENT_LANGUAGES[client]
+
     # Add extra_labels to the labels dictionary
     labels.update(extra_labels)
 
