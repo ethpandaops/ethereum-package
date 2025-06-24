@@ -324,7 +324,7 @@ CLIENT_LANGUAGES = {
     "lodestar": "javascript",
     "grandine": "rust",
     # Validator Clients (VC) - inherit from CL clients
-    "vero": "rust",
+    "vero": "python",
     # Remote Signers
     "web3signer": "java",
 }
