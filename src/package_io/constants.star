@@ -321,7 +321,7 @@ CLIENT_LANGUAGES = {
     "lighthouse": "rust",
     "teku": "java",
     "prysm": "go",
-    "lodestar": "javascript",
+    "lodestar": "typescript",
     "grandine": "rust",
     # Validator Clients (VC) - inherit from CL clients
     "vero": "python",
