@@ -134,6 +134,7 @@ def get_config(
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
+        "tty_enabled": True,
     }
 
     if participant.vc_min_cpu > 0:
