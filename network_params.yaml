@@ -164,10 +164,10 @@ ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 disable_peer_scoring: false
 persistent: false
-mev_type: null
+mev_type: "flashbots"
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
-  mev_builder_image: ethpandaops/flashbots-builder:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
   mev_builder_cl_image: sigp/lighthouse:latest
   mev_boost_image: ethpandaops/mev-boost:develop
   mev_boost_args: ["mev-boost", "--relay-check"]
