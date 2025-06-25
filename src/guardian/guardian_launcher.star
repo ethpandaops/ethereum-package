@@ -2,20 +2,20 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 
 SERVICE_NAME_PREFIX = "guardian"
-HTTP_PORT_NUMBER = 9013
-WEB_PORT_NUMBER = 8080
+HTTP_PORT_NUMBER = 8080
+LIBP2P_PORT_NUMBER = 9013
 
 USED_PORTS = {
+    constants.LIBP2P_PORT_ID: shared_utils.new_port_spec(
+        LIBP2P_PORT_NUMBER,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+    ),
     constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
     ),
-    constants.WEB_PORT_ID: shared_utils.new_port_spec(
-        WEB_PORT_NUMBER,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
 }
 
 
@@ -85,7 +85,7 @@ def get_config(
         "--libp2p.host",
         "0.0.0.0",
         "--libp2p.port",
-        "9013",
+        str(LIBP2P_PORT_NUMBER),
         "--node.key",
         node_enr,
         "--connection.retries",
@@ -94,7 +94,7 @@ def get_config(
         "30s",
         "--web.mode",
         "--web.port",
-        WEB_PORT_NUMBER,
+        str(HTTP_PORT_NUMBER),
     ]
 
     if len(guardian_params.extra_args) > 0:
