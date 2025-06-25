@@ -1,0 +1,116 @@
+---
+description: Ethereum Package Development Workflow - Git, testing, and deployment practices
+globs:
+  - "**/*.star"
+  - ".github/**/*"
+  - "network_params.yaml"
+alwaysApply: false
+---
+
+# Ethereum Package Development Workflow
+
+## Git Workflow
+
+### Branch Strategy
+- **main**: Production-ready code, protected branch
+- **feature/***: New features and enhancements
+- **fix/***: Bug fixes
+- **test/***: Testing and experimental changes
+
+### Commit Standards
+- Use conventional commit format: `type(scope): description`
+- Types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`
+- Keep commits atomic and focused
+- Write clear, descriptive commit messages
+
+### Pull Request Process
+1. Create feature branch from main
+2. Make changes following code standards
+3. Test locally with various network configurations
+4. Open PR with descriptive title (checked by CI)
+5. Ensure all CI checks pass
+6. Request review from maintainers
+7. Address review feedback
+8. Merge via squash and merge
+
+## Testing Requirements
+
+### Local Testing
+```bash
+# Basic network test
+kurtosis run . --args-file network_params.yaml
+
+# Test with specific configuration
+kurtosis run . --args-file .github/tests/minimal.yaml
+
+# Clean up after testing
+kurtosis enclave rm -f <enclave-name>
+```
+
+### CI Pipeline
+- **Per-PR Tests**: Run on every pull request
+  - Starlark validation
+  - Multiple configuration tests
+  - Docker image availability checks
+- **Nightly Tests**: Extended test suite
+- **Release Tests**: Full validation before release
+
+### Test Coverage
+- Test different client combinations
+- Validate MEV configurations
+- Check persistence features
+- Verify public network syncing
+- Test additional services integration
+
+## Release Process
+
+### Versioning
+- Uses semantic versioning (MAJOR.MINOR.PATCH)
+- Managed by release-please automation
+- Version tracked in version.txt
+
+### Release Checklist
+1. Ensure all tests pass
+2. Update CHANGELOG.md
+3. Verify documentation is current
+4. Test with latest client versions
+5. Create release via release-please PR
+
+## Development Best Practices
+
+### Before Starting Work
+1. Pull latest changes from main
+2. Check existing issues and PRs
+3. Discuss major changes in issues first
+
+### During Development
+1. Test incrementally
+2. Keep changes focused
+3. Update documentation as needed
+4. Add tests for new features
+
+### Code Review Guidelines
+- Review for correctness and standards compliance
+- Check for security implications
+- Verify resource usage is reasonable
+- Ensure backward compatibility
+- Test the changes locally
+
+### Debugging Tips
+- Use `--verbosity detailed` for verbose output
+- Check service logs: `kurtosis service logs <enclave> <service>`
+- Access service shell: `kurtosis service shell <enclave> <service>`
+- Download artifacts: `kurtosis files download <enclave> <file>`
+
+## Dependency Management
+- Pin critical dependencies versions
+- Update client images regularly
+- Test with new versions before updating defaults
+- Document breaking changes
+
+## Security Considerations
+- Never commit secrets or private keys
+- Use JWT authentication for all EL-CL communication
+- Validate all user inputs
+- Follow least privilege principle for permissions
+- Regular security audits of configurations

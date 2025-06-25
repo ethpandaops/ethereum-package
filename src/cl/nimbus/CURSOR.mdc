@@ -1,0 +1,18 @@
+---
+description: Nimbus - Consensus layer client launcher for Ethereum package
+globs: 
+  - "*.star"
+alwaysApply: false
+---
+
+Nimbus consensus layer client launcher that configures and deploys Nimbus beacon nodes.
+
+## Key Integration Pattern
+- Implements standard CL launcher interface with launch() and factory functions
+- Supports both integrated validator and separate validator client modes
+- Handles snooper integration for execution client monitoring
+
+## Important Constraints
+- Nimbus requires pre-existing data directory (must be created before bind-mount)
+- Limited to 4 threads to prevent crashes on high-CPU hosts
+- Requires doppelganger-detection disabled for proper operation

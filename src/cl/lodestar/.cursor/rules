@@ -1,0 +1,96 @@
+# Lodestar Component Rules
+
+This file defines specific rules and guidelines for the Lodestar consensus layer client implementation within the ethereum-package.
+
+## Component Overview
+Lodestar is a TypeScript/JavaScript-based Ethereum consensus layer client. This launcher integrates Lodestar into the ethereum-package's multi-client testing framework.
+
+## Code Organization
+- `lodestar_launcher.star` - Main launcher implementation following the standard CL client interface
+- Uses shared modules from parent directories for consistency across all CL clients
+- Follows the established pattern: `launch()` → `get_beacon_config()` → service configuration
+
+## Key Configuration Constants
+- **Beacon Data Directory**: `/data/lodestar/beacon-data`
+- **Port Assignments**:
+  - Discovery: 9000 (TCP/UDP)
+  - HTTP API: 4000
+  - Metrics: 8008
+- **Metrics Path**: `/metrics`
+
+## Implementation Patterns
+
+### Service Naming
+- Beacon service: `{participant_prefix}-{index}-beacon-lodestar`
+- Blobber service (if enabled): `blobber-{beacon_service_name}`
+
+### Configuration Requirements
+1. **Command Arguments Structure**:
+   - Start with `beacon` subcommand
+   - Include all required network parameters
+   - Apply participant-specific configurations
+   - Append extra parameters last
+
+2. **Network-Specific Handling**:
+   - Public networks: Use `--network` parameter
+   - Custom networks: Provide genesis state and config files
+   - Devnets/Ephemery: Use appropriate bootnode discovery
+
+3. **Checkpoint Sync**:
+   - Optional feature controlled by `checkpoint_sync_enabled`
+   - Uses `--checkpointSyncUrl` when enabled
+
+4. **Supernode Mode**:
+   - Enables `--supernode` flag when participant.supernode is true
+   - Affects service labeling for identification
+
+### File Mounts
+- Genesis configuration: `/genesis-data`
+- JWT secret: `/jwt`
+- Data directory: `/data/lodestar/beacon-data` (persistent or ephemeral)
+- Node key files for perfect peerdas (participant index < 16)
+
+### Environment Variables
+- Support for custom environment variables via `participant.cl_extra_env_vars`
+- `LODESTAR_PRESET` set to "minimal" for minimal preset networks
+
+### Resource Management
+- Configurable CPU limits (min/max)
+- Configurable memory limits (min/max)
+- Volume sizes based on network type when persistence enabled
+
+## Testing Considerations
+1. Verify ENR extraction from `/eth/v1/node/identity` endpoint
+2. Ensure proper bootnode connectivity
+3. Validate execution layer connection
+4. Check metrics endpoint availability
+
+## Integration Points
+1. **Execution Layer**: Via engine API and standard RPC
+2. **Blobber**: Optional sidecar for blob handling
+3. **Snooper**: Optional middleware for request inspection
+4. **Metrics**: Prometheus-compatible metrics endpoint
+
+## Common Issues and Solutions
+1. **JWT Authentication**: Ensure JWT secret is properly mounted and accessible
+2. **Network Discovery**: Verify ENR configuration matches public IP settings
+3. **Port Conflicts**: Check port assignments don't overlap with other services
+4. **Checkpoint Sync**: Validate checkpoint URL accessibility before enabling
+
+## Maintenance Guidelines
+1. Keep verbosity level mappings synchronized with Lodestar's log levels
+2. Update port constants if Lodestar defaults change
+3. Monitor for new Lodestar CLI flags in releases
+4. Test with both persistent and ephemeral storage configurations
+
+## Performance Tuning
+- Adjust resource limits based on network size and sync method
+- Consider checkpoint sync for faster initial synchronization
+- Monitor metrics for performance bottlenecks
+- Use appropriate log levels for production vs. debugging
+
+## Security Considerations
+1. JWT secret must be securely shared with execution client
+2. Restrict API namespaces appropriately (currently using `*` for testing)
+3. Ensure proper network isolation in multi-client setups
+4. Validate bootnodes to prevent eclipse attacks
