@@ -1,29 +1,28 @@
 participants_matrix:
   el:
     - el_type: geth
-      el_image: ethereum/client-go:v1.15.10
+      el_image: ethereum/client-go:v1.15.11
     - el_type: reth
-      el_image: ghcr.io/paradigmxyz/reth:v1.3.12
+      el_image: ghcr.io/paradigmxyz/reth:v1.4.8
     - el_type: nethermind
-      el_image: nethermind/nethermind:1.31.9
+      el_image: nethermind/nethermind:1.31.11
     - el_type: erigon
-      el_image: erigontech/erigon:v3.0.2
+      el_image: erigontech/erigon:v3.0.7
     - el_type: besu
-      el_image: hyperledger/besu:25.4.1
+      el_image: hyperledger/besu:25.6.0
   cl:
     - cl_type: lighthouse
       cl_image: sigp/lighthouse:v7.0.1
     - cl_type: teku
-      cl_image: consensys/teku:25.4.1
+      cl_image: consensys/teku:25.5.0
     - cl_type: nimbus
-      cl_image: statusim/nimbus-eth2:multiarch-v25.4.1
+      cl_image: statusim/nimbus-eth2:multiarch-v25.6.0
     - cl_type: lodestar
-      cl_image: chainsafe/lodestar:v1.29.0
+      cl_image: chainsafe/lodestar:v1.31.0
     - cl_type: prysm
-      cl_image: offchainlabs/prysm-beacon-chain:v6.0.0
-      vc_image: offchainlabs/prysm-validator:v6.0.0
+      cl_image: offchainlabs/prysm-beacon-chain:v6.0.4
+      vc_image: offchainlabs/prysm-validator:v6.0.4
 network_params:
-  electra_fork_epoch: 1
   min_validator_withdrawability_delay: 1
   shard_committee_period: 1
   churn_limit_quotient: 16

@@ -1271,34 +1271,38 @@ There are 4 custom labels that can be used to identify the nodes in the network.
 Execution Layer (EL) nodes:
 
 ```sh
-  "com.kurtosistech.custom.ethereum-package-client": "geth",
-  "com.kurtosistech.custom.ethereum-package-client-image": "ethereum-client-go-latest",
-  "com.kurtosistech.custom.ethereum-package-client-type": "execution",
-  "com.kurtosistech.custom.ethereum-package-connected-client": "lighthouse",
+  "kurtosistech.com.custom/ethereum-package.client": "geth",
+  "kurtosistech.com.custom/ethereum-package.client-image": "ethereum-client-go-latest",
+  "kurtosistech.com.custom/ethereum-package.client-language:": "go",
+  "kurtosistech.com.custom/ethereum-package.client-type": "execution",
+  "kurtosistech.com.custom/ethereum-package.connected-client": "lighthouse",
 ```
 
 Consensus Layer (CL) nodes - Beacon:
 
 ```sh
-  "com.kurtosistech.custom.ethereum-package-client": "lighthouse",
-  "com.kurtosistech.custom.ethereum-package-client-image": "sigp-lighthouse-latest",
-  "com.kurtosistech.custom.ethereum-package-client-type": "beacon",
-  "com.kurtosistech.custom.ethereum-package-connected-client": "geth",
+  "kurtosistech.com.custom/ethereum-package.client": "lighthouse",
+  "kurtosistech.com.custom/ethereum-package.client-image": "sigp-lighthouse-latest",
+  "kurtosistech.com.custom/ethereum-package.client-language:": "rust",
+  "kurtosistech.com.custom/ethereum-package.client-type": "beacon",
+  "kurtosistech.com.custom/ethereum-package.connected-client": "geth",
 ```
 
 Consensus Layer (CL) nodes - Validator:
 
 ```sh
-  "com.kurtosistech.custom.ethereum-package-client": "lighthouse",
-  "com.kurtosistech.custom.ethereum-package-client-image": "sigp-lighthouse-latest",
-  "com.kurtosistech.custom.ethereum-package-client-type": "validator",
-  "com.kurtosistech.custom.ethereum-package-connected-client": "geth",
+  "kurtosistech.com.custom/ethereum-package.client": "lighthouse",
+  "kurtosistech.com.custom/ethereum-package.client-image": "sigp-lighthouse-latest",
+  "kurtosistech.com.custom/ethereum-package.client-language:": "rust",
+  "kurtosistech.com.custom/ethereum-package.client-type": "validator",
+  "kurtosistech.com.custom/ethereum-package.connected-client": "geth",
 ```
 
-`ethereum-package-client` describes which client is running on the node.
-`ethereum-package-client-image` describes the image that is used for the client.
-`ethereum-package-client-type` describes the type of client that is running on the node (`execution`,`beacon` or `validator`).
-`ethereum-package-connected-client` describes the CL/EL client that is connected to the EL/CL client.
+* `ethereum-package.client` describes which client is running on the node.
+* `ethereum-package.client-image` describes the image that is used for the client.
+* `ethereum-package.client-type` describes the type of client that is running on the node (`execution`,`beacon` or `validator`).
+* `ethereum-package.connected-client` describes the CL/EL client that is connected to the EL/CL client.
+* `ethereum-package.client-language` describes the implementation language of the running service.
 
 ## Proposer Builder Separation (PBS) emulation
 
