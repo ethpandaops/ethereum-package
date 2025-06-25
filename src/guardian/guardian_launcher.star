@@ -9,7 +9,7 @@ USED_PORTS = {
     constants.LIBP2P_PORT_ID: shared_utils.new_port_spec(
         LIBP2P_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
+        wait=None,
     ),
     constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
