@@ -3,10 +3,16 @@ constants = import_module("../package_io/constants.star")
 
 SERVICE_NAME_PREFIX = "guardian"
 HTTP_PORT_NUMBER = 9013
+WEB_PORT_NUMBER = 8080
 
 USED_PORTS = {
     constants.HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+    ),
+    constants.WEB_PORT_ID: shared_utils.new_port_spec(
+        WEB_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
     )
@@ -86,6 +92,9 @@ def get_config(
         "5",
         "--connection.timeout",
         "30s",
+        "--web.mode",
+        "--web.port",
+        WEB_PORT_NUMBER,
     ]
 
     if len(guardian_params.extra_args) > 0:

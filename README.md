@@ -1078,7 +1078,7 @@ spamoor_params:
 # Configuration place for guardian as DAS guardian
 guardian_params:
   # The image to use for guardian
-  image: ethpandaops/eth-das-guardian:main
+  image: ethpandaops/eth-das-guardian:skylenet-ui
   # Resource management for guardian
   # CPU is milicores
   # RAM is in MB
