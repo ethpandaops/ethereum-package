@@ -122,6 +122,7 @@ network_params:
   withdrawal_type: "0x00"
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
   validator_balance: 32
+  min_epochs_for_data_column_sidecars_requests: 4096
 
 additional_services: []
 dora_params:
@@ -166,7 +167,7 @@ persistent: false
 mev_type: null
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
-  mev_builder_image: ethpandaops/flashbots-builder:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
   mev_builder_cl_image: sigp/lighthouse:latest
   mev_boost_image: ethpandaops/mev-boost:develop
   mev_boost_args: ["mev-boost", "--relay-check"]
@@ -207,7 +208,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:4.1.9
+  image: ethpandaops/ethereum-genesis-generator:4.1.15
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

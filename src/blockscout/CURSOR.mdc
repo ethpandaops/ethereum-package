@@ -1,0 +1,18 @@
+---
+description: Blockscout - Ethereum blockchain explorer deployment orchestrator
+globs: 
+  - "*.star"
+alwaysApply: false
+---
+
+Blockscout launcher that orchestrates deployment of explorer backend, verification service, and frontend.
+
+## Architecture Patterns
+- Three-service deployment pattern: backend API, smart contract verifier, and React frontend
+- Postgres database dependency management via external package import
+- Dynamic configuration based on EL client type (special handling for Erigon/Reth)
+
+## Key Constraints
+- Service startup order: postgres → verifier → backend → frontend
+- Port allocation must be coordinated across three services to avoid conflicts
+- Frontend requires backend service IP for API connectivity

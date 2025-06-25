@@ -1,0 +1,18 @@
+---
+description: Ethereum Package Source - Core orchestration for multi-client Ethereum network deployments
+globs: 
+  - "*.star"
+alwaysApply: false
+---
+
+Core orchestration layer that coordinates deployment of complete Ethereum networks with multiple execution and consensus client implementations.
+
+## Key Architectural Pattern
+- Participant-based architecture where each participant represents a complete node (EL+CL+VC+signer)
+- Network launcher strategies handle different deployment types (devnet, public, shadowfork, ephemery)
+- Service orchestration through Kurtosis plan API for containerized deployments
+
+## Important Constraints  
+- Network genesis timing must account for all service startup delays
+- Maintain participant independence while coordinating shared resources (bootnodes, genesis data)
+- Port allocation and service discovery must be deterministic for cross-component communication

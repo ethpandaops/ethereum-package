@@ -1,0 +1,18 @@
+---
+description: Teku - Ethereum consensus client launcher for the ethereum-package
+globs: 
+  - "*.star"
+  - "teku_launcher.star"
+alwaysApply: false
+---
+
+Teku consensus client launcher that configures and deploys Teku beacon nodes as part of the ethereum-package infrastructure.
+
+## Key Integration Pattern
+- Implements the standard CL launcher interface with full beacon node and optional validator client configurations
+- Integrates with execution clients via Engine API using JWT authentication with flexible snooper support
+
+## Important Constraints
+- Runs as "teku" user in container - write operations restricted to /data/teku paths
+- Supports checkpoint sync, perfect PeerDAS mode with node key assignment, and supernode configurations
+- Uses Teku-specific keystore format with separate keys and secrets directories
