@@ -425,7 +425,7 @@ def launch_participant_network(
 
     # add vc's in parallel to speed package execution
     vc_services = {}
-    if len(all_vc_contexts) > 0:
+    if len(vc_service_configs) > 0:
         vc_services = plan.add_services(vc_service_configs)
 
     all_vc_contexts = []
