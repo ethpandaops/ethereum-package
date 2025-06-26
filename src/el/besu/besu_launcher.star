@@ -44,10 +44,6 @@ def launch(
     participant_index,
     network_params,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
