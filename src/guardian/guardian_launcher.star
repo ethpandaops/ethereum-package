@@ -90,8 +90,6 @@ def get_config(
         "0.0.0.0",
         "--libp2p.port",
         str(LIBP2P_PORT_NUMBER),
-        "--node.key",
-        node_enr,
         "--connection.retries",
         "5",
         "--connection.timeout",
