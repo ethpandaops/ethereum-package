@@ -1199,7 +1199,7 @@ def default_participant():
         },
         "blobber_enabled": False,
         "blobber_extra_params": [],
-        "blobber_image": "ethpandaops/blobber:1.1.0",
+        "blobber_image": "ethpandaops/blobber:latest",
         "builder_network_params": None,
         "keymanager_enabled": None,
     }
