@@ -39,12 +39,13 @@ def launch_guardian(
             participant, index, participant_contexts, participant_configs
         )
 
-        service_name = "{0}-{1}".format(SERVICE_NAME_PREFIX, index + 1)
+        service_name = "{0}-{1}".format(SERVICE_NAME_PREFIX, full_name)
 
         config = get_config(
             service_name,
             cl_client.beacon_http_url,
             cl_client.enr,
+            full_name,
             guardian_params,
             global_node_selectors,
             docker_cache_params,
@@ -75,6 +76,7 @@ def get_config(
     service_name,
     beacon_api_url,
     node_enr,
+    full_name,
     guardian_params,
     node_selectors,
     docker_cache_params,
@@ -82,6 +84,8 @@ def get_config(
     cmd = [
         "--api.endpoint",
         beacon_api_url,
+        "--api.name",
+        full_name,
         "--libp2p.host",
         "0.0.0.0",
         "--libp2p.port",
