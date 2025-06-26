@@ -53,7 +53,7 @@ def launch(
         service_name,
         existing_el_clients,
         cl_client_name,
-        log_level,
+        global_log_level,
         persistent,
         tolerations,
         node_selectors,
