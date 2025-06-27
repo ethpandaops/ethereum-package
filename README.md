@@ -1349,6 +1349,14 @@ First, install prerequisites:
 Then, run the dev loop:
 
 1. Make your code changes
+1. **Run the linter to format and check your code:**
+
+   ```bash
+   kurtosis lint --format
+   ```
+
+   This ensures your Starlark code follows the project's formatting standards and catches any syntax issues.
+
 1. Rebuild and re-run the package by running the following from the root of the repo:
 
    ```bash
