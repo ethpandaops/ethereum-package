@@ -38,7 +38,6 @@ def get_config(
         "--remote-signer-url={0}".format(remote_signer_context.http_url),
         "--beacon-node-urls=" + beacon_http_url,
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=" + full_name,
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         "--log-level=" + log_level,
