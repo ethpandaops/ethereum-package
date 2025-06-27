@@ -53,6 +53,7 @@ executionapi:
   endpoints:
 {{ range $elClient := .ELClientInfo }}
     - url: "{{ $elClient.Execution_HTTP_URL }}"
+      engineSnooperUrl: "{{ $elClient.Execution_Engine_Snooper_URL }}"
       name: "{{ $elClient.FullName }}"
       archive: true
 {{- end }}

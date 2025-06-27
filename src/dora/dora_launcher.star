@@ -52,12 +52,22 @@ def launch_dora(
                 full_name,
             )
         )
+
+        snooper_el_engine_context = participant_contexts[index].snooper_el_engine_context
+        execution_snooper_url = ""
+        if snooper_el_engine_context:
+            execution_snooper_url = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+
         all_el_client_info.append(
             new_el_client_info(
                 "http://{0}:{1}".format(
                     el_client.ip_addr,
                     el_client.rpc_port_num,
                 ),
+                execution_snooper_url,
                 full_name,
             )
         )
@@ -202,8 +212,9 @@ def new_cl_client_info(beacon_http_url, full_name):
     }
 
 
-def new_el_client_info(execution_http_url, full_name):
+def new_el_client_info(execution_http_url, execution_snooper_url, full_name):
     return {
         "Execution_HTTP_URL": execution_http_url,
+        "Execution_Engine_Snooper_URL": execution_snooper_url,
         "FullName": full_name,
     }
