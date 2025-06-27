@@ -244,7 +244,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels,
+            extra_labels=participant.el_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
