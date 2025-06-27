@@ -39,9 +39,8 @@ def launch(
     service_name,
     node_keystore_files,
     beacon_http_url,
-    extra_params,
+    participant,
     node_selectors,
-    blobber_image,
 ):
     blobber_service_name = "{0}".format(service_name)
 
@@ -49,9 +48,8 @@ def launch(
         service_name,
         node_keystore_files,
         beacon_http_url,
-        extra_params,
+        participant,
         node_selectors,
-        blobber_image,
     )
 
     blobber_service = plan.add_service(blobber_service_name, blobber_config)
@@ -65,9 +63,8 @@ def get_config(
     service_name,
     node_keystore_files,
     beacon_http_url,
-    extra_params,
+    participant,
     node_selectors,
-    blobber_image,
 ):
     validator_root_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
@@ -83,12 +80,11 @@ def get_config(
         "--validator-proxy-port-start={0}".format(BLOBBER_VALIDATOR_PROXY_PORT_NUM),
     ]
 
-    if len(extra_params) > 0:
-        cmd.extend([param for param in extra_params])
+    if len(participant.blobber_extra_params) > 0:
+        cmd.extend([param for param in participant.blobber_extra_params])
 
-    image_to_use = blobber_image if blobber_image != "" else DEFAULT_BLOBBER_IMAGE
     return ServiceConfig(
-        image=image_to_use,
+        image=participant.blobber_image,
         ports=BLOBBER_USED_PORTS,
         files={
             VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid
