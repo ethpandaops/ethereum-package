@@ -48,7 +48,6 @@ def get_config(
         "--monitoring-host=0.0.0.0",
         "--monitoring-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + full_name,
     ]
 
     if remote_signer_context == None:
@@ -134,6 +133,7 @@ def get_config(
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
+        "tty_enabled": True,
     }
 
     if participant.vc_min_cpu > 0:
