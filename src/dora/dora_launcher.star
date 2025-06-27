@@ -53,7 +53,9 @@ def launch_dora(
             )
         )
 
-        snooper_el_engine_context = participant_contexts[index].snooper_el_engine_context
+        snooper_el_engine_context = participant_contexts[
+            index
+        ].snooper_el_engine_context
         execution_snooper_url = ""
         if snooper_el_engine_context:
             execution_snooper_url = "http://{0}:{1}".format(
