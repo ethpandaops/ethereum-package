@@ -13,7 +13,7 @@ vc_shared = import_module("./shared.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
 
 
-def launch(
+def get_vc_config(
     plan,
     launcher,
     keymanager_file,
@@ -178,22 +178,29 @@ def launch(
     else:
         fail("Unsupported vc_type: {0}".format(vc_type))
 
-    validator_service = plan.add_service(service_name, config)
+    return config
 
-    validator_metrics_port = validator_service.ports[constants.METRICS_PORT_ID]
+
+def new_vc_launcher(el_cl_genesis_data):
+    return struct(el_cl_genesis_data=el_cl_genesis_data)
+
+
+def get_vc_context(
+    plan,
+    service_name,
+    service,
+    client_name,
+):
+    validator_metrics_port = service.ports[constants.METRICS_PORT_ID]
     validator_metrics_url = "{0}:{1}".format(
-        validator_service.ip_address, validator_metrics_port.number
+        service.ip_address, validator_metrics_port.number
     )
     validator_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, vc_shared.METRICS_PATH, validator_metrics_url
     )
 
     return vc_context.new_vc_context(
-        client_name=vc_type,
+        client_name=client_name,
         service_name=service_name,
         metrics_info=validator_node_metrics_info,
     )
-
-
-def new_vc_launcher(el_cl_genesis_data):
-    return struct(el_cl_genesis_data=el_cl_genesis_data)
