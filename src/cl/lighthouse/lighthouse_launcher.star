@@ -96,7 +96,7 @@ def launch(
             blobber_service_name,
             node_keystore_files,
             beacon_http_url,
-            participant.blobber_extra_params,
+            participant,
             node_selectors,
         )
 

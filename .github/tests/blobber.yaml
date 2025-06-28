@@ -3,6 +3,7 @@ participants:
     el_image: ethpandaops/geth:master
     cl_type: lighthouse
     blobber_enabled: true
+    blobber_image: ethpandaops/blobber:latest
     blobber_extra_params:
       - --proposal-action-frequency=1
       - "--proposal-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 1500}"

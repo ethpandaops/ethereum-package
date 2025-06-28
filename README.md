@@ -446,6 +446,10 @@ participants:
     # Defaults to empty
     blobber_extra_params: []
 
+    # Blobber image to be used for the blobber container
+    # Defaults to empty
+    blobber_image: ethpandaops/blobber:latest
+
     # A set of parameters the node needs to reach an external block building network
     # If `null` then the builder infrastructure will not be instantiated
     # Example:
