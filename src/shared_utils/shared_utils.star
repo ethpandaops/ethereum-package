@@ -290,6 +290,7 @@ def get_port_specs(port_assignments):
             constants.LITTLE_BIGTABLE_PORT_ID,
             constants.WS_PORT_ID,
             constants.PROFILING_PORT_ID,
+            constants.LIBP2P_PORT_ID,
         ]:
             ports.update({port_id: new_port_spec(port, TCP_PROTOCOL)})
         elif port_id in [

@@ -293,6 +293,14 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "spammers",
     ],
+    "guardian_params": [
+        "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "extra_args",
+    ],
     "ethereum_genesis_generator_params": [
         "image",
     ],
@@ -328,6 +336,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "nginx",
     "tracoor",
     "spamoor",
+    "guardian",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
