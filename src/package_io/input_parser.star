@@ -464,11 +464,6 @@ def input_parser(plan, input_args):
                 "mev_relay_website_extra_env_vars"
             ],
             mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
-            mev_flood_image=result["mev_params"]["mev_flood_image"],
-            mev_flood_extra_args=result["mev_params"]["mev_flood_extra_args"],
-            mev_flood_seconds_per_bundle=result["mev_params"][
-                "mev_flood_seconds_per_bundle"
-            ],
             mock_mev_image=result["mev_params"]["mock_mev_image"],
         )
         if result["mev_params"]
@@ -1248,9 +1243,6 @@ def get_default_mev_params(mev_type, preset):
     mev_relay_website_extra_args = []
     mev_relay_website_extra_env_vars = {}
     mev_builder_extra_args = []
-    mev_flood_image = "flashbots/mev-flood"
-    mev_flood_extra_args = []
-    mev_flood_seconds_per_bundle = 15
     mev_builder_prometheus_config = {
         "scrape_interval": "15s",
         "labels": None,
@@ -1309,9 +1301,6 @@ def get_default_mev_params(mev_type, preset):
         "mev_relay_housekeeper_extra_env_vars": mev_relay_housekeeper_extra_env_vars,
         "mev_relay_website_extra_args": mev_relay_website_extra_args,
         "mev_relay_website_extra_env_vars": mev_relay_website_extra_env_vars,
-        "mev_flood_image": mev_flood_image,
-        "mev_flood_extra_args": mev_flood_extra_args,
-        "mev_flood_seconds_per_bundle": mev_flood_seconds_per_bundle,
         "mev_builder_prometheus_config": mev_builder_prometheus_config,
     }
 
@@ -1614,7 +1603,6 @@ def docker_cache_image_override(plan, result):
         "mev_params.mev_builder_image",
         "mev_params.mev_builder_cl_image",
         "mev_params.mev_boost_image",
-        "mev_params.mev_flood_image",
         "xatu_sentry_params.xatu_sentry_image",
         "tx_fuzz_params.image",
         "prometheus_params.image",
