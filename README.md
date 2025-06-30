@@ -979,16 +979,6 @@ mev_params:
     scrape_interval: 15s
     # Additional labels to be added. Default to empty
     labels: {}
-  # Image to use for mev-flood
-  mev_flood_image: flashbots/mev-flood
-  # Extra parameters to send to mev-flood
-  mev_flood_extra_args: []
-  # Number of seconds between bundles for mev-flood
-  mev_flood_seconds_per_bundle: 15
-  # Optional parameters to send to the custom_flood script that sends reliable payloads
-  custom_flood_params:
-    interval_between_transactions: 1
-
   # Image to use for mock mev
   mock_mev_image: ethpandaops/rustic-builder:main
 
@@ -1304,7 +1294,6 @@ Starting your network up with `"mev_type": "full"` will instantiate and connect 
 3. `mev-relay-website` - A website to monitor payloads that have been delivered
 4. `mev-relay-housekeeper` - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
 5. `mev-boost` - open-source middleware instantiated for each EL/Cl pair in the network, including the builder
-6. `mev-flood` - Deploys UniV2 smart contracts, provisions liquidity on UniV2 pairs, & sends a constant stream of UniV2 swap transactions to the network's public mempool.
 
 <details>
     <summary>Caveats when using "mev_type": "full"</summary>
@@ -1333,8 +1322,6 @@ Here's a table of where the keys are used
 | 0             | Builder             | ✅                |                 | As coinbase                |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
-| 6             | mev_flood           | ✅                |                 | As the contract owner      |
-| 7             | mev_flood           | ✅                |                 | As the user_key            |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
