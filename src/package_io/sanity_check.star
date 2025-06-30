@@ -338,6 +338,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "blutgang",
     "forky",
     "apache",
+    "nginx",
     "tracoor",
     "spamoor",
     "txpool_viz"
@@ -354,6 +355,7 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "mev_type": "",
     "xatu_sentry_enabled": "",
     "apache_port": "",
+    "nginx_port": "",
     "global_tolerations": "",
     "global_node_selectors": "",
     "keymanager_enabled": "",

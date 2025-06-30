@@ -40,7 +40,6 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
-        "--graffiti=" + full_name,
     ]
 
     if remote_signer_context == None:

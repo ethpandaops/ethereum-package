@@ -246,7 +246,6 @@ def get_beacon_config(
         ),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--validators-graffiti=" + full_name,
     ]
 
     keymanager_api_cmd = [

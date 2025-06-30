@@ -16,6 +16,7 @@ frontend:
   debug: false
   pprof: true
   minimize: false # minimize html templates
+  disablePageCache: true
   showSensitivePeerInfos: true
 
   # Name of the site, displayed in the title tag
@@ -52,6 +53,7 @@ executionapi:
   endpoints:
 {{ range $elClient := .ELClientInfo }}
     - url: "{{ $elClient.Execution_HTTP_URL }}"
+      engineSnooperUrl: "{{ $elClient.Execution_Engine_Snooper_URL }}"
       name: "{{ $elClient.FullName }}"
       archive: true
 {{- end }}

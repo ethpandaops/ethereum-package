@@ -263,7 +263,6 @@ def get_beacon_config(
         "--validators-dir=" + validator_keys_dirpath,
         "--secrets-dir=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=" + full_name,
     ]
 
     keymanager_api_cmd = [
