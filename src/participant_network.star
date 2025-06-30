@@ -201,11 +201,7 @@ def launch_participant_network(
     if not args_with_right_defaults.participants:
         fail("No participants configured")
 
-    for index, participant in enumerate(args_with_right_defaults.participants):
-        if num_participants == 1 and participant.cl_type == "lighthouse":
-            if "--target-peers=0" not in participant.cl_extra_params:
-                participant.cl_extra_params.append("--target-peers=0")
-                
+    for index, participant in enumerate(args_with_right_defaults.participants):                
         el_type = participant.el_type
         cl_type = participant.cl_type
         vc_type = participant.vc_type
