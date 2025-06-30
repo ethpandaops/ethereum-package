@@ -47,7 +47,6 @@ flashbots_mev_relay = import_module(
     "./src/mev/flashbots/mev_relay/mev_relay_launcher.star"
 )
 mock_mev = import_module("./src/mev/flashbots/mock_mev/mock_mev_launcher.star")
-mev_flood = import_module("./src/mev/flashbots/mev_flood/mev_flood_launcher.star")
 mev_custom_flood = import_module(
     "./src/mev/flashbots/mev_custom_flood/mev_custom_flood_launcher.star"
 )
@@ -304,15 +303,6 @@ def run(plan, args={}):
 
         first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
-        contract_owner, normal_user = prefunded_accounts[6:8]
-        mev_flood.launch_mev_flood(
-            plan,
-            mev_params.mev_flood_image,
-            all_el_contexts[-1].rpc_http_url,  # Only spam builder
-            contract_owner.private_key,
-            normal_user.private_key,
-            global_node_selectors,
-        )
         if (
             args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
             or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
@@ -344,14 +334,6 @@ def run(plan, args={}):
         else:
             fail("Invalid MEV type")
 
-        mev_flood.spam_in_background(
-            plan,
-            all_el_contexts[-1].rpc_http_url,  # Only spam builder
-            mev_params.mev_flood_extra_args,
-            mev_params.mev_flood_seconds_per_bundle,
-            contract_owner.private_key,
-            normal_user.private_key,
-        )
         mev_endpoints.append(endpoint)
         mev_endpoint_names.append(args_with_right_defaults.mev_type)
 
