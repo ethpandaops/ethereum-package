@@ -54,6 +54,7 @@ def launch(
         participant,
         seconds_per_slot,
         public_ports,
+        index,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
@@ -74,6 +75,7 @@ def get_config(
     participant,
     seconds_per_slot,
     public_ports,
+    participant_index,
 ):
     command = mev_boost_args
 
@@ -99,6 +101,14 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        labels=shared_utils.label_maker(
+            client="mev-boost",
+            client_type="mev",
+            image=mev_boost_image[-constants.MAX_LABEL_LENGTH :],
+            connected_client="{0}-{1}".format(participant.cl_type, participant.el_type),
+            extra_labels={constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
+            supernode=participant.supernode,
+        ),
     )
 
 
