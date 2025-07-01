@@ -90,7 +90,6 @@ def launch_dora(
         all_cl_client_info,
         all_el_client_info,
         mev_endpoint_info,
-        plan,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -195,10 +194,8 @@ def get_config(
 
 
 def new_config_template_data(
-    network, listen_port_num, cl_client_info, el_client_info, mev_endpoint_info, plan
+    network, listen_port_num, cl_client_info, el_client_info, mev_endpoint_info
 ):
-    plan.print("el_client_info: {0}".format(el_client_info))
-
     return {
         "Network": network,
         "PublicRPC": el_client_info[0]["Execution_HTTP_URL"],
