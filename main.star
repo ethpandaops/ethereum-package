@@ -457,6 +457,8 @@ def run(plan, args={}):
                 fuzz_target,
                 tx_fuzz_params,
                 global_node_selectors,
+                global_tolerations,
+
             )
             plan.print("Successfully launched tx-fuzz")
         elif additional_service == "forkmon":
