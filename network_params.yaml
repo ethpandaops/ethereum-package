@@ -181,9 +181,6 @@ mev_params:
   mev_builder_prometheus_config:
     scrape_interval: 15s
     labels: {}
-  mev_flood_image: flashbots/mev-flood
-  mev_flood_extra_args: []
-  mev_flood_seconds_per_bundle: 15
   custom_flood_params:
     interval_between_transactions: 1
 xatu_sentry_enabled: false
@@ -202,6 +199,7 @@ xatu_sentry_params:
     - contribution_and_proof
     - blob_sidecar
 apache_port: 40000
+nginx_port: 50000
 global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false

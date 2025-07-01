@@ -36,3 +36,10 @@ kurtosis run . --args-file network_params.yaml
 - Configuration templates are stored in static_files/
 - Each service runs in isolated containers managed by Kurtosis
 - Resource limits and network parameters are highly configurable
+
+## Required Development Workflow
+**CRITICAL:** Before any git commits or pushes, Claude MUST run:
+```bash
+kurtosis lint --format
+```
+This command formats Starlark code and validates syntax. All changes must pass linting before being committed or pushed to any branch.

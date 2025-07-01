@@ -94,6 +94,7 @@ def launch_mev_relay(
         "CAPELLA_FORK_VERSION": constants.CAPELLA_FORK_VERSION,
         "DENEB_FORK_VERSION": constants.DENEB_FORK_VERSION,
         "ELECTRA_FORK_VERSION": constants.ELECTRA_FORK_VERSION,
+        "FULU_FORK_VERSION": constants.FULU_FORK_VERSION,
         "GENESIS_VALIDATORS_ROOT": validator_root,
         "SEC_PER_SLOT": str(network_params.seconds_per_slot),
         "SLOTS_PER_EPOCH": str(32) if network_params.preset == "mainnet" else str(8),
