@@ -1651,6 +1651,13 @@ def docker_cache_image_override(plan, result):
                     + result["docker_cache_params"]["google_prefix"]
                     + "/".join(participant[images].split("/")[1:])
                 )
+            elif participant[images].startswith("ethpandaops/"):
+                # Handle ethpandaops images (including devnet-modified ones)
+                participant[images] = (
+                    result["docker_cache_params"]["url"]
+                    + result["docker_cache_params"]["dockerhub_prefix"]
+                    + participant[images]
+                )
             elif constants.CONTAINER_REGISTRY.dockerhub in participant[images]:
                 participant[images] = (
                     result["docker_cache_params"]["url"]
@@ -1712,14 +1719,27 @@ def get_devnet_image_tag(network_name, original_image):
     if "devnet" not in network_name:
         return original_image
 
-    if original_image.startswith("ethpandaops/"):
+    # For devnet networks, convert all client images to ethpandaops
+    if "/" in original_image:
+        # Extract just the image name (everything after the last /)
+        image_name_with_tag = original_image.split("/")[-1]
+        if ":" in image_name_with_tag:
+            image_name = image_name_with_tag.split(":")[0]
+        else:
+            image_name = image_name_with_tag
+
+        # Special case: ethereum/client-go should become ethpandaops/geth
+        if image_name == "client-go":
+            image_name = "geth"
+
+        return "ethpandaops/{0}:{1}".format(image_name, network_name)
+    else:
+        # Handle edge case where there's no registry prefix
         if ":" in original_image:
             image_name = original_image.split(":")[0]
         else:
             image_name = original_image
-        return "{0}:{1}".format(image_name, network_name)
-
-    return original_image
+        return "ethpandaops/{0}:{1}".format(image_name, network_name)
 
 
 def get_devnet_modified_images(network_name, default_images):
