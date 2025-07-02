@@ -55,7 +55,7 @@ def launch(
     blobber_service = plan.add_service(blobber_service_name, blobber_config)
     return blobber_context.new_blobber_context(
         blobber_service.ip_address,
-        blobber_service.ports[BLOBBER_VALIDATOR_PROXY_PORT_NUM],
+        blobber_service.ports[BLOBBER_VALIDATOR_PROXY_PORT_ID].number,
     )
 
 
@@ -75,7 +75,6 @@ def get_config(
         "--cl={0}".format(beacon_http_url),
         "--validator-key-folder={0}".format(validator_root_dirpath),
         "--enable-unsafe-mode",
-        # Does this get affected by public ip address changes?
         "--external-ip={0}".format(constants.PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--validator-proxy-port-start={0}".format(BLOBBER_VALIDATOR_PROXY_PORT_NUM),
     ]
