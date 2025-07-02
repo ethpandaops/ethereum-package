@@ -1731,6 +1731,12 @@ def get_devnet_image_tag(network_name, original_image):
         # Special case: ethereum/client-go should become ethpandaops/geth
         if image_name == "client-go":
             image_name = "geth"
+        # Special case: gcr.io/offchainlabs/prysm/beacon-chain should become ethpandaops/prysm-beacon-chain
+        elif image_name == "beacon-chain" and "prysm" in original_image:
+            image_name = "prysm-beacon-chain"
+        # Special case: gcr.io/offchainlabs/prysm/validator should become ethpandaops/prysm-validator
+        elif image_name == "validator" and "prysm" in original_image:
+            image_name = "prysm-validator"
 
         return "ethpandaops/{0}:{1}".format(image_name, network_name)
     else:
