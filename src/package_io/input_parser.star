@@ -790,8 +790,8 @@ def parse_network_params(plan, input_args):
 
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
-            # unless we are running lighthouse, we don't support blobber
-            if participant["cl_type"] != constants.CL_TYPE.lighthouse:
+            # lighthouse, lodestar, prysm, and grandine support blobber
+            if participant["cl_type"] not in [constants.CL_TYPE.lighthouse, constants.CL_TYPE.lodestar, constants.CL_TYPE.prysm, constants.CL_TYPE.grandine]:
                 fail(
                     "blobber is not supported for {0} client".format(
                         participant["cl_type"]

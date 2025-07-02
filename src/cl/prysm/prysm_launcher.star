@@ -83,6 +83,16 @@ def launch(
     )
     beacon_grpc_url = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
 
+    # Prepare blobber config without launching
+    blobber_config = None
+    if participant.blobber_enabled:
+        blobber_config = struct(
+            service_name = "{0}-{1}".format("blobber", beacon_service_name),
+            beacon_http_url = beacon_http_url,
+            node_keystore_files = node_keystore_files,
+            node_selectors = node_selectors,
+        )
+
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
     beacon_node_identity_recipe = GetHttpRequestRecipe(
         endpoint="/eth/v1/node/identity",
@@ -109,7 +119,7 @@ def launch(
     )
     nodes_metrics_info = [beacon_node_metrics_info]
 
-    return cl_context.new_cl_context(
+    cl_context_obj = cl_context.new_cl_context(
         client_name="prysm",
         enr=beacon_node_enr,
         ip_addr=beacon_service.ip_address,
@@ -127,6 +137,9 @@ def launch(
         else "",
         supernode=participant.supernode,
     )
+    
+    # Return tuple of cl_context and blobber_config
+    return (cl_context_obj, blobber_config)
 
 
 def get_beacon_config(

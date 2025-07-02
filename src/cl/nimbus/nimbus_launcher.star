@@ -122,7 +122,7 @@ def launch(
     )
     nodes_metrics_info = [nimbus_node_metrics_info]
 
-    return cl_context.new_cl_context(
+    cl_context_obj = cl_context.new_cl_context(
         client_name="nimbus",
         enr=beacon_node_enr,
         ip_addr=beacon_service.ip_address,
@@ -139,6 +139,9 @@ def launch(
         else "",
         supernode=participant.supernode,
     )
+    
+    # Nimbus doesn't support blobbers, return None for blobber config
+    return (cl_context_obj, None)
 
 
 def get_beacon_config(

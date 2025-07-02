@@ -41,7 +41,6 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--beacon-rpc-provider=" + cl_context.beacon_grpc_url,
         "--beacon-rest-api-provider=" + beacon_http_url,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
@@ -50,6 +49,11 @@ def get_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
     ]
+    
+    # Only add RPC provider if we're not using a blobber (blobber doesn't proxy RPC)
+    # Blobber uses port 5000, so check if that's in the URL
+    if ":5000" not in beacon_http_url:
+        cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
 
     if remote_signer_context == None:
         cmd.extend(
@@ -78,8 +82,13 @@ def get_config(
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
-    if cl_context.client_name != constants.CL_TYPE.prysm:
-        # Use Beacon API if a Prysm VC wants to connect to a non-Prysm BN
+    # Check if we're using a blobber by checking for port 5000
+    is_using_blobber = ":5000" in beacon_http_url
+    
+    if cl_context.client_name != constants.CL_TYPE.prysm or is_using_blobber:
+        # Use Beacon API if:
+        # 1. Prysm VC wants to connect to a non-Prysm BN, OR
+        # 2. Blobber is enabled (since blobber only proxies REST, not RPC)
         cmd.append("--enable-beacon-rest-api")
 
     if len(participant.vc_extra_params) > 0:

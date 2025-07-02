@@ -79,24 +79,15 @@ def launch(
         beacon_service.ip_address, beacon_http_port.number
     )
 
-    # Blobber config
+    # Prepare blobber config without launching
+    blobber_config = None
     if participant.blobber_enabled:
-        blobber_service_name = "{0}-{1}".format("blobber", beacon_service_name)
-        blobber_config = blobber_launcher.get_config(
-            blobber_service_name,
-            node_keystore_files,
-            beacon_http_url,
-            participant.blobber_extra_params,
+        blobber_config = struct(
+            service_name = "{0}-{1}".format("blobber", beacon_service_name),
+            beacon_http_url = beacon_http_url,
+            node_keystore_files = node_keystore_files,
+            node_selectors = node_selectors,
         )
-
-        blobber_service = plan.add_service(blobber_service_name, blobber_config)
-        blobber_http_port = blobber_service.ports[
-            blobber_launcher.BLOBBER_VALIDATOR_PROXY_PORT_ID
-        ]
-        blobber_http_url = "http://{0}:{1}".format(
-            blobber_service.ip_address, blobber_http_port.number
-        )
-        beacon_http_url = blobber_http_url
 
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
@@ -126,7 +117,7 @@ def launch(
     )
     nodes_metrics_info = [beacon_node_metrics_info]
 
-    return cl_context.new_cl_context(
+    cl_context_obj = cl_context.new_cl_context(
         client_name="lodestar",
         enr=beacon_node_enr,
         ip_addr=beacon_service.ip_address,
@@ -143,6 +134,9 @@ def launch(
         else "",
         supernode=participant.supernode,
     )
+    
+    # Return tuple of cl_context and blobber_config
+    return (cl_context_obj, blobber_config)
 
 
 def get_beacon_config(
