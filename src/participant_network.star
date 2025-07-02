@@ -197,22 +197,26 @@ def launch_participant_network(
                 config.participant,
                 config.blobber_config.node_selectors,
             )
-            
+
             # Store the blobber URL mapping
             blobber_http_url = "http://{0}:{1}".format(
                 blobber.ip_addr, blobber.port_num
             )
-            cl_context_to_blobber_url[config.cl_context.beacon_service_name] = blobber_http_url
-    
+            cl_context_to_blobber_url[
+                config.cl_context.beacon_service_name
+            ] = blobber_http_url
+
     # Helper function to get cl_context with blobber URL if available
     def get_cl_context_with_blobber_url(cl_context):
         beacon_service_name = cl_context.beacon_service_name
-        effective_beacon_url = cl_context_to_blobber_url.get(beacon_service_name, cl_context.beacon_http_url)
-        
+        effective_beacon_url = cl_context_to_blobber_url.get(
+            beacon_service_name, cl_context.beacon_http_url
+        )
+
         if effective_beacon_url == cl_context.beacon_http_url:
             # No blobber, return original context
             return cl_context
-        
+
         # Create a new cl_context with the blobber URL
         return cl_context_module.new_cl_context(
             client_name=cl_context.client_name,

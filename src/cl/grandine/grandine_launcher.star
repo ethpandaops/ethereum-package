@@ -130,7 +130,7 @@ def launch(
         else "",
         supernode=participant.supernode,
     )
-    
+
     # Return tuple of cl_context and blobber_config
     return (cl_context_obj, blobber_config)
 

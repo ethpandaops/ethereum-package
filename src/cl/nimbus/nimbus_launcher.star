@@ -139,7 +139,7 @@ def launch(
         else "",
         supernode=participant.supernode,
     )
-    
+
     # Nimbus doesn't support blobbers, return None for blobber config
     return (cl_context_obj, None)
 

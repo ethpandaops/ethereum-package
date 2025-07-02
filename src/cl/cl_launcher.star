@@ -213,11 +213,13 @@ def launch(
         if type(result) == "tuple":
             cl_context, blobber_config = result
             if blobber_config != None:
-                blobber_configs_with_contexts.append(struct(
-                    cl_context = cl_context,
-                    blobber_config = blobber_config,
-                    participant = participant
-                ))
+                blobber_configs_with_contexts.append(
+                    struct(
+                        cl_context=cl_context,
+                        blobber_config=blobber_config,
+                        participant=participant,
+                    )
+                )
         else:
             # Backward compatibility for CL clients that don't support blobbers
             cl_context = result

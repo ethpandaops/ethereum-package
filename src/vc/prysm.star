@@ -49,7 +49,7 @@ def get_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
         "--graffiti=" + full_name,
     ]
-    
+
     # Only add RPC provider if we're not using a blobber (blobber doesn't proxy RPC)
     # Blobber uses port 5000, so check if that's in the URL
     if ":5000" not in beacon_http_url:
@@ -84,7 +84,7 @@ def get_config(
 
     # Check if we're using a blobber by checking for port 5000
     is_using_blobber = ":5000" in beacon_http_url
-    
+
     if cl_context.client_name != constants.CL_TYPE.prysm or is_using_blobber:
         # Use Beacon API if:
         # 1. Prysm VC wants to connect to a non-Prysm BN, OR

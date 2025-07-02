@@ -128,7 +128,7 @@ def launch(
         else "",
         supernode=participant.supernode,
     )
-    
+
     # Teku doesn't support blobbers, return None for blobber config
     return (cl_context_obj, None)
 

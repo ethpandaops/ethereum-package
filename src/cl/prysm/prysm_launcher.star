@@ -87,10 +87,10 @@ def launch(
     blobber_config = None
     if participant.blobber_enabled:
         blobber_config = struct(
-            service_name = "{0}-{1}".format("blobber", beacon_service_name),
-            beacon_http_url = beacon_http_url,
-            node_keystore_files = node_keystore_files,
-            node_selectors = node_selectors,
+            service_name="{0}-{1}".format("blobber", beacon_service_name),
+            beacon_http_url=beacon_http_url,
+            node_keystore_files=node_keystore_files,
+            node_selectors=node_selectors,
         )
 
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
@@ -137,7 +137,7 @@ def launch(
         else "",
         supernode=participant.supernode,
     )
-    
+
     # Return tuple of cl_context and blobber_config
     return (cl_context_obj, blobber_config)
 
