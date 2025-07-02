@@ -89,10 +89,12 @@ def input_parser(plan, input_args):
     result = parse_network_params(plan, input_args)
     # add default eth2 input params
     result["blockscout_params"] = get_default_blockscout_params()
-    result["dora_params"] = get_default_dora_params()
+    result["dora_params"] = get_default_dora_params(result["network_params"]["network"])
     result["docker_cache_params"] = get_default_docker_cache_params()
     result["mev_params"] = get_default_mev_params(
-        result.get("mev_type"), result["network_params"]["preset"]
+        result.get("mev_type"),
+        result["network_params"]["preset"],
+        result["network_params"]["network"],
     )
     if (
         result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
@@ -101,19 +103,27 @@ def input_parser(plan, input_args):
         result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     else:
         result["additional_services"] = []
-    result["tx_fuzz_params"] = get_default_tx_fuzz_params()
+    result["tx_fuzz_params"] = get_default_tx_fuzz_params(
+        result["network_params"]["network"]
+    )
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
     result["grafana_params"] = get_default_grafana_params()
-    result["assertoor_params"] = get_default_assertoor_params()
+    result["assertoor_params"] = get_default_assertoor_params(
+        result["network_params"]["network"]
+    )
     result["prometheus_params"] = get_default_prometheus_params()
-    result["xatu_sentry_params"] = get_default_xatu_sentry_params()
+    result["xatu_sentry_params"] = get_default_xatu_sentry_params(
+        result["network_params"]["network"]
+    )
     result["persistent"] = False
     result["parallel_keystore_generation"] = False
     result["global_tolerations"] = []
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
-    result["spamoor_params"] = get_default_spamoor_params()
+    result["spamoor_params"] = get_default_spamoor_params(
+        result["network_params"]["network"]
+    )
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -685,7 +695,11 @@ def parse_network_params(plan, input_args):
 
         el_image = participant["el_image"]
         if el_image == "":
-            default_image = DEFAULT_EL_IMAGES.get(el_type, "")
+            # Get devnet-modified images if network contains 'devnet'
+            effective_el_images = get_devnet_modified_images(
+                result["network_params"]["network"], DEFAULT_EL_IMAGES
+            )
+            default_image = effective_el_images.get(el_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
@@ -697,9 +711,17 @@ def parse_network_params(plan, input_args):
         cl_image = participant["cl_image"]
         if cl_image == "":
             if result["network_params"]["preset"] == "minimal":
-                default_image = DEFAULT_CL_IMAGES_MINIMAL.get(cl_type, "")
+                # Get devnet-modified images if network contains 'devnet'
+                effective_cl_images = get_devnet_modified_images(
+                    result["network_params"]["network"], DEFAULT_CL_IMAGES_MINIMAL
+                )
+                default_image = effective_cl_images.get(cl_type, "")
             else:
-                default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
+                # Get devnet-modified images if network contains 'devnet'
+                effective_cl_images = get_devnet_modified_images(
+                    result["network_params"]["network"], DEFAULT_CL_IMAGES
+                )
+                default_image = effective_cl_images.get(cl_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
@@ -737,9 +759,17 @@ def parse_network_params(plan, input_args):
             if cl_image == "" or vc_type != cl_type:
                 # If the validator client image is also empty, default to the image for the chosen CL client
                 if result["network_params"]["preset"] == "minimal":
-                    default_image = DEFAULT_VC_IMAGES_MINIMAL.get(vc_type, "")
+                    # Get devnet-modified images if network contains 'devnet'
+                    effective_vc_images = get_devnet_modified_images(
+                        result["network_params"]["network"], DEFAULT_VC_IMAGES_MINIMAL
+                    )
+                    default_image = effective_vc_images.get(vc_type, "")
                 else:
-                    default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
+                    # Get devnet-modified images if network contains 'devnet'
+                    effective_vc_images = get_devnet_modified_images(
+                        result["network_params"]["network"], DEFAULT_VC_IMAGES
+                    )
+                    default_image = effective_vc_images.get(vc_type, "")
             else:
                 if cl_type == "prysm":
                     default_image = cl_image.replace("beacon-chain", "validator")
@@ -1208,9 +1238,9 @@ def get_default_blockscout_params():
     }
 
 
-def get_default_dora_params():
+def get_default_dora_params(network_name=""):
     return {
-        "image": constants.DEFAULT_DORA_IMAGE,
+        "image": get_devnet_image_tag(network_name, constants.DEFAULT_DORA_IMAGE),
         "env": {},
     }
 
@@ -1225,16 +1255,28 @@ def get_default_docker_cache_params():
     }
 
 
-def get_default_mev_params(mev_type, preset):
-    mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
-    mev_builder_image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+def get_default_mev_params(mev_type, preset, network_name=""):
+    mev_relay_image = get_devnet_image_tag(
+        network_name, constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
+    )
+    mev_builder_image = get_devnet_image_tag(
+        network_name, constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+    )
     if preset == "minimal":
-        mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[constants.CL_TYPE.lighthouse]
+        effective_cl_images = get_devnet_modified_images(
+            network_name, DEFAULT_CL_IMAGES_MINIMAL
+        )
+        mev_builder_cl_image = effective_cl_images[constants.CL_TYPE.lighthouse]
     else:
-        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+        effective_cl_images = get_devnet_modified_images(
+            network_name, DEFAULT_CL_IMAGES
+        )
+        mev_builder_cl_image = effective_cl_images[constants.CL_TYPE.lighthouse]
     mev_builder_extra_data = None
     mev_builder_subsidy = 0
-    mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
+    mev_boost_image = get_devnet_image_tag(
+        network_name, constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
+    )
     mev_boost_args = ["mev-boost", "--relay-check"]
     mev_relay_api_extra_args = []
     mev_relay_api_extra_env_vars = {}
@@ -1256,32 +1298,61 @@ def get_default_mev_params(mev_type, preset):
 
     if mev_type == constants.MEV_RS_MEV_TYPE:
         if preset == "minimal":
-            mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
-            mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
-            mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[
-                constants.CL_TYPE.lighthouse
-            ]
-            mev_boost_image = constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
+            mev_relay_image = get_devnet_image_tag(
+                network_name, constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
+            )
+            mev_builder_image = get_devnet_image_tag(
+                network_name, constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
+            )
+            effective_cl_images = get_devnet_modified_images(
+                network_name, DEFAULT_CL_IMAGES_MINIMAL
+            )
+            mev_builder_cl_image = effective_cl_images[constants.CL_TYPE.lighthouse]
+            mev_boost_image = get_devnet_image_tag(
+                network_name, constants.DEFAULT_MEV_RS_IMAGE_MINIMAL
+            )
         else:
-            mev_relay_image = constants.DEFAULT_MEV_RS_IMAGE
-            mev_builder_image = constants.DEFAULT_MEV_RS_IMAGE
-            mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
-            mev_boost_image = constants.DEFAULT_MEV_RS_IMAGE
+            mev_relay_image = get_devnet_image_tag(
+                network_name, constants.DEFAULT_MEV_RS_IMAGE
+            )
+            mev_builder_image = get_devnet_image_tag(
+                network_name, constants.DEFAULT_MEV_RS_IMAGE
+            )
+            effective_cl_images = get_devnet_modified_images(
+                network_name, DEFAULT_CL_IMAGES
+            )
+            mev_builder_cl_image = effective_cl_images[constants.CL_TYPE.lighthouse]
+            mev_boost_image = get_devnet_image_tag(
+                network_name, constants.DEFAULT_MEV_RS_IMAGE
+            )
         mev_builder_extra_data = "0x68656C6C6F20776F726C640A"  # "hello world\n"
         mev_builder_extra_args = ["--mev-builder-config=" + "/config/config.toml"]
 
     if mev_type == constants.COMMIT_BOOST_MEV_TYPE:
-        mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
-        mev_builder_image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
-        mev_boost_image = constants.DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE
-        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+        mev_relay_image = get_devnet_image_tag(
+            network_name, constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
+        )
+        mev_builder_image = get_devnet_image_tag(
+            network_name, constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+        )
+        mev_boost_image = get_devnet_image_tag(
+            network_name, constants.DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE
+        )
+        effective_cl_images = get_devnet_modified_images(
+            network_name, DEFAULT_CL_IMAGES
+        )
+        mev_builder_cl_image = effective_cl_images[constants.CL_TYPE.lighthouse]
         mev_builder_extra_data = (
             "0x436F6D6D69742D426F6F737420F09F93BB"  # Commit-Boost 📻
         )
 
     if mev_type == constants.MOCK_MEV_TYPE:
-        mev_builder_image = constants.DEFAULT_MOCK_MEV_IMAGE
-        mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
+        mev_builder_image = get_devnet_image_tag(
+            network_name, constants.DEFAULT_MOCK_MEV_IMAGE
+        )
+        mev_boost_image = get_devnet_image_tag(
+            network_name, constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
+        )
 
     return {
         "mev_relay_image": mev_relay_image,
@@ -1305,16 +1376,16 @@ def get_default_mev_params(mev_type, preset):
     }
 
 
-def get_default_tx_fuzz_params():
+def get_default_tx_fuzz_params(network_name=""):
     return {
-        "image": "ethpandaops/tx-fuzz:master",
+        "image": get_devnet_image_tag(network_name, "ethpandaops/tx-fuzz:master"),
         "tx_fuzz_extra_args": [],
     }
 
 
-def get_default_assertoor_params():
+def get_default_assertoor_params(network_name=""):
     return {
-        "image": constants.DEFAULT_ASSERTOOR_IMAGE,
+        "image": get_devnet_image_tag(network_name, constants.DEFAULT_ASSERTOOR_IMAGE),
         "run_stability_check": False,
         "run_block_proposal_check": False,
         "run_lifecycle_test": False,
@@ -1348,9 +1419,11 @@ def get_default_grafana_params():
     }
 
 
-def get_default_xatu_sentry_params():
+def get_default_xatu_sentry_params(network_name=""):
     return {
-        "xatu_sentry_image": "ethpandaops/xatu:latest",
+        "xatu_sentry_image": get_devnet_image_tag(
+            network_name, "ethpandaops/xatu:latest"
+        ),
         "xatu_server_addr": "localhost:8080",
         "xatu_server_headers": {},
         "xatu_server_tls": False,
@@ -1367,9 +1440,9 @@ def get_default_xatu_sentry_params():
     }
 
 
-def get_default_spamoor_params():
+def get_default_spamoor_params(network_name=""):
     return {
-        "image": constants.DEFAULT_SPAMOOR_IMAGE,
+        "image": get_devnet_image_tag(network_name, constants.DEFAULT_SPAMOOR_IMAGE),
         "min_cpu": 100,
         "max_cpu": 2000,
         "min_mem": 100,
@@ -1686,3 +1759,28 @@ def get_default_ethereum_genesis_generator_params():
     return {
         "image": constants.DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE,
     }
+
+
+def get_devnet_image_tag(network_name, original_image):
+    if "devnet" not in network_name:
+        return original_image
+
+    if original_image.startswith("ethpandaops/"):
+        if ":" in original_image:
+            image_name = original_image.split(":")[0]
+        else:
+            image_name = original_image
+        return "{0}:{1}".format(image_name, network_name)
+
+    return original_image
+
+
+def get_devnet_modified_images(network_name, default_images):
+    if "devnet" not in network_name:
+        return default_images
+
+    modified_images = {}
+    for client_type, image in default_images.items():
+        modified_images[client_type] = get_devnet_image_tag(network_name, image)
+
+    return modified_images
