@@ -27,40 +27,46 @@ runs:
 
         # Extract tool versions from Kurtosis source code with fallbacks
         echo "Fetching tool versions from Kurtosis source..."
+        echo "Tool versions extracted:"
 
         TRAEFIK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/reverse_proxy_functions/implementations/traefik/consts.go | grep 'containerImage.*=.*"traefik:' | sed 's/.*traefik:\([^"]*\)".*/\1/')
-        VECTOR_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_aggregator_functions/implementations/vector/consts.go | grep 'containerImage.*=.*"timberio/vector:' | sed 's/.*timberio\/vector:\([^"]*\)".*/\1/')
-        FLUENTBIT_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/consts.go | grep 'containerImage.*=.*"fluent/fluent-bit:' | sed 's/.*fluent\/fluent-bit:\([^"]*\)".*/\1/')
-        ALPINE_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/fluentbit_configuration_creator.go | grep 'configuratorContainerImage.*=.*"alpine:' | sed 's/.*alpine:\([^"]*\)".*/\1/')
-        BLACK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/78041d2b84d2e56a5bf84d70e3501dfa4056c4b6/cli/cli/commands/lint/lint.go | grep 'pyBlackDockerImage.*=.*"pyfound/black:' | sed 's/.*pyfound\/black:\([^"]*\)".*/\1/')
-        CURL_JQ_VERSION="latest"  # badouralix/curl-jq uses latest tag by default in Kurtosis
-        # Extract tool versions from current repository instead of main branch
-        EGG_VERSION=$(grep 'DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE.*=.*"ethpandaops/ethereum-genesis-generator:' "${GITHUB_WORKSPACE}/src/package_io/constants.star" | sed 's/.*ethpandaops\/ethereum-genesis-generator:\([^"]*\)".*/\1/')
-        LIGHTHOUSE_VERSION=$(grep '"lighthouse": "sigp/lighthouse:' "${GITHUB_WORKSPACE}/src/package_io/input_parser.star" | sed 's/.*sigp\/lighthouse:\([^"]*\)".*/\1/')
-        CLIENT_GO_VERSION=$(grep '"geth": "ethereum/client-go:' "${GITHUB_WORKSPACE}/src/package_io/input_parser.star" | sed 's/.*ethereum\/client-go:\([^"]*\)".*/\1/')
-        VAL_TOOLS_VERSION=$(grep 'ETH_VAL_TOOLS_IMAGE.*=.*"protolambda/eth2-val-tools:' "${GITHUB_WORKSPACE}/src/prelaunch_data_generator/validator_keystores/validator_keystore_generator.star" | sed 's/.*protolambda\/eth2-val-tools:\([^"]*\)".*/\1/')
-
         echo "TRAEFIK_VERSION=$TRAEFIK_VERSION" >> $GITHUB_ENV
-        echo "VECTOR_VERSION=$VECTOR_VERSION" >> $GITHUB_ENV
-        echo "FLUENTBIT_VERSION=$FLUENTBIT_VERSION" >> $GITHUB_ENV
-        echo "ALPINE_VERSION=$ALPINE_VERSION" >> $GITHUB_ENV
-        echo "BLACK_VERSION=$BLACK_VERSION" >> $GITHUB_ENV
-        echo "CURL_JQ_VERSION=$CURL_JQ_VERSION" >> $GITHUB_ENV
-        echo "EGG_VERSION=$EGG_VERSION" >> $GITHUB_ENV
-        echo "LIGHTHOUSE_VERSION=$LIGHTHOUSE_VERSION" >> $GITHUB_ENV
-        echo "CLIENT_GO_VERSION=$CLIENT_GO_VERSION" >> $GITHUB_ENV
-        echo "VAL_TOOLS_VERSION=$VAL_TOOLS_VERSION" >> $GITHUB_ENV
-
-        echo "Tool versions extracted:"
         echo "  Traefik: $TRAEFIK_VERSION"
+
+        VECTOR_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_aggregator_functions/implementations/vector/consts.go | grep 'containerImage.*=.*"timberio/vector:' | sed 's/.*timberio\/vector:\([^"]*\)".*/\1/')
+        echo "VECTOR_VERSION=$VECTOR_VERSION" >> $GITHUB_ENV
         echo "  Vector: $VECTOR_VERSION"
+
+        FLUENTBIT_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/consts.go | grep 'containerImage.*=.*"fluent/fluent-bit:' | sed 's/.*fluent\/fluent-bit:\([^"]*\)".*/\1/')
+        echo "FLUENTBIT_VERSION=$FLUENTBIT_VERSION" >> $GITHUB_ENV
         echo "  Fluent-bit: $FLUENTBIT_VERSION"
+
+        ALPINE_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/fluentbit_configuration_creator.go | grep 'configuratorContainerImage.*=.*"alpine:' | sed 's/.*alpine:\([^"]*\)".*/\1/')
+        echo "ALPINE_VERSION=$ALPINE_VERSION" >> $GITHUB_ENV
         echo "  Alpine: $ALPINE_VERSION"
+
+        BLACK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/78041d2b84d2e56a5bf84d70e3501dfa4056c4b6/cli/cli/commands/lint/lint.go | grep 'pyBlackDockerImage.*=.*"pyfound/black:' | sed 's/.*pyfound\/black:\([^"]*\)".*/\1/')
+        echo "BLACK_VERSION=$BLACK_VERSION" >> $GITHUB_ENV
         echo "  Black: $BLACK_VERSION"
+
+        CURL_JQ_VERSION="latest"  # badouralix/curl-jq uses latest tag by default in Kurtosis
+        echo "CURL_JQ_VERSION=$CURL_JQ_VERSION" >> $GITHUB_ENV
         echo "  Curl-jq: $CURL_JQ_VERSION"
+
+        EGG_VERSION=$(grep -A1 'DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (' $GITHUB_WORKSPACE/src/package_io/constants.star | grep 'ethpandaops/ethereum-genesis-generator:' | sed 's/.*ethpandaops\/ethereum-genesis-generator:\([^"]*\)".*/\1/')
+        echo "EGG_VERSION=$EGG_VERSION" >> $GITHUB_ENV
         echo "  EGG: $EGG_VERSION"
+
+        LIGHTHOUSE_VERSION=$(grep '"lighthouse": "sigp/lighthouse:' $GITHUB_WORKSPACE/src/package_io/input_parser.star | head -1 | sed 's/.*sigp\/lighthouse:\([^"]*\)".*/\1/')
+        echo "LIGHTHOUSE_VERSION=$LIGHTHOUSE_VERSION" >> $GITHUB_ENV
         echo "  Lighthouse: $LIGHTHOUSE_VERSION"
+
+        CLIENT_GO_VERSION=$(grep '"geth": "ethereum/client-go:' $GITHUB_WORKSPACE/src/package_io/input_parser.star | sed 's/.*ethereum\/client-go:\([^"]*\)".*/\1/')
+        echo "CLIENT_GO_VERSION=$CLIENT_GO_VERSION" >> $GITHUB_ENV
         echo "  Client-go: $CLIENT_GO_VERSION"
+
+        VAL_TOOLS_VERSION=$(grep 'ETH_VAL_TOOLS_IMAGE = "protolambda/eth2-val-tools:' $GITHUB_WORKSPACE/src/prelaunch_data_generator/validator_keystores/validator_keystore_generator.star | sed 's/.*protolambda\/eth2-val-tools:\([^"]*\)".*/\1/')
+        echo "VAL_TOOLS_VERSION=$VAL_TOOLS_VERSION" >> $GITHUB_ENV
         echo "  Val-tools: $VAL_TOOLS_VERSION"
 
     - name: Pull images
