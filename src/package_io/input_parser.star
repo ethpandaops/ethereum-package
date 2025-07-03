@@ -1675,26 +1675,32 @@ def docker_cache_image_override(plan, result):
     for tooling_image_key in tooling_overridable_image:
         image_parts = tooling_image_key.split(".")
         if (
-            result["docker_cache_params"]["url"]
+            result[image_parts[0]][image_parts[1]] != None
+            and result["docker_cache_params"]["url"]
             in result[image_parts[0]][image_parts[1]]
         ):
             break
         elif (
-            constants.CONTAINER_REGISTRY.ghcr in result[image_parts[0]][image_parts[1]]
+            result[image_parts[0]][image_parts[1]] != None
+            and constants.CONTAINER_REGISTRY.ghcr in result[image_parts[0]][image_parts[1]]
         ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["github_prefix"]
                 + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
             )
-        elif constants.CONTAINER_REGISTRY.gcr in result[image_parts[0]][image_parts[1]]:
+        elif (
+            result[image_parts[0]][image_parts[1]] != None
+            and constants.CONTAINER_REGISTRY.gcr in result[image_parts[0]][image_parts[1]]
+        ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["google_prefix"]
                 + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
             )
         elif (
-            constants.CONTAINER_REGISTRY.dockerhub
+            result[image_parts[0]][image_parts[1]] != None
+            and constants.CONTAINER_REGISTRY.dockerhub
             in result[image_parts[0]][image_parts[1]]
         ):
             result[image_parts[0]][image_parts[1]] = (
