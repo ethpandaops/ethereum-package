@@ -685,7 +685,11 @@ def parse_network_params(plan, input_args):
 
         el_image = participant["el_image"]
         if el_image == "":
-            default_image = DEFAULT_EL_IMAGES.get(el_type, "")
+            # Get devnet-modified images if network contains 'devnet'
+            effective_el_images = get_devnet_modified_images(
+                result["network_params"]["network"], DEFAULT_EL_IMAGES
+            )
+            default_image = effective_el_images.get(el_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
@@ -697,9 +701,17 @@ def parse_network_params(plan, input_args):
         cl_image = participant["cl_image"]
         if cl_image == "":
             if result["network_params"]["preset"] == "minimal":
-                default_image = DEFAULT_CL_IMAGES_MINIMAL.get(cl_type, "")
+                # Get devnet-modified images if network contains 'devnet'
+                effective_cl_images = get_devnet_modified_images(
+                    result["network_params"]["network"], DEFAULT_CL_IMAGES_MINIMAL
+                )
+                default_image = effective_cl_images.get(cl_type, "")
             else:
-                default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
+                # Get devnet-modified images if network contains 'devnet'
+                effective_cl_images = get_devnet_modified_images(
+                    result["network_params"]["network"], DEFAULT_CL_IMAGES
+                )
+                default_image = effective_cl_images.get(cl_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
@@ -737,9 +749,17 @@ def parse_network_params(plan, input_args):
             if cl_image == "" or vc_type != cl_type:
                 # If the validator client image is also empty, default to the image for the chosen CL client
                 if result["network_params"]["preset"] == "minimal":
-                    default_image = DEFAULT_VC_IMAGES_MINIMAL.get(vc_type, "")
+                    # Get devnet-modified images if network contains 'devnet'
+                    effective_vc_images = get_devnet_modified_images(
+                        result["network_params"]["network"], DEFAULT_VC_IMAGES_MINIMAL
+                    )
+                    default_image = effective_vc_images.get(vc_type, "")
                 else:
-                    default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
+                    # Get devnet-modified images if network contains 'devnet'
+                    effective_vc_images = get_devnet_modified_images(
+                        result["network_params"]["network"], DEFAULT_VC_IMAGES
+                    )
+                    default_image = effective_vc_images.get(vc_type, "")
             else:
                 if cl_type == "prysm":
                     default_image = cl_image.replace("beacon-chain", "validator")
@@ -1631,6 +1651,13 @@ def docker_cache_image_override(plan, result):
                     + result["docker_cache_params"]["google_prefix"]
                     + "/".join(participant[images].split("/")[1:])
                 )
+            elif participant[images].startswith("ethpandaops/"):
+                # Handle ethpandaops images (including devnet-modified ones)
+                participant[images] = (
+                    result["docker_cache_params"]["url"]
+                    + result["docker_cache_params"]["dockerhub_prefix"]
+                    + participant[images]
+                )
             elif constants.CONTAINER_REGISTRY.dockerhub in participant[images]:
                 participant[images] = (
                     result["docker_cache_params"]["url"]
@@ -1686,3 +1713,47 @@ def get_default_ethereum_genesis_generator_params():
     return {
         "image": constants.DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE,
     }
+
+
+def get_devnet_image_tag(network_name, original_image):
+    if "devnet" not in network_name:
+        return original_image
+
+    # For devnet networks, convert all client images to ethpandaops
+    if "/" in original_image:
+        # Extract just the image name (everything after the last /)
+        image_name_with_tag = original_image.split("/")[-1]
+        if ":" in image_name_with_tag:
+            image_name = image_name_with_tag.split(":")[0]
+        else:
+            image_name = image_name_with_tag
+
+        # Special case: ethereum/client-go should become ethpandaops/geth
+        if image_name == "client-go":
+            image_name = "geth"
+        # Special case: gcr.io/offchainlabs/prysm/beacon-chain should become ethpandaops/prysm-beacon-chain
+        elif image_name == "beacon-chain" and "prysm" in original_image:
+            image_name = "prysm-beacon-chain"
+        # Special case: gcr.io/offchainlabs/prysm/validator should become ethpandaops/prysm-validator
+        elif image_name == "validator" and "prysm" in original_image:
+            image_name = "prysm-validator"
+
+        return "ethpandaops/{0}:{1}".format(image_name, network_name)
+    else:
+        # Handle edge case where there's no registry prefix
+        if ":" in original_image:
+            image_name = original_image.split(":")[0]
+        else:
+            image_name = original_image
+        return "ethpandaops/{0}:{1}".format(image_name, network_name)
+
+
+def get_devnet_modified_images(network_name, default_images):
+    if "devnet" not in network_name:
+        return default_images
+
+    modified_images = {}
+    for client_type, image in default_images.items():
+        modified_images[client_type] = get_devnet_image_tag(network_name, image)
+
+    return modified_images
