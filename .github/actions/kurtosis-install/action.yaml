@@ -35,10 +35,10 @@ runs:
         BLACK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/78041d2b84d2e56a5bf84d70e3501dfa4056c4b6/cli/cli/commands/lint/lint.go | grep 'pyBlackDockerImage.*=.*"pyfound/black:' | sed 's/.*pyfound\/black:\([^"]*\)".*/\1/')
         CURL_JQ_VERSION="latest"  # badouralix/curl-jq uses latest tag by default in Kurtosis
         # Extract tool versions from current repository instead of main branch
-        EGG_VERSION=$(grep 'DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE.*=.*"ethpandaops/ethereum-genesis-generator:' $GITHUB_WORKSPACE/src/package_io/constants.star | sed 's/.*ethpandaops\/ethereum-genesis-generator:\([^"]*\)".*/\1/')
-        LIGHTHOUSE_VERSION=$(grep '"lighthouse": "sigp/lighthouse:' $GITHUB_WORKSPACE/src/package_io/input_parser.star | sed 's/.*sigp\/lighthouse:\([^"]*\)".*/\1/')
-        CLIENT_GO_VERSION=$(grep '"geth": "ethereum/client-go:' $GITHUB_WORKSPACE/src/package_io/input_parser.star | sed 's/.*ethereum\/client-go:\([^"]*\)".*/\1/')
-        VAL_TOOLS_VERSION=$(grep 'ETH_VAL_TOOLS_IMAGE.*=.*"protolambda/eth2-val-tools:' $GITHUB_WORKSPACE/src/prelaunch_data_generator/validator_keystores/validator_keystore_generator.star | sed 's/.*protolambda\/eth2-val-tools:\([^"]*\)".*/\1/')
+        EGG_VERSION=$(grep 'DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE.*=.*"ethpandaops/ethereum-genesis-generator:' "${GITHUB_WORKSPACE}/src/package_io/constants.star" | sed 's/.*ethpandaops\/ethereum-genesis-generator:\([^"]*\)".*/\1/')
+        LIGHTHOUSE_VERSION=$(grep '"lighthouse": "sigp/lighthouse:' "${GITHUB_WORKSPACE}/src/package_io/input_parser.star" | sed 's/.*sigp\/lighthouse:\([^"]*\)".*/\1/')
+        CLIENT_GO_VERSION=$(grep '"geth": "ethereum/client-go:' "${GITHUB_WORKSPACE}/src/package_io/input_parser.star" | sed 's/.*ethereum\/client-go:\([^"]*\)".*/\1/')
+        VAL_TOOLS_VERSION=$(grep 'ETH_VAL_TOOLS_IMAGE.*=.*"protolambda/eth2-val-tools:' "${GITHUB_WORKSPACE}/src/prelaunch_data_generator/validator_keystores/validator_keystore_generator.star" | sed 's/.*protolambda\/eth2-val-tools:\([^"]*\)".*/\1/')
 
         echo "TRAEFIK_VERSION=$TRAEFIK_VERSION" >> $GITHUB_ENV
         echo "VECTOR_VERSION=$VECTOR_VERSION" >> $GITHUB_ENV
