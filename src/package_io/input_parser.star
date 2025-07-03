@@ -464,7 +464,11 @@ def input_parser(plan, input_args):
                 "mev_relay_website_extra_env_vars"
             ],
             mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
+            mev_builder_prometheus_config=result["mev_params"][
+                "mev_builder_prometheus_config"
+            ],
             mock_mev_image=result["mev_params"]["mock_mev_image"],
+            launch_adminer=result["mev_params"]["launch_adminer"],
         )
         if result["mev_params"]
         else None,
@@ -1263,6 +1267,7 @@ def get_default_mev_params(mev_type, preset):
     mev_relay_website_extra_args = []
     mev_relay_website_extra_env_vars = {}
     mev_builder_extra_args = []
+    launch_adminer = False
     mev_builder_prometheus_config = {
         "scrape_interval": "15s",
         "labels": None,
@@ -1322,6 +1327,7 @@ def get_default_mev_params(mev_type, preset):
         "mev_relay_website_extra_args": mev_relay_website_extra_args,
         "mev_relay_website_extra_env_vars": mev_relay_website_extra_env_vars,
         "mev_builder_prometheus_config": mev_builder_prometheus_config,
+        "launch_adminer": launch_adminer,
     }
 
 
