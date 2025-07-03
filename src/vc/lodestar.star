@@ -58,7 +58,6 @@ def get_config(
         "--metrics.address=0.0.0.0",
         "--metrics.port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + full_name,
         "--useProduceBlockV3",
         "--disableKeystoresThreadPool",
     ]
