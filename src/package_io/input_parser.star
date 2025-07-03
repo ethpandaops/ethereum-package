@@ -464,7 +464,11 @@ def input_parser(plan, input_args):
                 "mev_relay_website_extra_env_vars"
             ],
             mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
+            mev_builder_prometheus_config=result["mev_params"][
+                "mev_builder_prometheus_config"
+            ],
             mock_mev_image=result["mev_params"]["mock_mev_image"],
+            launch_adminer=result["mev_params"]["launch_adminer"],
         )
         if result["mev_params"]
         else None,
@@ -1263,6 +1267,7 @@ def get_default_mev_params(mev_type, preset):
     mev_relay_website_extra_args = []
     mev_relay_website_extra_env_vars = {}
     mev_builder_extra_args = []
+    launch_adminer = False
     mev_builder_prometheus_config = {
         "scrape_interval": "15s",
         "labels": None,
@@ -1322,6 +1327,7 @@ def get_default_mev_params(mev_type, preset):
         "mev_relay_website_extra_args": mev_relay_website_extra_args,
         "mev_relay_website_extra_env_vars": mev_relay_website_extra_env_vars,
         "mev_builder_prometheus_config": mev_builder_prometheus_config,
+        "launch_adminer": launch_adminer,
     }
 
 
@@ -1623,6 +1629,7 @@ def docker_cache_image_override(plan, result):
         "mev_params.mev_builder_image",
         "mev_params.mev_builder_cl_image",
         "mev_params.mev_boost_image",
+        "mev_params.mock_mev_image",
         "xatu_sentry_params.xatu_sentry_image",
         "tx_fuzz_params.image",
         "prometheus_params.image",
@@ -1674,26 +1681,34 @@ def docker_cache_image_override(plan, result):
     for tooling_image_key in tooling_overridable_image:
         image_parts = tooling_image_key.split(".")
         if (
-            result["docker_cache_params"]["url"]
+            result[image_parts[0]][image_parts[1]] != None
+            and result["docker_cache_params"]["url"]
             in result[image_parts[0]][image_parts[1]]
         ):
             break
         elif (
-            constants.CONTAINER_REGISTRY.ghcr in result[image_parts[0]][image_parts[1]]
+            result[image_parts[0]][image_parts[1]] != None
+            and constants.CONTAINER_REGISTRY.ghcr
+            in result[image_parts[0]][image_parts[1]]
         ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["github_prefix"]
                 + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
             )
-        elif constants.CONTAINER_REGISTRY.gcr in result[image_parts[0]][image_parts[1]]:
+        elif (
+            result[image_parts[0]][image_parts[1]] != None
+            and constants.CONTAINER_REGISTRY.gcr
+            in result[image_parts[0]][image_parts[1]]
+        ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["google_prefix"]
                 + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
             )
         elif (
-            constants.CONTAINER_REGISTRY.dockerhub
+            result[image_parts[0]][image_parts[1]] != None
+            and constants.CONTAINER_REGISTRY.dockerhub
             in result[image_parts[0]][image_parts[1]]
         ):
             result[image_parts[0]][image_parts[1]] = (

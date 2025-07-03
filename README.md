@@ -981,6 +981,8 @@ mev_params:
     labels: {}
   # Image to use for mock mev
   mock_mev_image: ethpandaops/rustic-builder:main
+  # Whether to launch Adminer for the MEV relay PostgreSQL database
+  launch_adminer: false
 
 # Enables Xatu Sentry for all participants
 # Defaults to false
