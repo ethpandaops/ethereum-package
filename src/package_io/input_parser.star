@@ -8,8 +8,8 @@ sanity_check = import_module("./sanity_check.star")
 
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
-    "erigon": "ethpandaops/erigon:main",
-    "nethermind": "ethpandaops/nethermind:devnet-0",
+    "erigon": "erigontech/erigon:latest",
+    "nethermind": "ethpandaops/nethermind:master",
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
@@ -18,7 +18,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "teku": "consensys/teku:develop",
+    "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/offchainlabs/prysm/beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
@@ -27,7 +27,7 @@ DEFAULT_CL_IMAGES = {
 
 DEFAULT_CL_IMAGES_MINIMAL = {
     "lighthouse": "ethpandaops/lighthouse:stable",
-    "teku": "consensys/teku:develop",
+    "teku": "consensys/teku:latest",
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "chainsafe/lodestar:latest",
@@ -39,7 +39,7 @@ DEFAULT_VC_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/offchainlabs/prysm/validator:stable",
-    "teku": "consensys/teku:develop",
+    "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
@@ -49,7 +49,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
-    "teku": "consensys/teku:develop",
+    "teku": "consensys/teku:latest",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
