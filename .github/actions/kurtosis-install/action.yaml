@@ -32,17 +32,20 @@ runs:
         VECTOR_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_aggregator_functions/implementations/vector/consts.go | grep 'containerImage.*=.*"timberio/vector:' | sed 's/.*timberio\/vector:\([^"]*\)".*/\1/')
         FLUENTBIT_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/consts.go | grep 'containerImage.*=.*"fluent/fluent-bit:' | sed 's/.*fluent\/fluent-bit:\([^"]*\)".*/\1/')
         ALPINE_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/fluentbit_configuration_creator.go | grep 'configuratorContainerImage.*=.*"alpine:' | sed 's/.*alpine:\([^"]*\)".*/\1/')
+        BLACK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/78041d2b84d2e56a5bf84d70e3501dfa4056c4b6/cli/cli/commands/lint/lint.go | grep 'pyBlackDockerImage.*=.*"pyfound/black:' | sed 's/.*pyfound\/black:\([^"]*\)".*/\1/')
 
         echo "TRAEFIK_VERSION=$TRAEFIK_VERSION" >> $GITHUB_ENV
         echo "VECTOR_VERSION=$VECTOR_VERSION" >> $GITHUB_ENV
         echo "FLUENTBIT_VERSION=$FLUENTBIT_VERSION" >> $GITHUB_ENV
         echo "ALPINE_VERSION=$ALPINE_VERSION" >> $GITHUB_ENV
+        echo "BLACK_VERSION=$BLACK_VERSION" >> $GITHUB_ENV
 
         echo "Tool versions extracted:"
         echo "  Traefik: $TRAEFIK_VERSION"
         echo "  Vector: $VECTOR_VERSION"
         echo "  Fluent-bit: $FLUENTBIT_VERSION"
         echo "  Alpine: $ALPINE_VERSION"
+        echo "  Black: $BLACK_VERSION"
 
     - name: Pull images
       shell: bash
@@ -57,6 +60,7 @@ runs:
         docker pull docker.ethquokkaops.io/dh/alpine:$ALPINE_VERSION &
         docker pull docker.ethquokkaops.io/dh/traefik:$TRAEFIK_VERSION &
         docker pull docker.ethquokkaops.io/dh/badouralix/curl-jq &
+        docker pull docker.ethquokkaops.io/dh/pyfound/black:$BLACK_VERSION &
 
         # Wait for all pulls to complete
         wait
@@ -71,4 +75,5 @@ runs:
         docker tag docker.ethquokkaops.io/dh/alpine:$ALPINE_VERSION alpine:$ALPINE_VERSION
         docker tag docker.ethquokkaops.io/dh/traefik:$TRAEFIK_VERSION traefik:$TRAEFIK_VERSION
         docker tag docker.ethquokkaops.io/dh/badouralix/curl-jq badouralix/curl-jq
+        docker tag docker.ethquokkaops.io/dh/pyfound/black:$BLACK_VERSION pyfound/black:$BLACK_VERSION
 
