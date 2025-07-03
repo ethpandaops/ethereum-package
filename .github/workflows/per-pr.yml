@@ -71,11 +71,15 @@ jobs:
           username: ethpandaops
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Kurtosis Assertoor GitHub Action
-        uses: ethpandaops/kurtosis-assertoor-github-action@afca9cbc8ec2642f591c8c372186a87c683128f7 # bbusa/add-docker-cache
+        uses: ethpandaops/kurtosis-assertoor-github-action@52b50385e2ee7edcdb54f56c1737e8ef9542cd6a # bbusa/add-docker-cache
         with:
           ethereum_package_url: "."
           ethereum_package_branch: ""
           ethereum_package_args: .github/tests/mix-assert.yaml
+          docker_cache_enabled: true
+          docker_cache_url: docker.ethquokkaops.io
+
+
   #check_optimism_package:
   #  runs-on: self-hosted-ghr-size-l-x64
   #  steps:

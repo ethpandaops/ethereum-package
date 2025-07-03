@@ -45,7 +45,7 @@ runs:
         echo "ALPINE_VERSION=$ALPINE_VERSION" >> $GITHUB_ENV
         echo "  Alpine: $ALPINE_VERSION"
 
-        BLACK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/78041d2b84d2e56a5bf84d70e3501dfa4056c4b6/cli/cli/commands/lint/lint.go | grep 'pyBlackDockerImage.*=.*"pyfound/black:' | sed 's/.*pyfound\/black:\([^"]*\)".*/\1/')
+        BLACK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/cli/cli/commands/lint/lint.go | grep 'pyBlackDockerImage.*=.*"pyfound/black:' | sed 's/.*pyfound\/black:\([^"]*\)".*/\1/')
         echo "BLACK_VERSION=$BLACK_VERSION" >> $GITHUB_ENV
         echo "  Black: $BLACK_VERSION"
 
