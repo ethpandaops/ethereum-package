@@ -1623,6 +1623,7 @@ def docker_cache_image_override(plan, result):
         "mev_params.mev_builder_image",
         "mev_params.mev_builder_cl_image",
         "mev_params.mev_boost_image",
+        "mev_params.mock_mev_image",
         "xatu_sentry_params.xatu_sentry_image",
         "tx_fuzz_params.image",
         "prometheus_params.image",

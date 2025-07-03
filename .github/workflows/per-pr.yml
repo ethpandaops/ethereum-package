@@ -71,7 +71,7 @@ jobs:
           username: ethpandaops
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Kurtosis Assertoor GitHub Action
-        uses: ethpandaops/kurtosis-assertoor-github-action@5932604b244dbd2ddb811516b516a9094f4d2c2f # v1
+        uses: ethpandaops/kurtosis-assertoor-github-action@afca9cbc8ec2642f591c8c372186a87c683128f7 # bbusa/add-docker-cache
         with:
           ethereum_package_url: "."
           ethereum_package_branch: ""
