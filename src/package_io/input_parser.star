@@ -1682,7 +1682,8 @@ def docker_cache_image_override(plan, result):
             break
         elif (
             result[image_parts[0]][image_parts[1]] != None
-            and constants.CONTAINER_REGISTRY.ghcr in result[image_parts[0]][image_parts[1]]
+            and constants.CONTAINER_REGISTRY.ghcr
+            in result[image_parts[0]][image_parts[1]]
         ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
@@ -1691,7 +1692,8 @@ def docker_cache_image_override(plan, result):
             )
         elif (
             result[image_parts[0]][image_parts[1]] != None
-            and constants.CONTAINER_REGISTRY.gcr in result[image_parts[0]][image_parts[1]]
+            and constants.CONTAINER_REGISTRY.gcr
+            in result[image_parts[0]][image_parts[1]]
         ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
