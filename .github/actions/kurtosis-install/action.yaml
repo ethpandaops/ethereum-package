@@ -33,12 +33,23 @@ runs:
         FLUENTBIT_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/consts.go | grep 'containerImage.*=.*"fluent/fluent-bit:' | sed 's/.*fluent\/fluent-bit:\([^"]*\)".*/\1/')
         ALPINE_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/main/container-engine-lib/lib/backend_impls/docker/docker_kurtosis_backend/logs_collector_functions/implementations/fluentbit/fluentbit_configuration_creator.go | grep 'configuratorContainerImage.*=.*"alpine:' | sed 's/.*alpine:\([^"]*\)".*/\1/')
         BLACK_VERSION=$(curl -sf https://raw.githubusercontent.com/kurtosis-tech/kurtosis/78041d2b84d2e56a5bf84d70e3501dfa4056c4b6/cli/cli/commands/lint/lint.go | grep 'pyBlackDockerImage.*=.*"pyfound/black:' | sed 's/.*pyfound\/black:\([^"]*\)".*/\1/')
+        CURL_JQ_VERSION="latest"  # badouralix/curl-jq uses latest tag by default in Kurtosis
+        # Extract tool versions from current repository instead of main branch
+        EGG_VERSION=$(grep 'DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE.*=.*"ethpandaops/ethereum-genesis-generator:' $GITHUB_WORKSPACE/src/package_io/constants.star | sed 's/.*ethpandaops\/ethereum-genesis-generator:\([^"]*\)".*/\1/')
+        LIGHTHOUSE_VERSION=$(grep '"lighthouse": "sigp/lighthouse:' $GITHUB_WORKSPACE/src/package_io/input_parser.star | sed 's/.*sigp\/lighthouse:\([^"]*\)".*/\1/')
+        CLIENT_GO_VERSION=$(grep '"geth": "ethereum/client-go:' $GITHUB_WORKSPACE/src/package_io/input_parser.star | sed 's/.*ethereum\/client-go:\([^"]*\)".*/\1/')
+        VAL_TOOLS_VERSION=$(grep 'ETH_VAL_TOOLS_IMAGE.*=.*"protolambda/eth2-val-tools:' $GITHUB_WORKSPACE/src/prelaunch_data_generator/validator_keystores/validator_keystore_generator.star | sed 's/.*protolambda\/eth2-val-tools:\([^"]*\)".*/\1/')
 
         echo "TRAEFIK_VERSION=$TRAEFIK_VERSION" >> $GITHUB_ENV
         echo "VECTOR_VERSION=$VECTOR_VERSION" >> $GITHUB_ENV
         echo "FLUENTBIT_VERSION=$FLUENTBIT_VERSION" >> $GITHUB_ENV
         echo "ALPINE_VERSION=$ALPINE_VERSION" >> $GITHUB_ENV
         echo "BLACK_VERSION=$BLACK_VERSION" >> $GITHUB_ENV
+        echo "CURL_JQ_VERSION=$CURL_JQ_VERSION" >> $GITHUB_ENV
+        echo "EGG_VERSION=$EGG_VERSION" >> $GITHUB_ENV
+        echo "LIGHTHOUSE_VERSION=$LIGHTHOUSE_VERSION" >> $GITHUB_ENV
+        echo "CLIENT_GO_VERSION=$CLIENT_GO_VERSION" >> $GITHUB_ENV
+        echo "VAL_TOOLS_VERSION=$VAL_TOOLS_VERSION" >> $GITHUB_ENV
 
         echo "Tool versions extracted:"
         echo "  Traefik: $TRAEFIK_VERSION"
@@ -46,6 +57,11 @@ runs:
         echo "  Fluent-bit: $FLUENTBIT_VERSION"
         echo "  Alpine: $ALPINE_VERSION"
         echo "  Black: $BLACK_VERSION"
+        echo "  Curl-jq: $CURL_JQ_VERSION"
+        echo "  EGG: $EGG_VERSION"
+        echo "  Lighthouse: $LIGHTHOUSE_VERSION"
+        echo "  Client-go: $CLIENT_GO_VERSION"
+        echo "  Val-tools: $VAL_TOOLS_VERSION"
 
     - name: Pull images
       shell: bash
@@ -59,8 +75,12 @@ runs:
         docker pull docker.ethquokkaops.io/dh/fluent/fluent-bit:$FLUENTBIT_VERSION &
         docker pull docker.ethquokkaops.io/dh/alpine:$ALPINE_VERSION &
         docker pull docker.ethquokkaops.io/dh/traefik:$TRAEFIK_VERSION &
-        docker pull docker.ethquokkaops.io/dh/badouralix/curl-jq &
+        docker pull docker.ethquokkaops.io/dh/badouralix/curl-jq:$CURL_JQ_VERSION &
         docker pull docker.ethquokkaops.io/dh/pyfound/black:$BLACK_VERSION &
+        docker pull docker.ethquokkaops.io/dh/ethpandaops/ethereum-genesis-generator:$EGG_VERSION &
+        docker pull docker.ethquokkaops.io/dh/sigp/lighthouse:$LIGHTHOUSE_VERSION &
+        docker pull docker.ethquokkaops.io/dh/ethereum/client-go:$CLIENT_GO_VERSION &
+        docker pull docker.ethquokkaops.io/dh/protolambda/eth2-val-tools:$VAL_TOOLS_VERSION &
 
         # Wait for all pulls to complete
         wait
@@ -74,6 +94,10 @@ runs:
         docker tag docker.ethquokkaops.io/dh/fluent/fluent-bit:$FLUENTBIT_VERSION fluent/fluent-bit:$FLUENTBIT_VERSION
         docker tag docker.ethquokkaops.io/dh/alpine:$ALPINE_VERSION alpine:$ALPINE_VERSION
         docker tag docker.ethquokkaops.io/dh/traefik:$TRAEFIK_VERSION traefik:$TRAEFIK_VERSION
-        docker tag docker.ethquokkaops.io/dh/badouralix/curl-jq badouralix/curl-jq
+        docker tag docker.ethquokkaops.io/dh/badouralix/curl-jq:$CURL_JQ_VERSION badouralix/curl-jq:$CURL_JQ_VERSION
         docker tag docker.ethquokkaops.io/dh/pyfound/black:$BLACK_VERSION pyfound/black:$BLACK_VERSION
+        docker tag docker.ethquokkaops.io/dh/ethpandaops/ethereum-genesis-generator:$EGG_VERSION ethpandaops/ethereum-genesis-generator:$EGG_VERSION
+        docker tag docker.ethquokkaops.io/dh/sigp/lighthouse:$LIGHTHOUSE_VERSION sigp/lighthouse:$LIGHTHOUSE_VERSION
+        docker tag docker.ethquokkaops.io/dh/ethereum/client-go:$CLIENT_GO_VERSION ethereum/client-go:$CLIENT_GO_VERSION
+        docker tag docker.ethquokkaops.io/dh/protolambda/eth2-val-tools:$VAL_TOOLS_VERSION protolambda/eth2-val-tools:$VAL_TOOLS_VERSION
 
