@@ -9,7 +9,7 @@ sanity_check = import_module("./sanity_check.star")
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
     "erigon": "erigontech/erigon:latest",
-    "nethermind": "nethermind/nethermind:master",
+    "nethermind": "ethpandaops/nethermind:master",
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
