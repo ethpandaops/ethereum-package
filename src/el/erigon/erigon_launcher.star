@@ -177,17 +177,17 @@ def get_config(
     }
 
     if persistent:
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
         cmd.append(
             "--db.size.limit={0}MB".format(
                 int(participant.el_volume_size)
                 if int(participant.el_volume_size) > 0
-                else constants.VOLUME_SIZE[network_params.network][
+                else constants.VOLUME_SIZE[volume_size_key][
                     constants.EL_TYPE.erigon + "_volume_size"
                 ],
             )
-        )
-        volume_size_key = (
-            "devnets" if "devnet" in network_params.network else network_params.network
         )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),

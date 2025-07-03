@@ -17,7 +17,6 @@ NETWORK_ID_TO_NAME = {
     "560048": "hoodi",
 }
 
-LAUNCH_ADMINER = True
 
 # The min/max CPU/memory that mev-relay can use
 RELAY_MIN_CPU = 500
@@ -76,7 +75,7 @@ def launch_mev_relay(
         database="postgres",
         service_name="mev-relay-postgres",
         persistent=persistent,
-        launch_adminer=LAUNCH_ADMINER,
+        launch_adminer=mev_params.launch_adminer,
         min_cpu=POSTGRES_MIN_CPU,
         max_cpu=POSTGRES_MAX_CPU,
         min_memory=POSTGRES_MIN_MEMORY,

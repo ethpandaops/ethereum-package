@@ -273,6 +273,7 @@ SUBCATEGORY_PARAMS = {
         "mev_builder_prometheus_config",
         "custom_flood_params",
         "mock_mev_image",
+        "launch_adminer",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
