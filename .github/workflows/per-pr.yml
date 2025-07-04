@@ -8,8 +8,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  warmup_cache:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/docker-login
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Setup Kurtosis
+        uses: ./.github/actions/kurtosis-install
+
   run_starlark:
     runs-on: ubuntu-latest
+    needs: [warmup_cache]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -37,6 +48,7 @@ jobs:
             "./network_params.yaml"
           ]
     runs-on: ubuntu-latest
+    needs: [warmup_cache]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -46,6 +58,8 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
+        with:
+          warmup: 'false'
       - name: Run Starlark
         run: |
           kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
@@ -62,6 +76,7 @@ jobs:
 
   assertoor:
     runs-on: ubuntu-latest
+    needs: [warmup_cache]
     timeout-minutes: 30
     steps:
       - name: Checkout Repository
@@ -70,6 +85,8 @@ jobs:
         with:
           username: ethpandaops
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Setup Kurtosis
+        uses: ./.github/actions/kurtosis-install
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@5932604b244dbd2ddb811516b516a9094f4d2c2f # v1
         with:
