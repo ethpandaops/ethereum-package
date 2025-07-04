@@ -73,12 +73,23 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
+        id: setup
         with:
-          create_cache: 'true'
           warmup: 'false'
           cache_prefix: 'kurtosis-lint'
       - name: Kurtosis Lint
         run: kurtosis lint ${{ github.workspace }}
+      - name: "Cache docker images"
+        if: ${{ steps.setup.outputs.cache_hit != 'true' }}
+        shell: bash
+        run: |
+          cachedir="${{ steps.setup.outputs.cachedir }}"
+          if [ ! -d $cachedir ]; then
+            mkdir -p $cachedir
+          fi
+          
+          docker_images=$(docker image list --format '{{ if ne .Repository "<none>" }}{{ .Repository }}{{ if ne .Tag "<none>" }}:{{ .Tag }}{{ end }}{{ else }}{{ .ID }}{{ end }}' | tr '\n' ' ')
+          docker save --output $cachedir/docker-images.tar $docker_images
 
   assertoor:
     needs: [warmup_cache]

@@ -8,14 +8,20 @@ inputs:
     description: 'Warmup kurtosis cache'
     required: false
     default: 'true'
-  create_cache:
-    description: 'Create docker image cache as post action'
-    required: false
-    default: 'false'
   cache_prefix:
     description: 'Kurtosis cache prefix'
     required: false
     default: 'kurtosis-docker'
+outputs:
+  kurtosis_version:
+    description: "Kurtosis version"
+    value: ${{ steps.kurtosis_version.outputs.version }}
+  cache_hit:
+    description: "Cache hit"
+    value: ${{ steps.cache.outputs.cache_hit }}
+  cachedir:
+    description: "Cachedir"
+    value: ${{ steps.cache.outputs.cachedir }}
 runs:
   using: composite
   steps:
@@ -41,11 +47,10 @@ runs:
 
     - name: Setup Kurtosis with docker cache
       continue-on-error: true
-      id: testnet
+      id: cache
       uses: ethpandaops/kurtosis-cache-github-action@v1 # v1
       with:
         kurtosis_version: ${{ steps.kurtosis_version.outputs.version }}
         warmup_cache: ${{ inputs.warmup }}
-        create_cache: ${{ inputs.create_cache }}
         cache_prefix: ${{ inputs.cache_prefix }}
        
