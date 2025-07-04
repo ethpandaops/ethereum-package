@@ -105,7 +105,7 @@ jobs:
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
       - name: Kurtosis Assertoor GitHub Action
-        uses: ethpandaops/kurtosis-assertoor-github-action@52b50385e2ee7edcdb54f56c1737e8ef9542cd6a # bbusa/add-docker-cache
+        uses: ethpandaops/kurtosis-assertoor-github-action@5932604b244dbd2ddb811516b516a9094f4d2c2f # v1
         with:
           ethereum_package_url: "."
           ethereum_package_branch: ""
