@@ -12,6 +12,27 @@ inputs:
     description: 'Kurtosis cache prefix'
     required: false
     default: 'kurtosis-docker'
+  s3_access_key:
+    description: 'S3 access key'
+    required: false
+  s3_secret_key:
+    description: 'S3 secret key'
+    required: false
+  s3_bucket:
+    description: 'S3 bucket'
+    required: false
+  s3_endpoint:
+    description: 'S3 endpoint'
+    required: false
+    default: 's3.amazonaws.com'
+  s3_insecure:
+    description: 'S3 secure'
+    required: false
+    default: 'false'
+  s3_path:
+    description: 'S3 path'
+    required: false
+    default: ''
 outputs:
   kurtosis_version:
     description: "Kurtosis version"
@@ -53,4 +74,10 @@ runs:
         kurtosis_version: ${{ steps.kurtosis_version.outputs.version }}
         warmup_cache: ${{ inputs.warmup }}
         cache_prefix: ${{ inputs.cache_prefix }}
+        s3_access_key: ${{ inputs.s3_access_key }}
+        s3_secret_key: ${{ inputs.s3_secret_key }}
+        s3_bucket: ${{ inputs.s3_bucket }}
+        s3_endpoint: ${{ inputs.s3_endpoint }}
+        s3_insecure: ${{ inputs.s3_insecure }}
+        s3_path: ${{ inputs.s3_path }}
        
