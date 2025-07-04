@@ -394,7 +394,7 @@ def launch_participant_network(
             remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
         service_name = "vc-{0}".format(full_name)
-        vc_service_configs[service_name] = vc.get_vc_config(
+        vc_service_config = vc.get_vc_config(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
             keymanager_file=keymanager_file,
@@ -418,10 +418,14 @@ def launch_participant_network(
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
         )
+        if vc_service_config == None:
+            continue
+
+        vc_service_configs[service_name] = vc_service_config
         vc_service_info[service_name] = {
             "client_name": vc_type,
         }
-        current_vc_index += 1
+        current_vc_index += 1 
 
     # add vc's in parallel to speed package execution
     vc_services = {}

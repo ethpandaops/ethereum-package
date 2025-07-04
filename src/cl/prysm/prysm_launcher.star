@@ -79,6 +79,7 @@ def launch(
         participant,
         snooper_el_engine_context,
         node_keystore_files,
+        node_selectors,
     )
 
 
