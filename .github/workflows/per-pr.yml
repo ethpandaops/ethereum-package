@@ -73,6 +73,10 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
+        with:
+          create_cache: 'true'
+          warmup: 'false'
+          cache_prefix: 'kurtosis-lint'
       - name: Kurtosis Lint
         run: kurtosis lint ${{ github.workspace }}
 

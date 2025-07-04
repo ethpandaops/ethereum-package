@@ -8,6 +8,14 @@ inputs:
     description: 'Warmup kurtosis cache'
     required: false
     default: 'true'
+  create_cache:
+    description: 'Create docker image cache as post action'
+    required: false
+    default: 'false'
+  cache_prefix:
+    description: 'Kurtosis cache prefix'
+    required: false
+    default: 'kurtosis-docker'
 runs:
   using: composite
   steps:
@@ -38,4 +46,6 @@ runs:
       with:
         kurtosis_version: ${{ steps.kurtosis_version.outputs.version }}
         warmup_cache: ${{ inputs.warmup }}
+        create_cache: ${{ inputs.create_cache }}
+        cache_prefix: ${{ inputs.cache_prefix }}
        
