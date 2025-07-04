@@ -425,7 +425,7 @@ def launch_participant_network(
         vc_service_info[service_name] = {
             "client_name": vc_type,
         }
-        current_vc_index += 1 
+        current_vc_index += 1
 
     # add vc's in parallel to speed package execution
     vc_services = {}
