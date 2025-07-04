@@ -18,6 +18,11 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Setup Kurtosis and warmup cache
         uses: ./.github/actions/kurtosis-install
+        with:
+          s3_endpoint: ${{ vars.S3CACHE_ENDPOINT }}
+          s3_bucket: ${{ vars.S3CACHE_BUCKET }}
+          s3_access_key: ${{ secrets.S3CACHE_ACCESS_KEY }}
+          s3_secret_key: ${{ secrets.S3CACHE_ACCESS_SECRET }}
       - id: set-matrix
         # List all yaml files in the .github/tests directory, except for the k8s.yaml file
         run: echo "matrix=$(ls ./.github/tests/*.yaml | grep -vE 'k8s.yaml$' | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
@@ -39,6 +44,10 @@ jobs:
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
         with:
+          s3_endpoint: ${{ vars.S3CACHE_ENDPOINT }}
+          s3_bucket: ${{ vars.S3CACHE_BUCKET }}
+          s3_access_key: ${{ secrets.S3CACHE_ACCESS_KEY }}
+          s3_secret_key: ${{ secrets.S3CACHE_ACCESS_SECRET }}
           warmup: 'false'
       - name: Run Starlark
         run: |
@@ -81,6 +90,10 @@ jobs:
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
         with:
+          s3_endpoint: ${{ vars.S3CACHE_ENDPOINT }}
+          s3_bucket: ${{ vars.S3CACHE_BUCKET }}
+          s3_access_key: ${{ secrets.S3CACHE_ACCESS_KEY }}
+          s3_secret_key: ${{ secrets.S3CACHE_ACCESS_SECRET }}
           warmup: 'false'
       - name: Kurtosis Assertoor GitHub Action
         uses: ethpandaops/kurtosis-assertoor-github-action@5932604b244dbd2ddb811516b516a9094f4d2c2f # v1
