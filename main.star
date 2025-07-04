@@ -319,6 +319,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 num_participants,
                 global_node_selectors,
+                args_with_right_defaults.docker_cache_params,
             )
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
             endpoint, relay_ip_address, relay_port = mev_rs_mev_relay.launch_mev_relay(
