@@ -271,11 +271,9 @@ SUBCATEGORY_PARAMS = {
         "mev_relay_website_extra_env_vars",
         "mev_builder_extra_args",
         "mev_builder_prometheus_config",
-        "mev_flood_image",
-        "mev_flood_extra_args",
-        "mev_flood_seconds_per_bundle",
         "custom_flood_params",
         "mock_mev_image",
+        "launch_adminer",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",

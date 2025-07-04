@@ -19,8 +19,8 @@ jobs:
         uses: ./.github/actions/kurtosis-install
 
   run_starlark:
-    runs-on: ubuntu-latest
     needs: [warmup_cache]
+    runs-on: self-hosted-ghr-size-s-x64
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -47,8 +47,8 @@ jobs:
             "./.github/tests/minimal.yaml",
             "./network_params.yaml"
           ]
-    runs-on: ubuntu-latest
     needs: [warmup_cache]
+    runs-on: self-hosted-ghr-size-l-x64
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -65,7 +65,7 @@ jobs:
           kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted-ghr-size-xs-x64
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -75,8 +75,8 @@ jobs:
         run: kurtosis lint ${{ github.workspace }}
 
   assertoor:
-    runs-on: ubuntu-latest
     needs: [warmup_cache]
+    runs-on: self-hosted-ghr-size-m-x64
     timeout-minutes: 30
     steps:
       - name: Checkout Repository
@@ -88,13 +88,17 @@ jobs:
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
       - name: Kurtosis Assertoor GitHub Action
-        uses: ethpandaops/kurtosis-assertoor-github-action@5932604b244dbd2ddb811516b516a9094f4d2c2f # v1
+        uses: ethpandaops/kurtosis-assertoor-github-action@52b50385e2ee7edcdb54f56c1737e8ef9542cd6a # bbusa/add-docker-cache
         with:
           ethereum_package_url: "."
           ethereum_package_branch: ""
           ethereum_package_args: .github/tests/mix-assert.yaml
+          docker_cache_enabled: true
+          docker_cache_url: docker.ethquokkaops.io
+
+
   #check_optimism_package:
-  #  runs-on: ubuntu-latest
+  #  runs-on: self-hosted-ghr-size-l-x64
   #  steps:
   #    - name: Checkout Repository
   #      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

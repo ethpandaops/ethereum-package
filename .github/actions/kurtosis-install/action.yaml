@@ -38,5 +38,4 @@ runs:
       with:
         kurtosis_version: ${{ steps.kurtosis_version.outputs.version }}
         warmup_cache: ${{ inputs.warmup }}
-        
-
+       
