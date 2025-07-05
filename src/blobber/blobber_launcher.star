@@ -55,7 +55,7 @@ def launch(
     blobber_service = plan.add_service(blobber_service_name, blobber_config)
     return blobber_context.new_blobber_context(
         blobber_service.ip_address,
-        blobber_service.ports[BLOBBER_VALIDATOR_PROXY_PORT_NUM],
+        blobber_service.ports[BLOBBER_VALIDATOR_PROXY_PORT_ID],
     )
 
 
