@@ -76,6 +76,7 @@ def launch(
 
     all_snooper_el_engine_contexts = []
     all_cl_contexts = []
+    blobber_configs_with_contexts = []
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
         if network_params.network == constants.NETWORK_NAME.kurtosis
@@ -165,7 +166,7 @@ def launch(
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         if index == 0:
-            cl_context = launch_method(
+            result = launch_method(
                 plan,
                 cl_launcher,
                 cl_service_name,
@@ -187,7 +188,7 @@ def launch(
             )
         else:
             boot_cl_client_ctx = all_cl_contexts
-            cl_context = launch_method(
+            result = launch_method(
                 plan,
                 cl_launcher,
                 cl_service_name,
@@ -208,6 +209,21 @@ def launch(
                 network_params,
             )
 
+        # Handle both old (single return) and new (tuple) format
+        if type(result) == "tuple":
+            cl_context, blobber_config = result
+            if blobber_config != None:
+                blobber_configs_with_contexts.append(
+                    struct(
+                        cl_context=cl_context,
+                        blobber_config=blobber_config,
+                        participant=participant,
+                    )
+                )
+        else:
+            # Backward compatibility for CL clients that don't support blobbers
+            cl_context = result
+
         # Add participant cl additional prometheus labels
         for metrics_info in cl_context.cl_nodes_metrics_info:
             if metrics_info != None:
@@ -219,4 +235,5 @@ def launch(
         all_snooper_el_engine_contexts,
         preregistered_validator_keys_for_nodes,
         global_other_index,
+        blobber_configs_with_contexts,
     )

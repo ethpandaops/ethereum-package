@@ -85,6 +85,9 @@ def launch(
         beacon_service.ip_address, beacon_http_port.number
     )
 
+    # Grandine doesn't support blobbers, return None for blobber config
+    blobber_config = None
+
     beacon_metrics_port = beacon_service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(
         beacon_service.ip_address, beacon_metrics_port.number
@@ -110,7 +113,7 @@ def launch(
         beacon_service_name, BEACON_METRICS_PATH, beacon_metrics_url
     )
     nodes_metrics_info = [beacon_node_metrics_info]
-    return cl_context.new_cl_context(
+    cl_context_obj = cl_context.new_cl_context(
         client_name="grandine",
         enr=beacon_node_enr,
         ip_addr=beacon_service.ip_address,
@@ -127,6 +130,9 @@ def launch(
         else "",
         supernode=participant.supernode,
     )
+
+    # Return tuple of cl_context and blobber_config
+    return (cl_context_obj, blobber_config)
 
 
 def get_beacon_config(
