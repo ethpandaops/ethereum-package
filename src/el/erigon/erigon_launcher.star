@@ -285,10 +285,10 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, networkid, prague_time):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, networkid, osaka_time):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         networkid=networkid,
-        prague_time=prague_time,
+        osaka_time=osaka_time,
     )

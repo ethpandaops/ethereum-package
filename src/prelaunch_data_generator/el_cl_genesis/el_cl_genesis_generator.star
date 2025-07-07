@@ -85,13 +85,6 @@ def generate_el_cl_genesis_data(
         wait=None,
     )
 
-    prague_time = plan.run_sh(
-        name="read-prague-time",
-        description="Reading prague time from genesis",
-        run="jq .config.pragueTime /data/genesis.json | tr -d '\n'",
-        files={"/data": genesis.files_artifacts[0]},
-    )
-
     osaka_time = plan.run_sh(
         name="read-osaka-time",
         description="Reading osaka time from genesis",

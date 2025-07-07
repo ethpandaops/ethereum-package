@@ -264,7 +264,7 @@ def get_config(
                 )
             )
         if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            if launcher.prague_time:
+            if launcher.osaka_time:
                 cmd.append("--override.osaka=" + str(launcher.osaka_time))
 
     elif (
@@ -345,11 +345,11 @@ def new_geth_launcher(
     el_cl_genesis_data,
     jwt_file,
     networkid,
-    prague_time,
+    osaka_time,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         networkid=networkid,
-        prague_time=prague_time,
+        osaka_time=osaka_time,
     )
