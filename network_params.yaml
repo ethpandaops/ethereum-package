@@ -124,10 +124,6 @@ network_params:
   validator_balance: 32
   min_epochs_for_data_column_sidecars_requests: 4096
 
-docker_cache_params:
-  enabled: true
-  url: "docker.ethquokkaops.io"
-
 additional_services: []
 dora_params:
   image: ""
