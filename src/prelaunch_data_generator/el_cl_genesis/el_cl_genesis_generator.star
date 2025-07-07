@@ -95,7 +95,6 @@ def generate_el_cl_genesis_data(
     result = el_cl_genesis_data.new_el_cl_genesis_data(
         genesis.files_artifacts[0],
         genesis_validators_root.output,
-        prague_time.output,
         osaka_time.output,
     )
 
