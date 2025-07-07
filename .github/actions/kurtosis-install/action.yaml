@@ -40,7 +40,7 @@ inputs:
 outputs:
   kurtosis_version:
     description: "Kurtosis version"
-    value: ${{ steps.kurtosis_version.outputs.version }}
+    value: ${{ steps.cache.outputs.kurtosis_version }}
   cache_hit:
     description: "Cache hit"
     value: ${{ steps.cache.outputs.cache_hit }}
@@ -50,32 +50,12 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Setup kurtosis-cli
-      id: kurtosis_version
-      shell: bash
-      run: |
-        echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
-        sudo apt update
-        if [ "${{ inputs.version }}" = "latest" ]; then
-          sudo apt install kurtosis-cli
-        else
-          sudo apt install kurtosis-cli=${{ inputs.version }}
-        fi
-        kurtosis analytics disable
-        echo "$(dirname $(which kurtosis))" >> $GITHUB_PATH
-
-        # Get the installed version and save it as an environment variable
-        KURTOSIS_VERSION=$(kurtosis version | grep -o 'Version:[[:space:]]*[^[:space:]]*' | cut -d':' -f2 | tr -d ' ')
-        echo "KURTOSIS_VERSION=$KURTOSIS_VERSION" >> $GITHUB_ENV
-        echo "version=$KURTOSIS_VERSION" >> $GITHUB_OUTPUT
-        echo "Installed Kurtosis version: $KURTOSIS_VERSION"
-
     - name: Setup Kurtosis with docker cache
       continue-on-error: true
       id: cache
       uses: ethpandaops/kurtosis-cache-github-action@v1 # v1
       with:
-        kurtosis_version: ${{ steps.kurtosis_version.outputs.version }}
+        kurtosis_version: ${{ inputs.version }}
         warmup_cache: ${{ inputs.warmup }}
         warmup_only: ${{ inputs.warmup_only }}
         cache_prefix: ${{ inputs.cache_prefix }}
@@ -85,4 +65,20 @@ runs:
         s3_endpoint: ${{ inputs.s3_endpoint }}
         s3_insecure: ${{ inputs.s3_insecure }}
         s3_path: ${{ inputs.s3_path }}
-       
+
+    - name: Setup kurtosis-cli
+      if: ${{ inputs.warmup_only == 'false' }}
+      shell: bash
+      run: |
+        if [ -z "$(which kurtosis)" ]; then
+          echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+          sudo apt update
+          sudo apt install kurtosis-cli=${{ inputs.version }}
+        fi
+        kurtosis analytics disable
+        echo "$(dirname $(which kurtosis))" >> $GITHUB_PATH
+
+        # Get the installed version and save it as an environment variable
+        KURTOSIS_VERSION=$(kurtosis version | grep -o 'Version:[[:space:]]*[^[:space:]]*' | cut -d':' -f2 | tr -d ' ')
+        echo "KURTOSIS_VERSION=$KURTOSIS_VERSION" >> $GITHUB_ENV
+        echo "Installed Kurtosis version: $KURTOSIS_VERSION"
