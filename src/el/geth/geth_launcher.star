@@ -264,7 +264,7 @@ def get_config(
                 )
             )
         if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            if launcher.osaka_time:
+            if launcher.osaka_time != null:
                 cmd.append("--override.osaka=" + str(launcher.osaka_time))
 
     elif (
