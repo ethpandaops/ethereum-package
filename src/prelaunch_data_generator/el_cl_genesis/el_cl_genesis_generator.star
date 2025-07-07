@@ -84,11 +84,17 @@ def generate_el_cl_genesis_data(
         files={"/data": genesis.files_artifacts[1]},
         wait=None,
     )
-
     osaka_time = plan.run_sh(
         name="read-osaka-time",
         description="Reading osaka time from genesis",
-        run="jq .config.osakaTime /data/genesis.json | tr -d '\n'",,
+        run="jq '.config.osakaTime' /data/genesis.json | tr -d '\n'",
+        files={"/data": genesis.files_artifacts[0]},
+    )
+
+    osaka_enabled_check = plan.run_sh(
+        name="check-osaka-enabled",
+        description="Check if osaka time is enabled (not false)",
+        run="test \"$(jq '.config.osakaTime // false' /data/genesis.json | tr -d '\n')\" != \"false\" && echo true || echo false",
         files={"/data": genesis.files_artifacts[0]},
     )
 
@@ -96,6 +102,7 @@ def generate_el_cl_genesis_data(
         genesis.files_artifacts[0],
         genesis_validators_root.output,
         osaka_time.output,
+        osaka_enabled_check.output == "true",
     )
 
     return result
