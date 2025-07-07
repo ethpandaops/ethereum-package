@@ -186,7 +186,7 @@ def get_config(
         cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
 
     if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-        if launcher.osaka_time != None:
+        if launcher.osaka_time > 0:
             cmd.append("--override.osaka=" + str(launcher.osaka_time))
 
     files = {

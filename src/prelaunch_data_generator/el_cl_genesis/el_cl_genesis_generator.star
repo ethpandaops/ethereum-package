@@ -88,7 +88,7 @@ def generate_el_cl_genesis_data(
     osaka_time = plan.run_sh(
         name="read-osaka-time",
         description="Reading osaka time from genesis",
-        run="jq .config.osakaTime /data/genesis.json | tr -d '\n'",
+        run="jq '.config.osakaTime // 0' /data/genesis.json | tr -d '\n'",
         files={"/data": genesis.files_artifacts[0]},
     )
 
