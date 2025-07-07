@@ -8,6 +8,10 @@ inputs:
     description: 'Warmup kurtosis cache'
     required: false
     default: 'true'
+  warmup_only:
+    description: 'Warmup kurtosis cache, but do not load existing cache'
+    required: false
+    default: 'false'
   cache_prefix:
     description: 'Kurtosis cache prefix'
     required: false
@@ -73,6 +77,7 @@ runs:
       with:
         kurtosis_version: ${{ steps.kurtosis_version.outputs.version }}
         warmup_cache: ${{ inputs.warmup }}
+        warmup_only: ${{ inputs.warmup_only }}
         cache_prefix: ${{ inputs.cache_prefix }}
         s3_access_key: ${{ inputs.s3_access_key }}
         s3_secret_key: ${{ inputs.s3_secret_key }}

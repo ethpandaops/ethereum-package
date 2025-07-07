@@ -17,13 +17,14 @@ jobs:
         with:
           username: ethpandaops
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Setup Kurtosis
+      - name: Warmup kurtosis cache
         uses: ./.github/actions/kurtosis-install
         with:
           s3_endpoint: ${{ vars.S3CACHE_ENDPOINT }}
           s3_bucket: ${{ vars.S3CACHE_BUCKET }}
           s3_access_key: ${{ secrets.S3CACHE_ACCESS_KEY }}
           s3_secret_key: ${{ secrets.S3CACHE_ACCESS_SECRET }}
+          warmup_only: 'true'
 
   run_starlark:
     needs: [warmup_cache]
