@@ -265,7 +265,7 @@ def get_config(
             )
         if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
             if launcher.prague_time:
-                cmd.append("--override.prague=" + str(launcher.prague_time))
+                cmd.append("--override.osaka=" + str(launcher.osaka_time))
 
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS

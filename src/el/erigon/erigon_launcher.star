@@ -159,7 +159,7 @@ def get_config(
     cmd = [
         "erigon",
         "{0}".format(
-            "--override.prague=" + str(launcher.prague_time)
+            "--override.osaka=" + str(launcher.osaka_time)
             if constants.NETWORK_NAME.shadowfork in network_params.network
             else ""
         ),
