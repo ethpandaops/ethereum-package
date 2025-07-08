@@ -25,11 +25,11 @@ MIN_PEERS = 1
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_LOG_LEVEL.error: "ERROR",
-    constants.GLOBAL_LOG_LEVEL.warn: "WARN",
-    constants.GLOBAL_LOG_LEVEL.info: "INFO",
-    constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
-    constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -222,6 +222,7 @@ def get_beacon_config(
             if network_params.network in constants.PUBLIC_NETWORKS
             else "custom"
         ),
+        "--log-level={0}".format(log_level),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--http-address=0.0.0.0",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
