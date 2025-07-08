@@ -15,6 +15,7 @@ USED_PORTS = {
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        wait=None,
     ),
 }
 
@@ -82,21 +83,19 @@ def get_config(
     docker_cache_params,
 ):
     cmd = [
+        "--init.timeout=10m",
         "--api.endpoint",
         beacon_api_url,
-        "--api.name",
+        "--beacon.name",
         full_name,
         "--libp2p.host",
         "0.0.0.0",
         "--libp2p.port",
         str(LIBP2P_PORT_NUMBER),
-        "--connection.retries",
-        "5",
-        "--connection.timeout",
-        "30s",
         "--web.mode",
         "--web.port",
         str(HTTP_PORT_NUMBER),
+        "monitor",
     ]
 
     if len(guardian_params.extra_args) > 0:
