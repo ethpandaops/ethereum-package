@@ -139,11 +139,6 @@ def get_config(
 
     cmd = [
         "erigon",
-        "{0}".format(
-            "--override.prague=" + str(launcher.prague_time)
-            if constants.NETWORK_NAME.shadowfork in network_params.network
-            else ""
-        ),
         "--networkid={0}".format(launcher.networkid),
         "--log.console.verbosity=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -170,6 +165,10 @@ def get_config(
 
     if network_params.gas_limit > 0:
         cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
+
+    if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
+        if launcher.osaka_enabled:
+            cmd.append("--override.osaka=" + str(launcher.osaka_time))
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
@@ -247,7 +246,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels,
+            extra_labels=participant.el_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
@@ -300,10 +300,11 @@ def get_el_context(
     )
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, networkid, prague_time):
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, networkid):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         networkid=networkid,
-        prague_time=prague_time,
+        osaka_time=el_cl_genesis_data.osaka_time,
+        osaka_enabled=el_cl_genesis_data.osaka_enabled,
     )

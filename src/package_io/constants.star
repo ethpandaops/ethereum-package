@@ -332,6 +332,9 @@ CLIENT_LANGUAGES = {
 # Label key constant for client language
 CLIENT_LANGUAGE_LABEL_KEY = "ethereum-package.client-language"
 
+# Label key constant for node index
+NODE_INDEX_LABEL_KEY = "ethereum-package.node-index"
+
 VOLUME_SIZE["mainnet-shadowfork"] = VOLUME_SIZE["mainnet"]
 VOLUME_SIZE["sepolia-shadowfork"] = VOLUME_SIZE["sepolia"]
 VOLUME_SIZE["holesky-shadowfork"] = VOLUME_SIZE["holesky"]
