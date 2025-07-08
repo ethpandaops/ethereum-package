@@ -49,10 +49,6 @@ def launch(
     participant_index,
     network_params,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
@@ -62,7 +58,7 @@ def launch(
         service_name,
         existing_el_clients,
         cl_client_name,
-        log_level,
+        global_log_level,
         persistent,
         tolerations,
         node_selectors,
@@ -73,29 +69,11 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode = el_admin_node_info.get_enode_for_node(
-        plan, service_name, constants.RPC_PORT_ID
-    )
-
-    metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    reth_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metric_url
-    )
-
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
-
-    return el_context.new_el_context(
-        client_name="reth-builder" if launcher.builder_type else "reth",
-        enode=enode,
-        ip_addr=service.ip_address,
-        rpc_port_num=RPC_PORT_NUM,
-        ws_port_num=WS_PORT_NUM,
-        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
-        rpc_http_url=http_url,
-        ws_url=ws_url,
-        service_name=service_name,
-        el_metrics_info=[reth_metrics_info],
+    return get_el_context(
+        plan,
+        service_name,
+        service,
+        launcher,
     )
 
 
@@ -106,7 +84,7 @@ def get_config(
     service_name,
     existing_el_clients,
     cl_client_name,
-    log_level,
+    global_log_level,
     persistent,
     tolerations,
     node_selectors,
@@ -114,6 +92,10 @@ def get_config(
     participant_index,
     network_params,
 ):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     public_ports = {}
     public_ports_for_component = None
     if port_publisher.el_enabled:
@@ -323,6 +305,39 @@ def get_config(
     if participant.el_max_mem > 0:
         config_args["max_memory"] = participant.el_max_mem
     return ServiceConfig(**config_args)
+
+
+# makes request to [service_name] for enode and returns a full el_context
+def get_el_context(
+    plan,
+    service_name,
+    service,
+    launcher,
+):
+    enode = el_admin_node_info.get_enode_for_node(
+        plan, service_name, constants.RPC_PORT_ID
+    )
+
+    metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    reth_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, METRICS_PATH, metric_url
+    )
+
+    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+
+    return el_context.new_el_context(
+        client_name="reth-builder" if launcher.builder_type else "reth",
+        enode=enode,
+        ip_addr=service.ip_address,
+        rpc_port_num=RPC_PORT_NUM,
+        ws_port_num=WS_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        service_name=service_name,
+        el_metrics_info=[reth_metrics_info],
+    )
 
 
 def new_reth_launcher(
