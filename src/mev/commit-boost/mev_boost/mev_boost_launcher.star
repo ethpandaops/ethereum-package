@@ -78,6 +78,7 @@ def launch(
         el_cl_genesis_data,
         global_node_selectors,
         public_ports,
+        index,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
@@ -95,6 +96,7 @@ def get_config(
     el_cl_genesis_data,
     node_selectors,
     public_ports,
+    participant_index,
 ):
     return ServiceConfig(
         image=image,
@@ -114,6 +116,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        labels={constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
     )
 
 

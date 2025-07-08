@@ -1243,7 +1243,7 @@ ethereum_metrics_exporter_enabled: true
 
 ## Custom labels for Docker and Kubernetes
 
-There are 4 custom labels that can be used to identify the nodes in the network. These labels are used to identify the nodes in the network and can be used to run chaos tests on specific nodes. An example for these labels are as follows:
+There are 6 custom labels that can be used to identify the nodes in the network. These labels are used to identify the nodes in the network and can be used to run chaos tests on specific nodes. An example for these labels are as follows:
 
 Execution Layer (EL) nodes:
 
@@ -1253,6 +1253,7 @@ Execution Layer (EL) nodes:
   "kurtosistech.com.custom/ethereum-package.client-language:": "go",
   "kurtosistech.com.custom/ethereum-package.client-type": "execution",
   "kurtosistech.com.custom/ethereum-package.connected-client": "lighthouse",
+  "kurtosistech.com.custom/ethereum-package.node-index": "1",
 ```
 
 Consensus Layer (CL) nodes - Beacon:
@@ -1263,6 +1264,7 @@ Consensus Layer (CL) nodes - Beacon:
   "kurtosistech.com.custom/ethereum-package.client-language:": "rust",
   "kurtosistech.com.custom/ethereum-package.client-type": "beacon",
   "kurtosistech.com.custom/ethereum-package.connected-client": "geth",
+  "kurtosistech.com.custom/ethereum-package.node-index": "1",
 ```
 
 Consensus Layer (CL) nodes - Validator:
@@ -1273,6 +1275,7 @@ Consensus Layer (CL) nodes - Validator:
   "kurtosistech.com.custom/ethereum-package.client-language:": "rust",
   "kurtosistech.com.custom/ethereum-package.client-type": "validator",
   "kurtosistech.com.custom/ethereum-package.connected-client": "geth",
+  "kurtosistech.com.custom/ethereum-package.node-index": "1",
 ```
 
 * `ethereum-package.client` describes which client is running on the node.
@@ -1280,6 +1283,7 @@ Consensus Layer (CL) nodes - Validator:
 * `ethereum-package.client-type` describes the type of client that is running on the node (`execution`,`beacon` or `validator`).
 * `ethereum-package.connected-client` describes the CL/EL client that is connected to the EL/CL client.
 * `ethereum-package.client-language` describes the implementation language of the running service.
+* `ethereum-package.node-index` describes the index of the node (participant) that the service belongs to.
 
 ## Proposer Builder Separation (PBS) emulation
 
