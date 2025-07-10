@@ -3,7 +3,7 @@ participants:
     el_image: ethpandaops/geth:master
     cl_type: lighthouse
     blobber_enabled: true
-    blobber_image: parithoshj/blobber:refactor-eth2-v23
+    blobber_image: ethpandaops/blobber:latest
     blobber_extra_params:
       - --proposal-action-frequency=1
       - "--proposal-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 3000}"
@@ -16,7 +16,7 @@ participants:
     el_image: ethpandaops/geth:master
     cl_type: prysm
     blobber_enabled: true
-    blobber_image: parithoshj/blobber:refactor-eth2-v23
+    blobber_image: ethpandaops/blobber:latest
     blobber_extra_params:
       - --proposal-action-frequency=1
       - "--proposal-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 30000}"
