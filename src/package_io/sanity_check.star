@@ -432,4 +432,4 @@ def sanity_check(plan, input_args):
             )
 
     # If everything passes, print a message
-    plan.print("Sanity check passed")
+    # plan.print("Sanity check passed")

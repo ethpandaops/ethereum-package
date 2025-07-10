@@ -293,9 +293,9 @@ def launch_participant_network(
             )
 
         all_snooper_el_rpc_contexts.append(snooper_el_rpc_context)
-        plan.print("Successfully added {0} CL participants".format(num_participants))
+        # plan.print("Successfully added {0} CL participants {1}".format(num_participants, all_el_contexts))
 
-        plan.print("Start adding validators for participant #{0}".format(index_str))
+        # plan.print("Start adding validators for participant #{0} {1}".format(index_str), all_el_contexts)
         if participant.use_separate_vc == None:
             # This should only be the case for the MEV participant,
             # the regular participants default to False/True
@@ -313,9 +313,9 @@ def launch_participant_network(
             all_snooper_beacon_contexts.append(None)
             continue
 
-        plan.print(
-            "Using separate validator client for participant #{0}".format(index_str)
-        )
+        # plan.print(
+        #     "Using separate validator client for participant #{0} {1}".format(index_str, all_el_contexts)
+        # )
 
         vc_keystores = None
         if participant.validator_count != 0:

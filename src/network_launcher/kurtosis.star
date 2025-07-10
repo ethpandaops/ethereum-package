@@ -21,7 +21,7 @@ def launch(
     plan, network_params, args_with_right_defaults, parallel_keystore_generation
 ):
     num_participants = len(args_with_right_defaults.participants)
-    plan.print("Generating cl validator key stores")
+    # plan.print("Generating cl validator key stores")
     validator_data = None
     if not parallel_keystore_generation:
         validator_data = validator_keystores.generate_validator_keystores(
@@ -38,7 +38,7 @@ def launch(
             args_with_right_defaults.docker_cache_params,
         )
 
-    plan.print(json.indent(json.encode(validator_data)))
+    # plan.print("validator_data: {0}".format(json.indent(json.encode(validator_data))))
 
     # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
     final_genesis_timestamp = shared_utils.get_final_genesis_timestamp(
@@ -55,7 +55,7 @@ def launch(
         for participant in args_with_right_defaults.participants:
             total_number_of_validator_keys += participant.validator_count
 
-    plan.print("Generating EL CL data")
+    # plan.print("Generating EL CL data")
 
     ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
         args_with_right_defaults.docker_cache_params,

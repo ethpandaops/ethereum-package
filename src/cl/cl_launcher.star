@@ -31,7 +31,7 @@ def launch(
     prysm_password_artifact_uuid,
     global_other_index,
 ):
-    plan.print("Launching CL network")
+    # plan.print("Launching CL network")
 
     cl_launchers = {
         constants.CL_TYPE.lighthouse: {

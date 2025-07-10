@@ -150,7 +150,7 @@ def run(plan, args={}):
                 src=raw_node_key,
                 name="node-key-file-{0}".format(index + 1),
             )
-    plan.print("Read the prometheus, grafana templates")
+    # plan.print("Read the prometheus, grafana templates")
 
     if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
         plan.print("Generating mev-rs builder config file")
@@ -179,11 +179,6 @@ def run(plan, args={}):
             global_node_selectors,
         )
 
-    plan.print(
-        "Launching participant network with {0} participants and the following network params {1}".format(
-            num_participants, network_params
-        )
-    )
     (
         all_participants,
         final_genesis_timestamp,
