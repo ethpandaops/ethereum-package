@@ -336,6 +336,7 @@ def input_parser(plan, input_args):
                 ),
                 blobber_enabled=participant["blobber_enabled"],
                 blobber_extra_params=participant["blobber_extra_params"],
+                blobber_image=participant["blobber_image"],
                 keymanager_enabled=participant["keymanager_enabled"],
             )
             for participant in result["participants"]
@@ -823,8 +824,13 @@ def parse_network_params(plan, input_args):
 
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
-            # unless we are running lighthouse, we don't support blobber
-            if participant["cl_type"] != constants.CL_TYPE.lighthouse:
+            # lighthouse, lodestar, prysm, and grandine support blobber
+            if participant["cl_type"] not in [
+                constants.CL_TYPE.lighthouse,
+                constants.CL_TYPE.lodestar,
+                constants.CL_TYPE.prysm,
+                constants.CL_TYPE.grandine,
+            ]:
                 fail(
                     "blobber is not supported for {0} client".format(
                         participant["cl_type"]
@@ -1234,6 +1240,7 @@ def default_participant():
         },
         "blobber_enabled": False,
         "blobber_extra_params": [],
+        "blobber_image": "ethpandaops/blobber:latest",
         "builder_network_params": None,
         "keymanager_enabled": None,
     }
@@ -1647,6 +1654,7 @@ def docker_cache_image_override(plan, result):
         "cl_image",
         "vc_image",
         "remote_signer_image",
+        "blobber_image",
     ]
     tooling_overridable_image = [
         "dora_params.image",

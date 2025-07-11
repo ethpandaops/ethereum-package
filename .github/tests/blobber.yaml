@@ -3,14 +3,28 @@ participants:
     el_image: ethpandaops/geth:master
     cl_type: lighthouse
     blobber_enabled: true
+    blobber_image: ethpandaops/blobber:latest
     blobber_extra_params:
       - --proposal-action-frequency=1
-      - "--proposal-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 1500}"
+      - "--proposal-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 3000}"
     count: 1
   - el_type: geth
     el_image: ethpandaops/geth:master
     cl_type: lodestar
     count: 1
+  - el_type: geth
+    el_image: ethpandaops/geth:master
+    cl_type: prysm
+    blobber_enabled: true
+    blobber_image: ethpandaops/blobber:latest
+    blobber_extra_params:
+      - --proposal-action-frequency=1
+      - "--proposal-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 30000}"
+    count: 1
+
 additional_services:
   - dora
   - spamoor
+
+#       - "--proposal-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 30000}"
+#       - "--proposal-action={\"name\": \"conflicting_blobs\"}"
