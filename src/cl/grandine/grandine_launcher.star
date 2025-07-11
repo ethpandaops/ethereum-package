@@ -252,7 +252,6 @@ def get_beacon_config(
         "--keystore-dir=" + validator_keys_dirpath,
         "--keystore-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=" + full_name,
         "--enable-private-discovery",
     ]
 
@@ -371,7 +370,8 @@ def get_beacon_config(
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
-            extra_labels=participant.cl_extra_labels,
+            extra_labels=participant.cl_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

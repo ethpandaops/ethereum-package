@@ -164,7 +164,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.remote_signer,
             image=image,
             connected_client=vc_type,
-            extra_labels=participant.remote_signer_extra_labels,
+            extra_labels=participant.remote_signer_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(remote_signer_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

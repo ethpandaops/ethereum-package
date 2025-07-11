@@ -272,11 +272,9 @@ SUBCATEGORY_PARAMS = {
         "mev_relay_website_extra_env_vars",
         "mev_builder_extra_args",
         "mev_builder_prometheus_config",
-        "mev_flood_image",
-        "mev_flood_extra_args",
-        "mev_flood_seconds_per_bundle",
         "custom_flood_params",
         "mock_mev_image",
+        "launch_adminer",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
@@ -326,6 +324,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "blutgang",
     "forky",
     "apache",
+    "nginx",
     "tracoor",
     "spamoor",
 ]
@@ -341,6 +340,7 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "mev_type": "",
     "xatu_sentry_enabled": "",
     "apache_port": "",
+    "nginx_port": "",
     "global_tolerations": "",
     "global_node_selectors": "",
     "keymanager_enabled": "",

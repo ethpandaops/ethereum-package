@@ -47,7 +47,6 @@ def get_config(
         "--monitoring-host=0.0.0.0",
         "--monitoring-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + full_name,
     ]
 
     # Only add RPC provider if we're not using a blobber (blobber doesn't proxy RPC)
@@ -138,7 +137,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=participant.vc_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
