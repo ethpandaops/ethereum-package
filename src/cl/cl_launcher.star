@@ -90,6 +90,7 @@ def launch(
 
     all_snooper_el_engine_contexts = []
     all_cl_contexts = []
+    blobber_configs_with_contexts = []
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
         if network_params.network == constants.NETWORK_NAME.kurtosis
@@ -184,7 +185,7 @@ def launch(
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         if index == 0:
-            cl_context = launch_method(
+            result = launch_method(
                 plan,
                 cl_launcher,
                 cl_service_name,
@@ -205,6 +206,21 @@ def launch(
                 network_params,
             )
 
+            # Handle both old (single return) and new (tuple) format
+            if type(result) == "tuple":
+                cl_context, blobber_config = result
+                if blobber_config != None:
+                    blobber_configs_with_contexts.append(
+                        struct(
+                            cl_context=cl_context,
+                            blobber_config=blobber_config,
+                            participant=participant,
+                        )
+                    )
+            else:
+                # Backward compatibility for CL clients that don't support blobbers
+                cl_context = result
+            
             all_cl_contexts.append(cl_context)
 
             # Add participant cl additional prometheus labels
@@ -249,19 +265,44 @@ def launch(
         cl_services = plan.add_services(cl_service_configs)
 
     for beacon_service_name, beacon_service in cl_services.items():
-        get_cl_context = cl_participant_info[beacon_service_name]["get_cl_context"]
+        info = cl_participant_info[beacon_service_name]
+        get_cl_context = info["get_cl_context"]
+        participant = info["participant"]
 
         cl_context = get_cl_context(
             plan,
             beacon_service_name,
             beacon_service,
-            cl_participant_info[beacon_service_name]["participant"],
-            cl_participant_info[beacon_service_name]["snooper_el_engine_context"],
-            cl_participant_info[beacon_service_name]["new_cl_node_validator_keystores"],
-            cl_participant_info[beacon_service_name]["node_selectors"],
+            participant,
+            info["snooper_el_engine_context"],
+            info["new_cl_node_validator_keystores"],
+            info["node_selectors"],
         )
 
         all_cl_contexts.append(cl_context)
+        
+        # Check if this participant has blobber enabled and prepare blobber config
+        if participant.blobber_enabled:
+            blobber_service_name = "blobber-{0}".format(beacon_service_name.replace("cl-", ""))
+            beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
+            beacon_http_url = "http://{0}:{1}".format(
+                beacon_service.ip_address, beacon_http_port.number
+            )
+            
+            blobber_config = struct(
+                service_name=blobber_service_name,
+                beacon_http_url=beacon_http_url,
+                node_keystore_files=info["new_cl_node_validator_keystores"],
+                node_selectors=info["node_selectors"],
+            )
+            
+            blobber_configs_with_contexts.append(
+                struct(
+                    cl_context=cl_context,
+                    blobber_config=blobber_config,
+                    participant=participant,
+                )
+            )
 
         # Add participant cl additional prometheus labels
         for metrics_info in cl_context.cl_nodes_metrics_info:
@@ -273,4 +314,5 @@ def launch(
         all_snooper_el_engine_contexts,
         preregistered_validator_keys_for_nodes,
         global_other_index,
+        blobber_configs_with_contexts,
     )

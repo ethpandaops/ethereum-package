@@ -69,15 +69,70 @@ def launch(
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
 
-    return get_cl_context(
-        plan,
-        beacon_service_name,
-        beacon_service,
-        participant,
-        snooper_el_engine_context,
-        node_keystore_files,
-        node_selectors,
+    beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
+
+    beacon_http_url = "http://{0}:{1}".format(
+        beacon_service.ip_address, beacon_http_port.number
     )
+
+    # Prepare blobber config without launching
+    blobber_config = None
+    if participant.blobber_enabled:
+        blobber_config = struct(
+            service_name="{0}-{1}".format("blobber", beacon_service_name),
+            beacon_http_url=beacon_http_url,
+            node_keystore_files=node_keystore_files,
+            node_selectors=node_selectors,
+        )
+
+    # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
+
+    beacon_node_identity_recipe = GetHttpRequestRecipe(
+        endpoint="/eth/v1/node/identity",
+        port_id=constants.HTTP_PORT_ID,
+        extract={
+            "enr": ".data.enr",
+            "multiaddr": ".data.p2p_addresses[-1]",
+            "peer_id": ".data.peer_id",
+        },
+    )
+    response = plan.request(
+        recipe=beacon_node_identity_recipe, service_name=beacon_service_name
+    )
+    beacon_node_enr = response["extract.enr"]
+    beacon_multiaddr = response["extract.multiaddr"]
+    beacon_peer_id = response["extract.peer_id"]
+
+    beacon_metrics_port = beacon_service.ports[constants.METRICS_PORT_ID]
+    beacon_metrics_url = "{0}:{1}".format(
+        beacon_service.ip_address, beacon_metrics_port.number
+    )
+
+    beacon_node_metrics_info = node_metrics.new_node_metrics_info(
+        beacon_service_name, METRICS_PATH, beacon_metrics_url
+    )
+    nodes_metrics_info = [beacon_node_metrics_info]
+
+    cl_context_obj = cl_context.new_cl_context(
+        client_name="lodestar",
+        enr=beacon_node_enr,
+        ip_addr=beacon_service.ip_address,
+        http_port=beacon_http_port.number,
+        beacon_http_url=beacon_http_url,
+        cl_nodes_metrics_info=nodes_metrics_info,
+        beacon_service_name=beacon_service_name,
+        multiaddr=beacon_multiaddr,
+        peer_id=beacon_peer_id,
+        snooper_enabled=participant.snooper_enabled,
+        snooper_el_engine_context=snooper_el_engine_context,
+        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
+        if node_keystore_files
+        else "",
+        supernode=participant.supernode,
+    )
+
+    # Return tuple of cl_context and blobber_config
+    return (cl_context_obj, blobber_config)
 
 
 def get_beacon_config(
