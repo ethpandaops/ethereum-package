@@ -91,6 +91,14 @@ def run(plan, args={}):
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
 
+    for index, participant in enumerate(args_with_right_defaults.participants):
+        if (
+            num_participants == 1
+            and participant.cl_type == constants.CL_TYPE.lighthouse
+        ):
+            if "--target-peers=0" not in participant.cl_extra_params:
+                participant.cl_extra_params.append("--target-peers=0")
+
     prefunded_accounts = genesis_constants.PRE_FUNDED_ACCOUNTS
     if (
         network_params.preregistered_validator_keys_mnemonic
