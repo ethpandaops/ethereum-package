@@ -55,7 +55,7 @@ participants:
 # participant specific
     node_selectors: {}
     tolerations: []
-    count: 2
+    count: 1
     snooper_enabled: false
     ethereum_metrics_exporter_enabled: false
     xatu_sentry_enabled: false
