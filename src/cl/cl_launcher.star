@@ -220,7 +220,7 @@ def launch(
             else:
                 # Backward compatibility for CL clients that don't support blobbers
                 cl_context = result
-            
+
             all_cl_contexts.append(cl_context)
 
             # Add participant cl additional prometheus labels
@@ -280,22 +280,24 @@ def launch(
         )
 
         all_cl_contexts.append(cl_context)
-        
+
         # Check if this participant has blobber enabled and prepare blobber config
         if participant.blobber_enabled:
-            blobber_service_name = "blobber-{0}".format(beacon_service_name.replace("cl-", ""))
+            blobber_service_name = "blobber-{0}".format(
+                beacon_service_name.replace("cl-", "")
+            )
             beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
             beacon_http_url = "http://{0}:{1}".format(
                 beacon_service.ip_address, beacon_http_port.number
             )
-            
+
             blobber_config = struct(
                 service_name=blobber_service_name,
                 beacon_http_url=beacon_http_url,
                 node_keystore_files=info["new_cl_node_validator_keystores"],
                 node_selectors=info["node_selectors"],
             )
-            
+
             blobber_configs_with_contexts.append(
                 struct(
                     cl_context=cl_context,
