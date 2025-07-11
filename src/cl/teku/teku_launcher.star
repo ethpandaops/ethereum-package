@@ -111,7 +111,7 @@ def launch(
     )
     nodes_metrics_info = [beacon_node_metrics_info]
 
-    return cl_context.new_cl_context(
+    cl_context_obj = cl_context.new_cl_context(
         client_name="teku",
         enr=beacon_node_enr,
         ip_addr=beacon_service.ip_address,
@@ -128,6 +128,9 @@ def launch(
         else "",
         supernode=participant.supernode,
     )
+
+    # Teku doesn't support blobbers, return None for blobber config
+    return (cl_context_obj, None)
 
 
 def get_beacon_config(
@@ -246,7 +249,6 @@ def get_beacon_config(
         ),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--validators-graffiti=" + full_name,
     ]
 
     keymanager_api_cmd = [
@@ -384,7 +386,8 @@ def get_beacon_config(
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
-            extra_labels=participant.cl_extra_labels,
+            extra_labels=participant.cl_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

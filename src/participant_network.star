@@ -27,6 +27,8 @@ remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
 snooper_el_launcher = import_module("./snooper/snooper_el_launcher.star")
+blobber_launcher = import_module("./blobber/blobber_launcher.star")
+cl_context_module = import_module("./cl/cl_context.star")
 
 
 def launch_participant_network(
@@ -164,6 +166,7 @@ def launch_participant_network(
         all_snooper_el_engine_contexts,
         preregistered_validator_keys_for_nodes,
         global_other_index,
+        blobber_configs_with_contexts,
     ) = cl_client_launcher.launch(
         plan,
         network_params,
@@ -181,6 +184,57 @@ def launch_participant_network(
         prysm_password_artifact_uuid,
         global_other_index,
     )
+
+    # Launch all blobbers after all CLs are up
+    cl_context_to_blobber_url = {}
+    if len(blobber_configs_with_contexts) > 0:
+        plan.print("Launching blobbers for CL clients that have them enabled")
+        for config in blobber_configs_with_contexts:
+            blobber = blobber_launcher.launch(
+                plan,
+                config.blobber_config.service_name,
+                config.blobber_config.node_keystore_files,
+                config.blobber_config.beacon_http_url,
+                config.participant,
+                config.blobber_config.node_selectors,
+            )
+
+            # Store the blobber URL mapping
+            blobber_http_url = "http://{0}:{1}".format(
+                blobber.ip_addr, blobber.port_num
+            )
+            cl_context_to_blobber_url[
+                config.cl_context.beacon_service_name
+            ] = blobber_http_url
+
+    # Helper function to get cl_context with blobber URL if available
+    def get_cl_context_with_blobber_url(cl_context):
+        beacon_service_name = cl_context.beacon_service_name
+        effective_beacon_url = cl_context_to_blobber_url.get(
+            beacon_service_name, cl_context.beacon_http_url
+        )
+
+        if effective_beacon_url == cl_context.beacon_http_url:
+            # No blobber, return original context
+            return cl_context
+
+        # Create a new cl_context with the blobber URL
+        return cl_context_module.new_cl_context(
+            client_name=cl_context.client_name,
+            enr=cl_context.enr,
+            ip_addr=cl_context.ip_addr,
+            http_port=cl_context.http_port,
+            beacon_http_url=effective_beacon_url,
+            cl_nodes_metrics_info=cl_context.cl_nodes_metrics_info,
+            beacon_service_name=cl_context.beacon_service_name,
+            beacon_grpc_url=cl_context.beacon_grpc_url,
+            multiaddr=cl_context.multiaddr,
+            peer_id=cl_context.peer_id,
+            snooper_enabled=cl_context.snooper_enabled,
+            snooper_el_engine_context=cl_context.snooper_el_engine_context,
+            validator_keystore_files_artifact_uuid=cl_context.validator_keystore_files_artifact_uuid,
+            supernode=cl_context.supernode,
+        )
 
     ethereum_metrics_exporter_context = None
     all_ethereum_metrics_exporter_contexts = []
@@ -228,7 +282,7 @@ def launch_participant_network(
                 pair_name,
                 ethereum_metrics_exporter_service_name,
                 el_context,
-                cl_context,
+                get_cl_context_with_blobber_url(cl_context),
                 node_selectors,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
@@ -256,7 +310,7 @@ def launch_participant_network(
             xatu_sentry_context = xatu_sentry.launch(
                 plan,
                 xatu_sentry_service_name,
-                cl_context,
+                get_cl_context_with_blobber_url(cl_context),
                 xatu_sentry_params,
                 network_params,
                 pair_name,
@@ -336,7 +390,7 @@ def launch_participant_network(
             snooper_beacon_context = beacon_snooper.launch(
                 plan,
                 snooper_service_name,
-                cl_context,
+                get_cl_context_with_blobber_url(cl_context),
                 node_selectors,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
@@ -397,7 +451,7 @@ def launch_participant_network(
             vc_type=vc_type,
             image=participant.vc_image,
             global_log_level=args_with_right_defaults.global_log_level,
-            cl_context=cl_context,
+            cl_context=get_cl_context_with_blobber_url(cl_context),
             el_context=el_context,
             remote_signer_context=remote_signer_context,
             full_name=full_name,

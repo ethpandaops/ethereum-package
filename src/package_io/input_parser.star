@@ -8,8 +8,8 @@ sanity_check = import_module("./sanity_check.star")
 
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
-    "erigon": "ethpandaops/erigon:main",
-    "nethermind": "ethpandaops/nethermind:devnet-0",
+    "erigon": "erigontech/erigon:latest",
+    "nethermind": "ethpandaops/nethermind:master",
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
@@ -18,7 +18,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "teku": "consensys/teku:develop",
+    "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/offchainlabs/prysm/beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
@@ -27,7 +27,7 @@ DEFAULT_CL_IMAGES = {
 
 DEFAULT_CL_IMAGES_MINIMAL = {
     "lighthouse": "ethpandaops/lighthouse:stable",
-    "teku": "consensys/teku:develop",
+    "teku": "consensys/teku:latest",
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "chainsafe/lodestar:latest",
@@ -39,7 +39,7 @@ DEFAULT_VC_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/offchainlabs/prysm/validator:stable",
-    "teku": "consensys/teku:develop",
+    "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
@@ -49,7 +49,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
-    "teku": "consensys/teku:develop",
+    "teku": "consensys/teku:latest",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
@@ -330,6 +330,7 @@ def input_parser(plan, input_args):
                 ),
                 blobber_enabled=participant["blobber_enabled"],
                 blobber_extra_params=participant["blobber_extra_params"],
+                blobber_image=participant["blobber_image"],
                 keymanager_enabled=participant["keymanager_enabled"],
             )
             for participant in result["participants"]
@@ -464,12 +465,11 @@ def input_parser(plan, input_args):
                 "mev_relay_website_extra_env_vars"
             ],
             mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
-            mev_flood_image=result["mev_params"]["mev_flood_image"],
-            mev_flood_extra_args=result["mev_params"]["mev_flood_extra_args"],
-            mev_flood_seconds_per_bundle=result["mev_params"][
-                "mev_flood_seconds_per_bundle"
+            mev_builder_prometheus_config=result["mev_params"][
+                "mev_builder_prometheus_config"
             ],
             mock_mev_image=result["mev_params"]["mock_mev_image"],
+            launch_adminer=result["mev_params"]["launch_adminer"],
         )
         if result["mev_params"]
         else None,
@@ -515,6 +515,7 @@ def input_parser(plan, input_args):
             image=result["grafana_params"]["image"],
         ),
         apache_port=result["apache_port"],
+        nginx_port=result["nginx_port"],
         assertoor_params=struct(
             image=result["assertoor_params"]["image"],
             run_stability_check=result["assertoor_params"]["run_stability_check"],
@@ -689,7 +690,11 @@ def parse_network_params(plan, input_args):
 
         el_image = participant["el_image"]
         if el_image == "":
-            default_image = DEFAULT_EL_IMAGES.get(el_type, "")
+            # Get devnet-modified images if network contains 'devnet'
+            effective_el_images = get_devnet_modified_images(
+                result["network_params"]["network"], DEFAULT_EL_IMAGES
+            )
+            default_image = effective_el_images.get(el_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
@@ -701,9 +706,17 @@ def parse_network_params(plan, input_args):
         cl_image = participant["cl_image"]
         if cl_image == "":
             if result["network_params"]["preset"] == "minimal":
-                default_image = DEFAULT_CL_IMAGES_MINIMAL.get(cl_type, "")
+                # Get devnet-modified images if network contains 'devnet'
+                effective_cl_images = get_devnet_modified_images(
+                    result["network_params"]["network"], DEFAULT_CL_IMAGES_MINIMAL
+                )
+                default_image = effective_cl_images.get(cl_type, "")
             else:
-                default_image = DEFAULT_CL_IMAGES.get(cl_type, "")
+                # Get devnet-modified images if network contains 'devnet'
+                effective_cl_images = get_devnet_modified_images(
+                    result["network_params"]["network"], DEFAULT_CL_IMAGES
+                )
+                default_image = effective_cl_images.get(cl_type, "")
             if default_image == "":
                 fail(
                     "{0} received an empty image name and we don't have a default for it".format(
@@ -741,9 +754,17 @@ def parse_network_params(plan, input_args):
             if cl_image == "" or vc_type != cl_type:
                 # If the validator client image is also empty, default to the image for the chosen CL client
                 if result["network_params"]["preset"] == "minimal":
-                    default_image = DEFAULT_VC_IMAGES_MINIMAL.get(vc_type, "")
+                    # Get devnet-modified images if network contains 'devnet'
+                    effective_vc_images = get_devnet_modified_images(
+                        result["network_params"]["network"], DEFAULT_VC_IMAGES_MINIMAL
+                    )
+                    default_image = effective_vc_images.get(vc_type, "")
                 else:
-                    default_image = DEFAULT_VC_IMAGES.get(vc_type, "")
+                    # Get devnet-modified images if network contains 'devnet'
+                    effective_vc_images = get_devnet_modified_images(
+                        result["network_params"]["network"], DEFAULT_VC_IMAGES
+                    )
+                    default_image = effective_vc_images.get(vc_type, "")
             else:
                 if cl_type == "prysm":
                     default_image = cl_image.replace("beacon-chain", "validator")
@@ -789,8 +810,13 @@ def parse_network_params(plan, input_args):
 
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
-            # unless we are running lighthouse, we don't support blobber
-            if participant["cl_type"] != constants.CL_TYPE.lighthouse:
+            # lighthouse, lodestar, prysm, and grandine support blobber
+            if participant["cl_type"] not in [
+                constants.CL_TYPE.lighthouse,
+                constants.CL_TYPE.lodestar,
+                constants.CL_TYPE.prysm,
+                constants.CL_TYPE.grandine,
+            ]:
                 fail(
                     "blobber is not supported for {0} client".format(
                         participant["cl_type"]
@@ -972,6 +998,7 @@ def default_input_args(input_args):
         "mev_type": None,
         "xatu_sentry_enabled": False,
         "apache_port": None,
+        "nginx_port": None,
         "global_tolerations": [],
         "global_node_selectors": {},
         "use_remote_signer": False,
@@ -1198,6 +1225,7 @@ def default_participant():
         },
         "blobber_enabled": False,
         "blobber_extra_params": [],
+        "blobber_image": "ethpandaops/blobber:latest",
         "builder_network_params": None,
         "keymanager_enabled": None,
     }
@@ -1246,9 +1274,7 @@ def get_default_mev_params(mev_type, preset):
     mev_relay_website_extra_args = []
     mev_relay_website_extra_env_vars = {}
     mev_builder_extra_args = []
-    mev_flood_image = "flashbots/mev-flood"
-    mev_flood_extra_args = []
-    mev_flood_seconds_per_bundle = 15
+    launch_adminer = False
     mev_builder_prometheus_config = {
         "scrape_interval": "15s",
         "labels": None,
@@ -1307,10 +1333,8 @@ def get_default_mev_params(mev_type, preset):
         "mev_relay_housekeeper_extra_env_vars": mev_relay_housekeeper_extra_env_vars,
         "mev_relay_website_extra_args": mev_relay_website_extra_args,
         "mev_relay_website_extra_env_vars": mev_relay_website_extra_env_vars,
-        "mev_flood_image": mev_flood_image,
-        "mev_flood_extra_args": mev_flood_extra_args,
-        "mev_flood_seconds_per_bundle": mev_flood_seconds_per_bundle,
         "mev_builder_prometheus_config": mev_builder_prometheus_config,
+        "launch_adminer": launch_adminer,
     }
 
 
@@ -1604,6 +1628,7 @@ def docker_cache_image_override(plan, result):
         "cl_image",
         "vc_image",
         "remote_signer_image",
+        "blobber_image",
     ]
     tooling_overridable_image = [
         "dora_params.image",
@@ -1612,7 +1637,7 @@ def docker_cache_image_override(plan, result):
         "mev_params.mev_builder_image",
         "mev_params.mev_builder_cl_image",
         "mev_params.mev_boost_image",
-        "mev_params.mev_flood_image",
+        "mev_params.mock_mev_image",
         "xatu_sentry_params.xatu_sentry_image",
         "tx_fuzz_params.image",
         "prometheus_params.image",
@@ -1641,6 +1666,13 @@ def docker_cache_image_override(plan, result):
                     + result["docker_cache_params"]["google_prefix"]
                     + "/".join(participant[images].split("/")[1:])
                 )
+            elif participant[images].startswith("ethpandaops/"):
+                # Handle ethpandaops images (including devnet-modified ones)
+                participant[images] = (
+                    result["docker_cache_params"]["url"]
+                    + result["docker_cache_params"]["dockerhub_prefix"]
+                    + participant[images]
+                )
             elif constants.CONTAINER_REGISTRY.dockerhub in participant[images]:
                 participant[images] = (
                     result["docker_cache_params"]["url"]
@@ -1657,26 +1689,34 @@ def docker_cache_image_override(plan, result):
     for tooling_image_key in tooling_overridable_image:
         image_parts = tooling_image_key.split(".")
         if (
-            result["docker_cache_params"]["url"]
+            result[image_parts[0]][image_parts[1]] != None
+            and result["docker_cache_params"]["url"]
             in result[image_parts[0]][image_parts[1]]
         ):
             break
         elif (
-            constants.CONTAINER_REGISTRY.ghcr in result[image_parts[0]][image_parts[1]]
+            result[image_parts[0]][image_parts[1]] != None
+            and constants.CONTAINER_REGISTRY.ghcr
+            in result[image_parts[0]][image_parts[1]]
         ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["github_prefix"]
                 + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
             )
-        elif constants.CONTAINER_REGISTRY.gcr in result[image_parts[0]][image_parts[1]]:
+        elif (
+            result[image_parts[0]][image_parts[1]] != None
+            and constants.CONTAINER_REGISTRY.gcr
+            in result[image_parts[0]][image_parts[1]]
+        ):
             result[image_parts[0]][image_parts[1]] = (
                 result["docker_cache_params"]["url"]
                 + result["docker_cache_params"]["google_prefix"]
                 + "/".join(result[image_parts[0]][image_parts[1]].split("/")[1:])
             )
         elif (
-            constants.CONTAINER_REGISTRY.dockerhub
+            result[image_parts[0]][image_parts[1]] != None
+            and constants.CONTAINER_REGISTRY.dockerhub
             in result[image_parts[0]][image_parts[1]]
         ):
             result[image_parts[0]][image_parts[1]] = (
@@ -1696,3 +1736,47 @@ def get_default_ethereum_genesis_generator_params():
     return {
         "image": constants.DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE,
     }
+
+
+def get_devnet_image_tag(network_name, original_image):
+    if "devnet" not in network_name:
+        return original_image
+
+    # For devnet networks, convert all client images to ethpandaops
+    if "/" in original_image:
+        # Extract just the image name (everything after the last /)
+        image_name_with_tag = original_image.split("/")[-1]
+        if ":" in image_name_with_tag:
+            image_name = image_name_with_tag.split(":")[0]
+        else:
+            image_name = image_name_with_tag
+
+        # Special case: ethereum/client-go should become ethpandaops/geth
+        if image_name == "client-go":
+            image_name = "geth"
+        # Special case: gcr.io/offchainlabs/prysm/beacon-chain should become ethpandaops/prysm-beacon-chain
+        elif image_name == "beacon-chain" and "prysm" in original_image:
+            image_name = "prysm-beacon-chain"
+        # Special case: gcr.io/offchainlabs/prysm/validator should become ethpandaops/prysm-validator
+        elif image_name == "validator" and "prysm" in original_image:
+            image_name = "prysm-validator"
+
+        return "ethpandaops/{0}:{1}".format(image_name, network_name)
+    else:
+        # Handle edge case where there's no registry prefix
+        if ":" in original_image:
+            image_name = original_image.split(":")[0]
+        else:
+            image_name = original_image
+        return "ethpandaops/{0}:{1}".format(image_name, network_name)
+
+
+def get_devnet_modified_images(network_name, default_images):
+    if "devnet" not in network_name:
+        return default_images
+
+    modified_images = {}
+    for client_type, image in default_images.items():
+        modified_images[client_type] = get_devnet_image_tag(network_name, image)
+
+    return modified_images

@@ -17,7 +17,6 @@ NETWORK_ID_TO_NAME = {
     "560048": "hoodi",
 }
 
-LAUNCH_ADMINER = True
 
 # The min/max CPU/memory that mev-relay can use
 RELAY_MIN_CPU = 500
@@ -76,7 +75,7 @@ def launch_mev_relay(
         database="postgres",
         service_name="mev-relay-postgres",
         persistent=persistent,
-        launch_adminer=LAUNCH_ADMINER,
+        launch_adminer=mev_params.launch_adminer,
         min_cpu=POSTGRES_MIN_CPU,
         max_cpu=POSTGRES_MAX_CPU,
         min_memory=POSTGRES_MIN_MEMORY,
@@ -94,6 +93,7 @@ def launch_mev_relay(
         "CAPELLA_FORK_VERSION": constants.CAPELLA_FORK_VERSION,
         "DENEB_FORK_VERSION": constants.DENEB_FORK_VERSION,
         "ELECTRA_FORK_VERSION": constants.ELECTRA_FORK_VERSION,
+        "FULU_FORK_VERSION": constants.FULU_FORK_VERSION,
         "GENESIS_VALIDATORS_ROOT": validator_root,
         "SEC_PER_SLOT": str(network_params.seconds_per_slot),
         "SLOTS_PER_EPOCH": str(32) if network_params.preset == "mainnet" else str(8),
