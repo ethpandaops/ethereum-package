@@ -49,6 +49,7 @@ def launch_mev_relay(
     port_publisher,
     index,
     global_node_selectors,
+    docker_cache_params,
 ):
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,
@@ -66,6 +67,9 @@ def launch_mev_relay(
         min_memory=REDIS_MIN_MEMORY,
         max_memory=REDIS_MAX_MEMORY,
         node_selectors=node_selectors,
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params, "library/redis:alpine"
+        ),
     )
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(
@@ -81,6 +85,9 @@ def launch_mev_relay(
         min_memory=POSTGRES_MIN_MEMORY,
         max_memory=POSTGRES_MAX_MEMORY,
         node_selectors=node_selectors,
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params, "library/postgres:alpine"
+        ),
     )
 
     network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
