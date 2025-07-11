@@ -83,19 +83,19 @@ def get_config(
     docker_cache_params,
 ):
     cmd = [
+        "monitor",
         "--init.timeout=10m",
         "--api.endpoint",
         beacon_api_url,
-        "--beacon.name",
-        full_name,
+        # "--beacon.name",
+        # full_name,
         "--libp2p.host",
         "0.0.0.0",
         "--libp2p.port",
         str(LIBP2P_PORT_NUMBER),
-        "--web.mode",
-        "--web.port",
-        str(HTTP_PORT_NUMBER),
-        "monitor",
+        # "--web.mode",
+        # "--web.port",
+        # str(HTTP_PORT_NUMBER),
     ]
 
     if len(guardian_params.extra_args) > 0:
@@ -110,4 +110,5 @@ def get_config(
         min_memory=guardian_params.min_mem,
         max_memory=guardian_params.max_mem,
         node_selectors=node_selectors,
+        tty_enabled=True,
     )
