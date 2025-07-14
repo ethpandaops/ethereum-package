@@ -35,6 +35,10 @@ def launch_guardian(
 
     guardian_services = []
 
+    env_vars = {
+        "LOGRUS_LEVEL": "debug",
+    }
+
     for index, participant in enumerate(participant_contexts):
         full_name, cl_client, el_client, _ = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
@@ -50,6 +54,7 @@ def launch_guardian(
             guardian_params,
             global_node_selectors,
             docker_cache_params,
+            env_vars,
         )
 
         plan.add_service(service_name, config)
@@ -81,10 +86,10 @@ def get_config(
     guardian_params,
     node_selectors,
     docker_cache_params,
+    env_vars,
 ):
     cmd = [
         "monitor",
-        "--init.timeout=10m",
         "--api.endpoint",
         beacon_api_url,
         # "--beacon.name",
@@ -93,6 +98,7 @@ def get_config(
         "0.0.0.0",
         "--libp2p.port",
         str(LIBP2P_PORT_NUMBER),
+        "--wait.fulu=false",
         # "--web.mode",
         # "--web.port",
         # str(HTTP_PORT_NUMBER),
@@ -104,6 +110,7 @@ def get_config(
     return ServiceConfig(
         image=guardian_params.image,
         ports=USED_PORTS,
+        env_vars=env_vars,
         cmd=cmd,
         min_cpu=guardian_params.min_cpu,
         max_cpu=guardian_params.max_cpu,

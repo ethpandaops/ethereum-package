@@ -6,6 +6,7 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 vc_shared = import_module("../../vc/shared.star")
+static_files = import_module("../../static_files/static_files.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
@@ -326,9 +327,15 @@ def get_beacon_config(
         # we do the list comprehension as the default extra_params is a proto repeated string
         cmd.extend([param for param in participant.cl_extra_params])
 
+    # Create log4j config artifact
+    log4j_config_artifact = plan.upload_files(
+        src=static_files.TEKU_LOG4J_CONFIG_DIRPATH, name="teku-log4j-config"
+    )
+
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+        "/opt/log4j": log4j_config_artifact,
     }
 
     if network_params.perfect_peerdas_enabled and participant_index < 16:
@@ -393,6 +400,7 @@ def get_beacon_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
         "user": User(uid=0, gid=0),
+        "tty_enabled": True,
     }
 
     if int(participant.cl_min_cpu) > 0:
