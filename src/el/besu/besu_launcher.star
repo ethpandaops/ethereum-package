@@ -162,7 +162,7 @@ def get_config(
         "--rpc-ws-port={0}".format(WS_PORT_NUM),
         "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--p2p-enabled=true",
-        "--p2p-host=" + port_publisher.nat_exit_ip,
+        "--p2p-host=" + port_publisher.el_nat_exit_ip,
         "--p2p-port={0}".format(discovery_port_tcp),
         "--engine-rpc-enabled=true",
         "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,

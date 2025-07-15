@@ -237,7 +237,7 @@ def get_beacon_config(
         "--eth1-rpc-urls=" + EXECUTION_ENGINE_ENDPOINT,
         # ENR
         "--disable-enr-auto-update",
-        "--enr-address=" + port_publisher.nat_exit_ip,
+        "--enr-address=" + port_publisher.cl_nat_exit_ip,
         "--enr-udp-port={0}".format(discovery_port_udp),
         "--enr-tcp-port={0}".format(discovery_port_tcp),
         # QUIC

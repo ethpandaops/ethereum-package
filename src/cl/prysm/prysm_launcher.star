@@ -241,7 +241,7 @@ def get_beacon_config(
         "--http-host=0.0.0.0",
         "--http-cors-domain=*",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
-        "--p2p-host-ip=" + port_publisher.nat_exit_ip,
+        "--p2p-host-ip=" + port_publisher.cl_nat_exit_ip,
         "--p2p-tcp-port={0}".format(discovery_port_tcp),
         "--p2p-udp-port={0}".format(discovery_port_udp),
         "--p2p-quic-port={0}".format(discovery_port_quic),

@@ -158,7 +158,7 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
-        "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
+        "--nat=extip:{0}".format(port_publisher.el_nat_exit_ip),
         "--tcp-port={0}".format(discovery_port_tcp),
         "--udp-port={0}".format(discovery_port_udp),
     ]

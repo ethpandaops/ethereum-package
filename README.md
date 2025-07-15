@@ -1075,13 +1075,8 @@ ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
   image: ethpandaops/ethereum-genesis-generator:4.1.16
 
-# Global parameter to set the exit ip address of services and public ports
+# Per-service configuration to set the exit IP address and public ports
 port_publisher:
-  # if you have a service that you want to expose on a specific interface; set that IP here
-  # if you set it to auto it gets the public ip from ident.me and sets it
-  # Defaults to constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
-  # The default value just means its the IP address of the container in which the service is running
-  nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   # Execution Layer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 32000
@@ -1089,6 +1084,10 @@ port_publisher:
   el:
     enabled: false
     public_port_start: 32000
+    # nat_exit_ip: IP address to expose for EL P2P networking
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   # Consensus Layer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 33000
@@ -1096,6 +1095,10 @@ port_publisher:
   cl:
     enabled: false
     public_port_start: 33000
+    # nat_exit_ip: IP address to expose for CL P2P networking
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   # Validator client public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 34000
@@ -1103,6 +1106,10 @@ port_publisher:
   vc:
     enabled: false
     public_port_start: 34000
+    # nat_exit_ip: IP address to expose for VC networking
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   # remote signer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 35000
@@ -1110,6 +1117,10 @@ port_publisher:
   remote_signer:
     enabled: false
     public_port_start: 35000
+    # nat_exit_ip: IP address to expose for remote signer networking
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   # Additional services public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 36000
@@ -1117,6 +1128,10 @@ port_publisher:
   additional_services:
     enabled: false
     public_port_start: 36000
+    # nat_exit_ip: IP address to expose for additional services
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
 
   # MEV public port exposed to your local machine
   # Disabled by default
@@ -1125,6 +1140,10 @@ port_publisher:
   mev:
     enabled: false
     public_port_start: 37000
+    # nat_exit_ip: IP address to expose for MEV services
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
 
   # Other public port exposed to your local machine (like ethereum metrics exporter, snooper)
   # Disabled by default
@@ -1133,6 +1152,10 @@ port_publisher:
   other:
     enabled: false
     public_port_start: 38000
+    # nat_exit_ip: IP address to expose for other services
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
 ```
 
 #### Example configurations
