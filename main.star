@@ -200,12 +200,12 @@ def run(plan, args={}):
         parallel_keystore_generation,
     )
 
-    plan.print(
-        "NODE JSON RPC URI: '{0}:{1}'".format(
-            all_participants[0].el_context.ip_addr,
-            all_participants[0].el_context.rpc_port_num,
-        )
-    )
+    # plan.print(
+    #     "NODE JSON RPC URI: '{0}:{1}'".format(
+    #         all_participants[0].el_context.ip_addr,
+    #         all_participants[0].el_context.rpc_port_num,
+    #     )
+    # )
 
     all_el_contexts = []
     all_cl_contexts = []

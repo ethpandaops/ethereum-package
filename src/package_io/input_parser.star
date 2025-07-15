@@ -226,7 +226,7 @@ def input_parser(plan, input_args):
         )
     if result["docker_cache_params"]["enabled"]:
         docker_cache_image_override(plan, result)
-    else:
+    # else:
         # plan.print("Docker cache is disabled")
 
     if result["port_publisher"]["nat_exit_ip"] == "auto":

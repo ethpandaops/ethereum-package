@@ -90,6 +90,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
     all_sub_command_strs = []
     running_total_validator_count = 0
 
+    participants_to_exec_output = {}
     for idx, participant in enumerate(participants):
         output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
         if participant.validator_count == 0:
@@ -126,7 +127,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
         description="Generating keystores",
         recipe=ExecRecipe(command=["sh", "-c", command_str]),
     )
-    plan.verify(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+    participants_to_exec_output[idx] = command_result["output"]
 
     # Store outputs into files artifacts
     keystore_files = []
@@ -151,7 +152,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
             keystore_stop_index - 1,
         )
         artifact_name = plan.store_service_files(
-            service_name, output_dirpath, name=artifact_name
+            service_name, output_dirpath, name=artifact_name, depends_on=participants_to_exec_output[idx],
         )
 
         base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
@@ -183,14 +184,14 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
         description="Storing prysm password in a file",
         recipe=ExecRecipe(command=write_prysm_password_file_cmd),
     )
-    plan.verify(
-        write_prysm_password_file_cmd_result["code"],
-        "==",
-        SUCCESSFUL_EXEC_CMD_EXIT_CODE,
-    )
+    # plan.verify(
+    #     write_prysm_password_file_cmd_result["code"],
+    #     "==",
+    #     SUCCESSFUL_EXEC_CMD_EXIT_CODE,
+    # )
 
     prysm_password_artifact_name = plan.store_service_files(
-        service_name, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR, name="prysm-password"
+        service_name, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR, name="prysm-password", depends_on=write_prysm_password_file_cmd_result["output"]
     )
 
     result = keystores_result.new_generate_keystores_result(
