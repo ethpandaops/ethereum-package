@@ -58,6 +58,7 @@ def launch(
         blobber_service.ports[BLOBBER_VALIDATOR_PROXY_PORT_ID].number,
     )
 
+
 def get_config(
     service_name,
     node_keystore_files,
