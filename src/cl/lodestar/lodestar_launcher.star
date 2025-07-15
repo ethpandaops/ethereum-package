@@ -81,7 +81,6 @@ def launch(
 
     return cl_context_obj
 
-
 def get_beacon_config(
     plan,
     launcher,

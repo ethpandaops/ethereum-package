@@ -6,7 +6,7 @@ participants:
     blobber_image: ethpandaops/blobber:latest
     blobber_extra_params:
       - --proposal-action-frequency=1
-      - "--proposal-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 30000}"
+      - "--proposal-action={\"name\": \"blob_gossip_delay\", \"delay_milliseconds\": 3000}"
     count: 1
   - el_type: geth
     el_image: ethpandaops/geth:master
