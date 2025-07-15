@@ -120,13 +120,18 @@ def launch(
 
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
+        if index != 0:
+            boot_el_client_ctxs = [all_el_contexts[0]]
+        else:
+            boot_el_client_ctxs = []
+
         el_context = launch_method(
             plan,
             el_launcher,
             el_service_name,
             participant,
             global_log_level,
-            all_el_contexts,
+            boot_el_client_ctxs,
             persistent,
             tolerations,
             node_selectors,

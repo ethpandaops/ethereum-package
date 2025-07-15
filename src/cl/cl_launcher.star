@@ -186,14 +186,14 @@ def launch(
                 network_params,
             )
         else:
-            boot_cl_client_ctx = all_cl_contexts
+            boot_cl_client_ctxs = [all_cl_contexts[0]]
             cl_context = launch_method(
                 plan,
                 cl_launcher,
                 cl_service_name,
                 participant,
                 args_with_right_defaults.global_log_level,
-                boot_cl_client_ctx,
+                boot_cl_client_ctxs,
                 el_context,
                 full_name,
                 new_cl_node_validator_keystores,
