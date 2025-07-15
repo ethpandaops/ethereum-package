@@ -229,21 +229,40 @@ def input_parser(plan, input_args):
     else:
         plan.print("Docker cache is disabled")
 
-    # Auto-detect public IP for each service group that has nat_exit_ip set to "auto"
-    public_ip = None
-    for service_group in [
-        "el",
-        "cl",
-        "vc",
-        "remote_signer",
-        "additional_services",
-        "mev",
-        "other",
-    ]:
-        if result["port_publisher"][service_group]["nat_exit_ip"] == "auto":
-            if public_ip == None:
-                public_ip = get_public_ip(plan)
-            result["port_publisher"][service_group]["nat_exit_ip"] = public_ip
+    # Handle global nat_exit_ip setting - if set, apply to all service groups
+    if result["port_publisher"]["nat_exit_ip"] != "KURTOSIS_IP_ADDR_PLACEHOLDER":
+        global_nat_exit_ip = result["port_publisher"]["nat_exit_ip"]
+        if global_nat_exit_ip == "auto":
+            global_nat_exit_ip = get_public_ip(plan)
+            result["port_publisher"]["nat_exit_ip"] = global_nat_exit_ip
+
+        # Set all service groups to use the global value
+        for service_group in [
+            "el",
+            "cl",
+            "vc",
+            "remote_signer",
+            "additional_services",
+            "mev",
+            "other",
+        ]:
+            result["port_publisher"][service_group]["nat_exit_ip"] = global_nat_exit_ip
+    else:
+        # Auto-detect public IP for each service group that has nat_exit_ip set to "auto"
+        public_ip = None
+        for service_group in [
+            "el",
+            "cl",
+            "vc",
+            "remote_signer",
+            "additional_services",
+            "mev",
+            "other",
+        ]:
+            if result["port_publisher"][service_group]["nat_exit_ip"] == "auto":
+                if public_ip == None:
+                    public_ip = get_public_ip(plan)
+                result["port_publisher"][service_group]["nat_exit_ip"] = public_ip
 
     if "prometheus_grafana" in result["additional_services"]:
         plan.print(
@@ -585,6 +604,7 @@ def input_parser(plan, input_args):
             image=result["ethereum_genesis_generator_params"]["image"],
         ),
         port_publisher=struct(
+            nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
             cl_enabled=result["port_publisher"]["cl"]["enabled"],
             cl_public_port_start=result["port_publisher"]["cl"]["public_port_start"],
             cl_nat_exit_ip=result["port_publisher"]["cl"]["nat_exit_ip"],
@@ -1468,6 +1488,7 @@ def get_default_custom_flood_params():
 
 def get_port_publisher_params(parameter_type, input_args=None):
     port_publisher_parameters = {
+        "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
         "el": {
             "enabled": False,
             "public_port_start": 32000,
@@ -1508,9 +1529,17 @@ def get_port_publisher_params(parameter_type, input_args=None):
         return port_publisher_parameters
     else:
         for setting in input_args["port_publisher"]:
-            for sub_setting in input_args["port_publisher"][setting]:
-                sub_setting_value = input_args["port_publisher"][setting][sub_setting]
-                port_publisher_parameters[setting][sub_setting] = sub_setting_value
+            if setting == "nat_exit_ip":
+                # Handle global nat_exit_ip setting
+                nat_exit_ip_value = input_args["port_publisher"][setting]
+                port_publisher_parameters[setting] = nat_exit_ip_value
+            else:
+                # Handle service group settings
+                for sub_setting in input_args["port_publisher"][setting]:
+                    sub_setting_value = input_args["port_publisher"][setting][
+                        sub_setting
+                    ]
+                    port_publisher_parameters[setting][sub_setting] = sub_setting_value
         return port_publisher_parameters
 
 
