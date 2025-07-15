@@ -333,26 +333,6 @@ def get_cl_context(
         service.ip_address, beacon_http_port.number
     )
 
-    # Blobber config
-    if participant.blobber_enabled:
-        blobber_service_name = "{0}-{1}".format("blobber", service_name)
-        blobber_config = blobber_launcher.get_config(
-            blobber_service_name,
-            node_keystore_files,
-            beacon_http_url,
-            participant.blobber_extra_params,
-            node_selectors,
-        )
-
-        blobber_service = plan.add_service(blobber_service_name, blobber_config)
-        blobber_http_port = blobber_service.ports[
-            blobber_launcher.BLOBBER_VALIDATOR_PROXY_PORT_ID
-        ]
-        blobber_http_url = "http://{0}:{1}".format(
-            blobber_service.ip_address, blobber_http_port.number
-        )
-        beacon_http_url = blobber_http_url
-
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
     beacon_node_identity_recipe = GetHttpRequestRecipe(
         endpoint="/eth/v1/node/identity",
