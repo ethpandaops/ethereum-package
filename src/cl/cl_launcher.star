@@ -41,12 +41,14 @@ def launch(
             "launch_method": lighthouse.launch,
             "get_beacon_config": lighthouse.get_beacon_config,
             "get_cl_context": lighthouse.get_cl_context,
+            "get_blobber_config": lighthouse.get_blobber_config,
         },
         constants.CL_TYPE.lodestar: {
             "launcher": lodestar.new_lodestar_launcher(el_cl_data, jwt_file),
             "launch_method": lodestar.launch,
             "get_beacon_config": lodestar.get_beacon_config,
             "get_cl_context": lodestar.get_cl_context,
+            "get_blobber_config": lodestar.get_blobber_config,
         },
         constants.CL_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(
@@ -57,6 +59,7 @@ def launch(
             "launch_method": nimbus.launch,
             "get_beacon_config": nimbus.get_beacon_config,
             "get_cl_context": nimbus.get_cl_context,
+            "get_blobber_config": nimbus.get_blobber_config,
         },
         constants.CL_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
@@ -66,6 +69,7 @@ def launch(
             "launch_method": prysm.launch,
             "get_beacon_config": prysm.get_beacon_config,
             "get_cl_context": prysm.get_cl_context,
+            "get_blobber_config": prysm.get_blobber_config,
         },
         constants.CL_TYPE.teku: {
             "launcher": teku.new_teku_launcher(
@@ -76,6 +80,7 @@ def launch(
             "launch_method": teku.launch,
             "get_beacon_config": teku.get_beacon_config,
             "get_cl_context": teku.get_cl_context,
+            "get_blobber_config": teku.get_blobber_config,
         },
         constants.CL_TYPE.grandine: {
             "launcher": grandine.new_grandine_launcher(
@@ -85,6 +90,7 @@ def launch(
             "launch_method": grandine.launch,
             "get_beacon_config": grandine.get_beacon_config,
             "get_cl_context": grandine.get_cl_context,
+            "get_blobber_config": grandine.get_blobber_config,
         },
     }
 
@@ -120,11 +126,12 @@ def launch(
                 )
             )
 
-        cl_launcher, launch_method, get_beacon_config, get_cl_context = (
+        cl_launcher, launch_method, get_beacon_config, get_cl_context, get_blobber_config = (
             cl_launchers[cl_type]["launcher"],
             cl_launchers[cl_type]["launch_method"],
             cl_launchers[cl_type]["get_beacon_config"],
             cl_launchers[cl_type]["get_cl_context"],
+            cl_launchers[cl_type]["get_blobber_config"],
         )
 
         index_str = shared_utils.zfill_custom(
@@ -185,7 +192,7 @@ def launch(
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         if index == 0:
-            result = launch_method(
+            cl_context = launch_method(
                 plan,
                 cl_launcher,
                 cl_service_name,
@@ -206,27 +213,29 @@ def launch(
                 network_params,
             )
 
-            # Handle both old (single return) and new (tuple) format
-            if type(result) == "tuple":
-                cl_context, blobber_config = result
-                if blobber_config != None:
-                    blobber_configs_with_contexts.append(
-                        struct(
-                            cl_context=cl_context,
-                            blobber_config=blobber_config,
-                            participant=participant,
-                        )
-                    )
-            else:
-                # Backward compatibility for CL clients that don't support blobbers
-                cl_context = result
-
-            all_cl_contexts.append(cl_context)
+            blobber_config = get_blobber_config(
+                plan,
+                participant,
+                cl_service_name,
+                cl_context.beacon_http_url,
+                new_cl_node_validator_keystores,
+                node_selectors,
+            )
+            if blobber_config != None:
+                blobber_configs_with_contexts.append(
+                    struct(
+                    cl_context=cl_context,
+                    blobber_config=blobber_config,
+                    participant=participant,
+                )
+            )
 
             # Add participant cl additional prometheus labels
             for metrics_info in cl_context.cl_nodes_metrics_info:
                 if metrics_info != None:
                     metrics_info["config"] = participant.prometheus_config
+
+            all_cl_contexts.append(cl_context)
         else:
             boot_cl_client_ctx = all_cl_contexts
 
@@ -257,6 +266,7 @@ def launch(
                 "participant": participant,
                 "node_selectors": node_selectors,
                 "get_cl_context": get_cl_context,
+                "get_blobber_config": get_blobber_config,
             }
 
     # add rest of cl's in parallel to speed package execution
@@ -267,6 +277,7 @@ def launch(
     for beacon_service_name, beacon_service in cl_services.items():
         info = cl_participant_info[beacon_service_name]
         get_cl_context = info["get_cl_context"]
+        get_blobber_config = info["get_blobber_config"]
         participant = info["participant"]
 
         cl_context = get_cl_context(
@@ -279,25 +290,15 @@ def launch(
             info["node_selectors"],
         )
 
-        all_cl_contexts.append(cl_context)
-
-        # Check if this participant has blobber enabled and prepare blobber config
-        if participant.blobber_enabled:
-            blobber_service_name = "blobber-{0}".format(
-                beacon_service_name.replace("cl-", "")
-            )
-            beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
-            beacon_http_url = "http://{0}:{1}".format(
-                beacon_service.ip_address, beacon_http_port.number
-            )
-
-            blobber_config = struct(
-                service_name=blobber_service_name,
-                beacon_http_url=beacon_http_url,
-                node_keystore_files=info["new_cl_node_validator_keystores"],
-                node_selectors=info["node_selectors"],
-            )
-
+        blobber_config = get_blobber_config(
+            plan,
+            participant,
+            beacon_service_name,
+            cl_context.beacon_http_url,
+            info["new_cl_node_validator_keystores"],
+            info["node_selectors"],
+        )
+        if blobber_config != None:
             blobber_configs_with_contexts.append(
                 struct(
                     cl_context=cl_context,
@@ -310,6 +311,8 @@ def launch(
         for metrics_info in cl_context.cl_nodes_metrics_info:
             if metrics_info != None:
                 metrics_info["config"] = participant.prometheus_config
+
+        all_cl_contexts.append(cl_context)
 
     return (
         all_cl_contexts,

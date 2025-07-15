@@ -82,21 +82,6 @@ def launch(
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
 
-    beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
-    beacon_http_url = "http://{0}:{1}".format(
-        beacon_service.ip_address, beacon_http_port.number
-    )
-
-    # Prepare blobber config without launching
-    blobber_config = None
-    if participant.blobber_enabled:
-        blobber_config = struct(
-            service_name="{0}-{1}".format("blobber", beacon_service_name),
-            beacon_http_url=beacon_http_url,
-            node_keystore_files=node_keystore_files,
-            node_selectors=node_selectors,
-        )
-
     cl_context_obj = get_cl_context(
         plan,
         beacon_service_name,
@@ -107,8 +92,7 @@ def launch(
         node_selectors,
     )
 
-    # Return tuple of cl_context and blobber_config
-    return (cl_context_obj, blobber_config)
+    return cl_context_obj
 
 
 def get_beacon_config(
@@ -418,3 +402,21 @@ def new_lighthouse_launcher(el_cl_genesis_data, jwt_file):
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
     )
+
+def get_blobber_config(
+    plan,
+    participant,
+    beacon_service_name,
+    beacon_http_url,
+    node_keystore_files,
+    node_selectors,
+):
+    blobber_config = None
+    if participant.blobber_enabled:
+        blobber_config = struct(
+            service_name="{0}-{1}".format("blobber", beacon_service_name),
+            beacon_http_url=beacon_http_url,
+            node_keystore_files=node_keystore_files,
+            node_selectors=node_selectors,
+        )
+    return blobber_config

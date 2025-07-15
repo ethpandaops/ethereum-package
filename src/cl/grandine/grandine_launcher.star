@@ -76,9 +76,6 @@ def launch(
 
     beacon_service = plan.add_service(beacon_service_name, config)
 
-    # Grandine doesn't support blobbers, return None for blobber config
-    blobber_config = None
-
     cl_context_obj = get_cl_context(
         plan,
         beacon_service_name,
@@ -89,8 +86,7 @@ def launch(
         node_selectors,
     )
 
-    # Return tuple of cl_context and blobber_config
-    return (cl_context_obj, blobber_config)
+    return cl_context_obj
 
 
 def get_beacon_config(
@@ -418,3 +414,14 @@ def new_grandine_launcher(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
     )
+
+def get_blobber_config(
+    plan,
+    participant,
+    beacon_service_name,
+    beacon_http_url,
+    node_keystore_files,
+    node_selectors,
+):
+    # Grandine doesn't support blobbers, return None for blobber config
+    return None

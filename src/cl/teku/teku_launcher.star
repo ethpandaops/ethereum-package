@@ -86,8 +86,7 @@ def launch(
         node_selectors,
     )
 
-    # Teku doesn't support blobbers, return None for blobber config
-    return (cl_context_obj, None)
+    return cl_context_obj
 
 
 def get_beacon_config(
@@ -431,3 +430,14 @@ def new_teku_launcher(el_cl_genesis_data, jwt_file, keymanager_file):
         jwt_file=jwt_file,
         keymanager_file=keymanager_file,
     )
+
+def get_blobber_config(
+    plan,
+    participant,
+    beacon_service_name,
+    beacon_http_url,
+    node_keystore_files,
+    node_selectors,
+):
+    # Teku doesn't support blobbers, return None for blobber config
+    return None
