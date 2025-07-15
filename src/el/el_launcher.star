@@ -1,6 +1,9 @@
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
+el_context_l = import_module("./el_context.star")
+el_admin_node_info = import_module("./el_admin_node_info.star")
+node_metrics = import_module("../node_metrics_info.star")
 
 geth = import_module("./geth/geth_launcher.star")
 besu = import_module("./besu/besu_launcher.star")
@@ -35,6 +38,8 @@ def launch(
                 network_id,
             ),
             "launch_method": geth.launch,
+            "get_config": geth.get_config,
+            "get_el_context": geth.get_el_context,
         },
         constants.EL_TYPE.besu: {
             "launcher": besu.new_besu_launcher(
@@ -42,6 +47,8 @@ def launch(
                 jwt_file,
             ),
             "launch_method": besu.launch,
+            "get_config": besu.get_config,
+            "get_el_context": besu.get_el_context,
         },
         constants.EL_TYPE.erigon: {
             "launcher": erigon.new_erigon_launcher(
@@ -50,6 +57,8 @@ def launch(
                 network_id,
             ),
             "launch_method": erigon.launch,
+            "get_config": erigon.get_config,
+            "get_el_context": erigon.get_el_context,
         },
         constants.EL_TYPE.nethermind: {
             "launcher": nethermind.new_nethermind_launcher(
@@ -57,6 +66,8 @@ def launch(
                 jwt_file,
             ),
             "launch_method": nethermind.launch,
+            "get_config": nethermind.get_config,
+            "get_el_context": nethermind.get_el_context,
         },
         constants.EL_TYPE.reth: {
             "launcher": reth.new_reth_launcher(
@@ -64,6 +75,8 @@ def launch(
                 jwt_file,
             ),
             "launch_method": reth.launch,
+            "get_config": reth.get_config,
+            "get_el_context": reth.get_el_context,
         },
         constants.EL_TYPE.reth_builder: {
             "launcher": reth.new_reth_launcher(
@@ -73,6 +86,8 @@ def launch(
                 mev_params=mev_params,
             ),
             "launch_method": reth.launch,
+            "get_config": reth.get_config,
+            "get_el_context": reth.get_el_context,
         },
         constants.EL_TYPE.ethereumjs: {
             "launcher": ethereumjs.new_ethereumjs_launcher(
@@ -80,6 +95,8 @@ def launch(
                 jwt_file,
             ),
             "launch_method": ethereumjs.launch,
+            "get_config": ethereumjs.get_config,
+            "get_el_context": ethereumjs.get_el_context,
         },
         constants.EL_TYPE.nimbus: {
             "launcher": nimbus_eth1.new_nimbus_launcher(
@@ -87,11 +104,16 @@ def launch(
                 jwt_file,
             ),
             "launch_method": nimbus_eth1.launch,
+            "get_config": nimbus_eth1.get_config,
+            "get_el_context": nimbus_eth1.get_el_context,
         },
     }
 
     all_el_contexts = []
     network_name = shared_utils.get_network_name(network_params.network)
+    el_service_configs = {}
+    el_participant_info = {}
+
     for index, participant in enumerate(participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
@@ -110,9 +132,10 @@ def launch(
                 )
             )
 
-        el_launcher, launch_method = (
+        el_launcher, launch_method, get_config = (
             el_launchers[el_type]["launcher"],
             el_launchers[el_type]["launch_method"],
+            el_launchers[el_type]["get_config"],
         )
 
         # Zero-pad the index using the calculated zfill value
@@ -120,20 +143,67 @@ def launch(
 
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
-        el_context = launch_method(
+        if index == 0:
+            el_context = launch_method(
+                plan,
+                el_launcher,
+                el_service_name,
+                participant,
+                global_log_level,
+                all_el_contexts,
+                persistent,
+                tolerations,
+                node_selectors,
+                port_publisher,
+                index,
+                network_params,
+            )
+
+            # Add participant el additional prometheus metrics
+            for metrics_info in el_context.el_metrics_info:
+                if metrics_info != None:
+                    metrics_info["config"] = participant.prometheus_config
+
+            all_el_contexts.append(el_context)
+        else:
+            el_service_configs[el_service_name] = get_config(
+                plan,
+                el_launcher,
+                participant,
+                el_service_name,
+                all_el_contexts,
+                cl_type,
+                global_log_level,
+                persistent,
+                tolerations,
+                node_selectors,
+                port_publisher,
+                index,
+                network_params,
+            )
+
+            el_participant_info[el_service_name] = {
+                "client_name": el_type,
+                "supernode": participant.supernode,
+            }
+
+    # add remainder of el's in parallel to speed package execution
+    el_services = {}
+    if len(el_service_configs) > 0:
+        el_services = plan.add_services(el_service_configs)
+
+    # Create contexts for each service
+    for el_service_name, el_service in el_services.items():
+        el_type = el_participant_info[el_service_name]["client_name"]
+        get_el_context = el_launchers[el_type]["get_el_context"]
+
+        el_context = get_el_context(
             plan,
-            el_launcher,
             el_service_name,
-            participant,
-            global_log_level,
-            all_el_contexts,
-            persistent,
-            tolerations,
-            node_selectors,
-            port_publisher,
-            index,
-            network_params,
+            el_service,
+            el_launchers[el_type]["launcher"],
         )
+
         # Add participant el additional prometheus metrics
         for metrics_info in el_context.el_metrics_info:
             if metrics_info != None:
