@@ -79,7 +79,15 @@ def launch(
     # Grandine doesn't support blobbers, return None for blobber config
     blobber_config = None
 
-    cl_context_obj = get_cl_context(plan, beacon_service_name, beacon_service, participant, snooper_el_engine_context, node_keystore_files, node_selectors)
+    cl_context_obj = get_cl_context(
+        plan,
+        beacon_service_name,
+        beacon_service,
+        participant,
+        snooper_el_engine_context,
+        node_keystore_files,
+        node_selectors,
+    )
 
     # Return tuple of cl_context and blobber_config
     return (cl_context_obj, blobber_config)
