@@ -431,6 +431,7 @@ def new_teku_launcher(el_cl_genesis_data, jwt_file, keymanager_file):
         keymanager_file=keymanager_file,
     )
 
+
 def get_blobber_config(
     plan,
     participant,

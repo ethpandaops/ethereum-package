@@ -126,7 +126,13 @@ def launch(
                 )
             )
 
-        cl_launcher, launch_method, get_beacon_config, get_cl_context, get_blobber_config = (
+        (
+            cl_launcher,
+            launch_method,
+            get_beacon_config,
+            get_cl_context,
+            get_blobber_config,
+        ) = (
             cl_launchers[cl_type]["launcher"],
             cl_launchers[cl_type]["launch_method"],
             cl_launchers[cl_type]["get_beacon_config"],
@@ -192,7 +198,7 @@ def launch(
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
         if index == 0:
-            result = launch_method(
+            cl_context = launch_method(
                 plan,
                 cl_launcher,
                 cl_service_name,
@@ -224,11 +230,11 @@ def launch(
             if blobber_config != None:
                 blobber_configs_with_contexts.append(
                     struct(
-                    cl_context=cl_context,
-                    blobber_config=blobber_config,
-                    participant=participant,
+                        cl_context=cl_context,
+                        blobber_config=blobber_config,
+                        participant=participant,
+                    )
                 )
-            )
 
             # Add participant cl additional prometheus labels
             for metrics_info in cl_context.cl_nodes_metrics_info:
@@ -306,7 +312,7 @@ def launch(
                     participant=participant,
                 )
             )
-              
+
         # Add participant cl additional prometheus labels
         for metrics_info in cl_context.cl_nodes_metrics_info:
             if metrics_info != None:

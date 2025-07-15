@@ -403,6 +403,7 @@ def new_lighthouse_launcher(el_cl_genesis_data, jwt_file):
         jwt_file=jwt_file,
     )
 
+
 def get_blobber_config(
     plan,
     participant,

@@ -81,6 +81,7 @@ def launch(
 
     return cl_context_obj
 
+
 def get_beacon_config(
     plan,
     launcher,
@@ -367,6 +368,7 @@ def new_lodestar_launcher(el_cl_genesis_data, jwt_file):
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
     )
+
 
 def get_blobber_config(
     plan,
