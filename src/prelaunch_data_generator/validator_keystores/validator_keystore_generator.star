@@ -90,7 +90,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
     all_sub_command_strs = []
     running_total_validator_count = 0
 
-    participants_to_exec_output = {}
+    # participants_to_exec_output = {}
     for idx, participant in enumerate(participants):
         output_dirpath = NODE_KEYSTORES_OUTPUT_DIRPATH_FORMAT_STR.format(idx, "")
         if participant.validator_count == 0:
@@ -127,7 +127,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
         description="Generating keystores",
         recipe=ExecRecipe(command=["sh", "-c", command_str]),
     )
-    participants_to_exec_output[idx] = command_result["output"]
+    # participants_to_exec_output[idx] = command_result["output"]
 
     # Store outputs into files artifacts
     keystore_files = []
@@ -152,7 +152,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
             keystore_stop_index - 1,
         )
         artifact_name = plan.store_service_files(
-            service_name, output_dirpath, name=artifact_name, depends_on=participants_to_exec_output[idx],
+            service_name, output_dirpath, name=artifact_name, depends_on=command_result["output"],
         )
 
         base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
