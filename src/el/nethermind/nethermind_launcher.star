@@ -136,7 +136,7 @@ def get_config(
         "--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
         "--JsonRpc.EngineHost=0.0.0.0",
         "--JsonRpc.EnginePort={0}".format(ENGINE_RPC_PORT_NUM),
-        "--Network.ExternalIp={0}".format(port_publisher.nat_exit_ip),
+        "--Network.ExternalIp={0}".format(port_publisher.el_nat_exit_ip),
         "--Network.DiscoveryPort={0}".format(discovery_port_tcp),
         "--Network.P2PPort={0}".format(discovery_port_tcp),
         "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,

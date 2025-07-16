@@ -184,7 +184,7 @@ def get_config(
             "--ws.port={0}".format(WS_PORT_NUM),
             "--ws.api=net,eth",
             "--ws.origins=*",
-            "--nat=extip:" + port_publisher.nat_exit_ip,
+            "--nat=extip:" + port_publisher.el_nat_exit_ip,
             "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
             "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
             "--authrpc.addr=0.0.0.0",

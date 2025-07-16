@@ -147,7 +147,7 @@ def get_config(
         "--http.vhosts=*",
         "--ws",
         "--allow-insecure-unlock",
-        "--nat=extip:" + port_publisher.nat_exit_ip,
+        "--nat=extip:" + port_publisher.el_nat_exit_ip,
         "--http",
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",

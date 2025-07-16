@@ -1063,13 +1063,14 @@ ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
   image: ethpandaops/ethereum-genesis-generator:4.1.17
 
-# Global parameter to set the exit ip address of services and public ports
+# Configuration for public ports and NAT exit IP addresses
 port_publisher:
-  # if you have a service that you want to expose on a specific interface; set that IP here
-  # if you set it to auto it gets the public ip from ident.me and sets it
-  # Defaults to constants.PRIVATE_IP_ADDRESS_PLACEHOLDER
-  # The default value just means its the IP address of the container in which the service is running
+  # Global NAT exit IP address for all services (optional)
+  # If set, this will be used for all service groups (overrides individual nat_exit_ip settings)
+  # Set to "auto" to automatically detect public IP from ident.me
+  # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (uses per-service settings)
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+  
   # Execution Layer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 32000
@@ -1077,6 +1078,12 @@ port_publisher:
   el:
     enabled: false
     public_port_start: 32000
+    # nat_exit_ip: IP address to expose for EL P2P networking (optional)
+    # Only used if global nat_exit_ip is not set
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+  
   # Consensus Layer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 33000
@@ -1084,6 +1091,12 @@ port_publisher:
   cl:
     enabled: false
     public_port_start: 33000
+    # nat_exit_ip: IP address to expose for CL P2P networking (optional)
+    # Only used if global nat_exit_ip is not set
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+  
   # Validator client public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 34000
@@ -1091,6 +1104,12 @@ port_publisher:
   vc:
     enabled: false
     public_port_start: 34000
+    # nat_exit_ip: IP address to expose for VC networking (optional)
+    # Only used if global nat_exit_ip is not set
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+  
   # remote signer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 35000
@@ -1098,6 +1117,12 @@ port_publisher:
   remote_signer:
     enabled: false
     public_port_start: 35000
+    # nat_exit_ip: IP address to expose for remote signer networking (optional)
+    # Only used if global nat_exit_ip is not set
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+  
   # Additional services public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 36000
@@ -1105,6 +1130,11 @@ port_publisher:
   additional_services:
     enabled: false
     public_port_start: 36000
+    # nat_exit_ip: IP address to expose for additional services (optional)
+    # Only used if global nat_exit_ip is not set
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
 
   # MEV public port exposed to your local machine
   # Disabled by default
@@ -1113,6 +1143,11 @@ port_publisher:
   mev:
     enabled: false
     public_port_start: 37000
+    # nat_exit_ip: IP address to expose for MEV services (optional)
+    # Only used if global nat_exit_ip is not set
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
 
   # Other public port exposed to your local machine (like ethereum metrics exporter, snooper)
   # Disabled by default
@@ -1121,9 +1156,69 @@ port_publisher:
   other:
     enabled: false
     public_port_start: 38000
+    # nat_exit_ip: IP address to expose for other services (optional)
+    # Only used if global nat_exit_ip is not set
+    # Set to "auto" to automatically detect public IP from ident.me
+    # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
 ```
 
 #### Example configurations
+
+<details>
+    <summary>Port Publisher Configuration Examples</summary>
+
+**Global NAT Exit IP (Backward Compatible)**
+```yaml
+port_publisher:
+  nat_exit_ip: "auto"  # All services use auto-detected public IP
+  el:
+    enabled: true
+    public_port_start: 32000
+  cl:
+    enabled: true
+    public_port_start: 33000
+  additional_services:
+    enabled: true
+    public_port_start: 36000
+```
+
+**Per-Service NAT Exit IP (Granular Control)**
+```yaml
+port_publisher:
+  nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER  # Not set globally
+  el:
+    enabled: true
+    public_port_start: 32000
+    nat_exit_ip: "auto"  # Only EL uses public IP
+  cl:
+    enabled: true
+    public_port_start: 33000
+    nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER  # CL uses container IP
+  additional_services:
+    enabled: true
+    public_port_start: 36000
+    nat_exit_ip: "192.168.1.100"  # Custom IP for additional services
+```
+
+**Mixed Configuration**
+```yaml
+port_publisher:
+  nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER  # Not set globally
+  el:
+    enabled: true
+    public_port_start: 32000
+    nat_exit_ip: "auto"  # Auto-detect for EL
+  cl:
+    enabled: true
+    public_port_start: 33000
+    nat_exit_ip: "auto"  # Auto-detect for CL
+  additional_services:
+    enabled: true
+    public_port_start: 36000
+    # Uses default KURTOSIS_IP_ADDR_PLACEHOLDER for additional services
+```
+</details>
 
 <details>
     <summary>Verkle configuration example</summary>

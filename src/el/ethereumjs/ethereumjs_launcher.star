@@ -157,7 +157,7 @@ def get_config(
         "--wsEnginePort={0}".format(WS_PORT_ENGINE_NUM),
         "--wsEngineAddr=0.0.0.0",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--extIP={0}".format(port_publisher.nat_exit_ip),
+        "--extIP={0}".format(port_publisher.el_nat_exit_ip),
         "--sync=full",
         "--isSingleNode=true",
         "--logLevel={0}".format(log_level),

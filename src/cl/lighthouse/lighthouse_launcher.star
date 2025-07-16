@@ -194,7 +194,7 @@ def get_beacon_config(
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # ENR
         "--disable-enr-auto-update",
-        "--enr-address=" + port_publisher.nat_exit_ip,
+        "--enr-address=" + port_publisher.cl_nat_exit_ip,
         "--enr-tcp-port={0}".format(discovery_port_tcp),
         "--enr-udp-port={0}".format(discovery_port_udp),
         # QUIC

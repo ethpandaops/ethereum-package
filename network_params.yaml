@@ -227,3 +227,6 @@ port_publisher:
   mev:
     enabled: false
     public_port_start: 37000
+  other:
+    enabled: false
+    public_port_start: 38000

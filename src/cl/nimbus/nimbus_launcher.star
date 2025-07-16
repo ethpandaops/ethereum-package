@@ -204,7 +204,7 @@ def get_beacon_config(
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
-        "--nat=extip:" + port_publisher.nat_exit_ip,
+        "--nat=extip:" + port_publisher.cl_nat_exit_ip,
         "--enr-auto-update=false",
         "--history={0}".format("archive" if constants.ARCHIVE_MODE else "prune"),
         "--rest",

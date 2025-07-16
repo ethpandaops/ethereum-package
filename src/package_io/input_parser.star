@@ -229,8 +229,40 @@ def input_parser(plan, input_args):
     else:
         plan.print("Docker cache is disabled")
 
-    if result["port_publisher"]["nat_exit_ip"] == "auto":
-        result["port_publisher"]["nat_exit_ip"] = get_public_ip(plan)
+    # Handle global nat_exit_ip setting - if set, apply to all service groups
+    if result["port_publisher"]["nat_exit_ip"] != "KURTOSIS_IP_ADDR_PLACEHOLDER":
+        global_nat_exit_ip = result["port_publisher"]["nat_exit_ip"]
+        if global_nat_exit_ip == "auto":
+            global_nat_exit_ip = get_public_ip(plan)
+            result["port_publisher"]["nat_exit_ip"] = global_nat_exit_ip
+
+        # Set all service groups to use the global value
+        for service_group in [
+            "el",
+            "cl",
+            "vc",
+            "remote_signer",
+            "additional_services",
+            "mev",
+            "other",
+        ]:
+            result["port_publisher"][service_group]["nat_exit_ip"] = global_nat_exit_ip
+    else:
+        # Auto-detect public IP for each service group that has nat_exit_ip set to "auto"
+        public_ip = None
+        for service_group in [
+            "el",
+            "cl",
+            "vc",
+            "remote_signer",
+            "additional_services",
+            "mev",
+            "other",
+        ]:
+            if result["port_publisher"][service_group]["nat_exit_ip"] == "auto":
+                if public_ip == None:
+                    public_ip = get_public_ip(plan)
+                result["port_publisher"][service_group]["nat_exit_ip"] = public_ip
 
     if "prometheus_grafana" in result["additional_services"]:
         plan.print(
@@ -569,13 +601,19 @@ def input_parser(plan, input_args):
             nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
             cl_enabled=result["port_publisher"]["cl"]["enabled"],
             cl_public_port_start=result["port_publisher"]["cl"]["public_port_start"],
+            cl_nat_exit_ip=result["port_publisher"]["cl"]["nat_exit_ip"],
             el_enabled=result["port_publisher"]["el"]["enabled"],
             el_public_port_start=result["port_publisher"]["el"]["public_port_start"],
+            el_nat_exit_ip=result["port_publisher"]["el"]["nat_exit_ip"],
             vc_enabled=result["port_publisher"]["vc"]["enabled"],
             vc_public_port_start=result["port_publisher"]["vc"]["public_port_start"],
+            vc_nat_exit_ip=result["port_publisher"]["vc"]["nat_exit_ip"],
             remote_signer_enabled=result["port_publisher"]["remote_signer"]["enabled"],
             remote_signer_public_port_start=result["port_publisher"]["remote_signer"][
                 "public_port_start"
+            ],
+            remote_signer_nat_exit_ip=result["port_publisher"]["remote_signer"][
+                "nat_exit_ip"
             ],
             additional_services_enabled=result["port_publisher"]["additional_services"][
                 "enabled"
@@ -583,12 +621,17 @@ def input_parser(plan, input_args):
             additional_services_public_port_start=result["port_publisher"][
                 "additional_services"
             ]["public_port_start"],
+            additional_services_nat_exit_ip=result["port_publisher"][
+                "additional_services"
+            ]["nat_exit_ip"],
             mev_enabled=result["port_publisher"]["mev"]["enabled"],
             mev_public_port_start=result["port_publisher"]["mev"]["public_port_start"],
+            mev_nat_exit_ip=result["port_publisher"]["mev"]["nat_exit_ip"],
             other_enabled=result["port_publisher"]["other"]["enabled"],
             other_public_port_start=result["port_publisher"]["other"][
                 "public_port_start"
             ],
+            other_nat_exit_ip=result["port_publisher"]["other"]["nat_exit_ip"],
         ),
     )
 
@@ -1428,22 +1471,52 @@ def get_default_custom_flood_params():
 def get_port_publisher_params(parameter_type, input_args=None):
     port_publisher_parameters = {
         "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
-        "el": {"enabled": False, "public_port_start": 32000},
-        "cl": {"enabled": False, "public_port_start": 33000},
-        "vc": {"enabled": False, "public_port_start": 34000},
-        "remote_signer": {"enabled": False, "public_port_start": 35000},
-        "additional_services": {"enabled": False, "public_port_start": 36000},
-        "mev": {"enabled": False, "public_port_start": 37000},
-        "other": {"enabled": False, "public_port_start": 38000},
+        "el": {
+            "enabled": False,
+            "public_port_start": 32000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "cl": {
+            "enabled": False,
+            "public_port_start": 33000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "vc": {
+            "enabled": False,
+            "public_port_start": 34000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "remote_signer": {
+            "enabled": False,
+            "public_port_start": 35000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "additional_services": {
+            "enabled": False,
+            "public_port_start": 36000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "mev": {
+            "enabled": False,
+            "public_port_start": 37000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "other": {
+            "enabled": False,
+            "public_port_start": 38000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
     }
     if parameter_type == "default":
         return port_publisher_parameters
     else:
         for setting in input_args["port_publisher"]:
             if setting == "nat_exit_ip":
+                # Handle global nat_exit_ip setting
                 nat_exit_ip_value = input_args["port_publisher"][setting]
                 port_publisher_parameters[setting] = nat_exit_ip_value
             else:
+                # Handle service group settings
                 for sub_setting in input_args["port_publisher"][setting]:
                     sub_setting_value = input_args["port_publisher"][setting][
                         sub_setting

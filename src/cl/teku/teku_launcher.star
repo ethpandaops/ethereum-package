@@ -182,7 +182,7 @@ def get_beacon_config(
         ),
         "--p2p-enabled=true",
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
-        "--p2p-advertised-ip=" + port_publisher.nat_exit_ip,
+        "--p2p-advertised-ip=" + port_publisher.cl_nat_exit_ip,
         "--p2p-discovery-site-local-addresses-enabled=true",
         "--p2p-port={0}".format(discovery_port_tcp),
         "--rest-api-enabled=true",

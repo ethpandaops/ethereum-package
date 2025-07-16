@@ -172,7 +172,7 @@ def get_beacon_config(
         "--nat=true",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # ENR
-        "--enr.ip=" + port_publisher.nat_exit_ip,
+        "--enr.ip=" + port_publisher.cl_nat_exit_ip,
         "--enr.tcp={0}".format(discovery_port_tcp),
         "--enr.udp={0}".format(discovery_port_udp),
         # QUIC
