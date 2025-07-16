@@ -9,6 +9,23 @@ SERVICE_NAME_FRONTEND = "blockscout-frontend"
 HTTP_PORT_NUMBER = 4000
 HTTP_PORT_NUMBER_VERIF = 8050
 HTTP_PORT_NUMBER_FRONTEND = 3000
+
+
+def get_api_host(blockscout_service, port_publisher):
+    if port_publisher.additional_services_enabled:
+        return port_publisher.additional_services_nat_exit_ip
+    return blockscout_service.ip_address
+
+
+def get_api_port(blockscout_service, port_publisher):
+    if port_publisher.additional_services_enabled:
+        public_ports = shared_utils.get_public_ports_for_component(
+            "additional_services", port_publisher, 0
+        )
+        return public_ports[0]  # First port for the API
+    return blockscout_service.ports["http"].number
+
+
 BLOCKSCOUT_MIN_CPU = 100
 BLOCKSCOUT_MAX_CPU = 1000
 BLOCKSCOUT_MIN_MEMORY = 1024
@@ -238,9 +255,9 @@ def get_config_frontend(
             "NEXT_PUBLIC_NETWORK_NAME": "Kurtosis",
             "NEXT_PUBLIC_NETWORK_ID": network_params.network_id,
             "NEXT_PUBLIC_NETWORK_RPC_URL": el_client_rpc_url,
-            "NEXT_PUBLIC_API_HOST": blockscout_service.ip_address
+            "NEXT_PUBLIC_API_HOST": get_api_host(blockscout_service, port_publisher)
             + ":"
-            + str(blockscout_service.ports["http"].number),
+            + str(get_api_port(blockscout_service, port_publisher)),
             "NEXT_PUBLIC_AD_BANNER_PROVIDER": "none",
             "NEXT_PUBLIC_AD_TEXT_PROVIDER": "none",
             "NEXT_PUBLIC_IS_TESTNET": "true",
