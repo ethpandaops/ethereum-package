@@ -127,6 +127,7 @@ def launch_blockscout(
         network_params,
         global_node_selectors,
         blockscout_service,
+        port_publisher,
     )
     plan.add_service(SERVICE_NAME_FRONTEND, config_frontend)
     return blockscout_url
@@ -240,6 +241,7 @@ def get_config_frontend(
     network_params,
     node_selectors,
     blockscout_service,
+    port_publisher,
 ):
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
