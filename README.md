@@ -668,8 +668,6 @@ network_params:
   # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
   gas_limit: 0
 
-  # Maximum number of blobs per transaction for Fulu fork (default 0)
-  fulu_max_blobs_per_tx: 0
 
   # BPO
   # BPO1 epoch (default 18446744073709551615)
@@ -678,8 +676,6 @@ network_params:
   bpo_1_max_blobs: 12
   # Target number of blobs per block for BPO1 (default 9)
   bpo_1_target_blobs: 9
-  # Maximum number of blobs per transaction for BPO1 (default 0)
-  bpo_1_max_blobs_per_tx: 0
   # Base fee update fraction for BPO1 (default 5007716)
   bpo_1_base_fee_update_fraction: 5007716
 
@@ -689,8 +685,6 @@ network_params:
   bpo_2_max_blobs: 12
   # Target number of blobs per block for BPO2 (default 9)
   bpo_2_target_blobs: 9
-  # Maximum number of blobs per transaction for BPO2 (default 0)
-  bpo_2_max_blobs_per_tx: 0
   # Base fee update fraction for BPO2 (default 5007716)
   bpo_2_base_fee_update_fraction: 5007716
 
@@ -700,8 +694,6 @@ network_params:
   bpo_3_max_blobs: 12
   # Target number of blobs per block for BPO3 (default 9)
   bpo_3_target_blobs: 9
-  # Maximum number of blobs per transaction for BPO3 (default 0)
-  bpo_3_max_blobs_per_tx: 0
   # Base fee update fraction for BPO3 (default 5007716)
   bpo_3_base_fee_update_fraction: 5007716
 
@@ -711,8 +703,6 @@ network_params:
   bpo_4_max_blobs: 12
   # Target number of blobs per block for BPO4 (default 9)
   bpo_4_target_blobs: 9
-  # Maximum number of blobs per transaction for BPO4 (default 0)
-  bpo_4_max_blobs_per_tx: 0
   # Base fee update fraction for BPO4 (default 5007716)
   bpo_4_base_fee_update_fraction: 5007716
 
@@ -722,8 +712,6 @@ network_params:
   bpo_5_max_blobs: 12
   # Target number of blobs per block for BPO5 (default 9)
   bpo_5_target_blobs: 9
-  # Maximum number of blobs per transaction for BPO5 (default 0)
-  bpo_5_max_blobs_per_tx: 0
   # Base fee update fraction for BPO5 (default 5007716)
   bpo_5_base_fee_update_fraction: 5007716
 
@@ -1073,7 +1061,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.1.16
+  image: ethpandaops/ethereum-genesis-generator:4.1.17
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
