@@ -1226,7 +1226,7 @@ ethereum_metrics_exporter_enabled: true
 
 |               | Lighthouse VC | Prysm VC | Teku VC | Lodestar VC | Nimbus VC
 |---------------|---------------|----------|---------|-------------|-----------|
-| Lighthouse BN | ✅            | ❌       | ✅      | ✅          | ✅
+| Lighthouse BN | ✅            | ✅       | ✅      | ✅          | ✅
 | Prysm BN      | ✅            | ✅       | ✅      | ✅          | ✅
 | Teku BN       | ✅            | ✅       | ✅      | ✅          | ✅
 | Lodestar BN   | ✅            | ✅       | ✅      | ✅          | ✅
