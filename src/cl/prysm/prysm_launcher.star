@@ -351,6 +351,7 @@ def get_cl_context(
             "multiaddr": ".data.p2p_addresses[0]",
             "peer_id": ".data.peer_id",
         },
+        headers={"Accept-Encoding": "identity"},
     )
     response = plan.request(
         recipe=beacon_node_identity_recipe, service_name=service_name
