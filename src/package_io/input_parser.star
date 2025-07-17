@@ -235,8 +235,40 @@ def input_parser(plan, input_args):
     else:
         plan.print("Docker cache is disabled")
 
-    if result["port_publisher"]["nat_exit_ip"] == "auto":
-        result["port_publisher"]["nat_exit_ip"] = get_public_ip(plan)
+    # Handle global nat_exit_ip setting - if set, apply to all service groups
+    if result["port_publisher"]["nat_exit_ip"] != "KURTOSIS_IP_ADDR_PLACEHOLDER":
+        global_nat_exit_ip = result["port_publisher"]["nat_exit_ip"]
+        if global_nat_exit_ip == "auto":
+            global_nat_exit_ip = get_public_ip(plan)
+            result["port_publisher"]["nat_exit_ip"] = global_nat_exit_ip
+
+        # Set all service groups to use the global value
+        for service_group in [
+            "el",
+            "cl",
+            "vc",
+            "remote_signer",
+            "additional_services",
+            "mev",
+            "other",
+        ]:
+            result["port_publisher"][service_group]["nat_exit_ip"] = global_nat_exit_ip
+    else:
+        # Auto-detect public IP for each service group that has nat_exit_ip set to "auto"
+        public_ip = None
+        for service_group in [
+            "el",
+            "cl",
+            "vc",
+            "remote_signer",
+            "additional_services",
+            "mev",
+            "other",
+        ]:
+            if result["port_publisher"][service_group]["nat_exit_ip"] == "auto":
+                if public_ip == None:
+                    public_ip = get_public_ip(plan)
+                result["port_publisher"][service_group]["nat_exit_ip"] = public_ip
 
     if "prometheus_grafana" in result["additional_services"]:
         plan.print(
@@ -394,39 +426,33 @@ def input_parser(plan, input_args):
             base_fee_update_fraction_electra=result["network_params"][
                 "base_fee_update_fraction_electra"
             ],
-            fulu_max_blobs_per_tx=result["network_params"]["fulu_max_blobs_per_tx"],
             bpo_1_epoch=result["network_params"]["bpo_1_epoch"],
             bpo_1_max_blobs=result["network_params"]["bpo_1_max_blobs"],
             bpo_1_target_blobs=result["network_params"]["bpo_1_target_blobs"],
-            bpo_1_max_blobs_per_tx=result["network_params"]["bpo_1_max_blobs_per_tx"],
             bpo_1_base_fee_update_fraction=result["network_params"][
                 "bpo_1_base_fee_update_fraction"
             ],
             bpo_2_epoch=result["network_params"]["bpo_2_epoch"],
             bpo_2_max_blobs=result["network_params"]["bpo_2_max_blobs"],
             bpo_2_target_blobs=result["network_params"]["bpo_2_target_blobs"],
-            bpo_2_max_blobs_per_tx=result["network_params"]["bpo_2_max_blobs_per_tx"],
             bpo_2_base_fee_update_fraction=result["network_params"][
                 "bpo_2_base_fee_update_fraction"
             ],
             bpo_3_epoch=result["network_params"]["bpo_3_epoch"],
             bpo_3_max_blobs=result["network_params"]["bpo_3_max_blobs"],
             bpo_3_target_blobs=result["network_params"]["bpo_3_target_blobs"],
-            bpo_3_max_blobs_per_tx=result["network_params"]["bpo_3_max_blobs_per_tx"],
             bpo_3_base_fee_update_fraction=result["network_params"][
                 "bpo_3_base_fee_update_fraction"
             ],
             bpo_4_epoch=result["network_params"]["bpo_4_epoch"],
             bpo_4_max_blobs=result["network_params"]["bpo_4_max_blobs"],
             bpo_4_target_blobs=result["network_params"]["bpo_4_target_blobs"],
-            bpo_4_max_blobs_per_tx=result["network_params"]["bpo_4_max_blobs_per_tx"],
             bpo_4_base_fee_update_fraction=result["network_params"][
                 "bpo_4_base_fee_update_fraction"
             ],
             bpo_5_epoch=result["network_params"]["bpo_5_epoch"],
             bpo_5_max_blobs=result["network_params"]["bpo_5_max_blobs"],
             bpo_5_target_blobs=result["network_params"]["bpo_5_target_blobs"],
-            bpo_5_max_blobs_per_tx=result["network_params"]["bpo_5_max_blobs_per_tx"],
             bpo_5_base_fee_update_fraction=result["network_params"][
                 "bpo_5_base_fee_update_fraction"
             ],
@@ -589,13 +615,19 @@ def input_parser(plan, input_args):
             nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
             cl_enabled=result["port_publisher"]["cl"]["enabled"],
             cl_public_port_start=result["port_publisher"]["cl"]["public_port_start"],
+            cl_nat_exit_ip=result["port_publisher"]["cl"]["nat_exit_ip"],
             el_enabled=result["port_publisher"]["el"]["enabled"],
             el_public_port_start=result["port_publisher"]["el"]["public_port_start"],
+            el_nat_exit_ip=result["port_publisher"]["el"]["nat_exit_ip"],
             vc_enabled=result["port_publisher"]["vc"]["enabled"],
             vc_public_port_start=result["port_publisher"]["vc"]["public_port_start"],
+            vc_nat_exit_ip=result["port_publisher"]["vc"]["nat_exit_ip"],
             remote_signer_enabled=result["port_publisher"]["remote_signer"]["enabled"],
             remote_signer_public_port_start=result["port_publisher"]["remote_signer"][
                 "public_port_start"
+            ],
+            remote_signer_nat_exit_ip=result["port_publisher"]["remote_signer"][
+                "nat_exit_ip"
             ],
             additional_services_enabled=result["port_publisher"]["additional_services"][
                 "enabled"
@@ -603,12 +635,17 @@ def input_parser(plan, input_args):
             additional_services_public_port_start=result["port_publisher"][
                 "additional_services"
             ]["public_port_start"],
+            additional_services_nat_exit_ip=result["port_publisher"][
+                "additional_services"
+            ]["nat_exit_ip"],
             mev_enabled=result["port_publisher"]["mev"]["enabled"],
             mev_public_port_start=result["port_publisher"]["mev"]["public_port_start"],
+            mev_nat_exit_ip=result["port_publisher"]["mev"]["nat_exit_ip"],
             other_enabled=result["port_publisher"]["other"]["enabled"],
             other_public_port_start=result["port_publisher"]["other"][
                 "public_port_start"
             ],
+            other_nat_exit_ip=result["port_publisher"]["other"]["nat_exit_ip"],
         ),
     )
 
@@ -1070,31 +1107,25 @@ def default_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
-        "fulu_max_blobs_per_tx": 0,
         "bpo_1_epoch": 18446744073709551615,
         "bpo_1_max_blobs": 12,
         "bpo_1_target_blobs": 9,
-        "bpo_1_max_blobs_per_tx": 0,
         "bpo_1_base_fee_update_fraction": 5007716,
         "bpo_2_epoch": 18446744073709551615,
         "bpo_2_max_blobs": 12,
         "bpo_2_target_blobs": 9,
-        "bpo_2_max_blobs_per_tx": 0,
         "bpo_2_base_fee_update_fraction": 5007716,
         "bpo_3_epoch": 18446744073709551615,
         "bpo_3_max_blobs": 12,
         "bpo_3_target_blobs": 9,
-        "bpo_3_max_blobs_per_tx": 0,
         "bpo_3_base_fee_update_fraction": 5007716,
         "bpo_4_epoch": 18446744073709551615,
         "bpo_4_max_blobs": 12,
         "bpo_4_target_blobs": 9,
-        "bpo_4_max_blobs_per_tx": 0,
         "bpo_4_base_fee_update_fraction": 5007716,
         "bpo_5_epoch": 18446744073709551615,
         "bpo_5_max_blobs": 12,
         "bpo_5_target_blobs": 9,
-        "bpo_5_max_blobs_per_tx": 0,
         "bpo_5_base_fee_update_fraction": 5007716,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
@@ -1144,31 +1175,25 @@ def default_minimal_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
-        "fulu_max_blobs_per_tx": 0,
         "bpo_1_epoch": 18446744073709551615,
         "bpo_1_max_blobs": 12,
         "bpo_1_target_blobs": 9,
-        "bpo_1_max_blobs_per_tx": 0,
         "bpo_1_base_fee_update_fraction": 5007716,
         "bpo_2_epoch": 18446744073709551615,
         "bpo_2_max_blobs": 12,
         "bpo_2_target_blobs": 9,
-        "bpo_2_max_blobs_per_tx": 0,
         "bpo_2_base_fee_update_fraction": 5007716,
         "bpo_3_epoch": 18446744073709551615,
         "bpo_3_max_blobs": 12,
         "bpo_3_target_blobs": 9,
-        "bpo_3_max_blobs_per_tx": 0,
         "bpo_3_base_fee_update_fraction": 5007716,
         "bpo_4_epoch": 18446744073709551615,
         "bpo_4_max_blobs": 12,
         "bpo_4_target_blobs": 9,
-        "bpo_4_max_blobs_per_tx": 0,
         "bpo_4_base_fee_update_fraction": 5007716,
         "bpo_5_epoch": 18446744073709551615,
         "bpo_5_max_blobs": 12,
         "bpo_5_target_blobs": 9,
-        "bpo_5_max_blobs_per_tx": 0,
         "bpo_5_base_fee_update_fraction": 5007716,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
@@ -1472,22 +1497,52 @@ def get_default_custom_flood_params():
 def get_port_publisher_params(parameter_type, input_args=None):
     port_publisher_parameters = {
         "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
-        "el": {"enabled": False, "public_port_start": 32000},
-        "cl": {"enabled": False, "public_port_start": 33000},
-        "vc": {"enabled": False, "public_port_start": 34000},
-        "remote_signer": {"enabled": False, "public_port_start": 35000},
-        "additional_services": {"enabled": False, "public_port_start": 36000},
-        "mev": {"enabled": False, "public_port_start": 37000},
-        "other": {"enabled": False, "public_port_start": 38000},
+        "el": {
+            "enabled": False,
+            "public_port_start": 32000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "cl": {
+            "enabled": False,
+            "public_port_start": 33000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "vc": {
+            "enabled": False,
+            "public_port_start": 34000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "remote_signer": {
+            "enabled": False,
+            "public_port_start": 35000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "additional_services": {
+            "enabled": False,
+            "public_port_start": 36000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "mev": {
+            "enabled": False,
+            "public_port_start": 37000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
+        "other": {
+            "enabled": False,
+            "public_port_start": 38000,
+            "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
+        },
     }
     if parameter_type == "default":
         return port_publisher_parameters
     else:
         for setting in input_args["port_publisher"]:
             if setting == "nat_exit_ip":
+                # Handle global nat_exit_ip setting
                 nat_exit_ip_value = input_args["port_publisher"][setting]
                 port_publisher_parameters[setting] = nat_exit_ip_value
             else:
+                # Handle service group settings
                 for sub_setting in input_args["port_publisher"][setting]:
                     sub_setting_value = input_args["port_publisher"][setting][
                         sub_setting

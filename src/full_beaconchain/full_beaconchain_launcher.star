@@ -18,6 +18,22 @@ LITTLE_BIGTABLE_PORT_NUMBER = 9000
 
 FULL_BEACONCHAIN_CONFIG_FILENAME = "beaconchain-config.yml"
 
+
+def get_little_bigtable_host(little_bigtable, port_publisher):
+    if port_publisher.additional_services_enabled:
+        return port_publisher.additional_services_nat_exit_ip
+    return little_bigtable.ip_address
+
+
+def get_little_bigtable_port(little_bigtable, port_publisher):
+    if port_publisher.additional_services_enabled:
+        public_ports = shared_utils.get_public_ports_for_component(
+            "additional_services", port_publisher, 0
+        )
+        return public_ports[0]  # Use first port for little bigtable
+    return LITTLE_BIGTABLE_PORT_NUMBER
+
+
 # The min/max CPU/memory that postgres can use
 POSTGRES_MIN_CPU = 10
 POSTGRES_MAX_CPU = 1000
@@ -133,8 +149,8 @@ def launch_full_beacon(
         cl_contexts[0].http_port,
         cl_contexts[0].client_name,
         el_uri,
-        little_bigtable.ip_address,
-        LITTLE_BIGTABLE_PORT_NUMBER,
+        get_little_bigtable_host(little_bigtable, port_publisher),
+        get_little_bigtable_port(little_bigtable, port_publisher),
         postgres_output.service.name,
         POSTGRES_PORT_NUMBER,
         redis_url,

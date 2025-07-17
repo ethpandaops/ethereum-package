@@ -15,6 +15,7 @@ participants:
   - el_type: ethereumjs
     cl_type: grandine
 port_publisher:
+  nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:
     enabled: true
     public_port_start: 40000

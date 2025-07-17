@@ -54,16 +54,12 @@ def launch(
     participant_index,
     network_params,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     config = get_beacon_config(
         plan,
         launcher,
         beacon_service_name,
         participant,
-        log_level,
+        global_log_level,
         bootnode_contexts,
         el_context,
         full_name,
@@ -81,57 +77,17 @@ def launch(
 
     beacon_service = plan.add_service(beacon_service_name, config)
 
-    beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
-    beacon_http_url = "http://{0}:{1}".format(
-        beacon_service.ip_address, beacon_http_port.number
+    cl_context_obj = get_cl_context(
+        plan,
+        beacon_service_name,
+        beacon_service,
+        participant,
+        snooper_el_engine_context,
+        node_keystore_files,
+        node_selectors,
     )
 
-    beacon_metrics_port = beacon_service.ports[constants.METRICS_PORT_ID]
-    beacon_metrics_url = "{0}:{1}".format(
-        beacon_service.ip_address, beacon_metrics_port.number
-    )
-
-    beacon_node_identity_recipe = GetHttpRequestRecipe(
-        endpoint="/eth/v1/node/identity",
-        port_id=constants.HTTP_PORT_ID,
-        extract={
-            "enr": ".data.enr",
-            "multiaddr": ".data.p2p_addresses[0]",
-            "peer_id": ".data.peer_id",
-        },
-    )
-    response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=beacon_service_name
-    )
-    beacon_node_enr = response["extract.enr"]
-    beacon_multiaddr = response["extract.multiaddr"]
-    beacon_peer_id = response["extract.peer_id"]
-
-    beacon_node_metrics_info = node_metrics.new_node_metrics_info(
-        beacon_service_name, BEACON_METRICS_PATH, beacon_metrics_url
-    )
-    nodes_metrics_info = [beacon_node_metrics_info]
-
-    cl_context_obj = cl_context.new_cl_context(
-        client_name="teku",
-        enr=beacon_node_enr,
-        ip_addr=beacon_service.ip_address,
-        http_port=beacon_http_port.number,
-        beacon_http_url=beacon_http_url,
-        cl_nodes_metrics_info=nodes_metrics_info,
-        beacon_service_name=beacon_service_name,
-        multiaddr=beacon_multiaddr,
-        peer_id=beacon_peer_id,
-        snooper_enabled=participant.snooper_enabled,
-        snooper_el_engine_context=snooper_el_engine_context,
-        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
-        if node_keystore_files
-        else "",
-        supernode=participant.supernode,
-    )
-
-    # Teku doesn't support blobbers, return None for blobber config
-    return (cl_context_obj, None)
+    return cl_context_obj
 
 
 def get_beacon_config(
@@ -139,7 +95,7 @@ def get_beacon_config(
     launcher,
     beacon_service_name,
     participant,
-    log_level,
+    global_log_level,
     bootnode_contexts,
     el_context,
     full_name,
@@ -154,6 +110,9 @@ def get_beacon_config(
     participant_index,
     network_params,
 ):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
+    )
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
     if node_keystore_files:
@@ -224,7 +183,7 @@ def get_beacon_config(
         ),
         "--p2p-enabled=true",
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
-        "--p2p-advertised-ip=" + port_publisher.nat_exit_ip,
+        "--p2p-advertised-ip=" + port_publisher.cl_nat_exit_ip,
         "--p2p-discovery-site-local-addresses-enabled=true",
         "--p2p-port={0}".format(discovery_port_tcp),
         "--rest-api-enabled=true",
@@ -414,9 +373,80 @@ def get_beacon_config(
     return ServiceConfig(**config_args)
 
 
+def get_cl_context(
+    plan,
+    service_name,
+    service,
+    participant,
+    snooper_el_engine_context,
+    node_keystore_files,
+    node_selectors,
+):
+    beacon_http_port = service.ports[constants.HTTP_PORT_ID]
+    beacon_http_url = "http://{0}:{1}".format(
+        service.ip_address, beacon_http_port.number
+    )
+
+    beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
+    beacon_metrics_url = "{0}:{1}".format(
+        service.ip_address, beacon_metrics_port.number
+    )
+
+    beacon_node_identity_recipe = GetHttpRequestRecipe(
+        endpoint="/eth/v1/node/identity",
+        port_id=constants.HTTP_PORT_ID,
+        extract={
+            "enr": ".data.enr",
+            "multiaddr": ".data.p2p_addresses[0]",
+            "peer_id": ".data.peer_id",
+        },
+    )
+    response = plan.request(
+        recipe=beacon_node_identity_recipe, service_name=service_name
+    )
+    beacon_node_enr = response["extract.enr"]
+    beacon_multiaddr = response["extract.multiaddr"]
+    beacon_peer_id = response["extract.peer_id"]
+
+    beacon_node_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, BEACON_METRICS_PATH, beacon_metrics_url
+    )
+    nodes_metrics_info = [beacon_node_metrics_info]
+
+    return cl_context.new_cl_context(
+        client_name="teku",
+        enr=beacon_node_enr,
+        ip_addr=service.ip_address,
+        http_port=beacon_http_port.number,
+        beacon_http_url=beacon_http_url,
+        cl_nodes_metrics_info=nodes_metrics_info,
+        beacon_service_name=service_name,
+        multiaddr=beacon_multiaddr,
+        peer_id=beacon_peer_id,
+        snooper_enabled=participant.snooper_enabled,
+        snooper_el_engine_context=snooper_el_engine_context,
+        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
+        if node_keystore_files
+        else "",
+        supernode=participant.supernode,
+    )
+
+
 def new_teku_launcher(el_cl_genesis_data, jwt_file, keymanager_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         keymanager_file=keymanager_file,
     )
+
+
+def get_blobber_config(
+    plan,
+    participant,
+    beacon_service_name,
+    beacon_http_url,
+    node_keystore_files,
+    node_selectors,
+):
+    # Teku doesn't support blobbers, return None for blobber config
+    return None
