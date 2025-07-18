@@ -1061,7 +1061,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.1.17
+  image: ethpandaops/ethereum-genesis-generator:4.1.18
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
@@ -1070,7 +1070,7 @@ port_publisher:
   # Set to "auto" to automatically detect public IP from ident.me
   # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (uses per-service settings)
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # Execution Layer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 32000
@@ -1083,7 +1083,7 @@ port_publisher:
     # Set to "auto" to automatically detect public IP from ident.me
     # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # Consensus Layer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 33000
@@ -1096,7 +1096,7 @@ port_publisher:
     # Set to "auto" to automatically detect public IP from ident.me
     # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # Validator client public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 34000
@@ -1109,7 +1109,7 @@ port_publisher:
     # Set to "auto" to automatically detect public IP from ident.me
     # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # remote signer public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 35000
@@ -1122,7 +1122,7 @@ port_publisher:
     # Set to "auto" to automatically detect public IP from ident.me
     # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
-  
+
   # Additional services public port exposed to your local machine
   # Disabled by default
   # Public port start defaults to 36000
