@@ -13,6 +13,3 @@ participants:
   #  cl_type: grandine
 network_params:
   preset: minimal
-docker_cache_params:
-  enabled: true
-  url: "docker.ethquokkaops.io"
