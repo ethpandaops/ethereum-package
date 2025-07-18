@@ -25,9 +25,17 @@ def launch_txpool_viz(
     endpoints_list = []
     for participant in network_participants:
         el_metrics_info = participant.el_context.el_metrics_info
+        if (
+            el_metrics_info
+            and len(el_metrics_info) > 0
+            and "name" in el_metrics_info[0]
+        ):
+            name = el_metrics_info[0]["name"]
+        else:
+            name = "unknown"
         endpoints_list.append(
             {
-                "Name": el_metrics_info[0]["name"] if el_metrics_info else "unknown",
+                "Name": name,
                 "RPCUrl": participant.el_context.rpc_http_url,
                 "Socket": participant.el_context.ws_url,
             }
