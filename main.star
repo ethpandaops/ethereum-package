@@ -478,7 +478,7 @@ def run(plan, args={}):
                 txpool_viz_config_template,
                 all_participants,
                 args_with_right_defaults.txpool_viz_params,
-                global_node_selectors
+                global_node_selectors,
             )
         elif additional_service == "forkmon":
             plan.print("Launching el forkmon")

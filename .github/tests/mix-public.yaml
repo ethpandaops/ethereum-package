@@ -50,6 +50,7 @@ additional_services:
   - apache
   - tracoor
   - spamoor
+  - txpool_viz
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true

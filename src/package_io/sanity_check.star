@@ -310,8 +310,8 @@ SUBCATEGORY_PARAMS = {
         "filters",
         "focil_enabled",
         "log_level",
-        "env"
-    ]
+        "env",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -334,7 +334,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "nginx",
     "tracoor",
     "spamoor",
-    "txpool_viz"
+    "txpool_viz",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

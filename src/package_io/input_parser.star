@@ -1064,6 +1064,7 @@ def default_input_args(input_args):
             "public_port_start": None,
         },
         "spamoor_params": get_default_spamoor_params(),
+        "txpool_viz_params": get_default_txpool_viz_params(),
     }
 
 
@@ -1809,6 +1810,7 @@ def get_default_ethereum_genesis_generator_params():
         "image": constants.DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE,
     }
 
+
 def get_devnet_image_tag(network_name, original_image):
     if "devnet" not in network_name:
         return original_image
@@ -1841,6 +1843,7 @@ def get_devnet_image_tag(network_name, original_image):
             image_name = original_image
         return "ethpandaops/{0}:{1}".format(image_name, network_name)
 
+
 def get_devnet_modified_images(network_name, default_images):
     if "devnet" not in network_name:
         return default_images
@@ -1851,8 +1854,11 @@ def get_devnet_modified_images(network_name, default_images):
 
     return modified_images
 
+
 def get_txpool_viz_params(input_args):
-    image = input_args.get("txpool_viz_params", {}).get("image", constants.DEFAULT_TXPOOL_VIZ_IMAGE)
+    image = input_args.get("txpool_viz_params", {}).get(
+        "image", constants.DEFAULT_TXPOOL_VIZ_IMAGE
+    )
     min_cpu = input_args.get("txpool_viz_params", {}).get("min_cpu", False)
     max_cpu = input_args.get("txpool_viz_params", {}).get("max_cpu", False)
     min_mem = input_args.get("txpool_viz_params", {}).get("min_mem", False)
@@ -1860,7 +1866,9 @@ def get_txpool_viz_params(input_args):
     extra_args = input_args.get("txpool_viz_params", {}).get("extra_args", [])
     polling_args = input_args.get("txpool_viz_params", {}).get("polling", {})
     filters_args = input_args.get("txpool_viz_params", {}).get("filters", {})
-    focil_enabled = input_args.get("txpool_viz_params", {}).get("focil_enabled", "false")
+    focil_enabled = input_args.get("txpool_viz_params", {}).get(
+        "focil_enabled", "false"
+    )
     log_level = input_args.get("txpool_viz_params", {}).get("log_level", "info")
     env = input_args.get("txpool_viz_params", {}).get("env", {})
 
@@ -1885,4 +1893,25 @@ def get_txpool_viz_params(input_args):
         "focil_enabled": focil_enabled,
         "log_level": log_level,
         "env": env,
+    }
+
+
+def get_default_txpool_viz_params():
+    return {
+        "image": constants.DEFAULT_TXPOOL_VIZ_IMAGE,
+        "min_cpu": False,
+        "max_cpu": False,
+        "min_mem": False,
+        "max_mem": False,
+        "extra_args": [],
+        "polling": {
+            "interval": "0.5s",
+            "timeout": "3s",
+        },
+        "filters": {
+            "min_gas_price": "1gwei",
+        },
+        "focil_enabled": "false",
+        "log_level": "info",
+        "env": {},
     }
