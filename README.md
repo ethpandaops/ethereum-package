@@ -1061,7 +1061,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.1.18
+  image: ethpandaops/ethereum-genesis-generator:4.1.19
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
