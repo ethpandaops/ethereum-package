@@ -74,6 +74,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "dora_params",
     "docker_cache_params",
     "assertoor_params",
+    "txpool_viz_params",
     "prometheus_params",
     "grafana_params",
     "tx_fuzz_params",
@@ -179,6 +180,8 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "txpool_viz_params":
+            result["txpool_viz_params"] = get_txpool_viz_params(input_args)
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
@@ -571,6 +574,19 @@ def input_parser(plan, input_args):
             max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
+        ),
+        txpool_viz_params=struct(
+            image=result["txpool_viz_params"]["image"],
+            min_cpu=result["txpool_viz_params"]["min_cpu"],
+            max_cpu=result["txpool_viz_params"]["max_cpu"],
+            min_mem=result["txpool_viz_params"]["min_mem"],
+            max_mem=result["txpool_viz_params"]["max_mem"],
+            extra_args=result["txpool_viz_params"]["extra_args"],
+            polling=result["txpool_viz_params"]["polling"],
+            filters=result["txpool_viz_params"]["filters"],
+            focil_enabled=result["txpool_viz_params"]["focil_enabled"],
+            log_level=result["txpool_viz_params"]["log_level"],
+            env=result["txpool_viz_params"]["env"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -1048,6 +1064,7 @@ def default_input_args(input_args):
             "public_port_start": None,
         },
         "spamoor_params": get_default_spamoor_params(),
+        "txpool_viz_params": get_default_txpool_viz_params(),
     }
 
 
@@ -1698,6 +1715,7 @@ def docker_cache_image_override(plan, result):
         "prometheus_params.image",
         "grafana_params.image",
         "spamoor_params.image",
+        "txpool_viz_params.image",
         "ethereum_genesis_generator_params.image",
     ]
 
@@ -1835,3 +1853,65 @@ def get_devnet_modified_images(network_name, default_images):
         modified_images[client_type] = get_devnet_image_tag(network_name, image)
 
     return modified_images
+
+
+def get_txpool_viz_params(input_args):
+    image = input_args.get("txpool_viz_params", {}).get(
+        "image", constants.DEFAULT_TXPOOL_VIZ_IMAGE
+    )
+    min_cpu = input_args.get("txpool_viz_params", {}).get("min_cpu", False)
+    max_cpu = input_args.get("txpool_viz_params", {}).get("max_cpu", False)
+    min_mem = input_args.get("txpool_viz_params", {}).get("min_mem", False)
+    max_mem = input_args.get("txpool_viz_params", {}).get("max_mem", False)
+    extra_args = input_args.get("txpool_viz_params", {}).get("extra_args", [])
+    polling_args = input_args.get("txpool_viz_params", {}).get("polling", {})
+    filters_args = input_args.get("txpool_viz_params", {}).get("filters", {})
+    focil_enabled = input_args.get("txpool_viz_params", {}).get(
+        "focil_enabled", "false"
+    )
+    log_level = input_args.get("txpool_viz_params", {}).get("log_level", "info")
+    env = input_args.get("txpool_viz_params", {}).get("env", {})
+
+    polling_config = {
+        "interval": polling_args.get("interval", "0.5s"),
+        "timeout": polling_args.get("timeout", "3s"),
+    }
+
+    filters_config = {
+        "min_gas_price": filters_args.get("min_gas_price", "1gwei"),
+    }
+
+    return {
+        "image": image,
+        "min_cpu": min_cpu,
+        "max_cpu": max_cpu,
+        "min_mem": min_mem,
+        "max_mem": max_mem,
+        "extra_args": extra_args,
+        "polling": polling_config,
+        "filters": filters_config,
+        "focil_enabled": focil_enabled,
+        "log_level": log_level,
+        "env": env,
+    }
+
+
+def get_default_txpool_viz_params():
+    return {
+        "image": constants.DEFAULT_TXPOOL_VIZ_IMAGE,
+        "min_cpu": False,
+        "max_cpu": False,
+        "min_mem": False,
+        "max_mem": False,
+        "extra_args": [],
+        "polling": {
+            "interval": "0.5s",
+            "timeout": "3s",
+        },
+        "filters": {
+            "min_gas_price": "1gwei",
+        },
+        "focil_enabled": "false",
+        "log_level": "info",
+        "env": {},
+    }

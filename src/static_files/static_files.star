@@ -123,3 +123,9 @@ FLASHBOTS_RBUILDER_CONFIG_FILEPATH = (
 COMMIT_BOOST_CONFIG_FILEPATH = (
     STATIC_FILES_DIRPATH + "/mev/commit-boost/cb-config.toml.tmpl"
 )
+
+# txpool-viz config
+TXPOOL_VIZ_CONFIG_DIRPATH = "/txpool-viz-config"
+TXPOOL_VIZ_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + TXPOOL_VIZ_CONFIG_DIRPATH + "/config.yaml.tmpl"
+)
