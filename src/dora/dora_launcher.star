@@ -136,7 +136,12 @@ def get_config(
     )
 
     IMAGE_NAME = dora_params.image
-    env_vars = dora_params.env
+    default_env_vars = {
+        "FRONTEND_SHOW_SENSITIVE_PEER_INFOS": "true",
+        "API_ENABLED": "true",
+    }
+    env_vars = default_env_vars | (dora_params.env)
+    env_vars.update(default_env_vars)
     default_dora_image = (
         docker_cache_params.url
         + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
@@ -153,7 +158,6 @@ def get_config(
                 )
                 + "ethpandaops/dora:fulu-support"
             )
-            env_vars["FRONTEND_SHOW_SENSITIVE_PEER_INFOS"] = "true"
             env_vars["FRONTEND_SHOW_PEER_DAS_INFOS"] = "true"
         if network_params.eip7732_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = (
@@ -190,6 +194,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tty_enabled=True,
     )
 
 
