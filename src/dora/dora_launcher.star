@@ -153,7 +153,6 @@ def get_config(
                 )
                 + "ethpandaops/dora:fulu-support"
             )
-            env_vars["FRONTEND_SHOW_SENSITIVE_PEER_INFOS"] = "true"
             env_vars["FRONTEND_SHOW_PEER_DAS_INFOS"] = "true"
         if network_params.eip7732_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = (
