@@ -478,6 +478,7 @@ def launch_participant_network(
         vc_service_configs[service_name] = vc_service_config
         vc_service_info[service_name] = {
             "client_name": vc_type,
+            "participant_index": index,
         }
         current_vc_index += 1
 
@@ -486,7 +487,8 @@ def launch_participant_network(
     if len(vc_service_configs) > 0:
         vc_services = plan.add_services(vc_service_configs)
 
-    vc_contexts_by_service_name = {}
+    # Create VC contexts ordered by participant index
+    vc_contexts_temp = {}
     for vc_service_name, vc_service in vc_services.items():
         vc_context = vc.get_vc_context(
             plan,
@@ -495,10 +497,21 @@ def launch_participant_network(
             vc_service_info[vc_service_name]["client_name"],
         )
 
+        participant_index = vc_service_info[vc_service_name]["participant_index"]
         if vc_context and vc_context.metrics_info:
-            vc_context.metrics_info["config"] = participant.prometheus_config
+            vc_context.metrics_info["config"] = args_with_right_defaults.participants[
+                participant_index
+            ].prometheus_config
 
-        vc_contexts_by_service_name[vc_service_name] = vc_context
+        vc_contexts_temp[participant_index] = vc_context
+
+    # Convert to ordered list
+    all_vc_contexts = []
+    for i in range(len(args_with_right_defaults.participants)):
+        if i in vc_contexts_temp:
+            all_vc_contexts.append(vc_contexts_temp[i])
+        else:
+            all_vc_contexts.append(None)
 
     all_participants = []
     for index, participant in enumerate(args_with_right_defaults.participants):
@@ -510,28 +523,9 @@ def launch_participant_network(
         snooper_beacon_context = None
         snooper_el_rpc_context = None
 
-        index_str = shared_utils.zfill_custom(
-            index + 1, len(str(len(args_with_right_defaults.participants)))
-        )
-        full_name = (
-            "{0}-{1}-{2}-{3}".format(
-                index_str,
-                el_type,
-                cl_type,
-                vc_type,
-            )
-            if participant.cl_type != participant.vc_type
-            else "{0}-{1}-{2}".format(
-                index_str,
-                el_type,
-                cl_type,
-            )
-        )
-        service_name = "vc-{0}".format(full_name)
-
         el_context = all_el_contexts[index] if index < len(all_el_contexts) else None
         cl_context = all_cl_contexts[index] if index < len(all_cl_contexts) else None
-        vc_context = vc_contexts_by_service_name.get(service_name)
+        vc_context = all_vc_contexts[index] if index < len(all_vc_contexts) else None
 
         remote_signer_context = (
             all_remote_signer_contexts[index]
