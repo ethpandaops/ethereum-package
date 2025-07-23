@@ -715,7 +715,7 @@ network_params:
   # Base fee update fraction for BPO5 (default 5007716)
   bpo_5_base_fee_update_fraction: 5007716
 
-  # Withdrawal type
+  # Withdrawal type - available options (0x00, 0x01, 0x02)
   # Default to "0x00"
   withdrawal_type: "0x00"
 
@@ -723,7 +723,7 @@ network_params:
   # Default to "0x8943545177806ED17B9F23F0a21ee5948eCaa776" - 0 address of mnemonic
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
 
-  # Validator balance
+  # Validator balance (available ranges: 32-2048)
   # Default to 32 ETH
   validator_balance: 32
 
