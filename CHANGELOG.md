@@ -1,5 +1,86 @@
 # Changelog
 
+## [6.0.0](https://github.com/ethpandaops/ethereum-package/compare/5.0.1...6.0.0) (2025-07-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove mev_flood  ([#1091](https://github.com/ethpandaops/ethereum-package/issues/1091))
+
+### Features
+
+* add api to dora ([#1120](https://github.com/ethpandaops/ethereum-package/issues/1120)) ([9dbde5a](https://github.com/ethpandaops/ethereum-package/commit/9dbde5a5199360093c44866880ef5596e1fddb5a))
+* add bpo ([#1016](https://github.com/ethpandaops/ethereum-package/issues/1016)) ([37082b2](https://github.com/ethpandaops/ethereum-package/commit/37082b2253e3df3526cd96f48858d43bfadb9ebf))
+* add chainspec support for fusaka-devnet-2 ([#1055](https://github.com/ethpandaops/ethereum-package/issues/1055)) ([0e18733](https://github.com/ethpandaops/ethereum-package/commit/0e18733e0db851310ceb287bd72a96ec7336e4ab))
+* add client-language label to ethereum service containers ([#1074](https://github.com/ethpandaops/ethereum-package/issues/1074)) ([6955763](https://github.com/ethpandaops/ethereum-package/commit/6955763975046e2291217cf45eab8d5bde2f00d9))
+* add debug port for ethjs ([#1044](https://github.com/ethpandaops/ethereum-package/issues/1044)) ([459a931](https://github.com/ethpandaops/ethereum-package/commit/459a9312d6f503c3107c5b6cf25822b1e72aafae))
+* add disk usage as a metric for ethereum-metrics-exporter ([#1026](https://github.com/ethpandaops/ethereum-package/issues/1026)) ([8e793a5](https://github.com/ethpandaops/ethereum-package/commit/8e793a52da52eb13336c74184deff569ce5a47a8))
+* add engine snooper urls to dora config for block execution time tracking ([#1083](https://github.com/ethpandaops/ethereum-package/issues/1083)) ([7ffb9d5](https://github.com/ethpandaops/ethereum-package/commit/7ffb9d5af373f28db31fc257ff67ae0c68012dd9))
+* add extra labels ([#1030](https://github.com/ethpandaops/ethereum-package/issues/1030)) ([12447f8](https://github.com/ethpandaops/ethereum-package/commit/12447f8ece26d48c4f5b324d288d19cf518c1a36))
+* add maxblobspertx ([#1063](https://github.com/ethpandaops/ethereum-package/issues/1063)) ([1944080](https://github.com/ethpandaops/ethereum-package/commit/19440801b1837d266ad4d847f399a577f9c57550))
+* add mev-fulu test ([#1014](https://github.com/ethpandaops/ethereum-package/issues/1014)) ([67a76e9](https://github.com/ethpandaops/ethereum-package/commit/67a76e9ce49d64092afd13cde54db943928c71ab))
+* add MIN_EPOCHS_FOR_DATA_COLUMN_SIDECARS_REQUESTS as config option ([#1057](https://github.com/ethpandaops/ethereum-package/issues/1057)) ([97afe9c](https://github.com/ethpandaops/ethereum-package/commit/97afe9cf764447780db6a52acc666f370f8258ba))
+* add more groups to spamoor clients ([#1066](https://github.com/ethpandaops/ethereum-package/issues/1066)) ([c9ed485](https://github.com/ethpandaops/ethereum-package/commit/c9ed4855cde389c3917b4905438c1a073afc9e72))
+* add name and nameoverride func to clients page spamoor ([#1068](https://github.com/ethpandaops/ethereum-package/issues/1068)) ([e3abf47](https://github.com/ethpandaops/ethereum-package/commit/e3abf47d30c90a07c571af1b006a8d0902b8449f))
+* add nginx file server implementation ([#1065](https://github.com/ethpandaops/ethereum-package/issues/1065)) ([fd76bba](https://github.com/ethpandaops/ethereum-package/commit/fd76bba46326469872afb02c883a81c2fbfb9b0b))
+* add node index label ([#1086](https://github.com/ethpandaops/ethereum-package/issues/1086)) ([5aa0d44](https://github.com/ethpandaops/ethereum-package/commit/5aa0d442501c2193d8c54e5a1a0a374679a9d5d3))
+* add peercount support for nimbusel ([#1092](https://github.com/ethpandaops/ethereum-package/issues/1092)) ([12409e4](https://github.com/ethpandaops/ethereum-package/commit/12409e4912124f4a188994f623da49c623b7555c))
+* add public ports for mev ([#1023](https://github.com/ethpandaops/ethereum-package/issues/1023)) ([5d89274](https://github.com/ethpandaops/ethereum-package/commit/5d89274b8c0189add903dd814261eccdc1ef869f))
+* add public ports for other tools ([#1025](https://github.com/ethpandaops/ethereum-package/issues/1025)) ([fa9d05e](https://github.com/ethpandaops/ethereum-package/commit/fa9d05ef4bbc55ec307f1e50e46f365c5d293b3d))
+* add tx snooper ([#1043](https://github.com/ethpandaops/ethereum-package/issues/1043)) ([34e1151](https://github.com/ethpandaops/ethereum-package/commit/34e11513881aebba04e50e57515b3cad42a5f168))
+* add validator balance ([#1032](https://github.com/ethpandaops/ethereum-package/issues/1032)) ([3601346](https://github.com/ethpandaops/ethereum-package/commit/36013462cd74c1fd68de519d9dc0576f6920da97))
+* **ai:** Add docs ([#1061](https://github.com/ethpandaops/ethereum-package/issues/1061)) ([1bf0893](https://github.com/ethpandaops/ethereum-package/commit/1bf08937f7ec376d5e281fef87dc1efc28aeefef))
+* default to ethpandaops/client:devnet images ([#1097](https://github.com/ethpandaops/ethereum-package/issues/1097)) ([fa4f99a](https://github.com/ethpandaops/ethereum-package/commit/fa4f99a70a6789254ee5127d8f9bbcd9ec4f3e9f))
+* enable extra env vars to be set during runtime mev, enable pprof by default ([#1012](https://github.com/ethpandaops/ethereum-package/issues/1012)) ([94a7f22](https://github.com/ethpandaops/ethereum-package/commit/94a7f22c93f79a66d244fa6d9f179213afe6147e))
+* enable mass das guardian scans in dora ([#1125](https://github.com/ethpandaops/ethereum-package/issues/1125)) ([0671925](https://github.com/ethpandaops/ethereum-package/commit/06719250033abf51b4caabf36211e29906c6358b))
+* enable prom and grafana to be ran separatly ([#1028](https://github.com/ethpandaops/ethereum-package/issues/1028)) ([500c3f0](https://github.com/ethpandaops/ethereum-package/commit/500c3f06a53db0648406c78de7370c8f15b769f2))
+* enable tty for prysm ([#1076](https://github.com/ethpandaops/ethereum-package/issues/1076)) ([1ae1826](https://github.com/ethpandaops/ethereum-package/commit/1ae18265fa2c0421ff950e0aae6873aac2e4654b))
+* fine grained control with public ip addresses per service ([#1111](https://github.com/ethpandaops/ethereum-package/issues/1111)) ([3f60fa8](https://github.com/ethpandaops/ethereum-package/commit/3f60fa8540538dd94335aed6656d0034bf7c1255))
+* remove maxBlobsPerTx ([#1113](https://github.com/ethpandaops/ethereum-package/issues/1113)) ([9f40d0a](https://github.com/ethpandaops/ethereum-package/commit/9f40d0ac052759dcdc6515e7d6969c780f4f1b9b))
+* remove mev_flood  ([#1091](https://github.com/ethpandaops/ethereum-package/issues/1091)) ([2d3b170](https://github.com/ethpandaops/ethereum-package/commit/2d3b17048a37daa8f5742b978828eef6aa83b55c))
+
+
+### Bug Fixes
+
+* add fulu fork version for mev-boost-relay ([#1088](https://github.com/ethpandaops/ethereum-package/issues/1088)) ([953ec57](https://github.com/ethpandaops/ethereum-package/commit/953ec57c2446ba52f52c19d5d73f00529721aa61))
+* add input option for blobber ([#1072](https://github.com/ethpandaops/ethereum-package/issues/1072)) ([293286d](https://github.com/ethpandaops/ethereum-package/commit/293286dfe970868b2d18265e28ffe708b19907ff))
+* besu sync snap if non kurtosis ([#1034](https://github.com/ethpandaops/ethereum-package/issues/1034)) ([6752218](https://github.com/ethpandaops/ethereum-package/commit/6752218a02be6ef293b6adfc432535b53ac03748))
+* **blockscout:** make frontend available in kubernetes ([#1033](https://github.com/ethpandaops/ethereum-package/issues/1033)) ([d3ae571](https://github.com/ethpandaops/ethereum-package/commit/d3ae57110f8761bd26e47e2616ea6d52f8bff21c))
+* bump ethereum-genesis-generator to fix issues with large additional contracts ([#1019](https://github.com/ethpandaops/ethereum-package/issues/1019)) ([cb644af](https://github.com/ethpandaops/ethereum-package/commit/cb644aff035c6883575959ee50a64eef83615486))
+* change default images ([#1099](https://github.com/ethpandaops/ethereum-package/issues/1099)) ([ba92830](https://github.com/ethpandaops/ethereum-package/commit/ba9283094612b1605599a03361cbb74305db17d0))
+* default to empty blob schedule if non defined ([#1115](https://github.com/ethpandaops/ethereum-package/issues/1115)) ([35c298d](https://github.com/ethpandaops/ethereum-package/commit/35c298d2d912ad6dadc1c6dd97c71f724829e16c))
+* disable page cache in dora ([#1079](https://github.com/ethpandaops/ethereum-package/issues/1079)) ([1e51446](https://github.com/ethpandaops/ethereum-package/commit/1e514461501c3c54594231c553305b2e3e2fd424))
+* dora,assertoor pull through cache ([#1059](https://github.com/ethpandaops/ethereum-package/issues/1059)) ([69c965f](https://github.com/ethpandaops/ethereum-package/commit/69c965fb434622805a56267604562afdd9c869cb))
+* el/cl/vc index calculation bug, due to parallel execution ([#1121](https://github.com/ethpandaops/ethereum-package/issues/1121)) ([fc4e65e](https://github.com/ethpandaops/ethereum-package/commit/fc4e65e15c3b1b859e0f5eda31489d95e05abb7a))
+* enable submission pages in dora ([#1031](https://github.com/ethpandaops/ethereum-package/issues/1031)) ([33e3f7b](https://github.com/ethpandaops/ethereum-package/commit/33e3f7b1d1b818ae993885ceaee530bdbf9a8a30))
+* erigon db size alloc ([#1096](https://github.com/ethpandaops/ethereum-package/issues/1096)) ([777d37e](https://github.com/ethpandaops/ethereum-package/commit/777d37ed213916137e46b8886ed2e94d9140239b))
+* minimal spec ([#1037](https://github.com/ethpandaops/ethereum-package/issues/1037)) ([2372550](https://github.com/ethpandaops/ethereum-package/commit/23725502f0ee74106d84f7d9eb5d9d210ca983c5))
+* nethermind chainspec, default genesis gas to 60M ([#1039](https://github.com/ethpandaops/ethereum-package/issues/1039)) ([b839e61](https://github.com/ethpandaops/ethereum-package/commit/b839e6148c04a11bc7b33559fd0f891a4ec324ef))
+* only add --target-peers=0 only when the network is kurtosis ([#1119](https://github.com/ethpandaops/ethereum-package/issues/1119)) ([572cbfc](https://github.com/ethpandaops/ethereum-package/commit/572cbfcf48a6a2ccff7c25e3c9ff8c39488fe6c9))
+* only append blob schedule, if defined ([#1022](https://github.com/ethpandaops/ethereum-package/issues/1022)) ([43db03a](https://github.com/ethpandaops/ethereum-package/commit/43db03ac65e20398288d5c639a261153de0aa942))
+* prysm gzip encoding bug ([#1112](https://github.com/ethpandaops/ethereum-package/issues/1112)) ([9f5fc45](https://github.com/ethpandaops/ethereum-package/commit/9f5fc45bd50c4f272c284684a3bccd6cff2a561e))
+* pull kurtosis images in kurtosis install ([#1048](https://github.com/ethpandaops/ethereum-package/issues/1048)) ([a00b6dd](https://github.com/ethpandaops/ethereum-package/commit/a00b6ddb10b0232a4d674b8b8b7b65ad5ff49e2f))
+* rbuilder parallel safe sorting ([#1046](https://github.com/ethpandaops/ethereum-package/issues/1046)) ([ec5895d](https://github.com/ethpandaops/ethereum-package/commit/ec5895dcc14046c48db4dcf330f9d760b8f009f6))
+* remove graffiti ([#1082](https://github.com/ethpandaops/ethereum-package/issues/1082)) ([ee4fff4](https://github.com/ethpandaops/ethereum-package/commit/ee4fff44d1ab01ee6ff3f00c8324fbe8cbdb29d2))
+* revert prometheus branch ([#1024](https://github.com/ethpandaops/ethereum-package/issues/1024)) ([1559386](https://github.com/ethpandaops/ethereum-package/commit/1559386a3ca922bb11be2c2f011c083a052f6a55))
+* service ports ([#1021](https://github.com/ethpandaops/ethereum-package/issues/1021)) ([e83a1ad](https://github.com/ethpandaops/ethereum-package/commit/e83a1ad903eada1b2d193a305e43f1e33c41821f))
+* set miner gasprice for geth if running kt' ([#1027](https://github.com/ethpandaops/ethereum-package/issues/1027)) ([161fc14](https://github.com/ethpandaops/ethereum-package/commit/161fc14275420827e673617768b2e4aa5115e55d))
+* shadowfork enclave edits ([#1070](https://github.com/ethpandaops/ethereum-package/issues/1070)) ([63689ec](https://github.com/ethpandaops/ethereum-package/commit/63689ecf0a7119d2383d0dc08beaef0798e6a4ba))
+* shadowfork latest bug ([#1045](https://github.com/ethpandaops/ethereum-package/issues/1045)) ([197cdf8](https://github.com/ethpandaops/ethereum-package/commit/197cdf84cbcc713f46bb37c4af84c4a0cf1854ff))
+* shadowfork upstream to eth-clients ([#1047](https://github.com/ethpandaops/ethereum-package/issues/1047)) ([7c11a34](https://github.com/ethpandaops/ethereum-package/commit/7c11a34b8afc3f059aa6ca114f903d4f678bad29))
+* single-node lighthouse startup issue ([#1073](https://github.com/ethpandaops/ethereum-package/issues/1073)) ([6d29b3a](https://github.com/ethpandaops/ethereum-package/commit/6d29b3ab4e729913188358bc7a4ccdba9cf1e767))
+* specify devnet size for persistent flag ([#1054](https://github.com/ethpandaops/ethereum-package/issues/1054)) ([b4c398c](https://github.com/ethpandaops/ethereum-package/commit/b4c398c8fb6307024b02149e9269f479ed730215))
+* Update mainnet yaml ([#1069](https://github.com/ethpandaops/ethereum-package/issues/1069)) ([288919b](https://github.com/ethpandaops/ethereum-package/commit/288919b9519eeb90db6b95cd27459d4aafe10f88))
+* Update sf to osaka ([#1105](https://github.com/ethpandaops/ethereum-package/issues/1105)) ([59579bb](https://github.com/ethpandaops/ethereum-package/commit/59579bb09baad5cd9990b294bbc37517c3682ef0))
+* update some tests ([#1122](https://github.com/ethpandaops/ethereum-package/issues/1122)) ([9488046](https://github.com/ethpandaops/ethereum-package/commit/94880461c85946c2e3b7e4af06f21ce88cd0184a))
+* use default dora image for fulu networks ([#1128](https://github.com/ethpandaops/ethereum-package/issues/1128)) ([b1f4e5c](https://github.com/ethpandaops/ethereum-package/commit/b1f4e5c4bd8823e39ea9171a664292b691de71a1))
+* use reth-rbuilder image as the default mev_builder_image in network_params.yaml ([#1077](https://github.com/ethpandaops/ethereum-package/issues/1077)) ([f07f3b6](https://github.com/ethpandaops/ethereum-package/commit/f07f3b6acc3642dfdd10c162cb05353e835bbd1a))
+* use self hosted runners ([#1100](https://github.com/ethpandaops/ethereum-package/issues/1100)) ([2fc4a3c](https://github.com/ethpandaops/ethereum-package/commit/2fc4a3c4cb96ecef81894fa3284ead609e30c088))
+* use ubuntu-latest ([#1078](https://github.com/ethpandaops/ethereum-package/issues/1078)) ([d209af4](https://github.com/ethpandaops/ethereum-package/commit/d209af4abc698a8ac1e2599d47aefb06d7532b8f))
+* validator client compatibility update ([#1114](https://github.com/ethpandaops/ethereum-package/issues/1114)) ([b826cc9](https://github.com/ethpandaops/ethereum-package/commit/b826cc991925fac696a698a5d41f6df492410230))
+* yeet unused mev builder ([#1056](https://github.com/ethpandaops/ethereum-package/issues/1056)) ([40767fe](https://github.com/ethpandaops/ethereum-package/commit/40767fef19cc1f91c6b0ab435bc5c70ca616cf4c))
+* yeet-7907 ([#1116](https://github.com/ethpandaops/ethereum-package/issues/1116)) ([93c6630](https://github.com/ethpandaops/ethereum-package/commit/93c66309b4c437dd342a306be62682a816879932))
+
 ## [5.0.1](https://github.com/ethpandaops/ethereum-package/compare/5.0.0...5.0.1) (2025-05-08)
 
 
