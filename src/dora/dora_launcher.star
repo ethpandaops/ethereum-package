@@ -143,18 +143,6 @@ def get_config(
         + constants.DEFAULT_DORA_IMAGE
     )
     if dora_params.image == default_dora_image:
-        if network_params.fulu_fork_epoch < constants.FAR_FUTURE_EPOCH:
-            IMAGE_NAME = (
-                docker_cache_params.url
-                + (
-                    docker_cache_params.dockerhub_prefix
-                    if docker_cache_params.enabled
-                    else ""
-                )
-                + "ethpandaops/dora:fulu-support"
-            )
-            env_vars["FRONTEND_SHOW_SENSITIVE_PEER_INFOS"] = "true"
-            env_vars["FRONTEND_SHOW_PEER_DAS_INFOS"] = "true"
         if network_params.eip7732_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = (
                 docker_cache_params.url

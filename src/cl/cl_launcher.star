@@ -273,6 +273,7 @@ def launch(
                 "node_selectors": node_selectors,
                 "get_cl_context": get_cl_context,
                 "get_blobber_config": get_blobber_config,
+                "participant_index": index,
             }
 
     # add rest of cl's in parallel to speed package execution
@@ -280,11 +281,15 @@ def launch(
     if len(cl_service_configs) > 0:
         cl_services = plan.add_services(cl_service_configs)
 
+    # Create CL contexts ordered by participant index
+    cl_contexts_temp = {}
+    blobber_configs_temp = {}
     for beacon_service_name, beacon_service in cl_services.items():
         info = cl_participant_info[beacon_service_name]
         get_cl_context = info["get_cl_context"]
         get_blobber_config = info["get_blobber_config"]
         participant = info["participant"]
+        participant_index = info["participant_index"]
 
         cl_context = get_cl_context(
             plan,
@@ -305,12 +310,10 @@ def launch(
             info["node_selectors"],
         )
         if blobber_config != None:
-            blobber_configs_with_contexts.append(
-                struct(
-                    cl_context=cl_context,
-                    blobber_config=blobber_config,
-                    participant=participant,
-                )
+            blobber_configs_temp[participant_index] = struct(
+                cl_context=cl_context,
+                blobber_config=blobber_config,
+                participant=participant,
             )
 
         # Add participant cl additional prometheus labels
@@ -318,7 +321,14 @@ def launch(
             if metrics_info != None:
                 metrics_info["config"] = participant.prometheus_config
 
-        all_cl_contexts.append(cl_context)
+        cl_contexts_temp[participant_index] = cl_context
+
+    # Add remaining CL contexts in participant order (skipping index 0 which was added earlier)
+    for i in range(1, len(args_with_right_defaults.participants)):
+        if i in cl_contexts_temp:
+            all_cl_contexts.append(cl_contexts_temp[i])
+            if i in blobber_configs_temp:
+                blobber_configs_with_contexts.append(blobber_configs_temp[i])
 
     return (
         all_cl_contexts,

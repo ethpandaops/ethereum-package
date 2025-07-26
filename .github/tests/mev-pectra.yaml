@@ -6,7 +6,7 @@ participants:
     cl_image: sigp/lighthouse:v7.0.1
 
   - el_type: nethermind
-    el_image: nethermindeth/nethermind:release-1.31.9-genesis-pectra
+    el_image: nethermind/nethermind:1.32.3
     el_extra_params: ["--Blocks.ExtraData=TekuFromLocal"]
     cl_type: teku
     cl_image: consensys/teku:25.4.1

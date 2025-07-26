@@ -185,6 +185,8 @@ def launch(
             el_participant_info[el_service_name] = {
                 "client_name": el_type,
                 "supernode": participant.supernode,
+                "participant_index": index,
+                "participant": participant,
             }
 
     # add remainder of el's in parallel to speed package execution
@@ -192,9 +194,12 @@ def launch(
     if len(el_service_configs) > 0:
         el_services = plan.add_services(el_service_configs)
 
-    # Create contexts for each service
+    # Create contexts ordered by participant index
+    el_contexts_temp = {}
     for el_service_name, el_service in el_services.items():
         el_type = el_participant_info[el_service_name]["client_name"]
+        participant_index = el_participant_info[el_service_name]["participant_index"]
+        participant = el_participant_info[el_service_name]["participant"]
         get_el_context = el_launchers[el_type]["get_el_context"]
 
         el_context = get_el_context(
@@ -209,7 +214,12 @@ def launch(
             if metrics_info != None:
                 metrics_info["config"] = participant.prometheus_config
 
-        all_el_contexts.append(el_context)
+        el_contexts_temp[participant_index] = el_context
+
+    # Add remaining EL contexts in participant order (skipping index 0 which was added earlier)
+    for i in range(1, len(participants)):
+        if i in el_contexts_temp:
+            all_el_contexts.append(el_contexts_temp[i])
 
     plan.print("Successfully added {0} EL participants".format(num_participants))
     return all_el_contexts

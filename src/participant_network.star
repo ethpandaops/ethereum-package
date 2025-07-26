@@ -478,6 +478,7 @@ def launch_participant_network(
         vc_service_configs[service_name] = vc_service_config
         vc_service_info[service_name] = {
             "client_name": vc_type,
+            "participant_index": index,
         }
         current_vc_index += 1
 
@@ -486,7 +487,8 @@ def launch_participant_network(
     if len(vc_service_configs) > 0:
         vc_services = plan.add_services(vc_service_configs)
 
-    all_vc_contexts = []
+    # Create VC contexts ordered by participant index
+    vc_contexts_temp = {}
     for vc_service_name, vc_service in vc_services.items():
         vc_context = vc.get_vc_context(
             plan,
@@ -495,10 +497,21 @@ def launch_participant_network(
             vc_service_info[vc_service_name]["client_name"],
         )
 
+        participant_index = vc_service_info[vc_service_name]["participant_index"]
         if vc_context and vc_context.metrics_info:
-            vc_context.metrics_info["config"] = participant.prometheus_config
+            vc_context.metrics_info["config"] = args_with_right_defaults.participants[
+                participant_index
+            ].prometheus_config
 
-        all_vc_contexts.append(vc_context)
+        vc_contexts_temp[participant_index] = vc_context
+
+    # Convert to ordered list
+    all_vc_contexts = []
+    for i in range(len(args_with_right_defaults.participants)):
+        if i in vc_contexts_temp:
+            all_vc_contexts.append(vc_contexts_temp[i])
+        else:
+            all_vc_contexts.append(None)
 
     all_participants = []
     for index, participant in enumerate(args_with_right_defaults.participants):
