@@ -56,6 +56,7 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
+txpool_viz = import_module("./src/txpool_viz/txpool_viz.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -470,6 +471,18 @@ def run(plan, args={}):
                 global_node_selectors,
             )
             plan.print("Successfully launched tx-fuzz")
+        elif additional_service == "txpool_viz":
+            plan.print("Launching txpool-viz")
+            txpool_viz_config_template = read_file(
+                static_files.TXPOOL_VIZ_CONFIG_TEMPLATE_FILEPATH
+            )
+            txpool_viz.launch_txpool_viz(
+                plan,
+                txpool_viz_config_template,
+                all_participants,
+                args_with_right_defaults.txpool_viz_params,
+                global_node_selectors,
+            )
         elif additional_service == "forkmon":
             plan.print("Launching el forkmon")
             forkmon_config_template = read_file(
