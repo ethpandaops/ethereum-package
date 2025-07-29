@@ -329,16 +329,6 @@ SUBCATEGORY_PARAMS = {
     "ethereum_genesis_generator_params": [
         "image",
     ],
-    "port_publisher": [
-        "nat_exit_ip",
-        "el",
-        "cl",
-        "vc",
-        "remote_signer",
-        "additional_services",
-        "mev",
-        "other",
-    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -440,13 +430,30 @@ def sanity_check(plan, input_args):
     deep_validate_params(
         plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
     )
-    # Checks nested parameters using generic validation
-    validate_nested_params(
-        plan,
-        input_args,
-        "participants_matrix",
-        PARTICIPANT_MATRIX_PARAMS["participants_matrix"],
-    )
+    # Checks participants_matrix (uses original logic for arrays of objects)
+    if "participants_matrix" in input_args:
+        for sub_matrix_participant in input_args["participants_matrix"]:
+            if (
+                sub_matrix_participant
+                not in PARTICIPANT_MATRIX_PARAMS["participants_matrix"]
+            ):
+                fail(
+                    "Invalid parameter {0} for participants_matrix, allowed fields: {1}".format(
+                        sub_matrix_participant,
+                        PARTICIPANT_MATRIX_PARAMS["participants_matrix"].keys(),
+                    )
+                )
+            else:
+                deep_validate_params(
+                    plan,
+                    input_args["participants_matrix"],
+                    sub_matrix_participant,
+                    PARTICIPANT_MATRIX_PARAMS["participants_matrix"][
+                        sub_matrix_participant
+                    ],
+                )
+
+    # Checks port_publisher (uses new generic validation for key-value mappings)
     validate_nested_params(
         plan,
         input_args,
