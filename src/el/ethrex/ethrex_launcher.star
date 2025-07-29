@@ -247,7 +247,7 @@ def get_el_context(
     )
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    geth_metrics_info = node_metrics.new_node_metrics_info(
+    ethrex_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
 
@@ -255,7 +255,7 @@ def get_el_context(
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        client_name="geth",
+        client_name="ethrex",
         enode=enode,
         ip_addr=service.ip_address,
         rpc_port_num=RPC_PORT_NUM,
@@ -265,7 +265,7 @@ def get_el_context(
         ws_url=ws_url,
         enr=enr,
         service_name=service_name,
-        el_metrics_info=[geth_metrics_info],
+        el_metrics_info=[ethrex_metrics_info],
     )
 
 
