@@ -131,10 +131,12 @@ def get_config(
         "--Init.WebSocketsEnabled=true",
         "--JsonRpc.Enabled=true",
         "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin,debug,txpool",
-        "--JsonRpc.Host=0.0.0.0",
+        "--JsonRpc.Host={0}".format("::" if participant.el_ipv6_enabled else "0.0.0.0"),
         "--JsonRpc.Port={0}".format(RPC_PORT_NUM),
         "--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
-        "--JsonRpc.EngineHost=0.0.0.0",
+        "--JsonRpc.EngineHost={0}".format(
+            "::" if participant.el_ipv6_enabled else "0.0.0.0"
+        ),
         "--JsonRpc.EnginePort={0}".format(ENGINE_RPC_PORT_NUM),
         "--Network.ExternalIp={0}".format(port_publisher.el_nat_exit_ip),
         "--Network.DiscoveryPort={0}".format(discovery_port_tcp),
@@ -142,7 +144,9 @@ def get_config(
         "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
-        "--Metrics.ExposeHost=0.0.0.0",
+        "--Metrics.ExposeHost={0}".format(
+            "::" if participant.el_ipv6_enabled else "0.0.0.0"
+        ),
     ]
 
     if network_params.gas_limit > 0:

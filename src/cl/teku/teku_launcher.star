@@ -187,7 +187,9 @@ def get_beacon_config(
         "--p2p-port={0}".format(discovery_port_tcp),
         "--rest-api-enabled=true",
         "--rest-api-docs-enabled=true",
-        "--rest-api-interface=0.0.0.0",
+        "--rest-api-interface={0}".format(
+            "::" if participant.cl_ipv6_enabled else "0.0.0.0"
+        ),
         "--rest-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
@@ -195,7 +197,9 @@ def get_beacon_config(
         "--ee-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled",
-        "--metrics-interface=0.0.0.0",
+        "--metrics-interface={0}".format(
+            "::" if participant.cl_ipv6_enabled else "0.0.0.0"
+        ),
         "--metrics-host-allowlist=*",
         "--metrics-categories=BEACON,PROCESS,LIBP2P,JVM,NETWORK,PROCESS",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
@@ -214,7 +218,9 @@ def get_beacon_config(
         "--validator-api-enabled=true",
         "--validator-api-host-allowlist=*",
         "--validator-api-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--validator-api-interface=0.0.0.0",
+        "--validator-api-interface={0}".format(
+            "::" if participant.cl_ipv6_enabled else "0.0.0.0"
+        ),
         "--validator-api-bearer-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
         "--Xvalidator-api-ssl-enabled=false",
         "--Xvalidator-api-unsafe-hosts-enabled=true",

@@ -462,6 +462,20 @@ participants:
     # ]
     builder_network_params: null
 
+    # IPv6 Configuration for this participant
+    # Enable IPv6 networking for execution layer client
+    # When enabled, EL client will bind to IPv6 addresses as well as IPv4 addresses
+    # Overrides global ipv6_enabled setting when specified
+    # Defaults to null (uses global ipv6_enabled setting)
+    el_ipv6_enabled: null
+
+    # Enable IPv6 networking for consensus layer client
+    # When enabled, CL client will bind to IPv6 addresses as well as IPv4 addresses
+    # For Lighthouse, also enables IPv6-specific ENR and port configuration
+    # Overrides global ipv6_enabled setting when specified
+    # Defaults to null (uses global ipv6_enabled setting)
+    cl_ipv6_enabled: null
+
     # Participant flag for keymanager api
     # This will open up http ports to your validator services!
     # Defaults null and then set to default global keymanager_enabled (false)
@@ -1023,6 +1037,13 @@ global_tolerations: []
 # Defaults to empty
 global_node_selectors: {}
 
+# IPv6 Configuration
+# Enable IPv6 networking for all clients globally
+# When enabled, clients will bind to IPv6 addresses as well as IPv4 addresses
+# Individual participants can override this setting with el_ipv6_enabled/cl_ipv6_enabled
+# Defaults to false
+ipv6_enabled: false
+
 # Global parameters for keymanager api
 # This will open up http ports to your validator services!
 # Defaults to false
@@ -1162,6 +1183,78 @@ port_publisher:
     # Defaults to KURTOSIS_IP_ADDR_PLACEHOLDER (container IP)
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
 ```
+
+### IPv6 Configuration
+
+The ethereum-package supports IPv6 networking for both execution layer (EL) and consensus layer (CL) clients. IPv6 support can be enabled globally or configured per participant.
+
+#### Global IPv6 Configuration
+Enable IPv6 for all clients in the network:
+
+```yaml
+ipv6_enabled: true
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    count: 3
+```
+
+#### Per-Participant IPv6 Configuration
+Enable IPv6 selectively for specific participants:
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    el_ipv6_enabled: true
+    cl_ipv6_enabled: true
+    count: 2
+  - el_type: besu
+    cl_type: prysm
+    el_ipv6_enabled: false  # Uses IPv4
+    cl_ipv6_enabled: true   # Uses IPv6
+    count: 1
+```
+
+#### Mixed Configuration
+Global IPv6 with participant overrides:
+
+```yaml
+ipv6_enabled: true  # Default for all participants
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    count: 2  # Uses global IPv6 setting (true)
+  - el_type: besu
+    cl_type: prysm
+    el_ipv6_enabled: false  # Override: EL uses IPv4
+    cl_ipv6_enabled: true   # Override: CL uses IPv6 (same as global)
+    count: 1
+```
+
+#### Client Support Status
+
+| Client | EL IPv6 Support | CL IPv6 Support | Notes |
+|--------|----------------|----------------|-------|
+| Geth | ✅ Full | - | Dual-stack binding (IPv4 + IPv6) |
+| Besu | ✅ Full | - | Dual-stack binding (IPv4 + IPv6) |
+| Nethermind | ✅ Full | - | Dual-stack binding (IPv4 + IPv6) |
+| Reth | ✅ Full | - | Dual-stack binding (IPv4 + IPv6) |
+| Erigon | ✅ Full | - | Dual-stack binding (IPv4 + IPv6) |
+| EthereumJS | ✅ Full | - | Dual-stack binding (IPv4 + IPv6) |
+| Nimbus-eth1 | ✅ Full | - | Dual-stack binding (IPv4 + IPv6) |
+| Lighthouse | - | ✅ Full | Complete IPv6 with dedicated IPv6 ENR/ports |
+| Grandine | - | ✅ Full | Complete IPv6 with dedicated IPv6 flags |
+| Lodestar | - | ✅ Full | IPv6 ENR and discovery support |
+| Prysm | - | ✅ Full | Dual-stack binding (IPv4 + IPv6) |
+| Teku | - | ✅ Full | Dual-stack binding (IPv4 + IPv6) |
+| Nimbus | - | ✅ Full | Dual-stack binding (IPv4 + IPv6) |
+
+When IPv6 is enabled:
+- **EL Clients**: Use dual-stack binding to `::` which accepts both IPv4 and IPv6 connections
+- **CL Clients with dedicated IPv6 support** (Lighthouse, Grandine, Lodestar): Add IPv6-specific flags for ENR, discovery, and P2P networking while maintaining IPv4 support
+- **Other CL Clients**: Use dual-stack binding to `::` for HTTP/API endpoints
+- Maintains backward compatibility - IPv4 connections continue to work when IPv6 is enabled
 
 #### Example configurations
 

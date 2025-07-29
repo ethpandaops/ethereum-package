@@ -171,7 +171,9 @@ def get_config(
             ),
             "--http",
             "--http.port={0}".format(RPC_PORT_NUM),
-            "--http.addr=0.0.0.0",
+            "--http.addr={0}".format(
+                "::" if participant.el_ipv6_enabled else "0.0.0.0"
+            ),
             "--http.corsdomain=*",
             "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
                 ",flashbots"
@@ -180,15 +182,19 @@ def get_config(
                 else ""
             ),
             "--ws",
-            "--ws.addr=0.0.0.0",
+            "--ws.addr={0}".format("::" if participant.el_ipv6_enabled else "0.0.0.0"),
             "--ws.port={0}".format(WS_PORT_NUM),
             "--ws.api=net,eth",
             "--ws.origins=*",
             "--nat=extip:" + port_publisher.el_nat_exit_ip,
             "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
             "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-            "--authrpc.addr=0.0.0.0",
-            "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
+            "--authrpc.addr={0}".format(
+                "::" if participant.el_ipv6_enabled else "0.0.0.0"
+            ),
+            "--metrics={0}:{1}".format(
+                "::" if participant.el_ipv6_enabled else "0.0.0.0", METRICS_PORT_NUM
+            ),
             "--discovery.port={0}".format(discovery_port_udp),
             "--port={0}".format(discovery_port_tcp),
         ]

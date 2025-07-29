@@ -176,7 +176,7 @@ def get_config(
         "--verbosity=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--http",
-        "--http.addr=0.0.0.0",
+        "--http.addr={0}".format("::" if participant.el_ipv6_enabled else "0.0.0.0"),
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.vhosts=*",
         "--http.corsdomain=*",
@@ -184,14 +184,18 @@ def get_config(
         #  that users should NOT store private information in these Kurtosis nodes!
         "--http.api=admin,engine,net,eth,web3,debug,txpool",
         "--ws",
-        "--ws.addr=0.0.0.0",
+        "--ws.addr={0}".format("::" if participant.el_ipv6_enabled else "0.0.0.0"),
         "--ws.port={0}".format(WS_PORT_NUM),
         "--ws.api=admin,engine,net,eth,web3,debug,txpool",
         "--ws.origins=*",
         "--allow-insecure-unlock",
-        "--nat=extip:" + port_publisher.el_nat_exit_ip,
+        "{0}".format(
+            "--nat=extip:" + port_publisher.el_nat_exit_ip
+            if not participant.el_ipv6_enabled
+            else ""
+        ),
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
-        "--authrpc.addr=0.0.0.0",
+        "--authrpc.addr={0}".format("::" if participant.el_ipv6_enabled else "0.0.0.0"),
         "--authrpc.vhosts=*",
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full"
@@ -202,7 +206,7 @@ def get_config(
         else "--gcmode=archive",
         "--rpc.allow-unprotected-txs",
         "--metrics",
-        "--metrics.addr=0.0.0.0",
+        "--metrics.addr={0}".format("::" if participant.el_ipv6_enabled else "0.0.0.0"),
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
