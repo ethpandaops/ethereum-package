@@ -138,6 +138,46 @@ PARTICIPANT_MATRIX_PARAMS = {
     },
 }
 
+PORT_PUBLISHER_PARAMS = {
+    "port_publisher": {
+        "el": [
+            "enabled",
+            "public_port_start",
+            "nat_exit_ip",
+        ],
+        "cl": [
+            "enabled",
+            "public_port_start",
+            "nat_exit_ip",
+        ],
+        "vc": [
+            "enabled",
+            "public_port_start",
+            "nat_exit_ip",
+        ],
+        "remote_signer": [
+            "enabled",
+            "public_port_start",
+            "nat_exit_ip",
+        ],
+        "additional_services": [
+            "enabled",
+            "public_port_start",
+            "nat_exit_ip",
+        ],
+        "mev": [
+            "enabled",
+            "public_port_start",
+            "nat_exit_ip",
+        ],
+        "other": [
+            "enabled",
+            "public_port_start",
+            "nat_exit_ip",
+        ],
+    },
+}
+
 SUBCATEGORY_PARAMS = {
     "network_params": [
         "network",
@@ -366,33 +406,54 @@ def validate_params(plan, input_args, category, allowed_params):
                 )
 
 
+def validate_nested_params(
+    plan, input_args, category, nested_param_definition, special_keys=None
+):
+    if category not in input_args:
+        return
+
+    special_keys = special_keys or []
+    allowed_top_level_keys = list(nested_param_definition.keys()) + special_keys
+
+    # Validate top-level keys
+    for param in input_args[category].keys():
+        if param not in allowed_top_level_keys:
+            fail(
+                "Invalid parameter {0} for {1}, allowed fields: {2}".format(
+                    param, category, allowed_top_level_keys
+                )
+            )
+
+    # Validate nested parameters
+    for sub_param in input_args[category]:
+        if sub_param not in special_keys and sub_param in nested_param_definition:
+            validate_params(
+                plan,
+                input_args[category],
+                sub_param,
+                nested_param_definition[sub_param],
+            )
+
+
 def sanity_check(plan, input_args):
     # Checks participants
     deep_validate_params(
         plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
     )
-    # Checks participants_matrix
-    if "participants_matrix" in input_args:
-        for sub_matrix_participant in input_args["participants_matrix"]:
-            if (
-                sub_matrix_participant
-                not in PARTICIPANT_MATRIX_PARAMS["participants_matrix"]
-            ):
-                fail(
-                    "Invalid parameter {0} for participants_matrix, allowed fields: {1}".format(
-                        sub_matrix_participant,
-                        PARTICIPANT_MATRIX_PARAMS["participants_matrix"].keys(),
-                    )
-                )
-            else:
-                deep_validate_params(
-                    plan,
-                    input_args["participants_matrix"],
-                    sub_matrix_participant,
-                    PARTICIPANT_MATRIX_PARAMS["participants_matrix"][
-                        sub_matrix_participant
-                    ],
-                )
+    # Checks nested parameters using generic validation
+    validate_nested_params(
+        plan,
+        input_args,
+        "participants_matrix",
+        PARTICIPANT_MATRIX_PARAMS["participants_matrix"],
+    )
+    validate_nested_params(
+        plan,
+        input_args,
+        "port_publisher",
+        PORT_PUBLISHER_PARAMS["port_publisher"],
+        ["nat_exit_ip"],
+    )
 
     # Checks additional services
     if "additional_services" in input_args:
@@ -414,6 +475,7 @@ def sanity_check(plan, input_args):
         combined_root_params = (
             PARTICIPANT_CATEGORIES.keys()
             + PARTICIPANT_MATRIX_PARAMS.keys()
+            + PORT_PUBLISHER_PARAMS.keys()
             + SUBCATEGORY_PARAMS.keys()
             + ADDITIONAL_CATEGORY_PARAMS.keys()
         )
