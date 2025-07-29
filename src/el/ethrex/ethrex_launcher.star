@@ -65,34 +65,22 @@ def launch(
     participant_index,
     network_params,
 ):
-    image = participant.el_image
-    participant_log_level = participant.el_log_level
-    extra_params = participant.el_extra_params
-    extra_env_vars = participant.el_extra_env_vars
-    extra_labels = participant.el_extra_labels
-    el_volume_size = participant.el_volume_size
 
     log_level = input_parser.get_client_log_level_or_default(
-        participant_log_level, global_log_level, VERBOSITY_LEVELS
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
         plan,
-        launcher.el_cl_genesis_data,
-        launcher.jwt_file,
-        image,
+        launcher,
+        participant,
         service_name,
         existing_el_clients,
         cl_client_name,
-        log_level,
-        participant,
-        extra_params,
-        extra_env_vars,
-        extra_labels,
+        global_log_level,
         persistent,
-        el_volume_size,
         tolerations,
         node_selectors,
         port_publisher,
@@ -102,7 +90,9 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(plan, service_name, RPC_PORT_ID)
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
+        plan, service_name, RPC_PORT_ID
+    )
 
     metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     metrics_info = node_metrics.new_node_metrics_info(
@@ -129,19 +119,13 @@ def launch(
 
 def get_config(
     plan,
-    el_cl_genesis_data,
-    jwt_file,
-    image,
+    launcher,
+    participant,
     service_name,
     existing_el_clients,
     cl_client_name,
-    verbosity_level,
-    participant,
-    extra_params,
-    extra_env_vars,
-    extra_labels,
+    global_log_level,
     persistent,
-    el_volume_size,
     tolerations,
     node_selectors,
     port_publisher,
@@ -198,13 +182,13 @@ def get_config(
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
-                plan, el_cl_genesis_data.files_artifact_uuid
+                plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
         )
 
-    if len(extra_params) > 0:
+    if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
-        cmd.extend([param for param in extra_params])
+        cmd.extend([param for param in participant.el_extra_params])
 
     cmd_str = " ".join(cmd)
     if network not in constants.PUBLIC_NETWORKS:
@@ -215,25 +199,25 @@ def get_config(
     command_str = " && ".join(subcommand_strs)
 
     files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
     config_args = {
-        "image": image,
+        "image": participant.el_image,
         "ports": used_ports,
         "public_ports": public_ports,
         "cmd": [command_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "env_vars": extra_env_vars,
+        "env_vars": participant.el_extra_env_vars,
         "labels": shared_utils.label_maker(
             constants.EL_TYPE.ethrex,
             constants.CLIENT_TYPES.el,
-            image,
+            participant.el_image,
             cl_client_name,
-            extra_labels,
+            participant.el_extra_labels,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
@@ -249,6 +233,7 @@ def get_config(
         config_args["max_memory"] = participant.el_max_mem
 
     return ServiceConfig(**config_args)
+
 
 # makes request to [service_name] for enode and enr and returns a full el_context
 def get_el_context(
@@ -282,6 +267,7 @@ def get_el_context(
         service_name=service_name,
         el_metrics_info=[geth_metrics_info],
     )
+
 
 def new_ethrex_launcher(el_cl_genesis_data, jwt_file):
     return struct(el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file)
