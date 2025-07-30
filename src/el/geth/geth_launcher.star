@@ -36,6 +36,7 @@ VERBOSITY_LEVELS = {
 BUILDER_IMAGE_STR = "builder"
 SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
 
+FORCE_BOOTNODE_OVERRIDE = True
 
 def launch(
     plan,
@@ -234,7 +235,10 @@ def get_config(
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
-        if len(existing_el_clients) > 0:
+        if (
+            len(existing_el_clients) > 0
+            or FORCE_BOOTNODE_OVERRIDE
+        ):
             cmd.append(
                 "--bootnodes="
                 + ",".join(
