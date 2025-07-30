@@ -35,8 +35,6 @@ def get_used_ports(discovery_port):
     return used_ports
 
 
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "1",
     constants.GLOBAL_LOG_LEVEL.warn: "2",
@@ -148,7 +146,6 @@ def get_config(
         )
     used_ports = get_used_ports(discovery_port)
     cmd = [
-        "ethrex",
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--network={0}".format(
             network
@@ -187,14 +184,6 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.el_extra_params])
 
-    cmd_str = " ".join(cmd)
-    if network not in constants.PUBLIC_NETWORKS:
-        subcommand_strs = [cmd_str]
-    else:
-        subcommand_strs = [cmd_str]
-
-    command_str = " && ".join(subcommand_strs)
-
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
@@ -204,9 +193,8 @@ def get_config(
         "image": participant.el_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": [command_str],
+        "cmd": cmd,
         "files": files,
-        "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": participant.el_extra_env_vars,
         "labels": shared_utils.label_maker(
