@@ -44,6 +44,7 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.trace: "5",
 }
 
+
 def launch(
     plan,
     launcher,
@@ -134,7 +135,7 @@ def get_config(
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
-        #constants.WS_PORT_ID: WS_PORT_NUM,
+        # constants.WS_PORT_ID: WS_PORT_NUM,
         constants.METRICS_PORT_ID: METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
@@ -239,7 +240,7 @@ def get_el_context(
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    #ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+    # ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
         client_name="ethrex",
@@ -249,7 +250,7 @@ def get_el_context(
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
         rpc_http_url=http_url,
-        #ws_url=ws_url,
+        # ws_url=ws_url,
         enr=enr,
         service_name=service_name,
         el_metrics_info=[ethrex_metrics_info],
