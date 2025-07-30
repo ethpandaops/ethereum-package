@@ -44,14 +44,12 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.trace: "5",
 }
 
-
 def launch(
     plan,
     launcher,
     service_name,
     participant,
     global_log_level,
-    # If empty then the node will be launched as a bootnode
     existing_el_clients,
     persistent,
     tolerations,
@@ -60,10 +58,6 @@ def launch(
     participant_index,
     network_params,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
@@ -84,30 +78,11 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, constants.RPC_PORT_ID
-    )
-
-    metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metric_url
-    )
-
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
-
-    return el_context.new_el_context(
-        client_name="ethrex",
-        enode=enode,
-        ip_addr=service.ip_address,
-        rpc_port_num=RPC_PORT_NUM,
-        ws_port_num=WS_PORT_NUM,
-        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
-        rpc_http_url=http_url,
-        ws_url=ws_url,
-        enr=enr,
-        service_name=service_name,
-        el_metrics_info=[metrics_info],
+    return get_el_context(
+        plan,
+        service_name,
+        service,
+        launcher,
     )
 
 
@@ -159,7 +134,7 @@ def get_config(
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
-        constants.WS_PORT_ID: WS_PORT_NUM,
+        #constants.WS_PORT_ID: WS_PORT_NUM,
         constants.METRICS_PORT_ID: METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
@@ -264,7 +239,7 @@ def get_el_context(
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+    #ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
         client_name="ethrex",
@@ -274,7 +249,7 @@ def get_el_context(
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
         rpc_http_url=http_url,
-        ws_url=ws_url,
+        #ws_url=ws_url,
         enr=enr,
         service_name=service_name,
         el_metrics_info=[ethrex_metrics_info],
