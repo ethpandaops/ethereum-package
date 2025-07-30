@@ -12,28 +12,24 @@ DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 
-# Port IDs
-RPC_PORT_ID = "rpc"
-WS_PORT_ID = "ws"
-TCP_DISCOVERY_PORT_ID = "tcp-discovery"
-UDP_DISCOVERY_PORT_ID = "udp-discovery"
-ENGINE_RPC_PORT_ID = "engine-rpc"
-METRICS_PORT_ID = "metrics"
-
 # Paths
 METRICS_PATH = "/metrics"
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/ethrex/execution-data"
 
-
 def get_used_ports(discovery_port):
     used_ports = {
-        RPC_PORT_ID: shared_utils.new_port_spec(
+        constants.RPC_PORT_ID: shared_utils.new_port_spec(
             RPC_PORT_NUM,
             shared_utils.TCP_PROTOCOL,
             shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
-        ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
+        constants.ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
             ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+        ),
+        constants.METRICS_PORT_ID: shared_utils.new_port_spec(
+            METRICS_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return used_ports
@@ -65,7 +61,6 @@ def launch(
     participant_index,
     network_params,
 ):
-
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
     )
@@ -91,7 +86,7 @@ def launch(
     service = plan.add_service(service_name, config)
 
     enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, RPC_PORT_ID
+        plan, service_name, constants.RPC_PORT_ID
     )
 
     metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
@@ -146,8 +141,7 @@ def get_config(
         public_ports = shared_utils.get_port_specs(public_port_assignments)
         additional_public_port_assignments = {
             constants.RPC_PORT_ID: public_ports_for_component[2],
-            # constants.WS_PORT_ID: public_ports_for_component[3],
-            # constants.METRICS_PORT_ID: public_ports_for_component[4],
+            constants.METRICS_PORT_ID: public_ports_for_component[3],
         }
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
@@ -166,6 +160,9 @@ def get_config(
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",
+        "--metrics",
+        "--metrics.addr=0.0.0.0",
+        "--metrics.port={0}".format(METRICS_PORT_NUM),
     ]
     if network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
