@@ -16,6 +16,7 @@ METRICS_PORT_NUM = 9001
 METRICS_PATH = "/metrics"
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/ethrex/execution-data"
 
+
 def get_used_ports(discovery_port):
     used_ports = {
         constants.RPC_PORT_ID: shared_utils.new_port_spec(
@@ -125,31 +126,49 @@ def get_config(
     participant_index,
     network_params,
 ):
-    network = network_params.network
     public_ports = {}
-    discovery_port = DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "el", port_publisher, participant_index
         )
-        discovery_port = public_ports_for_component[0]
-        public_port_assignments = {
-            constants.ENGINE_RPC_PORT_ID: public_ports_for_component[1],
-        }
-        public_ports = shared_utils.get_port_specs(public_port_assignments)
+        public_ports = el_shared.get_general_el_public_port_specs(
+            public_ports_for_component
+        )
         additional_public_port_assignments = {
-            constants.RPC_PORT_ID: public_ports_for_component[2],
-            constants.METRICS_PORT_ID: public_ports_for_component[3],
+            constants.RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[4],
         }
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
-    used_ports = get_used_ports(discovery_port)
+
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+
+    used_port_assignments = {
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+    }
+    used_ports = shared_utils.get_port_specs(used_port_assignments)
+
     cmd = [
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--network={0}".format(
-            network
-            if network in constants.PUBLIC_NETWORKS
+            network_params.network
+            if network_params.network in constants.PUBLIC_NETWORKS
             else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
         ),
         "--http.port={0}".format(RPC_PORT_NUM),
@@ -161,7 +180,7 @@ def get_config(
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
     ]
-    if network == constants.NETWORK_NAME.kurtosis:
+    if network_params.network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -172,7 +191,7 @@ def get_config(
                     ]
                 )
             )
-    elif network not in constants.PUBLIC_NETWORKS:
+    elif network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
@@ -183,6 +202,14 @@ def get_config(
     if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.el_extra_params])
+
+    cmd_str = " ".join(cmd)
+    if network_params.network not in constants.PUBLIC_NETWORKS:
+        subcommand_strs = [cmd_str]
+    else:
+        subcommand_strs = [cmd_str]
+
+    command_str = " && ".join(subcommand_strs)
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
