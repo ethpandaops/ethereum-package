@@ -192,6 +192,19 @@ def get_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
+    if persistent:
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=int(participant.el_volume_size)
+            if int(participant.el_volume_size) > 0
+            else constants.VOLUME_SIZE[volume_size_key][
+                constants.EL_TYPE.ethrex + "_volume_size"
+            ],
+        )
+
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
@@ -201,11 +214,13 @@ def get_config(
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": participant.el_extra_env_vars,
         "labels": shared_utils.label_maker(
-            constants.EL_TYPE.ethrex,
-            constants.CLIENT_TYPES.el,
-            participant.el_image,
-            cl_client_name,
-            participant.el_extra_labels,
+            client=constants.EL_TYPE.ethrex,
+            client_type=constants.CLIENT_TYPES.el,
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
+            connected_client=cl_client_name,
+            extra_labels=participant.el_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
+            supernode=participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
