@@ -3,14 +3,16 @@ participants:
     cl_type: teku
   - el_type: nethermind
     cl_type: prysm
-  - el_type: geth # temp remove erigon till they fix their bugs
+  - el_type: erigon
     cl_type: nimbus
   - el_type: besu
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: geth # temp remove nimbus-eth1 till they fix their bugs
+  - el_type: nimbus
     cl_type: grandine
+  - el_type: ethrex
+    cl_type: lodestar
 additional_services:
   - assertoor
   - dora

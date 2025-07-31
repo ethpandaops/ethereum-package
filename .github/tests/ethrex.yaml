@@ -1,15 +1,13 @@
 participants:
-  - el_type: geth
+  - el_type: ethrex
     cl_type: teku
-  - el_type: nethermind
+  - el_type: ethrex
     cl_type: prysm
-  - el_type: erigon
+  - el_type: ethrex
     cl_type: nimbus
-  - el_type: besu
+  - el_type: ethrex
     cl_type: lighthouse
-  - el_type: reth
+  - el_type: ethrex
     cl_type: lodestar
-  - el_type: nimbus
-    cl_type: teku
   - el_type: ethrex
     cl_type: grandine

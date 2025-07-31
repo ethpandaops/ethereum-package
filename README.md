@@ -175,6 +175,7 @@ participants:
     # - reth: ghcr.io/paradigmxyz/reth
     # - ethereumjs: ethpandaops/ethereumjs:master
     # - nimbus-eth1: ethpandaops/nimbus-eth1:master
+    # - ethrex: ghcr.io/lambdaclass/ethrex:latest
     el_image: ""
 
     # The log level string that this participant's EL client should log at
