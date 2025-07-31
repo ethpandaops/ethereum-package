@@ -117,15 +117,15 @@ def input_parser(plan, input_args):
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
-        result["network_params"][
-            "deposit_contract_address"
-        ] = constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        result["network_params"]["deposit_contract_address"] = (
+            constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        )
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
-        result["network_params"][
-            "deposit_contract_address"
-        ] = constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        result["network_params"]["deposit_contract_address"] = (
+            constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        )
 
     for attr in input_args:
         value = input_args[attr]
@@ -276,6 +276,12 @@ def input_parser(plan, input_args):
                 "Please do not define 'grafana' or 'prometheus' in the additional_services field when 'prometheus_grafana' is used to launch both"
             )
 
+    # convert additional_services to dict if it's a list
+    if type(result["additional_services"]) == "list":
+        result["additional_services"] = {
+            service: [] for service in result["additional_services"]
+        }
+
     if (
         "mev_type" == constants.MOCK_MEV_TYPE
         and input_args["participants"][0]["cl_type"] != constants.CL_TYPE.lighthouse
@@ -296,6 +302,7 @@ def input_parser(plan, input_args):
     return struct(
         participants=[
             struct(
+                label=participant["label"],
                 el_type=participant["el_type"],
                 el_image=participant["el_image"],
                 el_log_level=participant["el_log_level"],
@@ -1189,6 +1196,7 @@ def default_minimal_network_params():
 
 def default_participant():
     return {
+        "label": "",
         "el_type": "geth",
         "el_image": "",
         "el_log_level": "",

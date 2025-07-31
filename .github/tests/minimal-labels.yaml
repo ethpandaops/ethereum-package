@@ -1,0 +1,12 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    label: "node-1"
+    count: 2
+  - el_type: reth
+    cl_type: lighthouse
+
+additional_services:
+  tx_fuzz:
+    - "node-1"
+  forkmon: []

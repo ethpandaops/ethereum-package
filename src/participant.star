@@ -1,4 +1,5 @@
 def new_participant(
+    label,
     el_type,
     cl_type,
     vc_type,
@@ -14,6 +15,7 @@ def new_participant(
     xatu_sentry_context,
 ):
     return struct(
+        label=label,
         el_type=el_type,
         cl_type=cl_type,
         vc_type=vc_type,

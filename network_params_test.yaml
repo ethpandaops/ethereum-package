@@ -1,0 +1,44 @@
+participants:
+  - label: tool_node
+    el_type: geth
+    cl_type: lighthouse
+    validator_count: 0
+
+  - el_type: geth
+    cl_type: lighthouse
+    cl_extra_params: [
+      "--builder=http://el-1-geth-lighthouse:9060"
+    ]
+    vc_extra_params: [ "--builder-proposals" ]
+    count: 5
+    validator_count: 101
+
+mev_type: null
+
+network_params:
+  genesis_delay: 120
+  seconds_per_slot: 12
+
+additional_services:
+  assertoor:
+    - tool_node
+  broadcaster: []
+  # spamoor: []
+  dora: []
+  prometheus: []
+  grafana: []
+  apache: []
+
+# spamoor_params:
+#   image: ethpandaops/spamoor:latest
+#   max_mem: 4000
+#   spammers:
+#     - scenario: eoatx
+#       name: "EOA Spammer"
+#       config:
+#         throughput: 50
+
+assertoor_params:
+  image: "ethpandaops/assertoor:latest"
+  tests:
+    - { file: "https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/pectra-dev/validator-lifecycle-test-v3.yaml"}

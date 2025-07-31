@@ -456,10 +456,27 @@ def run(plan, args={}):
         return output
 
     launch_prometheus_grafana = False
-    for index, additional_service in enumerate(
-        args_with_right_defaults.additional_services
+    for index, additional_service_name in enumerate(
+        args_with_right_defaults.additional_services.keys()
     ):
-        if additional_service == "tx_fuzz":
+        # When services are defined as a dictionary, we can specify the participants that will be passed to them
+        # If the list of participants is empty, we pass all of them
+        # To specify a service that will not receive any participants, we can just pass a random string as participant
+        service_participants = [
+            p
+            for p in all_participants
+            if p.label
+            in args_with_right_defaults.additional_services[additional_service_name]
+        ]
+        if not args_with_right_defaults.additional_services[additional_service_name]:
+            service_participants = all_participants
+        plan.print(
+            "Launching {0} with {1} participants".format(
+                additional_service_name, len(service_participants)
+            )
+        )
+
+        if additional_service_name == "tx_fuzz":
             plan.print("Launching tx-fuzz")
             tx_fuzz_params = args_with_right_defaults.tx_fuzz_params
             tx_fuzz.launch_tx_fuzz(
@@ -470,7 +487,7 @@ def run(plan, args={}):
                 global_node_selectors,
             )
             plan.print("Successfully launched tx-fuzz")
-        elif additional_service == "forkmon":
+        elif additional_service_name == "forkmon":
             plan.print("Launching el forkmon")
             forkmon_config_template = read_file(
                 static_files.FORKMON_CONFIG_TEMPLATE_FILEPATH
@@ -478,18 +495,18 @@ def run(plan, args={}):
             forkmon.launch_forkmon(
                 plan,
                 forkmon_config_template,
-                all_el_contexts,
+                [p.el_context for p in service_participants],
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched execution layer forkmon")
-        elif additional_service == "blockscout":
+        elif additional_service_name == "blockscout":
             plan.print("Launching blockscout")
             blockscout_sc_verif_url = blockscout.launch_blockscout(
                 plan,
-                all_el_contexts,
+                [p.el_context for p in service_participants],
                 persistent,
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
@@ -499,14 +516,14 @@ def run(plan, args={}):
                 network_params,
             )
             plan.print("Successfully launched blockscout")
-        elif additional_service == "dora":
+        elif additional_service_name == "dora":
             plan.print("Launching dora")
             dora_config_template = read_file(static_files.DORA_CONFIG_TEMPLATE_FILEPATH)
             dora_params = args_with_right_defaults.dora_params
             dora.launch_dora(
                 plan,
                 dora_config_template,
-                all_participants,
+                service_participants,
                 args_with_right_defaults.participants,
                 network_params,
                 dora_params,
@@ -518,7 +535,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched dora")
-        elif additional_service == "dugtrio":
+        elif additional_service_name == "dugtrio":
             plan.print("Launching dugtrio")
             dugtrio_config_template = read_file(
                 static_files.DUGTRIO_CONFIG_TEMPLATE_FILEPATH
@@ -526,7 +543,7 @@ def run(plan, args={}):
             dugtrio.launch_dugtrio(
                 plan,
                 dugtrio_config_template,
-                all_participants,
+                service_participants,
                 args_with_right_defaults.participants,
                 network_params,
                 global_node_selectors,
@@ -535,7 +552,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched dugtrio")
-        elif additional_service == "blutgang":
+        elif additional_service_name == "blutgang":
             plan.print("Launching blutgang")
             blutgang_config_template = read_file(
                 static_files.BLUTGANG_CONFIG_TEMPLATE_FILEPATH
@@ -543,7 +560,7 @@ def run(plan, args={}):
             blutgang.launch_blutgang(
                 plan,
                 blutgang_config_template,
-                all_participants,
+                service_participants,
                 args_with_right_defaults.participants,
                 network_params,
                 global_node_selectors,
@@ -552,12 +569,12 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched blutgang")
-        elif additional_service == "blobscan":
+        elif additional_service_name == "blobscan":
             plan.print("Launching blobscan")
             blobscan.launch_blobscan(
                 plan,
-                all_cl_contexts,
-                all_el_contexts,
+                [p.cl_context for p in service_participants],
+                [p.el_context for p in service_participants],
                 network_id,
                 network_params,
                 persistent,
@@ -567,7 +584,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched blobscan")
-        elif additional_service == "forky":
+        elif additional_service_name == "forky":
             plan.print("Launching forky")
             forky_config_template = read_file(
                 static_files.FORKY_CONFIG_TEMPLATE_FILEPATH
@@ -575,7 +592,7 @@ def run(plan, args={}):
             forky.launch_forky(
                 plan,
                 forky_config_template,
-                all_participants,
+                service_participants,
                 args_with_right_defaults.participants,
                 el_cl_data_files_artifact_uuid,
                 network_params,
@@ -586,7 +603,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched forky")
-        elif additional_service == "tracoor":
+        elif additional_service_name == "tracoor":
             plan.print("Launching tracoor")
             tracoor_config_template = read_file(
                 static_files.TRACOOR_CONFIG_TEMPLATE_FILEPATH
@@ -594,7 +611,7 @@ def run(plan, args={}):
             tracoor.launch_tracoor(
                 plan,
                 tracoor_config_template,
-                all_participants,
+                service_participants,
                 args_with_right_defaults.participants,
                 el_cl_data_files_artifact_uuid,
                 network_params,
@@ -605,13 +622,13 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched tracoor")
-        elif additional_service == "apache":
+        elif additional_service_name == "apache":
             plan.print("Launching apache")
             apache.launch_apache(
                 plan,
                 el_cl_data_files_artifact_uuid,
                 apache_port,
-                all_participants,
+                service_participants,
                 args_with_right_defaults.participants,
                 args_with_right_defaults.port_publisher,
                 index,
@@ -619,13 +636,13 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched apache")
-        elif additional_service == "nginx":
+        elif additional_service_name == "nginx":
             plan.print("Launching nginx")
             nginx.launch_nginx(
                 plan,
                 el_cl_data_files_artifact_uuid,
                 nginx_port,
-                all_participants,
+                service_participants,
                 args_with_right_defaults.participants,
                 args_with_right_defaults.port_publisher,
                 index,
@@ -633,7 +650,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched nginx")
-        elif additional_service == "full_beaconchain_explorer":
+        elif additional_service_name == "full_beaconchain_explorer":
             plan.print("Launching full-beaconchain-explorer")
             full_beaconchain_explorer_config_template = read_file(
                 static_files.FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH
@@ -642,33 +659,33 @@ def run(plan, args={}):
                 plan,
                 full_beaconchain_explorer_config_template,
                 el_cl_data_files_artifact_uuid,
-                all_cl_contexts,
-                all_el_contexts,
+                [p.cl_context for p in service_participants],
+                [p.el_context for p in service_participants],
                 persistent,
                 global_node_selectors,
                 args_with_right_defaults.port_publisher,
                 index,
             )
             plan.print("Successfully launched full-beaconchain-explorer")
-        elif additional_service == "prometheus":
+        elif additional_service_name == "prometheus":
             plan.print("Launching prometheus...")
             prometheus_private_url = prometheus.launch_prometheus(
                 plan,
-                all_el_contexts,
-                all_cl_contexts,
-                all_vc_contexts,
+                [p.el_context for p in service_participants],
+                [p.cl_context for p in service_participants],
+                [p.vc_context for p in service_participants],
                 network_params,
-                all_remote_signer_contexts,
+                [p.remote_signer_context for p in service_participants],
                 prometheus_additional_metrics_jobs,
-                all_ethereum_metrics_exporter_contexts,
-                all_xatu_sentry_contexts,
+                [p.ethereum_metrics_exporter_context for p in service_participants],
+                [p.xatu_sentry_context for p in service_participants],
                 global_node_selectors,
                 args_with_right_defaults.prometheus_params,
                 args_with_right_defaults.port_publisher,
                 index,
             )
             plan.print("Successfully launched prometheus")
-        elif additional_service == "grafana":
+        elif additional_service_name == "grafana":
             plan.print("Launching grafana...")
             grafana.launch_grafana(
                 plan,
@@ -681,11 +698,11 @@ def run(plan, args={}):
                 index,
             )
             plan.print("Successfully launched grafana")
-        elif additional_service == "prometheus_grafana":
+        elif additional_service_name == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True
             prometheus_grafana_index = index
-        elif additional_service == "assertoor":
+        elif additional_service_name == "assertoor":
             plan.print("Launching assertoor")
             assertoor_config_template = read_file(
                 static_files.ASSERTOOR_CONFIG_TEMPLATE_FILEPATH
@@ -694,7 +711,7 @@ def run(plan, args={}):
             assertoor.launch_assertoor(
                 plan,
                 assertoor_config_template,
-                all_participants,
+                service_participants,
                 args_with_right_defaults.participants,
                 network_params,
                 assertoor_params,
@@ -704,7 +721,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched assertoor")
-        elif additional_service == "custom_flood":
+        elif additional_service_name == "custom_flood":
             mev_custom_flood.spam_in_background(
                 plan,
                 prefunded_accounts[-1].private_key,
@@ -714,7 +731,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 args_with_right_defaults.docker_cache_params,
             )
-        elif additional_service == "spamoor":
+        elif additional_service_name == "spamoor":
             plan.print("Launching spamoor")
             spamoor_config_template = read_file(
                 static_files.SPAMOOR_CONFIG_TEMPLATE_FILEPATH
@@ -727,7 +744,7 @@ def run(plan, args={}):
                 spamoor_config_template,
                 spamoor_hosts_template,
                 prefunded_accounts,
-                all_participants,
+                service_participants,
                 args_with_right_defaults.participants,
                 args_with_right_defaults.spamoor_params,
                 global_node_selectors,
@@ -737,7 +754,7 @@ def run(plan, args={}):
                 osaka_time,
             )
         else:
-            fail("Invalid additional service %s" % (additional_service))
+            fail("Invalid additional service %s" % (additional_service_name))
     if launch_prometheus_grafana:
         plan.print("Launching prometheus...")
         prometheus_private_url = prometheus.launch_prometheus(

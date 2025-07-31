@@ -87,3 +87,6 @@ yarn-error.log
 
 # enclave dumps
 dump/
+
+# gemini
+GEMINI.md

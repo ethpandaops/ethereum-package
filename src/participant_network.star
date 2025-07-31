@@ -205,9 +205,9 @@ def launch_participant_network(
             blobber_http_url = "http://{0}:{1}".format(
                 blobber.ip_addr, blobber.port_num
             )
-            cl_context_to_blobber_url[
-                config.cl_context.beacon_service_name
-            ] = blobber_http_url
+            cl_context_to_blobber_url[config.cl_context.beacon_service_name] = (
+                blobber_http_url
+            )
 
     # Helper function to get cl_context with blobber URL if available
     def get_cl_context_with_blobber_url(cl_context):
@@ -562,6 +562,7 @@ def launch_participant_network(
             xatu_sentry_context = all_xatu_sentry_contexts[index]
 
         participant_entry = participant_module.new_participant(
+            participant.label,
             el_type,
             cl_type,
             vc_type,

@@ -1,5 +1,6 @@
 PARTICIPANT_CATEGORIES = {
     "participants": [
+        "label",
         "el_type",
         "el_image",
         "el_log_level",
