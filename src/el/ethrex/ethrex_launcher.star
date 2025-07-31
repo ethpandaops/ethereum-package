@@ -113,7 +113,7 @@ def get_config(
         )
         additional_public_port_assignments = {
             constants.RPC_PORT_ID: public_ports_for_component[3],
-            constants.WS_PORT_ID: public_ports_for_component[4],
+            # constants.WS_PORT_ID: public_ports_for_component[4],
         }
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
