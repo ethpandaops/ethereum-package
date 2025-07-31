@@ -167,7 +167,10 @@ def get_config(
                     ]
                 )
             )
-    elif network_params.network not in constants.PUBLIC_NETWORKS:
+    elif (
+        network_params.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
+    ):
         cmd.append(
             "--bootnodes="
             + shared_utils.get_devnet_enodes(
