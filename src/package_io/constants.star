@@ -7,6 +7,7 @@ EL_TYPE = struct(
     reth_builder="reth-builder",
     ethereumjs="ethereumjs",
     nimbus="nimbus",
+    ethrex="ethrex",
 )
 
 CL_TYPE = struct(
@@ -208,6 +209,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 500000,  # 500GB
         "lodestar_volume_size": 500000,  # 500GB
         "grandine_volume_size": 500000,  # 500GB
+        "ethrex_volume_size": 500000,  # 500GB
     },
     "sepolia": {
         "geth_volume_size": 300000,  # 300GB
@@ -224,6 +226,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 150000,  # 150GB
         "lodestar_volume_size": 150000,  # 150GB
         "grandine_volume_size": 150000,  # 150GB
+        "ethrex_volume_size": 150000,  # 150GB
     },
     "holesky": {
         "geth_volume_size": 100000,  # 100GB
@@ -240,6 +243,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 100000,  # 100GB
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
+        "ethrex_volume_size": 100000,  # 100GB
     },
     "devnets": {
         "geth_volume_size": 100000,  # 100GB
@@ -256,6 +260,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 100000,  # 100GB
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
+        "ethrex_volume_size": 100000,  # 100GB
     },
     "ephemery": {
         "geth_volume_size": 5000,  # 5GB
@@ -272,6 +277,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 1000,  # 1GB
         "lodestar_volume_size": 1000,  # 1GB
         "grandine_volume_size": 1000,  # 1GB
+        "ethrex_volume_size": 1000,  # 1GB
     },
     "kurtosis": {
         "geth_volume_size": 5000,  # 5GB
@@ -288,6 +294,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 1000,  # 1GB
         "lodestar_volume_size": 1000,  # 1GB
         "grandine_volume_size": 1000,  # 1GB
+        "ethrex_volume_size": 1000,  # 1GB
     },
     "hoodi": {
         "geth_volume_size": 100000,  # 100GB
@@ -304,6 +311,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 100000,  # 100GB
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
+        "ethrex_volume_size": 100000,  # 100GB
     },
 }
 # Language mapping for client implementations
