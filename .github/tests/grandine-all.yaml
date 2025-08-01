@@ -9,5 +9,7 @@ participants:
     cl_type: grandine
   - el_type: reth
     cl_type: grandine
-  - el_type: ethereumjs
+  - el_type: ethrex
+    cl_type: grandine
+  - el_type: nimbus
     cl_type: grandine
