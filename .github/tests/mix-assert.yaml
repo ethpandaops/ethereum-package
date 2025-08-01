@@ -9,10 +9,8 @@ participants:
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: nimbus
-    cl_type: grandine
   - el_type: ethrex
-    cl_type: lodestar
+    cl_type: grandine
 additional_services:
   - assertoor
   - dora

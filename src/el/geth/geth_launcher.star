@@ -234,16 +234,15 @@ def get_config(
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
-        if len(existing_el_clients) > 0:
-            cmd.append(
-                "--bootnodes="
-                + ",".join(
-                    [
-                        ctx.enode
-                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                    ]
-                )
+        cmd.append(
+            "--bootnodes="
+            + ",".join(
+                [
+                    ctx.enode
+                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                ]
             )
+        )
         if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
             if launcher.osaka_enabled:
                 cmd.append("--override.osaka=" + str(launcher.osaka_time))
