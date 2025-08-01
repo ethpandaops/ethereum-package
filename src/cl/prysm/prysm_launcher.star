@@ -183,9 +183,9 @@ def get_beacon_config(
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
-        "--rpc-host=0.0.0.0",
+        "--rpc-host={0}".format("::" if participant.cl_ipv6_enabled else "0.0.0.0"),
         "--rpc-port={0}".format(RPC_PORT_NUM),
-        "--http-host=0.0.0.0",
+        "--http-host={0}".format("::" if participant.cl_ipv6_enabled else "0.0.0.0"),
         "--http-cors-domain=*",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--p2p-host-ip=" + port_publisher.cl_nat_exit_ip,
@@ -199,11 +199,13 @@ def get_beacon_config(
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
-        "--monitoring-host=0.0.0.0",
+        "--monitoring-host={0}".format(
+            "::" if participant.cl_ipv6_enabled else "0.0.0.0"
+        ),
         "--monitoring-port={0}".format(BEACON_MONITORING_PORT_NUM),
         # vvvvvvvvv PROFILING CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--pprof",
-        "--pprofaddr=0.0.0.0",
+        "--pprofaddr={0}".format("::" if participant.cl_ipv6_enabled else "0.0.0.0"),
         "--pprofport={0}".format(PROFILING_PORT_NUM),
     ]
 

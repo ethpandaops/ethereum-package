@@ -135,13 +135,15 @@ def get_config(
         "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--host-allowlist=*",
         "--rpc-http-enabled=true",
-        "--rpc-http-host=0.0.0.0",
+        "--rpc-http-host={0}".format(
+            "::" if participant.el_ipv6_enabled else "0.0.0.0"
+        ),
         "--rpc-http-port={0}".format(RPC_PORT_NUM),
         "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--rpc-http-cors-origins=*",
         "--rpc-http-max-active-connections=300",
         "--rpc-ws-enabled=true",
-        "--rpc-ws-host=0.0.0.0",
+        "--rpc-ws-host={0}".format("::" if participant.el_ipv6_enabled else "0.0.0.0"),
         "--rpc-ws-port={0}".format(WS_PORT_NUM),
         "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--p2p-enabled=true",
@@ -160,7 +162,7 @@ def get_config(
             "VERKLE" if "verkle-gen" in network_params.network else "BONSAI"
         ),
         "--metrics-enabled=true",
-        "--metrics-host=0.0.0.0",
+        "--metrics-host={0}".format("::" if participant.el_ipv6_enabled else "0.0.0.0"),
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--min-gas-price=1000000000",
         "--bonsai-limit-trie-logs-enabled=false"

@@ -178,12 +178,12 @@ def get_beacon_config(
         "beacon_node",
         "--debug-level=" + log_level,
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--listen-address=0.0.0.0",
+        "--listen-address=0.0.0.0",  # Always bind IPv4
         "--port={0}".format(
             discovery_port_tcp
         ),  # NOTE: Remove for connecting to external net!
         "--http",
-        "--http-address=0.0.0.0",
+        "--http-address=0.0.0.0",  # Always bind IPv4 for HTTP
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         # NOTE: This comes from:
         #   https://github.com/sigp/lighthouse/blob/7c88f582d955537f7ffff9b2c879dcf5bf80ce13/scripts/local_testnet/beacon_node.sh
@@ -202,13 +202,25 @@ def get_beacon_config(
         "--quic-port={0}".format(discovery_port_quic),
         # Metrics
         "--metrics",
-        "--metrics-address=0.0.0.0",
+        "--metrics-address=0.0.0.0",  # Always bind IPv4 for metrics
         "--metrics-allow-origin=*",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # Enable this flag once we have https://github.com/sigp/lighthouse/issues/5054 fixed
         # "--allow-insecure-genesis-sync",
         "--enable-private-discovery",
     ]
+
+    # Add IPv6-specific flags for dual-stack support when enabled
+    if participant.cl_ipv6_enabled:
+        ipv6_flags = [
+            "--port6={0}".format(discovery_port_tcp),
+            "--discovery-port6={0}".format(discovery_port_udp),
+            "--enr-tcp6-port={0}".format(discovery_port_tcp),
+            "--enr-udp6-port={0}".format(discovery_port_udp),
+            "--quic-port6={0}".format(discovery_port_quic),
+            "--enr-quic6-port={0}".format(discovery_port_quic),
+        ]
+        cmd.extend(ipv6_flags)
 
     supernode_cmd = [
         "--subscribe-all-data-column-subnets",

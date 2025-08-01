@@ -208,7 +208,7 @@ def get_beacon_config(
         "--enr-auto-update=false",
         "--history={0}".format("archive" if constants.ARCHIVE_MODE else "prune"),
         "--rest",
-        "--rest-address=0.0.0.0",
+        "--rest-address={0}".format("::" if participant.cl_ipv6_enabled else "0.0.0.0"),
         "--rest-allow-origin=*",
         "--rest-port={0}".format(BEACON_HTTP_PORT_NUM),
         # There's a bug where if we don't set this flag, the Nimbus nodes won't work:
@@ -220,7 +220,9 @@ def get_beacon_config(
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # Metrics
         "--metrics",
-        "--metrics-address=0.0.0.0",
+        "--metrics-address={0}".format(
+            "::" if participant.cl_ipv6_enabled else "0.0.0.0"
+        ),
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
     ]
 
@@ -233,7 +235,9 @@ def get_beacon_config(
     keymanager_api_cmd = [
         "--keymanager",
         "--keymanager-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
-        "--keymanager-address=0.0.0.0",
+        "--keymanager-address={0}".format(
+            "::" if participant.cl_ipv6_enabled else "0.0.0.0"
+        ),
         "--keymanager-allow-origin=*",
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]

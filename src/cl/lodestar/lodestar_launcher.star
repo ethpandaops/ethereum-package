@@ -187,6 +187,17 @@ def get_beacon_config(
         "--supernode",
     ]
 
+    # Add IPv6-specific flags for dual-stack support when enabled
+    if participant.cl_ipv6_enabled:
+        ipv6_flags = [
+            "--listenAddress6=::0",
+            "--port6={0}".format(discovery_port_tcp),
+            "--enr.ip6=::",  # Will need actual IPv6 address in production
+            "--enr.tcp6={0}".format(discovery_port_tcp),
+            "--enr.udp6={0}".format(discovery_port_udp),
+        ]
+        cmd.extend(ipv6_flags)
+
     if participant.supernode:
         cmd.extend(supernode_cmd)
 
