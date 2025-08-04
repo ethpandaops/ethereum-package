@@ -62,7 +62,7 @@ jobs:
 
       - name: Notify
         if: (cancelled() || failure()) && env.discord_webhook_set == 'true'
-        uses: Ilshidur/action-discord@08d9328877d6954120eef2b07abbc79249bb6210 # dependabot/npm_and_yarn/axios-1.3.4-08d9328
+        uses: Ilshidur/action-discord@d2594079a10f1d6739ee50a2471f0ca57418b554 # dependabot/npm_and_yarn/axios-1.3.4-08d9328
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
