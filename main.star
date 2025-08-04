@@ -391,6 +391,7 @@ def run(plan, args={}):
                         args_with_right_defaults.port_publisher,
                         index,
                         global_node_selectors,
+                        global_tolerations,
                     )
                 elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
                     plan.print("Launching mev-rs mev boost")
