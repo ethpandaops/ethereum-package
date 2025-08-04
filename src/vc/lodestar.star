@@ -123,6 +123,10 @@ def get_config(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
 
+    # Add extra mounts
+    for mount_path, mount_source in participant.vc_extra_mounts.items():
+        files[mount_path] = mount_source
+
     env_vars = participant.vc_extra_env_vars
     if network_params.preset == "minimal":
         env_vars["LODESTAR_PRESET"] = "minimal"

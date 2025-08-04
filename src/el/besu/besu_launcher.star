@@ -231,6 +231,10 @@ def get_config(
             ],
         )
 
+    # Add extra mounts
+    for mount_path, mount_source in participant.el_extra_mounts.items():
+        files[mount_path] = mount_source
+
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,

@@ -64,6 +64,10 @@ def get_config(
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
+    # Add extra mounts
+    for mount_path, mount_source in participant.vc_extra_mounts.items():
+        files[mount_path] = mount_source
+
     config_args = {
         "image": image,
         "ports": ports,

@@ -197,6 +197,10 @@ def get_config(
             ],
         )
 
+    # Add extra mounts
+    for mount_path, mount_source in participant.el_extra_mounts.items():
+        files[mount_path] = mount_source
+
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network

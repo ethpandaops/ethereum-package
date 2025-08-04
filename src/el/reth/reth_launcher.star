@@ -243,6 +243,11 @@ def get_config(
                 constants.EL_TYPE.reth + "_volume_size"
             ],
         )
+
+    # Add extra mounts
+    for mount_path, mount_source in participant.el_extra_mounts.items():
+        files[mount_path] = mount_source
+
     env_vars = {}
     image = participant.el_image
     if launcher.builder_type == constants.MEV_RS_MEV_TYPE:

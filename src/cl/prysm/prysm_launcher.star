@@ -291,6 +291,10 @@ def get_beacon_config(
                 constants.CL_TYPE.prysm + "_volume_size"
             ],
         )
+    
+    # Add extra mounts
+    for mount_path, mount_source in participant.cl_extra_mounts.items():
+        files[mount_path] = mount_source
 
     config_args = {
         "image": participant.cl_image,

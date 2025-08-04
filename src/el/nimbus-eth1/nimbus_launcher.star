@@ -203,6 +203,11 @@ def get_config(
                 constants.EL_TYPE.nimbus + "_volume_size"
             ],
         )
+
+    # Add extra mounts
+    for mount_path, mount_source in participant.el_extra_mounts.items():
+        files[mount_path] = mount_source
+
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,
