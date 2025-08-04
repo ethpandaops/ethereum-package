@@ -35,6 +35,7 @@ def launch_forky(
     el_cl_data_files_artifact_uuid,
     network_params,
     global_node_selectors,
+    global_tolerations,
     final_genesis_timestamp,
     port_publisher,
     additional_service_index,
@@ -87,6 +88,7 @@ def launch_forky(
         el_cl_data_files_artifact_uuid,
         network_params,
         global_node_selectors,
+        global_tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -100,6 +102,7 @@ def get_config(
     el_cl_data_files_artifact_uuid,
     network_params,
     node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -136,6 +139,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 

@@ -19,6 +19,7 @@ def launch_mock_mev(
     jwt_file,
     global_log_level,
     global_node_selectors,
+    global_tolerations,
     mev_params,
 ):
     mock_builder = plan.add_service(
@@ -48,6 +49,7 @@ def launch_mock_mev(
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=global_node_selectors,
+            tolerations=global_tolerations,
         ),
     )
     return "http://{0}@{1}:{2}".format(

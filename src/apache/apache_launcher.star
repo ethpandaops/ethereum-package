@@ -36,6 +36,7 @@ def launch_apache(
     port_publisher,
     index,
     global_node_selectors,
+    global_tolerations,
     docker_cache_params,
 ):
     config_files_artifact_name = plan.upload_files(
@@ -104,6 +105,7 @@ def launch_apache(
         public_ports,
         bootstrap_info_files_artifact_name,
         global_node_selectors,
+        global_tolerations,
         docker_cache_params,
     )
 
@@ -116,6 +118,7 @@ def get_config(
     public_ports,
     bootstrap_info_files_artifact_name,
     node_selectors,
+    global_tolerations,
     docker_cache_params,
 ):
     files = {
@@ -172,6 +175,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 

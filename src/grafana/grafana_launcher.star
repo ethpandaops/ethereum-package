@@ -44,6 +44,7 @@ def launch_grafana(
     dashboard_providers_config_template,
     prometheus_private_url,
     global_node_selectors,
+    global_tolerations,
     grafana_params,
     port_publisher,
     index,
@@ -77,6 +78,7 @@ def launch_grafana(
         grafana_config_artifacts_uuid,
         merged_dashboards_artifact_name,
         global_node_selectors,
+        global_tolerations,
         grafana_params,
         public_ports,
     )
@@ -134,6 +136,7 @@ def get_config(
     grafana_config_artifacts_name,
     grafana_dashboards_artifacts_name,
     node_selectors,
+    global_tolerations,
     grafana_params,
     public_ports,
 ):
@@ -156,6 +159,7 @@ def get_config(
         min_memory=grafana_params.min_mem,
         max_memory=grafana_params.max_mem,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
         public_ports=public_ports,
     )
 

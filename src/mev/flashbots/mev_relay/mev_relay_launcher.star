@@ -49,6 +49,7 @@ def launch_mev_relay(
     port_publisher,
     index,
     global_node_selectors,
+    global_tolerations,
 ):
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,
@@ -126,6 +127,7 @@ def launch_mev_relay(
             min_memory=RELAY_MIN_MEMORY,
             max_memory=RELAY_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
         ),
     )
 
@@ -168,6 +170,7 @@ def launch_mev_relay(
             min_memory=RELAY_MIN_MEMORY,
             max_memory=RELAY_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
         ),
     )
 
@@ -219,6 +222,7 @@ def launch_mev_relay(
             min_memory=RELAY_MIN_MEMORY,
             max_memory=RELAY_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
         ),
     )
 

@@ -66,6 +66,7 @@ def launch_blockscout(
     el_contexts,
     persistent,
     global_node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -90,6 +91,7 @@ def launch_blockscout(
 
     config_verif = get_config_verif(
         global_node_selectors,
+        global_tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -107,6 +109,7 @@ def launch_blockscout(
         verif_url,
         el_client_name,
         global_node_selectors,
+        global_tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -126,6 +129,7 @@ def launch_blockscout(
         blockscout_params,
         network_params,
         global_node_selectors,
+        global_tolerations,
         blockscout_service,
         port_publisher,
     )
@@ -135,6 +139,7 @@ def launch_blockscout(
 
 def get_config_verif(
     node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -164,6 +169,7 @@ def get_config_verif(
         min_memory=BLOCKSCOUT_VERIF_MIN_MEMORY,
         max_memory=BLOCKSCOUT_VERIF_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 
@@ -173,6 +179,7 @@ def get_config_backend(
     verif_url,
     el_client_name,
     node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -230,6 +237,7 @@ def get_config_backend(
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 
@@ -240,6 +248,7 @@ def get_config_frontend(
     blockscout_params,
     network_params,
     node_selectors,
+    global_tolerations,
     blockscout_service,
     port_publisher,
 ):
@@ -279,4 +288,5 @@ def get_config_frontend(
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )

@@ -32,6 +32,7 @@ def launch_mev_relay(
     port_publisher,
     index,
     global_node_selectors,
+    global_tolerations,
 ):
     node_selectors = global_node_selectors
     image = mev_params.mev_relay_image
@@ -95,6 +96,7 @@ def launch_mev_relay(
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
             env_vars={"RUST_BACKTRACE": "1"},
         ),
     )

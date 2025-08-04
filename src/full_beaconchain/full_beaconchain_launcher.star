@@ -103,6 +103,7 @@ def launch_full_beacon(
     el_contexts,
     persistent,
     global_node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
 ):
@@ -135,7 +136,7 @@ def launch_full_beacon(
     little_bigtable = plan.add_service(
         name="beaconchain-littlebigtable",
         config=get_little_bigtable_config(
-            node_selectors, port_publisher, additional_service_index
+            node_selectors, global_tolerations, port_publisher, additional_service_index
         ),
     )
 
@@ -186,6 +187,7 @@ def launch_full_beacon(
             min_memory=INIT_MIN_MEMORY,
             max_memory=INIT_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
         ),
     )
 
@@ -239,6 +241,7 @@ def launch_full_beacon(
             min_memory=INDEXER_MIN_MEMORY,
             max_memory=INDEXER_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
         ),
     )
     # Start the eth1indexer
@@ -264,6 +267,7 @@ def launch_full_beacon(
             min_memory=ETH1INDEXER_MIN_MEMORY,
             max_memory=ETH1INDEXER_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
         ),
     )
 
@@ -282,6 +286,7 @@ def launch_full_beacon(
             min_memory=REWARDSEXPORTER_MIN_MEMORY,
             max_memory=REWARDSEXPORTER_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
         ),
     )
 
@@ -303,6 +308,7 @@ def launch_full_beacon(
             min_memory=STATISTICS_MIN_MEMORY,
             max_memory=STATISTICS_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
         ),
     )
 
@@ -321,19 +327,24 @@ def launch_full_beacon(
             min_memory=FDU_MIN_MEMORY,
             max_memory=FDU_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=global_tolerations,
         ),
     )
 
     frontend = plan.add_service(
         name="beaconchain-frontend",
         config=get_frontend_config(
-            files, node_selectors, port_publisher, additional_service_index
+            files,
+            node_selectors,
+            global_tolerations,
+            port_publisher,
+            additional_service_index,
         ),
     )
 
 
 def get_little_bigtable_config(
-    node_selectors, port_publisher, additional_service_index
+    node_selectors, global_tolerations, port_publisher, additional_service_index
 ):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
@@ -354,11 +365,12 @@ def get_little_bigtable_config(
         min_memory=LITTLE_BIGTABLE_MIN_MEMORY,
         max_memory=LITTLE_BIGTABLE_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 
 def get_frontend_config(
-    files, node_selectors, port_publisher, additional_service_index
+    files, node_selectors, global_tolerations, port_publisher, additional_service_index
 ):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
@@ -388,6 +400,7 @@ def get_frontend_config(
         min_memory=FRONTEND_MIN_MEMORY,
         max_memory=FRONTEND_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 

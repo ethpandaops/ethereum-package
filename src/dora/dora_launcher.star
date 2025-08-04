@@ -34,6 +34,7 @@ def launch_dora(
     network_params,
     dora_params,
     global_node_selectors,
+    global_tolerations,
     mev_endpoints,
     mev_endpoint_names,
     port_publisher,
@@ -106,6 +107,7 @@ def launch_dora(
         network_params,
         dora_params,
         global_node_selectors,
+        global_tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -119,6 +121,7 @@ def get_config(
     network_params,
     dora_params,
     node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -163,6 +166,7 @@ def get_config(
                 )
                 + "ethpandaops/dora:eip7805-support"
             )
+
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
@@ -178,6 +182,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 

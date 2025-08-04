@@ -39,6 +39,7 @@ def launch_blutgang(
     participant_configs,
     network_params,
     global_node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -75,6 +76,7 @@ def launch_blutgang(
         config_files_artifact_name,
         network_params,
         global_node_selectors,
+        global_tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -87,6 +89,7 @@ def get_config(
     config_files_artifact_name,
     network_params,
     node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -123,6 +126,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
         ready_conditions=ReadyCondition(
             recipe=GetHttpRequestRecipe(
                 port_id="admin",

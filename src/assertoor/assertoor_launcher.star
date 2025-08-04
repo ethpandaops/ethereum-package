@@ -39,6 +39,7 @@ def launch_assertoor(
     port_publisher,
     index,
     global_node_selectors,
+    global_tolerations,
     docker_cache_params,
 ):
     all_client_info = []
@@ -113,6 +114,7 @@ def launch_assertoor(
         assertoor_params,
         public_ports,
         global_node_selectors,
+        global_tolerations,
         docker_cache_params,
     )
 
@@ -126,6 +128,7 @@ def get_config(
     assertoor_params,
     public_ports,
     node_selectors,
+    global_tolerations,
     docker_cache_params,
 ):
     config_file_path = shared_utils.path_join(
@@ -166,6 +169,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 

@@ -83,6 +83,7 @@ def launch_blobscan(
     network_params,
     persistent,
     global_node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -125,6 +126,7 @@ def launch_blobscan(
         network_params.network,
         redis_output.url,
         node_selectors,
+        global_tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -142,6 +144,7 @@ def launch_blobscan(
         beacon_node_rpc_uri,
         execution_node_rpc_uri,
         node_selectors,
+        global_tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -154,6 +157,7 @@ def launch_blobscan(
         execution_node_rpc_uri,
         network_params.network,
         node_selectors,
+        global_tolerations,
         docker_cache_params,
     )
     plan.add_service(INDEXER_SERVICE_NAME, indexer_config)
@@ -165,6 +169,7 @@ def get_api_config(
     network_name,
     redis_url,
     node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -213,6 +218,7 @@ def get_api_config(
         min_memory=API_MIN_MEMORY,
         max_memory=API_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 
@@ -222,6 +228,7 @@ def get_web_config(
     beacon_node_rpc,
     execution_node_rpc,
     node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -259,6 +266,7 @@ def get_web_config(
         min_memory=WEB_MIN_MEMORY,
         max_memory=WEB_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 
@@ -268,6 +276,7 @@ def get_indexer_config(
     execution_node_rpc,
     network_name,
     node_selectors,
+    global_tolerations,
     docker_cache_params,
 ):
     IMAGE_NAME = "blossomlabs/blobscan-indexer:master"
@@ -293,4 +302,5 @@ def get_indexer_config(
         min_memory=INDEX_MIN_MEMORY,
         max_memory=INDEX_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )

@@ -16,6 +16,7 @@ def spam_in_background(
     el_uri,
     params,
     global_node_selectors,
+    global_tolerations,
     docker_cache_params,
 ):
     sender_script = plan.upload_files(src="./sender.py", name="mev-custom-flood-sender")
@@ -38,6 +39,7 @@ def spam_in_background(
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=global_node_selectors,
+            tolerations=global_tolerations,
         ),
     )
 

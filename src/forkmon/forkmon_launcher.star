@@ -30,6 +30,7 @@ def launch_forkmon(
     config_template,
     el_contexts,
     global_node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -56,6 +57,7 @@ def launch_forkmon(
     config = get_config(
         config_files_artifact_name,
         global_node_selectors,
+        global_tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -67,6 +69,7 @@ def launch_forkmon(
 def get_config(
     config_files_artifact_name,
     node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -98,6 +101,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=global_tolerations,
     )
 
 
