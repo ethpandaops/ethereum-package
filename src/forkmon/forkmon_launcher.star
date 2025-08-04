@@ -1,5 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 SERVICE_NAME = "forkmon"
 IMAGE_NAME = "ethpandaops/execution-monitor:master"
@@ -35,6 +36,8 @@ def launch_forkmon(
     additional_service_index,
     docker_cache_params,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     all_el_client_info = []
     for client in el_contexts:
         client_info = new_el_client_info(
@@ -57,7 +60,7 @@ def launch_forkmon(
     config = get_config(
         config_files_artifact_name,
         global_node_selectors,
-        global_tolerations,
+        tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -69,7 +72,7 @@ def launch_forkmon(
 def get_config(
     config_files_artifact_name,
     node_selectors,
-    global_tolerations,
+    tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -101,7 +104,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )
 
 

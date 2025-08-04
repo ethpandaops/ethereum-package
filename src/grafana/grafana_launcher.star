@@ -1,6 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 SERVICE_NAME = "grafana"
 
@@ -49,6 +50,8 @@ def launch_grafana(
     port_publisher,
     index,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     (
         grafana_config_artifacts_uuid,
         grafana_dashboards_artifacts_uuid,
@@ -78,7 +81,7 @@ def launch_grafana(
         grafana_config_artifacts_uuid,
         merged_dashboards_artifact_name,
         global_node_selectors,
-        global_tolerations,
+        tolerations,
         grafana_params,
         public_ports,
     )
@@ -136,7 +139,7 @@ def get_config(
     grafana_config_artifacts_name,
     grafana_dashboards_artifacts_name,
     node_selectors,
-    global_tolerations,
+    tolerations,
     grafana_params,
     public_ports,
 ):
@@ -159,7 +162,7 @@ def get_config(
         min_memory=grafana_params.min_mem,
         max_memory=grafana_params.max_mem,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
         public_ports=public_ports,
     )
 

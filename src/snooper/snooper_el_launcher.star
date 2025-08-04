@@ -27,6 +27,8 @@ def launch_snooper(
     global_other_index,
     docker_cache_params,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     snooper_service_name = "{0}".format(service_name)
 
     if "engine" in snooper_service_name:
@@ -58,7 +60,7 @@ def launch_snooper(
         service_name,
         el_context,
         node_selectors,
-        global_tolerations,
+        tolerations,
         docker_cache_params,
         snooper_used_ports,
         public_ports,
@@ -76,7 +78,7 @@ def get_config(
     service_name,
     el_context,
     node_selectors,
-    global_tolerations,
+    tolerations,
     docker_cache_params,
     snooper_used_ports,
     public_ports,
@@ -112,5 +114,5 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )

@@ -31,6 +31,8 @@ def launch(
     global_other_index,
     docker_cache_params,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     snooper_service_name = "{0}".format(service_name)
 
     public_ports = shared_utils.get_other_public_port(
@@ -44,7 +46,7 @@ def launch(
         service_name,
         cl_context,
         node_selectors,
-        global_tolerations,
+        tolerations,
         docker_cache_params,
         public_ports,
     )
@@ -60,7 +62,7 @@ def get_config(
     service_name,
     cl_context,
     node_selectors,
-    global_tolerations,
+    tolerations,
     docker_cache_params,
     public_ports,
 ):
@@ -86,5 +88,5 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )

@@ -1,4 +1,5 @@
 constants = import_module("../../../package_io/constants.star")
+input_parser = import_module("../../../package_io/input_parser.star")
 
 # Default image if none specified in mev_params
 
@@ -22,6 +23,7 @@ def launch_mock_mev(
     global_tolerations,
     mev_params,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
     mock_builder = plan.add_service(
         name=MOCK_MEV_SERVICE_NAME,
         config=ServiceConfig(
@@ -49,7 +51,7 @@ def launch_mock_mev(
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=global_node_selectors,
-            tolerations=global_tolerations,
+            tolerations=tolerations,
         ),
     )
     return "http://{0}@{1}:{2}".format(

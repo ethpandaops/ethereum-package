@@ -1,5 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 SERVICE_NAME = "dora"
 
 HTTP_PORT_NUMBER = 8080
@@ -41,6 +42,8 @@ def launch_dora(
     additional_service_index,
     docker_cache_params,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     all_cl_client_info = []
     all_el_client_info = []
     for index, participant in enumerate(participant_contexts):
@@ -107,7 +110,7 @@ def launch_dora(
         network_params,
         dora_params,
         global_node_selectors,
-        global_tolerations,
+        tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -121,7 +124,7 @@ def get_config(
     network_params,
     dora_params,
     node_selectors,
-    global_tolerations,
+    tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -182,7 +185,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )
 
 

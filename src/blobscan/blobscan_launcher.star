@@ -2,6 +2,7 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 redis = import_module("github.com/kurtosis-tech/redis-package/main.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 WEB_SERVICE_NAME = "blobscan-web"
 API_SERVICE_NAME = "blobscan-api"
@@ -89,6 +90,7 @@ def launch_blobscan(
     docker_cache_params,
 ):
     node_selectors = global_node_selectors
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
     beacon_node_rpc_uri = "{0}".format(cl_contexts[0].beacon_http_url)
     execution_node_rpc_uri = "{0}".format(el_contexts[0].rpc_http_url)
 
@@ -104,6 +106,7 @@ def launch_blobscan(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params, "library/postgres:alpine"
         ),
+        tolerations=tolerations,
     )
 
     redis_output = redis.run(
@@ -118,6 +121,7 @@ def launch_blobscan(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params, "library/redis:alpine"
         ),
+        tolerations=tolerations,
     )
 
     api_config = get_api_config(
@@ -126,7 +130,7 @@ def launch_blobscan(
         network_params.network,
         redis_output.url,
         node_selectors,
-        global_tolerations,
+        tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -144,7 +148,7 @@ def launch_blobscan(
         beacon_node_rpc_uri,
         execution_node_rpc_uri,
         node_selectors,
-        global_tolerations,
+        tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -157,7 +161,7 @@ def launch_blobscan(
         execution_node_rpc_uri,
         network_params.network,
         node_selectors,
-        global_tolerations,
+        tolerations,
         docker_cache_params,
     )
     plan.add_service(INDEXER_SERVICE_NAME, indexer_config)
@@ -169,7 +173,7 @@ def get_api_config(
     network_name,
     redis_url,
     node_selectors,
-    global_tolerations,
+    tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -218,7 +222,7 @@ def get_api_config(
         min_memory=API_MIN_MEMORY,
         max_memory=API_MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )
 
 
@@ -228,7 +232,7 @@ def get_web_config(
     beacon_node_rpc,
     execution_node_rpc,
     node_selectors,
-    global_tolerations,
+    tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -266,7 +270,7 @@ def get_web_config(
         min_memory=WEB_MIN_MEMORY,
         max_memory=WEB_MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )
 
 
@@ -276,7 +280,7 @@ def get_indexer_config(
     execution_node_rpc,
     network_name,
     node_selectors,
-    global_tolerations,
+    tolerations,
     docker_cache_params,
 ):
     IMAGE_NAME = "blossomlabs/blobscan-indexer:master"
@@ -302,5 +306,5 @@ def get_indexer_config(
         min_memory=INDEX_MIN_MEMORY,
         max_memory=INDEX_MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )

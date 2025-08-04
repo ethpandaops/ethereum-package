@@ -1,6 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 POSTGRES_IMAGE = "library/postgres:alpine"
 
@@ -73,6 +74,7 @@ def launch_blockscout(
     blockscout_params,
     network_params,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
     postgres_output = postgres.run(
         plan,
         service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
@@ -81,6 +83,7 @@ def launch_blockscout(
         persistent=persistent,
         node_selectors=global_node_selectors,
         image=shared_utils.docker_cache_image_calc(docker_cache_params, POSTGRES_IMAGE),
+        tolerations=tolerations,
     )
 
     el_context = el_contexts[0]
@@ -91,7 +94,7 @@ def launch_blockscout(
 
     config_verif = get_config_verif(
         global_node_selectors,
-        global_tolerations,
+        tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -109,7 +112,7 @@ def launch_blockscout(
         verif_url,
         el_client_name,
         global_node_selectors,
-        global_tolerations,
+        tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -129,7 +132,7 @@ def launch_blockscout(
         blockscout_params,
         network_params,
         global_node_selectors,
-        global_tolerations,
+        tolerations,
         blockscout_service,
         port_publisher,
     )
@@ -139,7 +142,7 @@ def launch_blockscout(
 
 def get_config_verif(
     node_selectors,
-    global_tolerations,
+    tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -169,7 +172,7 @@ def get_config_verif(
         min_memory=BLOCKSCOUT_VERIF_MIN_MEMORY,
         max_memory=BLOCKSCOUT_VERIF_MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )
 
 
@@ -179,7 +182,7 @@ def get_config_backend(
     verif_url,
     el_client_name,
     node_selectors,
-    global_tolerations,
+    tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -237,7 +240,7 @@ def get_config_backend(
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )
 
 
@@ -248,7 +251,7 @@ def get_config_frontend(
     blockscout_params,
     network_params,
     node_selectors,
-    global_tolerations,
+    tolerations,
     blockscout_service,
     port_publisher,
 ):
@@ -288,5 +291,5 @@ def get_config_frontend(
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
         node_selectors=node_selectors,
-        tolerations=global_tolerations,
+        tolerations=tolerations,
     )
