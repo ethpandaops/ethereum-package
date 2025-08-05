@@ -338,7 +338,6 @@ participants:
     # A list of optional extra mount points that will be passed to the validator client container
     # Key is the path in the container, value is an artifact name that already exists in Kurtosis
     # Example: vc_extra_mounts: {"/tmp/jwt-copy": "jwt_file"}
-    # Note: The artifact must already exist (e.g., uploaded via plan.upload_files)
     vc_extra_mounts: {}
 
     # A list of tolerations that will be passed to the validator container
@@ -1355,53 +1354,17 @@ participants:
     cl_type: lighthouse
     el_extra_mounts:
       "/custom/jwt/path": "jwt_file"  # jwt_file is a built-in artifact
-    cl_extra_mounts:
-      "/custom/keymanager": "keymanager_file"  # keymanager_file is a built-in artifact
 ```
 
-### Example: Mounting Files from Package Directory
-
-Place your custom files in the package directory (e.g., in `static_files/` or create your own directory):
+### Example: Mounting Files from local directory
 
 ```yaml
 participants:
   - el_type: geth
     cl_type: lighthouse
-    el_extra_mounts:
-      "/etc/custom/config.toml": "static_files/custom/geth-config.toml"
-      "/etc/ssl/ca.crt": "static_files/certs/ca.crt"
     cl_extra_mounts:
-      "/lighthouse/custom.yaml": "static_files/lighthouse/custom.yaml"
+      "/lighthouse/custom.yaml": "local_directory/lighthouse/custom.yaml"
 ```
-
-### Example: Multiple Mounts
-
-```yaml
-participants:
-  - el_type: geth
-    cl_type: lighthouse
-    el_extra_mounts:
-      # Mount a custom config file
-      "/geth/custom-config.toml": "static_files/configs/geth.toml"
-      # Mount the JWT to a custom location
-      "/secrets/jwt": "jwt_file"
-      # Mount a directory of scripts
-      "/scripts": "static_files/geth-scripts"
-    cl_extra_mounts:
-      # Mount lighthouse specific configs
-      "/lighthouse/network-config.yaml": "static_files/configs/lighthouse-network.yaml"
-    vc_extra_mounts:
-      # Mount validator configs
-      "/validator/graffiti.txt": "static_files/validator/graffiti.txt"
-```
-
-### Built-in Artifacts
-
-The following artifacts are automatically available:
-- `jwt_file` - The JWT secret used for EL-CL authentication
-- `keymanager_file` - The keymanager token file
-- `el_cl_genesis_data` - Genesis configuration files
-- Validator keystores (artifact names vary by participant)
 
 ### Notes
 
