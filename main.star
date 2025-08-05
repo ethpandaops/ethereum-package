@@ -262,6 +262,7 @@ def run(plan, args={}):
             plan,
             all_el_contexts,
             global_node_selectors,
+            global_tolerations,
         )
         fuzz_target = "http://{0}:{1}".format(
             broadcaster_service.ip_address,
@@ -298,6 +299,7 @@ def run(plan, args={}):
             jwt_file,
             args_with_right_defaults.global_log_level,
             global_node_selectors,
+            global_tolerations,
             args_with_right_defaults.mev_params,
         )
         mev_endpoints.append(endpoint)
@@ -330,6 +332,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 num_participants,
                 global_node_selectors,
+                global_tolerations,
             )
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
             endpoint, relay_ip_address, relay_port = mev_rs_mev_relay.launch_mev_relay(
@@ -341,6 +344,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 num_participants,
                 global_node_selectors,
+                global_tolerations,
             )
         else:
             fail("Invalid MEV type")
@@ -387,6 +391,7 @@ def run(plan, args={}):
                         args_with_right_defaults.port_publisher,
                         index,
                         global_node_selectors,
+                        global_tolerations,
                     )
                 elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
                     plan.print("Launching mev-rs mev boost")
@@ -411,6 +416,7 @@ def run(plan, args={}):
                         args_with_right_defaults.port_publisher,
                         index,
                         global_node_selectors,
+                        global_tolerations,
                     )
                 elif (
                     args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
@@ -437,6 +443,7 @@ def run(plan, args={}):
                         args_with_right_defaults.port_publisher,
                         index,
                         global_node_selectors,
+                        global_tolerations,
                         final_genesis_timestamp,
                     )
                 else:
@@ -468,6 +475,7 @@ def run(plan, args={}):
                 fuzz_target,
                 tx_fuzz_params,
                 global_node_selectors,
+                global_tolerations,
             )
             plan.print("Successfully launched tx-fuzz")
         elif additional_service == "forkmon":
@@ -480,6 +488,7 @@ def run(plan, args={}):
                 forkmon_config_template,
                 all_el_contexts,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
@@ -492,6 +501,7 @@ def run(plan, args={}):
                 all_el_contexts,
                 persistent,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
@@ -511,6 +521,7 @@ def run(plan, args={}):
                 network_params,
                 dora_params,
                 global_node_selectors,
+                global_tolerations,
                 mev_endpoints,
                 mev_endpoint_names,
                 args_with_right_defaults.port_publisher,
@@ -530,6 +541,7 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 network_params,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
@@ -547,6 +559,7 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 network_params,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
@@ -562,6 +575,7 @@ def run(plan, args={}):
                 network_params,
                 persistent,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
@@ -580,6 +594,7 @@ def run(plan, args={}):
                 el_cl_data_files_artifact_uuid,
                 network_params,
                 global_node_selectors,
+                global_tolerations,
                 final_genesis_timestamp,
                 args_with_right_defaults.port_publisher,
                 index,
@@ -599,6 +614,7 @@ def run(plan, args={}):
                 el_cl_data_files_artifact_uuid,
                 network_params,
                 global_node_selectors,
+                global_tolerations,
                 final_genesis_timestamp,
                 args_with_right_defaults.port_publisher,
                 index,
@@ -616,6 +632,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched apache")
@@ -630,6 +647,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched nginx")
@@ -646,6 +664,7 @@ def run(plan, args={}):
                 all_el_contexts,
                 persistent,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
             )
@@ -676,6 +695,7 @@ def run(plan, args={}):
                 grafana_dashboards_config_template,
                 prometheus_private_url,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.grafana_params,
                 args_with_right_defaults.port_publisher,
                 index,
@@ -701,6 +721,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched assertoor")
@@ -712,6 +733,7 @@ def run(plan, args={}):
                 fuzz_target,
                 args_with_right_defaults.custom_flood_params,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.docker_cache_params,
             )
         elif additional_service == "spamoor":
@@ -731,6 +753,7 @@ def run(plan, args={}):
                 args_with_right_defaults.participants,
                 args_with_right_defaults.spamoor_params,
                 global_node_selectors,
+                global_tolerations,
                 args_with_right_defaults.network_params,
                 args_with_right_defaults.port_publisher,
                 index,
@@ -762,6 +785,7 @@ def run(plan, args={}):
             grafana_dashboards_config_template,
             prometheus_private_url,
             global_node_selectors,
+            global_tolerations,
             args_with_right_defaults.grafana_params,
             args_with_right_defaults.port_publisher,
             prometheus_grafana_index,

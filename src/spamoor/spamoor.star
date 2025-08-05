@@ -1,5 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 SERVICE_NAME = "spamoor"
 
 HTTP_PORT_ID = "http"
@@ -28,11 +29,14 @@ def launch_spamoor(
     participant_configs,
     spamoor_params,
     global_node_selectors,
+    global_tolerations,
     network_params,
     port_publisher,
     additional_service_index,
     osaka_time,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     spammers = []
 
     for index, spammer in enumerate(spamoor_params.spammers):
@@ -100,6 +104,7 @@ def launch_spamoor(
         prefunded_addresses,
         spamoor_params,
         global_node_selectors,
+        tolerations,
         network_params,
         port_publisher,
         additional_service_index,
@@ -113,6 +118,7 @@ def get_config(
     prefunded_addresses,
     spamoor_params,
     node_selectors,
+    tolerations,
     network_params,
     port_publisher,
     additional_service_index,
@@ -154,6 +160,7 @@ def get_config(
         min_memory=spamoor_params.min_mem,
         max_memory=spamoor_params.max_mem,
         node_selectors=node_selectors,
+        tolerations=tolerations,
         files={
             SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },

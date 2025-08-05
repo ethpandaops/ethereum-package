@@ -41,7 +41,10 @@ def launch(
     beacon_http_url,
     participant,
     node_selectors,
+    global_tolerations,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     blobber_service_name = "{0}".format(service_name)
 
     blobber_config = get_config(
@@ -50,6 +53,7 @@ def launch(
         beacon_http_url,
         participant,
         node_selectors,
+        tolerations,
     )
 
     blobber_service = plan.add_service(blobber_service_name, blobber_config)
@@ -65,6 +69,7 @@ def get_config(
     beacon_http_url,
     participant,
     node_selectors,
+    tolerations,
 ):
     validator_root_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
@@ -95,4 +100,5 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )

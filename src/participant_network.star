@@ -199,6 +199,7 @@ def launch_participant_network(
                 config.blobber_config.beacon_http_url,
                 config.participant,
                 config.blobber_config.node_selectors,
+                global_tolerations,
             )
 
             # Store the blobber URL mapping
@@ -288,6 +289,7 @@ def launch_participant_network(
                 el_context,
                 get_cl_context_with_blobber_url(cl_context),
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
@@ -319,6 +321,7 @@ def launch_participant_network(
                 network_params,
                 pair_name,
                 node_selectors,
+                global_tolerations,
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(
@@ -340,6 +343,7 @@ def launch_participant_network(
                 snooper_service_name,
                 el_context,
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
@@ -396,6 +400,7 @@ def launch_participant_network(
                 snooper_service_name,
                 get_cl_context_with_blobber_url(cl_context),
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,

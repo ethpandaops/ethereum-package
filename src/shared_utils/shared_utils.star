@@ -172,6 +172,7 @@ def get_network_name(network):
 def get_final_genesis_timestamp(plan, padding):
     result = plan.run_sh(
         description="Getting final genesis timestamp",
+        name="read-genesis-timestamp",
         run="echo -n $(($(date +%s) + " + str(padding) + "))",
         store=[StoreSpec(src="/tmp", name="final-genesis-timestamp")],
     )

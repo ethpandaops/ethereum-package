@@ -37,6 +37,7 @@ def launch(
     port_publisher,
     index,
     global_node_selectors,
+    global_tolerations,
 ):
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,
@@ -45,12 +46,15 @@ def launch(
         0,
     )
 
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     config = get_config(
         mev_boost_launcher,
         genesis_timestamp,
         mev_boost_image,
         mev_boost_args,
         global_node_selectors,
+        tolerations,
         participant,
         seconds_per_slot,
         public_ports,
@@ -72,6 +76,7 @@ def get_config(
     mev_boost_image,
     mev_boost_args,
     node_selectors,
+    tolerations,
     participant,
     seconds_per_slot,
     public_ports,
@@ -101,6 +106,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
         labels=shared_utils.label_maker(
             client="mev-boost",
             client_type="mev",

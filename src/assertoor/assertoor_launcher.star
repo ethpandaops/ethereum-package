@@ -1,6 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 SERVICE_NAME = "assertoor"
 
 HTTP_PORT_ID = "http"
@@ -39,6 +40,7 @@ def launch_assertoor(
     port_publisher,
     index,
     global_node_selectors,
+    global_tolerations,
     docker_cache_params,
 ):
     all_client_info = []
@@ -52,6 +54,8 @@ def launch_assertoor(
         index,
         0,
     )
+
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
 
     for index, participant in enumerate(participant_contexts):
         (
@@ -113,6 +117,7 @@ def launch_assertoor(
         assertoor_params,
         public_ports,
         global_node_selectors,
+        tolerations,
         docker_cache_params,
     )
 
@@ -126,6 +131,7 @@ def get_config(
     assertoor_params,
     public_ports,
     node_selectors,
+    tolerations,
     docker_cache_params,
 ):
     config_file_path = shared_utils.path_join(
@@ -166,6 +172,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )
 
 
