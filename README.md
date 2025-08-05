@@ -196,9 +196,8 @@ participants:
     el_extra_params: []
 
     # A list of optional extra mount points that will be passed to the EL client container
-    # Key is the path in the container, value is an artifact name that already exists in Kurtosis
-    # Example: el_extra_mounts: {"/tmp/jwt-copy": "jwt_file"}
-    # Note: The artifact must already exist (e.g., uploaded via plan.upload_files)
+    # Key is the path in the container, value is the local path to the file
+    # Example: el_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
     el_extra_mounts: {}
 
     # A list of tolerations that will be passed to the EL client container
@@ -260,9 +259,8 @@ participants:
     cl_extra_params: []
 
     # A list of optional extra mount points that will be passed to the CL client container
-    # Key is the path in the container, value is an artifact name that already exists in Kurtosis
-    # Example: cl_extra_mounts: {"/tmp/jwt-copy": "jwt_file"}
-    # Note: The artifact must already exist (e.g., uploaded via plan.upload_files)
+    # Key is the path in the container, value is the local path to the file
+    # Example: cl_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
     cl_extra_mounts: {}
 
     # A list of tolerations that will be passed to the CL client container
@@ -336,8 +334,8 @@ participants:
     vc_extra_params: []
 
     # A list of optional extra mount points that will be passed to the validator client container
-    # Key is the path in the container, value is an artifact name that already exists in Kurtosis
-    # Example: vc_extra_mounts: {"/tmp/jwt-copy": "jwt_file"}
+    # Key is the path in the container, value is the local path to the file
+    # Example: vc_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
     vc_extra_mounts: {}
 
     # A list of tolerations that will be passed to the validator container
