@@ -66,7 +66,9 @@ def get_config(
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
     # Add extra mounts - automatically handle file uploads
-    processed_mounts = shared_utils.process_extra_mounts(plan, participant.vc_extra_mounts)
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.vc_extra_mounts
+    )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
