@@ -59,6 +59,7 @@ def get_vc_config(
         if remote_signer_context != None:
             fail("`use_remote_signer` flag not supported for lighthouse VC")
         config = lighthouse.get_config(
+            plan=plan,
             participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
@@ -77,6 +78,7 @@ def get_vc_config(
         )
     elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(
+            plan=plan,
             participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
@@ -97,6 +99,7 @@ def get_vc_config(
         )
     elif vc_type == constants.VC_TYPE.teku:
         config = teku.get_config(
+            plan=plan,
             participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
@@ -116,6 +119,7 @@ def get_vc_config(
         )
     elif vc_type == constants.VC_TYPE.nimbus:
         config = nimbus.get_config(
+            plan=plan,
             participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
@@ -135,6 +139,7 @@ def get_vc_config(
         )
     elif vc_type == constants.VC_TYPE.prysm:
         config = prysm.get_config(
+            plan=plan,
             participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
@@ -160,6 +165,7 @@ def get_vc_config(
         if keymanager_enabled:
             fail("vero VC doesn't support the Keymanager API")
         config = vero.get_config(
+            plan=plan,
             participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,

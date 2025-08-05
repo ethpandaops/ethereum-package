@@ -231,9 +231,10 @@ def get_config(
             ],
         )
 
-    # Add extra mounts
-    for mount_path, mount_source in participant.el_extra_mounts.items():
-        files[mount_path] = mount_source
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(plan, participant.el_extra_mounts)
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
 
     config_args = {
         "image": participant.el_image,

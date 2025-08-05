@@ -196,8 +196,9 @@ participants:
     el_extra_params: []
 
     # A list of optional extra mount points that will be passed to the EL client container
-    # Key is the path in the container, value is the path on the host
-    # Example: el_extra_mounts: {"/tmp/data": "/host/data"}
+    # Key is the path in the container, value is an artifact name that already exists in Kurtosis
+    # Example: el_extra_mounts: {"/tmp/jwt-copy": "jwt_file"}
+    # Note: The artifact must already exist (e.g., uploaded via plan.upload_files)
     el_extra_mounts: {}
 
     # A list of tolerations that will be passed to the EL client container
@@ -259,8 +260,9 @@ participants:
     cl_extra_params: []
 
     # A list of optional extra mount points that will be passed to the CL client container
-    # Key is the path in the container, value is the path on the host
-    # Example: cl_extra_mounts: {"/tmp/data": "/host/data"}
+    # Key is the path in the container, value is an artifact name that already exists in Kurtosis
+    # Example: cl_extra_mounts: {"/tmp/jwt-copy": "jwt_file"}
+    # Note: The artifact must already exist (e.g., uploaded via plan.upload_files)
     cl_extra_mounts: {}
 
     # A list of tolerations that will be passed to the CL client container
@@ -334,8 +336,9 @@ participants:
     vc_extra_params: []
 
     # A list of optional extra mount points that will be passed to the validator client container
-    # Key is the path in the container, value is the path on the host
-    # Example: vc_extra_mounts: {"/tmp/data": "/host/data"}
+    # Key is the path in the container, value is an artifact name that already exists in Kurtosis
+    # Example: vc_extra_mounts: {"/tmp/jwt-copy": "jwt_file"}
+    # Note: The artifact must already exist (e.g., uploaded via plan.upload_files)
     vc_extra_mounts: {}
 
     # A list of tolerations that will be passed to the validator container
@@ -1332,6 +1335,79 @@ ethereum_metrics_exporter_enabled: true
 ```
 
 </details>
+
+## Using Extra Mounts
+
+The `el_extra_mounts`, `cl_extra_mounts`, and `vc_extra_mounts` parameters allow you to mount additional files or directories into the EL, CL, and VC containers respectively. This is useful for providing custom configuration files, certificates, or other data that your clients need.
+
+### How it works
+
+The extra mounts feature automatically handles file uploads for you:
+- **Relative paths** within the package (e.g., `static_files/config.toml`) are automatically uploaded as artifacts
+- **Existing artifact names** (e.g., `jwt_file`) are used directly
+- Files are mounted at the specified container paths
+
+### Example: Using Built-in Artifacts
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    el_extra_mounts:
+      "/custom/jwt/path": "jwt_file"  # jwt_file is a built-in artifact
+    cl_extra_mounts:
+      "/custom/keymanager": "keymanager_file"  # keymanager_file is a built-in artifact
+```
+
+### Example: Mounting Files from Package Directory
+
+Place your custom files in the package directory (e.g., in `static_files/` or create your own directory):
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    el_extra_mounts:
+      "/etc/custom/config.toml": "static_files/custom/geth-config.toml"
+      "/etc/ssl/ca.crt": "static_files/certs/ca.crt"
+    cl_extra_mounts:
+      "/lighthouse/custom.yaml": "static_files/lighthouse/custom.yaml"
+```
+
+### Example: Multiple Mounts
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    el_extra_mounts:
+      # Mount a custom config file
+      "/geth/custom-config.toml": "static_files/configs/geth.toml"
+      # Mount the JWT to a custom location
+      "/secrets/jwt": "jwt_file"
+      # Mount a directory of scripts
+      "/scripts": "static_files/geth-scripts"
+    cl_extra_mounts:
+      # Mount lighthouse specific configs
+      "/lighthouse/network-config.yaml": "static_files/configs/lighthouse-network.yaml"
+    vc_extra_mounts:
+      # Mount validator configs
+      "/validator/graffiti.txt": "static_files/validator/graffiti.txt"
+```
+
+### Built-in Artifacts
+
+The following artifacts are automatically available:
+- `jwt_file` - The JWT secret used for EL-CL authentication
+- `keymanager_file` - The keymanager token file
+- `el_cl_genesis_data` - Genesis configuration files
+- Validator keystores (artifact names vary by participant)
+
+### Notes
+
+- All file paths must be relative to the package root directory
+- Files outside the package directory cannot be mounted directly
+- The entire directory structure is preserved when mounting directories
 
 ## Beacon Node <> Validator Client compatibility
 
