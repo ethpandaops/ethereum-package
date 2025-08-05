@@ -195,6 +195,11 @@ participants:
     # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
     el_extra_params: []
 
+    # A list of optional extra mount points that will be passed to the EL client container
+    # Key is the path in the container, value is the path on the host
+    # Example: el_extra_mounts: {"/tmp/data": "/host/data"}
+    el_extra_mounts: {}
+
     # A list of tolerations that will be passed to the EL client container
     # Only works with Kubernetes
     # Example: el_tolerations:
@@ -252,6 +257,11 @@ participants:
     # A list of optional extra params that will be passed to the CL client Beacon container for modifying its behaviour
     # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will be passed to the combined Beacon-validator node
     cl_extra_params: []
+
+    # A list of optional extra mount points that will be passed to the CL client container
+    # Key is the path in the container, value is the path on the host
+    # Example: cl_extra_mounts: {"/tmp/data": "/host/data"}
+    cl_extra_mounts: {}
 
     # A list of tolerations that will be passed to the CL client container
     # Only works with Kubernetes
@@ -322,6 +332,11 @@ participants:
     # A list of optional extra params that will be passed to the validator client container for modifying its behaviour
     # If the client combines the Beacon & validator nodes (e.g. Teku, Nimbus), then this list will also be passed to the combined Beacon-validator node
     vc_extra_params: []
+
+    # A list of optional extra mount points that will be passed to the validator client container
+    # Key is the path in the container, value is the path on the host
+    # Example: vc_extra_mounts: {"/tmp/data": "/host/data"}
+    vc_extra_mounts: {}
 
     # A list of tolerations that will be passed to the validator container
     # Only works with Kubernetes
