@@ -2,6 +2,7 @@ redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 constants = import_module("../../../package_io/constants.star")
 shared_utils = import_module("../../../shared_utils/shared_utils.star")
+input_parser = import_module("../../../package_io/input_parser.star")
 
 MEV_RELAY_WEBSITE = "mev-relay-website"
 MEV_RELAY_ENDPOINT = "mev-relay-api"
@@ -49,7 +50,9 @@ def launch_mev_relay(
     port_publisher,
     index,
     global_node_selectors,
+    global_tolerations,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,
         constants.HTTP_PORT_ID,
@@ -66,6 +69,7 @@ def launch_mev_relay(
         min_memory=REDIS_MIN_MEMORY,
         max_memory=REDIS_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(
@@ -81,6 +85,7 @@ def launch_mev_relay(
         min_memory=POSTGRES_MIN_MEMORY,
         max_memory=POSTGRES_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )
 
     network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
@@ -126,6 +131,7 @@ def launch_mev_relay(
             min_memory=RELAY_MIN_MEMORY,
             max_memory=RELAY_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=tolerations,
         ),
     )
 
@@ -168,6 +174,7 @@ def launch_mev_relay(
             min_memory=RELAY_MIN_MEMORY,
             max_memory=RELAY_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=tolerations,
         ),
     )
 
@@ -219,6 +226,7 @@ def launch_mev_relay(
             min_memory=RELAY_MIN_MEMORY,
             max_memory=RELAY_MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=tolerations,
         ),
     )
 

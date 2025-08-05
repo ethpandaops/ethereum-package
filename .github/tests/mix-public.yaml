@@ -9,9 +9,6 @@ participants:
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: nimbus
-    cl_type: teku
-    el_image: statusim/nimbus-eth1:master
   - el_type: ethrex
     cl_type: grandine
 port_publisher:

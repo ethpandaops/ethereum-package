@@ -164,6 +164,7 @@ def launch(
                 snooper_service_name,
                 el_context,
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,

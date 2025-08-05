@@ -32,7 +32,10 @@ def launch(
     port_publisher,
     index,
     global_node_selectors,
+    global_tolerations,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,
         constants.HTTP_PORT_ID,
@@ -81,6 +84,7 @@ def launch(
         config_files_artifact_name,
         el_cl_genesis_data,
         global_node_selectors,
+        tolerations,
         public_ports,
         index,
     )
@@ -99,6 +103,7 @@ def get_config(
     config_file,
     el_cl_genesis_data,
     node_selectors,
+    tolerations,
     public_ports,
     participant_index,
 ):
@@ -119,6 +124,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
         labels={constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
     )
 
