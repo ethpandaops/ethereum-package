@@ -292,6 +292,13 @@ def get_beacon_config(
             ],
         )
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.cl_extra_mounts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,

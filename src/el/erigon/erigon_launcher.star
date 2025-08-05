@@ -197,6 +197,13 @@ def get_config(
             ],
         )
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.el_extra_mounts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     if (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network

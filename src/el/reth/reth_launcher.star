@@ -243,6 +243,14 @@ def get_config(
                 constants.EL_TYPE.reth + "_volume_size"
             ],
         )
+
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.el_extra_mounts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     env_vars = {}
     image = participant.el_image
     if launcher.builder_type == constants.MEV_RS_MEV_TYPE:
