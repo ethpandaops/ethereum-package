@@ -156,16 +156,10 @@ def get_config(
             if network_params.network in constants.NETWORK_NAME.kurtosis
             else "--sync-mode=SNAP"
         ),
-        "--data-storage-format={0}".format(
-            "VERKLE" if "verkle-gen" in network_params.network else "BONSAI"
-        ),
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--min-gas-price=1000000000",
-        "--bonsai-limit-trie-logs-enabled=false"
-        if "verkle" not in network_params.network
-        else "",
     ]
 
     if network_params.gas_limit > 0:
