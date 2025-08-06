@@ -692,8 +692,8 @@ network_params:
   bpo_1_max_blobs: 12
   # Target number of blobs per block for BPO1 (default 9)
   bpo_1_target_blobs: 9
-  # Base fee update fraction for BPO1 (default 5007716)
-  bpo_1_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO1 (default 0)
+  bpo_1_base_fee_update_fraction: 0
 
   # BPO2 epoch (default 18446744073709551615)
   bpo_2_epoch: 18446744073709551615
@@ -701,8 +701,8 @@ network_params:
   bpo_2_max_blobs: 12
   # Target number of blobs per block for BPO2 (default 9)
   bpo_2_target_blobs: 9
-  # Base fee update fraction for BPO2 (default 5007716)
-  bpo_2_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO2 (default 0)
+  bpo_2_base_fee_update_fraction: 0
 
   # BPO3 epoch (default 18446744073709551615)
   bpo_3_epoch: 18446744073709551615
@@ -710,8 +710,8 @@ network_params:
   bpo_3_max_blobs: 12
   # Target number of blobs per block for BPO3 (default 9)
   bpo_3_target_blobs: 9
-  # Base fee update fraction for BPO3 (default 5007716)
-  bpo_3_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO3 (default 0)
+  bpo_3_base_fee_update_fraction: 0
 
   # BPO4 epoch (default 18446744073709551615)
   bpo_4_epoch: 18446744073709551615
@@ -719,8 +719,8 @@ network_params:
   bpo_4_max_blobs: 12
   # Target number of blobs per block for BPO4 (default 9)
   bpo_4_target_blobs: 9
-  # Base fee update fraction for BPO4 (default 5007716)
-  bpo_4_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO4 (default 0)
+  bpo_4_base_fee_update_fraction: 0
 
   # BPO5 epoch (default 18446744073709551615)
   bpo_5_epoch: 18446744073709551615
@@ -728,8 +728,8 @@ network_params:
   bpo_5_max_blobs: 12
   # Target number of blobs per block for BPO5 (default 9)
   bpo_5_target_blobs: 9
-  # Base fee update fraction for BPO5 (default 5007716)
-  bpo_5_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO5 (default 0)
+  bpo_5_base_fee_update_fraction: 0
 
   # Withdrawal type - available options (0x00, 0x01, 0x02)
   # Default to "0x00"
