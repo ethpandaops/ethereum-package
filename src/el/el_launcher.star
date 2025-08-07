@@ -30,6 +30,7 @@ def launch(
     port_publisher,
     mev_builder_type,
     mev_params,
+    extra_files_artifacts={},
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -167,6 +168,7 @@ def launch(
                 port_publisher,
                 index,
                 network_params,
+                extra_files_artifacts,
             )
 
             # Add participant el additional prometheus metrics
@@ -190,6 +192,7 @@ def launch(
                 port_publisher,
                 index,
                 network_params,
+                extra_files_artifacts,
             )
 
             el_participant_info[el_service_name] = {

@@ -32,6 +32,7 @@ def get_config(
     network_params,
     port_publisher,
     vc_index,
+    extra_files_artifacts,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
@@ -116,7 +117,7 @@ def get_config(
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.vc_extra_mounts
+        plan, participant.vc_extra_mounts, extra_files_artifacts
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
