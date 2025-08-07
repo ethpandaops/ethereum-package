@@ -79,7 +79,7 @@ def run(plan, args={}):
 
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
-    
+
     # Process extra_files - create artifacts from provided content
     extra_files_artifacts = {}
     extra_files = getattr(args_with_right_defaults, "extra_files", {})
@@ -87,15 +87,10 @@ def run(plan, args={}):
         for name, content in extra_files.items():
             # Use render_templates to create a file with the content
             # The file inside the artifact will be named after the extra_files key
-            template_data = {
-                name: struct(
-                    template = content,
-                    data = {}
-                )
-            }
+            template_data = {name: struct(template=content, data={})}
             artifact = plan.render_templates(template_data, name + "_artifact")
             extra_files_artifacts[name] = artifact
-    
+
     mev_params = args_with_right_defaults.mev_params
     parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
     persistent = args_with_right_defaults.persistent

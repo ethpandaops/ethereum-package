@@ -30,7 +30,7 @@ def launch(
     port_publisher,
     mev_builder_type,
     mev_params,
-    extra_files_artifacts = {},
+    extra_files_artifacts={},
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
