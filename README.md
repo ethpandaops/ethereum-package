@@ -1333,42 +1333,37 @@ ethereum_metrics_exporter_enabled: true
 
 </details>
 
-## Using Extra Mounts
+## Extra Files and Mounts
 
-The `el_extra_mounts`, `cl_extra_mounts`, and `vc_extra_mounts` parameters allow you to mount additional files or directories into the EL, CL, and VC containers respectively. This is useful for providing custom configuration files, certificates, or other data that your clients need.
+### Mounting Files into Containers
 
-### How it works
-
-The extra mounts feature automatically handles file uploads for you:
-- **Relative paths** within the package (e.g., `static_files/config.toml`) are automatically uploaded as artifacts
-- **Existing artifact names** (e.g., `jwt_file`) are used directly
-- Files are mounted at the specified container paths
-
-### Example: Using Built-in Artifacts
+Use `el_extra_mounts`, `cl_extra_mounts`, and `vc_extra_mounts` to mount files into containers:
 
 ```yaml
 participants:
   - el_type: geth
     cl_type: lighthouse
     el_extra_mounts:
-      "/custom/jwt/path": "jwt_file"  # jwt_file is a built-in artifact
+      "/config/custom.toml": "my_config"  # Reference pre-uploaded file by name
+    cl_extra_mounts:
+      "/data/genesis.json": "genesis_data"  # Reference another pre-uploaded file
 ```
 
-### Example: Mounting Files from local directory
+### Uploading External Files
+
+Use `network_params.extra_files` to upload files that can be referenced in mounts:
 
 ```yaml
+network_params:
+  extra_files:
+    my_config: "/path/to/config.toml"
+    genesis_data: "/home/user/genesis.json"
+
 participants:
   - el_type: geth
-    cl_type: lighthouse
-    cl_extra_mounts:
-      "/lighthouse/custom.yaml": "local_directory/lighthouse/custom.yaml"
+    el_extra_mounts:
+      "/config/custom.toml": "my_config"  # Reference by name
 ```
-
-### Notes
-
-- All file paths must be relative to the package root directory
-- Files outside the package directory cannot be mounted directly
-- The entire directory structure is preserved when mounting directories
 
 ## Beacon Node <> Validator Client compatibility
 

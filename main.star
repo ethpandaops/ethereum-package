@@ -127,6 +127,21 @@ def run(plan, args={}):
         name="keymanager_file",
     )
 
+    # Upload extra files specified in network_params
+    uploaded_files = {}
+    if hasattr(network_params, "extra_files") and network_params.extra_files:
+        plan.print("Uploading extra files specified in network_params")
+        for file_name, file_path in network_params.extra_files.items():
+            plan.print("  Uploading {0} from {1}".format(file_name, file_path))
+            # Ensure path is relative to package root
+            if not file_path.startswith("./"):
+                file_path = "./" + file_path
+            uploaded_file = plan.upload_files(
+                src=file_path,
+                name=file_name,
+            )
+            uploaded_files[file_name] = uploaded_file
+
     if network_params.perfect_peerdas_enabled:
         plan.print("Uploading peerdas node keys")
         for index, participant in enumerate(args_with_right_defaults.participants[:16]):
@@ -214,6 +229,7 @@ def run(plan, args={}):
         global_node_selectors,
         keymanager_enabled,
         parallel_keystore_generation,
+        uploaded_files,
     )
 
     plan.print(

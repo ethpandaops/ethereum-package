@@ -58,6 +58,7 @@ def launch(
     port_publisher,
     participant_index,
     network_params,
+    uploaded_files = {},
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -75,6 +76,7 @@ def launch(
         port_publisher,
         participant_index,
         network_params,
+        uploaded_files,
     )
 
     service = plan.add_service(service_name, config)
@@ -101,6 +103,7 @@ def get_config(
     port_publisher,
     participant_index,
     network_params,
+    uploaded_files = {},
 ):
     public_ports = {}
     public_ports_for_component = None
@@ -212,7 +215,7 @@ def get_config(
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.el_extra_mounts
+        plan, participant.el_extra_mounts, uploaded_files
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact

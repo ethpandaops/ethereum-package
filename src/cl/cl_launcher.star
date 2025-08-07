@@ -32,6 +32,7 @@ def launch(
     prysm_password_relative_filepath,
     prysm_password_artifact_uuid,
     global_other_index,
+    uploaded_files = {},
 ):
     plan.print("Launching CL network")
 
@@ -218,6 +219,7 @@ def launch(
                 args_with_right_defaults.port_publisher,
                 index,
                 network_params,
+                uploaded_files,
             )
 
             blobber_config = get_blobber_config(
@@ -265,6 +267,7 @@ def launch(
                 args_with_right_defaults.port_publisher,
                 index,
                 network_params,
+                uploaded_files,
             )
 
             cl_participant_info[cl_service_name] = {

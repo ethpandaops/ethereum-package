@@ -57,6 +57,7 @@ def launch(
     port_publisher,
     participant_index,
     network_params,
+    uploaded_files = {},
 ):
     # Launch Beacon node
     beacon_config = get_beacon_config(
@@ -114,6 +115,7 @@ def get_beacon_config(
     port_publisher,
     participant_index,
     network_params,
+    uploaded_files = {},
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -285,7 +287,7 @@ def get_beacon_config(
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.cl_extra_mounts
+        plan, participant.cl_extra_mounts, uploaded_files
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact

@@ -21,6 +21,7 @@ def get_config(
     network_params,
     port_publisher,
     vc_index,
+    uploaded_files = {},
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -103,7 +104,7 @@ def get_config(
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.vc_extra_mounts
+        plan, participant.vc_extra_mounts, uploaded_files
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact

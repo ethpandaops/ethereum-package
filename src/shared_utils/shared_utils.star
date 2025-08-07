@@ -419,16 +419,14 @@ def ensure_alphanumeric_bounds(s):
     return s[start:end]
 
 
-def process_extra_mounts(plan, extra_mounts):
+def process_extra_mounts(plan, extra_mounts, uploaded_files = {}):
     """
-    Process extra mounts by automatically handling file uploads.
+    Process extra mounts by resolving artifact references and uploading package files.
 
     Args:
         plan: The Kurtosis plan object
-        extra_mounts: Dictionary where keys are mount paths in container and values can be:
-                     - Artifact names (strings without path separators)
-                     - Relative file paths within the package (strings starting with ./ or static_files/)
-                     - Files artifact objects (already uploaded)
+        extra_mounts: Dictionary where keys are mount paths and values are artifact references
+        uploaded_files: Dictionary of pre-uploaded files from network_params.extra_files
 
     Returns:
         Dictionary where keys are mount paths and values are artifact names/objects
@@ -437,48 +435,30 @@ def process_extra_mounts(plan, extra_mounts):
         return {}
 
     processed_mounts = {}
-
     for mount_path, source in extra_mounts.items():
-        # If it's already a Files artifact object, use it directly
+        # Already a Files artifact
         if type(source) == "Files":
             processed_mounts[mount_path] = source
             continue
 
-        # If it's a string, determine if it's a path or artifact name
-        if type(source) == "string":
-            # Check if it looks like a file path
-            if "/" in source:
-                # It's a file path - must be within the package
-                artifact_name = "mount_" + source.replace("/", "_").replace(
-                    ".", "_"
-                ).strip("_")
+        if type(source) != "string":
+            processed_mounts[mount_path] = source
+            continue
 
-                # Ensure the path is relative and within the package
-                if source.startswith("/"):
-                    fail(
-                        "Absolute paths are not supported. Please use relative paths within the package or pre-uploaded artifact names."
-                    )
-
-                # Convert to package root relative path
-                # We need to go up from src/shared_utils/ to the package root
-                if source.startswith("./"):
-                    # Already relative, but need to adjust for current module location
-                    source = "../../" + source[2:]
-                elif source.startswith("static_files/"):
-                    # Path from package root
-                    source = "../../" + source
-                else:
-                    # Assume it's from package root
-                    source = "../../" + source
-
-                # Upload the file from within the package
-                artifact = plan.upload_files(src=source, name=artifact_name)
-                processed_mounts[mount_path] = artifact
-            else:
-                # No path separators - assume it's an artifact name
-                processed_mounts[mount_path] = source
+        # Check pre-uploaded files first
+        if source in uploaded_files:
+            processed_mounts[mount_path] = uploaded_files[source]
+            continue
+        
+        # If it contains a path separator, treat as package file
+        if "/" in source:
+            artifact_name = "mount_" + source.replace("/", "_").replace(".", "_").strip("_")
+            # Adjust path relative to current module location (src/shared_utils/)
+            package_path = "../../" + source.lstrip("./")
+            artifact = plan.upload_files(src=package_path, name=artifact_name)
+            processed_mounts[mount_path] = artifact
         else:
-            # Unknown type - pass through
+            # Treat as existing artifact name
             processed_mounts[mount_path] = source
 
     return processed_mounts
