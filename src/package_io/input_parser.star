@@ -294,6 +294,23 @@ def input_parser(plan, input_args):
             "Fulu fork must happen before BPO 1, please adjust the epochs accordingly."
         )
 
+    if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
+        has_supernodes = False
+        for participant in result["participants"]:
+            if participant.get("supernode", False):
+                has_supernodes = True
+                break
+
+        if (
+            not has_supernodes
+            and not result["network_params"]["perfect_peerdas_enabled"]
+        ):
+            fail(
+                "Fulu fork is enabled (epoch: {0}) but no supernodes are configured in the participant list and perfect_peerdas_enabled is not enabled. Either configure supernodes for some participants or enable perfect_peerdas_enabled in network_params and have 16 participants.".format(
+                    str(result["network_params"]["fulu_fork_epoch"])
+                )
+            )
+
     return struct(
         participants=[
             struct(
