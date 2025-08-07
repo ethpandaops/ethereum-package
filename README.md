@@ -196,8 +196,9 @@ participants:
     el_extra_params: []
 
     # A list of optional extra mount points that will be passed to the EL client container
-    # Key is the path in the container, value MUST be a reference to network_params.extra_files
-    # Example: el_extra_mounts: {"/tmp/custom.yaml": "my_config"}  # where "my_config" is defined in network_params.extra_files
+    # Key is the mount path (becomes a directory), value MUST reference a key from extra_files
+    # The file will be available at <mount_path>/<extra_files_key>
+    # Example: el_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     el_extra_mounts: {}
 
     # A list of tolerations that will be passed to the EL client container
@@ -259,8 +260,9 @@ participants:
     cl_extra_params: []
 
     # A list of optional extra mount points that will be passed to the CL client container
-    # Key is the path in the container, value MUST be a reference to network_params.extra_files
-    # Example: cl_extra_mounts: {"/tmp/custom.yaml": "my_config"}  # where "my_config" is defined in network_params.extra_files
+    # Key is the mount path (becomes a directory), value MUST reference a key from extra_files
+    # The file will be available at <mount_path>/<extra_files_key>
+    # Example: cl_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     cl_extra_mounts: {}
 
     # A list of tolerations that will be passed to the CL client container
@@ -334,8 +336,9 @@ participants:
     vc_extra_params: []
 
     # A list of optional extra mount points that will be passed to the validator client container
-    # Key is the path in the container, value MUST be a reference to network_params.extra_files
-    # Example: vc_extra_mounts: {"/tmp/custom.yaml": "my_config"}  # where "my_config" is defined in network_params.extra_files
+    # Key is the mount path (becomes a directory), value MUST reference a key from extra_files
+    # The file will be available at <mount_path>/<extra_files_key>
+    # Example: vc_extra_mounts: {"/config": "my_validator_config"}  # Creates /config/my_validator_config
     vc_extra_mounts: {}
 
     # A list of tolerations that will be passed to the validator container
@@ -795,6 +798,17 @@ dora_params:
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 
+# Define custom file contents to be mounted into containers
+# These files are referenced by name in el_extra_mounts, cl_extra_mounts, and vc_extra_mounts
+extra_files: {}
+  # Example:
+  # my_config_file.yaml: |
+  #   setting1: value1
+  #   setting2: value2
+  # my_script.sh: |
+  #   #!/bin/bash
+  #   echo "Custom script"
+  
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_fuzz_params:
   # TX Spammer docker image to use
@@ -1335,27 +1349,85 @@ ethereum_metrics_exporter_enabled: true
 
 ## Extra Files and Mounts
 
-Use `network_params.extra_files` to define file contents, then mount them using `el_extra_mounts`, `cl_extra_mounts`, and `vc_extra_mounts`:
+The `extra_files` feature allows you to define custom file contents in your configuration and mount them into any container (EL, CL, or VC).
+
+### How It Works
+
+1. **Define file contents** in the top-level `extra_files` section
+2. **Mount the files** into containers using `el_extra_mounts`, `cl_extra_mounts`, or `vc_extra_mounts`
+3. **Access the files** inside the container at `<mount_path>/<file_name>`
+
+### Important: Understanding Mount Paths
+
+Due to how Kurtosis handles artifacts, mount paths become **directories**, not files. When you mount a file:
+- The mount path you specify becomes a directory
+- Your file is placed inside that directory with its original name from `extra_files`
+
+### Complete Example
 
 ```yaml
-network_params:
-  extra_files:
-    my_config: |
-      # Custom configuration file content
-      setting1: value1
-      setting2: value2
-    genesis_override: |
-      {"custom": "genesis data"}
+# Define your custom files at the top level
+extra_files:
+  validator_config.json: |
+    {
+      "graffiti": "MyValidator",
+      "enable_doppelganger": true,
+      "suggested_fee_recipient": "0x1234..."
+    }
+  custom_genesis.json: |
+    {
+      "config": {
+        "chainId": 12345
+      }
+    }
+  startup_script.sh: |
+    #!/bin/bash
+    echo "Custom initialization"
+    # Your custom logic here
 
 participants:
   - el_type: geth
     cl_type: lighthouse
+    
+    # Mount files into the execution layer client
     el_extra_mounts:
-      "/config/custom.toml": "my_config"  # References my_config from extra_files
-      "/data/override.json": "genesis_override"  # References genesis_override from extra_files
+      "/genesis": "custom_genesis.json"  # File available at: /genesis/custom_genesis.json
+      "/scripts": "startup_script.sh"    # File available at: /scripts/startup_script.sh
+    
+    # Mount files into the consensus layer client  
+    cl_extra_mounts:
+      "/configs": "validator_config.json" # File available at: /configs/validator_config.json
+    
+    # Mount files into the validator client
+    vc_extra_mounts:
+      "/validator/config": "validator_config.json" # File available at: /validator/config/validator_config.json
 ```
 
-**Note:** All extra_mounts MUST reference files defined in `network_params.extra_files`. Direct package file mounting is not supported.
+### Accessing Your Files
+
+Once mounted, you can access your files inside the containers:
+
+```bash
+# Example: Access validator config in the VC container
+docker exec -it <vc-container> cat /validator/config/validator_config.json
+
+# Example: Run the startup script in the EL container
+docker exec -it <el-container> bash /scripts/startup_script.sh
+```
+
+### Use Cases
+
+- **Custom Configuration Files**: Mount client-specific configuration files
+- **Modified Genesis Files**: Override genesis parameters for testing
+- **Scripts and Tools**: Add debugging or monitoring scripts
+- **Key Files**: Mount validator keys or JWT secrets (for testing only!)
+- **Network Configs**: Custom bootnodes, static peers, or network topology files
+
+### Restrictions
+
+- **No Package Files**: You cannot mount files from the ethereum-package repository directly
+- **Content Only**: All files must be defined as content strings in `extra_files`
+- **Name References**: Mount values MUST reference keys defined in `extra_files`
 
 ## Beacon Node <> Validator Client compatibility
 

@@ -250,7 +250,6 @@ SUBCATEGORY_PARAMS = {
         "withdrawal_address",
         "validator_balance",
         "min_epochs_for_data_column_sidecars_requests",
-        "extra_files",
     ],
     "blockscout_params": [
         "image",
@@ -495,6 +494,7 @@ def sanity_check(plan, input_args):
             + ADDITIONAL_CATEGORY_PARAMS.keys()
         )
         combined_root_params.append("additional_services")
+        combined_root_params.append("extra_files")
 
         if param not in combined_root_params:
             fail(

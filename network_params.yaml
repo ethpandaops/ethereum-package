@@ -233,3 +233,14 @@ port_publisher:
   other:
     enabled: false
     public_port_start: 38000
+
+# Define custom file contents to be mounted into containers
+# Files defined here can be referenced in el_extra_mounts, cl_extra_mounts, and vc_extra_mounts
+# Example:
+# extra_files:
+#   my_config.json: |
+#     {"setting": "value"}
+#   my_script.sh: |
+#     #!/bin/bash
+#     echo "Hello"
+extra_files: {}

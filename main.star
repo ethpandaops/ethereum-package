@@ -79,6 +79,23 @@ def run(plan, args={}):
 
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
+    
+    # Process extra_files - create artifacts from provided content
+    extra_files_artifacts = {}
+    extra_files = getattr(args_with_right_defaults, "extra_files", {})
+    if extra_files:
+        for name, content in extra_files.items():
+            # Use render_templates to create a file with the content
+            # The file inside the artifact will be named after the extra_files key
+            template_data = {
+                name: struct(
+                    template = content,
+                    data = {}
+                )
+            }
+            artifact = plan.render_templates(template_data, name + "_artifact")
+            extra_files_artifacts[name] = artifact
+    
     mev_params = args_with_right_defaults.mev_params
     parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
     persistent = args_with_right_defaults.persistent
@@ -126,21 +143,6 @@ def run(plan, args={}):
         src=static_files.KEYMANAGER_PATH_FILEPATH,
         name="keymanager_file",
     )
-
-    # Upload extra files specified in network_params
-    extra_files_artifacts = {}
-    if hasattr(network_params, "extra_files") and network_params.extra_files:
-        plan.print("Uploading extra files specified in network_params")
-        for file_name, file_path in network_params.extra_files.items():
-            plan.print("  Uploading {0} from {1}".format(file_name, file_path))
-            # Ensure path is relative to package root
-            if not file_path.startswith("./"):
-                file_path = "./" + file_path
-            uploaded_file = plan.upload_files(
-                src=file_path,
-                name=file_name,
-            )
-            extra_files_artifacts[file_name] = uploaded_file
 
     if network_params.perfect_peerdas_enabled:
         plan.print("Uploading peerdas node keys")

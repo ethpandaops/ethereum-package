@@ -426,7 +426,7 @@ def process_extra_mounts(plan, extra_mounts, extra_files_artifacts = {}):
     Args:
         plan: The Kurtosis plan object
         extra_mounts: Dictionary where keys are mount paths and values are extra_file names
-        extra_files_artifacts: Dictionary of extra files artifacts from network_params.extra_files
+        extra_files_artifacts: Dictionary of extra files artifacts from extra_files
 
     Returns:
         Dictionary where keys are mount paths and values are artifact names/objects
@@ -443,7 +443,7 @@ def process_extra_mounts(plan, extra_mounts, extra_files_artifacts = {}):
         
         # Source MUST be an extra_files reference
         if source not in extra_files_artifacts:
-            fail("Mount source '" + source + "' not found in network_params.extra_files. All extra_mounts must reference files defined in network_params.extra_files.")
+            fail("Mount source '" + source + "' not found in extra_files. All extra_mounts must reference files defined in extra_files.")
         
         processed_mounts[mount_path] = extra_files_artifacts[source]
 
