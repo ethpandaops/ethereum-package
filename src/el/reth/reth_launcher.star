@@ -267,7 +267,7 @@ def get_config(
         cmd.append("--engine.persistence-threshold=0")
         cmd.append("--engine.memory-block-buffer-target=0")
         cmd.append(
-            "--txpool.no-local-transactions-propagation"
+            "--disable-tx-gossip"
         )  # disable tx propagation so that builder will have juicy blocks
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
