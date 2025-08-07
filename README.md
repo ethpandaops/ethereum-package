@@ -1374,60 +1374,16 @@ extra_files:
       "enable_doppelganger": true,
       "suggested_fee_recipient": "0x1234..."
     }
-  custom_genesis.json: |
-    {
-      "config": {
-        "chainId": 12345
-      }
-    }
-  startup_script.sh: |
-    #!/bin/bash
-    echo "Custom initialization"
-    # Your custom logic here
 
 participants:
   - el_type: geth
     cl_type: lighthouse
     
-    # Mount files into the execution layer client
-    el_extra_mounts:
-      "/genesis": "custom_genesis.json"  # File available at: /genesis/custom_genesis.json
-      "/scripts": "startup_script.sh"    # File available at: /scripts/startup_script.sh
-    
     # Mount files into the consensus layer client  
     cl_extra_mounts:
       "/configs": "validator_config.json" # File available at: /configs/validator_config.json
-    
-    # Mount files into the validator client
-    vc_extra_mounts:
-      "/validator/config": "validator_config.json" # File available at: /validator/config/validator_config.json
 ```
 
-### Accessing Your Files
-
-Once mounted, you can access your files inside the containers:
-
-```bash
-# Example: Access validator config in the VC container
-docker exec -it <vc-container> cat /validator/config/validator_config.json
-
-# Example: Run the startup script in the EL container
-docker exec -it <el-container> bash /scripts/startup_script.sh
-```
-
-### Use Cases
-
-- **Custom Configuration Files**: Mount client-specific configuration files
-- **Modified Genesis Files**: Override genesis parameters for testing
-- **Scripts and Tools**: Add debugging or monitoring scripts
-- **Key Files**: Mount validator keys or JWT secrets (for testing only!)
-- **Network Configs**: Custom bootnodes, static peers, or network topology files
-
-### Restrictions
-
-- **No Package Files**: You cannot mount files from the ethereum-package repository directly
-- **Content Only**: All files must be defined as content strings in `extra_files`
-- **Name References**: Mount values MUST reference keys defined in `extra_files`
 
 ## Beacon Node <> Validator Client compatibility
 
