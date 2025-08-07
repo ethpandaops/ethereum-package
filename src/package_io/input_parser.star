@@ -1120,6 +1120,7 @@ def default_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
+        "extra_files": {},
     }
 
 
@@ -1188,6 +1189,7 @@ def default_minimal_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
+        "extra_files": {},
     }
 
 

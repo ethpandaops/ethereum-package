@@ -36,7 +36,7 @@ def get_vc_config(
     network_params,
     port_publisher,
     vc_index,
-    uploaded_files = {},
+    extra_files_artifacts,
 ):
     if node_keystore_files == None:
         return None
@@ -76,7 +76,7 @@ def get_vc_config(
             network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
-            uploaded_files=uploaded_files,
+            extra_files_artifacts=extra_files_artifacts,
         )
     elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(
@@ -98,7 +98,7 @@ def get_vc_config(
             network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
-            uploaded_files=uploaded_files,
+            extra_files_artifacts=extra_files_artifacts,
         )
     elif vc_type == constants.VC_TYPE.teku:
         config = teku.get_config(
@@ -119,7 +119,7 @@ def get_vc_config(
             network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
-            uploaded_files=uploaded_files,
+            extra_files_artifacts=extra_files_artifacts,
         )
     elif vc_type == constants.VC_TYPE.nimbus:
         config = nimbus.get_config(
@@ -140,7 +140,7 @@ def get_vc_config(
             network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
-            uploaded_files=uploaded_files,
+            extra_files_artifacts=extra_files_artifacts,
         )
     elif vc_type == constants.VC_TYPE.prysm:
         config = prysm.get_config(
@@ -163,7 +163,7 @@ def get_vc_config(
             network_params=network_params,
             port_publisher=port_publisher,
             vc_index=vc_index,
-            uploaded_files=uploaded_files,
+            extra_files_artifacts=extra_files_artifacts,
         )
     elif vc_type == constants.VC_TYPE.vero:
         if remote_signer_context == None:
@@ -184,7 +184,7 @@ def get_vc_config(
             node_selectors=node_selectors,
             port_publisher=port_publisher,
             vc_index=vc_index,
-            uploaded_files=uploaded_files,
+            extra_files_artifacts=extra_files_artifacts,
         )
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")

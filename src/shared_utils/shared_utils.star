@@ -419,14 +419,14 @@ def ensure_alphanumeric_bounds(s):
     return s[start:end]
 
 
-def process_extra_mounts(plan, extra_mounts, uploaded_files = {}):
+def process_extra_mounts(plan, extra_mounts, extra_files_artifacts = {}):
     """
-    Process extra mounts by resolving artifact references and uploading package files.
+    Process extra mounts by resolving extra_files references ONLY.
 
     Args:
         plan: The Kurtosis plan object
-        extra_mounts: Dictionary where keys are mount paths and values are artifact references
-        uploaded_files: Dictionary of pre-uploaded files from network_params.extra_files
+        extra_mounts: Dictionary where keys are mount paths and values are extra_file names
+        extra_files_artifacts: Dictionary of extra files artifacts from network_params.extra_files
 
     Returns:
         Dictionary where keys are mount paths and values are artifact names/objects
@@ -436,29 +436,15 @@ def process_extra_mounts(plan, extra_mounts, uploaded_files = {}):
 
     processed_mounts = {}
     for mount_path, source in extra_mounts.items():
-        # Already a Files artifact
-        if type(source) == "Files":
-            processed_mounts[mount_path] = source
-            continue
-
+        # Non-string values (Files artifacts or other objects) - use directly
         if type(source) != "string":
             processed_mounts[mount_path] = source
             continue
-
-        # Check pre-uploaded files first
-        if source in uploaded_files:
-            processed_mounts[mount_path] = uploaded_files[source]
-            continue
         
-        # If it contains a path separator, treat as package file
-        if "/" in source:
-            artifact_name = "mount_" + source.replace("/", "_").replace(".", "_").strip("_")
-            # Adjust path relative to current module location (src/shared_utils/)
-            package_path = "../../" + source.lstrip("./")
-            artifact = plan.upload_files(src=package_path, name=artifact_name)
-            processed_mounts[mount_path] = artifact
-        else:
-            # Treat as existing artifact name
-            processed_mounts[mount_path] = source
+        # Source MUST be an extra_files reference
+        if source not in extra_files_artifacts:
+            fail("Mount source '" + source + "' not found in network_params.extra_files. All extra_mounts must reference files defined in network_params.extra_files.")
+        
+        processed_mounts[mount_path] = extra_files_artifacts[source]
 
     return processed_mounts

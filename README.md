@@ -196,8 +196,8 @@ participants:
     el_extra_params: []
 
     # A list of optional extra mount points that will be passed to the EL client container
-    # Key is the path in the container, value is the local path to the file
-    # Example: el_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
+    # Key is the path in the container, value MUST be a reference to network_params.extra_files
+    # Example: el_extra_mounts: {"/tmp/custom.yaml": "my_config"}  # where "my_config" is defined in network_params.extra_files
     el_extra_mounts: {}
 
     # A list of tolerations that will be passed to the EL client container
@@ -259,8 +259,8 @@ participants:
     cl_extra_params: []
 
     # A list of optional extra mount points that will be passed to the CL client container
-    # Key is the path in the container, value is the local path to the file
-    # Example: cl_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
+    # Key is the path in the container, value MUST be a reference to network_params.extra_files
+    # Example: cl_extra_mounts: {"/tmp/custom.yaml": "my_config"}  # where "my_config" is defined in network_params.extra_files
     cl_extra_mounts: {}
 
     # A list of tolerations that will be passed to the CL client container
@@ -334,8 +334,8 @@ participants:
     vc_extra_params: []
 
     # A list of optional extra mount points that will be passed to the validator client container
-    # Key is the path in the container, value is the local path to the file
-    # Example: vc_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
+    # Key is the path in the container, value MUST be a reference to network_params.extra_files
+    # Example: vc_extra_mounts: {"/tmp/custom.yaml": "my_config"}  # where "my_config" is defined in network_params.extra_files
     vc_extra_mounts: {}
 
     # A list of tolerations that will be passed to the validator container
@@ -1335,35 +1335,27 @@ ethereum_metrics_exporter_enabled: true
 
 ## Extra Files and Mounts
 
-### Mounting Files into Containers
-
-Use `el_extra_mounts`, `cl_extra_mounts`, and `vc_extra_mounts` to mount files into containers:
-
-```yaml
-participants:
-  - el_type: geth
-    cl_type: lighthouse
-    el_extra_mounts:
-      "/config/custom.toml": "my_config"  # Reference pre-uploaded file by name
-    cl_extra_mounts:
-      "/data/genesis.json": "genesis_data"  # Reference another pre-uploaded file
-```
-
-### Uploading External Files
-
-Use `network_params.extra_files` to upload files that can be referenced in mounts:
+Use `network_params.extra_files` to define file contents, then mount them using `el_extra_mounts`, `cl_extra_mounts`, and `vc_extra_mounts`:
 
 ```yaml
 network_params:
   extra_files:
-    my_config: "/path/to/config.toml"
-    genesis_data: "/home/user/genesis.json"
+    my_config: |
+      # Custom configuration file content
+      setting1: value1
+      setting2: value2
+    genesis_override: |
+      {"custom": "genesis data"}
 
 participants:
   - el_type: geth
+    cl_type: lighthouse
     el_extra_mounts:
-      "/config/custom.toml": "my_config"  # Reference by name
+      "/config/custom.toml": "my_config"  # References my_config from extra_files
+      "/data/override.json": "genesis_override"  # References genesis_override from extra_files
 ```
+
+**Note:** All extra_mounts MUST reference files defined in `network_params.extra_files`. Direct package file mounting is not supported.
 
 ## Beacon Node <> Validator Client compatibility
 
