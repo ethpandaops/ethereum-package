@@ -43,6 +43,7 @@ DEFAULT_VC_IMAGES = {
     "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:master",
+    "vouch": "attestant/vouch:latest",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -51,8 +52,9 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
     "teku": "consensys/teku:latest",
-    "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:master",
+    "grandine": "ethpandaops/grandine:develop-minimal",
+    "vouch": "attestant/vouch:latest",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
