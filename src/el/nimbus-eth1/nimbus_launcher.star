@@ -128,17 +128,21 @@ def get_config(
         "--data-dir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--net-key={0}/nodekey".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
         "--http-port={0}".format(WS_RPC_PORT_NUM),
-        "--http-address=0.0.0.0",
+        "--http-address={0}".format("::" if participant.el_ipv6_enabled else "0.0.0.0"),
         "--rpc",
         "--rpc-api=admin,eth,debug",
         "--ws",
         "--ws-api=admin,eth,debug",
         "--engine-api",
-        "--engine-api-address=0.0.0.0",
+        "--engine-api-address={0}".format(
+            "::" if participant.el_ipv6_enabled else "0.0.0.0"
+        ),
         "--engine-api-port={0}".format(ENGINE_RPC_PORT_NUM),
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--metrics",
-        "--metrics-address=0.0.0.0",
+        "--metrics-address={0}".format(
+            "::" if participant.el_ipv6_enabled else "0.0.0.0"
+        ),
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--nat=extip:{0}".format(port_publisher.el_nat_exit_ip),
         "--tcp-port={0}".format(discovery_port_tcp),

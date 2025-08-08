@@ -225,6 +225,20 @@ def get_beacon_config(
         "--subscribe-all-data-column-subnets",
     ]
 
+    # Add IPv6-specific flags for dual-stack support when enabled
+    if participant.cl_ipv6_enabled:
+        ipv6_flags = [
+            "--listen-address-ipv6=::",
+            "--libp2p-port-ipv6={0}".format(discovery_port_tcp),
+            "--discovery-port-ipv6={0}".format(discovery_port_udp),
+            "--quic-port-ipv6={0}".format(discovery_port_quic),
+            "--enr-address-ipv6=::",  # Will need actual IPv6 address in production
+            "--enr-udp-port-ipv6={0}".format(discovery_port_udp),
+            "--enr-tcp-port-ipv6={0}".format(discovery_port_tcp),
+            "--enr-quic-port-ipv6={0}".format(discovery_port_quic),
+        ]
+        cmd.extend(ipv6_flags)
+
     if network_params.gas_limit > 0:
         cmd.append("--default-gas-limit={0}".format(network_params.gas_limit))
 
