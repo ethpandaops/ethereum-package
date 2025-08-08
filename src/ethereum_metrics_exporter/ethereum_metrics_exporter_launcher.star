@@ -3,6 +3,7 @@ static_files = import_module("../static_files/static_files.star")
 ethereum_metrics_exporter_context = import_module(
     "../ethereum_metrics_exporter/ethereum_metrics_exporter_context.star"
 )
+input_parser = import_module("../package_io/input_parser.star")
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
 
@@ -27,11 +28,13 @@ def launch(
     el_context,
     cl_context,
     node_selectors,
+    global_tolerations,
     port_publisher,
     global_other_index,
     docker_cache_params,
     persistent,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
     public_ports = shared_utils.get_other_public_port(
         port_publisher,
         HTTP_PORT_ID,
@@ -89,6 +92,7 @@ def launch(
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=tolerations,
         ),
     )
 

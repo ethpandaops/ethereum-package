@@ -4,6 +4,7 @@ vc_shared = import_module("./shared.star")
 
 
 def get_config(
+    plan,
     participant,
     el_cl_genesis_data,
     keymanager_file,
@@ -41,7 +42,6 @@ def get_config(
         "--beacon-node-api-endpoint=" + beacon_http_url,
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--validators-graffiti=" + full_name,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled=true",
         "--metrics-host-allowlist=*",
@@ -119,6 +119,13 @@ def get_config(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.vc_extra_mounts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     config_args = {
         "image": image,
         "ports": ports,
@@ -131,7 +138,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=participant.vc_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

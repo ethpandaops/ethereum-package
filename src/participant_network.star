@@ -24,10 +24,15 @@ el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
 vc = import_module("./vc/vc_launcher.star")
 charon_launcher = import_module("./vc/charon_launcher.star")
+vc_shared = import_module("./vc/shared.star")
+vc_context_l = import_module("./vc/vc_context.star")
+node_metrics = import_module("./node_metrics_info.star")
 remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
 snooper_el_launcher = import_module("./snooper/snooper_el_launcher.star")
+blobber_launcher = import_module("./blobber/blobber_launcher.star")
+cl_context_module = import_module("./cl/cl_context.star")
 
 
 def launch_participant_network(
@@ -164,6 +169,7 @@ def launch_participant_network(
         all_snooper_el_engine_contexts,
         preregistered_validator_keys_for_nodes,
         global_other_index,
+        blobber_configs_with_contexts,
     ) = cl_client_launcher.launch(
         plan,
         network_params,
@@ -181,6 +187,58 @@ def launch_participant_network(
         prysm_password_artifact_uuid,
         global_other_index,
     )
+
+    # Launch all blobbers after all CLs are up
+    cl_context_to_blobber_url = {}
+    if len(blobber_configs_with_contexts) > 0:
+        plan.print("Launching blobbers for CL clients that have them enabled")
+        for config in blobber_configs_with_contexts:
+            blobber = blobber_launcher.launch(
+                plan,
+                config.blobber_config.service_name,
+                config.blobber_config.node_keystore_files,
+                config.blobber_config.beacon_http_url,
+                config.participant,
+                config.blobber_config.node_selectors,
+                global_tolerations,
+            )
+
+            # Store the blobber URL mapping
+            blobber_http_url = "http://{0}:{1}".format(
+                blobber.ip_addr, blobber.port_num
+            )
+            cl_context_to_blobber_url[
+                config.cl_context.beacon_service_name
+            ] = blobber_http_url
+
+    # Helper function to get cl_context with blobber URL if available
+    def get_cl_context_with_blobber_url(cl_context):
+        beacon_service_name = cl_context.beacon_service_name
+        effective_beacon_url = cl_context_to_blobber_url.get(
+            beacon_service_name, cl_context.beacon_http_url
+        )
+
+        if effective_beacon_url == cl_context.beacon_http_url:
+            # No blobber, return original context
+            return cl_context
+
+        # Create a new cl_context with the blobber URL
+        return cl_context_module.new_cl_context(
+            client_name=cl_context.client_name,
+            enr=cl_context.enr,
+            ip_addr=cl_context.ip_addr,
+            http_port=cl_context.http_port,
+            beacon_http_url=effective_beacon_url,
+            cl_nodes_metrics_info=cl_context.cl_nodes_metrics_info,
+            beacon_service_name=cl_context.beacon_service_name,
+            beacon_grpc_url=cl_context.beacon_grpc_url,
+            multiaddr=cl_context.multiaddr,
+            peer_id=cl_context.peer_id,
+            snooper_enabled=cl_context.snooper_enabled,
+            snooper_el_engine_context=cl_context.snooper_el_engine_context,
+            validator_keystore_files_artifact_uuid=cl_context.validator_keystore_files_artifact_uuid,
+            supernode=cl_context.supernode,
+        )
 
     ethereum_metrics_exporter_context = None
     all_ethereum_metrics_exporter_contexts = []
@@ -201,6 +259,8 @@ def launch_participant_network(
     if not args_with_right_defaults.participants:
         fail("No participants configured")
 
+    vc_service_configs = {}
+    vc_service_info = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
@@ -228,8 +288,9 @@ def launch_participant_network(
                 pair_name,
                 ethereum_metrics_exporter_service_name,
                 el_context,
-                cl_context,
+                get_cl_context_with_blobber_url(cl_context),
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
@@ -256,11 +317,12 @@ def launch_participant_network(
             xatu_sentry_context = xatu_sentry.launch(
                 plan,
                 xatu_sentry_service_name,
-                cl_context,
+                get_cl_context_with_blobber_url(cl_context),
                 xatu_sentry_params,
                 network_params,
                 pair_name,
                 node_selectors,
+                global_tolerations,
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(
@@ -282,6 +344,7 @@ def launch_participant_network(
                 snooper_service_name,
                 el_context,
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
@@ -336,8 +399,9 @@ def launch_participant_network(
             snooper_beacon_context = beacon_snooper.launch(
                 plan,
                 snooper_service_name,
-                cl_context,
+                get_cl_context_with_blobber_url(cl_context),
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
@@ -389,16 +453,19 @@ def launch_participant_network(
         if remote_signer_context and remote_signer_context.metrics_info:
             remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
+        service_name = "vc-{0}".format(full_name)
+
         # Use the charon_launcher for Charon validator clients
         if vc_type == constants.VC_TYPE.charon:
+            # Charon uses direct launch (not the new config-based approach)
             vc_context = charon_launcher.launch(
                 plan=plan,
                 launcher=charon_launcher.new_charon_launcher(el_cl_genesis_data=el_cl_data, jwt_file=jwt_file),
                 keymanager_file=keymanager_file,
-                service_name="vc-{0}".format(full_name),
+                service_name=service_name,
                 image=participant.vc_image,
                 global_log_level=args_with_right_defaults.global_log_level,
-                cl_context=cl_context,
+                cl_context=get_cl_context_with_blobber_url(cl_context),
                 el_context=el_context,
                 full_name=full_name,
                 node_keystore_files=vc_keystores,
@@ -410,39 +477,78 @@ def launch_participant_network(
                 vc_index=current_vc_index,
                 genesis_timestamp=final_genesis_timestamp,
             )
-        else:
-            vc_context = vc.launch(
-                plan=plan,
-                launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
-                keymanager_file=keymanager_file,
-                service_name="vc-{0}".format(full_name),
-                vc_type=vc_type,
-                image=participant.vc_image,
-                global_log_level=args_with_right_defaults.global_log_level,
-                cl_context=cl_context,
-                el_context=el_context,
-                remote_signer_context=remote_signer_context,
-                full_name=full_name,
-                snooper_enabled=participant.snooper_enabled,
-                snooper_beacon_context=snooper_beacon_context,
-                node_keystore_files=vc_keystores,
-                participant=participant,
-                prysm_password_relative_filepath=prysm_password_relative_filepath,
-                prysm_password_artifact_uuid=prysm_password_artifact_uuid,
-                global_tolerations=global_tolerations,
-                node_selectors=node_selectors,
-                network_params=network_params,
-                port_publisher=args_with_right_defaults.port_publisher,
-                vc_index=current_vc_index,
-            )
-        all_vc_contexts.append(vc_context)
+            # For Charon, add the context directly and continue
+            all_vc_contexts.append(vc_context)
+            current_vc_index += 1
+            continue
 
-        if vc_context and vc_context.metrics_info:
-            vc_context.metrics_info["config"] = participant.prometheus_config
+        # Standard validator clients use the new config-based approach
+        vc_service_config = vc.get_vc_config(
+            plan=plan,
+            launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
+            keymanager_file=keymanager_file,
+            service_name=service_name,
+            vc_type=vc_type,
+            image=participant.vc_image,
+            global_log_level=args_with_right_defaults.global_log_level,
+            cl_context=get_cl_context_with_blobber_url(cl_context),
+            el_context=el_context,
+            remote_signer_context=remote_signer_context,
+            full_name=full_name,
+            snooper_enabled=participant.snooper_enabled,
+            snooper_beacon_context=snooper_beacon_context,
+            node_keystore_files=vc_keystores,
+            participant=participant,
+            prysm_password_relative_filepath=prysm_password_relative_filepath,
+            prysm_password_artifact_uuid=prysm_password_artifact_uuid,
+            global_tolerations=global_tolerations,
+            node_selectors=node_selectors,
+            network_params=network_params,
+            port_publisher=args_with_right_defaults.port_publisher,
+            vc_index=current_vc_index,
+        )
+        if vc_service_config == None:
+            continue
+
+        vc_service_configs[service_name] = vc_service_config
+        vc_service_info[service_name] = {
+            "client_name": vc_type,
+            "participant_index": index,
+        }
         current_vc_index += 1
 
-    all_participants = []
+    # add vc's in parallel to speed package execution
+    vc_services = {}
+    if len(vc_service_configs) > 0:
+        vc_services = plan.add_services(vc_service_configs)
 
+    # Create VC contexts ordered by participant index
+    vc_contexts_temp = {}
+    for vc_service_name, vc_service in vc_services.items():
+        vc_context = vc.get_vc_context(
+            plan,
+            vc_service_name,
+            vc_service,
+            vc_service_info[vc_service_name]["client_name"],
+        )
+
+        participant_index = vc_service_info[vc_service_name]["participant_index"]
+        if vc_context and vc_context.metrics_info:
+            vc_context.metrics_info["config"] = args_with_right_defaults.participants[
+                participant_index
+            ].prometheus_config
+
+        vc_contexts_temp[participant_index] = vc_context
+
+    # Convert to ordered list
+    all_vc_contexts = []
+    for i in range(len(args_with_right_defaults.participants)):
+        if i in vc_contexts_temp:
+            all_vc_contexts.append(vc_contexts_temp[i])
+        else:
+            all_vc_contexts.append(None)
+
+    all_participants = []
     for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type

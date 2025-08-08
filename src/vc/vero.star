@@ -13,6 +13,7 @@ VERBOSITY_LEVELS = {
 
 
 def get_config(
+    plan,
     participant,
     el_cl_genesis_data,
     image,
@@ -38,7 +39,6 @@ def get_config(
         "--remote-signer-url={0}".format(remote_signer_context.http_url),
         "--beacon-node-urls=" + beacon_http_url,
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=" + full_name,
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         "--log-level=" + log_level,
@@ -65,6 +65,13 @@ def get_config(
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.vc_extra_mounts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     config_args = {
         "image": image,
         "ports": ports,
@@ -77,7 +84,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=participant.vc_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

@@ -9,7 +9,7 @@ participants:
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: ethereumjs
+  - el_type: ethrex
     cl_type: teku
 additional_services:
   - tx_fuzz
@@ -31,6 +31,3 @@ mev_type: flashbots
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
 persistent: True
-docker_cache_params:
-  enabled: true
-  url: "docker.ethquokkaops.io"

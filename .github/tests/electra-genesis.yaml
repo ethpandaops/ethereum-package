@@ -11,6 +11,8 @@ participants:
     cl_type: lodestar
   - el_type: ethereumjs
     cl_type: teku
+  - el_type: ethrex
+    cl_type: lighthouse
 network_params:
   altair_fork_epoch: 0
   bellatrix_fork_epoch: 0

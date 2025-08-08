@@ -25,6 +25,11 @@ APACHE_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enr.txt.tmpl"
 APACHE_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enr_list.txt.tmpl"
 APACHE_ENODE_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enode.txt.tmpl"
 
+NGINX_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/index.html"
+NGINX_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr.txt.tmpl"
+NGINX_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr_list.txt.tmpl"
+NGINX_ENODE_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enode.txt.tmpl"
+
 DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml.tmpl"
 DUGTRIO_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/dugtrio-config/config.yaml.tmpl"
@@ -53,6 +58,9 @@ ASSERTOOR_TESTS_CONFIG_DIRPATH = (
 SPAMOOR_CONFIG_DIRPATH = "/spamoor-config"
 SPAMOOR_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + SPAMOOR_CONFIG_DIRPATH + "/startup-spammer.yaml.tmpl"
+)
+SPAMOOR_HOSTS_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + SPAMOOR_CONFIG_DIRPATH + "/rpc-hosts.txt.tmpl"
 )
 
 # xatu-sentry config

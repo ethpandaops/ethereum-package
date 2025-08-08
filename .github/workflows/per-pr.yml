@@ -51,7 +51,7 @@ jobs:
           kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
 
   lint:
-    runs-on: self-hosted-ghr-size-s-x64
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -76,10 +76,12 @@ jobs:
           ethereum_package_url: "."
           ethereum_package_branch: ""
           ethereum_package_args: .github/tests/mix-assert.yaml
+
+
   #check_optimism_package:
   #  runs-on: ubuntu-latest
   #  steps:
-  #    - name: Checkout Repository
+  #    - name: Check out Repository
   #      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
   #    - name: Setup Kurtosis
   #      uses: ./.github/actions/kurtosis-install

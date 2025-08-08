@@ -51,10 +51,6 @@ def launch(
     participant_index,
     network_params,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
@@ -64,7 +60,7 @@ def launch(
         service_name,
         existing_el_clients,
         cl_client_name,
-        log_level,
+        global_log_level,
         persistent,
         tolerations,
         node_selectors,
@@ -75,30 +71,11 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, constants.RPC_PORT_ID
-    )
-
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    geth_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metrics_url
-    )
-
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
-
-    return el_context.new_el_context(
-        client_name="geth",
-        enode=enode,
-        ip_addr=service.ip_address,
-        rpc_port_num=RPC_PORT_NUM,
-        ws_port_num=WS_PORT_NUM,
-        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
-        rpc_http_url=http_url,
-        ws_url=ws_url,
-        enr=enr,
-        service_name=service_name,
-        el_metrics_info=[geth_metrics_info],
+    return get_el_context(
+        plan,
+        service_name,
+        service,
+        launcher,
     )
 
 
@@ -109,7 +86,7 @@ def get_config(
     service_name,
     existing_el_clients,
     cl_client_name,
-    log_level,
+    global_log_level,
     persistent,
     tolerations,
     node_selectors,
@@ -117,6 +94,10 @@ def get_config(
     participant_index,
     network_params,
 ):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     if (
         "--gcmode=archive" in participant.el_extra_params
         or "--gcmode archive" in participant.el_extra_params
@@ -208,7 +189,7 @@ def get_config(
         "--ws.api=admin,engine,net,eth,web3,debug,txpool",
         "--ws.origins=*",
         "--allow-insecure-unlock",
-        "--nat=extip:" + port_publisher.nat_exit_ip,
+        "--nat=extip:" + port_publisher.el_nat_exit_ip,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
@@ -253,19 +234,18 @@ def get_config(
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
-        if len(existing_el_clients) > 0:
-            cmd.append(
-                "--bootnodes="
-                + ",".join(
-                    [
-                        ctx.enode
-                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                    ]
-                )
+        cmd.append(
+            "--bootnodes="
+            + ",".join(
+                [
+                    ctx.enode
+                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                ]
             )
+        )
         if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            if launcher.prague_time:
-                cmd.append("--override.prague=" + str(launcher.prague_time))
+            if launcher.osaka_enabled:
+                cmd.append("--override.osaka=" + str(launcher.osaka_time))
 
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
@@ -308,6 +288,14 @@ def get_config(
                 constants.EL_TYPE.geth + "_volume_size"
             ],
         )
+
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.el_extra_mounts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,
@@ -323,7 +311,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels,
+            extra_labels=participant.el_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
@@ -341,15 +330,49 @@ def get_config(
     return ServiceConfig(**config_args)
 
 
+# makes request to [service_name] for enode and enr and returns a full el_context
+def get_el_context(
+    plan,
+    service_name,
+    service,
+    launcher,
+):
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
+        plan, service_name, constants.RPC_PORT_ID
+    )
+
+    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    geth_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, METRICS_PATH, metrics_url
+    )
+
+    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+
+    return el_context.new_el_context(
+        client_name="geth",
+        enode=enode,
+        ip_addr=service.ip_address,
+        rpc_port_num=RPC_PORT_NUM,
+        ws_port_num=WS_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        enr=enr,
+        service_name=service_name,
+        el_metrics_info=[geth_metrics_info],
+    )
+
+
 def new_geth_launcher(
     el_cl_genesis_data,
     jwt_file,
     networkid,
-    prague_time,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         networkid=networkid,
-        prague_time=prague_time,
+        osaka_time=el_cl_genesis_data.osaka_time,
+        osaka_enabled=el_cl_genesis_data.osaka_enabled,
     )

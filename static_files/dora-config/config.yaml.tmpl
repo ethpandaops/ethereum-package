@@ -16,7 +16,7 @@ frontend:
   debug: false
   pprof: true
   minimize: false # minimize html templates
-  showSensitivePeerInfos: true
+  disablePageCache: true
 
   # Name of the site, displayed in the title tag
   siteName: "Dora the Explorer"
@@ -32,6 +32,15 @@ frontend:
   rainbowkitProjectId: "15fe4ab4d5c0bcb6f0dc7c398301ff0e"
   showSubmitDeposit: true
   showSubmitElRequests: true
+  showPeerDASInfos: true
+  showSensitivePeerInfos: true
+  disableDasGuardianCheck: false
+  enableDasGuardianMassScan: true
+
+api:
+  enabled: true
+  corsOrigins:
+    - "*"
 
 beaconapi:
   # CL Client RPC
@@ -52,6 +61,7 @@ executionapi:
   endpoints:
 {{ range $elClient := .ELClientInfo }}
     - url: "{{ $elClient.Execution_HTTP_URL }}"
+      engineSnooperUrl: "{{ $elClient.Execution_Engine_Snooper_URL }}"
       name: "{{ $elClient.FullName }}"
       archive: true
 {{- end }}

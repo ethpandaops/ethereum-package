@@ -1,11 +1,13 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 SERVICE_NAME = "spamoor"
 
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 8080
 
 SPAMOOR_CONFIG_FILENAME = "startup-spammers.yaml"
+SPAMOOR_HOSTS_FILENAME = "rpc-hosts.txt"
 
 SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
@@ -21,16 +23,20 @@ USED_PORTS = {
 def launch_spamoor(
     plan,
     config_template,
+    hosts_template,
     prefunded_addresses,
     participant_contexts,
     participant_configs,
     spamoor_params,
     global_node_selectors,
+    global_tolerations,
     network_params,
     port_publisher,
     additional_service_index,
     osaka_time,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+
     spammers = []
 
     for index, spammer in enumerate(spamoor_params.spammers):
@@ -68,13 +74,25 @@ def launch_spamoor(
                 }
             )
 
-    template_data = new_config_template_data(spammers)
-
-    template_and_data = shared_utils.new_template_and_data(
-        config_template, template_data
-    )
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[SPAMOOR_CONFIG_FILENAME] = template_and_data
+
+    config_template_data = new_config_template_data(spammers)
+    config_template_and_data = shared_utils.new_template_and_data(
+        config_template, config_template_data
+    )
+    template_and_data_by_rel_dest_filepath[
+        SPAMOOR_CONFIG_FILENAME
+    ] = config_template_and_data
+
+    hosts_template_data = new_hosts_template_data(
+        participant_contexts, participant_configs
+    )
+    hosts_template_and_data = shared_utils.new_template_and_data(
+        hosts_template, hosts_template_data
+    )
+    template_and_data_by_rel_dest_filepath[
+        SPAMOOR_HOSTS_FILENAME
+    ] = hosts_template_and_data
 
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "spamoor-config"
@@ -84,10 +102,9 @@ def launch_spamoor(
         plan,
         config_files_artifact_name,
         prefunded_addresses,
-        participant_contexts,
-        participant_configs,
         spamoor_params,
         global_node_selectors,
+        tolerations,
         network_params,
         port_publisher,
         additional_service_index,
@@ -99,10 +116,9 @@ def get_config(
     plan,
     config_files_artifact_name,
     prefunded_addresses,
-    participant_contexts,
-    participant_configs,
     spamoor_params,
     node_selectors,
+    tolerations,
     network_params,
     port_publisher,
     additional_service_index,
@@ -112,35 +128,14 @@ def get_config(
         SPAMOOR_CONFIG_FILENAME,
     )
 
-    rpchosts = []
-    for index, participant in enumerate(participant_contexts):
-        (
-            full_name,
-            cl_client,
-            el_client,
-            participant_config,
-        ) = shared_utils.get_client_names(
-            participant, index, participant_contexts, participant_configs
-        )
-        if participant.snooper_el_rpc_context:
-            rpchost = "http://{0}:{1}".format(
-                participant.snooper_el_rpc_context.ip_addr,
-                participant.snooper_el_rpc_context.rpc_port_num,
-            )
-        else:
-            rpchost = "http://{0}:{1}".format(
-                el_client.ip_addr,
-                el_client.rpc_port_num,
-            )
-
-        if "builder" in full_name:
-            rpchost = "group(mevbuilder)" + rpchost
-
-        rpchosts.append(rpchost)
+    hosts_file_path = shared_utils.path_join(
+        SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
+        SPAMOOR_HOSTS_FILENAME,
+    )
 
     cmd = [
         "--privkey={}".format(prefunded_addresses[13].private_key),
-        "--rpchost={}".format(",".join(rpchosts)),
+        "--rpchost-file={}".format(hosts_file_path),
         "--startup-spammer={}".format(config_file_path),
     ]
 
@@ -165,6 +160,7 @@ def get_config(
         min_memory=spamoor_params.min_mem,
         max_memory=spamoor_params.max_mem,
         node_selectors=node_selectors,
+        tolerations=tolerations,
         files={
             SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
@@ -180,4 +176,52 @@ def new_config_template_data(
 
     return {
         "StartupSpammer": startup_spammer_json,
+    }
+
+
+def new_hosts_template_data(
+    participant_contexts,
+    participant_configs,
+):
+    rpchosts = []
+    for index, participant in enumerate(participant_contexts):
+        (
+            full_name,
+            cl_client,
+            el_client,
+            participant_config,
+        ) = shared_utils.get_client_names(
+            participant, index, participant_contexts, participant_configs
+        )
+        if participant.snooper_el_rpc_context:
+            rpchost = "http://{0}:{1}".format(
+                participant.snooper_el_rpc_context.ip_addr,
+                participant.snooper_el_rpc_context.rpc_port_num,
+            )
+        else:
+            rpchost = "http://{0}:{1}".format(
+                el_client.ip_addr,
+                el_client.rpc_port_num,
+            )
+
+        index_str = shared_utils.zfill_custom(
+            index + 1, len(str(len(participant_contexts)))
+        )
+        rpchost = (
+            "group({0},{1},{2})name({3})".format(
+                index_str,
+                cl_client.client_name,
+                el_client.client_name,
+                full_name,
+            )
+            + rpchost
+        )
+
+        if "builder" in full_name:
+            rpchost = "group(mevbuilder)" + rpchost
+
+        rpchosts.append(rpchost)
+
+    return {
+        "RPCHosts": rpchosts,
     }
