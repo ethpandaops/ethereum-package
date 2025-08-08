@@ -363,6 +363,33 @@ participants:
     # network parameter num_validator_keys_per_node
     validator_count: null
 
+  # Charon Distributed Validator Configuration
+    # The number of Charon nodes to create for distributed validation
+    # Each Charon node will run as a middleware between the beacon node and validator client
+    # Minimum 4 nodes recommended for fault tolerance
+    # Only used when vc_type is set to "charon"
+    # Defaults to 4
+    charon_node_count: 4
+
+    # Charon-specific parameters for distributed validator setup
+    # Only used when vc_type is set to "charon"
+    charon_params:
+      # The type of validator client to run with Charon
+      # Valid values are: lighthouse, lodestar, teku, nimbus, prysm
+      # Each Charon node will run this validator client type
+      # Defaults to "lighthouse"
+      charon_vc: lighthouse
+
+      # The Docker image for the validator client used with Charon
+      # This allows you to specify custom validator client images
+      # Defaults by client:
+      # - lighthouse: sigp/lighthouse:latest
+      # - lodestar: chainsafe/lodestar:latest
+      # - teku: consensys/teku:latest
+      # - nimbus: statusim/nimbus-validator-client:multiarch-latest
+      # - prysm: gcr.io/prysmaticlabs/prysm/validator:latest
+      charon_vc_image: sigp/lighthouse:latest
+
     # Whether to use a remote signer instead of the vc directly handling keys
     # Note Lighthouse VC does not support this flag
     # Defaults to false
@@ -1370,16 +1397,127 @@ participants:
 - Files outside the package directory cannot be mounted directly
 - The entire directory structure is preserved when mounting directories
 
+## Charon Distributed Validator Technology (DVT)
+
+[Charon](https://github.com/ObolNetwork/charon) is a distributed validator middleware that enables fault-tolerant Ethereum validation by running validator duties across multiple nodes. This package supports deploying Charon clusters with any of the supported validator clients.
+
+### What is Distributed Validation?
+
+Distributed validation splits validator duties across multiple nodes (typically 4-7), providing:
+
+- **Fault Tolerance**: Continue validating even if some nodes go offline
+- **Reduced Slashing Risk**: Consensus mechanisms prevent double-signing
+- **Improved Uptime**: No single point of failure
+- **Decentralization**: Distribute validator operations across multiple operators
+
+### Charon Configuration
+
+To use Charon distributed validators, set `vc_type: charon` in your participant configuration:
+
+```yaml
+participants:
+  - el_type: geth
+    el_image: ethereum/client-go:latest
+    cl_type: lighthouse
+    cl_image: sigp/lighthouse:latest-unstable
+    use_separate_vc: true
+    # Charon Configuration
+    vc_type: charon
+    vc_image: obolnetwork/charon:latest
+    charon_node_count: 4
+    charon_params:
+      charon_vc: teku
+      charon_vc_image: consensys/teku:latest
+```
+
+### Supported Validator Clients with Charon
+
+All major Ethereum validator clients are supported with Charon:
+
+| Validator Client | Status | Implementation           | Notes                         |
+| ---------------- | ------ | ------------------------ | ----------------------------- |
+| **Lighthouse**   | ✅     | Two-stage health checks  | Default choice, most tested   |
+| **Lodestar**     | ✅     | Script-based execution   | Custom key management         |
+| **Teku**         | ✅     | Config file approach     | External signer mode          |
+| **Nimbus**       | ✅     | Two-service architecture | Key import + validator client |
+| **Prysm**        | ✅     | Wallet-based import      | Prysm wallet integration      |
+
+### Example Configurations
+
+#### Basic Charon Setup (4 nodes with Lighthouse)
+
+```yaml
+participants:
+  - vc_type: charon
+    vc_image: obolnetwork/charon:latest
+    charon_node_count: 4
+    charon_params:
+      charon_vc: lighthouse
+      charon_vc_image: sigp/lighthouse:latest-unstable
+```
+
+#### Mixed Network (Charon + Standard Validators)
+
+```yaml
+participants:
+  # Distributed validator with Charon
+  - vc_type: charon
+    charon_node_count: 4
+    charon_params:
+      charon_vc: prysm
+      charon_vc_image: gcr.io/prysmaticlabs/prysm/validator:latest
+  # Standard validator
+  - vc_type: lighthouse
+    vc_image: sigp/lighthouse:latest-unstable
+```
+
+### Running Charon Networks
+
+```bash
+# Create your network_params.yaml with Charon configuration
+kurtosis run --enclave charon-testnet github.com/ethpandaops/ethereum-package --args-file network_params.yaml
+```
+### Running Charon Networks from source code
+```bash
+# Create your network_params.yaml with Charon configuration
+kurtosis run . --args-file network_params_charon_example.yaml
+```
+
+
+### Charon Architecture
+
+When you deploy a Charon participant, the package creates:
+
+1. **Charon Cluster**: Multiple Charon nodes that form a distributed validator cluster
+2. **Validator Clients**: Each Charon node connects to a validator client of your chosen type
+3. **Key Distribution**: Validator keys are split and distributed across the Charon nodes
+4. **Consensus Layer**: All nodes connect to the same beacon node for chain data
+
+```
+Beacon Node
+     ↓
+┌─────────────────────────────────────┐
+│          Charon Cluster             │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐ │
+│  │Charon-1 │ │Charon-2 │ │Charon-3 │ │
+│  │    ↓    │ │    ↓    │ │    ↓    │ │
+│  │ Teku VC │ │ Teku VC │ │ Teku VC │ │
+│  └─────────┘ └─────────┘ └─────────┘ │
+└─────────────────────────────────────┘
+```
+
 ## Beacon Node <> Validator Client compatibility
 
-|               | Lighthouse VC | Prysm VC | Teku VC | Lodestar VC | Nimbus VC
-|---------------|---------------|----------|---------|-------------|-----------|
-| Lighthouse BN | ✅            | ✅       | ✅      | ✅          | ✅
-| Prysm BN      | ✅            | ✅       | ✅      | ✅          | ✅
-| Teku BN       | ✅            | ✅       | ✅      | ✅          | ✅
-| Lodestar BN   | ✅            | ✅       | ✅      | ✅          | ✅
-| Nimbus BN     | ✅            | ✅       | ✅      | ✅          | ✅
-| Grandine BN   | ✅            | ✅       | ✅      | ✅          | ✅
+|               | Lighthouse VC | Prysm VC | Teku VC | Lodestar VC | Nimbus VC | Charon DVT |
+|---------------|---------------|----------|---------|-------------|-----------|------------|
+| Lighthouse BN | ✅            | ✅       | ✅      | ✅          | ✅        | ✅         |
+| Prysm BN      | ✅            | ✅       | ✅      | ✅          | ✅        | ✅         |
+| Teku BN       | ✅            | ✅       | ✅      | ✅          | ✅        | ✅         |
+| Lodestar BN   | ✅            | ✅       | ✅      | ✅          | ✅        | ✅         |
+| Nimbus BN     | ✅            | ✅       | ✅      | ✅          | ✅        | ✅         |
+| Grandine BN   | ✅            | ✅       | ✅      | ✅          | ✅        |            |
+
+**Note**: Charon DVT (Distributed Validator Technology) is compatible with all beacon node clients and can run any of the supported validator clients (Lighthouse, Lodestar, Teku, Nimbus, Prysm) in a distributed configuration.
 
 ## Custom labels for Docker and Kubernetes
 

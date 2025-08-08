@@ -1,0 +1,169 @@
+participants:
+  # EL
+  - el_type: geth
+    el_image: ethereum/client-go:latest
+    # CL
+    cl_type: lighthouse
+    cl_image: sigp/lighthouse:latest-unstable
+    supernode: false
+    use_separate_vc: true
+    # Validator
+    vc_type: charon
+    vc_image: obolnetwork/charon:latest
+    charon_node_count: 4
+    charon_params:
+      charon_vc: teku
+      charon_vc_image: consensys/teku:latest
+    validator_count: null
+    use_remote_signer: false
+  - el_type: geth
+    el_image: ethereum/client-go:latest
+    # CL
+    cl_type: lighthouse
+    cl_image: sigp/lighthouse:latest-unstable
+    supernode: false
+    use_separate_vc: true
+    # Validator
+    vc_type: lighthouse
+    vc_image: sigp/lighthouse:latest-unstable
+    use_remote_signer: false
+  - el_type: geth
+    el_image: ethereum/client-go:latest
+    # CL
+    cl_type: lighthouse
+    cl_image: sigp/lighthouse:latest-unstable
+    supernode: false
+    use_separate_vc: true
+    # Validator
+    vc_type: lighthouse
+    vc_image: sigp/lighthouse:latest-unstable
+    use_remote_signer: false
+network_params:
+  network: kurtosis
+  network_id: "3151908"
+  deposit_contract_address: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
+  seconds_per_slot: 12
+  num_validator_keys_per_node: 64
+  preregistered_validator_keys_mnemonic:
+    "giant issue aisle success illegal bike spike
+    question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy
+    very lucky have athlete"
+  preregistered_validator_count: 0
+  genesis_delay: 20
+  genesis_gaslimit: 30000000
+  max_per_epoch_activation_churn_limit: 8
+  churn_limit_quotient: 65536
+  ejection_balance: 16000000000
+  eth1_follow_distance: 2048
+  min_validator_withdrawability_delay: 256
+  shard_committee_period: 256
+  deneb_fork_epoch: 0
+  electra_fork_epoch: 0
+  fulu_fork_epoch: 18446744073709551615
+  network_sync_base_url: https://snapshots.ethpandaops.io/
+  force_snapshot_sync: false
+  data_column_sidecar_subnet_count: 128
+  samples_per_slot: 8
+  custody_requirement: 4
+  max_blobs_per_block_electra: 9
+  target_blobs_per_block_electra: 6
+  base_fee_update_fraction_electra: 5007716
+  additional_preloaded_contracts: {}
+  devnet_repo: ethpandaops
+  prefunded_accounts: {}
+additional_services: []
+dora_params:
+  image: ""
+tx_fuzz_params:
+  tx_fuzz_extra_args: []
+spamoor_params:
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 20
+  max_mem: 300
+  extra_args: []
+prometheus_params:
+  storage_tsdb_retention_time: "1d"
+  storage_tsdb_retention_size: "512MB"
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+grafana_params:
+  additional_dashboards: []
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+assertoor_params:
+  image: ""
+  run_stability_check: false
+  run_block_proposal_check: false
+  run_transaction_test: false
+  run_blob_transaction_test: false
+  run_opcodes_transaction_test: false
+  run_lifecycle_test: false
+  tests: []
+wait_for_finalization: false
+global_log_level: info
+snooper_enabled: false
+ethereum_metrics_exporter_enabled: false
+parallel_keystore_generation: false
+disable_peer_scoring: false
+persistent: false
+mev_type: null
+mev_params:
+  mev_relay_image: ethpandaops/mev-boost-relay:main
+  mev_builder_image: ethpandaops/flashbots-builder:main
+  mev_builder_cl_image: sigp/lighthouse:latest
+  mev_boost_image: ethpandaops/mev-boost:develop
+  mev_boost_args: ["mev-boost", "--relay-check"]
+  mev_relay_api_extra_args: []
+  mev_relay_housekeeper_extra_args: []
+  mev_relay_website_extra_args: []
+  mev_builder_extra_args: []
+  mev_builder_prometheus_config:
+    scrape_interval: 15s
+    labels: {}
+  custom_flood_params:
+    interval_between_transactions: 1
+xatu_sentry_enabled: false
+xatu_sentry_params:
+  xatu_sentry_image: ethpandaops/xatu-sentry
+  xatu_server_addr: localhost:8000
+  xatu_server_tls: false
+  xatu_server_headers: {}
+  beacon_subscriptions:
+    - attestation
+    - block
+    - chain_reorg
+    - finalized_checkpoint
+    - head
+    - voluntary_exit
+    - contribution_and_proof
+    - blob_sidecar
+apache_port: 40000
+global_tolerations: []
+global_node_selectors: {}
+keymanager_enabled: false
+checkpoint_sync_enabled: false
+checkpoint_sync_url: ""
+ethereum_genesis_generator_params:
+  image: ethpandaops/ethereum-genesis-generator:4.0.4
+port_publisher:
+  nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
+  el:
+    enabled: false
+    public_port_start: 32000
+  cl:
+    enabled: false
+    public_port_start: 33000
+  vc:
+    enabled: false
+    public_port_start: 34000
+  remote_signer:
+    enabled: false
+    public_port_start: 35000
+  additional_services:
+    enabled: false
+    public_port_start: 36000
