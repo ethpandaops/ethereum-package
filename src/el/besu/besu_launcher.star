@@ -151,11 +151,6 @@ def get_config(
         "--engine-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--engine-host-allowlist=*",
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
-        "{0}".format(
-            "--sync-mode=FULL"
-            if network_params.network in constants.NETWORK_NAME.kurtosis
-            else "--sync-mode=SNAP"
-        ),
         "--metrics-enabled=true",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
