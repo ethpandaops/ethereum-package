@@ -178,7 +178,7 @@ def get_vc_config(
             node_selectors=node_selectors,
             port_publisher=port_publisher,
             vc_index=vc_index,
-        )
+        )    
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
     else:

@@ -23,6 +23,7 @@ launch_shadowfork = import_module("./network_launcher/shadowfork.star")
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
 vc = import_module("./vc/vc_launcher.star")
+charon_launcher = import_module("./vc/charon_launcher.star")
 vc_shared = import_module("./vc/shared.star")
 vc_context_l = import_module("./vc/vc_context.star")
 node_metrics = import_module("./node_metrics_info.star")
@@ -453,6 +454,35 @@ def launch_participant_network(
             remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
         service_name = "vc-{0}".format(full_name)
+
+        # Use the charon_launcher for Charon validator clients
+        if vc_type == constants.VC_TYPE.charon:
+            # Charon uses direct launch (not the new config-based approach)
+            vc_context = charon_launcher.launch(
+                plan=plan,
+                launcher=charon_launcher.new_charon_launcher(el_cl_genesis_data=el_cl_data, jwt_file=jwt_file),
+                keymanager_file=keymanager_file,
+                service_name=service_name,
+                image=participant.vc_image,
+                global_log_level=args_with_right_defaults.global_log_level,
+                cl_context=get_cl_context_with_blobber_url(cl_context),
+                el_context=el_context,
+                full_name=full_name,
+                node_keystore_files=vc_keystores,
+                participant=participant,
+                global_tolerations=global_tolerations,
+                node_selectors=node_selectors,
+                network_params=network_params,
+                port_publisher=args_with_right_defaults.port_publisher,
+                vc_index=current_vc_index,
+                genesis_timestamp=final_genesis_timestamp,
+            )
+            # For Charon, add the context directly and continue
+            all_vc_contexts.append(vc_context)
+            current_vc_index += 1
+            continue
+
+        # Standard validator clients use the new config-based approach
         vc_service_config = vc.get_vc_config(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
