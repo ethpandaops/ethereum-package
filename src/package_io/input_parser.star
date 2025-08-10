@@ -524,6 +524,8 @@ def input_parser(plan, input_args):
             image=result["blockscout_params"]["image"],
             verif_image=result["blockscout_params"]["verif_image"],
             frontend_image=result["blockscout_params"]["frontend_image"],
+            public_app_host=result["blockscout_params"]["public_app_host"],
+            public_app_port=result["blockscout_params"]["public_app_port"],
         ),
         dora_params=struct(
             image=result["dora_params"]["image"],
