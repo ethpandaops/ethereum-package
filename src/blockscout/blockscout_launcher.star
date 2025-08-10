@@ -283,7 +283,7 @@ def get_config_frontend(
             "NEXT_PUBLIC_APP_HOST": blockscout_params.public_app_host,
             "NEXT_PUBLIC_APP_PORT": blockscout_params.public_app_port,
             "NEXT_PUBLIC_USE_NEXT_JS_PROXY": "true",
-            "PORT": blockscout_params.public_app_port,
+            "PORT": str(HTTP_PORT_NUMBER_FRONTEND),
         },
         min_cpu=BLOCKSCOUT_MIN_CPU,
         max_cpu=BLOCKSCOUT_MAX_CPU,
