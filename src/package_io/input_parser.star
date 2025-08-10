@@ -1287,6 +1287,8 @@ def get_default_blockscout_params():
         "image": "ghcr.io/blockscout/blockscout:latest",
         "verif_image": "ghcr.io/blockscout/smart-contract-verifier:latest",
         "frontend_image": "ghcr.io/blockscout/frontend:latest",
+        "public_app_host": "127.0.0.1",
+        "public_app_port": "3000",
     }
 
 
