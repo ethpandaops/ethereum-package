@@ -768,6 +768,7 @@ additional_services:
   - full_beaconchain_explorer
   - prometheus
   - grafana
+  - tempo
   - blobscan
   - dugtrio
   - blutgang
@@ -832,6 +833,29 @@ grafana_params:
   # Grafana docker image to use
   # Defaults to the latest image
   image: "grafana/grafana:latest"
+
+# Configuration place for tempo tracing backend
+tempo_params:
+  # How long to retain traces
+  retention_duration: "12h"
+  # Rate limiting for trace ingestion (bytes per second)
+  ingestion_rate_limit: 20971520  # 20MB
+  # Burst limit for trace ingestion (bytes)
+  ingestion_burst_limit: 52428800  # 50MB
+  # Maximum duration for trace searches
+  max_search_duration: "30s"
+  # Maximum bytes per individual trace
+  max_bytes_per_trace: 52428800  # 50MB
+  # Resource management for tempo container
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+  # Tempo docker image to use
+  # Defaults to the latest image
+  image: "grafana/tempo:latest"
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:

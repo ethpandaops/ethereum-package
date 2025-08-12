@@ -77,6 +77,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "assertoor_params",
     "prometheus_params",
     "grafana_params",
+    "tempo_params",
     "tx_fuzz_params",
     "custom_flood_params",
     "xatu_sentry_params",
@@ -108,6 +109,7 @@ def input_parser(plan, input_args):
     result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
     result["prometheus_params"] = get_default_prometheus_params()
+    result["tempo_params"] = get_default_tempo_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
     result["parallel_keystore_generation"] = False
@@ -170,6 +172,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["grafana_params"]:
                 sub_value = input_args["grafana_params"][sub_attr]
                 result["grafana_params"][sub_attr] = sub_value
+        elif attr == "tempo_params":
+            for sub_attr in input_args["tempo_params"]:
+                sub_value = input_args["tempo_params"][sub_attr]
+                result["tempo_params"][sub_attr] = sub_value
         elif attr == "xatu_sentry_params":
             for sub_attr in input_args["xatu_sentry_params"]:
                 sub_value = input_args["xatu_sentry_params"][sub_attr]
@@ -560,6 +566,18 @@ def input_parser(plan, input_args):
             min_mem=result["grafana_params"]["min_mem"],
             max_mem=result["grafana_params"]["max_mem"],
             image=result["grafana_params"]["image"],
+        ),
+        tempo_params=struct(
+            retention_duration=result["tempo_params"]["retention_duration"],
+            ingestion_rate_limit=result["tempo_params"]["ingestion_rate_limit"],
+            ingestion_burst_limit=result["tempo_params"]["ingestion_burst_limit"],
+            max_search_duration=result["tempo_params"]["max_search_duration"],
+            max_bytes_per_trace=result["tempo_params"]["max_bytes_per_trace"],
+            min_cpu=result["tempo_params"]["min_cpu"],
+            max_cpu=result["tempo_params"]["max_cpu"],
+            min_mem=result["tempo_params"]["min_mem"],
+            max_mem=result["tempo_params"]["max_mem"],
+            image=result["tempo_params"]["image"],
         ),
         apache_port=result["apache_port"],
         nginx_port=result["nginx_port"],
@@ -1430,6 +1448,21 @@ def get_default_grafana_params():
     }
 
 
+def get_default_tempo_params():
+    return {
+        "retention_duration": "12h",
+        "ingestion_rate_limit": 20971520,  # 20MB
+        "ingestion_burst_limit": 52428800,  # 50MB
+        "max_search_duration": "30s",
+        "max_bytes_per_trace": 52428800,  # 50MB
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
+        "image": "grafana/tempo:latest",
+    }
+
+
 def get_default_xatu_sentry_params():
     return {
         "xatu_sentry_image": "ethpandaops/xatu:latest",
@@ -1721,6 +1754,7 @@ def docker_cache_image_override(plan, result):
         "tx_fuzz_params.image",
         "prometheus_params.image",
         "grafana_params.image",
+        "tempo_params.image",
         "spamoor_params.image",
         "ethereum_genesis_generator_params.image",
     ]

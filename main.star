@@ -28,6 +28,7 @@ full_beaconchain_explorer = import_module(
 blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
+tempo = import_module("./src/tempo/tempo_launcher.star")
 commit_boost_mev_boost = import_module(
     "./src/mev/commit-boost/mev_boost/mev_boost_launcher.star"
 )
@@ -116,6 +117,9 @@ def run(plan, args={}):
     grafana_dashboards_config_template = read_file(
         static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
     )
+    tempo_config_template = read_file(
+        static_files.TEMPO_CONFIG_TEMPLATE_FILEPATH
+    )
     prometheus_additional_metrics_jobs = []
     raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
     jwt_file = plan.upload_files(
@@ -162,6 +166,22 @@ def run(plan, args={}):
                 name="node-key-file-{0}".format(index + 1),
             )
     plan.print("Read the prometheus, grafana templates")
+
+    # Pre-launch tempo so urls are available to other services
+    tempo_context = None
+    if "tempo" in args_with_right_defaults.additional_services:
+        plan.print("Pre-launching tempo for lighthouse telemetry...")
+        args_with_right_defaults.additional_services.remove("tempo")
+        tempo_context = tempo.launch_tempo(
+            plan,
+            tempo_config_template,
+            global_node_selectors,
+            global_tolerations,
+            args_with_right_defaults.tempo_params,
+            args_with_right_defaults.port_publisher,
+            0,
+        )
+        plan.print("Successfully pre-launched tempo")
 
     if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
         plan.print("Generating mev-rs builder config file")
@@ -214,6 +234,7 @@ def run(plan, args={}):
         global_node_selectors,
         keymanager_enabled,
         parallel_keystore_generation,
+        tempo_context,
     )
 
     plan.print(
@@ -699,6 +720,7 @@ def run(plan, args={}):
                 args_with_right_defaults.grafana_params,
                 args_with_right_defaults.port_publisher,
                 index,
+                tempo_context,
             )
             plan.print("Successfully launched grafana")
         elif additional_service == "prometheus_grafana":
@@ -789,6 +811,7 @@ def run(plan, args={}):
             args_with_right_defaults.grafana_params,
             args_with_right_defaults.port_publisher,
             prometheus_grafana_index,
+            tempo_context,
         )
         plan.print("Successfully launched grafana")
 
