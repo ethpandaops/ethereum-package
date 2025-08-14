@@ -27,6 +27,7 @@ def launch(
     global_node_selectors,
     global_tolerations,
     persistent,
+    tempo_context,
     num_participants,
     validator_data,
     prysm_password_relative_filepath,
@@ -218,6 +219,7 @@ def launch(
                 args_with_right_defaults.port_publisher,
                 index,
                 network_params,
+                tempo_context,
             )
 
             blobber_config = get_blobber_config(
@@ -265,6 +267,7 @@ def launch(
                 args_with_right_defaults.port_publisher,
                 index,
                 network_params,
+                tempo_context,
             )
 
             cl_participant_info[cl_service_name] = {

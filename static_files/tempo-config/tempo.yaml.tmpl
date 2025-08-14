@@ -1,0 +1,29 @@
+server:
+  http_listen_port: {{ .HTTPPort }}
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:{{ .OTLPGRPCPort }}
+        http:
+          endpoint: 0.0.0.0:{{ .OTLPHTTPPort }}
+
+ingester:
+  trace_idle_period: 10s
+  max_block_duration: 5m
+
+compactor:
+  compaction:
+    block_retention: {{ .RetentionDuration }}
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /tmp/tempo/wal
+    local:
+      path: /tmp/tempo/traces
+
+stream_over_http_enabled: true
