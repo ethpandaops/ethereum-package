@@ -72,7 +72,7 @@ def launch_tempo(
     )
 
     service = plan.add_service(SERVICE_NAME, config)
-    
+
     # Return connection info for other services
     return struct(
         service_name=SERVICE_NAME,
@@ -94,18 +94,18 @@ def get_tempo_config_dir_artifact_uuid(
     tempo_params,
 ):
     template_data = new_config_template_data(tempo_params)
-    
+
     template_and_data = shared_utils.new_template_and_data(
         config_template, template_data
     )
-    
+
     template_and_data_by_rel_dest_filepath = {}
     template_and_data_by_rel_dest_filepath[TEMPO_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "tempo-config"
     )
-    
+
     return config_files_artifact_name
 
 

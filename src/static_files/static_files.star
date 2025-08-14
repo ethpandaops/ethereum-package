@@ -84,9 +84,7 @@ GRAFANA_DASHBOARDS_CONFIG_DIRPATH = (
 )
 
 # Tempo config
-TEMPO_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/tempo-config/tempo.yaml.tmpl"
-)
+TEMPO_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/tempo-config/tempo.yaml.tmpl"
 
 # Geth + CL genesis generation
 GENESIS_GENERATION_CONFIG_DIRPATH = STATIC_FILES_DIRPATH + "/genesis-generation-config"

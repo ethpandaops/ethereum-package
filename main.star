@@ -117,9 +117,7 @@ def run(plan, args={}):
     grafana_dashboards_config_template = read_file(
         static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
     )
-    tempo_config_template = read_file(
-        static_files.TEMPO_CONFIG_TEMPLATE_FILEPATH
-    )
+    tempo_config_template = read_file(static_files.TEMPO_CONFIG_TEMPLATE_FILEPATH)
     prometheus_additional_metrics_jobs = []
     raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
     jwt_file = plan.upload_files(

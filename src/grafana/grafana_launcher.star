@@ -99,7 +99,9 @@ def get_grafana_config_dir_artifact_uuid(
     tempo_context,
     additional_dashboards=[],
 ):
-    datasource_data = new_datasource_config_template_data(prometheus_private_url, tempo_context)
+    datasource_data = new_datasource_config_template_data(
+        prometheus_private_url, tempo_context
+    )
     datasource_template_and_data = shared_utils.new_template_and_data(
         datasource_config_template, datasource_data
     )

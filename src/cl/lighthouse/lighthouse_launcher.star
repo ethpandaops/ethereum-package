@@ -258,7 +258,9 @@ def get_beacon_config(
 
     # Add tempo telemetry integration if tempo is available
     if tempo_context != None:
-        cmd.append("--telemetry-collector-url=http://{}".format(tempo_context.otlp_grpc_url))
+        cmd.append(
+            "--telemetry-collector-url=http://{}".format(tempo_context.otlp_grpc_url)
+        )
 
     if len(participant.cl_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
