@@ -82,7 +82,7 @@ After the Ethereum network is up and running, this package starts several auxili
 - [Forkmon](https://github.com/ethpandaops/ethereum-package/tree/main/src/forkmon), a "fork monitor" web UI for visualizing the CL clients' forks
 - [Prometheus](https://github.com/ethpandaops/ethereum-package/tree/main/src/prometheus) for collecting client node metrics
 - [Grafana](https://github.com/ethpandaops/ethereum-package/tree/main/src/grafana) for visualizing client node metrics
-- [An ETH transaction spammer](https://github.com/ethpandaops/ethereum-package/tree/main/src/transaction_spammer), which [has been forked off](https://github.com/kurtosis-tech/tx-fuzz) of [Marius' transaction spammer code](https://github.com/MariusVanDerWijden/tx-fuzz) so that it can run as a container
+- [An ETH transaction spammer](https://github.com/ethpandaops/ethereum-package/tree/main/src/tx_fuzz), which [has been forked off](https://github.com/kurtosis-tech/tx-fuzz) of [Marius' transaction spammer code](https://github.com/MariusVanDerWijden/tx-fuzz) so that it can run as a container
 
 ## [Testnet Verifier][testnet-verifier]
 
