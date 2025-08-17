@@ -257,6 +257,9 @@ SUBCATEGORY_PARAMS = {
         "frontend_image",
         "public_app_host",
         "public_app_port",
+        "network_name",
+        "network_currency_name",
+        "network_currency_symbol",
     ],
     "dora_params": [
         "image",

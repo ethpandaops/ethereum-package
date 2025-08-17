@@ -526,6 +526,11 @@ def input_parser(plan, input_args):
             frontend_image=result["blockscout_params"]["frontend_image"],
             public_app_host=result["blockscout_params"]["public_app_host"],
             public_app_port=result["blockscout_params"]["public_app_port"],
+            network_name=result["blockscout_params"]["network_name"],
+            network_currency_name=result["blockscout_params"]["network_currency_name"],
+            network_currency_symbol=result["blockscout_params"][
+                "network_currency_symbol"
+            ],
         ),
         dora_params=struct(
             image=result["dora_params"]["image"],
@@ -1289,6 +1294,9 @@ def get_default_blockscout_params():
         "frontend_image": "ghcr.io/blockscout/frontend:latest",
         "public_app_host": "127.0.0.1",
         "public_app_port": "3000",
+        "network_name": "Mainnet",
+        "network_currency_name": "Ether",
+        "network_currency_symbol": "ETH",
     }
 
 
