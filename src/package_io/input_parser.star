@@ -620,6 +620,7 @@ def input_parser(plan, input_args):
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
         keymanager_enabled=result["keymanager_enabled"],
+        extra_files=result.get("extra_files", {}),
         checkpoint_sync_enabled=result["checkpoint_sync_enabled"],
         checkpoint_sync_url=result["checkpoint_sync_url"],
         ethereum_genesis_generator_params=struct(
@@ -1053,6 +1054,7 @@ def default_input_args(input_args):
         "participants": participants,
         "participants_matrix": participants_matrix,
         "network_params": network_params,
+        "extra_files": {},
         "wait_for_finalization": False,
         "global_log_level": "info",
         "snooper_enabled": False,
