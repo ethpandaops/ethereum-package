@@ -135,7 +135,7 @@ def new_env_file_for_el_cl_genesis_data(
         "DenebForkEpoch": "{0}".format(network_params.deneb_fork_epoch),
         "ElectraForkEpoch": "{0}".format(network_params.electra_fork_epoch),
         "FuluForkEpoch": "{0}".format(network_params.fulu_fork_epoch),
-        "Eip7732ForkEpoch": "{0}".format(network_params.eip7732_fork_epoch),
+        "GloasForkEpoch": "{0}".format(network_params.gloas_fork_epoch),
         "Eip7805ForkEpoch": "{0}".format(network_params.eip7805_fork_epoch),
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
