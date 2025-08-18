@@ -689,49 +689,35 @@ network_params:
 
 
   # BPO
-  # BPO1 epoch (default 18446744073709551615)
+  # BPO1-5 epoch (default 18446744073709551615)
   bpo_1_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO1 (default 12)
-  bpo_1_max_blobs: 12
-  # Target number of blobs per block for BPO1 (default 9)
-  bpo_1_target_blobs: 9
-  # Base fee update fraction for BPO1 (default 0)
+  # Maximum number of blobs per block for BPO1-5
+  # If only max is set, target is auto-calculated as 2/3 of max
+  # If only target is set, max is auto-calculated as 3/2 of target
+  bpo_1_max_blobs: 0
+  # Target number of blobs per block for BPO1-5
+  bpo_1_target_blobs: 0
+  # Base fee update fraction for BPO1-5 (default 0)
   bpo_1_base_fee_update_fraction: 0
 
-  # BPO2 epoch (default 18446744073709551615)
   bpo_2_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO2 (default 12)
-  bpo_2_max_blobs: 12
-  # Target number of blobs per block for BPO2 (default 9)
-  bpo_2_target_blobs: 9
-  # Base fee update fraction for BPO2 (default 0)
+  bpo_2_max_blobs: 0
+  bpo_2_target_blobs: 0
   bpo_2_base_fee_update_fraction: 0
 
-  # BPO3 epoch (default 18446744073709551615)
   bpo_3_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO3 (default 12)
-  bpo_3_max_blobs: 12
-  # Target number of blobs per block for BPO3 (default 9)
-  bpo_3_target_blobs: 9
-  # Base fee update fraction for BPO3 (default 0)
+  bpo_3_max_blobs: 0
+  bpo_3_target_blobs: 0
   bpo_3_base_fee_update_fraction: 0
 
-  # BPO4 epoch (default 18446744073709551615)
   bpo_4_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO4 (default 12)
-  bpo_4_max_blobs: 12
-  # Target number of blobs per block for BPO4 (default 9)
-  bpo_4_target_blobs: 9
-  # Base fee update fraction for BPO4 (default 0)
+  bpo_4_max_blobs: 0
+  bpo_4_target_blobs: 0
   bpo_4_base_fee_update_fraction: 0
 
-  # BPO5 epoch (default 18446744073709551615)
   bpo_5_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO5 (default 12)
-  bpo_5_max_blobs: 12
-  # Target number of blobs per block for BPO5 (default 9)
-  bpo_5_target_blobs: 9
-  # Base fee update fraction for BPO5 (default 0)
+  bpo_5_max_blobs: 0
+  bpo_5_target_blobs: 0
   bpo_5_base_fee_update_fraction: 0
 
   # Withdrawal type - available options (0x00, 0x01, 0x02)
