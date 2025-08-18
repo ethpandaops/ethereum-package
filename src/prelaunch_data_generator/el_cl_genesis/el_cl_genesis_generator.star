@@ -144,7 +144,7 @@ def new_env_file_for_el_cl_genesis_data(
         "DenebForkVersion": constants.DENEB_FORK_VERSION,
         "ElectraForkVersion": constants.ELECTRA_FORK_VERSION,
         "FuluForkVersion": constants.FULU_FORK_VERSION,
-        "Eip7732ForkVersion": constants.GLOAS_FORK_VERSION,
+        "GloasForkVersion": constants.GLOAS_FORK_VERSION,
         "Eip7805ForkVersion": constants.EIP7805_FORK_VERSION,
         "ShadowForkFile": shadowfork_file,
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
