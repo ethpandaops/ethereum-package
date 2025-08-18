@@ -808,7 +808,7 @@ extra_files: {}
   # my_script.sh: |
   #   #!/bin/bash
   #   echo "Custom script"
-  
+
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_fuzz_params:
   # TX Spammer docker image to use
@@ -1091,7 +1091,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.0.0
+  image: ethpandaops/ethereum-genesis-generator:5.0.1
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
@@ -1378,8 +1378,8 @@ extra_files:
 participants:
   - el_type: geth
     cl_type: lighthouse
-    
-    # Mount files into the consensus layer client  
+
+    # Mount files into the consensus layer client
     cl_extra_mounts:
       "/configs": "validator_config.json" # File available at: /configs/validator_config.json
 ```
