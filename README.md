@@ -695,8 +695,8 @@ network_params:
   bpo_1_max_blobs: 12
   # Target number of blobs per block for BPO1 (default 9)
   bpo_1_target_blobs: 9
-  # Base fee update fraction for BPO1 (default 5007716)
-  bpo_1_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO1 (default 0)
+  bpo_1_base_fee_update_fraction: 0
 
   # BPO2 epoch (default 18446744073709551615)
   bpo_2_epoch: 18446744073709551615
@@ -704,8 +704,8 @@ network_params:
   bpo_2_max_blobs: 12
   # Target number of blobs per block for BPO2 (default 9)
   bpo_2_target_blobs: 9
-  # Base fee update fraction for BPO2 (default 5007716)
-  bpo_2_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO2 (default 0)
+  bpo_2_base_fee_update_fraction: 0
 
   # BPO3 epoch (default 18446744073709551615)
   bpo_3_epoch: 18446744073709551615
@@ -713,8 +713,8 @@ network_params:
   bpo_3_max_blobs: 12
   # Target number of blobs per block for BPO3 (default 9)
   bpo_3_target_blobs: 9
-  # Base fee update fraction for BPO3 (default 5007716)
-  bpo_3_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO3 (default 0)
+  bpo_3_base_fee_update_fraction: 0
 
   # BPO4 epoch (default 18446744073709551615)
   bpo_4_epoch: 18446744073709551615
@@ -722,8 +722,8 @@ network_params:
   bpo_4_max_blobs: 12
   # Target number of blobs per block for BPO4 (default 9)
   bpo_4_target_blobs: 9
-  # Base fee update fraction for BPO4 (default 5007716)
-  bpo_4_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO4 (default 0)
+  bpo_4_base_fee_update_fraction: 0
 
   # BPO5 epoch (default 18446744073709551615)
   bpo_5_epoch: 18446744073709551615
@@ -731,8 +731,8 @@ network_params:
   bpo_5_max_blobs: 12
   # Target number of blobs per block for BPO5 (default 9)
   bpo_5_target_blobs: 9
-  # Base fee update fraction for BPO5 (default 5007716)
-  bpo_5_base_fee_update_fraction: 5007716
+  # Base fee update fraction for BPO5 (default 0)
+  bpo_5_base_fee_update_fraction: 0
 
   # Withdrawal type - available options (0x00, 0x01, 0x02)
   # Default to "0x00"
@@ -808,7 +808,7 @@ extra_files: {}
   # my_script.sh: |
   #   #!/bin/bash
   #   echo "Custom script"
-  
+
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_fuzz_params:
   # TX Spammer docker image to use
@@ -1091,7 +1091,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.0.0
+  image: ethpandaops/ethereum-genesis-generator:5.0.1
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
@@ -1378,8 +1378,8 @@ extra_files:
 participants:
   - el_type: geth
     cl_type: lighthouse
-    
-    # Mount files into the consensus layer client  
+
+    # Mount files into the consensus layer client
     cl_extra_mounts:
       "/configs": "validator_config.json" # File available at: /configs/validator_config.json
 ```
@@ -1482,7 +1482,7 @@ Here's a table of where the keys are used
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
-| 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
+| 3             | tx_fuzz | ✅                |                 | To spam transactions with  |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
