@@ -294,6 +294,23 @@ def input_parser(plan, input_args):
             "Fulu fork must happen before BPO 1, please adjust the epochs accordingly."
         )
 
+    if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
+        has_supernodes = False
+        for participant in result["participants"]:
+            if participant.get("supernode", False):
+                has_supernodes = True
+                break
+
+        if (
+            not has_supernodes
+            and not result["network_params"]["perfect_peerdas_enabled"]
+        ):
+            fail(
+                "Fulu fork is enabled (epoch: {0}) but no supernodes are configured in the participant list and perfect_peerdas_enabled is not enabled. Either configure supernodes for some participants or enable perfect_peerdas_enabled in network_params and have 16 participants.".format(
+                    str(result["network_params"]["fulu_fork_epoch"])
+                )
+            )
+
     return struct(
         participants=[
             struct(
@@ -596,6 +613,7 @@ def input_parser(plan, input_args):
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
         keymanager_enabled=result["keymanager_enabled"],
+        extra_files=result.get("extra_files", {}),
         checkpoint_sync_enabled=result["checkpoint_sync_enabled"],
         checkpoint_sync_url=result["checkpoint_sync_url"],
         ethereum_genesis_generator_params=struct(
@@ -1029,6 +1047,7 @@ def default_input_args(input_args):
         "participants": participants,
         "participants_matrix": participants_matrix,
         "network_params": network_params,
+        "extra_files": {},
         "wait_for_finalization": False,
         "global_log_level": "info",
         "snooper_enabled": False,

@@ -231,7 +231,6 @@ def get_config_backend(
             "ECTO_USE_SSL": "false",
             "NETWORK": "Kurtosis",
             "SUBNETWORK": "Kurtosis",
-            "API_V2_ENABLED": "true",
             "PORT": "{}".format(HTTP_PORT_NUMBER),
             "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
         },

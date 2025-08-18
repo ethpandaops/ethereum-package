@@ -196,8 +196,9 @@ participants:
     el_extra_params: []
 
     # A list of optional extra mount points that will be passed to the EL client container
-    # Key is the path in the container, value is the local path to the file
-    # Example: el_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
+    # Key is the mount path (becomes a directory), value MUST reference a key from extra_files
+    # The file will be available at <mount_path>/<extra_files_key>
+    # Example: el_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     el_extra_mounts: {}
 
     # A list of tolerations that will be passed to the EL client container
@@ -259,8 +260,9 @@ participants:
     cl_extra_params: []
 
     # A list of optional extra mount points that will be passed to the CL client container
-    # Key is the path in the container, value is the local path to the file
-    # Example: cl_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
+    # Key is the mount path (becomes a directory), value MUST reference a key from extra_files
+    # The file will be available at <mount_path>/<extra_files_key>
+    # Example: cl_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     cl_extra_mounts: {}
 
     # A list of tolerations that will be passed to the CL client container
@@ -334,8 +336,9 @@ participants:
     vc_extra_params: []
 
     # A list of optional extra mount points that will be passed to the validator client container
-    # Key is the path in the container, value is the local path to the file
-    # Example: vc_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
+    # Key is the mount path (becomes a directory), value MUST reference a key from extra_files
+    # The file will be available at <mount_path>/<extra_files_key>
+    # Example: vc_extra_mounts: {"/config": "my_validator_config"}  # Creates /config/my_validator_config
     vc_extra_mounts: {}
 
     # A list of tolerations that will be passed to the validator container
@@ -795,6 +798,17 @@ dora_params:
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
 
+# Define custom file contents to be mounted into containers
+# These files are referenced by name in el_extra_mounts, cl_extra_mounts, and vc_extra_mounts
+extra_files: {}
+  # Example:
+  # my_config_file.yaml: |
+  #   setting1: value1
+  #   setting2: value2
+  # my_script.sh: |
+  #   #!/bin/bash
+  #   echo "Custom script"
+  
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_fuzz_params:
   # TX Spammer docker image to use
@@ -1077,7 +1091,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:4.1.19
+  image: ethpandaops/ethereum-genesis-generator:5.0.0
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
@@ -1333,42 +1347,43 @@ ethereum_metrics_exporter_enabled: true
 
 </details>
 
-## Using Extra Mounts
+## Extra Files and Mounts
 
-The `el_extra_mounts`, `cl_extra_mounts`, and `vc_extra_mounts` parameters allow you to mount additional files or directories into the EL, CL, and VC containers respectively. This is useful for providing custom configuration files, certificates, or other data that your clients need.
+The `extra_files` feature allows you to define custom file contents in your configuration and mount them into any container (EL, CL, or VC).
 
-### How it works
+### How It Works
 
-The extra mounts feature automatically handles file uploads for you:
-- **Relative paths** within the package (e.g., `static_files/config.toml`) are automatically uploaded as artifacts
-- **Existing artifact names** (e.g., `jwt_file`) are used directly
-- Files are mounted at the specified container paths
+1. **Define file contents** in the top-level `extra_files` section
+2. **Mount the files** into containers using `el_extra_mounts`, `cl_extra_mounts`, or `vc_extra_mounts`
+3. **Access the files** inside the container at `<mount_path>/<file_name>`
 
-### Example: Using Built-in Artifacts
+### Important: Understanding Mount Paths
+
+Due to how Kurtosis handles artifacts, mount paths become **directories**, not files. When you mount a file:
+- The mount path you specify becomes a directory
+- Your file is placed inside that directory with its original name from `extra_files`
+
+### Complete Example
 
 ```yaml
+# Define your custom files at the top level
+extra_files:
+  validator_config.json: |
+    {
+      "graffiti": "MyValidator",
+      "enable_doppelganger": true,
+      "suggested_fee_recipient": "0x1234..."
+    }
+
 participants:
   - el_type: geth
     cl_type: lighthouse
-    el_extra_mounts:
-      "/custom/jwt/path": "jwt_file"  # jwt_file is a built-in artifact
-```
-
-### Example: Mounting Files from local directory
-
-```yaml
-participants:
-  - el_type: geth
-    cl_type: lighthouse
+    
+    # Mount files into the consensus layer client  
     cl_extra_mounts:
-      "/lighthouse/custom.yaml": "local_directory/lighthouse/custom.yaml"
+      "/configs": "validator_config.json" # File available at: /configs/validator_config.json
 ```
 
-### Notes
-
-- All file paths must be relative to the package root directory
-- Files outside the package directory cannot be mounted directly
-- The entire directory structure is preserved when mounting directories
 
 ## Beacon Node <> Validator Client compatibility
 
