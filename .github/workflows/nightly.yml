@@ -11,7 +11,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - id: set-matrix
         # List all yaml files in the .github/tests directory, except for the k8s.yaml file
         run: echo "matrix=$(ls ./.github/tests/*.yaml | grep -vE 'k8s.yaml$' | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
@@ -25,7 +25,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/docker-login
         with:
           username: ethpandaops
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/docker-login
         with:
           username: ethpandaops
