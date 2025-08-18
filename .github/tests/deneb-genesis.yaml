@@ -1,6 +1,7 @@
 participants:
   - el_type: geth
     cl_type: teku
+    supernode: true
   - el_type: nethermind
     cl_type: prysm
   - el_type: erigon
