@@ -47,6 +47,7 @@ def launch_participant_network(
     keymanager_enabled,
     parallel_keystore_generation,
     extra_files_artifacts,
+    tempo_otlp_grpc_url,
 ):
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
@@ -182,6 +183,7 @@ def launch_participant_network(
         global_node_selectors,
         global_tolerations,
         persistent,
+        tempo_otlp_grpc_url,
         num_participants,
         validator_data,
         prysm_password_relative_filepath,
