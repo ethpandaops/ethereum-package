@@ -1,6 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
 xatu_sentry_context = import_module("../xatu_sentry/xatu_sentry_context.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 HTTP_PORT_ID = "http"
 METRICS_PORT_NUMBER = 9090
@@ -23,7 +24,9 @@ def launch(
     network_params,
     pair_name,
     node_selectors,
+    global_tolerations,
 ):
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
     config_template = read_file(static_files.XATU_SENTRY_CONFIG_TEMPLATE_FILEPATH)
 
     template_data = new_config_template_data(
@@ -80,6 +83,7 @@ def launch(
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=tolerations,
         ),
     )
 

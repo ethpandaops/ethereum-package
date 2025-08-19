@@ -48,6 +48,7 @@ def launch(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -65,6 +66,7 @@ def launch(
         port_publisher,
         participant_index,
         network_params,
+        extra_files_artifacts,
     )
 
     service = plan.add_service(service_name, config)
@@ -91,6 +93,7 @@ def get_config(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -249,6 +252,14 @@ def get_config(
                 constants.EL_TYPE.reth + "_volume_size"
             ],
         )
+
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.el_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     env_vars = {}
     image = participant.el_image
     if launcher.builder_type == constants.MEV_RS_MEV_TYPE:

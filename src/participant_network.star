@@ -46,6 +46,8 @@ def launch_participant_network(
     global_node_selectors,
     keymanager_enabled,
     parallel_keystore_generation,
+    extra_files_artifacts,
+    tempo_otlp_grpc_url,
 ):
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
@@ -149,6 +151,7 @@ def launch_participant_network(
         args_with_right_defaults.port_publisher,
         args_with_right_defaults.mev_type,
         args_with_right_defaults.mev_params,
+        extra_files_artifacts,
     )
 
     # Launch all consensus layer clients
@@ -180,11 +183,13 @@ def launch_participant_network(
         global_node_selectors,
         global_tolerations,
         persistent,
+        tempo_otlp_grpc_url,
         num_participants,
         validator_data,
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
         global_other_index,
+        extra_files_artifacts,
     )
 
     # Launch all blobbers after all CLs are up
@@ -199,6 +204,7 @@ def launch_participant_network(
                 config.blobber_config.beacon_http_url,
                 config.participant,
                 config.blobber_config.node_selectors,
+                global_tolerations,
             )
 
             # Store the blobber URL mapping
@@ -288,6 +294,7 @@ def launch_participant_network(
                 el_context,
                 get_cl_context_with_blobber_url(cl_context),
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
@@ -319,6 +326,7 @@ def launch_participant_network(
                 network_params,
                 pair_name,
                 node_selectors,
+                global_tolerations,
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(
@@ -340,6 +348,7 @@ def launch_participant_network(
                 snooper_service_name,
                 el_context,
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
@@ -396,6 +405,7 @@ def launch_participant_network(
                 snooper_service_name,
                 get_cl_context_with_blobber_url(cl_context),
                 node_selectors,
+                global_tolerations,
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
@@ -471,6 +481,7 @@ def launch_participant_network(
             network_params=network_params,
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
+            extra_files_artifacts=extra_files_artifacts,
         )
         if vc_service_config == None:
             continue

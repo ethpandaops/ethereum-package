@@ -19,7 +19,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/offchainlabs/prysm/beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
@@ -28,7 +28,7 @@ DEFAULT_CL_IMAGES = {
 
 DEFAULT_CL_IMAGES_MINIMAL = {
     "lighthouse": "ethpandaops/lighthouse:stable",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "chainsafe/lodestar:latest",
@@ -40,7 +40,7 @@ DEFAULT_VC_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/offchainlabs/prysm/validator:stable",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
@@ -50,7 +50,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
@@ -77,6 +77,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "assertoor_params",
     "prometheus_params",
     "grafana_params",
+    "tempo_params",
     "tx_fuzz_params",
     "custom_flood_params",
     "xatu_sentry_params",
@@ -108,6 +109,7 @@ def input_parser(plan, input_args):
     result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
     result["prometheus_params"] = get_default_prometheus_params()
+    result["tempo_params"] = get_default_tempo_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
     result["parallel_keystore_generation"] = False
@@ -170,6 +172,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["grafana_params"]:
                 sub_value = input_args["grafana_params"][sub_attr]
                 result["grafana_params"][sub_attr] = sub_value
+        elif attr == "tempo_params":
+            for sub_attr in input_args["tempo_params"]:
+                sub_value = input_args["tempo_params"][sub_attr]
+                result["tempo_params"][sub_attr] = sub_value
         elif attr == "xatu_sentry_params":
             for sub_attr in input_args["xatu_sentry_params"]:
                 sub_value = input_args["xatu_sentry_params"][sub_attr]
@@ -294,6 +300,23 @@ def input_parser(plan, input_args):
             "Fulu fork must happen before BPO 1, please adjust the epochs accordingly."
         )
 
+    if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
+        has_supernodes = False
+        for participant in result["participants"]:
+            if participant.get("supernode", False):
+                has_supernodes = True
+                break
+
+        if (
+            not has_supernodes
+            and not result["network_params"]["perfect_peerdas_enabled"]
+        ):
+            fail(
+                "Fulu fork is enabled (epoch: {0}) but no supernodes are configured in the participant list and perfect_peerdas_enabled is not enabled. Either configure supernodes for some participants or enable perfect_peerdas_enabled in network_params and have 16 participants.".format(
+                    str(result["network_params"]["fulu_fork_epoch"])
+                )
+            )
+
     return struct(
         participants=[
             struct(
@@ -302,6 +325,7 @@ def input_parser(plan, input_args):
                 el_log_level=participant["el_log_level"],
                 el_volume_size=participant["el_volume_size"],
                 el_extra_params=participant["el_extra_params"],
+                el_extra_mounts=participant["el_extra_mounts"],
                 el_extra_env_vars=participant["el_extra_env_vars"],
                 el_extra_labels=participant["el_extra_labels"],
                 el_tolerations=participant["el_tolerations"],
@@ -317,8 +341,10 @@ def input_parser(plan, input_args):
                 vc_log_level=participant["vc_log_level"],
                 vc_tolerations=participant["vc_tolerations"],
                 cl_extra_params=participant["cl_extra_params"],
+                cl_extra_mounts=participant["cl_extra_mounts"],
                 cl_extra_labels=participant["cl_extra_labels"],
                 vc_extra_params=participant["vc_extra_params"],
+                vc_extra_mounts=participant["vc_extra_mounts"],
                 vc_extra_env_vars=participant["vc_extra_env_vars"],
                 vc_extra_labels=participant["vc_extra_labels"],
                 use_remote_signer=participant["use_remote_signer"],
@@ -399,7 +425,7 @@ def input_parser(plan, input_args):
             deneb_fork_epoch=result["network_params"]["deneb_fork_epoch"],
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
-            eip7732_fork_epoch=result["network_params"]["eip7732_fork_epoch"],
+            gloas_fork_epoch=result["network_params"]["gloas_fork_epoch"],
             eip7805_fork_epoch=result["network_params"]["eip7805_fork_epoch"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
@@ -543,6 +569,18 @@ def input_parser(plan, input_args):
             max_mem=result["grafana_params"]["max_mem"],
             image=result["grafana_params"]["image"],
         ),
+        tempo_params=struct(
+            retention_duration=result["tempo_params"]["retention_duration"],
+            ingestion_rate_limit=result["tempo_params"]["ingestion_rate_limit"],
+            ingestion_burst_limit=result["tempo_params"]["ingestion_burst_limit"],
+            max_search_duration=result["tempo_params"]["max_search_duration"],
+            max_bytes_per_trace=result["tempo_params"]["max_bytes_per_trace"],
+            min_cpu=result["tempo_params"]["min_cpu"],
+            max_cpu=result["tempo_params"]["max_cpu"],
+            min_mem=result["tempo_params"]["min_mem"],
+            max_mem=result["tempo_params"]["max_mem"],
+            image=result["tempo_params"]["image"],
+        ),
         apache_port=result["apache_port"],
         nginx_port=result["nginx_port"],
         assertoor_params=struct(
@@ -596,6 +634,7 @@ def input_parser(plan, input_args):
         global_node_selectors=result["global_node_selectors"],
         ipv6_enabled=result["ipv6_enabled"],
         keymanager_enabled=result["keymanager_enabled"],
+        extra_files=result.get("extra_files", {}),
         checkpoint_sync_enabled=result["checkpoint_sync_enabled"],
         checkpoint_sync_url=result["checkpoint_sync_url"],
         ethereum_genesis_generator_params=struct(
@@ -686,6 +725,27 @@ def parse_network_params(plan, input_args):
             for sub_attr in input_args["network_params"]:
                 sub_value = input_args["network_params"][sub_attr]
                 result["network_params"][sub_attr] = sub_value
+
+            # Apply 2/3 ratio for BPO max and target blobs
+            for bpo_num in range(1, 6):  # BPO 1 through 5
+                max_key = "bpo_{}_max_blobs".format(bpo_num)
+                target_key = "bpo_{}_target_blobs".format(bpo_num)
+
+                # If only max is set (non-zero), calculate target as 2/3 of max (rounded)
+                if result["network_params"].get(max_key) and not result[
+                    "network_params"
+                ].get(target_key):
+                    result["network_params"][target_key] = int(
+                        result["network_params"][max_key] * 2.0 / 3.0 + 0.5
+                    )
+                # If only target is set (non-zero), calculate max as target * 3/2 (rounded)
+                elif result["network_params"].get(target_key) and not result[
+                    "network_params"
+                ].get(max_key):
+                    result["network_params"][max_key] = int(
+                        result["network_params"][target_key] * 3.0 / 2.0 + 0.5
+                    )
+                # If both are set or both are 0, don't override
         elif attr == "participants":
             participants = []
             for participant in input_args["participants"]:
@@ -1037,6 +1097,7 @@ def default_input_args(input_args):
         "participants": participants,
         "participants_matrix": participants_matrix,
         "network_params": network_params,
+        "extra_files": {},
         "wait_for_finalization": False,
         "global_log_level": "info",
         "snooper_enabled": False,
@@ -1087,7 +1148,7 @@ def default_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 0,
         "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1106,25 +1167,25 @@ def default_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "bpo_1_epoch": 18446744073709551615,
-        "bpo_1_max_blobs": 12,
-        "bpo_1_target_blobs": 9,
-        "bpo_1_base_fee_update_fraction": 5007716,
+        "bpo_1_max_blobs": 0,
+        "bpo_1_target_blobs": 0,
+        "bpo_1_base_fee_update_fraction": 0,
         "bpo_2_epoch": 18446744073709551615,
-        "bpo_2_max_blobs": 12,
-        "bpo_2_target_blobs": 9,
-        "bpo_2_base_fee_update_fraction": 5007716,
+        "bpo_2_max_blobs": 0,
+        "bpo_2_target_blobs": 0,
+        "bpo_2_base_fee_update_fraction": 0,
         "bpo_3_epoch": 18446744073709551615,
-        "bpo_3_max_blobs": 12,
-        "bpo_3_target_blobs": 9,
-        "bpo_3_base_fee_update_fraction": 5007716,
+        "bpo_3_max_blobs": 0,
+        "bpo_3_target_blobs": 0,
+        "bpo_3_base_fee_update_fraction": 0,
         "bpo_4_epoch": 18446744073709551615,
-        "bpo_4_max_blobs": 12,
-        "bpo_4_target_blobs": 9,
-        "bpo_4_base_fee_update_fraction": 5007716,
+        "bpo_4_max_blobs": 0,
+        "bpo_4_target_blobs": 0,
+        "bpo_4_base_fee_update_fraction": 0,
         "bpo_5_epoch": 18446744073709551615,
-        "bpo_5_max_blobs": 12,
-        "bpo_5_target_blobs": 9,
-        "bpo_5_base_fee_update_fraction": 5007716,
+        "bpo_5_max_blobs": 0,
+        "bpo_5_target_blobs": 0,
+        "bpo_5_base_fee_update_fraction": 0,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
@@ -1155,7 +1216,7 @@ def default_minimal_network_params():
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 0,
         "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7732_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1174,25 +1235,25 @@ def default_minimal_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "bpo_1_epoch": 18446744073709551615,
-        "bpo_1_max_blobs": 12,
-        "bpo_1_target_blobs": 9,
-        "bpo_1_base_fee_update_fraction": 5007716,
+        "bpo_1_max_blobs": 0,
+        "bpo_1_target_blobs": 0,
+        "bpo_1_base_fee_update_fraction": 0,
         "bpo_2_epoch": 18446744073709551615,
-        "bpo_2_max_blobs": 12,
-        "bpo_2_target_blobs": 9,
-        "bpo_2_base_fee_update_fraction": 5007716,
+        "bpo_2_max_blobs": 0,
+        "bpo_2_target_blobs": 0,
+        "bpo_2_base_fee_update_fraction": 0,
         "bpo_3_epoch": 18446744073709551615,
-        "bpo_3_max_blobs": 12,
-        "bpo_3_target_blobs": 9,
-        "bpo_3_base_fee_update_fraction": 5007716,
+        "bpo_3_max_blobs": 0,
+        "bpo_3_target_blobs": 0,
+        "bpo_3_base_fee_update_fraction": 0,
         "bpo_4_epoch": 18446744073709551615,
-        "bpo_4_max_blobs": 12,
-        "bpo_4_target_blobs": 9,
-        "bpo_4_base_fee_update_fraction": 5007716,
+        "bpo_4_max_blobs": 0,
+        "bpo_4_target_blobs": 0,
+        "bpo_4_base_fee_update_fraction": 0,
         "bpo_5_epoch": 18446744073709551615,
-        "bpo_5_max_blobs": 12,
-        "bpo_5_target_blobs": 9,
-        "bpo_5_base_fee_update_fraction": 5007716,
+        "bpo_5_max_blobs": 0,
+        "bpo_5_target_blobs": 0,
+        "bpo_5_base_fee_update_fraction": 0,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
@@ -1208,6 +1269,7 @@ def default_participant():
         "el_extra_env_vars": {},
         "el_extra_labels": {},
         "el_extra_params": [],
+        "el_extra_mounts": {},
         "el_tolerations": [],
         "el_volume_size": 0,
         "el_min_cpu": 0,
@@ -1220,6 +1282,7 @@ def default_participant():
         "cl_extra_env_vars": {},
         "cl_extra_labels": {},
         "cl_extra_params": [],
+        "cl_extra_mounts": {},
         "cl_tolerations": [],
         "cl_volume_size": 0,
         "cl_min_cpu": 0,
@@ -1234,6 +1297,7 @@ def default_participant():
         "vc_extra_env_vars": {},
         "vc_extra_labels": {},
         "vc_extra_params": [],
+        "vc_extra_mounts": {},
         "vc_tolerations": [],
         "vc_min_cpu": 0,
         "vc_max_cpu": 0,
@@ -1418,6 +1482,21 @@ def get_default_grafana_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "grafana/grafana:latest",
+    }
+
+
+def get_default_tempo_params():
+    return {
+        "retention_duration": "12h",
+        "ingestion_rate_limit": 20971520,  # 20MB
+        "ingestion_burst_limit": 52428800,  # 50MB
+        "max_search_duration": "30s",
+        "max_bytes_per_trace": 52428800,  # 50MB
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 2048,
+        "image": "grafana/tempo:latest",
     }
 
 
@@ -1712,6 +1791,7 @@ def docker_cache_image_override(plan, result):
         "tx_fuzz_params.image",
         "prometheus_params.image",
         "grafana_params.image",
+        "tempo_params.image",
         "spamoor_params.image",
         "ethereum_genesis_generator_params.image",
     ]

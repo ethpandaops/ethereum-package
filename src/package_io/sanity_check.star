@@ -6,6 +6,7 @@ PARTICIPANT_CATEGORIES = {
         "el_extra_env_vars",
         "el_extra_labels",
         "el_extra_params",
+        "el_extra_mounts",
         "el_tolerations",
         "el_volume_size",
         "el_min_cpu",
@@ -18,6 +19,7 @@ PARTICIPANT_CATEGORIES = {
         "cl_extra_env_vars",
         "cl_extra_labels",
         "cl_extra_params",
+        "cl_extra_mounts",
         "cl_tolerations",
         "cl_volume_size",
         "cl_min_cpu",
@@ -32,6 +34,7 @@ PARTICIPANT_CATEGORIES = {
         "vc_extra_env_vars",
         "vc_extra_labels",
         "vc_extra_params",
+        "vc_extra_mounts",
         "vc_tolerations",
         "vc_min_cpu",
         "vc_max_cpu",
@@ -75,6 +78,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "el_extra_env_vars",
             "el_extra_labels",
             "el_extra_params",
+            "el_extra_mounts",
             "el_tolerations",
             "el_volume_size",
             "el_min_cpu",
@@ -89,6 +93,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "cl_extra_env_vars",
             "cl_extra_labels",
             "cl_extra_params",
+            "cl_extra_mounts",
             "cl_tolerations",
             "cl_volume_size",
             "cl_min_cpu",
@@ -102,6 +107,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "vc_extra_env_vars",
             "vc_extra_labels",
             "vc_extra_params",
+            "vc_extra_mounts",
             "vc_tolerations",
             "vc_min_cpu",
             "vc_max_cpu",
@@ -118,6 +124,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "vc_extra_env_vars",
             "vc_extra_labels",
             "vc_extra_params",
+            "vc_extra_mounts",
             "vc_tolerations",
             "vc_min_cpu",
             "vc_max_cpu",
@@ -203,7 +210,7 @@ SUBCATEGORY_PARAMS = {
         "deneb_fork_epoch",
         "electra_fork_epoch",
         "fulu_fork_epoch",
-        "eip7732_fork_epoch",
+        "gloas_fork_epoch",
         "eip7805_fork_epoch",
         "network_sync_base_url",
         "force_snapshot_sync",
@@ -283,6 +290,18 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "image",
     ],
+    "tempo_params": [
+        "retention_duration",
+        "ingestion_rate_limit",
+        "ingestion_burst_limit",
+        "max_search_duration",
+        "max_bytes_per_trace",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "image",
+    ],
     "assertoor_params": [
         "image",
         "run_stability_check",
@@ -345,6 +364,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "prometheus_grafana",
     "prometheus",
     "grafana",
+    "tempo",
     "blobscan",
     "dugtrio",
     "blutgang",
@@ -490,6 +510,7 @@ def sanity_check(plan, input_args):
             + ADDITIONAL_CATEGORY_PARAMS.keys()
         )
         combined_root_params.append("additional_services")
+        combined_root_params.append("extra_files")
 
         if param not in combined_root_params:
             fail(

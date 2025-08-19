@@ -172,6 +172,7 @@ def get_network_name(network):
 def get_final_genesis_timestamp(plan, padding):
     result = plan.run_sh(
         description="Getting final genesis timestamp",
+        name="read-genesis-timestamp",
         run="echo -n $(($(date +%s) + " + str(padding) + "))",
         store=[StoreSpec(src="/tmp", name="final-genesis-timestamp")],
     )
@@ -416,3 +417,38 @@ def ensure_alphanumeric_bounds(s):
             break
 
     return s[start:end]
+
+
+def process_extra_mounts(plan, extra_mounts, extra_files_artifacts={}):
+    """
+    Process extra mounts by resolving extra_files references ONLY.
+
+    Args:
+        plan: The Kurtosis plan object
+        extra_mounts: Dictionary where keys are mount paths and values are extra_file names
+        extra_files_artifacts: Dictionary of extra files artifacts from extra_files
+
+    Returns:
+        Dictionary where keys are mount paths and values are artifact names/objects
+    """
+    if not extra_mounts:
+        return {}
+
+    processed_mounts = {}
+    for mount_path, source in extra_mounts.items():
+        # Non-string values (Files artifacts or other objects) - use directly
+        if type(source) != "string":
+            processed_mounts[mount_path] = source
+            continue
+
+        # Source MUST be an extra_files reference
+        if source not in extra_files_artifacts:
+            fail(
+                "Mount source '"
+                + source
+                + "' not found in extra_files. All extra_mounts must reference files defined in extra_files."
+            )
+
+        processed_mounts[mount_path] = extra_files_artifacts[source]
+
+    return processed_mounts

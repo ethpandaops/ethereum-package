@@ -65,6 +65,8 @@ def launch(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
+    tempo_otlp_grpc_url=None,
 ):
     beacon_config = get_beacon_config(
         plan,
@@ -85,6 +87,8 @@ def launch(
         port_publisher,
         participant_index,
         network_params,
+        extra_files_artifacts,
+        tempo_otlp_grpc_url,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -121,6 +125,8 @@ def get_beacon_config(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
+    tempo_otlp_grpc_url,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -315,6 +321,13 @@ def get_beacon_config(
                 constants.CL_TYPE.nimbus + "_volume_size"
             ],
         )
+
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.cl_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
 
     cmd_str = " ".join(cmd)
     if checkpoint_sync_enabled:
