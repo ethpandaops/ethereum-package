@@ -49,7 +49,7 @@ def launch_grafana(
     grafana_params,
     port_publisher,
     index,
-    tempo_context=None,
+    tempo_query_url=None,
 ):
     tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
 
@@ -62,7 +62,7 @@ def launch_grafana(
         datasource_config_template,
         dashboard_providers_config_template,
         prometheus_private_url,
-        tempo_context,
+        tempo_query_url,
         additional_dashboards=grafana_params.additional_dashboards,
     )
 
@@ -96,11 +96,11 @@ def get_grafana_config_dir_artifact_uuid(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
-    tempo_context,
+    tempo_query_url,
     additional_dashboards=[],
 ):
     datasource_data = new_datasource_config_template_data(
-        prometheus_private_url, tempo_context
+        prometheus_private_url, tempo_query_url
     )
     datasource_template_and_data = shared_utils.new_template_and_data(
         datasource_config_template, datasource_data
@@ -172,10 +172,10 @@ def get_config(
     )
 
 
-def new_datasource_config_template_data(prometheus_url, tempo_context):
+def new_datasource_config_template_data(prometheus_url, tempo_query_url):
     data = {"PrometheusURL": prometheus_url}
-    if tempo_context != None:
-        data["TempoURL"] = tempo_context.http_url
+    if tempo_query_url != None:
+        data["TempoURL"] = tempo_query_url
     return data
 
 

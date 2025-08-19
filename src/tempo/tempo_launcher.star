@@ -83,8 +83,8 @@ def launch_tempo(
         otlp_http_port_num=OTLP_HTTP_PORT_NUMBER,
         http_url="http://{}:{}".format(service.ip_address, HTTP_PORT_NUMBER),
         grpc_url="{}:{}".format(service.ip_address, GRPC_PORT_NUMBER),
-        otlp_grpc_url="{}:{}".format(service.ip_address, OTLP_GRPC_PORT_NUMBER),
-        otlp_http_url="http://{}:{}".format(service.ip_address, OTLP_HTTP_PORT_NUMBER),
+        otlp_grpc_url="{}:{}".format(SERVICE_NAME, OTLP_GRPC_PORT_NUMBER),
+        otlp_http_url="http://{}:{}".format(SERVICE_NAME, OTLP_HTTP_PORT_NUMBER),
     )
 
 

@@ -57,7 +57,7 @@ def launch(
     port_publisher,
     participant_index,
     network_params,
-    tempo_context,
+    tempo_otlp_grpc_url=None,
 ):
     # Launch Beacon node
     beacon_config = get_beacon_config(
@@ -79,7 +79,7 @@ def launch(
         port_publisher,
         participant_index,
         network_params,
-        tempo_context,
+        tempo_otlp_grpc_url,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -116,7 +116,7 @@ def get_beacon_config(
     port_publisher,
     participant_index,
     network_params,
-    tempo_context,
+    tempo_otlp_grpc_url,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -256,11 +256,9 @@ def get_beacon_config(
     else:  # Public networks
         cmd.append("--network=" + network_params.network)
 
-    # Add tempo telemetry integration if tempo is available
-    if tempo_context != None:
-        cmd.append(
-            "--telemetry-collector-url=http://{}".format(tempo_context.otlp_grpc_url)
-        )
+    # Add tempo telemetry integration if tempo is enabled
+    if tempo_otlp_grpc_url != None:
+        cmd.append("--telemetry-collector-url={}".format(tempo_otlp_grpc_url))
 
     if len(participant.cl_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
