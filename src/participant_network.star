@@ -46,6 +46,7 @@ def launch_participant_network(
     global_node_selectors,
     keymanager_enabled,
     parallel_keystore_generation,
+    extra_files_artifacts,
     tempo_otlp_grpc_url,
 ):
     network_id = network_params.network_id
@@ -150,6 +151,7 @@ def launch_participant_network(
         args_with_right_defaults.port_publisher,
         args_with_right_defaults.mev_type,
         args_with_right_defaults.mev_params,
+        extra_files_artifacts,
     )
 
     # Launch all consensus layer clients
@@ -187,6 +189,7 @@ def launch_participant_network(
         prysm_password_relative_filepath,
         prysm_password_artifact_uuid,
         global_other_index,
+        extra_files_artifacts,
     )
 
     # Launch all blobbers after all CLs are up
@@ -478,6 +481,7 @@ def launch_participant_network(
             network_params=network_params,
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
+            extra_files_artifacts=extra_files_artifacts,
         )
         if vc_service_config == None:
             continue

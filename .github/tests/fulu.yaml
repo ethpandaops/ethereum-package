@@ -1,6 +1,7 @@
 participants:
   - el_type: geth
     cl_type: teku
+    supernode: true
 
 
 network_params:

@@ -507,6 +507,7 @@ def sanity_check(plan, input_args):
             + ADDITIONAL_CATEGORY_PARAMS.keys()
         )
         combined_root_params.append("additional_services")
+        combined_root_params.append("extra_files")
 
         if param not in combined_root_params:
             fail(

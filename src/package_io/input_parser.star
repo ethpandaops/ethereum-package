@@ -19,7 +19,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/offchainlabs/prysm/beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
@@ -28,7 +28,7 @@ DEFAULT_CL_IMAGES = {
 
 DEFAULT_CL_IMAGES_MINIMAL = {
     "lighthouse": "ethpandaops/lighthouse:stable",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "chainsafe/lodestar:latest",
@@ -40,7 +40,7 @@ DEFAULT_VC_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "gcr.io/offchainlabs/prysm/validator:stable",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
@@ -50,7 +50,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:master",
 }
@@ -631,6 +631,7 @@ def input_parser(plan, input_args):
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
         keymanager_enabled=result["keymanager_enabled"],
+        extra_files=result.get("extra_files", {}),
         checkpoint_sync_enabled=result["checkpoint_sync_enabled"],
         checkpoint_sync_url=result["checkpoint_sync_url"],
         ethereum_genesis_generator_params=struct(
@@ -721,6 +722,27 @@ def parse_network_params(plan, input_args):
             for sub_attr in input_args["network_params"]:
                 sub_value = input_args["network_params"][sub_attr]
                 result["network_params"][sub_attr] = sub_value
+
+            # Apply 2/3 ratio for BPO max and target blobs
+            for bpo_num in range(1, 6):  # BPO 1 through 5
+                max_key = "bpo_{}_max_blobs".format(bpo_num)
+                target_key = "bpo_{}_target_blobs".format(bpo_num)
+
+                # If only max is set (non-zero), calculate target as 2/3 of max (rounded)
+                if result["network_params"].get(max_key) and not result[
+                    "network_params"
+                ].get(target_key):
+                    result["network_params"][target_key] = int(
+                        result["network_params"][max_key] * 2.0 / 3.0 + 0.5
+                    )
+                # If only target is set (non-zero), calculate max as target * 3/2 (rounded)
+                elif result["network_params"].get(target_key) and not result[
+                    "network_params"
+                ].get(max_key):
+                    result["network_params"][max_key] = int(
+                        result["network_params"][target_key] * 3.0 / 2.0 + 0.5
+                    )
+                # If both are set or both are 0, don't override
         elif attr == "participants":
             participants = []
             for participant in input_args["participants"]:
@@ -1064,6 +1086,7 @@ def default_input_args(input_args):
         "participants": participants,
         "participants_matrix": participants_matrix,
         "network_params": network_params,
+        "extra_files": {},
         "wait_for_finalization": False,
         "global_log_level": "info",
         "snooper_enabled": False,
@@ -1132,25 +1155,25 @@ def default_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "bpo_1_epoch": 18446744073709551615,
-        "bpo_1_max_blobs": 12,
-        "bpo_1_target_blobs": 9,
-        "bpo_1_base_fee_update_fraction": 5007716,
+        "bpo_1_max_blobs": 0,
+        "bpo_1_target_blobs": 0,
+        "bpo_1_base_fee_update_fraction": 0,
         "bpo_2_epoch": 18446744073709551615,
-        "bpo_2_max_blobs": 12,
-        "bpo_2_target_blobs": 9,
-        "bpo_2_base_fee_update_fraction": 5007716,
+        "bpo_2_max_blobs": 0,
+        "bpo_2_target_blobs": 0,
+        "bpo_2_base_fee_update_fraction": 0,
         "bpo_3_epoch": 18446744073709551615,
-        "bpo_3_max_blobs": 12,
-        "bpo_3_target_blobs": 9,
-        "bpo_3_base_fee_update_fraction": 5007716,
+        "bpo_3_max_blobs": 0,
+        "bpo_3_target_blobs": 0,
+        "bpo_3_base_fee_update_fraction": 0,
         "bpo_4_epoch": 18446744073709551615,
-        "bpo_4_max_blobs": 12,
-        "bpo_4_target_blobs": 9,
-        "bpo_4_base_fee_update_fraction": 5007716,
+        "bpo_4_max_blobs": 0,
+        "bpo_4_target_blobs": 0,
+        "bpo_4_base_fee_update_fraction": 0,
         "bpo_5_epoch": 18446744073709551615,
-        "bpo_5_max_blobs": 12,
-        "bpo_5_target_blobs": 9,
-        "bpo_5_base_fee_update_fraction": 5007716,
+        "bpo_5_max_blobs": 0,
+        "bpo_5_target_blobs": 0,
+        "bpo_5_base_fee_update_fraction": 0,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
@@ -1200,25 +1223,25 @@ def default_minimal_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "bpo_1_epoch": 18446744073709551615,
-        "bpo_1_max_blobs": 12,
-        "bpo_1_target_blobs": 9,
-        "bpo_1_base_fee_update_fraction": 5007716,
+        "bpo_1_max_blobs": 0,
+        "bpo_1_target_blobs": 0,
+        "bpo_1_base_fee_update_fraction": 0,
         "bpo_2_epoch": 18446744073709551615,
-        "bpo_2_max_blobs": 12,
-        "bpo_2_target_blobs": 9,
-        "bpo_2_base_fee_update_fraction": 5007716,
+        "bpo_2_max_blobs": 0,
+        "bpo_2_target_blobs": 0,
+        "bpo_2_base_fee_update_fraction": 0,
         "bpo_3_epoch": 18446744073709551615,
-        "bpo_3_max_blobs": 12,
-        "bpo_3_target_blobs": 9,
-        "bpo_3_base_fee_update_fraction": 5007716,
+        "bpo_3_max_blobs": 0,
+        "bpo_3_target_blobs": 0,
+        "bpo_3_base_fee_update_fraction": 0,
         "bpo_4_epoch": 18446744073709551615,
-        "bpo_4_max_blobs": 12,
-        "bpo_4_target_blobs": 9,
-        "bpo_4_base_fee_update_fraction": 5007716,
+        "bpo_4_max_blobs": 0,
+        "bpo_4_target_blobs": 0,
+        "bpo_4_base_fee_update_fraction": 0,
         "bpo_5_epoch": 18446744073709551615,
-        "bpo_5_max_blobs": 12,
-        "bpo_5_target_blobs": 9,
-        "bpo_5_base_fee_update_fraction": 5007716,
+        "bpo_5_max_blobs": 0,
+        "bpo_5_target_blobs": 0,
+        "bpo_5_base_fee_update_fraction": 0,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
