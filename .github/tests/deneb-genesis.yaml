@@ -21,4 +21,5 @@ network_params:
   deneb_fork_epoch: 0
   electra_fork_epoch: 1
   fulu_fork_epoch: 2
+  gloas_fork_epoch: 3
   genesis_delay: 120

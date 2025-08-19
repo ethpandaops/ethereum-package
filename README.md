@@ -587,6 +587,10 @@ network_params:
   # Defaults to 18446744073709551615
   fulu_fork_epoch: 18446744073709551615
 
+  # Gloas fork epoch
+  # Defaults to 18446744073709551615
+  gloas_fork_epoch: 18446744073709551615
+
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
   # If you have a local snapshot, you can set this to the local url:
@@ -620,10 +624,6 @@ network_params:
   target_blobs_per_block_electra: 6
   # Base fee update fraction for Electra fork (default 5007716)
   base_fee_update_fraction_electra: 5007716
-
-  # EIP-7732 fork epoch
-  # Defaults to 18446744073709551615
-  eip7732_fork_epoch: 18446744073709551615
 
   # EIP-7805 fork epoch
   # Defaults to 18446744073709551615
@@ -1101,7 +1101,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.0.1
+  image: ethpandaops/ethereum-genesis-generator:5.0.2
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
