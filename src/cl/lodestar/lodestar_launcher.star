@@ -178,7 +178,7 @@ def get_beacon_config(
         "--nat=true",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # ENR
-        "--enr.ip=" + port_publisher.cl_nat_exit_ip,
+        "--enr-ip=${{K8S_POD_IP:-{0}}}".format(port_publisher.cl_nat_exit_ip), 
         "--enr.tcp={0}".format(discovery_port_tcp),
         "--enr.udp={0}".format(discovery_port_udp),
         # QUIC
@@ -279,11 +279,12 @@ def get_beacon_config(
     if network_params.preset == "minimal":
         env_vars["LODESTAR_PRESET"] = "minimal"
 
+    cmd_with_sh = ["sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "cmd": cmd_with_sh,
         "files": files,
         "env_vars": env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

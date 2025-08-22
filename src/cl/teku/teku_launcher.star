@@ -188,7 +188,7 @@ def get_beacon_config(
         ),
         "--p2p-enabled=true",
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
-        "--p2p-advertised-ip=" + port_publisher.cl_nat_exit_ip,
+        "--p2p-advertised-ip=${{K8S_POD_IP:-{0}}}".format(port_publisher.cl_nat_exit_ip),
         "--p2p-discovery-site-local-addresses-enabled=true",
         "--p2p-port={0}".format(discovery_port_tcp),
         "--rest-api-enabled=true",
@@ -342,11 +342,12 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    cmd_with_sh = ["sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "cmd": cmd_with_sh,
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

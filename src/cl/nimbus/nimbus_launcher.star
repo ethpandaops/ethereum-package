@@ -210,7 +210,7 @@ def get_beacon_config(
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
-        "--nat=extip:" + port_publisher.cl_nat_exit_ip,
+        "--nat=extip:${{K8S_POD_IP:-{0}}}".format(port_publisher.cl_nat_exit_ip),
         "--enr-auto-update=false",
         "--history={0}".format("archive" if constants.ARCHIVE_MODE else "prune"),
         "--rest",
@@ -331,11 +331,12 @@ def get_beacon_config(
     else:
         command_str = cmd_str
 
+    cmd_with_sh = ["sh", "-c", command_str]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": [command_str],
+        "cmd": cmd_with_sh,
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "entrypoint": ENTRYPOINT_ARGS,

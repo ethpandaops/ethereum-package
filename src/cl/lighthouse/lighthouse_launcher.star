@@ -200,8 +200,6 @@ def get_beacon_config(
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # ENR
         "--disable-enr-auto-update",
-        # TODO this is what we need to fix
-        # "--enr-address=${0}".format(port_publisher.cl_nat_exit_ip),
         "--enr-address=${{K8S_POD_IP:-{0}}}".format(port_publisher.cl_nat_exit_ip), 
         "--enr-tcp-port={0}".format(discovery_port_tcp),
         "--enr-udp-port={0}".format(discovery_port_udp),
