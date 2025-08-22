@@ -209,6 +209,7 @@ SUBCATEGORY_PARAMS = {
         "electra_fork_epoch",
         "fulu_fork_epoch",
         "gloas_fork_epoch",
+        "eip7782_fork_epoch",
         "eip7805_fork_epoch",
         "network_sync_base_url",
         "force_snapshot_sync",
