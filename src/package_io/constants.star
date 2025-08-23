@@ -97,7 +97,7 @@ DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:5.0.0"
+    "ethpandaops/ethereum-genesis-generator:5.0.2"
 )
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
@@ -125,7 +125,7 @@ CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
 FULU_FORK_VERSION = "0x70000038"
-EIP7732_FORK_VERSION = "0x80000038"
+GLOAS_FORK_VERSION = "0x80000038"
 EIP7805_FORK_VERSION = "0x90000038"
 
 FAR_FUTURE_EPOCH = 18446744073709551615

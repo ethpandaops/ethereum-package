@@ -1,6 +1,7 @@
 participants:
   - el_type: geth
     cl_type: teku
+    supernode: true
   - el_type: reth
     cl_type: prysm
   - el_type: nethermind
@@ -22,5 +23,6 @@ network_params:
   deneb_fork_epoch: 3
   electra_fork_epoch: 4
   fulu_fork_epoch: 5
+  gloas_fork_epoch: 6
   genesis_delay: 120
 

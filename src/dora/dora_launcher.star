@@ -149,7 +149,7 @@ def get_config(
         + constants.DEFAULT_DORA_IMAGE
     )
     if dora_params.image == default_dora_image:
-        if network_params.eip7732_fork_epoch < constants.FAR_FUTURE_EPOCH:
+        if network_params.gloas_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = (
                 docker_cache_params.url
                 + (

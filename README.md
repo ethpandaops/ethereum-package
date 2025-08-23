@@ -587,6 +587,10 @@ network_params:
   # Defaults to 18446744073709551615
   fulu_fork_epoch: 18446744073709551615
 
+  # Gloas fork epoch
+  # Defaults to 18446744073709551615
+  gloas_fork_epoch: 18446744073709551615
+
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
   # If you have a local snapshot, you can set this to the local url:
@@ -620,10 +624,6 @@ network_params:
   target_blobs_per_block_electra: 6
   # Base fee update fraction for Electra fork (default 5007716)
   base_fee_update_fraction_electra: 5007716
-
-  # EIP-7732 fork epoch
-  # Defaults to 18446744073709551615
-  eip7732_fork_epoch: 18446744073709551615
 
   # EIP-7805 fork epoch
   # Defaults to 18446744073709551615
@@ -689,50 +689,36 @@ network_params:
 
 
   # BPO
-  # BPO1 epoch (default 18446744073709551615)
+  # BPO1-5 epoch (default 18446744073709551615)
   bpo_1_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO1 (default 12)
-  bpo_1_max_blobs: 12
-  # Target number of blobs per block for BPO1 (default 9)
-  bpo_1_target_blobs: 9
-  # Base fee update fraction for BPO1 (default 5007716)
-  bpo_1_base_fee_update_fraction: 5007716
+  # Maximum number of blobs per block for BPO1-5
+  # If only max is set, target is auto-calculated as 2/3 of max
+  # If only target is set, max is auto-calculated as 3/2 of target
+  bpo_1_max_blobs: 0
+  # Target number of blobs per block for BPO1-5
+  bpo_1_target_blobs: 0
+  # Base fee update fraction for BPO1-5 (default 0)
+  bpo_1_base_fee_update_fraction: 0
 
-  # BPO2 epoch (default 18446744073709551615)
   bpo_2_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO2 (default 12)
-  bpo_2_max_blobs: 12
-  # Target number of blobs per block for BPO2 (default 9)
-  bpo_2_target_blobs: 9
-  # Base fee update fraction for BPO2 (default 5007716)
-  bpo_2_base_fee_update_fraction: 5007716
+  bpo_2_max_blobs: 0
+  bpo_2_target_blobs: 0
+  bpo_2_base_fee_update_fraction: 0
 
-  # BPO3 epoch (default 18446744073709551615)
   bpo_3_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO3 (default 12)
-  bpo_3_max_blobs: 12
-  # Target number of blobs per block for BPO3 (default 9)
-  bpo_3_target_blobs: 9
-  # Base fee update fraction for BPO3 (default 5007716)
-  bpo_3_base_fee_update_fraction: 5007716
+  bpo_3_max_blobs: 0
+  bpo_3_target_blobs: 0
+  bpo_3_base_fee_update_fraction: 0
 
-  # BPO4 epoch (default 18446744073709551615)
   bpo_4_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO4 (default 12)
-  bpo_4_max_blobs: 12
-  # Target number of blobs per block for BPO4 (default 9)
-  bpo_4_target_blobs: 9
-  # Base fee update fraction for BPO4 (default 5007716)
-  bpo_4_base_fee_update_fraction: 5007716
+  bpo_4_max_blobs: 0
+  bpo_4_target_blobs: 0
+  bpo_4_base_fee_update_fraction: 0
 
-  # BPO5 epoch (default 18446744073709551615)
   bpo_5_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO5 (default 12)
-  bpo_5_max_blobs: 12
-  # Target number of blobs per block for BPO5 (default 9)
-  bpo_5_target_blobs: 9
-  # Base fee update fraction for BPO5 (default 5007716)
-  bpo_5_base_fee_update_fraction: 5007716
+  bpo_5_max_blobs: 0
+  bpo_5_target_blobs: 0
+  bpo_5_base_fee_update_fraction: 0
 
   # Withdrawal type - available options (0x00, 0x01, 0x02)
   # Default to "0x00"
@@ -771,6 +757,7 @@ additional_services:
   - full_beaconchain_explorer
   - prometheus
   - grafana
+  - tempo
   - blobscan
   - dugtrio
   - blutgang
@@ -808,7 +795,7 @@ extra_files: {}
   # my_script.sh: |
   #   #!/bin/bash
   #   echo "Custom script"
-  
+
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_fuzz_params:
   # TX Spammer docker image to use
@@ -846,6 +833,29 @@ grafana_params:
   # Grafana docker image to use
   # Defaults to the latest image
   image: "grafana/grafana:latest"
+
+# Configuration place for tempo tracing backend
+tempo_params:
+  # How long to retain traces
+  retention_duration: "12h"
+  # Rate limiting for trace ingestion (bytes per second)
+  ingestion_rate_limit: 20971520  # 20MB
+  # Burst limit for trace ingestion (bytes)
+  ingestion_burst_limit: 52428800  # 50MB
+  # Maximum duration for trace searches
+  max_search_duration: "30s"
+  # Maximum bytes per individual trace
+  max_bytes_per_trace: 52428800  # 50MB
+  # Resource management for tempo container
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+  # Tempo docker image to use
+  # Defaults to the latest image
+  image: "grafana/tempo:latest"
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
@@ -1091,7 +1101,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.0.0
+  image: ethpandaops/ethereum-genesis-generator:5.0.2
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
@@ -1378,8 +1388,8 @@ extra_files:
 participants:
   - el_type: geth
     cl_type: lighthouse
-    
-    # Mount files into the consensus layer client  
+
+    # Mount files into the consensus layer client
     cl_extra_mounts:
       "/configs": "validator_config.json" # File available at: /configs/validator_config.json
 ```
@@ -1482,7 +1492,7 @@ Here's a table of where the keys are used
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
-| 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
+| 3             | tx_fuzz | ✅                |                 | To spam transactions with  |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |

@@ -42,6 +42,7 @@ network_params:
   deneb_fork_epoch: 0
   electra_fork_epoch: 0
   fulu_fork_epoch: 0
+  gloas_fork_epoch: 1
   genesis_delay: 120
 additional_services:
   - dora

@@ -91,6 +91,7 @@ network_params:
   deneb_fork_epoch: 0
   electra_fork_epoch: 0
   fulu_fork_epoch: 18446744073709551615
+  gloas_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
   force_snapshot_sync: false
   data_column_sidecar_subnet_count: 128
@@ -103,25 +104,25 @@ network_params:
   devnet_repo: ethpandaops
   prefunded_accounts: {}
   bpo_1_epoch: 18446744073709551615
-  bpo_1_max_blobs: 12
-  bpo_1_target_blobs: 9
-  bpo_1_base_fee_update_fraction: 5007716
+  bpo_1_max_blobs: 0
+  bpo_1_target_blobs: 0
+  bpo_1_base_fee_update_fraction: 0
   bpo_2_epoch: 18446744073709551615
-  bpo_2_max_blobs: 12
-  bpo_2_target_blobs: 9
-  bpo_2_base_fee_update_fraction: 5007716
+  bpo_2_max_blobs: 0
+  bpo_2_target_blobs: 0
+  bpo_2_base_fee_update_fraction: 0
   bpo_3_epoch: 18446744073709551615
-  bpo_3_max_blobs: 12
-  bpo_3_target_blobs: 9
-  bpo_3_base_fee_update_fraction: 5007716
+  bpo_3_max_blobs: 0
+  bpo_3_target_blobs: 0
+  bpo_3_base_fee_update_fraction: 0
   bpo_4_epoch: 18446744073709551615
-  bpo_4_max_blobs: 12
-  bpo_4_target_blobs: 9
-  bpo_4_base_fee_update_fraction: 5007716
+  bpo_4_max_blobs: 0
+  bpo_4_target_blobs: 0
+  bpo_4_base_fee_update_fraction: 0
   bpo_5_epoch: 18446744073709551615
-  bpo_5_max_blobs: 12
-  bpo_5_target_blobs: 9
-  bpo_5_base_fee_update_fraction: 5007716
+  bpo_5_max_blobs: 0
+  bpo_5_target_blobs: 0
+  bpo_5_base_fee_update_fraction: 0
   withdrawal_type: "0x00"
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
   validator_balance: 32
@@ -209,7 +210,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.0.0
+  image: ethpandaops/ethereum-genesis-generator:5.0.2
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:
