@@ -260,6 +260,7 @@ SUBCATEGORY_PARAMS = {
         "network_name",
         "network_currency_name",
         "network_currency_symbol",
+        "is_testnet",
     ],
     "dora_params": [
         "image",

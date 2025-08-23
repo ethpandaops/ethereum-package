@@ -537,6 +537,7 @@ def input_parser(plan, input_args):
             network_currency_symbol=result["blockscout_params"][
                 "network_currency_symbol"
             ],
+            is_testnet=result["blockscout_params"]["is_testnet"],
         ),
         dora_params=struct(
             image=result["dora_params"]["image"],
@@ -1338,6 +1339,7 @@ def get_default_blockscout_params():
         "network_name": "Mainnet",
         "network_currency_name": "Ether",
         "network_currency_symbol": "ETH",
+        "is_testnet": True,
     }
 
 

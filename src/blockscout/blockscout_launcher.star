@@ -275,7 +275,7 @@ def get_config_frontend(
             + str(get_api_port(blockscout_service, port_publisher)),
             "NEXT_PUBLIC_AD_BANNER_PROVIDER": "none",
             "NEXT_PUBLIC_AD_TEXT_PROVIDER": "none",
-            "NEXT_PUBLIC_IS_TESTNET": "true",
+            "NEXT_PUBLIC_IS_TESTNET": str(blockscout_params.is_testnet).lower(),
             "NEXT_PUBLIC_GAS_TRACKER_ENABLED": "true",
             "NEXT_PUBLIC_HAS_BEACON_CHAIN": "true",
             "NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE": "validation",
