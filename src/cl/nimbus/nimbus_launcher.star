@@ -66,6 +66,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
+    backend,
     tempo_otlp_grpc_url=None,
 ):
     beacon_config = get_beacon_config(
@@ -88,6 +89,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
+        backend,
         tempo_otlp_grpc_url,
     )
 
@@ -126,6 +128,7 @@ def get_beacon_config(
     participant_index,
     network_params,
     extra_files_artifacts,
+    backend,
     tempo_otlp_grpc_url,
 ):
     log_level = input_parser.get_client_log_level_or_default(
@@ -210,7 +213,11 @@ def get_beacon_config(
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
-        "--nat=extip:${{K8S_POD_IP:-{0}}}".format(port_publisher.cl_nat_exit_ip),
+        "--nat=extip:{0}".format(
+            constants.K8S_POD_IP_ADDR_PLACEHOLDER
+            if backend == "kubernetes"
+            else port_publisher.cl_nat_exit_ip
+        ),
         "--enr-auto-update=false",
         "--history={0}".format("archive" if constants.ARCHIVE_MODE else "prune"),
         "--rest",
@@ -331,16 +338,16 @@ def get_beacon_config(
     else:
         command_str = cmd_str
 
-    cmd_with_sh = ["sh", "-c", command_str]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd_with_sh,
+        "cmd": [cmd_str],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "k8s_pod_ip_address_placeholder": constants.K8S_POD_IP_ADDR_PLACEHOLDER,
         "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         ),

@@ -53,6 +53,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
+    backend,
     tempo_otlp_grpc_url=None,
 ):
     config = get_beacon_config(
@@ -75,6 +76,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
+        backend,
         tempo_otlp_grpc_url,
     )
 
@@ -113,6 +115,7 @@ def get_beacon_config(
     participant_index,
     network_params,
     extra_files_artifacts,
+    backend,
     tempo_otlp_grpc_url,
 ):
     log_level = input_parser.get_client_log_level_or_default(
@@ -188,7 +191,11 @@ def get_beacon_config(
         ),
         "--p2p-enabled=true",
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
-        "--p2p-advertised-ip=${{K8S_POD_IP:-{0}}}".format(port_publisher.cl_nat_exit_ip),
+        "--p2p-advertised-ip={0}".format(
+            constants.K8S_POD_IP_ADDR_PLACEHOLDER
+            if backend == "kubernetes"
+            else port_publisher.cl_nat_exit_ip
+        ),
         "--p2p-discovery-site-local-addresses-enabled=true",
         "--p2p-port={0}".format(discovery_port_tcp),
         "--rest-api-enabled=true",
@@ -342,15 +349,15 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
-    cmd_with_sh = ["sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd_with_sh,
+        "cmd": cmd,
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "k8s_pod_ip_address_placeholder": constants.K8S_POD_IP_ADDR_PLACEHOLDER,
         "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         ),

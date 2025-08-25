@@ -103,6 +103,14 @@ def run(plan, args={}):
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
 
+    # Detect backend by checking for K8S_POD_IP environment variable
+    backend_result = plan.run_sh(
+        name="detect-backend",
+        description="Detecting backend",
+        run='if [ -n "$K8S_POD_IP" ]; then echo "kubernetes"; else echo "docker"; fi',
+    )
+    detected_backend = backend_result.output.strip()
+
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (
             num_participants == 1
@@ -240,6 +248,7 @@ def run(plan, args={}):
         parallel_keystore_generation,
         extra_files_artifacts,
         tempo_otlp_grpc_url,
+        detected_backend,
     )
 
     plan.print(
