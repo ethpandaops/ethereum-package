@@ -45,6 +45,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
+    backend,
     tempo_otlp_grpc_url=None,
 ):
     # Launch Beacon node
@@ -68,6 +69,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
+        backend,
         tempo_otlp_grpc_url,
     )
 
@@ -106,7 +108,8 @@ def get_beacon_config(
     participant_index,
     network_params,
     extra_files_artifacts,
-    tempo_otlp_grpc_urlk,
+    backend,
+    tempo_otlp_grpc_url,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -178,7 +181,11 @@ def get_beacon_config(
         "--nat=true",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # ENR
-        "--enr.ip=" + port_publisher.cl_nat_exit_ip,
+        "--enr.ip={0}".format(
+            constants.K8S_POD_IP_ADDR_PLACEHOLDER
+            if backend == "kubernetes"
+            else port_publisher.cl_nat_exit_ip
+        ),
         "--enr.tcp={0}".format(discovery_port_tcp),
         "--enr.udp={0}".format(discovery_port_udp),
         # QUIC
@@ -287,6 +294,7 @@ def get_beacon_config(
         "files": files,
         "env_vars": env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "k8s_pod_ip_address_placeholder": constants.K8S_POD_IP_ADDR_PLACEHOLDER,
         "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         ),
