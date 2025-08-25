@@ -174,7 +174,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_add_valid{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_add_valid{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -192,7 +192,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_add_invalid{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_add_invalid{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -210,7 +210,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_add_stale{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_add_stale{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -228,7 +228,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_add_noreplace{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_add_noreplace{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -246,7 +246,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_add_nonexclusive{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_add_nonexclusive{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -264,7 +264,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_add_gapped{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_add_gapped{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -282,7 +282,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_add_overdrafted{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_add_overdrafted{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -300,7 +300,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_add_overcapped{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_add_overcapped{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -318,7 +318,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_add_underpriced{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_add_underpriced{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -457,7 +457,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": true,
-          "expr": "blobpool_addwait{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+          "expr": "blobpool_addwait{instance=~\"$instance\", quantile=\"$quantile\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -475,7 +475,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": true,
-          "expr": "blobpool_addtime{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+          "expr": "blobpool_addtime{instance=~\"$instance\", quantile=\"$quantile\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -493,7 +493,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": true,
-          "expr": "blobpool_getwait{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+          "expr": "blobpool_getwait{instance=~\"$instance\", quantile=\"$quantile\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -511,7 +511,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": true,
-          "expr": "blobpool_gettime{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+          "expr": "blobpool_gettime{instance=~\"$instance\", quantile=\"$quantile\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -529,7 +529,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": true,
-          "expr": "blobpool_pendwait{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+          "expr": "blobpool_pendwait{instance=~\"$instance\", quantile=\"$quantile\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -547,7 +547,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": true,
-          "expr": "blobpool_pendtime{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+          "expr": "blobpool_pendtime{instance=~\"$instance\", quantile=\"$quantile\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -565,7 +565,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": true,
-          "expr": "blobpool_resetwait{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+          "expr": "blobpool_resetwait{instance=~\"$instance\", quantile=\"$quantile\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -583,7 +583,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": true,
-          "expr": "blobpool_resettime{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+          "expr": "blobpool_resettime{instance=~\"$instance\", quantile=\"$quantile\"}",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -693,7 +693,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_addwait_count{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_addwait_count{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -711,7 +711,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_getwait_count{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_getwait_count{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -729,7 +729,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_pendwait_count{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_pendwait_count{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -747,7 +747,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_resetwait_count{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_resetwait_count{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -857,7 +857,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_invalid{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_invalid{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -875,7 +875,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_dangling{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_dangling{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -893,7 +893,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_filled{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_filled{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -911,7 +911,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_overlapped{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_overlapped{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -929,7 +929,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_repeated{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_repeated{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -947,7 +947,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_gapped{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_gapped{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -965,7 +965,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_overdrafted{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_overdrafted{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -983,7 +983,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_overcapped{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_overcapped{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -1001,7 +1001,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_overflown{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_overflown{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -1019,7 +1019,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_underpriced{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_underpriced{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -1037,7 +1037,7 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(blobpool_drop_replaced{chain=\"$chain\", instance=~\"$instance\"}[1m]) * 12",
+          "expr": "rate(blobpool_drop_replaced{instance=~\"$instance\"}[1m]) * 12",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -1173,7 +1173,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": true,
-          "expr": "rate(blobpool_datareal{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(blobpool_datareal{instance=~\"$instance\"}[1m])",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -1265,7 +1265,7 @@
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "chain_head_header{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "chain_head_header{instance=~\"$instance\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1365,7 +1365,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "exemplar": true,
-              "expr": "chain_head_header{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "chain_head_header{instance=~\"$instance\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1378,7 +1378,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "exemplar": true,
-              "expr": "chain_head_receipt{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "chain_head_receipt{instance=~\"$instance\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1391,7 +1391,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "exemplar": true,
-              "expr": "chain_head_block{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "chain_head_block{instance=~\"$instance\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1469,7 +1469,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "chain_reorg_add{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "chain_reorg_add{instance=~\"$instance\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "range": true,
@@ -1545,7 +1545,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "txpool_pending{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "txpool_pending{instance=~\"$instance\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "refId": "A"
@@ -1641,7 +1641,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "txpool_pending{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "txpool_pending{instance=~\"$instance\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "executable",
@@ -1652,7 +1652,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "txpool_queued{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "txpool_queued{instance=~\"$instance\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "gapped",
@@ -1663,7 +1663,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "txpool_local{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "txpool_local{instance=~\"$instance\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "local",
@@ -1740,7 +1740,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "exemplar": true,
-              "expr": "chain_head_receipt{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "chain_head_receipt{instance=~\"$instance\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1817,7 +1817,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "txpool_local{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "txpool_local{instance=~\"$instance\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "refId": "A"
@@ -1893,7 +1893,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "chain_reorg_drop{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "chain_reorg_drop{instance=~\"$instance\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "range": true,
@@ -1970,7 +1970,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "exemplar": true,
-              "expr": "chain_head_block{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "chain_head_block{instance=~\"$instance\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -2047,7 +2047,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "txpool_queued{chain=\"$chain\", instance=~\"$instance\"}",
+              "expr": "txpool_queued{instance=~\"$instance\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "refId": "A"
@@ -2149,7 +2149,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "exemplar": true,
-              "expr": "chain_execution{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_execution{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -2161,7 +2161,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "chain_validation{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_validation{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -2174,7 +2174,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "chain_write{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_write{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2186,7 +2186,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "chain_account_reads{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_account_reads{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "account read (q=$quantile)",
@@ -2197,7 +2197,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "chain_account_updates{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_account_updates{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "account update (q=$quantile)",
@@ -2208,7 +2208,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "chain_account_hashes{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_account_hashes{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "account hashe (q=$quantile)",
@@ -2219,7 +2219,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "chain_account_commits{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_account_commits{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "account commit (q=$quantile)",
@@ -2230,7 +2230,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "chain_storage_reads{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_storage_reads{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "storage read (q=$quantile)",
@@ -2241,7 +2241,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "chain_storage_updates{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_storage_updates{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "storage update (q=$quantile)",
@@ -2252,7 +2252,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "chain_storage_hashes{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_storage_hashes{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "storage hashe (q=$quantile)",
@@ -2264,7 +2264,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "exemplar": true,
-              "expr": "chain_storage_commits{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_storage_commits{instance=~\"$instance\", quantile=\"$quantile\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -2277,7 +2277,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "exemplar": true,
-              "expr": "chain_snapshot_commits{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}",
+              "expr": "chain_snapshot_commits{instance=~\"$instance\", quantile=\"$quantile\"}",
               "hide": false,
               "interval": "",
               "legendFormat": "snapshot commit (q=$quantile)",
@@ -2379,7 +2379,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_valid{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_valid{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "valid",
@@ -2390,7 +2390,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_invalid{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_invalid{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "invalid",
@@ -2401,7 +2401,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_underpriced{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_underpriced{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -2414,7 +2414,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_pending_discard{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_pending_discard{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2426,7 +2426,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_pending_replace{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_pending_replace{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "executable replace",
@@ -2437,7 +2437,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_pending_ratelimit{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_pending_ratelimit{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "executable ratelimit",
@@ -2448,7 +2448,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_pending_nofunds{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_pending_nofunds{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "executable nofunds",
@@ -2459,7 +2459,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_queued_discard{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_queued_discard{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2471,7 +2471,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_queued_replace{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_queued_replace{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2483,7 +2483,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_queued_ratelimit{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_queued_ratelimit{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2495,7 +2495,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_queued_nofunds{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_queued_nofunds{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2508,7 +2508,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "rate(txpool_known{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_known{instance=~\"$instance\"}[1m])",
               "hide": false,
               "legendFormat": "known",
               "range": true,
@@ -2610,7 +2610,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_valid{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_valid{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "valid",
@@ -2621,7 +2621,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_invalid{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_invalid{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "invalid",
@@ -2632,7 +2632,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_underpriced{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_underpriced{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -2645,7 +2645,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_pending_discard{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_pending_discard{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2657,7 +2657,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_pending_replace{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_pending_replace{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "executable replace",
@@ -2668,7 +2668,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_pending_ratelimit{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_pending_ratelimit{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "executable ratelimit",
@@ -2679,7 +2679,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_pending_nofunds{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_pending_nofunds{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "executable nofunds",
@@ -2690,7 +2690,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_queued_discard{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_queued_discard{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2702,7 +2702,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_queued_replace{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_queued_replace{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2714,7 +2714,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_queued_ratelimit{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_queued_ratelimit{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2726,7 +2726,7 @@
                 "type": "prometheus",
                 "uid": "${DS_PROMETHEUS}"
               },
-              "expr": "rate(txpool_queued_nofunds{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_queued_nofunds{instance=~\"$instance\"}[1m])",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -2739,7 +2739,7 @@
                 "uid": "${DS_PROMETHEUS}"
               },
               "editorMode": "code",
-              "expr": "rate(txpool_known{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+              "expr": "rate(txpool_known{instance=~\"$instance\"}[1m])",
               "hide": false,
               "legendFormat": "known",
               "range": true,
@@ -2881,7 +2881,7 @@
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(geth_rpc_requests_success_count{instance=\"$instance\"}[5m])) by (chain, instance, method)",
+              "expr": "sum(rate(geth_rpc_requests_success_count{instance=\"$instance\"}[5m])) by (instance, method)",
               "hide": false,
               "interval": "",
               "legendFormat": "{{method}}",
@@ -3010,7 +3010,7 @@
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(geth_rpc_requests_failure_count{instance=\"$instance\"}[5m])) by (chain, instance, method)",
+              "expr": "sum(rate(geth_rpc_requests_failure_count{instance=\"$instance\"}[5m])) by (instance, method)",
               "hide": false,
               "interval": "",
               "legendFormat": "{{method}}",
@@ -3135,7 +3135,7 @@
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(geth_rpc_requests_success{quantile='$quantile', instance=\"$instance\"}[5m])) by (chain, instance, method) \n/ \nsum(rate(geth_rpc_requests_success_count{instance=\"$instance\"}[5m])) by (chain, instance, method) /1e6 \n< 1e200",
+              "expr": "sum(rate(geth_rpc_requests_success{quantile='$quantile', instance=\"$instance\"}[5m])) by (instance, method) \n/ \nsum(rate(geth_rpc_requests_success_count{instance=\"$instance\"}[5m])) by (instance, method) /1e6 \n< 1e200",
               "hide": false,
               "interval": "",
               "legendFormat": "{{method}}",
@@ -3264,7 +3264,7 @@
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(geth_rpc_requests_failure{quantile='$quantile', instance=\"$instance\"}[5m])) by (chain, instance, method) / sum(rate(geth_rpc_requests_failure_count{instance=\"$instance\"}[5m])) by (chain, instance, method) /1e6",
+              "expr": "sum(rate(geth_rpc_requests_failure{quantile='$quantile', instance=\"$instance\"}[5m])) by (instance, method) / sum(rate(geth_rpc_requests_failure_count{instance=\"$instance\"}[5m])) by (instance, method) /1e6",
               "hide": false,
               "interval": "",
               "legendFormat": "{{method}}",
@@ -3422,7 +3422,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "avg(system_cpu_sysload{chain=\"$chain\", instance=~\"$instance\"}) by (instance)",
+          "expr": "avg(system_cpu_sysload{instance=~\"$instance\"}) by (instance)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -3435,7 +3435,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "avg(system_cpu_syswait{chain=\"$chain\", instance=~\"$instance\"}) by (instance)",
+          "expr": "avg(system_cpu_syswait{instance=~\"$instance\"}) by (instance)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -3448,7 +3448,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "avg(system_cpu_procload{chain=\"$chain\", instance=~\"$instance\"}) by (instance)",
+          "expr": "avg(system_cpu_procload{instance=~\"$instance\"}) by (instance)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -3461,7 +3461,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "avg(system_cpu_goroutines{chain=\"$chain\", instance=~\"$instance\"}) by (instance)",
+          "expr": "avg(system_cpu_goroutines{instance=~\"$instance\"}) by (instance)",
           "hide": false,
           "interval": "",
           "legendFormat": "goroutines",
@@ -3473,7 +3473,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "avg(system_cpu_threads{chain=\"$chain\", instance=~\"$instance\"}) by (instance)",
+          "expr": "avg(system_cpu_threads{instance=~\"$instance\"}) by (instance)",
           "hide": false,
           "interval": "",
           "legendFormat": "threads",
@@ -3597,7 +3597,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(system_memory_allocs{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(system_memory_allocs{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3611,7 +3611,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "system_memory_used{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "system_memory_used{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3625,7 +3625,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "system_memory_held{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "system_memory_held{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3639,7 +3639,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(system_memory_frees{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(system_memory_frees{instance=~\"$instance\"}[1m])",
           "hide": false,
           "instant": false,
           "interval": "",
@@ -3652,7 +3652,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "system_memory_pauses{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "system_memory_pauses{instance=~\"$instance\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "pause",
@@ -3751,7 +3751,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(system_disk_readbytes{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(system_disk_readbytes{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -3764,7 +3764,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(system_disk_writebytes{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(system_disk_writebytes{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -3899,7 +3899,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(p2p_ingress{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(p2p_ingress{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -3914,7 +3914,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(p2p_egress{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(p2p_egress{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -3928,7 +3928,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "p2p_ingress{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "p2p_ingress{instance=~\"$instance\"}",
           "hide": false,
           "legendFormat": "igress-flow",
           "range": true,
@@ -3940,7 +3940,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "p2p_egress{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "p2p_egress{instance=~\"$instance\"}",
           "hide": false,
           "legendFormat": "egress-flow",
           "range": true,
@@ -4044,7 +4044,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "p2p_peers{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "p2p_peers{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -4057,7 +4057,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(p2p_dials{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(p2p_dials{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -4070,7 +4070,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(p2p_serves{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(p2p_serves{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -4172,7 +4172,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_throttle{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_downloader_throttle{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -4300,7 +4300,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_throttle{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_throttle{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": true,
           "interval": "",
@@ -4314,7 +4314,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_bodies_in{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_downloader_bodies_in{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "bodies in",
@@ -4326,7 +4326,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_headers_in{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_downloader_headers_in{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "headers in",
@@ -4338,7 +4338,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_receipts_in{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_downloader_receipts_in{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "receipts in",
@@ -4350,7 +4350,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_bodies_drop{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_bodies_drop{instance=~\"$instance\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "bodies drop",
@@ -4362,7 +4362,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_headers_drop{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_headers_drop{instance=~\"$instance\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "headers drop",
@@ -4374,7 +4374,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_receipts_drop{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_receipts_drop{instance=~\"$instance\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "receipts drop",
@@ -4386,7 +4386,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_bodies_timeout{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_bodies_timeout{instance=~\"$instance\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "bodies timeout",
@@ -4398,7 +4398,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_headers_timeout{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_headers_timeout{instance=~\"$instance\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "headers timeout",
@@ -4410,7 +4410,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_receipts_timeout{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_receipts_timeout{instance=~\"$instance\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "receipts timeout",
@@ -4515,7 +4515,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_throttle{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_throttle{instance=~\"$instance\"}",
           "format": "time_series",
           "hide": true,
           "interval": "",
@@ -4529,7 +4529,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_bodies_in{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_downloader_bodies_in{instance=~\"$instance\"}[1m])",
           "hide": true,
           "interval": "",
           "legendFormat": "bodies in",
@@ -4541,7 +4541,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_headers_in{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_downloader_headers_in{instance=~\"$instance\"}[1m])",
           "hide": true,
           "interval": "",
           "legendFormat": "headers in",
@@ -4553,7 +4553,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_receipts_in{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_downloader_receipts_in{instance=~\"$instance\"}[1m])",
           "hide": true,
           "interval": "",
           "legendFormat": "receipts in",
@@ -4565,7 +4565,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_bodies_drop{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_bodies_drop{instance=~\"$instance\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "bodies drop",
@@ -4577,7 +4577,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_headers_drop{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_headers_drop{instance=~\"$instance\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "headers drop",
@@ -4589,7 +4589,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_receipts_drop{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_receipts_drop{instance=~\"$instance\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "receipts drop",
@@ -4601,7 +4601,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_bodies_timeout{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_bodies_timeout{instance=~\"$instance\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "bodies timeout",
@@ -4613,7 +4613,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_headers_timeout{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_headers_timeout{instance=~\"$instance\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "headers timeout",
@@ -4625,7 +4625,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_downloader_receipts_timeout{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_downloader_receipts_timeout{instance=~\"$instance\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "receipts timeout",
@@ -4729,7 +4729,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_bodies_req{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}[1m])",
+          "expr": "rate(eth_downloader_bodies_req{instance=~\"$instance\", quantile=\"$quantile\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "bodies(q={{quantile}})",
@@ -4741,7 +4741,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_headers_req{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}[1m])",
+          "expr": "rate(eth_downloader_headers_req{instance=~\"$instance\", quantile=\"$quantile\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "headers(q={{quantile}})",
@@ -4753,7 +4753,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_downloader_receipts_req{chain=\"$chain\", instance=~\"$instance\", quantile=\"$quantile\"}[1m])",
+          "expr": "rate(eth_downloader_receipts_req{instance=~\"$instance\", quantile=\"$quantile\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "receipts(q={{quantile}})",
@@ -4835,7 +4835,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_fetcher_transaction_waiting_peers{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_fetcher_transaction_waiting_peers{instance=~\"$instance\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4903,7 +4903,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_fetcher_transaction_waiting_hashes{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_fetcher_transaction_waiting_hashes{instance=~\"$instance\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -4971,7 +4971,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_fetcher_transaction_queueing_peers{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_fetcher_transaction_queueing_peers{instance=~\"$instance\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5035,7 +5035,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_fetcher_transaction_queueing_hashes{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_fetcher_transaction_queueing_hashes{instance=~\"$instance\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5103,7 +5103,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_fetcher_transaction_fetching_peers{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_fetcher_transaction_fetching_peers{instance=~\"$instance\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5167,7 +5167,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_fetcher_transaction_fetching_hashes{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_fetcher_transaction_fetching_hashes{instance=~\"$instance\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -5271,7 +5271,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_transaction_request_out{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_transaction_request_out{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "request out",
@@ -5283,7 +5283,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_transaction_request_fail{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_transaction_request_fail{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "request fail",
@@ -5295,7 +5295,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_transaction_request_done{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_transaction_request_done{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "request done",
@@ -5307,7 +5307,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_transaction_request_timeout{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_transaction_request_timeout{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "request timeout",
@@ -5319,7 +5319,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_transaction_replies_in{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_transaction_replies_in{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "replies in",
@@ -5331,7 +5331,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_transaction_replies_known{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_transaction_replies_known{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "replies known",
@@ -5343,7 +5343,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_transaction_replies_underpriced{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_transaction_replies_underpriced{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "replies underpriced",
@@ -5355,7 +5355,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_transaction_replies_otherreject{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_transaction_replies_otherreject{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "replies otherreject",
@@ -5481,7 +5481,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_block_bodies{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_block_bodies{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "bodies",
@@ -5493,7 +5493,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_block_headers{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_block_headers{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "headers",
@@ -5505,7 +5505,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_block_filter_headers_in{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_block_filter_headers_in{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "filter headers in",
@@ -5517,7 +5517,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_block_filter_headers_out{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_block_filter_headers_out{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "filter headers out",
@@ -5529,7 +5529,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_block_filter_bodies_in{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_block_filter_bodies_in{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "filter bodies in",
@@ -5541,7 +5541,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_fetcher_block_filter_bodies_out{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_fetcher_block_filter_bodies_out{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "filter bodies out",
@@ -5673,7 +5673,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "blobpool_limbo_dataused{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "blobpool_limbo_dataused{instance=~\"$instance\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "limbo dataused",
@@ -5686,7 +5686,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "blobpool_limbo_datareal{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "blobpool_limbo_datareal{instance=~\"$instance\"}",
           "hide": false,
           "instant": false,
           "legendFormat": "limbo datareal",
@@ -5699,7 +5699,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "blobpool_dataused{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "blobpool_dataused{instance=~\"$instance\"}",
           "hide": false,
           "instant": false,
           "legendFormat": "store dataused",
@@ -5712,7 +5712,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "blobpool_datareal{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "blobpool_datareal{instance=~\"$instance\"}",
           "hide": false,
           "instant": false,
           "legendFormat": "store datareal",
@@ -5829,7 +5829,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_disk_read{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_disk_read{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -5843,7 +5843,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(eth_db_chaindata_disk_write{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_disk_write{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "ethdb write",
@@ -5857,7 +5857,7 @@
           },
           "editorMode": "code",
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_ancient_read{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_ancient_read{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -5871,7 +5871,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(eth_db_chaindata_ancient_write{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_ancient_write{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "ancient write",
@@ -5884,7 +5884,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_compact_input{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_compact_input{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "compact read",
@@ -5896,7 +5896,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_compact_output{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_compact_output{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "compact write",
@@ -5994,7 +5994,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "eth_db_chaindata_disk_read{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_db_chaindata_disk_read{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "leveldb read",
@@ -6005,7 +6005,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "eth_db_chaindata_disk_write{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_db_chaindata_disk_write{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "leveldb write",
@@ -6016,7 +6016,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "eth_db_chaindata_ancient_read{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_db_chaindata_ancient_read{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "ancient read",
@@ -6027,7 +6027,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "eth_db_chaindata_ancient_write{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_db_chaindata_ancient_write{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "ancient write",
@@ -6125,7 +6125,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "eth_db_chaindata_disk_size{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_db_chaindata_disk_size{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "leveldb",
@@ -6136,7 +6136,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "eth_db_chaindata_ancient_size{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_db_chaindata_ancient_size{instance=~\"$instance\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "ancient",
@@ -6217,7 +6217,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_db_chaindata_compact_writedelay_counter{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_db_chaindata_compact_writedelay_counter{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -6358,7 +6358,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_compact_time{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_compact_time{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -6371,7 +6371,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_compact_nonlevel0{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_compact_nonlevel0{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -6384,7 +6384,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_compact_level0{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_compact_level0{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -6397,7 +6397,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_compact_memory{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_compact_memory{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -6410,7 +6410,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_compact_seek{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_compact_seek{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "seek",
@@ -6422,7 +6422,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_compact_writedelay_duration{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_compact_writedelay_duration{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "delay time",
@@ -6434,7 +6434,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(eth_db_chaindata_compact_writedelay_counter{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(eth_db_chaindata_compact_writedelay_counter{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "delay count",
@@ -6527,7 +6527,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "eth_db_chaindata_compact_writedelay_duration{chain=\"$chain\", instance=~\"$instance\"}",
+          "expr": "eth_db_chaindata_compact_writedelay_duration{instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -6645,7 +6645,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "rate(trie_memcache_clean_read{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_clean_read{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -6660,7 +6660,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "rate(trie_memcache_clean_write{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_clean_write{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -6760,7 +6760,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(trie_memcache_gc_size{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_gc_size{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -6772,7 +6772,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(trie_memcache_flush_size{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_flush_size{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -6784,7 +6784,7 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "rate(trie_memcache_commit_size{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_commit_size{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "commit",
@@ -6910,7 +6910,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_clean_hit{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_clean_hit{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -6924,7 +6924,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_clean_miss{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_clean_miss{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -6938,7 +6938,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_clean_hit{chain=\"$chain\", instance=~\"$instance\"}[1m])/(rate(trie_memcache_clean_miss{chain=\"$chain\", instance=~\"$instance\"}[1m])+rate(trie_memcache_clean_hit{chain=\"$chain\", instance=~\"$instance\"}[1m]))",
+          "expr": "rate(trie_memcache_clean_hit{instance=~\"$instance\"}[1m])/(rate(trie_memcache_clean_miss{instance=~\"$instance\"}[1m])+rate(trie_memcache_clean_hit{instance=~\"$instance\"}[1m]))",
           "hide": false,
           "interval": "",
           "legendFormat": "hit rate",
@@ -7064,7 +7064,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_dirty_hit{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_dirty_hit{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -7078,7 +7078,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_dirty_miss{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_dirty_miss{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -7092,7 +7092,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_dirty_hit{chain=\"$chain\", instance=~\"$instance\"}[1m])/(rate(trie_memcache_dirty_miss{chain=\"$chain\", instance=~\"$instance\"}[1m])+rate(trie_memcache_dirty_hit{chain=\"$chain\", instance=~\"$instance\"}[1m]))",
+          "expr": "rate(trie_memcache_dirty_hit{instance=~\"$instance\"}[1m])/(rate(trie_memcache_dirty_miss{instance=~\"$instance\"}[1m])+rate(trie_memcache_dirty_hit{instance=~\"$instance\"}[1m]))",
           "hide": false,
           "interval": "",
           "legendFormat": "hit rate",
@@ -7196,7 +7196,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_gc_nodes{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_gc_nodes{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -7210,7 +7210,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_commit_nodes{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_commit_nodes{instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -7224,7 +7224,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_flush_nodes{chain=\"$chain\", instance=~\"$instance\"}[1m])",
+          "expr": "rate(trie_memcache_flush_nodes{instance=~\"$instance\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "overflow",
@@ -7328,7 +7328,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_gc_time{chain=\"$chain\", instance=~\"$instance\", quantile=~\"$quantile\"}[1m])",
+          "expr": "rate(trie_memcache_gc_time{instance=~\"$instance\", quantile=~\"$quantile\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -7342,7 +7342,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_commit_time{chain=\"$chain\", instance=~\"$instance\", quantile=~\"$quantile\"}[1m])",
+          "expr": "rate(trie_memcache_commit_time{instance=~\"$instance\", quantile=~\"$quantile\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -7356,7 +7356,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "rate(trie_memcache_flush_time{chain=\"$chain\", instance=~\"$instance\", quantile=~\"$quantile\"}[1m])",
+          "expr": "rate(trie_memcache_flush_time{instance=~\"$instance\", quantile=~\"$quantile\"}[1m])",
           "hide": false,
           "interval": "",
           "legendFormat": "overflow",
@@ -7389,33 +7389,13 @@
           "type": "prometheus",
           "uid": "${DS_PROMETHEUS}"
         },
-        "definition": "label_values(chain_head_block{}, chain)",
-        "description": "go-ethereum compatible chains",
-        "includeAll": false,
-        "label": "chain",
-        "name": "chain",
-        "options": [],
-        "query": {
-          "query": "label_values(chain_head_block{}, chain)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "type": "query"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
-        },
-        "definition": "label_values(chain_head_block{chain=~\"$chain\"}, instance)",
+        "definition": "label_values(chain_head_block{}, instance)",
         "includeAll": false,
         "label": "instance",
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(chain_head_block{chain=~\"$chain\"}, instance)",
+          "query": "label_values(chain_head_block{}, instance)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
