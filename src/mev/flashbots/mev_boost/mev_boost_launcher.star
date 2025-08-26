@@ -46,7 +46,7 @@ def launch(
         0,
     )
 
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     config = get_config(
         mev_boost_launcher,

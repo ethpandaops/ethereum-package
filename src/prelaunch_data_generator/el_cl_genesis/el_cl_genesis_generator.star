@@ -19,6 +19,8 @@ def generate_el_cl_genesis_data(
     network_params,
     total_num_validator_keys_to_preregister,
     latest_block,
+    global_tolerations=[],
+    global_node_selectors={},
 ):
     files = {}
     shadowfork_file = ""
@@ -75,6 +77,8 @@ def generate_el_cl_genesis_data(
             ),
         ],
         wait=None,
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
 
     genesis_validators_root = plan.run_sh(
@@ -83,12 +87,16 @@ def generate_el_cl_genesis_data(
         run="cat /data/genesis_validators_root.txt",
         files={"/data": genesis.files_artifacts[1]},
         wait=None,
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
     osaka_time = plan.run_sh(
         name="read-osaka-time",
         description="Reading osaka time from genesis",
         run="jq '.config.osakaTime' /data/genesis.json | tr -d '\n'",
         files={"/data": genesis.files_artifacts[0]},
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
 
     osaka_enabled_check = plan.run_sh(
@@ -96,6 +104,8 @@ def generate_el_cl_genesis_data(
         description="Check if osaka time is enabled (not false)",
         run="test \"$(jq '.config.osakaTime // false' /data/genesis.json | tr -d '\n')\" != \"false\" && echo true || echo false",
         files={"/data": genesis.files_artifacts[0]},
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
 
     result = el_cl_genesis_data.new_el_cl_genesis_data(

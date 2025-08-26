@@ -13,7 +13,7 @@ MAX_MEMORY = 2048
 def launch_broadcaster(
     plan, all_el_contexts, global_node_selectors, global_tolerations
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     config = get_config(all_el_contexts, global_node_selectors, tolerations)
     return plan.add_service(SERVICE_NAME, config)
 

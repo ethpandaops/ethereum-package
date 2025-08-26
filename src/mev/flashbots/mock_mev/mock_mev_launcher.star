@@ -23,7 +23,7 @@ def launch_mock_mev(
     global_tolerations,
     mev_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     mock_builder = plan.add_service(
         name=MOCK_MEV_SERVICE_NAME,
         config=ServiceConfig(
