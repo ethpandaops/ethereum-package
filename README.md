@@ -517,6 +517,77 @@ network_params:
   # Number of seconds per slot on the Beacon chain
   seconds_per_slot: 12
 
+  # Duration of a slot in milliseconds
+  # Defaults to 12000ms (12 seconds)
+  slot_duration_ms: 12000
+
+  # Seconds per ETH1 block for timing calculations
+  # Defaults to 14 seconds
+  seconds_per_eth1_block: 14
+
+  # Timing parameters for various operations (in basis points, where 10000 = 100%)
+  # Proposer reorg cutoff timing
+  # Defaults to 2000 basis points (~20% of slot duration)
+  proposer_reorg_cutoff_bps: 2000
+
+  # Attestation due timing
+  # Defaults to 4000 basis points (~40% of slot duration)
+  attestation_due_bps: 4000
+
+  # Aggregate due timing
+  # Defaults to 8000 basis points (~80% of slot duration)
+  aggregate_due_bps: 8000
+
+  # Sync message due timing
+  # Defaults to 4000 basis points (~40% of slot duration)
+  sync_message_due_bps: 4000
+
+  # Contribution due timing
+  # Defaults to 8000 basis points (~80% of slot duration)
+  contribution_due_bps: 8000
+
+  # Gloas fork timing parameters (optimized for faster slots)
+  # Attestation due timing for Gloas fork
+  # Defaults to 2500 basis points (25% of slot duration)
+  attestation_due_bps_gloas: 2500
+
+  # Aggregate due timing for Gloas fork
+  # Defaults to 5000 basis points (50% of slot duration)
+  aggregate_due_bps_gloas: 5000
+
+  # Sync message due timing for Gloas fork
+  # Defaults to 2500 basis points (25% of slot duration)
+  sync_message_due_bps_gloas: 2500
+
+  # Contribution due timing for Gloas fork
+  # Defaults to 5000 basis points (50% of slot duration)
+  contribution_due_bps_gloas: 5000
+
+  # Payload attestation due timing for Gloas fork
+  # Defaults to 7500 basis points (75% of slot duration)
+  payload_attestation_due_bps: 7500
+
+  # EIP-7805 timing parameters
+  # View freeze cutoff timing
+  # Defaults to 7500 basis points (75% of slot duration)
+  view_freeze_cutoff_bps: 7500
+
+  # Inclusion list submission due timing
+  # Defaults to 6667 basis points (~67% of slot duration)
+  inclusion_list_submission_due_bps: 6667
+
+  # Proposer inclusion list cutoff timing
+  # Defaults to 9167 basis points (~92% of slot duration)
+  proposer_inclusion_list_cutoff_bps: 9167
+
+  # Maximum request blocks for Deneb fork
+  # Defaults to 128
+  max_request_blocks_deneb: 128
+
+  # Maximum request blob sidecars for Electra fork
+  # Defaults to 1152 (128 * 9 blobs)
+  max_request_blob_sidecars_electra: 1152
+
   # The number of validator keys that each CL validator node should get
   num_validator_keys_per_node: 64
 
