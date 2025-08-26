@@ -1,4 +1,5 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
+input_parser = import_module("../../package_io/input_parser.star")
 
 el_cl_genesis_data = import_module("./el_cl_genesis_data.star")
 
@@ -19,9 +20,12 @@ def generate_el_cl_genesis_data(
     network_params,
     total_num_validator_keys_to_preregister,
     latest_block,
+    node_selectors,
+    global_tolerations,
 ):
     files = {}
     shadowfork_file = ""
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
     if latest_block != "":
         files[SHADOWFORK_FILEPATH] = latest_block
         shadowfork_file = SHADOWFORK_FILEPATH + "/latest_block.json"
@@ -75,6 +79,8 @@ def generate_el_cl_genesis_data(
             ),
         ],
         wait=None,
+        node_selectors=node_selectors,
+        tolerations=tolerations,
     )
 
     genesis_validators_root = plan.run_sh(
@@ -83,12 +89,16 @@ def generate_el_cl_genesis_data(
         run="cat /data/genesis_validators_root.txt",
         files={"/data": genesis.files_artifacts[1]},
         wait=None,
+        node_selectors=node_selectors,
+        tolerations=tolerations,
     )
     osaka_time = plan.run_sh(
         name="read-osaka-time",
         description="Reading osaka time from genesis",
         run="jq '.config.osakaTime' /data/genesis.json | tr -d '\n'",
         files={"/data": genesis.files_artifacts[0]},
+        node_selectors=node_selectors,
+        tolerations=tolerations,
     )
 
     osaka_enabled_check = plan.run_sh(
@@ -96,6 +106,8 @@ def generate_el_cl_genesis_data(
         description="Check if osaka time is enabled (not false)",
         run="test \"$(jq '.config.osakaTime // false' /data/genesis.json | tr -d '\n')\" != \"false\" && echo true || echo false",
         files={"/data": genesis.files_artifacts[0]},
+        node_selectors=node_selectors,
+        tolerations=tolerations,
     )
 
     result = el_cl_genesis_data.new_el_cl_genesis_data(

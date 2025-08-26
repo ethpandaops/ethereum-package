@@ -181,13 +181,6 @@ def get_beacon_config(
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
-    plan.print(
-        "K8S_POD_IP_ADDR_PLACEHOLDER: {0}".format(constants.K8S_POD_IP_ADDR_PLACEHOLDER)
-    )
-    plan.print(
-        "port_publisher.cl_nat_exit_ip: {0}".format(port_publisher.cl_nat_exit_ip)
-    )
-    plan.print("backend: {0}".format(backend))
     cmd = [
         LIGHTHOUSE_BINARY_COMMAND,
         "beacon_node",
