@@ -409,6 +409,8 @@ def input_parser(plan, input_args):
                 "deposit_contract_address"
             ],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
+            slot_duration_ms=result["network_params"]["slot_duration_ms"],
+            seconds_per_eth1_block=result["network_params"]["seconds_per_eth1_block"],
             genesis_delay=result["network_params"]["genesis_delay"],
             genesis_gaslimit=result["network_params"]["genesis_gaslimit"],
             max_per_epoch_activation_churn_limit=result["network_params"][
@@ -425,11 +427,39 @@ def input_parser(plan, input_args):
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
             gloas_fork_epoch=result["network_params"]["gloas_fork_epoch"],
             eip7805_fork_epoch=result["network_params"]["eip7805_fork_epoch"],
+            eip7441_fork_epoch=result["network_params"]["eip7441_fork_epoch"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
+            proposer_reorg_cutoff_bps=result["network_params"][
+                "proposer_reorg_cutoff_bps"
+            ],
+            attestation_due_bps=result["network_params"]["attestation_due_bps"],
+            aggregate_due_bps=result["network_params"]["aggregate_due_bps"],
+            sync_message_due_bps=result["network_params"]["sync_message_due_bps"],
+            contribution_due_bps=result["network_params"]["contribution_due_bps"],
+            attestation_due_bps_gloas=result["network_params"][
+                "attestation_due_bps_gloas"
+            ],
+            aggregate_due_bps_gloas=result["network_params"]["aggregate_due_bps_gloas"],
+            sync_message_due_bps_gloas=result["network_params"][
+                "sync_message_due_bps_gloas"
+            ],
+            contribution_due_bps_gloas=result["network_params"][
+                "contribution_due_bps_gloas"
+            ],
+            payload_attestation_due_bps=result["network_params"][
+                "payload_attestation_due_bps"
+            ],
+            view_freeze_cutoff_bps=result["network_params"]["view_freeze_cutoff_bps"],
+            inclusion_list_submission_due_bps=result["network_params"][
+                "inclusion_list_submission_due_bps"
+            ],
+            proposer_inclusion_list_cutoff_bps=result["network_params"][
+                "proposer_inclusion_list_cutoff_bps"
+            ],
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
             force_snapshot_sync=result["network_params"]["force_snapshot_sync"],
             shadowfork_block_height=result["network_params"]["shadowfork_block_height"],
@@ -443,6 +473,12 @@ def input_parser(plan, input_args):
             ],
             target_blobs_per_block_electra=result["network_params"][
                 "target_blobs_per_block_electra"
+            ],
+            max_request_blocks_deneb=result["network_params"][
+                "max_request_blocks_deneb"
+            ],
+            max_request_blob_sidecars_electra=result["network_params"][
+                "max_request_blob_sidecars_electra"
             ],
             base_fee_update_fraction_electra=result["network_params"][
                 "base_fee_update_fraction_electra"
