@@ -102,14 +102,7 @@ def run(plan, args={}):
     apache_port = args_with_right_defaults.apache_port
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
-
-    # Detect backend by checking for K8S_POD_IP environment variable
-    backend_result = plan.run_sh(
-        name="detect-backend",
-        description="Detecting backend",
-        run='if [ -n "$K8S_POD_IP" ]; then echo "kubernetes"; else echo "docker"; fi',
-    )
-    detected_backend = backend_result.output.strip()
+    detected_backend = plan.get_cluster_type()
 
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (

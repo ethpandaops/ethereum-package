@@ -192,7 +192,7 @@ def get_beacon_config(
         "--p2p-enabled=true",
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
         "--p2p-advertised-ip={0}".format(
-            constants.K8S_POD_IP_ADDR_PLACEHOLDER
+            "${K8S_POD_IP}"
             if backend == "kubernetes"
             else port_publisher.cl_nat_exit_ip
         ),
@@ -349,15 +349,15 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    cmd_shell = ["/bin/sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "cmd": cmd_shell if backend == "kubernetes" else cmd,
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "k8s_pod_ip_address_placeholder": constants.K8S_POD_IP_ADDR_PLACEHOLDER,
         "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         ),

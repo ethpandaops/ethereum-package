@@ -117,7 +117,6 @@ MEV_BOOST_PORT = 18550
 DEFAULT_MNEMONIC = "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete"
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
-K8S_POD_IP_ADDR_PLACEHOLDER = "K8S_POD_IP_ADDR_PLACEHOLDER"
 
 GENESIS_FORK_VERSION = "0x10000038"
 ALTAIR_FORK_VERSION = "0x20000038"

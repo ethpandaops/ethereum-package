@@ -214,7 +214,7 @@ def get_beacon_config(
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
         "--nat=extip:{0}".format(
-            constants.K8S_POD_IP_ADDR_PLACEHOLDER
+            "${K8S_POD_IP}"
             if backend == "kubernetes"
             else port_publisher.cl_nat_exit_ip
         ),
@@ -338,16 +338,16 @@ def get_beacon_config(
     else:
         command_str = cmd_str
 
+    cmd_shell = ["/bin/sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": [cmd_str],
+        "cmd": cmd_shell if backend == "kubernetes" else [cmd_str],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "k8s_pod_ip_address_placeholder": constants.K8S_POD_IP_ADDR_PLACEHOLDER,
         "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         ),

@@ -210,7 +210,7 @@ def get_beacon_config(
         # ENR
         "--disable-enr-auto-update",
         "--enr-address={0}".format(
-            constants.K8S_POD_IP_ADDR_PLACEHOLDER
+            "${K8S_POD_IP}"
             if backend == "kubernetes"
             else port_publisher.cl_nat_exit_ip
         ),
@@ -316,15 +316,15 @@ def get_beacon_config(
 
     env_vars = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
     env_vars.update(participant.cl_extra_env_vars)
+    cmd_shell = ["/bin/sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "cmd": cmd_shell if backend == "kubernetes" else cmd,
         "files": files,
         "env_vars": env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "k8s_pod_ip_address_placeholder": constants.K8S_POD_IP_ADDR_PLACEHOLDER,
         "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         ),
