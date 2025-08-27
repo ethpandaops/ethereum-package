@@ -6,6 +6,8 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
+PRYSM_ENTRYPOINT_COMMAND = "/entrypoint.sh"
+
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
 
@@ -189,6 +191,7 @@ def get_beacon_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
+        PRYSM_ENTRYPOINT_COMMAND,
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
@@ -312,12 +315,12 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
-    cmd_shell = ["/bin/sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd_shell if backend == "kubernetes" else cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": [" ".join(cmd)],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

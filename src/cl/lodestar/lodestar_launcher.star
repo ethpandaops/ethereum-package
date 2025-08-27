@@ -7,6 +7,8 @@ node_metrics = import_module("../../node_metrics_info.star")
 blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 constants = import_module("../../package_io/constants.star")
 
+LODESTAR_ENTRYPOINT_COMMAND = "node ./packages/cli/bin/lodestar"
+
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/lodestar/beacon-data"
 # Port nums
@@ -162,6 +164,7 @@ def get_beacon_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
+        LODESTAR_ENTRYPOINT_COMMAND,
         "beacon",
         "--logLevel=" + log_level,
         "--port={0}".format(discovery_port_tcp),
@@ -286,12 +289,12 @@ def get_beacon_config(
     if network_params.preset == "minimal":
         env_vars["LODESTAR_PRESET"] = "minimal"
 
-    cmd_shell = ["/bin/sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd_shell if backend == "kubernetes" else cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": [" ".join(cmd)],
         "files": files,
         "env_vars": env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

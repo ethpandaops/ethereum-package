@@ -7,8 +7,7 @@ node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 vc_shared = import_module("../../vc/shared.star")
 
-#  ---------------------------------- Beacon client -------------------------------------
-TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
+TEKU_ENTRYPOINT_COMMAND = "/opt/teku/bin/teku"
 
 # The Docker container runs as the "teku" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/teku/teku-beacon-data"
@@ -178,6 +177,7 @@ def get_beacon_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
+        TEKU_ENTRYPOINT_COMMAND,
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
         "--network={0}".format(
@@ -349,12 +349,12 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
-    cmd_shell = ["/bin/sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd_shell if backend == "kubernetes" else cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": [" ".join(cmd)],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

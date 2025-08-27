@@ -338,15 +338,14 @@ def get_beacon_config(
     else:
         command_str = cmd_str
 
-    cmd_shell = ["/bin/sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd_shell if backend == "kubernetes" else [cmd_str],
+        "entrypoint": ["sh", "-c"],
+        "cmd": [command_str],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
-        "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID

@@ -6,6 +6,9 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 vc_shared = import_module("../../vc/shared.star")
+
+GRANDINE_ENTRYPOINT_COMMAND = "grandine"
+
 #  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "grandine" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/grandine/grandine-beacon-data"
@@ -190,6 +193,7 @@ def get_beacon_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
+        GRANDINE_ENTRYPOINT_COMMAND,
         "--network={0}".format(
             network_params.network
             if network_params.network in constants.PUBLIC_NETWORKS
@@ -333,12 +337,12 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
-    cmd_shell = ["/bin/sh", "-c", " ".join(cmd)]
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd_shell if backend == "kubernetes" else cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": [" ".join(cmd)],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
