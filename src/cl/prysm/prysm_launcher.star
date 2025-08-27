@@ -320,7 +320,7 @@ def get_beacon_config(
         "ports": used_ports,
         "public_ports": public_ports,
         "entrypoint": ["sh", "-c"],
-        "cmd": [" ".join(cmd)],
+        "cmd": ["exec " + " ".join(cmd)],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
