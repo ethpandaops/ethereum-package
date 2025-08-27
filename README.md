@@ -591,6 +591,10 @@ network_params:
   # Defaults to 18446744073709551615
   gloas_fork_epoch: 18446744073709551615
 
+  # EIP-7782 fork epoch
+  # Defaults to 18446744073709551615
+  eip7782_fork_epoch: 18446744073709551615
+
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
   # If you have a local snapshot, you can set this to the local url:
