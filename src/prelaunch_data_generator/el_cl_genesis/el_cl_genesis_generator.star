@@ -1,4 +1,5 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
+input_parser = import_module("../../package_io/input_parser.star")
 
 el_cl_genesis_data = import_module("./el_cl_genesis_data.star")
 
@@ -24,6 +25,7 @@ def generate_el_cl_genesis_data(
 ):
     files = {}
     shadowfork_file = ""
+    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
     if latest_block != "":
         files[SHADOWFORK_FILEPATH] = latest_block
         shadowfork_file = SHADOWFORK_FILEPATH + "/latest_block.json"

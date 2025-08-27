@@ -34,6 +34,7 @@ def launch(
     prysm_password_artifact_uuid,
     global_other_index,
     extra_files_artifacts,
+    backend,
 ):
     plan.print("Launching CL network")
 
@@ -223,6 +224,7 @@ def launch(
                 index,
                 network_params,
                 extra_files_artifacts,
+                backend,
                 tempo_otlp_grpc_url,
             )
 
@@ -272,6 +274,7 @@ def launch(
                 index,
                 network_params,
                 extra_files_artifacts,
+                backend,
                 tempo_otlp_grpc_url,
             )
 

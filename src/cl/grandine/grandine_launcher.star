@@ -6,6 +6,9 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 vc_shared = import_module("../../vc/shared.star")
+
+GRANDINE_ENTRYPOINT_COMMAND = "grandine"
+
 #  ---------------------------------- Beacon client -------------------------------------
 # The Docker container runs as the "grandine" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/grandine/grandine-beacon-data"
@@ -53,6 +56,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
+    backend,
     tempo_otlp_grpc_url=None,
 ):
     config = get_beacon_config(
@@ -75,6 +79,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
+        backend,
         tempo_otlp_grpc_url,
     )
 
@@ -113,6 +118,7 @@ def get_beacon_config(
     participant_index,
     network_params,
     extra_files_artifacts,
+    backend,
     tempo_otlp_grpc_url,
 ):
     log_level = input_parser.get_client_log_level_or_default(
@@ -187,6 +193,7 @@ def get_beacon_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
+        GRANDINE_ENTRYPOINT_COMMAND,
         "--network={0}".format(
             network_params.network
             if network_params.network in constants.PUBLIC_NETWORKS
@@ -201,7 +208,11 @@ def get_beacon_config(
         "--eth1-rpc-urls=" + EXECUTION_ENGINE_ENDPOINT,
         # ENR
         "--disable-enr-auto-update",
-        "--enr-address=" + port_publisher.cl_nat_exit_ip,
+        "--enr-address={0}".format(
+            "${K8S_POD_IP}"
+            if backend == "kubernetes"
+            else port_publisher.cl_nat_exit_ip
+        ),
         "--enr-udp-port={0}".format(discovery_port_udp),
         "--enr-tcp-port={0}".format(discovery_port_tcp),
         # QUIC
@@ -330,7 +341,8 @@ def get_beacon_config(
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": ["exec " + " ".join(cmd)],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

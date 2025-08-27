@@ -102,6 +102,7 @@ def run(plan, args={}):
     apache_port = args_with_right_defaults.apache_port
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
+    detected_backend = plan.get_cluster_type()
 
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (
@@ -244,6 +245,7 @@ def run(plan, args={}):
         parallel_keystore_generation,
         extra_files_artifacts,
         tempo_otlp_grpc_url,
+        detected_backend,
     )
 
     plan.print(
