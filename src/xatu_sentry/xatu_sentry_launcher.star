@@ -26,7 +26,7 @@ def launch(
     node_selectors,
     global_tolerations,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     config_template = read_file(static_files.XATU_SENTRY_CONFIG_TEMPLATE_FILEPATH)
 
     template_data = new_config_template_data(

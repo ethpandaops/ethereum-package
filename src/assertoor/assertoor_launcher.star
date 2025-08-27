@@ -55,7 +55,7 @@ def launch_assertoor(
         0,
     )
 
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     for index, participant in enumerate(participant_contexts):
         (

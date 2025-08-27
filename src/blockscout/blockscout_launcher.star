@@ -74,7 +74,7 @@ def launch_blockscout(
     blockscout_params,
     network_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     postgres_output = postgres.run(
         plan,
         service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT),

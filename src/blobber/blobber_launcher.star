@@ -43,7 +43,7 @@ def launch(
     node_selectors,
     global_tolerations,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     blobber_service_name = "{0}".format(service_name)
 

@@ -34,7 +34,7 @@ def launch_mev_relay(
     global_node_selectors,
     global_tolerations,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     node_selectors = global_node_selectors
     image = mev_params.mev_relay_image
     network = (

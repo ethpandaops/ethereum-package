@@ -48,10 +48,10 @@ def launch(
     port_publisher,
     remote_signer_index,
 ):
-    tolerations = input_parser.get_client_tolerations(
-        participant.remote_signer_tolerations,
-        participant.tolerations,
-        global_tolerations,
+    tolerations = shared_utils.get_tolerations(
+        specific_container_tolerations=participant.remote_signer_tolerations,
+        participant_tolerations=participant.tolerations,
+        global_tolerations=global_tolerations,
     )
 
     config = get_config(

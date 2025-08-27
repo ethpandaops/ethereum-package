@@ -34,7 +34,7 @@ def launch(
     global_node_selectors,
     global_tolerations,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,

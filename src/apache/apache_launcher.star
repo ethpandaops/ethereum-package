@@ -44,7 +44,7 @@ def launch_apache(
         src=static_files.APACHE_CONFIG_FILEPATH, name="apache-config"
     )
 
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,

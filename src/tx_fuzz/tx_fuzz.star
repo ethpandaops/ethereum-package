@@ -17,7 +17,7 @@ def launch_tx_fuzz(
     global_node_selectors,
     global_tolerations,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     config = get_config(
         prefunded_addresses,

@@ -35,7 +35,7 @@ def launch(
     global_tolerations,
     final_genesis_timestamp,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     network = (
         network

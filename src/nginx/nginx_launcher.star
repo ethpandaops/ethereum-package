@@ -40,7 +40,7 @@ def launch_nginx(
     global_tolerations,
     docker_cache_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     config_files_artifact_name = plan.upload_files(
         src=static_files.NGINX_CONFIG_FILEPATH, name="nginx-config"

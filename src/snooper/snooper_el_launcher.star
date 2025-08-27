@@ -27,7 +27,7 @@ def launch_snooper(
     global_other_index,
     docker_cache_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     snooper_service_name = "{0}".format(service_name)
 

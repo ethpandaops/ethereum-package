@@ -452,3 +452,39 @@ def process_extra_mounts(plan, extra_mounts, extra_files_artifacts={}):
         processed_mounts[mount_path] = extra_files_artifacts[source]
 
     return processed_mounts
+
+
+def get_tolerations(
+    specific_container_tolerations=[], participant_tolerations=[], global_tolerations=[]
+):
+    toleration_list = []
+    tolerations = []
+    tolerations = (
+        specific_container_tolerations if specific_container_tolerations else []
+    )
+    if not tolerations:
+        tolerations = participant_tolerations if participant_tolerations else []
+        if not tolerations:
+            tolerations = global_tolerations if global_tolerations else []
+    if tolerations != []:
+        for toleration_data in tolerations:
+            if toleration_data.get("toleration_seconds"):
+                toleration_list.append(
+                    Toleration(
+                        key=toleration_data.get("key", ""),
+                        value=toleration_data.get("value", ""),
+                        operator=toleration_data.get("operator", ""),
+                        effect=toleration_data.get("effect", ""),
+                        toleration_seconds=toleration_data.get("toleration_seconds"),
+                    )
+                )
+            else:
+                toleration_list.append(
+                    Toleration(
+                        key=toleration_data.get("key", ""),
+                        value=toleration_data.get("value", ""),
+                        operator=toleration_data.get("operator", ""),
+                        effect=toleration_data.get("effect", ""),
+                    )
+                )
+    return toleration_list

@@ -24,6 +24,10 @@ def launch(
                 echo "Latest block number: $LATEST_BLOCK" && \
                 echo $LATEST_BLOCK > /blocks/block_height.txt',
                 store=[StoreSpec(src="/blocks", name="latest")],
+                tolerations=shared_utils.get_tolerations(
+                    global_tolerations=global_tolerations
+                ),
+                node_selectors=global_node_selectors,
             )
         else:
             latest_block = plan.run_sh(
@@ -36,13 +40,17 @@ def launch(
                 + str(network_params.shadowfork_block_height)
                 + " > /blocks/block_height.txt",
                 store=[StoreSpec(src="/blocks", name="latest")],
+                tolerations=shared_utils.get_tolerations(
+                    global_tolerations=global_tolerations
+                ),
+                node_selectors=global_node_selectors,
             )
 
         for index, participant in enumerate(participants):
-            tolerations = input_parser.get_client_tolerations(
-                participant.el_tolerations,
-                participant.tolerations,
-                global_tolerations,
+            tolerations = shared_utils.get_tolerations(
+                specific_container_tolerations=participant.el_tolerations,
+                participant_tolerations=participant.tolerations,
+                global_tolerations=global_tolerations,
             )
             node_selectors = input_parser.get_client_node_selectors(
                 participant.node_selectors,
@@ -120,6 +128,8 @@ def launch(
         description="Creating network configs folder",
         run="mkdir /network-configs",
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
     el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
         dummy_genesis_data.files_artifacts[0],
