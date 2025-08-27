@@ -6,7 +6,7 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
-PRYSM_ENTRYPOINT_COMMAND = "/entrypoint.sh"
+PRYSM_ENTRYPOINT_COMMAND = "/beacon-chain"
 
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
