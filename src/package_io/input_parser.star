@@ -1008,6 +1008,33 @@ def parse_network_params(plan, input_args):
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
 
+    seconds_per_slot = result["network_params"]["seconds_per_slot"]
+    slot_duration_ms = result["network_params"]["slot_duration_ms"]
+    preset = result["network_params"]["preset"]
+
+    if preset == "minimal":
+        seconds_per_slot_is_set = seconds_per_slot != 6
+        slot_duration_ms_is_set = slot_duration_ms != 6000
+    else:
+        seconds_per_slot_is_set = seconds_per_slot != 12
+        slot_duration_ms_is_set = slot_duration_ms != 12000
+
+    # Apply validation logic based on your requirements:
+    # One set 8/12000 -> 8/8000
+    # Both set incorrectly -> fail
+    if seconds_per_slot_is_set and not slot_duration_ms_is_set:
+        result["network_params"]["slot_duration_ms"] = seconds_per_slot * 1000
+    elif not seconds_per_slot_is_set and slot_duration_ms_is_set:
+        result["network_params"]["seconds_per_slot"] = int(slot_duration_ms / 1000)
+    else:
+        expected_slot_duration_ms = seconds_per_slot * 1000
+        if slot_duration_ms != expected_slot_duration_ms:
+            fail(
+                "seconds_per_slot ({0}) and slot_duration_ms ({1}) are inconsistent. Expected slot_duration_ms to be {2}. Use the same value for both, or only define one of them.".format(
+                    seconds_per_slot, slot_duration_ms, expected_slot_duration_ms
+                )
+            )
+
     if (
         result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
