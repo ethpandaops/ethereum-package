@@ -521,31 +521,6 @@ network_params:
   # Defaults to 12000ms (12 seconds)
   slot_duration_ms: 12000
 
-  # Seconds per ETH1 block for timing calculations
-  # Defaults to 14 seconds
-  seconds_per_eth1_block: 14
-
-  # Timing parameters for various operations (in basis points, where 10000 = 100%)
-  # Proposer reorg cutoff timing
-  # Defaults to 1667 basis points (~16.67% of slot duration)
-  proposer_reorg_cutoff_bps: 1667
-
-  # Attestation due timing
-  # Defaults to 3333 basis points (~33.33% of slot duration)
-  attestation_due_bps: 3333
-
-  # Aggregate due timing
-  # Defaults to 6667 basis points (~66.67% of slot duration)
-  aggregate_due_bps: 6667
-
-  # Sync message due timing
-  # Defaults to 3333 basis points (~33.33% of slot duration)
-  sync_message_due_bps: 3333
-
-  # Contribution due timing
-  # Defaults to 6667 basis points (~66.67% of slot duration)
-  contribution_due_bps: 6667
-
   # Gloas fork timing parameters (optimized for faster slots)
   # Attestation due timing for Gloas fork
   # Defaults to 2500 basis points (25% of slot duration)
@@ -1172,7 +1147,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.0.5
+  image: ethpandaops/ethereum-genesis-generator:5.0.6
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:

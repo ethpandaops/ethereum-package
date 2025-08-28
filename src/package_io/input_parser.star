@@ -410,7 +410,6 @@ def input_parser(plan, input_args):
             ],
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
             slot_duration_ms=result["network_params"]["slot_duration_ms"],
-            seconds_per_eth1_block=result["network_params"]["seconds_per_eth1_block"],
             genesis_delay=result["network_params"]["genesis_delay"],
             genesis_gaslimit=result["network_params"]["genesis_gaslimit"],
             max_per_epoch_activation_churn_limit=result["network_params"][
@@ -433,13 +432,6 @@ def input_parser(plan, input_args):
                 "min_validator_withdrawability_delay"
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
-            proposer_reorg_cutoff_bps=result["network_params"][
-                "proposer_reorg_cutoff_bps"
-            ],
-            attestation_due_bps=result["network_params"]["attestation_due_bps"],
-            aggregate_due_bps=result["network_params"]["aggregate_due_bps"],
-            sync_message_due_bps=result["network_params"]["sync_message_due_bps"],
-            contribution_due_bps=result["network_params"]["contribution_due_bps"],
             attestation_due_bps_gloas=result["network_params"][
                 "attestation_due_bps_gloas"
             ],
@@ -1183,7 +1175,6 @@ def default_network_params():
         "deposit_contract_address": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
         "seconds_per_slot": 12,
         "slot_duration_ms": 12000,
-        "seconds_per_eth1_block": 14,
         "num_validator_keys_per_node": 64,
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
@@ -1195,11 +1186,6 @@ def default_network_params():
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
         "shard_committee_period": 256,
-        "proposer_reorg_cutoff_bps": 1667,
-        "attestation_due_bps": 3333,
-        "aggregate_due_bps": 6667,
-        "sync_message_due_bps": 3333,
-        "contribution_due_bps": 6667,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
         "sync_message_due_bps_gloas": 2500,
@@ -1269,7 +1255,6 @@ def default_minimal_network_params():
         "deposit_contract_address": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
         "seconds_per_slot": 6,
         "slot_duration_ms": 6000,
-        "seconds_per_eth1_block": 14,
         "num_validator_keys_per_node": 64,
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
@@ -1281,11 +1266,6 @@ def default_minimal_network_params():
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
         "shard_committee_period": 64,
-        "proposer_reorg_cutoff_bps": 1667,
-        "attestation_due_bps": 3333,
-        "aggregate_due_bps": 6667,
-        "sync_message_due_bps": 3333,
-        "contribution_due_bps": 6667,
         "attestation_due_bps_gloas": 1250,
         "aggregate_due_bps_gloas": 2500,
         "sync_message_due_bps_gloas": 1250,
