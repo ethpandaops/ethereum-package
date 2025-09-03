@@ -74,6 +74,7 @@ network_params:
   network_id: "3151908"
   deposit_contract_address: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
   seconds_per_slot: 12
+  slot_duration_ms: 12000
   num_validator_keys_per_node: 64
   preregistered_validator_keys_mnemonic:
     "giant issue aisle success illegal bike spike
@@ -88,6 +89,14 @@ network_params:
   eth1_follow_distance: 2048
   min_validator_withdrawability_delay: 256
   shard_committee_period: 256
+  attestation_due_bps_gloas: 2500
+  aggregate_due_bps_gloas: 5000
+  sync_message_due_bps_gloas: 2500
+  contribution_due_bps_gloas: 5000
+  payload_attestation_due_bps: 7500
+  view_freeze_cutoff_bps: 7500
+  inclusion_list_submission_due_bps: 6667
+  proposer_inclusion_list_cutoff_bps: 9167
   deneb_fork_epoch: 0
   electra_fork_epoch: 0
   fulu_fork_epoch: 18446744073709551615
@@ -98,6 +107,8 @@ network_params:
   samples_per_slot: 8
   custody_requirement: 4
   max_blobs_per_block_electra: 9
+  max_request_blocks_deneb: 128
+  max_request_blob_sidecars_electra: 1152
   target_blobs_per_block_electra: 6
   base_fee_update_fraction_electra: 5007716
   additional_preloaded_contracts: {}
@@ -210,7 +221,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.0.3
+  image: ethpandaops/ethereum-genesis-generator:5.0.6
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:
