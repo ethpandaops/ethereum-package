@@ -121,7 +121,11 @@ def run(plan, args={}):
         != constants.DEFAULT_MNEMONIC
     ):
         prefunded_accounts = get_prefunded_accounts.get_accounts(
-            plan, network_params.preregistered_validator_keys_mnemonic
+            plan,
+            network_params.preregistered_validator_keys_mnemonic,
+            21,
+            global_tolerations,
+            global_node_selectors,
         )
 
     grafana_datasource_config_template = read_file(

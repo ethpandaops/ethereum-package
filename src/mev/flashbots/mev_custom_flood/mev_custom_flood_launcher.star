@@ -20,7 +20,7 @@ def spam_in_background(
     global_tolerations,
     docker_cache_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     sender_script = plan.upload_files(src="./sender.py", name="mev-custom-flood-sender")
 
     plan.add_service(

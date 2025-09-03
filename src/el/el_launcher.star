@@ -132,8 +132,10 @@ def launch(
             participant.node_selectors,
             global_node_selectors,
         )
-        tolerations = input_parser.get_client_tolerations(
-            participant.el_tolerations, participant.tolerations, global_tolerations
+        tolerations = shared_utils.get_tolerations(
+            specific_container_tolerations=participant.el_tolerations,
+            participant_tolerations=participant.tolerations,
+            global_tolerations=global_tolerations,
         )
 
         if el_type not in el_launchers:

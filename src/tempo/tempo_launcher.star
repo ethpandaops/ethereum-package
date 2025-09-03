@@ -48,7 +48,7 @@ def launch_tempo(
     port_publisher,
     index,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     config_files_artifact_name = get_tempo_config_dir_artifact_uuid(
         plan,
