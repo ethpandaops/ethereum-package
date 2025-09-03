@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         payload:
-          #- { name: "minimal", file: "./.github/tests/minimal.yaml" }
+          - { name: "minimal", file: "./.github/tests/minimal.yaml" }
           - { name: "network-params", file: "./network_params.yaml" }
     runs-on: ubuntu-latest
     steps:
