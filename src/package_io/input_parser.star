@@ -27,11 +27,11 @@ DEFAULT_CL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "teku": "ethpandaops/teku:master",
-    "nimbus": "ethpandaops/nimbus-eth2:stable-minimal",
+    "nimbus": "ethpandaops/nimbus-eth2:unstable-minimal",
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
-    "lodestar": "chainsafe/lodestar:latest",
+    "lodestar": "ethpandaops/lodestar:unstable",
     "grandine": "ethpandaops/grandine:develop-minimal",
 }
 
@@ -46,9 +46,9 @@ DEFAULT_VC_IMAGES = {
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
-    "lighthouse": "ethpandaops/lighthouse:stable",
-    "lodestar": "chainsafe/lodestar:latest",
-    "nimbus": "ethpandaops/nimbus-validator-client:stable-minimal",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
+    "lodestar": "ethpandaops/lodestar:unstable",
+    "nimbus": "ethpandaops/nimbus-validator-client:unstable-minimal",
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
     "teku": "ethpandaops/teku:master",
     "grandine": "ethpandaops/grandine:develop-minimal",
