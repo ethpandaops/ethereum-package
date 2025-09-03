@@ -200,6 +200,7 @@ def new_config_template_data(
         "ELClientInfo": el_client_info,
         "MEVRelayInfo": mev_endpoint_info,
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
+        "IsDevnet": True if "devnet" in network else False,
     }
 
 
