@@ -25,7 +25,7 @@ def generate_el_cl_genesis_data(
 ):
     files = {}
     shadowfork_file = ""
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     if latest_block != "":
         files[SHADOWFORK_FILEPATH] = latest_block
         shadowfork_file = SHADOWFORK_FILEPATH + "/latest_block.json"

@@ -1,6 +1,6 @@
 constants = import_module("../../../package_io/constants.star")
 input_parser = import_module("../../../package_io/input_parser.star")
-
+shared_utils = import_module("../../../shared_utils/shared_utils.star")
 # Default image if none specified in mev_params
 
 MOCK_MEV_SERVICE_NAME = "mock-mev"

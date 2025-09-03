@@ -1,4 +1,6 @@
 input_parser = import_module("../package_io/input_parser.star")
+shared_utils = import_module("../shared_utils/shared_utils.star")
+
 IMAGE_NAME = "nethermind/broadcaster:latest"
 SERVICE_NAME = "broadcaster"
 PORT = 8545

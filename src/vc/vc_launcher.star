@@ -11,7 +11,6 @@ prysm = import_module("./prysm.star")
 teku = import_module("./teku.star")
 vero = import_module("./vero.star")
 vc_shared = import_module("./shared.star")
-shared_utils = import_module("../shared_utils/shared_utils.star")
 
 
 def get_vc_config(
