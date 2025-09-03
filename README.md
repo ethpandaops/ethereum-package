@@ -517,6 +517,52 @@ network_params:
   # Number of seconds per slot on the Beacon chain
   seconds_per_slot: 12
 
+  # Duration of a slot in milliseconds
+  # Defaults to 12000ms (12 seconds)
+  slot_duration_ms: 12000
+
+  # Gloas fork timing parameters (optimized for faster slots)
+  # Attestation due timing for Gloas fork
+  # Defaults to 2500 basis points (25% of slot duration)
+  attestation_due_bps_gloas: 2500
+
+  # Aggregate due timing for Gloas fork
+  # Defaults to 5000 basis points (50% of slot duration)
+  aggregate_due_bps_gloas: 5000
+
+  # Sync message due timing for Gloas fork
+  # Defaults to 2500 basis points (25% of slot duration)
+  sync_message_due_bps_gloas: 2500
+
+  # Contribution due timing for Gloas fork
+  # Defaults to 5000 basis points (50% of slot duration)
+  contribution_due_bps_gloas: 5000
+
+  # Payload attestation due timing for Gloas fork
+  # Defaults to 7500 basis points (75% of slot duration)
+  payload_attestation_due_bps: 7500
+
+  # EIP-7805 timing parameters
+  # View freeze cutoff timing
+  # Defaults to 7500 basis points (75% of slot duration)
+  view_freeze_cutoff_bps: 7500
+
+  # Inclusion list submission due timing
+  # Defaults to 6667 basis points (~67% of slot duration)
+  inclusion_list_submission_due_bps: 6667
+
+  # Proposer inclusion list cutoff timing
+  # Defaults to 9167 basis points (~92% of slot duration)
+  proposer_inclusion_list_cutoff_bps: 9167
+
+  # Maximum request blocks for Deneb fork
+  # Defaults to 128
+  max_request_blocks_deneb: 128
+
+  # Maximum request blob sidecars for Electra fork
+  # Defaults to 1152 (128 * 9 blobs)
+  max_request_blob_sidecars_electra: 1152
+
   # The number of validator keys that each CL validator node should get
   num_validator_keys_per_node: 64
 
@@ -1101,7 +1147,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.0.3
+  image: ethpandaops/ethereum-genesis-generator:5.0.6
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
