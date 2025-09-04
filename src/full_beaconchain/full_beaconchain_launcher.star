@@ -108,7 +108,7 @@ def launch_full_beacon(
     port_publisher,
     additional_service_index,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     node_selectors = global_node_selectors
     postgres_output = postgres.run(
         plan,

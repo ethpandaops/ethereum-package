@@ -35,7 +35,7 @@ def launch_spamoor(
     additional_service_index,
     osaka_time,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     spammers = []
 

@@ -1,6 +1,6 @@
 constants = import_module("../../../package_io/constants.star")
 input_parser = import_module("../../../package_io/input_parser.star")
-
+shared_utils = import_module("../../../shared_utils/shared_utils.star")
 # Default image if none specified in mev_params
 
 MOCK_MEV_SERVICE_NAME = "mock-mev"
@@ -23,7 +23,7 @@ def launch_mock_mev(
     global_tolerations,
     mev_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     mock_builder = plan.add_service(
         name=MOCK_MEV_SERVICE_NAME,
         config=ServiceConfig(

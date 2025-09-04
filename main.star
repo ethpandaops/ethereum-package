@@ -102,6 +102,7 @@ def run(plan, args={}):
     apache_port = args_with_right_defaults.apache_port
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
+    detected_backend = plan.get_cluster_type()
 
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (
@@ -120,7 +121,11 @@ def run(plan, args={}):
         != constants.DEFAULT_MNEMONIC
     ):
         prefunded_accounts = get_prefunded_accounts.get_accounts(
-            plan, network_params.preregistered_validator_keys_mnemonic
+            plan,
+            network_params.preregistered_validator_keys_mnemonic,
+            21,
+            global_tolerations,
+            global_node_selectors,
         )
 
     grafana_datasource_config_template = read_file(
@@ -240,6 +245,7 @@ def run(plan, args={}):
         parallel_keystore_generation,
         extra_files_artifacts,
         tempo_otlp_grpc_url,
+        detected_backend,
     )
 
     plan.print(

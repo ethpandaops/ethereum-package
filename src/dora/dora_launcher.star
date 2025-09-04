@@ -42,7 +42,7 @@ def launch_dora(
     additional_service_index,
     docker_cache_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     all_cl_client_info = []
     all_el_client_info = []
@@ -200,6 +200,7 @@ def new_config_template_data(
         "ELClientInfo": el_client_info,
         "MEVRelayInfo": mev_endpoint_info,
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
+        "IsDevnet": True if "devnet" in network else False,
     }
 
 
