@@ -246,9 +246,6 @@ def get_config(
                 ]
             )
         )
-        if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            if launcher.osaka_enabled:
-                cmd.append("--override.osaka=" + str(launcher.osaka_time))
 
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
@@ -266,14 +263,29 @@ def get_config(
         cmd.extend([param for param in participant.el_extra_params])
 
     cmd_str = " ".join(cmd)
+
+    # Handle osaka parameter conditionally for shadowfork
+    if constants.NETWORK_NAME.shadowfork in network_params.network:
+        # Create wrapper script that conditionally adds osaka parameter
+        wrapper_script = 'OSAKA_TIME="' + str(launcher.osaka_time) + '"; '
+        wrapper_script += (
+            'if [ "$OSAKA_TIME" != "null" ] && [ "$OSAKA_TIME" != "" ]; then '
+        )
+        wrapper_script += 'OSAKA_PARAM="--override.osaka=$OSAKA_TIME"; '
+        wrapper_script += 'else OSAKA_PARAM=""; fi; '
+        wrapper_script += cmd_str + " $OSAKA_PARAM"
+        final_cmd_str = wrapper_script
+    else:
+        final_cmd_str = cmd_str
+
     if network_params.network not in constants.PUBLIC_NETWORKS:
         subcommand_strs = [
             init_datadir_cmd_str,
-            cmd_str,
+            final_cmd_str,
         ]
         command_str = " && ".join(subcommand_strs)
     else:
-        command_str = cmd_str
+        command_str = final_cmd_str
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
@@ -377,5 +389,4 @@ def new_geth_launcher(
         jwt_file=jwt_file,
         networkid=networkid,
         osaka_time=el_cl_genesis_data.osaka_time,
-        osaka_enabled=el_cl_genesis_data.osaka_enabled,
     )
