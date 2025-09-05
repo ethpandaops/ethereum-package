@@ -170,8 +170,9 @@ def get_config(
         cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
 
     if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-        if launcher.osaka_enabled:
-            cmd.append("--override.osaka=" + str(launcher.osaka_time))
+        osaka_time_str = str(launcher.osaka_time).strip()
+        if osaka_time_str not in ["0"]:
+            cmd.append("--override.osaka=" + osaka_time_str)
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
@@ -316,5 +317,4 @@ def new_erigon_launcher(el_cl_genesis_data, jwt_file, networkid):
         jwt_file=jwt_file,
         networkid=networkid,
         osaka_time=el_cl_genesis_data.osaka_time,
-        osaka_enabled=el_cl_genesis_data.osaka_enabled,
     )

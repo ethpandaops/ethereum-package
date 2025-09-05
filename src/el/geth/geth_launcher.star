@@ -247,8 +247,9 @@ def get_config(
             )
         )
         if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            if launcher.osaka_enabled:
-                cmd.append("--override.osaka=" + str(launcher.osaka_time))
+            osaka_time_str = str(launcher.osaka_time).strip()
+            if osaka_time_str not in ["0"]:
+                cmd.append("--override.osaka=" + osaka_time_str)
 
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
@@ -377,5 +378,4 @@ def new_geth_launcher(
         jwt_file=jwt_file,
         networkid=networkid,
         osaka_time=el_cl_genesis_data.osaka_time,
-        osaka_enabled=el_cl_genesis_data.osaka_enabled,
     )
