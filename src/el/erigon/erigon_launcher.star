@@ -169,11 +169,6 @@ def get_config(
     if network_params.gas_limit > 0:
         cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
 
-    if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-        osaka_time_str = str(launcher.osaka_time).strip()
-        if osaka_time_str not in ["0"]:
-            cmd.append("--override.osaka=" + osaka_time_str)
-
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
@@ -236,11 +231,27 @@ def get_config(
     if len(participant.el_extra_params) > 0:
         cmd.extend([param for param in participant.el_extra_params])
 
+    cmd_str = " ".join(cmd)
+
+    # Handle osaka parameter conditionally for shadowfork
+    if constants.NETWORK_NAME.shadowfork in network_params.network:
+        # Create wrapper script that conditionally adds osaka parameter
+        wrapper_script = 'OSAKA_TIME="' + str(launcher.osaka_time) + '"; '
+        wrapper_script += (
+            'if [ "$OSAKA_TIME" != "null" ] && [ "$OSAKA_TIME" != "" ]; then '
+        )
+        wrapper_script += 'OSAKA_PARAM="--override.osaka=$OSAKA_TIME"; '
+        wrapper_script += 'else OSAKA_PARAM=""; fi; '
+        wrapper_script += cmd_str + " $OSAKA_PARAM"
+        final_cmd_str = wrapper_script
+    else:
+        final_cmd_str = cmd_str
+
     if network_params.network not in constants.PUBLIC_NETWORKS:
-        command_arg = [init_datadir_cmd_str, " ".join(cmd)]
+        command_arg = [init_datadir_cmd_str, final_cmd_str]
         command_arg_str = " && ".join(command_arg)
     else:
-        command_arg_str = " ".join(cmd)
+        command_arg_str = final_cmd_str
 
     env_vars = participant.el_extra_env_vars
     config_args = {
