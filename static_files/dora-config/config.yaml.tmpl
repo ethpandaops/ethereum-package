@@ -26,7 +26,11 @@ frontend:
   ethExplorerLink: ""
 
   # file or inventory url to load validator names from
+{{- if .IsDevnet }}
+  validatorNamesInventory: "https://config.{{ .Network }}.ethpandaops.io/api/v1/nodes/validator-ranges"
+{{- else }}
   validatorNamesYaml: "/validator-ranges/validator-ranges.yaml"
+{{- end }}
 
   publicRpcUrl: "{{ .PublicRPC }}"
   rainbowkitProjectId: "15fe4ab4d5c0bcb6f0dc7c398301ff0e"
@@ -36,6 +40,7 @@ frontend:
   showSensitivePeerInfos: true
   disableDasGuardianCheck: false
   enableDasGuardianMassScan: true
+  showValidatorSummary: true
 
 api:
   enabled: true

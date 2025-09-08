@@ -49,8 +49,9 @@ def launch_grafana(
     grafana_params,
     port_publisher,
     index,
+    tempo_query_url=None,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     (
         grafana_config_artifacts_uuid,
@@ -61,6 +62,7 @@ def launch_grafana(
         datasource_config_template,
         dashboard_providers_config_template,
         prometheus_private_url,
+        tempo_query_url,
         additional_dashboards=grafana_params.additional_dashboards,
     )
 
@@ -68,6 +70,8 @@ def launch_grafana(
         plan,
         grafana_dashboards_artifacts_uuid,
         grafana_additional_dashboards_data,
+        global_tolerations,
+        global_node_selectors,
     )
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
@@ -94,9 +98,12 @@ def get_grafana_config_dir_artifact_uuid(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
+    tempo_query_url,
     additional_dashboards=[],
 ):
-    datasource_data = new_datasource_config_template_data(prometheus_private_url)
+    datasource_data = new_datasource_config_template_data(
+        prometheus_private_url, tempo_query_url
+    )
     datasource_template_and_data = shared_utils.new_template_and_data(
         datasource_config_template, datasource_data
     )
@@ -167,8 +174,11 @@ def get_config(
     )
 
 
-def new_datasource_config_template_data(prometheus_url):
-    return {"PrometheusURL": prometheus_url}
+def new_datasource_config_template_data(prometheus_url, tempo_query_url):
+    data = {"PrometheusURL": prometheus_url}
+    if tempo_query_url != None:
+        data["TempoURL"] = tempo_query_url
+    return data
 
 
 def new_dashboard_providers_config_template_data(dashboards_dirpath):
@@ -202,6 +212,8 @@ def merge_dashboards_artifacts(
     plan,
     grafana_dashboards_artifacts_name,
     grafana_additional_dashboards_data=[],
+    global_tolerations=[],
+    global_node_selectors={},
 ):
     if len(grafana_additional_dashboards_data) == 0:
         return grafana_dashboards_artifacts_name
@@ -227,6 +239,8 @@ def merge_dashboards_artifacts(
         store=[
             GRAFANA_ADDITIONAL_DASHBOARDS_MERGED_STORED_PATH_FORMAT,
         ],
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
 
     return result.files_artifacts[0]

@@ -74,7 +74,7 @@ def launch_blockscout(
     blockscout_params,
     network_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     postgres_output = postgres.run(
         plan,
         service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
@@ -231,7 +231,6 @@ def get_config_backend(
             "ECTO_USE_SSL": "false",
             "NETWORK": "Kurtosis",
             "SUBNETWORK": "Kurtosis",
-            "API_V2_ENABLED": "true",
             "PORT": "{}".format(HTTP_PORT_NUMBER),
             "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
         },

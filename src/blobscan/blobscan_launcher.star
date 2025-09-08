@@ -90,7 +90,7 @@ def launch_blobscan(
     docker_cache_params,
 ):
     node_selectors = global_node_selectors
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     beacon_node_rpc_uri = "{0}".format(cl_contexts[0].beacon_http_url)
     execution_node_rpc_uri = "{0}".format(el_contexts[0].rpc_http_url)
 

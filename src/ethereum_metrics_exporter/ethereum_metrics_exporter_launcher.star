@@ -34,7 +34,7 @@ def launch(
     docker_cache_params,
     persistent,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     public_ports = shared_utils.get_other_public_port(
         port_publisher,
         HTTP_PORT_ID,

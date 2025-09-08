@@ -191,6 +191,7 @@ SUBCATEGORY_PARAMS = {
         "network_id",
         "deposit_contract_address",
         "seconds_per_slot",
+        "slot_duration_ms",
         "num_validator_keys_per_node",
         "preregistered_validator_keys_mnemonic",
         "preregistered_validator_count",
@@ -202,14 +203,23 @@ SUBCATEGORY_PARAMS = {
         "eth1_follow_distance",
         "min_validator_withdrawability_delay",
         "shard_committee_period",
+        "attestation_due_bps_gloas",
+        "aggregate_due_bps_gloas",
+        "sync_message_due_bps_gloas",
+        "contribution_due_bps_gloas",
+        "payload_attestation_due_bps",
+        "view_freeze_cutoff_bps",
+        "inclusion_list_submission_due_bps",
+        "proposer_inclusion_list_cutoff_bps",
         "altair_fork_epoch",
         "bellatrix_fork_epoch",
         "capella_fork_epoch",
         "deneb_fork_epoch",
         "electra_fork_epoch",
         "fulu_fork_epoch",
-        "eip7732_fork_epoch",
+        "gloas_fork_epoch",
         "eip7805_fork_epoch",
+        "eip7441_fork_epoch",
         "network_sync_base_url",
         "force_snapshot_sync",
         "shadowfork_block_height",
@@ -218,6 +228,8 @@ SUBCATEGORY_PARAMS = {
         "custody_requirement",
         "max_blobs_per_block_electra",
         "target_blobs_per_block_electra",
+        "max_request_blocks_deneb",
+        "max_request_blob_sidecars_electra",
         "base_fee_update_fraction_electra",
         "preset",
         "additional_preloaded_contracts",
@@ -288,6 +300,18 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "image",
     ],
+    "tempo_params": [
+        "retention_duration",
+        "ingestion_rate_limit",
+        "ingestion_burst_limit",
+        "max_search_duration",
+        "max_bytes_per_trace",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "image",
+    ],
     "assertoor_params": [
         "image",
         "run_stability_check",
@@ -350,6 +374,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "prometheus_grafana",
     "prometheus",
     "grafana",
+    "tempo",
     "blobscan",
     "dugtrio",
     "blutgang",
@@ -494,6 +519,7 @@ def sanity_check(plan, input_args):
             + ADDITIONAL_CATEGORY_PARAMS.keys()
         )
         combined_root_params.append("additional_services")
+        combined_root_params.append("extra_files")
 
         if param not in combined_root_params:
             fail(

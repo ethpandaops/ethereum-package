@@ -196,8 +196,9 @@ participants:
     el_extra_params: []
 
     # A list of optional extra mount points that will be passed to the EL client container
-    # Key is the path in the container, value is the local path to the file
-    # Example: el_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
+    # Key is the mount path (becomes a directory), value MUST reference a key from extra_files
+    # The file will be available at <mount_path>/<extra_files_key>
+    # Example: el_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     el_extra_mounts: {}
 
     # A list of tolerations that will be passed to the EL client container
@@ -259,8 +260,9 @@ participants:
     cl_extra_params: []
 
     # A list of optional extra mount points that will be passed to the CL client container
-    # Key is the path in the container, value is the local path to the file
-    # Example: cl_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
+    # Key is the mount path (becomes a directory), value MUST reference a key from extra_files
+    # The file will be available at <mount_path>/<extra_files_key>
+    # Example: cl_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     cl_extra_mounts: {}
 
     # A list of tolerations that will be passed to the CL client container
@@ -334,8 +336,9 @@ participants:
     vc_extra_params: []
 
     # A list of optional extra mount points that will be passed to the validator client container
-    # Key is the path in the container, value is the local path to the file
-    # Example: vc_extra_mounts: {"/tmp/custom.yaml": "local_directory/custom.yaml"}
+    # Key is the mount path (becomes a directory), value MUST reference a key from extra_files
+    # The file will be available at <mount_path>/<extra_files_key>
+    # Example: vc_extra_mounts: {"/config": "my_validator_config"}  # Creates /config/my_validator_config
     vc_extra_mounts: {}
 
     # A list of tolerations that will be passed to the validator container
@@ -514,6 +517,52 @@ network_params:
   # Number of seconds per slot on the Beacon chain
   seconds_per_slot: 12
 
+  # Duration of a slot in milliseconds
+  # Defaults to 12000ms (12 seconds)
+  slot_duration_ms: 12000
+
+  # Gloas fork timing parameters (optimized for faster slots)
+  # Attestation due timing for Gloas fork
+  # Defaults to 2500 basis points (25% of slot duration)
+  attestation_due_bps_gloas: 2500
+
+  # Aggregate due timing for Gloas fork
+  # Defaults to 5000 basis points (50% of slot duration)
+  aggregate_due_bps_gloas: 5000
+
+  # Sync message due timing for Gloas fork
+  # Defaults to 2500 basis points (25% of slot duration)
+  sync_message_due_bps_gloas: 2500
+
+  # Contribution due timing for Gloas fork
+  # Defaults to 5000 basis points (50% of slot duration)
+  contribution_due_bps_gloas: 5000
+
+  # Payload attestation due timing for Gloas fork
+  # Defaults to 7500 basis points (75% of slot duration)
+  payload_attestation_due_bps: 7500
+
+  # EIP-7805 timing parameters
+  # View freeze cutoff timing
+  # Defaults to 7500 basis points (75% of slot duration)
+  view_freeze_cutoff_bps: 7500
+
+  # Inclusion list submission due timing
+  # Defaults to 6667 basis points (~67% of slot duration)
+  inclusion_list_submission_due_bps: 6667
+
+  # Proposer inclusion list cutoff timing
+  # Defaults to 9167 basis points (~92% of slot duration)
+  proposer_inclusion_list_cutoff_bps: 9167
+
+  # Maximum request blocks for Deneb fork
+  # Defaults to 128
+  max_request_blocks_deneb: 128
+
+  # Maximum request blob sidecars for Electra fork
+  # Defaults to 1152 (128 * 9 blobs)
+  max_request_blob_sidecars_electra: 1152
+
   # The number of validator keys that each CL validator node should get
   num_validator_keys_per_node: 64
 
@@ -584,6 +633,10 @@ network_params:
   # Defaults to 18446744073709551615
   fulu_fork_epoch: 18446744073709551615
 
+  # Gloas fork epoch
+  # Defaults to 18446744073709551615
+  gloas_fork_epoch: 18446744073709551615
+
   # Network sync base url for syncing public networks from a custom snapshot (mostly useful for shadowforks)
   # Defaults to "https://snapshots.ethpandaops.io/"
   # If you have a local snapshot, you can set this to the local url:
@@ -617,10 +670,6 @@ network_params:
   target_blobs_per_block_electra: 6
   # Base fee update fraction for Electra fork (default 5007716)
   base_fee_update_fraction_electra: 5007716
-
-  # EIP-7732 fork epoch
-  # Defaults to 18446744073709551615
-  eip7732_fork_epoch: 18446744073709551615
 
   # EIP-7805 fork epoch
   # Defaults to 18446744073709551615
@@ -686,50 +735,36 @@ network_params:
 
 
   # BPO
-  # BPO1 epoch (default 18446744073709551615)
+  # BPO1-5 epoch (default 18446744073709551615)
   bpo_1_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO1 (default 12)
-  bpo_1_max_blobs: 12
-  # Target number of blobs per block for BPO1 (default 9)
-  bpo_1_target_blobs: 9
-  # Base fee update fraction for BPO1 (default 5007716)
-  bpo_1_base_fee_update_fraction: 5007716
+  # Maximum number of blobs per block for BPO1-5
+  # If only max is set, target is auto-calculated as 2/3 of max
+  # If only target is set, max is auto-calculated as 3/2 of target
+  bpo_1_max_blobs: 0
+  # Target number of blobs per block for BPO1-5
+  bpo_1_target_blobs: 0
+  # Base fee update fraction for BPO1-5 (default 0)
+  bpo_1_base_fee_update_fraction: 0
 
-  # BPO2 epoch (default 18446744073709551615)
   bpo_2_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO2 (default 12)
-  bpo_2_max_blobs: 12
-  # Target number of blobs per block for BPO2 (default 9)
-  bpo_2_target_blobs: 9
-  # Base fee update fraction for BPO2 (default 5007716)
-  bpo_2_base_fee_update_fraction: 5007716
+  bpo_2_max_blobs: 0
+  bpo_2_target_blobs: 0
+  bpo_2_base_fee_update_fraction: 0
 
-  # BPO3 epoch (default 18446744073709551615)
   bpo_3_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO3 (default 12)
-  bpo_3_max_blobs: 12
-  # Target number of blobs per block for BPO3 (default 9)
-  bpo_3_target_blobs: 9
-  # Base fee update fraction for BPO3 (default 5007716)
-  bpo_3_base_fee_update_fraction: 5007716
+  bpo_3_max_blobs: 0
+  bpo_3_target_blobs: 0
+  bpo_3_base_fee_update_fraction: 0
 
-  # BPO4 epoch (default 18446744073709551615)
   bpo_4_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO4 (default 12)
-  bpo_4_max_blobs: 12
-  # Target number of blobs per block for BPO4 (default 9)
-  bpo_4_target_blobs: 9
-  # Base fee update fraction for BPO4 (default 5007716)
-  bpo_4_base_fee_update_fraction: 5007716
+  bpo_4_max_blobs: 0
+  bpo_4_target_blobs: 0
+  bpo_4_base_fee_update_fraction: 0
 
-  # BPO5 epoch (default 18446744073709551615)
   bpo_5_epoch: 18446744073709551615
-  # Maximum number of blobs per block for BPO5 (default 12)
-  bpo_5_max_blobs: 12
-  # Target number of blobs per block for BPO5 (default 9)
-  bpo_5_target_blobs: 9
-  # Base fee update fraction for BPO5 (default 5007716)
-  bpo_5_base_fee_update_fraction: 5007716
+  bpo_5_max_blobs: 0
+  bpo_5_target_blobs: 0
+  bpo_5_base_fee_update_fraction: 0
 
   # Withdrawal type - available options (0x00, 0x01, 0x02)
   # Default to "0x00"
@@ -768,6 +803,7 @@ additional_services:
   - full_beaconchain_explorer
   - prometheus
   - grafana
+  - tempo
   - blobscan
   - dugtrio
   - blutgang
@@ -794,6 +830,17 @@ dora_params:
   image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
+
+# Define custom file contents to be mounted into containers
+# These files are referenced by name in el_extra_mounts, cl_extra_mounts, and vc_extra_mounts
+extra_files: {}
+  # Example:
+  # my_config_file.yaml: |
+  #   setting1: value1
+  #   setting2: value2
+  # my_script.sh: |
+  #   #!/bin/bash
+  #   echo "Custom script"
 
 # Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
 tx_fuzz_params:
@@ -832,6 +879,29 @@ grafana_params:
   # Grafana docker image to use
   # Defaults to the latest image
   image: "grafana/grafana:latest"
+
+# Configuration place for tempo tracing backend
+tempo_params:
+  # How long to retain traces
+  retention_duration: "12h"
+  # Rate limiting for trace ingestion (bytes per second)
+  ingestion_rate_limit: 20971520  # 20MB
+  # Burst limit for trace ingestion (bytes)
+  ingestion_burst_limit: 52428800  # 50MB
+  # Maximum duration for trace searches
+  max_search_duration: "30s"
+  # Maximum bytes per individual trace
+  max_bytes_per_trace: 52428800  # 50MB
+  # Resource management for tempo container
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 10
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 2048
+  # Tempo docker image to use
+  # Defaults to the latest image
+  image: "grafana/tempo:latest"
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
@@ -1077,7 +1147,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.0.0
+  image: ethpandaops/ethereum-genesis-generator:5.0.6
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
@@ -1333,42 +1403,43 @@ ethereum_metrics_exporter_enabled: true
 
 </details>
 
-## Using Extra Mounts
+## Extra Files and Mounts
 
-The `el_extra_mounts`, `cl_extra_mounts`, and `vc_extra_mounts` parameters allow you to mount additional files or directories into the EL, CL, and VC containers respectively. This is useful for providing custom configuration files, certificates, or other data that your clients need.
+The `extra_files` feature allows you to define custom file contents in your configuration and mount them into any container (EL, CL, or VC).
 
-### How it works
+### How It Works
 
-The extra mounts feature automatically handles file uploads for you:
-- **Relative paths** within the package (e.g., `static_files/config.toml`) are automatically uploaded as artifacts
-- **Existing artifact names** (e.g., `jwt_file`) are used directly
-- Files are mounted at the specified container paths
+1. **Define file contents** in the top-level `extra_files` section
+2. **Mount the files** into containers using `el_extra_mounts`, `cl_extra_mounts`, or `vc_extra_mounts`
+3. **Access the files** inside the container at `<mount_path>/<file_name>`
 
-### Example: Using Built-in Artifacts
+### Important: Understanding Mount Paths
+
+Due to how Kurtosis handles artifacts, mount paths become **directories**, not files. When you mount a file:
+- The mount path you specify becomes a directory
+- Your file is placed inside that directory with its original name from `extra_files`
+
+### Complete Example
 
 ```yaml
+# Define your custom files at the top level
+extra_files:
+  validator_config.json: |
+    {
+      "graffiti": "MyValidator",
+      "enable_doppelganger": true,
+      "suggested_fee_recipient": "0x1234..."
+    }
+
 participants:
   - el_type: geth
     cl_type: lighthouse
-    el_extra_mounts:
-      "/custom/jwt/path": "jwt_file"  # jwt_file is a built-in artifact
-```
 
-### Example: Mounting Files from local directory
-
-```yaml
-participants:
-  - el_type: geth
-    cl_type: lighthouse
+    # Mount files into the consensus layer client
     cl_extra_mounts:
-      "/lighthouse/custom.yaml": "local_directory/lighthouse/custom.yaml"
+      "/configs": "validator_config.json" # File available at: /configs/validator_config.json
 ```
 
-### Notes
-
-- All file paths must be relative to the package root directory
-- Files outside the package directory cannot be mounted directly
-- The entire directory structure is preserved when mounting directories
 
 ## Beacon Node <> Validator Client compatibility
 
@@ -1467,7 +1538,7 @@ Here's a table of where the keys are used
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
 | 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
-| 3             | transaction_spammer | ✅                |                 | To spam transactions with  |
+| 3             | tx_fuzz | ✅                |                 | To spam transactions with  |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |

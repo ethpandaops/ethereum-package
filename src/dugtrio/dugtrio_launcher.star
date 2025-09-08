@@ -38,7 +38,7 @@ def launch_dugtrio(
     additional_service_index,
     docker_cache_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     all_cl_client_info = []
     for index, participant in enumerate(participant_contexts):

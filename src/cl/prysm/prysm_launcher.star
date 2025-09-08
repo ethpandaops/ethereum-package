@@ -6,6 +6,8 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
+PRYSM_ENTRYPOINT_COMMAND = "/beacon-chain"
+
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/prysm/beacon-data/"
 
@@ -48,6 +50,9 @@ def launch(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
+    backend,
+    tempo_otlp_grpc_url=None,
 ):
     beacon_config = get_beacon_config(
         plan,
@@ -68,6 +73,9 @@ def launch(
         port_publisher,
         participant_index,
         network_params,
+        extra_files_artifacts,
+        backend,
+        tempo_otlp_grpc_url,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -104,6 +112,9 @@ def get_beacon_config(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
+    backend,
+    tempo_otlp_grpc_url,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -180,6 +191,7 @@ def get_beacon_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
+        PRYSM_ENTRYPOINT_COMMAND,
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
@@ -188,7 +200,11 @@ def get_beacon_config(
         "--http-host=0.0.0.0",
         "--http-cors-domain=*",
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
-        "--p2p-host-ip=" + port_publisher.cl_nat_exit_ip,
+        "--p2p-host-ip={0}".format(
+            "${K8S_POD_IP}"
+            if backend == "kubernetes"
+            else port_publisher.cl_nat_exit_ip
+        ),
         "--p2p-tcp-port={0}".format(discovery_port_tcp),
         "--p2p-udp-port={0}".format(discovery_port_udp),
         "--p2p-quic-port={0}".format(discovery_port_quic),
@@ -294,7 +310,7 @@ def get_beacon_config(
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.cl_extra_mounts
+        plan, participant.cl_extra_mounts, extra_files_artifacts
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
@@ -303,7 +319,8 @@ def get_beacon_config(
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": ["exec " + " ".join(cmd)],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

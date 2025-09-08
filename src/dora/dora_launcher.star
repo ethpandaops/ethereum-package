@@ -43,7 +43,7 @@ def launch_dora(
     docker_cache_params,
     el_cl_genesis_data,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     all_cl_client_info = []
     all_el_client_info = []
@@ -152,7 +152,7 @@ def get_config(
         + constants.DEFAULT_DORA_IMAGE
     )
     if dora_params.image == default_dora_image:
-        if network_params.eip7732_fork_epoch < constants.FAR_FUTURE_EPOCH:
+        if network_params.gloas_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = (
                 docker_cache_params.url
                 + (
@@ -204,6 +204,7 @@ def new_config_template_data(
         "ELClientInfo": el_client_info,
         "MEVRelayInfo": mev_endpoint_info,
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
+        "IsDevnet": True if "devnet" in network else False,
     }
 
 

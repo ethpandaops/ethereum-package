@@ -8,7 +8,7 @@ constants = import_module("../../package_io/constants.star")
 
 blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 
-LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
+LIGHTHOUSE_ENTRYPOINT_COMMAND = "lighthouse"
 
 RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
 RUST_FULL_BACKTRACE_KEYWORD = "full"
@@ -57,6 +57,9 @@ def launch(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
+    backend,
+    tempo_otlp_grpc_url=None,
 ):
     # Launch Beacon node
     beacon_config = get_beacon_config(
@@ -78,6 +81,9 @@ def launch(
         port_publisher,
         participant_index,
         network_params,
+        extra_files_artifacts,
+        backend,
+        tempo_otlp_grpc_url,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -114,6 +120,9 @@ def get_beacon_config(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
+    backend,
+    tempo_otlp_grpc_url,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -172,9 +181,8 @@ def get_beacon_config(
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
-
     cmd = [
-        LIGHTHOUSE_BINARY_COMMAND,
+        LIGHTHOUSE_ENTRYPOINT_COMMAND,
         "beacon_node",
         "--debug-level=" + log_level,
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
@@ -194,7 +202,11 @@ def get_beacon_config(
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # ENR
         "--disable-enr-auto-update",
-        "--enr-address=" + port_publisher.cl_nat_exit_ip,
+        "--enr-address={0}".format(
+            "${K8S_POD_IP}"
+            if backend == "kubernetes"
+            else port_publisher.cl_nat_exit_ip
+        ),
         "--enr-tcp-port={0}".format(discovery_port_tcp),
         "--enr-udp-port={0}".format(discovery_port_udp),
         # QUIC
@@ -253,6 +265,11 @@ def get_beacon_config(
     else:  # Public networks
         cmd.append("--network=" + network_params.network)
 
+    # Add tempo telemetry integration if tempo is enabled
+    if tempo_otlp_grpc_url != None:
+        cmd.append("--telemetry-collector-url={}".format(tempo_otlp_grpc_url))
+        cmd.append("--telemetry-service-name={}".format(beacon_service_name))
+
     if len(participant.cl_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.cl_extra_params])
@@ -285,7 +302,7 @@ def get_beacon_config(
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.cl_extra_mounts
+        plan, participant.cl_extra_mounts, extra_files_artifacts
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
@@ -296,7 +313,8 @@ def get_beacon_config(
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": ["exec " + " ".join(cmd)],
         "files": files,
         "env_vars": env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

@@ -30,6 +30,7 @@ def launch(
     port_publisher,
     mev_builder_type,
     mev_params,
+    extra_files_artifacts={},
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -131,8 +132,10 @@ def launch(
             participant.node_selectors,
             global_node_selectors,
         )
-        tolerations = input_parser.get_client_tolerations(
-            participant.el_tolerations, participant.tolerations, global_tolerations
+        tolerations = shared_utils.get_tolerations(
+            specific_container_tolerations=participant.el_tolerations,
+            participant_tolerations=participant.tolerations,
+            global_tolerations=global_tolerations,
         )
 
         if el_type not in el_launchers:
@@ -167,6 +170,7 @@ def launch(
                 port_publisher,
                 index,
                 network_params,
+                extra_files_artifacts,
             )
 
             # Add participant el additional prometheus metrics
@@ -190,6 +194,7 @@ def launch(
                 port_publisher,
                 index,
                 network_params,
+                extra_files_artifacts,
             )
 
             el_participant_info[el_service_name] = {
