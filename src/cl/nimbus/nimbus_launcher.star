@@ -201,6 +201,7 @@ def get_beacon_config(
     )
 
     cmd = [
+        "exec",
         "{0}".format(BEACON_NODE_ENTRYPOINT),
         "--non-interactive=true",
         "--log-level=" + log_level,
@@ -343,7 +344,7 @@ def get_beacon_config(
         "ports": used_ports,
         "public_ports": public_ports,
         "entrypoint": ["sh", "-c"],
-        "cmd": ["exec " + command_str],
+        "cmd": [command_str],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
