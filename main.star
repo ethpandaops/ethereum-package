@@ -527,6 +527,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                el_cl_genesis_data,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "dugtrio":

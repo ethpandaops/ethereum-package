@@ -41,6 +41,7 @@ def launch_dora(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    el_cl_genesis_data,
 ):
     tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
 
@@ -114,6 +115,7 @@ def launch_dora(
         port_publisher,
         additional_service_index,
         docker_cache_params,
+        el_cl_genesis_data,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -128,6 +130,7 @@ def get_config(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    el_cl_genesis_data,
 ):
     config_file_path = shared_utils.path_join(
         DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -177,6 +180,7 @@ def get_config(
         files={
             DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
         },
         cmd=["-config", config_file_path],
         env_vars=env_vars,
