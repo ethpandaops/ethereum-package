@@ -63,6 +63,7 @@ beaconapi:
   redisCachePrefix: ""
 
 executionapi:
+  genesisConfig: "/network-configs/genesis.json"
   endpoints:
 {{ range $elClient := .ELClientInfo }}
     - url: "{{ $elClient.Execution_HTTP_URL }}"
