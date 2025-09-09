@@ -109,20 +109,11 @@ def get_config(
     else:
         gcmode_archive = False
 
-    if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-        init_datadir_cmd_str = "echo shadowfork"
 
-    # TODO: Remove once archive mode works with path based storage scheme
-    elif gcmode_archive:  # Disable path based storage scheme archive mode
-        init_datadir_cmd_str = "geth init --state.scheme=hash --datadir={0} {1}".format(
-            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-        )
-    else:
-        init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
-            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-            constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-        )
+    init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
+        EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
+    )
 
     public_ports = {}
     public_ports_for_component = None
@@ -164,8 +155,6 @@ def get_config(
 
     cmd = [
         "geth",
-        # TODO: REMOVE Once geth default db is path based, and builder rebased
-        "{0}".format("--state.scheme=hash" if gcmode_archive else ""),
         "{0}".format(
             "--{}".format(network_params.network)
             if network_params.network in constants.PUBLIC_NETWORKS

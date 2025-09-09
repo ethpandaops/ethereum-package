@@ -170,8 +170,7 @@ def get_config(
         cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
 
     if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-        if launcher.osaka_enabled:
-            cmd.append("--override.osaka=" + str(launcher.osaka_time))
+        cmd.append("--keep.stored.chain.config=true")
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
