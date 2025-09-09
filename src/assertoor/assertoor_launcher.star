@@ -26,23 +26,21 @@ USED_PORTS = {
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
 }
 
-
 def launch_assertoor(
-    plan,
-    config_template,
-    participant_contexts,
-    participant_configs,
-    network_params,
-    assertoor_params,
-    port_publisher,
-    index,
-    global_node_selectors,
-    global_tolerations,
-    docker_cache_params,
-):
+        plan,
+        config_template,
+        participant_contexts,
+        participant_configs,
+        network_params,
+        assertoor_params,
+        port_publisher,
+        index,
+        global_node_selectors,
+        global_tolerations,
+        docker_cache_params):
     all_client_info = []
     clients_with_validators = []
     clients_with_el_snooper = []
@@ -55,7 +53,7 @@ def launch_assertoor(
         0,
     )
 
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     for index, participant in enumerate(participant_contexts):
         (
@@ -64,7 +62,10 @@ def launch_assertoor(
             el_client,
             participant_config,
         ) = shared_utils.get_client_names(
-            participant, index, participant_contexts, participant_configs
+            participant,
+            index,
+            participant_contexts,
+            participant_configs,
         )
 
         client_info = new_client_info(
@@ -95,19 +96,20 @@ def launch_assertoor(
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        config_template, template_data
+        config_template,
+        template_data,
     )
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        ASSERTOOR_CONFIG_FILENAME
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[ASSERTOOR_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "assertoor-config"
+        template_and_data_by_rel_dest_filepath,
+        "assertoor-config",
     )
 
     tests_config_artifacts_name = plan.upload_files(
-        static_files.ASSERTOOR_TESTS_CONFIG_DIRPATH, name="assertoor-tests"
+        static_files.ASSERTOOR_TESTS_CONFIG_DIRPATH,
+        name = "assertoor-tests",
     )
 
     config = get_config(
@@ -123,17 +125,15 @@ def launch_assertoor(
 
     plan.add_service(SERVICE_NAME, config)
 
-
 def get_config(
-    config_files_artifact_name,
-    tests_config_artifacts_name,
-    network_params,
-    assertoor_params,
-    public_ports,
-    node_selectors,
-    tolerations,
-    docker_cache_params,
-):
+        config_files_artifact_name,
+        tests_config_artifacts_name,
+        network_params,
+        assertoor_params,
+        public_ports,
+        node_selectors,
+        tolerations,
+        docker_cache_params):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         ASSERTOOR_CONFIG_FILENAME,
@@ -142,50 +142,46 @@ def get_config(
     IMAGE_NAME = assertoor_params.image
 
     default_assertoor_image = (
-        docker_cache_params.url
-        + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
-        + constants.DEFAULT_ASSERTOOR_IMAGE
+        docker_cache_params.url +
+        (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "") +
+        constants.DEFAULT_ASSERTOOR_IMAGE
     )
     if assertoor_params.image == default_assertoor_image:
         if network_params.fulu_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = (
-                docker_cache_params.url
-                + (
-                    docker_cache_params.dockerhub_prefix
-                    if docker_cache_params.enabled
-                    else ""
-                )
-                + "ethpandaops/assertoor:fulu-support"
+                docker_cache_params.url +
+                (
+                    docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else ""
+                ) +
+                "ethpandaops/assertoor:fulu-support"
             )
     return ServiceConfig(
-        image=IMAGE_NAME,
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        files={
+        image = IMAGE_NAME,
+        ports = USED_PORTS,
+        public_ports = public_ports,
+        files = {
             ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             ASSERTOOR_TESTS_MOUNT_DIRPATH_ON_SERVICE: tests_config_artifacts_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
         },
-        cmd=["--config", config_file_path],
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        cmd = ["--config", config_file_path],
+        min_cpu = MIN_CPU,
+        max_cpu = MAX_CPU,
+        min_memory = MIN_MEMORY,
+        max_memory = MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
 
-
 def new_config_template_data(
-    listen_port_num,
-    all_client_info,
-    clients_with_validators,
-    clients_with_el_snooper,
-    clients_with_cl_snooper,
-    assertoor_params,
-):
+        listen_port_num,
+        all_client_info,
+        clients_with_validators,
+        clients_with_el_snooper,
+        clients_with_cl_snooper,
+        assertoor_params):
     additional_tests = []
-    for index, testcfg in enumerate(assertoor_params.tests):
+    for _, testcfg in enumerate(assertoor_params.tests):
         if type(testcfg) == "dict":
             additional_tests.append(json.encode(testcfg))
         else:
@@ -193,8 +189,8 @@ def new_config_template_data(
                 json.encode(
                     {
                         "file": testcfg,
-                    }
-                )
+                    },
+                ),
             )
 
     return {
@@ -212,15 +208,13 @@ def new_config_template_data(
         "AdditionalTests": additional_tests,
     }
 
-
 def new_client_info(
-    beacon_http_url,
-    el_ip_addr,
-    el_port_num,
-    el_snooper_context,
-    cl_snooper_context,
-    full_name,
-):
+        beacon_http_url,
+        el_ip_addr,
+        el_port_num,
+        el_snooper_context,
+        cl_snooper_context,
+        full_name):
     el_snooper_enabled = False
     el_snooper_url = ""
     cl_snooper_enabled = False

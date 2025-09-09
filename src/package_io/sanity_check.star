@@ -404,33 +404,37 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "checkpoint_sync_url": "",
 }
 
-
-def deep_validate_params(plan, input_args, category, allowed_params):
+def deep_validate_params(_, input_args, category, allowed_params):
     if category in input_args:
         for item in input_args[category]:
             for param in item.keys():
                 if param not in allowed_params:
                     fail(
                         "Invalid parameter {0} for {1}. Allowed fields: {2}".format(
-                            param, category, allowed_params
-                        )
+                            param,
+                            category,
+                            allowed_params,
+                        ),
                     )
 
-
-def validate_params(plan, input_args, category, allowed_params):
+def validate_params(_, input_args, category, allowed_params):
     if category in input_args:
         for param in input_args[category].keys():
             if param not in allowed_params:
                 fail(
                     "Invalid parameter {0} for {1}. Allowed fields: {2}".format(
-                        param, category, allowed_params
-                    )
+                        param,
+                        category,
+                        allowed_params,
+                    ),
                 )
 
-
 def validate_nested_params(
-    plan, input_args, category, nested_param_definition, special_keys=None
-):
+        plan,
+        input_args,
+        category,
+        nested_param_definition,
+        special_keys = None):
     if category not in input_args:
         return
 
@@ -442,8 +446,10 @@ def validate_nested_params(
         if param not in allowed_top_level_keys:
             fail(
                 "Invalid parameter {0} for {1}, allowed fields: {2}".format(
-                    param, category, allowed_top_level_keys
-                )
+                    param,
+                    category,
+                    allowed_top_level_keys,
+                ),
             )
 
     # Validate nested parameters
@@ -456,33 +462,34 @@ def validate_nested_params(
                 nested_param_definition[sub_param],
             )
 
-
 def sanity_check(plan, input_args):
     # Checks participants
     deep_validate_params(
-        plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
+        plan,
+        input_args,
+        "participants",
+        PARTICIPANT_CATEGORIES["participants"],
     )
+
     # Checks participants_matrix (uses original logic for arrays of objects)
     if "participants_matrix" in input_args:
         for sub_matrix_participant in input_args["participants_matrix"]:
             if (
-                sub_matrix_participant
-                not in PARTICIPANT_MATRIX_PARAMS["participants_matrix"]
+                sub_matrix_participant not in
+                PARTICIPANT_MATRIX_PARAMS["participants_matrix"]
             ):
                 fail(
                     "Invalid parameter {0} for participants_matrix, allowed fields: {1}".format(
                         sub_matrix_participant,
                         PARTICIPANT_MATRIX_PARAMS["participants_matrix"].keys(),
-                    )
+                    ),
                 )
             else:
                 deep_validate_params(
                     plan,
                     input_args["participants_matrix"],
                     sub_matrix_participant,
-                    PARTICIPANT_MATRIX_PARAMS["participants_matrix"][
-                        sub_matrix_participant
-                    ],
+                    PARTICIPANT_MATRIX_PARAMS["participants_matrix"][sub_matrix_participant],
                 )
 
     # Checks port_publisher (uses new generic validation for key-value mappings)
@@ -500,23 +507,28 @@ def sanity_check(plan, input_args):
             if additional_services not in ADDITIONAL_SERVICES_PARAMS:
                 fail(
                     "Invalid additional_services {0}, allowed fields: {1}".format(
-                        additional_services, ADDITIONAL_SERVICES_PARAMS
-                    )
+                        additional_services,
+                        ADDITIONAL_SERVICES_PARAMS,
+                    ),
                 )
 
     # Checks subcategories
     for subcategories in SUBCATEGORY_PARAMS.keys():
         validate_params(
-            plan, input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
+            plan,
+            input_args,
+            subcategories,
+            SUBCATEGORY_PARAMS[subcategories],
         )
+
     # Checks everything else
     for param in input_args.keys():
         combined_root_params = (
-            PARTICIPANT_CATEGORIES.keys()
-            + PARTICIPANT_MATRIX_PARAMS.keys()
-            + PORT_PUBLISHER_PARAMS.keys()
-            + SUBCATEGORY_PARAMS.keys()
-            + ADDITIONAL_CATEGORY_PARAMS.keys()
+            PARTICIPANT_CATEGORIES.keys() +
+            PARTICIPANT_MATRIX_PARAMS.keys() +
+            PORT_PUBLISHER_PARAMS.keys() +
+            SUBCATEGORY_PARAMS.keys() +
+            ADDITIONAL_CATEGORY_PARAMS.keys()
         )
         combined_root_params.append("additional_services")
         combined_root_params.append("extra_files")
@@ -524,8 +536,9 @@ def sanity_check(plan, input_args):
         if param not in combined_root_params:
             fail(
                 "Invalid parameter {0}, allowed fields {1}".format(
-                    param, combined_root_params
-                )
+                    param,
+                    combined_root_params,
+                ),
             )
 
     # If everything passes, print a message

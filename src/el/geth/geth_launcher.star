@@ -3,7 +3,7 @@ input_parser = import_module("../../package_io/input_parser.star")
 el_context = import_module("../../el/el_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 genesis_constants = import_module(
-    "../../prelaunch_data_generator/genesis_constants/genesis_constants.star"
+    "../../prelaunch_data_generator/genesis_constants/genesis_constants.star",
 )
 el_shared = import_module("../el_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
@@ -36,22 +36,20 @@ VERBOSITY_LEVELS = {
 BUILDER_IMAGE_STR = "builder"
 SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
 
-
 def launch(
-    plan,
-    launcher,
-    service_name,
-    participant,
-    global_log_level,
-    existing_el_clients,
-    persistent,
-    tolerations,
-    node_selectors,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-):
+        plan,
+        launcher,
+        service_name,
+        participant,
+        global_log_level,
+        existing_el_clients,
+        persistent,
+        tolerations,
+        node_selectors,
+        port_publisher,
+        participant_index,
+        network_params,
+        extra_files_artifacts):
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
@@ -80,30 +78,30 @@ def launch(
         launcher,
     )
 
-
 def get_config(
-    plan,
-    launcher,
-    participant,
-    service_name,
-    existing_el_clients,
-    cl_client_name,
-    global_log_level,
-    persistent,
-    tolerations,
-    node_selectors,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-):
+        plan,
+        launcher,
+        participant,
+        service_name,
+        existing_el_clients,
+        cl_client_name,
+        global_log_level,
+        persistent,
+        tolerations,
+        node_selectors,
+        port_publisher,
+        participant_index,
+        network_params,
+        extra_files_artifacts):
     log_level = input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+        participant.el_log_level,
+        global_log_level,
+        VERBOSITY_LEVELS,
     )
 
     if (
-        "--gcmode=archive" in participant.el_extra_params
-        or "--gcmode archive" in participant.el_extra_params
+        "--gcmode=archive" in participant.el_extra_params or
+        "--gcmode archive" in participant.el_extra_params
     ):
         gcmode_archive = True
     else:
@@ -118,28 +116,26 @@ def get_config(
     public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "el", port_publisher, participant_index
+            "el",
+            port_publisher,
+            participant_index,
         )
         public_ports = el_shared.get_general_el_public_port_specs(
-            public_ports_for_component
+            public_ports_for_component,
         )
         additional_public_port_assignments = {
             constants.RPC_PORT_ID: public_ports_for_component[3],
             constants.WS_PORT_ID: public_ports_for_component[4],
         }
         public_ports.update(
-            shared_utils.get_port_specs(additional_public_port_assignments)
+            shared_utils.get_port_specs(additional_public_port_assignments),
         )
 
     discovery_port_tcp = (
-        public_ports_for_component[0]
-        if public_ports_for_component
-        else DISCOVERY_PORT_NUM
+        public_ports_for_component[0] if public_ports_for_component else DISCOVERY_PORT_NUM
     )
     discovery_port_udp = (
-        public_ports_for_component[0]
-        if public_ports_for_component
-        else DISCOVERY_PORT_NUM
+        public_ports_for_component[0] if public_ports_for_component else DISCOVERY_PORT_NUM
     )
 
     used_port_assignments = {
@@ -155,14 +151,10 @@ def get_config(
     cmd = [
         "geth",
         "{0}".format(
-            "--{}".format(network_params.network)
-            if network_params.network in constants.PUBLIC_NETWORKS
-            else ""
+            "--{}".format(network_params.network) if network_params.network in constants.PUBLIC_NETWORKS else "",
         ),
         "{0}".format(
-            "--networkid={0}".format(launcher.networkid)
-            if network_params.network not in constants.PUBLIC_NETWORKS
-            else ""
+            "--networkid={0}".format(launcher.networkid) if network_params.network not in constants.PUBLIC_NETWORKS else "",
         ),
         "--verbosity=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
@@ -185,12 +177,8 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--syncmode=full"
-        if network_params.network == constants.NETWORK_NAME.kurtosis
-        and not gcmode_archive
-        else "--syncmode=snap"
-        if not gcmode_archive
-        else "--gcmode=archive",
+        "--syncmode=full" if network_params.network == constants.NETWORK_NAME.kurtosis and
+                             not gcmode_archive else "--syncmode=snap" if not gcmode_archive else "--gcmode=archive",
         "--rpc.allow-unprotected-txs",
         "--metrics",
         "--metrics.addr=0.0.0.0",
@@ -198,9 +186,7 @@ def get_config(
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
         "{0}".format(
-            "--miner.gasprice=1"
-            if network_params.network == constants.NETWORK_NAME.kurtosis
-            else ""
+            "--miner.gasprice=1" if network_params.network == constants.NETWORK_NAME.kurtosis else "",
         ),
     ]
 
@@ -222,31 +208,32 @@ def get_config(
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"
 
     if (
-        network_params.network == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in network_params.network
+        network_params.network == constants.NETWORK_NAME.kurtosis or
+        constants.NETWORK_NAME.shadowfork in network_params.network
     ):
         cmd.append(
-            "--bootnodes="
-            + ",".join(
+            "--bootnodes=" +
+            ",".join(
                 [
                     ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
-            )
+                    for ctx in existing_el_clients[:constants.MAX_ENODE_ENTRIES]
+                ],
+            ),
         )
         if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
             if launcher.osaka_enabled:
                 cmd.append("--override.osaka=" + str(launcher.osaka_time))
 
     elif (
-        network_params.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in network_params.network
+        network_params.network not in constants.PUBLIC_NETWORKS and
+        constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
-            "--bootnodes="
-            + shared_utils.get_devnet_enodes(
-                plan, launcher.el_cl_genesis_data.files_artifact_uuid
-            )
+            "--bootnodes=" +
+            shared_utils.get_devnet_enodes(
+                plan,
+                launcher.el_cl_genesis_data.files_artifact_uuid,
+            ),
         )
 
     if len(participant.el_extra_params) > 0:
@@ -272,17 +259,15 @@ def get_config(
             "devnets" if "devnet" in network_params.network else network_params.network
         )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.EL_TYPE.geth + "_volume_size"
-            ],
+            persistent_key = "data-{0}".format(service_name),
+            size = int(participant.el_volume_size) if int(participant.el_volume_size) > 0 else constants.VOLUME_SIZE[volume_size_key][constants.EL_TYPE.geth + "_volume_size"],
         )
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.el_extra_mounts, extra_files_artifacts
+        plan,
+        participant.el_extra_mounts,
+        extra_files_artifacts,
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
@@ -298,13 +283,13 @@ def get_config(
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.EL_TYPE.geth,
-            client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels
-            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
-            supernode=participant.supernode,
+            client = constants.EL_TYPE.geth,
+            client_type = constants.CLIENT_TYPES.el,
+            image = participant.el_image[-constants.MAX_LABEL_LENGTH:],
+            connected_client = cl_client_name,
+            extra_labels = participant.el_extra_labels |
+                           {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
+            supernode = participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
@@ -320,50 +305,43 @@ def get_config(
         config_args["max_memory"] = participant.el_max_mem
     return ServiceConfig(**config_args)
 
-
 # makes request to [service_name] for enode and enr and returns a full el_context
-def get_el_context(
-    plan,
-    service_name,
-    service,
-    launcher,
-):
+def get_el_context(plan, service_name, service, _):
     enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, constants.RPC_PORT_ID
+        plan,
+        service_name,
+        constants.RPC_PORT_ID,
     )
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     geth_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metrics_url
+        service_name,
+        METRICS_PATH,
+        metrics_url,
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
     ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        client_name="geth",
-        enode=enode,
-        ip_addr=service.ip_address,
-        rpc_port_num=RPC_PORT_NUM,
-        ws_port_num=WS_PORT_NUM,
-        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
-        rpc_http_url=http_url,
-        ws_url=ws_url,
-        enr=enr,
-        service_name=service_name,
-        el_metrics_info=[geth_metrics_info],
+        client_name = "geth",
+        enode = enode,
+        ip_addr = service.ip_address,
+        rpc_port_num = RPC_PORT_NUM,
+        ws_port_num = WS_PORT_NUM,
+        engine_rpc_port_num = ENGINE_RPC_PORT_NUM,
+        rpc_http_url = http_url,
+        ws_url = ws_url,
+        enr = enr,
+        service_name = service_name,
+        el_metrics_info = [geth_metrics_info],
     )
 
-
-def new_geth_launcher(
-    el_cl_genesis_data,
-    jwt_file,
-    networkid,
-):
+def new_geth_launcher(el_cl_genesis_data, jwt_file, networkid):
     return struct(
-        el_cl_genesis_data=el_cl_genesis_data,
-        jwt_file=jwt_file,
-        networkid=networkid,
-        osaka_time=el_cl_genesis_data.osaka_time,
-        osaka_enabled=el_cl_genesis_data.osaka_enabled,
+        el_cl_genesis_data = el_cl_genesis_data,
+        jwt_file = jwt_file,
+        networkid = networkid,
+        osaka_time = el_cl_genesis_data.osaka_time,
+        osaka_enabled = el_cl_genesis_data.osaka_enabled,
     )

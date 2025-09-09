@@ -11,21 +11,20 @@ HTTP_PORT_NUMBER = 4000
 HTTP_PORT_NUMBER_VERIF = 8050
 HTTP_PORT_NUMBER_FRONTEND = 3000
 
-
 def get_api_host(blockscout_service, port_publisher):
     if port_publisher.additional_services_enabled:
         return port_publisher.additional_services_nat_exit_ip
     return blockscout_service.ip_address
 
-
 def get_api_port(blockscout_service, port_publisher):
     if port_publisher.additional_services_enabled:
         public_ports = shared_utils.get_public_ports_for_component(
-            "additional_services", port_publisher, 0
+            "additional_services",
+            port_publisher,
+            0,
         )
         return public_ports[0]  # First port for the API
     return blockscout_service.ports["http"].number
-
 
 BLOCKSCOUT_MIN_CPU = 100
 BLOCKSCOUT_MAX_CPU = 1000
@@ -42,7 +41,7 @@ USED_PORTS = {
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
 }
 
 VERIF_USED_PORTS = {
@@ -50,7 +49,7 @@ VERIF_USED_PORTS = {
         HTTP_PORT_NUMBER_VERIF,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
 }
 
 FRONTEND_USED_PORTS = {
@@ -58,37 +57,36 @@ FRONTEND_USED_PORTS = {
         HTTP_PORT_NUMBER_FRONTEND,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
 }
 
-
 def launch_blockscout(
-    plan,
-    el_contexts,
-    persistent,
-    global_node_selectors,
-    global_tolerations,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-    blockscout_params,
-    network_params,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        el_contexts,
+        persistent,
+        global_node_selectors,
+        global_tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params,
+        blockscout_params,
+        network_params):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
     postgres_output = postgres.run(
         plan,
-        service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
-        database="blockscout",
-        extra_configs=["max_connections=1000"],
-        persistent=persistent,
-        node_selectors=global_node_selectors,
-        image=shared_utils.docker_cache_image_calc(docker_cache_params, POSTGRES_IMAGE),
-        tolerations=tolerations,
+        service_name = "{}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
+        database = "blockscout",
+        extra_configs = ["max_connections=1000"],
+        persistent = persistent,
+        node_selectors = global_node_selectors,
+        image = shared_utils.docker_cache_image_calc(docker_cache_params, POSTGRES_IMAGE),
+        tolerations = tolerations,
     )
 
     el_context = el_contexts[0]
     el_client_rpc_url = "http://{}:{}/".format(
-        el_context.ip_addr, el_context.rpc_port_num
+        el_context.ip_addr,
+        el_context.rpc_port_num,
     )
     el_client_name = el_context.client_name
 
@@ -103,7 +101,8 @@ def launch_blockscout(
     verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)
     verif_service = plan.add_service(verif_service_name, config_verif)
     verif_url = "http://{}:{}/".format(
-        verif_service.hostname, verif_service.ports["http"].number
+        verif_service.hostname,
+        verif_service.ports["http"].number,
     )
 
     config_backend = get_config_backend(
@@ -122,7 +121,8 @@ def launch_blockscout(
     plan.print(blockscout_service)
 
     blockscout_url = "http://{}:{}".format(
-        blockscout_service.hostname, blockscout_service.ports["http"].number
+        blockscout_service.hostname,
+        blockscout_service.ports["http"].number,
     )
 
     config_frontend = get_config_frontend(
@@ -139,15 +139,13 @@ def launch_blockscout(
     plan.add_service(SERVICE_NAME_FRONTEND, config_frontend)
     return blockscout_url
 
-
 def get_config_verif(
-    node_selectors,
-    tolerations,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-    blockscout_params,
-):
+        node_selectors,
+        tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params,
+        blockscout_params):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
         constants.HTTP_PORT_ID,
@@ -156,45 +154,43 @@ def get_config_verif(
     )
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
+        image = shared_utils.docker_cache_image_calc(
             docker_cache_params,
             blockscout_params.verif_image,
         ),
-        ports=VERIF_USED_PORTS,
-        public_ports=public_ports,
-        env_vars={
+        ports = VERIF_USED_PORTS,
+        public_ports = public_ports,
+        env_vars = {
             "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR": "0.0.0.0:{}".format(
-                HTTP_PORT_NUMBER_VERIF
-            )
+                HTTP_PORT_NUMBER_VERIF,
+            ),
         },
-        min_cpu=BLOCKSCOUT_VERIF_MIN_CPU,
-        max_cpu=BLOCKSCOUT_VERIF_MAX_CPU,
-        min_memory=BLOCKSCOUT_VERIF_MIN_MEMORY,
-        max_memory=BLOCKSCOUT_VERIF_MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        min_cpu = BLOCKSCOUT_VERIF_MIN_CPU,
+        max_cpu = BLOCKSCOUT_VERIF_MAX_CPU,
+        min_memory = BLOCKSCOUT_VERIF_MIN_MEMORY,
+        max_memory = BLOCKSCOUT_VERIF_MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
 
-
 def get_config_backend(
-    postgres_output,
-    el_client_rpc_url,
-    verif_url,
-    el_client_name,
-    node_selectors,
-    tolerations,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-    blockscout_params,
-):
+        postgres_output,
+        el_client_rpc_url,
+        verif_url,
+        el_client_name,
+        node_selectors,
+        tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params,
+        blockscout_params):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
-        protocol="postgresql",
-        user=postgres_output.user,
-        password=postgres_output.password,
-        hostname=postgres_output.service.hostname,
-        port=postgres_output.port.number,
-        database=postgres_output.database,
+        protocol = "postgresql",
+        user = postgres_output.user,
+        password = postgres_output.password,
+        hostname = postgres_output.service.hostname,
+        port = postgres_output.port.number,
+        database = postgres_output.database,
     )
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
@@ -205,21 +201,19 @@ def get_config_backend(
     )
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
+        image = shared_utils.docker_cache_image_calc(
             docker_cache_params,
             blockscout_params.image,
         ),
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        cmd=[
+        ports = USED_PORTS,
+        public_ports = public_ports,
+        cmd = [
             "/bin/sh",
             "-c",
             'bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()" && bin/blockscout start',
         ],
-        env_vars={
-            "ETHEREUM_JSONRPC_VARIANT": "erigon"
-            if el_client_name == "erigon" or el_client_name == "reth"
-            else el_client_name,
+        env_vars = {
+            "ETHEREUM_JSONRPC_VARIANT": "erigon" if el_client_name == "erigon" or el_client_name == "reth" else el_client_name,
             "ETHEREUM_JSONRPC_HTTP_URL": el_client_rpc_url,
             "ETHEREUM_JSONRPC_TRACE_URL": el_client_rpc_url,
             "DATABASE_URL": database_url,
@@ -234,43 +228,41 @@ def get_config_backend(
             "PORT": "{}".format(HTTP_PORT_NUMBER),
             "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
         },
-        min_cpu=BLOCKSCOUT_MIN_CPU,
-        max_cpu=BLOCKSCOUT_MAX_CPU,
-        min_memory=BLOCKSCOUT_MIN_MEMORY,
-        max_memory=BLOCKSCOUT_MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        min_cpu = BLOCKSCOUT_MIN_CPU,
+        max_cpu = BLOCKSCOUT_MAX_CPU,
+        min_memory = BLOCKSCOUT_MIN_MEMORY,
+        max_memory = BLOCKSCOUT_MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
 
-
 def get_config_frontend(
-    plan,
-    el_client_rpc_url,
-    docker_cache_params,
-    blockscout_params,
-    network_params,
-    node_selectors,
-    tolerations,
-    blockscout_service,
-    port_publisher,
-):
+        _,
+        el_client_rpc_url,
+        docker_cache_params,
+        blockscout_params,
+        network_params,
+        node_selectors,
+        tolerations,
+        blockscout_service,
+        port_publisher):
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
+        image = shared_utils.docker_cache_image_calc(
             docker_cache_params,
             blockscout_params.frontend_image,
         ),
-        ports=FRONTEND_USED_PORTS,
-        public_ports=FRONTEND_USED_PORTS,
-        env_vars={
+        ports = FRONTEND_USED_PORTS,
+        public_ports = FRONTEND_USED_PORTS,
+        env_vars = {
             "HOSTNAME": "0.0.0.0",
             "NEXT_PUBLIC_API_PROTOCOL": "http",
             "NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL": "ws",
             "NEXT_PUBLIC_NETWORK_NAME": "Kurtosis",
             "NEXT_PUBLIC_NETWORK_ID": network_params.network_id,
             "NEXT_PUBLIC_NETWORK_RPC_URL": el_client_rpc_url,
-            "NEXT_PUBLIC_API_HOST": get_api_host(blockscout_service, port_publisher)
-            + ":"
-            + str(get_api_port(blockscout_service, port_publisher)),
+            "NEXT_PUBLIC_API_HOST": get_api_host(blockscout_service, port_publisher) +
+                                    ":" +
+                                    str(get_api_port(blockscout_service, port_publisher)),
             "NEXT_PUBLIC_AD_BANNER_PROVIDER": "none",
             "NEXT_PUBLIC_AD_TEXT_PROVIDER": "none",
             "NEXT_PUBLIC_IS_TESTNET": "true",
@@ -285,10 +277,10 @@ def get_config_frontend(
             "NEXT_PUBLIC_USE_NEXT_JS_PROXY": "true",
             "PORT": str(HTTP_PORT_NUMBER_FRONTEND),
         },
-        min_cpu=BLOCKSCOUT_MIN_CPU,
-        max_cpu=BLOCKSCOUT_MAX_CPU,
-        min_memory=BLOCKSCOUT_MIN_MEMORY,
-        max_memory=BLOCKSCOUT_MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        min_cpu = BLOCKSCOUT_MIN_CPU,
+        max_cpu = BLOCKSCOUT_MAX_CPU,
+        min_memory = BLOCKSCOUT_MIN_MEMORY,
+        max_memory = BLOCKSCOUT_MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )

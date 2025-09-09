@@ -18,5 +18,5 @@ VALIDATOR_KEYMANAGER_USED_PORTS = {
         VALIDATOR_HTTP_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
 }

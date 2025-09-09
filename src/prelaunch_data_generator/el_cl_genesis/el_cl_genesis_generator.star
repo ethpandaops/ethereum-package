@@ -10,22 +10,20 @@ GENESIS_VALUES_FILENAME = "values.env"
 GENESIS_CONTRACTS_FILENAME = "additional-contracts.json"
 SHADOWFORK_FILEPATH = "/shadowfork"
 
-
 def generate_el_cl_genesis_data(
-    plan,
-    image,
-    genesis_generation_config_yml_template,
-    genesis_additional_contracts_yml_template,
-    genesis_unix_timestamp,
-    network_params,
-    total_num_validator_keys_to_preregister,
-    latest_block,
-    global_tolerations=[],
-    global_node_selectors={},
-):
+        plan,
+        image,
+        genesis_generation_config_yml_template,
+        genesis_additional_contracts_yml_template,
+        genesis_unix_timestamp,
+        network_params,
+        total_num_validator_keys_to_preregister,
+        latest_block,
+        global_tolerations = [],
+        global_node_selectors = {}):
     files = {}
     shadowfork_file = ""
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+    shared_utils.get_tolerations(global_tolerations = global_tolerations)
     if latest_block != "":
         files[SHADOWFORK_FILEPATH] = latest_block
         shadowfork_file = SHADOWFORK_FILEPATH + "/latest_block.json"
@@ -37,7 +35,8 @@ def generate_el_cl_genesis_data(
         network_params,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
-        genesis_generation_config_yml_template, template_data
+        genesis_generation_config_yml_template,
+        template_data,
     )
 
     additional_contracts_template_data = (
@@ -46,68 +45,66 @@ def generate_el_cl_genesis_data(
         )
     )
     additional_contracts_template = shared_utils.new_template_and_data(
-        genesis_additional_contracts_yml_template, additional_contracts_template_data
+        genesis_additional_contracts_yml_template,
+        additional_contracts_template_data,
     )
 
     genesis_values_and_dest_filepath = {}
 
-    genesis_values_and_dest_filepath[
-        GENESIS_VALUES_FILENAME
-    ] = genesis_generation_template
+    genesis_values_and_dest_filepath[GENESIS_VALUES_FILENAME] = genesis_generation_template
 
-    genesis_values_and_dest_filepath[
-        GENESIS_CONTRACTS_FILENAME
-    ] = additional_contracts_template
+    genesis_values_and_dest_filepath[GENESIS_CONTRACTS_FILENAME] = additional_contracts_template
 
     genesis_generation_config_artifact_name = plan.render_templates(
-        genesis_values_and_dest_filepath, "genesis-el-cl-env-file"
+        genesis_values_and_dest_filepath,
+        "genesis-el-cl-env-file",
     )
 
     files[GENESIS_VALUES_PATH] = genesis_generation_config_artifact_name
 
     genesis = plan.run_sh(
-        name="run-generate-genesis",
-        description="Creating genesis",
-        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed",
-        image=image,
-        files=files,
-        store=[
-            StoreSpec(src="/network-configs/", name="el_cl_genesis_data"),
+        name = "run-generate-genesis",
+        description = "Creating genesis",
+        run = "cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed",
+        image = image,
+        files = files,
+        store = [
+            StoreSpec(src = "/network-configs/", name = "el_cl_genesis_data"),
             StoreSpec(
-                src="/network-configs/genesis_validators_root.txt",
-                name="genesis_validators_root",
+                src = "/network-configs/genesis_validators_root.txt",
+                name = "genesis_validators_root",
             ),
         ],
-        wait=None,
-        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
-        node_selectors=global_node_selectors,
+        wait = None,
+        tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations),
+        node_selectors = global_node_selectors,
     )
 
     genesis_validators_root = plan.run_sh(
-        name="read-genesis-validators-root",
-        description="Reading genesis validators root",
-        run="cat /data/genesis_validators_root.txt",
-        files={"/data": genesis.files_artifacts[1]},
-        wait=None,
-        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
-        node_selectors=global_node_selectors,
+        name = "read-genesis-validators-root",
+        description = "Reading genesis validators root",
+        run = "cat /data/genesis_validators_root.txt",
+        files = {"/data": genesis.files_artifacts[1]},
+        wait = None,
+        tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations),
+        node_selectors = global_node_selectors,
     )
     osaka_time = plan.run_sh(
-        name="read-osaka-time",
-        description="Reading osaka time from genesis",
-        run="jq '.config.osakaTime' /data/genesis.json | tr -d '\n'",
-        files={"/data": genesis.files_artifacts[0]},
-        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
-        node_selectors=global_node_selectors,
+        name = "read-osaka-time",
+        description = "Reading osaka time from genesis",
+        run = "jq '.config.osakaTime' /data/genesis.json | tr -d '\n'",
+        files = {"/data": genesis.files_artifacts[0]},
+        tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations),
+        node_selectors = global_node_selectors,
     )
 
     osaka_enabled_check = plan.run_sh(
-        name="check-osaka-enabled",
-        description="Check if osaka time is enabled (not false)",
-        run="test \"$(jq '.config.osakaTime // false' /data/genesis.json | tr -d '\n')\" != \"false\" && echo true || echo false",
-        files={"/data": genesis.files_artifacts[0]},
-        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
-        node_selectors=global_node_selectors,
+        name = "check-osaka-enabled",
+        description = "Check if osaka time is enabled (not false)",
+        run = "test \"$(jq '.config.osakaTime // false' /data/genesis.json | tr -d '\n')\" != \"false\" && echo true || echo false",
+        files = {"/data": genesis.files_artifacts[0]},
+        tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations),
+        node_selectors = global_node_selectors,
     )
 
     result = el_cl_genesis_data.new_el_cl_genesis_data(
@@ -119,18 +116,14 @@ def generate_el_cl_genesis_data(
 
     return result
 
-
 def new_env_file_for_el_cl_genesis_data(
-    genesis_unix_timestamp,
-    total_num_validator_keys_to_preregister,
-    shadowfork_file,
-    network_params,
-):
+        genesis_unix_timestamp,
+        total_num_validator_keys_to_preregister,
+        shadowfork_file,
+        network_params):
     return {
         "UnixTimestamp": genesis_unix_timestamp,
-        "NetworkId": constants.NETWORK_ID[network_params.network.split("-")[0]]
-        if shadowfork_file
-        else network_params.network_id,  # This will override the network_id if shadowfork_file is present. If you want to use the network_id, please ensure that you don't use "shadowfork" in the network name.
+        "NetworkId": constants.NETWORK_ID[network_params.network.split("-")[0]] if shadowfork_file else network_params.network_id,  # This will override the network_id if shadowfork_file is present. If you want to use the network_id, please ensure that you don't use "shadowfork" in the network name.
         "DepositContractAddress": network_params.deposit_contract_address,
         "SecondsPerSlot": network_params.seconds_per_slot,
         "SlotDurationMs": network_params.slot_duration_ms,
@@ -181,9 +174,9 @@ def new_env_file_for_el_cl_genesis_data(
         "MaxRequestBlobSidecarsElectra": network_params.max_request_blob_sidecars_electra,
         "BaseFeeUpdateFractionElectra": network_params.base_fee_update_fraction_electra,
         "Preset": network_params.preset,
-        "AdditionalPreloadedContractsFile": GENESIS_VALUES_PATH
-        + "/"
-        + GENESIS_CONTRACTS_FILENAME,
+        "AdditionalPreloadedContractsFile": GENESIS_VALUES_PATH +
+                                            "/" +
+                                            GENESIS_CONTRACTS_FILENAME,
         "PrefundedAccounts": json.encode(network_params.prefunded_accounts),
         "MaxPayloadSize": network_params.max_payload_size,
         "Bpo1Epoch": "{0}".format(network_params.bpo_1_epoch),
@@ -212,10 +205,7 @@ def new_env_file_for_el_cl_genesis_data(
         "MinEpochsForDataColumnSidecarsRequests": network_params.min_epochs_for_data_column_sidecars_requests,
     }
 
-
-def new_additionsl_contracts_file_for_el_cl_genesis_data(
-    network_params,
-):
+def new_additionsl_contracts_file_for_el_cl_genesis_data(network_params):
     additional_contracts_json = network_params.additional_preloaded_contracts
     if type(additional_contracts_json) != "string":
         additional_contracts_json = json.encode(additional_contracts_json)

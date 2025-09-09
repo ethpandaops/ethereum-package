@@ -14,28 +14,28 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
-
 def get_config(
-    plan,
-    participant,
-    el_cl_genesis_data,
-    image,
-    global_log_level,
-    beacon_http_url,
-    cl_context,
-    el_context,
-    full_name,
-    node_keystore_files,
-    tolerations,
-    node_selectors,
-    keymanager_enabled,
-    network_params,
-    port_publisher,
-    vc_index,
-    extra_files_artifacts,
-):
+        plan,
+        participant,
+        el_cl_genesis_data,
+        image,
+        global_log_level,
+        beacon_http_url,
+        cl_context,
+        _,
+        _,
+        node_keystore_files,
+        tolerations,
+        node_selectors,
+        keymanager_enabled,
+        network_params,
+        port_publisher,
+        vc_index,
+        extra_files_artifacts):
     log_level = input_parser.get_client_log_level_or_default(
-        participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
+        participant.vc_log_level,
+        global_log_level,
+        VERBOSITY_LEVELS,
     )
 
     validator_keys_dirpath = shared_utils.path_join(
@@ -95,13 +95,15 @@ def get_config(
     public_keymanager_port_assignment = {}
     if port_publisher.vc_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "vc", port_publisher, vc_index
+            "vc",
+            port_publisher,
+            vc_index,
         )
         public_port_assignments = {
-            constants.METRICS_PORT_ID: public_ports_for_component[0]
+            constants.METRICS_PORT_ID: public_ports_for_component[0],
         }
         public_keymanager_port_assignment = {
-            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]
+            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1],
         }
         public_ports = shared_utils.get_port_specs(public_port_assignments)
 
@@ -112,12 +114,14 @@ def get_config(
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
         public_ports.update(
-            shared_utils.get_port_specs(public_keymanager_port_assignment)
+            shared_utils.get_port_specs(public_keymanager_port_assignment),
         )
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.vc_extra_mounts, extra_files_artifacts
+        plan,
+        participant.vc_extra_mounts,
+        extra_files_artifacts,
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
@@ -130,13 +134,13 @@ def get_config(
         "files": files,
         "env_vars": env,
         "labels": shared_utils.label_maker(
-            client=constants.VC_TYPE.lighthouse,
-            client_type=constants.CLIENT_TYPES.validator,
-            image=image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels
-            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
-            supernode=participant.supernode,
+            client = constants.VC_TYPE.lighthouse,
+            client_type = constants.CLIENT_TYPES.validator,
+            image = image[-constants.MAX_LABEL_LENGTH:],
+            connected_client = cl_context.client_name,
+            extra_labels = participant.vc_extra_labels |
+                           {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
+            supernode = participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,

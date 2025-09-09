@@ -2,27 +2,25 @@ constants = import_module("../package_io/constants.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
 vc_shared = import_module("./shared.star")
 
-
 def get_config(
-    plan,
-    participant,
-    el_cl_genesis_data,
-    keymanager_file,
-    image,
-    beacon_http_url,
-    cl_context,
-    el_context,
-    remote_signer_context,
-    full_name,
-    node_keystore_files,
-    tolerations,
-    node_selectors,
-    keymanager_enabled,
-    network_params,
-    port_publisher,
-    vc_index,
-    extra_files_artifacts,
-):
+        plan,
+        participant,
+        el_cl_genesis_data,
+        keymanager_file,
+        image,
+        beacon_http_url,
+        cl_context,
+        _,
+        remote_signer_context,
+        _,
+        node_keystore_files,
+        tolerations,
+        node_selectors,
+        keymanager_enabled,
+        network_params,
+        port_publisher,
+        vc_index,
+        extra_files_artifacts):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
     if node_keystore_files != None:
@@ -37,12 +35,12 @@ def get_config(
 
     cmd = [
         "validator-client",
-        "--network="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/config.yaml",
+        "--network=" +
+        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER +
+        "/config.yaml",
         "--beacon-node-api-endpoint=" + beacon_http_url,
-        "--validators-proposer-default-fee-recipient="
-        + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--validators-proposer-default-fee-recipient=" +
+        constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled=true",
         "--metrics-host-allowlist=*",
@@ -53,8 +51,8 @@ def get_config(
     if network_params.gas_limit > 0:
         cmd.append(
             "--validators-builder-registration-default-gas-limit={0}".format(
-                network_params.gas_limit
-            )
+                network_params.gas_limit,
+            ),
         )
 
     if remote_signer_context == None:
@@ -64,16 +62,16 @@ def get_config(
                     validator_keys_dirpath,
                     validator_secrets_dirpath,
                 ),
-            ]
+            ],
         )
     else:
         cmd.extend(
             [
                 "--validators-external-signer-url={0}".format(
-                    remote_signer_context.http_url
+                    remote_signer_context.http_url,
                 ),
                 "--validators-external-signer-public-keys=external-signer",
-            ]
+            ],
         )
 
     keymanager_api_cmd = [
@@ -99,13 +97,15 @@ def get_config(
     public_keymanager_port_assignment = {}
     if port_publisher.vc_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "vc", port_publisher, vc_index
+            "vc",
+            port_publisher,
+            vc_index,
         )
         public_port_assignments = {
-            constants.METRICS_PORT_ID: public_ports_for_component[0]
+            constants.METRICS_PORT_ID: public_ports_for_component[0],
         }
         public_keymanager_port_assignment = {
-            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]
+            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1],
         }
         public_ports = shared_utils.get_port_specs(public_port_assignments)
 
@@ -117,12 +117,14 @@ def get_config(
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
         public_ports.update(
-            shared_utils.get_port_specs(public_keymanager_port_assignment)
+            shared_utils.get_port_specs(public_keymanager_port_assignment),
         )
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.vc_extra_mounts, extra_files_artifacts
+        plan,
+        participant.vc_extra_mounts,
+        extra_files_artifacts,
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
@@ -135,13 +137,13 @@ def get_config(
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.VC_TYPE.teku,
-            client_type=constants.CLIENT_TYPES.validator,
-            image=image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels
-            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
-            supernode=participant.supernode,
+            client = constants.VC_TYPE.teku,
+            client_type = constants.CLIENT_TYPES.validator,
+            image = image[-constants.MAX_LABEL_LENGTH:],
+            connected_client = cl_context.client_name,
+            extra_labels = participant.vc_extra_labels |
+                           {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
+            supernode = participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,

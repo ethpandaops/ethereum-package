@@ -32,77 +32,76 @@ MAX_CPU = 300
 MIN_MEMORY = 128
 MAX_MEMORY = 1024
 
-
 def launch(
-    plan,
-    launcher,
-    service_name,
-    remote_signer_type,
-    image,
-    full_name,
-    vc_type,
-    node_keystore_files,
-    participant,
-    global_tolerations,
-    node_selectors,
-    port_publisher,
-    remote_signer_index,
-):
+        plan,
+        launcher,
+        service_name,
+        remote_signer_type,
+        image,
+        _,
+        vc_type,
+        node_keystore_files,
+        participant,
+        global_tolerations,
+        node_selectors,
+        port_publisher,
+        remote_signer_index):
     tolerations = shared_utils.get_tolerations(
-        specific_container_tolerations=participant.remote_signer_tolerations,
-        participant_tolerations=participant.tolerations,
-        global_tolerations=global_tolerations,
+        specific_container_tolerations = participant.remote_signer_tolerations,
+        participant_tolerations = participant.tolerations,
+        global_tolerations = global_tolerations,
     )
 
     config = get_config(
-        participant=participant,
-        el_cl_genesis_data=launcher.el_cl_genesis_data,
-        image=image,
-        vc_type=vc_type,
-        node_keystore_files=node_keystore_files,
-        tolerations=tolerations,
-        node_selectors=node_selectors,
-        port_publisher=port_publisher,
-        remote_signer_index=remote_signer_index,
+        participant = participant,
+        el_cl_genesis_data = launcher.el_cl_genesis_data,
+        image = image,
+        vc_type = vc_type,
+        node_keystore_files = node_keystore_files,
+        tolerations = tolerations,
+        node_selectors = node_selectors,
+        port_publisher = port_publisher,
+        remote_signer_index = remote_signer_index,
     )
 
     remote_signer_service = plan.add_service(service_name, config)
 
     remote_signer_http_port = remote_signer_service.ports[REMOTE_SIGNER_HTTP_PORT_ID]
     remote_signer_http_url = "http://{0}:{1}".format(
-        remote_signer_service.ip_address, remote_signer_http_port.number
+        remote_signer_service.ip_address,
+        remote_signer_http_port.number,
     )
 
-    remote_signer_metrics_port = remote_signer_service.ports[
-        REMOTE_SIGNER_METRICS_PORT_ID
-    ]
+    remote_signer_metrics_port = remote_signer_service.ports[REMOTE_SIGNER_METRICS_PORT_ID]
     validator_metrics_url = "{0}:{1}".format(
-        remote_signer_service.ip_address, remote_signer_metrics_port.number
+        remote_signer_service.ip_address,
+        remote_signer_metrics_port.number,
     )
     remote_signer_node_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, validator_metrics_url
+        service_name,
+        METRICS_PATH,
+        validator_metrics_url,
     )
 
     return remote_signer_context.new_remote_signer_context(
-        http_url=remote_signer_http_url,
-        client_name=remote_signer_type,
-        service_name=service_name,
-        metrics_info=remote_signer_node_metrics_info,
+        http_url = remote_signer_http_url,
+        client_name = remote_signer_type,
+        service_name = service_name,
+        metrics_info = remote_signer_node_metrics_info,
     )
 
-
 def get_config(
-    participant,
-    el_cl_genesis_data,
-    image,
-    vc_type,
-    node_keystore_files,
-    tolerations,
-    node_selectors,
-    port_publisher,
-    remote_signer_index,
-):
+        participant,
+        el_cl_genesis_data,
+        image,
+        vc_type,
+        node_keystore_files,
+        tolerations,
+        node_selectors,
+        port_publisher,
+        remote_signer_index):
     validator_keys_dirpath = ""
+    validator_secrets_dirpath = ""
     if node_keystore_files != None:
         validator_keys_dirpath = shared_utils.path_join(
             REMOTE_SIGNER_KEYS_MOUNTPOINT,
@@ -121,9 +120,9 @@ def get_config(
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(REMOTE_SIGNER_METRICS_PORT_NUM),
         "eth2",
-        "--network="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/config.yaml",
+        "--network=" +
+        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER +
+        "/config.yaml",
         "--keystores-path=" + validator_keys_dirpath,
         "--keystores-passwords-path=" + validator_secrets_dirpath,
         # slashing protection would require a postgres DB, applying DB migrations ...
@@ -142,10 +141,12 @@ def get_config(
     public_ports = {}
     if port_publisher.remote_signer_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "remote-signer", port_publisher, remote_signer_index
+            "remote-signer",
+            port_publisher,
+            remote_signer_index,
         )
         public_port_assignments = {
-            constants.METRICS_PORT_ID: public_ports_for_component[0]
+            constants.METRICS_PORT_ID: public_ports_for_component[0],
         }
         public_ports = shared_utils.get_port_specs(public_port_assignments)
 
@@ -160,13 +161,13 @@ def get_config(
         "files": files,
         "env_vars": participant.remote_signer_extra_env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.REMOTE_SIGNER_TYPE.web3signer,
-            client_type=constants.CLIENT_TYPES.remote_signer,
-            image=image,
-            connected_client=vc_type,
-            extra_labels=participant.remote_signer_extra_labels
-            | {constants.NODE_INDEX_LABEL_KEY: str(remote_signer_index + 1)},
-            supernode=participant.supernode,
+            client = constants.REMOTE_SIGNER_TYPE.web3signer,
+            client_type = constants.CLIENT_TYPES.remote_signer,
+            image = image,
+            connected_client = vc_type,
+            extra_labels = participant.remote_signer_extra_labels |
+                           {constants.NODE_INDEX_LABEL_KEY: str(remote_signer_index + 1)},
+            supernode = participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
@@ -183,6 +184,5 @@ def get_config(
 
     return ServiceConfig(**config_args)
 
-
 def new_remote_signer_launcher(el_cl_genesis_data):
-    return struct(el_cl_genesis_data=el_cl_genesis_data)
+    return struct(el_cl_genesis_data = el_cl_genesis_data)

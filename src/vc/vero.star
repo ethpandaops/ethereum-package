@@ -3,7 +3,6 @@ input_parser = import_module("../package_io/input_parser.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
 vc_shared = import_module("./shared.star")
 
-
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "ERROR",
     constants.GLOBAL_LOG_LEVEL.warn: "WARNING",
@@ -11,32 +10,32 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
 }
 
-
 def get_config(
-    plan,
-    participant,
-    el_cl_genesis_data,
-    image,
-    global_log_level,
-    beacon_http_url,
-    cl_context,
-    remote_signer_context,
-    full_name,
-    tolerations,
-    node_selectors,
-    port_publisher,
-    vc_index,
-    extra_files_artifacts,
-):
+        plan,
+        participant,
+        el_cl_genesis_data,
+        image,
+        global_log_level,
+        beacon_http_url,
+        cl_context,
+        remote_signer_context,
+        _,
+        tolerations,
+        node_selectors,
+        port_publisher,
+        vc_index,
+        extra_files_artifacts):
     log_level = input_parser.get_client_log_level_or_default(
-        participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
+        participant.vc_log_level,
+        global_log_level,
+        VERBOSITY_LEVELS,
     )
 
     cmd = [
         "--network=custom",
-        "--network-custom-config-path="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/config.yaml",
+        "--network-custom-config-path=" +
+        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER +
+        "/config.yaml",
         "--remote-signer-url={0}".format(remote_signer_context.http_url),
         "--beacon-node-urls=" + beacon_http_url,
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
@@ -56,10 +55,12 @@ def get_config(
     public_ports = {}
     if port_publisher.vc_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "vc", port_publisher, vc_index
+            "vc",
+            port_publisher,
+            vc_index,
         )
         public_port_assignments = {
-            constants.METRICS_PORT_ID: public_ports_for_component[0]
+            constants.METRICS_PORT_ID: public_ports_for_component[0],
         }
         public_ports = shared_utils.get_port_specs(public_port_assignments)
 
@@ -68,7 +69,9 @@ def get_config(
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.vc_extra_mounts, extra_files_artifacts
+        plan,
+        participant.vc_extra_mounts,
+        extra_files_artifacts,
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
@@ -81,13 +84,13 @@ def get_config(
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.VC_TYPE.vero,
-            client_type=constants.CLIENT_TYPES.validator,
-            image=image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels
-            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
-            supernode=participant.supernode,
+            client = constants.VC_TYPE.vero,
+            client_type = constants.CLIENT_TYPES.validator,
+            image = image[-constants.MAX_LABEL_LENGTH:],
+            connected_client = cl_context.client_name,
+            extra_labels = participant.vc_extra_labels |
+                           {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
+            supernode = participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,

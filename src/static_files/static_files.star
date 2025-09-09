@@ -6,8 +6,8 @@ EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/genesis-generation-config/el-cl/values.env.tmpl"
 )
 EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH
-    + "/genesis-generation-config/el-cl/additional-contracts.json.tmpl"
+    STATIC_FILES_DIRPATH +
+    "/genesis-generation-config/el-cl/additional-contracts.json.tmpl"
 )
 
 # EL Forkmon config
@@ -75,9 +75,9 @@ GRAFANA_DATASOURCE_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + GRAFANA_CONFIG_DIRPATH + "/templates/datasource.yml.tmpl"
 )
 GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH
-    + GRAFANA_CONFIG_DIRPATH
-    + "/templates/dashboard-providers.yml.tmpl"
+    STATIC_FILES_DIRPATH +
+    GRAFANA_CONFIG_DIRPATH +
+    "/templates/dashboard-providers.yml.tmpl"
 )
 GRAFANA_DASHBOARDS_CONFIG_DIRPATH = (
     STATIC_FILES_DIRPATH + GRAFANA_CONFIG_DIRPATH + "/dashboards"

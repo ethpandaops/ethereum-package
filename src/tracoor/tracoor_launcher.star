@@ -22,30 +22,31 @@ USED_PORTS = {
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
 }
 
-
 def launch_tracoor(
-    plan,
-    config_template,
-    participant_contexts,
-    participant_configs,
-    el_cl_data_files_artifact_uuid,
-    network_params,
-    global_node_selectors,
-    global_tolerations,
-    final_genesis_timestamp,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        config_template,
+        participant_contexts,
+        participant_configs,
+        el_cl_data_files_artifact_uuid,
+        network_params,
+        global_node_selectors,
+        global_tolerations,
+        _,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     all_client_info = []
     for index, participant in enumerate(participant_contexts):
         full_name, cl_client, el_client, _ = shared_utils.get_client_names(
-            participant, index, participant_contexts, participant_configs
+            participant,
+            index,
+            participant_contexts,
+            participant_configs,
         )
 
         beacon = new_cl_client_info(cl_client.beacon_http_url, full_name)
@@ -70,19 +71,21 @@ def launch_tracoor(
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        config_template, template_data
+        config_template,
+        template_data,
     )
     template_and_data_by_rel_dest_filepath = {}
     template_and_data_by_rel_dest_filepath[TRACOOR_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "tracoor-config"
+        template_and_data_by_rel_dest_filepath,
+        "tracoor-config",
     )
     el_cl_data_files_artifact_uuid = el_cl_data_files_artifact_uuid
     config = get_config(
         config_files_artifact_name,
-        el_cl_data_files_artifact_uuid,
-        network_params,
+        _,
+        _,
         global_node_selectors,
         tolerations,
         port_publisher,
@@ -92,17 +95,15 @@ def launch_tracoor(
 
     plan.add_service(SERVICE_NAME, config)
 
-
 def get_config(
-    config_files_artifact_name,
-    el_cl_data_files_artifact_uuid,
-    network_params,
-    node_selectors,
-    tolerations,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-):
+        config_files_artifact_name,
+        _,
+        _,
+        node_selectors,
+        tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params):
     config_file_path = shared_utils.path_join(
         TRACOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         TRACOOR_CONFIG_FILENAME,
@@ -116,44 +117,38 @@ def get_config(
     )
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
+        image = shared_utils.docker_cache_image_calc(
             docker_cache_params,
             IMAGE_NAME,
         ),
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        files={
+        ports = USED_PORTS,
+        public_ports = public_ports,
+        files = {
             TRACOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
-        cmd=[
+        cmd = [
             "single",
             "--single-config={0}".format(config_file_path),
         ],
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        min_cpu = MIN_CPU,
+        max_cpu = MAX_CPU,
+        min_memory = MIN_MEMORY,
+        max_memory = MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
 
-
-def new_config_template_data(
-    listen_port_num,
-    client_info,
-):
+def new_config_template_data(listen_port_num, client_info):
     return {
         "ListenPortNum": listen_port_num,
         "ParticipantClientInfo": client_info,
     }
-
 
 def new_cl_client_info(beacon_http_url, full_name):
     return {
         "Beacon_HTTP_URL": beacon_http_url,
         "FullName": full_name,
     }
-
 
 def new_el_client_info(execution_http_url, full_name):
     return {

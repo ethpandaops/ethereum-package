@@ -14,24 +14,22 @@ ethereumjs = import_module("./ethereumjs/ethereumjs_launcher.star")
 nimbus_eth1 = import_module("./nimbus-eth1/nimbus_launcher.star")
 ethrex = import_module("./ethrex/ethrex_launcher.star")
 
-
 def launch(
-    plan,
-    network_params,
-    el_cl_data,
-    jwt_file,
-    participants,
-    global_log_level,
-    global_node_selectors,
-    global_tolerations,
-    persistent,
-    network_id,
-    num_participants,
-    port_publisher,
-    mev_builder_type,
-    mev_params,
-    extra_files_artifacts={},
-):
+        plan,
+        network_params,
+        el_cl_data,
+        jwt_file,
+        participants,
+        global_log_level,
+        global_node_selectors,
+        global_tolerations,
+        persistent,
+        network_id,
+        num_participants,
+        port_publisher,
+        mev_builder_type,
+        mev_params,
+        extra_files_artifacts = {}):
     el_launchers = {
         constants.EL_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
@@ -84,8 +82,8 @@ def launch(
             "launcher": reth.new_reth_launcher(
                 el_cl_data,
                 jwt_file,
-                builder_type=mev_builder_type,
-                mev_params=mev_params,
+                builder_type = mev_builder_type,
+                mev_params = mev_params,
             ),
             "launch_method": reth.launch,
             "get_config": reth.get_config,
@@ -121,7 +119,7 @@ def launch(
     }
 
     all_el_contexts = []
-    network_name = shared_utils.get_network_name(network_params.network)
+    shared_utils.get_network_name(network_params.network)
     el_service_configs = {}
     el_participant_info = {}
 
@@ -133,16 +131,17 @@ def launch(
             global_node_selectors,
         )
         tolerations = shared_utils.get_tolerations(
-            specific_container_tolerations=participant.el_tolerations,
-            participant_tolerations=participant.tolerations,
-            global_tolerations=global_tolerations,
+            specific_container_tolerations = participant.el_tolerations,
+            participant_tolerations = participant.tolerations,
+            global_tolerations = global_tolerations,
         )
 
         if el_type not in el_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    el_type, ",".join(el_launchers.keys())
-                )
+                    el_type,
+                    ",".join(el_launchers.keys()),
+                ),
             )
 
         el_launcher, launch_method, get_config = (

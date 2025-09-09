@@ -17,13 +17,19 @@ VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
 
 BLOBBER_USED_PORTS = {
     BLOBBER_VALIDATOR_PROXY_PORT_ID: shared_utils.new_port_spec(
-        BLOBBER_VALIDATOR_PROXY_PORT_NUM, shared_utils.TCP_PROTOCOL, wait="5s"
+        BLOBBER_VALIDATOR_PROXY_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
+        wait = "5s",
     ),
     BLOBBER_BEACON_PORT_TCP_ID: shared_utils.new_port_spec(
-        BLOBBER_BEACON_PORT_NUM, shared_utils.TCP_PROTOCOL, wait=None
+        BLOBBER_BEACON_PORT_NUM,
+        shared_utils.TCP_PROTOCOL,
+        wait = None,
     ),
     BLOBBER_BEACON_PORT_UDP_ID: shared_utils.new_port_spec(
-        BLOBBER_BEACON_PORT_NUM, shared_utils.UDP_PROTOCOL, wait=None
+        BLOBBER_BEACON_PORT_NUM,
+        shared_utils.UDP_PROTOCOL,
+        wait = None,
     ),
 }
 
@@ -33,17 +39,15 @@ MAX_CPU = 500
 MIN_MEMORY = 10
 MAX_MEMORY = 300
 
-
 def launch(
-    plan,
-    service_name,
-    node_keystore_files,
-    beacon_http_url,
-    participant,
-    node_selectors,
-    global_tolerations,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        service_name,
+        node_keystore_files,
+        beacon_http_url,
+        participant,
+        node_selectors,
+        global_tolerations):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     blobber_service_name = "{0}".format(service_name)
 
@@ -62,15 +66,13 @@ def launch(
         blobber_service.ports[BLOBBER_VALIDATOR_PROXY_PORT_ID].number,
     )
 
-
 def get_config(
-    service_name,
-    node_keystore_files,
-    beacon_http_url,
-    participant,
-    node_selectors,
-    tolerations,
-):
+        _,
+        node_keystore_files,
+        beacon_http_url,
+        participant,
+        node_selectors,
+        tolerations):
     validator_root_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
         node_keystore_files.raw_root_dirpath,
@@ -88,17 +90,17 @@ def get_config(
         cmd.extend([param for param in participant.blobber_extra_params])
 
     return ServiceConfig(
-        image=participant.blobber_image,
-        ports=BLOBBER_USED_PORTS,
-        files={
-            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid
+        image = participant.blobber_image,
+        ports = BLOBBER_USED_PORTS,
+        files = {
+            VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS: node_keystore_files.files_artifact_uuid,
         },
-        cmd=cmd,
-        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        cmd = cmd,
+        private_ip_address_placeholder = constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        min_cpu = MIN_CPU,
+        max_cpu = MAX_CPU,
+        min_memory = MIN_MEMORY,
+        max_memory = MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )

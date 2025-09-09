@@ -13,7 +13,7 @@ USED_PORTS = {
     "http": shared_utils.new_port_spec(
         MEV_RELAY_ENDPOINT_PORT,
         "TCP",
-    )
+    ),
 }
 
 # The min/max CPU/memory that mev-relay can use
@@ -22,25 +22,21 @@ MAX_CPU = 500
 MIN_MEMORY = 16
 MAX_MEMORY = 256
 
-
 def launch_mev_relay(
-    plan,
-    mev_params,
-    network,
-    beacon_uri,
-    el_cl_genesis_data,
-    port_publisher,
-    index,
-    global_node_selectors,
-    global_tolerations,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        mev_params,
+        network,
+        beacon_uri,
+        el_cl_genesis_data,
+        port_publisher,
+        index,
+        global_node_selectors,
+        global_tolerations):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
     node_selectors = global_node_selectors
     image = mev_params.mev_relay_image
     network = (
-        network
-        if network in constants.PUBLIC_NETWORKS
-        else constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        network if network in constants.PUBLIC_NETWORKS else constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
     )
 
     public_ports = shared_utils.get_mev_public_port(
@@ -58,47 +54,48 @@ def launch_mev_relay(
     )
 
     mev_rs_relay_config_template = read_file(
-        static_files.MEV_RS_MEV_RELAY_CONFIG_FILEPATH
+        static_files.MEV_RS_MEV_RELAY_CONFIG_FILEPATH,
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        mev_rs_relay_config_template, relay_template_data
+        mev_rs_relay_config_template,
+        relay_template_data,
     )
 
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        MEV_RELAY_CONFIG_FILENAME
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[MEV_RELAY_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, MEV_RELAY_FILES_ARTIFACT_NAME
+        template_and_data_by_rel_dest_filepath,
+        MEV_RELAY_FILES_ARTIFACT_NAME,
     )
 
     config_file_path = shared_utils.path_join(
-        MEV_RELAY_MOUNT_DIRPATH_ON_SERVICE, MEV_RELAY_CONFIG_FILENAME
+        MEV_RELAY_MOUNT_DIRPATH_ON_SERVICE,
+        MEV_RELAY_CONFIG_FILENAME,
     )
 
     mev_relay_service = plan.add_service(
-        name="mev-rs-relay",
-        config=ServiceConfig(
-            image=image,
-            cmd=[
+        name = "mev-rs-relay",
+        config = ServiceConfig(
+            image = image,
+            cmd = [
                 "relay",
                 config_file_path,
             ],
-            files={
+            files = {
                 MEV_RELAY_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
             },
-            ports=USED_PORTS,
-            public_ports=public_ports,
-            min_cpu=MIN_CPU,
-            max_cpu=MAX_CPU,
-            min_memory=MIN_MEMORY,
-            max_memory=MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
-            env_vars={"RUST_BACKTRACE": "1"},
+            ports = USED_PORTS,
+            public_ports = public_ports,
+            min_cpu = MIN_CPU,
+            max_cpu = MAX_CPU,
+            min_memory = MIN_MEMORY,
+            max_memory = MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
+            env_vars = {"RUST_BACKTRACE": "1"},
         ),
     )
 
@@ -111,7 +108,6 @@ def launch_mev_relay(
         mev_relay_service.ip_address,
         MEV_RELAY_ENDPOINT_PORT,
     )
-
 
 def new_relay_config_template_data(network, port, beacon_uri, pubkey, secret):
     return {

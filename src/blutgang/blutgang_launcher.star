@@ -32,25 +32,26 @@ USED_PORTS = {
     ),
 }
 
-
 def launch_blutgang(
-    plan,
-    config_template,
-    participant_contexts,
-    participant_configs,
-    network_params,
-    global_node_selectors,
-    global_tolerations,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        config_template,
+        participant_contexts,
+        participant_configs,
+        network_params,
+        global_node_selectors,
+        global_tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     all_el_client_info = []
     for index, participant in enumerate(participant_contexts):
         full_name, _, el_client, _ = shared_utils.get_client_names(
-            participant, index, participant_contexts, participant_configs
+            participant,
+            index,
+            participant_contexts,
+            participant_configs,
         )
         all_el_client_info.append(
             new_el_client_info(
@@ -58,21 +59,25 @@ def launch_blutgang(
                 el_client.rpc_port_num,
                 el_client.ws_port_num,
                 full_name,
-            )
+            ),
         )
 
     template_data = new_config_template_data(
-        network_params.network, HTTP_PORT_NUMBER, all_el_client_info
+        network_params.network,
+        HTTP_PORT_NUMBER,
+        all_el_client_info,
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        config_template, template_data
+        config_template,
+        template_data,
     )
     template_and_data_by_rel_dest_filepath = {}
     template_and_data_by_rel_dest_filepath[BLUTGANG_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "blutgang-config"
+        template_and_data_by_rel_dest_filepath,
+        "blutgang-config",
     )
 
     config = get_config(
@@ -87,16 +92,14 @@ def launch_blutgang(
 
     plan.add_service(SERVICE_NAME, config)
 
-
 def get_config(
-    config_files_artifact_name,
-    network_params,
-    node_selectors,
-    tolerations,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-):
+        config_files_artifact_name,
+        _,
+        node_selectors,
+        tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params):
     config_file_path = shared_utils.path_join(
         BLUTGANG_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         BLUTGANG_CONFIG_FILENAME,
@@ -105,7 +108,9 @@ def get_config(
     public_ports = {}
     if port_publisher.additional_services_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "additional_services", port_publisher, additional_service_index
+            "additional_services",
+            port_publisher,
+            additional_service_index,
         )
         public_port_assignments = {
             constants.HTTP_PORT_ID: public_ports_for_component[0],
@@ -114,33 +119,32 @@ def get_config(
         public_ports = shared_utils.get_port_specs(public_port_assignments)
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
+        image = shared_utils.docker_cache_image_calc(
             docker_cache_params,
             IMAGE_NAME,
         ),
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        files={
+        ports = USED_PORTS,
+        public_ports = public_ports,
+        files = {
             BLUTGANG_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
-        cmd=["/app/blutgang", "-c", config_file_path],
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
-        ready_conditions=ReadyCondition(
-            recipe=GetHttpRequestRecipe(
-                port_id="admin",
-                endpoint="/ready",
+        cmd = ["/app/blutgang", "-c", config_file_path],
+        min_cpu = MIN_CPU,
+        max_cpu = MAX_CPU,
+        min_memory = MIN_MEMORY,
+        max_memory = MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
+        ready_conditions = ReadyCondition(
+            recipe = GetHttpRequestRecipe(
+                port_id = "admin",
+                endpoint = "/ready",
             ),
-            field="code",
-            assertion="==",
-            target_value=200,
+            field = "code",
+            assertion = "==",
+            target_value = 200,
         ),
     )
-
 
 def new_config_template_data(network, listen_port_num, el_client_info):
     return {
@@ -148,7 +152,6 @@ def new_config_template_data(network, listen_port_num, el_client_info):
         "ListenPortNum": listen_port_num,
         "ELClientInfo": el_client_info,
     }
-
 
 def new_el_client_info(ip_addr, rpc_port_num, ws_port_num, full_name):
     return {

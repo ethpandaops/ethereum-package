@@ -16,25 +16,25 @@ MAX_CPU = 100
 MIN_MEMORY = 10
 MAX_MEMORY = 600
 
-
 def launch_snooper(
-    plan,
-    service_name,
-    el_context,
-    node_selectors,
-    global_tolerations,
-    port_publisher,
-    global_other_index,
-    docker_cache_params,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        service_name,
+        el_context,
+        node_selectors,
+        global_tolerations,
+        port_publisher,
+        global_other_index,
+        docker_cache_params):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     snooper_service_name = "{0}".format(service_name)
 
     if "engine" in snooper_service_name:
         snooper_used_ports = {
             SNOOPER_EL_ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-                SNOOPER_ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, wait="5s"
+                SNOOPER_ENGINE_RPC_PORT_NUM,
+                shared_utils.TCP_PROTOCOL,
+                wait = "5s",
             ),
         }
         public_ports = shared_utils.get_other_public_port(
@@ -46,7 +46,9 @@ def launch_snooper(
     else:
         snooper_used_ports = {
             SNOOPER_EL_RPC_PORT_ID: shared_utils.new_port_spec(
-                SNOOPER_EL_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, wait="5s"
+                SNOOPER_EL_RPC_PORT_NUM,
+                shared_utils.TCP_PROTOCOL,
+                wait = "5s",
             ),
         }
         public_ports = shared_utils.get_other_public_port(
@@ -73,16 +75,14 @@ def launch_snooper(
         SNOOPER_EL_RPC_PORT_NUM,
     )
 
-
 def get_config(
-    service_name,
-    el_context,
-    node_selectors,
-    tolerations,
-    docker_cache_params,
-    snooper_used_ports,
-    public_ports,
-):
+        service_name,
+        el_context,
+        node_selectors,
+        tolerations,
+        docker_cache_params,
+        snooper_used_ports,
+        public_ports):
     engine_port_num = "http://{0}:{1}".format(
         el_context.ip_addr,
         el_context.engine_rpc_port_num,
@@ -95,24 +95,23 @@ def get_config(
         SNOOPER_BINARY_COMMAND,
         "-b=0.0.0.0",
         "-p={0}".format(
-            SNOOPER_ENGINE_RPC_PORT_NUM
-            if "engine" in service_name
-            else SNOOPER_EL_RPC_PORT_NUM
+            SNOOPER_ENGINE_RPC_PORT_NUM if "engine" in service_name else SNOOPER_EL_RPC_PORT_NUM,
         ),
         "{0}".format(engine_port_num if "engine" in service_name else rpc_port_num),
     ]
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
-            docker_cache_params, constants.DEFAULT_SNOOPER_IMAGE
+        image = shared_utils.docker_cache_image_calc(
+            docker_cache_params,
+            constants.DEFAULT_SNOOPER_IMAGE,
         ),
-        ports=snooper_used_ports,
-        public_ports=public_ports,
-        cmd=cmd,
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        ports = snooper_used_ports,
+        public_ports = public_ports,
+        cmd = cmd,
+        min_cpu = MIN_CPU,
+        max_cpu = MAX_CPU,
+        min_memory = MIN_MEMORY,
+        max_memory = MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )

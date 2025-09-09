@@ -7,8 +7,10 @@ FLASHBOTS_MEV_BOOST_PROTOCOL = "TCP"
 
 USED_PORTS = {
     "http": shared_utils.new_port_spec(
-        constants.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL, wait="5s"
-    )
+        constants.MEV_BOOST_PORT,
+        shared_utils.TCP_PROTOCOL,
+        wait = "5s",
+    ),
 }
 
 NETWORK_ID_TO_NAME = {
@@ -24,21 +26,19 @@ MAX_CPU = 500
 MIN_MEMORY = 16
 MAX_MEMORY = 256
 
-
 def launch(
-    plan,
-    mev_boost_launcher,
-    service_name,
-    genesis_timestamp,
-    mev_boost_image,
-    mev_boost_args,
-    participant,
-    seconds_per_slot,
-    port_publisher,
-    index,
-    global_node_selectors,
-    global_tolerations,
-):
+        plan,
+        mev_boost_launcher,
+        service_name,
+        genesis_timestamp,
+        mev_boost_image,
+        mev_boost_args,
+        participant,
+        seconds_per_slot,
+        port_publisher,
+        index,
+        global_node_selectors,
+        global_tolerations):
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,
         constants.HTTP_PORT_ID,
@@ -46,7 +46,7 @@ def launch(
         0,
     )
 
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     config = get_config(
         mev_boost_launcher,
@@ -65,31 +65,30 @@ def launch(
 
     return (
         mev_boost_context_module.new_mev_boost_context(
-            mev_boost_service.ip_address, constants.MEV_BOOST_PORT
+            mev_boost_service.ip_address,
+            constants.MEV_BOOST_PORT,
         ),
     )
 
-
 def get_config(
-    mev_boost_launcher,
-    genesis_timestamp,
-    mev_boost_image,
-    mev_boost_args,
-    node_selectors,
-    tolerations,
-    participant,
-    seconds_per_slot,
-    public_ports,
-    participant_index,
-):
+        mev_boost_launcher,
+        genesis_timestamp,
+        mev_boost_image,
+        mev_boost_args,
+        node_selectors,
+        tolerations,
+        participant,
+        seconds_per_slot,
+        public_ports,
+        participant_index):
     command = mev_boost_args
 
     return ServiceConfig(
-        image=mev_boost_image,
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        cmd=command,
-        env_vars={
+        image = mev_boost_image,
+        ports = USED_PORTS,
+        public_ports = public_ports,
+        cmd = command,
+        env_vars = {
             "GENESIS_FORK_VERSION": constants.GENESIS_FORK_VERSION,
             "GENESIS_TIMESTAMP": "{0}".format(genesis_timestamp),
             "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(constants.MEV_BOOST_PORT),
@@ -101,24 +100,24 @@ def get_config(
                 participant.el_type,
             ),
         },
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
-        labels=shared_utils.label_maker(
-            client="mev-boost",
-            client_type="mev",
-            image=mev_boost_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client="{0}-{1}".format(participant.cl_type, participant.el_type),
-            extra_labels={constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
-            supernode=participant.supernode,
+        min_cpu = MIN_CPU,
+        max_cpu = MAX_CPU,
+        min_memory = MIN_MEMORY,
+        max_memory = MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
+        labels = shared_utils.label_maker(
+            client = "mev-boost",
+            client_type = "mev",
+            image = mev_boost_image[-constants.MAX_LABEL_LENGTH:],
+            connected_client = "{0}-{1}".format(participant.cl_type, participant.el_type),
+            extra_labels = {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
+            supernode = participant.supernode,
         ),
     )
 
-
 def new_mev_boost_launcher(should_check_relay, relay_end_points):
     return struct(
-        should_check_relay=should_check_relay, relay_end_points=relay_end_points
+        should_check_relay = should_check_relay,
+        relay_end_points = relay_end_points,
     )

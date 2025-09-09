@@ -16,8 +16,7 @@ METRICS_PORT_NUM = 9001
 METRICS_PATH = "/metrics"
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/ethrex/execution-data"
 
-
-def get_used_ports(discovery_port):
+def get_used_ports(_):
     used_ports = {
         constants.RPC_PORT_ID: shared_utils.new_port_spec(
             RPC_PORT_NUM,
@@ -25,7 +24,8 @@ def get_used_ports(discovery_port):
             shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
         constants.ENGINE_RPC_PORT_ID: shared_utils.new_port_spec(
-            ENGINE_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL
+            ENGINE_RPC_PORT_NUM,
+            shared_utils.TCP_PROTOCOL,
         ),
         constants.METRICS_PORT_ID: shared_utils.new_port_spec(
             METRICS_PORT_NUM,
@@ -35,7 +35,6 @@ def get_used_ports(discovery_port):
     }
     return used_ports
 
-
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "1",
     constants.GLOBAL_LOG_LEVEL.warn: "2",
@@ -44,22 +43,20 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.trace: "5",
 }
 
-
 def launch(
-    plan,
-    launcher,
-    service_name,
-    participant,
-    global_log_level,
-    existing_el_clients,
-    persistent,
-    tolerations,
-    node_selectors,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-):
+        plan,
+        launcher,
+        service_name,
+        participant,
+        global_log_level,
+        existing_el_clients,
+        persistent,
+        tolerations,
+        node_selectors,
+        port_publisher,
+        participant_index,
+        network_params,
+        extra_files_artifacts):
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
@@ -88,49 +85,45 @@ def launch(
         launcher,
     )
 
-
 def get_config(
-    plan,
-    launcher,
-    participant,
-    service_name,
-    existing_el_clients,
-    cl_client_name,
-    global_log_level,
-    persistent,
-    tolerations,
-    node_selectors,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-):
+        plan,
+        launcher,
+        participant,
+        service_name,
+        existing_el_clients,
+        cl_client_name,
+        _,
+        persistent,
+        tolerations,
+        node_selectors,
+        port_publisher,
+        participant_index,
+        network_params,
+        extra_files_artifacts):
     public_ports = {}
     public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "el", port_publisher, participant_index
+            "el",
+            port_publisher,
+            participant_index,
         )
         public_ports = el_shared.get_general_el_public_port_specs(
-            public_ports_for_component
+            public_ports_for_component,
         )
         additional_public_port_assignments = {
             constants.RPC_PORT_ID: public_ports_for_component[3],
             # constants.WS_PORT_ID: public_ports_for_component[4],
         }
         public_ports.update(
-            shared_utils.get_port_specs(additional_public_port_assignments)
+            shared_utils.get_port_specs(additional_public_port_assignments),
         )
 
     discovery_port_tcp = (
-        public_ports_for_component[0]
-        if public_ports_for_component
-        else DISCOVERY_PORT_NUM
+        public_ports_for_component[0] if public_ports_for_component else DISCOVERY_PORT_NUM
     )
     discovery_port_udp = (
-        public_ports_for_component[0]
-        if public_ports_for_component
-        else DISCOVERY_PORT_NUM
+        public_ports_for_component[0] if public_ports_for_component else DISCOVERY_PORT_NUM
     )
 
     used_port_assignments = {
@@ -146,9 +139,7 @@ def get_config(
     cmd = [
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--network={0}".format(
-            network_params.network
-            if network_params.network in constants.PUBLIC_NETWORKS
-            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+            network_params.network if network_params.network in constants.PUBLIC_NETWORKS else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
         ),
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
@@ -164,23 +155,24 @@ def get_config(
     if network_params.network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
             cmd.append(
-                "--bootnodes="
-                + ",".join(
+                "--bootnodes=" +
+                ",".join(
                     [
                         ctx.enode
-                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                    ]
-                )
+                        for ctx in existing_el_clients[:constants.MAX_ENODE_ENTRIES]
+                    ],
+                ),
             )
     elif (
-        network_params.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in network_params.network
+        network_params.network not in constants.PUBLIC_NETWORKS and
+        constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
-            "--bootnodes="
-            + shared_utils.get_devnet_enodes(
-                plan, launcher.el_cl_genesis_data.files_artifact_uuid
-            )
+            "--bootnodes=" +
+            shared_utils.get_devnet_enodes(
+                plan,
+                launcher.el_cl_genesis_data.files_artifact_uuid,
+            ),
         )
 
     if len(participant.el_extra_params) > 0:
@@ -193,7 +185,7 @@ def get_config(
     else:
         subcommand_strs = [cmd_str]
 
-    command_str = " && ".join(subcommand_strs)
+    _ = " && ".join(subcommand_strs)
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
@@ -205,17 +197,15 @@ def get_config(
             "devnets" if "devnet" in network_params.network else network_params.network
         )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.EL_TYPE.ethrex + "_volume_size"
-            ],
+            persistent_key = "data-{0}".format(service_name),
+            size = int(participant.el_volume_size) if int(participant.el_volume_size) > 0 else constants.VOLUME_SIZE[volume_size_key][constants.EL_TYPE.ethrex + "_volume_size"],
         )
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.el_extra_mounts, extra_files_artifacts
+        plan,
+        participant.el_extra_mounts,
+        extra_files_artifacts,
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
@@ -229,13 +219,13 @@ def get_config(
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": participant.el_extra_env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.EL_TYPE.ethrex,
-            client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels
-            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
-            supernode=participant.supernode,
+            client = constants.EL_TYPE.ethrex,
+            client_type = constants.CLIENT_TYPES.el,
+            image = participant.el_image[-constants.MAX_LABEL_LENGTH:],
+            connected_client = cl_client_name,
+            extra_labels = participant.el_extra_labels |
+                           {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
+            supernode = participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
@@ -252,40 +242,37 @@ def get_config(
 
     return ServiceConfig(**config_args)
 
-
 # makes request to [service_name] for enode and enr and returns a full el_context
-def get_el_context(
-    plan,
-    service_name,
-    service,
-    launcher,
-):
+def get_el_context(plan, service_name, service, _):
     enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, constants.RPC_PORT_ID
+        plan,
+        service_name,
+        constants.RPC_PORT_ID,
     )
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
     ethrex_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metrics_url
+        service_name,
+        METRICS_PATH,
+        metrics_url,
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
     # ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        client_name="ethrex",
-        enode=enode,
-        ip_addr=service.ip_address,
-        rpc_port_num=RPC_PORT_NUM,
-        ws_port_num=WS_PORT_NUM,
-        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
-        rpc_http_url=http_url,
+        client_name = "ethrex",
+        enode = enode,
+        ip_addr = service.ip_address,
+        rpc_port_num = RPC_PORT_NUM,
+        ws_port_num = WS_PORT_NUM,
+        engine_rpc_port_num = ENGINE_RPC_PORT_NUM,
+        rpc_http_url = http_url,
         # ws_url=ws_url,
-        enr=enr,
-        service_name=service_name,
-        el_metrics_info=[ethrex_metrics_info],
+        enr = enr,
+        service_name = service_name,
+        el_metrics_info = [ethrex_metrics_info],
     )
 
-
 def new_ethrex_launcher(el_cl_genesis_data, jwt_file):
-    return struct(el_cl_genesis_data=el_cl_genesis_data, jwt_file=jwt_file)
+    return struct(el_cl_genesis_data = el_cl_genesis_data, jwt_file = jwt_file)
