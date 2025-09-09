@@ -19,21 +19,20 @@ LITTLE_BIGTABLE_PORT_NUMBER = 9000
 
 FULL_BEACONCHAIN_CONFIG_FILENAME = "beaconchain-config.yml"
 
-
 def get_little_bigtable_host(little_bigtable, port_publisher):
     if port_publisher.additional_services_enabled:
         return port_publisher.additional_services_nat_exit_ip
     return little_bigtable.ip_address
 
-
-def get_little_bigtable_port(little_bigtable, port_publisher):
+def get_little_bigtable_port(_, port_publisher):
     if port_publisher.additional_services_enabled:
         public_ports = shared_utils.get_public_ports_for_component(
-            "additional_services", port_publisher, 0
+            "additional_services",
+            port_publisher,
+            0,
         )
         return public_ports[0]  # Use first port for little bigtable
     return LITTLE_BIGTABLE_PORT_NUMBER
-
 
 # The min/max CPU/memory that postgres can use
 POSTGRES_MIN_CPU = 10
@@ -95,57 +94,60 @@ FRONTEND_MAX_CPU = 1000
 FRONTEND_MIN_MEMORY = 512
 FRONTEND_MAX_MEMORY = 2048
 
-
 def launch_full_beacon(
-    plan,
-    config_template,
-    el_cl_data_files_artifact_uuid,
-    cl_contexts,
-    el_contexts,
-    persistent,
-    global_node_selectors,
-    global_tolerations,
-    port_publisher,
-    additional_service_index,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        config_template,
+        el_cl_data_files_artifact_uuid,
+        cl_contexts,
+        el_contexts,
+        persistent,
+        global_node_selectors,
+        global_tolerations,
+        port_publisher,
+        additional_service_index):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
     node_selectors = global_node_selectors
     postgres_output = postgres.run(
         plan,
-        service_name="beaconchain-postgres",
-        image="postgres:15.2-alpine",
-        user=POSTGRES_USER,
-        password=POSTGRES_PASSWORD,
-        database=POSTGRES_DB,
-        min_cpu=POSTGRES_MIN_CPU,
-        max_cpu=POSTGRES_MAX_CPU,
-        min_memory=POSTGRES_MIN_MEMORY,
-        max_memory=POSTGRES_MAX_MEMORY,
-        persistent=persistent,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        service_name = "beaconchain-postgres",
+        image = "postgres:15.2-alpine",
+        user = POSTGRES_USER,
+        password = POSTGRES_PASSWORD,
+        database = POSTGRES_DB,
+        min_cpu = POSTGRES_MIN_CPU,
+        max_cpu = POSTGRES_MAX_CPU,
+        min_memory = POSTGRES_MIN_MEMORY,
+        max_memory = POSTGRES_MAX_MEMORY,
+        persistent = persistent,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
     redis_output = redis.run(
         plan,
-        service_name="beaconchain-redis",
-        image="redis:7",
-        min_cpu=REDIS_MIN_CPU,
-        max_cpu=REDIS_MAX_CPU,
-        min_memory=REDIS_MIN_MEMORY,
-        max_memory=REDIS_MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        service_name = "beaconchain-redis",
+        image = "redis:7",
+        min_cpu = REDIS_MIN_CPU,
+        max_cpu = REDIS_MAX_CPU,
+        min_memory = REDIS_MIN_MEMORY,
+        max_memory = REDIS_MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
+
     # TODO perhaps create a new service for the littlebigtable
     little_bigtable = plan.add_service(
-        name="beaconchain-littlebigtable",
-        config=get_little_bigtable_config(
-            node_selectors, tolerations, port_publisher, additional_service_index
+        name = "beaconchain-littlebigtable",
+        config = get_little_bigtable_config(
+            node_selectors,
+            tolerations,
+            port_publisher,
+            additional_service_index,
         ),
     )
 
     el_uri = "http://{0}:{1}".format(
-        el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
+        el_contexts[0].ip_addr,
+        el_contexts[0].rpc_port_num,
     )
     redis_url = "{}:{}".format(redis_output.hostname, redis_output.port_number)
 
@@ -163,15 +165,15 @@ def launch_full_beacon(
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        config_template, template_data
+        config_template,
+        template_data,
     )
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        FULL_BEACONCHAIN_CONFIG_FILENAME
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[FULL_BEACONCHAIN_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "beaconchain-config.yml"
+        template_and_data_by_rel_dest_filepath,
+        "beaconchain-config.yml",
     )
 
     files = {
@@ -181,81 +183,83 @@ def launch_full_beacon(
 
     # Initialize the db schema
     initdbschema = plan.add_service(
-        name="beaconchain-schema-initializer",
-        config=ServiceConfig(
-            image=IMAGE_NAME,
-            files=files,
-            entrypoint=["tail", "-f", "/dev/null"],
-            min_cpu=INIT_MIN_CPU,
-            max_cpu=INIT_MAX_CPU,
-            min_memory=INIT_MIN_MEMORY,
-            max_memory=INIT_MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+        name = "beaconchain-schema-initializer",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = files,
+            entrypoint = ["tail", "-f", "/dev/null"],
+            min_cpu = INIT_MIN_CPU,
+            max_cpu = INIT_MAX_CPU,
+            min_memory = INIT_MIN_MEMORY,
+            max_memory = INIT_MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
 
     plan.print("applying db schema")
     plan.exec(
-        service_name=initdbschema.name,
-        description="Applying db schema",
-        recipe=ExecRecipe(
+        service_name = initdbschema.name,
+        description = "Applying db schema",
+        recipe = ExecRecipe(
             [
                 "./misc",
                 "-config",
                 "/app/config/beaconchain-config.yml",
                 "-command",
                 "applyDbSchema",
-            ]
+            ],
         ),
     )
 
     plan.print("applying big table schema")
+
     # Initialize the bigtable schema
     plan.exec(
-        service_name=initdbschema.name,
-        description="Applying big table schema",
-        recipe=ExecRecipe(
+        service_name = initdbschema.name,
+        description = "Applying big table schema",
+        recipe = ExecRecipe(
             [
                 "./misc",
                 "-config",
                 "/app/config/beaconchain-config.yml",
                 "-command",
                 "initBigtableSchema",
-            ]
+            ],
         ),
     )
 
     # Start the indexer
-    indexer = plan.add_service(
-        name="beaconchain-indexer",
-        config=ServiceConfig(
-            image=IMAGE_NAME,
-            files=files,
-            entrypoint=["./explorer"],
-            cmd=[
+    plan.add_service(
+        name = "beaconchain-indexer",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = files,
+            entrypoint = ["./explorer"],
+            cmd = [
                 "-config",
                 "/app/config/beaconchain-config.yml",
             ],
-            env_vars={
+            env_vars = {
                 "INDEXER_ENABLED": "TRUE",
             },
-            min_cpu=INDEXER_MIN_CPU,
-            max_cpu=INDEXER_MAX_CPU,
-            min_memory=INDEXER_MIN_MEMORY,
-            max_memory=INDEXER_MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+            min_cpu = INDEXER_MIN_CPU,
+            max_cpu = INDEXER_MAX_CPU,
+            min_memory = INDEXER_MIN_MEMORY,
+            max_memory = INDEXER_MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
+
     # Start the eth1indexer
-    eth1indexer = plan.add_service(
-        name="beaconchain-eth1indexer",
-        config=ServiceConfig(
-            image=IMAGE_NAME,
-            files=files,
-            entrypoint=["./eth1indexer"],
-            cmd=[
+    plan.add_service(
+        name = "beaconchain-eth1indexer",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = files,
+            entrypoint = ["./eth1indexer"],
+            cmd = [
                 "-config",
                 "/app/config/beaconchain-config.yml",
                 "-blocks.concurrency",
@@ -266,78 +270,78 @@ def launch_full_beacon(
                 "1",
                 "-balances.enabled",
             ],
-            min_cpu=ETH1INDEXER_MIN_CPU,
-            max_cpu=ETH1INDEXER_MAX_CPU,
-            min_memory=ETH1INDEXER_MIN_MEMORY,
-            max_memory=ETH1INDEXER_MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+            min_cpu = ETH1INDEXER_MIN_CPU,
+            max_cpu = ETH1INDEXER_MAX_CPU,
+            min_memory = ETH1INDEXER_MIN_MEMORY,
+            max_memory = ETH1INDEXER_MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
 
-    rewardsexporter = plan.add_service(
-        name="beaconchain-rewardsexporter",
-        config=ServiceConfig(
-            image=IMAGE_NAME,
-            files=files,
-            entrypoint=["./rewards-exporter"],
-            cmd=[
+    plan.add_service(
+        name = "beaconchain-rewardsexporter",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = files,
+            entrypoint = ["./rewards-exporter"],
+            cmd = [
                 "-config",
                 "/app/config/beaconchain-config.yml",
             ],
-            min_cpu=REWARDSEXPORTER_MIN_CPU,
-            max_cpu=REWARDSEXPORTER_MAX_CPU,
-            min_memory=REWARDSEXPORTER_MIN_MEMORY,
-            max_memory=REWARDSEXPORTER_MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+            min_cpu = REWARDSEXPORTER_MIN_CPU,
+            max_cpu = REWARDSEXPORTER_MAX_CPU,
+            min_memory = REWARDSEXPORTER_MIN_MEMORY,
+            max_memory = REWARDSEXPORTER_MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
 
-    statistics = plan.add_service(
-        name="beaconchain-statistics",
-        config=ServiceConfig(
-            image=IMAGE_NAME,
-            files=files,
-            entrypoint=["./statistics"],
-            cmd=[
+    plan.add_service(
+        name = "beaconchain-statistics",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = files,
+            entrypoint = ["./statistics"],
+            cmd = [
                 "-config",
                 "/app/config/beaconchain-config.yml",
                 "-charts.enabled",
                 "-graffiti.enabled",
                 "-validators.enabled",
             ],
-            min_cpu=STATISTICS_MIN_CPU,
-            max_cpu=STATISTICS_MAX_CPU,
-            min_memory=STATISTICS_MIN_MEMORY,
-            max_memory=STATISTICS_MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+            min_cpu = STATISTICS_MIN_CPU,
+            max_cpu = STATISTICS_MAX_CPU,
+            min_memory = STATISTICS_MIN_MEMORY,
+            max_memory = STATISTICS_MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
 
-    fdu = plan.add_service(
-        name="beaconchain-fdu",
-        config=ServiceConfig(
-            image=IMAGE_NAME,
-            files=files,
-            entrypoint=["./frontend-data-updater"],
-            cmd=[
+    plan.add_service(
+        name = "beaconchain-fdu",
+        config = ServiceConfig(
+            image = IMAGE_NAME,
+            files = files,
+            entrypoint = ["./frontend-data-updater"],
+            cmd = [
                 "-config",
                 "/app/config/beaconchain-config.yml",
             ],
-            min_cpu=FDU_MIN_CPU,
-            max_cpu=FDU_MAX_CPU,
-            min_memory=FDU_MIN_MEMORY,
-            max_memory=FDU_MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+            min_cpu = FDU_MIN_CPU,
+            max_cpu = FDU_MAX_CPU,
+            min_memory = FDU_MIN_MEMORY,
+            max_memory = FDU_MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
 
-    frontend = plan.add_service(
-        name="beaconchain-frontend",
-        config=get_frontend_config(
+    plan.add_service(
+        name = "beaconchain-frontend",
+        config = get_frontend_config(
             files,
             node_selectors,
             global_tolerations,
@@ -346,10 +350,11 @@ def launch_full_beacon(
         ),
     )
 
-
 def get_little_bigtable_config(
-    node_selectors, tolerations, port_publisher, additional_service_index
-):
+        node_selectors,
+        tolerations,
+        port_publisher,
+        additional_service_index):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
         constants.LITTLE_BIGTABLE_PORT_ID,
@@ -357,25 +362,28 @@ def get_little_bigtable_config(
         0,
     )
     return ServiceConfig(
-        image="gobitfly/little_bigtable:latest",
-        ports={
+        image = "gobitfly/little_bigtable:latest",
+        ports = {
             constants.LITTLE_BIGTABLE_PORT_ID: PortSpec(
-                LITTLE_BIGTABLE_PORT_NUMBER, application_protocol="tcp"
-            )
+                LITTLE_BIGTABLE_PORT_NUMBER,
+                application_protocol = "tcp",
+            ),
         },
-        public_ports=public_ports,
-        min_cpu=LITTLE_BIGTABLE_MIN_CPU,
-        max_cpu=LITTLE_BIGTABLE_MAX_CPU,
-        min_memory=LITTLE_BIGTABLE_MIN_MEMORY,
-        max_memory=LITTLE_BIGTABLE_MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        public_ports = public_ports,
+        min_cpu = LITTLE_BIGTABLE_MIN_CPU,
+        max_cpu = LITTLE_BIGTABLE_MAX_CPU,
+        min_memory = LITTLE_BIGTABLE_MIN_MEMORY,
+        max_memory = LITTLE_BIGTABLE_MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
 
-
 def get_frontend_config(
-    files, node_selectors, tolerations, port_publisher, additional_service_index
-):
+        files,
+        node_selectors,
+        tolerations,
+        port_publisher,
+        additional_service_index):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
         constants.HTTP_PORT_ID,
@@ -383,43 +391,42 @@ def get_frontend_config(
         1,
     )
     return ServiceConfig(
-        image=IMAGE_NAME,
-        files=files,
-        entrypoint=["./explorer"],
-        cmd=[
+        image = IMAGE_NAME,
+        files = files,
+        entrypoint = ["./explorer"],
+        cmd = [
             "-config",
             "/app/config/beaconchain-config.yml",
         ],
-        env_vars={
+        env_vars = {
             "FRONTEND_ENABLED": "TRUE",
         },
-        ports={
+        ports = {
             constants.HTTP_PORT_ID: PortSpec(
-                FRONTEND_PORT_NUMBER, application_protocol="http"
+                FRONTEND_PORT_NUMBER,
+                application_protocol = "http",
             ),
         },
-        public_ports=public_ports,
-        min_cpu=FRONTEND_MIN_CPU,
-        max_cpu=FRONTEND_MAX_CPU,
-        min_memory=FRONTEND_MIN_MEMORY,
-        max_memory=FRONTEND_MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        public_ports = public_ports,
+        min_cpu = FRONTEND_MIN_CPU,
+        max_cpu = FRONTEND_MAX_CPU,
+        min_memory = FRONTEND_MIN_MEMORY,
+        max_memory = FRONTEND_MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
 
-
 def new_config_template_data(
-    cl_url,
-    cl_port,
-    cl_type,
-    el_uri,
-    lbt_host,
-    lbt_port,
-    db_host,
-    db_port,
-    redis_url,
-    frontend_port,
-):
+        cl_url,
+        cl_port,
+        cl_type,
+        el_uri,
+        lbt_host,
+        lbt_port,
+        db_host,
+        db_port,
+        redis_url,
+        frontend_port):
     return {
         "CLNodeHost": cl_url,
         "CLNodePort": cl_port,

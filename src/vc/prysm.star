@@ -5,29 +5,27 @@ vc_shared = import_module("./shared.star")
 PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-password"
 PRYSM_BEACON_RPC_PORT = 4000
 
-
 def get_config(
-    plan,
-    participant,
-    el_cl_genesis_data,
-    keymanager_file,
-    image,
-    beacon_http_url,
-    cl_context,
-    el_context,
-    remote_signer_context,
-    full_name,
-    node_keystore_files,
-    prysm_password_relative_filepath,
-    prysm_password_artifact_uuid,
-    tolerations,
-    node_selectors,
-    keymanager_enabled,
-    network_params,
-    port_publisher,
-    vc_index,
-    extra_files_artifacts,
-):
+        plan,
+        participant,
+        el_cl_genesis_data,
+        keymanager_file,
+        image,
+        beacon_http_url,
+        cl_context,
+        _,
+        remote_signer_context,
+        _,
+        node_keystore_files,
+        prysm_password_relative_filepath,
+        prysm_password_artifact_uuid,
+        tolerations,
+        node_selectors,
+        keymanager_enabled,
+        network_params,
+        port_publisher,
+        vc_index,
+        extra_files_artifacts):
     validator_keys_dirpath = shared_utils.path_join(
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
         node_keystore_files.prysm_relative_dirpath,
@@ -39,9 +37,9 @@ def get_config(
 
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
-        "--chain-config-file="
-        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-        + "/config.yaml",
+        "--chain-config-file=" +
+        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER +
+        "/config.yaml",
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         "--beacon-rest-api-provider=" + beacon_http_url,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
@@ -61,16 +59,16 @@ def get_config(
             [
                 "--wallet-dir=" + validator_keys_dirpath,
                 "--wallet-password-file=" + validator_secrets_dirpath,
-            ]
+            ],
         )
     else:
         cmd.extend(
             [
                 "--remote-signer-url={0}".format(remote_signer_context.http_url),
                 "--remote-signer-keys={0}/api/v1/eth2/publicKeys".format(
-                    remote_signer_context.http_url
+                    remote_signer_context.http_url,
                 ),
-            ]
+            ],
         )
 
     if network_params.gas_limit > 0:
@@ -106,13 +104,15 @@ def get_config(
     public_keymanager_port_assignment = {}
     if port_publisher.vc_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "vc", port_publisher, vc_index
+            "vc",
+            port_publisher,
+            vc_index,
         )
         public_port_assignments = {
-            constants.METRICS_PORT_ID: public_ports_for_component[0]
+            constants.METRICS_PORT_ID: public_ports_for_component[0],
         }
         public_keymanager_port_assignment = {
-            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]
+            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1],
         }
         public_ports = shared_utils.get_port_specs(public_port_assignments)
 
@@ -124,12 +124,14 @@ def get_config(
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
         public_ports.update(
-            shared_utils.get_port_specs(public_keymanager_port_assignment)
+            shared_utils.get_port_specs(public_keymanager_port_assignment),
         )
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.vc_extra_mounts, extra_files_artifacts
+        plan,
+        participant.vc_extra_mounts,
+        extra_files_artifacts,
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
@@ -142,13 +144,13 @@ def get_config(
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.VC_TYPE.prysm,
-            client_type=constants.CLIENT_TYPES.validator,
-            image=image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels
-            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
-            supernode=participant.supernode,
+            client = constants.VC_TYPE.prysm,
+            client_type = constants.CLIENT_TYPES.validator,
+            image = image[-constants.MAX_LABEL_LENGTH:],
+            connected_client = cl_context.client_name,
+            extra_labels = participant.vc_extra_labels |
+                           {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
+            supernode = participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,

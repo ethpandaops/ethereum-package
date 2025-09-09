@@ -15,18 +15,16 @@ MAX_CPU = 1000
 MIN_MEMORY = 16
 MAX_MEMORY = 1024
 
-
 def launch(
-    plan,
-    xatu_sentry_service_name,
-    cl_context,
-    xatu_sentry_params,
-    network_params,
-    pair_name,
-    node_selectors,
-    global_tolerations,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        xatu_sentry_service_name,
+        cl_context,
+        xatu_sentry_params,
+        network_params,
+        pair_name,
+        node_selectors,
+        global_tolerations):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
     config_template = read_file(static_files.XATU_SENTRY_CONFIG_TEMPLATE_FILEPATH)
 
     template_data = new_config_template_data(
@@ -41,7 +39,8 @@ def launch(
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        config_template, template_data
+        config_template,
+        template_data,
     )
 
     template_and_data_by_rel_dest_filepath = {}
@@ -51,7 +50,8 @@ def launch(
     template_and_data_by_rel_dest_filepath[config_name] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, config_name
+        template_and_data_by_rel_dest_filepath,
+        config_name,
     )
 
     config_file_path = shared_utils.path_join(
@@ -62,28 +62,28 @@ def launch(
     xatu_sentry_service = plan.add_service(
         xatu_sentry_service_name,
         ServiceConfig(
-            image=xatu_sentry_params.xatu_sentry_image,
-            ports={
+            image = xatu_sentry_params.xatu_sentry_image,
+            ports = {
                 HTTP_PORT_ID: shared_utils.new_port_spec(
                     METRICS_PORT_NUMBER,
                     shared_utils.TCP_PROTOCOL,
                     shared_utils.HTTP_APPLICATION_PROTOCOL,
-                )
+                ),
             },
-            files={
+            files = {
                 XATU_SENTRY_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             },
-            cmd=[
+            cmd = [
                 "sentry",
                 "--config",
                 config_file_path,
             ],
-            min_cpu=MIN_CPU,
-            max_cpu=MAX_CPU,
-            min_memory=MIN_MEMORY,
-            max_memory=MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+            min_cpu = MIN_CPU,
+            max_cpu = MAX_CPU,
+            min_memory = MIN_MEMORY,
+            max_memory = MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
 
@@ -93,17 +93,15 @@ def launch(
         pair_name,
     )
 
-
 def new_config_template_data(
-    metrics_port,
-    beacon_node_name,
-    beacon_node_addr,
-    xatu_server_addr,
-    network_name,
-    beacon_subscriptions,
-    xatu_server_headers,
-    xatu_server_tls,
-):
+        metrics_port,
+        beacon_node_name,
+        beacon_node_addr,
+        xatu_server_addr,
+        network_name,
+        beacon_subscriptions,
+        xatu_server_headers,
+        xatu_server_tls):
     return {
         "MetricsPort": metrics_port,
         "BeaconNodeName": beacon_node_name,

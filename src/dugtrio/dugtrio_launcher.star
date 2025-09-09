@@ -22,48 +22,53 @@ USED_PORTS = {
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
 }
 
-
 def launch_dugtrio(
-    plan,
-    config_template,
-    participant_contexts,
-    participant_configs,
-    network_params,
-    global_node_selectors,
-    global_tolerations,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        config_template,
+        participant_contexts,
+        participant_configs,
+        network_params,
+        global_node_selectors,
+        global_tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     all_cl_client_info = []
     for index, participant in enumerate(participant_contexts):
         full_name, cl_client, _, _ = shared_utils.get_client_names(
-            participant, index, participant_contexts, participant_configs
+            participant,
+            index,
+            participant_contexts,
+            participant_configs,
         )
         all_cl_client_info.append(
             new_cl_client_info(
                 cl_client.beacon_http_url,
                 full_name,
-            )
+            ),
         )
 
     template_data = new_config_template_data(
-        network_params.network, HTTP_PORT_NUMBER, all_cl_client_info
+        network_params.network,
+        HTTP_PORT_NUMBER,
+        all_cl_client_info,
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        config_template, template_data
+        config_template,
+        template_data,
     )
     template_and_data_by_rel_dest_filepath = {}
     template_and_data_by_rel_dest_filepath[DUGTRIO_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "dugtrio-config"
+        template_and_data_by_rel_dest_filepath,
+        "dugtrio-config",
     )
     config = get_config(
         config_files_artifact_name,
@@ -77,16 +82,14 @@ def launch_dugtrio(
 
     plan.add_service(SERVICE_NAME, config)
 
-
 def get_config(
-    config_files_artifact_name,
-    network_params,
-    node_selectors,
-    tolerations,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-):
+        config_files_artifact_name,
+        _,
+        node_selectors,
+        tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params):
     config_file_path = shared_utils.path_join(
         DUGTRIO_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         DUGTRIO_CONFIG_FILENAME,
@@ -100,33 +103,32 @@ def get_config(
     )
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
+        image = shared_utils.docker_cache_image_calc(
             docker_cache_params,
             IMAGE_NAME,
         ),
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        files={
+        ports = USED_PORTS,
+        public_ports = public_ports,
+        files = {
             DUGTRIO_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
-        cmd=["-config", config_file_path],
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
-        ready_conditions=ReadyCondition(
-            recipe=GetHttpRequestRecipe(
-                port_id="http",
-                endpoint="/healthcheck",
+        cmd = ["-config", config_file_path],
+        min_cpu = MIN_CPU,
+        max_cpu = MAX_CPU,
+        min_memory = MIN_MEMORY,
+        max_memory = MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
+        ready_conditions = ReadyCondition(
+            recipe = GetHttpRequestRecipe(
+                port_id = "http",
+                endpoint = "/healthcheck",
             ),
-            field="code",
-            assertion="==",
-            target_value=200,
+            field = "code",
+            assertion = "==",
+            target_value = 200,
         ),
     )
-
 
 def new_config_template_data(network, listen_port_num, cl_client_info):
     return {
@@ -134,7 +136,6 @@ def new_config_template_data(network, listen_port_num, cl_client_info):
         "ListenPortNum": listen_port_num,
         "CLClientInfo": cl_client_info,
     }
-
 
 def new_cl_client_info(beacon_http_url, full_name):
     return {

@@ -24,37 +24,38 @@ USED_PORTS = {
         HTTP_PORT_NUMBER,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
+    ),
 }
 
-
 def launch_forky(
-    plan,
-    config_template,
-    participant_contexts,
-    participant_configs,
-    el_cl_data_files_artifact_uuid,
-    network_params,
-    global_node_selectors,
-    global_tolerations,
-    final_genesis_timestamp,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        config_template,
+        participant_contexts,
+        participant_configs,
+        el_cl_data_files_artifact_uuid,
+        network_params,
+        global_node_selectors,
+        global_tolerations,
+        final_genesis_timestamp,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     all_cl_client_info = []
     all_el_client_info = []
     for index, participant in enumerate(participant_contexts):
         full_name, cl_client, el_client, _ = shared_utils.get_client_names(
-            participant, index, participant_contexts, participant_configs
+            participant,
+            index,
+            participant_contexts,
+            participant_configs,
         )
         all_cl_client_info.append(
             new_cl_client_info(
                 cl_client.beacon_http_url,
                 full_name,
-            )
+            ),
         )
         all_el_client_info.append(
             new_el_client_info(
@@ -63,7 +64,7 @@ def launch_forky(
                     el_client.rpc_port_num,
                 ),
                 full_name,
-            )
+            ),
         )
 
     template_data = new_config_template_data(
@@ -77,13 +78,15 @@ def launch_forky(
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        config_template, template_data
+        config_template,
+        template_data,
     )
     template_and_data_by_rel_dest_filepath = {}
     template_and_data_by_rel_dest_filepath[FORKY_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "forky-config"
+        template_and_data_by_rel_dest_filepath,
+        "forky-config",
     )
     el_cl_data_files_artifact_uuid = el_cl_data_files_artifact_uuid
     config = get_config(
@@ -99,17 +102,15 @@ def launch_forky(
 
     plan.add_service(SERVICE_NAME, config)
 
-
 def get_config(
-    config_files_artifact_name,
-    el_cl_data_files_artifact_uuid,
-    network_params,
-    node_selectors,
-    tolerations,
-    port_publisher,
-    additional_service_index,
-    docker_cache_params,
-):
+        config_files_artifact_name,
+        el_cl_data_files_artifact_uuid,
+        _,
+        node_selectors,
+        tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params):
     config_file_path = shared_utils.path_join(
         FORKY_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         FORKY_CONFIG_FILENAME,
@@ -125,36 +126,34 @@ def get_config(
     )
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
+        image = shared_utils.docker_cache_image_calc(
             docker_cache_params,
             IMAGE_NAME,
         ),
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        files={
+        ports = USED_PORTS,
+        public_ports = public_ports,
+        files = {
             FORKY_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
-        cmd=["--config", config_file_path],
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        cmd = ["--config", config_file_path],
+        min_cpu = MIN_CPU,
+        max_cpu = MAX_CPU,
+        min_memory = MIN_MEMORY,
+        max_memory = MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
 
-
 def new_config_template_data(
-    network,
-    seconds_per_slot,
-    final_genesis_timestamp,
-    preset,
-    listen_port_num,
-    cl_client_info,
-    el_client_info,
-):
+        network,
+        seconds_per_slot,
+        final_genesis_timestamp,
+        preset,
+        listen_port_num,
+        cl_client_info,
+        el_client_info):
     return {
         "Network": network,
         "SecondsPerSlot": seconds_per_slot,
@@ -166,13 +165,11 @@ def new_config_template_data(
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
     }
 
-
 def new_cl_client_info(beacon_http_url, full_name):
     return {
         "Beacon_HTTP_URL": beacon_http_url,
         "FullName": full_name,
     }
-
 
 def new_el_client_info(execution_http_url, full_name):
     return {

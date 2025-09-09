@@ -1,5 +1,5 @@
 el_cl_genesis_data_generator = import_module(
-    "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star"
+    "./prelaunch_data_generator/el_cl_genesis/el_cl_genesis_generator.star",
 )
 
 input_parser = import_module("./package_io/input_parser.star")
@@ -8,7 +8,7 @@ static_files = import_module("./static_files/static_files.star")
 constants = import_module("./package_io/constants.star")
 
 ethereum_metrics_exporter = import_module(
-    "./ethereum_metrics_exporter/ethereum_metrics_exporter_launcher.star"
+    "./ethereum_metrics_exporter/ethereum_metrics_exporter_launcher.star",
 )
 
 participant_module = import_module("./participant.star")
@@ -33,35 +33,32 @@ snooper_el_launcher = import_module("./snooper/snooper_el_launcher.star")
 blobber_launcher = import_module("./blobber/blobber_launcher.star")
 cl_context_module = import_module("./cl/cl_context.star")
 
-
 def launch_participant_network(
-    plan,
-    args_with_right_defaults,
-    network_params,
-    jwt_file,
-    keymanager_file,
-    persistent,
-    xatu_sentry_params,
-    global_tolerations,
-    global_node_selectors,
-    keymanager_enabled,
-    parallel_keystore_generation,
-    extra_files_artifacts,
-    tempo_otlp_grpc_url,
-    backend,
-):
+        plan,
+        args_with_right_defaults,
+        network_params,
+        jwt_file,
+        keymanager_file,
+        persistent,
+        xatu_sentry_params,
+        global_tolerations,
+        global_node_selectors,
+        _,
+        parallel_keystore_generation,
+        extra_files_artifacts,
+        tempo_otlp_grpc_url,
+        backend):
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
     total_number_of_validator_keys = 0
     latest_block = ""
     global_other_index = 0
     if (
-        network_params.network == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in network_params.network
+        network_params.network == constants.NETWORK_NAME.kurtosis or
+        constants.NETWORK_NAME.shadowfork in network_params.network
     ):
-        if (
-            constants.NETWORK_NAME.shadowfork in network_params.network
-        ):  # shadowfork requires some preparation
+        if constants.NETWORK_NAME.shadowfork in network_params.network:
+            # shadowfork requires some preparation
             latest_block, network_id = launch_shadowfork.shadowfork_prep(
                 plan,
                 network_params,
@@ -77,15 +74,18 @@ def launch_participant_network(
             final_genesis_timestamp,
             validator_data,
         ) = launch_kurtosis.launch(
-            plan, network_params, args_with_right_defaults, parallel_keystore_generation
+            plan,
+            network_params,
+            args_with_right_defaults,
+            parallel_keystore_generation,
         )
 
         el_cl_genesis_config_template = read_file(
-            static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH
+            static_files.EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH,
         )
 
         el_cl_genesis_additional_contracts_template = read_file(
-            static_files.EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH
+            static_files.EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH,
         )
 
         el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
@@ -109,8 +109,8 @@ def launch_participant_network(
             validator_data,
         ) = launch_ephemery.launch(plan, global_tolerations, global_node_selectors)
     elif (
-        network_params.network in constants.PUBLIC_NETWORKS
-        and network_params.network != constants.NETWORK_NAME.ephemery
+        network_params.network in constants.PUBLIC_NETWORKS and
+        network_params.network != constants.NETWORK_NAME.ephemery
     ):
         # We are running a public network
         (
@@ -161,14 +161,10 @@ def launch_participant_network(
 
     # Launch all consensus layer clients
     prysm_password_relative_filepath = (
-        validator_data.prysm_password_relative_filepath
-        if total_number_of_validator_keys > 0
-        else None
+        validator_data.prysm_password_relative_filepath if total_number_of_validator_keys > 0 else None
     )
     prysm_password_artifact_uuid = (
-        validator_data.prysm_password_artifact_uuid
-        if total_number_of_validator_keys > 0
-        else None
+        validator_data.prysm_password_artifact_uuid if total_number_of_validator_keys > 0 else None
     )
 
     (
@@ -215,17 +211,17 @@ def launch_participant_network(
 
             # Store the blobber URL mapping
             blobber_http_url = "http://{0}:{1}".format(
-                blobber.ip_addr, blobber.port_num
+                blobber.ip_addr,
+                blobber.port_num,
             )
-            cl_context_to_blobber_url[
-                config.cl_context.beacon_service_name
-            ] = blobber_http_url
+            cl_context_to_blobber_url[config.cl_context.beacon_service_name] = blobber_http_url
 
     # Helper function to get cl_context with blobber URL if available
     def get_cl_context_with_blobber_url(cl_context):
         beacon_service_name = cl_context.beacon_service_name
         effective_beacon_url = cl_context_to_blobber_url.get(
-            beacon_service_name, cl_context.beacon_http_url
+            beacon_service_name,
+            cl_context.beacon_http_url,
         )
 
         if effective_beacon_url == cl_context.beacon_http_url:
@@ -234,20 +230,20 @@ def launch_participant_network(
 
         # Create a new cl_context with the blobber URL
         return cl_context_module.new_cl_context(
-            client_name=cl_context.client_name,
-            enr=cl_context.enr,
-            ip_addr=cl_context.ip_addr,
-            http_port=cl_context.http_port,
-            beacon_http_url=effective_beacon_url,
-            cl_nodes_metrics_info=cl_context.cl_nodes_metrics_info,
-            beacon_service_name=cl_context.beacon_service_name,
-            beacon_grpc_url=cl_context.beacon_grpc_url,
-            multiaddr=cl_context.multiaddr,
-            peer_id=cl_context.peer_id,
-            snooper_enabled=cl_context.snooper_enabled,
-            snooper_el_engine_context=cl_context.snooper_el_engine_context,
-            validator_keystore_files_artifact_uuid=cl_context.validator_keystore_files_artifact_uuid,
-            supernode=cl_context.supernode,
+            client_name = cl_context.client_name,
+            enr = cl_context.enr,
+            ip_addr = cl_context.ip_addr,
+            http_port = cl_context.http_port,
+            beacon_http_url = effective_beacon_url,
+            cl_nodes_metrics_info = cl_context.cl_nodes_metrics_info,
+            beacon_service_name = cl_context.beacon_service_name,
+            beacon_grpc_url = cl_context.beacon_grpc_url,
+            multiaddr = cl_context.multiaddr,
+            peer_id = cl_context.peer_id,
+            snooper_enabled = cl_context.snooper_enabled,
+            snooper_el_engine_context = cl_context.snooper_el_engine_context,
+            validator_keystore_files_artifact_uuid = cl_context.validator_keystore_files_artifact_uuid,
+            supernode = cl_context.supernode,
         )
 
     ethereum_metrics_exporter_context = None
@@ -257,6 +253,7 @@ def launch_participant_network(
     all_remote_signer_contexts = []
     all_snooper_beacon_contexts = []
     all_snooper_el_rpc_contexts = []
+
     # Some CL clients cannot run validator clients in the same process and need
     # a separate validator client
     _cls_that_need_separate_vc = [
@@ -277,7 +274,8 @@ def launch_participant_network(
         vc_type = participant.vc_type
         remote_signer_type = participant.remote_signer_type
         index_str = shared_utils.zfill_custom(
-            index + 1, len(str(len(args_with_right_defaults.participants)))
+            index + 1,
+            len(str(len(args_with_right_defaults.participants))),
         )
         el_context = all_el_contexts[index] if index < len(all_el_contexts) else None
         cl_context = all_cl_contexts[index] if index < len(all_cl_contexts) else None
@@ -309,12 +307,12 @@ def launch_participant_network(
             global_other_index += 1
             plan.print(
                 "Successfully added {0} ethereum metrics exporter participants".format(
-                    ethereum_metrics_exporter_context
-                )
+                    ethereum_metrics_exporter_context,
+                ),
             )
 
             all_ethereum_metrics_exporter_contexts.append(
-                ethereum_metrics_exporter_context
+                ethereum_metrics_exporter_context,
             )
 
             xatu_sentry_context = None
@@ -336,8 +334,8 @@ def launch_participant_network(
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(
-                    xatu_sentry_context
-                )
+                    xatu_sentry_context,
+                ),
             )
 
             all_xatu_sentry_contexts.append(xatu_sentry_context)
@@ -362,8 +360,8 @@ def launch_participant_network(
             global_other_index += 1
             plan.print(
                 "Successfully added {0} snooper RPC participants".format(
-                    snooper_el_rpc_context
-                )
+                    snooper_el_rpc_context,
+                ),
             )
 
         all_snooper_el_rpc_contexts.append(snooper_el_rpc_context)
@@ -388,7 +386,7 @@ def launch_participant_network(
             continue
 
         plan.print(
-            "Using separate validator client for participant #{0}".format(index_str)
+            "Using separate validator client for participant #{0}".format(index_str),
         )
 
         vc_keystores = None
@@ -418,8 +416,8 @@ def launch_participant_network(
             )
             plan.print(
                 "Successfully added {0} snooper participants".format(
-                    snooper_beacon_context
-                )
+                    snooper_beacon_context,
+                ),
             )
             global_other_index += 1
 
@@ -431,9 +429,7 @@ def launch_participant_network(
                 el_type,
                 cl_type,
                 vc_type,
-            )
-            if participant.cl_type != participant.vc_type
-            else "{0}-{1}-{2}".format(
+            ) if participant.cl_type != participant.vc_type else "{0}-{1}-{2}".format(
                 index_str,
                 el_type,
                 cl_type,
@@ -442,21 +438,21 @@ def launch_participant_network(
 
         if participant.use_remote_signer:
             remote_signer_context = remote_signer.launch(
-                plan=plan,
-                launcher=remote_signer.new_remote_signer_launcher(
-                    el_cl_genesis_data=el_cl_data
+                plan = plan,
+                launcher = remote_signer.new_remote_signer_launcher(
+                    el_cl_genesis_data = el_cl_data,
                 ),
-                service_name="signer-{0}".format(full_name),
-                remote_signer_type=remote_signer_type,
-                image=participant.remote_signer_image,
-                full_name="{0}-remote_signer".format(full_name),
-                vc_type=vc_type,
-                node_keystore_files=vc_keystores,
-                participant=participant,
-                global_tolerations=global_tolerations,
-                node_selectors=node_selectors,
-                port_publisher=args_with_right_defaults.port_publisher,
-                remote_signer_index=current_vc_index,
+                service_name = "signer-{0}".format(full_name),
+                remote_signer_type = remote_signer_type,
+                image = participant.remote_signer_image,
+                full_name = "{0}-remote_signer".format(full_name),
+                vc_type = vc_type,
+                node_keystore_files = vc_keystores,
+                participant = participant,
+                global_tolerations = global_tolerations,
+                node_selectors = node_selectors,
+                port_publisher = args_with_right_defaults.port_publisher,
+                remote_signer_index = current_vc_index,
             )
 
         all_remote_signer_contexts.append(remote_signer_context)
@@ -465,29 +461,29 @@ def launch_participant_network(
 
         service_name = "vc-{0}".format(full_name)
         vc_service_config = vc.get_vc_config(
-            plan=plan,
-            launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
-            keymanager_file=keymanager_file,
-            service_name=service_name,
-            vc_type=vc_type,
-            image=participant.vc_image,
-            global_log_level=args_with_right_defaults.global_log_level,
-            cl_context=get_cl_context_with_blobber_url(cl_context),
-            el_context=el_context,
-            remote_signer_context=remote_signer_context,
-            full_name=full_name,
-            snooper_enabled=participant.snooper_enabled,
-            snooper_beacon_context=snooper_beacon_context,
-            node_keystore_files=vc_keystores,
-            participant=participant,
-            prysm_password_relative_filepath=prysm_password_relative_filepath,
-            prysm_password_artifact_uuid=prysm_password_artifact_uuid,
-            global_tolerations=global_tolerations,
-            node_selectors=node_selectors,
-            network_params=network_params,
-            port_publisher=args_with_right_defaults.port_publisher,
-            vc_index=current_vc_index,
-            extra_files_artifacts=extra_files_artifacts,
+            plan = plan,
+            launcher = vc.new_vc_launcher(el_cl_genesis_data = el_cl_data),
+            keymanager_file = keymanager_file,
+            service_name = service_name,
+            vc_type = vc_type,
+            image = participant.vc_image,
+            global_log_level = args_with_right_defaults.global_log_level,
+            cl_context = get_cl_context_with_blobber_url(cl_context),
+            el_context = el_context,
+            remote_signer_context = remote_signer_context,
+            full_name = full_name,
+            snooper_enabled = participant.snooper_enabled,
+            snooper_beacon_context = snooper_beacon_context,
+            node_keystore_files = vc_keystores,
+            participant = participant,
+            prysm_password_relative_filepath = prysm_password_relative_filepath,
+            prysm_password_artifact_uuid = prysm_password_artifact_uuid,
+            global_tolerations = global_tolerations,
+            node_selectors = node_selectors,
+            network_params = network_params,
+            port_publisher = args_with_right_defaults.port_publisher,
+            vc_index = current_vc_index,
+            extra_files_artifacts = extra_files_artifacts,
         )
         if vc_service_config == None:
             continue
@@ -516,9 +512,7 @@ def launch_participant_network(
 
         participant_index = vc_service_info[vc_service_name]["participant_index"]
         if vc_context and vc_context.metrics_info:
-            vc_context.metrics_info["config"] = args_with_right_defaults.participants[
-                participant_index
-            ].prometheus_config
+            vc_context.metrics_info["config"] = args_with_right_defaults.participants[participant_index].prometheus_config
 
         vc_contexts_temp[participant_index] = vc_context
 
@@ -545,34 +539,24 @@ def launch_participant_network(
         vc_context = all_vc_contexts[index] if index < len(all_vc_contexts) else None
 
         remote_signer_context = (
-            all_remote_signer_contexts[index]
-            if index < len(all_remote_signer_contexts)
-            else None
+            all_remote_signer_contexts[index] if index < len(all_remote_signer_contexts) else None
         )
 
         if participant.snooper_enabled:
             snooper_el_engine_context = (
-                all_snooper_el_engine_contexts[index]
-                if index < len(all_snooper_el_engine_contexts)
-                else None
+                all_snooper_el_engine_contexts[index] if index < len(all_snooper_el_engine_contexts) else None
             )
             snooper_beacon_context = (
-                all_snooper_beacon_contexts[index]
-                if index < len(all_snooper_beacon_contexts)
-                else None
+                all_snooper_beacon_contexts[index] if index < len(all_snooper_beacon_contexts) else None
             )
             snooper_el_rpc_context = (
-                all_snooper_el_rpc_contexts[index]
-                if index < len(all_snooper_el_rpc_contexts)
-                else None
+                all_snooper_el_rpc_contexts[index] if index < len(all_snooper_el_rpc_contexts) else None
             )
 
         ethereum_metrics_exporter_context = None
 
         if participant.ethereum_metrics_exporter_enabled:
-            ethereum_metrics_exporter_context = all_ethereum_metrics_exporter_contexts[
-                index
-            ]
+            ethereum_metrics_exporter_context = all_ethereum_metrics_exporter_contexts[index]
         xatu_sentry_context = None
 
         if participant.xatu_sentry_enabled and index < len(all_xatu_sentry_contexts):

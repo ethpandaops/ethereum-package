@@ -1,48 +1,48 @@
 EL_TYPE = struct(
-    geth="geth",
-    erigon="erigon",
-    nethermind="nethermind",
-    besu="besu",
-    reth="reth",
-    reth_builder="reth-builder",
-    ethereumjs="ethereumjs",
-    nimbus="nimbus",
-    ethrex="ethrex",
+    geth = "geth",
+    erigon = "erigon",
+    nethermind = "nethermind",
+    besu = "besu",
+    reth = "reth",
+    reth_builder = "reth-builder",
+    ethereumjs = "ethereumjs",
+    nimbus = "nimbus",
+    ethrex = "ethrex",
 )
 
 CL_TYPE = struct(
-    lighthouse="lighthouse",
-    teku="teku",
-    nimbus="nimbus",
-    prysm="prysm",
-    lodestar="lodestar",
-    grandine="grandine",
+    lighthouse = "lighthouse",
+    teku = "teku",
+    nimbus = "nimbus",
+    prysm = "prysm",
+    lodestar = "lodestar",
+    grandine = "grandine",
 )
 
 VC_TYPE = struct(
-    lighthouse="lighthouse",
-    lodestar="lodestar",
-    nimbus="nimbus",
-    prysm="prysm",
-    teku="teku",
-    vero="vero",
+    lighthouse = "lighthouse",
+    lodestar = "lodestar",
+    nimbus = "nimbus",
+    prysm = "prysm",
+    teku = "teku",
+    vero = "vero",
 )
 
-REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
+REMOTE_SIGNER_TYPE = struct(web3signer = "web3signer")
 
 GLOBAL_LOG_LEVEL = struct(
-    info="info",
-    error="error",
-    warn="warn",
-    debug="debug",
-    trace="trace",
+    info = "info",
+    error = "error",
+    warn = "warn",
+    debug = "debug",
+    trace = "trace",
 )
 
 CLIENT_TYPES = struct(
-    el="execution",
-    cl="beacon",
-    validator="validator",
-    remote_signer="remote-signer",
+    el = "execution",
+    cl = "beacon",
+    validator = "validator",
+    remote_signer = "remote-signer",
 )
 
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
@@ -134,20 +134,20 @@ FAR_FUTURE_EPOCH = 18446744073709551615
 MAX_LABEL_LENGTH = 63
 
 CONTAINER_REGISTRY = struct(
-    dockerhub="/",
-    ghcr="ghcr.io",
-    gcr="gcr.io",
+    dockerhub = "/",
+    ghcr = "ghcr.io",
+    gcr = "gcr.io",
 )
 
 NETWORK_NAME = struct(
-    mainnet="mainnet",
-    sepolia="sepolia",
-    holesky="holesky",
-    hoodi="hoodi",
-    ephemery="ephemery",
-    kurtosis="kurtosis",
-    verkle="verkle",
-    shadowfork="shadowfork",
+    mainnet = "mainnet",
+    sepolia = "sepolia",
+    holesky = "holesky",
+    hoodi = "hoodi",
+    ephemery = "ephemery",
+    kurtosis = "kurtosis",
+    verkle = "verkle",
+    shadowfork = "shadowfork",
 )
 
 PUBLIC_NETWORKS = (
@@ -315,6 +315,7 @@ VOLUME_SIZE = {
         "ethrex_volume_size": 100000,  # 100GB
     },
 }
+
 # Language mapping for client implementations
 CLIENT_LANGUAGES = {
     # Execution Layer (EL) clients

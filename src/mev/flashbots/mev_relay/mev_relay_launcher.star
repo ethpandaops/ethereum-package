@@ -18,7 +18,6 @@ NETWORK_ID_TO_NAME = {
     "560048": "hoodi",
 }
 
-
 # The min/max CPU/memory that mev-relay can use
 RELAY_MIN_CPU = 500
 RELAY_MAX_CPU = 3000
@@ -37,22 +36,20 @@ REDIS_MAX_CPU = 3000
 REDIS_MIN_MEMORY = 16
 REDIS_MAX_MEMORY = 1024
 
-
 def launch_mev_relay(
-    plan,
-    mev_params,
-    network_id,
-    beacon_uris,
-    validator_root,
-    blocksim_uri,
-    network_params,
-    persistent,
-    port_publisher,
-    index,
-    global_node_selectors,
-    global_tolerations,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        mev_params,
+        network_id,
+        beacon_uris,
+        validator_root,
+        blocksim_uri,
+        network_params,
+        persistent,
+        port_publisher,
+        index,
+        global_node_selectors,
+        global_tolerations):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,
         constants.HTTP_PORT_ID,
@@ -63,32 +60,33 @@ def launch_mev_relay(
     node_selectors = global_node_selectors
     redis = redis_module.run(
         plan,
-        service_name="mev-relay-redis",
-        min_cpu=REDIS_MIN_CPU,
-        max_cpu=REDIS_MAX_CPU,
-        min_memory=REDIS_MIN_MEMORY,
-        max_memory=REDIS_MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        service_name = "mev-relay-redis",
+        min_cpu = REDIS_MIN_CPU,
+        max_cpu = REDIS_MAX_CPU,
+        min_memory = REDIS_MIN_MEMORY,
+        max_memory = REDIS_MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
+
     # making the password postgres as the relay expects it to be postgres
     postgres = postgres_module.run(
         plan,
-        password="postgres",
-        user="postgres",
-        database="postgres",
-        service_name="mev-relay-postgres",
-        persistent=persistent,
-        launch_adminer=mev_params.launch_adminer,
-        min_cpu=POSTGRES_MIN_CPU,
-        max_cpu=POSTGRES_MAX_CPU,
-        min_memory=POSTGRES_MIN_MEMORY,
-        max_memory=POSTGRES_MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        password = "postgres",
+        user = "postgres",
+        database = "postgres",
+        service_name = "mev-relay-postgres",
+        persistent = persistent,
+        launch_adminer = mev_params.launch_adminer,
+        min_cpu = POSTGRES_MIN_CPU,
+        max_cpu = POSTGRES_MAX_CPU,
+        min_memory = POSTGRES_MIN_MEMORY,
+        max_memory = POSTGRES_MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
 
-    network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
+    NETWORK_ID_TO_NAME.get(network_id, network_id)
 
     image = mev_params.mev_relay_image
 
@@ -110,71 +108,73 @@ def launch_mev_relay(
     redis_url = "{}:{}".format(redis.hostname, redis.port_number)
     postgres_url = postgres.url + "?sslmode=disable"
     plan.add_service(
-        name=MEV_RELAY_HOUSEKEEPER,
-        config=ServiceConfig(
-            image=image,
-            cmd=[
-                "housekeeper",
-                "--network",
-                "custom",
-                "--db",
-                postgres_url,
-                "--redis-uri",
-                redis_url,
-                "--beacon-uris",
-                beacon_uris,
-            ]
-            + mev_params.mev_relay_housekeeper_extra_args,
-            env_vars=env_vars | mev_params.mev_relay_housekeeper_extra_env_vars,
-            min_cpu=RELAY_MIN_CPU,
-            max_cpu=RELAY_MAX_CPU,
-            min_memory=RELAY_MIN_MEMORY,
-            max_memory=RELAY_MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+        name = MEV_RELAY_HOUSEKEEPER,
+        config = ServiceConfig(
+            image = image,
+            cmd = [
+                      "housekeeper",
+                      "--network",
+                      "custom",
+                      "--db",
+                      postgres_url,
+                      "--redis-uri",
+                      redis_url,
+                      "--beacon-uris",
+                      beacon_uris,
+                  ] +
+                  mev_params.mev_relay_housekeeper_extra_args,
+            env_vars = env_vars | mev_params.mev_relay_housekeeper_extra_env_vars,
+            min_cpu = RELAY_MIN_CPU,
+            max_cpu = RELAY_MAX_CPU,
+            min_memory = RELAY_MIN_MEMORY,
+            max_memory = RELAY_MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
 
     api = plan.add_service(
-        name=MEV_RELAY_ENDPOINT,
-        config=ServiceConfig(
-            image=image,
-            cmd=[
-                "api",
-                "--network",
-                "custom",
-                "--db",
-                postgres_url,
-                "--secret-key",
-                constants.DEFAULT_MEV_SECRET_KEY,
-                "--listen-addr",
-                "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT),
-                "--redis-uri",
-                redis_url,
-                "--beacon-uris",
-                beacon_uris,
-                "--blocksim",
-                blocksim_uri,
-                "--pprof-listen-addr",
-                "0.0.0.0:{0}".format(MEV_RELAY_PPROF_PORT),
-            ]
-            + mev_params.mev_relay_api_extra_args,
-            ports={
+        name = MEV_RELAY_ENDPOINT,
+        config = ServiceConfig(
+            image = image,
+            cmd = [
+                      "api",
+                      "--network",
+                      "custom",
+                      "--db",
+                      postgres_url,
+                      "--secret-key",
+                      constants.DEFAULT_MEV_SECRET_KEY,
+                      "--listen-addr",
+                      "0.0.0.0:{0}".format(MEV_RELAY_ENDPOINT_PORT),
+                      "--redis-uri",
+                      redis_url,
+                      "--beacon-uris",
+                      beacon_uris,
+                      "--blocksim",
+                      blocksim_uri,
+                      "--pprof-listen-addr",
+                      "0.0.0.0:{0}".format(MEV_RELAY_PPROF_PORT),
+                  ] +
+                  mev_params.mev_relay_api_extra_args,
+            ports = {
                 "http": PortSpec(
-                    number=MEV_RELAY_ENDPOINT_PORT, transport_protocol="TCP"
+                    number = MEV_RELAY_ENDPOINT_PORT,
+                    transport_protocol = "TCP",
                 ),
                 "pprof": PortSpec(
-                    number=MEV_RELAY_PPROF_PORT, transport_protocol="TCP"
+                    number = MEV_RELAY_PPROF_PORT,
+                    transport_protocol = "TCP",
                 ),
             },
-            public_ports=public_ports,
-            env_vars=env_vars | mev_params.mev_relay_api_extra_env_vars,
-            min_cpu=RELAY_MIN_CPU,
-            max_cpu=RELAY_MAX_CPU,
-            min_memory=RELAY_MIN_MEMORY,
-            max_memory=RELAY_MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+            public_ports = public_ports,
+            env_vars = env_vars | mev_params.mev_relay_api_extra_env_vars,
+            min_cpu = RELAY_MIN_CPU,
+            max_cpu = RELAY_MAX_CPU,
+            min_memory = RELAY_MIN_MEMORY,
+            max_memory = RELAY_MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
 
@@ -185,51 +185,54 @@ def launch_mev_relay(
         1,
     )
     plan.add_service(
-        name=MEV_RELAY_WEBSITE,
-        config=ServiceConfig(
-            image=image,
-            cmd=[
-                "website",
-                "--network",
-                "custom",
-                "--db",
-                postgres_url,
-                "--listen-addr",
-                "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT),
-                "--redis-uri",
-                redis_url,
-                "https://{0}@{1}".format(
-                    constants.DEFAULT_MEV_PUBKEY, MEV_RELAY_ENDPOINT
-                ),
-                "--show-config-details",
-                "--relay-url",
-                "http://{0}@{1}:{2}".format(
-                    constants.DEFAULT_MEV_PUBKEY,
-                    api.ip_address,
-                    MEV_RELAY_ENDPOINT_PORT,
-                ),
-                "--pubkey-override",
-                constants.DEFAULT_MEV_PUBKEY,
-            ]
-            + mev_params.mev_relay_website_extra_args,
-            ports={
+        name = MEV_RELAY_WEBSITE,
+        config = ServiceConfig(
+            image = image,
+            cmd = [
+                      "website",
+                      "--network",
+                      "custom",
+                      "--db",
+                      postgres_url,
+                      "--listen-addr",
+                      "0.0.0.0:{0}".format(MEV_RELAY_WEBSITE_PORT),
+                      "--redis-uri",
+                      redis_url,
+                      "https://{0}@{1}".format(
+                          constants.DEFAULT_MEV_PUBKEY,
+                          MEV_RELAY_ENDPOINT,
+                      ),
+                      "--show-config-details",
+                      "--relay-url",
+                      "http://{0}@{1}:{2}".format(
+                          constants.DEFAULT_MEV_PUBKEY,
+                          api.ip_address,
+                          MEV_RELAY_ENDPOINT_PORT,
+                      ),
+                      "--pubkey-override",
+                      constants.DEFAULT_MEV_PUBKEY,
+                  ] +
+                  mev_params.mev_relay_website_extra_args,
+            ports = {
                 "http": PortSpec(
-                    number=MEV_RELAY_WEBSITE_PORT,
-                    transport_protocol="TCP",
-                    application_protocol="http",
-                )
+                    number = MEV_RELAY_WEBSITE_PORT,
+                    transport_protocol = "TCP",
+                    application_protocol = "http",
+                ),
             },
-            public_ports=public_ports,
-            env_vars=env_vars | mev_params.mev_relay_website_extra_env_vars,
-            min_cpu=RELAY_MIN_CPU,
-            max_cpu=RELAY_MAX_CPU,
-            min_memory=RELAY_MIN_MEMORY,
-            max_memory=RELAY_MAX_MEMORY,
-            node_selectors=node_selectors,
-            tolerations=tolerations,
+            public_ports = public_ports,
+            env_vars = env_vars | mev_params.mev_relay_website_extra_env_vars,
+            min_cpu = RELAY_MIN_CPU,
+            max_cpu = RELAY_MAX_CPU,
+            min_memory = RELAY_MIN_MEMORY,
+            max_memory = RELAY_MAX_MEMORY,
+            node_selectors = node_selectors,
+            tolerations = tolerations,
         ),
     )
 
     return "http://{0}@{1}:{2}".format(
-        constants.DEFAULT_MEV_PUBKEY, api.ip_address, MEV_RELAY_ENDPOINT_PORT
+        constants.DEFAULT_MEV_PUBKEY,
+        api.ip_address,
+        MEV_RELAY_ENDPOINT_PORT,
     )

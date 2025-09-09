@@ -1,6 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 validator_keystores = import_module(
-    "../prelaunch_data_generator/validator_keystores/validator_keystore_generator.star"
+    "../prelaunch_data_generator/validator_keystores/validator_keystore_generator.star",
 )
 
 constants = import_module("../package_io/constants.star")
@@ -16,10 +16,11 @@ CL_GENESIS_DATA_GENERATION_TIME = 5
 # This is in seconds
 CL_NODE_STARTUP_TIME = 5
 
-
 def launch(
-    plan, network_params, args_with_right_defaults, parallel_keystore_generation
-):
+        plan,
+        network_params,
+        args_with_right_defaults,
+        parallel_keystore_generation):
     num_participants = len(args_with_right_defaults.participants)
     plan.print("Generating cl validator key stores")
     validator_data = None
@@ -43,9 +44,9 @@ def launch(
     # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
     final_genesis_timestamp = shared_utils.get_final_genesis_timestamp(
         plan,
-        network_params.genesis_delay
-        + CL_GENESIS_DATA_GENERATION_TIME
-        + num_participants * CL_NODE_STARTUP_TIME,
+        network_params.genesis_delay +
+        CL_GENESIS_DATA_GENERATION_TIME +
+        num_participants * CL_NODE_STARTUP_TIME,
     )
 
     # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants

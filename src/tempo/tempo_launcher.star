@@ -38,17 +38,15 @@ USED_PORTS = {
     ),
 }
 
-
 def launch_tempo(
-    plan,
-    config_template,
-    global_node_selectors,
-    global_tolerations,
-    tempo_params,
-    port_publisher,
-    index,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        config_template,
+        global_node_selectors,
+        global_tolerations,
+        tempo_params,
+        port_publisher,
+        index):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     config_files_artifact_name = get_tempo_config_dir_artifact_uuid(
         plan,
@@ -75,70 +73,64 @@ def launch_tempo(
 
     # Return connection info for other services
     return struct(
-        service_name=SERVICE_NAME,
-        ip_addr=service.ip_address,
-        http_port_num=HTTP_PORT_NUMBER,
-        grpc_port_num=GRPC_PORT_NUMBER,
-        otlp_grpc_port_num=OTLP_GRPC_PORT_NUMBER,
-        otlp_http_port_num=OTLP_HTTP_PORT_NUMBER,
-        http_url="http://{}:{}".format(service.ip_address, HTTP_PORT_NUMBER),
-        grpc_url="{}:{}".format(service.ip_address, GRPC_PORT_NUMBER),
-        otlp_grpc_url="{}:{}".format(SERVICE_NAME, OTLP_GRPC_PORT_NUMBER),
-        otlp_http_url="http://{}:{}".format(SERVICE_NAME, OTLP_HTTP_PORT_NUMBER),
+        service_name = SERVICE_NAME,
+        ip_addr = service.ip_address,
+        http_port_num = HTTP_PORT_NUMBER,
+        grpc_port_num = GRPC_PORT_NUMBER,
+        otlp_grpc_port_num = OTLP_GRPC_PORT_NUMBER,
+        otlp_http_port_num = OTLP_HTTP_PORT_NUMBER,
+        http_url = "http://{}:{}".format(service.ip_address, HTTP_PORT_NUMBER),
+        grpc_url = "{}:{}".format(service.ip_address, GRPC_PORT_NUMBER),
+        otlp_grpc_url = "{}:{}".format(SERVICE_NAME, OTLP_GRPC_PORT_NUMBER),
+        otlp_http_url = "http://{}:{}".format(SERVICE_NAME, OTLP_HTTP_PORT_NUMBER),
     )
 
-
-def get_tempo_config_dir_artifact_uuid(
-    plan,
-    config_template,
-    tempo_params,
-):
+def get_tempo_config_dir_artifact_uuid(plan, config_template, tempo_params):
     template_data = new_config_template_data(tempo_params)
 
     template_and_data = shared_utils.new_template_and_data(
-        config_template, template_data
+        config_template,
+        template_data,
     )
 
     template_and_data_by_rel_dest_filepath = {}
     template_and_data_by_rel_dest_filepath[TEMPO_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "tempo-config"
+        template_and_data_by_rel_dest_filepath,
+        "tempo-config",
     )
 
     return config_files_artifact_name
 
-
 def get_config(
-    config_files_artifact_name,
-    node_selectors,
-    tolerations,
-    tempo_params,
-    public_ports,
-):
+        config_files_artifact_name,
+        node_selectors,
+        tolerations,
+        tempo_params,
+        public_ports):
     config_file_path = shared_utils.path_join(
         TEMPO_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         TEMPO_CONFIG_FILENAME,
     )
 
     return ServiceConfig(
-        image=tempo_params.image,
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        files={
+        image = tempo_params.image,
+        ports = USED_PORTS,
+        public_ports = public_ports,
+        files = {
             TEMPO_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
-        cmd=[
+        cmd = [
             "-config.file={}".format(config_file_path),
         ],
-        min_cpu=tempo_params.min_cpu,
-        max_cpu=tempo_params.max_cpu,
-        min_memory=tempo_params.min_mem,
-        max_memory=tempo_params.max_mem,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
+        min_cpu = tempo_params.min_cpu,
+        max_cpu = tempo_params.max_cpu,
+        min_memory = tempo_params.min_mem,
+        max_memory = tempo_params.max_mem,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
     )
-
 
 def new_config_template_data(tempo_params):
     return {

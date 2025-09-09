@@ -32,14 +32,12 @@ ENTRYPOINT_ARGS = [
     "99999",
 ]
 
-
 # Launches a prelaunch data generator IMAGE, for use in various of the genesis generation
 def launch_prelaunch_data_generator(
-    plan,
-    files_artifact_mountpoints,
-    service_name_suffix,
-    docker_cache_params,
-):
+        plan,
+        files_artifact_mountpoints,
+        service_name_suffix,
+        docker_cache_params):
     config = get_config(files_artifact_mountpoints, docker_cache_params)
 
     service_name = "{0}{1}".format(
@@ -50,10 +48,11 @@ def launch_prelaunch_data_generator(
 
     return service_name
 
-
 def launch_prelaunch_data_generator_parallel(
-    plan, files_artifact_mountpoints, service_name_suffixes, docker_cache_params
-):
+        plan,
+        files_artifact_mountpoints,
+        service_name_suffixes,
+        docker_cache_params):
     config = get_config(files_artifact_mountpoints, docker_cache_params)
     service_names = [
         "{0}{1}".format(
@@ -66,24 +65,25 @@ def launch_prelaunch_data_generator_parallel(
     plan.add_services(services_to_add)
     return service_names
 
-
 def get_config(files_artifact_mountpoints, docker_cache_params):
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
+        image = shared_utils.docker_cache_image_calc(
             docker_cache_params,
             ETH_VAL_TOOLS_IMAGE,
         ),
-        entrypoint=ENTRYPOINT_ARGS,
-        files=files_artifact_mountpoints,
+        entrypoint = ENTRYPOINT_ARGS,
+        files = files_artifact_mountpoints,
     )
-
 
 # Generates keystores for the given number of nodes from the given mnemonic, where each keystore contains approximately
 #
 # 	num_keys / num_nodes keys
 def generate_validator_keystores(plan, mnemonic, participants, docker_cache_params):
     service_name = launch_prelaunch_data_generator(
-        plan, {}, "cl-validator-keystore", docker_cache_params
+        plan,
+        {},
+        "cl-validator-keystore",
+        docker_cache_params,
     )
 
     all_output_dirpaths = []
@@ -122,9 +122,9 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
     command_str = " && ".join(all_sub_command_strs)
 
     command_result = plan.exec(
-        service_name=service_name,
-        description="Generating keystores",
-        recipe=ExecRecipe(command=["sh", "-c", command_str]),
+        service_name = service_name,
+        description = "Generating keystores",
+        recipe = ExecRecipe(command = ["sh", "-c", command_str]),
     )
     plan.verify(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
@@ -151,7 +151,9 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
             keystore_stop_index - 1,
         )
         artifact_name = plan.store_service_files(
-            service_name, output_dirpath, name=artifact_name
+            service_name,
+            output_dirpath,
+            name = artifact_name,
         )
 
         base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
@@ -179,9 +181,9 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
         ),
     ]
     write_prysm_password_file_cmd_result = plan.exec(
-        service_name=service_name,
-        description="Storing prysm password in a file",
-        recipe=ExecRecipe(command=write_prysm_password_file_cmd),
+        service_name = service_name,
+        description = "Storing prysm password in a file",
+        recipe = ExecRecipe(command = write_prysm_password_file_cmd),
     )
     plan.verify(
         write_prysm_password_file_cmd_result["code"],
@@ -190,7 +192,9 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
     )
 
     prysm_password_artifact_name = plan.store_service_files(
-        service_name, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR, name="prysm-password"
+        service_name,
+        PRYSM_PASSWORD_FILEPATH_ON_GENERATOR,
+        name = "prysm-password",
     )
 
     result = keystores_result.new_generate_keystores_result(
@@ -201,11 +205,12 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
 
     return result
 
-
 # this is like above but runs things in parallel - for large networks that run on k8s or gigantic dockers
 def generate_valdiator_keystores_in_parallel(
-    plan, mnemonic, participants, docker_cache_params
-):
+        plan,
+        mnemonic,
+        participants,
+        docker_cache_params):
     service_names = launch_prelaunch_data_generator_parallel(
         plan,
         {},
@@ -259,10 +264,10 @@ def generate_valdiator_keystores_in_parallel(
             # no generation command as validator count is 0
             continue
         plan.exec(
-            service_name=service_name,
-            description="Generating keystore for participant " + str(idx),
-            recipe=ExecRecipe(
-                command=["sh", "-c", generation_command + " >/dev/null 2>&1 &"]
+            service_name = service_name,
+            description = "Generating keystore for participant " + str(idx),
+            recipe = ExecRecipe(
+                command = ["sh", "-c", generation_command + " >/dev/null 2>&1 &"],
             ),
         )
 
@@ -276,13 +281,13 @@ def generate_valdiator_keystores_in_parallel(
         generation_finished_filepath = finished_files_to_verify[idx]
         verification_command = ["ls", generation_finished_filepath]
         plan.wait(
-            recipe=ExecRecipe(command=verification_command),
-            service_name=service_name,
-            field="code",
-            assertion="==",
-            target_value=0,
-            timeout="5m",
-            interval="0.5s",
+            recipe = ExecRecipe(command = verification_command),
+            service_name = service_name,
+            field = "code",
+            assertion = "==",
+            target_value = 0,
+            timeout = "5m",
+            interval = "0.5s",
         )
 
     # Store outputs into files artifacts
@@ -307,7 +312,9 @@ def generate_valdiator_keystores_in_parallel(
             keystore_stop_index,
         )
         artifact_name = plan.store_service_files(
-            service_name, output_dirpath, name=artifact_name
+            service_name,
+            output_dirpath,
+            name = artifact_name,
         )
 
         # This is necessary because the way Kurtosis currently implements artifact-storing is
@@ -334,9 +341,9 @@ def generate_valdiator_keystores_in_parallel(
         ),
     ]
     write_prysm_password_file_cmd_result = plan.exec(
-        service_name=service_names[0],
-        description="Storing prysm password in a file",
-        recipe=ExecRecipe(command=write_prysm_password_file_cmd),
+        service_name = service_names[0],
+        description = "Storing prysm password in a file",
+        recipe = ExecRecipe(command = write_prysm_password_file_cmd),
     )
     plan.verify(
         write_prysm_password_file_cmd_result["code"],
@@ -345,7 +352,9 @@ def generate_valdiator_keystores_in_parallel(
     )
 
     prysm_password_artifact_name = plan.store_service_files(
-        service_names[0], PRYSM_PASSWORD_FILEPATH_ON_GENERATOR, name="prysm-password"
+        service_names[0],
+        PRYSM_PASSWORD_FILEPATH_ON_GENERATOR,
+        name = "prysm-password",
     )
 
     result = keystores_result.new_generate_keystores_result(

@@ -10,8 +10,9 @@ MEV_BOOST_FILES_ARTIFACT_NAME = "mev-rs-mev-boost-config"
 
 USED_PORTS = {
     "http": shared_utils.new_port_spec(
-        constants.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL
-    )
+        constants.MEV_BOOST_PORT,
+        shared_utils.TCP_PROTOCOL,
+    ),
 }
 
 # The min/max CPU/memory that mev-boost can use
@@ -20,21 +21,19 @@ MAX_CPU = 500
 MIN_MEMORY = 16
 MAX_MEMORY = 256
 
-
 def launch(
-    plan,
-    mev_boost_launcher,
-    service_name,
-    network,
-    mev_params,
-    relays,
-    el_cl_genesis_data,
-    port_publisher,
-    index,
-    global_node_selectors,
-    global_tolerations,
-):
-    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+        plan,
+        mev_boost_launcher,
+        service_name,
+        network,
+        mev_params,
+        relays,
+        el_cl_genesis_data,
+        port_publisher,
+        index,
+        global_node_selectors,
+        global_tolerations):
+    tolerations = shared_utils.get_tolerations(global_tolerations = global_tolerations)
 
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,
@@ -44,9 +43,7 @@ def launch(
     )
 
     network = (
-        network
-        if network in constants.PUBLIC_NETWORKS
-        else constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        network if network in constants.PUBLIC_NETWORKS else constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
     )
     image = mev_params.mev_boost_image
     template_data = new_config_template_data(
@@ -56,17 +53,16 @@ def launch(
     )
 
     mev_rs_boost_config_template = read_file(
-        static_files.MEV_RS_MEV_BOOST_CONFIG_FILEPATH
+        static_files.MEV_RS_MEV_BOOST_CONFIG_FILEPATH,
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        mev_rs_boost_config_template, template_data
+        mev_rs_boost_config_template,
+        template_data,
     )
 
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        MEV_BOOST_CONFIG_FILENAME
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[MEV_BOOST_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath,
@@ -74,7 +70,8 @@ def launch(
     )
 
     config_file_path = shared_utils.path_join(
-        MEV_BOOST_MOUNT_DIRPATH_ON_SERVICE, MEV_BOOST_CONFIG_FILENAME
+        MEV_BOOST_MOUNT_DIRPATH_ON_SERVICE,
+        MEV_BOOST_CONFIG_FILENAME,
     )
 
     config = get_config(
@@ -92,48 +89,46 @@ def launch(
     mev_boost_service = plan.add_service(service_name, config)
 
     return mev_boost_context_module.new_mev_boost_context(
-        mev_boost_service.ip_address, constants.MEV_BOOST_PORT
+        mev_boost_service.ip_address,
+        constants.MEV_BOOST_PORT,
     )
 
-
 def get_config(
-    mev_boost_launcher,
-    image,
-    config_file_path,
-    config_file,
-    el_cl_genesis_data,
-    node_selectors,
-    tolerations,
-    public_ports,
-    participant_index,
-):
+        _,
+        image,
+        config_file_path,
+        config_file,
+        el_cl_genesis_data,
+        node_selectors,
+        tolerations,
+        public_ports,
+        participant_index):
     return ServiceConfig(
-        image=image,
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        cmd=[
+        image = image,
+        ports = USED_PORTS,
+        public_ports = public_ports,
+        cmd = [
             "boost",
             config_file_path,
         ],
-        files={
+        files = {
             MEV_BOOST_MOUNT_DIRPATH_ON_SERVICE: config_file,
             constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
         },
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
-        labels={constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
+        min_cpu = MIN_CPU,
+        max_cpu = MAX_CPU,
+        min_memory = MIN_MEMORY,
+        max_memory = MAX_MEMORY,
+        node_selectors = node_selectors,
+        tolerations = tolerations,
+        labels = {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
     )
-
 
 def new_mev_boost_launcher(should_check_relay, relay_end_points):
     return struct(
-        should_check_relay=should_check_relay, relay_end_points=relay_end_points
+        should_check_relay = should_check_relay,
+        relay_end_points = relay_end_points,
     )
-
 
 def new_config_template_data(network, port, relays):
     return {

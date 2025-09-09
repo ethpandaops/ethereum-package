@@ -13,19 +13,18 @@ MEV_FILE_PATH_ON_CONTAINER = (
     MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE + MEV_BUILDER_CONFIG_FILENAME
 )
 
-
 def new_builder_config(
-    plan,
-    service_name,
-    network_params,
-    fee_recipient,
-    mnemonic,
-    mev_params,
-    participants,
-    global_node_selectors,
-):
+        plan,
+        _,
+        network_params,
+        fee_recipient,
+        mnemonic,
+        mev_params,
+        participants,
+        _):
     num_of_participants = shared_utils.zfill_custom(
-        len(participants), len(str(len(participants)))
+        len(participants),
+        len(str(len(participants))),
     )
     builder_template_data = new_builder_config_template_data(
         network_params,
@@ -38,43 +37,40 @@ def new_builder_config(
         mev_params.mev_builder_subsidy,
     )
     flashbots_builder_config_template = read_file(
-        static_files.FLASHBOTS_RBUILDER_CONFIG_FILEPATH
+        static_files.FLASHBOTS_RBUILDER_CONFIG_FILEPATH,
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        flashbots_builder_config_template, builder_template_data
+        flashbots_builder_config_template,
+        builder_template_data,
     )
 
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        MEV_BUILDER_CONFIG_FILENAME
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[MEV_BUILDER_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, MEV_BUILDER_FILES_ARTIFACT_NAME
+        template_and_data_by_rel_dest_filepath,
+        MEV_BUILDER_FILES_ARTIFACT_NAME,
     )
 
-    config_file_path = shared_utils.path_join(
-        MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE, MEV_BUILDER_CONFIG_FILENAME
+    _ = shared_utils.path_join(
+        MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE,
+        MEV_BUILDER_CONFIG_FILENAME,
     )
 
     return config_files_artifact_name
 
-
 def new_builder_config_template_data(
-    network_params,
-    pubkey,
-    secret,
-    mnemonic,
-    fee_recipient,
-    extra_data,
-    num_of_participants,
-    subsidy,
-):
+        network_params,
+        pubkey,
+        secret,
+        mnemonic,
+        fee_recipient,
+        extra_data,
+        num_of_participants,
+        subsidy):
     return {
-        "Network": network_params.network
-        if network_params.network in constants.PUBLIC_NETWORKS
-        else "/network-configs/genesis.json",
+        "Network": network_params.network if network_params.network in constants.PUBLIC_NETWORKS else "/network-configs/genesis.json",
         "DataDir": "/data/reth/execution-data",
         "CLEndpoint": "http://cl-{0}-{1}-{2}:{3}".format(
             num_of_participants,

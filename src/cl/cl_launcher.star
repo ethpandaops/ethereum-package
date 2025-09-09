@@ -13,29 +13,27 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 
 snooper_el_launcher = import_module("../snooper/snooper_el_launcher.star")
 
-cl_context_BOOTNODE = None
-
+cl_context_bootnode = None
 
 def launch(
-    plan,
-    network_params,
-    el_cl_data,
-    jwt_file,
-    keymanager_file,
-    args_with_right_defaults,
-    all_el_contexts,
-    global_node_selectors,
-    global_tolerations,
-    persistent,
-    tempo_otlp_grpc_url,
-    num_participants,
-    validator_data,
-    prysm_password_relative_filepath,
-    prysm_password_artifact_uuid,
-    global_other_index,
-    extra_files_artifacts,
-    backend,
-):
+        plan,
+        network_params,
+        el_cl_data,
+        jwt_file,
+        keymanager_file,
+        args_with_right_defaults,
+        all_el_contexts,
+        global_node_selectors,
+        global_tolerations,
+        persistent,
+        tempo_otlp_grpc_url,
+        _,
+        validator_data,
+        _,
+        _,
+        global_other_index,
+        extra_files_artifacts,
+        backend):
     plan.print("Launching CL network")
 
     cl_launchers = {
@@ -101,12 +99,10 @@ def launch(
     all_cl_contexts = []
     blobber_configs_with_contexts = []
     preregistered_validator_keys_for_nodes = (
-        validator_data.per_node_keystores
-        if network_params.network == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in network_params.network
-        else None
+        validator_data.per_node_keystores if network_params.network == constants.NETWORK_NAME.kurtosis or
+                                             constants.NETWORK_NAME.shadowfork in network_params.network else None
     )
-    network_name = shared_utils.get_network_name(network_params.network)
+    _ = shared_utils.get_network_name(network_params.network)
 
     cl_service_configs = {}
     cl_participant_info = {}
@@ -119,16 +115,17 @@ def launch(
         )
 
         tolerations = shared_utils.get_tolerations(
-            specific_container_tolerations=participant.cl_tolerations,
-            participant_tolerations=participant.tolerations,
-            global_tolerations=global_tolerations,
+            specific_container_tolerations = participant.cl_tolerations,
+            participant_tolerations = participant.tolerations,
+            global_tolerations = global_tolerations,
         )
 
         if cl_type not in cl_launchers:
             fail(
                 "Unsupported launcher '{0}', need one of '{1}'".format(
-                    cl_type, ",".join(cl_launchers.keys())
-                )
+                    cl_type,
+                    ",".join(cl_launchers.keys()),
+                ),
             )
 
         (
@@ -146,15 +143,14 @@ def launch(
         )
 
         index_str = shared_utils.zfill_custom(
-            index + 1, len(str(len(args_with_right_defaults.participants)))
+            index + 1,
+            len(str(len(args_with_right_defaults.participants))),
         )
 
         cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
         if participant.validator_count != 0:
-            new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
-                index
-            ]
+            new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[index]
 
         el_context = all_el_contexts[index]
 
@@ -162,7 +158,9 @@ def launch(
         snooper_el_engine_context = None
         if participant.snooper_enabled:
             snooper_service_name = "snooper-engine-{0}-{1}-{2}".format(
-                index_str, cl_type, el_type
+                index_str,
+                cl_type,
+                el_type,
             )
             snooper_el_engine_context = snooper_el_launcher.launch_snooper(
                 plan,
@@ -177,28 +175,26 @@ def launch(
             global_other_index += 1
             plan.print(
                 "Successfully added {0} snooper participants".format(
-                    snooper_el_engine_context
-                )
+                    snooper_el_engine_context,
+                ),
             )
         checkpoint_sync_url = args_with_right_defaults.checkpoint_sync_url
         if args_with_right_defaults.checkpoint_sync_enabled:
             if args_with_right_defaults.checkpoint_sync_url == "":
                 if (
-                    network_params.network in constants.PUBLIC_NETWORKS
-                    or network_params.network == constants.NETWORK_NAME.ephemery
+                    network_params.network in constants.PUBLIC_NETWORKS or
+                    network_params.network == constants.NETWORK_NAME.ephemery
                 ):
-                    checkpoint_sync_url = constants.CHECKPOINT_SYNC_URL[
-                        network_params.network
-                    ]
+                    checkpoint_sync_url = constants.CHECKPOINT_SYNC_URL[network_params.network]
                 elif "devnet" in network_params.network:
                     checkpoint_sync_url = (
                         "https://checkpoint-sync.{0}.ethpandaops.io/".format(
-                            network_params.network
+                            network_params.network,
                         )
                     )
                 else:
                     fail(
-                        "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL."
+                        "Checkpoint sync URL is required if you enabled checkpoint_sync for custom networks. Please provide a valid URL.",
                     )
 
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
@@ -239,10 +235,10 @@ def launch(
             if blobber_config != None:
                 blobber_configs_with_contexts.append(
                     struct(
-                        cl_context=cl_context,
-                        blobber_config=blobber_config,
-                        participant=participant,
-                    )
+                        cl_context = cl_context,
+                        blobber_config = blobber_config,
+                        participant = participant,
+                    ),
                 )
 
             # Add participant cl additional prometheus labels
@@ -323,9 +319,9 @@ def launch(
         )
         if blobber_config != None:
             blobber_configs_temp[participant_index] = struct(
-                cl_context=cl_context,
-                blobber_config=blobber_config,
-                participant=participant,
+                cl_context = cl_context,
+                blobber_config = blobber_config,
+                participant = participant,
             )
 
         # Add participant cl additional prometheus labels

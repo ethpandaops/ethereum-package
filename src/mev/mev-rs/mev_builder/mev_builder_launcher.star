@@ -13,16 +13,7 @@ MEV_FILE_PATH_ON_CONTAINER = (
     MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE + MEV_BUILDER_CONFIG_FILENAME
 )
 
-
-def new_builder_config(
-    plan,
-    service_name,
-    network,
-    fee_recipient,
-    mnemonic,
-    extra_data,
-    global_node_selectors,
-):
+def new_builder_config(plan, _, network, fee_recipient, mnemonic, extra_data, _):
     builder_template_data = new_builder_config_template_data(
         network,
         constants.DEFAULT_MEV_PUBKEY,
@@ -32,37 +23,36 @@ def new_builder_config(
         extra_data,
     )
     mev_rs_builder_config_template = read_file(
-        static_files.MEV_RS_MEV_BUILDER_CONFIG_FILEPATH
+        static_files.MEV_RS_MEV_BUILDER_CONFIG_FILEPATH,
     )
 
     template_and_data = shared_utils.new_template_and_data(
-        mev_rs_builder_config_template, builder_template_data
+        mev_rs_builder_config_template,
+        builder_template_data,
     )
 
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[
-        MEV_BUILDER_CONFIG_FILENAME
-    ] = template_and_data
+    template_and_data_by_rel_dest_filepath[MEV_BUILDER_CONFIG_FILENAME] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, MEV_BUILDER_FILES_ARTIFACT_NAME
+        template_and_data_by_rel_dest_filepath,
+        MEV_BUILDER_FILES_ARTIFACT_NAME,
     )
 
-    config_file_path = shared_utils.path_join(
-        MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE, MEV_BUILDER_CONFIG_FILENAME
+    _ = shared_utils.path_join(
+        MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE,
+        MEV_BUILDER_CONFIG_FILENAME,
     )
 
     return config_files_artifact_name
 
-
 def new_builder_config_template_data(
-    network,
-    pubkey,
-    secret,
-    mnemonic,
-    fee_recipient,
-    extra_data,
-):
+        network,
+        pubkey,
+        secret,
+        mnemonic,
+        fee_recipient,
+        extra_data):
     return {
         "Network": network,
         "Relay": "mev-rs-relay",
