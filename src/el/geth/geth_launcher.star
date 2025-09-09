@@ -109,7 +109,6 @@ def get_config(
     else:
         gcmode_archive = False
 
-
     init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
