@@ -51,7 +51,7 @@ def launch_grafana(
     index,
     tempo_query_url=None,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     (
         grafana_config_artifacts_uuid,
@@ -70,6 +70,8 @@ def launch_grafana(
         plan,
         grafana_dashboards_artifacts_uuid,
         grafana_additional_dashboards_data,
+        global_tolerations,
+        global_node_selectors,
     )
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
@@ -210,6 +212,8 @@ def merge_dashboards_artifacts(
     plan,
     grafana_dashboards_artifacts_name,
     grafana_additional_dashboards_data=[],
+    global_tolerations=[],
+    global_node_selectors={},
 ):
     if len(grafana_additional_dashboards_data) == 0:
         return grafana_dashboards_artifacts_name
@@ -235,6 +239,8 @@ def merge_dashboards_artifacts(
         store=[
             GRAFANA_ADDITIONAL_DASHBOARDS_MERGED_STORED_PATH_FORMAT,
         ],
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
 
     return result.files_artifacts[0]

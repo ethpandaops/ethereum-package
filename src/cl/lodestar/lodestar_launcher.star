@@ -7,6 +7,8 @@ node_metrics = import_module("../../node_metrics_info.star")
 blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 constants = import_module("../../package_io/constants.star")
 
+LODESTAR_ENTRYPOINT_COMMAND = "node ./packages/cli/bin/lodestar"
+
 #  ---------------------------------- Beacon client -------------------------------------
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/lodestar/beacon-data"
 # Port nums
@@ -45,6 +47,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
+    backend,
     tempo_otlp_grpc_url=None,
 ):
     # Launch Beacon node
@@ -68,6 +71,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
+        backend,
         tempo_otlp_grpc_url,
     )
 
@@ -106,7 +110,8 @@ def get_beacon_config(
     participant_index,
     network_params,
     extra_files_artifacts,
-    tempo_otlp_grpc_urlk,
+    backend,
+    tempo_otlp_grpc_url,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -159,6 +164,7 @@ def get_beacon_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
+        LODESTAR_ENTRYPOINT_COMMAND,
         "beacon",
         "--logLevel=" + log_level,
         "--port={0}".format(discovery_port_tcp),
@@ -178,7 +184,11 @@ def get_beacon_config(
         "--nat=true",
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # ENR
-        "--enr.ip=" + port_publisher.cl_nat_exit_ip,
+        "--enr.ip={0}".format(
+            "${K8S_POD_IP}"
+            if backend == "kubernetes"
+            else port_publisher.cl_nat_exit_ip
+        ),
         "--enr.tcp={0}".format(discovery_port_tcp),
         "--enr.udp={0}".format(discovery_port_udp),
         # QUIC
@@ -294,7 +304,8 @@ def get_beacon_config(
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": ["exec " + " ".join(cmd)],
         "files": files,
         "env_vars": env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

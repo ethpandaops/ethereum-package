@@ -48,6 +48,7 @@ def launch_participant_network(
     parallel_keystore_generation,
     extra_files_artifacts,
     tempo_otlp_grpc_url,
+    backend,
 ):
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
@@ -96,6 +97,8 @@ def launch_participant_network(
             network_params,
             total_number_of_validator_keys,
             latest_block.files_artifacts[0] if latest_block != "" else "",
+            global_tolerations,
+            global_node_selectors,
         )
     elif network_params.network == constants.NETWORK_NAME.ephemery:
         # We are running an ephemery network
@@ -104,7 +107,7 @@ def launch_participant_network(
             final_genesis_timestamp,
             network_id,
             validator_data,
-        ) = launch_ephemery.launch(plan)
+        ) = launch_ephemery.launch(plan, global_tolerations, global_node_selectors)
     elif (
         network_params.network in constants.PUBLIC_NETWORKS
         and network_params.network != constants.NETWORK_NAME.ephemery
@@ -133,6 +136,8 @@ def launch_participant_network(
             plan,
             network_params.network,
             network_params.devnet_repo,
+            global_tolerations,
+            global_node_selectors,
         )
 
     # Launch all execution layer clients
@@ -190,6 +195,7 @@ def launch_participant_network(
         prysm_password_artifact_uuid,
         global_other_index,
         extra_files_artifacts,
+        backend,
     )
 
     # Launch all blobbers after all CLs are up

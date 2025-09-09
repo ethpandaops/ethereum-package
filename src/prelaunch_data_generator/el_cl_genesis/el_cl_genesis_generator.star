@@ -1,4 +1,5 @@
 shared_utils = import_module("../../shared_utils/shared_utils.star")
+input_parser = import_module("../../package_io/input_parser.star")
 
 el_cl_genesis_data = import_module("./el_cl_genesis_data.star")
 
@@ -19,9 +20,12 @@ def generate_el_cl_genesis_data(
     network_params,
     total_num_validator_keys_to_preregister,
     latest_block,
+    global_tolerations=[],
+    global_node_selectors={},
 ):
     files = {}
     shadowfork_file = ""
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     if latest_block != "":
         files[SHADOWFORK_FILEPATH] = latest_block
         shadowfork_file = SHADOWFORK_FILEPATH + "/latest_block.json"
@@ -75,6 +79,8 @@ def generate_el_cl_genesis_data(
             ),
         ],
         wait=None,
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
 
     genesis_validators_root = plan.run_sh(
@@ -83,12 +89,16 @@ def generate_el_cl_genesis_data(
         run="cat /data/genesis_validators_root.txt",
         files={"/data": genesis.files_artifacts[1]},
         wait=None,
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
     osaka_time = plan.run_sh(
         name="read-osaka-time",
         description="Reading osaka time from genesis",
         run="jq '.config.osakaTime' /data/genesis.json | tr -d '\n'",
         files={"/data": genesis.files_artifacts[0]},
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
 
     osaka_enabled_check = plan.run_sh(
@@ -96,6 +106,8 @@ def generate_el_cl_genesis_data(
         description="Check if osaka time is enabled (not false)",
         run="test \"$(jq '.config.osakaTime // false' /data/genesis.json | tr -d '\n')\" != \"false\" && echo true || echo false",
         files={"/data": genesis.files_artifacts[0]},
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
 
     result = el_cl_genesis_data.new_el_cl_genesis_data(
@@ -121,6 +133,7 @@ def new_env_file_for_el_cl_genesis_data(
         else network_params.network_id,  # This will override the network_id if shadowfork_file is present. If you want to use the network_id, please ensure that you don't use "shadowfork" in the network name.
         "DepositContractAddress": network_params.deposit_contract_address,
         "SecondsPerSlot": network_params.seconds_per_slot,
+        "SlotDurationMs": network_params.slot_duration_ms,
         "PreregisteredValidatorKeysMnemonic": network_params.preregistered_validator_keys_mnemonic,
         "NumValidatorKeysToPreregister": total_num_validator_keys_to_preregister,
         "GenesisDelay": 0,  # This delay is already precaculated in the final_genesis_timestamp
@@ -137,6 +150,7 @@ def new_env_file_for_el_cl_genesis_data(
         "FuluForkEpoch": "{0}".format(network_params.fulu_fork_epoch),
         "GloasForkEpoch": "{0}".format(network_params.gloas_fork_epoch),
         "Eip7805ForkEpoch": "{0}".format(network_params.eip7805_fork_epoch),
+        "Eip7441ForkEpoch": "{0}".format(network_params.eip7441_fork_epoch),
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
         "BellatrixForkVersion": constants.BELLATRIX_FORK_VERSION,
@@ -146,14 +160,25 @@ def new_env_file_for_el_cl_genesis_data(
         "FuluForkVersion": constants.FULU_FORK_VERSION,
         "GloasForkVersion": constants.GLOAS_FORK_VERSION,
         "Eip7805ForkVersion": constants.EIP7805_FORK_VERSION,
+        "Eip7441ForkVersion": constants.EIP7441_FORK_VERSION,
         "ShadowForkFile": shadowfork_file,
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
         "ShardCommitteePeriod": network_params.shard_committee_period,
+        "AttestationDueBpsGloas": network_params.attestation_due_bps_gloas,
+        "AggregateDueBpsGloas": network_params.aggregate_due_bps_gloas,
+        "SyncMessageDueBpsGloas": network_params.sync_message_due_bps_gloas,
+        "ContributionDueBpsGloas": network_params.contribution_due_bps_gloas,
+        "PayloadAttestationDueBps": network_params.payload_attestation_due_bps,
+        "ViewFreezeCutoffBps": network_params.view_freeze_cutoff_bps,
+        "InclusionListSubmissionDueBps": network_params.inclusion_list_submission_due_bps,
+        "ProposerInclusionListCutoffBps": network_params.proposer_inclusion_list_cutoff_bps,
         "DataColumnSidecarSubnetCount": network_params.data_column_sidecar_subnet_count,
         "SamplesPerSlot": network_params.samples_per_slot,
         "CustodyRequirement": network_params.custody_requirement,
         "MaxBlobsPerBlockElectra": network_params.max_blobs_per_block_electra,
         "TargetBlobsPerBlockElectra": network_params.target_blobs_per_block_electra,
+        "MaxRequestBlocksDeneb": network_params.max_request_blocks_deneb,
+        "MaxRequestBlobSidecarsElectra": network_params.max_request_blob_sidecars_electra,
         "BaseFeeUpdateFractionElectra": network_params.base_fee_update_fraction_electra,
         "Preset": network_params.preset,
         "AdditionalPreloadedContractsFile": GENESIS_VALUES_PATH
