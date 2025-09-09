@@ -240,7 +240,9 @@ def input_parser(plan, input_args):
     if result["port_publisher"]["nat_exit_ip"] != "KURTOSIS_IP_ADDR_PLACEHOLDER":
         global_nat_exit_ip = result["port_publisher"]["nat_exit_ip"]
         if global_nat_exit_ip == "auto":
-            global_nat_exit_ip = get_public_ip(plan)
+            global_nat_exit_ip = get_public_ip(
+                plan, result["global_tolerations"], result["global_node_selectors"]
+            )
             result["port_publisher"]["nat_exit_ip"] = global_nat_exit_ip
 
         # Set all service groups to use the global value
@@ -268,7 +270,11 @@ def input_parser(plan, input_args):
         ]:
             if result["port_publisher"][service_group]["nat_exit_ip"] == "auto":
                 if public_ip == None:
-                    public_ip = get_public_ip(plan)
+                    public_ip = get_public_ip(
+                        plan,
+                        result["global_tolerations"],
+                        result["global_node_selectors"],
+                    )
                 result["port_publisher"][service_group]["nat_exit_ip"] = public_ip
 
     if "prometheus_grafana" in result["additional_services"]:
@@ -1067,44 +1073,6 @@ def get_client_log_level_or_default(
     return log_level
 
 
-def get_client_tolerations(
-    specific_container_toleration, participant_tolerations, global_tolerations
-):
-    toleration_list = []
-    tolerations = []
-    tolerations = specific_container_toleration if specific_container_toleration else []
-    if not tolerations:
-        tolerations = participant_tolerations if participant_tolerations else []
-        if not tolerations:
-            tolerations = global_tolerations if global_tolerations else []
-
-    if tolerations != []:
-        for toleration_data in tolerations:
-            if toleration_data.get("toleration_seconds"):
-                toleration_list.append(
-                    Toleration(
-                        key=toleration_data.get("key", ""),
-                        value=toleration_data.get("value", ""),
-                        operator=toleration_data.get("operator", ""),
-                        effect=toleration_data.get("effect", ""),
-                        toleration_seconds=toleration_data.get("toleration_seconds"),
-                    )
-                )
-            # Gyani has to fix this in the future
-            # https://github.com/kurtosis-tech/kurtosis/issues/2093
-            else:
-                toleration_list.append(
-                    Toleration(
-                        key=toleration_data.get("key", ""),
-                        value=toleration_data.get("value", ""),
-                        operator=toleration_data.get("operator", ""),
-                        effect=toleration_data.get("effect", ""),
-                    )
-                )
-
-    return toleration_list
-
-
 def get_client_node_selectors(participant_node_selectors, global_node_selectors):
     node_selectors = {}
     node_selectors = participant_node_selectors if participant_node_selectors else {}
@@ -1826,11 +1794,13 @@ def deep_copy_participant(participant):
     return part
 
 
-def get_public_ip(plan):
+def get_public_ip(plan, global_tolerations=[], global_node_selectors={}):
     response = plan.run_sh(
         name="get-public-ip",
         description="Get the public IP address of the current machine",
         run="curl -s https://ident.me",
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
     return response.output
 

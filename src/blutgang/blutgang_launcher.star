@@ -45,7 +45,7 @@ def launch_blutgang(
     additional_service_index,
     docker_cache_params,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     all_el_client_info = []
     for index, participant in enumerate(participant_contexts):

@@ -41,8 +41,9 @@ def launch_dora(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    el_cl_data_files_artifact_uuid,
 ):
-    tolerations = input_parser.get_client_tolerations([], [], global_tolerations)
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     all_cl_client_info = []
     all_el_client_info = []
@@ -114,6 +115,7 @@ def launch_dora(
         port_publisher,
         additional_service_index,
         docker_cache_params,
+        el_cl_data_files_artifact_uuid,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -128,6 +130,7 @@ def get_config(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    el_cl_data_files_artifact_uuid,
 ):
     config_file_path = shared_utils.path_join(
         DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -177,6 +180,7 @@ def get_config(
         files={
             DORA_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_data_files_artifact_uuid,
         },
         cmd=["-config", config_file_path],
         env_vars=env_vars,
@@ -200,6 +204,7 @@ def new_config_template_data(
         "ELClientInfo": el_client_info,
         "MEVRelayInfo": mev_endpoint_info,
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
+        "IsDevnet": True if "devnet" in network else False,
     }
 
 

@@ -18,6 +18,10 @@ def shadowfork_prep(
             description="Fetching the chain id",
             run="curl -s https://ephemery.dev/latest/config.yaml | yq .DEPOSIT_CHAIN_ID | tr -d '\n'",
             image=constants.DEFAULT_YQ_IMAGE,
+            tolerations=shared_utils.get_tolerations(
+                global_tolerations=global_tolerations
+            ),
+            node_selectors=global_node_selectors,
         )
         network_id = chain_id.output
     else:
@@ -43,6 +47,10 @@ def shadowfork_prep(
             curl -s -f -o /shadowfork/latest_block.json "$URL" || { echo "Curl failed with exit code $?"; exit 1; } && \
             cat /shadowfork/latest_block.json',
             store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
+            tolerations=shared_utils.get_tolerations(
+                global_tolerations=global_tolerations
+            ),
+            node_selectors=global_node_selectors,
         )
     else:
         latest_block = plan.run_sh(
@@ -62,13 +70,17 @@ def shadowfork_prep(
             curl -s -f -o /shadowfork/latest_block.json "$URL" || { echo "Curl failed with exit code $?"; exit 1; } && \
             cat /shadowfork/latest_block.json',
             store=[StoreSpec(src="/shadowfork", name="latest_blocks")],
+            tolerations=shared_utils.get_tolerations(
+                global_tolerations=global_tolerations
+            ),
+            node_selectors=global_node_selectors,
         )
 
     for index, participant in enumerate(participants):
-        tolerations = input_parser.get_client_tolerations(
-            participant.el_tolerations,
-            participant.tolerations,
-            global_tolerations,
+        tolerations = shared_utils.get_tolerations(
+            specific_container_tolerations=participant.el_tolerations,
+            participant_tolerations=participant.tolerations,
+            global_tolerations=global_tolerations,
         )
         node_selectors = input_parser.get_client_node_selectors(
             participant.node_selectors,
