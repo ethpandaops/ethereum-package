@@ -215,6 +215,8 @@ xatu_sentry_params:
     - blob_sidecar
 apache_port: 40000
 nginx_port: 50000
+mirror_params:
+  image: ""
 global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false

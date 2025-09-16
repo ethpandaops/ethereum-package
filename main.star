@@ -805,6 +805,21 @@ def run(plan, args={}):
                 index,
                 osaka_time,
             )
+        elif additional_service == "mirror":
+            plan.print("Launching mirror middleware")
+            mirror_params = args_with_right_defaults.mirror_params
+            mirror.launch_mirror(
+                plan,
+                mirror_port,
+                all_participants,
+                args_with_right_defaults.participants,
+                mirror_params,
+                args_with_right_defaults.port_publisher,
+                index,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.docker_cache_params,
+            )
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:
