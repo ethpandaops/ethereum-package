@@ -9,16 +9,14 @@ participants:
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: ethereumjs
+  - el_type: ethrex
     cl_type: teku
 additional_services:
-  - tx_spammer
-  - blob_spammer
-  - el_forkmon
-  - beacon_metrics_gazer
+  - tx_fuzz
+  - forkmon
   - dora
-  - prometheus_grafana
-  - goomy_blob
+  - prometheus
+  - grafana
   - custom_flood
   - blobscan
   - blockscout
@@ -26,9 +24,10 @@ additional_services:
   - blutgang
   - apache
   - tracoor
+  - spamoor
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 mev_type: flashbots
 mev_params:
-  mev_relay_image: flashbots/mev-boost-relay:latest
+  mev_relay_image: ethpandaops/mev-boost-relay:main
 persistent: True

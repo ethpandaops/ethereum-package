@@ -26,15 +26,29 @@ def launch(
     service_name,
     cl_context,
     node_selectors,
+    global_tolerations,
+    port_publisher,
+    global_other_index,
     docker_cache_params,
 ):
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
     snooper_service_name = "{0}".format(service_name)
+
+    public_ports = shared_utils.get_other_public_port(
+        port_publisher,
+        SNOOPER_BEACON_RPC_PORT_ID,
+        global_other_index,
+        0,
+    )
 
     snooper_config = get_config(
         service_name,
         cl_context,
         node_selectors,
+        tolerations,
         docker_cache_params,
+        public_ports,
     )
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
@@ -48,7 +62,9 @@ def get_config(
     service_name,
     cl_context,
     node_selectors,
+    tolerations,
     docker_cache_params,
+    public_ports,
 ):
     beacon_rpc_port_num = "{0}".format(
         cl_context.beacon_http_url,
@@ -65,10 +81,12 @@ def get_config(
             docker_cache_params, constants.DEFAULT_SNOOPER_IMAGE
         ),
         ports=SNOOPER_USED_PORTS,
+        public_ports=public_ports,
         cmd=cmd,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )

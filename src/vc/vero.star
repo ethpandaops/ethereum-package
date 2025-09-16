@@ -13,7 +13,9 @@ VERBOSITY_LEVELS = {
 
 
 def get_config(
+    plan,
     participant,
+    el_cl_genesis_data,
     image,
     global_log_level,
     beacon_http_url,
@@ -24,16 +26,20 @@ def get_config(
     node_selectors,
     port_publisher,
     vc_index,
+    extra_files_artifacts,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
     cmd = [
+        "--network=custom",
+        "--network-custom-config-path="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
         "--remote-signer-url={0}".format(remote_signer_context.http_url),
         "--beacon-node-urls=" + beacon_http_url,
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=" + full_name,
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         "--log-level=" + log_level,
@@ -42,6 +48,10 @@ def get_config(
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.vc_extra_params])
+
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data.files_artifact_uuid,
+    }
 
     public_ports = {}
     if port_publisher.vc_enabled:
@@ -56,18 +66,27 @@ def get_config(
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.vc_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     config_args = {
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
         "cmd": cmd,
+        "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
             client=constants.VC_TYPE.vero,
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=participant.vc_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

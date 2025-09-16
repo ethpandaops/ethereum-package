@@ -1,6 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 SERVICE_NAME = "assertoor"
 
 HTTP_PORT_ID = "http"
@@ -18,7 +19,7 @@ VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
 MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 128
-MAX_MEMORY = 2048
+MAX_MEMORY = 8192
 
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -36,12 +37,25 @@ def launch_assertoor(
     participant_configs,
     network_params,
     assertoor_params,
+    port_publisher,
+    index,
     global_node_selectors,
+    global_tolerations,
+    docker_cache_params,
 ):
     all_client_info = []
     clients_with_validators = []
     clients_with_el_snooper = []
     clients_with_cl_snooper = []
+
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
+
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     for index, participant in enumerate(participant_contexts):
         (
@@ -57,7 +71,7 @@ def launch_assertoor(
             cl_client.beacon_http_url,
             el_client.ip_addr,
             el_client.rpc_port_num,
-            participant.snooper_engine_context,
+            participant.snooper_el_engine_context,
             participant.snooper_beacon_context,
             full_name,
         )
@@ -66,7 +80,7 @@ def launch_assertoor(
 
         if participant_config.validator_count != 0:
             clients_with_validators.append(client_info)
-        if participant.snooper_engine_context != None:
+        if participant.snooper_el_engine_context != None:
             clients_with_el_snooper.append(client_info)
         if participant.snooper_beacon_context != None:
             clients_with_cl_snooper.append(client_info)
@@ -101,7 +115,10 @@ def launch_assertoor(
         tests_config_artifacts_name,
         network_params,
         assertoor_params,
+        public_ports,
         global_node_selectors,
+        tolerations,
+        docker_cache_params,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -112,7 +129,10 @@ def get_config(
     tests_config_artifacts_name,
     network_params,
     assertoor_params,
+    public_ports,
     node_selectors,
+    tolerations,
+    docker_cache_params,
 ):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -121,12 +141,26 @@ def get_config(
 
     IMAGE_NAME = assertoor_params.image
 
-    if network_params.electra_fork_epoch < constants.ELECTRA_FORK_EPOCH:
-        IMAGE_NAME = "ethpandaops/assertoor:electra-support"
-
+    default_assertoor_image = (
+        docker_cache_params.url
+        + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
+        + constants.DEFAULT_ASSERTOOR_IMAGE
+    )
+    if assertoor_params.image == default_assertoor_image:
+        if network_params.fulu_fork_epoch < constants.FAR_FUTURE_EPOCH:
+            IMAGE_NAME = (
+                docker_cache_params.url
+                + (
+                    docker_cache_params.dockerhub_prefix
+                    if docker_cache_params.enabled
+                    else ""
+                )
+                + "ethpandaops/assertoor:fulu-support"
+            )
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
+        public_ports=public_ports,
         files={
             ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
             ASSERTOOR_TESTS_MOUNT_DIRPATH_ON_SERVICE: tests_config_artifacts_name,
@@ -138,6 +172,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )
 
 

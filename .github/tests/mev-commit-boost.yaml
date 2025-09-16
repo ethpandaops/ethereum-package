@@ -3,15 +3,14 @@ participants:
     cl_type: lighthouse
 mev_type: commit-boost
 additional_services:
-  - tx_spammer
-  - blob_spammer
+  - tx_fuzz
+  - spamoor
   - custom_flood
-  - el_forkmon
-  - beacon_metrics_gazer
+  - forkmon
   - dora
-  - prometheus_grafana
+  - prometheus
+  - grafana
 mev_params:
   mev_boost_image: ghcr.io/commit-boost/pbs:latest
-  mev_relay_image: flashbots/mev-boost-relay:latest
 network_params:
   seconds_per_slot: 3

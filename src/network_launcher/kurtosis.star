@@ -57,34 +57,11 @@ def launch(
 
     plan.print("Generating EL CL data")
 
-    # we are running capella genesis - deprecated
-    if network_params.deneb_fork_epoch > 0:
-        ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
-            args_with_right_defaults.docker_cache_params,
-            constants.ETHEREUM_GENESIS_GENERATOR.capella_genesis,
-        )
-    # we are running deneb genesis - default behavior
-    elif network_params.deneb_fork_epoch == 0:
-        ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
-            args_with_right_defaults.docker_cache_params,
-            constants.ETHEREUM_GENESIS_GENERATOR.deneb_genesis,
-        )
-    # we are running electra - experimental
-    elif network_params.electra_fork_epoch != None:
-        if network_params.electra_fork_epoch == 0:
-            ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
-                args_with_right_defaults.docker_cache_params,
-                constants.ETHEREUM_GENESIS_GENERATOR.verkle_genesis,
-            )
-        else:
-            ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
-                args_with_right_defaults.docker_cache_params,
-                constants.ETHEREUM_GENESIS_GENERATOR.verkle_support_genesis,
-            )
-    else:
-        fail(
-            "Unsupported fork epoch configuration, need to define either deneb_fork_epoch or electra_fork_epoch"
-        )
+    ethereum_genesis_generator_image = shared_utils.docker_cache_image_calc(
+        args_with_right_defaults.docker_cache_params,
+        args_with_right_defaults.ethereum_genesis_generator_params.image,
+    )
+
     return (
         total_number_of_validator_keys,
         ethereum_genesis_generator_image,

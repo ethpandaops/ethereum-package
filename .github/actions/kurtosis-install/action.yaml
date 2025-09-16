@@ -19,3 +19,8 @@ runs:
         fi
         kurtosis analytics disable
         echo "$(dirname $(which kurtosis))" >> $GITHUB_PATH
+
+        # Get the installed version and save it as an environment variable
+        KURTOSIS_VERSION=$(kurtosis version | grep -o 'Version:[[:space:]]*[^[:space:]]*' | cut -d':' -f2 | tr -d ' ')
+        echo "KURTOSIS_VERSION=$KURTOSIS_VERSION" >> $GITHUB_ENV
+        echo "Installed Kurtosis version: $KURTOSIS_VERSION"

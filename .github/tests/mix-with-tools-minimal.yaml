@@ -11,16 +11,16 @@ participants:
     cl_type: lodestar
   - el_type: geth
     cl_type: grandine
+  - el_type: ethrex
+    cl_type: lodestar
 network_params:
   preset: minimal
 additional_services:
-  - tx_spammer
-  - blob_spammer
-  - el_forkmon
-  - beacon_metrics_gazer
+  - tx_fuzz
+  - forkmon
   - dora
-  - prometheus_grafana
-  - goomy_blob
+  - prometheus
+  - grafana
   - custom_flood
   - blobscan
   - blockscout
@@ -28,9 +28,7 @@ additional_services:
   - blutgang
   - apache
   - tracoor
+  - spamoor
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true
-docker_cache_params:
-  enabled: true
-  url: "docker.ethquokkaops.io"

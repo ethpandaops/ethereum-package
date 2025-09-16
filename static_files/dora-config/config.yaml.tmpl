@@ -16,7 +16,7 @@ frontend:
   debug: false
   pprof: true
   minimize: false # minimize html templates
-  showSensitivePeerInfos: true
+  disablePageCache: true
 
   # Name of the site, displayed in the title tag
   siteName: "Dora the Explorer"
@@ -26,7 +26,26 @@ frontend:
   ethExplorerLink: ""
 
   # file or inventory url to load validator names from
+{{- if .IsDevnet }}
+  validatorNamesInventory: "https://config.{{ .Network }}.ethpandaops.io/api/v1/nodes/validator-ranges"
+{{- else }}
   validatorNamesYaml: "/validator-ranges/validator-ranges.yaml"
+{{- end }}
+
+  publicRpcUrl: "{{ .PublicRPC }}"
+  rainbowkitProjectId: "15fe4ab4d5c0bcb6f0dc7c398301ff0e"
+  showSubmitDeposit: true
+  showSubmitElRequests: true
+  showPeerDASInfos: true
+  showSensitivePeerInfos: true
+  disableDasGuardianCheck: false
+  enableDasGuardianMassScan: true
+  showValidatorSummary: true
+
+api:
+  enabled: true
+  corsOrigins:
+    - "*"
 
 beaconapi:
   # CL Client RPC
@@ -44,9 +63,11 @@ beaconapi:
   redisCachePrefix: ""
 
 executionapi:
+  genesisConfig: "/network-configs/genesis.json"
   endpoints:
 {{ range $elClient := .ELClientInfo }}
     - url: "{{ $elClient.Execution_HTTP_URL }}"
+      engineSnooperUrl: "{{ $elClient.Execution_Engine_Snooper_URL }}"
       name: "{{ $elClient.FullName }}"
       archive: true
 {{- end }}

@@ -9,7 +9,7 @@ participants:
     use_separate_vc: true
     vc_type: vero
     use_remote_signer: true
-  - el_type: ethereumjs
+  - el_type: ethrex
     cl_type: lodestar
     use_separate_vc: true
     vc_type: vero

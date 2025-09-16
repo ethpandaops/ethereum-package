@@ -9,23 +9,44 @@ participants:
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: nimbus
-    cl_type: teku
-  - el_type: ethereumjs
+  - el_type: ethrex
     cl_type: grandine
 port_publisher:
+  nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:
     enabled: true
-    public_port_start: 32000
+    public_port_start: 40000
   cl:
     enabled: true
-    public_port_start: 33000
+    public_port_start: 41000
   vc:
     enabled: true
-    public_port_start: 34000
+    public_port_start: 42000
   remote_signer:
     enabled: true
-    public_port_start: 35000
+    public_port_start: 43000
   additional_services:
     enabled: true
-    public_port_start: 36000
+    public_port_start: 44000
+  mev:
+    enabled: true
+    public_port_start: 45000
+  other:
+    enabled: true
+    public_port_start: 46000
+additional_services:
+  - tx_fuzz
+  - forkmon
+  - dora
+  - prometheus
+  - grafana
+  - custom_flood
+  - blobscan
+  - dugtrio
+  - blutgang
+  - apache
+  - tracoor
+  - spamoor
+ethereum_metrics_exporter_enabled: true
+snooper_enabled: true
+keymanager_enabled: true

@@ -13,6 +13,8 @@ participants:
     cl_type: teku
   - el_type: besu
     cl_type: grandine
+  - el_type: ethrex
+    cl_type: teku
 network_params:
   network: ephemery
 checkpoint_sync_enabled: true

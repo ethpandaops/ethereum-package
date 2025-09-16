@@ -5,10 +5,14 @@ STATIC_FILES_DIRPATH = "/static_files"
 EL_CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/genesis-generation-config/el-cl/values.env.tmpl"
 )
+EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH
+    + "/genesis-generation-config/el-cl/additional-contracts.json.tmpl"
+)
 
 # EL Forkmon config
-EL_FORKMON_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/el-forkmon-config/config.toml.tmpl"
+FORKMON_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/forkmon-config/config.toml.tmpl"
 )
 
 # Validator Ranges config
@@ -20,6 +24,11 @@ APACHE_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/index.html"
 APACHE_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enr.txt.tmpl"
 APACHE_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enr_list.txt.tmpl"
 APACHE_ENODE_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enode.txt.tmpl"
+
+NGINX_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/index.html"
+NGINX_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr.txt.tmpl"
+NGINX_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr_list.txt.tmpl"
+NGINX_ENODE_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enode.txt.tmpl"
 
 DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml.tmpl"
 DUGTRIO_CONFIG_TEMPLATE_FILEPATH = (
@@ -45,6 +54,15 @@ ASSERTOOR_TESTS_CONFIG_DIRPATH = (
     STATIC_FILES_DIRPATH + ASSERTOOR_CONFIG_DIRPATH + "/tests"
 )
 
+# spamoor config
+SPAMOOR_CONFIG_DIRPATH = "/spamoor-config"
+SPAMOOR_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + SPAMOOR_CONFIG_DIRPATH + "/startup-spammer.yaml.tmpl"
+)
+SPAMOOR_HOSTS_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + SPAMOOR_CONFIG_DIRPATH + "/rpc-hosts.txt.tmpl"
+)
+
 # xatu-sentry config
 XATU_SENTRY_CONFIG_DIRPATH = "/xatu-sentry-config"
 XATU_SENTRY_CONFIG_TEMPLATE_FILEPATH = (
@@ -65,6 +83,9 @@ GRAFANA_DASHBOARDS_CONFIG_DIRPATH = (
     STATIC_FILES_DIRPATH + GRAFANA_CONFIG_DIRPATH + "/dashboards"
 )
 
+# Tempo config
+TEMPO_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/tempo-config/tempo.yaml.tmpl"
+
 # Geth + CL genesis generation
 GENESIS_GENERATION_CONFIG_DIRPATH = STATIC_FILES_DIRPATH + "/genesis-generation-config"
 
@@ -84,6 +105,7 @@ CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH = (
 JWT_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/jwt/jwtsecret"
 KEYMANAGER_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/keymanager/keymanager.txt"
 
+PEERDAS_NODE_KEY_FILEPATH = STATIC_FILES_DIRPATH + "/peerdas-node-keys/"
 
 SHADOWFORK_FILEPATH = "/network-configs/latest_block.json"
 

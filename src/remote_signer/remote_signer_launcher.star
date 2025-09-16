@@ -48,10 +48,10 @@ def launch(
     port_publisher,
     remote_signer_index,
 ):
-    tolerations = input_parser.get_client_tolerations(
-        participant.remote_signer_tolerations,
-        participant.tolerations,
-        global_tolerations,
+    tolerations = shared_utils.get_tolerations(
+        specific_container_tolerations=participant.remote_signer_tolerations,
+        participant_tolerations=participant.tolerations,
+        global_tolerations=global_tolerations,
     )
 
     config = get_config(
@@ -164,7 +164,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.remote_signer,
             image=image,
             connected_client=vc_type,
-            extra_labels=participant.remote_signer_extra_labels,
+            extra_labels=participant.remote_signer_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(remote_signer_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

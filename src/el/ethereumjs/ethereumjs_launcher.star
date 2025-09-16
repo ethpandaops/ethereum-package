@@ -12,6 +12,7 @@ WS_PORT_ENGINE_NUM = 8547
 DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
+DEBUG_PORT_NUM = 9229
 
 METRICS_PATH = "/metrics"
 
@@ -41,11 +42,9 @@ def launch(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
+    extra_files_artifacts,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
@@ -55,16 +54,224 @@ def launch(
         service_name,
         existing_el_clients,
         cl_client_name,
-        log_level,
+        global_log_level,
         persistent,
         tolerations,
         node_selectors,
         port_publisher,
         participant_index,
+        network_params,
+        extra_files_artifacts,
     )
 
     service = plan.add_service(service_name, config)
 
+    return get_el_context(
+        plan,
+        service_name,
+        service,
+        launcher,
+    )
+
+
+def get_config(
+    plan,
+    launcher,
+    participant,
+    service_name,
+    existing_el_clients,
+    cl_client_name,
+    global_log_level,
+    persistent,
+    tolerations,
+    node_selectors,
+    port_publisher,
+    participant_index,
+    network_params,
+    extra_files_artifacts,
+):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
+    public_ports = {}
+    public_ports_for_component = None
+    if port_publisher.el_enabled:
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "el", port_publisher, participant_index
+        )
+        public_ports = el_shared.get_general_el_public_port_specs(
+            public_ports_for_component
+        )
+        additional_public_port_assignments = {
+            constants.RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[4],
+            constants.ENGINE_WS_PORT_ID: public_ports_for_component[5],
+        }
+
+        if "--inspect" in participant.el_extra_env_vars.get("NODE_OPTIONS", ""):
+            additional_public_port_assignments[
+                constants.DEBUG_PORT_ID
+            ] = public_ports_for_component[6]
+
+        public_ports.update(
+            shared_utils.get_port_specs(additional_public_port_assignments)
+        )
+
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+
+    used_port_assignments = {
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
+        constants.ENGINE_WS_PORT_ID: WS_PORT_ENGINE_NUM,
+    }
+
+    if "--inspect" in participant.el_extra_env_vars.get("NODE_OPTIONS", ""):
+        used_port_assignments[constants.DEBUG_PORT_ID] = DEBUG_PORT_NUM
+
+    used_ports = shared_utils.get_port_specs(used_port_assignments)
+
+    cmd = [
+        "--dataDir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
+        "--port={0}".format(discovery_port_tcp),
+        "--rpc",
+        "--rpcAddr=0.0.0.0",
+        "--rpcPort={0}".format(RPC_PORT_NUM),
+        "--rpcCors=*",
+        "--rpcEngine",
+        "--rpcEngineAddr=0.0.0.0",
+        "--rpcEnginePort={0}".format(ENGINE_RPC_PORT_NUM),
+        "--ws",
+        "--wsAddr=0.0.0.0",
+        "--wsPort={0}".format(WS_PORT_NUM),
+        "--wsEnginePort={0}".format(WS_PORT_ENGINE_NUM),
+        "--wsEngineAddr=0.0.0.0",
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--extIP={0}".format(port_publisher.el_nat_exit_ip),
+        "--sync=full",
+        "--isSingleNode=true",
+        "--logLevel={0}".format(log_level),
+        "--prometheus",
+        "--prometheusPort={0}".format(METRICS_PORT_NUM),
+    ]
+
+    if network_params.network not in constants.PUBLIC_NETWORKS:
+        cmd.append(
+            "--gethGenesis="
+            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+            + "/genesis.json",
+        )
+    else:
+        cmd.append("--network=" + network_params.network)
+
+    if (
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
+    ):
+        if len(existing_el_clients) > 0:
+            cmd.append(
+                "--bootnodes="
+                + ",".join(
+                    [
+                        ctx.enode
+                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                    ]
+                )
+            )
+    elif (
+        network_params.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
+    ):
+        cmd.append(
+            "--bootnodes="
+            + shared_utils.get_devnet_enodes(
+                plan, launcher.el_cl_genesis_data.files_artifact_uuid
+            )
+        )
+
+    if len(participant.el_extra_params) > 0:
+        # this is a repeated<proto type>, we convert it into Starlark
+        cmd.extend([param for param in participant.el_extra_params])
+
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+    }
+
+    if persistent:
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
+        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
+            persistent_key="data-{0}".format(service_name),
+            size=int(participant.el_volume_size)
+            if int(participant.el_volume_size) > 0
+            else constants.VOLUME_SIZE[volume_size_key][
+                constants.EL_TYPE.ethereumjs + "_volume_size"
+            ],
+        )
+
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.el_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
+    env_vars = participant.el_extra_env_vars
+    config_args = {
+        "image": participant.el_image,
+        "ports": used_ports,
+        "public_ports": public_ports,
+        "cmd": cmd,
+        "files": files,
+        "entrypoint": ENTRYPOINT_ARGS,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "env_vars": env_vars,
+        "labels": shared_utils.label_maker(
+            client=constants.EL_TYPE.ethereumjs,
+            client_type=constants.CLIENT_TYPES.el,
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
+            connected_client=cl_client_name,
+            extra_labels=participant.el_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
+            supernode=participant.supernode,
+        ),
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if participant.el_min_cpu > 0:
+        config_args["min_cpu"] = participant.el_min_cpu
+    if participant.el_max_cpu > 0:
+        config_args["max_cpu"] = participant.el_max_cpu
+    if participant.el_min_mem > 0:
+        config_args["min_memory"] = participant.el_min_mem
+    if participant.el_max_mem > 0:
+        config_args["max_memory"] = participant.el_max_mem
+    return ServiceConfig(**config_args)
+
+
+# makes request to [service_name] for enode and returns a full el_context
+def get_el_context(
+    plan,
+    service_name,
+    service,
+    launcher,
+):
     enode = el_admin_node_info.get_enode_for_node(
         plan, service_name, constants.RPC_PORT_ID
     )
@@ -90,155 +297,8 @@ def launch(
     )
 
 
-def get_config(
-    plan,
-    launcher,
-    participant,
-    service_name,
-    existing_el_clients,
-    cl_client_name,
-    log_level,
-    persistent,
-    tolerations,
-    node_selectors,
-    port_publisher,
-    participant_index,
-):
-    public_ports = {}
-    discovery_port = DISCOVERY_PORT_NUM
-    if port_publisher.el_enabled:
-        public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "el", port_publisher, participant_index
-        )
-        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
-            public_ports_for_component
-        )
-        additional_public_port_assignments = {
-            constants.RPC_PORT_ID: public_ports_for_component[2],
-            constants.WS_PORT_ID: public_ports_for_component[3],
-            constants.ENGINE_WS_PORT_ID: public_ports_for_component[4],
-        }
-        public_ports.update(
-            shared_utils.get_port_specs(additional_public_port_assignments)
-        )
-
-    used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
-        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
-        constants.RPC_PORT_ID: RPC_PORT_NUM,
-        constants.WS_PORT_ID: WS_PORT_NUM,
-        constants.ENGINE_WS_PORT_ID: WS_PORT_ENGINE_NUM,
-    }
-    used_ports = shared_utils.get_port_specs(used_port_assignments)
-
-    cmd = [
-        "--dataDir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--port={0}".format(discovery_port),
-        "--rpc",
-        "--rpcAddr=0.0.0.0",
-        "--rpcPort={0}".format(RPC_PORT_NUM),
-        "--rpcCors=*",
-        "--rpcEngine",
-        "--rpcEngineAddr=0.0.0.0",
-        "--rpcEnginePort={0}".format(ENGINE_RPC_PORT_NUM),
-        "--ws",
-        "--wsAddr=0.0.0.0",
-        "--wsPort={0}".format(WS_PORT_NUM),
-        "--wsEnginePort={0}".format(WS_PORT_ENGINE_NUM),
-        "--wsEngineAddr=0.0.0.0",
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--extIP={0}".format(port_publisher.nat_exit_ip),
-        "--sync=full",
-        "--isSingleNode=true",
-        "--logLevel={0}".format(log_level),
-    ]
-
-    if launcher.network not in constants.PUBLIC_NETWORKS:
-        cmd.append(
-            "--gethGenesis="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/genesis.json",
-        )
-    else:
-        cmd.append("--network=" + launcher.network)
-
-    if launcher.network == constants.NETWORK_NAME.kurtosis:
-        if len(existing_el_clients) > 0:
-            cmd.append(
-                "--bootnodes="
-                + ",".join(
-                    [
-                        ctx.enode
-                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                    ]
-                )
-            )
-    elif (
-        launcher.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in launcher.network
-    ):
-        cmd.append(
-            "--bootnodes="
-            + shared_utils.get_devnet_enodes(
-                plan, launcher.el_cl_genesis_data.files_artifact_uuid
-            )
-        )
-
-    if len(participant.el_extra_params) > 0:
-        # this is a repeated<proto type>, we convert it into Starlark
-        cmd.extend([param for param in participant.el_extra_params])
-
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
-    }
-
-    if persistent:
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.ethereumjs + "_volume_size"
-            ],
-        )
-    env_vars = participant.el_extra_env_vars
-    config_args = {
-        "image": participant.el_image,
-        "ports": used_ports,
-        "public_ports": public_ports,
-        "cmd": cmd,
-        "files": files,
-        "entrypoint": ENTRYPOINT_ARGS,
-        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "env_vars": env_vars,
-        "labels": shared_utils.label_maker(
-            client=constants.EL_TYPE.ethereumjs,
-            client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels,
-            supernode=participant.supernode,
-        ),
-        "tolerations": tolerations,
-        "node_selectors": node_selectors,
-    }
-
-    if participant.el_min_cpu > 0:
-        config_args["min_cpu"] = participant.el_min_cpu
-    if participant.el_max_cpu > 0:
-        config_args["max_cpu"] = participant.el_max_cpu
-    if participant.el_min_mem > 0:
-        config_args["min_memory"] = participant.el_min_mem
-    if participant.el_max_mem > 0:
-        config_args["max_memory"] = participant.el_max_mem
-    return ServiceConfig(**config_args)
-
-
-def new_ethereumjs_launcher(el_cl_genesis_data, jwt_file, network):
+def new_ethereumjs_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
     )

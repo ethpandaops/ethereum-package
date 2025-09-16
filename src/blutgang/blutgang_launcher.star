@@ -1,5 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 SERVICE_NAME = "blutgang"
 
 HTTP_PORT_NUMBER = 3000
@@ -39,10 +40,13 @@ def launch_blutgang(
     participant_configs,
     network_params,
     global_node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
 ):
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
     all_el_client_info = []
     for index, participant in enumerate(participant_contexts):
         full_name, _, el_client, _ = shared_utils.get_client_names(
@@ -75,6 +79,7 @@ def launch_blutgang(
         config_files_artifact_name,
         network_params,
         global_node_selectors,
+        tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -87,6 +92,7 @@ def get_config(
     config_files_artifact_name,
     network_params,
     node_selectors,
+    tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -123,6 +129,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
         ready_conditions=ReadyCondition(
             recipe=GetHttpRequestRecipe(
                 port_id="admin",

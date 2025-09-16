@@ -11,5 +11,5 @@ participants:
     cl_type: lodestar
   - el_type: nimbus
     cl_type: teku
-  - el_type: ethereumjs
+  - el_type: ethrex
     cl_type: grandine
