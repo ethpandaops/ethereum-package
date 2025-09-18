@@ -223,7 +223,7 @@ def get_beacon_config(
     ]
 
     supernode_cmd = [
-        "--subscribe-all-data-column-subnets",
+        "--supernode",
     ]
 
     if participant.supernode:
