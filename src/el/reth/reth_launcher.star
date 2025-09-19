@@ -219,7 +219,7 @@ def get_config(
         and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
-            "--bootnodes="
+            "--trusted-peers="
             + shared_utils.get_devnet_enodes(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
