@@ -100,11 +100,26 @@ def generate_el_cl_genesis_data(
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
-
     osaka_enabled_check = plan.run_sh(
         name="check-osaka-enabled",
         description="Check if osaka time is enabled (not false)",
         run="test \"$(jq '.config.osakaTime // false' /data/genesis.json | tr -d '\n')\" != \"false\" && echo true || echo false",
+        files={"/data": genesis.files_artifacts[0]},
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
+    )
+    amsterdam_time = plan.run_sh(
+        name="read-amsterdam-time",
+        description="Reading amsterdam time from genesis",
+        run="jq '.config.amsterdamTime' /data/genesis.json | tr -d '\n'",
+        files={"/data": genesis.files_artifacts[0]},
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
+    )
+    amsterdam_enabled_check = plan.run_sh(
+        name="check-amsterdam-enabled",
+        description="Check if amsterdam time is enabled (not false)",
+        run="test \"$(jq '.config.amsterdamTime // false' /data/genesis.json | tr -d '\n')\" != \"false\" && echo true || echo false",
         files={"/data": genesis.files_artifacts[0]},
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
@@ -115,6 +130,8 @@ def generate_el_cl_genesis_data(
         genesis_validators_root.output,
         osaka_time.output,
         osaka_enabled_check.output == "true",
+        amsterdam_time.output,
+        amsterdam_enabled_check.output == "true",
     )
 
     return result

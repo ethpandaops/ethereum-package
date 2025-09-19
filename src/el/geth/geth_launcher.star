@@ -366,4 +366,6 @@ def new_geth_launcher(
         networkid=networkid,
         osaka_time=el_cl_genesis_data.osaka_time,
         osaka_enabled=el_cl_genesis_data.osaka_enabled,
+        amsterdam_time=el_cl_genesis_data.amsterdam_time,
+        amsterdam_enabled=el_cl_genesis_data.amsterdam_enabled,
     )
