@@ -206,7 +206,7 @@ def get_config(
     ):
         if len(existing_el_clients) > 0:
             cmd.append(
-                "--bootnodes="
+                "--trusted-peers="
                 + ",".join(
                     [
                         ctx.enode
