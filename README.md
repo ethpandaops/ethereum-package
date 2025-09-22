@@ -314,7 +314,7 @@ participants:
     # - nimbus: statusim/nimbus-validator-client:multiarch-latest
     # - prysm: gcr.io/offchainlabs/prysm/validator:latest
     # - teku: consensys/teku:latest
-    # - vero: ghcr.io/serenita-org/vero:master
+    # - vero: ghcr.io/serenita-org/vero:latest
     vc_image: ""
 
     # The log level string that this participant's validator client should log at

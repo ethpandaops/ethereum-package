@@ -34,7 +34,7 @@ participants:
     el_image: ethpandaops/reth:main
     el_extra_params: ["--builder.extradata=GrandineFromLocal"]
     cl_type: grandine
-    cl_image: ethpandaops/grandine:develop
+    cl_image: ethpandaops/grandine:develop-minimal
 additional_services:
   - dora
   - tx_fuzz
