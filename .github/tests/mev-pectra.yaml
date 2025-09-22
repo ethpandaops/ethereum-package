@@ -6,10 +6,10 @@ participants:
     cl_image: sigp/lighthouse:v7.0.1
 
   - el_type: nethermind
-    el_image: nethermind/nethermind:1.32.3
+    el_image: nethermind/nethermind:1.33.1
     el_extra_params: ["--Blocks.ExtraData=TekuFromLocal"]
     cl_type: teku
-    cl_image: consensys/teku:25.4.1
+    cl_image: consensys/teku:25.9.2
 
   - el_type: reth
     el_image: ghcr.io/paradigmxyz/reth:v1.3.12

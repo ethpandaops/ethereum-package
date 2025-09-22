@@ -21,7 +21,7 @@ DEFAULT_CL_IMAGES = {
     "lighthouse": "ethpandaops/lighthouse:unstable",
     "teku": "ethpandaops/teku:master",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
-    "prysm": "gcr.io/offchainlabs/prysm/beacon-chain:stable",
+    "prysm": "ethpandaops/prysm-beacon-chain:develop",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
 }
@@ -39,10 +39,10 @@ DEFAULT_VC_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
-    "prysm": "gcr.io/offchainlabs/prysm/validator:stable",
+    "prysm": "ethpandaops/prysm-validator:develop",
     "teku": "ethpandaops/teku:master",
     "grandine": "sifrai/grandine:stable",
-    "vero": "ghcr.io/serenita-org/vero:master",
+    "vero": "ghcr.io/serenita-org/vero:latest",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -52,7 +52,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "prysm": "ethpandaops/prysm-validator:develop-minimal",
     "teku": "ethpandaops/teku:master",
     "grandine": "ethpandaops/grandine:develop-minimal",
-    "vero": "ghcr.io/serenita-org/vero:master",
+    "vero": "ghcr.io/serenita-org/vero:latest",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
