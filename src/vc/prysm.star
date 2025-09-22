@@ -12,7 +12,7 @@ def get_config(
     el_cl_genesis_data,
     keymanager_file,
     image,
-    beacon_http_url,
+    beacon_http_urls,
     cl_context,
     el_context,
     remote_signer_context,
@@ -43,7 +43,7 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--beacon-rest-api-provider=" + beacon_http_url,
+        "--beacon-rest-api-provider=" + ",".join(beacon_http_urls),
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -53,7 +53,7 @@ def get_config(
 
     # Only add RPC provider if we're not using a blobber (blobber doesn't proxy RPC)
     # Blobber uses port 5000, so check if that's in the URL
-    if ":5000" not in beacon_http_url:
+    if ":5000" not in beacon_http_urls[0]:
         cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
 
     if remote_signer_context == None:
@@ -84,7 +84,7 @@ def get_config(
     ]
 
     # Check if we're using a blobber by checking for port 5000
-    is_using_blobber = ":5000" in beacon_http_url
+    is_using_blobber = ":5000" in beacon_http_urls[0]
 
     if cl_context.client_name != constants.CL_TYPE.prysm or is_using_blobber:
         # Use Beacon API if:

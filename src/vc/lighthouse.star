@@ -21,7 +21,7 @@ def get_config(
     el_cl_genesis_data,
     image,
     global_log_level,
-    beacon_http_url,
+    beacon_http_urls,
     cl_context,
     el_context,
     full_name,
@@ -57,7 +57,7 @@ def get_config(
         "--secrets-dir=" + validator_secrets_dirpath,
         # The node won't have a slashing protection database and will fail to start otherwise
         "--init-slashing-protection",
-        "--beacon-nodes=" + beacon_http_url,
+        "--beacon-nodes=" + ",".join(beacon_http_urls),
         # "--enable-doppelganger-protection", // Disabled to not have to wait 2 epochs before validator can start
         # burn address - If unset, the validator will scream in its logs
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,

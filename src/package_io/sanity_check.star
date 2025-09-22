@@ -64,6 +64,7 @@ PARTICIPANT_CATEGORIES = {
         "blobber_image",
         "builder_network_params",
         "keymanager_enabled",
+        "vc_beacon_node_indices",
     ],
 }
 
@@ -114,6 +115,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "validator_count",
             "count",
             "supernode",
+            "vc_beacon_node_indices",
         ],
         "vc": [
             "vc_type",
