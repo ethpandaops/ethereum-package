@@ -35,14 +35,20 @@ def get_config(
             node_keystore_files.raw_secrets_relative_dirpath,
         )
 
-    cmd = [
-        "--beacon-node=" + ",".join(beacon_http_urls),
-        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
-        "--metrics",
-        "--metrics-address=0.0.0.0",
-        "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
-    ]
+    cmd = []
+
+    for beacon_url in beacon_http_urls:
+        cmd.append("--beacon-node=" + beacon_url)
+
+    cmd.extend(
+        [
+            "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+            # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
+            "--metrics",
+            "--metrics-address=0.0.0.0",
+            "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
+        ]
+    )
 
     if remote_signer_context == None:
         cmd.extend(
