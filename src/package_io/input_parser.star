@@ -18,7 +18,7 @@ DEFAULT_EL_IMAGES = {
 }
 
 DEFAULT_CL_IMAGES = {
-    "lighthouse": "sigp/lighthouse:unstable",
+    "lighthouse": "ethpandaops/lighthouse:unstable",
     "teku": "ethpandaops/teku:master",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "gcr.io/offchainlabs/prysm/beacon-chain:stable",
