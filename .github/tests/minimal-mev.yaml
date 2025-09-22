@@ -27,6 +27,6 @@ mev_type: flashbots
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
   mev_boost_image: ethpandaops/mev-boost:develop
-  mev_builder_cl_image: sigp/lighthouse:unstable
+  mev_builder_cl_image: ethpandaops/lighthouse:unstable
   mev_builder_image: ethpandaops/reth-rbuilder:develop
   mev_builder_subsidy: 1

@@ -1,6 +1,6 @@
 participants:
   - el_type: geth
-    el_image: ethpandaops/geth:maste
+    el_image: ethpandaops/geth:master
     el_extra_params: ["--miner.extradata=lighthouseFromLocal"]
     cl_type: lighthouse
     cl_image: ethpandaops/lighthouse:unstable
