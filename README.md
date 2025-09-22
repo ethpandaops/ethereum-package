@@ -361,6 +361,10 @@ participants:
     vc_min_mem: 0
     vc_max_mem: 0
 
+    # A list of indices of the beacon nodes that the validator client should connect to
+    # Defaults to null
+    vc_beacon_node_indices: null
+
     # Count of the number of validators you want to run for a given participant
     # Default to null, which means that the number of validators will be using the
     # network parameter num_validator_keys_per_node

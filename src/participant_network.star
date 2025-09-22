@@ -473,6 +473,7 @@ def launch_participant_network(
             image=participant.vc_image,
             global_log_level=args_with_right_defaults.global_log_level,
             cl_context=get_cl_context_with_blobber_url(cl_context),
+            all_cl_contexts=all_cl_contexts,
             el_context=el_context,
             remote_signer_context=remote_signer_context,
             full_name=full_name,

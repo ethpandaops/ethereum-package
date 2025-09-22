@@ -397,6 +397,7 @@ def input_parser(plan, input_args):
                 blobber_extra_params=participant["blobber_extra_params"],
                 blobber_image=participant["blobber_image"],
                 keymanager_enabled=participant["keymanager_enabled"],
+                vc_beacon_node_indices=participant["vc_beacon_node_indices"],
             )
             for participant in result["participants"]
         ],
@@ -1365,6 +1366,7 @@ def default_participant():
         "blobber_image": "ethpandaops/blobber:latest",
         "builder_network_params": None,
         "keymanager_enabled": None,
+        "vc_beacon_node_indices": None,
     }
 
 

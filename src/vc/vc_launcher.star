@@ -22,6 +22,7 @@ def get_vc_config(
     image,
     global_log_level,
     cl_context,
+    all_cl_contexts,
     el_context,
     remote_signer_context,
     full_name,
@@ -52,10 +53,21 @@ def get_vc_config(
             snooper_beacon_context.ip_addr,
             snooper_beacon_context.beacon_rpc_port_num,
         )
+        beacon_http_urls = [beacon_http_url]
     else:
-        beacon_http_url = "{0}".format(
-            cl_context.beacon_http_url,
-        )
+        beacon_http_urls = []
+        if (
+            participant.vc_beacon_node_indices != None
+            and len(participant.vc_beacon_node_indices) > 0
+        ):
+            for idx in participant.vc_beacon_node_indices:
+                if idx < len(all_cl_contexts):
+                    beacon_http_urls.append(all_cl_contexts[idx].beacon_http_url)
+
+        if len(beacon_http_urls) == 0:
+            beacon_http_urls = [cl_context.beacon_http_url]
+
+        beacon_http_url = beacon_http_urls[0]
 
     keymanager_enabled = participant.keymanager_enabled
     if vc_type == constants.VC_TYPE.lighthouse:
@@ -67,7 +79,7 @@ def get_vc_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
             global_log_level=global_log_level,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             full_name=full_name,
@@ -88,7 +100,7 @@ def get_vc_config(
             keymanager_file=keymanager_file,
             image=image,
             global_log_level=global_log_level,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             remote_signer_context=remote_signer_context,
@@ -109,7 +121,7 @@ def get_vc_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             remote_signer_context=remote_signer_context,
@@ -130,7 +142,7 @@ def get_vc_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             remote_signer_context=remote_signer_context,
@@ -151,7 +163,7 @@ def get_vc_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             remote_signer_context=remote_signer_context,
@@ -178,7 +190,7 @@ def get_vc_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
             global_log_level=global_log_level,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             remote_signer_context=remote_signer_context,
             full_name=full_name,

@@ -9,7 +9,7 @@ def get_config(
     el_cl_genesis_data,
     image,
     keymanager_file,
-    beacon_http_url,
+    beacon_http_urls,
     cl_context,
     el_context,
     remote_signer_context,
@@ -36,7 +36,7 @@ def get_config(
         )
 
     cmd = [
-        "--beacon-node=" + beacon_http_url,
+        "--beacon-node=" + ",".join(beacon_http_urls),
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
