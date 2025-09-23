@@ -220,12 +220,27 @@ def get_config(
                     ]
                 )
             )
+            cmd.append(
+                "--staticpeers="
+                + ",".join(
+                    [
+                        ctx.enode
+                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+                    ]
+                )
+            )
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
+            + shared_utils.get_devnet_enodes(
+                plan, launcher.el_cl_genesis_data.files_artifact_uuid
+            )
+        )
+        cmd.append(
+            "--staticpeers="
             + shared_utils.get_devnet_enodes(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
