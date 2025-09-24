@@ -217,8 +217,6 @@ def get_beacon_config(
         "--metrics-address=0.0.0.0",
         "--metrics-allow-origin=*",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
-        # Enable this flag once we have https://github.com/sigp/lighthouse/issues/5054 fixed
-        # "--allow-insecure-genesis-sync",
         "--enable-private-discovery",
     ]
 
@@ -231,6 +229,8 @@ def get_beacon_config(
 
     if checkpoint_sync_enabled:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
+    else:
+        cmd.append("--allow-insecure-genesis-sync")
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
