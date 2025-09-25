@@ -277,16 +277,16 @@ def get_el_context(
     )
 
     # TODO: Passing empty string for metrics_url for now https://github.com/ethpandaops/ethereum-package/issues/127
-    # metrics_url = "http://{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    # metrics_url = "http://{0}:{1}".format(service.name, METRICS_PORT_NUM)
     ethjs_metrics_info = None
 
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+    http_url = "http://{0}:{1}".format(service.name, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.name, WS_PORT_NUM)
 
     return el_context.new_el_context(
         client_name="ethereumjs",
         enode=enode,
-        ip_addr=service.ip_address,
+        ip_addr=service.name,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,

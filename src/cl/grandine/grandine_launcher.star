@@ -384,14 +384,10 @@ def get_cl_context(
     node_selectors,
 ):
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
-    beacon_http_url = "http://{0}:{1}".format(
-        service.ip_address, beacon_http_port.number
-    )
+    beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
-    beacon_metrics_url = "{0}:{1}".format(
-        service.ip_address, beacon_metrics_port.number
-    )
+    beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
 
     beacon_node_identity_recipe = GetHttpRequestRecipe(
         endpoint="/eth/v1/node/identity",
@@ -416,7 +412,7 @@ def get_cl_context(
     return cl_context.new_cl_context(
         client_name="grandine",
         enr=beacon_node_enr,
-        ip_addr=service.ip_address,
+        ip_addr=service.name,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
         cl_nodes_metrics_info=nodes_metrics_info,

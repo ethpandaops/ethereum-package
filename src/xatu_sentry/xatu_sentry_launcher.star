@@ -88,7 +88,7 @@ def launch(
     )
 
     return xatu_sentry_context.new_xatu_sentry_context(
-        xatu_sentry_service.ip_address,
+        xatu_sentry_service.name,
         METRICS_PORT_NUMBER,
         pair_name,
     )

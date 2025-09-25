@@ -336,9 +336,7 @@ def get_cl_context(
 ):
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
 
-    beacon_http_url = "http://{0}:{1}".format(
-        service.ip_address, beacon_http_port.number
-    )
+    beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
 
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
 
@@ -359,9 +357,7 @@ def get_cl_context(
     beacon_peer_id = response["extract.peer_id"]
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
-    beacon_metrics_url = "{0}:{1}".format(
-        service.ip_address, beacon_metrics_port.number
-    )
+    beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
 
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, beacon_metrics_url
@@ -371,7 +367,7 @@ def get_cl_context(
     return cl_context.new_cl_context(
         client_name="lodestar",
         enr=beacon_node_enr,
-        ip_addr=service.ip_address,
+        ip_addr=service.name,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
         cl_nodes_metrics_info=nodes_metrics_info,

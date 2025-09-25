@@ -98,7 +98,7 @@ def launch(
 
     return ethereum_metrics_exporter_context.new_ethereum_metrics_exporter_context(
         pair_name,
-        exporter_service.ip_address,
+        exporter_service.name,
         METRICS_PORT_NUMBER,
         cl_context.client_name,
         el_context.client_name,
