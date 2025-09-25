@@ -1317,26 +1317,25 @@ port_publisher:
 participants:
   - el_type: geth
     el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    elExtraParams:
+    el_extra_params:
     - "--override.verkle=<UNIXTIMESTAMP>"
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
   - el_type: geth
     el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    elExtraParams:
+    el_extra_params:
     - "--override.verkle=<UNIXTIMESTAMP>"
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
   - el_type: geth
     el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    elExtraParams:
+    el_extra_params:
     - "--override.verkle=<UNIXTIMESTAMP>"
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
 network_params:
   deneb_fork_epoch: 0
 wait_for_finalization: false
-wait_for_verifications: false
 global_log_level: info
 
 ```
