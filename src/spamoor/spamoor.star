@@ -70,6 +70,7 @@ def launch_spamoor(
                         "max_pending": 200,
                         "max_wallets": 200,
                         "client_group": "mevbuilder",
+                        "deploy_client_group": "default",
                     },
                 }
             )
