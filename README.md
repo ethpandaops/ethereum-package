@@ -169,12 +169,12 @@ participants:
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
     # Defaults by client:
     # - geth: ethereum/client-go:latest
-    # - erigon: ethpandaops/erigon:main
-    # - nethermind: nethermind/nethermind:latest
-    # - besu: hyperledger/besu:develop
+    # - erigon: erigontech/erigon:latest
+    # - nethermind: ethpandaops/nethermind:master
+    # - besu: hyperledger/besu:latest
     # - reth: ghcr.io/paradigmxyz/reth
     # - ethereumjs: ethpandaops/ethereumjs:master
-    # - nimbus-eth1: ethpandaops/nimbus-eth1:master
+    # - nimbus-eth1: statusim/nimbus-eth1:master
     # - ethrex: ghcr.io/lambdaclass/ethrex:latest
     el_image: ""
 
@@ -233,11 +233,11 @@ participants:
 
     # The Docker image that should be used for the CL client; leave blank to use the default for the client type
     # Defaults by client:
-    # - lighthouse: sigp/lighthouse:latest
-    # - teku: consensys/teku:latest
+    # - lighthouse: ethpandaops/lighthouse:unstable
+    # - teku: ethpandaops/teku:master
     # - nimbus: statusim/nimbus-eth2:multiarch-latest
-    # - prysm: gcr.io/offchainlabs/prysm/beacon-chain:latest
-    # - lodestar: chainsafe/lodestar:next
+    # - prysm: ethpandaops/prysm-beacon-chain:develop
+    # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
     cl_image: ""
 
@@ -312,8 +312,8 @@ participants:
     # - lighthouse: sigp/lighthouse:latest
     # - lodestar: chainsafe/lodestar:latest
     # - nimbus: statusim/nimbus-validator-client:multiarch-latest
-    # - prysm: gcr.io/offchainlabs/prysm/validator:latest
-    # - teku: consensys/teku:latest
+    # - prysm: ethpandaops/prysm-validator:develop
+    # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
     vc_image: ""
 
@@ -923,7 +923,7 @@ assertoor_params:
   # - no more than 2 reorgs per epoch
   run_stability_check: false
 
-  # Check block propöosals
+  # Check block proposals
   # This check monitors the chain and succeeds if:
   # - all client pairs have proposed a block
   run_block_proposal_check: false
@@ -1017,7 +1017,7 @@ docker_cache_params:
   github_prefix: "/gh/"
   google_prefix: "/gcr/"
 
-# Supports three valeus
+# Supports four values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
@@ -1317,26 +1317,25 @@ port_publisher:
 participants:
   - el_type: geth
     el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    elExtraParams:
+    el_extra_params:
     - "--override.verkle=<UNIXTIMESTAMP>"
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
   - el_type: geth
     el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    elExtraParams:
+    el_extra_params:
     - "--override.verkle=<UNIXTIMESTAMP>"
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
   - el_type: geth
     el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    elExtraParams:
+    el_extra_params:
     - "--override.verkle=<UNIXTIMESTAMP>"
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
 network_params:
   deneb_fork_epoch: 0
 wait_for_finalization: false
-wait_for_verifications: false
 global_log_level: info
 
 ```
@@ -1505,10 +1504,10 @@ Consensus Layer (CL) nodes - Validator:
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
 
 ```
-kurtosis run github.com/ethpandaops/ethereum-package '{"mev_type": "full"}'
+kurtosis run github.com/ethpandaops/ethereum-package '{"mev_type": "flashbots"}'
 ```
 
-Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
+Starting your network up with `"mev_type": "flashbots"` will instantiate and connect the following infrastructure to your network:
 
 1. `Flashbot's block builder & CL validator + beacon` - A modified Geth client that builds blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay.
 2. `mev-relay-api` - Services that provide APIs for (a) proposers, (b) block builders, (c) data
@@ -1517,7 +1516,7 @@ Starting your network up with `"mev_type": "full"` will instantiate and connect 
 5. `mev-boost` - open-source middleware instantiated for each EL/Cl pair in the network, including the builder
 
 <details>
-    <summary>Caveats when using "mev_type": "full"</summary>
+    <summary>Caveats when using "mev_type": "flashbots"</summary>
 
 * Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 1st epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 1st epoch.
 * After the 3rd epoch, the mev-relay service will begin to receive execution payloads (eth_sendPayload, which does not contain transaction content) from the mev-builder service (or mock-builder in mock-mev mode).
