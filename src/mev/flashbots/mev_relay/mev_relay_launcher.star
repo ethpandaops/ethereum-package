@@ -198,7 +198,7 @@ def launch_mev_relay(
                 "--relay-url",
                 "http://{0}@{1}:{2}".format(
                     constants.DEFAULT_MEV_PUBKEY,
-                    api.ip_address,
+                    api.name,
                     MEV_RELAY_ENDPOINT_PORT,
                 ),
                 "--pubkey-override",
@@ -223,5 +223,5 @@ def launch_mev_relay(
     )
 
     return "http://{0}@{1}:{2}".format(
-        constants.DEFAULT_MEV_PUBKEY, api.ip_address, MEV_RELAY_ENDPOINT_PORT
+        constants.DEFAULT_MEV_PUBKEY, api.name, MEV_RELAY_ENDPOINT_PORT
     )

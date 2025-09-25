@@ -76,7 +76,7 @@ def launch(
     beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
 
     beacon_http_url = "http://{0}:{1}".format(
-        beacon_service.ip_address, beacon_http_port.number
+        beacon_service.name, beacon_http_port.number
     )
 
     # Blobber config
@@ -94,7 +94,7 @@ def launch(
             blobber_launcher.BLOBBER_VALIDATOR_PROXY_PORT_ID
         ]
         blobber_http_url = "http://{0}:{1}".format(
-            blobber_service.ip_address, blobber_http_port.number
+            blobber_service.name, blobber_http_port.number
         )
         beacon_http_url = blobber_http_url
 
@@ -118,7 +118,7 @@ def launch(
 
     beacon_metrics_port = beacon_service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(
-        beacon_service.ip_address, beacon_metrics_port.number
+        beacon_service.name, beacon_metrics_port.number
     )
 
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
@@ -129,7 +129,7 @@ def launch(
     return cl_context.new_cl_context(
         client_name="lodestar",
         enr=beacon_node_enr,
-        ip_addr=beacon_service.ip_address,
+        ip_addr=beacon_service.name,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
         cl_nodes_metrics_info=nodes_metrics_info,

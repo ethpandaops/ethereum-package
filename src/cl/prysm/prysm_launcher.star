@@ -79,9 +79,9 @@ def launch(
     beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
 
     beacon_http_url = "http://{0}:{1}".format(
-        beacon_service.ip_address, BEACON_HTTP_PORT_NUM
+        beacon_service.name, BEACON_HTTP_PORT_NUM
     )
-    beacon_grpc_url = "{0}:{1}".format(beacon_service.ip_address, RPC_PORT_NUM)
+    beacon_grpc_url = "{0}:{1}".format(beacon_service.name, RPC_PORT_NUM)
 
     # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
     beacon_node_identity_recipe = GetHttpRequestRecipe(
@@ -102,7 +102,7 @@ def launch(
 
     beacon_metrics_port = beacon_service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(
-        beacon_service.ip_address, beacon_metrics_port.number
+        beacon_service.name, beacon_metrics_port.number
     )
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
         beacon_service_name, METRICS_PATH, beacon_metrics_url
@@ -112,7 +112,7 @@ def launch(
     return cl_context.new_cl_context(
         client_name="prysm",
         enr=beacon_node_enr,
-        ip_addr=beacon_service.ip_address,
+        ip_addr=beacon_service.name,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
         cl_nodes_metrics_info=nodes_metrics_info,

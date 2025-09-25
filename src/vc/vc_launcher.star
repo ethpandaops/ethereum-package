@@ -182,7 +182,7 @@ def launch(
 
     validator_metrics_port = validator_service.ports[constants.METRICS_PORT_ID]
     validator_metrics_url = "{0}:{1}".format(
-        validator_service.ip_address, validator_metrics_port.number
+        validator_service.name, validator_metrics_port.number
     )
     validator_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, vc_shared.METRICS_PATH, validator_metrics_url

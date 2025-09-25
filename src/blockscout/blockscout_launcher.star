@@ -238,7 +238,7 @@ def get_config_frontend(
             "NEXT_PUBLIC_NETWORK_NAME": "Kurtosis",
             "NEXT_PUBLIC_NETWORK_ID": network_params.network_id,
             "NEXT_PUBLIC_NETWORK_RPC_URL": el_client_rpc_url,
-            "NEXT_PUBLIC_API_HOST": blockscout_service.ip_address
+            "NEXT_PUBLIC_API_HOST": blockscout_service.name
             + ":"
             + str(blockscout_service.ports["http"].number),
             "NEXT_PUBLIC_AD_BANNER_PROVIDER": "none",

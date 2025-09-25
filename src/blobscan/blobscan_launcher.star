@@ -116,7 +116,7 @@ def launch_blobscan(
     blobscan_config = plan.add_service(API_SERVICE_NAME, api_config)
 
     blobscan_api_url = "http://{0}:{1}".format(
-        blobscan_config.ip_address, blobscan_config.ports[constants.HTTP_PORT_ID].number
+        blobscan_config.name, blobscan_config.ports[constants.HTTP_PORT_ID].number
     )
 
     web_config = get_web_config(

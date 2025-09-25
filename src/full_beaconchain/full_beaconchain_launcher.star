@@ -133,7 +133,7 @@ def launch_full_beacon(
         cl_contexts[0].http_port,
         cl_contexts[0].client_name,
         el_uri,
-        little_bigtable.ip_address,
+        little_bigtable.name,
         LITTLE_BIGTABLE_PORT_NUMBER,
         postgres_output.service.name,
         POSTGRES_PORT_NUMBER,

@@ -248,7 +248,7 @@ def run(plan, args={}):
             global_node_selectors,
         )
         fuzz_target = "http://{0}:{1}".format(
-            broadcaster_service.ip_address,
+            broadcaster_service.name,
             broadcaster.PORT,
         )
 

@@ -64,7 +64,7 @@ def launch_snooper(
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
     return snooper_el_engine_context.new_snooper_el_client_context(
-        snooper_service.ip_address,
+        snooper_service.name,
         SNOOPER_ENGINE_RPC_PORT_NUM,
         SNOOPER_EL_RPC_PORT_NUM,
     )

@@ -51,5 +51,5 @@ def launch_mock_mev(
         ),
     )
     return "http://{0}@{1}:{2}".format(
-        constants.DEFAULT_MEV_PUBKEY, mock_builder.ip_address, MOCK_MEV_BUILDER_PORT
+        constants.DEFAULT_MEV_PUBKEY, mock_builder.name, MOCK_MEV_BUILDER_PORT
     )
