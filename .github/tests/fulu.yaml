@@ -1,6 +1,7 @@
 participants:
   - el_type: geth
     cl_type: teku
+    supernode: true
 
 
 network_params:
@@ -10,6 +11,5 @@ network_params:
   deneb_fork_epoch: 0
   electra_fork_epoch: 1
   fulu_fork_epoch: 2
-  eip7732_fork_epoch: 3
-  eip7805_fork_epoch: 4
+  gloas_fork_epoch: 3
 

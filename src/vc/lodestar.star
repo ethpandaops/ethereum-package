@@ -13,12 +13,13 @@ VERBOSITY_LEVELS = {
 
 
 def get_config(
+    plan,
     participant,
     el_cl_genesis_data,
     keymanager_file,
     image,
     global_log_level,
-    beacon_http_url,
+    beacon_http_urls,
     cl_context,
     el_context,
     remote_signer_context,
@@ -30,6 +31,7 @@ def get_config(
     network_params,
     port_publisher,
     vc_index,
+    extra_files_artifacts,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
@@ -51,14 +53,13 @@ def get_config(
         "--paramsFile="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--beaconNodes=" + beacon_http_url,
+        "--beaconNodes=" + ",".join(beacon_http_urls),
         "--suggestedFeeRecipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv PROMETHEUS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics",
         "--metrics.address=0.0.0.0",
         "--metrics.port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + full_name,
         "--useProduceBlockV3",
         "--disableKeystoresThreadPool",
     ]
@@ -124,6 +125,13 @@ def get_config(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.vc_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     env_vars = participant.vc_extra_env_vars
     if network_params.preset == "minimal":
         env_vars["LODESTAR_PRESET"] = "minimal"
@@ -140,7 +148,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=participant.vc_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

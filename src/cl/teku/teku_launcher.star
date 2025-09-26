@@ -7,8 +7,7 @@ node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 vc_shared = import_module("../../vc/shared.star")
 
-#  ---------------------------------- Beacon client -------------------------------------
-TEKU_BINARY_FILEPATH_IN_IMAGE = "/opt/teku/bin/teku"
+TEKU_ENTRYPOINT_COMMAND = "/opt/teku/bin/teku"
 
 # The Docker container runs as the "teku" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/teku/teku-beacon-data"
@@ -52,17 +51,16 @@ def launch(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
+    backend,
+    tempo_otlp_grpc_url=None,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     config = get_beacon_config(
         plan,
         launcher,
         beacon_service_name,
         participant,
-        log_level,
+        global_log_level,
         bootnode_contexts,
         el_context,
         full_name,
@@ -76,58 +74,24 @@ def launch(
         port_publisher,
         participant_index,
         network_params,
+        extra_files_artifacts,
+        backend,
+        tempo_otlp_grpc_url,
     )
 
     beacon_service = plan.add_service(beacon_service_name, config)
 
-    beacon_http_port = beacon_service.ports[constants.HTTP_PORT_ID]
-    beacon_http_url = "http://{0}:{1}".format(
-        beacon_service.ip_address, beacon_http_port.number
+    cl_context_obj = get_cl_context(
+        plan,
+        beacon_service_name,
+        beacon_service,
+        participant,
+        snooper_el_engine_context,
+        node_keystore_files,
+        node_selectors,
     )
 
-    beacon_metrics_port = beacon_service.ports[constants.METRICS_PORT_ID]
-    beacon_metrics_url = "{0}:{1}".format(
-        beacon_service.ip_address, beacon_metrics_port.number
-    )
-
-    beacon_node_identity_recipe = GetHttpRequestRecipe(
-        endpoint="/eth/v1/node/identity",
-        port_id=constants.HTTP_PORT_ID,
-        extract={
-            "enr": ".data.enr",
-            "multiaddr": ".data.p2p_addresses[0]",
-            "peer_id": ".data.peer_id",
-        },
-    )
-    response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=beacon_service_name
-    )
-    beacon_node_enr = response["extract.enr"]
-    beacon_multiaddr = response["extract.multiaddr"]
-    beacon_peer_id = response["extract.peer_id"]
-
-    beacon_node_metrics_info = node_metrics.new_node_metrics_info(
-        beacon_service_name, BEACON_METRICS_PATH, beacon_metrics_url
-    )
-    nodes_metrics_info = [beacon_node_metrics_info]
-
-    return cl_context.new_cl_context(
-        client_name="teku",
-        enr=beacon_node_enr,
-        ip_addr=beacon_service.ip_address,
-        http_port=beacon_http_port.number,
-        beacon_http_url=beacon_http_url,
-        cl_nodes_metrics_info=nodes_metrics_info,
-        beacon_service_name=beacon_service_name,
-        multiaddr=beacon_multiaddr,
-        peer_id=beacon_peer_id,
-        snooper_enabled=participant.snooper_enabled,
-        snooper_el_engine_context=snooper_el_engine_context,
-        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
-        if node_keystore_files
-        else "",
-        supernode=participant.supernode,
-    )
+    return cl_context_obj
 
 
 def get_beacon_config(
@@ -135,7 +99,7 @@ def get_beacon_config(
     launcher,
     beacon_service_name,
     participant,
-    log_level,
+    global_log_level,
     bootnode_contexts,
     el_context,
     full_name,
@@ -149,7 +113,13 @@ def get_beacon_config(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
+    backend,
+    tempo_otlp_grpc_url,
 ):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
+    )
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
     if node_keystore_files:
@@ -207,6 +177,7 @@ def get_beacon_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
+        TEKU_ENTRYPOINT_COMMAND,
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
         "--network={0}".format(
@@ -220,7 +191,11 @@ def get_beacon_config(
         ),
         "--p2p-enabled=true",
         "--p2p-peer-lower-bound={0}".format(MIN_PEERS),
-        "--p2p-advertised-ip=" + port_publisher.nat_exit_ip,
+        "--p2p-advertised-ip={0}".format(
+            "${K8S_POD_IP}"
+            if backend == "kubernetes"
+            else port_publisher.cl_nat_exit_ip
+        ),
         "--p2p-discovery-site-local-addresses-enabled=true",
         "--p2p-port={0}".format(discovery_port_tcp),
         "--rest-api-enabled=true",
@@ -246,7 +221,6 @@ def get_beacon_config(
         ),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--validators-graffiti=" + full_name,
     ]
 
     keymanager_api_cmd = [
@@ -356,20 +330,31 @@ def get_beacon_config(
             )
 
     if persistent:
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
             size=int(participant.cl_volume_size)
             if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[network_params.network][
+            else constants.VOLUME_SIZE[volume_size_key][
                 constants.CL_TYPE.teku + "_volume_size"
             ],
         )
+
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.cl_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
 
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": ["exec " + " ".join(cmd)],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -381,7 +366,8 @@ def get_beacon_config(
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
-            extra_labels=participant.cl_extra_labels,
+            extra_labels=participant.cl_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
@@ -400,9 +386,80 @@ def get_beacon_config(
     return ServiceConfig(**config_args)
 
 
+def get_cl_context(
+    plan,
+    service_name,
+    service,
+    participant,
+    snooper_el_engine_context,
+    node_keystore_files,
+    node_selectors,
+):
+    beacon_http_port = service.ports[constants.HTTP_PORT_ID]
+    beacon_http_url = "http://{0}:{1}".format(
+        service.ip_address, beacon_http_port.number
+    )
+
+    beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
+    beacon_metrics_url = "{0}:{1}".format(
+        service.ip_address, beacon_metrics_port.number
+    )
+
+    beacon_node_identity_recipe = GetHttpRequestRecipe(
+        endpoint="/eth/v1/node/identity",
+        port_id=constants.HTTP_PORT_ID,
+        extract={
+            "enr": ".data.enr",
+            "multiaddr": ".data.p2p_addresses[0]",
+            "peer_id": ".data.peer_id",
+        },
+    )
+    response = plan.request(
+        recipe=beacon_node_identity_recipe, service_name=service_name
+    )
+    beacon_node_enr = response["extract.enr"]
+    beacon_multiaddr = response["extract.multiaddr"]
+    beacon_peer_id = response["extract.peer_id"]
+
+    beacon_node_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, BEACON_METRICS_PATH, beacon_metrics_url
+    )
+    nodes_metrics_info = [beacon_node_metrics_info]
+
+    return cl_context.new_cl_context(
+        client_name="teku",
+        enr=beacon_node_enr,
+        ip_addr=service.ip_address,
+        http_port=beacon_http_port.number,
+        beacon_http_url=beacon_http_url,
+        cl_nodes_metrics_info=nodes_metrics_info,
+        beacon_service_name=service_name,
+        multiaddr=beacon_multiaddr,
+        peer_id=beacon_peer_id,
+        snooper_enabled=participant.snooper_enabled,
+        snooper_el_engine_context=snooper_el_engine_context,
+        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
+        if node_keystore_files
+        else "",
+        supernode=participant.supernode,
+    )
+
+
 def new_teku_launcher(el_cl_genesis_data, jwt_file, keymanager_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         keymanager_file=keymanager_file,
     )
+
+
+def get_blobber_config(
+    plan,
+    participant,
+    beacon_service_name,
+    beacon_http_url,
+    node_keystore_files,
+    node_selectors,
+):
+    # Teku doesn't support blobbers, return None for blobber config
+    return None

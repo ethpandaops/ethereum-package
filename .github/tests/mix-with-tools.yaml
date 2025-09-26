@@ -9,7 +9,7 @@ participants:
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: ethereumjs
+  - el_type: ethrex
     cl_type: grandine
   - el_type: geth
     cl_type: grandine
@@ -29,6 +29,3 @@ additional_services:
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true
-docker_cache_params:
-  enabled: true
-  url: "docker.ethquokkaops.io"

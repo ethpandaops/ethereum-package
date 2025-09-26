@@ -1,5 +1,6 @@
 constants = import_module("../../../package_io/constants.star")
-
+input_parser = import_module("../../../package_io/input_parser.star")
+shared_utils = import_module("../../../shared_utils/shared_utils.star")
 # Default image if none specified in mev_params
 
 MOCK_MEV_SERVICE_NAME = "mock-mev"
@@ -19,8 +20,10 @@ def launch_mock_mev(
     jwt_file,
     global_log_level,
     global_node_selectors,
+    global_tolerations,
     mev_params,
 ):
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     mock_builder = plan.add_service(
         name=MOCK_MEV_SERVICE_NAME,
         config=ServiceConfig(
@@ -48,6 +51,7 @@ def launch_mock_mev(
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=global_node_selectors,
+            tolerations=tolerations,
         ),
     )
     return "http://{0}@{1}:{2}".format(

@@ -1,6 +1,7 @@
 participants:
   - el_type: geth
     cl_type: teku
+    supernode: true
   - el_type: nethermind
     cl_type: prysm
   - el_type: erigon
@@ -11,6 +12,8 @@ participants:
     cl_type: lodestar
   - el_type: ethereumjs
     cl_type: teku
+  - el_type: ethrex
+    cl_type: prysm
 network_params:
   altair_fork_epoch: 0
   bellatrix_fork_epoch: 0
@@ -18,4 +21,5 @@ network_params:
   deneb_fork_epoch: 0
   electra_fork_epoch: 1
   fulu_fork_epoch: 2
+  gloas_fork_epoch: 3
   genesis_delay: 120

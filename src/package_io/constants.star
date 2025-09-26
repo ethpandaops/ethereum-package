@@ -7,6 +7,7 @@ EL_TYPE = struct(
     reth_builder="reth-builder",
     ethereumjs="ethereumjs",
     nimbus="nimbus",
+    ethrex="ethrex",
 )
 
 CL_TYPE = struct(
@@ -96,7 +97,7 @@ DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:4.1.8"
+    "ethpandaops/ethereum-genesis-generator:5.0.6"
 )
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
@@ -124,7 +125,8 @@ CAPELLA_FORK_VERSION = "0x40000038"
 DENEB_FORK_VERSION = "0x50000038"
 ELECTRA_FORK_VERSION = "0x60000038"
 FULU_FORK_VERSION = "0x70000038"
-EIP7732_FORK_VERSION = "0x80000038"
+GLOAS_FORK_VERSION = "0x80000038"
+EIP7441_FORK_VERSION = "0xa0000038"
 EIP7805_FORK_VERSION = "0x90000038"
 
 FAR_FUTURE_EPOCH = 18446744073709551615
@@ -208,6 +210,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 500000,  # 500GB
         "lodestar_volume_size": 500000,  # 500GB
         "grandine_volume_size": 500000,  # 500GB
+        "ethrex_volume_size": 500000,  # 500GB
     },
     "sepolia": {
         "geth_volume_size": 300000,  # 300GB
@@ -224,6 +227,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 150000,  # 150GB
         "lodestar_volume_size": 150000,  # 150GB
         "grandine_volume_size": 150000,  # 150GB
+        "ethrex_volume_size": 150000,  # 150GB
     },
     "holesky": {
         "geth_volume_size": 100000,  # 100GB
@@ -240,6 +244,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 100000,  # 100GB
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
+        "ethrex_volume_size": 100000,  # 100GB
     },
     "devnets": {
         "geth_volume_size": 100000,  # 100GB
@@ -256,6 +261,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 100000,  # 100GB
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
+        "ethrex_volume_size": 100000,  # 100GB
     },
     "ephemery": {
         "geth_volume_size": 5000,  # 5GB
@@ -272,6 +278,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 1000,  # 1GB
         "lodestar_volume_size": 1000,  # 1GB
         "grandine_volume_size": 1000,  # 1GB
+        "ethrex_volume_size": 1000,  # 1GB
     },
     "kurtosis": {
         "geth_volume_size": 5000,  # 5GB
@@ -288,6 +295,7 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 1000,  # 1GB
         "lodestar_volume_size": 1000,  # 1GB
         "grandine_volume_size": 1000,  # 1GB
+        "ethrex_volume_size": 1000,  # 1GB
     },
     "hoodi": {
         "geth_volume_size": 100000,  # 100GB
@@ -304,8 +312,38 @@ VOLUME_SIZE = {
         "nimbus_volume_size": 100000,  # 100GB
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
+        "ethrex_volume_size": 100000,  # 100GB
     },
 }
+# Language mapping for client implementations
+CLIENT_LANGUAGES = {
+    # Execution Layer (EL) clients
+    "geth": "go",
+    "erigon": "go",
+    "nethermind": "csharp",
+    "besu": "java",
+    "reth": "rust",
+    "reth-builder": "rust",
+    "ethereumjs": "javascript",
+    "nimbus": "nim",
+    # Consensus Layer (CL) clients
+    "lighthouse": "rust",
+    "teku": "java",
+    "prysm": "go",
+    "lodestar": "typescript",
+    "grandine": "rust",
+    # Validator Clients (VC) - inherit from CL clients
+    "vero": "python",
+    # Remote Signers
+    "web3signer": "java",
+}
+
+# Label key constant for client language
+CLIENT_LANGUAGE_LABEL_KEY = "ethereum-package.client-language"
+
+# Label key constant for node index
+NODE_INDEX_LABEL_KEY = "ethereum-package.node-index"
+
 VOLUME_SIZE["mainnet-shadowfork"] = VOLUME_SIZE["mainnet"]
 VOLUME_SIZE["sepolia-shadowfork"] = VOLUME_SIZE["sepolia"]
 VOLUME_SIZE["holesky-shadowfork"] = VOLUME_SIZE["holesky"]

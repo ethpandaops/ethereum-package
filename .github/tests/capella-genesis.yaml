@@ -1,6 +1,7 @@
 participants:
   - el_type: geth
     cl_type: teku
+    supernode: true
   - el_type: reth
     cl_type: prysm
   - el_type: nethermind
@@ -11,6 +12,8 @@ participants:
     cl_type: lodestar
   - el_type: erigon
     cl_type: grandine
+  - el_type: ethrex
+    cl_type: teku
 additional_services:
   - dora
 network_params:
@@ -20,4 +23,5 @@ network_params:
   deneb_fork_epoch: 1
   electra_fork_epoch: 2
   fulu_fork_epoch: 3
+  gloas_fork_epoch: 4
   genesis_delay: 120

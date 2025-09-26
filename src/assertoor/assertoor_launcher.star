@@ -1,6 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 SERVICE_NAME = "assertoor"
 
 HTTP_PORT_ID = "http"
@@ -39,6 +40,8 @@ def launch_assertoor(
     port_publisher,
     index,
     global_node_selectors,
+    global_tolerations,
+    docker_cache_params,
 ):
     all_client_info = []
     clients_with_validators = []
@@ -51,6 +54,8 @@ def launch_assertoor(
         index,
         0,
     )
+
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     for index, participant in enumerate(participant_contexts):
         (
@@ -112,6 +117,8 @@ def launch_assertoor(
         assertoor_params,
         public_ports,
         global_node_selectors,
+        tolerations,
+        docker_cache_params,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -124,6 +131,8 @@ def get_config(
     assertoor_params,
     public_ports,
     node_selectors,
+    tolerations,
+    docker_cache_params,
 ):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -132,10 +141,22 @@ def get_config(
 
     IMAGE_NAME = assertoor_params.image
 
-    if assertoor_params.image == constants.DEFAULT_ASSERTOOR_IMAGE:
+    default_assertoor_image = (
+        docker_cache_params.url
+        + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
+        + constants.DEFAULT_ASSERTOOR_IMAGE
+    )
+    if assertoor_params.image == default_assertoor_image:
         if network_params.fulu_fork_epoch < constants.FAR_FUTURE_EPOCH:
-            IMAGE_NAME = "ethpandaops/assertoor:fulu-support"
-
+            IMAGE_NAME = (
+                docker_cache_params.url
+                + (
+                    docker_cache_params.dockerhub_prefix
+                    if docker_cache_params.enabled
+                    else ""
+                )
+                + "ethpandaops/assertoor:fulu-support"
+            )
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
@@ -151,6 +172,7 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )
 
 

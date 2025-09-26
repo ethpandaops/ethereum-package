@@ -1,6 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 static_files = import_module("../static_files/static_files.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 SERVICE_NAME = "grafana"
 
@@ -44,10 +45,14 @@ def launch_grafana(
     dashboard_providers_config_template,
     prometheus_private_url,
     global_node_selectors,
+    global_tolerations,
     grafana_params,
     port_publisher,
     index,
+    tempo_query_url=None,
 ):
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
     (
         grafana_config_artifacts_uuid,
         grafana_dashboards_artifacts_uuid,
@@ -57,6 +62,7 @@ def launch_grafana(
         datasource_config_template,
         dashboard_providers_config_template,
         prometheus_private_url,
+        tempo_query_url,
         additional_dashboards=grafana_params.additional_dashboards,
     )
 
@@ -64,6 +70,8 @@ def launch_grafana(
         plan,
         grafana_dashboards_artifacts_uuid,
         grafana_additional_dashboards_data,
+        global_tolerations,
+        global_node_selectors,
     )
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
@@ -77,6 +85,7 @@ def launch_grafana(
         grafana_config_artifacts_uuid,
         merged_dashboards_artifact_name,
         global_node_selectors,
+        tolerations,
         grafana_params,
         public_ports,
     )
@@ -89,9 +98,12 @@ def get_grafana_config_dir_artifact_uuid(
     datasource_config_template,
     dashboard_providers_config_template,
     prometheus_private_url,
+    tempo_query_url,
     additional_dashboards=[],
 ):
-    datasource_data = new_datasource_config_template_data(prometheus_private_url)
+    datasource_data = new_datasource_config_template_data(
+        prometheus_private_url, tempo_query_url
+    )
     datasource_template_and_data = shared_utils.new_template_and_data(
         datasource_config_template, datasource_data
     )
@@ -134,6 +146,7 @@ def get_config(
     grafana_config_artifacts_name,
     grafana_dashboards_artifacts_name,
     node_selectors,
+    tolerations,
     grafana_params,
     public_ports,
 ):
@@ -156,12 +169,16 @@ def get_config(
         min_memory=grafana_params.min_mem,
         max_memory=grafana_params.max_mem,
         node_selectors=node_selectors,
+        tolerations=tolerations,
         public_ports=public_ports,
     )
 
 
-def new_datasource_config_template_data(prometheus_url):
-    return {"PrometheusURL": prometheus_url}
+def new_datasource_config_template_data(prometheus_url, tempo_query_url):
+    data = {"PrometheusURL": prometheus_url}
+    if tempo_query_url != None:
+        data["TempoURL"] = tempo_query_url
+    return data
 
 
 def new_dashboard_providers_config_template_data(dashboards_dirpath):
@@ -195,6 +212,8 @@ def merge_dashboards_artifacts(
     plan,
     grafana_dashboards_artifacts_name,
     grafana_additional_dashboards_data=[],
+    global_tolerations=[],
+    global_node_selectors={},
 ):
     if len(grafana_additional_dashboards_data) == 0:
         return grafana_dashboards_artifacts_name
@@ -220,6 +239,8 @@ def merge_dashboards_artifacts(
         store=[
             GRAFANA_ADDITIONAL_DASHBOARDS_MERGED_STORED_PATH_FORMAT,
         ],
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
 
     return result.files_artifacts[0]

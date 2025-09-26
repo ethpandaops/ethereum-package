@@ -16,11 +16,12 @@ VERBOSITY_LEVELS = {
 
 
 def get_config(
+    plan,
     participant,
     el_cl_genesis_data,
     image,
     global_log_level,
-    beacon_http_url,
+    beacon_http_urls,
     cl_context,
     el_context,
     full_name,
@@ -31,6 +32,7 @@ def get_config(
     network_params,
     port_publisher,
     vc_index,
+    extra_files_artifacts,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
@@ -55,7 +57,7 @@ def get_config(
         "--secrets-dir=" + validator_secrets_dirpath,
         # The node won't have a slashing protection database and will fail to start otherwise
         "--init-slashing-protection",
-        "--beacon-nodes=" + beacon_http_url,
+        "--beacon-nodes=" + ",".join(beacon_http_urls),
         # "--enable-doppelganger-protection", // Disabled to not have to wait 2 epochs before validator can start
         # burn address - If unset, the validator will scream in its logs
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
@@ -65,7 +67,6 @@ def get_config(
         "--metrics-allow-origin=*",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ PROMETHEUS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + full_name,
     ]
 
     keymanager_api_cmd = [
@@ -114,6 +115,13 @@ def get_config(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.vc_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     config_args = {
         "image": image,
         "ports": ports,
@@ -126,7 +134,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=participant.vc_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
