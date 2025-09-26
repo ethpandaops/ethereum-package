@@ -1,6 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 POSTGRES_IMAGE = "library/postgres:alpine"
 
@@ -9,6 +10,23 @@ SERVICE_NAME_FRONTEND = "blockscout-frontend"
 HTTP_PORT_NUMBER = 4000
 HTTP_PORT_NUMBER_VERIF = 8050
 HTTP_PORT_NUMBER_FRONTEND = 3000
+
+
+def get_api_host(blockscout_service, port_publisher):
+    if port_publisher.additional_services_enabled:
+        return port_publisher.additional_services_nat_exit_ip
+    return blockscout_service.ip_address
+
+
+def get_api_port(blockscout_service, port_publisher):
+    if port_publisher.additional_services_enabled:
+        public_ports = shared_utils.get_public_ports_for_component(
+            "additional_services", port_publisher, 0
+        )
+        return public_ports[0]  # First port for the API
+    return blockscout_service.ports["http"].number
+
+
 BLOCKSCOUT_MIN_CPU = 100
 BLOCKSCOUT_MAX_CPU = 1000
 BLOCKSCOUT_MIN_MEMORY = 1024
@@ -49,12 +67,14 @@ def launch_blockscout(
     el_contexts,
     persistent,
     global_node_selectors,
+    global_tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
     blockscout_params,
     network_params,
 ):
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     postgres_output = postgres.run(
         plan,
         service_name="{}-postgres".format(SERVICE_NAME_BLOCKSCOUT),
@@ -63,6 +83,7 @@ def launch_blockscout(
         persistent=persistent,
         node_selectors=global_node_selectors,
         image=shared_utils.docker_cache_image_calc(docker_cache_params, POSTGRES_IMAGE),
+        tolerations=tolerations,
     )
 
     el_context = el_contexts[0]
@@ -73,6 +94,7 @@ def launch_blockscout(
 
     config_verif = get_config_verif(
         global_node_selectors,
+        tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -90,6 +112,7 @@ def launch_blockscout(
         verif_url,
         el_client_name,
         global_node_selectors,
+        tolerations,
         port_publisher,
         additional_service_index,
         docker_cache_params,
@@ -109,7 +132,9 @@ def launch_blockscout(
         blockscout_params,
         network_params,
         global_node_selectors,
+        tolerations,
         blockscout_service,
+        port_publisher,
     )
     plan.add_service(SERVICE_NAME_FRONTEND, config_frontend)
     return blockscout_url
@@ -117,6 +142,7 @@ def launch_blockscout(
 
 def get_config_verif(
     node_selectors,
+    tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -146,6 +172,7 @@ def get_config_verif(
         min_memory=BLOCKSCOUT_VERIF_MIN_MEMORY,
         max_memory=BLOCKSCOUT_VERIF_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )
 
 
@@ -155,6 +182,7 @@ def get_config_backend(
     verif_url,
     el_client_name,
     node_selectors,
+    tolerations,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -203,7 +231,6 @@ def get_config_backend(
             "ECTO_USE_SSL": "false",
             "NETWORK": "Kurtosis",
             "SUBNETWORK": "Kurtosis",
-            "API_V2_ENABLED": "true",
             "PORT": "{}".format(HTTP_PORT_NUMBER),
             "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
         },
@@ -212,6 +239,7 @@ def get_config_backend(
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )
 
 
@@ -222,7 +250,9 @@ def get_config_frontend(
     blockscout_params,
     network_params,
     node_selectors,
+    tolerations,
     blockscout_service,
+    port_publisher,
 ):
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
@@ -238,9 +268,9 @@ def get_config_frontend(
             "NEXT_PUBLIC_NETWORK_NAME": "Kurtosis",
             "NEXT_PUBLIC_NETWORK_ID": network_params.network_id,
             "NEXT_PUBLIC_NETWORK_RPC_URL": el_client_rpc_url,
-            "NEXT_PUBLIC_API_HOST": blockscout_service.ip_address
+            "NEXT_PUBLIC_API_HOST": get_api_host(blockscout_service, port_publisher)
             + ":"
-            + str(blockscout_service.ports["http"].number),
+            + str(get_api_port(blockscout_service, port_publisher)),
             "NEXT_PUBLIC_AD_BANNER_PROVIDER": "none",
             "NEXT_PUBLIC_AD_TEXT_PROVIDER": "none",
             "NEXT_PUBLIC_IS_TESTNET": "true",
@@ -260,4 +290,5 @@ def get_config_frontend(
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )

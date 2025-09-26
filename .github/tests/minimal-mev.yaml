@@ -7,10 +7,13 @@ participants:
     cl_type: nimbus
   - el_type: besu
     cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
   - el_type: reth
     cl_type: lodestar
   - el_type: geth
     cl_type: grandine
+  - el_type: ethrex
+    cl_type: lodestar
 network_params:
   preset: minimal
   electra_fork_epoch: 1
@@ -24,6 +27,6 @@ mev_type: flashbots
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
   mev_boost_image: ethpandaops/mev-boost:develop
-  mev_builder_cl_image: sigp/lighthouse:v7.0.0
+  mev_builder_cl_image: ethpandaops/lighthouse:unstable
   mev_builder_image: ethpandaops/reth-rbuilder:develop
   mev_builder_subsidy: 1

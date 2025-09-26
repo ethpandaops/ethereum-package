@@ -4,7 +4,7 @@ el_cl_genesis_data = import_module(
 )
 
 
-def launch(plan, network, repo):
+def launch(plan, network, repo, global_tolerations=[], global_node_selectors={}):
     # We are running a devnet
     url = shared_utils.calculate_devnet_url(network, repo)
     el_cl_genesis_uuid = plan.upload_files(
@@ -17,6 +17,8 @@ def launch(plan, network, repo):
         run="mkdir -p /network-configs/ && mv /opt/* /network-configs/",
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
         files={"/opt": el_cl_genesis_uuid},
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
     )
     genesis_validators_root = read_file(url + "/genesis_validators_root.txt")
 

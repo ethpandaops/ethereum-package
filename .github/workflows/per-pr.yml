@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/docker-login
         with:
           username: ethpandaops
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/docker-login
         with:
           username: ethpandaops
@@ -51,10 +51,10 @@ jobs:
           kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
 
   lint:
-    runs-on: self-hosted-ghr-size-s-x64
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
       - name: Kurtosis Lint
@@ -65,7 +65,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: ./.github/actions/docker-login
         with:
           username: ethpandaops
@@ -76,11 +76,13 @@ jobs:
           ethereum_package_url: "."
           ethereum_package_branch: ""
           ethereum_package_args: .github/tests/mix-assert.yaml
+
+
   #check_optimism_package:
   #  runs-on: ubuntu-latest
   #  steps:
-  #    - name: Checkout Repository
-  #      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  #    - name: Check out Repository
+  #      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
   #    - name: Setup Kurtosis
   #      uses: ./.github/actions/kurtosis-install
   #    - name: Run L1

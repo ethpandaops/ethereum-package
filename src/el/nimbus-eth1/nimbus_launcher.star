@@ -39,11 +39,8 @@ def launch(
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
@@ -53,40 +50,23 @@ def launch(
         service_name,
         existing_el_clients,
         cl_client_name,
-        log_level,
+        global_log_level,
         persistent,
         tolerations,
         node_selectors,
         port_publisher,
         participant_index,
         network_params,
+        extra_files_artifacts,
     )
 
     service = plan.add_service(service_name, config)
 
-    enode = el_admin_node_info.get_enode_for_node(
-        plan, service_name, constants.WS_RPC_PORT_ID
-    )
-
-    metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    nimbus_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metric_url
-    )
-
-    http_url = "http://{0}:{1}".format(service.ip_address, WS_RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_RPC_PORT_NUM)
-
-    return el_context.new_el_context(
-        client_name="nimbus",
-        enode=enode,
-        ip_addr=service.ip_address,
-        rpc_port_num=WS_RPC_PORT_NUM,
-        ws_port_num=WS_RPC_PORT_NUM,
-        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
-        rpc_http_url=http_url,
-        ws_url=ws_url,
-        service_name=service_name,
-        el_metrics_info=[nimbus_metrics_info],
+    return get_el_context(
+        plan,
+        service_name,
+        service,
+        launcher,
     )
 
 
@@ -97,14 +77,19 @@ def get_config(
     service_name,
     existing_el_clients,
     cl_client_name,
-    log_level,
+    global_log_level,
     persistent,
     tolerations,
     node_selectors,
     port_publisher,
     participant_index,
     network_params,
+    extra_files_artifacts,
 ):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     public_ports = {}
     public_ports_for_component = None
     if port_publisher.el_enabled:
@@ -148,9 +133,9 @@ def get_config(
         "--http-port={0}".format(WS_RPC_PORT_NUM),
         "--http-address=0.0.0.0",
         "--rpc",
-        "--rpc-api=eth,debug",
+        "--rpc-api=admin,eth,debug",
         "--ws",
-        "--ws-api=eth,debug",
+        "--ws-api=admin,eth,debug",
         "--engine-api",
         "--engine-api-address=0.0.0.0",
         "--engine-api-port={0}".format(ENGINE_RPC_PORT_NUM),
@@ -158,7 +143,7 @@ def get_config(
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(METRICS_PORT_NUM),
-        "--nat=extip:{0}".format(port_publisher.nat_exit_ip),
+        "--nat=extip:{0}".format(port_publisher.el_nat_exit_ip),
         "--tcp-port={0}".format(discovery_port_tcp),
         "--udp-port={0}".format(discovery_port_udp),
     ]
@@ -168,7 +153,7 @@ def get_config(
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
-            "--custom-network="
+            "--network="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.json"
         )
@@ -221,6 +206,14 @@ def get_config(
                 constants.EL_TYPE.nimbus + "_volume_size"
             ],
         )
+
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.el_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,
@@ -235,7 +228,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels,
+            extra_labels=participant.el_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
@@ -251,6 +245,39 @@ def get_config(
     if participant.el_max_mem > 0:
         config_args["max_memory"] = participant.el_max_mem
     return ServiceConfig(**config_args)
+
+
+# makes request to [service_name] for enode and returns a full el_context
+def get_el_context(
+    plan,
+    service_name,
+    service,
+    launcher,
+):
+    enode = el_admin_node_info.get_enode_for_node(
+        plan, service_name, constants.WS_RPC_PORT_ID
+    )
+
+    metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    nimbus_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, METRICS_PATH, metric_url
+    )
+
+    http_url = "http://{0}:{1}".format(service.ip_address, WS_RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_RPC_PORT_NUM)
+
+    return el_context.new_el_context(
+        client_name="nimbus",
+        enode=enode,
+        ip_addr=service.ip_address,
+        rpc_port_num=WS_RPC_PORT_NUM,
+        ws_port_num=WS_RPC_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        service_name=service_name,
+        el_metrics_info=[nimbus_metrics_info],
+    )
 
 
 def new_nimbus_launcher(el_cl_genesis_data, jwt_file):
