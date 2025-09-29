@@ -76,13 +76,13 @@ def launch_tempo(
     # Return connection info for other services
     return struct(
         service_name=SERVICE_NAME,
-        ip_addr=service.ip_address,
+        ip_addr=service.name,
         http_port_num=HTTP_PORT_NUMBER,
         grpc_port_num=GRPC_PORT_NUMBER,
         otlp_grpc_port_num=OTLP_GRPC_PORT_NUMBER,
         otlp_http_port_num=OTLP_HTTP_PORT_NUMBER,
-        http_url="http://{}:{}".format(service.ip_address, HTTP_PORT_NUMBER),
-        grpc_url="{}:{}".format(service.ip_address, GRPC_PORT_NUMBER),
+        http_url="http://{}:{}".format(service.name, HTTP_PORT_NUMBER),
+        grpc_url="{}:{}".format(service.name, GRPC_PORT_NUMBER),
         otlp_grpc_url="{}:{}".format(SERVICE_NAME, OTLP_GRPC_PORT_NUMBER),
         otlp_http_url="http://{}:{}".format(SERVICE_NAME, OTLP_HTTP_PORT_NUMBER),
     )
