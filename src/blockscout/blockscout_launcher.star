@@ -15,7 +15,7 @@ HTTP_PORT_NUMBER_FRONTEND = 3000
 def get_api_host(blockscout_service, port_publisher):
     if port_publisher.additional_services_enabled:
         return port_publisher.additional_services_nat_exit_ip
-    return blockscout_service.ip_address
+    return blockscout_service.name
 
 
 def get_api_port(blockscout_service, port_publisher):
