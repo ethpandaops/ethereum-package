@@ -53,14 +53,6 @@ VERIF_USED_PORTS = {
     )
 }
 
-FRONTEND_USED_PORTS = {
-    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
-        HTTP_PORT_NUMBER_FRONTEND,
-        shared_utils.TCP_PROTOCOL,
-        shared_utils.HTTP_APPLICATION_PROTOCOL,
-    )
-}
-
 
 def launch_blockscout(
     plan,
@@ -135,6 +127,7 @@ def launch_blockscout(
         tolerations,
         blockscout_service,
         port_publisher,
+        additional_service_index,
     )
     plan.add_service(SERVICE_NAME_FRONTEND, config_frontend)
     return blockscout_url
@@ -253,14 +246,39 @@ def get_config_frontend(
     tolerations,
     blockscout_service,
     port_publisher,
+    additional_service_index,
 ):
+    # Determine the port to use
+    frontend_port = HTTP_PORT_NUMBER_FRONTEND
+    if port_publisher.additional_services_enabled:
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "additional_services", port_publisher, additional_service_index
+        )
+        frontend_port = public_ports_for_component[2]
+
+    # Create port specs with the determined port
+    frontend_ports = {
+        constants.HTTP_PORT_ID: shared_utils.new_port_spec(
+            frontend_port,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+        )
+    }
+
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        2,
+    )
+
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params,
             blockscout_params.frontend_image,
         ),
-        ports=FRONTEND_USED_PORTS,
-        public_ports=FRONTEND_USED_PORTS,
+        ports=frontend_ports,
+        public_ports=public_ports,
         env_vars={
             "HOSTNAME": "0.0.0.0",
             "NEXT_PUBLIC_API_PROTOCOL": "http",
@@ -281,9 +299,9 @@ def get_config_frontend(
             # "NEXT_PUBLIC_APP_HOST": "0.0.0.0",
             "NEXT_PUBLIC_APP_PROTOCOL": "http",
             "NEXT_PUBLIC_APP_HOST": "127.0.0.1",
-            "NEXT_PUBLIC_APP_PORT": str(HTTP_PORT_NUMBER_FRONTEND),
+            "NEXT_PUBLIC_APP_PORT": str(frontend_port),
             "NEXT_PUBLIC_USE_NEXT_JS_PROXY": "true",
-            "PORT": str(HTTP_PORT_NUMBER_FRONTEND),
+            "PORT": str(frontend_port),
         },
         min_cpu=BLOCKSCOUT_MIN_CPU,
         max_cpu=BLOCKSCOUT_MAX_CPU,
