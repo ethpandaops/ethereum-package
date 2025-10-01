@@ -1143,6 +1143,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1223,14 +1224,14 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "(12 * rate(beacon_inclusion_list_transactions_sent_to_payload_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
+          "expr": "(12 * rate(beacon_inclusion_list_transactions_notify_new_payload_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
           "interval": "",
           "legendFormat": "{{job}} {{source}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Total number of inclusion list transactions sent to new payload",
+      "title": "Total number of inclusion list transactions sent when notifying new payload",
       "type": "timeseries"
     },
     {
@@ -1238,6 +1239,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1318,13 +1320,13 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "(12 * rate(beacon_inclusion_list_transactions_sent_to_prepare_execution_payload_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
+          "expr": "sum by (job) (increase(beacon_inclusion_list_transactions_prepare_execution_payload_total{client_name=~\"$client\", job=~\"$job\"}[$__interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Total number of inclusion list transactions sent to prepare execution payload",
+      "title": "Total number of inclusion list transactions sent when preparing execution payload",
       "type": "timeseries"
     },
     {
@@ -1631,5 +1633,5 @@
   "timezone": "browser",
   "title": "FOCIL metrics",
   "uid": "aebclixwkbke8a",
-  "version": 2
+  "version": 3
 }
