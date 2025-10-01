@@ -1115,7 +1115,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by ($sum_by) (increase(beacon_inclusion_list_unsatisfied_blocks_total{client_name=~\"$client\", job=~\"$job\"}[$__interval]))",
+          "expr": "sum by ($sum_by) (12 * rate(beacon_inclusion_list_unsatisfied_blocks_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
           "interval": "",
           "legendFormat": "{{job}} {{source}}",
           "range": true,
@@ -1319,11 +1319,17 @@
       "pluginVersion": "12.2.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "editorMode": "code",
-          "expr": "sum by (job) (increase(beacon_inclusion_list_transactions_prepare_execution_payload_total{client_name=~\"$client\", job=~\"$job\"}[$__interval]))",
-          "legendFormat": "__auto",
+          "expr": "(12 * rate(beacon_inclusion_list_transactions_prepare_execution_payload_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{job}} {{source}}",
           "range": true,
-          "refId": "A"
+          "refId": "B"
         }
       ],
       "title": "Total number of inclusion list transactions sent when preparing execution payload",
@@ -1810,7 +1816,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by ($sum_by) (increase(execution_inclusion_list_unsatisfied_blocks_total{client_name=~\"$client\", job=~\"$job\"}[$__interval]))",
+          "expr": "sum by ($sum_by) (12 * rate(execution_inclusion_list_unsatisfied_blocks_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -2210,5 +2216,5 @@
   "timezone": "browser",
   "title": "FOCIL metrics",
   "uid": "aebclixwkbke8a",
-  "version": 3
+  "version": 4
 }
