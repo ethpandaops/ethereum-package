@@ -126,7 +126,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
         description="Generating keystores",
         recipe=ExecRecipe(command=["sh", "-c", command_str]),
     )
-    # plan.verify(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+    plan.verify(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
     # Store outputs into files artifacts
     keystore_files = []
@@ -183,11 +183,11 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
         description="Storing prysm password in a file",
         recipe=ExecRecipe(command=write_prysm_password_file_cmd),
     )
-    # plan.verify(
-    #     write_prysm_password_file_cmd_result["code"],
-    #     "==",
-    #     SUCCESSFUL_EXEC_CMD_EXIT_CODE,
-    # )
+    plan.verify(
+        write_prysm_password_file_cmd_result["code"],
+        "==",
+        SUCCESSFUL_EXEC_CMD_EXIT_CODE,
+    )
 
     prysm_password_artifact_name = plan.store_service_files(
         service_name, 
