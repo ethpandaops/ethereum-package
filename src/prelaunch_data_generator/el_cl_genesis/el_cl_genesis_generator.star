@@ -99,9 +99,7 @@ def generate_el_cl_genesis_data(
         description="Reading osaka time from genesis",
         run="jq '.config.osakaTime' /data/genesis.json | tr -d '\n'",
         files={"/data": genesis.files_artifacts[0]},
-        tolerations=shared_utils.get_tolerations(
-            global_tolerations=global_tolerations
-        ),
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
 
@@ -110,9 +108,7 @@ def generate_el_cl_genesis_data(
         description="Reading bpo 1 time from genesis",
         run="jq '.config.bpo1Time' /data/genesis.json | tr -d '\n'",
         files={"/data": genesis.files_artifacts[0]},
-        tolerations=shared_utils.get_tolerations(
-            global_tolerations=global_tolerations
-        ),
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
 
@@ -121,9 +117,7 @@ def generate_el_cl_genesis_data(
         description="Reading bpo 2 time from genesis",
         run="jq '.config.bpo2Time' /data/genesis.json | tr -d '\n'",
         files={"/data": genesis.files_artifacts[0]},
-        tolerations=shared_utils.get_tolerations(
-            global_tolerations=global_tolerations
-        ),
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
 
