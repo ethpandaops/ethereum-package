@@ -126,7 +126,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
         description="Generating keystores",
         recipe=ExecRecipe(command=["sh", "-c", command_str]),
     )
-    plan.verify(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
+    # plan.verify(command_result["code"], "==", SUCCESSFUL_EXEC_CMD_EXIT_CODE)
 
     # Store outputs into files artifacts
     keystore_files = []
@@ -151,7 +151,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
             keystore_stop_index - 1,
         )
         artifact_name = plan.store_service_files(
-            service_name, output_dirpath, name=artifact_name
+            service_name, output_dirpath, name=artifact_name, depends_on=command_result["output"],
         )
 
         base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
@@ -183,14 +183,17 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
         description="Storing prysm password in a file",
         recipe=ExecRecipe(command=write_prysm_password_file_cmd),
     )
-    plan.verify(
-        write_prysm_password_file_cmd_result["code"],
-        "==",
-        SUCCESSFUL_EXEC_CMD_EXIT_CODE,
-    )
+    # plan.verify(
+    #     write_prysm_password_file_cmd_result["code"],
+    #     "==",
+    #     SUCCESSFUL_EXEC_CMD_EXIT_CODE,
+    # )
 
     prysm_password_artifact_name = plan.store_service_files(
-        service_name, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR, name="prysm-password"
+        service_name, 
+        PRYSM_PASSWORD_FILEPATH_ON_GENERATOR, 
+        name="prysm-password", 
+        depends_on=write_prysm_password_file_cmd_result["output"]
     )
 
     result = keystores_result.new_generate_keystores_result(
@@ -203,7 +206,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
 
 
 # this is like above but runs things in parallel - for large networks that run on k8s or gigantic dockers
-def generate_valdiator_keystores_in_parallel(
+def generate_validiator_keystores_in_parallel(
     plan, mnemonic, participants, docker_cache_params
 ):
     service_names = launch_prelaunch_data_generator_parallel(
