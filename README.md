@@ -786,6 +786,10 @@ network_params:
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
+  # Minimum number of epochs for block requests
+  # Default to 33024
+  min_epochs_for_block_requests: 33024
+
 # Global parameters for the network
 
 # By default includes
