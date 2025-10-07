@@ -191,7 +191,7 @@ GENESIS_TIME = {
     "mainnet": 1606824023,
     "sepolia": 1655733600,
     "holesky": 1695902400,
-    "hoodi": 1741971600,
+    "hoodi": 1742213400,
 }
 
 VOLUME_SIZE = {

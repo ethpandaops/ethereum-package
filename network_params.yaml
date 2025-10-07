@@ -141,7 +141,7 @@ network_params:
 
 additional_services: []
 dora_params:
-  image: ""
+  image: "ethpandaops/dora:latest"
 tx_fuzz_params:
   tx_fuzz_extra_args: []
 spamoor_params:
@@ -164,7 +164,7 @@ grafana_params:
   min_mem: 128
   max_mem: 2048
 assertoor_params:
-  image: ""
+  image: "ethpandaops/assertoor:latest"
   run_stability_check: false
   run_block_proposal_check: false
   run_transaction_test: false
