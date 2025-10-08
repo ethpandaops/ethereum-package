@@ -314,6 +314,4 @@ def new_erigon_launcher(el_cl_genesis_data, jwt_file, networkid):
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         networkid=networkid,
-        osaka_time=el_cl_genesis_data.osaka_time,
-        osaka_enabled=el_cl_genesis_data.osaka_enabled,
     )
