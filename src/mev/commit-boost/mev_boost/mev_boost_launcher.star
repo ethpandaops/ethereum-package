@@ -110,7 +110,6 @@ def get_config(
         cmd=[],
         env_vars={
             "CB_CONFIG": config_file_path,
-            "RUST_LOG": "debug",
         },
         files={
             CB_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_file,

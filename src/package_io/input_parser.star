@@ -1680,8 +1680,14 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         index_str = shared_utils.zfill_custom(
             index + 1, len(str(len(parsed_arguments_dict["participants"])))
         )
+
+        if mev_type == constants.COMMIT_BOOST_MEV_TYPE:
+            prefix = constants.COMMIT_BOOST_SERVICE_NAME_PREFIX
+        else:
+            prefix = constants.MEV_BOOST_SERVICE_NAME_PREFIX
+
         mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
-            constants.MEV_BOOST_SERVICE_NAME_PREFIX,
+            prefix,
             index_str,
             participant["cl_type"],
             participant["el_type"],
