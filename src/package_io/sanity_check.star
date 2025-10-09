@@ -198,6 +198,7 @@ SUBCATEGORY_PARAMS = {
         "preregistered_validator_keys_mnemonic",
         "preregistered_validator_count",
         "genesis_delay",
+        "genesis_time",
         "genesis_gaslimit",
         "max_per_epoch_activation_churn_limit",
         "churn_limit_quotient",
