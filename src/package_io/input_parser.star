@@ -308,10 +308,20 @@ def input_parser(plan, input_args):
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
+        num_perfect_peerdas_participants = 0
         for participant in result["participants"]:
+            num_perfect_peerdas_participants += 1
             if participant.get("supernode", False):
                 has_supernodes = True
                 break
+
+        if result["network_params"]["perfect_peerdas_enabled"]:
+            if num_perfect_peerdas_participants < 16:
+                fail(
+                    "perfect_peerdas_enabled is true (this is a unique test if you don't know what it does, consider removing it) but the number of participants ({0}) is less than 16. Please set the number of participants to at least 16.".format(
+                        str(num_perfect_peerdas_participants)
+                    )
+                )
 
         if (
             not has_supernodes
