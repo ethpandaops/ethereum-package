@@ -82,6 +82,7 @@ network_params:
     very lucky have athlete"
   preregistered_validator_count: 0
   genesis_delay: 20
+  genesis_time: 0
   genesis_gaslimit: 60000000
   max_per_epoch_activation_churn_limit: 8
   churn_limit_quotient: 65536
