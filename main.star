@@ -230,7 +230,7 @@ def run(plan, args={}):
         genesis_validators_root,
         el_cl_data_files_artifact_uuid,
         network_id,
-        osaka_time,
+        shadowfork_times,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults,
@@ -803,7 +803,7 @@ def run(plan, args={}):
                 args_with_right_defaults.network_params,
                 args_with_right_defaults.port_publisher,
                 index,
-                osaka_time,
+                shadowfork_times,
             )
         else:
             fail("Invalid additional service %s" % (additional_service))

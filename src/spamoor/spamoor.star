@@ -33,7 +33,7 @@ def launch_spamoor(
     network_params,
     port_publisher,
     additional_service_index,
-    osaka_time,
+    shadowfork_times,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -43,10 +43,10 @@ def launch_spamoor(
         if (
             "peerdas" in network_params.network
             or network_params.fulu_fork_epoch != constants.FAR_FUTURE_EPOCH
-        ) and "blob" in spammer["scenario"]:
+        ) and "blob" in spammer["scenario"] and "osaka_time" in shadowfork_times:
             if "config" not in spammer:
                 spammer["config"] = {}
-            spammer["config"]["fulu_activation"] = osaka_time
+            spammer["config"]["fulu_activation"] = shadowfork_times["osaka_time"]
 
         spammers.append(spammer)
 

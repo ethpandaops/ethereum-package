@@ -603,5 +603,5 @@ def launch_participant_network(
         el_cl_data.genesis_validators_root,
         el_cl_data.files_artifact_uuid,
         network_id,
-        el_cl_data.shadowfork_times["osaka_time"],
+        el_cl_data.shadowfork_times,
     )
