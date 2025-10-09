@@ -308,10 +308,20 @@ def input_parser(plan, input_args):
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
+        num_perfect_peerdas_participants = 0
         for participant in result["participants"]:
+            num_perfect_peerdas_participants += 1
             if participant.get("supernode", False):
                 has_supernodes = True
                 break
+
+        if result["network_params"]["perfect_peerdas_enabled"]:
+            if num_perfect_peerdas_participants < 16:
+                fail(
+                    "perfect_peerdas_enabled is true (this is a unique test if you don't know what it does, consider removing it) but the number of participants ({0}) is less than 16. Please set the number of participants to at least 16.".format(
+                        str(num_perfect_peerdas_participants)
+                    )
+                )
 
         if (
             not has_supernodes
@@ -418,6 +428,7 @@ def input_parser(plan, input_args):
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
             slot_duration_ms=result["network_params"]["slot_duration_ms"],
             genesis_delay=result["network_params"]["genesis_delay"],
+            genesis_time=result["network_params"]["genesis_time"],
             genesis_gaslimit=result["network_params"]["genesis_gaslimit"],
             max_per_epoch_activation_churn_limit=result["network_params"][
                 "max_per_epoch_activation_churn_limit"
@@ -1151,6 +1162,7 @@ def default_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
+        "genesis_time": 0,
         "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 8,
         "churn_limit_quotient": 65536,
@@ -1232,6 +1244,7 @@ def default_minimal_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
+        "genesis_time": 0,
         "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 4,
         "churn_limit_quotient": 32,

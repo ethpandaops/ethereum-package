@@ -580,6 +580,12 @@ network_params:
   # How long you want the network to wait before starting up
   genesis_delay: 20
 
+  # Unix timestamp for genesis. If specified (non-zero), this overrides genesis_delay.
+  # When set to 0 (default), the genesis time is automatically calculated based on current time and genesis_delay.
+  # Use this field to set a specific genesis time for the network.
+  # Defaults to 0
+  genesis_time: 0
+
   # The gas limit of the network set at genesis
   # Defaults to 60000000
 
