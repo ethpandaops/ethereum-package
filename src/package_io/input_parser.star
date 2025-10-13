@@ -118,9 +118,8 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
-    result["mempool_bridge_params"] = get_default_mempool_bridge_params(
-        result["network_params"]
-    )
+    # Only initialize mempool_bridge_params if service is enabled (default empty)
+    result["mempool_bridge_params"] = {"source_enodes": []}
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -1626,27 +1625,12 @@ def get_default_custom_flood_params():
     return {"interval_between_transactions": 1}
 
 
-def get_default_mempool_bridge_params(network_params):
-    # mempool-bridge uses ENR or enode records for P2P connections, not HTTP RPC
-    # For shadowforks, point to eth-clients repo enodes
-    # Users can override with specific enodes if needed
-    source_enodes = []
-
-    if constants.NETWORK_NAME.shadowfork in network_params["network"]:
-        shadow_base = network_params["network"].split("-shadowfork")[0]
-        # Provide reference URLs where users can find enodes
-        # These need to be fetched externally and provided as source_enodes
-        enode_refs = {
-            "mainnet": "https://raw.githubusercontent.com/eth-clients/mainnet/refs/heads/main/metadata/enodes.yaml",
-            "sepolia": "https://raw.githubusercontent.com/eth-clients/sepolia/refs/heads/main/metadata/enodes.yaml",
-            "hoodi": "https://raw.githubusercontent.com/eth-clients/hoodi/refs/heads/main/metadata/enodes.yaml",
-            "holesky": "https://raw.githubusercontent.com/eth-clients/holesky/refs/heads/main/metadata/enodes.yaml",
-        }
-        # Default to empty, users should provide via mempool_bridge_params.source_enodes
-
-    return {
-        "source_enodes": source_enodes,
-    }
+# mempool_bridge_params default is {"source_enodes": []}
+# For shadowforks, users should provide enodes from eth-clients repos:
+# - mainnet: https://github.com/eth-clients/mainnet/blob/main/metadata/enodes.yaml
+# - sepolia: https://github.com/eth-clients/sepolia/blob/main/metadata/enodes.yaml
+# - hoodi: https://github.com/eth-clients/hoodi/blob/main/metadata/enodes.yaml
+# - holesky: https://github.com/eth-clients/holesky/blob/main/metadata/enodes.yaml
 
 
 def get_port_publisher_params(parameter_type, input_args=None):
