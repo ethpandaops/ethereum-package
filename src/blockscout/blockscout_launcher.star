@@ -228,6 +228,7 @@ def get_config_backend(
 
     if shadowfork_block_height != "":
         env_vars["INDEXER_START_BLOCK"] = shadowfork_block_height
+        env_vars["TRACE_FIRST_BLOCK"] = shadowfork_block_height
 
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
