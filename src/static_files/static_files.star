@@ -37,6 +37,9 @@ DUGTRIO_CONFIG_TEMPLATE_FILEPATH = (
 BLUTGANG_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/blutgang-config/config.toml.tmpl"
 )
+ERPC_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/erpc-config/erpc.yaml.tmpl"
+)
 FORKY_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/forky-config/config.yaml.tmpl"
 TRACOOR_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/tracoor-config/config.yaml.tmpl"
