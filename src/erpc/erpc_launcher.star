@@ -135,7 +135,7 @@ def get_config(
         ready_conditions=ReadyCondition(
             recipe=PostHttpRequestRecipe(
                 port_id="http",
-                endpoint="/main/evm/" + str(network_params.network_id),
+                endpoint="/",
                 content_type="application/json",
                 body='{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}',
             ),
