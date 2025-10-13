@@ -1561,13 +1561,16 @@ def get_default_xatu_sentry_params():
         "xatu_server_tls": False,
         "beacon_subscriptions": [
             "attestation",
+            "single_attestation",
             "block",
+            "block_gossip",
             "chain_reorg",
             "finalized_checkpoint",
             "head",
             "voluntary_exit",
             "contribution_and_proof",
             "blob_sidecar",
+            "data_column_sidecar",
         ],
     }
 
