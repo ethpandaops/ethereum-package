@@ -669,7 +669,7 @@ def input_parser(plan, input_args):
             extra_args=result["spamoor_params"]["extra_args"],
         ),
         mempool_bridge_params=struct(
-            source_url=result["mempool_bridge_params"]["source_url"],
+            source_enodes=result["mempool_bridge_params"]["source_enodes"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -1628,12 +1628,24 @@ def get_default_custom_flood_params():
 
 def get_default_mempool_bridge_params(network_params):
     # mempool-bridge uses ENR or enode records for P2P connections, not HTTP RPC
-    # For shadowforks, users need to provide the source network's enode/enr manually
-    # Example: enode://abc123@bootnode.sepolia.ethpandaops.io:30303
-    source_url = ""
+    # For shadowforks, point to eth-clients repo enodes
+    # Users can override with specific enodes if needed
+    source_enodes = []
+
+    if constants.NETWORK_NAME.shadowfork in network_params["network"]:
+        shadow_base = network_params["network"].split("-shadowfork")[0]
+        # Provide reference URLs where users can find enodes
+        # These need to be fetched externally and provided as source_enodes
+        enode_refs = {
+            "mainnet": "https://raw.githubusercontent.com/eth-clients/mainnet/refs/heads/main/metadata/enodes.yaml",
+            "sepolia": "https://raw.githubusercontent.com/eth-clients/sepolia/refs/heads/main/metadata/enodes.yaml",
+            "hoodi": "https://raw.githubusercontent.com/eth-clients/hoodi/refs/heads/main/metadata/enodes.yaml",
+            "holesky": "https://raw.githubusercontent.com/eth-clients/holesky/refs/heads/main/metadata/enodes.yaml",
+        }
+        # Default to empty, users should provide via mempool_bridge_params.source_enodes
 
     return {
-        "source_url": source_url,
+        "source_enodes": source_enodes,
     }
 
 

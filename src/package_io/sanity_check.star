@@ -362,7 +362,7 @@ SUBCATEGORY_PARAMS = {
         "spammers",
     ],
     "mempool_bridge_params": [
-        "source_url",
+        "source_enodes",
     ],
     "ethereum_genesis_generator_params": [
         "image",

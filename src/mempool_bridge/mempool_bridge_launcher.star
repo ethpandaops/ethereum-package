@@ -39,8 +39,10 @@ def launch_mempool_bridge(
     # Build source endpoints - either from params or use first node as source
     # Mempool-bridge uses ENR/enode for P2P connections, not HTTP RPC
     source_endpoints = []
-    if mempool_bridge_params.source_url:
-        source_endpoints.append(mempool_bridge_params.source_url)
+    if len(mempool_bridge_params.source_enodes) > 0:
+        # Use provided enodes
+        for enode in mempool_bridge_params.source_enodes:
+            source_endpoints.append(enode)
     elif len(all_el_contexts) > 0:
         # If no source specified, use first node as source for local testing
         first_context = all_el_contexts[0]
