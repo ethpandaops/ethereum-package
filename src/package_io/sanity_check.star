@@ -382,6 +382,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "blobscan",
     "dugtrio",
     "blutgang",
+    "erpc",
     "forky",
     "apache",
     "nginx",
