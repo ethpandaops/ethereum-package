@@ -1,0 +1,11 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    count: 2
+  - el_type: reth
+    cl_type: prysm
+    count: 1
+
+
+additional_services:
+  - erpc

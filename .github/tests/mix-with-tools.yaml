@@ -22,7 +22,7 @@ additional_services:
   - custom_flood
   - blobscan
   - dugtrio
-  - blutgang
+  - erpc
   - apache
   - tracoor
   - spamoor
