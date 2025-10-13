@@ -129,10 +129,24 @@ def generate_el_cl_genesis_data(
 
     plan.print("Shadowfork times: {0}".format(shadowfork_times))
 
+    shadowfork_block_height = ""
+    if latest_block != "":
+        block_height_result = plan.run_sh(
+            name="read-shadowfork-block-height",
+            description="Reading shadowfork block height",
+            run="cat /shadowfork/block_height.txt | tr -d '\n'",
+            files={"/shadowfork": latest_block},
+            tolerations=tolerations,
+            node_selectors=global_node_selectors,
+        )
+        shadowfork_block_height = block_height_result.output
+        plan.print("Shadowfork block height: {0}".format(shadowfork_block_height))
+
     result = el_cl_genesis_data.new_el_cl_genesis_data(
         genesis.files_artifacts[0],
         genesis_validators_root.output,
         shadowfork_times,
+        shadowfork_block_height,
     )
 
     return result
