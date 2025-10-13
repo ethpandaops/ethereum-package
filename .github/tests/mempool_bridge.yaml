@@ -8,13 +8,10 @@ additional_services:
 
 network_params:
   network: hoodi-shadowfork
-  shadowfork_block_height: 340000
+  #shadowfork_block_height: 340000
   withdrawal_type: "0x01"
   validator_balance: 1000000
   withdrawal_address: "0x4d1CB4eB7969f8806E2CaAc0cbbB71f88C8ec413"
 
-# No need to specify source_enodes - will be auto-fetched from:
-# https://raw.githubusercontent.com/eth-clients/hoodi/refs/heads/main/metadata/enodes.yaml
-
 persistent: true
-wait_for_finalization: false
+

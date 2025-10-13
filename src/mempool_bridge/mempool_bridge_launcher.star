@@ -57,8 +57,12 @@ def launch_mempool_bridge(
         # For shadowforks, fetch enodes from eth-clients repos
         shadow_base = network_params.network.split("-shadowfork")[0]
         if shadow_base in ENODE_URLS:
-            plan.print("Fetching enodes for {0} from eth-clients repo".format(shadow_base))
-            source_endpoints = fetch_enodes_from_url(plan, ENODE_URLS[shadow_base], all_el_contexts)
+            plan.print(
+                "Fetching enodes for {0} from eth-clients repo".format(shadow_base)
+            )
+            source_endpoints = fetch_enodes_from_url(
+                plan, ENODE_URLS[shadow_base], all_el_contexts
+            )
             plan.print("Fetched {0} enodes for source".format(len(source_endpoints)))
 
     if len(source_endpoints) == 0 and len(all_el_contexts) > 0:
@@ -180,7 +184,9 @@ def fetch_enodes_from_url(plan, url, el_contexts):
             command=[
                 "/bin/sh",
                 "-c",
-                'curl -s "{0}" | grep "^- enode:" | sed "s/^- //" | sed "s/ *#.*//"'.format(url),
+                'curl -s "{0}" | grep "^- enode:" | sed "s/^- //" | sed "s/ *#.*//"'.format(
+                    url
+                ),
             ]
         ),
     )
