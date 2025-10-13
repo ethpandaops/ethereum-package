@@ -168,37 +168,29 @@ def new_config_template_data(
 
 def fetch_enodes_from_url(plan, url, el_contexts):
     """
-    Fetch and parse enodes from a YAML file URL using curl.
-    Returns a list of enode strings.
+    Fetch enodes from eth-clients repo YAML file.
+    The shell command extracts and cleans enode lines in one pass.
     """
-    # Use first EL service to run curl command
     if len(el_contexts) == 0:
         return []
 
     first_el_service = el_contexts[0].service_name
 
-    # Use curl to fetch the YAML file
+    # Fetch YAML and extract enodes: curl -> grep enode lines -> strip prefix/comments
     curl_result = plan.exec(
         service_name=first_el_service,
         recipe=ExecRecipe(
             command=[
                 "/bin/sh",
                 "-c",
-                'curl -s "{0}" | grep "^- enode:" | sed "s/^- //" | sed "s/ *#.*//"'.format(
-                    url
-                ),
+                'curl -s "{0}" | grep "^- enode:" | sed "s/^- //" | sed "s/ *#.*//"'.format(url),
             ]
         ),
     )
 
-    # Parse the output to extract enodes
-    enodes = []
+    # Split output into list of enodes (one per line)
     output = curl_result["output"]
     if output:
-        lines = output.split("\n")
-        for line in lines:
-            line = line.strip()
-            if line and line.startswith("enode://"):
-                enodes.append(line)
+        return [line.strip() for line in output.split("\n") if line.strip()]
 
-    return enodes
+    return []
