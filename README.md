@@ -806,24 +806,25 @@ network_params:
 # - A light beacon chain explorer will be launched
 # - Default: []
 additional_services:
-  - assertoor
-  - broadcaster
-  - tx_fuzz
-  - custom_flood
-  - spamoor
-  - forkmon
-  - blockscout
-  - dora
-  - full_beaconchain_explorer
-  - prometheus
-  - grafana
-  - tempo
-  - blobscan
-  - dugtrio
-  - blutgang
-  - forky
   - apache
+  - assertoor
+  - blobscan
+  - blockscout
+  - blutgang
+  - broadcaster
+  - custom_flood
+  - dora
+  - dugtrio
+  - erpc
+  - forkmon
+  - forky
+  - full_beaconchain_explorer
+  - grafana
+  - prometheus
+  - spamoor
+  - tempo
   - tracoor
+  - tx_fuzz
 
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
 blockscout_params:

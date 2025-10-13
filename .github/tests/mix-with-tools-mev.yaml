@@ -21,7 +21,7 @@ additional_services:
   - blobscan
   - blockscout
   - dugtrio
-  - blutgang
+  - erpc
   - apache
   - tracoor
   - spamoor
