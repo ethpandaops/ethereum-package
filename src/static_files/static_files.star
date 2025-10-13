@@ -126,3 +126,7 @@ FLASHBOTS_RBUILDER_CONFIG_FILEPATH = (
 COMMIT_BOOST_CONFIG_FILEPATH = (
     STATIC_FILES_DIRPATH + "/mev/commit-boost/cb-config.toml.tmpl"
 )
+
+MEMPOOL_BRIDGE_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mempool-bridge-config/config.yaml.tmpl"
+)

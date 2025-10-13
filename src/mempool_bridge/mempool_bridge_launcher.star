@@ -1,0 +1,129 @@
+shared_utils = import_module("../shared_utils/shared_utils.star")
+constants = import_module("../package_io/constants.star")
+
+IMAGE_NAME = "ethpandaops/mempool-bridge:latest"
+SERVICE_NAME = "mempool-bridge"
+
+HTTP_PORT_NUMBER = 9090
+
+MEMPOOL_BRIDGE_CONFIG_FILENAME = "config.yaml"
+MEMPOOL_BRIDGE_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
+
+MIN_CPU = 100
+MAX_CPU = 1000
+MIN_MEMORY = 128
+MAX_MEMORY = 2048
+
+USED_PORTS = {
+    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
+        HTTP_PORT_NUMBER,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+    )
+}
+
+
+def launch_mempool_bridge(
+    plan,
+    config_template,
+    all_el_contexts,
+    global_node_selectors,
+    global_tolerations,
+    port_publisher,
+    additional_service_index,
+    docker_cache_params,
+):
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
+    all_execution_endpoints = []
+    for context in all_el_contexts:
+        endpoint_info = new_execution_endpoint_info(
+            "http://{0}:{1}".format(context.ip_addr, context.rpc_port_num)
+        )
+        all_execution_endpoints.append(endpoint_info)
+
+    template_data = new_config_template_data(
+        HTTP_PORT_NUMBER,
+        all_execution_endpoints,
+    )
+
+    template_and_data = shared_utils.new_template_and_data(
+        config_template, template_data
+    )
+    template_and_data_by_rel_dest_filepath = {}
+    template_and_data_by_rel_dest_filepath[
+        MEMPOOL_BRIDGE_CONFIG_FILENAME
+    ] = template_and_data
+
+    config_files_artifact_name = plan.render_templates(
+        template_and_data_by_rel_dest_filepath, "mempool-bridge-config"
+    )
+
+    config = get_config(
+        config_files_artifact_name,
+        global_node_selectors,
+        tolerations,
+        port_publisher,
+        additional_service_index,
+        docker_cache_params,
+    )
+
+    plan.add_service(SERVICE_NAME, config)
+
+
+def get_config(
+    config_files_artifact_name,
+    node_selectors,
+    tolerations,
+    port_publisher,
+    additional_service_index,
+    docker_cache_params,
+):
+    config_file_path = shared_utils.path_join(
+        MEMPOOL_BRIDGE_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
+        MEMPOOL_BRIDGE_CONFIG_FILENAME,
+    )
+
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        additional_service_index,
+        0,
+    )
+
+    return ServiceConfig(
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params,
+            IMAGE_NAME,
+        ),
+        ports=USED_PORTS,
+        public_ports=public_ports,
+        files={
+            MEMPOOL_BRIDGE_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+        },
+        cmd=[
+            "--config={0}".format(config_file_path),
+        ],
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
+        tolerations=tolerations,
+    )
+
+
+def new_config_template_data(
+    listen_port_num,
+    execution_endpoints,
+):
+    return {
+        "ListenPortNum": listen_port_num,
+        "ExecutionEndpoints": execution_endpoints,
+    }
+
+
+def new_execution_endpoint_info(execution_http_url):
+    return {
+        "URL": execution_http_url,
+    }

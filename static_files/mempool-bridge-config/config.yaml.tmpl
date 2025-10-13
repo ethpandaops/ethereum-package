@@ -1,0 +1,9 @@
+logging: "info"
+
+addr: ":{{ .ListenPortNum }}"
+
+nodes:
+{{- range $index, $endpoint := .ExecutionEndpoints }}
+  - name: "execution-{{ $index }}"
+    url: "{{ $endpoint.URL }}"
+{{- end }}
