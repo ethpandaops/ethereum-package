@@ -13,11 +13,8 @@ network_params:
   validator_balance: 1000000
   withdrawal_address: "0x4d1CB4eB7969f8806E2CaAc0cbbB71f88C8ec413"
 
-mempool_bridge_params:
-  source_enodes:
-    # From https://raw.githubusercontent.com/eth-clients/hoodi/refs/heads/main/metadata/enodes.yaml
-    - "enode://2112dd3839dd752813d4df7f40936f06829fc54c0e051a93967c26e5f5d27d99d886b57b4ffcc3c475e930ec9e79c56ef1dbb7d86ca5ee83a9d2ccf36e5c240c@134.209.138.84:30303"
-    - "enode://60203fcb3524e07c5df60a14ae1c9c5b24023ea5d47463dfae051d2c9f3219f309657537576090ca0ae641f73d419f53d8e8000d7a464319d4784acd7d2abc41@209.38.124.160:30303"
+# No need to specify source_enodes - will be auto-fetched from:
+# https://raw.githubusercontent.com/eth-clients/hoodi/refs/heads/main/metadata/enodes.yaml
 
 persistent: true
 wait_for_finalization: false

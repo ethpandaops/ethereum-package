@@ -3,6 +3,15 @@ constants = import_module("../package_io/constants.star")
 
 IMAGE_NAME = "ethpandaops/mempool-bridge:latest"
 SERVICE_NAME = "mempool-bridge"
+CURL_IMAGE = "badouralix/curl-jq"
+
+# Enode source URLs for different networks
+ENODE_URLS = {
+    "mainnet": "https://raw.githubusercontent.com/eth-clients/mainnet/refs/heads/main/metadata/enodes.yaml",
+    "sepolia": "https://raw.githubusercontent.com/eth-clients/sepolia/refs/heads/main/metadata/enodes.yaml",
+    "hoodi": "https://raw.githubusercontent.com/eth-clients/hoodi/refs/heads/main/metadata/enodes.yaml",
+    "holesky": "https://raw.githubusercontent.com/eth-clients/holesky/refs/heads/main/metadata/enodes.yaml",
+}
 
 HTTP_PORT_NUMBER = 9090
 
@@ -28,6 +37,7 @@ def launch_mempool_bridge(
     config_template,
     all_el_contexts,
     mempool_bridge_params,
+    network_params,
     global_node_selectors,
     global_tolerations,
     port_publisher,
@@ -36,14 +46,22 @@ def launch_mempool_bridge(
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
-    # Build source endpoints - either from params or use first node as source
+    # Build source endpoints - either from params, fetch from network, or use first node
     # Mempool-bridge uses ENR/enode for P2P connections, not HTTP RPC
     source_endpoints = []
     if len(mempool_bridge_params.source_enodes) > 0:
         # Use provided enodes
         for enode in mempool_bridge_params.source_enodes:
             source_endpoints.append(enode)
-    elif len(all_el_contexts) > 0:
+    elif constants.NETWORK_NAME.shadowfork in network_params.network:
+        # For shadowforks, fetch enodes from eth-clients repos
+        shadow_base = network_params.network.split("-shadowfork")[0]
+        if shadow_base in ENODE_URLS:
+            plan.print("Fetching enodes for {0} from eth-clients repo".format(shadow_base))
+            source_endpoints = fetch_enodes_from_url(plan, ENODE_URLS[shadow_base], all_el_contexts)
+            plan.print("Fetched {0} enodes for source".format(len(source_endpoints)))
+
+    if len(source_endpoints) == 0 and len(all_el_contexts) > 0:
         # If no source specified, use first node as source for local testing
         first_context = all_el_contexts[0]
         if first_context.enode:
@@ -142,3 +160,39 @@ def new_config_template_data(
         "SourceEndpoints": source_endpoints,
         "TargetEndpoints": target_endpoints,
     }
+
+
+def fetch_enodes_from_url(plan, url, el_contexts):
+    """
+    Fetch and parse enodes from a YAML file URL using curl.
+    Returns a list of enode strings.
+    """
+    # Use first EL service to run curl command
+    if len(el_contexts) == 0:
+        return []
+
+    first_el_service = el_contexts[0].service_name
+
+    # Use curl to fetch the YAML file
+    curl_result = plan.exec(
+        service_name=first_el_service,
+        recipe=ExecRecipe(
+            command=[
+                "/bin/sh",
+                "-c",
+                'curl -s "{0}" | grep "^- enode:" | sed "s/^- //" | sed "s/ *#.*//"'.format(url),
+            ]
+        ),
+    )
+
+    # Parse the output to extract enodes
+    enodes = []
+    output = curl_result["output"]
+    if output:
+        lines = output.split("\n")
+        for line in lines:
+            line = line.strip()
+            if line and line.startswith("enode://"):
+                enodes.append(line)
+
+    return enodes
