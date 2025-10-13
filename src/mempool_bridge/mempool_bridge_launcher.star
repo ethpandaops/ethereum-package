@@ -36,17 +36,27 @@ def launch_mempool_bridge(
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
-    # Build source endpoints - either from params or empty
+    # Build source endpoints - either from params or use first node as source
+    # Mempool-bridge uses ENR/enode for P2P connections, not HTTP RPC
     source_endpoints = []
     if mempool_bridge_params.source_url:
         source_endpoints.append(mempool_bridge_params.source_url)
+    elif len(all_el_contexts) > 0:
+        # If no source specified, use first node as source for local testing
+        first_context = all_el_contexts[0]
+        if first_context.enode:
+            source_endpoints.append(first_context.enode)
+        elif first_context.enr:
+            source_endpoints.append(first_context.enr)
 
-    # Build target endpoints from all EL contexts
+    # Build target endpoints from all EL contexts using enode/enr
     target_endpoints = []
     for context in all_el_contexts:
-        target_endpoints.append(
-            "http://{0}:{1}".format(context.ip_addr, context.rpc_port_num)
-        )
+        # Prefer enode if available, fallback to enr
+        if context.enode:
+            target_endpoints.append(context.enode)
+        elif context.enr:
+            target_endpoints.append(context.enr)
 
     template_data = new_config_template_data(
         HTTP_PORT_NUMBER,

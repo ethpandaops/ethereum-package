@@ -1627,12 +1627,10 @@ def get_default_custom_flood_params():
 
 
 def get_default_mempool_bridge_params(network_params):
+    # mempool-bridge uses ENR or enode records for P2P connections, not HTTP RPC
+    # For shadowforks, users need to provide the source network's enode/enr manually
+    # Example: enode://abc123@bootnode.sepolia.ethpandaops.io:30303
     source_url = ""
-
-    # For shadowforks, use ethpandaops RPC endpoint
-    if constants.NETWORK_NAME.shadowfork in network_params["network"]:
-        shadow_base = network_params["network"].split("-shadowfork")[0]
-        source_url = "https://rpc.{0}.ethpandaops.io".format(shadow_base)
 
     return {
         "source_url": source_url,

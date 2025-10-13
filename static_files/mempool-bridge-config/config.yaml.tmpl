@@ -1,7 +1,9 @@
-addr: ":{{ .ListenPortNum }}"
+logging: "info"
+metricsAddr: ":{{ .ListenPortNum }}"
 
 {{- if .SourceEndpoints }}
 source:
+  retryInterval: 30s
   nodeRecords:
 {{- range $endpoint := .SourceEndpoints }}
     - "{{ $endpoint }}"
@@ -9,6 +11,7 @@ source:
 {{- end }}
 
 target:
+  retryInterval: 30s
   nodeRecords:
 {{- range $endpoint := .TargetEndpoints }}
     - "{{ $endpoint }}"
