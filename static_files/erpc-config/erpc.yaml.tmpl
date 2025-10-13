@@ -1,0 +1,71 @@
+logLevel: debug
+
+server:
+  httpHostV4: 0.0.0.0
+  httpPortV4: {{ .HTTPPort }}
+  aliasing:
+    rules:
+      - matchDomain: "*"
+        serveProject: "main"
+        serveArchitecture: "evm"
+        serveChain: "{{ .NetworkID }}"
+
+metrics:
+  enabled: true
+  hostV4: 0.0.0.0
+  port: {{ .MetricsPort }}
+
+healthCheck:
+  mode: networks
+
+database:
+  evmJsonRpcCache:
+    connectors:
+      - id: memory-cache
+        driver: memory
+    policies:
+      - network: "*"
+        method: "*"
+        finality: realtime
+        empty: allow
+        connector: memory-cache
+        ttl: 2s
+      - network: "*"
+        method: "*"
+        finality: unfinalized
+        empty: allow
+        connector: memory-cache
+        ttl: 10s
+      - network: "*"
+        method: "*"
+        finality: finalized
+        empty: allow
+        connector: memory-cache
+        ttl: 1h
+
+projects:
+  - id: main
+    upstreams:
+      {{- range $elClient := .ELClientInfo }}
+      - id: {{ $elClient.FullName }}
+        type: evm
+        endpoint: http://{{ $elClient.IP_Addr }}:{{ $elClient.RPC_PortNum }}
+        evm:
+          chainId: {{ $.NetworkID }}
+      {{- end }}
+    networks:
+      - architecture: evm
+        evm:
+          chainId: {{ .NetworkID }}
+        failsafe:
+          timeout:
+            duration: 30s
+          retry:
+            maxAttempts: 3
+            delay: 500ms
+            backoffMaxDelay: 10s
+            backoffFactor: 1.2
+            jitter: 500ms
+          hedge:
+            delay: 3000ms
+            maxCount: 2
