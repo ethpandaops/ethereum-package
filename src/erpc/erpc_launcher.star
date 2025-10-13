@@ -125,6 +125,7 @@ def get_config(
         files={
             ERPC_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
+        cmd=["/erpc-server", config_file_path],
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
@@ -132,9 +133,11 @@ def get_config(
         node_selectors=node_selectors,
         tolerations=tolerations,
         ready_conditions=ReadyCondition(
-            recipe=GetHttpRequestRecipe(
+            recipe=PostHttpRequestRecipe(
                 port_id="http",
-                endpoint="/healthz",
+                endpoint="/main/evm/" + str(network_params.network_id),
+                content_type="application/json",
+                body='{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}',
             ),
             field="code",
             assertion="==",
