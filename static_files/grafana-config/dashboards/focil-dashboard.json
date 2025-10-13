@@ -1319,13 +1319,17 @@
       "pluginVersion": "12.2.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "editorMode": "code",
           "expr": "(12 * rate(beacon_inclusion_list_transactions_prepare_execution_payload_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
           "hide": false,
           "instant": false,
           "legendFormat": "{{job}} {{source}}",
           "range": true,
-          "refId": "A"
+          "refId": "B"
         }
       ],
       "title": "Total number of inclusion list transactions sent when preparing execution payload",
@@ -1930,5 +1934,5 @@
   "timezone": "browser",
   "title": "FOCIL metrics",
   "uid": "aebclixwkbke8a",
-  "version": 3
+  "version": 4
 }
