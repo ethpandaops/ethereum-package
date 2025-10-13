@@ -1,12 +1,16 @@
 participants:
   - el_type: geth
     cl_type: lighthouse
-  - el_type: nethermind
-    cl_type: teku
-  - el_type: reth
-    cl_type: prysm
 
 additional_services:
   - mempool_bridge
+  - dora
 
-wait_for_finalization: true
+network_params:
+  network: hoodi-shadowfork
+  shadowfork_block_height: 340000
+  withdrawal_type: "0x01"
+  validator_balance: 1000000
+  withdrawal_address: "0x4d1CB4eB7969f8806E2CaAc0cbbB71f88C8ec413" #spamoor's address
+
+persistent: true

@@ -792,6 +792,7 @@ def run(plan, args={}):
                 plan,
                 mempool_bridge_config_template,
                 all_el_contexts,
+                args_with_right_defaults.mempool_bridge_params,
                 global_node_selectors,
                 global_tolerations,
                 args_with_right_defaults.port_publisher,

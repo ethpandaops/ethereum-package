@@ -27,6 +27,7 @@ def launch_mempool_bridge(
     plan,
     config_template,
     all_el_contexts,
+    mempool_bridge_params,
     global_node_selectors,
     global_tolerations,
     port_publisher,
@@ -35,16 +36,22 @@ def launch_mempool_bridge(
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
-    all_execution_endpoints = []
+    # Build source endpoints - either from params or empty
+    source_endpoints = []
+    if mempool_bridge_params.source_url:
+        source_endpoints.append(mempool_bridge_params.source_url)
+
+    # Build target endpoints from all EL contexts
+    target_endpoints = []
     for context in all_el_contexts:
-        endpoint_info = new_execution_endpoint_info(
+        target_endpoints.append(
             "http://{0}:{1}".format(context.ip_addr, context.rpc_port_num)
         )
-        all_execution_endpoints.append(endpoint_info)
 
     template_data = new_config_template_data(
         HTTP_PORT_NUMBER,
-        all_execution_endpoints,
+        source_endpoints,
+        target_endpoints,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -115,15 +122,11 @@ def get_config(
 
 def new_config_template_data(
     listen_port_num,
-    execution_endpoints,
+    source_endpoints,
+    target_endpoints,
 ):
     return {
         "ListenPortNum": listen_port_num,
-        "ExecutionEndpoints": execution_endpoints,
-    }
-
-
-def new_execution_endpoint_info(execution_http_url):
-    return {
-        "URL": execution_http_url,
+        "SourceEndpoints": source_endpoints,
+        "TargetEndpoints": target_endpoints,
     }

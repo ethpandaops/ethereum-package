@@ -361,6 +361,9 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "spammers",
     ],
+    "mempool_bridge_params": [
+        "source_url",
+    ],
     "ethereum_genesis_generator_params": [
         "image",
     ],

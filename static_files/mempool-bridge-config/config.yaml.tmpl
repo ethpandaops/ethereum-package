@@ -1,13 +1,15 @@
 addr: ":{{ .ListenPortNum }}"
 
+{{- if .SourceEndpoints }}
 source:
   nodeRecords:
-{{- range $index, $endpoint := .ExecutionEndpoints }}
-    - "{{ $endpoint.URL }}"
+{{- range $endpoint := .SourceEndpoints }}
+    - "{{ $endpoint }}"
+{{- end }}
 {{- end }}
 
 target:
   nodeRecords:
-{{- range $index, $endpoint := .ExecutionEndpoints }}
-    - "{{ $endpoint.URL }}"
+{{- range $endpoint := .TargetEndpoints }}
+    - "{{ $endpoint }}"
 {{- end }}
