@@ -134,7 +134,7 @@ def generate_el_cl_genesis_data(
         block_height_result = plan.run_sh(
             name="read-shadowfork-block-height",
             description="Reading shadowfork block height from latest_block.json",
-            run="jq -r '.result.number' /shadowfork/latest_block.json | tr -d '\n'",
+            run="printf '%d' $(jq -r '.result.number' /shadowfork/latest_block.json | tr -d '\n')",
             files={"/shadowfork": latest_block},
             tolerations=tolerations,
             node_selectors=global_node_selectors,
