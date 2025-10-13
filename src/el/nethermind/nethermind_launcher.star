@@ -166,6 +166,10 @@ def get_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/chainspec.json"
         )
+
+        # Configure block timing to match consensus layer
+        if network_params.seconds_per_slot > 0:
+            cmd.append("--Blocks.SecondsPerSlot={0}".format(network_params.seconds_per_slot))
     else:
         cmd.append("--config=" + network_params.network)
 
