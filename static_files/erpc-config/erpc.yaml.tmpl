@@ -3,6 +3,12 @@ logLevel: debug
 server:
   httpHostV4: 0.0.0.0
   httpPortV4: {{ .HTTPPort }}
+  aliasing:
+    rules:
+      - matchDomain: "*"
+        serveProject: "main"
+        serveArchitecture: "evm"
+        serveChain: "{{ .NetworkID }}"
 
 metrics:
   enabled: true
