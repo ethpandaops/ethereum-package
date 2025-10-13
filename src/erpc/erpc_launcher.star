@@ -60,7 +60,11 @@ def launch_erpc(
         )
 
     template_data = new_config_template_data(
-        network_params.network, HTTP_PORT_NUMBER, METRICS_PORT_NUMBER, all_el_client_info
+        network_params.network,
+        network_params.network_id,
+        HTTP_PORT_NUMBER,
+        METRICS_PORT_NUMBER,
+        all_el_client_info,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -139,9 +143,12 @@ def get_config(
     )
 
 
-def new_config_template_data(network, http_port, metrics_port, el_client_info):
+def new_config_template_data(
+    network, network_id, http_port, metrics_port, el_client_info
+):
     return {
         "Network": network,
+        "NetworkID": network_id,
         "HTTPPort": http_port,
         "MetricsPort": metrics_port,
         "ELClientInfo": el_client_info,

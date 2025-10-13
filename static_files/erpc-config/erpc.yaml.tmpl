@@ -9,6 +9,9 @@ metrics:
   hostV4: 0.0.0.0
   port: {{ .MetricsPort }}
 
+healthCheck:
+  mode: networks
+
 database:
   evmJsonRpcCache:
     connectors:
@@ -42,12 +45,12 @@ projects:
         type: evm
         endpoint: http://{{ $elClient.IP_Addr }}:{{ $elClient.RPC_PortNum }}
         evm:
-          chainId: 1
+          chainId: {{ $.NetworkID }}
       {{- end }}
     networks:
       - architecture: evm
         evm:
-          chainId: 1
+          chainId: {{ .NetworkID }}
         failsafe:
           timeout:
             duration: 30s

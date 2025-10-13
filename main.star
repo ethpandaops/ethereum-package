@@ -601,9 +601,7 @@ def run(plan, args={}):
             plan.print("Successfully launched blutgang")
         elif additional_service == "erpc":
             plan.print("Launching erpc")
-            erpc_config_template = read_file(
-                static_files.ERPC_CONFIG_TEMPLATE_FILEPATH
-            )
+            erpc_config_template = read_file(static_files.ERPC_CONFIG_TEMPLATE_FILEPATH)
             erpc.launch_erpc(
                 plan,
                 erpc_config_template,
