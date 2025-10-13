@@ -6,15 +6,6 @@ participants:
     cl_type: prysm
     count: 1
 
-network_params:
-  network: kurtosis
-  seconds_per_slot: 12
-  num_validator_keys_per_node: 64
-  genesis_delay: 60
 
 additional_services:
   - erpc
-  - prometheus
-  - grafana
-
-wait_for_finalization: false
