@@ -1,9 +1,13 @@
-logging: "info"
-
 addr: ":{{ .ListenPortNum }}"
 
-nodes:
+source:
+  nodeRecords:
 {{- range $index, $endpoint := .ExecutionEndpoints }}
-  - name: "execution-{{ $index }}"
-    url: "{{ $endpoint.URL }}"
+    - "{{ $endpoint.URL }}"
+{{- end }}
+
+target:
+  nodeRecords:
+{{- range $index, $endpoint := .ExecutionEndpoints }}
+    - "{{ $endpoint.URL }}"
 {{- end }}

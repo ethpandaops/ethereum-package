@@ -386,6 +386,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "apache",
     "nginx",
     "tracoor",
+    "mempool_bridge",
     "spamoor",
 ]
 

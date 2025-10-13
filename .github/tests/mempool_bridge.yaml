@@ -1,0 +1,12 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: nethermind
+    cl_type: teku
+  - el_type: reth
+    cl_type: prysm
+
+additional_services:
+  - mempool_bridge
+
+wait_for_finalization: true
