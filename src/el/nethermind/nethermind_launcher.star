@@ -169,7 +169,9 @@ def get_config(
 
         # Configure block timing to match consensus layer
         if network_params.seconds_per_slot and network_params.seconds_per_slot != 12:
-            cmd.append("--Blocks.SecondsPerSlot={0}".format(network_params.seconds_per_slot))
+            cmd.append(
+                "--Blocks.SecondsPerSlot={0}".format(network_params.seconds_per_slot)
+            )
     else:
         cmd.append("--config=" + network_params.network)
 
