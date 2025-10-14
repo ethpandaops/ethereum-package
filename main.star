@@ -232,6 +232,7 @@ def run(plan, args={}):
         el_cl_data_files_artifact_uuid,
         network_id,
         osaka_time,
+        shadowfork_block_height,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults,
@@ -540,6 +541,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
                 args_with_right_defaults.blockscout_params,
                 network_params,
+                shadowfork_block_height,
             )
             plan.print("Successfully launched blockscout")
         elif additional_service == "dora":
