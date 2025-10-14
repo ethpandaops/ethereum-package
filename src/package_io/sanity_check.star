@@ -198,6 +198,7 @@ SUBCATEGORY_PARAMS = {
         "preregistered_validator_keys_mnemonic",
         "preregistered_validator_count",
         "genesis_delay",
+        "genesis_time",
         "genesis_gaslimit",
         "max_per_epoch_activation_churn_limit",
         "churn_limit_quotient",
@@ -264,6 +265,7 @@ SUBCATEGORY_PARAMS = {
         "withdrawal_address",
         "validator_balance",
         "min_epochs_for_data_column_sidecars_requests",
+        "min_epochs_for_block_requests",
     ],
     "blockscout_params": [
         "image",
@@ -380,6 +382,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "blobscan",
     "dugtrio",
     "blutgang",
+    "erpc",
     "forky",
     "apache",
     "nginx",

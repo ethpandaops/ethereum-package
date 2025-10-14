@@ -580,6 +580,12 @@ network_params:
   # How long you want the network to wait before starting up
   genesis_delay: 20
 
+  # Unix timestamp for genesis. If specified (non-zero), this overrides genesis_delay.
+  # When set to 0 (default), the genesis time is automatically calculated based on current time and genesis_delay.
+  # Use this field to set a specific genesis time for the network.
+  # Defaults to 0
+  genesis_time: 0
+
   # The gas limit of the network set at genesis
   # Defaults to 60000000
 
@@ -786,6 +792,10 @@ network_params:
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
+  # Minimum number of epochs for block requests
+  # Default to 33024
+  min_epochs_for_block_requests: 33024
+
 # Global parameters for the network
 
 # By default includes
@@ -796,24 +806,25 @@ network_params:
 # - A light beacon chain explorer will be launched
 # - Default: []
 additional_services:
-  - assertoor
-  - broadcaster
-  - tx_fuzz
-  - custom_flood
-  - spamoor
-  - forkmon
-  - blockscout
-  - dora
-  - full_beaconchain_explorer
-  - prometheus
-  - grafana
-  - tempo
-  - blobscan
-  - dugtrio
-  - blutgang
-  - forky
   - apache
+  - assertoor
+  - blobscan
+  - blockscout
+  - blutgang
+  - broadcaster
+  - custom_flood
+  - dora
+  - dugtrio
+  - erpc
+  - forkmon
+  - forky
+  - full_beaconchain_explorer
+  - grafana
+  - prometheus
+  - spamoor
+  - tempo
   - tracoor
+  - tx_fuzz
 
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
 blockscout_params:
@@ -1083,14 +1094,16 @@ xatu_sentry_params:
   # Beacon event stream topics to subscribe to
   beacon_subscriptions:
     - attestation
+    - single_attestation
     - block
+    - block_gossip
     - chain_reorg
     - finalized_checkpoint
     - head
     - voluntary_exit
     - contribution_and_proof
     - blob_sidecar
-
+    - data_column_sidecar
 # Apache params
 # Apache public port to port forward to local machine
 # Default to port None, only set if apache additional service is activated
@@ -1151,7 +1164,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.0.6
+  image: ethpandaops/ethereum-genesis-generator:5.0.8
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:

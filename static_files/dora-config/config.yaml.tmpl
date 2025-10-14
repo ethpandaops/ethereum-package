@@ -32,7 +32,6 @@ frontend:
   validatorNamesYaml: "/validator-ranges/validator-ranges.yaml"
 {{- end }}
 
-  publicRpcUrl: "{{ .PublicRPC }}"
   rainbowkitProjectId: "15fe4ab4d5c0bcb6f0dc7c398301ff0e"
   showSubmitDeposit: true
   showSubmitElRequests: true
@@ -46,6 +45,10 @@ api:
   enabled: true
   corsOrigins:
     - "*"
+
+rpcProxy:
+  enabled: true
+  upstreamUrl: "{{ .PublicRPC }}"
 
 beaconapi:
   # CL Client RPC

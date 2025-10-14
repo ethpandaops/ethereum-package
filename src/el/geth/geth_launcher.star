@@ -235,8 +235,15 @@ def get_config(
             )
         )
         if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            if launcher.osaka_enabled:
-                cmd.append("--override.osaka=" + str(launcher.osaka_time))
+            cmd.append(
+                "--override.osaka=" + str(launcher.shadowfork_times["osaka_time"])
+            )
+            cmd.append(
+                "--override.bpo1=" + str(launcher.shadowfork_times["bpo_1_time"])
+            )
+            cmd.append(
+                "--override.bpo2=" + str(launcher.shadowfork_times["bpo_2_time"])
+            )
 
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
@@ -332,18 +339,18 @@ def get_el_context(
         plan, service_name, constants.RPC_PORT_ID
     )
 
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    metrics_url = "{0}:{1}".format(service.name, METRICS_PORT_NUM)
     geth_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
 
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+    http_url = "http://{0}:{1}".format(service.name, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.name, WS_PORT_NUM)
 
     return el_context.new_el_context(
         client_name="geth",
         enode=enode,
-        ip_addr=service.ip_address,
+        ip_addr=service.name,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
@@ -364,6 +371,5 @@ def new_geth_launcher(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         networkid=networkid,
-        osaka_time=el_cl_genesis_data.osaka_time,
-        osaka_enabled=el_cl_genesis_data.osaka_enabled,
+        shadowfork_times=el_cl_genesis_data.shadowfork_times,
     )

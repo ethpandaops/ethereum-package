@@ -1,0 +1,26 @@
+participants_matrix:
+  el:
+    - el_type: reth
+      el_image: ethpandaops/reth:bal-devnet-0
+    - el_type: geth
+      el_image: ethpandaops/geth:bal-devnet-0
+    - el_type: besu
+      el_image: ethpandaops/besu:bal-devnet-0
+      el_extra_params: ["--bonsai-parallel-tx-processing-enabled=false"]
+  cl:
+    - cl_type: lodestar
+      cl_image: ethpandaops/lodestar:bal-devnet-0
+      supernode: true
+    - cl_type: prysm
+      cl_image: ethpandaops/prysm-beacon-chain:bal-devnet-0
+network_params:
+  genesis_delay: 20
+  fulu_fork_epoch: 0
+  gloas_fork_epoch: 1
+snooper_enabled: true
+dora_params:
+  image: ethpandaops/dora:eip7928-support
+additional_services:
+  - dora
+  - tx_fuzz
+  - spamoor

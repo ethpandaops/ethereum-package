@@ -97,7 +97,7 @@ DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:5.0.6"
+    "ethpandaops/ethereum-genesis-generator:5.0.8"
 )
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
@@ -191,7 +191,7 @@ GENESIS_TIME = {
     "mainnet": 1606824023,
     "sepolia": 1655733600,
     "holesky": 1695902400,
-    "hoodi": 1741971600,
+    "hoodi": 1742213400,
 }
 
 VOLUME_SIZE = {

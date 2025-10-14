@@ -82,6 +82,7 @@ network_params:
     very lucky have athlete"
   preregistered_validator_count: 0
   genesis_delay: 20
+  genesis_time: 0
   genesis_gaslimit: 60000000
   max_per_epoch_activation_churn_limit: 8
   churn_limit_quotient: 65536
@@ -138,10 +139,11 @@ network_params:
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
   validator_balance: 32
   min_epochs_for_data_column_sidecars_requests: 4096
+  min_epochs_for_block_requests: 33024
 
 additional_services: []
 dora_params:
-  image: ""
+  image: "ethpandaops/dora:latest"
 tx_fuzz_params:
   tx_fuzz_extra_args: []
 spamoor_params:
@@ -164,7 +166,7 @@ grafana_params:
   min_mem: 128
   max_mem: 2048
 assertoor_params:
-  image: ""
+  image: "ethpandaops/assertoor:latest"
   run_stability_check: false
   run_block_proposal_check: false
   run_transaction_test: false
@@ -206,13 +208,16 @@ xatu_sentry_params:
   xatu_server_headers: {}
   beacon_subscriptions:
     - attestation
+    - single_attestation
     - block
+    - block_gossip
     - chain_reorg
     - finalized_checkpoint
     - head
     - voluntary_exit
     - contribution_and_proof
     - blob_sidecar
+    - data_column_sidecar
 apache_port: 40000
 nginx_port: 50000
 global_tolerations: []
@@ -221,7 +226,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.0.6
+  image: ethpandaops/ethereum-genesis-generator:5.0.8
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:

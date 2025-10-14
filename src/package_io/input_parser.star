@@ -308,10 +308,20 @@ def input_parser(plan, input_args):
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
+        num_perfect_peerdas_participants = 0
         for participant in result["participants"]:
+            num_perfect_peerdas_participants += 1
             if participant.get("supernode", False):
                 has_supernodes = True
                 break
+
+        if result["network_params"]["perfect_peerdas_enabled"]:
+            if num_perfect_peerdas_participants < 16:
+                fail(
+                    "perfect_peerdas_enabled is true (this is a unique test if you don't know what it does, consider removing it) but the number of participants ({0}) is less than 16. Please set the number of participants to at least 16.".format(
+                        str(num_perfect_peerdas_participants)
+                    )
+                )
 
         if (
             not has_supernodes
@@ -418,6 +428,7 @@ def input_parser(plan, input_args):
             seconds_per_slot=result["network_params"]["seconds_per_slot"],
             slot_duration_ms=result["network_params"]["slot_duration_ms"],
             genesis_delay=result["network_params"]["genesis_delay"],
+            genesis_time=result["network_params"]["genesis_time"],
             genesis_gaslimit=result["network_params"]["genesis_gaslimit"],
             max_per_epoch_activation_churn_limit=result["network_params"][
                 "max_per_epoch_activation_churn_limit"
@@ -526,6 +537,9 @@ def input_parser(plan, input_args):
             validator_balance=result["network_params"]["validator_balance"],
             min_epochs_for_data_column_sidecars_requests=result["network_params"][
                 "min_epochs_for_data_column_sidecars_requests"
+            ],
+            min_epochs_for_block_requests=result["network_params"][
+                "min_epochs_for_block_requests"
             ],
         ),
         mev_params=struct(
@@ -1148,6 +1162,7 @@ def default_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
+        "genesis_time": 0,
         "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 8,
         "churn_limit_quotient": 65536,
@@ -1191,13 +1206,13 @@ def default_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "bpo_1_epoch": 18446744073709551615,
-        "bpo_1_max_blobs": 0,
-        "bpo_1_target_blobs": 0,
-        "bpo_1_base_fee_update_fraction": 0,
+        "bpo_1_max_blobs": 15,
+        "bpo_1_target_blobs": 10,
+        "bpo_1_base_fee_update_fraction": 8346193,
         "bpo_2_epoch": 18446744073709551615,
-        "bpo_2_max_blobs": 0,
-        "bpo_2_target_blobs": 0,
-        "bpo_2_base_fee_update_fraction": 0,
+        "bpo_2_max_blobs": 21,
+        "bpo_2_target_blobs": 14,
+        "bpo_2_base_fee_update_fraction": 11684671,
         "bpo_3_epoch": 18446744073709551615,
         "bpo_3_max_blobs": 0,
         "bpo_3_target_blobs": 0,
@@ -1214,6 +1229,7 @@ def default_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
+        "min_epochs_for_block_requests": 33024,
     }
 
 
@@ -1228,6 +1244,7 @@ def default_minimal_network_params():
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
+        "genesis_time": 0,
         "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 4,
         "churn_limit_quotient": 32,
@@ -1294,6 +1311,7 @@ def default_minimal_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
+        "min_epochs_for_block_requests": 272,
     }
 
 
@@ -1543,13 +1561,16 @@ def get_default_xatu_sentry_params():
         "xatu_server_tls": False,
         "beacon_subscriptions": [
             "attestation",
+            "single_attestation",
             "block",
+            "block_gossip",
             "chain_reorg",
             "finalized_checkpoint",
             "head",
             "voluntary_exit",
             "contribution_and_proof",
             "blob_sidecar",
+            "data_column_sidecar",
         ],
     }
 
@@ -1675,8 +1696,14 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         index_str = shared_utils.zfill_custom(
             index + 1, len(str(len(parsed_arguments_dict["participants"])))
         )
+
+        if mev_type == constants.COMMIT_BOOST_MEV_TYPE:
+            prefix = constants.COMMIT_BOOST_SERVICE_NAME_PREFIX
+        else:
+            prefix = constants.MEV_BOOST_SERVICE_NAME_PREFIX
+
         mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
-            constants.MEV_BOOST_SERVICE_NAME_PREFIX,
+            prefix,
             index_str,
             participant["cl_type"],
             participant["el_type"],

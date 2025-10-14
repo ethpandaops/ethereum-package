@@ -105,10 +105,10 @@ def launch_mev_relay(
     return (
         "http://{0}@{1}:{2}".format(
             constants.DEFAULT_MEV_PUBKEY,
-            mev_relay_service.ip_address,
+            mev_relay_service.name,
             MEV_RELAY_ENDPOINT_PORT,
         ),
-        mev_relay_service.ip_address,
+        mev_relay_service.name,
         MEV_RELAY_ENDPOINT_PORT,
     )
 

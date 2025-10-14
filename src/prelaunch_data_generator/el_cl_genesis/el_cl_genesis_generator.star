@@ -92,6 +92,8 @@ def generate_el_cl_genesis_data(
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
+    shadowfork_times = {}
+
     osaka_time = plan.run_sh(
         name="read-osaka-time",
         description="Reading osaka time from genesis",
@@ -101,20 +103,50 @@ def generate_el_cl_genesis_data(
         node_selectors=global_node_selectors,
     )
 
-    osaka_enabled_check = plan.run_sh(
-        name="check-osaka-enabled",
-        description="Check if osaka time is enabled (not false)",
-        run="test \"$(jq '.config.osakaTime // false' /data/genesis.json | tr -d '\n')\" != \"false\" && echo true || echo false",
+    bpo_1_time = plan.run_sh(
+        name="read-bpo-1-time",
+        description="Reading bpo 1 time from genesis",
+        run="jq '.config.bpo1Time' /data/genesis.json | tr -d '\n'",
         files={"/data": genesis.files_artifacts[0]},
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
 
+    bpo_2_time = plan.run_sh(
+        name="read-bpo-2-time",
+        description="Reading bpo 2 time from genesis",
+        run="jq '.config.bpo2Time' /data/genesis.json | tr -d '\n'",
+        files={"/data": genesis.files_artifacts[0]},
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
+    )
+
+    shadowfork_times = {
+        "osaka_time": osaka_time.output,
+        "bpo_1_time": bpo_1_time.output,
+        "bpo_2_time": bpo_2_time.output,
+    }
+
+    plan.print("Shadowfork times: {0}".format(shadowfork_times))
+
+    shadowfork_block_height = ""
+    if latest_block != "":
+        block_height_result = plan.run_sh(
+            name="read-shadowfork-block-height",
+            description="Reading shadowfork block height from latest_block.json",
+            run="printf '%d' $(jq -r '.result.number' /shadowfork/latest_block.json | tr -d '\n')",
+            files={"/shadowfork": latest_block},
+            tolerations=tolerations,
+            node_selectors=global_node_selectors,
+        )
+        shadowfork_block_height = block_height_result.output
+        plan.print("Shadowfork block height: {0}".format(shadowfork_block_height))
+
     result = el_cl_genesis_data.new_el_cl_genesis_data(
         genesis.files_artifacts[0],
         genesis_validators_root.output,
-        osaka_time.output,
-        osaka_enabled_check.output == "true",
+        shadowfork_times,
+        shadowfork_block_height,
     )
 
     return result
@@ -210,6 +242,7 @@ def new_env_file_for_el_cl_genesis_data(
         "WithdrawalAddress": network_params.withdrawal_address,
         "ValidatorBalance": int(network_params.validator_balance * 1000000000),
         "MinEpochsForDataColumnSidecarsRequests": network_params.min_epochs_for_data_column_sidecars_requests,
+        "MinEpochsForBlockRequests": network_params.min_epochs_for_block_requests,
     }
 
 
