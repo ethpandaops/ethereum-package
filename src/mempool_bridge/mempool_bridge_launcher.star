@@ -4,8 +4,8 @@ constants = import_module("../package_io/constants.star")
 IMAGE_NAME = "ethpandaops/mempool-bridge:latest"
 SERVICE_NAME = "mempool-bridge"
 CURL_IMAGE = "badouralix/curl-jq"
+MAX_ENODES_TO_FETCH = 5
 
-# Enode source URLs for different networks
 ENODE_URLS = {
     "mainnet": "https://raw.githubusercontent.com/eth-clients/mainnet/refs/heads/main/metadata/enodes.yaml",
     "sepolia": "https://raw.githubusercontent.com/eth-clients/sepolia/refs/heads/main/metadata/enodes.yaml",
@@ -46,32 +46,27 @@ def launch_mempool_bridge(
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
-    # Build source endpoints - either from params, fetch from network, or use first node
-    # Mempool-bridge uses ENR/enode for P2P connections, not HTTP RPC
+    network = network_params.network
     source_endpoints = []
-    if len(mempool_bridge_params.source_enodes) > 0:
-        # Use provided enodes
-        for enode in mempool_bridge_params.source_enodes:
-            source_endpoints.append(enode)
-    elif constants.NETWORK_NAME.shadowfork in network_params.network:
-        # For shadowforks, fetch enodes from eth-clients repos
-        shadow_base = network_params.network.split("-shadowfork")[0]
-        if shadow_base in ENODE_URLS:
-            plan.print(
-                "Fetching enodes for {0} from eth-clients repo".format(shadow_base)
-            )
-            source_endpoints = fetch_enodes_from_url(
-                plan, ENODE_URLS[shadow_base], all_el_contexts
-            )
-            plan.print("Fetched {0} enodes for source".format(len(source_endpoints)))
-
-    if len(source_endpoints) == 0 and len(all_el_contexts) > 0:
-        # If no source specified, use first node as source for local testing
-        first_context = all_el_contexts[0]
-        if first_context.enode:
-            source_endpoints.append(first_context.enode)
-        elif first_context.enr:
-            source_endpoints.append(first_context.enr)
+    if mempool_bridge_params.source_enodes:
+        source_endpoints = mempool_bridge_params.source_enodes
+    else:
+        if "shadowfork" in network_params.network:
+            network = network_params.network.split("-shadowfork")[0]
+        if network in constants.PUBLIC_NETWORKS:
+            plan.print("Fetching enodes for {0} from eth-clients repo".format(network))
+            for i in range(1, MAX_ENODES_TO_FETCH + 1):
+                enode = plan.run_sh(
+                    name="fetch-enode-{0}".format(i),
+                    description="Fetching enode #{0}".format(i),
+                    run="curl -s {0} | grep -E '^[[:space:]]*-[[:space:]]*enode' | sed -n '{1}p' | sed 's/^[[:space:]]*-[[:space:]]*//; s/[[:space:]]*#.*//' | tr -d '\\n'".format(
+                        ENODE_URLS[network], i
+                    ),
+                    node_selectors=global_node_selectors,
+                    tolerations=tolerations,
+                    wait=None,
+                )
+                source_endpoints.append(enode.output)
 
     # Build target endpoints from all EL contexts using enode/enr
     target_endpoints = []
@@ -164,35 +159,3 @@ def new_config_template_data(
         "SourceEndpoints": source_endpoints,
         "TargetEndpoints": target_endpoints,
     }
-
-
-def fetch_enodes_from_url(plan, url, el_contexts):
-    """
-    Fetch enodes from eth-clients repo YAML file.
-    The shell command extracts and cleans enode lines in one pass.
-    """
-    if len(el_contexts) == 0:
-        return []
-
-    first_el_service = el_contexts[0].service_name
-
-    # Fetch YAML and extract enodes: curl -> grep enode lines -> strip prefix/comments
-    curl_result = plan.exec(
-        service_name=first_el_service,
-        recipe=ExecRecipe(
-            command=[
-                "/bin/sh",
-                "-c",
-                'curl -s "{0}" | grep "^- enode:" | sed "s/^- //" | sed "s/ *#.*//"'.format(
-                    url
-                ),
-            ]
-        ),
-    )
-
-    # Split output into list of enodes (one per line)
-    output = curl_result["output"]
-    if output:
-        return [line.strip() for line in output.split("\n") if line.strip()]
-
-    return []

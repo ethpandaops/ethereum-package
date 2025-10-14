@@ -1,12 +1,16 @@
-logging: "info"
+logging: "debug"
 metricsAddr: ":{{ .ListenPortNum }}"
+
+mode: "p2p"
 
 {{- if .SourceEndpoints }}
 source:
   retryInterval: 30s
   nodeRecords:
 {{- range $endpoint := .SourceEndpoints }}
+{{- if $endpoint }}
     - "{{ $endpoint }}"
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -14,5 +18,7 @@ target:
   retryInterval: 30s
   nodeRecords:
 {{- range $endpoint := .TargetEndpoints }}
+{{- if $endpoint }}
     - "{{ $endpoint }}"
+{{- end }}
 {{- end }}
