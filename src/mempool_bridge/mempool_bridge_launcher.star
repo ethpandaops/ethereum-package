@@ -183,7 +183,9 @@ def fetch_enodes_from_url(plan, url, el_contexts):
             command=[
                 "/bin/sh",
                 "-c",
-                'curl -s "{0}" | grep "^- enode:" | sed "s/^- //" | sed "s/ *#.*//"'.format(url),
+                'curl -s "{0}" | grep "^- enode:" | sed "s/^- //" | sed "s/ *#.*//"'.format(
+                    url
+                ),
             ]
         ),
     )
