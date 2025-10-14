@@ -208,13 +208,16 @@ xatu_sentry_params:
   xatu_server_headers: {}
   beacon_subscriptions:
     - attestation
+    - single_attestation
     - block
+    - block_gossip
     - chain_reorg
     - finalized_checkpoint
     - head
     - voluntary_exit
     - contribution_and_proof
     - blob_sidecar
+    - data_column_sidecar
 apache_port: 40000
 nginx_port: 50000
 global_tolerations: []
