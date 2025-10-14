@@ -1094,14 +1094,16 @@ xatu_sentry_params:
   # Beacon event stream topics to subscribe to
   beacon_subscriptions:
     - attestation
+    - single_attestation
     - block
+    - block_gossip
     - chain_reorg
     - finalized_checkpoint
     - head
     - voluntary_exit
     - contribution_and_proof
     - blob_sidecar
-
+    - data_column_sidecar
 # Apache params
 # Apache public port to port forward to local machine
 # Default to port None, only set if apache additional service is activated
