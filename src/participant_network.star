@@ -604,4 +604,5 @@ def launch_participant_network(
         el_cl_data.files_artifact_uuid,
         network_id,
         el_cl_data.shadowfork_times.get("osaka_time", ""),
+        el_cl_data.shadowfork_block_height,
     )
