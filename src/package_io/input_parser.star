@@ -118,8 +118,7 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
-    # Only initialize mempool_bridge_params if service is enabled (default empty)
-    result["mempool_bridge_params"] = {"source_enodes": []}
+    result["mempool_bridge_params"] = get_default_mempool_bridge_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -668,6 +667,7 @@ def input_parser(plan, input_args):
             extra_args=result["spamoor_params"]["extra_args"],
         ),
         mempool_bridge_params=struct(
+            image=result["mempool_bridge_params"]["image"],
             source_enodes=result["mempool_bridge_params"]["source_enodes"],
         ),
         additional_services=result["additional_services"],
@@ -1628,12 +1628,11 @@ def get_default_custom_flood_params():
     return {"interval_between_transactions": 1}
 
 
-# mempool_bridge_params default is {"source_enodes": []}
-# For shadowforks, users should provide enodes from eth-clients repos:
-# - mainnet: https://github.com/eth-clients/mainnet/blob/main/metadata/enodes.yaml
-# - sepolia: https://github.com/eth-clients/sepolia/blob/main/metadata/enodes.yaml
-# - hoodi: https://github.com/eth-clients/hoodi/blob/main/metadata/enodes.yaml
-# - holesky: https://github.com/eth-clients/holesky/blob/main/metadata/enodes.yaml
+def get_default_mempool_bridge_params():
+    return {
+        "image": "ethpandaops/mempool-bridge:latest",
+        "source_enodes": [],
+    }
 
 
 def get_port_publisher_params(parameter_type, input_args=None):

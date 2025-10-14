@@ -820,6 +820,7 @@ additional_services:
   - forky
   - full_beaconchain_explorer
   - grafana
+  - mempool_bridge
   - prometheus
   - spamoor
   - tempo
@@ -1027,6 +1028,19 @@ docker_cache_params:
   dockerhub_prefix: "/dh/"
   github_prefix: "/gh/"
   google_prefix: "/gcr/"
+
+
+# Configuration place for mempool bridge (https://github.com/ethpandaops/mempool-bridge)
+mempool_bridge_params:
+  # The image to use for mempool bridge
+  image: ethpandaops/mempool-bridge:latest
+  # The source enodes to use for mempool bridge
+  # Example:
+  # source_enodes:
+  #   - "enode://1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef@127.0.0.1:30303"
+  #   - "enode://1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef@127.0.0.1:30304"
+  # Default: []
+  source_enodes: []
 
 # Supports four values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up

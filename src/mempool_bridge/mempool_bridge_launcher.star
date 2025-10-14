@@ -1,9 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 
-IMAGE_NAME = "ethpandaops/mempool-bridge:latest"
 SERVICE_NAME = "mempool-bridge"
-CURL_IMAGE = "badouralix/curl-jq"
 MAX_ENODES_TO_FETCH = 5
 
 ENODE_URLS = {
@@ -102,6 +100,7 @@ def launch_mempool_bridge(
         port_publisher,
         additional_service_index,
         docker_cache_params,
+        mempool_bridge_params,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -114,6 +113,7 @@ def get_config(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    mempool_bridge_params,
 ):
     config_file_path = shared_utils.path_join(
         MEMPOOL_BRIDGE_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -130,7 +130,7 @@ def get_config(
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params,
-            IMAGE_NAME,
+            mempool_bridge_params.image,
         ),
         ports=USED_PORTS,
         public_ports=public_ports,
