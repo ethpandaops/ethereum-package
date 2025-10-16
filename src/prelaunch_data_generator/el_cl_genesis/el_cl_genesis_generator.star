@@ -14,6 +14,7 @@ SHADOWFORK_FILEPATH = "/shadowfork"
 def generate_el_cl_genesis_data(
     plan,
     image,
+    genesis_generator_params,
     genesis_generation_config_yml_template,
     genesis_additional_contracts_yml_template,
     genesis_unix_timestamp,
@@ -35,6 +36,7 @@ def generate_el_cl_genesis_data(
         total_num_validator_keys_to_preregister,
         shadowfork_file,
         network_params,
+        genesis_generator_params.extra_env,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
         genesis_generation_config_yml_template, template_data
@@ -157,7 +159,12 @@ def new_env_file_for_el_cl_genesis_data(
     total_num_validator_keys_to_preregister,
     shadowfork_file,
     network_params,
+    extra_env,
 ):
+    extra_env_safe = {}
+    for k, v in extra_env.items():
+        extra_env_safe[k] = json.encode(v)
+
     return {
         "UnixTimestamp": genesis_unix_timestamp,
         "NetworkId": constants.NETWORK_ID[network_params.network.split("-")[0]]
@@ -243,6 +250,7 @@ def new_env_file_for_el_cl_genesis_data(
         "ValidatorBalance": int(network_params.validator_balance * 1000000000),
         "MinEpochsForDataColumnSidecarsRequests": network_params.min_epochs_for_data_column_sidecars_requests,
         "MinEpochsForBlockRequests": network_params.min_epochs_for_block_requests,
+        "ExtraEnvVars": extra_env_safe,
     }
 
 

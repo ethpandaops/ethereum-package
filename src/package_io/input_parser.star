@@ -685,6 +685,7 @@ def input_parser(plan, input_args):
         checkpoint_sync_url=result["checkpoint_sync_url"],
         ethereum_genesis_generator_params=struct(
             image=result["ethereum_genesis_generator_params"]["image"],
+            extra_env=result["ethereum_genesis_generator_params"]["extra_env"],
         ),
         port_publisher=struct(
             nat_exit_ip=result["port_publisher"]["nat_exit_ip"],
@@ -1950,6 +1951,7 @@ def docker_cache_image_override(plan, result):
 def get_default_ethereum_genesis_generator_params():
     return {
         "image": constants.DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE,
+        "extra_env": {},
     }
 
 
