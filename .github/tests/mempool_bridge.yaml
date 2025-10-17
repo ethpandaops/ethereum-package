@@ -19,7 +19,6 @@ persistent: true
 mempool_bridge_params:
   log_level: "debug"
   mode: "rpc"
-  image: bbusa/mempool-bridge:latest
   source_enodes:
     - http://127.0.0.1:8545
     - http://127.0.0.1:8546
