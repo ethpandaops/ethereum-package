@@ -1,0 +1,33 @@
+logging: "{{ .LogLevel }}"
+
+metricsAddr: ":{{ .ListenPortNum }}"
+
+mode: "{{ .Mode }}"
+
+source:
+  retryInterval: {{ .RetryInterval }}
+  pollingInterval: {{ .PollingInterval }}
+{{- if eq .Mode "p2p" }}
+  nodeRecords:
+{{- else }}
+  rpcEndpoints:
+{{- end }}
+{{- range $endpoint := .SourceEndpoints }}
+{{- if $endpoint }}
+    - {{ $endpoint }}
+{{- end }}
+{{- end }}
+
+target:
+  retryInterval: {{ .RetryInterval }}
+  sendConcurrency: {{ .SendConcurrency }}
+{{- if eq .Mode "p2p" }}
+  nodeRecords:
+{{- else }}
+  rpcEndpoints:
+{{- end }}
+{{- range $endpoint := .TargetEndpoints }}
+{{- if $endpoint }}
+    - {{ $endpoint }}
+{{- end }}
+{{- end }}

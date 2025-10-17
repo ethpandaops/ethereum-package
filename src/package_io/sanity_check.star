@@ -361,6 +361,15 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "spammers",
     ],
+    "mempool_bridge_params": [
+        "image",
+        "source_enodes",
+        "mode",
+        "log_level",
+        "send_concurrency",
+        "polling_interval",
+        "retry_interval",
+    ],
     "ethereum_genesis_generator_params": [
         "image",
         "extra_env",
@@ -388,6 +397,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "apache",
     "nginx",
     "tracoor",
+    "mempool_bridge",
     "spamoor",
 ]
 
