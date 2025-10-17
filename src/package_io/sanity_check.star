@@ -364,6 +364,11 @@ SUBCATEGORY_PARAMS = {
     "mempool_bridge_params": [
         "image",
         "source_enodes",
+        "mode",
+        "log_level",
+        "send_concurrency",
+        "polling_interval",
+        "retry_interval",
     ],
     "ethereum_genesis_generator_params": [
         "image",

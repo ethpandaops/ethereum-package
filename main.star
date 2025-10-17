@@ -818,6 +818,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched mempool-bridge")
         elif additional_service == "spamoor":

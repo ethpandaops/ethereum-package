@@ -1,24 +1,33 @@
-logging: "debug"
+logging: "{{ .LogLevel }}"
+
 metricsAddr: ":{{ .ListenPortNum }}"
 
-mode: "p2p"
+mode: "{{ .Mode }}"
 
-{{- if .SourceEndpoints }}
 source:
-  retryInterval: 30s
+  retryInterval: {{ .RetryInterval }}
+  pollingInterval: {{ .PollingInterval }}
+{{- if eq .Mode "p2p" }}
   nodeRecords:
+{{- else }}
+  rpcEndpoints:
+{{- end }}
 {{- range $endpoint := .SourceEndpoints }}
 {{- if $endpoint }}
-    - "{{ $endpoint }}"
-{{- end }}
+    - {{ $endpoint }}
 {{- end }}
 {{- end }}
 
 target:
-  retryInterval: 30s
+  retryInterval: {{ .RetryInterval }}
+  sendConcurrency: {{ .SendConcurrency }}
+{{- if eq .Mode "p2p" }}
   nodeRecords:
+{{- else }}
+  rpcEndpoints:
+{{- end }}
 {{- range $endpoint := .TargetEndpoints }}
 {{- if $endpoint }}
-    - "{{ $endpoint }}"
+    - {{ $endpoint }}
 {{- end }}
 {{- end }}

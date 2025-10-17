@@ -669,6 +669,11 @@ def input_parser(plan, input_args):
         mempool_bridge_params=struct(
             image=result["mempool_bridge_params"]["image"],
             source_enodes=result["mempool_bridge_params"]["source_enodes"],
+            mode=result["mempool_bridge_params"]["mode"],
+            log_level=result["mempool_bridge_params"]["log_level"],
+            send_concurrency=result["mempool_bridge_params"]["send_concurrency"],
+            polling_interval=result["mempool_bridge_params"]["polling_interval"],
+            retry_interval=result["mempool_bridge_params"]["retry_interval"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -1632,6 +1637,11 @@ def get_default_mempool_bridge_params():
     return {
         "image": "ethpandaops/mempool-bridge:latest",
         "source_enodes": [],
+        "mode": "p2p",
+        "log_level": "",
+        "send_concurrency": 10,
+        "polling_interval": "10s",
+        "retry_interval": "30s",
     }
 
 
