@@ -372,6 +372,7 @@ SUBCATEGORY_PARAMS = {
     ],
     "ethereum_genesis_generator_params": [
         "image",
+        "extra_env",
     ],
 }
 

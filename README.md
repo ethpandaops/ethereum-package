@@ -1206,6 +1206,8 @@ spamoor_params:
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
   image: ethpandaops/ethereum-genesis-generator:5.1.0
+  # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
+  extra_env: {}
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
