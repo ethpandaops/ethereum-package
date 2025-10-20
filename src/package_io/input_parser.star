@@ -339,6 +339,15 @@ def input_parser(plan, input_args):
                 )
             )
 
+    if (
+        "mempool_bridge" in result["additional_services"]
+        and result["network_params"]["network"] not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in result["network_params"]["network"]
+    ):
+        fail(
+            "Mempool bridge is enabled but network is not mainnet, sepolia, hoodi or shadowfork, please set network to mainnet, sepolia, hoodi or shadowfork"
+        )
+
     return struct(
         participants=[
             struct(
