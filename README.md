@@ -568,7 +568,7 @@ network_params:
   max_request_blob_sidecars_electra: 1152
 
   # The number of validator keys that each CL validator node should get
-  num_validator_keys_per_node: 64
+  num_validator_keys_per_node: 128
 
   # This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
   # validator keys already preregistered as validators
