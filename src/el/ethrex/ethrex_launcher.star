@@ -184,7 +184,7 @@ def get_config(
         )
 
     if network_params.gas_limit > 0:
-        cmd.append("--block-producer.gas-limit={0}".format(network_params.gas_limit))
+        cmd.append("--builder.gas-limit={0}".format(network_params.gas_limit))
 
     if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
