@@ -1075,7 +1075,7 @@ def parse_network_params(plan, input_args):
 
     if (
         result["network_params"]["network"] != constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork not in result["network_params"]["network"]
+        and constants.NETWORK_NAME.shadowfork not in result["network_params"]["network"]
     ):
         for participant in result["participants"]:
             participant["validator_count"] = 0
