@@ -62,8 +62,8 @@ DEFAULT_REMOTE_SIGNER_IMAGES = {
 # MEV Params
 MEV_BOOST_PORT = 18550
 
-# Minimum number of validators required for a network to be valid is 64
-MIN_VALIDATORS = 64
+# Minimum number of validators required for a network to be valid is 1
+MIN_VALIDATORS = 1
 
 DEFAULT_ADDITIONAL_SERVICES = []
 
@@ -314,12 +314,14 @@ def input_parser(plan, input_args):
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
+        has_node_with_128_plus_validators = False
         num_perfect_peerdas_participants = 0
         for participant in result["participants"]:
             num_perfect_peerdas_participants += 1
             if participant.get("supernode", False):
                 has_supernodes = True
-                break
+            if participant.get("validator_count", 0) >= 128:
+                has_node_with_128_plus_validators = True
 
         if result["network_params"]["perfect_peerdas_enabled"]:
             if num_perfect_peerdas_participants < 16:
@@ -331,10 +333,11 @@ def input_parser(plan, input_args):
 
         if (
             not has_supernodes
+            and not has_node_with_128_plus_validators
             and not result["network_params"]["perfect_peerdas_enabled"]
         ):
             fail(
-                "Fulu fork is enabled (epoch: {0}) but no supernodes are configured in the participant list and perfect_peerdas_enabled is not enabled. Either configure supernodes for some participants or enable perfect_peerdas_enabled in network_params and have 16 participants.".format(
+                "Fulu fork is enabled (epoch: {0}) but no supernodes are configured, no nodes have 128 or more validators, and perfect_peerdas_enabled is not enabled. Either configure a supernode, ensure at least one node has 128+ validators, or enable perfect_peerdas_enabled in network_params with 16 participants.".format(
                     str(result["network_params"]["fulu_fork_epoch"])
                 )
             )
@@ -1183,7 +1186,7 @@ def default_network_params():
         "deposit_contract_address": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
         "seconds_per_slot": 12,
         "slot_duration_ms": 12000,
-        "num_validator_keys_per_node": 64,
+        "num_validator_keys_per_node": 128,
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
@@ -1265,7 +1268,7 @@ def default_minimal_network_params():
         "deposit_contract_address": "0x00000000219ab540356cBB839Cbe05303d7705Fa",
         "seconds_per_slot": 6,
         "slot_duration_ms": 6000,
-        "num_validator_keys_per_node": 64,
+        "num_validator_keys_per_node": 128,
         "preregistered_validator_keys_mnemonic": constants.DEFAULT_MNEMONIC,
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
