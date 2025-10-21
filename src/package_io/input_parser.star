@@ -83,6 +83,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "mempool_bridge_params",
 )
 
 
@@ -117,6 +118,7 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
+    result["mempool_bridge_params"] = get_default_mempool_bridge_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -186,6 +188,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "mempool_bridge_params":
+            for sub_attr in input_args["mempool_bridge_params"]:
+                sub_value = input_args["mempool_bridge_params"][sub_attr]
+                result["mempool_bridge_params"][sub_attr] = sub_value
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
@@ -332,6 +338,15 @@ def input_parser(plan, input_args):
                     str(result["network_params"]["fulu_fork_epoch"])
                 )
             )
+
+    if (
+        "mempool_bridge" in result["additional_services"]
+        and result["network_params"]["network"] not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in result["network_params"]["network"]
+    ):
+        fail(
+            "Mempool bridge is enabled but network is not mainnet, sepolia, hoodi or shadowfork, please set network to mainnet, sepolia, hoodi or shadowfork"
+        )
 
     return struct(
         participants=[
@@ -659,6 +674,15 @@ def input_parser(plan, input_args):
             max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
+        ),
+        mempool_bridge_params=struct(
+            image=result["mempool_bridge_params"]["image"],
+            source_enodes=result["mempool_bridge_params"]["source_enodes"],
+            mode=result["mempool_bridge_params"]["mode"],
+            log_level=result["mempool_bridge_params"]["log_level"],
+            send_concurrency=result["mempool_bridge_params"]["send_concurrency"],
+            polling_interval=result["mempool_bridge_params"]["polling_interval"],
+            retry_interval=result["mempool_bridge_params"]["retry_interval"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -1617,6 +1641,18 @@ def get_default_spamoor_params():
 def get_default_custom_flood_params():
     # this is a simple script that increases the balance of the coinbase address at a cadence
     return {"interval_between_transactions": 1}
+
+
+def get_default_mempool_bridge_params():
+    return {
+        "image": "ethpandaops/mempool-bridge:latest",
+        "source_enodes": [],
+        "mode": "p2p",
+        "log_level": "",
+        "send_concurrency": 10,
+        "polling_interval": "10s",
+        "retry_interval": "30s",
+    }
 
 
 def get_port_publisher_params(parameter_type, input_args=None):
