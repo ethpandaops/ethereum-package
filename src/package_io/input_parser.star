@@ -62,9 +62,6 @@ DEFAULT_REMOTE_SIGNER_IMAGES = {
 # MEV Params
 MEV_BOOST_PORT = 18550
 
-# Minimum number of validators required for a network to be valid is 1
-MIN_VALIDATORS = 1
-
 DEFAULT_ADDITIONAL_SERVICES = []
 
 ATTR_TO_BE_SKIPPED_AT_ROOT = (
@@ -1077,17 +1074,9 @@ def parse_network_params(plan, input_args):
             )
 
     if (
-        result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
+        result["network_params"]["network"] != constants.NETWORK_NAME.kurtosis
+        and constants.NETWORK_NAME.shadowfork not in result["network_params"]["network"]
     ):
-        if MIN_VALIDATORS > actual_num_validators:
-            fail(
-                "We require at least {0} validators but got {1}".format(
-                    MIN_VALIDATORS, actual_num_validators
-                )
-            )
-    else:
-        # Don't allow validators on non-kurtosis networks
         for participant in result["participants"]:
             participant["validator_count"] = 0
 
