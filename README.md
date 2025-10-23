@@ -568,7 +568,7 @@ network_params:
   max_request_blob_sidecars_electra: 1152
 
   # The number of validator keys that each CL validator node should get
-  num_validator_keys_per_node: 64
+  num_validator_keys_per_node: 128
 
   # This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
   # validator keys already preregistered as validators
@@ -820,6 +820,7 @@ additional_services:
   - forky
   - full_beaconchain_explorer
   - grafana
+  - mempool_bridge
   - prometheus
   - spamoor
   - tempo
@@ -1028,6 +1029,46 @@ docker_cache_params:
   github_prefix: "/gh/"
   google_prefix: "/gcr/"
 
+
+# Configuration place for mempool bridge (https://github.com/ethpandaops/mempool-bridge)
+mempool_bridge_params:
+  # The image to use for mempool bridge
+  image: ethpandaops/mempool-bridge:latest
+  # The mode for mempool bridge operation
+  # Valid values are "p2p" or "rpc"
+  # Default: "p2p"
+  mode: "p2p"
+  # The source enodes to use for mempool bridge
+  # Example:
+  # P2P mode:
+  # source_enodes:
+  #   - enode://1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef@127.0.0.1:30303
+  #   - enode://1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef@127.0.0.1:30304
+  # RPC mode:
+  # source_enodes:
+  #   - http://127.0.0.1:8545
+  #   - http://127.0.0.1:8546
+  # Default: []
+  source_enodes: []
+
+  # The log level for mempool bridge
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
+
+  # The number of concurrent goroutines to use when sending transactions to targets
+  # Default: 10
+  send_concurrency: 10
+
+  # The interval in seconds for polling the source for new transactions
+  # Default: "10s"
+  polling_interval: "10s"
+
+  # The retry interval duration for retrying failed operations
+  # Default: "30s"
+  retry_interval: "30s"
+
 # Supports four values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
@@ -1165,6 +1206,8 @@ spamoor_params:
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
   image: ethpandaops/ethereum-genesis-generator:5.1.0
+  # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
+  extra_env: {}
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
