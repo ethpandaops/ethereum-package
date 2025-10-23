@@ -14,7 +14,7 @@ participants:
     el_max_mem: 0
 # CL
     cl_type: lighthouse
-    cl_image: sigp/lighthouse:latest-unstable
+    cl_image: lighthouse-postgres:local
     cl_log_level: ""
     cl_extra_env_vars: {}
     cl_extra_labels: {}

@@ -8,6 +8,8 @@ constants = import_module("../../package_io/constants.star")
 
 blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 
+postgres_launcher = import_module("./postgres_launcher.star")
+
 LIGHTHOUSE_BINARY_COMMAND = "lighthouse"
 
 RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
@@ -198,6 +200,13 @@ def get_beacon_config(
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
+    # --- Add Postgres service ---
+    plan.print("Starting Postgres service before Lighthouse...")
+    postgres_service = postgres_launcher.launch_postgres(plan)
+    postgres_host = postgres_service.hostname()
+    plan.print("Postgres host: {}".format(postgres_host))
+
+
     # NOTE: If connecting to the merge devnet remotely we DON'T want the following flags; when they're not set, the node's external IP address is auto-detected
     #  from the peers it communicates with but when they're set they basically say "override the autodetection and
     #  use what I specify instead." This requires having a know external IP address and port, which we definitely won't
@@ -238,6 +247,9 @@ def get_beacon_config(
         "--metrics-allow-origin=*",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
+        "--beacon-node-backend=postgres",
+        "--postgres-url=postgresql://postgres:admin@{0}:5432/store".format(postgres_host),
+
         # Enable this flag once we have https://github.com/sigp/lighthouse/issues/5054 fixed
         # "--allow-insecure-genesis-sync",
         "--enable-private-discovery",
