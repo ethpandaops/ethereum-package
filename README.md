@@ -1098,12 +1098,13 @@ mempool_bridge_params:
   # Default: "30s"
   retry_interval: "30s"
 
-# Supports four values
+# Supports five values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
 # "mev-rs" - mev-boost, relays and builder are all spun up, powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 # "commit-boost" - mev-boost, relays and builder are all spun up, powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
+# "helix" - helix relay, flashbots builder and flashbots mev-boost are spun up, powered by [helix](https://github.com/gattaca-com/helix)
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 

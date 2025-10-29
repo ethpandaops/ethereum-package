@@ -49,6 +49,7 @@ flashbots_mev_boost = import_module(
 flashbots_mev_relay = import_module(
     "./src/mev/flashbots/mev_relay/mev_relay_launcher.star"
 )
+helix_relay = import_module("./src/mev/helix/helix_relay_launcher.star")
 mock_mev = import_module("./src/mev/flashbots/mock_mev/mock_mev_launcher.star")
 mev_custom_flood = import_module(
     "./src/mev/flashbots/mev_custom_flood/mev_custom_flood_launcher.star"
@@ -212,11 +213,12 @@ def run(plan, args={}):
     elif (
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
+        or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
     ):
         plan.print("Generating flashbots builder config file")
         flashbots_builder_config_file = flashbots_mev_rbuilder.new_builder_config(
             plan,
-            constants.FLASHBOTS_MEV_TYPE,
+            args_with_right_defaults.mev_type,
             network_params,
             constants.VALIDATING_REWARDS_ACCOUNT,
             network_params.preregistered_validator_keys_mnemonic,
@@ -347,6 +349,7 @@ def run(plan, args={}):
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
+        or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
     ):
         blocksim_uri = "http://{0}:{1}".format(
             all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
@@ -385,6 +388,23 @@ def run(plan, args={}):
                 global_node_selectors,
                 global_tolerations,
             )
+        elif args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE:
+            endpoint = helix_relay.launch_helix_relay(
+                plan,
+                mev_params,
+                network_id,
+                beacon_uri,
+                genesis_validators_root,
+                final_genesis_timestamp,
+                blocksim_uri,
+                network_params,
+                persistent,
+                args_with_right_defaults.port_publisher,
+                num_participants,
+                global_node_selectors,
+                global_tolerations,
+                el_cl_data_files_artifact_uuid,
+            )
         else:
             fail("Invalid MEV type")
 
@@ -407,6 +427,7 @@ def run(plan, args={}):
                 if (
                     args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
                     or args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE
+                    or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
                 ):
                     mev_boost_launcher = flashbots_mev_boost.new_mev_boost_launcher(
                         MEV_BOOST_SHOULD_CHECK_RELAY,
