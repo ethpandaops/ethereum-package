@@ -70,7 +70,7 @@ def generate_el_cl_genesis_data(
     genesis = plan.run_sh(
         name="run-generate-genesis",
         description="Creating genesis",
-        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed",
+        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed && cat > /tmp/convert.py << 'PYSCRIPT'\nimport yaml, json\ndef to_strings(obj):\n    if isinstance(obj, dict):\n        return {k: to_strings(v) for k, v in obj.items()}\n    elif isinstance(obj, list):\n        return [to_strings(item) for item in obj]\n    elif isinstance(obj, str):\n        return obj\n    else:\n        return str(obj)\nwith open('/network-configs/config.yaml', 'r') as f:\n    data = yaml.load(f, Loader=yaml.BaseLoader)\njson.dump(to_strings(data), open('/network-configs/config.json', 'w'), indent=2)\nPYSCRIPT\npython3 /tmp/convert.py",
         image=image,
         files=files,
         store=[
