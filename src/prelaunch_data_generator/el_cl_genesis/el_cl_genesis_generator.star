@@ -23,6 +23,7 @@ def generate_el_cl_genesis_data(
     latest_block,
     global_tolerations=[],
     global_node_selectors={},
+    mev_type=None,
 ):
     files = {}
     shadowfork_file = ""
@@ -67,10 +68,19 @@ def generate_el_cl_genesis_data(
 
     files[GENESIS_VALUES_PATH] = genesis_generation_config_artifact_name
 
+    # Build the run command with conditional config.json creation
+    run_command = "cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed"
+    
+    # Only create config.json if helix-relay is being used
+    # Once the helix-relay implements: https://github.com/gattaca-com/helix/issues/312 then we don't have to maintain a config.json file
+    # as they will load the ethspec from the beacon node.
+    if mev_type == "helix":
+        run_command += " && python3 -c \"import yaml, json; data=yaml.load(open('/network-configs/config.yaml'), Loader=yaml.BaseLoader); json.dump(data, open('/network-configs/config.json', 'w'), indent=2)\""
+
     genesis = plan.run_sh(
         name="run-generate-genesis",
         description="Creating genesis",
-        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed && cat > /tmp/convert.py << 'PYSCRIPT'\nimport yaml, json\ndef to_strings(obj):\n    if isinstance(obj, dict):\n        return {k: to_strings(v) for k, v in obj.items()}\n    elif isinstance(obj, list):\n        return [to_strings(item) for item in obj]\n    elif isinstance(obj, str):\n        return obj\n    else:\n        return str(obj)\nwith open('/network-configs/config.yaml', 'r') as f:\n    data = yaml.load(f, Loader=yaml.BaseLoader)\njson.dump(to_strings(data), open('/network-configs/config.json', 'w'), indent=2)\nPYSCRIPT\npython3 /tmp/convert.py",
+        run=run_command,
         image=image,
         files=files,
         store=[
