@@ -3,6 +3,7 @@ input_parser = import_module("../../../package_io/input_parser.star")
 static_files = import_module("../../../static_files/static_files.star")
 constants = import_module("../../../package_io/constants.star")
 flashbots_relay = import_module("../mev_relay/mev_relay_launcher.star")
+helix_relay = import_module("../helix/helix_relay_launcher.star")
 lighthouse = import_module("../../../cl/lighthouse/lighthouse_launcher.star")
 # MEV Builder flags
 
@@ -76,7 +77,7 @@ def new_builder_config_template_data(
     # Determine relay service name and port based on MEV type
     if mev_type == constants.HELIX_MEV_TYPE:
         relay_service = "helix-relay"
-        relay_port = 4040  # HELIX_RELAY_ENDPOINT_PORT
+        relay_port = helix_relay.HELIX_RELAY_ENDPOINT_PORT
         relay_name = "helix"
     else:
         relay_service = "mev-relay-api"
