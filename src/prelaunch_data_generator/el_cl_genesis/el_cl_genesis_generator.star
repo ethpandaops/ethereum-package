@@ -70,7 +70,7 @@ def generate_el_cl_genesis_data(
 
     # Build the run command with conditional config.json creation
     run_command = "cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed"
-    
+
     # Only create config.json if helix-relay is being used
     # Once the helix-relay implements: https://github.com/gattaca-com/helix/issues/312 then we don't have to maintain a config.json file
     # as they will load the ethspec from the beacon node.

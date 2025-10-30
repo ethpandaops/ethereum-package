@@ -5,7 +5,7 @@ shared_utils = import_module("../../shared_utils/shared_utils.star")
 input_parser = import_module("../../package_io/input_parser.star")
 static_files = import_module("../../static_files/static_files.star")
 
-HELIX_RELAY_NAME="helix-relay"
+HELIX_RELAY_NAME = "helix-relay"
 
 HELIX_RELAY_CONFIG_FILENAME = "config.yaml"
 HELIX_RELAY_MOUNT_DIRPATH_ON_SERVICE = "/config/"
@@ -64,7 +64,7 @@ def launch_helix_relay(
         index,
         0,
     )
-    
+
     # Get public ports for the website
     website_public_ports = shared_utils.get_mev_public_port(
         port_publisher,
@@ -72,10 +72,9 @@ def launch_helix_relay(
         index,
         1,
     )
-    
+
     # Combine both public port assignments
     public_ports.update(website_public_ports)
-    
 
     node_selectors = global_node_selectors
     redis = redis_module.run(
@@ -131,7 +130,9 @@ def launch_helix_relay(
 
     # Prepare template data for rendering
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[HELIX_RELAY_CONFIG_FILENAME] = template_and_data
+    template_and_data_by_rel_dest_filepath[
+        HELIX_RELAY_CONFIG_FILENAME
+    ] = template_and_data
 
     # Render the configuration file
     config_files_artifact_name = plan.render_templates(
@@ -151,10 +152,7 @@ def launch_helix_relay(
         name=HELIX_RELAY_NAME,
         config=ServiceConfig(
             image=image,
-            cmd=[
-                "--config",
-                config_file_path
-            ],
+            cmd=["--config", config_file_path],
             files={
                 HELIX_RELAY_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
@@ -181,6 +179,7 @@ def launch_helix_relay(
     return "http://{0}@{1}:{2}".format(
         constants.DEFAULT_MEV_PUBKEY, api.ip_address, HELIX_RELAY_ENDPOINT_PORT
     )
+
 
 def new_helix_relay_config_template_data(
     network_name,
