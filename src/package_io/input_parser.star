@@ -80,6 +80,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "bootnodoor_params",
     "mempool_bridge_params",
 )
 
@@ -189,6 +190,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["mempool_bridge_params"]:
                 sub_value = input_args["mempool_bridge_params"][sub_attr]
                 result["mempool_bridge_params"][sub_attr] = sub_value
+        elif attr == "bootnodoor_params":
+            for sub_attr in input_args["bootnodoor_params"]:
+                sub_value = input_args["bootnodoor_params"][sub_attr]
+                result["bootnodoor_params"][sub_attr] = sub_value
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
@@ -747,6 +752,15 @@ def input_parser(plan, input_args):
             ],
             other_nat_exit_ip=result["port_publisher"]["other"]["nat_exit_ip"],
         ),
+        bootnode=result["bootnode"],
+        bootnodoor_params=struct(
+            image=result["bootnodoor_params"]["image"],
+            min_cpu=result["bootnodoor_params"]["min_cpu"],
+            max_cpu=result["bootnodoor_params"]["max_cpu"],
+            min_mem=result["bootnodoor_params"]["min_mem"],
+            max_mem=result["bootnodoor_params"]["max_mem"],
+            extra_args=result["bootnodoor_params"]["extra_args"],
+        ),
     )
 
 
@@ -1165,6 +1179,8 @@ def default_input_args(input_args):
             "public_port_start": None,
         },
         "spamoor_params": get_default_spamoor_params(),
+        "bootnode": "client",
+        "bootnodoor_params": get_default_bootnodoor_params(),
     }
 
 
@@ -1644,6 +1660,17 @@ def get_default_mempool_bridge_params():
         "send_concurrency": 10,
         "polling_interval": "10s",
         "retry_interval": "30s",
+    }
+
+
+def get_default_bootnodoor_params():
+    return {
+        "image": constants.DEFAULT_BOOTNODOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 512,
+        "extra_args": [],
     }
 
 

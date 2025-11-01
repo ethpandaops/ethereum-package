@@ -60,6 +60,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    bootnode_enr_override=None,
 ):
     # Launch Beacon node
     beacon_config = get_beacon_config(
@@ -84,6 +85,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        bootnode_enr_override,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -123,6 +125,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    bootnode_enr_override=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -232,38 +235,36 @@ def get_beacon_config(
     else:
         cmd.append("--allow-insecure-genesis-sync")
 
+    bootnode_arg = bootnode_enr_override
+
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
         if (
             network_params.network == constants.NETWORK_NAME.kurtosis
             or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
-            if bootnode_contexts != None:
-                cmd.append(
-                    "--boot-nodes="
-                    + ",".join(
-                        [
-                            ctx.enr
-                            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                        ]
-                    )
+            if bootnode_arg == None and bootnode_contexts != None:
+                bootnode_arg = ",".join(
+                    [
+                        ctx.enr
+                        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
+                    ]
                 )
         elif network_params.network == constants.NETWORK_NAME.ephemery:
-            cmd.append(
-                "--boot-nodes="
-                + shared_utils.get_devnet_enrs_list(
+            if bootnode_arg == None:
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
-            )
-        else:  # Devnets
-            cmd.append(
-                "--boot-nodes="
-                + shared_utils.get_devnet_enrs_list(
-                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
-                )
+        elif bootnode_arg == None:  # Devnets
+            bootnode_arg = shared_utils.get_devnet_enrs_list(
+                plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
     else:  # Public networks
         cmd.append("--network=" + network_params.network)
+
+    # Add bootnode argument if set
+    if bootnode_arg != None:
+        cmd.append("--boot-nodes=" + bootnode_arg)
 
     # Add tempo telemetry integration if tempo is enabled
     if tempo_otlp_grpc_url != None:
