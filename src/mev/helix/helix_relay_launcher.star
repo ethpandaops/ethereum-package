@@ -1,4 +1,3 @@
-redis_module = import_module("github.com/kurtosis-tech/redis-package/main.star")
 postgres_module = import_module("github.com/kurtosis-tech/postgres-package/main.star")
 constants = import_module("../../package_io/constants.star")
 shared_utils = import_module("../../shared_utils/shared_utils.star")
@@ -31,12 +30,6 @@ POSTGRES_MIN_CPU = 10
 POSTGRES_MAX_CPU = 1000
 POSTGRES_MIN_MEMORY = 32
 POSTGRES_MAX_MEMORY = 1024
-
-# The min/max CPU/memory that redis can use
-REDIS_MIN_CPU = 500
-REDIS_MAX_CPU = 3000
-REDIS_MIN_MEMORY = 16
-REDIS_MAX_MEMORY = 1024
 
 
 def launch_helix_relay(
@@ -77,16 +70,6 @@ def launch_helix_relay(
     public_ports.update(website_public_ports)
 
     node_selectors = global_node_selectors
-    redis = redis_module.run(
-        plan,
-        service_name="helix-relay-redis",
-        min_cpu=REDIS_MIN_CPU,
-        max_cpu=REDIS_MAX_CPU,
-        min_memory=REDIS_MIN_MEMORY,
-        max_memory=REDIS_MAX_MEMORY,
-        node_selectors=node_selectors,
-        tolerations=tolerations,
-    )
     # making the password postgres as the relay expects it to be postgres
     # Using TimescaleDB image as Helix relay requires TimescaleDB extension
     postgres = postgres_module.run(
@@ -117,7 +100,6 @@ def launch_helix_relay(
         beacon_uris,
         validator_root,
         postgres,
-        redis,
         HELIX_RELAY_ENDPOINT_PORT,
         HELIX_RELAY_WEBSITE_PORT,
     )
@@ -188,7 +170,6 @@ def new_helix_relay_config_template_data(
     beacon_uris,
     validator_root,
     postgres,
-    redis,
     endpoint_port,
     website_port,
 ):
