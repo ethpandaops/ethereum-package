@@ -374,6 +374,14 @@ SUBCATEGORY_PARAMS = {
         "image",
         "extra_env",
     ],
+    "bootnodoor_params": [
+        "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "extra_args",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -418,6 +426,7 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "keymanager_enabled": "",
     "checkpoint_sync_enabled": "",
     "checkpoint_sync_url": "",
+    "bootnode": "",
 }
 
 
