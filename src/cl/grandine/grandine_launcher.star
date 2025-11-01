@@ -267,10 +267,7 @@ def get_beacon_config(
         ):
             if bootnode_contexts != None and bootnode_arg == None:
                 bootnode_arg = ",".join(
-                    [
-                        ctx.enr
-                        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                    ]
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
                 )
         elif network_params.network == constants.NETWORK_NAME.ephemery:
             if bootnode_arg == None:
@@ -289,10 +286,7 @@ def get_beacon_config(
                 )
 
     if bootnode_arg != None:
-        cmd.append(
-            "--boot-nodes="
-            + bootnode_arg
-        )
+        cmd.append("--boot-nodes=" + bootnode_arg)
 
     if len(participant.cl_extra_params) > 0:
         # we do the list comprehension as the default participant.extra_params is a proto repeated string

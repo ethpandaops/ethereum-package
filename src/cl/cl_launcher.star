@@ -105,7 +105,11 @@ def launch(
     # Generic bootnode ENR override - can be set from bootnodoor or any other bootnode service
     bootnode_enr_override = bootnodoor_enr
     if bootnode_enr_override != None:
-        plan.print("Using bootnode ENR override for all CL clients: {0}".format(bootnode_enr_override))
+        plan.print(
+            "Using bootnode ENR override for all CL clients: {0}".format(
+                bootnode_enr_override
+            )
+        )
 
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores

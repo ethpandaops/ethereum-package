@@ -183,6 +183,11 @@ def get_beacon_config(
         TEKU_ENTRYPOINT_COMMAND,
         "--logging=" + log_level,
         "--log-destination=CONSOLE",
+        "--network={0}".format(
+            network_params.network
+            if network_params.network in constants.PUBLIC_NETWORKS
+            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml"
+        ),
         "--data-path=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--data-storage-mode={0}".format(
             "ARCHIVE" if constants.ARCHIVE_MODE else "PRUNE"
@@ -264,31 +269,35 @@ def get_beacon_config(
         ):
             if bootnode_contexts != None and bootnode_arg == None:
                 bootnode_arg = "--p2p-discovery-bootnodes=" + ",".join(
-                    [
-                        ctx.enr
-                        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                    ]
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
                 )
         elif network_params.network == constants.NETWORK_NAME.ephemery:
             if bootnode_arg == None:
-                bootnode_arg = "--p2p-discovery-bootnodes=" + shared_utils.get_devnet_enrs_list(
-                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
+                bootnode_arg = (
+                    "--p2p-discovery-bootnodes="
+                    + shared_utils.get_devnet_enrs_list(
+                        plan, launcher.el_cl_genesis_data.files_artifact_uuid
+                    )
                 )
         elif constants.NETWORK_NAME.shadowfork in network_params.network:
             if bootnode_arg == None:
-                bootnode_arg = "--p2p-discovery-bootnodes=" + shared_utils.get_devnet_enrs_list(
-                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
+                bootnode_arg = (
+                    "--p2p-discovery-bootnodes="
+                    + shared_utils.get_devnet_enrs_list(
+                        plan, launcher.el_cl_genesis_data.files_artifact_uuid
+                    )
                 )
         else:  # Devnets
             if bootnode_arg == None:
-                bootnode_arg = "--p2p-discovery-bootnodes=" + shared_utils.get_devnet_enrs_list(
-                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
+                bootnode_arg = (
+                    "--p2p-discovery-bootnodes="
+                    + shared_utils.get_devnet_enrs_list(
+                        plan, launcher.el_cl_genesis_data.files_artifact_uuid
+                    )
                 )
 
     if bootnode_arg != None:
-        cmd.append(
-            "--p2p-discovery-bootnodes=" + bootnode_arg
-        )
+        cmd.append("--p2p-discovery-bootnodes=" + bootnode_arg)
 
     if len(participant.cl_extra_params) > 0:
         # we do the list comprehension as the default extra_params is a proto repeated string

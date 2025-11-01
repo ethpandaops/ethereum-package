@@ -269,7 +269,7 @@ def get_beacon_config(
 
     if participant.supernode:
         cmd.extend(supernode_cmd)
-    
+
     if bootnode_enr_override != None:
         cmd.append("--bootstrap-node=" + bootnode_enr_override)
     elif network_params.network not in constants.PUBLIC_NETWORKS:

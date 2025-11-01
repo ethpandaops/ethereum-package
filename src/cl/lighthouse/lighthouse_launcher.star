@@ -245,10 +245,7 @@ def get_beacon_config(
         ):
             if bootnode_arg == None and bootnode_contexts != None:
                 bootnode_arg = ",".join(
-                    [
-                        ctx.enr
-                        for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                    ]
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
                 )
         elif network_params.network == constants.NETWORK_NAME.ephemery:
             if bootnode_arg == None:
