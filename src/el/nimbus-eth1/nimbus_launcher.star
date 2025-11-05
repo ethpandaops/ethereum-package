@@ -277,6 +277,7 @@ def get_el_context(
         ws_url=ws_url,
         service_name=service_name,
         el_metrics_info=[nimbus_metrics_info],
+        ip_address=service.ip_address,
     )
 
 

@@ -284,6 +284,7 @@ def get_el_context(
         enr=enr,
         service_name=service_name,
         el_metrics_info=[ethrex_metrics_info],
+        ip_address=service.ip_address,
     )
 
 

@@ -10,11 +10,13 @@ def new_el_context(
     enr="",
     service_name="",
     el_metrics_info=None,
+    ip_address="",
 ):
     return struct(
         client_name=client_name,
         enode=enode,
         ip_addr=ip_addr,
+        ip_address=ip_address,
         rpc_port_num=rpc_port_num,
         ws_port_num=ws_port_num,
         engine_rpc_port_num=engine_rpc_port_num,
