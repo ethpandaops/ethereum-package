@@ -16,8 +16,6 @@ def new_el_context(
         client_name=client_name,
         enode=enode,
         dns_name=dns_name,
-        ip_addr=ip_addr,
-        ip_address=ip_address,
         rpc_port_num=rpc_port_num,
         ws_port_num=ws_port_num,
         engine_rpc_port_num=engine_rpc_port_num,

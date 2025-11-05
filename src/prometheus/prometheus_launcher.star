@@ -194,7 +194,7 @@ def get_metrics_jobs(
                 new_metrics_job(
                     job_name="ethereum-metrics-exporter-{0}".format(context.pair_name),
                     endpoint="{}:{}".format(
-                        context.dns_name,
+                        context.ip_addr,
                         context.metrics_port_num,
                     ),
                     metrics_path="/metrics",
@@ -219,7 +219,7 @@ def get_metrics_jobs(
                 new_metrics_job(
                     job_name="xatu-sentry-{0}".format(context.pair_name),
                     endpoint="{}:{}".format(
-                        context.dns_name,
+                        context.ip_addr,
                         context.metrics_port_num,
                     ),
                     metrics_path="/metrics",

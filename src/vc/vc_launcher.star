@@ -50,7 +50,7 @@ def get_vc_config(
 
     if snooper_enabled:
         beacon_http_url = "http://{0}:{1}".format(
-            snooper_beacon_context.dns_name,
+            snooper_beacon_context.ip_addr,
             snooper_beacon_context.beacon_rpc_port_num,
         )
         beacon_http_urls = [beacon_http_url]

@@ -64,7 +64,7 @@ def launch_dora(
         execution_snooper_url = ""
         if snooper_el_engine_context:
             execution_snooper_url = "http://{0}:{1}".format(
-                snooper_el_engine_context.dns_name,
+                snooper_el_engine_context.ip_addr,
                 snooper_el_engine_context.engine_rpc_port_num,
             )
 

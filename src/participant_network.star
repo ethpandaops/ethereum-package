@@ -237,7 +237,7 @@ def launch_participant_network(
         return cl_context_module.new_cl_context(
             client_name=cl_context.client_name,
             enr=cl_context.enr,
-            ip_addr=cl_context.dns_name,
+            ip_addr=cl_context.ip_addr,
             http_port=cl_context.http_port,
             beacon_http_url=effective_beacon_url,
             cl_nodes_metrics_info=cl_context.cl_nodes_metrics_info,

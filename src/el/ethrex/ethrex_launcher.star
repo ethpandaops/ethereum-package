@@ -280,7 +280,7 @@ def get_el_context(
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
         rpc_http_url=http_url,
-        ws_url=ws_url,
+        # ws_url=ws_url,
         enr=enr,
         service_name=service_name,
         el_metrics_info=[ethrex_metrics_info],
