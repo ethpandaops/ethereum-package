@@ -196,12 +196,12 @@ def new_hosts_template_data(
         )
         if participant.snooper_el_rpc_context:
             rpchost = "http://{0}:{1}".format(
-                participant.snooper_el_rpc_context.ip_addr,
+                participant.snooper_el_rpc_context.dns_name,
                 participant.snooper_el_rpc_context.rpc_port_num,
             )
         else:
             rpchost = "http://{0}:{1}".format(
-                el_client.ip_addr,
+                el_client.dns_name,
                 el_client.rpc_port_num,
             )
 

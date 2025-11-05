@@ -216,7 +216,7 @@ def launch_participant_network(
 
             # Store the blobber URL mapping
             blobber_http_url = "http://{0}:{1}".format(
-                blobber.ip_addr, blobber.port_num
+                blobber.dns_name, blobber.port_num
             )
             cl_context_to_blobber_url[
                 config.cl_context.beacon_service_name
@@ -237,7 +237,7 @@ def launch_participant_network(
         return cl_context_module.new_cl_context(
             client_name=cl_context.client_name,
             enr=cl_context.enr,
-            ip_addr=cl_context.ip_addr,
+            ip_addr=cl_context.dns_name,
             http_port=cl_context.http_port,
             beacon_http_url=effective_beacon_url,
             cl_nodes_metrics_info=cl_context.cl_nodes_metrics_info,

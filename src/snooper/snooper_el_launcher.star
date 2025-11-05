@@ -84,11 +84,11 @@ def get_config(
     public_ports,
 ):
     engine_port_num = "http://{0}:{1}".format(
-        el_context.ip_addr,
+        el_context.dns_name,
         el_context.engine_rpc_port_num,
     )
     rpc_port_num = "http://{0}:{1}".format(
-        el_context.ip_addr,
+        el_context.dns_name,
         el_context.rpc_port_num,
     )
     cmd = [

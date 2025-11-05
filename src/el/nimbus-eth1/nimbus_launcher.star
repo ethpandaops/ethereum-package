@@ -269,7 +269,7 @@ def get_el_context(
     return el_context.new_el_context(
         client_name="nimbus",
         enode=enode,
-        ip_addr=service.name,
+        dns_name=service.name,
         rpc_port_num=WS_RPC_PORT_NUM,
         ws_port_num=WS_RPC_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
@@ -277,7 +277,7 @@ def get_el_context(
         ws_url=ws_url,
         service_name=service_name,
         el_metrics_info=[nimbus_metrics_info],
-        ip_address=service.ip_address,
+        ip_addr=service.ip_address,
     )
 
 

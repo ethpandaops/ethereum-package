@@ -118,19 +118,19 @@ def get_beacon_config(
     )
 
     el_client_rpc_url_str = "http://{0}:{1}".format(
-        el_context.ip_addr,
+        el_context.dns_name,
         el_context.rpc_port_num,
     )
 
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if participant.snooper_enabled:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
+            snooper_el_engine_context.dns_name,
             snooper_el_engine_context.engine_rpc_port_num,
         )
     else:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.ip_addr,
+            el_context.dns_name,
             el_context.engine_rpc_port_num,
         )
 

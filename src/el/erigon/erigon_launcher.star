@@ -297,6 +297,7 @@ def get_el_context(
     return el_context.new_el_context(
         client_name="erigon",
         enode=enode,
+        dns_name=service.name,
         ip_addr=service.name,
         rpc_port_num=WS_RPC_PORT_NUM,
         ws_port_num=WS_RPC_PORT_NUM,
@@ -306,7 +307,7 @@ def get_el_context(
         enr=enr,
         service_name=service_name,
         el_metrics_info=[erigon_metrics_info],
-        ip_address=service.ip_address,
+        ip_addr=service.ip_address,
     )
 
 

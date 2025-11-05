@@ -145,12 +145,12 @@ def launch_full_beacon(
     )
 
     el_uri = "http://{0}:{1}".format(
-        el_contexts[0].ip_addr, el_contexts[0].rpc_port_num
+        el_contexts[0].dns_name, el_contexts[0].rpc_port_num
     )
     redis_url = "{}:{}".format(redis_output.hostname, redis_output.port_number)
 
     template_data = new_config_template_data(
-        cl_contexts[0].ip_addr,
+        cl_contexts[0].dns_name,
         cl_contexts[0].http_port,
         cl_contexts[0].client_name,
         el_uri,

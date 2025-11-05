@@ -256,7 +256,7 @@ def run(plan, args={}):
 
     plan.print(
         "NODE JSON RPC URI: '{0}:{1}'".format(
-            all_participants[0].el_context.ip_addr,
+            all_participants[0].el_context.dns_name,
             all_participants[0].el_context.rpc_port_num,
         )
     )
@@ -289,7 +289,7 @@ def run(plan, args={}):
     )
 
     fuzz_target = "http://{0}:{1}".format(
-        all_el_contexts[0].ip_address,
+        all_el_contexts[0].ip_addr,
         all_el_contexts[0].rpc_port_num,
     )
     plan.print("Fuzz target: {0}".format(fuzz_target))
@@ -325,7 +325,7 @@ def run(plan, args={}):
         and args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE
     ):
         el_uri = "{0}:{1}".format(
-            all_el_contexts[0].ip_addr,
+            all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
         beacon_uri = "{0}".format(all_cl_contexts[0].beacon_http_url)[
@@ -349,7 +349,7 @@ def run(plan, args={}):
         or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
     ):
         blocksim_uri = "http://{0}:{1}".format(
-            all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
+            all_el_contexts[-1].dns_name, all_el_contexts[-1].rpc_port_num
         )
         beacon_uri = all_cl_contexts[-1].beacon_http_url
 
