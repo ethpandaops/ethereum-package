@@ -292,7 +292,6 @@ def run(plan, args={}):
         all_el_contexts[0].ip_addr,
         all_el_contexts[0].rpc_port_num,
     )
-    plan.print("Fuzz target: {0}".format(fuzz_target))
 
     # Broadcaster forwards requests, sent to it, to all nodes in parallel
     if "broadcaster" in args_with_right_defaults.additional_services:
