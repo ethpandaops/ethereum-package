@@ -91,6 +91,7 @@ def launch_participant_network(
         el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
             plan,
             ethereum_genesis_generator_image,
+            args_with_right_defaults.ethereum_genesis_generator_params,
             el_cl_genesis_config_template,
             el_cl_genesis_additional_contracts_template,
             final_genesis_timestamp,
@@ -603,5 +604,6 @@ def launch_participant_network(
         el_cl_data.genesis_validators_root,
         el_cl_data.files_artifact_uuid,
         network_id,
-        el_cl_data.osaka_time,
+        el_cl_data.shadowfork_times.get("osaka_time", ""),
+        el_cl_data.shadowfork_block_height,
     )

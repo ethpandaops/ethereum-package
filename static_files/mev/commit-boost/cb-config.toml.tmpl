@@ -9,3 +9,9 @@ port = {{ .Port }}
 id = "mev_relay_{{$index}}"
 url = "{{ $relay }}"
 {{- end }}
+
+[logs.stdout]
+level = "debug"
+
+[logs.file]
+enabled=false

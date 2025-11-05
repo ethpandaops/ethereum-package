@@ -17,6 +17,7 @@ forkmon = import_module("./src/forkmon/forkmon_launcher.star")
 dora = import_module("./src/dora/dora_launcher.star")
 dugtrio = import_module("./src/dugtrio/dugtrio_launcher.star")
 blutgang = import_module("./src/blutgang/blutgang_launcher.star")
+erpc = import_module("./src/erpc/erpc_launcher.star")
 blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 forky = import_module("./src/forky/forky_launcher.star")
 tracoor = import_module("./src/tracoor/tracoor_launcher.star")
@@ -52,6 +53,7 @@ mev_custom_flood = import_module(
     "./src/mev/flashbots/mev_custom_flood/mev_custom_flood_launcher.star"
 )
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
+mempool_bridge = import_module("./src/mempool_bridge/mempool_bridge_launcher.star")
 assertoor = import_module("./src/assertoor/assertoor_launcher.star")
 get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
@@ -135,6 +137,9 @@ def run(plan, args={}):
         static_files.GRAFANA_DASHBOARD_PROVIDERS_CONFIG_TEMPLATE_FILEPATH
     )
     tempo_config_template = read_file(static_files.TEMPO_CONFIG_TEMPLATE_FILEPATH)
+    mempool_bridge_config_template = read_file(
+        static_files.MEMPOOL_BRIDGE_CONFIG_TEMPLATE_FILEPATH
+    )
     prometheus_additional_metrics_jobs = []
     raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
     jwt_file = plan.upload_files(
@@ -231,6 +236,7 @@ def run(plan, args={}):
         el_cl_data_files_artifact_uuid,
         network_id,
         osaka_time,
+        shadowfork_block_height,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults,
@@ -539,6 +545,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
                 args_with_right_defaults.blockscout_params,
                 network_params,
+                shadowfork_block_height,
             )
             plan.print("Successfully launched blockscout")
         elif additional_service == "dora":
@@ -598,6 +605,22 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched blutgang")
+        elif additional_service == "erpc":
+            plan.print("Launching erpc")
+            erpc_config_template = read_file(static_files.ERPC_CONFIG_TEMPLATE_FILEPATH)
+            erpc.launch_erpc(
+                plan,
+                erpc_config_template,
+                all_participants,
+                args_with_right_defaults.participants,
+                network_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched erpc")
         elif additional_service == "blobscan":
             plan.print("Launching blobscan")
             blobscan.launch_blobscan(
@@ -782,6 +805,22 @@ def run(plan, args={}):
                 global_tolerations,
                 args_with_right_defaults.docker_cache_params,
             )
+        elif additional_service == "mempool_bridge":
+            plan.print("Launching mempool-bridge")
+            mempool_bridge.launch_mempool_bridge(
+                plan,
+                mempool_bridge_config_template,
+                all_el_contexts,
+                args_with_right_defaults.mempool_bridge_params,
+                args_with_right_defaults.network_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
+            )
+            plan.print("Successfully launched mempool-bridge")
         elif additional_service == "spamoor":
             plan.print("Launching spamoor")
             spamoor_config_template = read_file(
