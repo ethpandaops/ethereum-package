@@ -268,30 +268,27 @@ def get_beacon_config(
             or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
             if bootnode_contexts != None and bootnode_arg == None:
-                bootnode_arg = "--p2p-discovery-bootnodes=" + ",".join(
+                bootnode_arg = ",".join(
                     [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
                 )
         elif network_params.network == constants.NETWORK_NAME.ephemery:
             if bootnode_arg == None:
                 bootnode_arg = (
-                    "--p2p-discovery-bootnodes="
-                    + shared_utils.get_devnet_enrs_list(
+                    shared_utils.get_devnet_enrs_list(
                         plan, launcher.el_cl_genesis_data.files_artifact_uuid
                     )
                 )
         elif constants.NETWORK_NAME.shadowfork in network_params.network:
             if bootnode_arg == None:
                 bootnode_arg = (
-                    "--p2p-discovery-bootnodes="
-                    + shared_utils.get_devnet_enrs_list(
+                    shared_utils.get_devnet_enrs_list(
                         plan, launcher.el_cl_genesis_data.files_artifact_uuid
                     )
                 )
         else:  # Devnets
             if bootnode_arg == None:
                 bootnode_arg = (
-                    "--p2p-discovery-bootnodes="
-                    + shared_utils.get_devnet_enrs_list(
+                    shared_utils.get_devnet_enrs_list(
                         plan, launcher.el_cl_genesis_data.files_artifact_uuid
                     )
                 )

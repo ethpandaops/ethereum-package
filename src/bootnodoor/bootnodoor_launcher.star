@@ -35,6 +35,9 @@ def launch_bootnodoor(
     # Get the genesis validators root from the genesis data
     genesis_validators_root = el_cl_genesis_data.genesis_validators_root
 
+    # Get the EL genesis hash
+    el_genesis_hash = get_el_genesis_hash(plan, network_params, el_cl_genesis_data)
+
     # Fetch external bootnodes for non-kurtosis networks
     # For kurtosis/shadowfork: bootnodoor is the primary bootnode, no external bootnodes needed
     # For ephemery/devnets: read bootstrap_nodes.txt from genesis data
@@ -58,6 +61,7 @@ def launch_bootnodoor(
         el_cl_genesis_data,
         private_key,
         genesis_validators_root,
+        el_genesis_hash,
         external_bootnodes,
         global_node_selectors,
         tolerations,
@@ -80,7 +84,20 @@ def launch_bootnodoor(
 
     bootnodoor_enr = response["body"]
 
-    return bootnodoor_enr
+    # Request ENODE from the running bootnodoor service for EL bootnode
+    enode_recipe = GetHttpRequestRecipe(
+        endpoint="/enode",
+        port_id=constants.HTTP_PORT_ID,
+    )
+
+    enode_response = plan.request(
+        recipe=enode_recipe,
+        service_name=SERVICE_NAME,
+    )
+
+    bootnodoor_enode = enode_response["body"]
+
+    return bootnodoor_enr, bootnodoor_enode
 
 
 def get_config(
@@ -88,6 +105,7 @@ def get_config(
     el_cl_genesis_data,
     private_key,
     genesis_validators_root,
+    el_genesis_hash,
     external_bootnodes,
     node_selectors,
     tolerations,
@@ -98,6 +116,10 @@ def get_config(
         "{0}/config.yaml".format(constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS),
         "--genesis-validators-root",
         genesis_validators_root,
+        "--el-config",
+        "{0}/genesis.json".format(constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS),
+        "--el-genesis-hash",
+        el_genesis_hash,
         "--private-key",
         private_key,
         "--bind-addr",
@@ -133,6 +155,26 @@ def get_config(
         node_selectors=node_selectors,
         tolerations=tolerations,
     )
+
+
+def get_el_genesis_hash(plan, network_params, el_cl_genesis_data):
+    # For mainnet and sepolia, use static genesis hashes
+    if network_params.network == "mainnet":
+        return "0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3"
+    elif network_params.network == "sepolia":
+        return "0x25a5cc106eea7138acab33231d7160d69cb777ee0c2c553fcddf5138993e6dd9"
+
+    # For other networks, extract from deposit_contract_block_hash.txt
+    result = plan.run_sh(
+        name="read-el-genesis-hash",
+        description="Reading EL genesis hash from deposit_contract_block_hash.txt",
+        run="cat /network-configs/deposit_contract_block_hash.txt",
+        files={
+            "/network-configs": el_cl_genesis_data.files_artifact_uuid,
+        },
+        wait=None,
+    )
+    return result.output
 
 
 def generate_random_private_key(plan):

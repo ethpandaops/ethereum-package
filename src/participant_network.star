@@ -144,9 +144,10 @@ def launch_participant_network(
 
     # Launch bootnodoor if configured
     bootnodoor_enr = None
+    bootnodoor_enode = None
     if args_with_right_defaults.bootnode == "bootnodoor":
         plan.print("Launching bootnodoor as bootnode service")
-        bootnodoor_enr = bootnodoor_launcher.launch_bootnodoor(
+        bootnodoor_enr, bootnodoor_enode = bootnodoor_launcher.launch_bootnodoor(
             plan,
             args_with_right_defaults.bootnodoor_params,
             el_cl_data,
@@ -156,6 +157,7 @@ def launch_participant_network(
             args_with_right_defaults.docker_cache_params,
         )
         plan.print("Bootnodoor launched with ENR: {0}".format(bootnodoor_enr))
+        plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
 
     # Launch all execution layer clients
     all_el_contexts = el_client_launcher.launch(
@@ -174,6 +176,7 @@ def launch_participant_network(
         args_with_right_defaults.mev_type,
         args_with_right_defaults.mev_params,
         extra_files_artifacts,
+        bootnodoor_enode,
     )
 
     # Launch all consensus layer clients
