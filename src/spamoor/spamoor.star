@@ -201,7 +201,7 @@ def new_hosts_template_data(
             )
         else:
             rpchost = "http://{0}:{1}".format(
-                el_client.dns_name,
+                el_client.ip_addr,
                 el_client.rpc_port_num,
             )
 

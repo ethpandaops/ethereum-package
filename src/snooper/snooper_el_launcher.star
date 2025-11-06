@@ -68,7 +68,7 @@ def launch_snooper(
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
     return snooper_el_engine_context.new_snooper_el_client_context(
-        snooper_service.name,
+        snooper_service.ip_address,
         SNOOPER_ENGINE_RPC_PORT_NUM,
         SNOOPER_EL_RPC_PORT_NUM,
     )
@@ -84,11 +84,11 @@ def get_config(
     public_ports,
 ):
     engine_port_num = "http://{0}:{1}".format(
-        el_context.dns_name,
+        el_context.ip_addr,
         el_context.engine_rpc_port_num,
     )
     rpc_port_num = "http://{0}:{1}".format(
-        el_context.dns_name,
+        el_context.ip_addr,
         el_context.rpc_port_num,
     )
     cmd = [
