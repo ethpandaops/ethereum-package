@@ -5,7 +5,7 @@ participants:
 
 mev_type: flashbots
 mev_params:
-  mev_builder_image: ethpandaops/reth-rbuilder:develop-d8d17c9
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
   mev_relay_image: ethpandaops/mev-boost-relay:main
   mev_boost_image: ethpandaops/mev-boost:develop
 
