@@ -273,24 +273,18 @@ def get_beacon_config(
                 )
         elif network_params.network == constants.NETWORK_NAME.ephemery:
             if bootnode_arg == None:
-                bootnode_arg = (
-                    shared_utils.get_devnet_enrs_list(
-                        plan, launcher.el_cl_genesis_data.files_artifact_uuid
-                    )
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
+                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
         elif constants.NETWORK_NAME.shadowfork in network_params.network:
             if bootnode_arg == None:
-                bootnode_arg = (
-                    shared_utils.get_devnet_enrs_list(
-                        plan, launcher.el_cl_genesis_data.files_artifact_uuid
-                    )
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
+                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
         else:  # Devnets
             if bootnode_arg == None:
-                bootnode_arg = (
-                    shared_utils.get_devnet_enrs_list(
-                        plan, launcher.el_cl_genesis_data.files_artifact_uuid
-                    )
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
+                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
 
     if bootnode_arg != None:
