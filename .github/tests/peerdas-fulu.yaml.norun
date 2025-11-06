@@ -78,5 +78,3 @@ additional_services:
 
 snooper_enabled: false
 
-dora_params:
-  image: ethpandaops/dora:fulu-support
