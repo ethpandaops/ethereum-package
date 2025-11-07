@@ -61,7 +61,7 @@ def launch_helix_relay(
     # Get public ports for the website
     website_public_ports = shared_utils.get_mev_public_port(
         port_publisher,
-        constants.METRICS_PORT_ID,
+        constants.HTTP_PORT_ID,
         index,
         1,
     )
@@ -143,7 +143,7 @@ def launch_helix_relay(
                 "http": PortSpec(
                     number=HELIX_RELAY_ENDPOINT_PORT, transport_protocol="TCP"
                 ),
-                "metrics": PortSpec(
+                "website": PortSpec(
                     number=HELIX_RELAY_WEBSITE_PORT, transport_protocol="TCP"
                 ),
             },
