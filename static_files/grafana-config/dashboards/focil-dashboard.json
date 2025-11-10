@@ -1344,7 +1344,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by($sum_by) (12 * rate(execution_inclusion_list_transactions_included_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
+          "expr": "sum by($sum_by) (12 * rate(execution_inclusion_list_block_validation_transactions_included_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
           "interval": "",
           "legendFormat": "{{job}}",
           "range": true,
@@ -1439,8 +1439,9 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by($sum_by) (12 * rate(execution_inclusion_list_transactions_excluded_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
-          "legendFormat": "__auto",
+          "expr": "sum by($sum_by, reason) (12 * rate(execution_inclusion_list_block_validation_transactions_excluded_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
+          "interval": "",
+          "legendFormat": "{{job}} {{reason}}",
           "range": true,
           "refId": "A"
         }
@@ -1634,7 +1635,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by($sum_by) (12 * rate(execution_block_building_inclusion_list_transactions_included_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
+          "expr": "sum by($sum_by) (12 * rate(execution_inclusion_list_block_building_transactions_included_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
           "legendFormat": "{{job}}",
           "range": true,
           "refId": "A"
@@ -1728,8 +1729,9 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by($sum_by) (12 * rate(execution_block_building_inclusion_list_transactions_excluded_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
-          "legendFormat": "__auto",
+          "expr": "sum by($sum_by, reason) (12 * rate(execution_inclusion_list_block_building_transactions_excluded_total{client_name=~\"$client\", job=~\"$job\"}[$__rate_interval]))",
+          "interval": "",
+          "legendFormat": "{{job}} {{reason}}",
           "range": true,
           "refId": "A"
         }
