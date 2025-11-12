@@ -423,6 +423,7 @@ def input_parser(plan, input_args):
                 blobber_image=participant["blobber_image"],
                 keymanager_enabled=participant["keymanager_enabled"],
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
+                checkpoint_sync_enabled=participant["checkpoint_sync_enabled"],
             )
             for participant in result["participants"]
         ],
