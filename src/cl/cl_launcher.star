@@ -181,7 +181,11 @@ def launch(
                 )
             )
         checkpoint_sync_url = args_with_right_defaults.checkpoint_sync_url
-        if args_with_right_defaults.checkpoint_sync_enabled:
+        # Use participant-level checkpoint_sync_enabled if set, otherwise use global
+        checkpoint_sync_enabled = args_with_right_defaults.checkpoint_sync_enabled
+        if participant.checkpoint_sync_enabled != None:
+            checkpoint_sync_enabled = participant.checkpoint_sync_enabled
+        if checkpoint_sync_enabled:
             if args_with_right_defaults.checkpoint_sync_url == "":
                 if (
                     network_params.network in constants.PUBLIC_NETWORKS
@@ -218,7 +222,7 @@ def launch(
                 persistent,
                 tolerations,
                 node_selectors,
-                args_with_right_defaults.checkpoint_sync_enabled,
+                checkpoint_sync_enabled,
                 checkpoint_sync_url,
                 args_with_right_defaults.port_publisher,
                 index,
@@ -268,7 +272,7 @@ def launch(
                 persistent,
                 tolerations,
                 node_selectors,
-                args_with_right_defaults.checkpoint_sync_enabled,
+                checkpoint_sync_enabled,
                 checkpoint_sync_url,
                 args_with_right_defaults.port_publisher,
                 index,

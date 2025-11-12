@@ -1402,6 +1402,7 @@ def default_participant():
         "builder_network_params": None,
         "keymanager_enabled": None,
         "vc_beacon_node_indices": None,
+        "checkpoint_sync_enabled": None,
     }
 
 

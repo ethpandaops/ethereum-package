@@ -490,6 +490,12 @@ participants:
     # Defaults null and then set to default global keymanager_enabled (false)
     keymanager_enabled: null
 
+    # Per-participant override for checkpoint sync. If set, this will override the global checkpoint_sync_enabled flag for this participant.
+    # Defaults to null (uses global checkpoint_sync_enabled setting)
+    # Set to true to enable checkpoint sync for this participant (even if globally disabled)
+    # Set to false to disable checkpoint sync for this participant (even if globally enabled)
+    checkpoint_sync_enabled: null
+
 # Participants matrix creates a participant for each combination of EL, CL and VC clients
 # Each EL/CL/VC item can provide the same parameters as a standard participant
 participants_matrix: {}
@@ -1173,6 +1179,7 @@ global_node_selectors: {}
 keymanager_enabled: false
 
 # Global flag to enable checkpoint sync across the network
+# Can be overridden per participant using the checkpoint_sync_enabled flag in the participant configuration
 checkpoint_sync_enabled: false
 
 # Global flag to set checkpoint sync url
