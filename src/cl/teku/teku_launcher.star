@@ -169,6 +169,11 @@ def get_beacon_config(
         public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[3]}
+            )
+        )
 
     discovery_port_tcp = (
         public_ports_for_component[0]
