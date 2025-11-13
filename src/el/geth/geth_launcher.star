@@ -51,6 +51,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
+    bootnodoor_enode=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -69,6 +70,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
+        bootnodoor_enode,
     )
 
     service = plan.add_service(service_name, config)
@@ -96,6 +98,7 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
+    bootnodoor_enode=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -221,7 +224,10 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"
 
-    if (
+    # Handle bootnode configuration with bootnodoor_enode override
+    if bootnodoor_enode != None:
+        cmd.append("--bootnodes=" + bootnodoor_enode)
+    elif (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
@@ -234,17 +240,6 @@ def get_config(
                 ]
             )
         )
-        if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            cmd.append(
-                "--override.osaka=" + str(launcher.shadowfork_times["osaka_time"])
-            )
-            cmd.append(
-                "--override.bpo1=" + str(launcher.shadowfork_times["bpo_1_time"])
-            )
-            cmd.append(
-                "--override.bpo2=" + str(launcher.shadowfork_times["bpo_2_time"])
-            )
-
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in network_params.network
@@ -255,6 +250,11 @@ def get_config(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
         )
+
+    if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
+        cmd.append("--override.osaka=" + str(launcher.shadowfork_times["osaka_time"]))
+        cmd.append("--override.bpo1=" + str(launcher.shadowfork_times["bpo_1_time"]))
+        cmd.append("--override.bpo2=" + str(launcher.shadowfork_times["bpo_2_time"]))
 
     if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
