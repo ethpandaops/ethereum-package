@@ -40,10 +40,7 @@ def launch_spamoor(
     spammers = []
 
     for index, spammer in enumerate(spamoor_params.spammers):
-        if (
-            "peerdas" in network_params.network
-            or network_params.fulu_fork_epoch != constants.FAR_FUTURE_EPOCH
-        ) and "blob" in spammer["scenario"]:
+        if (osaka_time != "") and "blob" in spammer["scenario"]:
             if "config" not in spammer:
                 spammer["config"] = {}
             spammer["config"]["fulu_activation"] = osaka_time
