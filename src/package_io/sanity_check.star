@@ -65,6 +65,7 @@ PARTICIPANT_CATEGORIES = {
         "builder_network_params",
         "keymanager_enabled",
         "vc_beacon_node_indices",
+        "checkpoint_sync_enabled",
     ],
 }
 
@@ -116,6 +117,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "count",
             "supernode",
             "vc_beacon_node_indices",
+            "checkpoint_sync_enabled",
         ],
         "vc": [
             "vc_type",
