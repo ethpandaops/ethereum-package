@@ -69,7 +69,7 @@ def launch_assertoor(
 
         client_info = new_client_info(
             cl_client.beacon_http_url,
-            el_client.ip_addr,
+            el_client.dns_name,
             el_client.rpc_port_num,
             participant.snooper_el_engine_context,
             participant.snooper_beacon_context,
@@ -218,13 +218,13 @@ def new_client_info(
     if el_snooper_context != None:
         el_snooper_enabled = True
         el_snooper_url = "http://{0}:{1}".format(
-            el_snooper_context.ip_addr,
+            el_snooper_context.dns_name,
             el_snooper_context.engine_rpc_port_num,
         )
     if cl_snooper_context != None:
         cl_snooper_enabled = True
         cl_snooper_url = "http://{0}:{1}".format(
-            cl_snooper_context.ip_addr,
+            cl_snooper_context.dns_name,
             cl_snooper_context.beacon_rpc_port_num,
         )
 

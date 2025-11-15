@@ -51,7 +51,7 @@ def launch(
         ),
         "--execution-url",
         "http://{}:{}".format(
-            el_context.ip_addr,
+            el_context.dns_name,
             el_context.rpc_port_num,
         ),
     ]
