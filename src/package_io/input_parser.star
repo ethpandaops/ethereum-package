@@ -405,6 +405,8 @@ def input_parser(plan, input_args):
                 remote_signer_max_cpu=participant["remote_signer_max_cpu"],
                 remote_signer_min_mem=participant["remote_signer_min_mem"],
                 remote_signer_max_mem=participant["remote_signer_max_mem"],
+                el_ipv6_enabled=participant["el_ipv6_enabled"],
+                cl_ipv6_enabled=participant["cl_ipv6_enabled"],
                 validator_count=participant["validator_count"],
                 tolerations=participant["tolerations"],
                 node_selectors=participant["node_selectors"],
@@ -704,6 +706,7 @@ def input_parser(plan, input_args):
         ),
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
+        ipv6_enabled=result["ipv6_enabled"],
         keymanager_enabled=result["keymanager_enabled"],
         extra_files=result.get("extra_files", {}),
         checkpoint_sync_enabled=result["checkpoint_sync_enabled"],
@@ -1002,6 +1005,14 @@ def parse_network_params(plan, input_args):
                 "num_validator_keys_per_node"
             ]
 
+        el_ipv6_enabled = participant["el_ipv6_enabled"]
+        if el_ipv6_enabled == None:
+            el_ipv6_enabled = result["ipv6_enabled"]
+
+        cl_ipv6_enabled = participant["cl_ipv6_enabled"]
+        if cl_ipv6_enabled == None:
+            cl_ipv6_enabled = result["ipv6_enabled"]
+
         actual_num_validators += participant["validator_count"]
 
         cl_extra_params = participant.get("cl_extra_params", [])
@@ -1147,6 +1158,7 @@ def default_input_args(input_args):
         "global_log_level": "info",
         "snooper_enabled": False,
         "ethereum_metrics_exporter_enabled": False,
+        "ipv6_enabled": False,
         "parallel_keystore_generation": False,
         "disable_peer_scoring": False,
         "persistent": False,
@@ -1387,6 +1399,8 @@ def default_participant():
         "remote_signer_min_mem": 0,
         "remote_signer_max_mem": 0,
         "validator_count": None,
+        "el_ipv6_enabled": None,
+        "cl_ipv6_enabled": None,
         "node_selectors": {},
         "tolerations": [],
         "count": 1,
