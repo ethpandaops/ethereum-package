@@ -9,19 +9,19 @@ sanity_check = import_module("./sanity_check.star")
 DEFAULT_EL_IMAGES = {
     "geth": "ethpandaops/geth:master",
     "erigon": "erigontech/erigon:latest",
-    "nethermind": "ethpandaops/nethermind:master",
+    "nethermind": "nethermind/nethermind:latest",
     "besu": "hyperledger/besu:latest",
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
-    "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
+    "ethrex": "ethpandaops/ethrex:main",
 }
 
 DEFAULT_CL_IMAGES = {
-    "lighthouse": "ethpandaops/lighthouse:unstable",
-    "teku": "ethpandaops/teku:master",
+    "lighthouse": "sigp/lighthouse:latest",
+    "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
-    "prysm": "ethpandaops/prysm-beacon-chain:develop",
+    "prysm": "offchainlabs/prysm-beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
 }
@@ -39,8 +39,8 @@ DEFAULT_VC_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
-    "prysm": "ethpandaops/prysm-validator:develop",
-    "teku": "ethpandaops/teku:master",
+    "prysm": "offchainlabs/prysm-validator:stable",
+    "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
 }
@@ -423,6 +423,7 @@ def input_parser(plan, input_args):
                 blobber_image=participant["blobber_image"],
                 keymanager_enabled=participant["keymanager_enabled"],
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
+                checkpoint_sync_enabled=participant["checkpoint_sync_enabled"],
             )
             for participant in result["participants"]
         ],
@@ -1269,14 +1270,14 @@ def default_minimal_network_params():
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
         "shard_committee_period": 64,
-        "attestation_due_bps_gloas": 1250,
-        "aggregate_due_bps_gloas": 2500,
-        "sync_message_due_bps_gloas": 1250,
-        "contribution_due_bps_gloas": 2500,
-        "payload_attestation_due_bps": 3750,
-        "view_freeze_cutoff_bps": 3750,
-        "inclusion_list_submission_due_bps": 3333,
-        "proposer_inclusion_list_cutoff_bps": 4583,
+        "attestation_due_bps_gloas": 2500,
+        "aggregate_due_bps_gloas": 5000,
+        "sync_message_due_bps_gloas": 2500,
+        "contribution_due_bps_gloas": 5000,
+        "payload_attestation_due_bps": 7500,
+        "view_freeze_cutoff_bps": 7500,
+        "inclusion_list_submission_due_bps": 6667,
+        "proposer_inclusion_list_cutoff_bps": 9167,
         "altair_fork_epoch": 0,
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
@@ -1402,6 +1403,7 @@ def default_participant():
         "builder_network_params": None,
         "keymanager_enabled": None,
         "vc_beacon_node_indices": None,
+        "checkpoint_sync_enabled": None,
     }
 
 
