@@ -365,6 +365,9 @@ def get_beacon_config(
         "user": User(uid=0, gid=0),
     }
 
+    if len(participant.cl_devices) > 0:
+        config_args["devices"] = participant.cl_devices
+
     if int(participant.cl_min_cpu) > 0:
         config_args["min_cpu"] = int(participant.cl_min_cpu)
     if int(participant.cl_max_cpu) > 0:
