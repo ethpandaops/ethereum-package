@@ -75,7 +75,7 @@ network_params:
   deposit_contract_address: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
   seconds_per_slot: 12
   slot_duration_ms: 12000
-  num_validator_keys_per_node: 64
+  num_validator_keys_per_node: 128
   preregistered_validator_keys_mnemonic:
     "giant issue aisle success illegal bike spike
     question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy

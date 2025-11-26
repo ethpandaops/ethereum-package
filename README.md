@@ -490,6 +490,10 @@ participants:
     # Defaults null and then set to default global keymanager_enabled (false)
     keymanager_enabled: null
 
+    # Per-participant override for checkpoint sync. If set, this will override the global checkpoint_sync_enabled flag for this participant.
+    # Defaults to null (uses global checkpoint_sync_enabled setting)
+    checkpoint_sync_enabled: null
+
 # Participants matrix creates a participant for each combination of EL, CL and VC clients
 # Each EL/CL/VC item can provide the same parameters as a standard participant
 participants_matrix: {}
@@ -568,7 +572,7 @@ network_params:
   max_request_blob_sidecars_electra: 1152
 
   # The number of validator keys that each CL validator node should get
-  num_validator_keys_per_node: 64
+  num_validator_keys_per_node: 128
 
   # This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
   # validator keys already preregistered as validators
@@ -1173,6 +1177,7 @@ global_node_selectors: {}
 keymanager_enabled: false
 
 # Global flag to enable checkpoint sync across the network
+# Default to false
 checkpoint_sync_enabled: false
 
 # Global flag to set checkpoint sync url
