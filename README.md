@@ -494,6 +494,13 @@ participants:
     # Defaults to null (uses global checkpoint_sync_enabled setting)
     checkpoint_sync_enabled: null
 
+    # If set to true, the beacon node will be created and then immediately stopped.
+    # No health checks are performed during creation (ready_conditions are disabled).
+    # The service can be started later using: kurtosis service start <enclave> <service-name>
+    # This is useful for testing or when you want to manually control when the beacon node starts.
+    # Defaults to false
+    skip_start: false
+
 # Participants matrix creates a participant for each combination of EL, CL and VC clients
 # Each EL/CL/VC item can provide the same parameters as a standard participant
 participants_matrix: {}
