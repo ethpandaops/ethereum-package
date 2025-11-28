@@ -8,7 +8,8 @@ participants:
     checkpoint_sync_enabled: true
     skip_start: true
     validator_count: 1
-
+network_params:
+  preset: minimal
 additional_services:
   - dora
 
