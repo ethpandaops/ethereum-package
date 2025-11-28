@@ -21,6 +21,7 @@ participants:
     cl_extra_labels: {}
     cl_extra_params: []
     cl_extra_mounts: {}
+    cl_devices: []
     cl_tolerations: []
     cl_volume_size: 0
     cl_min_cpu: 0
