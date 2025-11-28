@@ -279,6 +279,9 @@ SUBCATEGORY_PARAMS = {
         "image",
         "env",
     ],
+    "checkpointz_params": [
+        "image",
+    ],
     "docker_cache_params": [
         "enabled",
         "url",
@@ -387,6 +390,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "forkmon",
     "blockscout",
     "dora",
+    "checkpointz",
     "full_beaconchain_explorer",
     "prometheus_grafana",
     "prometheus",

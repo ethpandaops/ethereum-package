@@ -70,6 +70,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "mev_params",
     "blockscout_params",
     "dora_params",
+    "checkpointz_params",
     "docker_cache_params",
     "assertoor_params",
     "prometheus_params",
@@ -90,6 +91,7 @@ def input_parser(plan, input_args):
     # add default eth2 input params
     result["blockscout_params"] = get_default_blockscout_params()
     result["dora_params"] = get_default_dora_params()
+    result["checkpointz_params"] = get_default_checkpointz_params()
     result["docker_cache_params"] = get_default_docker_cache_params()
     result["mev_params"] = get_default_mev_params(
         result.get("mev_type"), result["network_params"]["preset"]
@@ -596,6 +598,9 @@ def input_parser(plan, input_args):
             image=result["blockscout_params"]["image"],
             verif_image=result["blockscout_params"]["verif_image"],
             frontend_image=result["blockscout_params"]["frontend_image"],
+        ),
+        checkpointz_params=struct(
+            image=result["checkpointz_params"]["image"],
         ),
         dora_params=struct(
             image=result["dora_params"]["image"],
@@ -1421,6 +1426,12 @@ def get_default_dora_params():
     return {
         "image": constants.DEFAULT_DORA_IMAGE,
         "env": {},
+    }
+
+
+def get_default_checkpointz_params():
+    return {
+        "image": constants.DEFAULT_CHECKPOINTZ_IMAGE,
     }
 
 
