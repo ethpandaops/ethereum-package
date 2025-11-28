@@ -598,6 +598,9 @@ def input_parser(plan, input_args):
             verif_image=result["blockscout_params"]["verif_image"],
             frontend_image=result["blockscout_params"]["frontend_image"],
         ),
+        checkpointz_params=struct(
+            image=result["checkpointz_params"]["image"],
+        ),
         dora_params=struct(
             image=result["dora_params"]["image"],
             env=result["dora_params"]["env"],
