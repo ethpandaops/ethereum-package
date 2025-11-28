@@ -816,6 +816,7 @@ additional_services:
   - blockscout
   - blutgang
   - broadcaster
+  - checkpointz
   - custom_flood
   - dora
   - dugtrio
@@ -850,6 +851,12 @@ dora_params:
   image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
+
+# Configuration place for checkpointz - https://github.com/ethpandaops/checkpointz
+checkpointz_params:
+  # Checkpointz docker image to use
+  # Defaults to the latest image
+  image: "ethpandaops/checkpointz:latest"
 
 # Define custom file contents to be mounted into containers
 # These files are referenced by name in el_extra_mounts, cl_extra_mounts, and vc_extra_mounts
