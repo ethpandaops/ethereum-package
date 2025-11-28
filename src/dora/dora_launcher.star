@@ -71,7 +71,7 @@ def launch_dora(
         all_el_client_info.append(
             new_el_client_info(
                 "http://{0}:{1}".format(
-                    el_client.ip_addr,
+                    el_client.dns_name,
                     el_client.rpc_port_num,
                 ),
                 execution_snooper_url,
