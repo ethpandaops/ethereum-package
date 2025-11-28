@@ -199,6 +199,17 @@ def launch_participant_network(
         backend,
     )
 
+    # Stop beacon nodes for participants with skip_start enabled
+    for index, participant in enumerate(args_with_right_defaults.participants):
+        if participant.skip_start:
+            cl_context = all_cl_contexts[index]
+            plan.print(
+                "Stopping beacon node {0} due to skip_start flag".format(
+                    cl_context.beacon_service_name
+                )
+            )
+            plan.stop_service(cl_context.beacon_service_name)
+
     # Launch all blobbers after all CLs are up
     cl_context_to_blobber_url = {}
     if len(blobber_configs_with_contexts) > 0:
