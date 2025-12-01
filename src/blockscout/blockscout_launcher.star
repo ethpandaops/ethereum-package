@@ -9,7 +9,7 @@ SERVICE_NAME_BLOCKSCOUT = "blockscout"
 SERVICE_NAME_FRONTEND = "blockscout-frontend"
 HTTP_PORT_NUMBER = 4000
 HTTP_PORT_NUMBER_VERIF = 8050
-HTTP_PORT_NUMBER_FRONTEND = 3000
+HTTP_PORT_NUMBER_FRONTEND = 33000
 
 
 def get_api_host(blockscout_service, port_publisher):
