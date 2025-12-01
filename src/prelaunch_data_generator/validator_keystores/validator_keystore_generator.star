@@ -203,7 +203,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
 
 
 # this is like above but runs things in parallel - for large networks that run on k8s or gigantic dockers
-def generate_valdiator_keystores_in_parallel(
+def generate_validator_keystores_in_parallel(
     plan, mnemonic, participants, docker_cache_params
 ):
     service_names = launch_prelaunch_data_generator_parallel(
