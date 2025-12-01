@@ -157,6 +157,7 @@ def get_config(
         "{0}".format(
             "--sync-mode=FULL"
             if network_params.network in constants.NETWORK_NAME.kurtosis
+            or participant.el_storage_type == "archive"
             else "--sync-mode=SNAP"
         ),
         "--metrics-enabled=true",
@@ -164,6 +165,10 @@ def get_config(
         "--metrics-port={0}".format(METRICS_PORT_NUM),
         "--min-gas-price=1000000000",
     ]
+
+    # Configure storage type - besu defaults to full (BONSAI), use FOREST for archive
+    if participant.el_storage_type == "archive":
+        cmd.append("--data-storage-format=FOREST")
 
     if network_params.gas_limit > 0:
         cmd.append("--target-gas-limit={0}".format(network_params.gas_limit))

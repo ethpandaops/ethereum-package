@@ -1,0 +1,11 @@
+# Test archive mode for clients that default to full (geth, nethermind, besu)
+participants:
+  - el_type: geth
+    el_storage_type: archive
+    cl_type: lighthouse
+  - el_type: nethermind
+    el_storage_type: archive
+    cl_type: teku
+  - el_type: besu
+    el_storage_type: archive
+    cl_type: nimbus
