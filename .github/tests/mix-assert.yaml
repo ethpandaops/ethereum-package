@@ -11,6 +11,8 @@ participants:
     cl_type: lodestar
   - el_type: ethrex
     cl_type: grandine
+network_params:
+  preset: minimal
 additional_services:
   - assertoor
   - dora
