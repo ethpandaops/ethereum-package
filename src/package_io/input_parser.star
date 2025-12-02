@@ -236,6 +236,31 @@ def input_parser(plan, input_args):
         fail(
             "shadowfork networks require persistent to be true, otherwise the snapshot won't be able to be kept for the run"
         )
+
+    # Check for shadowfork + archive mode and unsupported client + archive mode combinations
+    is_shadowfork = "shadowfork" in result["network_params"]["network"]
+    unsupported_archive_clients = ["ethrex", "ethereumjs", "nimbus"]
+
+    for idx, participant in enumerate(result["participants"]):
+        el_type = participant["el_type"]
+        el_storage_type = participant["el_storage_type"]
+
+        # Check if shadowfork is enabled with archive mode
+        if is_shadowfork and el_storage_type == "archive":
+            fail(
+                "Participant {0} (el_type={1}): Archive mode (el_storage_type='archive') is not supported with shadowfork networks. Shadowfork fetches an existing database which may have a different storage type.".format(
+                    idx, el_type
+                )
+            )
+
+        # Check if client doesn't support archive mode
+        if el_type in unsupported_archive_clients and el_storage_type == "archive":
+            fail(
+                "Participant {0}: {1} does not support archive mode (el_storage_type='archive'). Please remove the el_storage_type setting or use a different EL client.".format(
+                    idx, el_type
+                )
+            )
+
     if result["docker_cache_params"]["enabled"]:
         docker_cache_image_override(plan, result)
     else:
@@ -356,6 +381,7 @@ def input_parser(plan, input_args):
                 el_type=participant["el_type"],
                 el_image=participant["el_image"],
                 el_log_level=participant["el_log_level"],
+                el_storage_type=participant["el_storage_type"],
                 el_volume_size=participant["el_volume_size"],
                 el_extra_params=participant["el_extra_params"],
                 el_extra_mounts=participant["el_extra_mounts"],
@@ -1343,6 +1369,7 @@ def default_participant():
         "el_type": "geth",
         "el_image": "",
         "el_log_level": "",
+        "el_storage_type": "",
         "el_extra_env_vars": {},
         "el_extra_labels": {},
         "el_extra_params": [],
