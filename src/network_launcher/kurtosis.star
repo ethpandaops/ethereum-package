@@ -31,7 +31,7 @@ def launch(
             args_with_right_defaults.docker_cache_params,
         )
     else:
-        validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
+        validator_data = validator_keystores.generate_validator_keystores_in_parallel(
             plan,
             network_params.preregistered_validator_keys_mnemonic,
             args_with_right_defaults.participants,

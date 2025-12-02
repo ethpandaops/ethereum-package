@@ -312,7 +312,7 @@ def get_port_specs(port_assignments, wait=NOT_PROVIDED_WAIT):
             constants.METRICS_PORT_ID,
             constants.VALIDATOR_HTTP_PORT_ID,
             constants.ADMIN_PORT_ID,
-            constants.VALDIATOR_GRPC_PORT_ID,
+            constants.VALIDATOR_GRPC_PORT_ID,
             constants.RBUILDER_PORT_ID,
             constants.RBUILDER_METRICS_PORT_ID,
         ]:
