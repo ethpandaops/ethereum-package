@@ -242,8 +242,8 @@ def input_parser(plan, input_args):
     unsupported_archive_clients = ["ethrex", "ethereumjs", "nimbus"]
     
     for idx, participant in enumerate(result["participants"]):
-        el_type = participant.el_type
-        el_storage_type = participant.el_storage_type
+        el_type = participant["el_type"]
+        el_storage_type = participant["el_storage_type"]
         
         # Check if shadowfork is enabled with archive mode
         if is_shadowfork and el_storage_type == "archive":
