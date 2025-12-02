@@ -11,8 +11,6 @@ participants:
     skip_start: true
     validator_count: 1
 
-
-
   - cl_type: lodestar
     checkpoint_sync_enabled: true
     skip_start: true
@@ -25,7 +23,11 @@ participants:
 
 network_params:
   seconds_per_slot: 4
-
+  preset: minimal
+  #fulu_fork_epoch: 0
 additional_services:
   - dora
   - checkpointz
+
+checkpointz_params:
+  image: bbusa/checkpointz:latest
