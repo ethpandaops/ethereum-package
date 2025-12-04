@@ -20,6 +20,7 @@ def get_config(
     participant,
     el_cl_genesis_data,
     image,
+    service_name,
     global_log_level,
     beacon_http_urls,
     cl_context,
@@ -33,6 +34,7 @@ def get_config(
     port_publisher,
     vc_index,
     extra_files_artifacts,
+    tempo_otlp_grpc_url=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
@@ -80,6 +82,11 @@ def get_config(
     if network_params.gas_limit > 0:
         cmd.append("--gas-limit={0}".format(network_params.gas_limit))
         cmd.append("--builder-proposals")
+
+    # Add tempo telemetry integration if tempo is enabled
+    if tempo_otlp_grpc_url != None:
+        cmd.append("--telemetry-collector-url={}".format(tempo_otlp_grpc_url))
+        cmd.append("--telemetry-service-name={}".format(service_name))
 
     if len(participant.vc_extra_params):
         cmd.extend([param for param in participant.vc_extra_params])

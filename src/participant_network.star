@@ -510,6 +510,7 @@ def launch_participant_network(
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
             extra_files_artifacts=extra_files_artifacts,
+            tempo_otlp_grpc_url=tempo_otlp_grpc_url,
         )
         if vc_service_config == None:
             continue

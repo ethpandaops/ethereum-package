@@ -200,6 +200,10 @@ def get_config(
         ]
     )
 
+    # Configure storage type - reth defaults to archive, use --full for full node
+    if participant.el_storage_type == "full":
+        cmd.append("--full")
+
     if network_params.gas_limit > 0:
         cmd.append("--builder.gaslimit={0}".format(network_params.gas_limit))
 

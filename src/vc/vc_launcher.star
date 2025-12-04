@@ -38,6 +38,7 @@ def get_vc_config(
     port_publisher,
     vc_index,
     extra_files_artifacts,
+    tempo_otlp_grpc_url=None,
 ):
     if node_keystore_files == None:
         return None
@@ -78,6 +79,7 @@ def get_vc_config(
             participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
+            service_name=service_name,
             global_log_level=global_log_level,
             beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
@@ -91,6 +93,7 @@ def get_vc_config(
             port_publisher=port_publisher,
             vc_index=vc_index,
             extra_files_artifacts=extra_files_artifacts,
+            tempo_otlp_grpc_url=tempo_otlp_grpc_url,
         )
     elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(

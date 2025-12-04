@@ -70,6 +70,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "mev_params",
     "blockscout_params",
     "dora_params",
+    "checkpointz_params",
     "docker_cache_params",
     "assertoor_params",
     "prometheus_params",
@@ -91,6 +92,7 @@ def input_parser(plan, input_args):
     # add default eth2 input params
     result["blockscout_params"] = get_default_blockscout_params()
     result["dora_params"] = get_default_dora_params()
+    result["checkpointz_params"] = get_default_checkpointz_params()
     result["docker_cache_params"] = get_default_docker_cache_params()
     result["mev_params"] = get_default_mev_params(
         result.get("mev_type"), result["network_params"]["preset"]
@@ -198,6 +200,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
                 result["ethereum_genesis_generator_params"][sub_attr] = sub_value
+        elif attr == "checkpointz_params":
+            for sub_attr in input_args["checkpointz_params"]:
+                sub_value = input_args["checkpointz_params"][sub_attr]
+                result["checkpointz_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -239,6 +245,31 @@ def input_parser(plan, input_args):
         fail(
             "shadowfork networks require persistent to be true, otherwise the snapshot won't be able to be kept for the run"
         )
+
+    # Check for shadowfork + archive mode and unsupported client + archive mode combinations
+    is_shadowfork = "shadowfork" in result["network_params"]["network"]
+    unsupported_archive_clients = ["ethrex", "ethereumjs", "nimbus"]
+
+    for idx, participant in enumerate(result["participants"]):
+        el_type = participant["el_type"]
+        el_storage_type = participant["el_storage_type"]
+
+        # Check if shadowfork is enabled with archive mode
+        if is_shadowfork and el_storage_type == "archive":
+            fail(
+                "Participant {0} (el_type={1}): Archive mode (el_storage_type='archive') is not supported with shadowfork networks. Shadowfork fetches an existing database which may have a different storage type.".format(
+                    idx, el_type
+                )
+            )
+
+        # Check if client doesn't support archive mode
+        if el_type in unsupported_archive_clients and el_storage_type == "archive":
+            fail(
+                "Participant {0}: {1} does not support archive mode (el_storage_type='archive'). Please remove the el_storage_type setting or use a different EL client.".format(
+                    idx, el_type
+                )
+            )
+
     if result["docker_cache_params"]["enabled"]:
         docker_cache_image_override(plan, result)
     else:
@@ -359,6 +390,7 @@ def input_parser(plan, input_args):
                 el_type=participant["el_type"],
                 el_image=participant["el_image"],
                 el_log_level=participant["el_log_level"],
+                el_storage_type=participant["el_storage_type"],
                 el_volume_size=participant["el_volume_size"],
                 el_extra_params=participant["el_extra_params"],
                 el_extra_mounts=participant["el_extra_mounts"],
@@ -600,6 +632,9 @@ def input_parser(plan, input_args):
             image=result["blockscout_params"]["image"],
             verif_image=result["blockscout_params"]["verif_image"],
             frontend_image=result["blockscout_params"]["frontend_image"],
+        ),
+        checkpointz_params=struct(
+            image=result["checkpointz_params"]["image"],
         ),
         dora_params=struct(
             image=result["dora_params"]["image"],
@@ -1354,6 +1389,7 @@ def default_participant():
         "el_type": "geth",
         "el_image": "",
         "el_log_level": "",
+        "el_storage_type": "",
         "el_extra_env_vars": {},
         "el_extra_labels": {},
         "el_extra_params": [],
@@ -1435,6 +1471,12 @@ def get_default_dora_params():
     return {
         "image": constants.DEFAULT_DORA_IMAGE,
         "env": {},
+    }
+
+
+def get_default_checkpointz_params():
+    return {
+        "image": constants.DEFAULT_CHECKPOINTZ_IMAGE,
     }
 
 

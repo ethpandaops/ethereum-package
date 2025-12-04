@@ -169,6 +169,10 @@ def get_config(
         "--torrent.port={0}".format(torrent_port),
     ]
 
+    # Configure storage type - erigon defaults to archive, use --prune.mode=full for full node
+    if participant.el_storage_type == "full":
+        cmd.append("--prune.mode=full")
+
     if network_params.gas_limit > 0:
         cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
 

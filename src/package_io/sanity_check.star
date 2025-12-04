@@ -3,6 +3,7 @@ PARTICIPANT_CATEGORIES = {
         "el_type",
         "el_image",
         "el_log_level",
+        "el_storage_type",
         "el_extra_env_vars",
         "el_extra_labels",
         "el_extra_params",
@@ -75,6 +76,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "el_type",
             "el_image",
             "el_log_level",
+            "el_storage_type",
             "el_extra_env_vars",
             "el_extra_labels",
             "el_extra_params",
@@ -278,6 +280,9 @@ SUBCATEGORY_PARAMS = {
         "image",
         "env",
     ],
+    "checkpointz_params": [
+        "image",
+    ],
     "docker_cache_params": [
         "enabled",
         "url",
@@ -394,6 +399,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "forkmon",
     "blockscout",
     "dora",
+    "checkpointz",
     "full_beaconchain_explorer",
     "prometheus_grafana",
     "prometheus",
