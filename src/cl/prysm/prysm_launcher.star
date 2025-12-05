@@ -53,6 +53,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    bootnode_enr_override=None,
 ):
     beacon_config = get_beacon_config(
         plan,
@@ -76,6 +77,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        bootnode_enr_override,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -115,6 +117,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    bootnode_enr_override=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -244,6 +247,9 @@ def get_beacon_config(
     if network_params.preset == "minimal":
         cmd.append("--minimal-config=true")
 
+    if bootnode_enr_override != None:
+        cmd.append("--bootstrap-node=" + bootnode_enr_override)
+
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--p2p-static-id=true")
         cmd.append(
@@ -261,7 +267,7 @@ def get_beacon_config(
             network_params.network == constants.NETWORK_NAME.kurtosis
             or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
-            if bootnode_contexts != None:
+            if bootnode_enr_override == None and bootnode_contexts != None:
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     cmd.append("--bootstrap-node=" + ctx.enr)
         elif network_params.network == constants.NETWORK_NAME.ephemery:
@@ -269,17 +275,19 @@ def get_beacon_config(
                 "--genesis-beacon-api-url="
                 + constants.CHECKPOINT_SYNC_URL[network_params.network]
             )
-            cmd.append(
-                "--bootstrap-node="
-                + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-                + "/bootstrap_nodes.yaml"
-            )
+            if bootnode_enr_override == None:
+                cmd.append(
+                    "--bootstrap-node="
+                    + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+                    + "/bootstrap_nodes.yaml"
+                )
         else:  # Devnets
-            cmd.append(
-                "--bootstrap-node="
-                + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-                + "/bootstrap_nodes.yaml"
-            )
+            if bootnode_enr_override == None:
+                cmd.append(
+                    "--bootstrap-node="
+                    + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+                    + "/bootstrap_nodes.yaml"
+                )
     else:  # Public network
         cmd.append("--{}".format(network_params.network))
 
