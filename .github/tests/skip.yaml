@@ -30,4 +30,4 @@ additional_services:
   - checkpointz
 
 checkpointz_params:
-  image: bbusa/checkpointz:latest
+  image: ethpandaops/checkpointz:0.0.1-custom-preset
