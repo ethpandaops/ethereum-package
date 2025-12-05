@@ -67,6 +67,7 @@ PARTICIPANT_CATEGORIES = {
         "keymanager_enabled",
         "vc_beacon_node_indices",
         "checkpoint_sync_enabled",
+        "skip_start",
     ],
 }
 
