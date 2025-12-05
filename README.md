@@ -18,7 +18,13 @@ Specifically, this [package][package-reference] will:
 Optional features (enabled via flags or parameter files at runtime):
 
 - Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
-- Spin up & configure parameters for the infrastructure behind Flashbot's implementation of PBS using `mev-boost`, in either `full` or `mock` mode. [More details on PBS implementation](./README.md#proposer-builder-separation-pbs-implementation-via-flashbots-mev-boost-protocol).
+- Spin up & configure parameters for the infrastructure behind PBS (Proposer-Builder Separation) using `mev-boost`, with support for multiple relay implementations:
+  - `flashbots` - Full Flashbots MEV infrastructure
+  - `helix` - High-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend
+  - `mev-rs` - Alternative relay implementation
+  - `commit-boost` - Commit-boost based infrastructure
+  - `mock` - Mock builder for testing
+  - [More details on PBS implementation](./README.md#proposer-builder-separation-pbs-emulation).
 - Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
 - Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client.
 - Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
@@ -1098,12 +1104,14 @@ mempool_bridge_params:
   # Default: "30s"
   retry_interval: "30s"
 
-# Supports four values
+# Supports six values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
 # "mev-rs" - mev-boost, relays and builder are all spun up, powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 # "commit-boost" - mev-boost, relays and builder are all spun up, powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
+# "helix" - helix relay, flashbots builder and mev-boost are spun up, powered by [helix](https://github.com/gattaca-com/helix)
+#            Note: Helix uses TimescaleDB (PostgreSQL with time-series extension) for data storage
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -1479,6 +1487,40 @@ network_params:
 </details>
 
 <details>
+    <summary>A 3-node Ethereum network with Helix relay for MEV-boost infrastructure</summary>
+
+```yaml
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:master
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    count: 2
+  - el_type: nethermind
+    el_image: ethpandaops/nethermind:master
+    cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:develop
+
+mev_type: helix
+mev_params:
+  mev_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
+  mev_boost_image: ethpandaops/mev-boost:develop
+  mev_builder_cl_image: ethpandaops/lighthouse:unstable
+  mev_builder_subsidy: 1
+
+additional_services:
+  - dora
+  - spamoor
+
+network_params:
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+```
+
+</details>
+
+<details>
     <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper)</summary>
 
 ```yaml
@@ -1604,6 +1646,14 @@ Starting your network up with `"mev_type": "flashbots"` will instantiate and con
 3. `mev-relay-website` - A website to monitor payloads that have been delivered
 4. `mev-relay-housekeeper` - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
 5. `mev-boost` - open-source middleware instantiated for each EL/Cl pair in the network, including the builder
+
+The package also supports other MEV implementations:
+
+- `"mev_type": "helix"` - Uses the high-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend for data storage
+- `"mev_type": "mev-rs"` - Alternative relay implementation powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
+- `"mev_type": "commit-boost"` - Infrastructure powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
+
+Each implementation provides different features and performance characteristics suitable for various testing and development scenarios.
 
 <details>
     <summary>Caveats when using "mev_type": "flashbots"</summary>
