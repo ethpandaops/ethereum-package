@@ -100,7 +100,6 @@ def launch_participant_network(
             latest_block.files_artifacts[0] if latest_block != "" else "",
             global_tolerations,
             global_node_selectors,
-            args_with_right_defaults.mev_type,
         )
     elif network_params.network == constants.NETWORK_NAME.ephemery:
         # We are running an ephemery network
