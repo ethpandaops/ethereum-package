@@ -101,9 +101,11 @@ def get_config(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
+    # Check if archive mode is explicitly set via extra params or el_storage_type
     if (
         "--gcmode=archive" in participant.el_extra_params
         or "--gcmode archive" in participant.el_extra_params
+        or participant.el_storage_type == "archive"
     ):
         gcmode_archive = True
     else:

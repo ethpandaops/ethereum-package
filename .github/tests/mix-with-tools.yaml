@@ -17,6 +17,7 @@ additional_services:
   - tx_fuzz
   - forkmon
   - dora
+  - checkpointz
   - prometheus
   - grafana
   - dugtrio
