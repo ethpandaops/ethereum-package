@@ -662,8 +662,8 @@ network_params:
   electra_fork_epoch: 0
 
   # Fulu fork epoch
-  # Defaults to 18446744073709551615
-  fulu_fork_epoch: 18446744073709551615
+  # Defaults to 0
+  fulu_fork_epoch: 0
 
   # Gloas fork epoch
   # Defaults to 18446744073709551615
@@ -767,21 +767,21 @@ network_params:
 
 
   # BPO
-  # BPO1-5 epoch (default 18446744073709551615)
-  bpo_1_epoch: 18446744073709551615
+  # BPO1-5 epoch (default 0/18446744073709551615)
+  bpo_1_epoch: 0
   # Maximum number of blobs per block for BPO1-5
   # If only max is set, target is auto-calculated as 2/3 of max
   # If only target is set, max is auto-calculated as 3/2 of target
-  bpo_1_max_blobs: 0
+  bpo_1_max_blobs: 15
   # Target number of blobs per block for BPO1-5
-  bpo_1_target_blobs: 0
+  bpo_1_target_blobs: 10
   # Base fee update fraction for BPO1-5 (default 0)
-  bpo_1_base_fee_update_fraction: 0
+  bpo_1_base_fee_update_fraction: 8346193
 
   bpo_2_epoch: 18446744073709551615
-  bpo_2_max_blobs: 0
-  bpo_2_target_blobs: 0
-  bpo_2_base_fee_update_fraction: 0
+  bpo_2_max_blobs: 21
+  bpo_2_target_blobs: 14
+  bpo_2_base_fee_update_fraction: 11684671
 
   bpo_3_epoch: 18446744073709551615
   bpo_3_max_blobs: 0
@@ -1235,7 +1235,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.1.0
+  image: ethpandaops/ethereum-genesis-generator:5.2.0
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 

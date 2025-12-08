@@ -41,8 +41,7 @@ def launch_spamoor(
 
     for index, spammer in enumerate(spamoor_params.spammers):
         if (
-            "peerdas" in network_params.network
-            or network_params.fulu_fork_epoch != constants.FAR_FUTURE_EPOCH
+            network_params.fulu_fork_epoch != constants.FAR_FUTURE_EPOCH
         ) and "blob" in spammer["scenario"]:
             if "config" not in spammer:
                 spammer["config"] = {}
