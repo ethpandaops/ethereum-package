@@ -7,7 +7,7 @@ genesis_constants = import_module(
 sanity_check = import_module("./sanity_check.star")
 
 DEFAULT_EL_IMAGES = {
-    "geth": "ethpandaops/geth:master",
+    "geth": "ethereum/client-go:latest",
     "erigon": "erigontech/erigon:latest",
     "nethermind": "nethermind/nethermind:latest",
     "besu": "hyperledger/besu:latest",
