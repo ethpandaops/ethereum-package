@@ -268,7 +268,7 @@ def get_config_frontend(
     blockscout_service,
     port_publisher,
 ):
-    env_vars={
+    env_vars = {
         "HOSTNAME": "0.0.0.0",
         "NEXT_PUBLIC_API_PROTOCOL": "http",
         "NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL": "ws",
@@ -302,7 +302,6 @@ def get_config_frontend(
         ports=FRONTEND_USED_PORTS,
         public_ports=FRONTEND_USED_PORTS,
         env_vars=env_vars,
-
         min_cpu=BLOCKSCOUT_MIN_CPU,
         max_cpu=BLOCKSCOUT_MAX_CPU,
         min_memory=BLOCKSCOUT_MIN_MEMORY,
