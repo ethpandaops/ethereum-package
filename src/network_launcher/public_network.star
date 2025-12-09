@@ -130,10 +130,7 @@ def launch(
             BASE_URL=https://raw.githubusercontent.com/eth-clients/"
         + network_params.network
         + '/main/metadata && \
-            curl -fsSL -o config.yaml "$BASE_URL/config.yaml" || echo "config.yaml not found" && \
             curl -fsSL -o genesis.json "$BASE_URL/genesis.json" || echo "genesis.json not found" && \
-            curl -fsSL -o genesis.ssz "$BASE_URL/genesis.ssz" || echo "genesis.ssz not found" && \
-            curl -fsSL -o deposit_contract.txt "$BASE_URL/deposit_contract.txt" || echo "deposit_contract.txt not found" && \
             jq \'.config.osakaTime\' /network-configs/genesis.json | tr -d \'\n\'',
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
