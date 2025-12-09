@@ -42,5 +42,4 @@ network_params:
   min_validator_withdrawability_delay: 1
   shard_committee_period: 1
   churn_limit_quotient: 16
-  fulu_fork_epoch: 1
   prefunded_accounts: '{"0xb9e79d19f651a941757b35830232e7efc77e1c79": {"balance": "100000ETH"}}'

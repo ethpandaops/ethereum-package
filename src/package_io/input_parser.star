@@ -369,6 +369,10 @@ def input_parser(plan, input_args):
             not has_supernodes
             and not has_node_with_128_plus_validators
             and not result["network_params"]["perfect_peerdas_enabled"]
+            and (
+                result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
+                or "shadowfork" in result["network_params"]["network"]
+            )
         ):
             fail(
                 "Fulu fork is enabled (epoch: {0}) but no supernodes are configured, no nodes have 128 or more validators, and perfect_peerdas_enabled is not enabled. Either configure a supernode, ensure at least one node has 128+ validators, or enable perfect_peerdas_enabled in network_params with 16 participants.".format(
@@ -792,7 +796,6 @@ def input_parser(plan, input_args):
             ],
             other_nat_exit_ip=result["port_publisher"]["other"]["nat_exit_ip"],
         ),
-        bootnode=result["bootnode"],
         bootnodoor_params=struct(
             image=result["bootnodoor_params"]["image"],
             min_cpu=result["bootnodoor_params"]["min_cpu"],
@@ -1219,7 +1222,6 @@ def default_input_args(input_args):
             "public_port_start": None,
         },
         "spamoor_params": get_default_spamoor_params(),
-        "bootnode": "client",
         "bootnodoor_params": get_default_bootnodoor_params(),
     }
 
