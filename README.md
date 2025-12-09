@@ -846,6 +846,7 @@ additional_services:
   - blobscan
   - blockscout
   - blutgang
+  - bootnodoor
   - broadcaster
   - checkpointz
   - custom_flood
@@ -960,6 +961,15 @@ tempo_params:
   # Tempo docker image to use
   # Defaults to the latest image
   image: "grafana/tempo:latest"
+
+# Configuration place for bootnodoor (EL+CL bootnode)
+bootnodoor_params:
+  # Bootnodoor docker image to use
+  # Defaults to the latest image
+  image: "ethpandaops/bootnodoor:latest"
+
+  # A list of optional params that will be passed to the bootnodoor command for modifying its behaviour
+  extra_args: []
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
