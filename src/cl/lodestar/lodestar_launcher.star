@@ -164,7 +164,11 @@ def get_beacon_config(
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
-    used_ports = shared_utils.get_port_specs(used_port_assignments)
+    # Disable port checks if skip_start is enabled
+    if participant.skip_start:
+        used_ports = shared_utils.get_port_specs(used_port_assignments, wait=None)
+    else:
+        used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         LODESTAR_ENTRYPOINT_COMMAND,
@@ -296,9 +300,6 @@ def get_beacon_config(
         "files": files,
         "env_vars": env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
-            constants.HTTP_PORT_ID
-        ),
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.lodestar,
             client_type=constants.CLIENT_TYPES.cl,
@@ -311,6 +312,12 @@ def get_beacon_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Only add ready_conditions if not skipping start
+    if not participant.skip_start:
+        config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(
+            constants.HTTP_PORT_ID
+        )
 
     if int(participant.cl_min_cpu) > 0:
         config_args["min_cpu"] = int(participant.cl_min_cpu)
@@ -336,23 +343,28 @@ def get_cl_context(
 
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
 
-    # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
-
-    beacon_node_identity_recipe = GetHttpRequestRecipe(
-        endpoint="/eth/v1/node/identity",
-        port_id=constants.HTTP_PORT_ID,
-        extract={
-            "enr": ".data.enr",
-            "multiaddr": ".data.p2p_addresses[-1]",
-            "peer_id": ".data.peer_id",
-        },
-    )
-    response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=service_name
-    )
-    beacon_node_enr = response["extract.enr"]
-    beacon_multiaddr = response["extract.multiaddr"]
-    beacon_peer_id = response["extract.peer_id"]
+    # Skip HTTP requests if skip_start is enabled (service won't be running)
+    if participant.skip_start:
+        beacon_node_enr = ""
+        beacon_multiaddr = ""
+        beacon_peer_id = ""
+    else:
+        # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
+        beacon_node_identity_recipe = GetHttpRequestRecipe(
+            endpoint="/eth/v1/node/identity",
+            port_id=constants.HTTP_PORT_ID,
+            extract={
+                "enr": ".data.enr",
+                "multiaddr": ".data.p2p_addresses[-1]",
+                "peer_id": ".data.peer_id",
+            },
+        )
+        response = plan.request(
+            recipe=beacon_node_identity_recipe, service_name=service_name
+        )
+        beacon_node_enr = response["extract.enr"]
+        beacon_multiaddr = response["extract.multiaddr"]
+        beacon_peer_id = response["extract.peer_id"]
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
