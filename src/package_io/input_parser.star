@@ -14,7 +14,7 @@ DEFAULT_EL_IMAGES = {
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
-    "ethrex": "ethpandaops/ethrex:main",
+    "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
 }
 
 DEFAULT_CL_IMAGES = {
@@ -632,6 +632,7 @@ def input_parser(plan, input_args):
             image=result["blockscout_params"]["image"],
             verif_image=result["blockscout_params"]["verif_image"],
             frontend_image=result["blockscout_params"]["frontend_image"],
+            env=result["blockscout_params"]["env"],
         ),
         checkpointz_params=struct(
             image=result["checkpointz_params"]["image"],
@@ -1252,7 +1253,7 @@ def default_network_params():
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 0,
-        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
@@ -1274,7 +1275,7 @@ def default_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
-        "bpo_1_epoch": 18446744073709551615,
+        "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
         "bpo_1_base_fee_update_fraction": 8346193,
@@ -1334,7 +1335,7 @@ def default_minimal_network_params():
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 0,
-        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
@@ -1356,14 +1357,14 @@ def default_minimal_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
-        "bpo_1_epoch": 18446744073709551615,
-        "bpo_1_max_blobs": 0,
-        "bpo_1_target_blobs": 0,
-        "bpo_1_base_fee_update_fraction": 0,
+        "bpo_1_epoch": 0,
+        "bpo_1_max_blobs": 15,
+        "bpo_1_target_blobs": 10,
+        "bpo_1_base_fee_update_fraction": 8346193,
         "bpo_2_epoch": 18446744073709551615,
-        "bpo_2_max_blobs": 0,
-        "bpo_2_target_blobs": 0,
-        "bpo_2_base_fee_update_fraction": 0,
+        "bpo_2_max_blobs": 21,
+        "bpo_2_target_blobs": 14,
+        "bpo_2_base_fee_update_fraction": 11684671,
         "bpo_3_epoch": 18446744073709551615,
         "bpo_3_max_blobs": 0,
         "bpo_3_target_blobs": 0,
@@ -1464,6 +1465,7 @@ def get_default_blockscout_params():
         "image": "ghcr.io/blockscout/blockscout:latest",
         "verif_image": "ghcr.io/blockscout/smart-contract-verifier:latest",
         "frontend_image": "ghcr.io/blockscout/frontend:latest",
+        "env": {},
     }
 
 
