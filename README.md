@@ -861,6 +861,8 @@ blockscout_params:
   # Frontend image
   # Defaults to ghcr.io/blockscout/frontend:latest
   frontend_image: "ghcr.io/blockscout/frontend:latest"
+  # Environment variables
+  env: {}
 
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
