@@ -795,7 +795,6 @@ def input_parser(plan, input_args):
             ],
             other_nat_exit_ip=result["port_publisher"]["other"]["nat_exit_ip"],
         ),
-        bootnode=result["bootnode"],
         bootnodoor_params=struct(
             image=result["bootnodoor_params"]["image"],
             min_cpu=result["bootnodoor_params"]["min_cpu"],
@@ -1222,7 +1221,6 @@ def default_input_args(input_args):
             "public_port_start": None,
         },
         "spamoor_params": get_default_spamoor_params(),
-        "bootnode": "client",
         "bootnodoor_params": get_default_bootnodoor_params(),
     }
 

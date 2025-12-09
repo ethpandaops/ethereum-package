@@ -846,6 +846,7 @@ additional_services:
   - blobscan
   - blockscout
   - blutgang
+  - bootnodoor
   - broadcaster
   - checkpointz
   - custom_flood
@@ -951,11 +952,6 @@ bootnodoor_params:
   max_mem: 512
   # A list of optional extra args the bootnodoor container should spin up with
   extra_args: []
-
-# Bootnode type
-# Supported values: "client", "bootnodoor"
-# Defaults to "client"
-bootnode: client
 
 # Configuration place for tempo tracing backend
 tempo_params:

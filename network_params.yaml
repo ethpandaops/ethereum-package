@@ -210,7 +210,6 @@ bootnodoor_params:
   min_mem: 128
   max_mem: 512
   extra_args: []
-bootnode: client
 xatu_sentry_enabled: false
 xatu_sentry_params:
   xatu_sentry_image: ethpandaops/xatu-sentry

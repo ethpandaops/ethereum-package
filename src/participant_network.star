@@ -145,8 +145,9 @@ def launch_participant_network(
     # Launch bootnodoor if configured
     bootnodoor_enr = None
     bootnodoor_enode = None
-    if args_with_right_defaults.bootnode == "bootnodoor":
+    if "bootnodoor" in args_with_right_defaults.additional_services:
         plan.print("Launching bootnodoor as bootnode service")
+        args_with_right_defaults.additional_services.remove("bootnodoor")
         bootnodoor_enr, bootnodoor_enode = bootnodoor_launcher.launch_bootnodoor(
             plan,
             args_with_right_defaults.bootnodoor_params,

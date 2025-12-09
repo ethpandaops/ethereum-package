@@ -389,6 +389,7 @@ SUBCATEGORY_PARAMS = {
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
+    "bootnodoor",
     "assertoor",
     "broadcaster",
     "tx_fuzz",
@@ -431,7 +432,6 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "keymanager_enabled": "",
     "checkpoint_sync_enabled": "",
     "checkpoint_sync_url": "",
-    "bootnode": "",
 }
 
 
