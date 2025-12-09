@@ -9,7 +9,7 @@ def get_config(
     el_cl_genesis_data,
     keymanager_file,
     image,
-    beacon_http_url,
+    beacon_http_urls,
     cl_context,
     el_context,
     remote_signer_context,
@@ -40,7 +40,7 @@ def get_config(
         "--network="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--beacon-node-api-endpoint=" + beacon_http_url,
+        "--beacon-node-api-endpoint=" + ",".join(beacon_http_urls),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv

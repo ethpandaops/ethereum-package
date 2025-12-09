@@ -59,6 +59,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
+    bootnodoor_enode=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -77,6 +78,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
+        bootnodoor_enode,
     )
 
     service = plan.add_service(service_name, config)
@@ -104,6 +106,7 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
+    bootnodoor_enode=None,
 ):
     public_ports = {}
     public_ports_for_component = None
@@ -161,7 +164,10 @@ def get_config(
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
     ]
-    if network_params.network == constants.NETWORK_NAME.kurtosis:
+    # Handle bootnode configuration with bootnodoor_enode override
+    if bootnodoor_enode != None:
+        cmd.append("--bootnodes=" + bootnodoor_enode)
+    elif network_params.network == constants.NETWORK_NAME.kurtosis:
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -182,6 +188,9 @@ def get_config(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
         )
+
+    if network_params.gas_limit > 0:
+        cmd.append("--builder.gas-limit={0}".format(network_params.gas_limit))
 
     if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -264,18 +273,18 @@ def get_el_context(
         plan, service_name, constants.RPC_PORT_ID
     )
 
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    metrics_url = "{0}:{1}".format(service.name, METRICS_PORT_NUM)
     ethrex_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
 
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    # ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+    http_url = "http://{0}:{1}".format(service.name, RPC_PORT_NUM)
+    # ws_url = "ws://{0}:{1}".format(service.name, WS_PORT_NUM)
 
     return el_context.new_el_context(
         client_name="ethrex",
         enode=enode,
-        ip_addr=service.ip_address,
+        ip_addr=service.name,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,

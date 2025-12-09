@@ -15,7 +15,7 @@ HTTP_PORT_NUMBER_FRONTEND = 3000
 def get_api_host(blockscout_service, port_publisher):
     if port_publisher.additional_services_enabled:
         return port_publisher.additional_services_nat_exit_ip
-    return blockscout_service.ip_address
+    return blockscout_service.name
 
 
 def get_api_port(blockscout_service, port_publisher):
@@ -73,6 +73,7 @@ def launch_blockscout(
     docker_cache_params,
     blockscout_params,
     network_params,
+    shadowfork_block_height="",
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     postgres_output = postgres.run(
@@ -117,6 +118,7 @@ def launch_blockscout(
         additional_service_index,
         docker_cache_params,
         blockscout_params,
+        shadowfork_block_height,
     )
     blockscout_service = plan.add_service(SERVICE_NAME_BLOCKSCOUT, config_backend)
     plan.print(blockscout_service)
@@ -155,6 +157,13 @@ def get_config_verif(
         0,
     )
 
+    env_vars = {
+        "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR": "0.0.0.0:{}".format(
+            HTTP_PORT_NUMBER_VERIF
+        )
+    }
+    env_vars.update(blockscout_params.env)
+
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params,
@@ -162,11 +171,7 @@ def get_config_verif(
         ),
         ports=VERIF_USED_PORTS,
         public_ports=public_ports,
-        env_vars={
-            "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR": "0.0.0.0:{}".format(
-                HTTP_PORT_NUMBER_VERIF
-            )
-        },
+        env_vars=env_vars,
         min_cpu=BLOCKSCOUT_VERIF_MIN_CPU,
         max_cpu=BLOCKSCOUT_VERIF_MAX_CPU,
         min_memory=BLOCKSCOUT_VERIF_MIN_MEMORY,
@@ -187,6 +192,7 @@ def get_config_backend(
     additional_service_index,
     docker_cache_params,
     blockscout_params,
+    shadowfork_block_height="",
 ):
     database_url = "{protocol}://{user}:{password}@{hostname}:{port}/{database}".format(
         protocol="postgresql",
@@ -204,6 +210,31 @@ def get_config_backend(
         1,
     )
 
+    env_vars = {
+        "ETHEREUM_JSONRPC_VARIANT": "erigon"
+        if el_client_name == "erigon" or el_client_name == "reth"
+        else el_client_name,
+        "ETHEREUM_JSONRPC_HTTP_URL": el_client_rpc_url,
+        "ETHEREUM_JSONRPC_TRACE_URL": el_client_rpc_url,
+        "DATABASE_URL": database_url,
+        "COIN": "ETH",
+        "MICROSERVICE_SC_VERIFIER_ENABLED": "true",
+        "MICROSERVICE_SC_VERIFIER_URL": verif_url,
+        "MICROSERVICE_SC_VERIFIER_TYPE": "sc_verifier",
+        "INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER": "true",
+        "ECTO_USE_SSL": "false",
+        "NETWORK": "Kurtosis",
+        "SUBNETWORK": "Kurtosis",
+        "PORT": "{}".format(HTTP_PORT_NUMBER),
+        "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
+    }
+
+    if shadowfork_block_height != "":
+        env_vars["INDEXER_START_BLOCK"] = shadowfork_block_height
+        env_vars["TRACE_FIRST_BLOCK"] = shadowfork_block_height
+
+    env_vars.update(blockscout_params.env)
+
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params,
@@ -216,24 +247,7 @@ def get_config_backend(
             "-c",
             'bin/blockscout eval "Elixir.Explorer.ReleaseTasks.create_and_migrate()" && bin/blockscout start',
         ],
-        env_vars={
-            "ETHEREUM_JSONRPC_VARIANT": "erigon"
-            if el_client_name == "erigon" or el_client_name == "reth"
-            else el_client_name,
-            "ETHEREUM_JSONRPC_HTTP_URL": el_client_rpc_url,
-            "ETHEREUM_JSONRPC_TRACE_URL": el_client_rpc_url,
-            "DATABASE_URL": database_url,
-            "COIN": "ETH",
-            "MICROSERVICE_SC_VERIFIER_ENABLED": "true",
-            "MICROSERVICE_SC_VERIFIER_URL": verif_url,
-            "MICROSERVICE_SC_VERIFIER_TYPE": "sc_verifier",
-            "INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER": "true",
-            "ECTO_USE_SSL": "false",
-            "NETWORK": "Kurtosis",
-            "SUBNETWORK": "Kurtosis",
-            "PORT": "{}".format(HTTP_PORT_NUMBER),
-            "SECRET_KEY_BASE": "56NtB48ear7+wMSf0IQuWDAAazhpb31qyc7GiyspBP2vh7t5zlCsF5QDv76chXeN",
-        },
+        env_vars=env_vars,
         min_cpu=BLOCKSCOUT_MIN_CPU,
         max_cpu=BLOCKSCOUT_MAX_CPU,
         min_memory=BLOCKSCOUT_MIN_MEMORY,
@@ -254,6 +268,32 @@ def get_config_frontend(
     blockscout_service,
     port_publisher,
 ):
+    env_vars = {
+        "HOSTNAME": "0.0.0.0",
+        "NEXT_PUBLIC_API_PROTOCOL": "http",
+        "NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL": "ws",
+        "NEXT_PUBLIC_NETWORK_NAME": "Kurtosis",
+        "NEXT_PUBLIC_NETWORK_ID": network_params.network_id,
+        "NEXT_PUBLIC_NETWORK_RPC_URL": el_client_rpc_url,
+        "NEXT_PUBLIC_API_HOST": get_api_host(blockscout_service, port_publisher)
+        + ":"
+        + str(get_api_port(blockscout_service, port_publisher)),
+        "NEXT_PUBLIC_AD_BANNER_PROVIDER": "none",
+        "NEXT_PUBLIC_AD_TEXT_PROVIDER": "none",
+        "NEXT_PUBLIC_IS_TESTNET": "true",
+        "NEXT_PUBLIC_GAS_TRACKER_ENABLED": "true",
+        "NEXT_PUBLIC_HAS_BEACON_CHAIN": "true",
+        "NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE": "validation",
+        "NEXT_PUBLIC_NETWORK_ICON": "https://ethpandaops.io/logo.png",
+        # "NEXT_PUBLIC_APP_HOST": "0.0.0.0",
+        "NEXT_PUBLIC_APP_PROTOCOL": "http",
+        "NEXT_PUBLIC_APP_HOST": "127.0.0.1",
+        "NEXT_PUBLIC_APP_PORT": str(HTTP_PORT_NUMBER_FRONTEND),
+        "NEXT_PUBLIC_USE_NEXT_JS_PROXY": "true",
+        "PORT": str(HTTP_PORT_NUMBER_FRONTEND),
+    }
+    env_vars.update(blockscout_params.env)
+
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params,
@@ -261,30 +301,7 @@ def get_config_frontend(
         ),
         ports=FRONTEND_USED_PORTS,
         public_ports=FRONTEND_USED_PORTS,
-        env_vars={
-            "HOSTNAME": "0.0.0.0",
-            "NEXT_PUBLIC_API_PROTOCOL": "http",
-            "NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL": "ws",
-            "NEXT_PUBLIC_NETWORK_NAME": "Kurtosis",
-            "NEXT_PUBLIC_NETWORK_ID": network_params.network_id,
-            "NEXT_PUBLIC_NETWORK_RPC_URL": el_client_rpc_url,
-            "NEXT_PUBLIC_API_HOST": get_api_host(blockscout_service, port_publisher)
-            + ":"
-            + str(get_api_port(blockscout_service, port_publisher)),
-            "NEXT_PUBLIC_AD_BANNER_PROVIDER": "none",
-            "NEXT_PUBLIC_AD_TEXT_PROVIDER": "none",
-            "NEXT_PUBLIC_IS_TESTNET": "true",
-            "NEXT_PUBLIC_GAS_TRACKER_ENABLED": "true",
-            "NEXT_PUBLIC_HAS_BEACON_CHAIN": "true",
-            "NEXT_PUBLIC_NETWORK_VERIFICATION_TYPE": "validation",
-            "NEXT_PUBLIC_NETWORK_ICON": "https://ethpandaops.io/logo.png",
-            # "NEXT_PUBLIC_APP_HOST": "0.0.0.0",
-            "NEXT_PUBLIC_APP_PROTOCOL": "http",
-            "NEXT_PUBLIC_APP_HOST": "127.0.0.1",
-            "NEXT_PUBLIC_APP_PORT": str(HTTP_PORT_NUMBER_FRONTEND),
-            "NEXT_PUBLIC_USE_NEXT_JS_PROXY": "true",
-            "PORT": str(HTTP_PORT_NUMBER_FRONTEND),
-        },
+        env_vars=env_vars,
         min_cpu=BLOCKSCOUT_MIN_CPU,
         max_cpu=BLOCKSCOUT_MAX_CPU,
         min_memory=BLOCKSCOUT_MIN_MEMORY,

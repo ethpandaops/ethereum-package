@@ -22,6 +22,7 @@ def get_vc_config(
     image,
     global_log_level,
     cl_context,
+    all_cl_contexts,
     el_context,
     remote_signer_context,
     full_name,
@@ -37,6 +38,7 @@ def get_vc_config(
     port_publisher,
     vc_index,
     extra_files_artifacts,
+    tempo_otlp_grpc_url=None,
 ):
     if node_keystore_files == None:
         return None
@@ -52,10 +54,21 @@ def get_vc_config(
             snooper_beacon_context.ip_addr,
             snooper_beacon_context.beacon_rpc_port_num,
         )
+        beacon_http_urls = [beacon_http_url]
     else:
-        beacon_http_url = "{0}".format(
-            cl_context.beacon_http_url,
-        )
+        beacon_http_urls = []
+        if (
+            participant.vc_beacon_node_indices != None
+            and len(participant.vc_beacon_node_indices) > 0
+        ):
+            for idx in participant.vc_beacon_node_indices:
+                if idx < len(all_cl_contexts):
+                    beacon_http_urls.append(all_cl_contexts[idx].beacon_http_url)
+
+        if len(beacon_http_urls) == 0:
+            beacon_http_urls = [cl_context.beacon_http_url]
+
+        beacon_http_url = beacon_http_urls[0]
 
     keymanager_enabled = participant.keymanager_enabled
     if vc_type == constants.VC_TYPE.lighthouse:
@@ -66,8 +79,9 @@ def get_vc_config(
             participant=participant,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
+            service_name=service_name,
             global_log_level=global_log_level,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             full_name=full_name,
@@ -79,6 +93,7 @@ def get_vc_config(
             port_publisher=port_publisher,
             vc_index=vc_index,
             extra_files_artifacts=extra_files_artifacts,
+            tempo_otlp_grpc_url=tempo_otlp_grpc_url,
         )
     elif vc_type == constants.VC_TYPE.lodestar:
         config = lodestar.get_config(
@@ -88,7 +103,7 @@ def get_vc_config(
             keymanager_file=keymanager_file,
             image=image,
             global_log_level=global_log_level,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             remote_signer_context=remote_signer_context,
@@ -109,7 +124,7 @@ def get_vc_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             remote_signer_context=remote_signer_context,
@@ -130,7 +145,7 @@ def get_vc_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             remote_signer_context=remote_signer_context,
@@ -151,7 +166,7 @@ def get_vc_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             el_context=el_context,
             remote_signer_context=remote_signer_context,
@@ -178,7 +193,7 @@ def get_vc_config(
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             image=image,
             global_log_level=global_log_level,
-            beacon_http_url=beacon_http_url,
+            beacon_http_urls=beacon_http_urls,
             cl_context=cl_context,
             remote_signer_context=remote_signer_context,
             full_name=full_name,
@@ -208,7 +223,7 @@ def get_vc_context(
 ):
     validator_metrics_port = service.ports[constants.METRICS_PORT_ID]
     validator_metrics_url = "{0}:{1}".format(
-        service.ip_address, validator_metrics_port.number
+        service.name, validator_metrics_port.number
     )
     validator_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, vc_shared.METRICS_PATH, validator_metrics_url

@@ -88,7 +88,7 @@ def launch(
     mev_boost_service = plan.add_service(service_name, config)
 
     return mev_boost_context_module.new_mev_boost_context(
-        mev_boost_service.ip_address, constants.MEV_BOOST_PORT
+        mev_boost_service.name, constants.MEV_BOOST_PORT
     )
 
 
@@ -110,7 +110,6 @@ def get_config(
         cmd=[],
         env_vars={
             "CB_CONFIG": config_file_path,
-            "RUST_LOG": "debug",
         },
         files={
             CB_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_file,

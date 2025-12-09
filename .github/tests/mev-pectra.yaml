@@ -1,15 +1,15 @@
 participants:
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.11
+    el_image: ethereum/client-go:v1.16.7
     el_extra_params: ["--miner.extradata=pawanRocks"]
     cl_type: lighthouse
     cl_image: sigp/lighthouse:v7.0.1
 
   - el_type: nethermind
-    el_image: nethermind/nethermind:1.32.3
+    el_image: nethermind/nethermind:1.33.1
     el_extra_params: ["--Blocks.ExtraData=TekuFromLocal"]
     cl_type: teku
-    cl_image: consensys/teku:25.4.1
+    cl_image: consensys/teku:25.9.2
 
   - el_type: reth
     el_image: ghcr.io/paradigmxyz/reth:v1.3.12
@@ -31,7 +31,7 @@ participants:
     cl_image: statusim/nimbus-eth2:multiarch-v25.4.1
 
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.11
+    el_image: ethereum/client-go:v1.16.7
     el_extra_params: ["--miner.extradata=pawanRocks"]
     cl_type: grandine
     cl_image: sifrai/grandine:1.1.0

@@ -40,6 +40,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
+    bootnodoor_enode=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -58,6 +59,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
+        bootnodoor_enode,
     )
 
     service = plan.add_service(service_name, config)
@@ -85,6 +87,7 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
+    bootnodoor_enode=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -133,7 +136,7 @@ def get_config(
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--Init.WebSocketsEnabled=true",
         "--JsonRpc.Enabled=true",
-        "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin,debug,txpool",
+        "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin,debug,txpool,trace",
         "--JsonRpc.Host=0.0.0.0",
         "--JsonRpc.Port={0}".format(RPC_PORT_NUM),
         "--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
@@ -147,6 +150,10 @@ def get_config(
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
         "--Metrics.ExposeHost=0.0.0.0",
     ]
+
+    # Configure storage type - nethermind defaults to hybrid pruning, use None mode for archive
+    if participant.el_storage_type == "archive":
+        cmd.append("--Pruning.Mode=None")
 
     if network_params.gas_limit > 0:
         cmd.append("--Blocks.TargetBlockGasLimit={0}".format(network_params.gas_limit))
@@ -166,10 +173,19 @@ def get_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/chainspec.json"
         )
+
+        # Configure block timing to match consensus layer
+        if network_params.seconds_per_slot and network_params.seconds_per_slot != 12:
+            cmd.append(
+                "--Blocks.SecondsPerSlot={0}".format(network_params.seconds_per_slot)
+            )
     else:
         cmd.append("--config=" + network_params.network)
 
-    if (
+    # Handle bootnode configuration with bootnodoor_enode override
+    if bootnodoor_enode != None:
+        cmd.append("--Discovery.Bootnodes=" + bootnodoor_enode)
+    elif (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
@@ -266,18 +282,18 @@ def get_el_context(
         plan, service_name, constants.RPC_PORT_ID
     )
 
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    metrics_url = "{0}:{1}".format(service.name, METRICS_PORT_NUM)
     nethermind_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
 
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+    http_url = "http://{0}:{1}".format(service.name, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.name, WS_PORT_NUM)
 
     return el_context.new_el_context(
         client_name="nethermind",
         enode=enode,
-        ip_addr=service.ip_address,
+        ip_addr=service.name,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,

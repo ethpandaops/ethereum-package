@@ -1,0 +1,98 @@
+# Optional: Custom instance identifier for logging/monitoring
+instance_id: "kurtosis-helix-relay"
+
+network_config: !Custom
+  dir_path: "{{ .GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER }}/config.json"
+  genesis_validator_root: "{{ .GENESIS_VALIDATORS_ROOT }}"
+  genesis_time: {{ .GENESIS_TIME }}
+
+# PostgreSQL Database Configuration (with TimescaleDB)
+postgres:
+  hostname: "{{ .POSTGRES_HOST_NAME }}"
+  port: {{ .POSTGRES_PORT }}
+  db_name: "{{ .POSTGRES_DB }}"
+  user: "{{ .POSTGRES_USER }}"
+  password: "{{ .POSTGRES_PASS }}"
+  region: 0
+  region_name: "LOCAL"
+
+# Beacon Client(s) - for fetching chain data and publishing blocks
+beacon_clients:
+  - url: "{{ .BEACON_URI }}"
+
+gossip_payload_on_header: false
+
+# Simulator(s) - Execution clients for block validation
+simulators:
+  # Regular validation simulator
+  - url: "{{ .BLOCKSIM_URI }}"
+    namespace: flashbots  # RPC method prefix
+    is_merging_simulator: false
+    max_concurrent_tasks: 32
+
+# API Routes Configuration
+router_config:
+  enabled_routes:
+    # Builder API routes
+    - route: GetValidators
+    - route: SubmitBlock
+    - route: GetTopBid
+    
+    # Proposer API routes
+    - route: GetHeader
+      rate_limit:
+        replenish_ms: 100
+        burst_size: 10
+    - route: GetPayload
+    - route: RegisterValidators
+    - route: Status
+    
+    # Data API routes
+    - route: ProposerPayloadDelivered
+    - route: BuilderBidsReceived
+    - route: ValidatorRegistration
+  
+  # Graceful shutdown delay (milliseconds)
+  shutdown_delay_ms: 12000
+
+# Timing game configuration (for header delay strategy)
+timing_game_config:
+  max_header_delay_ms: 650
+  latest_header_delay_ms_in_slot: 2000
+  default_client_latency_ms: 150
+
+# Target propagation duration for get_payload
+target_get_payload_propagation_duration_ms: 1000
+
+# Instance type flags
+is_submission_instance: true   # Accepts block submissions
+is_registration_instance: true  # Accepts validator registrations
+
+# Admin API authentication token
+admin_token: "admin_token"
+
+# Alternative: Console logging
+logging: !Console
+
+# Optional: Website/dashboard
+website:
+  enabled: true
+  port: {{ .HELIX_RELAY_WEBSITE_PORT }}
+  listen_address: "0.0.0.0"
+  show_config_details: false
+  network_name: "Kurtosis Helix Relay" # TODO - we can configure this to show network
+  relay_url: "https://{{ .HELIX_RELAY_ENDPOINT_URL }}"
+  relay_pubkey: "{{ .HELIX_RELAY_PUBKEY }}"
+  link_beaconchain: "https://holesky.beaconcha.in"
+  link_etherscan: "https://holesky.etherscan.io"
+  link_data_api: "https://relay.example.com/relay/v1/data"
+
+# CPU Core Pinning (CRITICAL for production performance)
+cores:
+  auctioneer: 0             # Single core for main auctioneer thread
+  sub_workers: [0]  # Cores for submission workers
+  reg_workers: [0]  # Cores for registration workers
+  tokio: [0]    # Cores for Tokio async runtime
+
+# Optional: Enable local development mode (disables some checks)
+is_local_dev: false

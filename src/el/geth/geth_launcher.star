@@ -51,6 +51,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
+    bootnodoor_enode=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -69,6 +70,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
+        bootnodoor_enode,
     )
 
     service = plan.add_service(service_name, config)
@@ -96,23 +98,21 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
+    bootnodoor_enode=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
+    # Check if archive mode is explicitly set via extra params or el_storage_type
     if (
         "--gcmode=archive" in participant.el_extra_params
         or "--gcmode archive" in participant.el_extra_params
+        or participant.el_storage_type == "archive"
     ):
         gcmode_archive = True
     else:
         gcmode_archive = False
-
-    init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
-        EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-    )
 
     public_ports = {}
     public_ports_for_component = None
@@ -160,7 +160,9 @@ def get_config(
             else ""
         ),
         "{0}".format(
-            "--networkid={0}".format(launcher.networkid)
+            "--override.genesis={0}".format(
+                constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+            )
             if network_params.network not in constants.PUBLIC_NETWORKS
             else ""
         ),
@@ -179,7 +181,6 @@ def get_config(
         "--ws.port={0}".format(WS_PORT_NUM),
         "--ws.api=admin,engine,net,eth,web3,debug,txpool",
         "--ws.origins=*",
-        "--allow-insecure-unlock",
         "--nat=extip:" + port_publisher.el_nat_exit_ip,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
@@ -221,7 +222,10 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"
 
-    if (
+    # Handle bootnode configuration with bootnodoor_enode override
+    if bootnodoor_enode != None:
+        cmd.append("--bootnodes=" + bootnodoor_enode)
+    elif (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
@@ -234,10 +238,6 @@ def get_config(
                 ]
             )
         )
-        if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            if launcher.osaka_enabled:
-                cmd.append("--override.osaka=" + str(launcher.osaka_time))
-
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in network_params.network
@@ -253,15 +253,7 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.el_extra_params])
 
-    cmd_str = " ".join(cmd)
-    if network_params.network not in constants.PUBLIC_NETWORKS:
-        subcommand_strs = [
-            init_datadir_cmd_str,
-            cmd_str,
-        ]
-        command_str = " && ".join(subcommand_strs)
-    else:
-        command_str = cmd_str
+    command_str = " ".join(cmd)
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
@@ -332,18 +324,18 @@ def get_el_context(
         plan, service_name, constants.RPC_PORT_ID
     )
 
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
+    metrics_url = "{0}:{1}".format(service.name, METRICS_PORT_NUM)
     geth_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, metrics_url
     )
 
-    http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_PORT_NUM)
+    http_url = "http://{0}:{1}".format(service.name, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.name, WS_PORT_NUM)
 
     return el_context.new_el_context(
         client_name="geth",
         enode=enode,
-        ip_addr=service.ip_address,
+        ip_addr=service.name,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
@@ -364,6 +356,4 @@ def new_geth_launcher(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         networkid=networkid,
-        osaka_time=el_cl_genesis_data.osaka_time,
-        osaka_enabled=el_cl_genesis_data.osaka_enabled,
     )

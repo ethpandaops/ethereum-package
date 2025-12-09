@@ -1,40 +1,40 @@
 participants:
   - el_type: geth
-    el_image: ethpandaops/geth:fusaka-devnet-3
+    el_image: ethpandaops/geth:master
     el_extra_params: ["--miner.extradata=lighthouseFromLocal"]
     cl_type: lighthouse
-    cl_image: ethpandaops/lighthouse:fusaka-devnet-3
+    cl_image: ethpandaops/lighthouse:unstable
     supernode: true
 
   - el_type: nethermind
-    el_image: ethpandaops/nethermind:fusaka-devnet-3
+    el_image: ethpandaops/nethermind:master
     el_extra_params: ["--Blocks.ExtraData=TekuFromLocal"]
     cl_type: teku
-    cl_image: ethpandaops/teku:fusaka-devnet-3
+    cl_image: ethpandaops/teku:master
 
   - el_type: reth
-    el_image: ethpandaops/reth:fusaka-devnet-3
+    el_image: ethpandaops/reth:main
     el_extra_params: ["--builder.extradata=LodestarFromLocal"]
     cl_type: lodestar
-    cl_image: ethpandaops/lodestar:fusaka-devnet-3
+    cl_image: ethpandaops/lodestar:unstable
 
   - el_type: geth
-    el_image: ethpandaops/geth:fusaka-devnet-3
+    el_image: ethpandaops/geth:master
     el_extra_params: ["--miner.extradata=PrysmFromLocal"]
     cl_type: prysm
-    cl_image: ethpandaops/prysm-beacon-chain:fusaka-devnet-3-minimal
+    cl_image: ethpandaops/prysm-beacon-chain:develop-minimal
 
   - el_type: nethermind
-    el_image: ethpandaops/nethermind:fusaka-devnet-3
+    el_image: ethpandaops/nethermind:master
     el_extra_params: ["--Blocks.ExtraData=NimbusFromLocal"]
     cl_type: nimbus
-    cl_image: ethpandaops/nimbus-eth2:fusaka-devnet-3-minimal
+    cl_image: ethpandaops/nimbus-eth2:unstable-minimal
 
   - el_type: reth
-    el_image: ethpandaops/reth:fusaka-devnet-3
+    el_image: ethpandaops/reth:main
     el_extra_params: ["--builder.extradata=GrandineFromLocal"]
     cl_type: grandine
-    cl_image: ethpandaops/grandine:fusaka-devnet-3-minimal
+    cl_image: ethpandaops/grandine:develop-minimal
 additional_services:
   - dora
   - tx_fuzz
@@ -45,7 +45,7 @@ network_params:
   min_validator_withdrawability_delay: 1
   shard_committee_period: 1
   churn_limit_quotient: 16
-  fulu_fork_epoch: 10
+  fulu_fork_epoch: 0
   genesis_delay: 120
   preset: minimal
 

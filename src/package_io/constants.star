@@ -63,7 +63,7 @@ ADMIN_PORT_ID = "admin"
 RBUILDER_PORT_ID = "rbuilder-rpc"
 RBUILDER_METRICS_PORT_ID = "rbuilder-metric"
 LITTLE_BIGTABLE_PORT_ID = "littlebigtable"
-VALDIATOR_GRPC_PORT_ID = "grpc"
+VALIDATOR_GRPC_PORT_ID = "grpc"
 
 VALIDATING_REWARDS_ACCOUNT = "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
 MAX_ENR_ENTRIES = 20
@@ -92,12 +92,15 @@ MOCK_MEV_TYPE = "mock"
 FLASHBOTS_MEV_TYPE = "flashbots"
 MEV_RS_MEV_TYPE = "mev-rs"
 COMMIT_BOOST_MEV_TYPE = "commit-boost"
+HELIX_MEV_TYPE = "helix"
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
+DEFAULT_CHECKPOINTZ_IMAGE = "ethpandaops/checkpointz:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
+DEFAULT_BOOTNODOOR_IMAGE = "ethpandaops/bootnodoor:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:5.0.6"
+    "ethpandaops/ethereum-genesis-generator:5.2.0"
 )
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
@@ -107,6 +110,7 @@ DEFAULT_MEV_RS_IMAGE = "ethpandaops/mev-rs:main"
 DEFAULT_MEV_RS_IMAGE_MINIMAL = "ethpandaops/mev-rs:main-minimal"
 DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE = "ghcr.io/commit-boost/pbs:latest"
 DEFAULT_MOCK_MEV_IMAGE = "ethpandaops/rustic-builder:main"
+DEFAULT_HELIX_RELAY_IMAGE = "ghcr.io/gattaca-com/helix-relay:main"
 DEFAULT_MEV_PUBKEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
 DEFAULT_MEV_SECRET_KEY = (
     "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
@@ -191,7 +195,7 @@ GENESIS_TIME = {
     "mainnet": 1606824023,
     "sepolia": 1655733600,
     "holesky": 1695902400,
-    "hoodi": 1741971600,
+    "hoodi": 1742213400,
 }
 
 VOLUME_SIZE = {

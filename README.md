@@ -17,13 +17,19 @@ Specifically, this [package][package-reference] will:
 
 Optional features (enabled via flags or parameter files at runtime):
 
-* Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
-* Spin up & configure parameters for the infrastructure behind Flashbot's implementation of PBS using `mev-boost`, in either `full` or `mock` mode. More details [here](./README.md#proposer-builder-separation-pbs-implementation-via-flashbots-mev-boost-protocol).
-* Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
-* Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client.
-* Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
-* Specify the required parameters for the nodes to reach an external block building network
-* Generate keystores for each node in parallel
+- Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
+- Spin up & configure parameters for the infrastructure behind PBS (Proposer-Builder Separation) using `mev-boost`, with support for multiple relay implementations:
+  - `flashbots` - Full Flashbots MEV infrastructure
+  - `helix` - High-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend
+  - `mev-rs` - Alternative relay implementation
+  - `commit-boost` - Commit-boost based infrastructure
+  - `mock` - Mock builder for testing
+  - [More details on PBS implementation](./README.md#proposer-builder-separation-pbs-emulation).
+- Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
+- Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client.
+- Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
+- Specify the required parameters for the nodes to reach an external block building network
+- Generate keystores for each node in parallel
 
 ## Quickstart
 
@@ -37,7 +43,7 @@ Optional features (enabled via flags or parameter files at runtime):
    kurtosis run --enclave my-testnet github.com/ethpandaops/ethereum-package
    ```
 
-#### Run with your own configuration
+### Run with your own configuration
 
 Kurtosis packages are parameterizable, meaning you can customize your network and its behavior to suit your needs by storing parameters in a file that you can pass in at runtime like so:
 
@@ -51,7 +57,8 @@ Where `network_params.yaml` contains the parameters for your network in your hom
 
 Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster.
 
-#### Considerations for Running on a Public Testnet with a Cloud Provider
+### Considerations for Running on a Public Testnet with a Cloud Provider
+
 When running on a public testnet using a cloud provider's Kubernetes cluster, there are a few important factors to consider:
 
 1. State Growth: The growth of the state might be faster than anticipated. This could potentially lead to issues if the default parameters become insufficient over time. It's important to monitor state growth and adjust parameters as necessary.
@@ -65,7 +72,9 @@ To mitigate these issues, you can use the `el_volume_size` and `cl_volume_size` 
 For optimal performance, we recommend using a cloud provider that allows you to provision Kubernetes clusters with fast persistent storage or self hosting your own Kubernetes cluster with fast persistent storage.
 
 ### Shadowforking
+
 In order to enable shadowfork capabilities, you can use the `network_params.network` flag. The expected value is the name of the network you want to shadowfork followed by `-shadowfork`. Please note that `persistent` configuration parameter has to be enabled for shadowforks to work! Current limitation on k8s is it is only working on a single node cluster. For example, to shadowfork the Holesky testnet, you can use the following command:
+
 ```yaml
 ...
 network_params:
@@ -74,8 +83,10 @@ persistent: true
 ...
 ```
 
-##### Shadowforking custom verkle networks
+#### Shadowforking custom verkle networks
+
 In order to enable shadowfork capabilities for verkle networks, you need to define electra and mention verkle in the network name after shadowfork.
+
 ```yaml
 ...
 network_params:
@@ -86,7 +97,9 @@ persistent: true
 ```
 
 #### Taints and tolerations
+
 It is possible to run the package on a Kubernetes cluster with taints and tolerations. This is done by adding the tolerations to the `tolerations` field in the `network_params.yaml` file. For example:
+
 ```yaml
 participants:
   - el_type: reth
@@ -99,6 +112,7 @@ global_tolerations:
 ```
 
 It is possible to define toleration globally, per participant or per container. The order of precedence is as follows:
+
 1. Container (`el_tolerations`, `cl_tolerations`, `vc_tolerations`)
 2. Participant (`tolerations`)
 3. Global (`global_tolerations`)
@@ -129,7 +143,7 @@ And if you need the logs for a service, simply run:
 kurtosis service logs my-testnet $SERVICE_NAME
 ```
 
-Check out the full list of CLI commands [here](https://docs.kurtosis.com/cli)
+Check out the [full list of Kurtosis CLI commands](https://docs.kurtosis.com/cli)
 
 ## Debugging
 
@@ -145,7 +159,7 @@ For example, to retrieve the Execution Layer (EL) genesis data, run:
 kurtosis files download my-testnet el-genesis-data ~/Downloads
 ```
 
-# Basic file sharing
+## Basic file sharing
 
 Apache is included in the package to allow for basic file sharing. The Apache service is started when additional services are enabled. It will expose the network-configs directory, which might needed if you want to share the network config publicly.
 
@@ -169,12 +183,12 @@ participants:
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
     # Defaults by client:
     # - geth: ethereum/client-go:latest
-    # - erigon: ethpandaops/erigon:main
-    # - nethermind: nethermind/nethermind:latest
-    # - besu: hyperledger/besu:develop
+    # - erigon: erigontech/erigon:latest
+    # - nethermind: ethpandaops/nethermind:master
+    # - besu: hyperledger/besu:latest
     # - reth: ghcr.io/paradigmxyz/reth
     # - ethereumjs: ethpandaops/ethereumjs:master
-    # - nimbus-eth1: ethpandaops/nimbus-eth1:master
+    # - nimbus-eth1: statusim/nimbus-eth1:master
     # - ethrex: ghcr.io/lambdaclass/ethrex:latest
     el_image: ""
 
@@ -185,11 +199,20 @@ participants:
     # over a specific participant's logging
     el_log_level: ""
 
+    # The storage type for the EL client: "full" or "archive"
+    # IMPORTANT: Consider updating el_volume_size if you set this
+    # If this is emptystring, each client will use its default behavior:
+    #   - reth, erigon: default to archive (use "full" to save space)
+    #   - geth, besu, nethermind: default to full (use "archive" to keep historical data)
+    #   - ethereumjs, ethrex, nimbus-eth1: unused (full only?)
+    # Example: el_storage_type: "full" or "archive"
+    el_storage_type: ""
+
     # A list of optional extra env_vars the el container should spin up with
     el_extra_env_vars: {}
 
     # A list of optional extra labels the el container should spin up with
-    # Example; el_extra_labels: {"ethereum-package.partition": "1"}
+    # Example: el_extra_labels: {"ethereum-package.partition": "1"}
     el_extra_labels: {}
 
     # A list of optional extra params that will be passed to the EL client container for modifying its behaviour
@@ -213,6 +236,7 @@ participants:
     el_tolerations: []
 
     # Persistent storage size for the EL client container (in MB)
+    # IMPORTANT: Consider settings this if you are setting el_storage_type
     # Defaults to 0, which means that the default size for the client will be used
     # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
     el_volume_size: 0
@@ -233,11 +257,11 @@ participants:
 
     # The Docker image that should be used for the CL client; leave blank to use the default for the client type
     # Defaults by client:
-    # - lighthouse: sigp/lighthouse:latest
-    # - teku: consensys/teku:latest
+    # - lighthouse: ethpandaops/lighthouse:unstable
+    # - teku: ethpandaops/teku:master
     # - nimbus: statusim/nimbus-eth2:multiarch-latest
-    # - prysm: gcr.io/offchainlabs/prysm/beacon-chain:latest
-    # - lodestar: chainsafe/lodestar:next
+    # - prysm: ethpandaops/prysm-beacon-chain:develop
+    # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
     cl_image: ""
 
@@ -312,9 +336,9 @@ participants:
     # - lighthouse: sigp/lighthouse:latest
     # - lodestar: chainsafe/lodestar:latest
     # - nimbus: statusim/nimbus-validator-client:multiarch-latest
-    # - prysm: gcr.io/offchainlabs/prysm/validator:latest
-    # - teku: consensys/teku:latest
-    # - vero: ghcr.io/serenita-org/vero:master
+    # - prysm: ethpandaops/prysm-validator:develop
+    # - teku: ethpandaops/teku:master
+    # - vero: ghcr.io/serenita-org/vero:latest
     vc_image: ""
 
     # The log level string that this participant's validator client should log at
@@ -360,6 +384,10 @@ participants:
     vc_max_cpu: 0
     vc_min_mem: 0
     vc_max_mem: 0
+
+    # A list of indices of the beacon nodes that the validator client should connect to
+    # Defaults to null
+    vc_beacon_node_indices: null
 
     # Count of the number of validators you want to run for a given participant
     # Default to null, which means that the number of validators will be using the
@@ -486,6 +514,17 @@ participants:
     # Defaults null and then set to default global keymanager_enabled (false)
     keymanager_enabled: null
 
+    # Per-participant override for checkpoint sync. If set, this will override the global checkpoint_sync_enabled flag for this participant.
+    # Defaults to null (uses global checkpoint_sync_enabled setting)
+    checkpoint_sync_enabled: null
+
+    # If set to true, the beacon node will be created and then immediately stopped.
+    # No health checks are performed during creation (ready_conditions are disabled).
+    # The service can be started later using: kurtosis service start <enclave> <service-name>
+    # This is useful for testing or when you want to manually control when the beacon node starts.
+    # Defaults to false
+    skip_start: false
+
 # Participants matrix creates a participant for each combination of EL, CL and VC clients
 # Each EL/CL/VC item can provide the same parameters as a standard participant
 participants_matrix: {}
@@ -564,7 +603,7 @@ network_params:
   max_request_blob_sidecars_electra: 1152
 
   # The number of validator keys that each CL validator node should get
-  num_validator_keys_per_node: 64
+  num_validator_keys_per_node: 128
 
   # This mnemonic will a) be used to create keystores for all the types of validators that we have and b) be used to generate a CL genesis.ssz that has the children
   # validator keys already preregistered as validators
@@ -575,6 +614,12 @@ network_params:
 
   # How long you want the network to wait before starting up
   genesis_delay: 20
+
+  # Unix timestamp for genesis. If specified (non-zero), this overrides genesis_delay.
+  # When set to 0 (default), the genesis time is automatically calculated based on current time and genesis_delay.
+  # Use this field to set a specific genesis time for the network.
+  # Defaults to 0
+  genesis_time: 0
 
   # The gas limit of the network set at genesis
   # Defaults to 60000000
@@ -630,8 +675,8 @@ network_params:
   electra_fork_epoch: 0
 
   # Fulu fork epoch
-  # Defaults to 18446744073709551615
-  fulu_fork_epoch: 18446744073709551615
+  # Defaults to 0
+  fulu_fork_epoch: 0
 
   # Gloas fork epoch
   # Defaults to 18446744073709551615
@@ -735,21 +780,21 @@ network_params:
 
 
   # BPO
-  # BPO1-5 epoch (default 18446744073709551615)
-  bpo_1_epoch: 18446744073709551615
+  # BPO1-5 epoch (default 0/18446744073709551615)
+  bpo_1_epoch: 0
   # Maximum number of blobs per block for BPO1-5
   # If only max is set, target is auto-calculated as 2/3 of max
   # If only target is set, max is auto-calculated as 3/2 of target
-  bpo_1_max_blobs: 0
+  bpo_1_max_blobs: 15
   # Target number of blobs per block for BPO1-5
-  bpo_1_target_blobs: 0
+  bpo_1_target_blobs: 10
   # Base fee update fraction for BPO1-5 (default 0)
-  bpo_1_base_fee_update_fraction: 0
+  bpo_1_base_fee_update_fraction: 8346193
 
   bpo_2_epoch: 18446744073709551615
-  bpo_2_max_blobs: 0
-  bpo_2_target_blobs: 0
-  bpo_2_base_fee_update_fraction: 0
+  bpo_2_max_blobs: 21
+  bpo_2_target_blobs: 14
+  bpo_2_base_fee_update_fraction: 11684671
 
   bpo_3_epoch: 18446744073709551615
   bpo_3_max_blobs: 0
@@ -782,6 +827,10 @@ network_params:
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
+  # Minimum number of epochs for block requests
+  # Default to 33024
+  min_epochs_for_block_requests: 33024
+
 # Global parameters for the network
 
 # By default includes
@@ -792,24 +841,28 @@ network_params:
 # - A light beacon chain explorer will be launched
 # - Default: []
 additional_services:
-  - assertoor
-  - broadcaster
-  - tx_fuzz
-  - custom_flood
-  - spamoor
-  - forkmon
-  - blockscout
-  - dora
-  - full_beaconchain_explorer
-  - prometheus
-  - grafana
-  - tempo
-  - blobscan
-  - dugtrio
-  - blutgang
-  - forky
   - apache
+  - assertoor
+  - blobscan
+  - blockscout
+  - blutgang
+  - bootnodoor
+  - broadcaster
+  - checkpointz
+  - custom_flood
+  - dora
+  - dugtrio
+  - erpc
+  - forkmon
+  - forky
+  - full_beaconchain_explorer
+  - grafana
+  - mempool_bridge
+  - prometheus
+  - spamoor
+  - tempo
   - tracoor
+  - tx_fuzz
 
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
 blockscout_params:
@@ -822,6 +875,8 @@ blockscout_params:
   # Frontend image
   # Defaults to ghcr.io/blockscout/frontend:latest
   frontend_image: "ghcr.io/blockscout/frontend:latest"
+  # Environment variables
+  env: {}
 
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
@@ -830,6 +885,12 @@ dora_params:
   image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
+
+# Configuration place for checkpointz - https://github.com/ethpandaops/checkpointz
+checkpointz_params:
+  # Checkpointz docker image to use
+  # Defaults to the latest image
+  image: "ethpandaops/checkpointz:latest"
 
 # Define custom file contents to be mounted into containers
 # These files are referenced by name in el_extra_mounts, cl_extra_mounts, and vc_extra_mounts
@@ -880,6 +941,18 @@ grafana_params:
   # Defaults to the latest image
   image: "grafana/grafana:latest"
 
+# Bootnodoor params
+bootnodoor_params:
+  # Bootnodoor docker image to use
+  # Defaults to the latest image
+  image: "ethpandaops/bootnodoor:latest"
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  # A list of optional extra args the bootnodoor container should spin up with
+  extra_args: []
+
 # Configuration place for tempo tracing backend
 tempo_params:
   # How long to retain traces
@@ -919,7 +992,7 @@ assertoor_params:
   # - no more than 2 reorgs per epoch
   run_stability_check: false
 
-  # Check block propöosals
+  # Check block proposals
   # This check monitors the chain and succeeds if:
   # - all client pairs have proposed a block
   run_block_proposal_check: false
@@ -1013,12 +1086,54 @@ docker_cache_params:
   github_prefix: "/gh/"
   google_prefix: "/gcr/"
 
-# Supports three valeus
+
+# Configuration place for mempool bridge (https://github.com/ethpandaops/mempool-bridge)
+mempool_bridge_params:
+  # The image to use for mempool bridge
+  image: ethpandaops/mempool-bridge:latest
+  # The mode for mempool bridge operation
+  # Valid values are "p2p" or "rpc"
+  # Default: "p2p"
+  mode: "p2p"
+  # The source enodes to use for mempool bridge
+  # Example:
+  # P2P mode:
+  # source_enodes:
+  #   - enode://1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef@127.0.0.1:30303
+  #   - enode://1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef@127.0.0.1:30304
+  # RPC mode:
+  # source_enodes:
+  #   - http://127.0.0.1:8545
+  #   - http://127.0.0.1:8546
+  # Default: []
+  source_enodes: []
+
+  # The log level for mempool bridge
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
+
+  # The number of concurrent goroutines to use when sending transactions to targets
+  # Default: 10
+  send_concurrency: 10
+
+  # The interval in seconds for polling the source for new transactions
+  # Default: "10s"
+  polling_interval: "10s"
+
+  # The retry interval duration for retrying failed operations
+  # Default: "30s"
+  retry_interval: "30s"
+
+# Supports six values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
 # "mev-rs" - mev-boost, relays and builder are all spun up, powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 # "commit-boost" - mev-boost, relays and builder are all spun up, powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
+# "helix" - helix relay, flashbots builder and mev-boost are spun up, powered by [helix](https://github.com/gattaca-com/helix)
+#            Note: Helix uses TimescaleDB (PostgreSQL with time-series extension) for data storage
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -1079,14 +1194,16 @@ xatu_sentry_params:
   # Beacon event stream topics to subscribe to
   beacon_subscriptions:
     - attestation
+    - single_attestation
     - block
+    - block_gossip
     - chain_reorg
     - finalized_checkpoint
     - head
     - voluntary_exit
     - contribution_and_proof
     - blob_sidecar
-
+    - data_column_sidecar
 # Apache params
 # Apache public port to port forward to local machine
 # Default to port None, only set if apache additional service is activated
@@ -1115,6 +1232,7 @@ global_node_selectors: {}
 keymanager_enabled: false
 
 # Global flag to enable checkpoint sync across the network
+# Default to false
 checkpoint_sync_enabled: false
 
 # Global flag to set checkpoint sync url
@@ -1147,7 +1265,9 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.0.6
+  image: ethpandaops/ethereum-genesis-generator:5.2.0
+  # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
+  extra_env: {}
 
 # Configuration for public ports and NAT exit IP addresses
 port_publisher:
@@ -1249,12 +1369,13 @@ port_publisher:
     nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
 ```
 
-#### Example configurations
+### Example configurations
 
 <details>
     <summary>Port Publisher Configuration Examples</summary>
 
 **Global NAT Exit IP (Backward Compatible)**
+
 ```yaml
 port_publisher:
   nat_exit_ip: "auto"  # All services use auto-detected public IP
@@ -1270,6 +1391,7 @@ port_publisher:
 ```
 
 **Per-Service NAT Exit IP (Granular Control)**
+
 ```yaml
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER  # Not set globally
@@ -1288,6 +1410,7 @@ port_publisher:
 ```
 
 **Mixed Configuration**
+
 ```yaml
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER  # Not set globally
@@ -1304,6 +1427,7 @@ port_publisher:
     public_port_start: 36000
     # Uses default KURTOSIS_IP_ADDR_PLACEHOLDER for additional services
 ```
+
 </details>
 
 <details>
@@ -1313,26 +1437,25 @@ port_publisher:
 participants:
   - el_type: geth
     el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    elExtraParams:
+    el_extra_params:
     - "--override.verkle=<UNIXTIMESTAMP>"
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
   - el_type: geth
     el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    elExtraParams:
+    el_extra_params:
     - "--override.verkle=<UNIXTIMESTAMP>"
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
   - el_type: geth
     el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    elExtraParams:
+    el_extra_params:
     - "--override.verkle=<UNIXTIMESTAMP>"
     cl_type: lighthouse
     cl_image: sigp/lighthouse:latest
 network_params:
   deneb_fork_epoch: 0
 wait_for_finalization: false
-wait_for_verifications: false
 global_log_level: info
 
 ```
@@ -1386,6 +1509,40 @@ network_params:
 </details>
 
 <details>
+    <summary>A 3-node Ethereum network with Helix relay for MEV-boost infrastructure</summary>
+
+```yaml
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:master
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    count: 2
+  - el_type: nethermind
+    el_image: ethpandaops/nethermind:master
+    cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:develop
+
+mev_type: helix
+mev_params:
+  mev_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
+  mev_boost_image: ethpandaops/mev-boost:develop
+  mev_builder_cl_image: ethpandaops/lighthouse:unstable
+  mev_builder_subsidy: 1
+
+additional_services:
+  - dora
+  - spamoor
+
+network_params:
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+```
+
+</details>
+
+<details>
     <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper)</summary>
 
 ```yaml
@@ -1416,6 +1573,7 @@ The `extra_files` feature allows you to define custom file contents in your conf
 ### Important: Understanding Mount Paths
 
 Due to how Kurtosis handles artifacts, mount paths become **directories**, not files. When you mount a file:
+
 - The mount path you specify becomes a directory
 - Your file is placed inside that directory with its original name from `extra_files`
 
@@ -1439,7 +1597,6 @@ participants:
     cl_extra_mounts:
       "/configs": "validator_config.json" # File available at: /configs/validator_config.json
 ```
-
 
 ## Beacon Node <> Validator Client compatibility
 
@@ -1489,22 +1646,22 @@ Consensus Layer (CL) nodes - Validator:
   "kurtosistech.com.custom/ethereum-package.node-index": "1",
 ```
 
-* `ethereum-package.client` describes which client is running on the node.
-* `ethereum-package.client-image` describes the image that is used for the client.
-* `ethereum-package.client-type` describes the type of client that is running on the node (`execution`,`beacon` or `validator`).
-* `ethereum-package.connected-client` describes the CL/EL client that is connected to the EL/CL client.
-* `ethereum-package.client-language` describes the implementation language of the running service.
-* `ethereum-package.node-index` describes the index of the node (participant) that the service belongs to.
+- `ethereum-package.client` describes which client is running on the node.
+- `ethereum-package.client-image` describes the image that is used for the client.
+- `ethereum-package.client-type` describes the type of client that is running on the node (`execution`,`beacon` or `validator`).
+- `ethereum-package.connected-client` describes the CL/EL client that is connected to the EL/CL client.
+- `ethereum-package.client-language` describes the implementation language of the running service.
+- `ethereum-package.node-index` describes the index of the node (participant) that the service belongs to.
 
 ## Proposer Builder Separation (PBS) emulation
 
 To spin up the network of Ethereum nodes with an external block building network (using Flashbot's `mev-boost` protocol), simply use:
 
-```
-kurtosis run github.com/ethpandaops/ethereum-package '{"mev_type": "full"}'
+```bash
+kurtosis run github.com/ethpandaops/ethereum-package '{"mev_type": "flashbots"}'
 ```
 
-Starting your network up with `"mev_type": "full"` will instantiate and connect the following infrastructure to your network:
+Starting your network up with `"mev_type": "flashbots"` will instantiate and connect the following infrastructure to your network:
 
 1. `Flashbot's block builder & CL validator + beacon` - A modified Geth client that builds blocks. The CL validator and beacon clients are lighthouse clients configured to receive payloads from the relay.
 2. `mev-relay-api` - Services that provide APIs for (a) proposers, (b) block builders, (c) data
@@ -1512,12 +1669,20 @@ Starting your network up with `"mev_type": "full"` will instantiate and connect 
 4. `mev-relay-housekeeper` - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
 5. `mev-boost` - open-source middleware instantiated for each EL/Cl pair in the network, including the builder
 
-<details>
-    <summary>Caveats when using "mev_type": "full"</summary>
+The package also supports other MEV implementations:
 
-* Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 1st epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 1st epoch.
-* After the 3rd epoch, the mev-relay service will begin to receive execution payloads (eth_sendPayload, which does not contain transaction content) from the mev-builder service (or mock-builder in mock-mev mode).
-* Validators will start to receive validated execution payload headers from the mev-relay service (via mev-boost) after the 4th epoch. The validator selects the most valuable header, signs the payload, and returns the signed header to the relay - effectively proposing the payload of transactions to be included in the soon-to-be-proposed block. Once the relay verifies the block proposer's signature, the relay will respond with the full execution payload body (incl. the transaction contents) for the validator to use when proposing a SignedBeaconBlock to the network.
+- `"mev_type": "helix"` - Uses the high-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend for data storage
+- `"mev_type": "mev-rs"` - Alternative relay implementation powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
+- `"mev_type": "commit-boost"` - Infrastructure powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
+
+Each implementation provides different features and performance characteristics suitable for various testing and development scenarios.
+
+<details>
+    <summary>Caveats when using "mev_type": "flashbots"</summary>
+
+- Validators (64 per node by default, so 128 in the example in this guide) will get registered with the relay automatically after the 1st epoch. This registration process is simply a configuration addition to the mev-boost config - which Kurtosis will automatically take care of as part of the set up. This means that the mev-relay infrastructure only becomes aware of the existence of the validators after the 1st epoch.
+- After the 3rd epoch, the mev-relay service will begin to receive execution payloads (eth_sendPayload, which does not contain transaction content) from the mev-builder service (or mock-builder in mock-mev mode).
+- Validators will start to receive validated execution payload headers from the mev-relay service (via mev-boost) after the 4th epoch. The validator selects the most valuable header, signs the payload, and returns the signed header to the relay - effectively proposing the payload of transactions to be included in the soon-to-be-proposed block. Once the relay verifies the block proposer's signature, the relay will respond with the full execution payload body (incl. the transaction contents) for the validator to use when proposing a SignedBeaconBlock to the network.
 
 </details>
 
@@ -1576,13 +1741,13 @@ When you're happy with your changes:
 
 1. Create a PR
 1. Add one of the maintainers of the repo as a "Review Request":
-   * `parithosh` (Ethereum Foundation)
-   * `barnabasbusa` (Ethereum Foundation)
-   * `pk910` (Ethereum Foundation)
-   * `samcm` (Ethereum Foundation)
-   * `h4ck3rk3y` (Kurtosis)
-   * `mieubrisse` (Kurtosis)
-   * `leederek` (Kurtosis)
+   - `parithosh` (Ethereum Foundation)
+   - `barnabasbusa` (Ethereum Foundation)
+   - `pk910` (Ethereum Foundation)
+   - `samcm` (Ethereum Foundation)
+   - `h4ck3rk3y` (Kurtosis)
+   - `mieubrisse` (Kurtosis)
+   - `leederek` (Kurtosis)
 1. Once everything works, merge!
 
 ## PeerDAS
@@ -1591,6 +1756,7 @@ We can use a set of pre-generated node keys to achieve a perfect column distribu
 For this to work, we need a network of 16 nodes running, so each node would custody 8 unique columns.
 
 Here's a table of the private keys that can be used to create the nodes:
+
 | nodeId | sep256k1 privKey | columns |
 |--------|-------------|---------|
 | 0x9908...4159 | 0x86e8...4c8d | 17, 51, 52, 76, 103, 113, 117, 118 |

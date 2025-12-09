@@ -19,16 +19,17 @@ additional_services:
   - tx_fuzz
   - forkmon
   - dora
+  - checkpointz
   - prometheus
   - grafana
   - custom_flood
-  - blobscan
   - blockscout
   - dugtrio
-  - blutgang
+  - erpc
   - apache
   - tracoor
   - spamoor
+  - bootnodoor
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true

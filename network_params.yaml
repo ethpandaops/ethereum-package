@@ -75,13 +75,14 @@ network_params:
   deposit_contract_address: "0x00000000219ab540356cBB839Cbe05303d7705Fa"
   seconds_per_slot: 12
   slot_duration_ms: 12000
-  num_validator_keys_per_node: 64
+  num_validator_keys_per_node: 128
   preregistered_validator_keys_mnemonic:
     "giant issue aisle success illegal bike spike
     question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy
     very lucky have athlete"
   preregistered_validator_count: 0
   genesis_delay: 20
+  genesis_time: 0
   genesis_gaslimit: 60000000
   max_per_epoch_activation_churn_limit: 8
   churn_limit_quotient: 65536
@@ -99,7 +100,7 @@ network_params:
   proposer_inclusion_list_cutoff_bps: 9167
   deneb_fork_epoch: 0
   electra_fork_epoch: 0
-  fulu_fork_epoch: 18446744073709551615
+  fulu_fork_epoch: 0
   gloas_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
   force_snapshot_sync: false
@@ -114,14 +115,14 @@ network_params:
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   prefunded_accounts: {}
-  bpo_1_epoch: 18446744073709551615
-  bpo_1_max_blobs: 0
-  bpo_1_target_blobs: 0
-  bpo_1_base_fee_update_fraction: 0
+  bpo_1_epoch: 0
+  bpo_1_max_blobs: 15
+  bpo_1_target_blobs: 10
+  bpo_1_base_fee_update_fraction: 8346193
   bpo_2_epoch: 18446744073709551615
-  bpo_2_max_blobs: 0
-  bpo_2_target_blobs: 0
-  bpo_2_base_fee_update_fraction: 0
+  bpo_2_max_blobs: 21
+  bpo_2_target_blobs: 14
+  bpo_2_base_fee_update_fraction: 11684671
   bpo_3_epoch: 18446744073709551615
   bpo_3_max_blobs: 0
   bpo_3_target_blobs: 0
@@ -138,10 +139,11 @@ network_params:
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
   validator_balance: 32
   min_epochs_for_data_column_sidecars_requests: 4096
+  min_epochs_for_block_requests: 33024
 
 additional_services: []
 dora_params:
-  image: ""
+  image: "ethpandaops/dora:latest"
 tx_fuzz_params:
   tx_fuzz_extra_args: []
 spamoor_params:
@@ -164,7 +166,7 @@ grafana_params:
   min_mem: 128
   max_mem: 2048
 assertoor_params:
-  image: ""
+  image: "ethpandaops/assertoor:latest"
   run_stability_check: false
   run_block_proposal_check: false
   run_transaction_test: false
@@ -172,6 +174,8 @@ assertoor_params:
   run_opcodes_transaction_test: false
   run_lifecycle_test: false
   tests: []
+checkpointz_params:
+  image: "ethpandaops/checkpointz:latest"
 wait_for_finalization: false
 global_log_level: info
 snooper_enabled: false
@@ -179,6 +183,7 @@ ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 disable_peer_scoring: false
 persistent: false
+# Supports: null, mock, flashbots, mev-rs, commit-boost, helix
 mev_type: null
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
@@ -198,6 +203,13 @@ mev_params:
     labels: {}
   custom_flood_params:
     interval_between_transactions: 1
+bootnodoor_params:
+  image: ethpandaops/bootnodoor:latest
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  extra_args: []
 xatu_sentry_enabled: false
 xatu_sentry_params:
   xatu_sentry_image: ethpandaops/xatu-sentry
@@ -206,13 +218,16 @@ xatu_sentry_params:
   xatu_server_headers: {}
   beacon_subscriptions:
     - attestation
+    - single_attestation
     - block
+    - block_gossip
     - chain_reorg
     - finalized_checkpoint
     - head
     - voluntary_exit
     - contribution_and_proof
     - blob_sidecar
+    - data_column_sidecar
 apache_port: 40000
 nginx_port: 50000
 global_tolerations: []
@@ -221,7 +236,8 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.0.6
+  image: ethpandaops/ethereum-genesis-generator:5.2.0
+  extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
   el:
