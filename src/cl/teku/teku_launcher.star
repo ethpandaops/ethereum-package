@@ -54,6 +54,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    bootnode_enr_override=None,
 ):
     config = get_beacon_config(
         plan,
@@ -77,6 +78,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        bootnode_enr_override,
     )
 
     beacon_service = plan.add_service(beacon_service_name, config)
@@ -116,6 +118,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    bootnode_enr_override=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -174,7 +177,11 @@ def get_beacon_config(
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
-    used_ports = shared_utils.get_port_specs(used_port_assignments)
+    # Disable port checks if skip_start is enabled
+    if participant.skip_start:
+        used_ports = shared_utils.get_port_specs(used_port_assignments, wait=None)
+    else:
+        used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         TEKU_ENTRYPOINT_COMMAND,
@@ -252,6 +259,8 @@ def get_beacon_config(
     else:
         cmd.append("--ignore-weak-subjectivity-period-enabled=true")
 
+    bootnode_arg = bootnode_enr_override
+
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--genesis-state="
@@ -262,37 +271,28 @@ def get_beacon_config(
             network_params.network == constants.NETWORK_NAME.kurtosis
             or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
-            if bootnode_contexts != None:
-                cmd.append(
-                    "--p2p-discovery-bootnodes="
-                    + ",".join(
-                        [
-                            ctx.enr
-                            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                        ]
-                    )
+            if bootnode_contexts != None and bootnode_arg == None:
+                bootnode_arg = ",".join(
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
                 )
         elif network_params.network == constants.NETWORK_NAME.ephemery:
-            cmd.append(
-                "--p2p-discovery-bootnodes="
-                + shared_utils.get_devnet_enrs_list(
+            if bootnode_arg == None:
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
-            )
         elif constants.NETWORK_NAME.shadowfork in network_params.network:
-            cmd.append(
-                "--p2p-discovery-bootnodes="
-                + shared_utils.get_devnet_enrs_list(
+            if bootnode_arg == None:
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
-            )
         else:  # Devnets
-            cmd.append(
-                "--p2p-discovery-bootnodes="
-                + shared_utils.get_devnet_enrs_list(
+            if bootnode_arg == None:
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
-            )
+
+    if bootnode_arg != None:
+        cmd.append("--p2p-discovery-bootnodes=" + bootnode_arg)
 
     if len(participant.cl_extra_params) > 0:
         # we do the list comprehension as the default extra_params is a proto repeated string
@@ -358,9 +358,6 @@ def get_beacon_config(
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
-            constants.HTTP_PORT_ID
-        ),
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.teku,
             client_type=constants.CLIENT_TYPES.cl,
@@ -377,6 +374,11 @@ def get_beacon_config(
 
     if len(participant.cl_devices) > 0:
         config_args["devices"] = participant.cl_devices
+    # Only add ready_conditions if not skipping start
+    if not participant.skip_start:
+        config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(
+            constants.HTTP_PORT_ID
+        )
 
     if int(participant.cl_min_cpu) > 0:
         config_args["min_cpu"] = int(participant.cl_min_cpu)
@@ -404,21 +406,27 @@ def get_cl_context(
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
 
-    beacon_node_identity_recipe = GetHttpRequestRecipe(
-        endpoint="/eth/v1/node/identity",
-        port_id=constants.HTTP_PORT_ID,
-        extract={
-            "enr": ".data.enr",
-            "multiaddr": ".data.p2p_addresses[0]",
-            "peer_id": ".data.peer_id",
-        },
-    )
-    response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=service_name
-    )
-    beacon_node_enr = response["extract.enr"]
-    beacon_multiaddr = response["extract.multiaddr"]
-    beacon_peer_id = response["extract.peer_id"]
+    # Skip HTTP requests if skip_start is enabled (service won't be running)
+    if participant.skip_start:
+        beacon_node_enr = ""
+        beacon_multiaddr = ""
+        beacon_peer_id = ""
+    else:
+        beacon_node_identity_recipe = GetHttpRequestRecipe(
+            endpoint="/eth/v1/node/identity",
+            port_id=constants.HTTP_PORT_ID,
+            extract={
+                "enr": ".data.enr",
+                "multiaddr": ".data.p2p_addresses[0]",
+                "peer_id": ".data.peer_id",
+            },
+        )
+        response = plan.request(
+            recipe=beacon_node_identity_recipe, service_name=service_name
+        )
+        beacon_node_enr = response["extract.enr"]
+        beacon_multiaddr = response["extract.multiaddr"]
+        beacon_peer_id = response["extract.peer_id"]
 
     beacon_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, BEACON_METRICS_PATH, beacon_metrics_url

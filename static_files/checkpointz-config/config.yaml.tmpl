@@ -1,0 +1,26 @@
+global:
+  listenAddr: ":5555"
+  logging: "info"
+  metricsAddr: ":9090"
+
+checkpointz:
+  mode: "full"
+  custom_preset: true
+  caches:
+    blocks:
+      max_items: 200
+    states:
+      max_items: 5
+  historical_epoch_count: 20
+  frontend:
+    enabled: true
+    brand_name: "Checkpointz - {{ .Network }}"
+    public_url: "http://localhost:5555"
+
+beacon:
+  upstreams:
+{{ range $clClient := .CLClientInfo }}
+  - name: "{{ $clClient.FullName }}"
+    address: "{{ $clClient.Beacon_HTTP_URL }}"
+    dataProvider: true
+{{- end }}

@@ -32,6 +32,7 @@ beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
 snooper_el_launcher = import_module("./snooper/snooper_el_launcher.star")
 blobber_launcher = import_module("./blobber/blobber_launcher.star")
 cl_context_module = import_module("./cl/cl_context.star")
+bootnodoor_launcher = import_module("./bootnodoor/bootnodoor_launcher.star")
 
 
 def launch_participant_network(
@@ -141,6 +142,23 @@ def launch_participant_network(
             global_node_selectors,
         )
 
+    # Launch bootnodoor if configured
+    bootnodoor_enr = None
+    bootnodoor_enode = None
+    if args_with_right_defaults.bootnode == "bootnodoor":
+        plan.print("Launching bootnodoor as bootnode service")
+        bootnodoor_enr, bootnodoor_enode = bootnodoor_launcher.launch_bootnodoor(
+            plan,
+            args_with_right_defaults.bootnodoor_params,
+            el_cl_data,
+            network_params,
+            global_node_selectors,
+            global_tolerations,
+            args_with_right_defaults.docker_cache_params,
+        )
+        plan.print("Bootnodoor launched with ENR: {0}".format(bootnodoor_enr))
+        plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
+
     # Launch all execution layer clients
     all_el_contexts = el_client_launcher.launch(
         plan,
@@ -158,6 +176,7 @@ def launch_participant_network(
         args_with_right_defaults.mev_type,
         args_with_right_defaults.mev_params,
         extra_files_artifacts,
+        bootnodoor_enode,
     )
 
     # Launch all consensus layer clients
@@ -197,7 +216,19 @@ def launch_participant_network(
         global_other_index,
         extra_files_artifacts,
         backend,
+        bootnodoor_enr,
     )
+
+    # Stop beacon nodes for participants with skip_start enabled
+    for index, participant in enumerate(args_with_right_defaults.participants):
+        if participant.skip_start:
+            cl_context = all_cl_contexts[index]
+            plan.print(
+                "Stopping beacon node {0} due to skip_start flag".format(
+                    cl_context.beacon_service_name
+                )
+            )
+            plan.stop_service(cl_context.beacon_service_name)
 
     # Launch all blobbers after all CLs are up
     cl_context_to_blobber_url = {}
@@ -490,6 +521,7 @@ def launch_participant_network(
             port_publisher=args_with_right_defaults.port_publisher,
             vc_index=current_vc_index,
             extra_files_artifacts=extra_files_artifacts,
+            tempo_otlp_grpc_url=tempo_otlp_grpc_url,
         )
         if vc_service_config == None:
             continue
@@ -604,6 +636,6 @@ def launch_participant_network(
         el_cl_data.genesis_validators_root,
         el_cl_data.files_artifact_uuid,
         network_id,
-        el_cl_data.shadowfork_times.get("osaka_time", ""),
+        el_cl_data.osaka_time,
         el_cl_data.shadowfork_block_height,
     )

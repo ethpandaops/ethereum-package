@@ -101,7 +101,7 @@ network_params:
   proposer_inclusion_list_cutoff_bps: 9167
   deneb_fork_epoch: 0
   electra_fork_epoch: 0
-  fulu_fork_epoch: 18446744073709551615
+  fulu_fork_epoch: 0
   gloas_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
   force_snapshot_sync: false
@@ -116,14 +116,14 @@ network_params:
   additional_preloaded_contracts: {}
   devnet_repo: ethpandaops
   prefunded_accounts: {}
-  bpo_1_epoch: 18446744073709551615
-  bpo_1_max_blobs: 0
-  bpo_1_target_blobs: 0
-  bpo_1_base_fee_update_fraction: 0
+  bpo_1_epoch: 0
+  bpo_1_max_blobs: 15
+  bpo_1_target_blobs: 10
+  bpo_1_base_fee_update_fraction: 8346193
   bpo_2_epoch: 18446744073709551615
-  bpo_2_max_blobs: 0
-  bpo_2_target_blobs: 0
-  bpo_2_base_fee_update_fraction: 0
+  bpo_2_max_blobs: 21
+  bpo_2_target_blobs: 14
+  bpo_2_base_fee_update_fraction: 11684671
   bpo_3_epoch: 18446744073709551615
   bpo_3_max_blobs: 0
   bpo_3_target_blobs: 0
@@ -175,6 +175,8 @@ assertoor_params:
   run_opcodes_transaction_test: false
   run_lifecycle_test: false
   tests: []
+checkpointz_params:
+  image: "ethpandaops/checkpointz:latest"
 wait_for_finalization: false
 global_log_level: info
 snooper_enabled: false
@@ -182,6 +184,7 @@ ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 disable_peer_scoring: false
 persistent: false
+# Supports: null, mock, flashbots, mev-rs, commit-boost, helix
 mev_type: null
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
@@ -227,7 +230,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.1.0
+  image: ethpandaops/ethereum-genesis-generator:5.2.0
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER

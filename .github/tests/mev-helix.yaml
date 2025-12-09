@@ -1,0 +1,45 @@
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:master
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    vc_image: ethpandaops/lighthouse:unstable
+    supernode: true
+    count: 2
+  - el_type: nethermind
+    el_image: ethpandaops/nethermind:master
+    cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:develop
+    supernode: true
+
+additional_services:
+  - dora
+  - spamoor
+
+mev_type: helix
+mev_params:
+  mev_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
+  mev_boost_image: ethpandaops/mev-boost:develop
+  mev_builder_cl_image: ethpandaops/lighthouse:unstable
+  mev_builder_subsidy: 1
+
+spamoor_params:
+  spammers:
+     - name: "Blob Spammer (Kurtosis Package)"
+       description: "3 type-4 blob transactions per slot with 1-2 sidecars each, gas/blobgas limit 20 gwei"
+       scenario: "blobs"
+       config:
+         throughput: 10
+     - name: "ERC txs"
+       description: "ERC txs"
+       scenario: "erctx"
+       config:
+         throughput: 50
+         max_pending: 400
+
+network_params:
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  churn_limit_quotient: 16
+  prefunded_accounts: '{"0xb9e79d19f651a941757b35830232e7efc77e1c79": {"balance": "100000ETH"}}'

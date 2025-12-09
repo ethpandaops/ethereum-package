@@ -3,6 +3,7 @@ PARTICIPANT_CATEGORIES = {
         "el_type",
         "el_image",
         "el_log_level",
+        "el_storage_type",
         "el_extra_env_vars",
         "el_extra_labels",
         "el_extra_params",
@@ -67,6 +68,7 @@ PARTICIPANT_CATEGORIES = {
         "keymanager_enabled",
         "vc_beacon_node_indices",
         "checkpoint_sync_enabled",
+        "skip_start",
     ],
 }
 
@@ -76,6 +78,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "el_type",
             "el_image",
             "el_log_level",
+            "el_storage_type",
             "el_extra_env_vars",
             "el_extra_labels",
             "el_extra_params",
@@ -271,14 +274,13 @@ SUBCATEGORY_PARAMS = {
         "min_epochs_for_data_column_sidecars_requests",
         "min_epochs_for_block_requests",
     ],
-    "blockscout_params": [
-        "image",
-        "verif_image",
-        "frontend_image",
-    ],
+    "blockscout_params": ["image", "verif_image", "frontend_image", "env"],
     "dora_params": [
         "image",
         "env",
+    ],
+    "checkpointz_params": [
+        "image",
     ],
     "docker_cache_params": [
         "enabled",
@@ -378,6 +380,14 @@ SUBCATEGORY_PARAMS = {
         "image",
         "extra_env",
     ],
+    "bootnodoor_params": [
+        "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "extra_args",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -388,6 +398,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "forkmon",
     "blockscout",
     "dora",
+    "checkpointz",
     "full_beaconchain_explorer",
     "prometheus_grafana",
     "prometheus",
@@ -422,6 +433,7 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "keymanager_enabled": "",
     "checkpoint_sync_enabled": "",
     "checkpoint_sync_url": "",
+    "bootnode": "",
 }
 
 

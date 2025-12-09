@@ -35,6 +35,7 @@ def launch(
     global_other_index,
     extra_files_artifacts,
     backend,
+    bootnodoor_enr=None,
 ):
     plan.print("Launching CL network")
 
@@ -100,6 +101,16 @@ def launch(
     all_snooper_el_engine_contexts = []
     all_cl_contexts = []
     blobber_configs_with_contexts = []
+
+    # Generic bootnode ENR override - can be set from bootnodoor or any other bootnode service
+    bootnode_enr_override = bootnodoor_enr
+    if bootnode_enr_override != None:
+        plan.print(
+            "Using bootnode ENR override for all CL clients: {0}".format(
+                bootnode_enr_override
+            )
+        )
+
     preregistered_validator_keys_for_nodes = (
         validator_data.per_node_keystores
         if network_params.network == constants.NETWORK_NAME.kurtosis
@@ -187,7 +198,14 @@ def launch(
             checkpoint_sync_enabled = participant.checkpoint_sync_enabled
         if checkpoint_sync_enabled:
             if args_with_right_defaults.checkpoint_sync_url == "":
-                if (
+                if network_params.network == constants.NETWORK_NAME.kurtosis:
+                    if "checkpointz" in args_with_right_defaults.additional_services:
+                        checkpoint_sync_url = "http://checkpointz:5555"
+                    else:
+                        fail(
+                            "Checkpoint sync URL is required if you enabled checkpoint_sync for kurtosis network. Please enable checkpointz additional service."
+                        )
+                elif (
                     network_params.network in constants.PUBLIC_NETWORKS
                     or network_params.network == constants.NETWORK_NAME.ephemery
                 ):
@@ -230,6 +248,7 @@ def launch(
                 extra_files_artifacts,
                 backend,
                 tempo_otlp_grpc_url,
+                bootnode_enr_override,
             )
 
             blobber_config = get_blobber_config(
@@ -280,6 +299,7 @@ def launch(
                 extra_files_artifacts,
                 backend,
                 tempo_otlp_grpc_url,
+                bootnode_enr_override,
             )
 
             cl_participant_info[cl_service_name] = {
