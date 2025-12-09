@@ -6,17 +6,27 @@ static_files = import_module("../../static_files/static_files.star")
 
 HELIX_RELAY_NAME = "helix-relay"
 
+HTTP_PORT_ID = "http"
+ENDPOINT_PORT_ID = "endpoint"
+
 HELIX_RELAY_CONFIG_FILENAME = "config.yaml"
 HELIX_RELAY_MOUNT_DIRPATH_ON_SERVICE = "/config/"
 HELIX_RELAY_FILES_ARTIFACT_NAME = "helix-relay-config"
 
 HELIX_RELAY_ENDPOINT_PORT = 4040
 HELIX_RELAY_WEBSITE_PORT = 9060
-NETWORK_ID_TO_NAME = {
-    "1": "mainnet",
-    "17000": "holesky",
-    "11155111": "sepolia",
-    "560048": "hoodi",
+
+USED_PORTS = {
+    ENDPOINT_PORT_ID: shared_utils.new_port_spec(
+        HELIX_RELAY_ENDPOINT_PORT,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+    ),
+    HTTP_PORT_ID: shared_utils.new_port_spec(
+        HELIX_RELAY_WEBSITE_PORT,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+    ),
 }
 
 # The min/max CPU/memory that mev-relay can use
@@ -34,13 +44,12 @@ POSTGRES_MAX_MEMORY = 1024
 
 def launch_helix_relay(
     plan,
+    network_params,
     mev_params,
-    network_id,
     beacon_uris,
-    validator_root,
+    genesis_validators_root,
     genesis_timestamp,
     blocksim_uri,
-    network_params,
     persistent,
     port_publisher,
     index,
@@ -49,29 +58,24 @@ def launch_helix_relay(
     el_cl_genesis_data,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
-
-    # Get public ports for the API endpoint
-    public_ports = shared_utils.get_mev_public_port(
+    public_ports = {}
+    endpoint_public_port = shared_utils.get_mev_public_port(
         port_publisher,
-        constants.HTTP_PORT_ID,
+        ENDPOINT_PORT_ID,
         index,
         0,
     )
-
-    # Get public ports for the website
-    website_public_ports = shared_utils.get_mev_public_port(
+    public_ports.update(endpoint_public_port)
+    website_public_port = shared_utils.get_mev_public_port(
         port_publisher,
-        constants.HTTP_PORT_ID,
+        HTTP_PORT_ID,
         index,
         1,
     )
-
-    # Combine both public port assignments
-    public_ports.update(website_public_ports)
+    public_ports.update(website_public_port)
 
     node_selectors = global_node_selectors
-    # making the password postgres as the relay expects it to be postgres
-    # Using TimescaleDB image as Helix relay requires TimescaleDB extension
+
     postgres = postgres_module.run(
         plan,
         password="postgres",
@@ -89,19 +93,14 @@ def launch_helix_relay(
         tolerations=tolerations,
     )
 
-    network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
-    image = mev_params.mev_relay_image
-
     # Generate configuration file using template
     helix_template_data = new_helix_relay_config_template_data(
-        network_name,
+        network_params,
         genesis_timestamp,
         blocksim_uri,
         beacon_uris,
-        validator_root,
+        genesis_validators_root,
         postgres,
-        HELIX_RELAY_ENDPOINT_PORT,
-        HELIX_RELAY_WEBSITE_PORT,
     )
 
     # Read the helix config template
@@ -130,23 +129,16 @@ def launch_helix_relay(
         "RELAY_KEY": constants.DEFAULT_MEV_SECRET_KEY,
     }
 
-    api = plan.add_service(
+    endpoint = plan.add_service(
         name=HELIX_RELAY_NAME,
         config=ServiceConfig(
-            image=image,
+            image=mev_params.mev_relay_image,
             cmd=["--config", config_file_path],
             files={
                 HELIX_RELAY_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
             },
-            ports={
-                "http": PortSpec(
-                    number=HELIX_RELAY_ENDPOINT_PORT, transport_protocol="TCP"
-                ),
-                "website": PortSpec(
-                    number=HELIX_RELAY_WEBSITE_PORT, transport_protocol="TCP"
-                ),
-            },
+            ports=USED_PORTS,
             public_ports=public_ports,
             env_vars=env_vars | mev_params.mev_relay_api_extra_env_vars,
             min_cpu=RELAY_MIN_CPU,
@@ -159,34 +151,32 @@ def launch_helix_relay(
     )
 
     return "http://{0}@{1}:{2}".format(
-        constants.DEFAULT_MEV_PUBKEY, api.ip_address, HELIX_RELAY_ENDPOINT_PORT
+        constants.DEFAULT_MEV_PUBKEY, endpoint.ip_address, HELIX_RELAY_ENDPOINT_PORT
     )
 
 
 def new_helix_relay_config_template_data(
-    network_name,
+    network_params,
     genesis_timestamp,
     blocksim_uri,
     beacon_uris,
-    validator_root,
+    genesis_validators_root,
     postgres,
-    endpoint_port,
-    website_port,
 ):
     return {
-        "NETWORK_NAME": network_name,
+        "NETWORK_NAME": network_params.network,
         "GENESIS_TIME": genesis_timestamp,
         "BLOCKSIM_URI": blocksim_uri,
         "BEACON_URI": beacon_uris,
-        "GENESIS_VALIDATORS_ROOT": validator_root,
+        "GENESIS_VALIDATORS_ROOT": genesis_validators_root,
         "POSTGRES_HOST_NAME": postgres.service.name,
         "POSTGRES_PORT": 5432,
         "POSTGRES_DB": "postgres",
         "POSTGRES_USER": "postgres",
         "POSTGRES_PASS": "postgres",
-        "HELIX_RELAY_ENDPOINT_PORT": endpoint_port,
-        "HELIX_RELAY_WEBSITE_PORT": website_port,
-        "HELIX_RELAY_ENDPOINT_URL": "helix-relay:{}".format(endpoint_port),
+        "HELIX_RELAY_ENDPOINT_PORT": HELIX_RELAY_ENDPOINT_PORT,
+        "HELIX_RELAY_WEBSITE_PORT": HELIX_RELAY_WEBSITE_PORT,
+        "HELIX_RELAY_ENDPOINT_URL": "helix-relay:{}".format(HELIX_RELAY_ENDPOINT_PORT),
         "HELIX_RELAY_PUBKEY": constants.DEFAULT_MEV_PUBKEY,
         "GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER": constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
     }

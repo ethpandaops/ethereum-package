@@ -391,13 +391,12 @@ def run(plan, args={}):
         elif args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE:
             endpoint = helix_relay.launch_helix_relay(
                 plan,
+                network_params,
                 mev_params,
-                network_id,
                 beacon_uri,
                 genesis_validators_root,
                 final_genesis_timestamp,
                 blocksim_uri,
-                network_params,
                 persistent,
                 args_with_right_defaults.port_publisher,
                 num_participants,
