@@ -1,0 +1,30 @@
+participants:
+  - cl_type: prysm
+
+  - cl_type: lighthouse
+    checkpoint_sync_enabled: true
+    skip_start: true
+    validator_count: 1
+
+  - cl_type: teku
+    checkpoint_sync_enabled: true
+    skip_start: true
+    validator_count: 1
+
+  - cl_type: lodestar
+    checkpoint_sync_enabled: true
+    skip_start: true
+    validator_count: 1
+
+  - cl_type: grandine
+    checkpoint_sync_enabled: true
+    skip_start: true
+    validator_count: 1
+
+network_params:
+  seconds_per_slot: 4
+  preset: minimal
+additional_services:
+  - dora
+  - checkpointz
+

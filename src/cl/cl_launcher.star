@@ -198,7 +198,14 @@ def launch(
             checkpoint_sync_enabled = participant.checkpoint_sync_enabled
         if checkpoint_sync_enabled:
             if args_with_right_defaults.checkpoint_sync_url == "":
-                if (
+                if network_params.network == constants.NETWORK_NAME.kurtosis:
+                    if "checkpointz" in args_with_right_defaults.additional_services:
+                        checkpoint_sync_url = "http://checkpointz:5555"
+                    else:
+                        fail(
+                            "Checkpoint sync URL is required if you enabled checkpoint_sync for kurtosis network. Please enable checkpointz additional service."
+                        )
+                elif (
                     network_params.network in constants.PUBLIC_NETWORKS
                     or network_params.network == constants.NETWORK_NAME.ephemery
                 ):
