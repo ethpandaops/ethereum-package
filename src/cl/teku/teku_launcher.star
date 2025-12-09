@@ -54,6 +54,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    bootnode_enr_override=None,
 ):
     config = get_beacon_config(
         plan,
@@ -77,6 +78,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        bootnode_enr_override,
     )
 
     beacon_service = plan.add_service(beacon_service_name, config)
@@ -116,6 +118,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    bootnode_enr_override=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -256,6 +259,8 @@ def get_beacon_config(
     else:
         cmd.append("--ignore-weak-subjectivity-period-enabled=true")
 
+    bootnode_arg = bootnode_enr_override
+
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--genesis-state="
@@ -266,37 +271,28 @@ def get_beacon_config(
             network_params.network == constants.NETWORK_NAME.kurtosis
             or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
-            if bootnode_contexts != None:
-                cmd.append(
-                    "--p2p-discovery-bootnodes="
-                    + ",".join(
-                        [
-                            ctx.enr
-                            for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]
-                        ]
-                    )
+            if bootnode_contexts != None and bootnode_arg == None:
+                bootnode_arg = ",".join(
+                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
                 )
         elif network_params.network == constants.NETWORK_NAME.ephemery:
-            cmd.append(
-                "--p2p-discovery-bootnodes="
-                + shared_utils.get_devnet_enrs_list(
+            if bootnode_arg == None:
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
-            )
         elif constants.NETWORK_NAME.shadowfork in network_params.network:
-            cmd.append(
-                "--p2p-discovery-bootnodes="
-                + shared_utils.get_devnet_enrs_list(
+            if bootnode_arg == None:
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
-            )
         else:  # Devnets
-            cmd.append(
-                "--p2p-discovery-bootnodes="
-                + shared_utils.get_devnet_enrs_list(
+            if bootnode_arg == None:
+                bootnode_arg = shared_utils.get_devnet_enrs_list(
                     plan, launcher.el_cl_genesis_data.files_artifact_uuid
                 )
-            )
+
+    if bootnode_arg != None:
+        cmd.append("--p2p-discovery-bootnodes=" + bootnode_arg)
 
     if len(participant.cl_extra_params) > 0:
         # we do the list comprehension as the default extra_params is a proto repeated string
