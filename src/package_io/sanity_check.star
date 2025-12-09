@@ -272,11 +272,7 @@ SUBCATEGORY_PARAMS = {
         "min_epochs_for_data_column_sidecars_requests",
         "min_epochs_for_block_requests",
     ],
-    "blockscout_params": [
-        "image",
-        "verif_image",
-        "frontend_image",
-    ],
+    "blockscout_params": ["image", "verif_image", "frontend_image", "env"],
     "dora_params": [
         "image",
         "env",
