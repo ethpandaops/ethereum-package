@@ -12,4 +12,6 @@ network_params:
   electra_fork_epoch: 1
   fulu_fork_epoch: 2
   gloas_fork_epoch: 3
+  bpo_1_epoch: 4
+  bpo_2_epoch: 5
 
