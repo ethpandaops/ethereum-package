@@ -111,11 +111,6 @@ def get_config(
     else:
         gcmode_archive = False
 
-    init_datadir_cmd_str = "geth init --datadir={0} {1}".format(
-        EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
-    )
-
     public_ports = {}
     public_ports_for_component = None
     if port_publisher.el_enabled:
@@ -162,7 +157,9 @@ def get_config(
             else ""
         ),
         "{0}".format(
-            "--networkid={0}".format(launcher.networkid)
+            "--override.genesis={0}".format(
+                constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+            )
             if network_params.network not in constants.PUBLIC_NETWORKS
             else ""
         ),
@@ -181,7 +178,6 @@ def get_config(
         "--ws.port={0}".format(WS_PORT_NUM),
         "--ws.api=admin,engine,net,eth,web3,debug,txpool",
         "--ws.origins=*",
-        "--allow-insecure-unlock",
         "--nat=extip:" + port_publisher.el_nat_exit_ip,
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
@@ -236,16 +232,6 @@ def get_config(
                 ]
             )
         )
-        if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-            cmd.append(
-                "--override.osaka=" + str(launcher.shadowfork_times["osaka_time"])
-            )
-            cmd.append(
-                "--override.bpo1=" + str(launcher.shadowfork_times["bpo_1_time"])
-            )
-            cmd.append(
-                "--override.bpo2=" + str(launcher.shadowfork_times["bpo_2_time"])
-            )
 
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
@@ -262,15 +248,7 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.el_extra_params])
 
-    cmd_str = " ".join(cmd)
-    if network_params.network not in constants.PUBLIC_NETWORKS:
-        subcommand_strs = [
-            init_datadir_cmd_str,
-            cmd_str,
-        ]
-        command_str = " && ".join(subcommand_strs)
-    else:
-        command_str = cmd_str
+    command_str = " ".join(cmd)
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
@@ -373,5 +351,4 @@ def new_geth_launcher(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         networkid=networkid,
-        shadowfork_times=el_cl_genesis_data.shadowfork_times,
     )
