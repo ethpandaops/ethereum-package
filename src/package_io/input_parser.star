@@ -14,7 +14,7 @@ DEFAULT_EL_IMAGES = {
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
-    "ethrex": "ethpandaops/ethrex:main",
+    "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
 }
 
 DEFAULT_CL_IMAGES = {
@@ -81,6 +81,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "bootnodoor_params",
     "mempool_bridge_params",
 )
 
@@ -191,6 +192,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["mempool_bridge_params"]:
                 sub_value = input_args["mempool_bridge_params"][sub_attr]
                 result["mempool_bridge_params"][sub_attr] = sub_value
+        elif attr == "bootnodoor_params":
+            for sub_attr in input_args["bootnodoor_params"]:
+                sub_value = input_args["bootnodoor_params"][sub_attr]
+                result["bootnodoor_params"][sub_attr] = sub_value
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
@@ -784,6 +789,15 @@ def input_parser(plan, input_args):
             ],
             other_nat_exit_ip=result["port_publisher"]["other"]["nat_exit_ip"],
         ),
+        bootnode=result["bootnode"],
+        bootnodoor_params=struct(
+            image=result["bootnodoor_params"]["image"],
+            min_cpu=result["bootnodoor_params"]["min_cpu"],
+            max_cpu=result["bootnodoor_params"]["max_cpu"],
+            min_mem=result["bootnodoor_params"]["min_mem"],
+            max_mem=result["bootnodoor_params"]["max_mem"],
+            extra_args=result["bootnodoor_params"]["extra_args"],
+        ),
     )
 
 
@@ -1202,6 +1216,8 @@ def default_input_args(input_args):
             "public_port_start": None,
         },
         "spamoor_params": get_default_spamoor_params(),
+        "bootnode": "client",
+        "bootnodoor_params": get_default_bootnodoor_params(),
     }
 
 
@@ -1237,7 +1253,7 @@ def default_network_params():
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 0,
-        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
@@ -1259,7 +1275,7 @@ def default_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
-        "bpo_1_epoch": 18446744073709551615,
+        "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
         "bpo_1_base_fee_update_fraction": 8346193,
@@ -1319,7 +1335,7 @@ def default_minimal_network_params():
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 0,
-        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
@@ -1341,14 +1357,14 @@ def default_minimal_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
-        "bpo_1_epoch": 18446744073709551615,
-        "bpo_1_max_blobs": 0,
-        "bpo_1_target_blobs": 0,
-        "bpo_1_base_fee_update_fraction": 0,
+        "bpo_1_epoch": 0,
+        "bpo_1_max_blobs": 15,
+        "bpo_1_target_blobs": 10,
+        "bpo_1_base_fee_update_fraction": 8346193,
         "bpo_2_epoch": 18446744073709551615,
-        "bpo_2_max_blobs": 0,
-        "bpo_2_target_blobs": 0,
-        "bpo_2_base_fee_update_fraction": 0,
+        "bpo_2_max_blobs": 21,
+        "bpo_2_target_blobs": 14,
+        "bpo_2_base_fee_update_fraction": 11684671,
         "bpo_3_epoch": 18446744073709551615,
         "bpo_3_max_blobs": 0,
         "bpo_3_target_blobs": 0,
@@ -1690,6 +1706,17 @@ def get_default_mempool_bridge_params():
         "send_concurrency": 10,
         "polling_interval": "10s",
         "retry_interval": "30s",
+    }
+
+
+def get_default_bootnodoor_params():
+    return {
+        "image": constants.DEFAULT_BOOTNODOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 512,
+        "extra_args": [],
     }
 
 
