@@ -249,11 +249,6 @@ def get_config(
             )
         )
 
-    if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
-        cmd.append("--override.osaka=" + str(launcher.shadowfork_times["osaka_time"]))
-        cmd.append("--override.bpo1=" + str(launcher.shadowfork_times["bpo_1_time"]))
-        cmd.append("--override.bpo2=" + str(launcher.shadowfork_times["bpo_2_time"]))
-
     if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.el_extra_params])

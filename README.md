@@ -940,6 +940,23 @@ grafana_params:
   # Defaults to the latest image
   image: "grafana/grafana:latest"
 
+# Bootnodoor params
+bootnodoor_params:
+  # Bootnodoor docker image to use
+  # Defaults to the latest image
+  image: "ethpandaops/bootnodoor:latest"
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  # A list of optional extra args the bootnodoor container should spin up with
+  extra_args: []
+
+# Bootnode type
+# Supported values: "client", "bootnodoor"
+# Defaults to "client"
+bootnode: client
+
 # Configuration place for tempo tracing backend
 tempo_params:
   # How long to retain traces
