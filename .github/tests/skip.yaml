@@ -24,10 +24,7 @@ participants:
 network_params:
   seconds_per_slot: 4
   preset: minimal
-  #fulu_fork_epoch: 0
 additional_services:
   - dora
   - checkpointz
 
-checkpointz_params:
-  image: ethpandaops/checkpointz:0.0.1-custom-preset
