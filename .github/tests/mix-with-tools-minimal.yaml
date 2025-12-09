@@ -23,7 +23,6 @@ additional_services:
   - prometheus
   - grafana
   - custom_flood
-  - blobscan
   - blockscout
   - dugtrio
   - erpc
