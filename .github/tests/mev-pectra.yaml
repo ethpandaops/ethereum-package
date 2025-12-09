@@ -1,6 +1,6 @@
 participants:
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.11
+    el_image: ethereum/client-go:v1.16.7
     el_extra_params: ["--miner.extradata=pawanRocks"]
     cl_type: lighthouse
     cl_image: sigp/lighthouse:v7.0.1
@@ -31,7 +31,7 @@ participants:
     cl_image: statusim/nimbus-eth2:multiarch-v25.4.1
 
   - el_type: geth
-    el_image: ethereum/client-go:v1.15.11
+    el_image: ethereum/client-go:v1.16.7
     el_extra_params: ["--miner.extradata=pawanRocks"]
     cl_type: grandine
     cl_image: sifrai/grandine:1.1.0

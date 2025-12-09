@@ -6,6 +6,7 @@ participants:
   - el_type: erigon
 network_params:
   fulu_fork_epoch: 10
+  bpo_1_epoch: 11
   network: hoodi-shadowfork
 additional_services:
   - dora

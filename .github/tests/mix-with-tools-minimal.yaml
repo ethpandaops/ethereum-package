@@ -23,7 +23,6 @@ additional_services:
   - prometheus
   - grafana
   - custom_flood
-  - blobscan
   - blockscout
   - dugtrio
   - erpc
@@ -33,3 +32,4 @@ additional_services:
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true
+bootnode: bootnodoor

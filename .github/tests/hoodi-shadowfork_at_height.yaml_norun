@@ -2,6 +2,7 @@ participants:
   - el_type: geth
 network_params:
   fulu_fork_epoch: 10
+  bpo_1_epoch: 11
   shadowfork_block_height: 240000
   network: hoodi-shadowfork
 additional_services:

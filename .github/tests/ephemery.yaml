@@ -9,12 +9,10 @@ participants:
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: ethereumjs
-    cl_type: teku
   - el_type: besu
     cl_type: grandine
   - el_type: ethrex
     cl_type: teku
 network_params:
-  network: ephemery
+  network: sepolia
 checkpoint_sync_enabled: true
