@@ -953,11 +953,6 @@ bootnodoor_params:
   # A list of optional extra args the bootnodoor container should spin up with
   extra_args: []
 
-# Bootnode type
-# Supported values: "client", "bootnodoor"
-# Defaults to "client"
-bootnode: client
-
 # Configuration place for tempo tracing backend
 tempo_params:
   # How long to retain traces
@@ -980,15 +975,6 @@ tempo_params:
   # Tempo docker image to use
   # Defaults to the latest image
   image: "grafana/tempo:latest"
-
-# Configuration place for bootnodoor (EL+CL bootnode)
-bootnodoor_params:
-  # Bootnodoor docker image to use
-  # Defaults to the latest image
-  image: "ethpandaops/bootnodoor:latest"
-
-  # A list of optional params that will be passed to the bootnodoor command for modifying its behaviour
-  extra_args: []
 
 # Configuration place for the assertoor testing tool - https://github.com/ethpandaops/assertoor
 assertoor_params:
