@@ -7,7 +7,6 @@ participants:
     cl_type: nimbus
   - el_type: besu
     cl_type: lighthouse
-    cl_image: ethpandaops/lighthouse:unstable
   - el_type: reth
     cl_type: lodestar
   - el_type: geth
@@ -16,7 +15,6 @@ participants:
     cl_type: lodestar
 network_params:
   preset: minimal
-  electra_fork_epoch: 1
   prefunded_accounts: '{"0xb9e79D19f651a941757b35830232E7EFC77E1c79": {"balance": "100000ETH"}}'
 
 additional_services:

@@ -14,7 +14,7 @@ DEFAULT_EL_IMAGES = {
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
-    "ethrex": "ethpandaops/ethrex:main",
+    "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
 }
 
 DEFAULT_CL_IMAGES = {
@@ -81,6 +81,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "bootnodoor_params",
     "mempool_bridge_params",
 )
 
@@ -191,10 +192,18 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["mempool_bridge_params"]:
                 sub_value = input_args["mempool_bridge_params"][sub_attr]
                 result["mempool_bridge_params"][sub_attr] = sub_value
+        elif attr == "bootnodoor_params":
+            for sub_attr in input_args["bootnodoor_params"]:
+                sub_value = input_args["bootnodoor_params"][sub_attr]
+                result["bootnodoor_params"][sub_attr] = sub_value
         elif attr == "ethereum_genesis_generator_params":
             for sub_attr in input_args["ethereum_genesis_generator_params"]:
                 sub_value = input_args["ethereum_genesis_generator_params"][sub_attr]
                 result["ethereum_genesis_generator_params"][sub_attr] = sub_value
+        elif attr == "checkpointz_params":
+            for sub_attr in input_args["checkpointz_params"]:
+                sub_value = input_args["checkpointz_params"][sub_attr]
+                result["checkpointz_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -204,6 +213,7 @@ def input_parser(plan, input_args):
         constants.FLASHBOTS_MEV_TYPE,
         constants.MEV_RS_MEV_TYPE,
         constants.COMMIT_BOOST_MEV_TYPE,
+        constants.HELIX_MEV_TYPE,
     ):
         result = enrich_mev_extra_params(
             result,
@@ -215,7 +225,7 @@ def input_parser(plan, input_args):
         pass
     else:
         fail(
-            "Unsupported MEV type: {0}, please use 'mock', 'flashbots', 'mev-rs' or 'commit-boost' type".format(
+            "Unsupported MEV type: {0}, please use 'mock', 'flashbots', 'mev-rs', 'commit-boost' or 'helix' type".format(
                 result.get("mev_type")
             )
         )
@@ -359,6 +369,10 @@ def input_parser(plan, input_args):
             not has_supernodes
             and not has_node_with_128_plus_validators
             and not result["network_params"]["perfect_peerdas_enabled"]
+            and (
+                result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
+                or "shadowfork" in result["network_params"]["network"]
+            )
         ):
             fail(
                 "Fulu fork is enabled (epoch: {0}) but no supernodes are configured, no nodes have 128 or more validators, and perfect_peerdas_enabled is not enabled. Either configure a supernode, ensure at least one node has 128+ validators, or enable perfect_peerdas_enabled in network_params with 16 participants.".format(
@@ -452,6 +466,7 @@ def input_parser(plan, input_args):
                 keymanager_enabled=participant["keymanager_enabled"],
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
                 checkpoint_sync_enabled=participant["checkpoint_sync_enabled"],
+                skip_start=participant["skip_start"],
             )
             for participant in result["participants"]
         ],
@@ -623,6 +638,7 @@ def input_parser(plan, input_args):
             image=result["blockscout_params"]["image"],
             verif_image=result["blockscout_params"]["verif_image"],
             frontend_image=result["blockscout_params"]["frontend_image"],
+            env=result["blockscout_params"]["env"],
         ),
         checkpointz_params=struct(
             image=result["checkpointz_params"]["image"],
@@ -778,6 +794,14 @@ def input_parser(plan, input_args):
                 "public_port_start"
             ],
             other_nat_exit_ip=result["port_publisher"]["other"]["nat_exit_ip"],
+        ),
+        bootnodoor_params=struct(
+            image=result["bootnodoor_params"]["image"],
+            min_cpu=result["bootnodoor_params"]["min_cpu"],
+            max_cpu=result["bootnodoor_params"]["max_cpu"],
+            min_mem=result["bootnodoor_params"]["min_mem"],
+            max_mem=result["bootnodoor_params"]["max_mem"],
+            extra_args=result["bootnodoor_params"]["extra_args"],
         ),
     )
 
@@ -1197,6 +1221,7 @@ def default_input_args(input_args):
             "public_port_start": None,
         },
         "spamoor_params": get_default_spamoor_params(),
+        "bootnodoor_params": get_default_bootnodoor_params(),
     }
 
 
@@ -1232,7 +1257,7 @@ def default_network_params():
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 0,
-        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
@@ -1254,7 +1279,7 @@ def default_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
-        "bpo_1_epoch": 18446744073709551615,
+        "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
         "bpo_1_base_fee_update_fraction": 8346193,
@@ -1314,7 +1339,7 @@ def default_minimal_network_params():
         "capella_fork_epoch": 0,
         "deneb_fork_epoch": 0,
         "electra_fork_epoch": 0,
-        "fulu_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
@@ -1336,14 +1361,14 @@ def default_minimal_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
-        "bpo_1_epoch": 18446744073709551615,
-        "bpo_1_max_blobs": 0,
-        "bpo_1_target_blobs": 0,
-        "bpo_1_base_fee_update_fraction": 0,
+        "bpo_1_epoch": 0,
+        "bpo_1_max_blobs": 15,
+        "bpo_1_target_blobs": 10,
+        "bpo_1_base_fee_update_fraction": 8346193,
         "bpo_2_epoch": 18446744073709551615,
-        "bpo_2_max_blobs": 0,
-        "bpo_2_target_blobs": 0,
-        "bpo_2_base_fee_update_fraction": 0,
+        "bpo_2_max_blobs": 21,
+        "bpo_2_target_blobs": 14,
+        "bpo_2_base_fee_update_fraction": 11684671,
         "bpo_3_epoch": 18446744073709551615,
         "bpo_3_max_blobs": 0,
         "bpo_3_target_blobs": 0,
@@ -1436,6 +1461,7 @@ def default_participant():
         "keymanager_enabled": None,
         "vc_beacon_node_indices": None,
         "checkpoint_sync_enabled": None,
+        "skip_start": False,
     }
 
 
@@ -1444,6 +1470,7 @@ def get_default_blockscout_params():
         "image": "ghcr.io/blockscout/blockscout:latest",
         "verif_image": "ghcr.io/blockscout/smart-contract-verifier:latest",
         "frontend_image": "ghcr.io/blockscout/frontend:latest",
+        "env": {},
     }
 
 
@@ -1528,6 +1555,13 @@ def get_default_mev_params(mev_type, preset):
     if mev_type == constants.MOCK_MEV_TYPE:
         mev_builder_image = constants.DEFAULT_MOCK_MEV_IMAGE
         mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
+
+    if mev_type == constants.HELIX_MEV_TYPE:
+        mev_relay_image = constants.DEFAULT_HELIX_RELAY_IMAGE
+        mev_builder_image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
+        mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
+        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+        mev_builder_extra_data = "0x48656C6978"  # "Helix" in hex
 
     return {
         "mev_relay_image": mev_relay_image,
@@ -1687,6 +1721,17 @@ def get_default_mempool_bridge_params():
     }
 
 
+def get_default_bootnodoor_params():
+    return {
+        "image": constants.DEFAULT_BOOTNODOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 512,
+        "extra_args": [],
+    }
+
+
 def get_port_publisher_params(parameter_type, input_args=None):
     port_publisher_parameters = {
         "nat_exit_ip": "KURTOSIS_IP_ADDR_PLACEHOLDER",
@@ -1828,6 +1873,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
     if (
         mev_type == constants.FLASHBOTS_MEV_TYPE
         or mev_type == constants.COMMIT_BOOST_MEV_TYPE
+        or mev_type == constants.HELIX_MEV_TYPE
     ):
         mev_participant = default_participant()
         mev_participant["el_type"] = "reth-builder"

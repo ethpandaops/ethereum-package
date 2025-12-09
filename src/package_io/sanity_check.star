@@ -67,6 +67,7 @@ PARTICIPANT_CATEGORIES = {
         "keymanager_enabled",
         "vc_beacon_node_indices",
         "checkpoint_sync_enabled",
+        "skip_start",
     ],
 }
 
@@ -271,11 +272,7 @@ SUBCATEGORY_PARAMS = {
         "min_epochs_for_data_column_sidecars_requests",
         "min_epochs_for_block_requests",
     ],
-    "blockscout_params": [
-        "image",
-        "verif_image",
-        "frontend_image",
-    ],
+    "blockscout_params": ["image", "verif_image", "frontend_image", "env"],
     "dora_params": [
         "image",
         "env",
@@ -381,9 +378,18 @@ SUBCATEGORY_PARAMS = {
         "image",
         "extra_env",
     ],
+    "bootnodoor_params": [
+        "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "extra_args",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
+    "bootnodoor",
     "assertoor",
     "broadcaster",
     "tx_fuzz",

@@ -18,7 +18,13 @@ Specifically, this [package][package-reference] will:
 Optional features (enabled via flags or parameter files at runtime):
 
 - Block until the Beacon nodes finalize an epoch (i.e. finalized_epoch > 0)
-- Spin up & configure parameters for the infrastructure behind Flashbot's implementation of PBS using `mev-boost`, in either `full` or `mock` mode. [More details on PBS implementation](./README.md#proposer-builder-separation-pbs-implementation-via-flashbots-mev-boost-protocol).
+- Spin up & configure parameters for the infrastructure behind PBS (Proposer-Builder Separation) using `mev-boost`, with support for multiple relay implementations:
+  - `flashbots` - Full Flashbots MEV infrastructure
+  - `helix` - High-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend
+  - `mev-rs` - Alternative relay implementation
+  - `commit-boost` - Commit-boost based infrastructure
+  - `mock` - Mock builder for testing
+  - [More details on PBS implementation](./README.md#proposer-builder-separation-pbs-emulation).
 - Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
 - Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client.
 - Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
@@ -512,6 +518,13 @@ participants:
     # Defaults to null (uses global checkpoint_sync_enabled setting)
     checkpoint_sync_enabled: null
 
+    # If set to true, the beacon node will be created and then immediately stopped.
+    # No health checks are performed during creation (ready_conditions are disabled).
+    # The service can be started later using: kurtosis service start <enclave> <service-name>
+    # This is useful for testing or when you want to manually control when the beacon node starts.
+    # Defaults to false
+    skip_start: false
+
 # Participants matrix creates a participant for each combination of EL, CL and VC clients
 # Each EL/CL/VC item can provide the same parameters as a standard participant
 participants_matrix: {}
@@ -662,8 +675,8 @@ network_params:
   electra_fork_epoch: 0
 
   # Fulu fork epoch
-  # Defaults to 18446744073709551615
-  fulu_fork_epoch: 18446744073709551615
+  # Defaults to 0
+  fulu_fork_epoch: 0
 
   # Gloas fork epoch
   # Defaults to 18446744073709551615
@@ -767,21 +780,21 @@ network_params:
 
 
   # BPO
-  # BPO1-5 epoch (default 18446744073709551615)
-  bpo_1_epoch: 18446744073709551615
+  # BPO1-5 epoch (default 0/18446744073709551615)
+  bpo_1_epoch: 0
   # Maximum number of blobs per block for BPO1-5
   # If only max is set, target is auto-calculated as 2/3 of max
   # If only target is set, max is auto-calculated as 3/2 of target
-  bpo_1_max_blobs: 0
+  bpo_1_max_blobs: 15
   # Target number of blobs per block for BPO1-5
-  bpo_1_target_blobs: 0
+  bpo_1_target_blobs: 10
   # Base fee update fraction for BPO1-5 (default 0)
-  bpo_1_base_fee_update_fraction: 0
+  bpo_1_base_fee_update_fraction: 8346193
 
   bpo_2_epoch: 18446744073709551615
-  bpo_2_max_blobs: 0
-  bpo_2_target_blobs: 0
-  bpo_2_base_fee_update_fraction: 0
+  bpo_2_max_blobs: 21
+  bpo_2_target_blobs: 14
+  bpo_2_base_fee_update_fraction: 11684671
 
   bpo_3_epoch: 18446744073709551615
   bpo_3_max_blobs: 0
@@ -833,6 +846,7 @@ additional_services:
   - blobscan
   - blockscout
   - blutgang
+  - bootnodoor
   - broadcaster
   - checkpointz
   - custom_flood
@@ -861,6 +875,8 @@ blockscout_params:
   # Frontend image
   # Defaults to ghcr.io/blockscout/frontend:latest
   frontend_image: "ghcr.io/blockscout/frontend:latest"
+  # Environment variables
+  env: {}
 
 # Configuration place for dora the explorer - https://github.com/ethpandaops/dora
 dora_params:
@@ -924,6 +940,18 @@ grafana_params:
   # Grafana docker image to use
   # Defaults to the latest image
   image: "grafana/grafana:latest"
+
+# Bootnodoor params
+bootnodoor_params:
+  # Bootnodoor docker image to use
+  # Defaults to the latest image
+  image: "ethpandaops/bootnodoor:latest"
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  # A list of optional extra args the bootnodoor container should spin up with
+  extra_args: []
 
 # Configuration place for tempo tracing backend
 tempo_params:
@@ -1098,12 +1126,14 @@ mempool_bridge_params:
   # Default: "30s"
   retry_interval: "30s"
 
-# Supports four values
+# Supports six values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
 # "mev-rs" - mev-boost, relays and builder are all spun up, powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 # "commit-boost" - mev-boost, relays and builder are all spun up, powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
+# "helix" - helix relay, flashbots builder and mev-boost are spun up, powered by [helix](https://github.com/gattaca-com/helix)
+#            Note: Helix uses TimescaleDB (PostgreSQL with time-series extension) for data storage
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -1235,7 +1265,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.1.0
+  image: ethpandaops/ethereum-genesis-generator:5.2.0
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
@@ -1479,6 +1509,40 @@ network_params:
 </details>
 
 <details>
+    <summary>A 3-node Ethereum network with Helix relay for MEV-boost infrastructure</summary>
+
+```yaml
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:master
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    count: 2
+  - el_type: nethermind
+    el_image: ethpandaops/nethermind:master
+    cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:develop
+
+mev_type: helix
+mev_params:
+  mev_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
+  mev_boost_image: ethpandaops/mev-boost:develop
+  mev_builder_cl_image: ethpandaops/lighthouse:unstable
+  mev_builder_subsidy: 1
+
+additional_services:
+  - dora
+  - spamoor
+
+network_params:
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+```
+
+</details>
+
+<details>
     <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper)</summary>
 
 ```yaml
@@ -1604,6 +1668,14 @@ Starting your network up with `"mev_type": "flashbots"` will instantiate and con
 3. `mev-relay-website` - A website to monitor payloads that have been delivered
 4. `mev-relay-housekeeper` - Updates known validators, proposer duties, and more in the background. Only a single instance of this should run.
 5. `mev-boost` - open-source middleware instantiated for each EL/Cl pair in the network, including the builder
+
+The package also supports other MEV implementations:
+
+- `"mev_type": "helix"` - Uses the high-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend for data storage
+- `"mev_type": "mev-rs"` - Alternative relay implementation powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
+- `"mev_type": "commit-boost"` - Infrastructure powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
+
+Each implementation provides different features and performance characteristics suitable for various testing and development scenarios.
 
 <details>
     <summary>Caveats when using "mev_type": "flashbots"</summary>

@@ -16,9 +16,9 @@ additional_services:
   - dora
   - spamoor
 
-mev_type: flashbots
+mev_type: helix
 mev_params:
-  mev_relay_image: ethpandaops/mev-boost-relay:main
+  mev_relay_image: ghcr.io/gattaca-com/helix-relay:main
   mev_builder_image: ethpandaops/reth-rbuilder:develop
   mev_boost_image: ethpandaops/mev-boost:develop
   mev_builder_cl_image: ethpandaops/lighthouse:unstable

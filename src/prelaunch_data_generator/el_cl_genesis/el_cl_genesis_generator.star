@@ -94,8 +94,7 @@ def generate_el_cl_genesis_data(
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
-    shadowfork_times = {}
-
+    osaka_time = ""
     osaka_time = plan.run_sh(
         name="read-osaka-time",
         description="Reading osaka time from genesis",
@@ -104,32 +103,6 @@ def generate_el_cl_genesis_data(
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
-
-    bpo_1_time = plan.run_sh(
-        name="read-bpo-1-time",
-        description="Reading bpo 1 time from genesis",
-        run="jq '.config.bpo1Time' /data/genesis.json | tr -d '\n'",
-        files={"/data": genesis.files_artifacts[0]},
-        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
-        node_selectors=global_node_selectors,
-    )
-
-    bpo_2_time = plan.run_sh(
-        name="read-bpo-2-time",
-        description="Reading bpo 2 time from genesis",
-        run="jq '.config.bpo2Time' /data/genesis.json | tr -d '\n'",
-        files={"/data": genesis.files_artifacts[0]},
-        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
-        node_selectors=global_node_selectors,
-    )
-
-    shadowfork_times = {
-        "osaka_time": osaka_time.output,
-        "bpo_1_time": bpo_1_time.output,
-        "bpo_2_time": bpo_2_time.output,
-    }
-
-    plan.print("Shadowfork times: {0}".format(shadowfork_times))
 
     shadowfork_block_height = ""
     if latest_block != "":
@@ -147,7 +120,7 @@ def generate_el_cl_genesis_data(
     result = el_cl_genesis_data.new_el_cl_genesis_data(
         genesis.files_artifacts[0],
         genesis_validators_root.output,
-        shadowfork_times,
+        osaka_time.output,
         shadowfork_block_height,
     )
 
