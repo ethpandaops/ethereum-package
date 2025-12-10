@@ -81,6 +81,7 @@ network_params:
     question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy
     very lucky have athlete"
   preregistered_validator_count: 0
+  additional_mnemonics: []
   genesis_delay: 20
   genesis_time: 0
   genesis_gaslimit: 60000000
@@ -236,7 +237,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.2.0
+  image: ethpandaops/ethereum-genesis-generator:5.2.1
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
