@@ -333,7 +333,7 @@ def run(plan, args={}):
 
         # beacon uri for mock mev needs to use ip address and not dns name
         beacon_uri_for_mock_mev = "{0}:{1}".format(
-            all_cl_contexts[0].ip_addr,
+            all_cl_contexts[0].ip_address,
             all_cl_contexts[0].http_port,
         )
 

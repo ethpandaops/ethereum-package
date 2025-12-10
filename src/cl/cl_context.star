@@ -4,6 +4,7 @@ def new_cl_context(
     ip_addr,
     http_port,
     beacon_http_url,
+    ip_address="",
     cl_nodes_metrics_info=None,
     beacon_service_name="",
     beacon_grpc_url="",
