@@ -19,6 +19,7 @@ def new_cl_context(
         client_name=client_name,
         enr=enr,
         ip_addr=ip_addr,
+        ip_address=ip_address,
         http_port=http_port,
         beacon_http_url=beacon_http_url,
         cl_nodes_metrics_info=cl_nodes_metrics_info,
