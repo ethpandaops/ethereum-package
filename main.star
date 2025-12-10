@@ -330,13 +330,17 @@ def run(plan, args={}):
             all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
-        beacon_uri = "{0}".format(all_cl_contexts[0].beacon_http_url)[
-            7:
-        ]  # remove http://
+
+        # beacon uri for mock mev needs to use ip address and not dns name
+        beacon_uri_for_mock_mev = "{0}:{1}".format(
+            all_cl_contexts[0].ip_addr,
+            all_cl_contexts[0].http_port,
+        )
+
         endpoint = mock_mev.launch_mock_mev(
             plan,
             el_uri,
-            beacon_uri,
+            beacon_uri_for_mock_mev,
             jwt_file,
             args_with_right_defaults.global_log_level,
             global_node_selectors,
