@@ -241,6 +241,7 @@ SUBCATEGORY_PARAMS = {
         "base_fee_update_fraction_electra",
         "preset",
         "additional_preloaded_contracts",
+        "additional_mnemonics",
         "devnet_repo",
         "prefunded_accounts",
         "max_payload_size",
