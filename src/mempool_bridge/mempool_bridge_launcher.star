@@ -93,7 +93,7 @@ def launch_mempool_bridge(
     for context in all_el_contexts:
         if mode == "rpc":
             # For RPC mode, use HTTP RPC endpoint
-            rpc_url = "http://{0}:{1}".format(context.ip_addr, context.rpc_port_num)
+            rpc_url = "http://{0}:{1}".format(context.dns_name, context.rpc_port_num)
             target_endpoints.append(rpc_url)
         else:
             # For P2P mode, prefer enode if available, fallback to enr
