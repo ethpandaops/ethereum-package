@@ -361,7 +361,7 @@ def get_cl_context(
     node_selectors,
 ):
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
-    beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
+    beacon_http_url = "http://{0}:{1}".format(service.ip_address, beacon_http_port.number)
 
     # Skip HTTP requests if skip_start is enabled (service won't be running)
     if participant.skip_start:
