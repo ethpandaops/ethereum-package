@@ -624,7 +624,7 @@ network_params:
       # The number of validators to generate from this mnemonic
       count: 10
       # The withdrawal address for these validators
-      # Only used when wd_prefix is 0x01 (execution layer withdrawal credentials)
+      # Only used when wd_prefix is 0x01 or 0x02 (execution layer withdrawal credentials)
       wd_address: 0x000000000000000000000000000000000000dEaD
       # The withdrawal credentials prefix
       # 0x00: BLS withdrawal credentials (default)
