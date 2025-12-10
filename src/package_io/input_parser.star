@@ -638,6 +638,9 @@ def input_parser(plan, input_args):
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
             ],
+            additional_mnemonics=result["network_params"][
+                "additional_mnemonics"
+            ],
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
             max_payload_size=result["network_params"]["max_payload_size"],
@@ -1326,6 +1329,7 @@ def default_network_params():
         "base_fee_update_fraction_electra": 5007716,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
+        "additional_mnemonics": [],
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
@@ -1408,6 +1412,7 @@ def default_minimal_network_params():
         "base_fee_update_fraction_electra": 5007716,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
+        "additional_mnemonics": [],
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
