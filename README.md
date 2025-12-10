@@ -615,6 +615,7 @@ network_params:
   # Additional mnemonics to generate validators from
   # These validators will be included in genesis but won't have keystores generated
   # Useful for pre-registering validators with custom withdrawal credentials or states
+  # Default: []
   additional_mnemonics:
     - # The mnemonic to derive validator keys from
       mnemonic: "estate dog switch misery manage room million bleak wrap distance always insane usage busy chicken limit already duck feature unhappy dial emotion expire please"
