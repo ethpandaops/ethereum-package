@@ -638,9 +638,7 @@ def input_parser(plan, input_args):
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
             ],
-            additional_mnemonics=result["network_params"][
-                "additional_mnemonics"
-            ],
+            additional_mnemonics=result["network_params"]["additional_mnemonics"],
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
             max_payload_size=result["network_params"]["max_payload_size"],

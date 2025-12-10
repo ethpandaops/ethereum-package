@@ -239,6 +239,7 @@ def new_additionsl_contracts_file_for_el_cl_genesis_data(
         "AdditionalPreloadedContracts": additional_contracts_json,
     }
 
+
 def get_additional_mnemonics_json(
     network_params,
 ):
