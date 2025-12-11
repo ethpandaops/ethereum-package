@@ -350,6 +350,8 @@ def get_beacon_config(
         "tty_enabled": True,
     }
 
+    if len(participant.cl_devices) > 0:
+        config_args["devices"] = participant.cl_devices
     # Only add ready_conditions if not skipping start (port checks are already disabled via wait="disable")
     if not participant.skip_start:
         config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(
