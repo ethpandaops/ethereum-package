@@ -612,6 +612,35 @@ network_params:
   # The number of pre-registered validators for genesis. If 0 or not specified then the value will be calculated from the participants
   preregistered_validator_count: 0
 
+  # Additional mnemonics to generate validators from
+  # These validators will be included in genesis but won't have keystores generated
+  # Useful for pre-registering validators with custom withdrawal credentials or states
+  # Default: []
+  additional_mnemonics:
+    - # The mnemonic to derive validator keys from
+      mnemonic: "estate dog switch misery manage room million bleak wrap distance always insane usage busy chicken limit already duck feature unhappy dial emotion expire please"
+      # The validator index to start deriving keys from
+      # Defaults to 0
+      start: 0
+      # The number of validators to generate from this mnemonic
+      count: 10
+      # The withdrawal address for these validators
+      # Only used when wd_prefix is 0x01 or 0x02 (execution layer withdrawal credentials)
+      wd_address: 0x000000000000000000000000000000000000dEaD
+      # The withdrawal credentials prefix
+      # 0x00: BLS withdrawal credentials (default)
+      # 0x01: Execution layer withdrawal credentials (uses wd_address)
+      # 0x02: Compounding withdrawal credentials (uses wd_address)
+      wd_prefix: 0x01
+      # The validator balance in gwei
+      # Defaults to 32000000000 (32 ETH)
+      balance: 32000000000
+      # The initial validator status
+      # 0: active (default)
+      # 1: slashed
+      # 2: exited
+      status: 1
+
   # How long you want the network to wait before starting up
   genesis_delay: 20
 
@@ -1265,7 +1294,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.2.0
+  image: ethpandaops/ethereum-genesis-generator:5.2.2
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 

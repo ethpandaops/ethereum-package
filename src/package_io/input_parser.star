@@ -338,12 +338,64 @@ def input_parser(plan, input_args):
         )
 
     if (
-        result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH
-        and result["network_params"]["bpo_1_epoch"]
+        result["network_params"]["bpo_1_epoch"]
         < result["network_params"]["fulu_fork_epoch"]
     ):
-        fail(
-            "Fulu fork must happen before BPO 1, please adjust the epochs accordingly."
+        result["network_params"]["bpo_1_epoch"] = result["network_params"][
+            "fulu_fork_epoch"
+        ]
+        plan.print(
+            "BPO 1 epoch adjusted to Fulu epoch {0}".format(
+                result["network_params"]["fulu_fork_epoch"]
+            )
+        )
+    if (
+        result["network_params"]["bpo_2_epoch"]
+        < result["network_params"]["bpo_1_epoch"]
+    ):
+        result["network_params"]["bpo_2_epoch"] = result["network_params"][
+            "bpo_1_epoch"
+        ]
+        plan.print(
+            "BPO 2 epoch adjusted to BPO 1 epoch {0}".format(
+                result["network_params"]["bpo_1_epoch"]
+            )
+        )
+    if (
+        result["network_params"]["bpo_3_epoch"]
+        < result["network_params"]["bpo_2_epoch"]
+    ):
+        result["network_params"]["bpo_3_epoch"] = result["network_params"][
+            "bpo_2_epoch"
+        ]
+        plan.print(
+            "BPO 3 epoch adjusted to BPO 2 epoch {0}".format(
+                result["network_params"]["bpo_2_epoch"]
+            )
+        )
+    if (
+        result["network_params"]["bpo_4_epoch"]
+        < result["network_params"]["bpo_3_epoch"]
+    ):
+        result["network_params"]["bpo_4_epoch"] = result["network_params"][
+            "bpo_3_epoch"
+        ]
+        plan.print(
+            "BPO 4 epoch adjusted to BPO 3 epoch {0}".format(
+                result["network_params"]["bpo_3_epoch"]
+            )
+        )
+    if (
+        result["network_params"]["bpo_5_epoch"]
+        < result["network_params"]["bpo_4_epoch"]
+    ):
+        result["network_params"]["bpo_5_epoch"] = result["network_params"][
+            "bpo_4_epoch"
+        ]
+        plan.print(
+            "BPO 5 epoch adjusted to BPO 4 epoch {0}".format(
+                result["network_params"]["bpo_4_epoch"]
+            )
         )
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
@@ -587,6 +639,7 @@ def input_parser(plan, input_args):
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
             ],
+            additional_mnemonics=result["network_params"]["additional_mnemonics"],
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
             max_payload_size=result["network_params"]["max_payload_size"],
@@ -1275,6 +1328,7 @@ def default_network_params():
         "base_fee_update_fraction_electra": 5007716,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
+        "additional_mnemonics": [],
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
@@ -1357,6 +1411,7 @@ def default_minimal_network_params():
         "base_fee_update_fraction_electra": 5007716,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
+        "additional_mnemonics": [],
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,

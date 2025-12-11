@@ -174,6 +174,7 @@ def new_env_file_for_el_cl_genesis_data(
         "Eip7805ForkVersion": constants.EIP7805_FORK_VERSION,
         "Eip7441ForkVersion": constants.EIP7441_FORK_VERSION,
         "ShadowForkFile": shadowfork_file,
+        "AdditionalValidatorMnemonics": get_additional_mnemonics_json(network_params),
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
         "ShardCommitteePeriod": network_params.shard_committee_period,
         "AttestationDueBpsGloas": network_params.attestation_due_bps_gloas,
@@ -237,3 +238,16 @@ def new_additionsl_contracts_file_for_el_cl_genesis_data(
     return {
         "AdditionalPreloadedContracts": additional_contracts_json,
     }
+
+
+def get_additional_mnemonics_json(
+    network_params,
+):
+    additional_mnemonics_json = network_params.additional_mnemonics
+    if type(additional_mnemonics_json) == "string":
+        # re-encode json to trim whitespaces and newlines
+        additional_mnemonics_json = json.decode(additional_mnemonics_json)
+
+    additional_mnemonics_json = json.encode(json.encode(additional_mnemonics_json))
+
+    return additional_mnemonics_json

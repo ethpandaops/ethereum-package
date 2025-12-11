@@ -1,0 +1,23 @@
+participants:
+  - el_type: geth
+    cl_type: teku
+  - el_type: nethermind
+    cl_type: prysm
+  - el_type: erigon
+    cl_type: nimbus
+  - el_type: besu
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: lodestar
+  - el_type: ethrex
+    cl_type: teku
+network_params:
+  network: kurtosis
+  num_validator_keys_per_node: 128
+  additional_mnemonics:
+    - mnemonic: "estate dog switch misery manage room million bleak wrap distance always insane usage busy chicken limit already duck feature unhappy dial emotion expire please"
+      count: 10
+      status: 1 # exited
+    - mnemonic: "bachelor goose intact globe grab observe youth kit castle purchase ranch safe wire planet portion artist soon captain before cute dinner arrange cat churn"
+      count: 10
+      status: 2 # slashed & exited
