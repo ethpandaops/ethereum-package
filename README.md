@@ -224,6 +224,12 @@ participants:
     # Example: el_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     el_extra_mounts: {}
 
+    # A list of host devices to mount into the EL client container
+    # Useful for hardware device access like TPM, HSM, etc.
+    # Example: el_devices: ["/dev/tpm0"]
+    # Defaults to empty list
+    el_devices: []
+
     # A list of tolerations that will be passed to the EL client container
     # Only works with Kubernetes
     # Example: el_tolerations:
@@ -288,6 +294,12 @@ participants:
     # The file will be available at <mount_path>/<extra_files_key>
     # Example: cl_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     cl_extra_mounts: {}
+
+    # A list of host devices to mount into the CL client container
+    # Useful for hardware device access like TPM, HSM, etc.
+    # Example: cl_devices: ["/dev/tpm0"]
+    # Defaults to empty list
+    cl_devices: []
 
     # A list of tolerations that will be passed to the CL client container
     # Only works with Kubernetes
@@ -364,6 +376,12 @@ participants:
     # The file will be available at <mount_path>/<extra_files_key>
     # Example: vc_extra_mounts: {"/config": "my_validator_config"}  # Creates /config/my_validator_config
     vc_extra_mounts: {}
+
+    # A list of host devices to mount into the validator client container
+    # Useful for hardware device access like TPM, HSM, etc.
+    # Example: vc_devices: ["/dev/tpm0"]
+    # Defaults to empty list
+    vc_devices: []
 
     # A list of tolerations that will be passed to the validator container
     # Only works with Kubernetes
