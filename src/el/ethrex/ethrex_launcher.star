@@ -37,11 +37,11 @@ def get_used_ports(discovery_port):
 
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_LOG_LEVEL.error: "1",
-    constants.GLOBAL_LOG_LEVEL.warn: "2",
-    constants.GLOBAL_LOG_LEVEL.info: "3",
-    constants.GLOBAL_LOG_LEVEL.debug: "4",
-    constants.GLOBAL_LOG_LEVEL.trace: "5",
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -153,6 +153,7 @@ def get_config(
             if network_params.network in constants.PUBLIC_NETWORKS
             else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
         ),
+        "--log.level={0}".format(VERBOSITY_LEVELS[global_log_level]),
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
