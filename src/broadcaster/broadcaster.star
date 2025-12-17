@@ -28,7 +28,7 @@ def get_config(
     return ServiceConfig(
         image=IMAGE_NAME,
         cmd=[
-            "http://{0}:{1}".format(context.ip_addr, context.rpc_port_num)
+            "http://{0}:{1}".format(context.dns_name, context.rpc_port_num)
             for context in all_el_contexts
         ],
         min_cpu=MIN_CPU,

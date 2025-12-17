@@ -121,7 +121,7 @@ def get_beacon_config(
     )
 
     el_client_rpc_url_str = "http://{0}:{1}".format(
-        el_context.ip_addr,
+        el_context.dns_name,
         el_context.rpc_port_num,
     )
 
@@ -133,7 +133,7 @@ def get_beacon_config(
         )
     else:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.ip_addr,
+            el_context.dns_name,
             el_context.engine_rpc_port_num,
         )
 
@@ -313,6 +313,8 @@ def get_beacon_config(
         "node_selectors": node_selectors,
     }
 
+    if len(participant.cl_devices) > 0:
+        config_args["devices"] = participant.cl_devices
     # Only add ready_conditions if not skipping start
     if not participant.skip_start:
         config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(

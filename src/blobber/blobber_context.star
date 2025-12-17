@@ -1,5 +1,5 @@
-def new_blobber_context(ip_addr, port_num):
+def new_blobber_context(dns_name, port_num):
     return struct(
-        ip_addr=ip_addr,
+        dns_name=dns_name,
         port_num=port_num,
     )

@@ -338,12 +338,64 @@ def input_parser(plan, input_args):
         )
 
     if (
-        result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH
-        and result["network_params"]["bpo_1_epoch"]
+        result["network_params"]["bpo_1_epoch"]
         < result["network_params"]["fulu_fork_epoch"]
     ):
-        fail(
-            "Fulu fork must happen before BPO 1, please adjust the epochs accordingly."
+        result["network_params"]["bpo_1_epoch"] = result["network_params"][
+            "fulu_fork_epoch"
+        ]
+        plan.print(
+            "BPO 1 epoch adjusted to Fulu epoch {0}".format(
+                result["network_params"]["fulu_fork_epoch"]
+            )
+        )
+    if (
+        result["network_params"]["bpo_2_epoch"]
+        < result["network_params"]["bpo_1_epoch"]
+    ):
+        result["network_params"]["bpo_2_epoch"] = result["network_params"][
+            "bpo_1_epoch"
+        ]
+        plan.print(
+            "BPO 2 epoch adjusted to BPO 1 epoch {0}".format(
+                result["network_params"]["bpo_1_epoch"]
+            )
+        )
+    if (
+        result["network_params"]["bpo_3_epoch"]
+        < result["network_params"]["bpo_2_epoch"]
+    ):
+        result["network_params"]["bpo_3_epoch"] = result["network_params"][
+            "bpo_2_epoch"
+        ]
+        plan.print(
+            "BPO 3 epoch adjusted to BPO 2 epoch {0}".format(
+                result["network_params"]["bpo_2_epoch"]
+            )
+        )
+    if (
+        result["network_params"]["bpo_4_epoch"]
+        < result["network_params"]["bpo_3_epoch"]
+    ):
+        result["network_params"]["bpo_4_epoch"] = result["network_params"][
+            "bpo_3_epoch"
+        ]
+        plan.print(
+            "BPO 4 epoch adjusted to BPO 3 epoch {0}".format(
+                result["network_params"]["bpo_3_epoch"]
+            )
+        )
+    if (
+        result["network_params"]["bpo_5_epoch"]
+        < result["network_params"]["bpo_4_epoch"]
+    ):
+        result["network_params"]["bpo_5_epoch"] = result["network_params"][
+            "bpo_4_epoch"
+        ]
+        plan.print(
+            "BPO 5 epoch adjusted to BPO 4 epoch {0}".format(
+                result["network_params"]["bpo_4_epoch"]
+            )
         )
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
@@ -399,6 +451,7 @@ def input_parser(plan, input_args):
                 el_volume_size=participant["el_volume_size"],
                 el_extra_params=participant["el_extra_params"],
                 el_extra_mounts=participant["el_extra_mounts"],
+                el_devices=participant["el_devices"],
                 el_extra_env_vars=participant["el_extra_env_vars"],
                 el_extra_labels=participant["el_extra_labels"],
                 el_tolerations=participant["el_tolerations"],
@@ -415,9 +468,11 @@ def input_parser(plan, input_args):
                 vc_tolerations=participant["vc_tolerations"],
                 cl_extra_params=participant["cl_extra_params"],
                 cl_extra_mounts=participant["cl_extra_mounts"],
+                cl_devices=participant["cl_devices"],
                 cl_extra_labels=participant["cl_extra_labels"],
                 vc_extra_params=participant["vc_extra_params"],
                 vc_extra_mounts=participant["vc_extra_mounts"],
+                vc_devices=participant["vc_devices"],
                 vc_extra_env_vars=participant["vc_extra_env_vars"],
                 vc_extra_labels=participant["vc_extra_labels"],
                 use_remote_signer=participant["use_remote_signer"],
@@ -586,6 +641,7 @@ def input_parser(plan, input_args):
             additional_preloaded_contracts=result["network_params"][
                 "additional_preloaded_contracts"
             ],
+            additional_mnemonics=result["network_params"]["additional_mnemonics"],
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
             max_payload_size=result["network_params"]["max_payload_size"],
@@ -1274,6 +1330,7 @@ def default_network_params():
         "base_fee_update_fraction_electra": 5007716,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
+        "additional_mnemonics": [],
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
@@ -1356,6 +1413,7 @@ def default_minimal_network_params():
         "base_fee_update_fraction_electra": 5007716,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
+        "additional_mnemonics": [],
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
@@ -1399,6 +1457,7 @@ def default_participant():
         "el_extra_labels": {},
         "el_extra_params": [],
         "el_extra_mounts": {},
+        "el_devices": [],
         "el_tolerations": [],
         "el_volume_size": 0,
         "el_min_cpu": 0,
@@ -1412,6 +1471,7 @@ def default_participant():
         "cl_extra_labels": {},
         "cl_extra_params": [],
         "cl_extra_mounts": {},
+        "cl_devices": [],
         "cl_tolerations": [],
         "cl_volume_size": 0,
         "cl_min_cpu": 0,
@@ -1427,6 +1487,7 @@ def default_participant():
         "vc_extra_labels": {},
         "vc_extra_params": [],
         "vc_extra_mounts": {},
+        "vc_devices": [],
         "vc_tolerations": [],
         "vc_min_cpu": 0,
         "vc_max_cpu": 0,

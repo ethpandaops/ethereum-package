@@ -224,6 +224,12 @@ participants:
     # Example: el_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     el_extra_mounts: {}
 
+    # A list of host devices to mount into the EL client container
+    # Useful for hardware device access like TPM, HSM, etc.
+    # Example: el_devices: ["/dev/tpm0"]
+    # Defaults to empty list
+    el_devices: []
+
     # A list of tolerations that will be passed to the EL client container
     # Only works with Kubernetes
     # Example: el_tolerations:
@@ -288,6 +294,12 @@ participants:
     # The file will be available at <mount_path>/<extra_files_key>
     # Example: cl_extra_mounts: {"/config": "my_config_file"}  # Creates /config/my_config_file
     cl_extra_mounts: {}
+
+    # A list of host devices to mount into the CL client container
+    # Useful for hardware device access like TPM, HSM, etc.
+    # Example: cl_devices: ["/dev/tpm0"]
+    # Defaults to empty list
+    cl_devices: []
 
     # A list of tolerations that will be passed to the CL client container
     # Only works with Kubernetes
@@ -364,6 +376,12 @@ participants:
     # The file will be available at <mount_path>/<extra_files_key>
     # Example: vc_extra_mounts: {"/config": "my_validator_config"}  # Creates /config/my_validator_config
     vc_extra_mounts: {}
+
+    # A list of host devices to mount into the validator client container
+    # Useful for hardware device access like TPM, HSM, etc.
+    # Example: vc_devices: ["/dev/tpm0"]
+    # Defaults to empty list
+    vc_devices: []
 
     # A list of tolerations that will be passed to the validator container
     # Only works with Kubernetes
@@ -612,6 +630,35 @@ network_params:
   # The number of pre-registered validators for genesis. If 0 or not specified then the value will be calculated from the participants
   preregistered_validator_count: 0
 
+  # Additional mnemonics to generate validators from
+  # These validators will be included in genesis but won't have keystores generated
+  # Useful for pre-registering validators with custom withdrawal credentials or states
+  # Default: []
+  additional_mnemonics:
+    - # The mnemonic to derive validator keys from
+      mnemonic: "estate dog switch misery manage room million bleak wrap distance always insane usage busy chicken limit already duck feature unhappy dial emotion expire please"
+      # The validator index to start deriving keys from
+      # Defaults to 0
+      start: 0
+      # The number of validators to generate from this mnemonic
+      count: 10
+      # The withdrawal address for these validators
+      # Only used when wd_prefix is 0x01 or 0x02 (execution layer withdrawal credentials)
+      wd_address: 0x000000000000000000000000000000000000dEaD
+      # The withdrawal credentials prefix
+      # 0x00: BLS withdrawal credentials (default)
+      # 0x01: Execution layer withdrawal credentials (uses wd_address)
+      # 0x02: Compounding withdrawal credentials (uses wd_address)
+      wd_prefix: 0x01
+      # The validator balance in gwei
+      # Defaults to 32000000000 (32 ETH)
+      balance: 32000000000
+      # The initial validator status
+      # 0: active (default)
+      # 1: slashed
+      # 2: exited
+      status: 1
+
   # How long you want the network to wait before starting up
   genesis_delay: 20
 
@@ -833,12 +880,7 @@ network_params:
 
 # Global parameters for the network
 
-# By default includes
-# - A transaction spammer & blob spammer is launched to fake transactions sent to the network
-# - Forkmon for EL will be launched
-# - A prometheus will be started, coupled with grafana
-# - A beacon metrics gazer will be launched
-# - A light beacon chain explorer will be launched
+# By default we do not launch anything
 # - Default: []
 additional_services:
   - apache
@@ -1265,7 +1307,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.2.0
+  image: ethpandaops/ethereum-genesis-generator:5.2.2
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 

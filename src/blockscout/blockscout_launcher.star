@@ -89,7 +89,7 @@ def launch_blockscout(
 
     el_context = el_contexts[0]
     el_client_rpc_url = "http://{}:{}/".format(
-        el_context.ip_addr, el_context.rpc_port_num
+        el_context.dns_name, el_context.rpc_port_num
     )
     el_client_name = el_context.client_name
 
