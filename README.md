@@ -862,12 +862,7 @@ network_params:
 
 # Global parameters for the network
 
-# By default includes
-# - A transaction spammer & blob spammer is launched to fake transactions sent to the network
-# - Forkmon for EL will be launched
-# - A prometheus will be started, coupled with grafana
-# - A beacon metrics gazer will be launched
-# - A light beacon chain explorer will be launched
+# By default we do not launch anything
 # - Default: []
 additional_services:
   - apache
