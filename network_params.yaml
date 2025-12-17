@@ -7,6 +7,7 @@ participants:
     el_extra_labels: {}
     el_extra_params: []
     el_extra_mounts: {}
+    el_devices: []
     el_tolerations: []
     el_volume_size: 0
     el_min_cpu: 0
@@ -21,6 +22,7 @@ participants:
     cl_extra_labels: {}
     cl_extra_params: []
     cl_extra_mounts: {}
+    cl_devices: []
     cl_tolerations: []
     cl_volume_size: 0
     cl_min_cpu: 0
@@ -37,6 +39,7 @@ participants:
     vc_extra_labels: {}
     vc_extra_params: []
     vc_extra_mounts: {}
+    vc_devices: []
     vc_tolerations: []
     vc_min_cpu: 0
     vc_max_cpu: 0
