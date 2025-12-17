@@ -179,7 +179,9 @@ def launch_mev_relay(
             cmd=[],
             ports={
                 "http": PortSpec(
-                    number=MEV_RELAY_ENDPOINT_PORT, transport_protocol="TCP"
+                    number=MEV_RELAY_ENDPOINT_PORT,
+                    transport_protocol="TCP",
+                    wait="5m",
                 ),
             },
             public_ports=public_ports,
@@ -190,6 +192,16 @@ def launch_mev_relay(
             max_memory=RELAY_MAX_MEMORY,
             node_selectors=node_selectors,
             tolerations=tolerations,
+            ready_conditions=ReadyCondition(
+                recipe=GetHttpRequestRecipe(
+                    port_id="http",
+                    endpoint="/auction-api/livez",
+                ),
+                field="code",
+                assertion="==",
+                target_value=200,
+                timeout="5m",
+            ),
         ),
     )
 
