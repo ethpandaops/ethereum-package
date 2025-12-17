@@ -287,7 +287,7 @@ def get_el_context(
     return el_context.new_el_context(
         client_name="ethrex",
         enode=enode,
-        ip_addr=service.name,
+        dns_name=service.name,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
@@ -296,6 +296,7 @@ def get_el_context(
         enr=enr,
         service_name=service_name,
         el_metrics_info=[ethrex_metrics_info],
+        ip_addr=service.ip_address,
     )
 
 

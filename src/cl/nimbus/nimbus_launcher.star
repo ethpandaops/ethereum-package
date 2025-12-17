@@ -157,7 +157,7 @@ def get_beacon_config(
         )
     else:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.ip_addr,
+            el_context.dns_name,
             el_context.engine_rpc_port_num,
         )
 

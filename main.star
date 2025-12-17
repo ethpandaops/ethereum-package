@@ -259,7 +259,7 @@ def run(plan, args={}):
 
     plan.print(
         "NODE JSON RPC URI: '{0}:{1}'".format(
-            all_participants[0].el_context.ip_addr,
+            all_participants[0].el_context.dns_name,
             all_participants[0].el_context.rpc_port_num,
         )
     )
@@ -327,16 +327,20 @@ def run(plan, args={}):
         and args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE
     ):
         el_uri = "{0}:{1}".format(
-            all_el_contexts[0].ip_addr,
+            all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
-        beacon_uri = "{0}".format(all_cl_contexts[0].beacon_http_url)[
-            7:
-        ]  # remove http://
+
+        # beacon uri for mock mev needs to use ip address and not dns name
+        beacon_uri_for_mock_mev = "{0}:{1}".format(
+            all_cl_contexts[0].ip_address,
+            all_cl_contexts[0].http_port,
+        )
+
         endpoint = mock_mev.launch_mock_mev(
             plan,
             el_uri,
-            beacon_uri,
+            beacon_uri_for_mock_mev,
             jwt_file,
             args_with_right_defaults.global_log_level,
             global_node_selectors,
@@ -352,7 +356,7 @@ def run(plan, args={}):
         or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
     ):
         blocksim_uri = "http://{0}:{1}".format(
-            all_el_contexts[-1].ip_addr, all_el_contexts[-1].rpc_port_num
+            all_el_contexts[-1].dns_name, all_el_contexts[-1].rpc_port_num
         )
         beacon_uri = all_cl_contexts[-1].beacon_http_url
 

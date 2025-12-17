@@ -139,7 +139,7 @@ def get_beacon_config(
         )
     else:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.ip_addr,
+            el_context.dns_name,
             el_context.engine_rpc_port_num,
         )
 
@@ -398,6 +398,7 @@ def get_cl_context(
         client_name="lighthouse",
         enr=beacon_node_enr,
         ip_addr=service.name,
+        ip_address=service.ip_address,
         http_port=beacon_http_port.number,
         beacon_http_url=beacon_http_url,
         cl_nodes_metrics_info=nodes_metrics_info,
