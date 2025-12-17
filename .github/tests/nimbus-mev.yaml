@@ -1,4 +1,5 @@
 participants:
   - el_type: geth
     cl_type: nimbus
+    cl_image: ethpandaops/nimbus-eth2:unstable
 mev_type: flashbots

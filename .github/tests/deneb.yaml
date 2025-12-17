@@ -16,8 +16,6 @@ participants:
     cl_type: lodestar
 additional_services:
   - dora
-  - spamoor
-  - blockscout
 network_params:
   altair_fork_epoch: 0
   bellatrix_fork_epoch: 0
