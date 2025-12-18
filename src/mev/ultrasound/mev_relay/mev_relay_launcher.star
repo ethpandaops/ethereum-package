@@ -5,7 +5,7 @@ shared_utils = import_module("../../../shared_utils/shared_utils.star")
 input_parser = import_module("../../../package_io/input_parser.star")
 
 MEV_RELAY_ENDPOINT = "mev-ultrasound-relay"
-MEV_RELAY_ENDPOINT_PORT = 9062
+MEV_RELAY_ENDPOINT_PORT = 80
 
 
 # The min/max CPU/memory that mev-relay can use
