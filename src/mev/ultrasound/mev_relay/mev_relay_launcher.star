@@ -181,7 +181,7 @@ def launch_mev_relay(
                 "http": PortSpec(
                     number=MEV_RELAY_ENDPOINT_PORT,
                     transport_protocol="TCP",
-                    wait=None,
+                    # wait=None,
                 ),
             },
             public_ports=public_ports,
