@@ -57,7 +57,7 @@ def launch(
     # Check if any timing games are enabled
     use_config_file = False
     if timing_games_params:
-        for relay_name in (relay_names or []):
+        for relay_name in relay_names or []:
             if relay_name in timing_games_params:
                 if timing_games_params[relay_name].get("enable_timing_games", False):
                     use_config_file = True
@@ -112,14 +112,20 @@ def generate_config_file(
         relay_name = relay_names[idx] if idx < len(relay_names) else "unknown"
         timing_config = timing_games_params.get(relay_name, {})
 
-        relays.append({
-            "URL": endpoint,
-            "EnableTimingGames": str(
-                timing_config.get("enable_timing_games", False)
-            ).lower(),
-            "TargetFirstRequestMs": timing_config.get("target_first_request_ms", 200),
-            "FrequencyGetHeaderMs": timing_config.get("frequency_get_header_ms", 100),
-        })
+        relays.append(
+            {
+                "URL": endpoint,
+                "EnableTimingGames": str(
+                    timing_config.get("enable_timing_games", False)
+                ).lower(),
+                "TargetFirstRequestMs": timing_config.get(
+                    "target_first_request_ms", 200
+                ),
+                "FrequencyGetHeaderMs": timing_config.get(
+                    "frequency_get_header_ms", 100
+                ),
+            }
+        )
 
     template_data = {"Relays": relays}
 
@@ -131,7 +137,9 @@ def generate_config_file(
     )
 
     template_and_data_by_rel_dest_filepath = {}
-    template_and_data_by_rel_dest_filepath[MEV_BOOST_CONFIG_FILENAME] = template_and_data
+    template_and_data_by_rel_dest_filepath[
+        MEV_BOOST_CONFIG_FILENAME
+    ] = template_and_data
 
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath,
