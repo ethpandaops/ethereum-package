@@ -84,6 +84,19 @@ def get_config(
 ):
     command = mev_boost_args
 
+    # Build the RELAYS string with all relay endpoints
+    # mev-boost accepts multiple relays separated by commas
+    relay_urls = []
+    for idx, endpoint in enumerate(mev_boost_launcher.relay_end_points):
+        relay_url = "{0}?id={1}-{2}-relay{3}".format(
+            endpoint,
+            participant.cl_type,
+            participant.el_type,
+            idx,
+        )
+        relay_urls.append(relay_url)
+    relays_str = ",".join(relay_urls)
+
     return ServiceConfig(
         image=mev_boost_image,
         ports=USED_PORTS,
@@ -95,11 +108,7 @@ def get_config(
             "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(constants.MEV_BOOST_PORT),
             "SKIP_RELAY_SIGNATURE_CHECK": "1",
             "SLOT_SEC": str(seconds_per_slot),
-            "RELAYS": "{0}?id={1}-{2}".format(
-                mev_boost_launcher.relay_end_points[0],
-                participant.cl_type,
-                participant.el_type,
-            ),
+            "RELAYS": relays_str,
         },
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
