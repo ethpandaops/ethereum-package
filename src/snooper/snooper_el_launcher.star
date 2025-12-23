@@ -71,6 +71,7 @@ def launch_snooper(
         snooper_service.ip_address,
         SNOOPER_ENGINE_RPC_PORT_NUM,
         SNOOPER_EL_RPC_PORT_NUM,
+        snooper_service.name,
     )
 
 
