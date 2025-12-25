@@ -1,0 +1,16 @@
+FROM alpine:latest
+
+# Install required dependencies
+RUN apk add --no-cache curl
+
+# Install buildifier
+RUN ARCH=$(uname -m) \
+    && if [ "$ARCH" = "x86_64" ]; then BUILDIFIER_ARCH="amd64"; elif [ "$ARCH" = "aarch64" ]; then BUILDIFIER_ARCH="arm64"; else BUILDIFIER_ARCH="amd64"; fi \
+    && curl -fsSL -o /usr/local/bin/buildifier "https://github.com/bazelbuild/buildtools/releases/download/v8.2.1/buildifier-linux-${BUILDIFIER_ARCH}" \
+    && chmod +x /usr/local/bin/buildifier
+
+# Set working directory for linting
+WORKDIR /workspace
+
+# Entry point to run buildifier
+ENTRYPOINT ["/usr/local/bin/buildifier"]
