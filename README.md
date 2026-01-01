@@ -177,7 +177,7 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 participants:
   # EL(Execution Layer) Specific flags
     # The type of EL client that should be started
-    # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1
+    # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1, ethrex, dummy
   - el_type: geth
 
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -190,6 +190,7 @@ participants:
     # - ethereumjs: ethpandaops/ethereumjs:master
     # - nimbus-eth1: statusim/nimbus-eth1:master
     # - ethrex: ghcr.io/lambdaclass/ethrex:latest
+    # - dummy: (no default; set el_image)
     el_image: ""
 
     # The log level string that this participant's EL client should log at
@@ -204,7 +205,7 @@ participants:
     # If this is emptystring, each client will use its default behavior:
     #   - reth, erigon: default to archive (use "full" to save space)
     #   - geth, besu, nethermind: default to full (use "archive" to keep historical data)
-    #   - ethereumjs, ethrex, nimbus-eth1: unused (full only?)
+    #   - ethereumjs, ethrex, nimbus-eth1, dummy: unused (full only?)
     # Example: el_storage_type: "full" or "archive"
     el_storage_type: ""
 
