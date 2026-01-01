@@ -1561,10 +1561,7 @@ def get_default_docker_cache_params():
 def get_default_mev_params(mev_type, preset):
     mev_relay_image = constants.DEFAULT_FLASHBOTS_RELAY_IMAGE
     mev_builder_image = constants.DEFAULT_FLASHBOTS_BUILDER_IMAGE
-    if preset == "minimal":
-        mev_builder_cl_image = DEFAULT_CL_IMAGES_MINIMAL[constants.CL_TYPE.lighthouse]
-    else:
-        mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+    mev_builder_cl_image = DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
     mev_builder_extra_data = None
     mev_builder_subsidy = 0
     mev_boost_image = constants.DEFAULT_FLASHBOTS_MEV_BOOST_IMAGE
@@ -1943,13 +1940,6 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
                 "cl_image": parsed_arguments_dict["mev_params"]["mev_builder_cl_image"],
                 "cl_log_level": parsed_arguments_dict["global_log_level"],
-                "cl_extra_params": [
-                    "--always-prepare-payload",
-                    "--prepare-payload-lookahead",
-                    "8000",
-                    "--disable-peer-scoring",
-                    "--supernode",
-                ],
                 "el_extra_params": parsed_arguments_dict["mev_params"][
                     "mev_builder_extra_args"
                 ],
@@ -1959,6 +1949,79 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 ],
             }
         )
+
+        mev_cl_image = parsed_arguments_dict["mev_params"]["mev_builder_cl_image"]
+        mev_cl_type = constants.CL_TYPE.lighthouse
+        for candidate in [
+            constants.CL_TYPE.lighthouse,
+            constants.CL_TYPE.lodestar,
+            constants.CL_TYPE.prysm,
+            constants.CL_TYPE.teku,
+            constants.CL_TYPE.nimbus,
+            constants.CL_TYPE.grandine,
+        ]:
+            if candidate in mev_cl_image:
+                mev_cl_type = candidate
+                break
+        mev_participant["cl_type"] = mev_cl_type
+        mev_participant["vc_type"] = mev_cl_type
+
+        # Compute mev_url for this mev participant so we can set CL-specific
+        # extra params (different CLs accept different flags).
+        if mev_type == constants.COMMIT_BOOST_MEV_TYPE:
+            prefix = constants.COMMIT_BOOST_SERVICE_NAME_PREFIX
+        else:
+            prefix = constants.MEV_BOOST_SERVICE_NAME_PREFIX
+        num_participants = len(parsed_arguments_dict["participants"])
+        index_str = shared_utils.zfill_custom(
+            num_participants + 1, len(str(num_participants + 1))
+        )
+        mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
+            prefix,
+            index_str,
+            mev_participant["cl_type"],
+            mev_participant["el_type"],
+            constants.MEV_BOOST_PORT,
+        )
+
+        mev_participant["cl_extra_params"] = []
+        # CL-specific builder flags
+        if mev_cl_type == constants.CL_TYPE.lighthouse:
+            mev_participant["cl_extra_params"].extend(
+                [
+                    "--builder={0}".format(mev_url),
+                    "--always-prepare-payload",
+                    "--prepare-payload-lookahead",
+                    "8000",
+                    "--disable-peer-scoring",
+                    "--supernode",
+                ]
+            )
+        elif mev_cl_type == constants.CL_TYPE.lodestar:
+            mev_participant["cl_extra_params"].append("--builder")
+            mev_participant["cl_extra_params"].append(
+                "--builder.urls={0}".format(mev_url)
+            )
+        elif mev_cl_type == constants.CL_TYPE.nimbus:
+            mev_participant["cl_extra_params"].append("--payload-builder=true")
+            mev_participant["cl_extra_params"].append(
+                "--payload-builder-url={0}".format(mev_url)
+            )
+        elif mev_cl_type == constants.CL_TYPE.teku:
+            mev_participant["cl_extra_params"].append(
+                "--builder-endpoint={0}".format(mev_url)
+            )
+            mev_participant["cl_extra_params"].append(
+                "--validators-builder-registration-default-enabled=true"
+            )
+        elif mev_cl_type == constants.CL_TYPE.prysm:
+            mev_participant["cl_extra_params"].append(
+                "--http-mev-relay={0}".format(mev_url)
+            )
+        elif mev_cl_type == constants.CL_TYPE.grandine:
+            mev_participant["cl_extra_params"].append(
+                "--builder-url={0}".format(mev_url)
+            )
 
         parsed_arguments_dict["participants"].append(mev_participant)
 
@@ -1970,18 +2033,82 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "el_image": parsed_arguments_dict["mev_params"]["mev_builder_image"],
                 "cl_image": parsed_arguments_dict["mev_params"]["mev_builder_cl_image"],
                 "cl_log_level": parsed_arguments_dict["global_log_level"],
-                "cl_extra_params": [
-                    "--always-prepare-payload",
-                    "--prepare-payload-lookahead",
-                    "8000",
-                    "--disable-peer-scoring",
-                ],
                 "el_extra_params": parsed_arguments_dict["mev_params"][
                     "mev_builder_extra_args"
                 ],
                 "validator_count": 0,
             }
         )
+        # Infer CL type from provided MEV builder CL image for MEV-RS case as well
+        mev_cl_image = parsed_arguments_dict["mev_params"]["mev_builder_cl_image"]
+        mev_cl_type = constants.CL_TYPE.lighthouse
+        for candidate in [
+            constants.CL_TYPE.lighthouse,
+            constants.CL_TYPE.lodestar,
+            constants.CL_TYPE.prysm,
+            constants.CL_TYPE.teku,
+            constants.CL_TYPE.nimbus,
+            constants.CL_TYPE.grandine,
+        ]:
+            if candidate in mev_cl_image:
+                mev_cl_type = candidate
+                break
+        mev_participant["cl_type"] = mev_cl_type
+        mev_participant["vc_type"] = mev_cl_type
+
+        if mev_type == constants.COMMIT_BOOST_MEV_TYPE:
+            prefix = constants.COMMIT_BOOST_SERVICE_NAME_PREFIX
+        else:
+            prefix = constants.MEV_BOOST_SERVICE_NAME_PREFIX
+        num_participants = len(parsed_arguments_dict["participants"])
+        index_str = shared_utils.zfill_custom(
+            num_participants + 1, len(str(num_participants + 1))
+        )
+        mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
+            prefix,
+            index_str,
+            mev_participant["cl_type"],
+            mev_participant["el_type"],
+            constants.MEV_BOOST_PORT,
+        )
+
+        mev_participant["cl_extra_params"] = []
+        if mev_cl_type == constants.CL_TYPE.lighthouse:
+            mev_participant["cl_extra_params"].extend(
+                [
+                    "--builder={0}".format(mev_url),
+                    "--always-prepare-payload",
+                    "--prepare-payload-lookahead",
+                    "8000",
+                    "--disable-peer-scoring",
+                ]
+            )
+        elif mev_cl_type == constants.CL_TYPE.lodestar:
+            mev_participant["cl_extra_params"].append("--builder")
+            mev_participant["cl_extra_params"].append(
+                "--builder.urls={0}".format(mev_url)
+            )
+        elif mev_cl_type == constants.CL_TYPE.nimbus:
+            mev_participant["cl_extra_params"].append("--payload-builder=true")
+            mev_participant["cl_extra_params"].append(
+                "--payload-builder-url={0}".format(mev_url)
+            )
+        elif mev_cl_type == constants.CL_TYPE.teku:
+            mev_participant["cl_extra_params"].append(
+                "--builder-endpoint={0}".format(mev_url)
+            )
+            mev_participant["cl_extra_params"].append(
+                "--validators-builder-registration-default-enabled=true"
+            )
+        elif mev_cl_type == constants.CL_TYPE.prysm:
+            mev_participant["cl_extra_params"].append(
+                "--http-mev-relay={0}".format(mev_url)
+            )
+        elif mev_cl_type == constants.CL_TYPE.grandine:
+            mev_participant["cl_extra_params"].append(
+                "--builder-url={0}".format(mev_url)
+            )
+
         parsed_arguments_dict["participants"].append(mev_participant)
     if mev_type == constants.MOCK_MEV_TYPE:
         parsed_arguments_dict["mev_params"]["mock_mev_image"] = parsed_arguments_dict[

@@ -122,8 +122,34 @@ def launch(
     cl_service_configs = {}
     cl_participant_info = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
-        cl_type = participant.cl_type
+        # The declared client type from the participant YAML
+        declared_cl = participant.cl_type
         el_type = participant.el_type
+        # If the participant image indicates a different CL than the declared
+        # `cl_type`, prefer the image-detected type so we select the correct
+        # launcher (prevents running lighthouse commands in a lodestar image).
+        cl_image = participant.cl_image
+        # Try to infer from image if mismatch or launcher missing. Prefer the
+        # image-inferred type but do not mutate the participant struct here —
+        # instead compute a single `effective_cl_type` used for all launcher
+        # selection and naming below. This avoids side-effects and makes the
+        # decision deterministic for this function's execution.
+        inferred_cl = None
+        for candidate in cl_launchers.keys():
+            if candidate in cl_image:
+                inferred_cl = candidate
+                break
+        effective_cl_type = inferred_cl if inferred_cl != None else declared_cl
+        if inferred_cl != None and inferred_cl != declared_cl:
+            plan.print(
+                "CL type mismatch detected for participant {0}: declared '{1}', image suggests '{2}'. Using image-inferred type.".format(
+                    index + 1, declared_cl, inferred_cl
+                )
+            )
+
+        # Use the effective client type for all subsequent launcher selection
+        # and naming within this function.
+        cl_type = effective_cl_type
         node_selectors = input_parser.get_client_node_selectors(
             participant.node_selectors,
             global_node_selectors,
