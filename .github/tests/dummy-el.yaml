@@ -1,0 +1,23 @@
+participants:
+  - el_type: dummy
+    el_image: dummy_el:local
+    cl_type: teku
+  - el_type: dummy
+    el_image: dummy_el:local
+    cl_type: prysm
+  - el_type: dummy
+    el_image: dummy_el:local
+    cl_type: nimbus
+  - el_type: dummy
+    el_image: dummy_el:local
+    cl_type: lighthouse
+  - el_type: dummy
+    el_image: dummy_el:local
+    cl_type: lodestar
+  - el_type: dummy
+    el_image: dummy_el:local
+    cl_type: grandine
+
+network_params:
+  preset: minimal
+  fulu_fork_epoch: 0
