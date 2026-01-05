@@ -126,7 +126,6 @@ def get_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
-        "/usr/local/bin/dummy_el",
         "--host=0.0.0.0",
         "--port={0}".format(ENGINE_RPC_PORT_NUM),
         "--rpc-port={0}".format(RPC_PORT_NUM),
@@ -162,7 +161,6 @@ def get_config(
         "public_ports": public_ports,
         "cmd": cmd,
         "files": files,
-        "entrypoint": [],
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": shared_utils.label_maker(
