@@ -190,7 +190,7 @@ participants:
     # - ethereumjs: ethpandaops/ethereumjs:master
     # - nimbus-eth1: statusim/nimbus-eth1:master
     # - ethrex: ghcr.io/lambdaclass/ethrex:latest
-    # - dummy: (no default; set el_image)
+    # - dummy: ethpandaops/dummy-el:master
     el_image: ""
 
     # The log level string that this participant's EL client should log at
