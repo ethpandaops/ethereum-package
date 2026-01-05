@@ -15,6 +15,7 @@ DEFAULT_EL_IMAGES = {
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
     "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
+    "dummy": "ethpandaops/dummy-el:master",
 }
 
 DEFAULT_CL_IMAGES = {
