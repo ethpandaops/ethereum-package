@@ -1,0 +1,225 @@
+shared_utils = import_module("../../shared_utils/shared_utils.star")
+input_parser = import_module("../../package_io/input_parser.star")
+el_context = import_module("../../el/el_context.star")
+el_admin_node_info = import_module("../../el/el_admin_node_info.star")
+el_shared = import_module("../el_shared.star")
+constants = import_module("../../package_io/constants.star")
+
+RPC_PORT_NUM = 8545
+WS_PORT_NUM = 8546
+DISCOVERY_PORT_NUM = 30303
+ENGINE_RPC_PORT_NUM = 8551
+METRICS_PORT_NUM = 9001
+
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
+def launch(
+    plan,
+    launcher,
+    service_name,
+    participant,
+    global_log_level,
+    existing_el_clients,
+    persistent,
+    tolerations,
+    node_selectors,
+    port_publisher,
+    participant_index,
+    network_params,
+    extra_files_artifacts,
+    bootnodoor_enode=None,
+):
+    cl_client_name = service_name.split("-")[3]
+
+    config = get_config(
+        plan,
+        launcher,
+        participant,
+        service_name,
+        existing_el_clients,
+        cl_client_name,
+        global_log_level,
+        persistent,
+        tolerations,
+        node_selectors,
+        port_publisher,
+        participant_index,
+        network_params,
+        extra_files_artifacts,
+        bootnodoor_enode,
+    )
+
+    service = plan.add_service(service_name, config)
+
+    return get_el_context(
+        plan,
+        service_name,
+        service,
+        launcher,
+    )
+
+
+def get_config(
+    plan,
+    launcher,
+    participant,
+    service_name,
+    existing_el_clients,
+    cl_client_name,
+    global_log_level,
+    persistent,
+    tolerations,
+    node_selectors,
+    port_publisher,
+    participant_index,
+    network_params,
+    extra_files_artifacts,
+    bootnodoor_enode=None,
+):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
+    public_ports = {}
+    public_ports_for_component = None
+    if port_publisher.el_enabled:
+        public_ports_for_component = shared_utils.get_public_ports_for_component(
+            "el", port_publisher, participant_index
+        )
+        public_ports = el_shared.get_general_el_public_port_specs(
+            public_ports_for_component
+        )
+        additional_public_port_assignments = {
+            constants.RPC_PORT_ID: public_ports_for_component[3],
+            constants.WS_PORT_ID: public_ports_for_component[4],
+        }
+        public_ports.update(
+            shared_utils.get_port_specs(additional_public_port_assignments)
+        )
+
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+
+    used_port_assignments = {
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
+        constants.RPC_PORT_ID: RPC_PORT_NUM,
+        constants.WS_PORT_ID: WS_PORT_NUM,
+        constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+    }
+    used_ports = shared_utils.get_port_specs(used_port_assignments)
+
+    cmd = [
+        "--host=0.0.0.0",
+        "--port={0}".format(ENGINE_RPC_PORT_NUM),
+        "--rpc-port={0}".format(RPC_PORT_NUM),
+        "--ws-port={0}".format(WS_PORT_NUM),
+        "--metrics-port={0}".format(METRICS_PORT_NUM),
+        "--p2p-port={0}".format(discovery_port_tcp),
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+    ]
+
+    if len(participant.el_extra_params) > 0:
+        # this is a repeated<proto type>, we convert it into Starlark
+        cmd.extend([param for param in participant.el_extra_params])
+
+    files = {
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+    }
+
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.el_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
+    env_vars = participant.el_extra_env_vars
+    if "RUST_LOG" not in env_vars:
+        env_vars = env_vars | {"RUST_LOG": log_level}
+
+    config_args = {
+        "image": participant.el_image,
+        "ports": used_ports,
+        "public_ports": public_ports,
+        "cmd": cmd,
+        "files": files,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "env_vars": env_vars,
+        "labels": shared_utils.label_maker(
+            client=constants.EL_TYPE.dummy,
+            client_type=constants.CLIENT_TYPES.el,
+            image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
+            connected_client=cl_client_name,
+            extra_labels=participant.el_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
+            supernode=participant.supernode,
+        ),
+        "tolerations": tolerations,
+        "node_selectors": node_selectors,
+    }
+
+    if participant.el_min_cpu > 0:
+        config_args["min_cpu"] = participant.el_min_cpu
+    if participant.el_max_cpu > 0:
+        config_args["max_cpu"] = participant.el_max_cpu
+    if participant.el_min_mem > 0:
+        config_args["min_memory"] = participant.el_min_mem
+    if participant.el_max_mem > 0:
+        config_args["max_memory"] = participant.el_max_mem
+    if len(participant.el_devices) > 0:
+        config_args["devices"] = participant.el_devices
+    return ServiceConfig(**config_args)
+
+
+def get_el_context(
+    plan,
+    service_name,
+    service,
+    launcher,
+):
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
+        plan, service_name, constants.RPC_PORT_ID
+    )
+
+    http_url = "http://{0}:{1}".format(service.name, RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.name, WS_PORT_NUM)
+
+    return el_context.new_el_context(
+        client_name=constants.EL_TYPE.dummy,
+        enode=enode,
+        dns_name=service.name,
+        rpc_port_num=RPC_PORT_NUM,
+        ws_port_num=WS_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        enr=enr,
+        service_name=service_name,
+        el_metrics_info=[],
+        ip_addr=service.ip_address,
+    )
+
+
+def new_dummy_launcher(el_cl_genesis_data, jwt_file):
+    return struct(
+        el_cl_genesis_data=el_cl_genesis_data,
+        jwt_file=jwt_file,
+    )
