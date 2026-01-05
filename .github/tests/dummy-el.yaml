@@ -14,4 +14,3 @@ participants:
 
 network_params:
   preset: minimal
-  fulu_fork_epoch: 0
