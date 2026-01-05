@@ -132,16 +132,18 @@ def get_beacon_config(
     )
 
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     public_ports_for_component = None
@@ -204,8 +206,6 @@ def get_beacon_config(
         #   https://github.com/sigp/lighthouse/blob/7c88f582d955537f7ffff9b2c879dcf5bf80ce13/scripts/local_testnet/beacon_node.sh
         # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
         "--disable-packet-filter",
-        "--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # ENR
         "--disable-enr-auto-update",
@@ -226,6 +226,10 @@ def get_beacon_config(
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         "--enable-private-discovery",
     ]
+
+    if EXECUTION_ENGINE_ENDPOINT != None:
+        cmd.append("--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT)
+        cmd.append("--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 
     supernode_cmd = [
         "--supernode",

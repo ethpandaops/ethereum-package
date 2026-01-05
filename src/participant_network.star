@@ -627,6 +627,7 @@ def launch_participant_network(
             snooper_el_rpc_context,
             ethereum_metrics_exporter_context,
             xatu_sentry_context,
+            participant.zk_enabled,
         )
 
         all_participants.append(participant_entry)

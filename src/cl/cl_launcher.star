@@ -160,7 +160,8 @@ def launch(
             index + 1, len(str(len(args_with_right_defaults.participants)))
         )
 
-        cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
+        el_type_for_name = "zk" if participant.zk_enabled else el_type
+        cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type_for_name)
         new_cl_node_validator_keystores = None
         if participant.validator_count != 0:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
@@ -171,7 +172,7 @@ def launch(
 
         cl_context = None
         snooper_el_engine_context = None
-        if participant.snooper_enabled:
+        if participant.snooper_enabled and el_context != None:
             snooper_service_name = "snooper-engine-{0}-{1}-{2}".format(
                 index_str, cl_type, el_type
             )
@@ -224,7 +225,7 @@ def launch(
                     )
 
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
-        full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
+        full_name = "{0}-{1}-{2}".format(index_str, el_type_for_name, cl_type)
         if index == 0:
             cl_context = launch_method(
                 plan,

@@ -8,7 +8,6 @@ EL_TYPE = struct(
     ethereumjs="ethereumjs",
     nimbus="nimbus",
     ethrex="ethrex",
-    dummy="dummy",
 )
 
 CL_TYPE = struct(
@@ -331,7 +330,6 @@ CLIENT_LANGUAGES = {
     "reth-builder": "rust",
     "ethereumjs": "javascript",
     "nimbus": "nim",
-    "dummy": "rust",
     # Consensus Layer (CL) clients
     "lighthouse": "rust",
     "teku": "java",

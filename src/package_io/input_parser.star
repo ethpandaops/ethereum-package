@@ -15,7 +15,6 @@ DEFAULT_EL_IMAGES = {
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
     "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
-    "dummy": "ethpandaops/dummy-el:master",
 }
 
 DEFAULT_CL_IMAGES = {
@@ -250,7 +249,7 @@ def input_parser(plan, input_args):
 
     # Check for shadowfork + archive mode and unsupported client + archive mode combinations
     is_shadowfork = "shadowfork" in result["network_params"]["network"]
-    unsupported_archive_clients = ["dummy", "ethrex", "ethereumjs", "nimbus"]
+    unsupported_archive_clients = ["ethrex", "ethereumjs", "nimbus"]
 
     for idx, participant in enumerate(result["participants"]):
         el_type = participant["el_type"]
@@ -1093,6 +1092,9 @@ def parse_network_params(plan, input_args):
         if xatu_sentry_enabled == None:
             participant["xatu_sentry_enabled"] = result["xatu_sentry_enabled"]
 
+        if result["global_zk_enabled"]:
+            participant["zk_enabled"] = True
+
         blobber_enabled = participant["blobber_enabled"]
         if blobber_enabled:
             # lighthouse, lodestar, prysm, and grandine support blobber
@@ -1279,6 +1281,7 @@ def default_input_args(input_args):
         },
         "spamoor_params": get_default_spamoor_params(),
         "bootnodoor_params": get_default_bootnodoor_params(),
+        "global_zk_enabled": False,
     }
 
 
@@ -1524,6 +1527,7 @@ def default_participant():
         "vc_beacon_node_indices": None,
         "checkpoint_sync_enabled": None,
         "skip_start": False,
+        "zk_enabled": False,
     }
 
 
