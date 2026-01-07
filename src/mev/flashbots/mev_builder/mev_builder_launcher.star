@@ -99,7 +99,6 @@ def new_builder_config(
     return config_files_artifact_name
 
 
-
 def new_builder_config_template_data(
     network_params,
     pubkey,
