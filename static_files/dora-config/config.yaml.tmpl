@@ -106,6 +106,10 @@ mevIndexer:
 {{- end }}
   refreshInterval: 5m
 
+executionIndexer:
+  enabled: true
+  retention: 168h # keep history for 1 week
+
 database:
   engine: "sqlite"
   sqlite:
