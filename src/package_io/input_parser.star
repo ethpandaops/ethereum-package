@@ -683,7 +683,9 @@ def input_parser(plan, input_args):
                 "mev_relay_website_extra_env_vars"
             ],
             mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
-            mev_builder_cl_extra_params=result["mev_params"]["mev_builder_cl_extra_params"],
+            mev_builder_cl_extra_params=result["mev_params"][
+                "mev_builder_cl_extra_params"
+            ],
             mev_builder_prometheus_config=result["mev_params"][
                 "mev_builder_prometheus_config"
             ],
@@ -1953,7 +1955,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "8000",
                     "--disable-peer-scoring",
                     "--supernode",
-                ] + parsed_arguments_dict["mev_params"]["mev_builder_cl_extra_params"],
+                ]
+                + parsed_arguments_dict["mev_params"]["mev_builder_cl_extra_params"],
                 "el_extra_params": parsed_arguments_dict["mev_params"][
                     "mev_builder_extra_args"
                 ],
@@ -1979,7 +1982,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--prepare-payload-lookahead",
                     "8000",
                     "--disable-peer-scoring",
-                ] + parsed_arguments_dict["mev_params"]["mev_builder_cl_extra_params"],
+                ]
+                + parsed_arguments_dict["mev_params"]["mev_builder_cl_extra_params"],
                 "el_extra_params": parsed_arguments_dict["mev_params"][
                     "mev_builder_extra_args"
                 ],
