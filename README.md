@@ -1188,6 +1188,8 @@ mev_params:
   mev_builder_image: ethpandaops/reth-rbuilder:develop
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
+  # Extra parameters to send to the CL builder
+  mev_builder_cl_extra_params: []
   # The subsidy to use for the builder (in ETH)
   mev_builder_subsidy: 0
   # The image to use for mev-boost
