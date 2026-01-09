@@ -1,0 +1,13 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: geth
+    cl_type: lodestar
+  - el_type: dummy
+    cl_type: lighthouse
+    validator_count: 1
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+
+additional_services:
+  - ews
+  - dora

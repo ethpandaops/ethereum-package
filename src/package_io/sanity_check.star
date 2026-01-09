@@ -394,6 +394,12 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "extra_args",
     ],
+    "ews_params": [
+        "image",
+        "retain",
+        "num_proofs",
+        "env",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -421,6 +427,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "tracoor",
     "mempool_bridge",
     "spamoor",
+    "ews",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

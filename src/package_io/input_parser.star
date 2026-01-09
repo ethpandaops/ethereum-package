@@ -84,6 +84,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "spamoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
+    "ews_params",
 )
 
 
@@ -120,6 +121,7 @@ def input_parser(plan, input_args):
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
+    result["ews_params"] = get_default_ews_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -205,6 +207,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["checkpointz_params"]:
                 sub_value = input_args["checkpointz_params"][sub_attr]
                 result["checkpointz_params"][sub_attr] = sub_value
+        elif attr == "ews_params":
+            for sub_attr in input_args["ews_params"]:
+                sub_value = input_args["ews_params"][sub_attr]
+                result["ews_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -431,6 +437,23 @@ def input_parser(plan, input_args):
                 "Fulu fork is enabled (epoch: {0}) but no supernodes are configured, no nodes have 128 or more validators, and perfect_peerdas_enabled is not enabled. Either configure a supernode, ensure at least one node has 128+ validators, or enable perfect_peerdas_enabled in network_params with 16 participants.".format(
                     str(result["network_params"]["fulu_fork_epoch"])
                 )
+            )
+
+    if "ews" in result["additional_services"]:
+        has_non_dummy_el = False
+        has_dummy_el = False
+        for participant in result["participants"]:
+            if participant["el_type"] != "dummy":
+                has_non_dummy_el = True
+            else:
+                has_dummy_el = True
+        if not has_non_dummy_el:
+            fail(
+                "ews (execution-witness-sentry) is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
+            )
+        if not has_dummy_el:
+            fail(
+                "ews (execution-witness-sentry) is enabled but no participants are using dummy EL. At least one participant must use dummy EL to receive execution witnesses."
             )
 
     if (
@@ -862,6 +885,12 @@ def input_parser(plan, input_args):
             min_mem=result["bootnodoor_params"]["min_mem"],
             max_mem=result["bootnodoor_params"]["max_mem"],
             extra_args=result["bootnodoor_params"]["extra_args"],
+        ),
+        ews_params=struct(
+            image=result["ews_params"]["image"],
+            retain=result["ews_params"]["retain"],
+            num_proofs=result["ews_params"]["num_proofs"],
+            env=result["ews_params"]["env"],
         ),
     )
 
@@ -1796,6 +1825,15 @@ def get_default_bootnodoor_params():
         "min_mem": 128,
         "max_mem": 512,
         "extra_args": [],
+    }
+
+
+def get_default_ews_params():
+    return {
+        "image": constants.DEFAULT_EWS_IMAGE,
+        "retain": 10,
+        "num_proofs": 1,
+        "env": {},
     }
 
 
