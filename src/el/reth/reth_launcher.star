@@ -7,6 +7,8 @@ node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 mev_rs_builder = import_module("../../mev/mev-rs/mev_builder/mev_builder_launcher.star")
 lighthouse = import_module("../../cl/lighthouse/lighthouse_launcher.star")
+prysm = import_module("../../cl/prysm/prysm_launcher.star")
+teku = import_module("../../cl/teku/teku_launcher.star")
 flashbots_rbuilder = import_module(
     "../../mev/flashbots/mev_builder/mev_builder_launcher.star"
 )
@@ -289,13 +291,23 @@ def get_config(
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME
+
+        # Infer builder CL type from image and get correct port
+        # Note: Only Lighthouse, Lodestar, Prysm, and Teku are supported as builder CLs.
+        mev_cl_image = launcher.mev_params.mev_builder_cl_image
+        mev_cl_port = lighthouse.BEACON_HTTP_PORT_NUM  # default
+        if constants.CL_TYPE.prysm in mev_cl_image:
+            mev_cl_port = prysm.BEACON_HTTP_PORT_NUM
+        elif constants.CL_TYPE.teku in mev_cl_image:
+            mev_cl_port = teku.BEACON_HTTP_PORT_NUM
+
         env_vars.update(
             {
                 "CL_ENDPOINT": "http://cl-{0}-{1}-{2}:{3}".format(
                     participant_index + 1,
                     cl_client_name,
                     constants.EL_TYPE.reth_builder,
-                    lighthouse.BEACON_HTTP_PORT_NUM,
+                    mev_cl_port,
                 ),
             }
         )

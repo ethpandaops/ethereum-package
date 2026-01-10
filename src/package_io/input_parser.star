@@ -1866,14 +1866,15 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
 
 
 def infer_cl_type_from_image(cl_image):
-    """Infer CL client type from given config."""
+    """Infer CL client type from given config.
+    
+    Note: Only Lighthouse, Prysm, and Teku are supported as builder CLs.
+    Lodestar, Nimbus, and Grandine have incompatible payload_attributes SSE event formats.
+    """
     for candidate in [
         constants.CL_TYPE.lighthouse,
-        constants.CL_TYPE.lodestar,
         constants.CL_TYPE.prysm,
         constants.CL_TYPE.teku,
-        constants.CL_TYPE.nimbus,
-        constants.CL_TYPE.grandine,
     ]:
         if candidate in cl_image:
             return candidate
@@ -1885,6 +1886,9 @@ def get_mev_cl_extra_params(cl_type, mev_url, include_supernode=False):
 
     For MEV builder nodes, the CL needs to prepare payloads for EVERY slot,
     not just slots where the validator is proposing. This requires special flags.
+    
+    Note: Only Lighthouse, Prysm, and Teku are supported as builder CLs.
+    Lodestar, Nimbus, and Grandine have incompatible payload_attributes SSE event formats.
     """
     params = []
     if cl_type == constants.CL_TYPE.lighthouse:
@@ -1899,25 +1903,17 @@ def get_mev_cl_extra_params(cl_type, mev_url, include_supernode=False):
         )
         if include_supernode:
             params.append("--supernode")
-    elif cl_type == constants.CL_TYPE.lodestar:
-        params.append("--builder")
-        params.append("--builder.urls={0}".format(mev_url))
-        # emitPayloadAttributes sends payload attributes before every slot for builders
-        params.append("--emitPayloadAttributes")
-    elif cl_type == constants.CL_TYPE.nimbus:
-        params.append("--payload-builder=true")
-        params.append("--payload-builder-url={0}".format(mev_url))
     elif cl_type == constants.CL_TYPE.teku:
         params.append("--builder-endpoint={0}".format(mev_url))
         params.append("--validators-builder-registration-default-enabled=true")
         # BUILDER_ALWAYS ensures builder is always used for payload construction
         params.append("--builder-bid-compare-factor=BUILDER_ALWAYS")
+        # This flag makes Teku send payload_attributes on every slot (required for block builders)
+        params.append("--Xfork-choice-updated-always-send-payload-attributes=true")
     elif cl_type == constants.CL_TYPE.prysm:
         params.append("--http-mev-relay={0}".format(mev_url))
         # prepare-all-payloads tells Prysm to prepare payloads for every slot (required for builders)
         params.append("--prepare-all-payloads")
-    elif cl_type == constants.CL_TYPE.grandine:
-        params.append("--builder-url={0}".format(mev_url))
     return params
 
 

@@ -5,11 +5,8 @@ constants = import_module("../../../package_io/constants.star")
 flashbots_relay = import_module("../mev_relay/mev_relay_launcher.star")
 helix_relay = import_module("../../helix/helix_relay_launcher.star")
 lighthouse = import_module("../../../cl/lighthouse/lighthouse_launcher.star")
-lodestar = import_module("../../../cl/lodestar/lodestar_launcher.star")
-nimbus = import_module("../../../cl/nimbus/nimbus_launcher.star")
 prysm = import_module("../../../cl/prysm/prysm_launcher.star")
 teku = import_module("../../../cl/teku/teku_launcher.star")
-grandine = import_module("../../../cl/grandine/grandine_launcher.star")
 
 # MEV Builder flags
 
@@ -35,15 +32,14 @@ def new_builder_config(
         len(participants), len(str(len(participants)))
     )
     # Infer the builder CL type from the provided image so CLEndpoint is correct
+    # Note: Only Lighthouse, Prysm, and Teku are supported as builder CLs.
+    # Lodestar, Nimbus, and Grandine have incompatible payload_attributes SSE event formats.
     mev_cl_image = mev_params.mev_builder_cl_image
     mev_cl_type = constants.CL_TYPE.lighthouse
     for candidate in [
         constants.CL_TYPE.lighthouse,
-        constants.CL_TYPE.lodestar,
         constants.CL_TYPE.prysm,
         constants.CL_TYPE.teku,
-        constants.CL_TYPE.nimbus,
-        constants.CL_TYPE.grandine,
     ]:
         if candidate in mev_cl_image:
             mev_cl_type = candidate
@@ -51,16 +47,10 @@ def new_builder_config(
 
     # Map CL type to its beacon HTTP port constant
     mev_cl_port = lighthouse.BEACON_HTTP_PORT_NUM
-    if mev_cl_type == constants.CL_TYPE.lodestar:
-        mev_cl_port = lodestar.BEACON_HTTP_PORT_NUM
-    elif mev_cl_type == constants.CL_TYPE.prysm:
+    if mev_cl_type == constants.CL_TYPE.prysm:
         mev_cl_port = prysm.BEACON_HTTP_PORT_NUM
     elif mev_cl_type == constants.CL_TYPE.teku:
         mev_cl_port = teku.BEACON_HTTP_PORT_NUM
-    elif mev_cl_type == constants.CL_TYPE.nimbus:
-        mev_cl_port = nimbus.BEACON_HTTP_PORT_NUM
-    elif mev_cl_type == constants.CL_TYPE.grandine:
-        mev_cl_port = grandine.BEACON_HTTP_PORT_NUM
 
     builder_template_data = new_builder_config_template_data(
         network_params,
