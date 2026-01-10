@@ -356,6 +356,7 @@ SUBCATEGORY_PARAMS = {
         "custom_flood_params",
         "mock_mev_image",
         "launch_adminer",
+        "mev_boost_timing_games_params",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",

@@ -691,6 +691,9 @@ def input_parser(plan, input_args):
             ],
             mock_mev_image=result["mev_params"]["mock_mev_image"],
             launch_adminer=result["mev_params"]["launch_adminer"],
+            mev_boost_timing_games_params=result["mev_params"][
+                "mev_boost_timing_games_params"
+            ],
         )
         if result["mev_params"]
         else None,
@@ -1650,6 +1653,18 @@ def get_default_mev_params(mev_type, preset):
         "mev_relay_website_extra_env_vars": mev_relay_website_extra_env_vars,
         "mev_builder_prometheus_config": mev_builder_prometheus_config,
         "launch_adminer": launch_adminer,
+        "mev_boost_timing_games_params": {
+            "flashbots": {
+                "enable_timing_games": False,
+                "target_first_request_ms": 200,
+                "frequency_get_header_ms": 100,
+            },
+            "helix": {
+                "enable_timing_games": False,
+                "target_first_request_ms": 200,
+                "frequency_get_header_ms": 100,
+            },
+        },
     }
 
 
