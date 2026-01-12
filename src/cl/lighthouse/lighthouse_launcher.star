@@ -321,11 +321,12 @@ def get_beacon_config(
     env_vars = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
     env_vars.update(participant.cl_extra_env_vars)
 
-    # Build the command string, using injected binary if provided
+    # Build the command string, copying injected binary if provided
+    cmd_str = " ".join(cmd)
     if cl_binary_artifact != None:
-        cmd_str = "exec /opt/bin/lighthouse " + " ".join(cmd[1:])
+        cmd_str = "cp /opt/bin/lighthouse /usr/local/bin/lighthouse && exec " + cmd_str
     else:
-        cmd_str = "exec " + " ".join(cmd)
+        cmd_str = "exec " + cmd_str
 
     config_args = {
         "image": participant.cl_image,

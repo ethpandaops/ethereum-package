@@ -308,11 +308,12 @@ def get_config(
             }
         )
 
-    # Build the command string, using injected binary if provided
+    # Build the command string, copying injected binary if provided
+    cmd_str = " ".join(cmd)
     if el_binary_artifact != None:
-        cmd_str = "exec /opt/bin/reth " + " ".join(cmd)
+        cmd_str = "cp /opt/bin/reth /usr/local/bin/reth && exec reth " + cmd_str
     else:
-        cmd_str = "exec reth " + " ".join(cmd)
+        cmd_str = "exec reth " + cmd_str
 
     config_args = {
         "image": image,

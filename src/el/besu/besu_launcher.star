@@ -249,11 +249,23 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if el_binary_artifact != None:
+        files["/opt/bin"] = el_binary_artifact
+
+    # Build the command string, copying injected binary if provided
+    if el_binary_artifact != None:
+        final_cmd_str = (
+            "cp /opt/bin/besu /opt/besu/bin/besu && exec /opt/besu/bin/besu " + cmd_str
+        )
+    else:
+        final_cmd_str = "exec /opt/besu/bin/besu " + cmd_str
+
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": [cmd_str],
+        "cmd": [final_cmd_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

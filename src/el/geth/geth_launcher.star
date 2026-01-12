@@ -281,12 +281,22 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if el_binary_artifact != None:
+        files["/opt/bin"] = el_binary_artifact
+
+    # Build the command string, copying injected binary if provided
+    if el_binary_artifact != None:
+        cmd_str = "cp /opt/bin/geth /usr/local/bin/geth && exec geth " + command_str
+    else:
+        cmd_str = "exec geth " + command_str
+
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": [command_str],
+        "cmd": [cmd_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,

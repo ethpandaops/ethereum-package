@@ -100,29 +100,30 @@ def run(plan, args={}):
             extra_files_artifacts[name] = artifact
 
     # Process binary injection - upload local binaries for participants
-    # Users can specify el_binary_path/cl_binary_path to inject a local binary
-    # The binary will be mounted into the container and executed instead of the default
     # NOTE: Binary injection is only supported with Docker backend
     binary_artifacts = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
-        has_binary_path = participant.el_binary_path or participant.cl_binary_path or participant.vc_binary_path
-        if has_binary_path and detected_backend != "docker":
-            fail("Binary injection (*_binary_path) is only supported with Docker backend, detected: {0}".format(detected_backend))
         participant_binaries = {}
-        if participant.el_binary_path:
-            plan.print("Uploading EL binary for participant {0}: {1}".format(index + 1, participant.el_binary_path))
-            el_binary_artifact = plan.upload_files(
-                src=participant.el_binary_path,
-                name="el-binary-{0}".format(index + 1),
-            )
-            participant_binaries["el"] = el_binary_artifact
-        if participant.cl_binary_path:
-            plan.print("Uploading CL binary for participant {0}: {1}".format(index + 1, participant.cl_binary_path))
-            cl_binary_artifact = plan.upload_files(
-                src=participant.cl_binary_path,
-                name="cl-binary-{0}".format(index + 1),
-            )
-            participant_binaries["cl"] = cl_binary_artifact
+        for bin_type, bin_path in [
+            ("el", participant.el_binary_path),
+            ("cl", participant.cl_binary_path),
+            ("vc", participant.vc_binary_path),
+        ]:
+            if bin_path:
+                if detected_backend != "docker":
+                    fail(
+                        "Binary injection (*_binary_path) is only supported with Docker backend, detected: {0}".format(
+                            detected_backend
+                        )
+                    )
+                plan.print(
+                    "Uploading {0} binary for participant {1}: {2}".format(
+                        bin_type.upper(), index + 1, bin_path
+                    )
+                )
+                participant_binaries[bin_type] = plan.upload_files(
+                    src=bin_path, name="{0}-binary-{1}".format(bin_type, index + 1)
+                )
         if participant_binaries:
             binary_artifacts[index] = participant_binaries
 

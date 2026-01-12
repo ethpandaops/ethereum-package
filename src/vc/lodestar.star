@@ -32,6 +32,7 @@ def get_config(
     port_publisher,
     vc_index,
     extra_files_artifacts,
+    vc_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
@@ -132,15 +133,30 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if vc_binary_artifact != None:
+        files["/opt/bin"] = vc_binary_artifact
+
     env_vars = participant.vc_extra_env_vars
     if network_params.preset == "minimal":
         env_vars["LODESTAR_PRESET"] = "minimal"
+
+    # Build the command string, copying injected binary if provided
+    cmd_str = " ".join(cmd)
+    if vc_binary_artifact != None:
+        cmd_str = (
+            "cp /opt/bin/lodestar /usr/app/packages/cli/bin/lodestar && exec node /usr/app/packages/cli/bin/lodestar "
+            + cmd_str
+        )
+    else:
+        cmd_str = "exec node /usr/app/packages/cli/bin/lodestar " + cmd_str
 
     config_args = {
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": [cmd_str],
         "files": files,
         "env_vars": env_vars,
         "labels": shared_utils.label_maker(

@@ -223,12 +223,27 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if el_binary_artifact != None:
+        files["/opt/bin"] = el_binary_artifact
+
+    # Build the command string, copying injected binary if provided
+    cmd_str = " ".join(cmd)
+    if el_binary_artifact != None:
+        cmd_str = (
+            "cp /opt/bin/nimbus_execution_client /home/user/nimbus-eth1/build/nimbus_execution_client && exec /home/user/nimbus-eth1/build/nimbus_execution_client "
+            + cmd_str
+        )
+    else:
+        cmd_str = "exec /home/user/nimbus-eth1/build/nimbus_execution_client " + cmd_str
+
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "cmd": cmd,
+        "entrypoint": ["sh", "-c"],
+        "cmd": [cmd_str],
         "files": files,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
