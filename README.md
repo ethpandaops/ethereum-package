@@ -197,7 +197,12 @@ participants:
     # When set, the binary will be uploaded and mounted into the container,
     # replacing the default binary from the Docker image
     # Useful for rapid debugging with locally compiled binaries
-    # Example: el_binary_path: "/path/to/reth/target/release/reth"
+    # IMPORTANT: The path must be within the ethereum-package directory
+    # You must create a subdirectory in the cloned repository for your binary files
+    # IMPORTANT: The binary must be compiled on a Linux system with compatible libraries
+    # matching those in the client's Dockerfile to avoid dependency issues
+    # Example: Build reth with `cargo build --release --bin reth --target-dir ../ethereum-package/binaries/.`
+    # Then set: el_binary_path: "./binaries/release/reth"
     el_binary_path: ""
 
     # The log level string that this participant's EL client should log at
@@ -283,7 +288,12 @@ participants:
     # When set, the binary will be uploaded and mounted into the container,
     # replacing the default binary from the Docker image
     # Useful for rapid debugging with locally compiled binaries
-    # Example: cl_binary_path: "/path/to/lighthouse/target/release/lighthouse"
+    # IMPORTANT: The path must be within the ethereum-package directory
+    # You must create a subdirectory in the cloned repository for your binary files
+    # IMPORTANT: The binary must be compiled on a Linux system with compatible libraries
+    # matching those in the client's Dockerfile to avoid dependency issues
+    # Example: Build lighthouse with `cargo build --release --bin lighthouse --target-dir ../ethereum-package/binaries/.`
+    # Then set: cl_binary_path: "./binaries/release/lighthouse"
     cl_binary_path: ""
 
     # The log level string that this participant's CL client should log at
@@ -372,7 +382,12 @@ participants:
     # When set, the binary will be uploaded and mounted into the container,
     # replacing the default binary from the Docker image
     # Useful for rapid debugging with locally compiled binaries
-    # Example: vc_binary_path: "/path/to/lighthouse/target/release/lighthouse"
+    # IMPORTANT: The path must be within the ethereum-package directory
+    # You must create a subdirectory in the cloned repository for your binary files
+    # IMPORTANT: The binary must be compiled on a Linux system with compatible libraries
+    # matching those in the client's Dockerfile to avoid dependency issues
+    # Example: Build lighthouse with `cargo build --release --bin lighthouse --target-dir ../ethereum-package/binaries/.`
+    # Then set: vc_binary_path: "./binaries/release/lighthouse"
     vc_binary_path: ""
 
     # The log level string that this participant's validator client should log at
