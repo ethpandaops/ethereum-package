@@ -50,6 +50,7 @@ def launch_participant_network(
     extra_files_artifacts,
     tempo_otlp_grpc_url,
     backend,
+    binary_artifacts={},
 ):
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
@@ -178,6 +179,7 @@ def launch_participant_network(
         args_with_right_defaults.mev_params,
         extra_files_artifacts,
         bootnodoor_enode,
+        binary_artifacts,
     )
 
     # Launch all consensus layer clients
@@ -218,6 +220,7 @@ def launch_participant_network(
         extra_files_artifacts,
         backend,
         bootnodoor_enr,
+        binary_artifacts,
     )
 
     # Stop beacon nodes for participants with skip_start enabled

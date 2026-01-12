@@ -50,6 +50,7 @@ def launch(
     backend,
     tempo_otlp_grpc_url=None,
     bootnode_enr_override=None,
+    cl_binary_artifact=None,
 ):
     # Launch Beacon node
     beacon_config = get_beacon_config(
@@ -75,6 +76,7 @@ def launch(
         backend,
         tempo_otlp_grpc_url,
         bootnode_enr_override,
+        cl_binary_artifact,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -115,6 +117,7 @@ def get_beacon_config(
     backend,
     tempo_otlp_grpc_url,
     bootnode_enr_override=None,
+    cl_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS

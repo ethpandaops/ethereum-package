@@ -193,6 +193,13 @@ participants:
     # - dummy: ethpandaops/dummy-el:master
     el_image: ""
 
+    # Path to a local EL binary to inject into the container (Docker only)
+    # When set, the binary will be uploaded and mounted into the container,
+    # replacing the default binary from the Docker image
+    # Useful for rapid debugging with locally compiled binaries
+    # Example: el_binary_path: "/path/to/reth/target/release/reth"
+    el_binary_path: ""
+
     # The log level string that this participant's EL client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
     # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
@@ -271,6 +278,13 @@ participants:
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
     cl_image: ""
+
+    # Path to a local CL binary to inject into the container (Docker only)
+    # When set, the binary will be uploaded and mounted into the container,
+    # replacing the default binary from the Docker image
+    # Useful for rapid debugging with locally compiled binaries
+    # Example: cl_binary_path: "/path/to/lighthouse/target/release/lighthouse"
+    cl_binary_path: ""
 
     # The log level string that this participant's CL client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
@@ -353,6 +367,13 @@ participants:
     # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
     vc_image: ""
+
+    # Path to a local VC binary to inject into the container (Docker only)
+    # When set, the binary will be uploaded and mounted into the container,
+    # replacing the default binary from the Docker image
+    # Useful for rapid debugging with locally compiled binaries
+    # Example: vc_binary_path: "/path/to/lighthouse/target/release/lighthouse"
+    vc_binary_path: ""
 
     # The log level string that this participant's validator client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
