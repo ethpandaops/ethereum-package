@@ -682,6 +682,9 @@ def input_parser(plan, input_args):
                 "mev_relay_website_extra_env_vars"
             ],
             mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
+            mev_builder_cl_extra_params=result["mev_params"][
+                "mev_builder_cl_extra_params"
+            ],
             mev_builder_prometheus_config=result["mev_params"][
                 "mev_builder_prometheus_config"
             ],
@@ -1581,6 +1584,7 @@ def get_default_mev_params(mev_type, preset):
     mev_relay_website_extra_args = []
     mev_relay_website_extra_env_vars = {}
     mev_builder_extra_args = []
+    mev_builder_cl_extra_params = []
     launch_adminer = False
     mev_builder_prometheus_config = {
         "scrape_interval": "15s",
@@ -1639,6 +1643,7 @@ def get_default_mev_params(mev_type, preset):
         "mev_builder_cl_image": mev_builder_cl_image,
         "mev_builder_extra_data": mev_builder_extra_data,
         "mev_builder_extra_args": mev_builder_extra_args,
+        "mev_builder_cl_extra_params": mev_builder_cl_extra_params,
         "mev_boost_image": mev_boost_image,
         "mev_boost_args": mev_boost_args,
         "mev_relay_api_extra_args": mev_relay_api_extra_args,
@@ -1954,7 +1959,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "8000",
                     "--disable-peer-scoring",
                     "--supernode",
-                ],
+                ]
+                + parsed_arguments_dict["mev_params"]["mev_builder_cl_extra_params"],
                 "el_extra_params": parsed_arguments_dict["mev_params"][
                     "mev_builder_extra_args"
                 ],
@@ -1980,7 +1986,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                     "--prepare-payload-lookahead",
                     "8000",
                     "--disable-peer-scoring",
-                ],
+                ]
+                + parsed_arguments_dict["mev_params"]["mev_builder_cl_extra_params"],
                 "el_extra_params": parsed_arguments_dict["mev_params"][
                     "mev_builder_extra_args"
                 ],
