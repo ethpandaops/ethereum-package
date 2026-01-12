@@ -323,7 +323,7 @@ def get_beacon_config(
 
     # Build the command string, using injected binary if provided
     if cl_binary_artifact != None:
-        cmd_str = "chmod +x /opt/bin/lighthouse && exec /opt/bin/lighthouse " + " ".join(cmd[1:])
+        cmd_str = "exec /opt/bin/lighthouse " + " ".join(cmd[1:])
     else:
         cmd_str = "exec " + " ".join(cmd)
 

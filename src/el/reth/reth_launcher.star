@@ -310,7 +310,7 @@ def get_config(
 
     # Build the command string, using injected binary if provided
     if el_binary_artifact != None:
-        cmd_str = "chmod +x /opt/bin/reth && exec /opt/bin/reth " + " ".join(cmd)
+        cmd_str = "exec /opt/bin/reth " + " ".join(cmd)
     else:
         cmd_str = "exec reth " + " ".join(cmd)
 
