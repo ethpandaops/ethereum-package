@@ -284,12 +284,10 @@ def get_config(
     # Binary injection - mount custom binary directory if provided
     if el_binary_artifact != None:
         files["/opt/bin"] = el_binary_artifact
-
-    # Build the command string, copying injected binary if provided
-    if el_binary_artifact != None:
-        cmd_str = "cp /opt/bin/geth /usr/local/bin/geth && exec geth " + command_str
+        # Copy injected binary to override default, then run original command
+        cmd_str = "cp /opt/bin/geth /usr/local/bin/geth && " + command_str
     else:
-        cmd_str = "exec geth " + command_str
+        cmd_str = command_str
 
     env_vars = participant.el_extra_env_vars
     config_args = {

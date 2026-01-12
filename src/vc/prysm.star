@@ -139,22 +139,11 @@ def get_config(
     if vc_binary_artifact != None:
         files["/opt/bin"] = vc_binary_artifact
 
-    # Build the command string, copying injected binary if provided
-    cmd_str = " ".join(cmd)
-    if vc_binary_artifact != None:
-        cmd_str = (
-            "cp /opt/bin/validator /app/cmd/validator/validator && exec /app/cmd/validator/validator "
-            + cmd_str
-        )
-    else:
-        cmd_str = "exec /app/cmd/validator/validator " + cmd_str
-
     config_args = {
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
-        "entrypoint": ["sh", "-c"],
-        "cmd": [cmd_str],
+        "cmd": cmd,
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
         "labels": shared_utils.label_maker(
@@ -170,6 +159,14 @@ def get_config(
         "node_selectors": node_selectors,
         "tty_enabled": True,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if vc_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/validator /app/cmd/validator/validator && /app/cmd/validator/validator "
+            + " ".join(cmd)
+        ]
 
     if participant.vc_min_cpu > 0:
         config_args["min_cpu"] = participant.vc_min_cpu

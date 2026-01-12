@@ -141,22 +141,11 @@ def get_config(
     if network_params.preset == "minimal":
         env_vars["LODESTAR_PRESET"] = "minimal"
 
-    # Build the command string, copying injected binary if provided
-    cmd_str = " ".join(cmd)
-    if vc_binary_artifact != None:
-        cmd_str = (
-            "cp /opt/bin/lodestar /usr/app/packages/cli/bin/lodestar && exec node /usr/app/packages/cli/bin/lodestar "
-            + cmd_str
-        )
-    else:
-        cmd_str = "exec node /usr/app/packages/cli/bin/lodestar " + cmd_str
-
     config_args = {
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
-        "entrypoint": ["sh", "-c"],
-        "cmd": [cmd_str],
+        "cmd": cmd,
         "files": files,
         "env_vars": env_vars,
         "labels": shared_utils.label_maker(
@@ -171,6 +160,14 @@ def get_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if vc_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/lodestar /usr/app/packages/cli/bin/lodestar && node /usr/app/packages/cli/bin/lodestar "
+            + " ".join(cmd)
+        ]
 
     if participant.vc_min_cpu > 0:
         config_args["min_cpu"] = participant.vc_min_cpu

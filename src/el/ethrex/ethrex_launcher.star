@@ -237,19 +237,11 @@ def get_config(
     if el_binary_artifact != None:
         files["/opt/bin"] = el_binary_artifact
 
-    # Build the command string, copying injected binary if provided
-    cmd_str = " ".join(cmd)
-    if el_binary_artifact != None:
-        cmd_str = "cp /opt/bin/ethrex /usr/local/bin/ethrex && exec ethrex " + cmd_str
-    else:
-        cmd_str = "exec ethrex " + cmd_str
-
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "entrypoint": ["sh", "-c"],
-        "cmd": [cmd_str],
+        "cmd": cmd,
         "files": files,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": participant.el_extra_env_vars,
@@ -265,6 +257,13 @@ def get_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if el_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/ethrex /usr/local/bin/ethrex && ethrex " + " ".join(cmd)
+        ]
 
     if participant.el_min_cpu > 0:
         config_args["min_cpu"] = participant.el_min_cpu

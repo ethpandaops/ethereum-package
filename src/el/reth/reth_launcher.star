@@ -308,19 +308,11 @@ def get_config(
             }
         )
 
-    # Build the command string, copying injected binary if provided
-    cmd_str = " ".join(cmd)
-    if el_binary_artifact != None:
-        cmd_str = "cp /opt/bin/reth /usr/local/bin/reth && exec reth " + cmd_str
-    else:
-        cmd_str = "exec reth " + cmd_str
-
     config_args = {
         "image": image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "entrypoint": ["sh", "-c"],
-        "cmd": [cmd_str],
+        "cmd": cmd,
         "files": files,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars | participant.el_extra_env_vars,
@@ -336,6 +328,13 @@ def get_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if el_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/reth /usr/local/bin/reth && reth " + " ".join(cmd)
+        ]
 
     if participant.el_min_cpu > 0:
         config_args["min_cpu"] = participant.el_min_cpu

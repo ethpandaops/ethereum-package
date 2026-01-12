@@ -257,18 +257,16 @@ def get_config(
         if el_binary_artifact != None:
             command_arg_str = (
                 init_datadir_cmd_str
-                + " && cp /opt/bin/erigon /usr/local/bin/erigon && exec "
+                + " && cp /opt/bin/erigon /usr/local/bin/erigon && "
                 + cmd_str
             )
         else:
-            command_arg_str = init_datadir_cmd_str + " && exec " + cmd_str
+            command_arg_str = init_datadir_cmd_str + " && " + cmd_str
     else:
         if el_binary_artifact != None:
-            command_arg_str = (
-                "cp /opt/bin/erigon /usr/local/bin/erigon && exec " + cmd_str
-            )
+            command_arg_str = "cp /opt/bin/erigon /usr/local/bin/erigon && " + cmd_str
         else:
-            command_arg_str = "exec " + cmd_str
+            command_arg_str = cmd_str
 
     env_vars = participant.el_extra_env_vars
     config_args = {
