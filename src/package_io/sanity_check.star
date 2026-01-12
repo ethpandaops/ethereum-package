@@ -341,6 +341,7 @@ SUBCATEGORY_PARAMS = {
         "mev_relay_image",
         "mev_builder_image",
         "mev_builder_cl_image",
+        "mev_builder_cl_extra_params",
         "mev_builder_subsidy",
         "mev_boost_image",
         "mev_boost_args",

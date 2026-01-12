@@ -193,6 +193,7 @@ mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
   mev_builder_image: ethpandaops/reth-rbuilder:develop
   mev_builder_cl_image: sigp/lighthouse:latest
+  mev_builder_cl_extra_params: []
   mev_boost_image: ethpandaops/mev-boost:develop
   mev_boost_args: ["mev-boost", "--relay-check"]
   mev_relay_api_extra_args: []
