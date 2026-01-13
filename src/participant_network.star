@@ -50,7 +50,6 @@ def launch_participant_network(
     extra_files_artifacts,
     tempo_otlp_grpc_url,
     backend,
-    binary_artifacts={},
 ):
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
@@ -160,6 +159,42 @@ def launch_participant_network(
         )
         plan.print("Bootnodoor launched with ENR: {0}".format(bootnodoor_enr))
         plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
+
+    # Upload binary artifacts for participants (after genesis, before EL/CL/VC launch)
+    # Only upload when both binary_path and force_restart are enabled
+    # Path prefix needed because this file is in src/ subdirectory
+    binary_artifacts = {}
+    for index, participant in enumerate(args_with_right_defaults.participants):
+        participant_binaries = {}
+        if participant.el_binary_path and participant.el_force_restart:
+            filename = participant.el_binary_path.split("/")[-1]
+            participant_binaries["el"] = struct(
+                artifact=plan.upload_files(
+                    src="../" + participant.el_binary_path,
+                    name="el-binary-{0}".format(index + 1),
+                ),
+                filename=filename,
+            )
+        if participant.cl_binary_path and participant.cl_force_restart:
+            filename = participant.cl_binary_path.split("/")[-1]
+            participant_binaries["cl"] = struct(
+                artifact=plan.upload_files(
+                    src="../" + participant.cl_binary_path,
+                    name="cl-binary-{0}".format(index + 1),
+                ),
+                filename=filename,
+            )
+        if participant.vc_binary_path and participant.vc_force_restart:
+            filename = participant.vc_binary_path.split("/")[-1]
+            participant_binaries["vc"] = struct(
+                artifact=plan.upload_files(
+                    src="../" + participant.vc_binary_path,
+                    name="vc-binary-{0}".format(index + 1),
+                ),
+                filename=filename,
+            )
+        if participant_binaries:
+            binary_artifacts[index] = participant_binaries
 
     # Launch all execution layer clients
     all_el_contexts = el_client_launcher.launch(
@@ -500,9 +535,7 @@ def launch_participant_network(
             remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
         service_name = "vc-{0}".format(full_name)
-        vc_binary_artifact = None
-        if index in binary_artifacts and "vc" in binary_artifacts[index]:
-            vc_binary_artifact = binary_artifacts[index]["vc"]
+        vc_binary_artifact = binary_artifacts.get(index, {}).get("vc", None)
         vc_service_config = vc.get_vc_config(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
@@ -538,13 +571,34 @@ def launch_participant_network(
         vc_service_info[service_name] = {
             "client_name": vc_type,
             "participant_index": index,
+            "participant": participant,
         }
         current_vc_index += 1
 
     # add vc's in parallel to speed package execution
+    # Identify which services need force_update
+    force_restart_service_names = []
+    for service_name in vc_service_configs.keys():
+        participant = vc_service_info[service_name]["participant"]
+        if participant.vc_force_restart == True:
+            force_restart_service_names.append(service_name)
+
+    # Remove force_restart services from batch config
+    regular_configs = {
+        k: v
+        for k, v in vc_service_configs.items()
+        if k not in force_restart_service_names
+    }
+
     vc_services = {}
-    if len(vc_service_configs) > 0:
-        vc_services = plan.add_services(vc_service_configs)
+    if len(regular_configs) > 0:
+        vc_services = plan.add_services(regular_configs)
+
+    # Add force_restart services individually with force_update=True
+    for service_name in force_restart_service_names:
+        vc_services[service_name] = plan.add_service(
+            service_name, vc_service_configs[service_name], force_update=True
+        )
 
     # Create VC contexts ordered by participant index
     vc_contexts_temp = {}

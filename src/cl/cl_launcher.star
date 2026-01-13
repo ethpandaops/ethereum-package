@@ -227,9 +227,7 @@ def launch(
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
-        cl_binary_artifact = None
-        if index in binary_artifacts and "cl" in binary_artifacts[index]:
-            cl_binary_artifact = binary_artifacts[index]["cl"]
+        cl_binary_artifact = binary_artifacts.get(index, {}).get("cl", None)
 
         if index == 0:
             cl_context = launch_method(
@@ -322,16 +320,29 @@ def launch(
             }
 
     # add rest of cl's in parallel to speed package execution
-    cl_services = {}
-    if len(cl_service_configs) > 0:
-        cl_services = plan.add_services(cl_service_configs)
+    # Identify which services need force_update
+    force_restart_service_names = []
+    for service_name in cl_service_configs.keys():
+        participant = cl_participant_info[service_name]["participant"]
+        if participant.cl_force_restart == True:
+            force_restart_service_names.append(service_name)
 
-    # Handle force_restart for lighthouse services by removing and re-adding
-    for service_name in cl_services.keys():
-        info = cl_participant_info[service_name]
-        if info["cl_type"] == constants.CL_TYPE.lighthouse and info["participant"].cl_force_restart:
-            plan.remove_service(service_name)
-            cl_services[service_name] = plan.add_service(service_name, cl_service_configs[service_name])
+    # Remove force_restart services from batch config
+    regular_configs = {
+        k: v
+        for k, v in cl_service_configs.items()
+        if k not in force_restart_service_names
+    }
+
+    cl_services = {}
+    if len(regular_configs) > 0:
+        cl_services = plan.add_services(regular_configs)
+
+    # Add force_restart services individually with force_update=True
+    for service_name in force_restart_service_names:
+        cl_services[service_name] = plan.add_service(
+            service_name, cl_service_configs[service_name], force_update=True
+        )
 
     # Create CL contexts ordered by participant index
     cl_contexts_temp = {}
