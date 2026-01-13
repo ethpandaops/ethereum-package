@@ -271,6 +271,12 @@ participants:
     el_min_mem: 0
     el_max_mem: 0
 
+    # Force container recreation on next run (Docker only)
+    # When set to true, the container will be recreated even if the image tag hasn't changed
+    # Useful when rebuilding Docker images with the same tag or recompiling binaries with the same name
+    # Defaults to false
+    el_force_restart: false
+
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
     # Valid values are nimbus, lighthouse, lodestar, teku, prysm, and grandine
@@ -354,6 +360,12 @@ participants:
     cl_max_cpu: 0
     cl_min_mem: 0
     cl_max_mem: 0
+
+    # Force container recreation on next run (Docker only)
+    # When set to true, the container will be recreated even if the image tag hasn't changed
+    # Useful when rebuilding Docker images with the same tag or recompiling binaries with the same name
+    # Defaults to false
+    cl_force_restart: false
 
     # Whether to act as a supernode for the network
     # Supernodes will subscribe to all subnet topics
@@ -445,6 +457,12 @@ participants:
     vc_max_cpu: 0
     vc_min_mem: 0
     vc_max_mem: 0
+
+    # Force container recreation on next run (Docker only)
+    # When set to true, the container will be recreated even if the image tag hasn't changed
+    # Useful when rebuilding Docker images with the same tag or recompiling binaries with the same name
+    # Defaults to false
+    vc_force_restart: false
 
     # A list of indices of the beacon nodes that the validator client should connect to
     # Defaults to null

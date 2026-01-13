@@ -176,7 +176,6 @@ def launch(
 
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
-        # Get binary artifact for this participant if it exists
         el_binary_artifact = None
         if index in binary_artifacts and "el" in binary_artifacts[index]:
             el_binary_artifact = binary_artifacts[index]["el"]

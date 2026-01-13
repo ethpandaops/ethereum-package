@@ -227,7 +227,6 @@ def launch(
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
-        # Get binary artifact for this participant if it exists
         cl_binary_artifact = None
         if index in binary_artifacts and "cl" in binary_artifacts[index]:
             cl_binary_artifact = binary_artifacts[index]["cl"]
@@ -319,12 +318,20 @@ def launch(
                 "get_cl_context": get_cl_context,
                 "get_blobber_config": get_blobber_config,
                 "participant_index": index,
+                "cl_type": cl_type,
             }
 
     # add rest of cl's in parallel to speed package execution
     cl_services = {}
     if len(cl_service_configs) > 0:
         cl_services = plan.add_services(cl_service_configs)
+
+    # Handle force_restart for lighthouse services by removing and re-adding
+    for service_name in cl_services.keys():
+        info = cl_participant_info[service_name]
+        if info["cl_type"] == constants.CL_TYPE.lighthouse and info["participant"].cl_force_restart:
+            plan.remove_service(service_name)
+            cl_services[service_name] = plan.add_service(service_name, cl_service_configs[service_name])
 
     # Create CL contexts ordered by participant index
     cl_contexts_temp = {}

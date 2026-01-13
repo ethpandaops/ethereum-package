@@ -92,6 +92,10 @@ def launch(
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
 
+    if participant.cl_force_restart:
+        plan.remove_service(beacon_service_name)
+        beacon_service = plan.add_service(beacon_service_name, beacon_config)
+
     cl_context_obj = get_cl_context(
         plan,
         beacon_service_name,
