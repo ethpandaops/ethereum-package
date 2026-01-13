@@ -86,6 +86,9 @@ def run(plan, args={}):
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
 
+    # Detect the backend type early - needed for binary injection validation
+    detected_backend = plan.get_cluster_type()
+
     # Process extra_files - create artifacts from provided content
     extra_files_artifacts = {}
     extra_files = getattr(args_with_right_defaults, "extra_files", {})
@@ -97,6 +100,39 @@ def run(plan, args={}):
             artifact = plan.render_templates(template_data, name + "_artifact")
             extra_files_artifacts[name] = artifact
 
+    # Process binary injection - upload local binaries for participants
+    # NOTE: Binary injection is only supported with Docker backend
+    binary_artifacts = {}
+    for index, participant in enumerate(args_with_right_defaults.participants):
+        participant_binaries = {}
+        for bin_type, bin_path in [
+            ("el", participant.el_binary_path),
+            ("cl", participant.cl_binary_path),
+            ("vc", participant.vc_binary_path),
+        ]:
+            if bin_path:
+                if detected_backend != "docker":
+                    fail(
+                        "Binary injection (*_binary_path) is only supported with Docker backend, detected: {0}".format(
+                            detected_backend
+                        )
+                    )
+                plan.print(
+                    "Uploading {0} binary for participant {1}: {2}".format(
+                        bin_type.upper(), index + 1, bin_path
+                    )
+                )
+                # Extract filename from path and store both artifact and filename
+                filename = bin_path.split("/")[-1]
+                participant_binaries[bin_type] = struct(
+                    artifact=plan.upload_files(
+                        src=bin_path, name="{0}-binary-{1}".format(bin_type, index + 1)
+                    ),
+                    filename=filename,
+                )
+        if participant_binaries:
+            binary_artifacts[index] = participant_binaries
+
     mev_params = args_with_right_defaults.mev_params
     parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
     persistent = args_with_right_defaults.persistent
@@ -107,7 +143,6 @@ def run(plan, args={}):
     apache_port = args_with_right_defaults.apache_port
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
-    detected_backend = plan.get_cluster_type()
 
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (
@@ -256,6 +291,7 @@ def run(plan, args={}):
         extra_files_artifacts,
         tempo_otlp_grpc_url,
         detected_backend,
+        binary_artifacts,
     )
 
     plan.print(
