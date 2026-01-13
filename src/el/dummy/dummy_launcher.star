@@ -154,6 +154,10 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if el_binary_artifact != None:
+        files["/opt/bin"] = el_binary_artifact.artifact
+
     env_vars = participant.el_extra_env_vars
     if "RUST_LOG" not in env_vars:
         env_vars = env_vars | {"RUST_LOG": log_level}
@@ -178,6 +182,16 @@ def get_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if el_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/{0} /usr/local/bin/dummy && dummy ".format(
+                el_binary_artifact.filename
+            )
+            + " ".join(cmd)
+        ]
 
     if participant.el_min_cpu > 0:
         config_args["min_cpu"] = participant.el_min_cpu

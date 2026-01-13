@@ -347,13 +347,15 @@ def get_beacon_config(
 
     # Binary injection - mount custom binary directory if provided
     if cl_binary_artifact != None:
-        files["/opt/bin"] = cl_binary_artifact
+        files["/opt/bin"] = cl_binary_artifact.artifact
 
     cmd_str = " ".join(cmd)
     # Add binary copy prefix if injected
     if cl_binary_artifact != None:
         cmd_str = (
-            "cp /opt/bin/nimbus_beacon_node /home/user/nimbus-eth2/build/nimbus_beacon_node && "
+            "cp /opt/bin/{0} /home/user/nimbus-eth2/build/nimbus_beacon_node && ".format(
+                cl_binary_artifact.filename
+            )
             + cmd_str
         )
     if checkpoint_sync_enabled:

@@ -130,7 +130,7 @@ def get_config(
 
     # Binary injection - mount custom binary directory if provided
     if vc_binary_artifact != None:
-        files["/opt/bin"] = vc_binary_artifact
+        files["/opt/bin"] = vc_binary_artifact.artifact
 
     config_args = {
         "image": image,
@@ -156,7 +156,10 @@ def get_config(
     if vc_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/teku /opt/teku/bin/teku && /opt/teku/bin/teku " + " ".join(cmd)
+            "cp /opt/bin/{0} /opt/teku/bin/teku && /opt/teku/bin/teku ".format(
+                vc_binary_artifact.filename
+            )
+            + " ".join(cmd)
         ]
 
     if participant.vc_min_cpu > 0:

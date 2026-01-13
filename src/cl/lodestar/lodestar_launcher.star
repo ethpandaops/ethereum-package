@@ -291,7 +291,7 @@ def get_beacon_config(
 
     # Binary injection - mount custom binary directory if provided
     if cl_binary_artifact != None:
-        files["/opt/bin"] = cl_binary_artifact
+        files["/opt/bin"] = cl_binary_artifact.artifact
 
     env_vars = participant.cl_extra_env_vars
 
@@ -302,7 +302,10 @@ def get_beacon_config(
     cmd_str = " ".join(cmd)
     if cl_binary_artifact != None:
         cmd_str = (
-            "cp /opt/bin/lodestar /usr/app/packages/cli/bin/lodestar && exec " + cmd_str
+            "cp /opt/bin/{0} /usr/app/packages/cli/bin/lodestar && exec ".format(
+                cl_binary_artifact.filename
+            )
+            + cmd_str
         )
     else:
         cmd_str = "exec " + cmd_str

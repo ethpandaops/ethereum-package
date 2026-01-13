@@ -244,7 +244,7 @@ def get_config(
 
     # Binary injection - mount custom binary directory if provided
     if el_binary_artifact != None:
-        files["/opt/bin"] = el_binary_artifact
+        files["/opt/bin"] = el_binary_artifact.artifact
 
     env_vars = participant.el_extra_env_vars
     config_args = {
@@ -272,7 +272,9 @@ def get_config(
     if el_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/nethermind /nethermind/nethermind && /nethermind/nethermind "
+            "cp /opt/bin/{0} /nethermind/nethermind && /nethermind/nethermind ".format(
+                el_binary_artifact.filename
+            )
             + " ".join(cmd)
         ]
 

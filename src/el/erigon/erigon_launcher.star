@@ -249,7 +249,7 @@ def get_config(
 
     # Binary injection - mount custom binary directory if provided
     if el_binary_artifact != None:
-        files["/opt/bin"] = el_binary_artifact
+        files["/opt/bin"] = el_binary_artifact.artifact
 
     # Build command with optional binary copy
     cmd_str = " ".join(cmd)
@@ -257,14 +257,21 @@ def get_config(
         if el_binary_artifact != None:
             command_arg_str = (
                 init_datadir_cmd_str
-                + " && cp /opt/bin/erigon /usr/local/bin/erigon && "
+                + " && cp /opt/bin/{0} /usr/local/bin/erigon && ".format(
+                    el_binary_artifact.filename
+                )
                 + cmd_str
             )
         else:
             command_arg_str = init_datadir_cmd_str + " && " + cmd_str
     else:
         if el_binary_artifact != None:
-            command_arg_str = "cp /opt/bin/erigon /usr/local/bin/erigon && " + cmd_str
+            command_arg_str = (
+                "cp /opt/bin/{0} /usr/local/bin/erigon && ".format(
+                    el_binary_artifact.filename
+                )
+                + cmd_str
+            )
         else:
             command_arg_str = cmd_str
 

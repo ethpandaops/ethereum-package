@@ -332,12 +332,15 @@ def get_beacon_config(
 
     # Binary injection - mount custom binary directory if provided
     if cl_binary_artifact != None:
-        files["/opt/bin"] = cl_binary_artifact
+        files["/opt/bin"] = cl_binary_artifact.artifact
 
     # Build the command string, copying injected binary if provided
     cmd_str = " ".join(cmd)
     if cl_binary_artifact != None:
-        cmd_str = "cp /opt/bin/beacon-chain /beacon-chain && exec " + cmd_str
+        cmd_str = (
+            "cp /opt/bin/{0} /beacon-chain && exec ".format(cl_binary_artifact.filename)
+            + cmd_str
+        )
     else:
         cmd_str = "exec " + cmd_str
 

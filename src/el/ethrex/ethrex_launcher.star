@@ -235,7 +235,7 @@ def get_config(
 
     # Binary injection - mount custom binary directory if provided
     if el_binary_artifact != None:
-        files["/opt/bin"] = el_binary_artifact
+        files["/opt/bin"] = el_binary_artifact.artifact
 
     config_args = {
         "image": participant.el_image,
@@ -262,7 +262,10 @@ def get_config(
     if el_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/ethrex /usr/local/bin/ethrex && ethrex " + " ".join(cmd)
+            "cp /opt/bin/{0} /usr/local/bin/ethrex && ethrex ".format(
+                el_binary_artifact.filename
+            )
+            + " ".join(cmd)
         ]
 
     if participant.el_min_cpu > 0:

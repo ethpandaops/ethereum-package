@@ -251,9 +251,12 @@ def get_config(
 
     # Binary injection - mount custom binary directory if provided
     if el_binary_artifact != None:
-        files["/opt/bin"] = el_binary_artifact
+        files["/opt/bin"] = el_binary_artifact.artifact
         # Copy injected binary to override default, then run original command
-        final_cmd_str = "cp /opt/bin/besu /opt/besu/bin/besu && " + cmd_str
+        final_cmd_str = (
+            "cp /opt/bin/{0} /opt/besu/bin/besu && ".format(el_binary_artifact.filename)
+            + cmd_str
+        )
     else:
         final_cmd_str = cmd_str
 

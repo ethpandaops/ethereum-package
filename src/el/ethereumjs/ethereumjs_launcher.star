@@ -240,6 +240,10 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if el_binary_artifact != None:
+        files["/opt/bin"] = el_binary_artifact.artifact
+
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,
@@ -262,6 +266,16 @@ def get_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if el_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/{0} /usr/app/packages/client/bin/cli.js && node /usr/app/packages/client/bin/cli.js ".format(
+                el_binary_artifact.filename
+            )
+            + " ".join(cmd)
+        ]
 
     if participant.el_min_cpu > 0:
         config_args["min_cpu"] = participant.el_min_cpu

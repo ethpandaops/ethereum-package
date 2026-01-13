@@ -118,7 +118,7 @@ def get_config(
 
     # Binary injection - mount custom binary directory if provided
     if vc_binary_artifact != None:
-        files["/opt/bin"] = vc_binary_artifact
+        files["/opt/bin"] = vc_binary_artifact.artifact
 
     config_args = {
         "image": image,
@@ -145,7 +145,9 @@ def get_config(
     if vc_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/nimbus_validator_client /usr/bin/nimbus_validator_client && /usr/bin/nimbus_validator_client "
+            "cp /opt/bin/{0} /usr/bin/nimbus_validator_client && /usr/bin/nimbus_validator_client ".format(
+                vc_binary_artifact.filename
+            )
             + " ".join(cmd)
         ]
 

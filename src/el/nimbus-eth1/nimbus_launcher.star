@@ -225,7 +225,7 @@ def get_config(
 
     # Binary injection - mount custom binary directory if provided
     if el_binary_artifact != None:
-        files["/opt/bin"] = el_binary_artifact
+        files["/opt/bin"] = el_binary_artifact.artifact
 
     env_vars = participant.el_extra_env_vars
     config_args = {
@@ -253,7 +253,9 @@ def get_config(
     if el_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/nimbus_execution_client /home/user/nimbus-eth1/build/nimbus_execution_client && /home/user/nimbus-eth1/build/nimbus_execution_client "
+            "cp /opt/bin/{0} /home/user/nimbus-eth1/build/nimbus_execution_client && /home/user/nimbus-eth1/build/nimbus_execution_client ".format(
+                el_binary_artifact.filename
+            )
             + " ".join(cmd)
         ]
 

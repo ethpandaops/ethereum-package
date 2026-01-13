@@ -121,8 +121,13 @@ def run(plan, args={}):
                         bin_type.upper(), index + 1, bin_path
                     )
                 )
-                participant_binaries[bin_type] = plan.upload_files(
-                    src=bin_path, name="{0}-binary-{1}".format(bin_type, index + 1)
+                # Extract filename from path and store both artifact and filename
+                filename = bin_path.split("/")[-1]
+                participant_binaries[bin_type] = struct(
+                    artifact=plan.upload_files(
+                        src=bin_path, name="{0}-binary-{1}".format(bin_type, index + 1)
+                    ),
+                    filename=filename,
                 )
         if participant_binaries:
             binary_artifacts[index] = participant_binaries

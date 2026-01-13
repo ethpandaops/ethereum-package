@@ -273,7 +273,7 @@ def get_config(
     # Binary injection - mount custom binary directory if provided
     # The artifact is a directory, so we mount it and reference the binary inside
     if el_binary_artifact != None:
-        files["/opt/bin"] = el_binary_artifact
+        files["/opt/bin"] = el_binary_artifact.artifact
 
     env_vars = {}
     image = participant.el_image
@@ -333,7 +333,10 @@ def get_config(
     if el_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/reth /usr/local/bin/reth && reth " + " ".join(cmd)
+            "cp /opt/bin/{0} /usr/local/bin/reth && reth ".format(
+                el_binary_artifact.filename
+            )
+            + " ".join(cmd)
         ]
 
     if participant.el_min_cpu > 0:

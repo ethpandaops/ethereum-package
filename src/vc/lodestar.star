@@ -135,7 +135,7 @@ def get_config(
 
     # Binary injection - mount custom binary directory if provided
     if vc_binary_artifact != None:
-        files["/opt/bin"] = vc_binary_artifact
+        files["/opt/bin"] = vc_binary_artifact.artifact
 
     env_vars = participant.vc_extra_env_vars
     if network_params.preset == "minimal":
@@ -165,7 +165,9 @@ def get_config(
     if vc_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/lodestar /usr/app/packages/cli/bin/lodestar && node /usr/app/packages/cli/bin/lodestar "
+            "cp /opt/bin/{0} /usr/app/packages/cli/bin/lodestar && node /usr/app/packages/cli/bin/lodestar ".format(
+                vc_binary_artifact.filename
+            )
             + " ".join(cmd)
         ]
 
