@@ -33,6 +33,7 @@ def launch(
     mev_params,
     extra_files_artifacts={},
     bootnodoor_enode=None,
+    binary_artifacts={},
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -175,6 +176,11 @@ def launch(
 
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
+        # Get binary artifact for this participant if it exists
+        el_binary_artifact = None
+        if index in binary_artifacts and "el" in binary_artifacts[index]:
+            el_binary_artifact = binary_artifacts[index]["el"]
+
         if index == 0:
             el_context = launch_method(
                 plan,
@@ -191,6 +197,7 @@ def launch(
                 network_params,
                 extra_files_artifacts,
                 bootnodoor_enode,
+                el_binary_artifact,
             )
 
             # Add participant el additional prometheus metrics
@@ -216,6 +223,7 @@ def launch(
                 network_params,
                 extra_files_artifacts,
                 bootnodoor_enode,
+                el_binary_artifact,
             )
 
             el_participant_info[el_service_name] = {
