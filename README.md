@@ -938,6 +938,7 @@ additional_services:
   - dora
   - dugtrio
   - erpc
+  - ews
   - forkmon
   - forky
   - full_beaconchain_explorer
@@ -1037,6 +1038,20 @@ bootnodoor_params:
   max_mem: 512
   # A list of optional extra args the bootnodoor container should spin up with
   extra_args: []
+
+# Configuration place for execution-witness-sentry (ews) - https://github.com/eth-act/zkboost
+ews_params:
+  # EWS docker image to use
+  # Defaults to the latest image
+  image: "ghcr.io/eth-act/zkboost/execution-witness-sentry:latest"
+  # Number of execution witnesses to retain
+  # Defaults to 10
+  retain: 10
+  # Number of proofs to generate
+  # Defaults to 1
+  num_proofs: 1
+  # A list of optional extra env_vars the ews container should spin up with
+  env: {}
 
 # Configuration place for tempo tracing backend
 tempo_params:

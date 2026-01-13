@@ -61,6 +61,7 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
+ews = import_module("./src/ews/ews_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -926,6 +927,23 @@ def run(plan, args={}):
                 index,
                 osaka_time,
             )
+        elif additional_service == "ews":
+            plan.print("Launching execution-witness-sentry")
+            ews_config_template = read_file(static_files.EWS_CONFIG_TEMPLATE_FILEPATH)
+            ews.launch_ews(
+                plan,
+                ews_config_template,
+                all_participants,
+                args_with_right_defaults.participants,
+                network_params,
+                args_with_right_defaults.ews_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched execution-witness-sentry")
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:

@@ -58,6 +58,11 @@ def launch_dora(
             )
         )
 
+        # Skip dummy EL clients - they don't have real execution endpoints
+        el_type = participant_configs[index].el_type
+        if el_type == "dummy":
+            continue
+
         snooper_el_engine_context = participant_contexts[
             index
         ].snooper_el_engine_context
@@ -196,9 +201,13 @@ def get_config(
 def new_config_template_data(
     network, listen_port_num, cl_client_info, el_client_info, mev_endpoint_info
 ):
+    public_rpc = ""
+    if len(el_client_info) > 0:
+        public_rpc = el_client_info[0]["Execution_HTTP_URL"]
+
     return {
         "Network": network,
-        "PublicRPC": el_client_info[0]["Execution_HTTP_URL"],
+        "PublicRPC": public_rpc,
         "ListenPortNum": listen_port_num,
         "CLClientInfo": cl_client_info,
         "ELClientInfo": el_client_info,
