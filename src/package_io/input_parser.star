@@ -457,6 +457,14 @@ def input_parser(plan, input_args):
             )
 
     if (
+        "bootnodoor" not in result["additional_services"]
+        and result["participants"][0]["el_type"] == "dummy"
+    ):
+        fail(
+            "First participant cannot use dummy EL without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
+        )
+
+    if (
         "mempool_bridge" in result["additional_services"]
         and result["network_params"]["network"] not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in result["network_params"]["network"]
