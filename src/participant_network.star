@@ -160,39 +160,23 @@ def launch_participant_network(
         plan.print("Bootnodoor launched with ENR: {0}".format(bootnodoor_enr))
         plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
 
-    # Upload binary artifacts for participants (after genesis, before EL/CL/VC launch)
-    # Only upload when both binary_path and force_restart are enabled
-    # Path prefix needed because this file is in src/ subdirectory
+    # Upload binary artifacts when both binary_path and force_restart are enabled
     binary_artifacts = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
         participant_binaries = {}
-        if participant.el_binary_path and participant.el_force_restart:
-            filename = participant.el_binary_path.split("/")[-1]
-            participant_binaries["el"] = struct(
-                artifact=plan.upload_files(
-                    src="../" + participant.el_binary_path,
-                    name="el-binary-{0}".format(index + 1),
-                ),
-                filename=filename,
-            )
-        if participant.cl_binary_path and participant.cl_force_restart:
-            filename = participant.cl_binary_path.split("/")[-1]
-            participant_binaries["cl"] = struct(
-                artifact=plan.upload_files(
-                    src="../" + participant.cl_binary_path,
-                    name="cl-binary-{0}".format(index + 1),
-                ),
-                filename=filename,
-            )
-        if participant.vc_binary_path and participant.vc_force_restart:
-            filename = participant.vc_binary_path.split("/")[-1]
-            participant_binaries["vc"] = struct(
-                artifact=plan.upload_files(
-                    src="../" + participant.vc_binary_path,
-                    name="vc-binary-{0}".format(index + 1),
-                ),
-                filename=filename,
-            )
+        for bin_type, bin_path, force_restart in [
+            ("el", participant.el_binary_path, participant.el_force_restart),
+            ("cl", participant.cl_binary_path, participant.cl_force_restart),
+            ("vc", participant.vc_binary_path, participant.vc_force_restart),
+        ]:
+            if bin_path and force_restart:
+                participant_binaries[bin_type] = struct(
+                    artifact=plan.upload_files(
+                        src="../" + bin_path,
+                        name="{0}-binary-{1}".format(bin_type, index + 1),
+                    ),
+                    filename=bin_path.split("/")[-1],
+                )
         if participant_binaries:
             binary_artifacts[index] = participant_binaries
 
@@ -576,29 +560,9 @@ def launch_participant_network(
         current_vc_index += 1
 
     # add vc's in parallel to speed package execution
-    # Identify which services need force_update
-    force_restart_service_names = []
-    for service_name in vc_service_configs.keys():
-        participant = vc_service_info[service_name]["participant"]
-        if participant.vc_force_restart == True:
-            force_restart_service_names.append(service_name)
-
-    # Remove force_restart services from batch config
-    regular_configs = {
-        k: v
-        for k, v in vc_service_configs.items()
-        if k not in force_restart_service_names
-    }
-
-    vc_services = {}
-    if len(regular_configs) > 0:
-        vc_services = plan.add_services(regular_configs)
-
-    # Add force_restart services individually with force_update=True
-    for service_name in force_restart_service_names:
-        vc_services[service_name] = plan.add_service(
-            service_name, vc_service_configs[service_name], force_update=True
-        )
+    vc_services = shared_utils.add_services_with_force_restart(
+        plan, vc_service_configs, vc_service_info, "vc_force_restart"
+    )
 
     # Create VC contexts ordered by participant index
     vc_contexts_temp = {}

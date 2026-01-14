@@ -197,6 +197,7 @@ participants:
     # When set, the binary will be uploaded and mounted into the container,
     # replacing the default binary from the Docker image
     # Useful for rapid debugging with locally compiled binaries
+    # IMPORTANT: el_force_restart must be set to true when using this option
     # IMPORTANT: The binary file must live inside the ethereum-package directory
     # Build the client in its own repo, then copy ONLY the binary to ethereum-package
     # Do not run builds inside ethereum-package or copy build dependencies - only the final binary
@@ -296,6 +297,7 @@ participants:
     # When set, the binary will be uploaded and mounted into the container,
     # replacing the default binary from the Docker image
     # Useful for rapid debugging with locally compiled binaries
+    # IMPORTANT: cl_force_restart must be set to true when using this option
     # IMPORTANT: The binary file must live inside the ethereum-package directory
     # Build the client in its own repo, then copy ONLY the binary to ethereum-package
     # Do not run builds inside ethereum-package or copy build dependencies - only the final binary
@@ -398,6 +400,7 @@ participants:
     # When set, the binary will be uploaded and mounted into the container,
     # replacing the default binary from the Docker image
     # Useful for rapid debugging with locally compiled binaries
+    # IMPORTANT: vc_force_restart must be set to true when using this option
     # IMPORTANT: The binary file must live inside the ethereum-package directory
     # Build the client in its own repo, then copy ONLY the binary to ethereum-package
     # Do not run builds inside ethereum-package or copy build dependencies - only the final binary

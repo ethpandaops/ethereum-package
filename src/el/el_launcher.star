@@ -230,29 +230,9 @@ def launch(
             }
 
     # add remainder of el's in parallel to speed package execution
-    # Identify which services need force_update
-    force_restart_service_names = []
-    for service_name in el_service_configs.keys():
-        participant = el_participant_info[service_name]["participant"]
-        if participant.el_force_restart == True:
-            force_restart_service_names.append(service_name)
-
-    # Remove force_restart services from batch config
-    regular_configs = {
-        k: v
-        for k, v in el_service_configs.items()
-        if k not in force_restart_service_names
-    }
-
-    el_services = {}
-    if len(regular_configs) > 0:
-        el_services = plan.add_services(regular_configs)
-
-    # Add force_restart services individually with force_update=True
-    for service_name in force_restart_service_names:
-        el_services[service_name] = plan.add_service(
-            service_name, el_service_configs[service_name], force_update=True
-        )
+    el_services = shared_utils.add_services_with_force_restart(
+        plan, el_service_configs, el_participant_info, "el_force_restart"
+    )
 
     # Create contexts ordered by participant index
     el_contexts_temp = {}

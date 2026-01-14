@@ -320,29 +320,9 @@ def launch(
             }
 
     # add rest of cl's in parallel to speed package execution
-    # Identify which services need force_update
-    force_restart_service_names = []
-    for service_name in cl_service_configs.keys():
-        participant = cl_participant_info[service_name]["participant"]
-        if participant.cl_force_restart == True:
-            force_restart_service_names.append(service_name)
-
-    # Remove force_restart services from batch config
-    regular_configs = {
-        k: v
-        for k, v in cl_service_configs.items()
-        if k not in force_restart_service_names
-    }
-
-    cl_services = {}
-    if len(regular_configs) > 0:
-        cl_services = plan.add_services(regular_configs)
-
-    # Add force_restart services individually with force_update=True
-    for service_name in force_restart_service_names:
-        cl_services[service_name] = plan.add_service(
-            service_name, cl_service_configs[service_name], force_update=True
-        )
+    cl_services = shared_utils.add_services_with_force_restart(
+        plan, cl_service_configs, cl_participant_info, "cl_force_restart"
+    )
 
     # Create CL contexts ordered by participant index
     cl_contexts_temp = {}
