@@ -193,6 +193,20 @@ participants:
     # - dummy: ethpandaops/dummy-el:master
     el_image: ""
 
+    # Path to a local EL binary to inject into the container (Docker only)
+    # When set, the binary will be uploaded and mounted into the container,
+    # replacing the default binary from the Docker image
+    # Useful for rapid debugging with locally compiled binaries
+    # IMPORTANT: The binary file must live inside the ethereum-package directory
+    # Build the client in its own repo, then copy ONLY the binary to ethereum-package
+    # Do not run builds inside ethereum-package or copy build dependencies - only the final binary
+    # IMPORTANT: The binary must be compiled on a Linux system with compatible libraries
+    # matching those in the client's Dockerfile to avoid dependency issues
+    # Example workflow (from reth repo):
+    #   cargo build --release --bin reth && cp target/release/reth ../ethereum-package/binaries/
+    # Then set: el_binary_path: "./binaries/reth"
+    el_binary_path: ""
+
     # The log level string that this participant's EL client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
     # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
@@ -271,6 +285,20 @@ participants:
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
     cl_image: ""
+
+    # Path to a local CL binary to inject into the container (Docker only)
+    # When set, the binary will be uploaded and mounted into the container,
+    # replacing the default binary from the Docker image
+    # Useful for rapid debugging with locally compiled binaries
+    # IMPORTANT: The binary file must live inside the ethereum-package directory
+    # Build the client in its own repo, then copy ONLY the binary to ethereum-package
+    # Do not run builds inside ethereum-package or copy build dependencies - only the final binary
+    # IMPORTANT: The binary must be compiled on a Linux system with compatible libraries
+    # matching those in the client's Dockerfile to avoid dependency issues
+    # Example workflow (from lighthouse repo):
+    #   cargo build --release --bin lighthouse && cp target/release/lighthouse ../ethereum-package/binaries/
+    # Then set: cl_binary_path: "./binaries/lighthouse"
+    cl_binary_path: ""
 
     # The log level string that this participant's CL client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
@@ -353,6 +381,20 @@ participants:
     # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
     vc_image: ""
+
+    # Path to a local VC binary to inject into the container (Docker only)
+    # When set, the binary will be uploaded and mounted into the container,
+    # replacing the default binary from the Docker image
+    # Useful for rapid debugging with locally compiled binaries
+    # IMPORTANT: The binary file must live inside the ethereum-package directory
+    # Build the client in its own repo, then copy ONLY the binary to ethereum-package
+    # Do not run builds inside ethereum-package or copy build dependencies - only the final binary
+    # IMPORTANT: The binary must be compiled on a Linux system with compatible libraries
+    # matching those in the client's Dockerfile to avoid dependency issues
+    # Example workflow (from lighthouse repo):
+    #   cargo build --release --bin lighthouse && cp target/release/lighthouse ../ethereum-package/binaries/
+    # Then set: vc_binary_path: "./binaries/lighthouse"
+    vc_binary_path: ""
 
     # The log level string that this participant's validator client should log at
     # If this is emptystring then the global `logLevel` parameter's value will be translated into a string appropriate for the client (e.g. if
@@ -896,6 +938,7 @@ additional_services:
   - dora
   - dugtrio
   - erpc
+  - ews
   - forkmon
   - forky
   - full_beaconchain_explorer
@@ -995,6 +1038,20 @@ bootnodoor_params:
   max_mem: 512
   # A list of optional extra args the bootnodoor container should spin up with
   extra_args: []
+
+# Configuration place for execution-witness-sentry (ews) - https://github.com/eth-act/zkboost
+ews_params:
+  # EWS docker image to use
+  # Defaults to the latest image
+  image: "ghcr.io/eth-act/zkboost/execution-witness-sentry:latest"
+  # Number of execution witnesses to retain
+  # Defaults to 10
+  retain: 10
+  # Number of proofs to generate
+  # Defaults to 1
+  num_proofs: 1
+  # A list of optional extra env_vars the ews container should spin up with
+  env: {}
 
 # Configuration place for tempo tracing backend
 tempo_params:
@@ -1188,6 +1245,8 @@ mev_params:
   mev_builder_image: ethpandaops/reth-rbuilder:develop
   # The image to use for the CL builder
   mev_builder_cl_image: sigp/lighthouse:latest
+  # Extra parameters to send to the CL builder
+  mev_builder_cl_extra_params: []
   # The subsidy to use for the builder (in ETH)
   mev_builder_subsidy: 0
   # The image to use for mev-boost

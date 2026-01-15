@@ -60,6 +60,7 @@ def launch(
     network_params,
     extra_files_artifacts,
     bootnodoor_enode=None,
+    el_binary_artifact=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -79,6 +80,7 @@ def launch(
         network_params,
         extra_files_artifacts,
         bootnodoor_enode,
+        el_binary_artifact,
     )
 
     service = plan.add_service(service_name, config)
@@ -107,6 +109,7 @@ def get_config(
     network_params,
     extra_files_artifacts,
     bootnodoor_enode=None,
+    el_binary_artifact=None,
 ):
     public_ports = {}
     public_ports_for_component = None
@@ -230,6 +233,10 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if el_binary_artifact != None:
+        files["/opt/bin"] = el_binary_artifact.artifact
+
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
@@ -250,6 +257,16 @@ def get_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if el_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/{0} /usr/local/bin/ethrex && ethrex ".format(
+                el_binary_artifact.filename
+            )
+            + " ".join(cmd)
+        ]
 
     if participant.el_min_cpu > 0:
         config_args["min_cpu"] = participant.el_min_cpu

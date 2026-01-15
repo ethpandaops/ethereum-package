@@ -2,6 +2,7 @@ PARTICIPANT_CATEGORIES = {
     "participants": [
         "el_type",
         "el_image",
+        "el_binary_path",
         "el_log_level",
         "el_storage_type",
         "el_extra_env_vars",
@@ -17,6 +18,7 @@ PARTICIPANT_CATEGORIES = {
         "el_max_mem",
         "cl_type",
         "cl_image",
+        "cl_binary_path",
         "cl_log_level",
         "cl_extra_env_vars",
         "cl_extra_labels",
@@ -33,6 +35,7 @@ PARTICIPANT_CATEGORIES = {
         "use_separate_vc",
         "vc_type",
         "vc_image",
+        "vc_binary_path",
         "vc_log_level",
         "vc_extra_env_vars",
         "vc_extra_labels",
@@ -79,6 +82,7 @@ PARTICIPANT_MATRIX_PARAMS = {
         "el": [
             "el_type",
             "el_image",
+            "el_binary_path",
             "el_log_level",
             "el_storage_type",
             "el_extra_env_vars",
@@ -96,6 +100,7 @@ PARTICIPANT_MATRIX_PARAMS = {
         "cl": [
             "cl_type",
             "cl_image",
+            "cl_binary_path",
             "cl_log_level",
             "cl_extra_env_vars",
             "cl_extra_labels",
@@ -111,6 +116,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "use_separate_vc",
             "vc_type",
             "vc_image",
+            "vc_binary_path",
             "vc_log_level",
             "vc_extra_env_vars",
             "vc_extra_labels",
@@ -130,6 +136,7 @@ PARTICIPANT_MATRIX_PARAMS = {
         "vc": [
             "vc_type",
             "vc_image",
+            "vc_binary_path",
             "vc_log_level",
             "vc_extra_env_vars",
             "vc_extra_labels",
@@ -341,6 +348,7 @@ SUBCATEGORY_PARAMS = {
         "mev_relay_image",
         "mev_builder_image",
         "mev_builder_cl_image",
+        "mev_builder_cl_extra_params",
         "mev_builder_subsidy",
         "mev_boost_image",
         "mev_boost_args",
@@ -395,6 +403,12 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "extra_args",
     ],
+    "ews_params": [
+        "image",
+        "retain",
+        "num_proofs",
+        "env",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -422,6 +436,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "tracoor",
     "mempool_bridge",
     "spamoor",
+    "ews",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

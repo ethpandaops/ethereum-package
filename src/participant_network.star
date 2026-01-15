@@ -50,6 +50,7 @@ def launch_participant_network(
     extra_files_artifacts,
     tempo_otlp_grpc_url,
     backend,
+    binary_artifacts={},
 ):
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
@@ -178,6 +179,7 @@ def launch_participant_network(
         args_with_right_defaults.mev_params,
         extra_files_artifacts,
         bootnodoor_enode,
+        binary_artifacts,
     )
 
     # Launch all consensus layer clients
@@ -218,6 +220,7 @@ def launch_participant_network(
         extra_files_artifacts,
         backend,
         bootnodoor_enr,
+        binary_artifacts,
     )
 
     # Stop beacon nodes for participants with skip_start enabled
@@ -497,6 +500,9 @@ def launch_participant_network(
             remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
         service_name = "vc-{0}".format(full_name)
+        vc_binary_artifact = None
+        if index in binary_artifacts and "vc" in binary_artifacts[index]:
+            vc_binary_artifact = binary_artifacts[index]["vc"]
         vc_service_config = vc.get_vc_config(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
@@ -523,6 +529,7 @@ def launch_participant_network(
             vc_index=current_vc_index,
             extra_files_artifacts=extra_files_artifacts,
             tempo_otlp_grpc_url=tempo_otlp_grpc_url,
+            vc_binary_artifact=vc_binary_artifact,
         )
         if vc_service_config == None:
             continue

@@ -36,6 +36,7 @@ def launch(
     extra_files_artifacts,
     backend,
     bootnodoor_enr=None,
+    binary_artifacts={},
 ):
     plan.print("Launching CL network")
 
@@ -225,6 +226,12 @@ def launch(
 
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
+
+        # Get binary artifact for this participant if it exists
+        cl_binary_artifact = None
+        if index in binary_artifacts and "cl" in binary_artifacts[index]:
+            cl_binary_artifact = binary_artifacts[index]["cl"]
+
         if index == 0:
             cl_context = launch_method(
                 plan,
@@ -249,6 +256,7 @@ def launch(
                 backend,
                 tempo_otlp_grpc_url,
                 bootnode_enr_override,
+                cl_binary_artifact,
             )
 
             blobber_config = get_blobber_config(
@@ -300,6 +308,7 @@ def launch(
                 backend,
                 tempo_otlp_grpc_url,
                 bootnode_enr_override,
+                cl_binary_artifact,
             )
 
             cl_participant_info[cl_service_name] = {
