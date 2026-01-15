@@ -175,11 +175,7 @@ def launch(
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
-
-        # Get binary artifact for this participant if it exists
-        el_binary_artifact = None
-        if index in binary_artifacts and "el" in binary_artifacts[index]:
-            el_binary_artifact = binary_artifacts[index]["el"]
+        el_binary_artifact = binary_artifacts.get(index, {}).get("el", None)
 
         if index == 0:
             el_context = launch_method(
@@ -234,9 +230,9 @@ def launch(
             }
 
     # add remainder of el's in parallel to speed package execution
-    el_services = {}
-    if len(el_service_configs) > 0:
-        el_services = plan.add_services(el_service_configs)
+    el_services = shared_utils.add_services_with_force_restart(
+        plan, el_service_configs, el_participant_info, "el_force_restart"
+    )
 
     # Create contexts ordered by participant index
     el_contexts_temp = {}
