@@ -1,5 +1,23 @@
 # Changelog
 
+## [6.1.0](https://github.com/ethpandaops/ethereum-package/compare/6.0.0...6.1.0) (2026-01-15)
+
+
+### Features
+
+* Add Besu and Teku grafana dashboards ([#1281](https://github.com/ethpandaops/ethereum-package/issues/1281)) ([7a3cc83](https://github.com/ethpandaops/ethereum-package/commit/7a3cc83c6a5de4a49eaa7b3e66d4ca936ad240f7))
+* add custom binary execution functionality ([#1287](https://github.com/ethpandaops/ethereum-package/issues/1287)) ([68f9c19](https://github.com/ethpandaops/ethereum-package/commit/68f9c19ddb7c65cdefba260aa4f33cf080978f87))
+* add ews (execution witness sentry) ([#1285](https://github.com/ethpandaops/ethereum-package/issues/1285)) ([5593889](https://github.com/ethpandaops/ethereum-package/commit/559388991071d3cb8b665a131dc3b97d2e44b974))
+* add force_restart - to be able to replace images/binaries without killing enclave ([#1289](https://github.com/ethpandaops/ethereum-package/issues/1289)) ([e243677](https://github.com/ethpandaops/ethereum-package/commit/e243677d68affc719ca596664119d860cab8e856))
+* add mev-builder-cl-extra-params ([#1284](https://github.com/ethpandaops/ethereum-package/issues/1284)) ([c7027e8](https://github.com/ethpandaops/ethereum-package/commit/c7027e863fb60c218d9d00d24e4061c5aabd1882))
+* enable dora execution indexer ([#1282](https://github.com/ethpandaops/ethereum-package/issues/1282)) ([5c8fd38](https://github.com/ethpandaops/ethereum-package/commit/5c8fd3867d8536047c972561f28a79ccbd73e12e))
+
+
+### Bug Fixes
+
+* fail if dummy first error handling ([#1290](https://github.com/ethpandaops/ethereum-package/issues/1290)) ([8803a15](https://github.com/ethpandaops/ethereum-package/commit/8803a1598745e5195c66737c8670b52ef93adaf9))
+* grafana dashboard data source ([#1291](https://github.com/ethpandaops/ethereum-package/issues/1291)) ([6b605f1](https://github.com/ethpandaops/ethereum-package/commit/6b605f15c6389cbd53f280fb4ffac03559eee181))
+
 ## [6.0.0](https://github.com/ethpandaops/ethereum-package/compare/5.0.1...6.0.0) (2026-01-05)
 
 
