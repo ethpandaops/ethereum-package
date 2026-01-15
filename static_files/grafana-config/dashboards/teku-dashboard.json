@@ -151,7 +151,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of blocks published",
       "fieldConfig": {
@@ -206,7 +206,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "expr": "sum(validator_beacon_node_requests_total{instance=~\"$system\",method=\"publish_block\",outcome=\"success\"})",
           "instant": true,
@@ -221,7 +221,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of attestations published",
       "fieldConfig": {
@@ -276,7 +276,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "expr": "sum(validator_beacon_node_requests_total{instance=~\"$system\",method=\"publish_attestation\",outcome=\"success\"})",
           "instant": true,
@@ -291,7 +291,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of local validators",
       "fieldConfig": {
@@ -416,7 +416,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": false,
           "expr": "sort_desc(sum by (status) (validator_local_validator_counts{instance=~\"$system\"}))",
@@ -432,7 +432,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "The total amount of staked Eth by all validators running on this validator node.",
       "fieldConfig": {
@@ -489,7 +489,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "expr": "sum by (withdrawal_credentials_type) (validator_local_validator_balances{instance=~\"$system\"} / 10^9)",
@@ -505,7 +505,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Total amount of Eth staked by local validators.",
       "fieldConfig": {
@@ -558,7 +558,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "expr": "sum(validator_local_validator_balances{instance=~\"$system\"}) / 10^9",
@@ -574,7 +574,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "fieldConfig": {
         "defaults": {
@@ -671,7 +671,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": false,
           "expr": "sum by (version) (beacon_teku_version_total{instance=~\"$system\"} or validator_teku_version_total{instance=~\"$system\"})",
@@ -688,7 +688,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of sync committee messages published.",
       "fieldConfig": {
@@ -743,7 +743,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "sum(validator_beacon_node_requests_total{instance=~\"$system\",method=\"send_sync_committee_messages\",outcome=\"success\"})",
@@ -759,7 +759,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of aggregates published",
       "fieldConfig": {
@@ -814,7 +814,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "expr": "sum(validator_beacon_node_requests_total{instance=~\"$system\",method=\"publish_aggregate_and_proofs\",outcome=\"success\"})",
           "instant": true,
@@ -829,7 +829,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Total number of active validators in the network.",
       "fieldConfig": {
@@ -882,7 +882,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "expr": "max(beacon_current_active_validators{instance=~\"$system\"})",
           "instant": true,
@@ -897,7 +897,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Percentage of attestations in each epoch with the correct head root, correct target root and that were successfully included in blocks.",
       "fieldConfig": {
@@ -986,7 +986,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "clamp_max(avg((validator_performance_included_attestations{instance=~\"$system\"} / validator_performance_expected_attestations{instance=~\"$system\"}) >= 0), 1)",
@@ -997,7 +997,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "clamp_max(avg((validator_performance_correct_head_block_count{instance=~\"$system\"} / validator_performance_included_attestations{instance=~\"$system\"}) >= 0), 1)",
@@ -1008,7 +1008,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "avg((validator_performance_correct_target_count{instance=~\"$system\"} / validator_performance_included_attestations{instance=~\"$system\"}) >= 0)",
@@ -1019,7 +1019,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "clamp_max(avg(\n((\nvalidator_performance_correct_head_block_count{instance=~\"$system\"} - (validator_performance_expected_attestations{instance=~\"$system\"} - validator_performance_correct_head_block_count{instance=~\"$system\"}) +\nvalidator_performance_correct_target_count{instance=~\"$system\"} - (validator_performance_expected_attestations{instance=~\"$system\"} - validator_performance_correct_target_count{instance=~\"$system\"}) +\nvalidator_performance_included_attestations{instance=~\"$system\"} - (validator_performance_expected_attestations{instance=~\"$system\"} - validator_performance_included_attestations{instance=~\"$system\"}) +\n(0.875  * validator_performance_included_attestations{instance=~\"$system\"} / validator_performance_inclusion_distance_average{instance=~\"$system\"})\n) / validator_performance_expected_attestations{instance=~\"$system\"} / 3.875)>=0), 1)",
@@ -1030,7 +1030,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "clamp_max(avg((validator_performance_included_sync_committee_messages{instance=~\"$system\"} / validator_performance_expected_sync_committee_messages{instance=~\"$system\"}) >= 0), 1)",
@@ -1042,7 +1042,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "clamp_max(avg((validator_performance_produced_sync_committee_messages{instance=~\"$system\"} / validator_performance_expected_sync_committee_messages{instance=~\"$system\"}) >= 0), 1)",
@@ -1054,7 +1054,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "clamp_max(avg((validator_performance_correct_sync_committee_messages{instance=~\"$system\"} / validator_performance_produced_sync_committee_messages{instance=~\"$system\"}) >= 0), 1)",
@@ -1066,7 +1066,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1084,7 +1084,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of slots between when an attestation is created to when it is included in a block. The minimum possible inclusion distance is 1.",
       "fieldConfig": {
@@ -1172,7 +1172,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "expr": "validator_performance_inclusion_distance_min{instance=~\"$system\"}",
           "interval": "",
@@ -1182,7 +1182,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "expr": "validator_performance_inclusion_distance_average{instance=~\"$system\"}",
           "interval": "",
@@ -1192,7 +1192,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "expr": "validator_performance_inclusion_distance_max{instance=~\"$system\"}",
           "interval": "",
@@ -1206,7 +1206,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Percentage of blocks produced in each epoch that were successfully included in the canonical chain.",
       "fieldConfig": {
@@ -1295,7 +1295,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "validator_performance_included_blocks{instance=~\"$system\"} / validator_performance_expected_blocks{instance=~\"$system\"}",
@@ -1310,7 +1310,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Percentage of attestations in each epoch with the correct head root, correct target root and that were successfully included in blocks.",
       "fieldConfig": {
@@ -1399,7 +1399,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "clamp_max((validator_performance_included_attestations{instance=~\"$system\"} / validator_performance_expected_attestations{instance=~\"$system\"} >= 0), 1)",
@@ -1414,7 +1414,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Percentage of attestations in each epoch with the correct head root, correct target root and that were successfully included in blocks.",
       "fieldConfig": {
@@ -1506,7 +1506,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -1533,7 +1533,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1750,7 +1750,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (rate(validator_attestation_publication_delay{instance=~\"$system\"}[5m])) or sum by (interval) (rate(validator_attestation_publication_delay_total{instance=~\"$system\"}[5m]))",
@@ -1766,7 +1766,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -1996,7 +1996,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (rate(validator_block_publication_delay{instance=~\"$system\"}[$__range])) or sum by (interval) (rate(validator_block_publication_delay_total{instance=~\"$system\"}[$__range]))",
@@ -2012,7 +2012,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -2220,7 +2220,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (increase(validator_attestation_publication_delay{instance=~\"$system\"}[$__range])) or sum by (interval) (increase(validator_attestation_publication_delay_total{instance=~\"$system\"}[$__range]))",
@@ -2235,7 +2235,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -2443,7 +2443,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (increase(validator_block_publication_delay{instance=~\"$system\"}[$__range])) or sum by (interval) (increase(validator_block_publication_delay_total{instance=~\"$system\"}[$__range]))",
@@ -2475,7 +2475,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Current slot according to system time",
       "fieldConfig": {
@@ -2526,7 +2526,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": false,
           "expr": "max by (network) (beacon_slot{instance=~\"$system\"})",
@@ -2542,7 +2542,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Slot of the latest imported block",
       "fieldConfig": {
@@ -2593,7 +2593,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -2610,7 +2610,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Current justified epoch",
       "fieldConfig": {
@@ -2661,7 +2661,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": false,
           "expr": "max by (network) (beacon_current_justified_epoch{instance=~\"$system\"})",
@@ -2677,7 +2677,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Current finalized epoch",
       "fieldConfig": {
@@ -2728,7 +2728,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": false,
           "expr": "max by (network) (beacon_finalized_epoch{instance=~\"$system\"})",
@@ -2744,7 +2744,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Total number of peers connected to the selected nodes.\n\nInbound shows the number of connections initiated by remote peers.\n\nOutbound shows the number of connections initiated by the local node.\n\nA low number of inbound connections could indicate an issue with the network configuration (e.g. ports not open).",
       "fieldConfig": {
@@ -2866,7 +2866,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -2880,7 +2880,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "expr": "beacon_peer_count{instance=~\"$system\",direction=\"inbound\"} != 0",
@@ -2893,7 +2893,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "expr": "beacon_peer_count{instance=~\"$system\",direction=\"outbound\"} != 0",
@@ -2910,7 +2910,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "The current epoch according to system time",
       "fieldConfig": {
@@ -2961,7 +2961,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": false,
           "expr": "max by (network) (beacon_epoch{instance=~\"$system\"})",
@@ -2977,7 +2977,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of slots the head block is behind.",
       "fieldConfig": {
@@ -3036,7 +3036,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -3053,7 +3053,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of epochs that justification has been delayed.",
       "fieldConfig": {
@@ -3112,7 +3112,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -3130,7 +3130,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of epochs that finalisation has been delayed.",
       "fieldConfig": {
@@ -3189,7 +3189,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -3207,7 +3207,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Percentage of validators which voted for the correct target in the previous epoch.",
       "fieldConfig": {
@@ -3275,7 +3275,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "max by (network) (beacon_previous_correct_validators{instance=~\"$system\"} / beacon_previous_active_validators{instance=~\"$system\"})",
@@ -3290,7 +3290,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Number of slots the head block is behind the current slot. Empty slots may mean the head block trails by a few slots.",
       "fieldConfig": {
@@ -3399,7 +3399,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "clamp_min(beacon_slot{instance=~\"$system\"} - beacon_head_slot{instance=~\"$system\"}, 0)",
@@ -3410,7 +3410,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "expr": "clamp_min(min(beacon_epoch{instance=~\"$system\"} - beacon_current_justified_epoch{instance=~\"$system\"} - 1) without (instance), 0)",
           "interval": "",
@@ -3420,7 +3420,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "expr": "clamp_min(min(beacon_epoch{instance=~\"$system\"} - beacon_finalized_epoch{instance=~\"$system\"} - 2) without (instance), 0)",
           "interval": "",
@@ -3434,7 +3434,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Overall participation rate in the chain. The Correct Validators must be above 2/3rd for the chain to finalize.",
       "fieldConfig": {
@@ -3523,7 +3523,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "max by (network) (beacon_previous_live_validators{instance=~\"$system\"} / beacon_previous_active_validators{instance=~\"$system\"})",
@@ -3534,7 +3534,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "max by (network) (beacon_previous_correct_validators{instance=~\"$system\"} / beacon_previous_active_validators{instance=~\"$system\"})",
@@ -3545,7 +3545,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "max by (network) (beacon_previous_live_sync_committee{instance=~\"$system\"} / (512 * 32))",
@@ -3561,7 +3561,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Breakdown of client software run by peers. Note that software cannot always be determined for peers and percentage of peers isn't indicative of number of validators using that software.",
       "fieldConfig": {
@@ -3643,7 +3643,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -3671,7 +3671,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Total number of prepared proposers",
           "fieldConfig": {
@@ -3716,7 +3716,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum(beacon_proposers_data_total{instance=~\"$system\", type=\"prepared_proposers\"}) or sum(beacon_proposers_data{instance=~\"$system\", type=\"prepared_proposers\"})",
@@ -3731,7 +3731,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Total number of registered validators willing to produce blocks using builder infrastructure",
           "fieldConfig": {
@@ -3776,7 +3776,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum(beacon_proposers_data_total{instance=~\"$system\", type=\"registered_validators\"}) or sum(beacon_proposers_data{instance=~\"$system\", type=\"registered_validators\"})",
@@ -3791,7 +3791,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -3894,7 +3894,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (source) (increase(beacon_execution_payload_source{instance=~\"$system\"}[$__range])) or sum by (source) (increase(beacon_execution_payload_source_total{instance=~\"$system\"}[$__range]))",
@@ -3909,7 +3909,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -3966,7 +3966,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (fallback_reason) (increase(beacon_execution_payload_source{instance=~\"$system\", source=\"builder_local_el_fallback\", fallback_reason!~\"\"}[$__range])) or sum by (fallback_reason) (increase(beacon_execution_payload_source_total{instance=~\"$system\", source=\"builder_local_el_fallback\", fallback_reason!~\"\"}[$__range]))",
@@ -4037,7 +4037,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Status API",
           "fieldConfig": {
@@ -4277,7 +4277,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (rate(beacon_builder_requests_total{instance=~\"$system\", method=\"status\"}[5m]))",
@@ -4288,7 +4288,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (outcome) (rate(beacon_builder_requests_total{instance=~\"$system\", method=\"status\", outcome=\"error\"}[5m]))",
@@ -4304,7 +4304,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Validator Registration API",
           "fieldConfig": {
@@ -4544,7 +4544,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (rate(beacon_builder_requests_total{instance=~\"$system\", method=\"register_validators\"}[5m]))",
@@ -4555,7 +4555,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (outcome) (rate(beacon_builder_requests_total{instance=~\"$system\", method=\"register_validators\", outcome=\"error\"}[5m]))",
@@ -4571,7 +4571,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Validator Registration API",
           "fieldConfig": {
@@ -4656,7 +4656,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (outcome) (increase(beacon_builder_requests_total{instance=~\"$system\", method=\"status\"}[$__range]))",
@@ -4671,7 +4671,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Status API",
           "fieldConfig": {
@@ -4879,7 +4879,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (increase(beacon_builder_requests_total{instance=~\"$system\", method=\"status\"}[$__range]))",
@@ -4894,7 +4894,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Validator Registration API",
           "fieldConfig": {
@@ -4979,7 +4979,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (outcome) (increase(beacon_builder_requests_total{instance=~\"$system\", method=\"register_validators\"}[$__range]))",
@@ -4994,7 +4994,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Validator Registration API",
           "fieldConfig": {
@@ -5187,7 +5187,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (increase(beacon_builder_requests_total{instance=~\"$system\", method=\"register_validators\"}[$__range]))",
@@ -5244,7 +5244,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Get Header API",
           "fieldConfig": {
@@ -5529,7 +5529,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (rate(beacon_builder_requests_total{instance=~\"$system\", method=\"get_header\"}[5m]))",
@@ -5541,7 +5541,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (outcome) (rate(beacon_builder_requests_total{instance=~\"$system\", method=\"get_header\", outcome=\"error\"}[5m]))",
@@ -5557,7 +5557,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Get Payload API",
           "fieldConfig": {
@@ -5797,7 +5797,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (rate(beacon_builder_requests_total{instance=~\"$system\", method=\"get_payload\"}[5m]))",
@@ -5808,7 +5808,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (outcome) (rate(beacon_builder_requests_total{instance=~\"$system\", method=\"get_payload\", outcome=\"error\"}[5m]))",
@@ -5824,7 +5824,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Get Header API",
           "fieldConfig": {
@@ -5909,7 +5909,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (outcome) (increase(beacon_builder_requests_total{instance=~\"$system\", method=\"get_header\"}[$__range]))",
@@ -5924,7 +5924,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Get Header API",
           "fieldConfig": {
@@ -6117,7 +6117,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (increase(beacon_builder_requests_total{instance=~\"$system\", method=\"get_header\"}[$__range]))",
@@ -6132,7 +6132,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Get Payload API",
           "fieldConfig": {
@@ -6217,7 +6217,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (outcome) (increase(beacon_builder_requests_total{instance=~\"$system\", method=\"get_payload\"}[$__range]))",
@@ -6232,7 +6232,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Builder Get Payload API",
           "fieldConfig": {
@@ -6425,7 +6425,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "sum by (interval) (increase(beacon_builder_requests_total{instance=~\"$system\", method=\"get_payload\"}[$__range]))",
@@ -6457,7 +6457,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -6663,7 +6663,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "sum by (interval) (increase(beacon_block_import_delay_counter{instance=~\"$system\", stage=\"arrival\"}[$__range])) or sum by (interval) (increase(beacon_block_import_delay_counter_total{instance=~\"$system\", stage=\"arrival\"}[$__range]))",
@@ -6678,7 +6678,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Block total processing time for successfully imported blocks",
       "fieldConfig": {
@@ -6884,7 +6884,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -6901,7 +6901,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "How long Teku waited for the execution layer to finish block processing",
       "fieldConfig": {
@@ -7062,7 +7062,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "sum by (interval) (increase(beacon_block_import_delay_counter{instance=~\"$system\", stage=\"execution_payload_result_received\"}[$__range])) or sum by (interval) (increase(beacon_block_import_delay_counter_total{instance=~\"$system\", stage=\"execution_payload_result_received\"}[$__range]))",
@@ -7077,7 +7077,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Block import failures grouped by failure reason",
       "fieldConfig": {
@@ -7132,7 +7132,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -7159,7 +7159,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -7247,7 +7247,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "exemplar": true,
@@ -7261,7 +7261,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "avg without (instance) (irate(process_cpu_seconds_total{instance=~\"$system\"}[1m]))",
@@ -7273,7 +7273,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "max without (instance) (irate(process_cpu_seconds_total{instance=~\"$system\"}[1m]))",
@@ -7285,7 +7285,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "exemplar": true,
@@ -7299,7 +7299,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "avg by (instance,mode) (irate(node_cpu_seconds_total{instance=~\"$system\",mode!=\"idle\"}[1m]))",
@@ -7315,7 +7315,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Percentage of old gen heap used.",
           "fieldConfig": {
@@ -7399,7 +7399,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "(jvm_memory_pool_bytes_used{job=\"besu-node\", pool=\"G1 Old Gen\", instance=~\"$system\"} / jvm_memory_pool_bytes_max{job=\"besu-node\", pool=\"G1 Old Gen\", instance=~\"$system\"}) * 100  or (jvm_memory_pool_used_bytes{job=\"besu-node\", pool=\"G1 Old Gen\", instance=~\"$system\"} / jvm_memory_pool_max_bytes{job=\"besu-node\", pool=\"G1 Old Gen\", instance=~\"$system\"}) * 100  ",
@@ -7411,7 +7411,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "(jvm_memory_pool_bytes_used{job=~\"teku-.*\", pool=\"G1 Old Gen\", instance=~\"$system\"} / jvm_memory_pool_bytes_max{job=~\"teku-.*\", pool=\"G1 Old Gen\", instance=~\"$system\"}) * 100 or (jvm_memory_pool_used_bytes{job=~\"teku-.*\", pool=\"G1 Old Gen\", instance=~\"$system\"} / jvm_memory_pool_max_bytes{job=~\"teku-.*\", pool=\"G1 Old Gen\", instance=~\"$system\"}) * 100",
@@ -7427,7 +7427,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -7557,7 +7557,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "jvm_memory_pool_bytes_used{instance=~\"$system\"} or jvm_memory_pool_used_bytes{instance=~\"$system\"}",
               "hide": false,
@@ -7568,7 +7568,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "sum by (instance) (jvm_memory_pool_bytes_used{instance=~\"$system\"}) or sum by (instance) (jvm_memory_pool_used_bytes{instance=~\"$system\"})",
               "hide": false,
@@ -7579,7 +7579,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "process_resident_memory_bytes{instance=~\"$system\"}",
               "hide": false,
@@ -7590,7 +7590,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": " (jvm_memory_pool_bytes_max{instance=~\"$system\"}) or (jvm_memory_pool_max_bytes{instance=~\"$system\"})",
               "hide": false,
@@ -7601,7 +7601,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "expr": "node_memory_MemTotal_bytes{instance=~\"$system\"}",
               "hide": true,
@@ -7616,7 +7616,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -7726,7 +7726,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "exemplar": true,
@@ -7760,7 +7760,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -7864,7 +7864,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "sum by (instance) (irate(node_network_transmit_bytes_total{instance=~\"$system\"}[1m]))",
@@ -7876,7 +7876,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "sum by (instance) (irate(node_network_receive_bytes_total{instance=~\"$system\"}[1m]))",
@@ -7892,7 +7892,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -8018,7 +8018,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "sum by (instance)(irate(libp2p_gossip_messages_total{instance=~\"$system\"}[1m]))",
@@ -8030,7 +8030,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "irate(libp2p_gossip_messages_total{instance=~\"$system\"}[1m])",
@@ -8046,7 +8046,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Tracks the total number of RPC requests served and the total number of objects served per request type",
       "fieldConfig": {
@@ -8148,7 +8148,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -8162,7 +8162,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -8176,7 +8176,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -8190,7 +8190,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -8204,7 +8204,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -8218,7 +8218,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -8236,7 +8236,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Tracks the reason for remotely initiated disconnections",
       "fieldConfig": {
@@ -8295,7 +8295,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -8313,7 +8313,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -8372,7 +8372,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -8390,7 +8390,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -8482,7 +8482,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -8510,7 +8510,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -8607,7 +8607,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "exemplar": true,
@@ -8625,7 +8625,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -8721,7 +8721,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "exemplar": true,
               "expr": "irate(node_disk_io_time_seconds_total{instance=~\"$system\"}[1m])",
@@ -8737,7 +8737,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -8833,7 +8833,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "exemplar": true,
@@ -8847,7 +8847,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "exemplar": true,
@@ -8882,7 +8882,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Tracks number of signatures waiting to be batch verified",
       "fieldConfig": {
@@ -8970,7 +8970,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "executor_signature_verifications_queue_size{instance=~\"$system\"}",
@@ -8981,7 +8981,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "avg without (instance) (executor_signature_verifications_queue_size{instance=~\"$system\"})",
@@ -8993,7 +8993,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "max without (instance) (executor_signature_verifications_queue_size{instance=~\"$system\"})",
@@ -9009,7 +9009,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "The average number of signature tasks per batch. \n\nCalculated by dividing the total number of tasks by the total number of batches for the period (1m).",
       "fieldConfig": {
@@ -9097,7 +9097,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "irate(executor_signature_verifications_task_count{instance=~\"$system\"}[1m]) / irate(executor_signature_verifications_batch_count{instance=~\"$system\"}[1m]) or irate(executor_signature_verifications_task_count_total{instance=~\"$system\"}[1m]) / irate(executor_signature_verifications_batch_count_total{instance=~\"$system\"}[1m])",
@@ -9108,7 +9108,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "avg without (instance) (irate(executor_signature_verifications_task_count{instance=~\"$system\"}[1m]) / irate(executor_signature_verifications_batch_count{instance=~\"$system\"}[1m])) or avg without (instance) (irate(executor_signature_verifications_task_count_total{instance=~\"$system\"}[1m]) / irate(executor_signature_verifications_batch_count_total{instance=~\"$system\"}[1m]))",
@@ -9120,7 +9120,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "max without (instance) (irate(executor_signature_verifications_task_count{instance=~\"$system\"}[1m]) / irate(executor_signature_verifications_batch_count{instance=~\"$system\"}[1m])) or max without (instance) (irate(executor_signature_verifications_task_count_total{instance=~\"$system\"}[1m]) / irate(executor_signature_verifications_batch_count_total{instance=~\"$system\"}[1m]))",
@@ -9136,7 +9136,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Histogram of signature verification batch sizes.",
       "fieldConfig": {
@@ -9224,7 +9224,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "executor_signature_verifications_batch_size{instance=~\"$system\"}",
@@ -9235,7 +9235,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "avg without (instance) (executor_signature_verifications_batch_size{instance=~\"$system\"})",
@@ -9251,7 +9251,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -9353,7 +9353,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "beacon_pending_pool_size{instance=~\"$system\"}",
@@ -9365,7 +9365,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "beacon_future_items_size{instance=~\"$system\"}",
@@ -9381,7 +9381,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -9485,7 +9485,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "executor_queue_size{instance=~\"$system\"}",
@@ -9501,7 +9501,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -9603,7 +9603,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "storage_memory_states_cache_size{instance=~\"$system\"}",
@@ -9615,7 +9615,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "storage_memory_block_count{instance=~\"$system\"}",
@@ -9627,7 +9627,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "storage_memory_checkpoint_states_cache_size{instance=~\"$system\"}",
@@ -9639,7 +9639,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "expr": "storage_memory_epoch_states_cache_size{instance=~\"$system\"}",
@@ -9656,7 +9656,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -9760,7 +9760,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
           "expr": "eventbus_event_published_count{instance=~\"$system\"} - ignoring(subscriber) group_right eventbus_event_consumed_count{instance=~\"$system\"} or eventbus_event_published_count_total{instance=~\"$system\"} - ignoring(subscriber) group_right eventbus_event_consumed_count_total{instance=~\"$system\"}",
@@ -9776,7 +9776,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -9880,7 +9880,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -9894,7 +9894,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -9912,7 +9912,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "",
       "fieldConfig": {
@@ -10015,7 +10015,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -10029,7 +10029,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -10047,7 +10047,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Shows the number of BlsToExecutionChange operations in the operation pool.",
       "fieldConfig": {
@@ -10150,7 +10150,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -10164,7 +10164,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -10192,7 +10192,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -10278,7 +10278,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "beacon_block_blobs_trackers_pool_size{instance=~\"$system\"} or beacon_block_blobs_trackers_pool_size_total{instance=~\"$system\"}",
@@ -10294,7 +10294,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -10380,7 +10380,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "rate(beacon_block_blobs_trackers_pool_stats{instance=~\"$system\"}[$__rate_interval]) or rate(beacon_block_blobs_trackers_pool_stats_total{instance=~\"$system\"}[$__rate_interval])",
@@ -10396,7 +10396,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -10484,7 +10484,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "beacon_block_blobs_trackers_pool_stats{instance=~\"$system\", subtype=~\"gossip_duplicate|rpc_duplicate|local_el_duplicate\"} or beacon_block_blobs_trackers_pool_stats_total{instance=~\"$system\", subtype=~\"gossip_duplicate|rpc_duplicate|local_el_duplicate\"}",
@@ -10500,7 +10500,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -10587,7 +10587,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "beacon_block_blobs_trackers_pool_stats{instance=~\"$system\", subtype=\"rpc_fetch\"} or beacon_block_blobs_trackers_pool_stats_total{instance=~\"$system\", subtype=\"rpc_fetch\"}",
@@ -10603,7 +10603,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -10691,7 +10691,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "beacon_block_blobs_trackers_pool_stats{instance=~\"$system\", subtype=\"rpc\"} or beacon_block_blobs_trackers_pool_stats_total{instance=~\"$system\", subtype=\"rpc\"}",
@@ -10707,7 +10707,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -10794,7 +10794,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -10811,7 +10811,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "beacon_block_blobs_trackers_pool_stats{instance=~\"$system\", subtype=\"local_el\"} or beacon_block_blobs_trackers_pool_stats_total{instance=~\"$system\", subtype=\"local_el\"}",
@@ -10828,7 +10828,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -10915,7 +10915,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -10950,7 +10950,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -11005,7 +11005,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -11021,7 +11021,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -11041,7 +11041,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -11090,7 +11090,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "beacon_earliest_available_slot{instance=~\"$system\"}",
@@ -11106,7 +11106,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -11198,7 +11198,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "exemplar": true,
@@ -11216,7 +11216,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Number of data column gossip messages received per second.",
           "fieldConfig": {
@@ -11334,7 +11334,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "rate(beacon_data_column_sidecar_processing_requests_total{instance=~\"$system\"}[$__rate_interval])",
@@ -11346,7 +11346,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "avg_over_time(rate(beacon_data_column_sidecar_processing_requests_total{instance=~\"$system\"}[$__rate_interval])[1h:])",
@@ -11362,7 +11362,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Rate of gossip messages that have failed validations. \n\nThe number of failed messages corresponds to the difference between the number of messages received and the number of messages successfully validated.",
           "fieldConfig": {
@@ -11450,7 +11450,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -11467,7 +11467,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -11484,7 +11484,7 @@
             {
               "datasource": {
                 "type": "__expr__",
-                "uid": "${DS_EXPRESSION}"
+                "uid": "__expr__"
               },
               "expression": "$A/$B",
               "hide": false,
@@ -11498,7 +11498,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Rate of Data Column Validation Result\n\nThe number of failed messages corresponds to the difference between the number of messages received and the number of messages successfully validated.",
           "fieldConfig": {
@@ -11581,7 +11581,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -11602,7 +11602,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -11715,7 +11715,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "increase(libp2p_rpc_requests_sent_total{instance=~\"$system\", protocolId=~\"/eth2/beacon_chain/req/data_column_sidecars_by_root/\\\\d+/.*\"}[1m])",
@@ -11727,7 +11727,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "increase(libp2p_rpc_requests_sent_total{instance=~\"$system\", protocolId=~\"/eth2/beacon_chain/req/data_column_sidecars_by_range/\\\\d+/.*\"}[1m])",
@@ -11740,7 +11740,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "avg_over_time(increase(libp2p_rpc_requests_sent_total{instance=~\"$system\", protocolId=~\"/eth2/beacon_chain/req/data_column_sidecars_by_root/\\\\d+/.*\"}[1m])[1h:])",
@@ -11752,7 +11752,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "avg_over_time(increase(libp2p_rpc_requests_sent_total{instance=~\"$system\", protocolId=~\"/eth2/beacon_chain/req/data_column_sidecars_by_range/\\\\d+/.*\"}[1m])[1h:])",
@@ -11769,7 +11769,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "fieldConfig": {
             "defaults": {
@@ -11851,7 +11851,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "rate(libp2p_rpc_requests_failed_total{instance=~\"$system\"}[$__rate_interval]) / rate(libp2p_rpc_requests_total{instance=~\"$system\"}[$__rate_interval])",
@@ -11866,7 +11866,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Number of engine_getBlobsV2 requests received per minute.",
           "fieldConfig": {
@@ -11981,7 +11981,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -12000,7 +12000,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -12021,7 +12021,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "Rate of engine_getBlobsV2 requests that have failed. \n\n\nThe number of failed requests corresponds to the difference between the number of requests and the number of successful responses received.",
           "fieldConfig": {
@@ -12108,7 +12108,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -12129,7 +12129,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "PBFA97CFB590B2093"
           },
           "description": "",
           "fieldConfig": {
@@ -12244,7 +12244,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -12261,7 +12261,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "${DS_PROMETHEUS}"
+                "uid": "PBFA97CFB590B2093"
               },
               "editorMode": "code",
               "expr": "avg_over_time((rate(beacon_engine_getBlobsV2_request_duration_seconds_sum{instance=~\"$system\"}[1m])/rate(beacon_engine_getBlobsV2_request_duration_seconds_count{instance=~\"$system\"}[1m]))[1h:])",
@@ -12293,60 +12293,19 @@
         "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
+          "uid": "PBFA97CFB590B2093"
         },
-        "definition": "validator_local_validator_count{network=~\"$network\",alerting=~\"$alerting\"}",
+        "definition": "label_values({client_name=\"teku\"}, instance)",
         "includeAll": true,
         "label": "System",
         "multi": true,
         "name": "system",
         "options": [],
         "query": {
-          "query": "validator_local_validator_count{network=~\"$network\",alerting=~\"$alerting\"}",
+          "query": "label_values({client_name=\"teku\"}, instance)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
-        "regex": "/instance=\"([^\"]*)\"/",
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
-        },
-        "definition": "label_values(network)",
-        "includeAll": true,
-        "label": "Network",
-        "name": "network",
-        "options": [],
-        "query": {
-          "query": "label_values(network)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "current": {},
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
-        },
-        "definition": "label_values(alerting)",
-        "includeAll": true,
-        "label": "Alerting",
-        "multi": true,
-        "name": "alerting",
-        "options": [],
-        "query": {
-          "query": "label_values(alerting)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
         "regex": "",
         "sort": 1,
         "type": "query"
@@ -12354,7 +12313,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
