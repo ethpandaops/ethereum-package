@@ -750,7 +750,10 @@ def validate_spammer_params(plan, input_args):
             )
 
         if "config" in spammer:
-            allowed_config_params = SPAMMER_CONFIG_COMMON_PARAMS + SPAMMER_CONFIG_SCENARIO_PARAMS.get(scenario, [])
+            allowed_config_params = (
+                SPAMMER_CONFIG_COMMON_PARAMS
+                + SPAMMER_CONFIG_SCENARIO_PARAMS.get(scenario, [])
+            )
             for config_param in spammer["config"].keys():
                 if config_param not in allowed_config_params:
                     fail(
