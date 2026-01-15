@@ -83,6 +83,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "spamoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
+    "ews_params",
 )
 
 
@@ -119,6 +120,7 @@ def input_parser(plan, input_args):
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
+    result["ews_params"] = get_default_ews_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -204,6 +206,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["checkpointz_params"]:
                 sub_value = input_args["checkpointz_params"][sub_attr]
                 result["checkpointz_params"][sub_attr] = sub_value
+        elif attr == "ews_params":
+            for sub_attr in input_args["ews_params"]:
+                sub_value = input_args["ews_params"][sub_attr]
+                result["ews_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -432,6 +438,31 @@ def input_parser(plan, input_args):
                 )
             )
 
+    if "ews" in result["additional_services"]:
+        has_non_dummy_el = False
+        has_dummy_el = False
+        for participant in result["participants"]:
+            if participant["el_type"] != "dummy":
+                has_non_dummy_el = True
+            else:
+                has_dummy_el = True
+        if not has_non_dummy_el:
+            fail(
+                "ews (execution-witness-sentry) is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
+            )
+        if not has_dummy_el:
+            fail(
+                "ews (execution-witness-sentry) is enabled but no participants are using dummy EL. At least one participant must use dummy EL to receive execution witnesses."
+            )
+
+    if (
+        "bootnodoor" not in result["additional_services"]
+        and result["participants"][0]["el_type"] == "dummy"
+    ):
+        fail(
+            "First participant cannot use dummy EL without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
+        )
+
     if (
         "mempool_bridge" in result["additional_services"]
         and result["network_params"]["network"] not in constants.PUBLIC_NETWORKS
@@ -446,6 +477,7 @@ def input_parser(plan, input_args):
             struct(
                 el_type=participant["el_type"],
                 el_image=participant["el_image"],
+                el_binary_path=participant["el_binary_path"],
                 el_log_level=participant["el_log_level"],
                 el_storage_type=participant["el_storage_type"],
                 el_volume_size=participant["el_volume_size"],
@@ -457,6 +489,7 @@ def input_parser(plan, input_args):
                 el_tolerations=participant["el_tolerations"],
                 cl_type=participant["cl_type"],
                 cl_image=participant["cl_image"],
+                cl_binary_path=participant["cl_binary_path"],
                 cl_log_level=participant["cl_log_level"],
                 cl_volume_size=participant["cl_volume_size"],
                 cl_extra_env_vars=participant["cl_extra_env_vars"],
@@ -464,6 +497,7 @@ def input_parser(plan, input_args):
                 use_separate_vc=participant["use_separate_vc"],
                 vc_type=participant["vc_type"],
                 vc_image=participant["vc_image"],
+                vc_binary_path=participant["vc_binary_path"],
                 vc_log_level=participant["vc_log_level"],
                 vc_tolerations=participant["vc_tolerations"],
                 cl_extra_params=participant["cl_extra_params"],
@@ -490,14 +524,17 @@ def input_parser(plan, input_args):
                 el_max_cpu=participant["el_max_cpu"],
                 el_min_mem=participant["el_min_mem"],
                 el_max_mem=participant["el_max_mem"],
+                el_force_restart=participant["el_force_restart"],
                 cl_min_cpu=participant["cl_min_cpu"],
                 cl_max_cpu=participant["cl_max_cpu"],
                 cl_min_mem=participant["cl_min_mem"],
                 cl_max_mem=participant["cl_max_mem"],
+                cl_force_restart=participant["cl_force_restart"],
                 vc_min_cpu=participant["vc_min_cpu"],
                 vc_max_cpu=participant["vc_max_cpu"],
                 vc_min_mem=participant["vc_min_mem"],
                 vc_max_mem=participant["vc_max_mem"],
+                vc_force_restart=participant["vc_force_restart"],
                 remote_signer_min_cpu=participant["remote_signer_min_cpu"],
                 remote_signer_max_cpu=participant["remote_signer_max_cpu"],
                 remote_signer_min_mem=participant["remote_signer_min_mem"],
@@ -861,6 +898,12 @@ def input_parser(plan, input_args):
             min_mem=result["bootnodoor_params"]["min_mem"],
             max_mem=result["bootnodoor_params"]["max_mem"],
             extra_args=result["bootnodoor_params"]["extra_args"],
+        ),
+        ews_params=struct(
+            image=result["ews_params"]["image"],
+            retain=result["ews_params"]["retain"],
+            num_proofs=result["ews_params"]["num_proofs"],
+            env=result["ews_params"]["env"],
         ),
     )
 
@@ -1458,6 +1501,7 @@ def default_participant():
     return {
         "el_type": "geth",
         "el_image": "",
+        "el_binary_path": "",
         "el_log_level": "",
         "el_storage_type": "",
         "el_extra_env_vars": {},
@@ -1471,8 +1515,10 @@ def default_participant():
         "el_max_cpu": 0,
         "el_min_mem": 0,
         "el_max_mem": 0,
+        "el_force_restart": False,
         "cl_type": "lighthouse",
         "cl_image": "",
+        "cl_binary_path": "",
         "cl_log_level": "",
         "cl_extra_env_vars": {},
         "cl_extra_labels": {},
@@ -1485,10 +1531,12 @@ def default_participant():
         "cl_max_cpu": 0,
         "cl_min_mem": 0,
         "cl_max_mem": 0,
+        "cl_force_restart": False,
         "supernode": False,
         "use_separate_vc": None,
         "vc_type": "",
         "vc_image": "",
+        "vc_binary_path": "",
         "vc_log_level": "",
         "vc_extra_env_vars": {},
         "vc_extra_labels": {},
@@ -1500,6 +1548,7 @@ def default_participant():
         "vc_max_cpu": 0,
         "vc_min_mem": 0,
         "vc_max_mem": 0,
+        "vc_force_restart": False,
         "use_remote_signer": None,
         "remote_signer_type": "web3signer",
         "remote_signer_image": "",
@@ -1800,6 +1849,15 @@ def get_default_bootnodoor_params():
         "min_mem": 128,
         "max_mem": 512,
         "extra_args": [],
+    }
+
+
+def get_default_ews_params():
+    return {
+        "image": constants.DEFAULT_EWS_IMAGE,
+        "retain": 10,
+        "num_proofs": 1,
+        "env": {},
     }
 
 

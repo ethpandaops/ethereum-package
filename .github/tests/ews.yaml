@@ -1,0 +1,12 @@
+participants:
+  - count: 3
+  - el_type: dummy
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    cl_extra_params:
+      - --activate-zkvm
+
+additional_services:
+  - ews
+  - dora
+mev_type: flashbots

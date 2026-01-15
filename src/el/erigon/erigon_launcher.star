@@ -43,6 +43,7 @@ def launch(
     network_params,
     extra_files_artifacts,
     bootnodoor_enode=None,
+    el_binary_artifact=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -62,9 +63,12 @@ def launch(
         network_params,
         extra_files_artifacts,
         bootnodoor_enode,
+        el_binary_artifact,
     )
 
-    service = plan.add_service(service_name, config)
+    service = plan.add_service(
+        service_name, config, force_update=participant.el_force_restart
+    )
 
     return get_el_context(
         plan,
@@ -90,6 +94,7 @@ def get_config(
     network_params,
     extra_files_artifacts,
     bootnodoor_enode=None,
+    el_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -244,11 +249,33 @@ def get_config(
     if len(participant.el_extra_params) > 0:
         cmd.extend([param for param in participant.el_extra_params])
 
+    # Binary injection - mount custom binary directory if provided
+    if el_binary_artifact != None:
+        files["/opt/bin"] = el_binary_artifact.artifact
+
+    # Build command with optional binary copy
+    cmd_str = " ".join(cmd)
     if network_params.network not in constants.PUBLIC_NETWORKS:
-        command_arg = [init_datadir_cmd_str, " ".join(cmd)]
-        command_arg_str = " && ".join(command_arg)
+        if el_binary_artifact != None:
+            command_arg_str = (
+                init_datadir_cmd_str
+                + " && cp /opt/bin/{0} /usr/local/bin/erigon && ".format(
+                    el_binary_artifact.filename
+                )
+                + cmd_str
+            )
+        else:
+            command_arg_str = init_datadir_cmd_str + " && " + cmd_str
     else:
-        command_arg_str = " ".join(cmd)
+        if el_binary_artifact != None:
+            command_arg_str = (
+                "cp /opt/bin/{0} /usr/local/bin/erigon && ".format(
+                    el_binary_artifact.filename
+                )
+                + cmd_str
+            )
+        else:
+            command_arg_str = cmd_str
 
     env_vars = participant.el_extra_env_vars
     config_args = {

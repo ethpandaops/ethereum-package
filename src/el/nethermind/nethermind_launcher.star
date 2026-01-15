@@ -41,6 +41,7 @@ def launch(
     network_params,
     extra_files_artifacts,
     bootnodoor_enode=None,
+    el_binary_artifact=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -60,9 +61,12 @@ def launch(
         network_params,
         extra_files_artifacts,
         bootnodoor_enode,
+        el_binary_artifact,
     )
 
-    service = plan.add_service(service_name, config)
+    service = plan.add_service(
+        service_name, config, force_update=participant.el_force_restart
+    )
 
     return get_el_context(
         plan,
@@ -88,6 +92,7 @@ def get_config(
     network_params,
     extra_files_artifacts,
     bootnodoor_enode=None,
+    el_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -239,6 +244,10 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if el_binary_artifact != None:
+        files["/opt/bin"] = el_binary_artifact.artifact
+
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,
@@ -260,6 +269,16 @@ def get_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if el_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/{0} /nethermind/nethermind && /nethermind/nethermind ".format(
+                el_binary_artifact.filename
+            )
+            + " ".join(cmd)
+        ]
 
     if participant.el_min_cpu > 0:
         config_args["min_cpu"] = participant.el_min_cpu

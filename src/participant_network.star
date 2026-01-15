@@ -160,6 +160,26 @@ def launch_participant_network(
         plan.print("Bootnodoor launched with ENR: {0}".format(bootnodoor_enr))
         plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
 
+    # Upload binary artifacts when both binary_path and force_restart are enabled
+    binary_artifacts = {}
+    for index, participant in enumerate(args_with_right_defaults.participants):
+        participant_binaries = {}
+        for bin_type, bin_path, force_restart in [
+            ("el", participant.el_binary_path, participant.el_force_restart),
+            ("cl", participant.cl_binary_path, participant.cl_force_restart),
+            ("vc", participant.vc_binary_path, participant.vc_force_restart),
+        ]:
+            if bin_path and force_restart:
+                participant_binaries[bin_type] = struct(
+                    artifact=plan.upload_files(
+                        src="../" + bin_path,
+                        name="{0}-binary-{1}".format(bin_type, index + 1),
+                    ),
+                    filename=bin_path.split("/")[-1],
+                )
+        if participant_binaries:
+            binary_artifacts[index] = participant_binaries
+
     # Launch all execution layer clients
     all_el_contexts = el_client_launcher.launch(
         plan,
@@ -178,6 +198,7 @@ def launch_participant_network(
         args_with_right_defaults.mev_params,
         extra_files_artifacts,
         bootnodoor_enode,
+        binary_artifacts,
     )
 
     # Launch all consensus layer clients
@@ -218,6 +239,7 @@ def launch_participant_network(
         extra_files_artifacts,
         backend,
         bootnodoor_enr,
+        binary_artifacts,
     )
 
     # Stop beacon nodes for participants with skip_start enabled
@@ -497,6 +519,7 @@ def launch_participant_network(
             remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
         service_name = "vc-{0}".format(full_name)
+        vc_binary_artifact = binary_artifacts.get(index, {}).get("vc", None)
         vc_service_config = vc.get_vc_config(
             plan=plan,
             launcher=vc.new_vc_launcher(el_cl_genesis_data=el_cl_data),
@@ -523,6 +546,7 @@ def launch_participant_network(
             vc_index=current_vc_index,
             extra_files_artifacts=extra_files_artifacts,
             tempo_otlp_grpc_url=tempo_otlp_grpc_url,
+            vc_binary_artifact=vc_binary_artifact,
         )
         if vc_service_config == None:
             continue
@@ -531,13 +555,14 @@ def launch_participant_network(
         vc_service_info[service_name] = {
             "client_name": vc_type,
             "participant_index": index,
+            "participant": participant,
         }
         current_vc_index += 1
 
     # add vc's in parallel to speed package execution
-    vc_services = {}
-    if len(vc_service_configs) > 0:
-        vc_services = plan.add_services(vc_service_configs)
+    vc_services = shared_utils.add_services_with_force_restart(
+        plan, vc_service_configs, vc_service_info, "vc_force_restart"
+    )
 
     # Create VC contexts ordered by participant index
     vc_contexts_temp = {}

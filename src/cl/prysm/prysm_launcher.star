@@ -54,6 +54,7 @@ def launch(
     backend,
     tempo_otlp_grpc_url=None,
     bootnode_enr_override=None,
+    cl_binary_artifact=None,
 ):
     beacon_config = get_beacon_config(
         plan,
@@ -78,6 +79,7 @@ def launch(
         backend,
         tempo_otlp_grpc_url,
         bootnode_enr_override,
+        cl_binary_artifact,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -118,6 +120,7 @@ def get_beacon_config(
     backend,
     tempo_otlp_grpc_url,
     bootnode_enr_override=None,
+    cl_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -331,12 +334,26 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if cl_binary_artifact != None:
+        files["/opt/bin"] = cl_binary_artifact.artifact
+
+    # Build the command string, copying injected binary if provided
+    cmd_str = " ".join(cmd)
+    if cl_binary_artifact != None:
+        cmd_str = (
+            "cp /opt/bin/{0} /beacon-chain && exec ".format(cl_binary_artifact.filename)
+            + cmd_str
+        )
+    else:
+        cmd_str = "exec " + cmd_str
+
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
         "entrypoint": ["sh", "-c"],
-        "cmd": ["exec " + " ".join(cmd)],
+        "cmd": [cmd_str],
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
