@@ -63,7 +63,6 @@ def launch(
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
-    # Launch Beacon node
     beacon_config = get_beacon_config(
         plan,
         launcher,
@@ -90,7 +89,9 @@ def launch(
         cl_binary_artifact,
     )
 
-    beacon_service = plan.add_service(beacon_service_name, beacon_config)
+    beacon_service = plan.add_service(
+        beacon_service_name, beacon_config, force_update=participant.cl_force_restart
+    )
 
     cl_context_obj = get_cl_context(
         plan,

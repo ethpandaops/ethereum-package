@@ -1,0 +1,10 @@
+participants:
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    count: 4
+  - el_type: geth
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    cl_binary_path: binary/lighthouse
+additional_services:
+  - dora
