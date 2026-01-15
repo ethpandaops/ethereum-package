@@ -138,16 +138,18 @@ def get_beacon_config(
             node_keystore_files.teku_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     public_ports_for_component = None
@@ -214,8 +216,6 @@ def get_beacon_config(
         "--rest-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--rest-api-host-allowlist=*",
         "--data-storage-non-canonical-blocks-enabled=true",
-        "--ee-jwt-secret-file=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--ee-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled",
         "--metrics-interface=0.0.0.0",
@@ -224,6 +224,11 @@ def get_beacon_config(
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
+
+    if EXECUTION_ENGINE_ENDPOINT != None:
+        cmd.append("--ee-jwt-secret-file=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
+        cmd.append("--ee-endpoint=" + EXECUTION_ENGINE_ENDPOINT)
+
     validator_default_cmd = [
         "--validator-keys={0}:{1}".format(
             validator_keys_dirpath,

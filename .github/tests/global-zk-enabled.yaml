@@ -1,0 +1,12 @@
+participants:
+  - cl_type: lighthouse
+  - cl_type: teku
+  - cl_type: prysm
+  - cl_type: nimbus
+  - cl_type: lodestar
+  - cl_type: grandine
+
+network_params:
+  preset: minimal
+
+global_zk_enabled: true

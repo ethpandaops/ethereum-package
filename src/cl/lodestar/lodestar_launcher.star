@@ -123,22 +123,24 @@ def get_beacon_config(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    el_client_rpc_url_str = "http://{0}:{1}".format(
-        el_context.dns_name,
-        el_context.rpc_port_num,
-    )
-
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+    el_client_rpc_url_str = None
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        el_client_rpc_url_str = "http://{0}:{1}".format(
             el_context.dns_name,
-            el_context.engine_rpc_port_num,
+            el_context.rpc_port_num,
         )
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     public_ports_for_component = None
@@ -184,15 +186,11 @@ def get_beacon_config(
         "--eth1.depositContractDeployBlock=0",
         "--network.connectToDiscv5Bootnodes=true",
         "--discv5=true",
-        "--eth1=true",
-        "--eth1.providerUrls=" + el_client_rpc_url_str,
-        "--execution.urls=" + EXECUTION_ENGINE_ENDPOINT,
         "--rest=true",
         "--rest.address=0.0.0.0",
         "--rest.namespace=*",
         "--rest.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--nat=true",
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # ENR
         "--enr.ip={0}".format(
             "${K8S_POD_IP}"
@@ -208,6 +206,12 @@ def get_beacon_config(
         "--metrics.address=0.0.0.0",
         "--metrics.port={0}".format(BEACON_METRICS_PORT_NUM),
     ]
+
+    if EXECUTION_ENGINE_ENDPOINT != None:
+        cmd.append("--eth1=true")
+        cmd.append("--eth1.providerUrls=" + el_client_rpc_url_str)
+        cmd.append("--execution.urls=" + EXECUTION_ENGINE_ENDPOINT)
+        cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 
     supernode_cmd = [
         "--supernode",

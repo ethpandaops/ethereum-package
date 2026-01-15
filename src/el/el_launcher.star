@@ -13,7 +13,6 @@ reth = import_module("./reth/reth_launcher.star")
 ethereumjs = import_module("./ethereumjs/ethereumjs_launcher.star")
 nimbus_eth1 = import_module("./nimbus-eth1/nimbus_launcher.star")
 ethrex = import_module("./ethrex/ethrex_launcher.star")
-dummy = import_module("./dummy/dummy_launcher.star")
 
 
 def launch(
@@ -121,15 +120,6 @@ def launch(
             "get_el_context": ethrex.get_el_context,
             "launch_method": ethrex.launch,
         },
-        constants.EL_TYPE.dummy: {
-            "launcher": dummy.new_dummy_launcher(
-                el_cl_data,
-                jwt_file,
-            ),
-            "launch_method": dummy.launch,
-            "get_config": dummy.get_config,
-            "get_el_context": dummy.get_el_context,
-        },
     }
 
     all_el_contexts = []
@@ -148,6 +138,11 @@ def launch(
     for index, participant in enumerate(participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
+
+        if participant.zk_enabled:
+            all_el_contexts.append(None)
+            continue
+
         node_selectors = input_parser.get_client_node_selectors(
             participant.node_selectors,
             global_node_selectors,

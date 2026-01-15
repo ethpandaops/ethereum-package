@@ -153,16 +153,18 @@ def get_beacon_config(
             node_keystore_files.raw_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     validator_public_port_assignment = {}
@@ -223,7 +225,6 @@ def get_beacon_config(
             else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
         "--nat=extip:{0}".format(
             "${K8S_POD_IP}"
             if backend == "kubernetes"
@@ -241,12 +242,15 @@ def get_beacon_config(
         "--doppelganger-detection=false",
         # Nimbus can handle a max of 256 threads, if the host has more then nimbus crashes. Setting it to 4 so it doesn't crash on build servers
         "--num-threads=4",
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # Metrics
         "--metrics",
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
     ]
+
+    if EXECUTION_ENGINE_ENDPOINT != None:
+        cmd.append("--web3-url=" + EXECUTION_ENGINE_ENDPOINT)
+        cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 
     validator_default_cmd = [
         "--validators-dir=" + validator_keys_dirpath,

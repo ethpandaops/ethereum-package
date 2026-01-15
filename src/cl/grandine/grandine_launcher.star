@@ -143,16 +143,18 @@ def get_beacon_config(
             node_keystore_files.teku_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     validator_public_port_assignment = {}
@@ -214,8 +216,6 @@ def get_beacon_config(
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--libp2p-port={0}".format(discovery_port_tcp),
         "--discovery-port={0}".format(discovery_port_tcp),
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--eth1-rpc-urls=" + EXECUTION_ENGINE_ENDPOINT,
         # ENR
         "--disable-enr-auto-update",
         "--enr-address={0}".format(
@@ -234,6 +234,11 @@ def get_beacon_config(
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         "--features=DisableFinalizedRootCheck",  # enables peering with prysm
     ]
+
+    if EXECUTION_ENGINE_ENDPOINT != None:
+        cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
+        cmd.append("--eth1-rpc-urls=" + EXECUTION_ENGINE_ENDPOINT)
+
     validator_default_cmd = [
         "--keystore-dir=" + validator_keys_dirpath,
         "--keystore-password-file=" + validator_secrets_dirpath,

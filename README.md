@@ -177,7 +177,7 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 participants:
   # EL(Execution Layer) Specific flags
     # The type of EL client that should be started
-    # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1, ethrex, dummy
+    # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1, ethrex
   - el_type: geth
 
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -190,7 +190,6 @@ participants:
     # - ethereumjs: ethpandaops/ethereumjs:master
     # - nimbus-eth1: statusim/nimbus-eth1:master
     # - ethrex: ghcr.io/lambdaclass/ethrex:latest
-    # - dummy: ethpandaops/dummy-el:master
     el_image: ""
 
     # Path to a local EL binary to inject into the container (Docker only)
@@ -220,7 +219,7 @@ participants:
     # If this is emptystring, each client will use its default behavior:
     #   - reth, erigon: default to archive (use "full" to save space)
     #   - geth, besu, nethermind: default to full (use "archive" to keep historical data)
-    #   - ethereumjs, ethrex, nimbus-eth1, dummy: unused (full only?)
+    #   - ethereumjs, ethrex, nimbus-eth1: unused (full only?)
     # Example: el_storage_type: "full" or "archive"
     el_storage_type: ""
 
@@ -606,6 +605,13 @@ participants:
     # This is useful for testing or when you want to manually control when the beacon node starts.
     # Defaults to false
     skip_start: false
+
+    # If set to true, no execution layer client will be launched for this participant.
+    # The consensus layer will operate without an execution endpoint connection.
+    # This is useful for ZK-based setups where the CL can attest without an EL.
+    # Can also be set globally with `global_zk_enabled`.
+    # Defaults to false
+    zk_enabled: false
 
 # Participants matrix creates a participant for each combination of EL, CL and VC clients
 # Each EL/CL/VC item can provide the same parameters as a standard participant
@@ -1353,6 +1359,12 @@ global_node_selectors: {}
 # This will open up http ports to your validator services!
 # Defaults to false
 keymanager_enabled: false
+
+# Global flag to enable ZK mode for all participants
+# When enabled, no execution layer clients will be launched and CLs will operate without EL connections
+# This overrides per-participant zk_enabled settings
+# Defaults to false
+global_zk_enabled: false
 
 # Global flag to enable checkpoint sync across the network
 # Default to false

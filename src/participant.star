@@ -12,6 +12,7 @@ def new_participant(
     snooper_el_rpc_context,
     ethereum_metrics_exporter_context,
     xatu_sentry_context,
+    zk_enabled=False,
 ):
     return struct(
         el_type=el_type,
@@ -27,4 +28,5 @@ def new_participant(
         snooper_el_rpc_context=snooper_el_rpc_context,
         ethereum_metrics_exporter_context=ethereum_metrics_exporter_context,
         xatu_sentry_context=xatu_sentry_context,
+        zk_enabled=zk_enabled,
     )

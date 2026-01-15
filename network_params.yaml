@@ -75,6 +75,7 @@ participants:
     blobber_extra_params: []
     builder_network_params: null
     keymanager_enabled: false
+    zk_enabled: false
 network_params:
   network: kurtosis
   network_id: "3151908"
@@ -241,6 +242,7 @@ nginx_port: 50000
 global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false
+global_zk_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
