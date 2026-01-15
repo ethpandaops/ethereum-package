@@ -409,6 +409,214 @@ SUBCATEGORY_PARAMS = {
     ],
 }
 
+SPAMMER_PARAMS = [
+    "name",
+    "description",
+    "scenario",
+    "config",
+]
+
+SPAMMER_SCENARIO_TYPES = [
+    "eoatx",
+    "blobs",
+    "blob-combined",
+    "blob-conflicting",
+    "blob-replacements",
+    "blob-average",
+    "gasburnertx",
+    "calltx",
+    "setcodetx",
+    "erc20tx",
+    "erc721tx",
+    "erc1155tx",
+    "deploytx",
+    "deploy-destruct",
+    "factorydeploytx",
+    "uniswap-swaps",
+    "wallets",
+    "storagespam",
+    "taskrunner",
+    "evm-fuzz",
+    "geastx",
+    "xentoken",
+]
+
+SPAMMER_CONFIG_COMMON_PARAMS = [
+    "total_count",
+    "throughput",
+    "max_pending",
+    "max_wallets",
+    "rebroadcast",
+    "base_fee",
+    "tip_fee",
+    "timeout",
+    "client_group",
+    "log_txs",
+]
+
+SPAMMER_CONFIG_SCENARIO_PARAMS = {
+    "eoatx": [
+        "gas_limit",
+        "amount",
+        "data",
+        "to",
+        "random_amount",
+        "random_target",
+        "self_tx_only",
+    ],
+    "blobs": [
+        "sidecars",
+        "blob_fee",
+        "blob_v1_percent",
+        "fulu_activation",
+        "throughput_increment_interval",
+        "blob_data",
+        "submit_count",
+    ],
+    "blob-combined": [
+        "sidecars",
+        "blob_fee",
+        "blob_v1_percent",
+        "fulu_activation",
+        "throughput_increment_interval",
+        "blob_data",
+        "submit_count",
+    ],
+    "blob-conflicting": [
+        "sidecars",
+        "blob_fee",
+        "blob_v1_percent",
+        "fulu_activation",
+        "throughput_increment_interval",
+        "blob_data",
+        "submit_count",
+        "replace_rate",
+    ],
+    "blob-replacements": [
+        "sidecars",
+        "blob_fee",
+        "blob_v1_percent",
+        "fulu_activation",
+        "throughput_increment_interval",
+        "blob_data",
+        "submit_count",
+        "replacement_count",
+        "replace_delay",
+    ],
+    "blob-average": [
+        "sidecars",
+        "blob_fee",
+        "blob_v1_percent",
+        "fulu_activation",
+        "throughput_increment_interval",
+        "blob_data",
+        "submit_count",
+        "target_average",
+        "adjustment_interval",
+    ],
+    "gasburnertx": [
+        "gas_units_to_burn",
+        "gas_remainder",
+        "opcodes",
+        "init_opcodes",
+        "deploy_client_group",
+    ],
+    "calltx": [
+        "deploy_gas_limit",
+        "gas_limit",
+        "amount",
+        "random_amount",
+        "random_target",
+        "contract_code",
+        "contract_file",
+        "contract_address",
+        "contract_args",
+        "contract_addr_path",
+        "call_data",
+        "call_abi",
+        "call_abi_file",
+        "call_fn_name",
+        "call_fn_sig",
+        "call_args",
+        "deploy_client_group",
+    ],
+    "setcodetx": [
+        "min_authorizations",
+        "max_authorizations",
+        "max_delegators",
+        "gas_limit",
+        "amount",
+        "data",
+        "code_addr",
+        "random_amount",
+        "random_target",
+        "random_code_addr",
+    ],
+    "erc20tx": [
+        "amount",
+        "random_amount",
+        "random_target",
+        "deploy_client_group",
+    ],
+    "erc721tx": [
+        "random_target",
+        "deploy_client_group",
+    ],
+    "erc1155tx": [
+        "random_target",
+        "deploy_client_group",
+    ],
+    "deploytx": [
+        "gas_limit",
+        "bytecodes",
+        "bytecodes_file",
+    ],
+    "deploy-destruct": [
+        "gas_limit",
+        "deploy_client_group",
+    ],
+    "factorydeploytx": [
+        "gas_limit",
+        "deploy_count",
+        "deploy_client_group",
+    ],
+    "uniswap-swaps": [
+        "amount",
+        "random_amount",
+        "deploy_client_group",
+    ],
+    "wallets": [
+        "wallet_count",
+        "wallet_seed",
+        "refill_amount",
+        "refill_min_balance",
+    ],
+    "storagespam": [
+        "gas_limit",
+        "slots_per_tx",
+        "deploy_client_group",
+    ],
+    "taskrunner": [
+        "tasks",
+        "task_file",
+    ],
+    "evm-fuzz": [
+        "gas_limit",
+        "opcodes",
+        "init_opcodes",
+        "deploy_client_group",
+    ],
+    "geastx": [
+        "gas_limit",
+        "amount",
+        "random_amount",
+        "random_target",
+    ],
+    "xentoken": [
+        "deploy_client_group",
+    ],
+}
+
 ADDITIONAL_SERVICES_PARAMS = [
     "bootnodoor",
     "assertoor",
@@ -509,6 +717,49 @@ def validate_nested_params(
             )
 
 
+def validate_spammer_params(plan, input_args):
+    if "spamoor_params" not in input_args:
+        return
+    if "spammers" not in input_args["spamoor_params"]:
+        return
+
+    for index, spammer in enumerate(input_args["spamoor_params"]["spammers"]):
+        spammer_id = "spamoor_params.spammers[{0}]".format(index)
+
+        for param in spammer.keys():
+            if param not in SPAMMER_PARAMS:
+                fail(
+                    "Invalid parameter '{0}' for {1}. Allowed fields: {2}".format(
+                        param, spammer_id, SPAMMER_PARAMS
+                    )
+                )
+
+        if "scenario" not in spammer:
+            fail(
+                "{0} is missing required 'scenario' field. Must specify one of: {1}".format(
+                    spammer_id, SPAMMER_SCENARIO_TYPES
+                )
+            )
+
+        scenario = spammer["scenario"]
+        if scenario not in SPAMMER_SCENARIO_TYPES:
+            fail(
+                "Invalid scenario '{0}' for {1}. Allowed scenarios: {2}".format(
+                    scenario, spammer_id, SPAMMER_SCENARIO_TYPES
+                )
+            )
+
+        if "config" in spammer:
+            allowed_config_params = SPAMMER_CONFIG_COMMON_PARAMS + SPAMMER_CONFIG_SCENARIO_PARAMS.get(scenario, [])
+            for config_param in spammer["config"].keys():
+                if config_param not in allowed_config_params:
+                    fail(
+                        "Invalid config parameter '{0}' for {1} (scenario: {2}). Allowed fields: {3}".format(
+                            config_param, spammer_id, scenario, allowed_config_params
+                        )
+                    )
+
+
 def sanity_check(plan, input_args):
     # Checks participants
     deep_validate_params(
@@ -561,6 +812,10 @@ def sanity_check(plan, input_args):
         validate_params(
             plan, input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
         )
+
+    # Checks spammer configs
+    validate_spammer_params(plan, input_args)
+
     # Checks everything else
     for param in input_args.keys():
         combined_root_params = (
