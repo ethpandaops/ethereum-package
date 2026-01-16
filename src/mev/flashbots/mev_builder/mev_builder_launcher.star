@@ -38,6 +38,7 @@ def new_builder_config(
         num_of_participants,
         mev_params.mev_builder_subsidy,
         mev_type,
+        mev_params.run_multiple_relays,
     )
     flashbots_builder_config_template = read_file(
         static_files.FLASHBOTS_RBUILDER_CONFIG_FILEPATH
@@ -73,16 +74,50 @@ def new_builder_config_template_data(
     num_of_participants,
     subsidy,
     mev_type,
+    run_multiple_relays=False,
 ):
-    # Determine relay service name and port based on MEV type
-    if mev_type == constants.HELIX_MEV_TYPE:
-        relay_service = "helix-relay"
-        relay_port = helix_relay.HELIX_RELAY_ENDPOINT_PORT
-        relay_name = "helix"
+    # Build the list of relays based on configuration
+    relays = []
+
+    if run_multiple_relays:
+        # Add both flashbots and helix relays
+        relays.append(
+            {
+                "Name": "flashbots",
+                "Service": "mev-relay-api",
+                "Port": flashbots_relay.MEV_RELAY_ENDPOINT_PORT,
+                "Priority": 0,
+            }
+        )
+        relays.append(
+            {
+                "Name": "helix",
+                "Service": "helix-relay",
+                "Port": helix_relay.HELIX_RELAY_ENDPOINT_PORT,
+                "Priority": 1,
+            }
+        )
+    elif mev_type == constants.HELIX_MEV_TYPE:
+        relays.append(
+            {
+                "Name": "helix",
+                "Service": "helix-relay",
+                "Port": helix_relay.HELIX_RELAY_ENDPOINT_PORT,
+                "Priority": 0,
+            }
+        )
     else:
-        relay_service = "mev-relay-api"
-        relay_port = flashbots_relay.MEV_RELAY_ENDPOINT_PORT
-        relay_name = "flashbots"
+        relays.append(
+            {
+                "Name": "flashbots",
+                "Service": "mev-relay-api",
+                "Port": flashbots_relay.MEV_RELAY_ENDPOINT_PORT,
+                "Priority": 0,
+            }
+        )
+
+    # Build enabled_relays string for the config: "relay1", "relay2"
+    enabled_relays = ", ".join(['"{}"'.format(r["Name"]) for r in relays])
 
     return {
         "Network": network_params.network
@@ -96,9 +131,8 @@ def new_builder_config_template_data(
             lighthouse.BEACON_HTTP_PORT_NUM,
         ),
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
-        "Relay": relay_service,
-        "RelayPort": relay_port,
-        "RelayName": relay_name,
+        "Relays": relays,
+        "EnabledRelays": enabled_relays,
         "PublicKey": pubkey,
         "SecretKey": secret,
         "Mnemonic": mnemonic,
