@@ -170,6 +170,8 @@ def new_config_template_data(
 ):
     startup_spammer_json = []
     for index, spammer in enumerate(startup_spammer):
+        if "name" not in spammer:
+            spammer["name"] = "kurtosis-{0}".format(index)
         startup_spammer_json.append(json.encode(spammer))
 
     return {
