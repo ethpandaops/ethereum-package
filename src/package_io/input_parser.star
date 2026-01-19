@@ -85,6 +85,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "bootnodoor_params",
     "mempool_bridge_params",
     "ews_params",
+    "ethereum_genesis_generator_params",
 )
 
 
@@ -600,6 +601,9 @@ def input_parser(plan, input_args):
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
+            ],
+            min_builder_withdrawability_delay=result["network_params"][
+                "min_builder_withdrawability_delay"
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             attestation_due_bps_gloas=result["network_params"][
@@ -1346,6 +1350,7 @@ def default_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
+        "min_builder_withdrawability_delay": 4096,
         "shard_committee_period": 256,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
@@ -1429,6 +1434,7 @@ def default_minimal_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
+        "min_builder_withdrawability_delay": 8,
         "shard_committee_period": 64,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
