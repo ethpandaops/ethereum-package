@@ -13,6 +13,7 @@ reth = import_module("./reth/reth_launcher.star")
 ethereumjs = import_module("./ethereumjs/ethereumjs_launcher.star")
 nimbus_eth1 = import_module("./nimbus-eth1/nimbus_launcher.star")
 ethrex = import_module("./ethrex/ethrex_launcher.star")
+dummy = import_module("./dummy/dummy_launcher.star")
 
 
 def launch(
@@ -32,6 +33,7 @@ def launch(
     mev_params,
     extra_files_artifacts={},
     bootnodoor_enode=None,
+    binary_artifacts={},
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -119,6 +121,15 @@ def launch(
             "get_el_context": ethrex.get_el_context,
             "launch_method": ethrex.launch,
         },
+        constants.EL_TYPE.dummy: {
+            "launcher": dummy.new_dummy_launcher(
+                el_cl_data,
+                jwt_file,
+            ),
+            "launch_method": dummy.launch,
+            "get_config": dummy.get_config,
+            "get_el_context": dummy.get_el_context,
+        },
     }
 
     all_el_contexts = []
@@ -164,6 +175,7 @@ def launch(
         index_str = shared_utils.zfill_custom(index + 1, len(str(len(participants))))
 
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
+        el_binary_artifact = binary_artifacts.get(index, {}).get("el", None)
 
         if index == 0:
             el_context = launch_method(
@@ -181,6 +193,7 @@ def launch(
                 network_params,
                 extra_files_artifacts,
                 bootnodoor_enode,
+                el_binary_artifact,
             )
 
             # Add participant el additional prometheus metrics
@@ -206,6 +219,7 @@ def launch(
                 network_params,
                 extra_files_artifacts,
                 bootnodoor_enode,
+                el_binary_artifact,
             )
 
             el_participant_info[el_service_name] = {
@@ -216,9 +230,9 @@ def launch(
             }
 
     # add remainder of el's in parallel to speed package execution
-    el_services = {}
-    if len(el_service_configs) > 0:
-        el_services = plan.add_services(el_service_configs)
+    el_services = shared_utils.add_services_with_force_restart(
+        plan, el_service_configs, el_participant_info, "el_force_restart"
+    )
 
     # Create contexts ordered by participant index
     el_contexts_temp = {}

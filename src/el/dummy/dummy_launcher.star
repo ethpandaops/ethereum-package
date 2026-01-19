@@ -3,13 +3,7 @@ input_parser = import_module("../../package_io/input_parser.star")
 el_context = import_module("../../el/el_context.star")
 el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 el_shared = import_module("../el_shared.star")
-node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
-
-# The dirpath of the execution data directory on the client container
-EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/nethermind/execution-data"
-
-METRICS_PATH = "/metrics"
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -18,11 +12,11 @@ ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_LOG_LEVEL.error: "ERROR",
-    constants.GLOBAL_LOG_LEVEL.warn: "WARN",
-    constants.GLOBAL_LOG_LEVEL.info: "INFO",
-    constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
-    constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
 
@@ -127,8 +121,8 @@ def get_config(
     )
 
     used_port_assignments = {
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.WS_PORT_ID: WS_PORT_NUM,
@@ -137,83 +131,14 @@ def get_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
-        "--log=" + log_level,
-        "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--Init.WebSocketsEnabled=true",
-        "--JsonRpc.Enabled=true",
-        "--JsonRpc.EnabledModules=net,eth,consensus,subscribe,web3,admin,debug,txpool,trace",
-        "--JsonRpc.Host=0.0.0.0",
-        "--JsonRpc.Port={0}".format(RPC_PORT_NUM),
-        "--JsonRpc.WebSocketsPort={0}".format(WS_PORT_NUM),
-        "--JsonRpc.EngineHost=0.0.0.0",
-        "--JsonRpc.EnginePort={0}".format(ENGINE_RPC_PORT_NUM),
-        "--Network.ExternalIp={0}".format(port_publisher.el_nat_exit_ip),
-        "--Network.DiscoveryPort={0}".format(discovery_port_tcp),
-        "--Network.P2PPort={0}".format(discovery_port_tcp),
-        "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--Metrics.Enabled=true",
-        "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
-        "--Metrics.ExposeHost=0.0.0.0",
+        "--host=0.0.0.0",
+        "--port={0}".format(ENGINE_RPC_PORT_NUM),
+        "--rpc-port={0}".format(RPC_PORT_NUM),
+        "--ws-port={0}".format(WS_PORT_NUM),
+        "--metrics-port={0}".format(METRICS_PORT_NUM),
+        "--p2p-port={0}".format(discovery_port_tcp),
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
     ]
-
-    # Configure storage type - nethermind defaults to hybrid pruning, use None mode for archive
-    if participant.el_storage_type == "archive":
-        cmd.append("--Pruning.Mode=None")
-
-    if network_params.gas_limit > 0:
-        cmd.append("--Blocks.TargetBlockGasLimit={0}".format(network_params.gas_limit))
-
-    if constants.NETWORK_NAME.shadowfork in network_params.network:
-        cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
-        )
-        cmd.append("--config=" + network_params.network.split("-")[0])
-        cmd.append("--Init.BaseDbPath=" + network_params.network.split("-")[0])
-    elif network_params.network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--config=none")
-        cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
-        )
-
-        # Configure block timing to match consensus layer
-        if network_params.seconds_per_slot and network_params.seconds_per_slot != 12:
-            cmd.append(
-                "--Blocks.SecondsPerSlot={0}".format(network_params.seconds_per_slot)
-            )
-    else:
-        cmd.append("--config=" + network_params.network)
-
-    # Handle bootnode configuration with bootnodoor_enode override
-    if bootnodoor_enode != None:
-        cmd.append("--Discovery.Bootnodes=" + bootnodoor_enode)
-    elif (
-        network_params.network == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in network_params.network
-    ):
-        if len(existing_el_clients) > 0:
-            cmd.append(
-                "--Discovery.Bootnodes="
-                + ",".join(
-                    [
-                        ctx.enode
-                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                    ]
-                )
-            )
-    elif (
-        network_params.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in network_params.network
-    ):
-        cmd.append(
-            "--Discovery.Bootnodes="
-            + shared_utils.get_devnet_enodes(
-                plan, launcher.el_cl_genesis_data.files_artifact_uuid
-            )
-        )
 
     if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -223,19 +148,6 @@ def get_config(
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
-
-    if persistent:
-        volume_size_key = (
-            "devnets" if "devnet" in network_params.network else network_params.network
-        )
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.EL_TYPE.nethermind + "_volume_size"
-            ],
-        )
 
     # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
@@ -249,6 +161,9 @@ def get_config(
         files["/opt/bin"] = el_binary_artifact.artifact
 
     env_vars = participant.el_extra_env_vars
+    if "RUST_LOG" not in env_vars:
+        env_vars = env_vars | {"RUST_LOG": log_level}
+
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
@@ -258,7 +173,7 @@ def get_config(
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": shared_utils.label_maker(
-            client=constants.EL_TYPE.nethermind,
+            client=constants.EL_TYPE.dummy,
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
@@ -274,7 +189,7 @@ def get_config(
     if el_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/{0} /nethermind/nethermind && /nethermind/nethermind ".format(
+            "cp /opt/bin/{0} /usr/local/bin/dummy && dummy ".format(
                 el_binary_artifact.filename
             )
             + " ".join(cmd)
@@ -299,20 +214,15 @@ def get_el_context(
     service,
     launcher,
 ):
-    enode = el_admin_node_info.get_enode_for_node(
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, constants.RPC_PORT_ID
-    )
-
-    metrics_url = "{0}:{1}".format(service.name, METRICS_PORT_NUM)
-    nethermind_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metrics_url
     )
 
     http_url = "http://{0}:{1}".format(service.name, RPC_PORT_NUM)
     ws_url = "ws://{0}:{1}".format(service.name, WS_PORT_NUM)
 
     return el_context.new_el_context(
-        client_name="nethermind",
+        client_name=constants.EL_TYPE.dummy,
         enode=enode,
         dns_name=service.name,
         rpc_port_num=RPC_PORT_NUM,
@@ -320,13 +230,14 @@ def get_el_context(
         engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
         rpc_http_url=http_url,
         ws_url=ws_url,
+        enr=enr,
         service_name=service_name,
-        el_metrics_info=[nethermind_metrics_info],
+        el_metrics_info=[],
         ip_addr=service.ip_address,
     )
 
 
-def new_nethermind_launcher(el_cl_genesis_data, jwt_file):
+def new_dummy_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,

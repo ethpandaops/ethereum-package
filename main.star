@@ -61,6 +61,7 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
+ews = import_module("./src/ews/ews_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -85,6 +86,9 @@ def run(plan, args={}):
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
 
+    # Detect the backend type early - needed for binary injection validation
+    detected_backend = plan.get_cluster_type()
+
     # Process extra_files - create artifacts from provided content
     extra_files_artifacts = {}
     extra_files = getattr(args_with_right_defaults, "extra_files", {})
@@ -96,6 +100,20 @@ def run(plan, args={}):
             artifact = plan.render_templates(template_data, name + "_artifact")
             extra_files_artifacts[name] = artifact
 
+    # Validate binary injection - only supported with Docker backend
+    for participant in args_with_right_defaults.participants:
+        for bin_path in [
+            participant.el_binary_path,
+            participant.cl_binary_path,
+            participant.vc_binary_path,
+        ]:
+            if bin_path and detected_backend != "docker":
+                fail(
+                    "Binary injection (*_binary_path) is only supported with Docker backend, detected: {0}".format(
+                        detected_backend
+                    )
+                )
+
     mev_params = args_with_right_defaults.mev_params
     parallel_keystore_generation = args_with_right_defaults.parallel_keystore_generation
     persistent = args_with_right_defaults.persistent
@@ -106,7 +124,6 @@ def run(plan, args={}):
     apache_port = args_with_right_defaults.apache_port
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
-    detected_backend = plan.get_cluster_type()
 
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (
@@ -890,6 +907,23 @@ def run(plan, args={}):
                 index,
                 osaka_time,
             )
+        elif additional_service == "ews":
+            plan.print("Launching execution-witness-sentry")
+            ews_config_template = read_file(static_files.EWS_CONFIG_TEMPLATE_FILEPATH)
+            ews.launch_ews(
+                plan,
+                ews_config_template,
+                all_participants,
+                args_with_right_defaults.participants,
+                network_params,
+                args_with_right_defaults.ews_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched execution-witness-sentry")
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:

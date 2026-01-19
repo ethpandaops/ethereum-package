@@ -69,6 +69,7 @@ def launch(
     backend,
     tempo_otlp_grpc_url=None,
     bootnode_enr_override=None,
+    cl_binary_artifact=None,
 ):
     beacon_config = get_beacon_config(
         plan,
@@ -93,6 +94,7 @@ def launch(
         backend,
         tempo_otlp_grpc_url,
         bootnode_enr_override,
+        cl_binary_artifact,
     )
 
     beacon_service = plan.add_service(beacon_service_name, beacon_config)
@@ -133,6 +135,7 @@ def get_beacon_config(
     backend,
     tempo_otlp_grpc_url,
     bootnode_enr_override=None,
+    cl_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -260,7 +263,7 @@ def get_beacon_config(
     ]
 
     supernode_cmd = [
-        "--debug-peerdas-supernode=true",
+        "--peerdas-supernode=true",
     ]
 
     if network_params.perfect_peerdas_enabled and participant_index < 16:
@@ -342,7 +345,19 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if cl_binary_artifact != None:
+        files["/opt/bin"] = cl_binary_artifact.artifact
+
     cmd_str = " ".join(cmd)
+    # Add binary copy prefix if injected
+    if cl_binary_artifact != None:
+        cmd_str = (
+            "cp /opt/bin/{0} /home/user/nimbus-eth2/build/nimbus_beacon_node && ".format(
+                cl_binary_artifact.filename
+            )
+            + cmd_str
+        )
     if checkpoint_sync_enabled:
         command_str = " && ".join([nimbus_checkpoint_sync_subtask_str, cmd_str])
     else:

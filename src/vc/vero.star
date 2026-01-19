@@ -27,6 +27,7 @@ def get_config(
     port_publisher,
     vc_index,
     extra_files_artifacts,
+    vc_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
@@ -73,6 +74,10 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    # Binary injection - mount custom binary directory if provided
+    if vc_binary_artifact != None:
+        files["/opt/bin"] = vc_binary_artifact.artifact
+
     config_args = {
         "image": image,
         "ports": ports,
@@ -92,6 +97,16 @@ def get_config(
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if vc_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/{0} /usr/local/bin/vero && vero ".format(
+                vc_binary_artifact.filename
+            )
+            + " ".join(cmd)
+        ]
 
     if participant.vc_min_cpu > 0:
         config_args["min_cpu"] = participant.vc_min_cpu

@@ -36,6 +36,7 @@ def launch(
     extra_files_artifacts,
     backend,
     bootnodoor_enr=None,
+    binary_artifacts={},
 ):
     plan.print("Launching CL network")
 
@@ -225,6 +226,9 @@ def launch(
 
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
+
+        cl_binary_artifact = binary_artifacts.get(index, {}).get("cl", None)
+
         if index == 0:
             cl_context = launch_method(
                 plan,
@@ -249,6 +253,7 @@ def launch(
                 backend,
                 tempo_otlp_grpc_url,
                 bootnode_enr_override,
+                cl_binary_artifact,
             )
 
             blobber_config = get_blobber_config(
@@ -300,6 +305,7 @@ def launch(
                 backend,
                 tempo_otlp_grpc_url,
                 bootnode_enr_override,
+                cl_binary_artifact,
             )
 
             cl_participant_info[cl_service_name] = {
@@ -310,12 +316,13 @@ def launch(
                 "get_cl_context": get_cl_context,
                 "get_blobber_config": get_blobber_config,
                 "participant_index": index,
+                "cl_type": cl_type,
             }
 
     # add rest of cl's in parallel to speed package execution
-    cl_services = {}
-    if len(cl_service_configs) > 0:
-        cl_services = plan.add_services(cl_service_configs)
+    cl_services = shared_utils.add_services_with_force_restart(
+        plan, cl_service_configs, cl_participant_info, "cl_force_restart"
+    )
 
     # Create CL contexts ordered by participant index
     cl_contexts_temp = {}
