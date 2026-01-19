@@ -21,7 +21,7 @@ def get_config(
     beacon_http_urls,
     cl_context,
     remote_signer_context,
-    full_name,
+    _full_name,
     tolerations,
     node_selectors,
     port_publisher,

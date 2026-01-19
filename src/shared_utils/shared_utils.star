@@ -423,7 +423,7 @@ def ensure_alphanumeric_bounds(s):
     return s[start:end]
 
 
-def process_extra_mounts(plan, extra_mounts, extra_files_artifacts={}):
+def process_extra_mounts(_plan, extra_mounts, extra_files_artifacts={}):
     """
     Process extra mounts by resolving extra_files references ONLY.
 

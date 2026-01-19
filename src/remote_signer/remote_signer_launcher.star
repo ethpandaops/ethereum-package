@@ -39,7 +39,6 @@ def launch(
     service_name,
     remote_signer_type,
     image,
-    full_name,
     vc_type,
     node_keystore_files,
     participant,

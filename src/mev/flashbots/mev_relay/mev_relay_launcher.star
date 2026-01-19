@@ -41,7 +41,6 @@ REDIS_MAX_MEMORY = 1024
 def launch_mev_relay(
     plan,
     mev_params,
-    network_id,
     beacon_uris,
     validator_root,
     blocksim_uri,
@@ -87,8 +86,6 @@ def launch_mev_relay(
         node_selectors=node_selectors,
         tolerations=tolerations,
     )
-
-    network_name = NETWORK_ID_TO_NAME.get(network_id, network_id)
 
     image = mev_params.mev_relay_image
 

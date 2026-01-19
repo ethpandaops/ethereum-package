@@ -464,7 +464,7 @@ ADDITIONAL_CATEGORY_PARAMS = {
 }
 
 
-def deep_validate_params(plan, input_args, category, allowed_params):
+def deep_validate_params(input_args, category, allowed_params):
     if category in input_args:
         for item in input_args[category]:
             for param in item.keys():
@@ -476,7 +476,7 @@ def deep_validate_params(plan, input_args, category, allowed_params):
                     )
 
 
-def validate_params(plan, input_args, category, allowed_params):
+def validate_params(input_args, category, allowed_params):
     if category in input_args:
         for param in input_args[category].keys():
             if param not in allowed_params:
@@ -488,7 +488,7 @@ def validate_params(plan, input_args, category, allowed_params):
 
 
 def validate_nested_params(
-    plan, input_args, category, nested_param_definition, special_keys=None
+    input_args, category, nested_param_definition, special_keys=None
 ):
     if category not in input_args:
         return
@@ -509,7 +509,6 @@ def validate_nested_params(
     for sub_param in input_args[category]:
         if sub_param not in special_keys and sub_param in nested_param_definition:
             validate_params(
-                plan,
                 input_args[category],
                 sub_param,
                 nested_param_definition[sub_param],
@@ -519,7 +518,7 @@ def validate_nested_params(
 def sanity_check(plan, input_args):
     # Checks participants
     deep_validate_params(
-        plan, input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
+        input_args, "participants", PARTICIPANT_CATEGORIES["participants"]
     )
     # Checks participants_matrix (uses original logic for arrays of objects)
     if "participants_matrix" in input_args:
@@ -536,7 +535,6 @@ def sanity_check(plan, input_args):
                 )
             else:
                 deep_validate_params(
-                    plan,
                     input_args["participants_matrix"],
                     sub_matrix_participant,
                     PARTICIPANT_MATRIX_PARAMS["participants_matrix"][
@@ -546,7 +544,6 @@ def sanity_check(plan, input_args):
 
     # Checks port_publisher (uses new generic validation for key-value mappings)
     validate_nested_params(
-        plan,
         input_args,
         "port_publisher",
         PORT_PUBLISHER_PARAMS["port_publisher"],
@@ -565,9 +562,7 @@ def sanity_check(plan, input_args):
 
     # Checks subcategories
     for subcategories in SUBCATEGORY_PARAMS.keys():
-        validate_params(
-            plan, input_args, subcategories, SUBCATEGORY_PARAMS[subcategories]
-        )
+        validate_params(input_args, subcategories, SUBCATEGORY_PARAMS[subcategories])
     # Checks everything else
     for param in input_args.keys():
         combined_root_params = (

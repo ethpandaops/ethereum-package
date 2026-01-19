@@ -43,7 +43,6 @@ def launch(
     )
 
     snooper_config = get_config(
-        service_name,
         cl_context,
         node_selectors,
         tolerations,
@@ -52,7 +51,6 @@ def launch(
     )
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
-    snooper_http_port = snooper_service.ports[SNOOPER_BEACON_RPC_PORT_ID]
     return snooper_beacon_context.new_snooper_beacon_client_context(
         snooper_service.ip_address,
         SNOOPER_BEACON_RPC_PORT_NUM,
@@ -61,7 +59,6 @@ def launch(
 
 
 def get_config(
-    service_name,
     cl_context,
     node_selectors,
     tolerations,

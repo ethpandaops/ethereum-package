@@ -34,6 +34,4 @@ def generate_validator_ranges(
         VALIDATOR_RANGES_FILE_NAME
     ] = shared_utils.new_template_and_data(config_template, template_data)
 
-    VALIDATOR_RANGES_ARTIFACT_NAME = plan.render_templates(
-        template_and_data_by_rel_dest_filepath, "validator-ranges"
-    )
+    plan.render_templates(template_and_data_by_rel_dest_filepath, "validator-ranges")

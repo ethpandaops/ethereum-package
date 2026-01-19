@@ -16,12 +16,10 @@ MEV_FILE_PATH_ON_CONTAINER = (
 
 def new_builder_config(
     plan,
-    service_name,
     network,
     fee_recipient,
     mnemonic,
     extra_data,
-    global_node_selectors,
 ):
     builder_template_data = new_builder_config_template_data(
         network,
@@ -46,10 +44,6 @@ def new_builder_config(
 
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, MEV_BUILDER_FILES_ARTIFACT_NAME
-    )
-
-    config_file_path = shared_utils.path_join(
-        MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE, MEV_BUILDER_CONFIG_FILENAME
     )
 
     return config_files_artifact_name

@@ -17,7 +17,7 @@ METRICS_PATH = "/metrics"
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/ethrex/execution-data"
 
 
-def get_used_ports(discovery_port):
+def get_used_ports(_discovery_port):
     used_ports = {
         constants.RPC_PORT_ID: shared_utils.new_port_spec(
             RPC_PORT_NUM,
@@ -202,14 +202,6 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.el_extra_params])
 
-    cmd_str = " ".join(cmd)
-    if network_params.network not in constants.PUBLIC_NETWORKS:
-        subcommand_strs = [cmd_str]
-    else:
-        subcommand_strs = [cmd_str]
-
-    command_str = " && ".join(subcommand_strs)
-
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
@@ -289,7 +281,7 @@ def get_el_context(
     plan,
     service_name,
     service,
-    launcher,
+    _launcher,
 ):
     enode, enr = el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, constants.RPC_PORT_ID

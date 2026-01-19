@@ -133,7 +133,6 @@ def launch(
     }
 
     all_el_contexts = []
-    network_name = shared_utils.get_network_name(network_params.network)
     el_service_configs = {}
     el_participant_info = {}
 

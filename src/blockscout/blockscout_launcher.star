@@ -128,7 +128,6 @@ def launch_blockscout(
     )
 
     config_frontend = get_config_frontend(
-        plan,
         el_client_rpc_url,
         docker_cache_params,
         blockscout_params,
@@ -258,7 +257,6 @@ def get_config_backend(
 
 
 def get_config_frontend(
-    plan,
     el_client_rpc_url,
     docker_cache_params,
     blockscout_params,

@@ -44,7 +44,6 @@ def launch(
     global_log_level,
     bootnode_contexts,
     el_context,
-    full_name,
     node_keystore_files,
     snooper_el_engine_context,
     persistent,
@@ -69,7 +68,6 @@ def launch(
         global_log_level,
         bootnode_contexts,
         el_context,
-        full_name,
         node_keystore_files,
         snooper_el_engine_context,
         persistent,
@@ -96,7 +94,6 @@ def launch(
         participant,
         snooper_el_engine_context,
         node_keystore_files,
-        node_selectors,
     )
 
     return cl_context_obj
@@ -110,7 +107,6 @@ def get_beacon_config(
     global_log_level,
     bootnode_contexts,
     el_context,
-    full_name,
     node_keystore_files,
     snooper_el_engine_context,
     persistent,
@@ -123,14 +119,9 @@ def get_beacon_config(
     network_params,
     extra_files_artifacts,
     backend,
-    tempo_otlp_grpc_url,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
     if node_keystore_files:
@@ -406,7 +397,6 @@ def get_cl_context(
     participant,
     snooper_el_engine_context,
     node_keystore_files,
-    node_selectors,
 ):
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
@@ -470,7 +460,6 @@ def new_grandine_launcher(
 
 
 def get_blobber_config(
-    plan,
     participant,
     beacon_service_name,
     beacon_http_url,

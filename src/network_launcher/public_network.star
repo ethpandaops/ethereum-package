@@ -12,7 +12,7 @@ def launch(
     if network_params.force_snapshot_sync:
         # Fetch block data and determine block height
         if network_params.shadowfork_block_height == "latest":
-            latest_block = plan.run_sh(
+            plan.run_sh(
                 name="fetch-latest-block-data-public",
                 description="Fetching the latest block data for public network",
                 run="mkdir -p /blocks && \
@@ -30,7 +30,7 @@ def launch(
                 node_selectors=global_node_selectors,
             )
         else:
-            latest_block = plan.run_sh(
+            plan.run_sh(
                 name="fetch-specific-block-data-public",
                 description="Fetching block data for specific block",
                 run="mkdir -p /blocks && \
@@ -66,7 +66,7 @@ def launch(
             )
 
             el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
-            el_data = plan.add_service(
+            plan.add_service(
                 name="snapshot-{0}".format(el_service_name),
                 config=ServiceConfig(
                     image="alpine:3.19.1",

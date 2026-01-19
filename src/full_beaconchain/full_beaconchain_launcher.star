@@ -26,7 +26,7 @@ def get_little_bigtable_host(little_bigtable, port_publisher):
     return little_bigtable.ip_address
 
 
-def get_little_bigtable_port(little_bigtable, port_publisher):
+def get_little_bigtable_port(port_publisher):
     if port_publisher.additional_services_enabled:
         public_ports = shared_utils.get_public_ports_for_component(
             "additional_services", port_publisher, 0
@@ -155,7 +155,7 @@ def launch_full_beacon(
         cl_contexts[0].client_name,
         el_uri,
         get_little_bigtable_host(little_bigtable, port_publisher),
-        get_little_bigtable_port(little_bigtable, port_publisher),
+        get_little_bigtable_port(port_publisher),
         postgres_output.service.name,
         POSTGRES_PORT_NUMBER,
         redis_url,
@@ -227,7 +227,7 @@ def launch_full_beacon(
     )
 
     # Start the indexer
-    indexer = plan.add_service(
+    plan.add_service(
         name="beaconchain-indexer",
         config=ServiceConfig(
             image=IMAGE_NAME,
@@ -249,7 +249,7 @@ def launch_full_beacon(
         ),
     )
     # Start the eth1indexer
-    eth1indexer = plan.add_service(
+    plan.add_service(
         name="beaconchain-eth1indexer",
         config=ServiceConfig(
             image=IMAGE_NAME,
@@ -275,7 +275,7 @@ def launch_full_beacon(
         ),
     )
 
-    rewardsexporter = plan.add_service(
+    plan.add_service(
         name="beaconchain-rewardsexporter",
         config=ServiceConfig(
             image=IMAGE_NAME,
@@ -294,7 +294,7 @@ def launch_full_beacon(
         ),
     )
 
-    statistics = plan.add_service(
+    plan.add_service(
         name="beaconchain-statistics",
         config=ServiceConfig(
             image=IMAGE_NAME,
@@ -316,7 +316,7 @@ def launch_full_beacon(
         ),
     )
 
-    fdu = plan.add_service(
+    plan.add_service(
         name="beaconchain-fdu",
         config=ServiceConfig(
             image=IMAGE_NAME,
@@ -335,7 +335,7 @@ def launch_full_beacon(
         ),
     )
 
-    frontend = plan.add_service(
+    plan.add_service(
         name="beaconchain-frontend",
         config=get_frontend_config(
             files,

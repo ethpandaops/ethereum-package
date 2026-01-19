@@ -223,7 +223,7 @@ def new_vc_launcher(el_cl_genesis_data):
 
 
 def get_vc_context(
-    plan,
+    _plan,
     service_name,
     service,
     client_name,

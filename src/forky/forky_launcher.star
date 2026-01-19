@@ -103,7 +103,7 @@ def launch_forky(
 def get_config(
     config_files_artifact_name,
     el_cl_data_files_artifact_uuid,
-    network_params,
+    _network_params,
     node_selectors,
     tolerations,
     port_publisher,

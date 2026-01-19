@@ -303,7 +303,7 @@ def get_el_context(
     plan,
     service_name,
     service,
-    launcher,
+    _launcher,
 ):
     enode = el_admin_node_info.get_enode_for_node(
         plan, service_name, constants.RPC_PORT_ID

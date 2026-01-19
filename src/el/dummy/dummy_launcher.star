@@ -74,18 +74,18 @@ def get_config(
     plan,
     launcher,
     participant,
-    service_name,
-    existing_el_clients,
+    _service_name,
+    _existing_el_clients,
     cl_client_name,
     global_log_level,
-    persistent,
+    _persistent,
     tolerations,
     node_selectors,
     port_publisher,
     participant_index,
-    network_params,
+    _network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    _bootnodoor_enode=None,
     el_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
@@ -212,7 +212,7 @@ def get_el_context(
     plan,
     service_name,
     service,
-    launcher,
+    _launcher,
 ):
     enode, enr = el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, constants.RPC_PORT_ID

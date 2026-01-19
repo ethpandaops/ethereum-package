@@ -30,7 +30,6 @@ def launch_spamoor(
     spamoor_params,
     global_node_selectors,
     global_tolerations,
-    network_params,
     port_publisher,
     additional_service_index,
     osaka_time,
@@ -48,12 +47,7 @@ def launch_spamoor(
         spammers.append(spammer)
 
     for index, participant in enumerate(participant_contexts):
-        (
-            full_name,
-            cl_client,
-            el_client,
-            participant_config,
-        ) = shared_utils.get_client_names(
+        full_name, _, _, _ = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
 
@@ -97,13 +91,11 @@ def launch_spamoor(
     )
 
     config = get_config(
-        plan,
         config_files_artifact_name,
         prefunded_addresses,
         spamoor_params,
         global_node_selectors,
         tolerations,
-        network_params,
         port_publisher,
         additional_service_index,
     )
@@ -111,13 +103,11 @@ def launch_spamoor(
 
 
 def get_config(
-    plan,
     config_files_artifact_name,
     prefunded_addresses,
     spamoor_params,
     node_selectors,
     tolerations,
-    network_params,
     port_publisher,
     additional_service_index,
 ):
@@ -144,7 +134,7 @@ def get_config(
         0,
     )
 
-    for index, extra_arg in enumerate(spamoor_params.extra_args):
+    for _, extra_arg in enumerate(spamoor_params.extra_args):
         cmd.append(extra_arg)
 
     return ServiceConfig(
@@ -169,7 +159,7 @@ def new_config_template_data(
     startup_spammer,
 ):
     startup_spammer_json = []
-    for index, spammer in enumerate(startup_spammer):
+    for _, spammer in enumerate(startup_spammer):
         startup_spammer_json.append(json.encode(spammer))
 
     return {
@@ -183,12 +173,7 @@ def new_hosts_template_data(
 ):
     rpchosts = []
     for index, participant in enumerate(participant_contexts):
-        (
-            full_name,
-            cl_client,
-            el_client,
-            participant_config,
-        ) = shared_utils.get_client_names(
+        _, _, el_client, _ = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
         if participant.snooper_el_rpc_context:

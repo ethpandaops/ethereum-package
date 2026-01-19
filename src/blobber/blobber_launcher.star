@@ -64,7 +64,7 @@ def launch(
 
 
 def get_config(
-    service_name,
+    _service_name,
     node_keystore_files,
     beacon_http_url,
     participant,

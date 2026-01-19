@@ -31,11 +31,9 @@ def launch_tracoor(
     config_template,
     participant_contexts,
     participant_configs,
-    el_cl_data_files_artifact_uuid,
     network_params,
     global_node_selectors,
     global_tolerations,
-    final_genesis_timestamp,
     port_publisher,
     additional_service_index,
     docker_cache_params,
@@ -78,11 +76,8 @@ def launch_tracoor(
     config_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "tracoor-config"
     )
-    el_cl_data_files_artifact_uuid = el_cl_data_files_artifact_uuid
     config = get_config(
         config_files_artifact_name,
-        el_cl_data_files_artifact_uuid,
-        network_params,
         global_node_selectors,
         tolerations,
         port_publisher,
@@ -95,8 +90,6 @@ def launch_tracoor(
 
 def get_config(
     config_files_artifact_name,
-    el_cl_data_files_artifact_uuid,
-    network_params,
     node_selectors,
     tolerations,
     port_publisher,

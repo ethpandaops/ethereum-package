@@ -77,7 +77,6 @@ def launch_blutgang(
 
     config = get_config(
         config_files_artifact_name,
-        network_params,
         global_node_selectors,
         tolerations,
         port_publisher,
@@ -90,7 +89,6 @@ def launch_blutgang(
 
 def get_config(
     config_files_artifact_name,
-    network_params,
     node_selectors,
     tolerations,
     port_publisher,

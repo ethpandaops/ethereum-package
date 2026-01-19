@@ -79,7 +79,6 @@ def launch_erpc(
 
     config = get_config(
         config_files_artifact_name,
-        network_params,
         global_node_selectors,
         tolerations,
         port_publisher,
@@ -92,7 +91,6 @@ def launch_erpc(
 
 def get_config(
     config_files_artifact_name,
-    network_params,
     node_selectors,
     tolerations,
     port_publisher,

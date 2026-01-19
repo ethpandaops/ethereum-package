@@ -35,13 +35,11 @@ def launch_assertoor(
     config_template,
     participant_contexts,
     participant_configs,
-    network_params,
     assertoor_params,
     port_publisher,
     index,
     global_node_selectors,
     global_tolerations,
-    docker_cache_params,
 ):
     all_client_info = []
     clients_with_validators = []
@@ -113,12 +111,10 @@ def launch_assertoor(
     config = get_config(
         config_files_artifact_name,
         tests_config_artifacts_name,
-        network_params,
         assertoor_params,
         public_ports,
         global_node_selectors,
         tolerations,
-        docker_cache_params,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -127,12 +123,10 @@ def launch_assertoor(
 def get_config(
     config_files_artifact_name,
     tests_config_artifacts_name,
-    network_params,
     assertoor_params,
     public_ports,
     node_selectors,
     tolerations,
-    docker_cache_params,
 ):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -141,11 +135,6 @@ def get_config(
 
     IMAGE_NAME = assertoor_params.image
 
-    default_assertoor_image = (
-        docker_cache_params.url
-        + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
-        + constants.DEFAULT_ASSERTOOR_IMAGE
-    )
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
@@ -174,7 +163,7 @@ def new_config_template_data(
     assertoor_params,
 ):
     additional_tests = []
-    for index, testcfg in enumerate(assertoor_params.tests):
+    for _, testcfg in enumerate(assertoor_params.tests):
         if type(testcfg) == "dict":
             additional_tests.append(json.encode(testcfg))
         else:

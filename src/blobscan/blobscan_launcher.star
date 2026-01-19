@@ -145,8 +145,6 @@ def launch_blobscan(
     web_config = get_web_config(
         postgres_output.url,
         network_params.network,
-        beacon_node_rpc_uri,
-        execution_node_rpc_uri,
         node_selectors,
         tolerations,
         port_publisher,
@@ -229,8 +227,6 @@ def get_api_config(
 def get_web_config(
     postgres_url,
     network_name,
-    beacon_node_rpc,
-    execution_node_rpc,
     node_selectors,
     tolerations,
     port_publisher,

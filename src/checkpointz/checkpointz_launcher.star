@@ -40,7 +40,6 @@ def launch_checkpointz(
     global_tolerations,
     port_publisher,
     additional_service_index,
-    docker_cache_params,
     el_cl_data_files_artifact_uuid,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
@@ -75,13 +74,11 @@ def launch_checkpointz(
     )
     config = get_config(
         config_files_artifact_name,
-        network_params,
         checkpointz_params,
         global_node_selectors,
         tolerations,
         port_publisher,
         additional_service_index,
-        docker_cache_params,
         el_cl_data_files_artifact_uuid,
     )
 
@@ -90,13 +87,11 @@ def launch_checkpointz(
 
 def get_config(
     config_files_artifact_name,
-    network_params,
     checkpointz_params,
     node_selectors,
     tolerations,
     port_publisher,
     additional_service_index,
-    docker_cache_params,
     el_cl_data_files_artifact_uuid,
 ):
     config_file_path = shared_utils.path_join(

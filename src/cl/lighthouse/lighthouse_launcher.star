@@ -46,7 +46,6 @@ def launch(
     global_log_level,
     bootnode_contexts,
     el_context,
-    full_name,
     node_keystore_files,
     snooper_el_engine_context,
     persistent,
@@ -71,7 +70,6 @@ def launch(
         global_log_level,
         bootnode_contexts,
         el_context,
-        full_name,
         node_keystore_files,
         snooper_el_engine_context,
         persistent,
@@ -100,7 +98,6 @@ def launch(
         participant,
         snooper_el_engine_context,
         node_keystore_files,
-        node_selectors,
     )
 
     return cl_context_obj
@@ -114,7 +111,6 @@ def get_beacon_config(
     global_log_level,
     bootnode_contexts,
     el_context,
-    full_name,
     node_keystore_files,
     snooper_el_engine_context,
     persistent,
@@ -281,9 +277,6 @@ def get_beacon_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.cl_extra_params])
 
-    recipe = GetHttpRequestRecipe(
-        endpoint="/eth/v1/node/identity", port_id=constants.HTTP_PORT_ID
-    )
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
@@ -382,7 +375,6 @@ def get_cl_context(
     participant,
     snooper_el_engine_context,
     node_keystore_files,
-    node_selectors,
 ):
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
@@ -444,7 +436,6 @@ def new_lighthouse_launcher(el_cl_genesis_data, jwt_file):
 
 
 def get_blobber_config(
-    plan,
     participant,
     beacon_service_name,
     beacon_http_url,

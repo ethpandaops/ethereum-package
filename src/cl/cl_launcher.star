@@ -28,10 +28,10 @@ def launch(
     global_tolerations,
     persistent,
     tempo_otlp_grpc_url,
-    num_participants,
+    _num_participants,
     validator_data,
-    prysm_password_relative_filepath,
-    prysm_password_artifact_uuid,
+    _prysm_password_relative_filepath,
+    _prysm_password_artifact_uuid,
     global_other_index,
     extra_files_artifacts,
     backend,
@@ -118,7 +118,6 @@ def launch(
         or constants.NETWORK_NAME.shadowfork in network_params.network
         else None
     )
-    network_name = shared_utils.get_network_name(network_params.network)
 
     cl_service_configs = {}
     cl_participant_info = {}
@@ -225,7 +224,6 @@ def launch(
                     )
 
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
-        full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
         cl_binary_artifact = binary_artifacts.get(index, {}).get("cl", None)
 
@@ -238,7 +236,6 @@ def launch(
                 args_with_right_defaults.global_log_level,
                 cl_context_BOOTNODE,
                 el_context,
-                full_name,
                 new_cl_node_validator_keystores,
                 snooper_el_engine_context,
                 persistent,
@@ -257,7 +254,6 @@ def launch(
             )
 
             blobber_config = get_blobber_config(
-                plan,
                 participant,
                 cl_service_name,
                 cl_context.beacon_http_url,
@@ -290,7 +286,6 @@ def launch(
                 args_with_right_defaults.global_log_level,
                 boot_cl_client_ctx,
                 el_context,
-                full_name,
                 new_cl_node_validator_keystores,
                 snooper_el_engine_context,
                 persistent,
@@ -341,11 +336,9 @@ def launch(
             participant,
             info["snooper_el_engine_context"],
             info["new_cl_node_validator_keystores"],
-            info["node_selectors"],
         )
 
         blobber_config = get_blobber_config(
-            plan,
             participant,
             beacon_service_name,
             cl_context.beacon_http_url,

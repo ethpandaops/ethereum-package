@@ -123,7 +123,6 @@ def run(plan, args={}):
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
     apache_port = args_with_right_defaults.apache_port
     nginx_port = args_with_right_defaults.nginx_port
-    docker_cache_params = args_with_right_defaults.docker_cache_params
 
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (
@@ -160,7 +159,6 @@ def run(plan, args={}):
         static_files.MEMPOOL_BRIDGE_CONFIG_TEMPLATE_FILEPATH
     )
     prometheus_additional_metrics_jobs = []
-    raw_jwt_secret = read_file(static_files.JWT_PATH_FILEPATH)
     jwt_file = plan.upload_files(
         src=static_files.JWT_PATH_FILEPATH,
         name="jwt_file",
@@ -200,7 +198,7 @@ def run(plan, args={}):
                     + participant.cl_type
                     + "/node-key-file-{0}".format(index + 1)
                 )
-            node_key_file = plan.upload_files(
+            plan.upload_files(
                 src=raw_node_key,
                 name="node-key-file-{0}".format(index + 1),
             )
@@ -218,14 +216,12 @@ def run(plan, args={}):
 
     if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
         plan.print("Generating mev-rs builder config file")
-        mev_rs_builder_config_file = mev_rs_mev_builder.new_builder_config(
+        mev_rs_mev_builder.new_builder_config(
             plan,
-            constants.MEV_RS_MEV_TYPE,
             network_params.network,
             constants.VALIDATING_REWARDS_ACCOUNT,
             network_params.preregistered_validator_keys_mnemonic,
             args_with_right_defaults.mev_params.mev_builder_extra_data,
-            global_node_selectors,
         )
     elif (
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
@@ -233,7 +229,7 @@ def run(plan, args={}):
         or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
     ):
         plan.print("Generating flashbots builder config file")
-        flashbots_builder_config_file = flashbots_mev_rbuilder.new_builder_config(
+        flashbots_mev_rbuilder.new_builder_config(
             plan,
             args_with_right_defaults.mev_type,
             network_params,
@@ -241,7 +237,6 @@ def run(plan, args={}):
             network_params.preregistered_validator_keys_mnemonic,
             args_with_right_defaults.mev_params,
             enumerate(args_with_right_defaults.participants),
-            global_node_selectors,
         )
 
     plan.print(
@@ -301,7 +296,7 @@ def run(plan, args={}):
     validator_ranges_config_template = read_file(
         static_files.VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH
     )
-    ranges = validator_ranges.generate_validator_ranges(
+    validator_ranges.generate_validator_ranges(
         plan,
         validator_ranges_config_template,
         all_participants,
@@ -336,7 +331,7 @@ def run(plan, args={}):
         and participant.builder_network_params != None
     ):
         mev_endpoints = participant.builder_network_params.relay_end_points
-        for idx, mev_endpoint in enumerate(mev_endpoints):
+        for idx, _ in enumerate(mev_endpoints):
             mev_endpoint_names.append("relay-{0}".format(idx + 1))
     # otherwise dummy relays spinup if chosen
     elif (
@@ -386,7 +381,6 @@ def run(plan, args={}):
             endpoint = flashbots_mev_relay.launch_mev_relay(
                 plan,
                 mev_params,
-                network_id,
                 beacon_uri,
                 genesis_validators_root,
                 blocksim_uri,
@@ -398,7 +392,7 @@ def run(plan, args={}):
                 global_tolerations,
             )
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
-            endpoint, relay_ip_address, relay_port = mev_rs_mev_relay.launch_mev_relay(
+            endpoint, _, _ = mev_rs_mev_relay.launch_mev_relay(
                 plan,
                 mev_params,
                 network_params.network,
@@ -487,7 +481,6 @@ def run(plan, args={}):
                     )
                     mev_boost_context = mev_rs_mev_boost.launch(
                         plan,
-                        mev_boost_launcher,
                         mev_boost_service_name,
                         network_params.network,
                         mev_params,
@@ -514,7 +507,6 @@ def run(plan, args={}):
                     )
                     mev_boost_context = commit_boost_mev_boost.launch(
                         plan,
-                        mev_boost_launcher,
                         mev_boost_service_name,
                         network_params.network,
                         mev_params,
@@ -628,7 +620,6 @@ def run(plan, args={}):
                 global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
-                args_with_right_defaults.docker_cache_params,
                 el_cl_data_files_artifact_uuid,
             )
             plan.print("Successfully launched checkpointz")
@@ -730,11 +721,9 @@ def run(plan, args={}):
                 tracoor_config_template,
                 all_participants,
                 args_with_right_defaults.participants,
-                el_cl_data_files_artifact_uuid,
                 network_params,
                 global_node_selectors,
                 global_tolerations,
-                final_genesis_timestamp,
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
@@ -848,13 +837,11 @@ def run(plan, args={}):
                 assertoor_config_template,
                 all_participants,
                 args_with_right_defaults.participants,
-                network_params,
                 assertoor_params,
                 args_with_right_defaults.port_publisher,
                 index,
                 global_node_selectors,
                 global_tolerations,
-                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched assertoor")
         elif additional_service == "custom_flood":
@@ -902,7 +889,6 @@ def run(plan, args={}):
                 args_with_right_defaults.spamoor_params,
                 global_node_selectors,
                 global_tolerations,
-                args_with_right_defaults.network_params,
                 args_with_right_defaults.port_publisher,
                 index,
                 osaka_time,

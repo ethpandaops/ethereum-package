@@ -23,7 +23,6 @@ MAX_MEMORY = 256
 
 def launch(
     plan,
-    mev_boost_launcher,
     service_name,
     network,
     mev_params,
@@ -74,7 +73,6 @@ def launch(
     )
 
     config = get_config(
-        mev_boost_launcher,
         image,
         config_file_path,
         config_files_artifact_name,
@@ -93,7 +91,6 @@ def launch(
 
 
 def get_config(
-    mev_boost_launcher,
     image,
     config_file_path,
     config_file,

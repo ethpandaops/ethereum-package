@@ -90,7 +90,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
-    result = parse_network_params(plan, input_args)
+    result = parse_network_params(input_args)
     # add default eth2 input params
     result["blockscout_params"] = get_default_blockscout_params()
     result["dora_params"] = get_default_dora_params()
@@ -224,7 +224,6 @@ def input_parser(plan, input_args):
     ):
         result = enrich_mev_extra_params(
             result,
-            constants.MEV_BOOST_SERVICE_NAME_PREFIX,
             constants.MEV_BOOST_PORT,
             result.get("mev_type"),
         )
@@ -909,7 +908,7 @@ def input_parser(plan, input_args):
     )
 
 
-def parse_network_params(plan, input_args):
+def parse_network_params(input_args):
     result = default_input_args(input_args)
     if input_args.get("network_params", {}).get("preset") == "minimal":
         result["network_params"] = default_minimal_network_params()
@@ -989,7 +988,6 @@ def parse_network_params(plan, input_args):
             result["participants"] = participants
 
     total_participant_count = 0
-    actual_num_validators = 0
     # validation of the above defaults
     for index, participant in enumerate(result["participants"]):
         el_type = participant["el_type"]
@@ -1159,8 +1157,6 @@ def parse_network_params(plan, input_args):
             participant["validator_count"] = result["network_params"][
                 "num_validator_keys_per_node"
             ]
-
-        actual_num_validators += participant["validator_count"]
 
         cl_extra_params = participant.get("cl_extra_params", [])
         participant["cl_extra_params"] = cl_extra_params
@@ -1915,7 +1911,7 @@ def get_port_publisher_params(parameter_type, input_args=None):
 
 
 def enrich_disable_peer_scoring(parsed_arguments_dict):
-    for index, participant in enumerate(parsed_arguments_dict["participants"]):
+    for _, participant in enumerate(parsed_arguments_dict["participants"]):
         if participant["cl_type"] == "lighthouse":
             participant["cl_extra_params"].append("--disable-peer-scoring")
         if participant["cl_type"] == "prysm":
@@ -1930,7 +1926,7 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
 
 
 # TODO perhaps clean this up into a map
-def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
+def enrich_mev_extra_params(parsed_arguments_dict, mev_port, mev_type):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
         index_str = shared_utils.zfill_custom(
             index + 1, len(str(len(parsed_arguments_dict["participants"])))
