@@ -759,6 +759,10 @@ network_params:
   # Defaults to 256 epochs ~27 hours
   min_validator_withdrawability_delay: 256
 
+  # The minimum number of epochs for builder withdrawability delay
+  # Defaults to 4096, 8 for minimal preset
+  min_builder_withdrawability_delay: 4096
+
   # The period of the shard committee
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
@@ -1388,7 +1392,7 @@ spamoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.2.2
+  image: ethpandaops/ethereum-genesis-generator:5.2.3
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
