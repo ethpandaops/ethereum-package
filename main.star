@@ -372,10 +372,11 @@ def run(plan, args={}):
         or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
     ):
+        builder_cl_context = all_cl_contexts[-1]
         blocksim_uri = "http://{0}:{1}".format(
             all_el_contexts[-1].dns_name, all_el_contexts[-1].rpc_port_num
         )
-        beacon_uri = all_cl_contexts[-1].beacon_http_url
+        beacon_uri = builder_cl_context.beacon_http_url
 
         first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
@@ -396,6 +397,7 @@ def run(plan, args={}):
                 num_participants,
                 global_node_selectors,
                 global_tolerations,
+                builder_cl_context.beacon_service_name,
             )
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
             endpoint, relay_ip_address, relay_port = mev_rs_mev_relay.launch_mev_relay(
