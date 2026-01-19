@@ -103,7 +103,7 @@ def launch_mev_relay(
         recipe=GetHttpRequestRecipe(
             endpoint="/eth/v1/node/syncing",
             port_id=constants.HTTP_PORT_ID,
-            extract={"is_syncing": ".data.is_syncing"},
+            extract={"is_syncing": ".data.is_syncing | tostring"},
         ),
         field="extract.is_syncing",
         assertion="==",
