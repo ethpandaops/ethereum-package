@@ -602,6 +602,9 @@ def input_parser(plan, input_args):
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
             ],
+            min_builder_withdrawability_delay=result["network_params"][
+                "min_builder_withdrawability_delay"
+            ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             attestation_due_bps_gloas=result["network_params"][
                 "attestation_due_bps_gloas"
