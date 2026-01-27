@@ -18,6 +18,7 @@ CL_TYPE = struct(
     prysm="prysm",
     lodestar="lodestar",
     grandine="grandine",
+    consensoor="consensoor",
 )
 
 VC_TYPE = struct(
@@ -27,6 +28,8 @@ VC_TYPE = struct(
     prysm="prysm",
     teku="teku",
     vero="vero",
+    grandine="grandine",
+    consensoor="consensoor",
 )
 
 REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
