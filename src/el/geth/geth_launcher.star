@@ -206,6 +206,16 @@ def get_config(
         "--pprof",
         "--pprof.addr=0.0.0.0",
         "--pprof.port={0}".format(PPROF_PORT_NUM),
+    ]
+
+    # Add Pyroscope continuous profiling if enabled
+    if launcher.pyroscope_url != None:
+        cmd.extend([
+            "--pyroscope",
+            "--pyroscope.server={0}".format(launcher.pyroscope_url),
+        ])
+
+    cmd.extend([
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
         "{0}".format(
@@ -213,7 +223,7 @@ def get_config(
             if network_params.network == constants.NETWORK_NAME.kurtosis
             else ""
         ),
-    ]
+    ])
 
     if network_params.gas_limit > 0:
         cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
@@ -378,9 +388,11 @@ def new_geth_launcher(
     el_cl_genesis_data,
     jwt_file,
     networkid,
+    pyroscope_url=None,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         networkid=networkid,
+        pyroscope_url=pyroscope_url,
     )

@@ -32,6 +32,7 @@ prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
 tempo = import_module("./src/tempo/tempo_launcher.star")
 pyroscope = import_module("./src/pyroscope/pyroscope_launcher.star")
+alloy = import_module("./src/alloy/alloy_launcher.star")
 commit_boost_mev_boost = import_module(
     "./src/mev/commit-boost/mev_boost/mev_boost_launcher.star"
 )
@@ -217,6 +218,32 @@ def run(plan, args={}):
             tempo.SERVICE_NAME, tempo.HTTP_PORT_NUMBER
         )
 
+    # Launch Pyroscope EARLY so that EL/CL clients can use native Pyroscope SDK
+    # to push profiles. DNS must be resolvable before clients start.
+    pyroscope_url = None
+    pyroscope_java_agent_artifact = None
+    if "pyroscope" in args_with_right_defaults.additional_services:
+        plan.print("Launching Pyroscope early for native SDK profiling support...")
+        pyroscope_config_template = read_file(
+            static_files.PYROSCOPE_CONFIG_TEMPLATE_FILEPATH
+        )
+        # Calculate index for port publishing (position in additional_services list)
+        pyroscope_index = args_with_right_defaults.additional_services.index("pyroscope")
+        pyroscope_context = pyroscope.launch_pyroscope_early(
+            plan,
+            pyroscope_config_template,
+            global_node_selectors,
+            global_tolerations,
+            args_with_right_defaults.pyroscope_params,
+            args_with_right_defaults.port_publisher,
+            pyroscope_index,
+        )
+        pyroscope_url = pyroscope_context.url
+        pyroscope_java_agent_artifact = pyroscope_context.java_agent_artifact
+        plan.print("Pyroscope available at: {}".format(pyroscope_url))
+        # Remove from additional_services to prevent duplicate launch
+        args_with_right_defaults.additional_services.remove("pyroscope")
+
     if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
         plan.print("Generating mev-rs builder config file")
         mev_rs_builder_config_file = mev_rs_mev_builder.new_builder_config(
@@ -273,6 +300,8 @@ def run(plan, args={}):
         extra_files_artifacts,
         tempo_otlp_grpc_url,
         detected_backend,
+        pyroscope_url,
+        pyroscope_java_agent_artifact,
     )
 
     plan.print(
@@ -297,6 +326,26 @@ def run(plan, args={}):
             participant.ethereum_metrics_exporter_context
         )
         all_xatu_sentry_contexts.append(participant.xatu_sentry_context)
+
+    # Launch Alloy for pprof scraping if Pyroscope is enabled
+    # This gives us continuous profiling for Go clients (Erigon, Prysm) that
+    # don't have native Pyroscope SDK support (only pprof endpoints)
+    if pyroscope_url != None:
+        plan.print("Launching Alloy for pprof scraping of Go clients...")
+        alloy_config_template = read_file(static_files.ALLOY_CONFIG_TEMPLATE_FILEPATH)
+        alloy.launch_alloy(
+            plan,
+            alloy_config_template,
+            all_el_contexts,
+            all_cl_contexts,
+            pyroscope_url,
+            global_node_selectors,
+            global_tolerations,
+            None,  # alloy_params - use defaults
+            args_with_right_defaults.port_publisher,
+            0,  # index
+        )
+        plan.print("Alloy launched for continuous pprof profiling")
 
     # Generate validator ranges
     validator_ranges_config_template = read_file(
@@ -822,6 +871,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 tempo_query_url,
+                pyroscope_url,
             )
             plan.print("Successfully launched grafana")
         elif additional_service == "tempo":
@@ -975,6 +1025,7 @@ def run(plan, args={}):
             args_with_right_defaults.port_publisher,
             prometheus_grafana_index,
             tempo_query_url,
+            pyroscope_url,
         )
         plan.print("Successfully launched grafana")
 

@@ -14,6 +14,16 @@ PYROSCOPE_DATA_DIRPATH = "/data"
 # pprof port used by Go clients (for reference)
 PPROF_PORT_NUM = 6060
 
+# Reth metrics port (pprof heap endpoint is on the metrics server)
+# Note: Reth only exposes pprof when built with jemalloc-prof feature
+# Use image: ghcr.io/paradigmxyz/reth:nightly-profiling
+RETH_METRICS_PORT_NUM = 9001
+
+# Pyroscope Java agent configuration for Java clients (Besu, Teku)
+PYROSCOPE_JAVA_AGENT_VERSION = "2.1.2"
+PYROSCOPE_JAVA_AGENT_URL = "https://github.com/grafana/pyroscope-java/releases/download/v{0}/pyroscope.jar".format(PYROSCOPE_JAVA_AGENT_VERSION)
+PYROSCOPE_JAVA_AGENT_FILENAME = "pyroscope.jar"
+
 USED_PORTS = {
     HTTP_PORT_ID: shared_utils.new_port_spec(
         HTTP_PORT_NUMBER,
@@ -21,6 +31,74 @@ USED_PORTS = {
         shared_utils.HTTP_APPLICATION_PROTOCOL,
     ),
 }
+
+
+def download_java_agent(plan):
+    """
+    Download the Pyroscope Java agent JAR and return it as a files artifact.
+    This is used by Java clients (Besu, Teku) for profiling.
+    """
+    plan.print("Downloading Pyroscope Java agent v{0}...".format(PYROSCOPE_JAVA_AGENT_VERSION))
+
+    result = plan.run_sh(
+        name="pyroscope-java-agent-download",
+        description="Download Pyroscope Java agent JAR",
+        image="curlimages/curl:latest",
+        run="mkdir -p /tmp/output && curl -sL -o /tmp/output/{0} {1}".format(PYROSCOPE_JAVA_AGENT_FILENAME, PYROSCOPE_JAVA_AGENT_URL),
+        store=[StoreSpec(src="/tmp/output/{0}".format(PYROSCOPE_JAVA_AGENT_FILENAME), name="pyroscope-java-agent")],
+    )
+
+    return result.files_artifacts[0]
+
+
+def launch_pyroscope_early(
+    plan,
+    config_template,
+    global_node_selectors,
+    global_tolerations,
+    pyroscope_params,
+    port_publisher,
+    index,
+):
+    """
+    Launch Pyroscope early (before participant network) so that EL/CL clients
+    can use native Pyroscope SDK to push profiles. This function does not log
+    pprof targets since EL/CL contexts aren't available yet.
+    """
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
+    config_files_artifact_name = get_pyroscope_config_artifact(
+        plan,
+        config_template,
+    )
+
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        HTTP_PORT_ID,
+        index,
+        0,
+    )
+
+    config = get_config(
+        config_files_artifact_name,
+        global_node_selectors,
+        tolerations,
+        pyroscope_params,
+        public_ports,
+    )
+
+    service = plan.add_service(SERVICE_NAME, config)
+
+    # Download the Java agent for Java clients (Besu, Teku)
+    java_agent_artifact = download_java_agent(plan)
+
+    return struct(
+        service_name=SERVICE_NAME,
+        ip_addr=service.ip_address,
+        http_port_num=HTTP_PORT_NUMBER,
+        url="http://{}:{}".format(service.name, HTTP_PORT_NUMBER),
+        java_agent_artifact=java_agent_artifact,
+    )
 
 
 def launch_pyroscope(
@@ -41,7 +119,9 @@ def launch_pyroscope(
     if len(pprof_targets) > 0:
         plan.print("Pyroscope: pprof endpoints available at:")
         for target in pprof_targets:
-            plan.print("  - {}: http://{}/debug/pprof/".format(target["name"], target["address"]))
+            pprof_path = target.get("pprof_path", "/debug/pprof/")
+            note = " (requires profiling image)" if target["client_name"] == "reth" else ""
+            plan.print("  - {}: http://{}{}{}".format(target["name"], target["address"], pprof_path, note))
 
     config_files_artifact_name = get_pyroscope_config_artifact(
         plan,
@@ -78,7 +158,7 @@ def get_pprof_targets(el_contexts, cl_contexts):
     """Collect pprof endpoint URLs from all clients that support it."""
     targets = []
 
-    # Go EL clients with pprof support
+    # Go EL clients with pprof support (port 6060)
     go_el_clients = ["geth", "erigon"]
     for ctx in el_contexts:
         if ctx.client_name in go_el_clients:
@@ -87,6 +167,18 @@ def get_pprof_targets(el_contexts, cl_contexts):
                 "address": "{}:{}".format(ctx.dns_name, PPROF_PORT_NUM),
                 "client_type": "el",
                 "client_name": ctx.client_name,
+            })
+
+    # Reth pprof support (on metrics port 9001, requires jemalloc-prof build)
+    # Use image: ghcr.io/paradigmxyz/reth:nightly-profiling to enable
+    for ctx in el_contexts:
+        if ctx.client_name == "reth":
+            targets.append({
+                "name": ctx.service_name,
+                "address": "{}:{}".format(ctx.dns_name, RETH_METRICS_PORT_NUM),
+                "client_type": "el",
+                "client_name": ctx.client_name,
+                "pprof_path": "/debug/pprof/heap",  # Reth only exposes heap profiles
             })
 
     # Go CL clients with pprof support (Prysm)

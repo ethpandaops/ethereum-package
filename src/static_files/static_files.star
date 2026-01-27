@@ -95,6 +95,9 @@ PYROSCOPE_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/pyroscope-config/pyroscope.yaml.tmpl"
 )
 
+# Alloy config (pprof scraping for profiling)
+ALLOY_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/alloy/config.alloy.tmpl"
+
 # Geth + CL genesis generation
 GENESIS_GENERATION_CONFIG_DIRPATH = STATIC_FILES_DIRPATH + "/genesis-generation-config"
 
