@@ -1,20 +1,24 @@
-# Pyroscope configuration for continuous profiling
+# Pyroscope server configuration
 # Auto-generated for ethereum-package
+#
+# Note: Grafana Pyroscope is a storage/query server.
+# For scraping pprof endpoints, use Grafana Alloy or access pprof endpoints directly.
+#
+# Available pprof endpoints:
+# - Geth: http://<geth-service>:6060/debug/pprof/
+# - Prysm: http://<prysm-service>:6060/debug/pprof/
 
-scrape-configs:
-{{- range .Targets }}
-  - job-name: '{{ .name }}'
-    enabled-profiles: [cpu, memory, goroutine, mutex, block]
-    scrape-interval: '{{ $.ScrapeInterval }}'
-    scrape-timeout: '10s'
-    scheme: http
-    static-configs:
-      - application: '{{ .client_name }}-{{ .client_type }}'
-        spy-name: gospy
-        targets:
-          - '{{ .address }}'
-        labels:
-          service: '{{ .name }}'
-          client_type: '{{ .client_type }}'
-          client_name: '{{ .client_name }}'
-{{- end }}
+# Server configuration
+server:
+  http_listen_port: {{ .HTTPPort }}
+
+# Storage configuration (in-memory for dev)
+storage:
+  backend: filesystem
+  filesystem:
+    dir: /data
+
+# Limits
+limits:
+  max_query_length: 0
+  max_query_lookback: 0

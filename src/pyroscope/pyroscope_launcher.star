@@ -9,8 +9,9 @@ HTTP_PORT_NUMBER = 4040
 
 PYROSCOPE_CONFIG_FILENAME = "pyroscope.yaml"
 PYROSCOPE_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/etc/pyroscope"
+PYROSCOPE_DATA_DIRPATH = "/data"
 
-# pprof port used by Go clients
+# pprof port used by Go clients (for reference)
 PPROF_PORT_NUM = 6060
 
 USED_PORTS = {
@@ -35,14 +36,16 @@ def launch_pyroscope(
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
-    # Collect pprof targets from clients
+    # Log available pprof targets for user reference
     pprof_targets = get_pprof_targets(el_contexts, cl_contexts)
+    if len(pprof_targets) > 0:
+        plan.print("Pyroscope: pprof endpoints available at:")
+        for target in pprof_targets:
+            plan.print("  - {}: http://{}/debug/pprof/".format(target["name"], target["address"]))
 
     config_files_artifact_name = get_pyroscope_config_artifact(
         plan,
         config_template,
-        pyroscope_params,
-        pprof_targets,
     )
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
@@ -67,6 +70,7 @@ def launch_pyroscope(
         ip_addr=service.ip_address,
         http_port_num=HTTP_PORT_NUMBER,
         url="http://{}:{}".format(service.name, HTTP_PORT_NUMBER),
+        pprof_targets=pprof_targets,
     )
 
 
@@ -102,13 +106,9 @@ def get_pprof_targets(el_contexts, cl_contexts):
 def get_pyroscope_config_artifact(
     plan,
     config_template,
-    pyroscope_params,
-    pprof_targets,
 ):
     template_data = {
         "HTTPPort": HTTP_PORT_NUMBER,
-        "Targets": pprof_targets,
-        "ScrapeInterval": pyroscope_params.scrape_interval,
     }
 
     template_and_data = shared_utils.new_template_and_data(
@@ -143,6 +143,9 @@ def get_config(
         public_ports=public_ports,
         files={
             PYROSCOPE_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+            PYROSCOPE_DATA_DIRPATH: Directory(
+                persistent_key="pyroscope-data",
+            ),
         },
         cmd=[
             "-config.file=" + config_file_path,
