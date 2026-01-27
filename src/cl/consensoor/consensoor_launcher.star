@@ -182,8 +182,12 @@ def get_beacon_config(
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
         "--engine-api-url=" + EXECUTION_ENGINE_ENDPOINT,
         "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--genesis-state=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz",
-        "--network-config=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml",
+        "--genesis-state="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.ssz",
+        "--network-config="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
         "--preset=" + network_params.preset,
         "--p2p-port={0}".format(discovery_port),
         "--p2p-host=0.0.0.0",
@@ -237,7 +241,9 @@ def get_beacon_config(
     }
 
     if node_keystore_files != None:
-        files[constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER] = node_keystore_files.files_artifact_uuid
+        files[
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
+        ] = node_keystore_files.files_artifact_uuid
 
     if persistent:
         volume_size_key = (
@@ -335,9 +341,13 @@ def get_cl_context(
         beacon_peer_id = response["extract.peer_id"]
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
-    beacon_metrics_url = "{0}:{1}".format(service.ip_address, beacon_metrics_port.number)
+    beacon_metrics_url = "{0}:{1}".format(
+        service.ip_address, beacon_metrics_port.number
+    )
     nodes_metrics_info = [
-        node_metrics.new_node_metrics_info(service_name, METRICS_PATH, beacon_metrics_url),
+        node_metrics.new_node_metrics_info(
+            service_name, METRICS_PATH, beacon_metrics_url
+        ),
     ]
     return cl_context.new_cl_context(
         client_name="consensoor",
