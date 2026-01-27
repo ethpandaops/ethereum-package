@@ -31,6 +31,7 @@ blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
 tempo = import_module("./src/tempo/tempo_launcher.star")
+pyroscope = import_module("./src/pyroscope/pyroscope_launcher.star")
 commit_boost_mev_boost = import_module(
     "./src/mev/commit-boost/mev_boost/mev_boost_launcher.star"
 )
@@ -835,6 +836,23 @@ def run(plan, args={}):
                 index,
             )
             plan.print("Successfully launched tempo")
+        elif additional_service == "pyroscope":
+            plan.print("Launching pyroscope for continuous profiling...")
+            pyroscope_config_template = read_file(
+                static_files.PYROSCOPE_CONFIG_TEMPLATE_FILEPATH
+            )
+            pyroscope.launch_pyroscope(
+                plan,
+                pyroscope_config_template,
+                all_el_contexts,
+                all_cl_contexts,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.pyroscope_params,
+                args_with_right_defaults.port_publisher,
+                index,
+            )
+            plan.print("Successfully launched pyroscope")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True

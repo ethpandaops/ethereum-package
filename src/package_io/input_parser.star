@@ -77,6 +77,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "prometheus_params",
     "grafana_params",
     "tempo_params",
+    "pyroscope_params",
     "tx_fuzz_params",
     "custom_flood_params",
     "xatu_sentry_params",
@@ -114,6 +115,7 @@ def input_parser(plan, input_args):
     result["assertoor_params"] = get_default_assertoor_params()
     result["prometheus_params"] = get_default_prometheus_params()
     result["tempo_params"] = get_default_tempo_params()
+    result["pyroscope_params"] = get_default_pyroscope_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
     result["parallel_keystore_generation"] = False
@@ -182,6 +184,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["tempo_params"]:
                 sub_value = input_args["tempo_params"][sub_attr]
                 result["tempo_params"][sub_attr] = sub_value
+        elif attr == "pyroscope_params":
+            for sub_attr in input_args["pyroscope_params"]:
+                sub_value = input_args["pyroscope_params"][sub_attr]
+                result["pyroscope_params"][sub_attr] = sub_value
         elif attr == "xatu_sentry_params":
             for sub_attr in input_args["xatu_sentry_params"]:
                 sub_value = input_args["xatu_sentry_params"][sub_attr]
@@ -791,6 +797,14 @@ def input_parser(plan, input_args):
             min_mem=result["tempo_params"]["min_mem"],
             max_mem=result["tempo_params"]["max_mem"],
             image=result["tempo_params"]["image"],
+        ),
+        pyroscope_params=struct(
+            image=result["pyroscope_params"]["image"],
+            scrape_interval=result["pyroscope_params"]["scrape_interval"],
+            min_cpu=result["pyroscope_params"]["min_cpu"],
+            max_cpu=result["pyroscope_params"]["max_cpu"],
+            min_mem=result["pyroscope_params"]["min_mem"],
+            max_mem=result["pyroscope_params"]["max_mem"],
         ),
         apache_port=result["apache_port"],
         nginx_port=result["nginx_port"],
@@ -1763,6 +1777,17 @@ def get_default_tempo_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "grafana/tempo:latest",
+    }
+
+
+def get_default_pyroscope_params():
+    return {
+        "image": "grafana/pyroscope:latest",
+        "scrape_interval": "15s",
+        "min_cpu": 10,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 1024,
     }
 
 

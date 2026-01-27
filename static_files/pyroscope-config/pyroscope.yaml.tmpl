@@ -1,0 +1,20 @@
+# Pyroscope configuration for continuous profiling
+# Auto-generated for ethereum-package
+
+scrape-configs:
+{{- range .Targets }}
+  - job-name: '{{ .name }}'
+    enabled-profiles: [cpu, memory, goroutine, mutex, block]
+    scrape-interval: '{{ $.ScrapeInterval }}'
+    scrape-timeout: '10s'
+    scheme: http
+    static-configs:
+      - application: '{{ .client_name }}-{{ .client_type }}'
+        spy-name: gospy
+        targets:
+          - '{{ .address }}'
+        labels:
+          service: '{{ .name }}'
+          client_type: '{{ .client_type }}'
+          client_name: '{{ .client_name }}'
+{{- end }}

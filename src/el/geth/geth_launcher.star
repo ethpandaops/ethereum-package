@@ -14,6 +14,7 @@ WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
+PPROF_PORT_NUM = 6060
 
 # TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
 NUM_MINING_THREADS = 1
@@ -154,6 +155,7 @@ def get_config(
         constants.RPC_PORT_ID: RPC_PORT_NUM,
         constants.WS_PORT_ID: WS_PORT_NUM,
         constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+        constants.PPROF_PORT_ID: PPROF_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -201,6 +203,9 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
+        "--pprof",
+        "--pprof.addr=0.0.0.0",
+        "--pprof.port={0}".format(PPROF_PORT_NUM),
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
         "{0}".format(
