@@ -37,6 +37,8 @@ def launch(
     backend,
     bootnodoor_enr=None,
     binary_artifacts={},
+    pyroscope_url=None,
+    pyroscope_java_agent_artifact=None,
 ):
     plan.print("Launching CL network")
 
@@ -81,6 +83,8 @@ def launch(
                 el_cl_data,
                 jwt_file,
                 keymanager_file,
+                pyroscope_url,
+                pyroscope_java_agent_artifact,
             ),
             "launch_method": teku.launch,
             "get_beacon_config": teku.get_beacon_config,

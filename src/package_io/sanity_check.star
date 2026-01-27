@@ -342,6 +342,14 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "image",
     ],
+    "pyroscope_params": [
+        "image",
+        "scrape_interval",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+    ],
     "assertoor_params": [
         "image",
         "run_stability_check",
@@ -432,6 +440,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "prometheus",
     "grafana",
     "tempo",
+    "pyroscope",
     "blobscan",
     "dugtrio",
     "blutgang",
