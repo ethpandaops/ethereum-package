@@ -302,6 +302,7 @@ def get_config(
         "image": participant.el_image,
         "ports": used_ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.el_enabled,
         "cmd": [cmd_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
