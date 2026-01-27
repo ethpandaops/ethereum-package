@@ -1,0 +1,26 @@
+participants:
+  # - count: 4
+  #   supernode: true
+  - el_type: geth
+    el_image: ethpandaops/geth:epbs-devnet-0
+    cl_type: consensoor
+    cl_image: consensoor:latest
+    cl_force_restart: true
+    supernode: true
+    count: 1
+network_params:
+  #gloas_fork_epoch: 1  # GLOAS/ePBS at epoch 2 (slot 16 with minimal preset)
+  preset: mainnet
+
+
+additional_services:
+  - dora
+  #- spamoor
+snooper_enabled: true
+global_log_level: debug
+
+port_publisher:
+  cl:
+    enabled: true
+  additional_services:
+    enabled: true
