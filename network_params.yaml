@@ -215,6 +215,18 @@ mev_params:
   run_multiple_relays: false
   # Helix relay image (used when run_multiple_relays is true or mev_type is helix)
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  # Timing games configuration for mev-boost
+  # When enable_timing_games is true for a relay, mev-boost will use a config file
+  # with timing games settings instead of the default RELAYS env var
+  mev_boost_timing_games_params:
+    flashbots:
+      enable_timing_games: false
+      target_first_request_ms: 200
+      frequency_get_header_ms: 100
+    helix:
+      enable_timing_games: false
+      target_first_request_ms: 200
+      frequency_get_header_ms: 100
   custom_flood_params:
     interval_between_transactions: 1
 buildoor_params:

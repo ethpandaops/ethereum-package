@@ -751,6 +751,9 @@ def input_parser(plan, input_args):
             launch_adminer=result["mev_params"]["launch_adminer"],
             run_multiple_relays=result["mev_params"]["run_multiple_relays"],
             helix_relay_image=result["mev_params"]["helix_relay_image"],
+            mev_boost_timing_games_params=result["mev_params"][
+                "mev_boost_timing_games_params"
+            ],
         )
         if result["mev_params"]
         else None,
@@ -1742,6 +1745,18 @@ def get_default_mev_params(mev_type, preset):
         "launch_adminer": launch_adminer,
         "run_multiple_relays": False,
         "helix_relay_image": constants.DEFAULT_HELIX_RELAY_IMAGE,
+        "mev_boost_timing_games_params": {
+            "flashbots": {
+                "enable_timing_games": False,
+                "target_first_request_ms": 200,
+                "frequency_get_header_ms": 100,
+            },
+            "helix": {
+                "enable_timing_games": False,
+                "target_first_request_ms": 200,
+                "frequency_get_header_ms": 100,
+            },
+        },
     }
 
 

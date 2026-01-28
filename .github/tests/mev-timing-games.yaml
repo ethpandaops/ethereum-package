@@ -16,7 +16,7 @@ additional_services:
   - dora
   - spamoor
 
-# Use flashbots as base mev_type, but run_multiple_relays will launch both flashbots and helix
+# Test mev-boost timing games with flashbots relay
 mev_type: flashbots
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
@@ -24,19 +24,17 @@ mev_params:
   mev_boost_image: ethpandaops/mev-boost:develop
   mev_builder_cl_image: ethpandaops/lighthouse:unstable
   mev_builder_subsidy: 1
-  run_multiple_relays: true
-  helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
-  # Enable timing games for both relays - mev-boost will use config file
+  # Enable timing games for the flashbots relay
   mev_boost_timing_games_params:
     flashbots:
       enable_timing_games: true
       target_first_request_ms: 200
       frequency_get_header_ms: 100
     helix:
-      enable_timing_games: true
-      target_first_request_ms: 150
-      frequency_get_header_ms: 75
-  
+      enable_timing_games: false
+      target_first_request_ms: 200
+      frequency_get_header_ms: 100
+
 spamoor_params:
   spammers:
     - name: "Blob Spammer (Kurtosis Package)"
