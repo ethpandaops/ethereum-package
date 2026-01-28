@@ -373,6 +373,7 @@ SUBCATEGORY_PARAMS = {
         "launch_adminer",
         "run_multiple_relays",
         "helix_relay_image",
+        "mev_boost_timing_games_params",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
