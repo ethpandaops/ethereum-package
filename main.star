@@ -380,7 +380,49 @@ def run(plan, args={}):
 
         first_cl_client = all_cl_contexts[0]
         first_client_beacon_name = first_cl_client.beacon_service_name
-        if (
+
+        # Check if we should run multiple relays (flashbots + helix)
+        if mev_params.run_multiple_relays:
+            plan.print("Launching multiple MEV relays (flashbots + helix)")
+            # Launch flashbots relay first
+            flashbots_endpoint = flashbots_mev_relay.launch_mev_relay(
+                plan,
+                mev_params,
+                network_id,
+                beacon_uri,
+                genesis_validators_root,
+                blocksim_uri,
+                network_params,
+                persistent,
+                args_with_right_defaults.port_publisher,
+                num_participants,
+                global_node_selectors,
+                global_tolerations,
+                builder_cl_context.beacon_service_name,
+            )
+            mev_endpoints.append(flashbots_endpoint)
+            mev_endpoint_names.append("flashbots")
+
+            # Launch helix relay second
+            helix_endpoint = helix_relay.launch_helix_relay(
+                plan,
+                network_params,
+                mev_params,
+                beacon_uri,
+                genesis_validators_root,
+                final_genesis_timestamp,
+                blocksim_uri,
+                persistent,
+                args_with_right_defaults.port_publisher,
+                num_participants + 1,  # Use different index for port allocation
+                global_node_selectors,
+                global_tolerations,
+                el_cl_data_files_artifact_uuid,
+                mev_params.helix_relay_image,  # Use the helix-specific image
+            )
+            mev_endpoints.append(helix_endpoint)
+            mev_endpoint_names.append("helix")
+        elif (
             args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
             or args_with_right_defaults.mev_type == constants.COMMIT_BOOST_MEV_TYPE
         ):
@@ -399,6 +441,8 @@ def run(plan, args={}):
                 global_tolerations,
                 builder_cl_context.beacon_service_name,
             )
+            mev_endpoints.append(endpoint)
+            mev_endpoint_names.append(args_with_right_defaults.mev_type)
         elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
             endpoint, relay_ip_address, relay_port = mev_rs_mev_relay.launch_mev_relay(
                 plan,
@@ -411,6 +455,8 @@ def run(plan, args={}):
                 global_node_selectors,
                 global_tolerations,
             )
+            mev_endpoints.append(endpoint)
+            mev_endpoint_names.append(args_with_right_defaults.mev_type)
         elif args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE:
             endpoint = helix_relay.launch_helix_relay(
                 plan,
@@ -427,11 +473,10 @@ def run(plan, args={}):
                 global_tolerations,
                 el_cl_data_files_artifact_uuid,
             )
+            mev_endpoints.append(endpoint)
+            mev_endpoint_names.append(args_with_right_defaults.mev_type)
         else:
             fail("Invalid MEV type")
-
-        mev_endpoints.append(endpoint)
-        mev_endpoint_names.append(args_with_right_defaults.mev_type)
 
     # spin up the mev boost contexts if some endpoints for relays have been passed
     all_mevboost_contexts = []
