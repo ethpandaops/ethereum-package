@@ -338,6 +338,7 @@ def get_beacon_config(
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.cl_enabled,
         "entrypoint": ["sh", "-c"],
         "cmd": [cmd_str],
         "files": files,
