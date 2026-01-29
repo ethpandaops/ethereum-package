@@ -78,6 +78,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "grafana_params",
     "tempo_params",
     "tx_fuzz_params",
+    "rakoon_params",
     "custom_flood_params",
     "xatu_sentry_params",
     "port_publisher",
@@ -108,6 +109,7 @@ def input_parser(plan, input_args):
     else:
         result["additional_services"] = []
     result["tx_fuzz_params"] = get_default_tx_fuzz_params()
+    result["rakoon_params"] = get_default_rakoon_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
     result["grafana_params"] = get_default_grafana_params()
@@ -162,6 +164,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["tx_fuzz_params"]:
                 sub_value = input_args["tx_fuzz_params"][sub_attr]
                 result["tx_fuzz_params"][sub_attr] = sub_value
+        elif attr == "rakoon_params":
+            for sub_attr in input_args["rakoon_params"]:
+                sub_value = input_args["rakoon_params"][sub_attr]
+                result["rakoon_params"][sub_attr] = sub_value
         elif attr == "custom_flood_params":
             for sub_attr in input_args["custom_flood_params"]:
                 sub_value = input_args["custom_flood_params"][sub_attr]
@@ -758,6 +764,16 @@ def input_parser(plan, input_args):
         tx_fuzz_params=struct(
             image=result["tx_fuzz_params"]["image"],
             tx_fuzz_extra_args=result["tx_fuzz_params"]["tx_fuzz_extra_args"],
+        ),
+        rakoon_params=struct(
+            image=result["rakoon_params"]["image"],
+            tx_type=result["rakoon_params"]["tx_type"],
+            workers=result["rakoon_params"]["workers"],
+            batch_size=result["rakoon_params"]["batch_size"],
+            seed=result["rakoon_params"]["seed"],
+            fuzzing=result["rakoon_params"]["fuzzing"],
+            poll_interval=result["rakoon_params"]["poll_interval"],
+            extra_args=result["rakoon_params"]["extra_args"],
         ),
         prometheus_params=struct(
             storage_tsdb_retention_time=result["prometheus_params"][
@@ -1715,6 +1731,19 @@ def get_default_tx_fuzz_params():
     }
 
 
+def get_default_rakoon_params():
+    return {
+        "image": "ethpandaops/fuzztools:main",
+        "tx_type": "eip7702",
+        "workers": 50,
+        "batch_size": 100,
+        "seed": "",
+        "fuzzing": True,
+        "poll_interval": "",
+        "extra_args": [],
+    }
+
+
 def get_default_assertoor_params():
     return {
         "image": constants.DEFAULT_ASSERTOOR_IMAGE,
@@ -2102,6 +2131,7 @@ def docker_cache_image_override(plan, result):
         "mev_params.mock_mev_image",
         "xatu_sentry_params.xatu_sentry_image",
         "tx_fuzz_params.image",
+        "rakoon_params.image",
         "prometheus_params.image",
         "grafana_params.image",
         "tempo_params.image",
