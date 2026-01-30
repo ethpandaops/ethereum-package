@@ -1,12 +1,35 @@
 participants:
+  # Normal nodes with real EL (nodes 1-3)
   - count: 3
+    el_type: reth
+    cl_type: lighthouse
+    cl_image: ghcr.io/han0110/lighthouse/lighthouse:latest-optional-proofs
+  # zkVM enabled nodes with dummy EL (nodes 4-6)
   - el_type: dummy
     cl_type: lighthouse
-    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    cl_image: ghcr.io/han0110/lighthouse/lighthouse:latest-optional-proofs
     cl_extra_params:
       - --activate-zkvm
+    count: 3
 
 additional_services:
   - ews
   - dora
 mev_type: flashbots
+ews_params:
+  num_proofs: 2
+  proof_types:
+    - ethrex-zisk
+    - reth-zisk
+  env:
+    RUST_LOG: info
+  zkboost:
+    zkvms:
+      - program_id: ethrex-zisk
+        mock_proving_time_ms: 1000
+        mock_proof_size: 1024
+      - program_id: reth-zisk
+        mock_proving_time_ms: 1000
+        mock_proof_size: 1024
+    env:
+      RUST_LOG: info

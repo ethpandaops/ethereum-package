@@ -912,9 +912,13 @@ def run(plan, args={}):
         elif additional_service == "ews":
             plan.print("Launching execution-witness-sentry")
             ews_config_template = read_file(static_files.EWS_CONFIG_TEMPLATE_FILEPATH)
+            zkboost_config_template = read_file(
+                static_files.ZKBOOST_CONFIG_TEMPLATE_FILEPATH
+            )
             ews.launch_ews(
                 plan,
                 ews_config_template,
+                zkboost_config_template,
                 all_participants,
                 args_with_right_defaults.participants,
                 network_params,

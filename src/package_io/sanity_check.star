@@ -414,6 +414,8 @@ SUBCATEGORY_PARAMS = {
         "retain",
         "num_proofs",
         "env",
+        "proof_types",
+        "zkboost",
     ],
 }
 

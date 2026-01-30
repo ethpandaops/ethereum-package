@@ -211,7 +211,13 @@ def input_parser(plan, input_args):
         elif attr == "ews_params":
             for sub_attr in input_args["ews_params"]:
                 sub_value = input_args["ews_params"][sub_attr]
-                result["ews_params"][sub_attr] = sub_value
+                if sub_attr == "zkboost":
+                    for zkboost_attr in sub_value:
+                        result["ews_params"]["zkboost"][zkboost_attr] = sub_value[
+                            zkboost_attr
+                        ]
+                else:
+                    result["ews_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -909,6 +915,12 @@ def input_parser(plan, input_args):
             retain=result["ews_params"]["retain"],
             num_proofs=result["ews_params"]["num_proofs"],
             env=result["ews_params"]["env"],
+            proof_types=result["ews_params"]["proof_types"],
+            zkboost=struct(
+                image=result["ews_params"]["zkboost"]["image"],
+                zkvms=result["ews_params"]["zkboost"]["zkvms"],
+                env=result["ews_params"]["zkboost"]["env"],
+            ),
         ),
     )
 
@@ -1860,6 +1872,12 @@ def get_default_ews_params():
         "retain": 10,
         "num_proofs": 1,
         "env": {},
+        "proof_types": [],
+        "zkboost": {
+            "image": constants.DEFAULT_ZKBOOST_IMAGE,
+            "zkvms": [],
+            "env": {},
+        },
     }
 
 
