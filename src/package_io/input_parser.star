@@ -25,6 +25,7 @@ DEFAULT_CL_IMAGES = {
     "prysm": "offchainlabs/prysm-beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
+    "consensoor": "ethpandaops/consensoor:main",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -34,6 +35,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "ethpandaops/lodestar:unstable",
     "grandine": "ethpandaops/grandine:develop-minimal",
+    "consensoor": "ethpandaops/consensoor:main",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -44,6 +46,7 @@ DEFAULT_VC_IMAGES = {
     "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
+    "consensoor": "ethpandaops/consensoor:main",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -54,6 +57,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "teku": "ethpandaops/teku:master",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:latest",
+    "consensoor": "ethpandaops/consensoor:main",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
