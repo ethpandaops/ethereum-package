@@ -12,6 +12,7 @@ validator_ranges = import_module(
 )
 
 tx_fuzz = import_module("./src/tx_fuzz/tx_fuzz.star")
+rakoon = import_module("./src/rakoon/rakoon.star")
 forkmon = import_module("./src/forkmon/forkmon_launcher.star")
 
 dora = import_module("./src/dora/dora_launcher.star")
@@ -605,6 +606,19 @@ def run(plan, args={}):
                 global_tolerations,
             )
             plan.print("Successfully launched tx-fuzz")
+        elif additional_service == "rakoon":
+            plan.print("Launching rakoon transaction fuzzer")
+            rakoon_params = args_with_right_defaults.rakoon_params
+            rakoon.launch_rakoon(
+                plan,
+                prefunded_accounts,
+                fuzz_target,
+                rakoon_params,
+                network_params.genesis_delay,
+                global_node_selectors,
+                global_tolerations,
+            )
+            plan.print("Successfully launched rakoon")
         elif additional_service == "forkmon":
             plan.print("Launching el forkmon")
             forkmon_config_template = read_file(

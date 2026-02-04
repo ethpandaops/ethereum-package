@@ -212,6 +212,8 @@ def get_vc_config(
         )
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
+    elif vc_type == constants.VC_TYPE.consensoor:
+        return None
     else:
         fail("Unsupported vc_type: {0}".format(vc_type))
 
