@@ -50,6 +50,8 @@ def launch_participant_network(
     extra_files_artifacts,
     tempo_otlp_grpc_url,
     backend,
+    pyroscope_url=None,
+    pyroscope_java_agent_artifact=None,
 ):
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
@@ -180,6 +182,9 @@ def launch_participant_network(
         if participant_binaries:
             binary_artifacts[index] = participant_binaries
 
+    # pyroscope_url is passed from main.star if Pyroscope is enabled
+    # This allows native Pyroscope SDK profiling (Geth supports --pyroscope flag)
+
     # Launch all execution layer clients
     all_el_contexts = el_client_launcher.launch(
         plan,
@@ -199,6 +204,8 @@ def launch_participant_network(
         extra_files_artifacts,
         bootnodoor_enode,
         binary_artifacts,
+        pyroscope_url,
+        pyroscope_java_agent_artifact,
     )
 
     # Launch all consensus layer clients
@@ -240,6 +247,8 @@ def launch_participant_network(
         backend,
         bootnodoor_enr,
         binary_artifacts,
+        pyroscope_url,
+        pyroscope_java_agent_artifact,
     )
 
     # Stop beacon nodes for participants with skip_start enabled

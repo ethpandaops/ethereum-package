@@ -310,6 +310,7 @@ def get_port_specs(port_assignments, wait=NOT_PROVIDED_WAIT):
         elif port_id in [
             constants.HTTP_PORT_ID,
             constants.METRICS_PORT_ID,
+            constants.PPROF_PORT_ID,
             constants.VALIDATOR_HTTP_PORT_ID,
             constants.ADMIN_PORT_ID,
             constants.VALIDATOR_GRPC_PORT_ID,
