@@ -209,11 +209,7 @@ mev_params:
   mev_builder_prometheus_config:
     scrape_interval: 15s
     labels: {}
-  # When true, launches both flashbots and helix relays
-  # The reth-rbuilder will submit bids to both relays
-  # mev-boost will query both relays for bids
   run_multiple_relays: false
-  # Helix relay image (used when run_multiple_relays is true or mev_type is helix)
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
   custom_flood_params:
     interval_between_transactions: 1

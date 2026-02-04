@@ -1324,6 +1324,12 @@ mev_params:
   mock_mev_image: ethpandaops/rustic-builder:main
   # Whether to launch Adminer for the MEV relay PostgreSQL database
   launch_adminer: false
+  # When true, launches both flashbots and helix relays
+  # The reth-rbuilder will submit bids to both relays and mev-boost will query both relays for bids
+  # Works with mev_type: flashbots
+  run_multiple_relays: false
+  # The image to use for helix relay (used when run_multiple_relays is true or mev_type is helix)
+  helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
 
 # Enables Xatu Sentry for all participants
 # Defaults to false
