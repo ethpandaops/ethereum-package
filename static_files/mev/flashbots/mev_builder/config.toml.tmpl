@@ -23,7 +23,7 @@ ignore_cancellable_orders = true
 
 live_builders = ["mp-ordering", "mgp-ordering"]
 
-enabled_relays = ["{{ .RelayName }}"]
+enabled_relays = [{{ .EnabledRelays }}]
 
 root_hash_use_sparse_trie=true
 root_hash_compare_sparse_trie=false
@@ -32,13 +32,14 @@ root_hash_compare_sparse_trie=false
 subsidy = "{{ .Subsidy }}"
 {{- end }}
 
-
+{{ range $relay := .Relays }}
 [[relays]]
-name = "{{ .RelayName }}"
-url = "http://{{ .PublicKey }}@{{ .Relay }}:{{ .RelayPort }}"
-priority = 0
+name = "{{ $relay.Name }}"
+url = "http://{{ $.PublicKey }}@{{ $relay.Service }}:{{ $relay.Port }}"
+priority = {{ $relay.Priority }}
 use_ssz_for_submit = false
 use_gzip_for_submit = false
+{{ end }}
 
 
 [[builders]]
