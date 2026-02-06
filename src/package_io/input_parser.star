@@ -87,6 +87,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "slashoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
     "ews_params",
@@ -127,6 +128,7 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
+    result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["ews_params"] = get_default_ews_params()
 
@@ -202,6 +204,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "slashoor_params":
+            for sub_attr in input_args["slashoor_params"]:
+                sub_value = input_args["slashoor_params"][sub_attr]
+                result["slashoor_params"][sub_attr] = sub_value
         elif attr == "mempool_bridge_params":
             for sub_attr in input_args["mempool_bridge_params"]:
                 sub_value = input_args["mempool_bridge_params"][sub_attr]
@@ -1860,6 +1866,23 @@ def get_default_spamoor_params():
                 },
             },
         ],
+    }
+
+
+def get_default_slashoor_params():
+    return {
+        "image": constants.DEFAULT_SLASHOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 512,
+        "extra_args": [],
+        "log_level": "info",
+        "beacon_timeout": "30s",
+        "max_epochs_to_keep": 54000,
+        "detector_enabled": True,
+        "submitter_enabled": True,
+        "submitter_dry_run": False,
     }
 
 
