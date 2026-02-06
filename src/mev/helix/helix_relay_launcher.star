@@ -56,6 +56,7 @@ def launch_helix_relay(
     global_node_selectors,
     global_tolerations,
     el_cl_genesis_data,
+    relay_image=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     public_ports = {}
@@ -129,10 +130,13 @@ def launch_helix_relay(
         "RELAY_KEY": constants.DEFAULT_MEV_SECRET_KEY,
     }
 
+    # Use provided relay_image if available, otherwise use mev_params.mev_relay_image
+    helix_image = relay_image if relay_image else mev_params.mev_relay_image
+
     endpoint = plan.add_service(
         name=HELIX_RELAY_NAME,
         config=ServiceConfig(
-            image=mev_params.mev_relay_image,
+            image=helix_image,
             cmd=["--config", config_file_path],
             files={
                 HELIX_RELAY_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,

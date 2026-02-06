@@ -209,6 +209,8 @@ mev_params:
   mev_builder_prometheus_config:
     scrape_interval: 15s
     labels: {}
+  run_multiple_relays: false
+  helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
   custom_flood_params:
     interval_between_transactions: 1
 bootnodoor_params:
@@ -244,7 +246,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.2.3
+  image: ethpandaops/ethereum-genesis-generator:5.2.4
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER

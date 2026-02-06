@@ -313,6 +313,16 @@ SUBCATEGORY_PARAMS = {
         "image",
         "tx_fuzz_extra_args",
     ],
+    "rakoon_params": [
+        "image",
+        "tx_type",
+        "workers",
+        "batch_size",
+        "seed",
+        "fuzzing",
+        "poll_interval",
+        "extra_args",
+    ],
     "prometheus_params": [
         "min_cpu",
         "max_cpu",
@@ -371,6 +381,8 @@ SUBCATEGORY_PARAMS = {
         "custom_flood_params",
         "mock_mev_image",
         "launch_adminer",
+        "run_multiple_relays",
+        "helix_relay_image",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
@@ -443,6 +455,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "nginx",
     "tracoor",
     "mempool_bridge",
+    "rakoon",
     "spamoor",
     "ews",
 ]

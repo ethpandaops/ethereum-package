@@ -6,6 +6,7 @@ nimbus = import_module("./nimbus/nimbus_launcher.star")
 prysm = import_module("./prysm/prysm_launcher.star")
 teku = import_module("./teku/teku_launcher.star")
 grandine = import_module("./grandine/grandine_launcher.star")
+consensoor = import_module("./consensoor/consensoor_launcher.star")
 
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
@@ -96,6 +97,16 @@ def launch(
             "get_beacon_config": grandine.get_beacon_config,
             "get_cl_context": grandine.get_cl_context,
             "get_blobber_config": grandine.get_blobber_config,
+        },
+        constants.CL_TYPE.consensoor: {
+            "launcher": consensoor.new_consensoor_launcher(
+                el_cl_data,
+                jwt_file,
+            ),
+            "launch_method": consensoor.launch,
+            "get_beacon_config": consensoor.get_beacon_config,
+            "get_cl_context": consensoor.get_cl_context,
+            "get_blobber_config": consensoor.get_blobber_config,
         },
     }
 
