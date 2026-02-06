@@ -63,6 +63,7 @@ get_prefunded_accounts = import_module(
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
 ews = import_module("./src/ews/ews_launcher.star")
+ere = import_module("./src/ere/ere_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -591,6 +592,7 @@ def run(plan, args={}):
         return output
 
     launch_prometheus_grafana = False
+    ere_endpoints = {}
     for index, additional_service in enumerate(
         args_with_right_defaults.additional_services
     ):
@@ -968,6 +970,20 @@ def run(plan, args={}):
                 index,
                 osaka_time,
             )
+        elif additional_service == "ere_server_zisk":
+            plan.print("Launching ERE server (zisk)")
+            ere_server_zisk_url = ere.launch_ere_server(
+                plan,
+                "ethrex-zisk",
+                args_with_right_defaults.ere_server_zisk_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            ere_endpoints["ethrex-zisk"] = ere_server_zisk_url
+            plan.print("Successfully launched ERE server (zisk)")
         elif additional_service == "ews":
             plan.print("Launching execution-witness-sentry")
             ews_config_template = read_file(static_files.EWS_CONFIG_TEMPLATE_FILEPATH)
@@ -987,6 +1003,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                ere_endpoints,
             )
             plan.print("Successfully launched execution-witness-sentry")
         else:

@@ -429,6 +429,13 @@ SUBCATEGORY_PARAMS = {
         "proof_types",
         "zkboost",
     ],
+    "ere_server_zisk_params": [
+        "image",
+        "env",
+        "gpu_count",
+        "gpu_devices",
+        "program_url",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -458,6 +465,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "rakoon",
     "spamoor",
     "ews",
+    "ere_server_zisk",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

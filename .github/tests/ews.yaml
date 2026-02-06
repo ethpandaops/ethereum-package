@@ -12,24 +12,29 @@ participants:
       - --activate-zkvm
     count: 3
 
+network_params:
+  prefunded_accounts: '{"0xb9e79d19f651a941757b35830232e7efc77e1c79": {"balance": "100000ETH"}}'
+
+mev_params:
+  mev_builder_subsidy: 1
+
 additional_services:
+  - ere_server_zisk
   - ews
   - dora
 mev_type: flashbots
+
+ere_server_zisk_params:
+  gpu_count: 1
+
 ews_params:
-  num_proofs: 2
+  num_proofs: 1
   proof_types:
     - ethrex-zisk
-    - reth-zisk
   env:
     RUST_LOG: info
   zkboost:
     zkvms:
       - program_id: ethrex-zisk
-        mock_proving_time_ms: 1000
-        mock_proof_size: 1024
-      - program_id: reth-zisk
-        mock_proving_time_ms: 1000
-        mock_proof_size: 1024
     env:
       RUST_LOG: info

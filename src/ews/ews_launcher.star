@@ -50,6 +50,7 @@ def launch_ews(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    ere_endpoints={},
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -125,6 +126,7 @@ def launch_ews(
         global_node_selectors,
         tolerations,
         docker_cache_params,
+        ere_endpoints,
     )
 
 
@@ -189,6 +191,7 @@ def launch_zkboost(
     node_selectors,
     tolerations,
     docker_cache_params,
+    ere_endpoints={},
 ):
     ews_info = new_ews_info(
         "http://{0}:{1}".format(SERVICE_NAME, HTTP_PORT_NUMBER),
@@ -196,7 +199,7 @@ def launch_zkboost(
 
     zkvms = []
     for zkvm in ews_params.zkboost.zkvms:
-        zkvms.append(new_zkvm_info(zkvm))
+        zkvms.append(new_zkvm_info(zkvm, ere_endpoints))
 
     zkboost_template_data = new_zkboost_config_template_data(ews_info, zkvms)
 
@@ -290,11 +293,15 @@ def new_ews_info(http_url):
     }
 
 
-def new_zkvm_info(zkvm):
+def new_zkvm_info(zkvm, ere_endpoints={}):
+    program_id = zkvm.get("program_id", "")
     info = {
-        "ProgramId": zkvm.get("program_id", ""),
+        "ProgramId": program_id,
     }
-    if zkvm.get("endpoint"):
+    # Auto-wire ERE endpoint if available and no explicit endpoint set
+    if not zkvm.get("endpoint") and program_id in ere_endpoints:
+        info["Endpoint"] = ere_endpoints[program_id]
+    elif zkvm.get("endpoint"):
         info["Endpoint"] = zkvm["endpoint"]
     if zkvm.get("mock_proving_time_ms"):
         info["MockProvingTimeMs"] = zkvm["mock_proving_time_ms"]
