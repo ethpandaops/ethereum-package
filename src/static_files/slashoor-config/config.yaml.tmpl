@@ -1,0 +1,16 @@
+beacon:
+  endpoints:
+{{- range .BeaconEndpoints }}
+    - "{{ . }}"
+{{- end }}
+  timeout: {{ .BeaconTimeout }}
+
+indexer:
+  max_epochs_to_keep: {{ .MaxEpochsToKeep }}
+
+detector:
+  enabled: {{ .DetectorEnabled }}
+
+submitter:
+  enabled: {{ .SubmitterEnabled }}
+  dry_run: {{ .SubmitterDryRun }}
