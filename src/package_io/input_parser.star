@@ -90,6 +90,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "bootnodoor_params",
     "mempool_bridge_params",
     "ews_params",
+    "ere_server_zisk_params",
     "ethereum_genesis_generator_params",
 )
 
@@ -129,6 +130,7 @@ def input_parser(plan, input_args):
     result["spamoor_params"] = get_default_spamoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["ews_params"] = get_default_ews_params()
+    result["ere_server_zisk_params"] = get_default_ere_server_zisk_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -221,7 +223,17 @@ def input_parser(plan, input_args):
         elif attr == "ews_params":
             for sub_attr in input_args["ews_params"]:
                 sub_value = input_args["ews_params"][sub_attr]
-                result["ews_params"][sub_attr] = sub_value
+                if sub_attr == "zkboost":
+                    for zkboost_attr in sub_value:
+                        result["ews_params"]["zkboost"][zkboost_attr] = sub_value[
+                            zkboost_attr
+                        ]
+                else:
+                    result["ews_params"][sub_attr] = sub_value
+        elif attr == "ere_server_zisk_params":
+            for sub_attr in input_args["ere_server_zisk_params"]:
+                sub_value = input_args["ere_server_zisk_params"][sub_attr]
+                result["ere_server_zisk_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -931,6 +943,19 @@ def input_parser(plan, input_args):
             retain=result["ews_params"]["retain"],
             num_proofs=result["ews_params"]["num_proofs"],
             env=result["ews_params"]["env"],
+            proof_types=result["ews_params"]["proof_types"],
+            zkboost=struct(
+                image=result["ews_params"]["zkboost"]["image"],
+                zkvms=result["ews_params"]["zkboost"]["zkvms"],
+                env=result["ews_params"]["zkboost"]["env"],
+            ),
+        ),
+        ere_server_zisk_params=struct(
+            image=result["ere_server_zisk_params"]["image"],
+            env=result["ere_server_zisk_params"]["env"],
+            gpu_count=result["ere_server_zisk_params"]["gpu_count"],
+            gpu_devices=result["ere_server_zisk_params"]["gpu_devices"],
+            program_url=result["ere_server_zisk_params"]["program_url"],
         ),
     )
 
@@ -1897,6 +1922,22 @@ def get_default_ews_params():
         "retain": 10,
         "num_proofs": 1,
         "env": {},
+        "proof_types": [],
+        "zkboost": {
+            "image": constants.DEFAULT_ZKBOOST_IMAGE,
+            "zkvms": [],
+            "env": {},
+        },
+    }
+
+
+def get_default_ere_server_zisk_params():
+    return {
+        "image": constants.DEFAULT_ERE_SERVER_ZISK_IMAGE,
+        "env": {"RUST_LOG": "info"},
+        "gpu_count": 0,
+        "gpu_devices": [],
+        "program_url": "https://github.com/eth-act/ere-guests/releases/download/v0.4.0/stateless-validator-ethrex-zisk",
     }
 
 

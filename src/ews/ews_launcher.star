@@ -2,12 +2,16 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 
 SERVICE_NAME = "ews"
+ZKBOOST_SERVICE_NAME = "zkboost"
 
 HTTP_PORT_NUMBER = 3000
+ZKBOOST_HTTP_PORT_NUMBER = 3000
 
 EWS_CONFIG_FILENAME = "config.toml"
+ZKBOOST_CONFIG_FILENAME = "zkboost-config.toml"
 
 EWS_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
+ZKBOOST_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
 MIN_CPU = 100
 MAX_CPU = 1000
@@ -23,10 +27,20 @@ USED_PORTS = {
     )
 }
 
+ZKBOOST_USED_PORTS = {
+    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
+        ZKBOOST_HTTP_PORT_NUMBER,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+        wait=None,
+    )
+}
+
 
 def launch_ews(
     plan,
     config_template,
+    zkboost_config_template,
     participant_contexts,
     participant_configs,
     network_params,
@@ -36,6 +50,7 @@ def launch_ews(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    ere_endpoints={},
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -68,6 +83,10 @@ def launch_ews(
                     cl_client.beacon_http_url,
                 )
 
+    zkboost_info = new_zkboost_info(
+        "http://{0}:{1}".format(ZKBOOST_SERVICE_NAME, ZKBOOST_HTTP_PORT_NUMBER),
+    )
+
     template_data = new_config_template_data(
         network_params.network,
         ews_params.retain,
@@ -75,6 +94,8 @@ def launch_ews(
         first_real_el_info,
         head_subscription_cl_info,
         dummy_cl_client_info,
+        zkboost_info,
+        ews_params.proof_types,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -97,6 +118,16 @@ def launch_ews(
     )
 
     plan.add_service(SERVICE_NAME, config)
+
+    launch_zkboost(
+        plan,
+        zkboost_config_template,
+        ews_params,
+        global_node_selectors,
+        tolerations,
+        docker_cache_params,
+        ere_endpoints,
+    )
 
 
 def get_config(
@@ -132,7 +163,7 @@ def get_config(
         files={
             EWS_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
-        entrypoint=["/app/execution-witness-sentry"],
+        entrypoint=["/usr/local/bin/execution-witness-sentry"],
         cmd=["--config", config_file_path],
         env_vars=ews_params.env,
         min_cpu=MIN_CPU,
@@ -141,16 +172,84 @@ def get_config(
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
         tolerations=tolerations,
-        # ready_conditions=ReadyCondition(
-        #     recipe=GetHttpRequestRecipe(
-        #         port_id=constants.HTTP_PORT_ID,
-        #         endpoint="/health",
-        #     ),
-        #     field="code",
-        #     assertion="==",
-        #     target_value=200,
-        # ),
+        ready_conditions=ReadyCondition(
+            recipe=GetHttpRequestRecipe(
+                port_id=constants.HTTP_PORT_ID,
+                endpoint="/health",
+            ),
+            field="code",
+            assertion="==",
+            target_value=200,
+        ),
     )
+
+
+def launch_zkboost(
+    plan,
+    zkboost_config_template,
+    ews_params,
+    node_selectors,
+    tolerations,
+    docker_cache_params,
+    ere_endpoints={},
+):
+    ews_info = new_ews_info(
+        "http://{0}:{1}".format(SERVICE_NAME, HTTP_PORT_NUMBER),
+    )
+
+    zkvms = []
+    for zkvm in ews_params.zkboost.zkvms:
+        zkvms.append(new_zkvm_info(zkvm, ere_endpoints))
+
+    zkboost_template_data = new_zkboost_config_template_data(ews_info, zkvms)
+
+    template_and_data = shared_utils.new_template_and_data(
+        zkboost_config_template, zkboost_template_data
+    )
+    template_and_data_by_rel_dest_filepath = {}
+    template_and_data_by_rel_dest_filepath[ZKBOOST_CONFIG_FILENAME] = template_and_data
+
+    config_files_artifact_name = plan.render_templates(
+        template_and_data_by_rel_dest_filepath, "zkboost-config"
+    )
+
+    config_file_path = shared_utils.path_join(
+        ZKBOOST_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
+        ZKBOOST_CONFIG_FILENAME,
+    )
+
+    IMAGE_NAME = shared_utils.docker_cache_image_calc(
+        docker_cache_params,
+        ews_params.zkboost.image,
+    )
+
+    config = ServiceConfig(
+        image=IMAGE_NAME,
+        ports=ZKBOOST_USED_PORTS,
+        files={
+            ZKBOOST_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+        },
+        entrypoint=["/usr/local/bin/zkboost-server"],
+        cmd=["--config", config_file_path],
+        env_vars=ews_params.zkboost.env,
+        min_cpu=MIN_CPU,
+        max_cpu=MAX_CPU,
+        min_memory=MIN_MEMORY,
+        max_memory=MAX_MEMORY,
+        node_selectors=node_selectors,
+        tolerations=tolerations,
+        ready_conditions=ReadyCondition(
+            recipe=GetHttpRequestRecipe(
+                port_id=constants.HTTP_PORT_ID,
+                endpoint="/health",
+            ),
+            field="code",
+            assertion="==",
+            target_value=200,
+        ),
+    )
+
+    plan.add_service(ZKBOOST_SERVICE_NAME, config)
 
 
 def new_config_template_data(
@@ -160,6 +259,8 @@ def new_config_template_data(
     el_client_info,
     head_subscription_cl_info,
     zkvm_cl_client_info,
+    zkboost_info,
+    proof_types,
 ):
     return {
         "Network": network,
@@ -168,7 +269,45 @@ def new_config_template_data(
         "ELClientInfo": el_client_info,
         "HeadSubscriptionCLInfo": head_subscription_cl_info,
         "ZkvmCLClientInfo": zkvm_cl_client_info,
+        "ZkboostInfo": zkboost_info,
+        "ProofTypes": proof_types,
     }
+
+
+def new_zkboost_config_template_data(ews_info, zkvms):
+    return {
+        "EWSInfo": ews_info,
+        "Zkvms": zkvms,
+    }
+
+
+def new_zkboost_info(http_url):
+    return {
+        "HTTP_URL": http_url,
+    }
+
+
+def new_ews_info(http_url):
+    return {
+        "HTTP_URL": http_url,
+    }
+
+
+def new_zkvm_info(zkvm, ere_endpoints={}):
+    program_id = zkvm.get("program_id", "")
+    info = {
+        "ProgramId": program_id,
+    }
+    # Auto-wire ERE endpoint if available and no explicit endpoint set
+    if not zkvm.get("endpoint") and program_id in ere_endpoints:
+        info["Endpoint"] = ere_endpoints[program_id]
+    elif zkvm.get("endpoint"):
+        info["Endpoint"] = zkvm["endpoint"]
+    if zkvm.get("mock_proving_time_ms"):
+        info["MockProvingTimeMs"] = zkvm["mock_proving_time_ms"]
+    if zkvm.get("mock_proof_size"):
+        info["MockProofSize"] = zkvm["mock_proof_size"]
+    return info
 
 
 def new_el_client_info(full_name, el_http_url, el_ws_url):
