@@ -1,0 +1,11 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    count: 2
+mev_type: buildoor
+buildoor_params:
+  legacy_builder: true
+  epbs_builder: true
+additional_services:
+  - dora
+  - spamoor
