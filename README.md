@@ -1272,7 +1272,7 @@ mempool_bridge_params:
   # Default: "30s"
   retry_interval: "30s"
 
-# Supports six values
+# Supports seven values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
@@ -1280,6 +1280,8 @@ mempool_bridge_params:
 # "commit-boost" - mev-boost, relays and builder are all spun up, powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
 # "helix" - helix relay, flashbots builder and mev-boost are spun up, powered by [helix](https://github.com/gattaca-com/helix)
 #            Note: Helix uses TimescaleDB (PostgreSQL with time-series extension) for data storage
+# "buildoor" - a self-contained builder+relay service & mev-boost are spun up, powered by [buildoor](https://github.com/ethpandaops/buildoor)
+#              Supports both legacy builder API and ePBS bidding. No separate relay infrastructure or builder participant needed.
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -1330,6 +1332,17 @@ mev_params:
   run_multiple_relays: false
   # The image to use for helix relay (used when run_multiple_relays is true or mev_type is helix)
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
+
+# Parameters for the buildoor builder+relay service (used when mev_type is "buildoor")
+buildoor_params:
+  # The image to use for buildoor
+  image: ethpandaops/buildoor:main
+  # Enable the legacy builder API (traditional block building via relay)
+  builder_api: true
+  # Enable ePBS bidding and revealing
+  epbs_builder: true
+  # Extra parameters to pass to the buildoor service
+  extra_args: []
 
 # Enables Xatu Sentry for all participants
 # Defaults to false
@@ -1663,6 +1676,25 @@ network_params:
 </details>
 
 <details>
+    <summary>A 2-node Ethereum network with buildoor (self-contained builder+relay)</summary>
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    count: 2
+mev_type: buildoor
+buildoor_params:
+  builder_api: true
+  epbs_builder: true
+additional_services:
+  - dora
+  - spamoor
+```
+
+</details>
+
+<details>
     <summary>A 3-node Ethereum network with Helix relay for MEV-boost infrastructure</summary>
 
 ```yaml
@@ -1865,6 +1897,7 @@ The package also supports other MEV implementations:
 - `"mev_type": "helix"` - Uses the high-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend for data storage
 - `"mev_type": "mev-rs"` - Alternative relay implementation powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 - `"mev_type": "commit-boost"` - Infrastructure powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
+- `"mev_type": "buildoor"` - A self-contained builder+relay service powered by [buildoor](https://github.com/ethpandaops/buildoor). Supports both legacy builder API and ePBS bidding without requiring separate relay infrastructure or a dedicated builder participant.
 
 Each implementation provides different features and performance characteristics suitable for various testing and development scenarios.
 

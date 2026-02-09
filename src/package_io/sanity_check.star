@@ -427,6 +427,12 @@ SUBCATEGORY_PARAMS = {
         "num_proofs",
         "env",
     ],
+    "buildoor_params": [
+        "image",
+        "extra_args",
+        "builder_api",
+        "epbs_builder",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [

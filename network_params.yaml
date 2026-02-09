@@ -190,7 +190,7 @@ ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 disable_peer_scoring: false
 persistent: false
-# Supports: null, mock, flashbots, mev-rs, commit-boost, helix
+# Supports: null, mock, flashbots, mev-rs, commit-boost, helix, buildoor
 mev_type: null
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
@@ -213,6 +213,11 @@ mev_params:
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
   custom_flood_params:
     interval_between_transactions: 1
+buildoor_params:
+  image: ethpandaops/buildoor:main
+  builder_api: true
+  epbs_builder: true
+  extra_args: []
 bootnodoor_params:
   image: ethpandaops/bootnodoor:latest
   min_cpu: 100
