@@ -430,7 +430,7 @@ SUBCATEGORY_PARAMS = {
     "buildoor_params": [
         "image",
         "extra_args",
-        "legacy_builder",
+        "builder_api",
         "epbs_builder",
     ],
 }

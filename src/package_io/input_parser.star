@@ -942,7 +942,7 @@ def input_parser(plan, input_args):
         buildoor_params=struct(
             image=result["buildoor_params"]["image"],
             extra_args=result["buildoor_params"]["extra_args"],
-            legacy_builder=result["buildoor_params"]["legacy_builder"],
+            builder_api=result["buildoor_params"]["builder_api"],
             epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
     )
@@ -1917,7 +1917,7 @@ def get_default_buildoor_params():
     return {
         "image": constants.DEFAULT_BUILDOOR_IMAGE,
         "extra_args": [],
-        "legacy_builder": True,
+        "builder_api": True,
         "epbs_builder": True,
     }
 

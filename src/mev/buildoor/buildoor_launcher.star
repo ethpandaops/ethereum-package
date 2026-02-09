@@ -44,7 +44,7 @@ def launch_buildoor(
         "--builder-api-port={0}".format(BUILDOOR_BUILDER_API_PORT),
     ]
 
-    if buildoor_params.legacy_builder:
+    if buildoor_params.builder_api:
         cmd.append("--builder-api-enabled")
 
     if buildoor_params.epbs_builder:

@@ -215,7 +215,7 @@ mev_params:
     interval_between_transactions: 1
 buildoor_params:
   image: ethpandaops/buildoor:main
-  legacy_builder: true
+  builder_api: true
   epbs_builder: true
   extra_args: []
 bootnodoor_params:

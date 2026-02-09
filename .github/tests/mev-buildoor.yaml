@@ -4,7 +4,7 @@ participants:
     count: 2
 mev_type: buildoor
 buildoor_params:
-  legacy_builder: true
+  builder_api: true
   epbs_builder: true
 additional_services:
   - dora

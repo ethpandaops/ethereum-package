@@ -1338,7 +1338,7 @@ buildoor_params:
   # The image to use for buildoor
   image: ethpandaops/buildoor:main
   # Enable the legacy builder API (traditional block building via relay)
-  legacy_builder: true
+  builder_api: true
   # Enable ePBS bidding and revealing
   epbs_builder: true
   # Extra parameters to pass to the buildoor service
@@ -1685,7 +1685,7 @@ participants:
     count: 2
 mev_type: buildoor
 buildoor_params:
-  legacy_builder: true
+  builder_api: true
   epbs_builder: true
 additional_services:
   - dora
