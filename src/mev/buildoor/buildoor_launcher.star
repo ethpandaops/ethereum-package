@@ -58,7 +58,9 @@ def launch_buildoor(
             image=buildoor_params.image,
             ports={
                 "api": PortSpec(
-                    number=BUILDOOR_API_PORT, transport_protocol="TCP", application_protocol="http"
+                    number=BUILDOOR_API_PORT,
+                    transport_protocol="TCP",
+                    application_protocol="http",
                 ),
                 "builder-api": PortSpec(
                     number=BUILDOOR_BUILDER_API_PORT, transport_protocol="TCP"
