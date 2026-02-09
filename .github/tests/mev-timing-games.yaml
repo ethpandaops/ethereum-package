@@ -24,6 +24,7 @@ mev_params:
   mev_boost_image: ethpandaops/mev-boost:develop
   mev_builder_cl_image: ethpandaops/lighthouse:unstable
   mev_builder_subsidy: 1
+  run_multiple_relays: true
   # Enable timing games for the flashbots relay
   mev_boost_timing_games_params:
     flashbots:
