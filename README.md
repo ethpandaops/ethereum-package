@@ -1435,7 +1435,7 @@ spamoor_params:
 # and automatically submits attester slashings to the beacon chain
 slashoor_params:
   # The image to use for slashoor
-  image: ethpandaops/slashoor:master
+  image: ethpandaops/slashoor:latest
   # Resource management for slashoor
   # CPU is milicores
   # RAM is in MB
