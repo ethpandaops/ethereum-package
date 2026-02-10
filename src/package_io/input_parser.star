@@ -91,6 +91,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "bootnodoor_params",
     "mempool_bridge_params",
     "ews_params",
+    "buildoor_params",
     "ethereum_genesis_generator_params",
 )
 
@@ -131,6 +132,7 @@ def input_parser(plan, input_args):
     result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["ews_params"] = get_default_ews_params()
+    result["buildoor_params"] = get_default_buildoor_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -228,6 +230,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["ews_params"]:
                 sub_value = input_args["ews_params"][sub_attr]
                 result["ews_params"][sub_attr] = sub_value
+        elif attr == "buildoor_params":
+            for sub_attr in input_args["buildoor_params"]:
+                sub_value = input_args["buildoor_params"][sub_attr]
+                result["buildoor_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -238,6 +244,7 @@ def input_parser(plan, input_args):
         constants.MEV_RS_MEV_TYPE,
         constants.COMMIT_BOOST_MEV_TYPE,
         constants.HELIX_MEV_TYPE,
+        constants.BUILDOOR_MEV_TYPE,
     ):
         result = enrich_mev_extra_params(
             result,
@@ -249,7 +256,7 @@ def input_parser(plan, input_args):
         pass
     else:
         fail(
-            "Unsupported MEV type: {0}, please use 'mock', 'flashbots', 'mev-rs', 'commit-boost' or 'helix' type".format(
+            "Unsupported MEV type: {0}, please use 'mock', 'flashbots', 'mev-rs', 'commit-boost', 'helix' or 'buildoor' type".format(
                 result.get("mev_type")
             )
         )
@@ -956,6 +963,12 @@ def input_parser(plan, input_args):
             retain=result["ews_params"]["retain"],
             num_proofs=result["ews_params"]["num_proofs"],
             env=result["ews_params"]["env"],
+        ),
+        buildoor_params=struct(
+            image=result["buildoor_params"]["image"],
+            extra_args=result["buildoor_params"]["extra_args"],
+            builder_api=result["buildoor_params"]["builder_api"],
+            epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
     )
 
@@ -1944,6 +1957,15 @@ def get_default_ews_params():
         "retain": 10,
         "num_proofs": 1,
         "env": {},
+    }
+
+
+def get_default_buildoor_params():
+    return {
+        "image": constants.DEFAULT_BUILDOOR_IMAGE,
+        "extra_args": [],
+        "builder_api": True,
+        "epbs_builder": True,
     }
 
 
