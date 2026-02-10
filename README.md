@@ -971,6 +971,7 @@ additional_services:
   - mempool_bridge
   - prometheus
   - rakoon
+  - slashoor
   - spamoor
   - tempo
   - tracoor
@@ -1414,6 +1415,34 @@ spamoor_params:
   #     throughput: 10  # 10 tx per block
   spammers: []
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
+  extra_args: []
+
+# Configuration place for slashoor - https://github.com/ethpandaops/slashoor
+# Slashoor is a lazy slasher that monitors validators for slashing violations
+# and automatically submits attester slashings to the beacon chain
+slashoor_params:
+  # The image to use for slashoor
+  image: ethpandaops/slashoor:master
+  # Resource management for slashoor
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  # Log level for slashoor (error, warn, info, debug, trace)
+  log_level: info
+  # Timeout for beacon API requests
+  beacon_timeout: 30s
+  # Maximum epochs to keep in memory for slashing detection
+  max_epochs_to_keep: 54000
+  # Enable the detector service
+  detector_enabled: true
+  # Enable the submitter service
+  submitter_enabled: true
+  # Run in dry-run mode (detect but don't submit slashings)
+  submitter_dry_run: false
+  # A list of optional extra args
   extra_args: []
 
 # Ethereum genesis generator params

@@ -983,6 +983,8 @@ def run(plan, args={}):
                 args_with_right_defaults.slashoor_params,
                 global_node_selectors,
                 global_tolerations,
+                network_params,
+                args_with_right_defaults.additional_services,
             )
             plan.print("Successfully launched slashoor")
         elif additional_service == "ews":

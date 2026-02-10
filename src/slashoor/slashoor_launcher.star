@@ -15,6 +15,8 @@ def launch_slashoor(
     slashoor_params,
     global_node_selectors,
     global_tolerations,
+    network_params,
+    additional_services,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -23,9 +25,12 @@ def launch_slashoor(
         beacon_http_url = participant.cl_context.beacon_http_url
         beacon_endpoints.append(beacon_http_url)
 
+    dora_url = get_dora_url(slashoor_params, network_params, additional_services)
+
     template_data = new_config_template_data(
         beacon_endpoints,
         slashoor_params,
+        dora_url,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -89,12 +94,32 @@ def get_config(
 def new_config_template_data(
     beacon_endpoints,
     slashoor_params,
+    dora_url,
 ):
     return {
         "BeaconEndpoints": beacon_endpoints,
         "BeaconTimeout": slashoor_params.beacon_timeout,
         "MaxEpochsToKeep": slashoor_params.max_epochs_to_keep,
+        "BackfillSlots": slashoor_params.backfill_slots,
         "DetectorEnabled": slashoor_params.detector_enabled,
+        "ProposerEnabled": slashoor_params.proposer_enabled,
         "SubmitterEnabled": slashoor_params.submitter_enabled,
         "SubmitterDryRun": slashoor_params.submitter_dry_run,
+        "DoraEnabled": slashoor_params.dora_enabled,
+        "DoraURL": dora_url,
+        "DoraScanOnStartup": slashoor_params.dora_scan_on_startup,
     }
+
+
+def get_dora_url(slashoor_params, network_params, additional_services):
+    if slashoor_params.dora_url:
+        return slashoor_params.dora_url
+
+    if "dora" in additional_services:
+        return "http://dora:8080"
+
+    network = network_params.network
+    if network in constants.PUBLIC_NETWORKS or "devnet" in network:
+        return "https://dora.{}.ethpandaops.io".format(network)
+
+    return ""
