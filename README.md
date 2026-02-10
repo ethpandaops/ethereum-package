@@ -1449,12 +1449,22 @@ slashoor_params:
   beacon_timeout: 30s
   # Maximum epochs to keep in memory for slashing detection
   max_epochs_to_keep: 54000
+  # Number of slots to backfill on startup
+  backfill_slots: 64
   # Enable the detector service
   detector_enabled: true
+  # Enable the proposer slashing service
+  proposer_enabled: true
   # Enable the submitter service
   submitter_enabled: true
   # Run in dry-run mode (detect but don't submit slashings)
   submitter_dry_run: false
+  # Enable dora as a slashing database source
+  dora_enabled: true
+  # Custom dora URL (auto-detected if dora is in additional_services or on public networks)
+  dora_url: ""
+  # Scan dora on startup for existing slashings
+  dora_scan_on_startup: true
   # A list of optional extra args
   extra_args: []
 
