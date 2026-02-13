@@ -356,6 +356,24 @@ def get_beacon_config(
     if cl_binary_artifact != None:
         files["/opt/bin"] = cl_binary_artifact.artifact
 
+    # Build Pyroscope Java agent configuration if enabled (mount the pre-downloaded JAR)
+    pyroscope_env_vars = {}
+    pyroscope_agent_mount_path = "/pyroscope"
+    if launcher.pyroscope_url != None and launcher.pyroscope_java_agent_artifact != None:
+        java_agent_path = pyroscope_agent_mount_path + "/pyroscope.jar"
+        pyroscope_env_vars = {
+            "JAVA_OPTS": "-javaagent:{0}".format(java_agent_path),
+            "PYROSCOPE_APPLICATION_NAME": beacon_service_name,
+            "PYROSCOPE_SERVER_ADDRESS": launcher.pyroscope_url,
+            "PYROSCOPE_FORMAT": "jfr",
+            "PYROSCOPE_PROFILER_EVENT": "cpu",
+            "PYROSCOPE_PROFILER_ALLOC": "512k",
+            "PYROSCOPE_PROFILER_LOCK": "10ms",
+            "PYROSCOPE_UPLOAD_INTERVAL": "15s",
+            "PYROSCOPE_LOG_LEVEL": "info",
+        }
+        files[pyroscope_agent_mount_path] = launcher.pyroscope_java_agent_artifact
+
     # Build the command string, copying injected binary if provided
     cmd_str = " ".join(cmd)
     if cl_binary_artifact != None:
@@ -376,7 +394,7 @@ def get_beacon_config(
         "entrypoint": ["sh", "-c"],
         "cmd": [cmd_str],
         "files": files,
-        "env_vars": participant.cl_extra_env_vars,
+        "env_vars": participant.cl_extra_env_vars | pyroscope_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.teku,
@@ -472,11 +490,13 @@ def get_cl_context(
     )
 
 
-def new_teku_launcher(el_cl_genesis_data, jwt_file, keymanager_file):
+def new_teku_launcher(el_cl_genesis_data, jwt_file, keymanager_file, pyroscope_url=None, pyroscope_java_agent_artifact=None):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
         keymanager_file=keymanager_file,
+        pyroscope_url=pyroscope_url,
+        pyroscope_java_agent_artifact=pyroscope_java_agent_artifact,
     )
 
 

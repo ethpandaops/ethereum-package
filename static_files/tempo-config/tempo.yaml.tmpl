@@ -1,5 +1,6 @@
 server:
   http_listen_port: {{ .HTTPPort }}
+  grpc_listen_port: {{ .GRPCPort }}
 
 distributor:
   receivers:
@@ -14,10 +15,6 @@ ingester:
   trace_idle_period: 10s
   max_block_duration: 5m
 
-compactor:
-  compaction:
-    block_retention: {{ .RetentionDuration }}
-
 storage:
   trace:
     backend: local
@@ -25,5 +22,18 @@ storage:
       path: /tmp/tempo/wal
     local:
       path: /tmp/tempo/traces
+    block:
+      bloom_filter_false_positive: 0.05
+    blocklist_poll: 5m
+
+overrides:
+  defaults:
+    ingestion:
+      rate_limit_bytes: {{ .IngestionRateLimit }}
+      burst_size_bytes: {{ .IngestionBurstLimit }}
+    global:
+      max_bytes_per_trace: {{ .MaxBytesPerTrace }}
+    read:
+      max_search_duration: {{ .MaxSearchDuration }}
 
 stream_over_http_enabled: true

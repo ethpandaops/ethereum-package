@@ -34,6 +34,8 @@ def launch(
     extra_files_artifacts={},
     bootnodoor_enode=None,
     binary_artifacts={},
+    pyroscope_url=None,
+    pyroscope_java_agent_artifact=None,
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -41,6 +43,7 @@ def launch(
                 el_cl_data,
                 jwt_file,
                 network_id,
+                pyroscope_url,
             ),
             "launch_method": geth.launch,
             "get_config": geth.get_config,
@@ -50,6 +53,8 @@ def launch(
             "launcher": besu.new_besu_launcher(
                 el_cl_data,
                 jwt_file,
+                pyroscope_url,
+                pyroscope_java_agent_artifact,
             ),
             "launch_method": besu.launch,
             "get_config": besu.get_config,
