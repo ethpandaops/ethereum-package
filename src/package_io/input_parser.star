@@ -1952,7 +1952,7 @@ def get_default_ere_server_zisk_params():
         "gpu_count": 0,
         "gpu_devices": [],
         "program_url": "https://github.com/eth-act/ere-guests/releases/download/v0.4.0/stateless-validator-ethrex-zisk",
-        "extra_args": ["--shm-size", "32G", "--ulimit", "memlock=-1:-1"],
+        "extra_args": [],
     }
 
 
