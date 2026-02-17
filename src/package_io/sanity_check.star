@@ -436,6 +436,12 @@ SUBCATEGORY_PARAMS = {
         "gpu_devices",
         "program_url",
     ],
+    "buildoor_params": [
+        "image",
+        "extra_args",
+        "builder_api",
+        "epbs_builder",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
