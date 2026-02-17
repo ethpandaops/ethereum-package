@@ -963,6 +963,7 @@ additional_services:
   - dora
   - dugtrio
   - erpc
+  - ere_server_zisk
   - ews
   - forkmon
   - forky
@@ -1084,6 +1085,42 @@ bootnodoor_params:
   max_mem: 512
   # A list of optional extra args the bootnodoor container should spin up with
   extra_args: []
+
+# Configuration place for ERE server (zisk) - proof generation server for zkboost
+# When ere_server_zisk is in additional_services and ews is also present,
+# the ERE endpoint is automatically wired into the zkboost zkvm config for ethrex-zisk.
+ere_server_zisk_params:
+  # ERE server docker image to use
+  image: "bbusa/ere-server-zisk:local"
+  # A list of optional extra env_vars the ere server container should spin up with
+  env:
+    RUST_LOG: info
+  # Number of GPUs to passthrough to the container (0 = no GPU)
+  # Auto-generates /dev/nvidia0..N, /dev/nvidiactl, /dev/nvidia-uvm
+  gpu_count: 0
+  # Explicit list of GPU device paths to passthrough (overrides gpu_count)
+  # Example: ["/dev/nvidia0", "/dev/nvidiactl", "/dev/nvidia-uvm"]
+  gpu_devices: []
+  # URL to download the ERE program binary from
+  program_url: "https://github.com/eth-act/ere-guests/releases/download/v0.4.0/stateless-validator-ethrex-zisk"
+  # Extra arguments to pass to the ere-server command at runtime
+  extra_args: []
+
+> **GPU Gotcha**: The ERE server requires GPU access with the correct NVIDIA driver libraries. If you see `CUDA driver version is insufficient for CUDA runtime version` errors, you need to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and set it as the default Docker runtime:
+>
+> ```bash
+> # Install NVIDIA Container Toolkit
+> curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+> curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+>   sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+>   sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+> sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+> sudo nvidia-ctk runtime configure --runtime=docker
+> # Set nvidia as default runtime in /etc/docker/daemon.json: "default-runtime": "nvidia"
+> sudo systemctl restart docker
+> ```
+>
+> Without this, Kurtosis containers only get `/dev/nvidia*` device files but not the host's `libcuda.so` driver library, causing CUDA initialization failures.
 
 # Configuration place for execution-witness-sentry (ews) - https://github.com/eth-act/zkboost
 ews_params:
