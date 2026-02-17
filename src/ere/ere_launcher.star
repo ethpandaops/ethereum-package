@@ -88,8 +88,8 @@ def launch_ere_server(
             # Create a nice wrapper that skips priority setting (SYS_NICE not available in container)
             # nice is called as: nice -5 cmd args... or nice -n 5 cmd args...
             "printf '#!/bin/sh\\nwhile [ $# -gt 0 ]; do case \"$1\" in -n) shift 2;; -*) shift;; *) break;; esac; done\\nexec \"$@\"\\n' > /usr/local/bin/nice && chmod +x /usr/local/bin/nice && "
-            + "exec /ere/bin/ere-server --port {0} --program-path {1} {2}".format(
-                str(HTTP_PORT_NUMBER), program_path, resource_type
+            + "exec /ere/bin/ere-server --port {0} --program-path {1} {2} {3}".format(
+                str(HTTP_PORT_NUMBER), program_path, resource_type, " ".join(ere_params.extra_args)
             ),
         ],
         env_vars=ere_params.env,

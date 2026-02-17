@@ -963,6 +963,7 @@ def input_parser(plan, input_args):
             gpu_count=result["ere_server_zisk_params"]["gpu_count"],
             gpu_devices=result["ere_server_zisk_params"]["gpu_devices"],
             program_url=result["ere_server_zisk_params"]["program_url"],
+            extra_args=result["ere_server_zisk_params"]["extra_args"],
         ),
         buildoor_params=struct(
             image=result["buildoor_params"]["image"],
@@ -1951,6 +1952,7 @@ def get_default_ere_server_zisk_params():
         "gpu_count": 0,
         "gpu_devices": [],
         "program_url": "https://github.com/eth-act/ere-guests/releases/download/v0.4.0/stateless-validator-ethrex-zisk",
+        "extra_args": ["--shm-size", "32G", "--ulimit", "memlock=-1:-1"],
     }
 
 

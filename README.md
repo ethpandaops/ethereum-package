@@ -1103,6 +1103,9 @@ ere_server_zisk_params:
   gpu_devices: []
   # URL to download the ERE program binary from
   program_url: "https://github.com/eth-act/ere-guests/releases/download/v0.4.0/stateless-validator-ethrex-zisk"
+  # Extra arguments to pass to the ere-server command at runtime
+  # Defaults to: ["--shm-size", "32G", "--ulimit", "memlock=-1:-1"]
+  extra_args: ["--shm-size", "32G", "--ulimit", "memlock=-1:-1"]
 
 > **GPU Gotcha**: The ERE server requires GPU access with the correct NVIDIA driver libraries. If you see `CUDA driver version is insufficient for CUDA runtime version` errors, you need to install the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and set it as the default Docker runtime:
 >

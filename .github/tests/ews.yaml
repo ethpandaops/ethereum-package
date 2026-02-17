@@ -28,6 +28,7 @@ ere_server_zisk_params:
   image: han0110/ere-server-zisk:e7ed714-cuda
   gpu_count: 1
 
+
 ews_params:
   num_proofs: 1
   proof_types:

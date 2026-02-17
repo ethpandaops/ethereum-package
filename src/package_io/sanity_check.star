@@ -435,6 +435,7 @@ SUBCATEGORY_PARAMS = {
         "gpu_count",
         "gpu_devices",
         "program_url",
+        "extra_args",
     ],
     "buildoor_params": [
         "image",
