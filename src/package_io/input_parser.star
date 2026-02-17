@@ -236,7 +236,6 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["ere_server_zisk_params"]:
                 sub_value = input_args["ere_server_zisk_params"][sub_attr]
                 result["ere_server_zisk_params"][sub_attr] = sub_value
-                result["ews_params"][sub_attr] = sub_value
         elif attr == "buildoor_params":
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
