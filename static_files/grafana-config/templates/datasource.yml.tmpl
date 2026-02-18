@@ -10,6 +10,17 @@ datasources:
     basicAuth: false
     isDefault: true
     editable: true
+{{- if .PyroscopeURL }}
+  - name: Pyroscope
+    uid: pyroscope
+    type: grafana-pyroscope-datasource
+    access: proxy
+    orgId: 1
+    url: {{ .PyroscopeURL }}
+    basicAuth: false
+    isDefault: false
+    editable: true
+{{- end }}
 {{- if .TempoURL }}
   - name: Tempo
     type: tempo
@@ -26,4 +37,14 @@ datasources:
         spanStartTimeShift: '1h'
         spanEndTimeShift: '1h'
         filterByTraceID: true
+{{- if $.PyroscopeURL }}
+      tracesToProfiles:
+        datasourceUid: 'pyroscope'
+        tags:
+          - key: 'service.name'
+            value: 'service_name'
+        profileTypeId: 'process_cpu:cpu:nanoseconds:cpu:nanoseconds'
+        customQuery: true
+        query: '{service_name="${__span.tags["service.name"]}"}'
+{{- end }}
 {{- end }}

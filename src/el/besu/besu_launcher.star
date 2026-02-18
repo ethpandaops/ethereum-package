@@ -224,12 +224,36 @@ def get_config(
 
     cmd_str = " ".join(cmd)
 
-    env_vars = participant.el_extra_env_vars | JAVA_OPTS
+    # Build environment variables with JAVA_OPTS
+    java_opts_value = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n"
+
+    # Add Pyroscope Java agent if enabled (mount the pre-downloaded JAR)
+    pyroscope_env_vars = {}
+    pyroscope_agent_mount_path = "/pyroscope"
+    if launcher.pyroscope_url != None and launcher.pyroscope_java_agent_artifact != None:
+        java_agent_path = pyroscope_agent_mount_path + "/pyroscope.jar"
+        java_opts_value = java_opts_value + " -javaagent:{0}".format(java_agent_path)
+        pyroscope_env_vars = {
+            "PYROSCOPE_APPLICATION_NAME": service_name,
+            "PYROSCOPE_SERVER_ADDRESS": launcher.pyroscope_url,
+            "PYROSCOPE_FORMAT": "jfr",
+            "PYROSCOPE_PROFILER_EVENT": "cpu",
+            "PYROSCOPE_PROFILER_ALLOC": "512k",
+            "PYROSCOPE_PROFILER_LOCK": "10ms",
+            "PYROSCOPE_UPLOAD_INTERVAL": "15s",
+            "PYROSCOPE_LOG_LEVEL": "info",
+        }
+
+    env_vars = participant.el_extra_env_vars | {"JAVA_OPTS": java_opts_value} | pyroscope_env_vars
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+
+    # Mount Pyroscope Java agent if available
+    if launcher.pyroscope_url != None and launcher.pyroscope_java_agent_artifact != None:
+        files[pyroscope_agent_mount_path] = launcher.pyroscope_java_agent_artifact
 
     if persistent:
         volume_size_key = (
@@ -332,8 +356,10 @@ def get_el_context(
     )
 
 
-def new_besu_launcher(el_cl_genesis_data, jwt_file):
+def new_besu_launcher(el_cl_genesis_data, jwt_file, pyroscope_url=None, pyroscope_java_agent_artifact=None):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
+        pyroscope_url=pyroscope_url,
+        pyroscope_java_agent_artifact=pyroscope_java_agent_artifact,
     )

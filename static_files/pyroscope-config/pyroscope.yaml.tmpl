@@ -1,0 +1,45 @@
+# Pyroscope server configuration
+# Auto-generated for ethereum-package
+#
+# Note: Grafana Pyroscope is a storage/query server.
+# For scraping pprof endpoints, use Grafana Alloy or access pprof endpoints directly.
+#
+# Profiling Support Matrix:
+#
+# EL Clients:
+# - Geth: Native Pyroscope SDK (push-based, automatic)
+# - Erigon: pprof at http://<service>:6060/debug/pprof/
+# - Reth: pprof heap at http://<service>:9001/debug/pprof/heap
+#   (requires profiling image: ghcr.io/paradigmxyz/reth:nightly-profiling)
+# - Besu: Pyroscope Java Agent (push-based)
+# - Nethermind: Not supported
+#
+# CL Clients:
+# - Prysm: pprof at http://<service>:6060/debug/pprof/
+# - Teku: Pyroscope Java Agent (push-based)
+# - Lighthouse: No profiling, but has OpenTelemetry tracing
+#   Enable with: additional_services: [tempo]
+#   Traces viewable in Grafana via Tempo datasource
+# - Lodestar: Not supported
+# - Nimbus: Not supported
+
+# Server configuration
+server:
+  http_listen_port: {{ .HTTPPort }}
+
+# Storage configuration (in-memory for dev)
+storage:
+  backend: filesystem
+  filesystem:
+    dir: /data
+
+# Limits
+limits:
+  max_query_length: 0
+  max_query_lookback: 0
+  # Increase limits for JFR profiles from Java clients (Besu, Teku)
+  # Default max_profile_size_bytes is 4MB, Java JFR profiles can be larger
+  max_profile_size_bytes: 524288000  # 500MB
+  max_profile_stacktrace_samples: 65536
+  ingestion_rate_mb: 64
+  ingestion_burst_size_mb: 32
