@@ -551,6 +551,8 @@ def run(plan, args={}):
                         index,
                         global_node_selectors,
                         global_tolerations,
+                        mev_params.mev_boost_timing_games_params,
+                        mev_endpoint_names,
                     )
                 elif args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
                     plan.print("Launching mev-rs mev boost")
