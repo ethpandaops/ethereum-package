@@ -1,5 +1,41 @@
 # Changelog
 
+## [6.1.0](https://github.com/ethpandaops/ethereum-package/compare/6.0.0...6.1.0) (2026-02-19)
+
+
+### Features
+
+* Add Besu and Teku grafana dashboards ([#1281](https://github.com/ethpandaops/ethereum-package/issues/1281)) ([7a3cc83](https://github.com/ethpandaops/ethereum-package/commit/7a3cc83c6a5de4a49eaa7b3e66d4ca936ad240f7))
+* add buildoor as separate mev stack ([#1309](https://github.com/ethpandaops/ethereum-package/issues/1309)) ([903fd99](https://github.com/ethpandaops/ethereum-package/commit/903fd992c9a06a350a92a82bd392a3ebc5aa70ea))
+* add custom binary execution functionality ([#1287](https://github.com/ethpandaops/ethereum-package/issues/1287)) ([68f9c19](https://github.com/ethpandaops/ethereum-package/commit/68f9c19ddb7c65cdefba260aa4f33cf080978f87))
+* add ews (execution witness sentry) ([#1285](https://github.com/ethpandaops/ethereum-package/issues/1285)) ([5593889](https://github.com/ethpandaops/ethereum-package/commit/559388991071d3cb8b665a131dc3b97d2e44b974))
+* add force_restart - to be able to replace images/binaries without killing enclave ([#1289](https://github.com/ethpandaops/ethereum-package/issues/1289)) ([e243677](https://github.com/ethpandaops/ethereum-package/commit/e243677d68affc719ca596664119d860cab8e856))
+* add mev-builder-cl-extra-params ([#1284](https://github.com/ethpandaops/ethereum-package/issues/1284)) ([c7027e8](https://github.com/ethpandaops/ethereum-package/commit/c7027e863fb60c218d9d00d24e4061c5aabd1882))
+* add min builder withdrawal delay ([#1294](https://github.com/ethpandaops/ethereum-package/issues/1294)) ([7f67acd](https://github.com/ethpandaops/ethereum-package/commit/7f67acda08e12705a64fe157c200f316ca4b01bf))
+* Adding rakoon as tool ([#1303](https://github.com/ethpandaops/ethereum-package/issues/1303)) ([0272744](https://github.com/ethpandaops/ethereum-package/commit/02727445663d0554374898dd9b310653a6e1e430))
+* **ci:** add consensoor ([#1301](https://github.com/ethpandaops/ethereum-package/issues/1301)) ([865e221](https://github.com/ethpandaops/ethereum-package/commit/865e221fe5ca4e397f5b522e868477aa197deff1))
+* **constants:** add 'consensoor' to CL_TYPE and VC_TYPE constants ([865e221](https://github.com/ethpandaops/ethereum-package/commit/865e221fe5ca4e397f5b522e868477aa197deff1))
+* enable dora execution indexer ([#1282](https://github.com/ethpandaops/ethereum-package/issues/1282)) ([5c8fd38](https://github.com/ethpandaops/ethereum-package/commit/5c8fd3867d8536047c972561f28a79ccbd73e12e))
+* enable execution details indexing & tracing for dora ([#1317](https://github.com/ethpandaops/ethereum-package/issues/1317)) ([2f2690b](https://github.com/ethpandaops/ethereum-package/commit/2f2690ba6926497a75ecc57b081b57d97dcebb5c))
+* **launcher:** add publish_udp to participant configurations ([#1300](https://github.com/ethpandaops/ethereum-package/issues/1300)) ([a412048](https://github.com/ethpandaops/ethereum-package/commit/a4120483625f12acc7c090013657c9d9603fbde6))
+* **launcher:** integrate consensoor client launcher ([865e221](https://github.com/ethpandaops/ethereum-package/commit/865e221fe5ca4e397f5b522e868477aa197deff1))
+* **starlark:** add Consensoor launcher support for Starlark ([865e221](https://github.com/ethpandaops/ethereum-package/commit/865e221fe5ca4e397f5b522e868477aa197deff1))
+* support spinning up multiple relays ([#1272](https://github.com/ethpandaops/ethereum-package/issues/1272)) ([c26e7e2](https://github.com/ethpandaops/ethereum-package/commit/c26e7e2e9f1b93ec0755012c4a2007ee7082531d))
+* update assertoor config ([#1312](https://github.com/ethpandaops/ethereum-package/issues/1312)) ([8afc10c](https://github.com/ethpandaops/ethereum-package/commit/8afc10c8c16b168c46592c855e3ee4d0a4cd2d07))
+* use gloas-support image image for assertoor when gloas is scheduled ([#1318](https://github.com/ethpandaops/ethereum-package/issues/1318)) ([f18408b](https://github.com/ethpandaops/ethereum-package/commit/f18408b0195c03dc1c930ad2ca200050c4b14080))
+* **vc:** allow 'consensoor' VC type in vc_launcher ([865e221](https://github.com/ethpandaops/ethereum-package/commit/865e221fe5ca4e397f5b522e868477aa197deff1))
+
+
+### Bug Fixes
+
+* dora eip7732-support to gloas-support ([#1298](https://github.com/ethpandaops/ethereum-package/issues/1298)) ([c6ca605](https://github.com/ethpandaops/ethereum-package/commit/c6ca605fc7af611d88864355285f8ef4ebfd42a1))
+* enable private discovery for Grandine for both built-in and external vc ([#1315](https://github.com/ethpandaops/ethereum-package/issues/1315)) ([7282336](https://github.com/ethpandaops/ethereum-package/commit/72823365ae5078e2d38de0f36865b7c3f1ac006a))
+* enforce spammer names to avoid deduplication on spammor side ([#1296](https://github.com/ethpandaops/ethereum-package/issues/1296)) ([2faba19](https://github.com/ethpandaops/ethereum-package/commit/2faba1900ccdb1deeff9dccb888a0b072bf85fd5))
+* fail if dummy first error handling ([#1290](https://github.com/ethpandaops/ethereum-package/issues/1290)) ([8803a15](https://github.com/ethpandaops/ethereum-package/commit/8803a1598745e5195c66737c8670b52ef93adaf9))
+* grafana dashboard data source ([#1291](https://github.com/ethpandaops/ethereum-package/issues/1291)) ([6b605f1](https://github.com/ethpandaops/ethereum-package/commit/6b605f15c6389cbd53f280fb4ffac03559eee181))
+* mev api ci startup bug ([#1297](https://github.com/ethpandaops/ethereum-package/issues/1297)) ([103b078](https://github.com/ethpandaops/ethereum-package/commit/103b078f107ade53c3d61c12b9e040a1d04ed07a))
+* update assertoor ai models ([#1313](https://github.com/ethpandaops/ethereum-package/issues/1313)) ([234fb54](https://github.com/ethpandaops/ethereum-package/commit/234fb54662a42734b77720bc95e9ef45ba4115f9))
+
 ## [6.0.0](https://github.com/ethpandaops/ethereum-package/compare/5.0.1...6.0.0) (2026-01-05)
 
 
