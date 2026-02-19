@@ -156,7 +156,7 @@ def get_config(
                 )
                 + "ethpandaops/assertoor:gloas-support"
             )
-    
+
     return ServiceConfig(
         image=IMAGE_NAME,
         ports=USED_PORTS,
