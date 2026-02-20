@@ -8,6 +8,7 @@ def get_config(
     image,
     service_name,
     beacon_http_url,
+    vc_http_url,
     tolerations,
     node_selectors,
     prover_index,
@@ -15,6 +16,10 @@ def get_config(
     cmd = [
         "-target-beacon-node=" + beacon_http_url,
     ]
+
+    # Add validator client URL if available
+    if vc_http_url != "":
+        cmd.append("-validator-client=" + vc_http_url)
 
     if len(participant.prover_extra_params) > 0:
         cmd.extend([param for param in participant.prover_extra_params])

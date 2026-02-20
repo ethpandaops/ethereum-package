@@ -568,18 +568,18 @@ def launch_participant_network(
     # Create VC contexts ordered by participant index
     vc_contexts_temp = {}
     for vc_service_name, vc_service in vc_services.items():
+        participant_index = vc_service_info[vc_service_name]["participant_index"]
+        participant = args_with_right_defaults.participants[participant_index]
         vc_context = vc.get_vc_context(
             plan,
             vc_service_name,
             vc_service,
             vc_service_info[vc_service_name]["client_name"],
+            participant.keymanager_enabled,
         )
 
-        participant_index = vc_service_info[vc_service_name]["participant_index"]
         if vc_context and vc_context.metrics_info:
-            vc_context.metrics_info["config"] = args_with_right_defaults.participants[
-                participant_index
-            ].prometheus_config
+            vc_context.metrics_info["config"] = participant.prometheus_config
 
         vc_contexts_temp[participant_index] = vc_context
 
@@ -624,12 +624,17 @@ def launch_participant_network(
         service_name = "prover-{0}-{1}-{2}".format(index_str, el_type, cl_type)
         beacon_http_url = cl_context.beacon_http_url
 
+        # Get VC context for this participant to pass HTTP URL to prover
+        vc_context = all_vc_contexts[index] if index < len(all_vc_contexts) else None
+        vc_http_url = vc_context.http_url if vc_context != None else ""
+
         prover_service_config = prover.get_prover_config(
             participant=participant,
             prover_type=prover_type,
             image=participant.prover_image,
             service_name=service_name,
             beacon_http_url=beacon_http_url,
+            vc_http_url=vc_http_url,
             tolerations=tolerations,
             node_selectors=node_selectors,
             prover_index=current_prover_index,
