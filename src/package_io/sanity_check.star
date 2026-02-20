@@ -77,6 +77,16 @@ PARTICIPANT_CATEGORIES = {
         "vc_beacon_node_indices",
         "checkpoint_sync_enabled",
         "skip_start",
+        "prover_type",
+        "prover_image",
+        "prover_extra_env_vars",
+        "prover_extra_labels",
+        "prover_extra_params",
+        "prover_tolerations",
+        "prover_min_cpu",
+        "prover_max_cpu",
+        "prover_min_mem",
+        "prover_max_mem",
     ],
 }
 

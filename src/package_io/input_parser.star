@@ -64,6 +64,10 @@ DEFAULT_REMOTE_SIGNER_IMAGES = {
     "web3signer": "consensys/web3signer:latest",
 }
 
+DEFAULT_PROVER_IMAGES = {
+    "dummy": "dummy-prover:latest",
+}
+
 # MEV Params
 MEV_BOOST_PORT = 18550
 
@@ -578,6 +582,16 @@ def input_parser(plan, input_args):
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
                 checkpoint_sync_enabled=participant["checkpoint_sync_enabled"],
                 skip_start=participant["skip_start"],
+                prover_type=participant["prover_type"],
+                prover_image=participant["prover_image"],
+                prover_extra_env_vars=participant["prover_extra_env_vars"],
+                prover_extra_labels=participant["prover_extra_labels"],
+                prover_extra_params=participant["prover_extra_params"],
+                prover_tolerations=participant["prover_tolerations"],
+                prover_min_cpu=participant["prover_min_cpu"],
+                prover_max_cpu=participant["prover_max_cpu"],
+                prover_min_mem=participant["prover_min_mem"],
+                prover_max_mem=participant["prover_max_mem"],
             )
             for participant in result["participants"]
         ],
@@ -1158,6 +1172,13 @@ def parse_network_params(plan, input_args):
                 remote_signer_type, ""
             )
 
+        prover_type = participant["prover_type"]
+        prover_image = participant["prover_image"]
+        if prover_type != "" and prover_image == "":
+            participant["prover_image"] = DEFAULT_PROVER_IMAGES.get(prover_type, "")
+            if participant["prover_image"] == "":
+                fail("Received empty prover image for prover_type: {0}".format(prover_type))
+
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == None:
             participant["snooper_enabled"] = result["snooper_enabled"]
@@ -1617,6 +1638,16 @@ def default_participant():
         "vc_beacon_node_indices": None,
         "checkpoint_sync_enabled": None,
         "skip_start": False,
+        "prover_type": "",
+        "prover_image": "",
+        "prover_extra_env_vars": {},
+        "prover_extra_labels": {},
+        "prover_extra_params": [],
+        "prover_tolerations": [],
+        "prover_min_cpu": 0,
+        "prover_max_cpu": 0,
+        "prover_min_mem": 0,
+        "prover_max_mem": 0,
     }
 
 

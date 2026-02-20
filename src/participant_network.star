@@ -27,6 +27,7 @@ vc_shared = import_module("./vc/shared.star")
 vc_context_l = import_module("./vc/vc_context.star")
 node_metrics = import_module("./node_metrics_info.star")
 remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
+prover = import_module("./prover/prover_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
 snooper_el_launcher = import_module("./snooper/snooper_el_launcher.star")
@@ -567,18 +568,18 @@ def launch_participant_network(
     # Create VC contexts ordered by participant index
     vc_contexts_temp = {}
     for vc_service_name, vc_service in vc_services.items():
+        participant_index = vc_service_info[vc_service_name]["participant_index"]
+        participant = args_with_right_defaults.participants[participant_index]
         vc_context = vc.get_vc_context(
             plan,
             vc_service_name,
             vc_service,
             vc_service_info[vc_service_name]["client_name"],
+            participant.keymanager_enabled,
         )
 
-        participant_index = vc_service_info[vc_service_name]["participant_index"]
         if vc_context and vc_context.metrics_info:
-            vc_context.metrics_info["config"] = args_with_right_defaults.participants[
-                participant_index
-            ].prometheus_config
+            vc_context.metrics_info["config"] = participant.prometheus_config
 
         vc_contexts_temp[participant_index] = vc_context
 
@@ -590,12 +591,101 @@ def launch_participant_network(
         else:
             all_vc_contexts.append(None)
 
+    # Launch provers for participants that have prover_type set
+    prover_service_configs = {}
+    prover_service_info = {}
+    current_prover_index = 0
+    for index, participant in enumerate(args_with_right_defaults.participants):
+        if participant.prover_type == "":
+            continue
+
+        el_type = participant.el_type
+        cl_type = participant.cl_type
+        prover_type = participant.prover_type
+        index_str = shared_utils.zfill_custom(
+            index + 1, len(str(len(args_with_right_defaults.participants)))
+        )
+
+        cl_context = all_cl_contexts[index] if index < len(all_cl_contexts) else None
+        if cl_context == None:
+            continue
+
+        node_selectors = input_parser.get_client_node_selectors(
+            participant.node_selectors,
+            global_node_selectors,
+        )
+
+        tolerations = shared_utils.get_tolerations(
+            specific_container_tolerations=participant.prover_tolerations,
+            participant_tolerations=participant.tolerations,
+            global_tolerations=global_tolerations,
+        )
+
+        service_name = "prover-{0}-{1}-{2}".format(index_str, el_type, cl_type)
+        beacon_http_url = cl_context.beacon_http_url
+
+        # Get VC context for this participant to pass HTTP URL to prover
+        vc_context = all_vc_contexts[index] if index < len(all_vc_contexts) else None
+        vc_http_url = vc_context.http_url if vc_context != None else ""
+
+        prover_service_config = prover.get_prover_config(
+            participant=participant,
+            prover_type=prover_type,
+            image=participant.prover_image,
+            service_name=service_name,
+            beacon_http_url=beacon_http_url,
+            vc_http_url=vc_http_url,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            prover_index=current_prover_index,
+        )
+
+        prover_service_configs[service_name] = prover_service_config
+        prover_service_info[service_name] = {
+            "client_name": prover_type,
+            "participant_index": index,
+            "participant": participant,
+        }
+        current_prover_index += 1
+
+    # Launch provers in parallel
+    prover_services = {}
+    if len(prover_service_configs) > 0:
+        prover_services = plan.add_services(prover_service_configs)
+
+    # Create prover contexts ordered by participant index
+    prover_contexts_temp = {}
+    for prover_service_name, prover_service in prover_services.items():
+        prover_context = prover.get_prover_context(
+            plan,
+            prover_service_name,
+            prover_service,
+            prover_service_info[prover_service_name]["client_name"],
+        )
+
+        participant_index = prover_service_info[prover_service_name]["participant_index"]
+        if prover_context and prover_context.metrics_info:
+            prover_context.metrics_info["config"] = args_with_right_defaults.participants[
+                participant_index
+            ].prometheus_config
+
+        prover_contexts_temp[participant_index] = prover_context
+
+    # Convert to ordered list
+    all_prover_contexts = []
+    for i in range(len(args_with_right_defaults.participants)):
+        if i in prover_contexts_temp:
+            all_prover_contexts.append(prover_contexts_temp[i])
+        else:
+            all_prover_contexts.append(None)
+
     all_participants = []
     for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
         vc_type = participant.vc_type
         remote_signer_type = participant.remote_signer_type
+        prover_type = participant.prover_type
         snooper_el_engine_context = None
         snooper_beacon_context = None
         snooper_el_rpc_context = None
@@ -607,6 +697,12 @@ def launch_participant_network(
         remote_signer_context = (
             all_remote_signer_contexts[index]
             if index < len(all_remote_signer_contexts)
+            else None
+        )
+
+        prover_context = (
+            all_prover_contexts[index]
+            if index < len(all_prover_contexts)
             else None
         )
 
@@ -643,10 +739,12 @@ def launch_participant_network(
             cl_type,
             vc_type,
             remote_signer_type,
+            prover_type,
             el_context,
             cl_context,
             vc_context,
             remote_signer_context,
+            prover_context,
             snooper_el_engine_context,
             snooper_beacon_context,
             snooper_el_rpc_context,

@@ -229,6 +229,7 @@ def get_vc_context(
     service_name,
     service,
     client_name,
+    keymanager_enabled,
 ):
     validator_metrics_port = service.ports[constants.METRICS_PORT_ID]
     validator_metrics_url = "{0}:{1}".format(
@@ -238,8 +239,13 @@ def get_vc_context(
         service_name, vc_shared.METRICS_PATH, validator_metrics_url
     )
 
+    vc_http_url = ""
+    if keymanager_enabled:
+        vc_http_url = "http://{0}:{1}".format(service.name, vc_shared.VALIDATOR_HTTP_PORT_NUM)
+
     return vc_context.new_vc_context(
         client_name=client_name,
         service_name=service_name,
         metrics_info=validator_node_metrics_info,
+        http_url=vc_http_url,
     )
