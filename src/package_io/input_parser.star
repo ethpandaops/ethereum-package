@@ -87,6 +87,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "slashoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
     "ews_params",
@@ -128,6 +129,7 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
+    result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["ews_params"] = get_default_ews_params()
     result["buildoor_params"] = get_default_buildoor_params()
@@ -204,6 +206,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "slashoor_params":
+            for sub_attr in input_args["slashoor_params"]:
+                sub_value = input_args["slashoor_params"][sub_attr]
+                result["slashoor_params"][sub_attr] = sub_value
         elif attr == "mempool_bridge_params":
             for sub_attr in input_args["mempool_bridge_params"]:
                 sub_value = input_args["mempool_bridge_params"][sub_attr]
@@ -852,6 +858,25 @@ def input_parser(plan, input_args):
             max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
+        ),
+        slashoor_params=struct(
+            image=result["slashoor_params"]["image"],
+            min_cpu=result["slashoor_params"]["min_cpu"],
+            max_cpu=result["slashoor_params"]["max_cpu"],
+            min_mem=result["slashoor_params"]["min_mem"],
+            max_mem=result["slashoor_params"]["max_mem"],
+            extra_args=result["slashoor_params"]["extra_args"],
+            log_level=result["slashoor_params"]["log_level"],
+            beacon_timeout=result["slashoor_params"]["beacon_timeout"],
+            max_epochs_to_keep=result["slashoor_params"]["max_epochs_to_keep"],
+            detector_enabled=result["slashoor_params"]["detector_enabled"],
+            proposer_enabled=result["slashoor_params"]["proposer_enabled"],
+            submitter_enabled=result["slashoor_params"]["submitter_enabled"],
+            submitter_dry_run=result["slashoor_params"]["submitter_dry_run"],
+            dora_enabled=result["slashoor_params"]["dora_enabled"],
+            dora_url=result["slashoor_params"]["dora_url"],
+            dora_scan_on_startup=result["slashoor_params"]["dora_scan_on_startup"],
+            backfill_slots=result["slashoor_params"]["backfill_slots"],
         ),
         mempool_bridge_params=struct(
             image=result["mempool_bridge_params"]["image"],
@@ -1873,6 +1898,28 @@ def get_default_spamoor_params():
                 },
             },
         ],
+    }
+
+
+def get_default_slashoor_params():
+    return {
+        "image": constants.DEFAULT_SLASHOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 512,
+        "extra_args": [],
+        "log_level": "info",
+        "beacon_timeout": "30s",
+        "max_epochs_to_keep": 54000,
+        "detector_enabled": True,
+        "proposer_enabled": True,
+        "submitter_enabled": True,
+        "submitter_dry_run": False,
+        "dora_enabled": True,
+        "dora_url": "",
+        "dora_scan_on_startup": True,
+        "backfill_slots": 64,
     }
 
 

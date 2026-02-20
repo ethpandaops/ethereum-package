@@ -1,0 +1,28 @@
+beacon:
+  endpoints:
+{{- range .BeaconEndpoints }}
+    - "{{ . }}"
+{{- end }}
+  timeout: {{ .BeaconTimeout }}
+
+indexer:
+  max_epochs_to_keep: {{ .MaxEpochsToKeep }}
+
+backfill_slots: {{ .BackfillSlots }}
+
+detector:
+  enabled: {{ .DetectorEnabled }}
+
+proposer:
+  enabled: {{ .ProposerEnabled }}
+
+submitter:
+  enabled: {{ .SubmitterEnabled }}
+  dry_run: {{ .SubmitterDryRun }}
+
+dora:
+  enabled: {{ .DoraEnabled }}
+{{- if .DoraURL }}
+  url: "{{ .DoraURL }}"
+{{- end }}
+  scan_on_startup: {{ .DoraScanOnStartup }}
