@@ -110,42 +110,52 @@ def get_config(
     else:
         shanghai_time = plan.run_sh(
             name="{}-shanghai-time".format(service_name),
-            run="jq -r '.config.shanghaiTime // 0' < {} | tr -d '\\n'".format(GENESIS_FILEPATH),
+            run="jq -r '.config.shanghaiTime // 0' < {} | tr -d '\\n'".format(
+                GENESIS_FILEPATH
+            ),
             files={
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
             },
         )
         cancun_time = plan.run_sh(
             name="{}-cancun-time".format(service_name),
-            run="jq -r '.config.cancunTime // 0' < {} | tr -d '\\n'".format(GENESIS_FILEPATH),
+            run="jq -r '.config.cancunTime // 0' < {} | tr -d '\\n'".format(
+                GENESIS_FILEPATH
+            ),
             files={
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
             },
         )
         prague_time = plan.run_sh(
             name="{}-prague-time".format(service_name),
-            run="jq -r '.config.pragueTime // 0' < {} | tr -d '\\n'".format(GENESIS_FILEPATH),
+            run="jq -r '.config.pragueTime // 0' < {} | tr -d '\\n'".format(
+                GENESIS_FILEPATH
+            ),
             files={
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
             },
         )
         osaka_time = plan.run_sh(
             name="{}-osaka-time".format(service_name),
-            run="jq -r '.config.osakaTime // 0' < {} | tr -d '\\n'".format(GENESIS_FILEPATH),
+            run="jq -r '.config.osakaTime // 0' < {} | tr -d '\\n'".format(
+                GENESIS_FILEPATH
+            ),
             files={
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
             },
         )
-        cmd.extend([
-            "--shanghai-time",
-            shanghai_time.output,
-            "--cancun-time",
-            cancun_time.output,
-            "--prague-time",
-            prague_time.output,
-            "--osaka-time",
-            osaka_time.output,
-        ])
+        cmd.extend(
+            [
+                "--shanghai-time",
+                shanghai_time.output,
+                "--cancun-time",
+                cancun_time.output,
+                "--prague-time",
+                prague_time.output,
+                "--osaka-time",
+                osaka_time.output,
+            ]
+        )
 
     if len(participant.el_extra_params) > 0:
         cmd.extend([param for param in participant.el_extra_params])
