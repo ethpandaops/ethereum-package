@@ -431,23 +431,25 @@ def collect_identities(plan, all_cl_contexts, participants):
                 recipe=beacon_node_identity_recipe,
                 service_name=ctx.beacon_service_name,
             )
-            enriched.append(cl_context_l.new_cl_context(
-                client_name=ctx.client_name,
-                enr=response["extract.enr"],
-                ip_addr=ctx.ip_addr,
-                ip_address=ctx.ip_address,
-                http_port=ctx.http_port,
-                beacon_http_url=ctx.beacon_http_url,
-                cl_nodes_metrics_info=ctx.cl_nodes_metrics_info,
-                beacon_service_name=ctx.beacon_service_name,
-                beacon_grpc_url=ctx.beacon_grpc_url,
-                multiaddr=response["extract.multiaddr"],
-                peer_id=response["extract.peer_id"],
-                snooper_enabled=ctx.snooper_enabled,
-                snooper_el_engine_context=ctx.snooper_el_engine_context,
-                validator_keystore_files_artifact_uuid=ctx.validator_keystore_files_artifact_uuid,
-                supernode=ctx.supernode,
-            ))
+            enriched.append(
+                cl_context_l.new_cl_context(
+                    client_name=ctx.client_name,
+                    enr=response["extract.enr"],
+                    ip_addr=ctx.ip_addr,
+                    ip_address=ctx.ip_address,
+                    http_port=ctx.http_port,
+                    beacon_http_url=ctx.beacon_http_url,
+                    cl_nodes_metrics_info=ctx.cl_nodes_metrics_info,
+                    beacon_service_name=ctx.beacon_service_name,
+                    beacon_grpc_url=ctx.beacon_grpc_url,
+                    multiaddr=response["extract.multiaddr"],
+                    peer_id=response["extract.peer_id"],
+                    snooper_enabled=ctx.snooper_enabled,
+                    snooper_el_engine_context=ctx.snooper_el_engine_context,
+                    validator_keystore_files_artifact_uuid=ctx.validator_keystore_files_artifact_uuid,
+                    supernode=ctx.supernode,
+                )
+            )
         else:
             enriched.append(ctx)
     return enriched
