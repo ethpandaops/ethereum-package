@@ -115,6 +115,7 @@ def get_beacon_config(
     tempo_otlp_grpc_url,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
+    skip_ready_conditions=False,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -291,7 +292,7 @@ def get_beacon_config(
         "node_selectors": node_selectors,
     }
 
-    if not participant.skip_start:
+    if not participant.skip_start and not skip_ready_conditions:
         config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         )

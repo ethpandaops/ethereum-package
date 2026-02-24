@@ -317,6 +317,7 @@ def launch(
                 tempo_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
+                skip_ready_conditions=True,
             )
 
             cl_participant_info[cl_service_name] = {
@@ -395,7 +396,9 @@ def launch(
 
 
 def collect_identities(plan, all_cl_contexts, participants):
-    """Fill in missing ENRs/multiaddrs/peer_ids for contexts created with skip_identity=True."""
+    """Fill in missing ENRs/multiaddrs/peer_ids for contexts created with skip_identity=True.
+    Uses plan.wait to retry until CLs are healthy (health checks are deferred for non-boot nodes).
+    """
     enriched = []
     for index, ctx in enumerate(all_cl_contexts):
         participant = participants[index] if index < len(participants) else None
@@ -427,9 +430,14 @@ def collect_identities(plan, all_cl_contexts, participants):
                     port_id=constants.HTTP_PORT_ID,
                     extract=extract,
                 )
-            response = plan.request(
+            response = plan.wait(
                 recipe=beacon_node_identity_recipe,
                 service_name=ctx.beacon_service_name,
+                field="code",
+                assertion="IN",
+                target_value=[200],
+                interval="1s",
+                timeout="5m",
             )
             enriched.append(
                 cl_context_l.new_cl_context(

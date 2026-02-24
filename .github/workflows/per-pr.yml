@@ -101,7 +101,7 @@ jobs:
           kurtosis run ${{ github.workspace }} \
             --args-file .github/tests/speed.yaml \
             --verbosity detailed \
-            --image-download always 2>&1 | tee /tmp/speed-benchmark-output.log
+            --image-download missing 2>&1 | tee /tmp/speed-benchmark-output.log
 
           END_TIME=$(date +%s)
           TOTAL_DURATION=$((END_TIME - START_TIME))
@@ -146,7 +146,7 @@ jobs:
           kurtosis run ${{ github.workspace }} \
             --args-file .github/tests/speed-3x3.yaml \
             --verbosity detailed \
-            --image-download always 2>&1 | tee /tmp/speed-benchmark-3x3-output.log
+            --image-download missing 2>&1 | tee /tmp/speed-benchmark-3x3-output.log
 
           END_TIME=$(date +%s)
           TOTAL_DURATION=$((END_TIME - START_TIME))
