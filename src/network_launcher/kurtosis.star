@@ -21,6 +21,7 @@ def launch(
     plan, network_params, args_with_right_defaults, parallel_keystore_generation
 ):
     num_participants = len(args_with_right_defaults.participants)
+    plan.print("TIMING:keystore_generation:start")
     plan.print("Generating cl validator key stores")
     validator_data = None
     if not parallel_keystore_generation:
@@ -38,6 +39,7 @@ def launch(
             args_with_right_defaults.docker_cache_params,
         )
 
+    plan.print("TIMING:keystore_generation:end")
     plan.print(json.indent(json.encode(validator_data)))
 
     # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
