@@ -315,6 +315,11 @@ participants:
     # over a specific participant's logging
     cl_log_level: ""
 
+    # Used to disable global logging settings for this participant and leave it up to the configuration to set logging configurations,
+    # for example, when using a custom log4j.xml file in Teku
+    # NOTE: this option is only supported by Teku at the moment
+    custom_log_config: false
+
     # A list of optional extra env_vars the cl container should spin up with
     cl_extra_env_vars: {}
 

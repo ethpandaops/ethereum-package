@@ -33,6 +33,7 @@ participants:
     cl_max_mem: 0
     supernode: false
     use_separate_vc: true
+    custom_log_config: false
 # Validator
     vc_type: lighthouse
     vc_image: sigp/lighthouse:latest
