@@ -267,7 +267,7 @@ def launch(
             el_service_name,
             el_service,
             el_launchers[el_type]["launcher"],
-            False,
+            True,
         )
 
         # Add participant el additional prometheus metrics
@@ -284,3 +284,30 @@ def launch(
 
     plan.print("Successfully added {0} EL participants".format(num_participants))
     return all_el_contexts
+
+
+def collect_enodes(plan, all_el_contexts):
+    """Fill in missing enodes for contexts that were created with skip_enode=True."""
+    enriched = []
+    for ctx in all_el_contexts:
+        if ctx.enode == "":
+            enode, enr = el_admin_node_info.get_enode_enr_for_node(
+                plan, ctx.service_name, constants.RPC_PORT_ID
+            )
+            enriched.append(el_context_l.new_el_context(
+                client_name=ctx.client_name,
+                enode=enode,
+                dns_name=ctx.dns_name,
+                rpc_port_num=ctx.rpc_port_num,
+                ws_port_num=ctx.ws_port_num,
+                engine_rpc_port_num=ctx.engine_rpc_port_num,
+                rpc_http_url=ctx.rpc_http_url,
+                ws_url=ctx.ws_url,
+                enr=enr,
+                service_name=ctx.service_name,
+                el_metrics_info=ctx.el_metrics_info,
+                ip_addr=ctx.ip_addr,
+            ))
+        else:
+            enriched.append(ctx)
+    return enriched

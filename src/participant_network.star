@@ -575,6 +575,12 @@ def launch_participant_network(
     )
     plan.print("TIMING:vc_launch:end")
 
+    # Deferred: collect enodes/identities now that all nodes are warm
+    plan.print("TIMING:deferred_collection:start")
+    all_el_contexts = el_client_launcher.collect_enodes(plan, all_el_contexts)
+    all_cl_contexts = cl_client_launcher.collect_identities(plan, all_cl_contexts, args_with_right_defaults.participants)
+    plan.print("TIMING:deferred_collection:end")
+
     # Create VC contexts ordered by participant index
     vc_contexts_temp = {}
     for vc_service_name, vc_service in vc_services.items():

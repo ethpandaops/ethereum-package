@@ -419,6 +419,7 @@ def get_cl_context(
     snooper_el_engine_context,
     node_keystore_files,
     node_selectors,
+    skip_identity=False,
 ):
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
@@ -427,7 +428,8 @@ def get_cl_context(
     beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
 
     # Skip HTTP requests if skip_start is enabled (service won't be running)
-    if participant.skip_start:
+    # or if skip_identity is set (identity will be collected later)
+    if participant.skip_start or skip_identity:
         beacon_node_enr = ""
         beacon_multiaddr = ""
         beacon_peer_id = ""
