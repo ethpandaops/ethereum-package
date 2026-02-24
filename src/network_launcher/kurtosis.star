@@ -2,6 +2,9 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 validator_keystores = import_module(
     "../prelaunch_data_generator/validator_keystores/validator_keystore_generator.star"
 )
+keystores_result = import_module(
+    "../prelaunch_data_generator/validator_keystores/generate_keystores_result.star"
+)
 
 constants = import_module("../package_io/constants.star")
 
@@ -24,7 +27,21 @@ def launch(
     plan.print("TIMING:keystore_generation:start")
     plan.print("Generating cl validator key stores")
     validator_data = None
-    if not parallel_keystore_generation:
+
+    needs_keystores = False
+    for participant in args_with_right_defaults.participants:
+        if participant.validator_count > 0:
+            needs_keystores = True
+            break
+
+    if not needs_keystores:
+        plan.print("No participants have validators, skipping keystore generation")
+        validator_data = keystores_result.new_generate_keystores_result(
+            prysm_password_artifact_uuid=None,
+            prysm_password_relative_filepath=None,
+            per_node_keystores=[None for _ in args_with_right_defaults.participants],
+        )
+    elif not parallel_keystore_generation:
         validator_data = validator_keystores.generate_validator_keystores(
             plan,
             network_params.preregistered_validator_keys_mnemonic,

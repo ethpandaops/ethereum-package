@@ -70,17 +70,19 @@ def generate_el_cl_genesis_data(
     genesis = plan.run_sh(
         name="run-generate-genesis",
         description="Creating genesis and extracting metadata",
-        run=" && ".join([
-            "cp /opt/values.env /config/values.env",
-            "./entrypoint.sh all",
-            "mkdir /network-configs",
-            "mv /data/metadata/* /network-configs/",
-            "mv /data/parsed /network-configs/parsed",
-            # Extract genesis_validators_root and osaka_time in the same container
-            # to avoid spinning up 2 extra containers just to read files
-            "cat /network-configs/genesis_validators_root.txt > /tmp/genesis_validators_root.txt",
-            "jq -r '.config.osakaTime' /network-configs/genesis.json > /tmp/osaka_time.txt",
-        ]),
+        run=" && ".join(
+            [
+                "cp /opt/values.env /config/values.env",
+                "./entrypoint.sh all",
+                "mkdir /network-configs",
+                "mv /data/metadata/* /network-configs/",
+                "mv /data/parsed /network-configs/parsed",
+                # Extract genesis_validators_root and osaka_time in the same container
+                # to avoid spinning up 2 extra containers just to read files
+                "cat /network-configs/genesis_validators_root.txt > /tmp/genesis_validators_root.txt",
+                "jq -r '.config.osakaTime' /network-configs/genesis.json > /tmp/osaka_time.txt",
+            ]
+        ),
         image=image,
         files=files,
         store=[
