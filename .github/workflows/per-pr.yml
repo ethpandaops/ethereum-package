@@ -59,6 +59,10 @@ jobs:
         uses: ./.github/actions/kurtosis-install
       - name: Kurtosis Lint
         run: kurtosis lint ${{ github.workspace }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Buildifier Lint
+        run: make lint
 
   assertoor:
     runs-on: ubuntu-latest
