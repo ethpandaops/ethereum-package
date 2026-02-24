@@ -185,6 +185,13 @@ def launch_participant_network(
         if participant_binaries:
             binary_artifacts[index] = participant_binaries
 
+    # Pre-pull all unique participant images in parallel so that
+    # subsequent add_service/add_services calls find them cached.
+    # Docker deduplicates concurrent pulls so this is safe.
+    plan.print("TIMING:image_warmup:start")
+    _warm_participant_images(plan, args_with_right_defaults.participants)
+    plan.print("TIMING:image_warmup:end")
+
     # Launch all execution layer clients
     plan.print("TIMING:el_launch:start")
     all_el_contexts = el_client_launcher.launch(
@@ -685,3 +692,29 @@ def launch_participant_network(
         el_cl_data.osaka_time,
         el_cl_data.shadowfork_block_height,
     )
+
+
+def _warm_participant_images(plan, participants):
+    """Pre-pull all unique EL/CL/VC images in parallel using throwaway services.
+
+    This triggers parallel Docker pulls for every unique image upfront,
+    so that later add_service/add_services calls find images already cached.
+    """
+    seen_images = {}
+    warmer_configs = {}
+    for participant in participants:
+        for image in [participant.el_image, participant.cl_image, participant.vc_image]:
+            if image and image not in seen_images:
+                seen_images[image] = True
+                warmer_name = "warmer-{0}".format(len(warmer_configs) + 1)
+                warmer_configs[warmer_name] = ServiceConfig(
+                    image=image,
+                    entrypoint=["sh"],
+                    cmd=["-c", "sleep 300"],
+                )
+    if not warmer_configs:
+        return
+    plan.print("Warming {0} unique images in parallel".format(len(warmer_configs)))
+    plan.add_services(warmer_configs)
+    for warmer_name in warmer_configs:
+        plan.stop_service(warmer_name)
