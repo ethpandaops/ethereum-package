@@ -69,15 +69,29 @@ def generate_el_cl_genesis_data(
 
     genesis = plan.run_sh(
         name="run-generate-genesis",
-        description="Creating genesis",
-        run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed",
+        description="Creating genesis and extracting metadata",
+        run=" && ".join([
+            "cp /opt/values.env /config/values.env",
+            "./entrypoint.sh all",
+            "mkdir /network-configs",
+            "mv /data/metadata/* /network-configs/",
+            "mv /data/parsed /network-configs/parsed",
+            # Extract genesis_validators_root and osaka_time in the same container
+            # to avoid spinning up 2 extra containers just to read files
+            "cat /network-configs/genesis_validators_root.txt > /tmp/genesis_validators_root.txt",
+            "jq -r '.config.osakaTime' /network-configs/genesis.json > /tmp/osaka_time.txt",
+        ]),
         image=image,
         files=files,
         store=[
             StoreSpec(src="/network-configs/", name="el_cl_genesis_data"),
             StoreSpec(
-                src="/network-configs/genesis_validators_root.txt",
+                src="/tmp/genesis_validators_root.txt",
                 name="genesis_validators_root",
+            ),
+            StoreSpec(
+                src="/tmp/osaka_time.txt",
+                name="osaka_time",
             ),
         ],
         wait=None,
@@ -88,18 +102,19 @@ def generate_el_cl_genesis_data(
     genesis_validators_root = plan.run_sh(
         name="read-genesis-validators-root",
         description="Reading genesis validators root",
-        run="cat /data/genesis_validators_root.txt",
+        run="cat /data/genesis_validators_root.txt | tr -d '\n'",
         files={"/data": genesis.files_artifacts[1]},
         wait=None,
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
-    osaka_time = ""
+
     osaka_time = plan.run_sh(
         name="read-osaka-time",
         description="Reading osaka time from genesis",
-        run="jq '.config.osakaTime' /data/genesis.json | tr -d '\n'",
-        files={"/data": genesis.files_artifacts[0]},
+        run="cat /data/osaka_time.txt | tr -d '\n'",
+        files={"/data": genesis.files_artifacts[2]},
+        wait=None,
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
