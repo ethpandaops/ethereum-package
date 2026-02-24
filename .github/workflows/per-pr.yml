@@ -90,6 +90,14 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
+      - name: Pre-pull Docker images
+        run: |
+          # Pre-pull images in parallel so kurtosis finds them cached (with --image-download missing)
+          docker pull ethereum/client-go:latest &
+          docker pull ethpandaops/lighthouse:unstable &
+          docker pull ethpandaops/ethereum-genesis-generator:5.2.4 &
+          docker pull protolambda/eth2-val-tools:latest &
+          wait
       - name: Run Speed Benchmark
         run: |
           set -euo pipefail
@@ -135,6 +143,18 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
+      - name: Pre-pull Docker images
+        run: |
+          # Pre-pull images in parallel so kurtosis finds them cached (with --image-download missing)
+          docker pull ethereum/client-go:latest &
+          docker pull ghcr.io/paradigmxyz/reth &
+          docker pull nethermind/nethermind:latest &
+          docker pull ethpandaops/lighthouse:unstable &
+          docker pull ethpandaops/teku:master &
+          docker pull ethpandaops/nimbus-eth2:unstable-minimal &
+          docker pull ethpandaops/ethereum-genesis-generator:5.2.4 &
+          docker pull protolambda/eth2-val-tools:latest &
+          wait
       - name: Run Speed Benchmark 3x3
         run: |
           set -euo pipefail
