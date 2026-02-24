@@ -1,8 +1,6 @@
 participants:
   - el_type: geth
     cl_type: lighthouse
-    validator_count: 0
-    use_separate_vc: false
 network_params:
   preset: minimal
   genesis_delay: 5
