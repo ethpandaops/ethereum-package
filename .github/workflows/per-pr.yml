@@ -92,6 +92,8 @@ jobs:
         uses: ./.github/actions/kurtosis-install
       - name: Run Speed Benchmark
         run: |
+          set -euo pipefail
+
           echo "=== Speed Benchmark ==="
           echo "Start time: $(date -u +%Y-%m-%dT%H:%M:%S%Z)"
           START_TIME=$(date +%s)

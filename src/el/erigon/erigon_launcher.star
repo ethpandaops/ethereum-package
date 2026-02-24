@@ -321,10 +321,14 @@ def get_el_context(
     service_name,
     service,
     launcher,
+    skip_enode=False,
 ):
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, constants.WS_RPC_PORT_ID
-    )
+    enode = ""
+    enr = ""
+    if not skip_enode:
+        enode, enr = el_admin_node_info.get_enode_enr_for_node(
+            plan, service_name, constants.WS_RPC_PORT_ID
+        )
 
     metrics_url = "{0}:{1}".format(service.name, METRICS_PORT_NUM)
     erigon_metrics_info = node_metrics.new_node_metrics_info(

@@ -165,9 +165,8 @@ def launch(
                 )
             )
 
-        el_launcher, launch_method, get_config = (
+        el_launcher, get_config = (
             el_launchers[el_type]["launcher"],
-            el_launchers[el_type]["launch_method"],
             el_launchers[el_type]["get_config"],
         )
 
@@ -178,13 +177,21 @@ def launch(
         el_binary_artifact = binary_artifacts.get(index, {}).get("el", None)
 
         if index == 0:
-            el_context = launch_method(
+            # When there's only 1 participant, skip the enode extraction (plan.wait
+            # on admin_nodeInfo) since the enode is only used as a bootnode for
+            # subsequent EL nodes. This avoids a blocking wait and allows the CL
+            # boot node to start sooner.
+            skip_enode = num_participants == 1
+            cl_client_name = el_service_name.split("-")[3]
+
+            config = get_config(
                 plan,
                 el_launcher,
-                el_service_name,
                 participant,
-                global_log_level,
+                el_service_name,
                 all_el_contexts,
+                cl_client_name,
+                global_log_level,
                 persistent,
                 tolerations,
                 node_selectors,
@@ -194,6 +201,19 @@ def launch(
                 extra_files_artifacts,
                 bootnodoor_enode,
                 el_binary_artifact,
+            )
+
+            service = plan.add_service(
+                el_service_name, config, force_update=participant.el_force_restart
+            )
+
+            get_el_context = el_launchers[el_type]["get_el_context"]
+            el_context = get_el_context(
+                plan,
+                el_service_name,
+                service,
+                el_launcher,
+                skip_enode,
             )
 
             # Add participant el additional prometheus metrics
@@ -247,6 +267,7 @@ def launch(
             el_service_name,
             el_service,
             el_launchers[el_type]["launcher"],
+            False,
         )
 
         # Add participant el additional prometheus metrics
