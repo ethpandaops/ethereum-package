@@ -6,7 +6,6 @@ participants:
 network_params:
   preset: minimal
   genesis_delay: 5
-  genesis_time: 1893456000
   electra_fork_epoch: 0
   fulu_fork_epoch: 18446744073709551615
 parallel_keystore_generation: true
