@@ -156,6 +156,7 @@ def get_config(
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.remote_signer_enabled,
         "cmd": cmd,
         "files": files,
         "env_vars": participant.remote_signer_extra_env_vars,

@@ -190,7 +190,7 @@ ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 disable_peer_scoring: false
 persistent: false
-# Supports: null, mock, flashbots, mev-rs, commit-boost, helix
+# Supports: null, mock, flashbots, mev-rs, commit-boost, helix, buildoor
 mev_type: null
 mev_params:
   mev_relay_image: ethpandaops/mev-boost-relay:main
@@ -209,8 +209,15 @@ mev_params:
   mev_builder_prometheus_config:
     scrape_interval: 15s
     labels: {}
+  run_multiple_relays: false
+  helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
   custom_flood_params:
     interval_between_transactions: 1
+buildoor_params:
+  image: ethpandaops/buildoor:main
+  builder_api: true
+  epbs_builder: true
+  extra_args: []
 bootnodoor_params:
   image: ethpandaops/bootnodoor:latest
   min_cpu: 100
@@ -244,7 +251,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.2.2
+  image: ethpandaops/ethereum-genesis-generator:5.2.4
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER

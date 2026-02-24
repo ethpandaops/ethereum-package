@@ -1,0 +1,8 @@
+participants:
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    count: 2
+  - el_type: geth
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    cl_force_restart: true

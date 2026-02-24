@@ -6,6 +6,7 @@ nimbus = import_module("./nimbus/nimbus_launcher.star")
 prysm = import_module("./prysm/prysm_launcher.star")
 teku = import_module("./teku/teku_launcher.star")
 grandine = import_module("./grandine/grandine_launcher.star")
+consensoor = import_module("./consensoor/consensoor_launcher.star")
 
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
@@ -96,6 +97,16 @@ def launch(
             "get_beacon_config": grandine.get_beacon_config,
             "get_cl_context": grandine.get_cl_context,
             "get_blobber_config": grandine.get_blobber_config,
+        },
+        constants.CL_TYPE.consensoor: {
+            "launcher": consensoor.new_consensoor_launcher(
+                el_cl_data,
+                jwt_file,
+            ),
+            "launch_method": consensoor.launch,
+            "get_beacon_config": consensoor.get_beacon_config,
+            "get_cl_context": consensoor.get_cl_context,
+            "get_blobber_config": consensoor.get_blobber_config,
         },
     }
 
@@ -227,10 +238,7 @@ def launch(
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
         full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
-        # Get binary artifact for this participant if it exists
-        cl_binary_artifact = None
-        if index in binary_artifacts and "cl" in binary_artifacts[index]:
-            cl_binary_artifact = binary_artifacts[index]["cl"]
+        cl_binary_artifact = binary_artifacts.get(index, {}).get("cl", None)
 
         if index == 0:
             cl_context = launch_method(
@@ -319,12 +327,13 @@ def launch(
                 "get_cl_context": get_cl_context,
                 "get_blobber_config": get_blobber_config,
                 "participant_index": index,
+                "cl_type": cl_type,
             }
 
     # add rest of cl's in parallel to speed package execution
-    cl_services = {}
-    if len(cl_service_configs) > 0:
-        cl_services = plan.add_services(cl_service_configs)
+    cl_services = shared_utils.add_services_with_force_restart(
+        plan, cl_service_configs, cl_participant_info, "cl_force_restart"
+    )
 
     # Create CL contexts ordered by participant index
     cl_contexts_temp = {}

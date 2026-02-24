@@ -165,7 +165,7 @@ def get_config(
                     if docker_cache_params.enabled
                     else ""
                 )
-                + "ethpandaops/dora:eip7732-support"
+                + "ethpandaops/dora:gloas-support"
             )
         if network_params.eip7805_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = (

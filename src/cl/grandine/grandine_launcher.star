@@ -233,12 +233,12 @@ def get_beacon_config(
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         "--features=DisableFinalizedRootCheck",  # enables peering with prysm
+        "--enable-private-discovery",
     ]
     validator_default_cmd = [
         "--keystore-dir=" + validator_keys_dirpath,
         "--keystore-password-file=" + validator_secrets_dirpath,
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--enable-private-discovery",
     ]
 
     keymanager_api_cmd = [
@@ -361,6 +361,7 @@ def get_beacon_config(
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.cl_enabled,
         "entrypoint": ["sh", "-c"],
         "cmd": [cmd_str],
         "files": files,

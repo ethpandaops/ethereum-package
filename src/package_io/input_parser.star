@@ -25,6 +25,7 @@ DEFAULT_CL_IMAGES = {
     "prysm": "offchainlabs/prysm-beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
+    "consensoor": "ethpandaops/consensoor:main",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -34,6 +35,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "prysm": "ethpandaops/prysm-beacon-chain:develop-minimal",
     "lodestar": "ethpandaops/lodestar:unstable",
     "grandine": "ethpandaops/grandine:develop-minimal",
+    "consensoor": "ethpandaops/consensoor:main",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -44,6 +46,7 @@ DEFAULT_VC_IMAGES = {
     "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
+    "consensoor": "ethpandaops/consensoor:main",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -54,6 +57,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "teku": "ethpandaops/teku:master",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:latest",
+    "consensoor": "ethpandaops/consensoor:main",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -78,13 +82,17 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "grafana_params",
     "tempo_params",
     "tx_fuzz_params",
+    "rakoon_params",
     "custom_flood_params",
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "slashoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
     "ews_params",
+    "buildoor_params",
+    "ethereum_genesis_generator_params",
 )
 
 
@@ -107,6 +115,7 @@ def input_parser(plan, input_args):
     else:
         result["additional_services"] = []
     result["tx_fuzz_params"] = get_default_tx_fuzz_params()
+    result["rakoon_params"] = get_default_rakoon_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
     result["grafana_params"] = get_default_grafana_params()
@@ -120,8 +129,10 @@ def input_parser(plan, input_args):
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
     result["spamoor_params"] = get_default_spamoor_params()
+    result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["ews_params"] = get_default_ews_params()
+    result["buildoor_params"] = get_default_buildoor_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -161,6 +172,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["tx_fuzz_params"]:
                 sub_value = input_args["tx_fuzz_params"][sub_attr]
                 result["tx_fuzz_params"][sub_attr] = sub_value
+        elif attr == "rakoon_params":
+            for sub_attr in input_args["rakoon_params"]:
+                sub_value = input_args["rakoon_params"][sub_attr]
+                result["rakoon_params"][sub_attr] = sub_value
         elif attr == "custom_flood_params":
             for sub_attr in input_args["custom_flood_params"]:
                 sub_value = input_args["custom_flood_params"][sub_attr]
@@ -191,6 +206,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "slashoor_params":
+            for sub_attr in input_args["slashoor_params"]:
+                sub_value = input_args["slashoor_params"][sub_attr]
+                result["slashoor_params"][sub_attr] = sub_value
         elif attr == "mempool_bridge_params":
             for sub_attr in input_args["mempool_bridge_params"]:
                 sub_value = input_args["mempool_bridge_params"][sub_attr]
@@ -211,6 +230,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["ews_params"]:
                 sub_value = input_args["ews_params"][sub_attr]
                 result["ews_params"][sub_attr] = sub_value
+        elif attr == "buildoor_params":
+            for sub_attr in input_args["buildoor_params"]:
+                sub_value = input_args["buildoor_params"][sub_attr]
+                result["buildoor_params"][sub_attr] = sub_value
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -221,6 +244,7 @@ def input_parser(plan, input_args):
         constants.MEV_RS_MEV_TYPE,
         constants.COMMIT_BOOST_MEV_TYPE,
         constants.HELIX_MEV_TYPE,
+        constants.BUILDOOR_MEV_TYPE,
     ):
         result = enrich_mev_extra_params(
             result,
@@ -232,7 +256,7 @@ def input_parser(plan, input_args):
         pass
     else:
         fail(
-            "Unsupported MEV type: {0}, please use 'mock', 'flashbots', 'mev-rs', 'commit-boost' or 'helix' type".format(
+            "Unsupported MEV type: {0}, please use 'mock', 'flashbots', 'mev-rs', 'commit-boost', 'helix' or 'buildoor' type".format(
                 result.get("mev_type")
             )
         )
@@ -525,14 +549,17 @@ def input_parser(plan, input_args):
                 el_max_cpu=participant["el_max_cpu"],
                 el_min_mem=participant["el_min_mem"],
                 el_max_mem=participant["el_max_mem"],
+                el_force_restart=participant["el_force_restart"],
                 cl_min_cpu=participant["cl_min_cpu"],
                 cl_max_cpu=participant["cl_max_cpu"],
                 cl_min_mem=participant["cl_min_mem"],
                 cl_max_mem=participant["cl_max_mem"],
+                cl_force_restart=participant["cl_force_restart"],
                 vc_min_cpu=participant["vc_min_cpu"],
                 vc_max_cpu=participant["vc_max_cpu"],
                 vc_min_mem=participant["vc_min_mem"],
                 vc_max_mem=participant["vc_max_mem"],
+                vc_force_restart=participant["vc_force_restart"],
                 remote_signer_min_cpu=participant["remote_signer_min_cpu"],
                 remote_signer_max_cpu=participant["remote_signer_max_cpu"],
                 remote_signer_min_mem=participant["remote_signer_min_mem"],
@@ -597,6 +624,9 @@ def input_parser(plan, input_args):
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
+            ],
+            min_builder_withdrawability_delay=result["network_params"][
+                "min_builder_withdrawability_delay"
             ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             attestation_due_bps_gloas=result["network_params"][
@@ -725,6 +755,8 @@ def input_parser(plan, input_args):
             ],
             mock_mev_image=result["mev_params"]["mock_mev_image"],
             launch_adminer=result["mev_params"]["launch_adminer"],
+            run_multiple_relays=result["mev_params"]["run_multiple_relays"],
+            helix_relay_image=result["mev_params"]["helix_relay_image"],
         )
         if result["mev_params"]
         else None,
@@ -751,6 +783,16 @@ def input_parser(plan, input_args):
         tx_fuzz_params=struct(
             image=result["tx_fuzz_params"]["image"],
             tx_fuzz_extra_args=result["tx_fuzz_params"]["tx_fuzz_extra_args"],
+        ),
+        rakoon_params=struct(
+            image=result["rakoon_params"]["image"],
+            tx_type=result["rakoon_params"]["tx_type"],
+            workers=result["rakoon_params"]["workers"],
+            batch_size=result["rakoon_params"]["batch_size"],
+            seed=result["rakoon_params"]["seed"],
+            fuzzing=result["rakoon_params"]["fuzzing"],
+            poll_interval=result["rakoon_params"]["poll_interval"],
+            extra_args=result["rakoon_params"]["extra_args"],
         ),
         prometheus_params=struct(
             storage_tsdb_retention_time=result["prometheus_params"][
@@ -816,6 +858,25 @@ def input_parser(plan, input_args):
             max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
+        ),
+        slashoor_params=struct(
+            image=result["slashoor_params"]["image"],
+            min_cpu=result["slashoor_params"]["min_cpu"],
+            max_cpu=result["slashoor_params"]["max_cpu"],
+            min_mem=result["slashoor_params"]["min_mem"],
+            max_mem=result["slashoor_params"]["max_mem"],
+            extra_args=result["slashoor_params"]["extra_args"],
+            log_level=result["slashoor_params"]["log_level"],
+            beacon_timeout=result["slashoor_params"]["beacon_timeout"],
+            max_epochs_to_keep=result["slashoor_params"]["max_epochs_to_keep"],
+            detector_enabled=result["slashoor_params"]["detector_enabled"],
+            proposer_enabled=result["slashoor_params"]["proposer_enabled"],
+            submitter_enabled=result["slashoor_params"]["submitter_enabled"],
+            submitter_dry_run=result["slashoor_params"]["submitter_dry_run"],
+            dora_enabled=result["slashoor_params"]["dora_enabled"],
+            dora_url=result["slashoor_params"]["dora_url"],
+            dora_scan_on_startup=result["slashoor_params"]["dora_scan_on_startup"],
+            backfill_slots=result["slashoor_params"]["backfill_slots"],
         ),
         mempool_bridge_params=struct(
             image=result["mempool_bridge_params"]["image"],
@@ -902,6 +963,12 @@ def input_parser(plan, input_args):
             retain=result["ews_params"]["retain"],
             num_proofs=result["ews_params"]["num_proofs"],
             env=result["ews_params"]["env"],
+        ),
+        buildoor_params=struct(
+            image=result["buildoor_params"]["image"],
+            extra_args=result["buildoor_params"]["extra_args"],
+            builder_api=result["buildoor_params"]["builder_api"],
+            epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
     )
 
@@ -1343,6 +1410,7 @@ def default_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
+        "min_builder_withdrawability_delay": 4096,
         "shard_committee_period": 256,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
@@ -1426,6 +1494,7 @@ def default_minimal_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
+        "min_builder_withdrawability_delay": 8,
         "shard_committee_period": 64,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
@@ -1509,6 +1578,7 @@ def default_participant():
         "el_max_cpu": 0,
         "el_min_mem": 0,
         "el_max_mem": 0,
+        "el_force_restart": False,
         "cl_type": "lighthouse",
         "cl_image": "",
         "cl_binary_path": "",
@@ -1524,6 +1594,7 @@ def default_participant():
         "cl_max_cpu": 0,
         "cl_min_mem": 0,
         "cl_max_mem": 0,
+        "cl_force_restart": False,
         "supernode": False,
         "use_separate_vc": None,
         "vc_type": "",
@@ -1540,6 +1611,7 @@ def default_participant():
         "vc_max_cpu": 0,
         "vc_min_mem": 0,
         "vc_max_mem": 0,
+        "vc_force_restart": False,
         "use_remote_signer": None,
         "remote_signer_type": "web3signer",
         "remote_signer_image": "",
@@ -1693,6 +1765,8 @@ def get_default_mev_params(mev_type, preset):
         "mev_relay_website_extra_env_vars": mev_relay_website_extra_env_vars,
         "mev_builder_prometheus_config": mev_builder_prometheus_config,
         "launch_adminer": launch_adminer,
+        "run_multiple_relays": False,
+        "helix_relay_image": constants.DEFAULT_HELIX_RELAY_IMAGE,
     }
 
 
@@ -1700,6 +1774,19 @@ def get_default_tx_fuzz_params():
     return {
         "image": "ethpandaops/tx-fuzz:master",
         "tx_fuzz_extra_args": [],
+    }
+
+
+def get_default_rakoon_params():
+    return {
+        "image": "ethpandaops/fuzztools:main",
+        "tx_type": "eip7702",
+        "workers": 50,
+        "batch_size": 100,
+        "seed": "",
+        "fuzzing": True,
+        "poll_interval": "",
+        "extra_args": [],
     }
 
 
@@ -1814,6 +1901,28 @@ def get_default_spamoor_params():
     }
 
 
+def get_default_slashoor_params():
+    return {
+        "image": constants.DEFAULT_SLASHOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 512,
+        "extra_args": [],
+        "log_level": "info",
+        "beacon_timeout": "30s",
+        "max_epochs_to_keep": 54000,
+        "detector_enabled": True,
+        "proposer_enabled": True,
+        "submitter_enabled": True,
+        "submitter_dry_run": False,
+        "dora_enabled": True,
+        "dora_url": "",
+        "dora_scan_on_startup": True,
+        "backfill_slots": 64,
+    }
+
+
 def get_default_custom_flood_params():
     # this is a simple script that increases the balance of the coinbase address at a cadence
     return {"interval_between_transactions": 1}
@@ -1848,6 +1957,15 @@ def get_default_ews_params():
         "retain": 10,
         "num_proofs": 1,
         "env": {},
+    }
+
+
+def get_default_buildoor_params():
+    return {
+        "image": constants.DEFAULT_BUILDOOR_IMAGE,
+        "extra_args": [],
+        "builder_api": True,
+        "epbs_builder": True,
     }
 
 
@@ -2090,6 +2208,7 @@ def docker_cache_image_override(plan, result):
         "mev_params.mock_mev_image",
         "xatu_sentry_params.xatu_sentry_image",
         "tx_fuzz_params.image",
+        "rakoon_params.image",
         "prometheus_params.image",
         "grafana_params.image",
         "tempo_params.image",

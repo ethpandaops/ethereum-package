@@ -197,6 +197,7 @@ participants:
     # When set, the binary will be uploaded and mounted into the container,
     # replacing the default binary from the Docker image
     # Useful for rapid debugging with locally compiled binaries
+    # IMPORTANT: el_force_restart must be set to true when using this option
     # IMPORTANT: The binary file must live inside the ethereum-package directory
     # Build the client in its own repo, then copy ONLY the binary to ethereum-package
     # Do not run builds inside ethereum-package or copy build dependencies - only the final binary
@@ -271,6 +272,12 @@ participants:
     el_min_mem: 0
     el_max_mem: 0
 
+    # Force container recreation on next run (Docker only)
+    # When set to true, the container will be recreated even if the image tag hasn't changed
+    # Useful when rebuilding Docker images with the same tag or recompiling binaries with the same name
+    # Defaults to false
+    el_force_restart: false
+
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
     # Valid values are nimbus, lighthouse, lodestar, teku, prysm, and grandine
@@ -290,6 +297,7 @@ participants:
     # When set, the binary will be uploaded and mounted into the container,
     # replacing the default binary from the Docker image
     # Useful for rapid debugging with locally compiled binaries
+    # IMPORTANT: cl_force_restart must be set to true when using this option
     # IMPORTANT: The binary file must live inside the ethereum-package directory
     # Build the client in its own repo, then copy ONLY the binary to ethereum-package
     # Do not run builds inside ethereum-package or copy build dependencies - only the final binary
@@ -355,6 +363,12 @@ participants:
     cl_min_mem: 0
     cl_max_mem: 0
 
+    # Force container recreation on next run (Docker only)
+    # When set to true, the container will be recreated even if the image tag hasn't changed
+    # Useful when rebuilding Docker images with the same tag or recompiling binaries with the same name
+    # Defaults to false
+    cl_force_restart: false
+
     # Whether to act as a supernode for the network
     # Supernodes will subscribe to all subnet topics
     # This flag should only be used with peerdas
@@ -386,6 +400,7 @@ participants:
     # When set, the binary will be uploaded and mounted into the container,
     # replacing the default binary from the Docker image
     # Useful for rapid debugging with locally compiled binaries
+    # IMPORTANT: vc_force_restart must be set to true when using this option
     # IMPORTANT: The binary file must live inside the ethereum-package directory
     # Build the client in its own repo, then copy ONLY the binary to ethereum-package
     # Do not run builds inside ethereum-package or copy build dependencies - only the final binary
@@ -445,6 +460,12 @@ participants:
     vc_max_cpu: 0
     vc_min_mem: 0
     vc_max_mem: 0
+
+    # Force container recreation on next run (Docker only)
+    # When set to true, the container will be recreated even if the image tag hasn't changed
+    # Useful when rebuilding Docker images with the same tag or recompiling binaries with the same name
+    # Defaults to false
+    vc_force_restart: false
 
     # A list of indices of the beacon nodes that the validator client should connect to
     # Defaults to null
@@ -738,6 +759,10 @@ network_params:
   # Defaults to 256 epochs ~27 hours
   min_validator_withdrawability_delay: 256
 
+  # The minimum number of epochs for builder withdrawability delay
+  # Defaults to 4096, 8 for minimal preset
+  min_builder_withdrawability_delay: 4096
+
   # The period of the shard committee
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256
@@ -945,6 +970,8 @@ additional_services:
   - grafana
   - mempool_bridge
   - prometheus
+  - rakoon
+  - slashoor
   - spamoor
   - tempo
   - tracoor
@@ -996,6 +1023,26 @@ tx_fuzz_params:
   image: "ethpandaops/tx-fuzz:master"
   # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
   tx_fuzz_extra_args: []
+
+# Configuration place for rakoon transaction fuzzer - https://github.com/protocol-security/fuzztools
+rakoon_params:
+  # Rakoon docker image to use
+  image: "ethpandaops/fuzztools:v1"
+  # Transaction type to fuzz (eip7702, eip1559, eip2930, legacy)
+  # Note: blob transactions are not supported by design
+  tx_type: "eip7702"
+  # Number of concurrent workers
+  workers: 50
+  # Number of transactions per batch
+  batch_size: 100
+  # Seed for reproducible fuzzing (empty string = random)
+  seed: ""
+  # Enable fuzzing mode
+  fuzzing: true
+  # Poll interval for gas price queries (empty string = use default)
+  poll_interval: ""
+  # A list of optional extra params that will be passed to rakoon
+  extra_args: []
 
 # Configuration place for prometheus
 prometheus_params:
@@ -1226,7 +1273,7 @@ mempool_bridge_params:
   # Default: "30s"
   retry_interval: "30s"
 
-# Supports six values
+# Supports seven values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up
 # "mock" - mock-builder & mev-boost are spun up
 # "flashbots" - mev-boost, relays, flooder and builder are all spun up, powered by [flashbots](https://github.com/flashbots)
@@ -1234,6 +1281,8 @@ mempool_bridge_params:
 # "commit-boost" - mev-boost, relays and builder are all spun up, powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
 # "helix" - helix relay, flashbots builder and mev-boost are spun up, powered by [helix](https://github.com/gattaca-com/helix)
 #            Note: Helix uses TimescaleDB (PostgreSQL with time-series extension) for data storage
+# "buildoor" - a self-contained builder+relay service & mev-boost are spun up, powered by [buildoor](https://github.com/ethpandaops/buildoor)
+#              Supports both legacy builder API and ePBS bidding. No separate relay infrastructure or builder participant needed.
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -1278,6 +1327,23 @@ mev_params:
   mock_mev_image: ethpandaops/rustic-builder:main
   # Whether to launch Adminer for the MEV relay PostgreSQL database
   launch_adminer: false
+  # When true, launches both flashbots and helix relays
+  # The reth-rbuilder will submit bids to both relays and mev-boost will query both relays for bids
+  # Works with mev_type: flashbots
+  run_multiple_relays: false
+  # The image to use for helix relay (used when run_multiple_relays is true or mev_type is helix)
+  helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
+
+# Parameters for the buildoor builder+relay service (used when mev_type is "buildoor")
+buildoor_params:
+  # The image to use for buildoor
+  image: ethpandaops/buildoor:main
+  # Enable the legacy builder API (traditional block building via relay)
+  builder_api: true
+  # Enable ePBS bidding and revealing
+  epbs_builder: true
+  # Extra parameters to pass to the buildoor service
+  extra_args: []
 
 # Enables Xatu Sentry for all participants
 # Defaults to false
@@ -1364,10 +1430,48 @@ spamoor_params:
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
   extra_args: []
 
+# Configuration place for slashoor - https://github.com/ethpandaops/slashoor
+# Slashoor is a lazy slasher that monitors validators for slashing violations
+# and automatically submits attester slashings to the beacon chain
+slashoor_params:
+  # The image to use for slashoor
+  image: ethpandaops/slashoor:latest
+  # Resource management for slashoor
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  # Log level for slashoor (error, warn, info, debug, trace)
+  log_level: info
+  # Timeout for beacon API requests
+  beacon_timeout: 30s
+  # Maximum epochs to keep in memory for slashing detection
+  max_epochs_to_keep: 54000
+  # Number of slots to backfill on startup
+  backfill_slots: 64
+  # Enable the detector service
+  detector_enabled: true
+  # Enable the proposer slashing service
+  proposer_enabled: true
+  # Enable the submitter service
+  submitter_enabled: true
+  # Run in dry-run mode (detect but don't submit slashings)
+  submitter_dry_run: false
+  # Enable dora as a slashing database source
+  dora_enabled: true
+  # Custom dora URL (auto-detected if dora is in additional_services or on public networks)
+  dora_url: ""
+  # Scan dora on startup for existing slashings
+  dora_scan_on_startup: true
+  # A list of optional extra args
+  extra_args: []
+
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.2.2
+  image: ethpandaops/ethereum-genesis-generator:5.2.4
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
@@ -1611,6 +1715,25 @@ network_params:
 </details>
 
 <details>
+    <summary>A 2-node Ethereum network with buildoor (self-contained builder+relay)</summary>
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    count: 2
+mev_type: buildoor
+buildoor_params:
+  builder_api: true
+  epbs_builder: true
+additional_services:
+  - dora
+  - spamoor
+```
+
+</details>
+
+<details>
     <summary>A 3-node Ethereum network with Helix relay for MEV-boost infrastructure</summary>
 
 ```yaml
@@ -1658,6 +1781,43 @@ additional_services:
   - grafana
   - tx_fuzz
 ethereum_metrics_exporter_enabled: true
+```
+
+</details>
+
+<details>
+    <summary>Network with rakoon transaction fuzzer</summary>
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: teku
+additional_services:
+  - rakoon
+rakoon_params:
+  tx_type: "eip7702"
+  workers: 50
+  batch_size: 100
+```
+
+For advanced fuzzing with broadcaster:
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: teku
+additional_services:
+  - broadcaster  # Broadcasts to all nodes
+  - rakoon
+rakoon_params:
+  tx_type: "eip1559"
+  workers: 100
+  batch_size: 200
+  seed: "12345"  # Reproducible fuzzing
 ```
 
 </details>
@@ -1776,6 +1936,7 @@ The package also supports other MEV implementations:
 - `"mev_type": "helix"` - Uses the high-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend for data storage
 - `"mev_type": "mev-rs"` - Alternative relay implementation powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 - `"mev_type": "commit-boost"` - Infrastructure powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
+- `"mev_type": "buildoor"` - A self-contained builder+relay service powered by [buildoor](https://github.com/ethpandaops/buildoor). Supports both legacy builder API and ePBS bidding without requiring separate relay infrastructure or a dedicated builder participant.
 
 Each implementation provides different features and performance characteristics suitable for various testing and development scenarios.
 
@@ -1810,6 +1971,7 @@ Here's a table of where the keys are used
 | 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
 | 13            | spamoor             | ✅                |                 | Spams transactions         |
+| 14            | rakoon              | ✅                |                 | Protocol fuzzing           |
 
 ## Developing On This Package
 

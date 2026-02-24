@@ -138,6 +138,7 @@ def get_config(
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.vc_enabled,
         "cmd": cmd,
         "files": files,
         "env_vars": env,

@@ -18,6 +18,7 @@ CL_TYPE = struct(
     prysm="prysm",
     lodestar="lodestar",
     grandine="grandine",
+    consensoor="consensoor",
 )
 
 VC_TYPE = struct(
@@ -27,6 +28,8 @@ VC_TYPE = struct(
     prysm="prysm",
     teku="teku",
     vero="vero",
+    grandine="grandine",
+    consensoor="consensoor",
 )
 
 REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
@@ -94,14 +97,16 @@ FLASHBOTS_MEV_TYPE = "flashbots"
 MEV_RS_MEV_TYPE = "mev-rs"
 COMMIT_BOOST_MEV_TYPE = "commit-boost"
 HELIX_MEV_TYPE = "helix"
+BUILDOOR_MEV_TYPE = "buildoor"
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_CHECKPOINTZ_IMAGE = "ethpandaops/checkpointz:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:latest"
+DEFAULT_SLASHOOR_IMAGE = "ethpandaops/slashoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_BOOTNODOOR_IMAGE = "ethpandaops/bootnodoor:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:5.2.2"
+    "ethpandaops/ethereum-genesis-generator:5.2.4"
 )
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
@@ -111,6 +116,7 @@ DEFAULT_MEV_RS_IMAGE = "ethpandaops/mev-rs:main"
 DEFAULT_MEV_RS_IMAGE_MINIMAL = "ethpandaops/mev-rs:main-minimal"
 DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE = "ghcr.io/commit-boost/pbs:latest"
 DEFAULT_MOCK_MEV_IMAGE = "ethpandaops/rustic-builder:main"
+DEFAULT_BUILDOOR_IMAGE = "ethpandaops/buildoor:main"
 DEFAULT_HELIX_RELAY_IMAGE = "ghcr.io/gattaca-com/helix-relay:main"
 DEFAULT_EWS_IMAGE = "ghcr.io/eth-act/zkboost/execution-witness-sentry:latest"
 DEFAULT_MEV_PUBKEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"

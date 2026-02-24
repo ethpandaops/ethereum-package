@@ -492,3 +492,29 @@ def get_tolerations(
                     )
                 )
     return toleration_list
+
+
+def add_services_with_force_restart(
+    plan, service_configs, participant_info, force_restart_attr
+):
+    force_restart_names = [
+        name
+        for name in service_configs.keys()
+        if getattr(participant_info[name]["participant"], force_restart_attr, False)
+        == True
+    ]
+
+    regular_configs = {
+        k: v for k, v in service_configs.items() if k not in force_restart_names
+    }
+
+    services = {}
+    if len(regular_configs) > 0:
+        services = plan.add_services(regular_configs)
+
+    for service_name in force_restart_names:
+        services[service_name] = plan.add_service(
+            service_name, service_configs[service_name], force_update=True
+        )
+
+    return services

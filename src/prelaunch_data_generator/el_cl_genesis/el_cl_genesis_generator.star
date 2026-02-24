@@ -176,6 +176,7 @@ def new_env_file_for_el_cl_genesis_data(
         "ShadowForkFile": shadowfork_file,
         "AdditionalValidatorMnemonics": get_additional_mnemonics_json(network_params),
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
+        "MinBuilderWithdrawabilityDelay": network_params.min_builder_withdrawability_delay,
         "ShardCommitteePeriod": network_params.shard_committee_period,
         "AttestationDueBpsGloas": network_params.attestation_due_bps_gloas,
         "AggregateDueBpsGloas": network_params.aggregate_due_bps_gloas,

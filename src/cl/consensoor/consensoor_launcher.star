@@ -6,35 +6,20 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
-blobber_launcher = import_module("../../blobber/blobber_launcher.star")
+BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/consensoor"
 
-LIGHTHOUSE_ENTRYPOINT_COMMAND = "lighthouse"
-
-RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
-RUST_FULL_BACKTRACE_KEYWORD = "full"
-
-#  ---------------------------------- Beacon client -------------------------------------
-BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/lighthouse/beacon-data"
-NODE_KEY_MOUNTPOINT_ON_CLIENTS = (
-    BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER + "/beacon/network"
-)
-# Port nums
 BEACON_DISCOVERY_PORT_NUM = 9000
-BEACON_HTTP_PORT_NUM = 4000
-BEACON_METRICS_PORT_NUM = 5054
-BEACON_QUIC_PORT_NUM = 9001
-# The min/max CPU/memory that the beacon node can use
-BEACON_MIN_CPU = 50
-BEACON_MIN_MEMORY = 256
+BEACON_HTTP_PORT_NUM = 5052
+BEACON_METRICS_PORT_NUM = 8008
 
 METRICS_PATH = "/metrics"
 
 VERBOSITY_LEVELS = {
-    constants.GLOBAL_LOG_LEVEL.error: "error",
-    constants.GLOBAL_LOG_LEVEL.warn: "warn",
-    constants.GLOBAL_LOG_LEVEL.info: "info",
-    constants.GLOBAL_LOG_LEVEL.debug: "debug",
-    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+    constants.GLOBAL_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_LOG_LEVEL.warn: "WARNING",
+    constants.GLOBAL_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_LOG_LEVEL.trace: "DEBUG",
 }
 
 
@@ -135,7 +120,6 @@ def get_beacon_config(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    # If snooper is enabled use the snooper engine context, otherwise use the execution client context
     if participant.snooper_enabled:
         EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
             snooper_el_engine_context.ip_addr,
@@ -155,144 +139,111 @@ def get_beacon_config(
             port_publisher,
             participant_index,
         )
-        public_ports = cl_shared.get_general_cl_public_port_specs(
-            public_ports_for_component
-        )
-        public_ports.update(
-            shared_utils.get_port_specs(
-                {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[3]}
-            )
-        )
+        public_ports = {
+            constants.TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                public_ports_for_component[0],
+                shared_utils.TCP_PROTOCOL,
+            ),
+            constants.UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                public_ports_for_component[0],
+                shared_utils.UDP_PROTOCOL,
+            ),
+            constants.HTTP_PORT_ID: shared_utils.new_port_spec(
+                public_ports_for_component[1],
+                shared_utils.TCP_PROTOCOL,
+                shared_utils.HTTP_APPLICATION_PROTOCOL,
+            ),
+            constants.METRICS_PORT_ID: shared_utils.new_port_spec(
+                public_ports_for_component[2],
+                shared_utils.TCP_PROTOCOL,
+                shared_utils.HTTP_APPLICATION_PROTOCOL,
+            ),
+        }
 
-    discovery_port_tcp = (
+    discovery_port = (
         public_ports_for_component[0]
         if public_ports_for_component
         else BEACON_DISCOVERY_PORT_NUM
-    )
-    discovery_port_udp = (
-        public_ports_for_component[0]
-        if public_ports_for_component
-        else BEACON_DISCOVERY_PORT_NUM
-    )
-    discovery_port_quic = (
-        public_ports_for_component[3]
-        if public_ports_for_component
-        else BEACON_QUIC_PORT_NUM
     )
 
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
-        constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
-    # Disable port checks if skip_start is enabled
-    if participant.skip_start:
-        used_ports = shared_utils.get_port_specs(used_port_assignments, wait=None)
-    else:
-        used_ports = shared_utils.get_port_specs(used_port_assignments)
+
+    used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
-        LIGHTHOUSE_ENTRYPOINT_COMMAND,
-        "beacon_node",
-        "--debug-level=" + log_level,
-        "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--listen-address=0.0.0.0",
-        "--port={0}".format(
-            discovery_port_tcp
-        ),  # NOTE: Remove for connecting to external net!
-        "--http",
-        "--http-address=0.0.0.0",
-        "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
-        # NOTE: This comes from:
-        #   https://github.com/sigp/lighthouse/blob/7c88f582d955537f7ffff9b2c879dcf5bf80ce13/scripts/local_testnet/beacon_node.sh
-        # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
-        "--disable-packet-filter",
-        "--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        # ENR
-        "--disable-enr-auto-update",
-        "--enr-address={0}".format(
-            "${K8S_POD_IP}"
-            if backend == "kubernetes"
-            else port_publisher.cl_nat_exit_ip
-        ),
-        "--enr-tcp-port={0}".format(discovery_port_tcp),
-        "--enr-udp-port={0}".format(discovery_port_udp),
-        # QUIC
-        "--enr-quic-port={0}".format(discovery_port_quic),
-        "--quic-port={0}".format(discovery_port_quic),
-        # Metrics
-        "--metrics",
-        "--metrics-address=0.0.0.0",
-        "--metrics-allow-origin=*",
+        "consensoor",
+        "run",
+        "--log-level=" + log_level,
+        "--data-dir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
+        "--engine-api-url=" + EXECUTION_ENGINE_ENDPOINT,
+        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--genesis-state="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/genesis.ssz",
+        "--network-config="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml",
+        "--preset=" + network_params.preset,
+        "--p2p-port={0}".format(discovery_port),
+        "--p2p-host=0.0.0.0",
+        "--beacon-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
-        "--enable-private-discovery",
+        "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
+        "--graffiti=consensoor",
     ]
 
-    supernode_cmd = [
-        "--supernode",
-    ]
-
-    if participant.supernode:
-        cmd.extend(supernode_cmd)
-
-    if checkpoint_sync_enabled:
+    if checkpoint_sync_enabled and checkpoint_sync_url:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
-    else:
-        cmd.append("--allow-insecure-genesis-sync")
+
+    if node_keystore_files != None:
+        validator_keys_dirpath = shared_utils.path_join(
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            shared_utils.path_base(node_keystore_files.teku_keys_relative_dirpath),
+        )
+        validator_secrets_dirpath = shared_utils.path_join(
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+            shared_utils.path_base(node_keystore_files.teku_secrets_relative_dirpath),
+        )
+        cmd.append(
+            "--validator-keys={0}:{1}".format(
+                validator_keys_dirpath,
+                validator_secrets_dirpath,
+            )
+        )
 
     bootnode_arg = bootnode_enr_override
-
     if network_params.network not in constants.PUBLIC_NETWORKS:
-        cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
         if (
             network_params.network == constants.NETWORK_NAME.kurtosis
             or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
             if bootnode_arg == None and bootnode_contexts != None:
-                bootnode_arg = ",".join(
-                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
-                )
-        elif network_params.network == constants.NETWORK_NAME.ephemery:
-            if bootnode_arg == None:
-                bootnode_arg = shared_utils.get_devnet_enrs_list(
-                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
-                )
-        elif bootnode_arg == None:  # Devnets
-            bootnode_arg = shared_utils.get_devnet_enrs_list(
-                plan, launcher.el_cl_genesis_data.files_artifact_uuid
-            )
-    else:  # Public networks
-        cmd.append("--network=" + network_params.network)
+                for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
+                    if ctx.enr:
+                        cmd.append("--bootnodes=" + ctx.enr)
+                    elif ctx.multiaddr:
+                        cmd.append("--bootnodes=" + ctx.multiaddr)
 
-    # Add bootnode argument if set
-    if bootnode_arg != None:
-        cmd.append("--boot-nodes=" + bootnode_arg)
-
-    # Add tempo telemetry integration if tempo is enabled
-    if tempo_otlp_grpc_url != None:
-        cmd.append("--telemetry-collector-url={}".format(tempo_otlp_grpc_url))
-        cmd.append("--telemetry-service-name={}".format(beacon_service_name))
+    if participant.supernode:
+        cmd.append("--supernode")
 
     if len(participant.cl_extra_params) > 0:
-        # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.cl_extra_params])
 
-    recipe = GetHttpRequestRecipe(
-        endpoint="/eth/v1/node/identity", port_id=constants.HTTP_PORT_ID
-    )
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
-    if network_params.perfect_peerdas_enabled and participant_index < 16:
-        files[NODE_KEY_MOUNTPOINT_ON_CLIENTS] = "node-key-file-{0}".format(
-            participant_index + 1
-        )
+    if node_keystore_files != None:
+        files[
+            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
+        ] = node_keystore_files.files_artifact_uuid
 
     if persistent:
         volume_size_key = (
@@ -307,45 +258,28 @@ def get_beacon_config(
             ],
         )
 
-    # Add extra mounts - automatically handle file uploads
     processed_mounts = shared_utils.process_extra_mounts(
         plan, participant.cl_extra_mounts, extra_files_artifacts
     )
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
-    # Binary injection - mount custom binary directory if provided
-    # The artifact is a directory, so we mount it and reference the binary inside
-    if cl_binary_artifact != None:
-        files["/opt/bin"] = cl_binary_artifact.artifact
+    env_vars = participant.cl_extra_env_vars
 
-    env_vars = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
-    env_vars.update(participant.cl_extra_env_vars)
-
-    # Build the command string, copying injected binary if provided
     cmd_str = " ".join(cmd)
-    if cl_binary_artifact != None:
-        cmd_str = (
-            "cp /opt/bin/{0} /usr/local/bin/lighthouse && exec ".format(
-                cl_binary_artifact.filename
-            )
-            + cmd_str
-        )
-    else:
-        cmd_str = "exec " + cmd_str
+    cmd_str = "exec " + cmd_str
 
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "publish_udp": port_publisher.cl_enabled,
         "entrypoint": ["sh", "-c"],
         "cmd": [cmd_str],
         "files": files,
         "env_vars": env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "labels": shared_utils.label_maker(
-            client=constants.CL_TYPE.lighthouse,
+            client=constants.CL_TYPE.consensoor,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=el_context.client_name,
@@ -357,9 +291,6 @@ def get_beacon_config(
         "node_selectors": node_selectors,
     }
 
-    if len(participant.cl_devices) > 0:
-        config_args["devices"] = participant.cl_devices
-    # Only add ready_conditions if not skipping start
     if not participant.skip_start:
         config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
@@ -388,13 +319,11 @@ def get_cl_context(
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
 
-    # Skip HTTP requests if skip_start is enabled (service won't be running)
     if participant.skip_start:
         beacon_node_enr = ""
         beacon_multiaddr = ""
         beacon_peer_id = ""
     else:
-        # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
         beacon_node_identity_recipe = GetHttpRequestRecipe(
             endpoint="/eth/v1/node/identity",
             port_id=constants.HTTP_PORT_ID,
@@ -412,13 +341,16 @@ def get_cl_context(
         beacon_peer_id = response["extract.peer_id"]
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
-    beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
-    beacon_node_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, beacon_metrics_url
+    beacon_metrics_url = "{0}:{1}".format(
+        service.ip_address, beacon_metrics_port.number
     )
-    nodes_metrics_info = [beacon_node_metrics_info]
+    nodes_metrics_info = [
+        node_metrics.new_node_metrics_info(
+            service_name, METRICS_PATH, beacon_metrics_url
+        ),
+    ]
     return cl_context.new_cl_context(
-        client_name="lighthouse",
+        client_name="consensoor",
         enr=beacon_node_enr,
         ip_addr=service.name,
         ip_address=service.ip_address,
@@ -437,7 +369,7 @@ def get_cl_context(
     )
 
 
-def new_lighthouse_launcher(el_cl_genesis_data, jwt_file):
+def new_consensoor_launcher(el_cl_genesis_data, jwt_file):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
@@ -452,12 +384,4 @@ def get_blobber_config(
     node_keystore_files,
     node_selectors,
 ):
-    blobber_config = None
-    if participant.blobber_enabled:
-        blobber_config = struct(
-            service_name="{0}-{1}".format("blobber", beacon_service_name),
-            beacon_http_url=beacon_http_url,
-            node_keystore_files=node_keystore_files,
-            node_selectors=node_selectors,
-        )
-    return blobber_config
+    return None
