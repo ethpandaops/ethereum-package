@@ -63,6 +63,7 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
+slashoor = import_module("./src/slashoor/slashoor_launcher.star")
 ews = import_module("./src/ews/ews_launcher.star")
 
 GRAFANA_USER = "admin"
@@ -999,6 +1000,24 @@ def run(plan, args={}):
                 index,
                 osaka_time,
             )
+            plan.print("Successfully launched spamoor")
+        elif additional_service == "slashoor":
+            plan.print("Launching slashoor")
+            slashoor_config_template = read_file(
+                static_files.SLASHOOR_CONFIG_TEMPLATE_FILEPATH
+            )
+            slashoor.launch_slashoor(
+                plan,
+                slashoor_config_template,
+                all_participants,
+                args_with_right_defaults.participants,
+                args_with_right_defaults.slashoor_params,
+                global_node_selectors,
+                global_tolerations,
+                network_params,
+                args_with_right_defaults.additional_services,
+            )
+            plan.print("Successfully launched slashoor")
         elif additional_service == "ews":
             plan.print("Launching execution-witness-sentry")
             ews_config_template = read_file(static_files.EWS_CONFIG_TEMPLATE_FILEPATH)

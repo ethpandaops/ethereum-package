@@ -109,8 +109,17 @@ mevIndexer:
 executionIndexer:
   enabled: true
   retention: 168h # keep history for 1 week
+  detailsEnabled: true
+  tracesEnabled: true
+  detailsMaxSize: "10GB"
 
 database:
   engine: "sqlite"
   sqlite:
     file: "/dora-database.sqlite"
+
+blockDb:
+  engine: "pebble"
+  pebble:
+    path: "/dora-blockdb.peb"
+    cacheSize: 100
