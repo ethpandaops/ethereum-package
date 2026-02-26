@@ -2342,12 +2342,21 @@ def get_devnet_image_tag(network_name, original_image):
         return "ethpandaops/{0}:{1}".format(image_name, network_name)
 
 
+DEVNET_EXCLUDED_CLIENTS = {
+    "teku": "ethpandaops/teku:master",
+    "besu": "ethpandaops/besu:main",
+}
+
+
 def get_devnet_modified_images(network_name, default_images):
     if "devnet" not in network_name:
         return default_images
 
     modified_images = {}
     for client_type, image in default_images.items():
-        modified_images[client_type] = get_devnet_image_tag(network_name, image)
+        if client_type in DEVNET_EXCLUDED_CLIENTS:
+            modified_images[client_type] = DEVNET_EXCLUDED_CLIENTS[client_type]
+        else:
+            modified_images[client_type] = get_devnet_image_tag(network_name, image)
 
     return modified_images
