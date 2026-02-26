@@ -663,7 +663,7 @@ network_params:
   # Defaults to 7500 basis points (75% of slot duration)
   payload_attestation_due_bps: 7500
 
-  # EIP-7805 timing parameters
+  # Heze timing parameters
   # View freeze cutoff timing
   # Defaults to 7500 basis points (75% of slot duration)
   view_freeze_cutoff_bps: 7500
@@ -831,9 +831,9 @@ network_params:
   # Base fee update fraction for Electra fork (default 5007716)
   base_fee_update_fraction_electra: 5007716
 
-  # EIP-7805 fork epoch
+  # Heze fork epoch
   # Defaults to 18446744073709551615
-  eip7805_fork_epoch: 18446744073709551615
+  heze_fork_epoch: 18446744073709551615
 
 
   # Preset for the network
@@ -1471,7 +1471,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.2.4
+  image: ethpandaops/ethereum-genesis-generator:5.3.0
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
