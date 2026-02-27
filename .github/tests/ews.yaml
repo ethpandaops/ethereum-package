@@ -22,7 +22,7 @@ additional_services:
   - ere_server_zisk
   - ews
   - dora
-  - spamoor
+  #- spamoor
 mev_type: flashbots
 
 spamoor_params:
@@ -30,14 +30,16 @@ spamoor_params:
     - name: "mild spamming"
       scenario: eoatx
       config:
-        throughput: 3
-        max_pending: 6
-        max_wallets: 3
+        throughput: 1
+        max_pending: 1
+        max_wallets: 1
 
 ere_server_zisk_params:
   image: ghcr.io/eth-act/ere/ere-server-zisk:0.3.0-cuda
   gpu_count: 1
 
+dora_params:
+  image: ethpandaops/dora:kw-optional-proofs
 
 ews_params:
   num_proofs: 2
@@ -50,3 +52,11 @@ ews_params:
       - program_id: ethrex-zisk
     env:
       RUST_LOG: info
+
+port_publisher:
+  el:
+    enabled: true
+  cl:
+    enabled: true
+  additional_services:
+    enabled: true
