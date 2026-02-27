@@ -1,12 +1,62 @@
 participants:
+  # Normal nodes with real EL (nodes 1-3)
   - count: 3
+    el_type: reth
+    cl_type: lighthouse
+    cl_image: ghcr.io/han0110/lighthouse/lighthouse:latest-optional-proofs
+  # zkVM enabled nodes with dummy EL (nodes 4-6)
   - el_type: dummy
     cl_type: lighthouse
-    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    cl_image: ghcr.io/han0110/lighthouse/lighthouse:latest-optional-proofs
     cl_extra_params:
       - --activate-zkvm
+    count: 3
+
+network_params:
+  prefunded_accounts: '{"0xb9e79d19f651a941757b35830232e7efc77e1c79": {"balance": "100000ETH"}}'
+
+mev_params:
+  mev_builder_subsidy: 1
 
 additional_services:
+  - ere_server_zisk
   - ews
   - dora
+  #- spamoor
 mev_type: flashbots
+
+spamoor_params:
+  spammers:
+    - name: "mild spamming"
+      scenario: eoatx
+      config:
+        throughput: 1
+        max_pending: 1
+        max_wallets: 1
+
+ere_server_zisk_params:
+  image: ghcr.io/eth-act/ere/ere-server-zisk:0.3.0-cuda
+  gpu_count: 1
+
+dora_params:
+  image: ethpandaops/dora:kw-optional-proofs
+
+ews_params:
+  num_proofs: 2
+  proof_types:
+    - ethrex-zisk
+  env:
+    RUST_LOG: info
+  zkboost:
+    zkvms:
+      - program_id: ethrex-zisk
+    env:
+      RUST_LOG: info
+
+port_publisher:
+  el:
+    enabled: true
+  cl:
+    enabled: true
+  additional_services:
+    enabled: true
