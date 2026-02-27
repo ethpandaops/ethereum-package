@@ -29,6 +29,7 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.info: "INFO",
     constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
     constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.custom: "CUSTOM",
 }
 
 
@@ -223,8 +224,7 @@ def get_beacon_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
-    if participant.custom_log_config:
-        # ignores log_level and expects a custom log config
+    if log_level == "CUSTOM":
         cmd.append("--log-destination=CUSTOM")
     else:
         cmd.append("--logging=" + log_level)
