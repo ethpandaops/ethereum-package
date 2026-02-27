@@ -1122,6 +1122,17 @@ ere_server_zisk_params:
 > ```
 >
 > Without this, Kurtosis containers only get `/dev/nvidia*` device files but not the host's `libcuda.so` driver library, causing CUDA initialization failures.
+>
+> **Shared Memory Gotcha**: The ZisK CUDA prover requires a large shared memory (`/dev/shm`) allocation. Docker defaults to 64MB which will cause the prover to crash with `CUDA context is destroyed` errors during NTT kernel execution. Add the following to your `/etc/docker/daemon.json` and restart Docker:
+>
+> ```json
+> {
+>     "default-shm-size": "32G",
+>     "default-ulimits": {
+>         "memlock": { "Name": "memlock", "Hard": -1, "Soft": -1 }
+>     }
+> }
+> ```
 
 # Configuration place for execution-witness-sentry (ews) - https://github.com/eth-act/zkboost
 ews_params:
