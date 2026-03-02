@@ -256,7 +256,7 @@ def get_config(
     if el_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/{0} /home/user/nimbus-eth1/build/nimbus_execution_client && /home/user/nimbus-eth1/build/nimbus_execution_client ".format(
+            "cp /opt/bin/{0} /home/user/nimbus-eth1/build/nimbus && /home/user/nimbus-eth1/build/nimbus ".format(
                 el_binary_artifact.filename
             )
             + " ".join(cmd)
