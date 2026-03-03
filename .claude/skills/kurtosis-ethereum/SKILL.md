@@ -29,7 +29,7 @@ kurtosis enclave rm -f <name>          # cleanup
 
 **If you are told to use a fork or a branch of the ethereum-package, then replace github.com/ethpandaops/ethereum-package with github.com/<fork>/ethereum-package@branch**
 
-**If you want to quickly sanity check something, then use preset: "minimal". This will lead to much faster networks, but do not default to this approach. Only use it when you are sure you want to quickly check something**
+**If you want to quickly sanity check something, then use preset: "minimal". This will lead to much faster networks, but do not default to this approach. Only use it when you are sure you want to quickly check something. When the user expects it to behave like mainnet, then use preset: "mainnet".**
 
 ## Config Structure (`network_params.yaml`)
 
@@ -114,6 +114,9 @@ participants:
     cl_type: lodestar
   - el_type: reth
     cl_type: lighthouse
+
+network_params:
+  preset: minimal
 ```
 
 ### Mixed clients with monitoring
@@ -126,6 +129,9 @@ participants:
     cl_type: prysm
   - el_type: besu
     cl_type: teku
+
+network_params:
+  preset: minimal
 
 additional_services:
   - dora
@@ -143,6 +149,9 @@ participants:
     el_image: ethpandaops/geth:my-branch
     cl_type: lighthouse
     cl_image: ethpandaops/lighthouse:my-branch
+
+network_params:
+  preset: minimal
 ```
 
 ### Observer node (no validators)
@@ -152,6 +161,9 @@ participants:
   - el_type: geth
     cl_type: lighthouse
     validator_count: 0
+
+network_params:
+  preset: minimal
 ```
 
 ## Monitoring
