@@ -29,6 +29,8 @@ kurtosis enclave rm -f <name>          # cleanup
 
 **If you are told to use a fork or a branch of the ethereum-package, then replace github.com/ethpandaops/ethereum-package with github.com/<fork>/ethereum-package@branch**
 
+**If you want to quickly sanity check something, then use preset: "minimal". This will lead to much faster networks, but do not default to this approach. Only use it when you are sure you want to quickly check something**
+
 ## Config Structure (`network_params.yaml`)
 
 ### `participants`
