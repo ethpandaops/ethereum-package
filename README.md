@@ -2042,6 +2042,45 @@ Here's a table of the private keys that can be used to create the nodes:
 
 Private keys can be found in the `static_files/peerdas-node-keys` directory.
 
+## AI Agent Skill (Claude Code & Codex)
+
+This repository ships with an AI agent skill called `kurtosis-ethereum` that lets AI coding agents spin up and manage Ethereum devnets. The skill is automatically discovered by both [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and [OpenAI Codex](https://developers.openai.com/codex/skills/) when working in this repo.
+
+The canonical skill lives at `.claude/skills/kurtosis-ethereum/` with a symlink at `.agents/skills/kurtosis-ethereum/` for Codex compatibility. The same `SKILL.md` works for both agents.
+
+### Installation
+
+**Claude Code:**
+
+```bash
+claude skill install --name kurtosis-ethereum /path/to/ethereum-package/.claude/skills/kurtosis-ethereum
+```
+
+Or reference it directly from GitHub:
+
+```bash
+claude skill install --name kurtosis-ethereum github.com/ethpandaops/ethereum-package/.claude/skills/kurtosis-ethereum
+```
+
+**Codex:** The skill is auto-discovered from `.agents/skills/` when working in this repo. No extra installation needed.
+
+### Usage
+
+Once available, invoke the skill with a natural language prompt:
+
+```
+# Claude Code
+/kurtosis-ethereum spin up a 4-node devnet with geth+lighthouse and reth+prysm with assertoor stability checks
+
+# Codex — the skill is invoked implicitly or via /skills
+spin up a 4-node devnet with geth+lighthouse and reth+prysm with assertoor stability checks
+```
+
+The skill provides:
+- Configuration generation for multi-client devnets
+- A reference tool (`kurtosis-ref.sh`) for looking up supported clients, parameters, fork epochs, MEV options, and CI test examples
+- Templates for common setups (mixed clients, custom images, observer nodes, MEV infrastructure)
+
 <!------------------------ Only links below here -------------------------------->
 
 [docker-installation]: https://docs.docker.com/get-docker/
