@@ -27,6 +27,7 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.info: "INFO",
     constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
     constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.custom: "CUSTOM",
 }
 
 
@@ -142,7 +143,12 @@ def get_config(
 
     cmd = [
         "besu",
-        "--logging=" + log_level,
+    ]
+
+    if log_level != "CUSTOM":
+        cmd.append("--logging=" + log_level)
+
+    cmd += [
         "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--host-allowlist=*",
         "--rpc-http-enabled=true",

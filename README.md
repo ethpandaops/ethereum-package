@@ -213,6 +213,8 @@ participants:
     # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
     # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
     # over a specific participant's logging
+    # Set to "custom" (Besu only) to disable global logging settings and leave it up to the client configuration,
+    # for example, when using a custom log4j2.xml file
     el_log_level: ""
 
     # The storage type for the EL client: "full" or "archive"
@@ -313,6 +315,8 @@ participants:
     # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
     # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
     # over a specific participant's logging
+    # Set to "custom" (Teku only) to disable global logging settings and leave it up to the client configuration,
+    # for example, when using a custom log4j.xml file
     cl_log_level: ""
 
     # A list of optional extra env_vars the cl container should spin up with
