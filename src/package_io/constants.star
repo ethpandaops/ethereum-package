@@ -40,6 +40,7 @@ GLOBAL_LOG_LEVEL = struct(
     warn="warn",
     debug="debug",
     trace="trace",
+    custom="custom",
 )
 
 CLIENT_TYPES = struct(
