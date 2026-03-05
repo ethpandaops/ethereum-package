@@ -548,12 +548,6 @@ participants:
     # Default to 1
     count: 1
 
-    # Snooper local flag for a participant.
-    # Snooper can be enabled with the `snooper_enabled` flag per client or globally via `snooper_params.enabled`
-    # Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
-    # Default to null
-    snooper_enabled: null
-
     # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
     # Defaults null and then set to global ethereum_metrics_exporter_enabled (false)
     ethereum_metrics_exporter_enabled: null
@@ -1202,7 +1196,7 @@ global_log_level: "info"
 # Configuration for snooper - dumps all JSON-RPC requests and responses
 # including BeaconAPI, EngineAPI and ExecutionAPI
 snooper_params:
-  # Enable snooper globally for all participants (replaces snooper_enabled)
+  # Enable snooper globally for all participants
   enabled: false
   # The image to use for snooper
   # Defaults to ethpandaops/rpc-snooper:latest
