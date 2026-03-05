@@ -391,6 +391,12 @@ SUBCATEGORY_PARAMS = {
         "xatu_server_headers",
         "beacon_subscriptions",
     ],
+    "snooper_params": [
+        "enabled",
+        "image",
+        "extra_args",
+        "extra_env_vars",
+    ],
     "spamoor_params": [
         "image",
         "min_cpu",

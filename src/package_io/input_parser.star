@@ -87,6 +87,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "snooper_params",
     "slashoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
@@ -128,6 +129,7 @@ def input_parser(plan, input_args):
     result["global_tolerations"] = []
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
+    result["snooper_params"] = get_default_snooper_params()
     result["spamoor_params"] = get_default_spamoor_params()
     result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
@@ -202,6 +204,10 @@ def input_parser(plan, input_args):
                 result["xatu_sentry_params"][sub_attr] = sub_value
         elif attr == "port_publisher":
             result["port_publisher"] = get_port_publisher_params("user", input_args)
+        elif attr == "snooper_params":
+            for sub_attr in input_args["snooper_params"]:
+                sub_value = input_args["snooper_params"][sub_attr]
+                result["snooper_params"][sub_attr] = sub_value
         elif attr == "spamoor_params":
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
@@ -234,6 +240,12 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
                 result["buildoor_params"][sub_attr] = sub_value
+
+    if result.get("snooper_enabled"):
+        plan.print(
+            "DEPRECATION WARNING: 'snooper_enabled' is deprecated, use 'snooper_params.enabled' instead"
+        )
+        result["snooper_params"]["enabled"] = True
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -892,6 +904,12 @@ def input_parser(plan, input_args):
         global_log_level=result["global_log_level"],
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
+        snooper_params=struct(
+            enabled=result["snooper_params"]["enabled"],
+            image=result["snooper_params"]["image"],
+            extra_args=result["snooper_params"]["extra_args"],
+            extra_env_vars=result["snooper_params"]["extra_env_vars"],
+        ),
         ethereum_metrics_exporter_enabled=result["ethereum_metrics_exporter_enabled"],
         xatu_sentry_enabled=result["xatu_sentry_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
@@ -1052,6 +1070,10 @@ def parse_network_params(plan, input_args):
                     participants.append(participant_copy)
             result["participants"] = participants
 
+    if "snooper_params" in input_args:
+        for sub_attr in input_args["snooper_params"]:
+            result["snooper_params"][sub_attr] = input_args["snooper_params"][sub_attr]
+
     total_participant_count = 0
     actual_num_validators = 0
     # validation of the above defaults
@@ -1185,7 +1207,9 @@ def parse_network_params(plan, input_args):
 
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == None:
-            participant["snooper_enabled"] = result["snooper_enabled"]
+            participant["snooper_enabled"] = (
+                result["snooper_enabled"] or result["snooper_params"]["enabled"]
+            )
 
         keymanager_enabled = participant["keymanager_enabled"]
         if keymanager_enabled == None:
@@ -1387,6 +1411,7 @@ def default_input_args(input_args):
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
             "public_port_start": None,
         },
+        "snooper_params": get_default_snooper_params(),
         "spamoor_params": get_default_spamoor_params(),
         "bootnodoor_params": get_default_bootnodoor_params(),
     }
@@ -1860,6 +1885,15 @@ def get_default_xatu_sentry_params():
             "blob_sidecar",
             "data_column_sidecar",
         ],
+    }
+
+
+def get_default_snooper_params():
+    return {
+        "enabled": False,
+        "image": constants.DEFAULT_SNOOPER_IMAGE,
+        "extra_args": [],
+        "extra_env_vars": {},
     }
 
 
