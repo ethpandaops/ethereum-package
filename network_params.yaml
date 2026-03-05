@@ -185,7 +185,11 @@ checkpointz_params:
   image: "ethpandaops/checkpointz:latest"
 wait_for_finalization: false
 global_log_level: info
-snooper_enabled: false
+snooper_params:
+  enabled: false
+  image: ""
+  extra_args: []
+  extra_env_vars: {}
 ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 disable_peer_scoring: false

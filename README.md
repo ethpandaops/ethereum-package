@@ -545,7 +545,7 @@ participants:
     count: 1
 
     # Snooper local flag for a participant.
-    # Snooper can be enabled with the `snooper_enabled` flag per client or globally
+    # Snooper can be enabled with the `snooper_enabled` flag per client or globally via `snooper_params.enabled`
     # Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
     # Default to null
     snooper_enabled: null
@@ -1195,11 +1195,18 @@ wait_for_finalization: false
 # This value will be overridden by participant-specific values
 global_log_level: "info"
 
-# Snooper global flag for all participants
-# Snooper can be enabled with the `snooper_enabled` flag per client or globally
-# Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
-# Default to false
-snooper_enabled: false
+# Configuration for snooper - dumps all JSON-RPC requests and responses
+# including BeaconAPI, EngineAPI and ExecutionAPI
+snooper_params:
+  # Enable snooper globally for all participants (replaces snooper_enabled)
+  enabled: false
+  # The image to use for snooper
+  # Defaults to ethpandaops/rpc-snooper:latest
+  image: ""
+  # Extra arguments to pass to the snooper binary
+  extra_args: []
+  # Extra environment variables to set on the snooper container
+  extra_env_vars: {}
 
 # Enables Ethereum Metrics Exporter for all participants
 # Defaults to false
@@ -1775,7 +1782,8 @@ participants:
   - el_type: geth
     cl_type: lighthouse
     count: 2
-snooper_enabled: true
+snooper_params:
+  enabled: true
 additional_services:
   - prometheus
   - grafana

@@ -26,6 +26,7 @@ def launch_snooper(
     port_publisher,
     global_other_index,
     docker_cache_params,
+    snooper_params,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -64,6 +65,7 @@ def launch_snooper(
         docker_cache_params,
         snooper_used_ports,
         public_ports,
+        snooper_params,
     )
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
@@ -83,7 +85,10 @@ def get_config(
     docker_cache_params,
     snooper_used_ports,
     public_ports,
+    snooper_params,
 ):
+    image = snooper_params.image if snooper_params.image else constants.DEFAULT_SNOOPER_IMAGE
+
     engine_port_num = "http://{0}:{1}".format(
         el_context.ip_addr,
         el_context.engine_rpc_port_num,
@@ -101,15 +106,18 @@ def get_config(
             else SNOOPER_EL_RPC_PORT_NUM
         ),
         "{0}".format(engine_port_num if "engine" in service_name else rpc_port_num),
-    ]
+    ] + snooper_params.extra_args
+
+    env_vars = dict(snooper_params.extra_env_vars) if snooper_params.extra_env_vars else {}
 
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
-            docker_cache_params, constants.DEFAULT_SNOOPER_IMAGE
+            docker_cache_params, image
         ),
         ports=snooper_used_ports,
         public_ports=public_ports,
         cmd=cmd,
+        env_vars=env_vars,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
