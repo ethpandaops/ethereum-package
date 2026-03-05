@@ -87,7 +87,11 @@ def get_config(
     public_ports,
     snooper_params,
 ):
-    image = snooper_params.image if snooper_params.image else constants.DEFAULT_SNOOPER_IMAGE
+    image = (
+        snooper_params.image
+        if snooper_params.image
+        else constants.DEFAULT_SNOOPER_IMAGE
+    )
 
     engine_port_num = "http://{0}:{1}".format(
         el_context.ip_addr,
@@ -108,12 +112,12 @@ def get_config(
         "{0}".format(engine_port_num if "engine" in service_name else rpc_port_num),
     ] + snooper_params.extra_args
 
-    env_vars = dict(snooper_params.extra_env_vars) if snooper_params.extra_env_vars else {}
+    env_vars = (
+        dict(snooper_params.extra_env_vars) if snooper_params.extra_env_vars else {}
+    )
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
-            docker_cache_params, image
-        ),
+        image=shared_utils.docker_cache_image_calc(docker_cache_params, image),
         ports=snooper_used_ports,
         public_ports=public_ports,
         cmd=cmd,

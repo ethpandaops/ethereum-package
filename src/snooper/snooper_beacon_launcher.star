@@ -71,7 +71,11 @@ def get_config(
     public_ports,
     snooper_params,
 ):
-    image = snooper_params.image if snooper_params.image else constants.DEFAULT_SNOOPER_IMAGE
+    image = (
+        snooper_params.image
+        if snooper_params.image
+        else constants.DEFAULT_SNOOPER_IMAGE
+    )
 
     beacon_rpc_port_num = "{0}".format(
         cl_context.beacon_http_url,
@@ -83,12 +87,12 @@ def get_config(
         "{0}".format(beacon_rpc_port_num),
     ] + snooper_params.extra_args
 
-    env_vars = dict(snooper_params.extra_env_vars) if snooper_params.extra_env_vars else {}
+    env_vars = (
+        dict(snooper_params.extra_env_vars) if snooper_params.extra_env_vars else {}
+    )
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
-            docker_cache_params, image
-        ),
+        image=shared_utils.docker_cache_image_calc(docker_cache_params, image),
         ports=SNOOPER_USED_PORTS,
         public_ports=public_ports,
         cmd=cmd,

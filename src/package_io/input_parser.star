@@ -242,7 +242,9 @@ def input_parser(plan, input_args):
                 result["buildoor_params"][sub_attr] = sub_value
 
     if result.get("snooper_enabled"):
-        print("DEPRECATION WARNING: 'snooper_enabled' is deprecated, use 'snooper_params.enabled' instead")
+        plan.print(
+            "DEPRECATION WARNING: 'snooper_enabled' is deprecated, use 'snooper_params.enabled' instead"
+        )
         result["snooper_params"]["enabled"] = True
 
     if result.get("disable_peer_scoring"):
@@ -1068,6 +1070,10 @@ def parse_network_params(plan, input_args):
                     participants.append(participant_copy)
             result["participants"] = participants
 
+    if "snooper_params" in input_args:
+        for sub_attr in input_args["snooper_params"]:
+            result["snooper_params"][sub_attr] = input_args["snooper_params"][sub_attr]
+
     total_participant_count = 0
     actual_num_validators = 0
     # validation of the above defaults
@@ -1201,7 +1207,9 @@ def parse_network_params(plan, input_args):
 
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == None:
-            participant["snooper_enabled"] = result["snooper_enabled"] or result["snooper_params"]["enabled"]
+            participant["snooper_enabled"] = (
+                result["snooper_enabled"] or result["snooper_params"]["enabled"]
+            )
 
         keymanager_enabled = participant["keymanager_enabled"]
         if keymanager_enabled == None:
@@ -1403,6 +1411,7 @@ def default_input_args(input_args):
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
             "public_port_start": None,
         },
+        "snooper_params": get_default_snooper_params(),
         "spamoor_params": get_default_spamoor_params(),
         "bootnodoor_params": get_default_bootnodoor_params(),
     }
