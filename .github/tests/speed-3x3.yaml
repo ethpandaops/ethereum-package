@@ -1,0 +1,26 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: teku
+  - el_type: nethermind
+    cl_type: nimbus
+  - el_type: geth
+    cl_type: teku
+  - el_type: reth
+    cl_type: lighthouse
+  - el_type: nethermind
+    cl_type: nimbus
+  - el_type: geth
+    cl_type: nimbus
+  - el_type: reth
+    cl_type: teku
+  - el_type: nethermind
+    cl_type: lighthouse
+network_params:
+  preset: minimal
+  genesis_delay: 5
+  electra_fork_epoch: 0
+  fulu_fork_epoch: 18446744073709551615
+parallel_keystore_generation: true
+additional_services: []

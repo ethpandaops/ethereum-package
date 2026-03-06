@@ -1,0 +1,10 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+network_params:
+  preset: minimal
+  genesis_delay: 5
+  electra_fork_epoch: 0
+  fulu_fork_epoch: 18446744073709551615
+parallel_keystore_generation: true
+additional_services: []

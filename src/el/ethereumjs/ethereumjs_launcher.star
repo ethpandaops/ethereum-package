@@ -299,10 +299,13 @@ def get_el_context(
     service_name,
     service,
     launcher,
+    skip_enode=False,
 ):
-    enode = el_admin_node_info.get_enode_for_node(
-        plan, service_name, constants.RPC_PORT_ID
-    )
+    enode = ""
+    if not skip_enode:
+        enode = el_admin_node_info.get_enode_for_node(
+            plan, service_name, constants.RPC_PORT_ID
+        )
 
     # TODO: Passing empty string for metrics_url for now https://github.com/ethpandaops/ethereum-package/issues/127
     # metrics_url = "http://{0}:{1}".format(service.name, METRICS_PORT_NUM)

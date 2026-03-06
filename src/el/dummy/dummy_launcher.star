@@ -214,10 +214,14 @@ def get_el_context(
     service_name,
     service,
     launcher,
+    skip_enode=False,
 ):
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, constants.RPC_PORT_ID
-    )
+    enode = ""
+    enr = ""
+    if not skip_enode:
+        enode, enr = el_admin_node_info.get_enode_enr_for_node(
+            plan, service_name, constants.RPC_PORT_ID
+        )
 
     http_url = "http://{0}:{1}".format(service.name, RPC_PORT_NUM)
     ws_url = "ws://{0}:{1}".format(service.name, WS_PORT_NUM)

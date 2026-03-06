@@ -6,6 +6,7 @@ def get_ready_conditions(port_id):
         field="code",
         assertion="IN",
         target_value=[200, 206],
+        interval="0.5s",
         timeout="30m",
     )
 

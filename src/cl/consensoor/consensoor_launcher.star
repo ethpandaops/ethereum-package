@@ -115,6 +115,7 @@ def get_beacon_config(
     tempo_otlp_grpc_url,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
+    skip_ready_conditions=False,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -291,7 +292,7 @@ def get_beacon_config(
         "node_selectors": node_selectors,
     }
 
-    if not participant.skip_start:
+    if not participant.skip_start and not skip_ready_conditions:
         config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         )
@@ -315,11 +316,14 @@ def get_cl_context(
     snooper_el_engine_context,
     node_keystore_files,
     node_selectors,
+    skip_identity=False,
 ):
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
 
-    if participant.skip_start:
+    # Skip HTTP requests if skip_start is enabled (service won't be running)
+    # or if skip_identity is set (identity will be collected later)
+    if participant.skip_start or skip_identity:
         beacon_node_enr = ""
         beacon_multiaddr = ""
         beacon_peer_id = ""
