@@ -2058,15 +2058,14 @@ The canonical skill lives at `.claude/skills/kurtosis-ethereum/` with a symlink 
 
 **Claude Code:**
 
-```bash
-claude skill install --name kurtosis-ethereum /path/to/ethereum-package/.claude/skills/kurtosis-ethereum
-```
-
-Or reference it directly from GitHub:
+Clone the repo and copy the skill to your personal Claude skills folder:
 
 ```bash
-claude skill install --name kurtosis-ethereum github.com/ethpandaops/ethereum-package/.claude/skills/kurtosis-ethereum
+git clone https://github.com/ethpandaops/ethereum-package.git
+cp -r ethereum-package/.claude/skills/kurtosis-ethereum ~/.claude/skills/
 ```
+
+Claude Code auto-discovers skills in `~/.claude/skills/`. Once copied, invoke with `/kurtosis-ethereum`.
 
 **Codex:** The skill is auto-discovered from `.agents/skills/` when working in this repo. No extra installation needed.
 
