@@ -678,10 +678,6 @@ network_params:
   # Defaults to 128
   max_request_blocks_deneb: 128
 
-  # Maximum request blob sidecars for Electra fork
-  # Defaults to 1152 (128 * 9 blobs)
-  max_request_blob_sidecars_electra: 1152
-
   # The number of validator keys that each CL validator node should get
   num_validator_keys_per_node: 128
 
@@ -813,8 +809,6 @@ network_params:
   # Example: shadowfork_block_height: 340000 for hoodi
   shadowfork_block_height: "latest"
 
-  # The number of data column sidecar subnets used in the gossipsub protocol
-  data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
 
@@ -940,9 +934,6 @@ network_params:
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
-  # Minimum number of epochs for block requests
-  # Default to 33024
-  min_epochs_for_block_requests: 33024
 
 # Global parameters for the network
 
@@ -1476,7 +1467,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.3.1
+  image: ethpandaops/ethereum-genesis-generator:5.3.2
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
