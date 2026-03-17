@@ -87,6 +87,8 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "snooper_params",
+    "slashoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
     "ews_params",
@@ -127,7 +129,9 @@ def input_parser(plan, input_args):
     result["global_tolerations"] = []
     result["global_node_selectors"] = {}
     result["port_publisher"] = get_port_publisher_params("default")
+    result["snooper_params"] = get_default_snooper_params()
     result["spamoor_params"] = get_default_spamoor_params()
+    result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["ews_params"] = get_default_ews_params()
     result["buildoor_params"] = get_default_buildoor_params()
@@ -200,10 +204,18 @@ def input_parser(plan, input_args):
                 result["xatu_sentry_params"][sub_attr] = sub_value
         elif attr == "port_publisher":
             result["port_publisher"] = get_port_publisher_params("user", input_args)
+        elif attr == "snooper_params":
+            for sub_attr in input_args["snooper_params"]:
+                sub_value = input_args["snooper_params"][sub_attr]
+                result["snooper_params"][sub_attr] = sub_value
         elif attr == "spamoor_params":
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "slashoor_params":
+            for sub_attr in input_args["slashoor_params"]:
+                sub_value = input_args["slashoor_params"][sub_attr]
+                result["slashoor_params"][sub_attr] = sub_value
         elif attr == "mempool_bridge_params":
             for sub_attr in input_args["mempool_bridge_params"]:
                 sub_value = input_args["mempool_bridge_params"][sub_attr]
@@ -228,6 +240,12 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
                 result["buildoor_params"][sub_attr] = sub_value
+
+    if result.get("snooper_enabled"):
+        plan.print(
+            "DEPRECATION WARNING: 'snooper_enabled' is deprecated, use 'snooper_params.enabled' instead"
+        )
+        result["snooper_params"]["enabled"] = True
 
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
@@ -613,7 +631,7 @@ def input_parser(plan, input_args):
             electra_fork_epoch=result["network_params"]["electra_fork_epoch"],
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
             gloas_fork_epoch=result["network_params"]["gloas_fork_epoch"],
-            eip7805_fork_epoch=result["network_params"]["eip7805_fork_epoch"],
+            heze_fork_epoch=result["network_params"]["heze_fork_epoch"],
             eip7441_fork_epoch=result["network_params"]["eip7441_fork_epoch"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
@@ -856,6 +874,25 @@ def input_parser(plan, input_args):
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
         ),
+        slashoor_params=struct(
+            image=result["slashoor_params"]["image"],
+            min_cpu=result["slashoor_params"]["min_cpu"],
+            max_cpu=result["slashoor_params"]["max_cpu"],
+            min_mem=result["slashoor_params"]["min_mem"],
+            max_mem=result["slashoor_params"]["max_mem"],
+            extra_args=result["slashoor_params"]["extra_args"],
+            log_level=result["slashoor_params"]["log_level"],
+            beacon_timeout=result["slashoor_params"]["beacon_timeout"],
+            max_epochs_to_keep=result["slashoor_params"]["max_epochs_to_keep"],
+            detector_enabled=result["slashoor_params"]["detector_enabled"],
+            proposer_enabled=result["slashoor_params"]["proposer_enabled"],
+            submitter_enabled=result["slashoor_params"]["submitter_enabled"],
+            submitter_dry_run=result["slashoor_params"]["submitter_dry_run"],
+            dora_enabled=result["slashoor_params"]["dora_enabled"],
+            dora_url=result["slashoor_params"]["dora_url"],
+            dora_scan_on_startup=result["slashoor_params"]["dora_scan_on_startup"],
+            backfill_slots=result["slashoor_params"]["backfill_slots"],
+        ),
         mempool_bridge_params=struct(
             image=result["mempool_bridge_params"]["image"],
             source_enodes=result["mempool_bridge_params"]["source_enodes"],
@@ -870,6 +907,12 @@ def input_parser(plan, input_args):
         global_log_level=result["global_log_level"],
         mev_type=result["mev_type"],
         snooper_enabled=result["snooper_enabled"],
+        snooper_params=struct(
+            enabled=result["snooper_params"]["enabled"],
+            image=result["snooper_params"]["image"],
+            extra_args=result["snooper_params"]["extra_args"],
+            extra_env_vars=result["snooper_params"]["extra_env_vars"],
+        ),
         ethereum_metrics_exporter_enabled=result["ethereum_metrics_exporter_enabled"],
         xatu_sentry_enabled=result["xatu_sentry_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
@@ -1030,6 +1073,10 @@ def parse_network_params(plan, input_args):
                     participants.append(participant_copy)
             result["participants"] = participants
 
+    if "snooper_params" in input_args:
+        for sub_attr in input_args["snooper_params"]:
+            result["snooper_params"][sub_attr] = input_args["snooper_params"][sub_attr]
+
     total_participant_count = 0
     actual_num_validators = 0
     # validation of the above defaults
@@ -1163,7 +1210,9 @@ def parse_network_params(plan, input_args):
 
         snooper_enabled = participant["snooper_enabled"]
         if snooper_enabled == None:
-            participant["snooper_enabled"] = result["snooper_enabled"]
+            participant["snooper_enabled"] = (
+                result["snooper_enabled"] or result["snooper_params"]["enabled"]
+            )
 
         keymanager_enabled = participant["keymanager_enabled"]
         if keymanager_enabled == None:
@@ -1365,6 +1414,7 @@ def default_input_args(input_args):
             "nat_exit_ip": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
             "public_port_start": None,
         },
+        "snooper_params": get_default_snooper_params(),
         "spamoor_params": get_default_spamoor_params(),
         "bootnodoor_params": get_default_bootnodoor_params(),
     }
@@ -1405,7 +1455,7 @@ def default_network_params():
         "electra_fork_epoch": 0,
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1489,7 +1539,7 @@ def default_minimal_network_params():
         "electra_fork_epoch": 0,
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7805_fork_epoch": constants.FAR_FUTURE_EPOCH,
+        "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1853,6 +1903,15 @@ def get_default_xatu_sentry_params():
     }
 
 
+def get_default_snooper_params():
+    return {
+        "enabled": False,
+        "image": constants.DEFAULT_SNOOPER_IMAGE,
+        "extra_args": [],
+        "extra_env_vars": {},
+    }
+
+
 def get_default_spamoor_params():
     return {
         "image": constants.DEFAULT_SPAMOOR_IMAGE,
@@ -1888,6 +1947,28 @@ def get_default_spamoor_params():
                 },
             },
         ],
+    }
+
+
+def get_default_slashoor_params():
+    return {
+        "image": constants.DEFAULT_SLASHOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 512,
+        "extra_args": [],
+        "log_level": "info",
+        "beacon_timeout": "30s",
+        "max_epochs_to_keep": 54000,
+        "detector_enabled": True,
+        "proposer_enabled": True,
+        "submitter_enabled": True,
+        "submitter_dry_run": False,
+        "dora_enabled": True,
+        "dora_url": "",
+        "dora_scan_on_startup": True,
+        "backfill_slots": 64,
     }
 
 
@@ -2310,12 +2391,21 @@ def get_devnet_image_tag(network_name, original_image):
         return "ethpandaops/{0}:{1}".format(image_name, network_name)
 
 
+DEVNET_EXCLUDED_CLIENTS = {
+    "teku": "ethpandaops/teku:master",
+    "besu": "ethpandaops/besu:main",
+}
+
+
 def get_devnet_modified_images(network_name, default_images):
     if "devnet" not in network_name:
         return default_images
 
     modified_images = {}
     for client_type, image in default_images.items():
-        modified_images[client_type] = get_devnet_image_tag(network_name, image)
+        if client_type in DEVNET_EXCLUDED_CLIENTS:
+            modified_images[client_type] = DEVNET_EXCLUDED_CLIENTS[client_type]
+        else:
+            modified_images[client_type] = get_devnet_image_tag(network_name, image)
 
     return modified_images

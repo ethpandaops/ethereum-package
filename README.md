@@ -213,6 +213,8 @@ participants:
     # global `logLevel` = `info` then Geth would receive `3`, Besu would receive `INFO`, etc.)
     # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
     # over a specific participant's logging
+    # Set to "custom" (Besu only) to disable global logging settings and leave it up to the client configuration,
+    # for example, when using a custom log4j2.xml file
     el_log_level: ""
 
     # The storage type for the EL client: "full" or "archive"
@@ -313,6 +315,8 @@ participants:
     # global `logLevel` = `info` then Teku would receive `INFO`, Prysm would receive `info`, etc.)
     # If this is not emptystring, then this value will override the global `logLevel` setting to allow for fine-grained control
     # over a specific participant's logging
+    # Set to "custom" (Teku only) to disable global logging settings and leave it up to the client configuration,
+    # for example, when using a custom log4j.xml file
     cl_log_level: ""
 
     # A list of optional extra env_vars the cl container should spin up with
@@ -544,12 +548,6 @@ participants:
     # Default to 1
     count: 1
 
-    # Snooper local flag for a participant.
-    # Snooper can be enabled with the `snooper_enabled` flag per client or globally
-    # Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
-    # Default to null
-    snooper_enabled: null
-
     # Enables Ethereum Metrics Exporter for this participant. Can be set globally.
     # Defaults null and then set to global ethereum_metrics_exporter_enabled (false)
     ethereum_metrics_exporter_enabled: null
@@ -663,7 +661,7 @@ network_params:
   # Defaults to 7500 basis points (75% of slot duration)
   payload_attestation_due_bps: 7500
 
-  # EIP-7805 timing parameters
+  # Heze timing parameters
   # View freeze cutoff timing
   # Defaults to 7500 basis points (75% of slot duration)
   view_freeze_cutoff_bps: 7500
@@ -831,9 +829,9 @@ network_params:
   # Base fee update fraction for Electra fork (default 5007716)
   base_fee_update_fraction_electra: 5007716
 
-  # EIP-7805 fork epoch
+  # Heze fork epoch
   # Defaults to 18446744073709551615
-  eip7805_fork_epoch: 18446744073709551615
+  heze_fork_epoch: 18446744073709551615
 
 
   # Preset for the network
@@ -971,6 +969,7 @@ additional_services:
   - mempool_bridge
   - prometheus
   - rakoon
+  - slashoor
   - spamoor
   - tempo
   - tracoor
@@ -1194,11 +1193,18 @@ wait_for_finalization: false
 # This value will be overridden by participant-specific values
 global_log_level: "info"
 
-# Snooper global flag for all participants
-# Snooper can be enabled with the `snooper_enabled` flag per client or globally
-# Snooper dumps all JSON-RPC requests and responses including BeaconAPI, EngineAPI and ExecutionAPI.
-# Default to false
-snooper_enabled: false
+# Configuration for snooper - dumps all JSON-RPC requests and responses
+# including BeaconAPI, EngineAPI and ExecutionAPI
+snooper_params:
+  # Enable snooper globally for all participants
+  enabled: false
+  # The image to use for snooper
+  # Defaults to ethpandaops/rpc-snooper:latest
+  image: ""
+  # Extra arguments to pass to the snooper binary
+  extra_args: []
+  # Extra environment variables to set on the snooper container
+  extra_env_vars: {}
 
 # Enables Ethereum Metrics Exporter for all participants
 # Defaults to false
@@ -1429,10 +1435,48 @@ spamoor_params:
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
   extra_args: []
 
+# Configuration place for slashoor - https://github.com/ethpandaops/slashoor
+# Slashoor is a lazy slasher that monitors validators for slashing violations
+# and automatically submits attester slashings to the beacon chain
+slashoor_params:
+  # The image to use for slashoor
+  image: ethpandaops/slashoor:latest
+  # Resource management for slashoor
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  # Log level for slashoor (error, warn, info, debug, trace)
+  log_level: info
+  # Timeout for beacon API requests
+  beacon_timeout: 30s
+  # Maximum epochs to keep in memory for slashing detection
+  max_epochs_to_keep: 54000
+  # Number of slots to backfill on startup
+  backfill_slots: 64
+  # Enable the detector service
+  detector_enabled: true
+  # Enable the proposer slashing service
+  proposer_enabled: true
+  # Enable the submitter service
+  submitter_enabled: true
+  # Run in dry-run mode (detect but don't submit slashings)
+  submitter_dry_run: false
+  # Enable dora as a slashing database source
+  dora_enabled: true
+  # Custom dora URL (auto-detected if dora is in additional_services or on public networks)
+  dora_url: ""
+  # Scan dora on startup for existing slashings
+  dora_scan_on_startup: true
+  # A list of optional extra args
+  extra_args: []
+
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.2.4
+  image: ethpandaops/ethereum-genesis-generator:5.3.1
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
@@ -1736,7 +1780,8 @@ participants:
   - el_type: geth
     cl_type: lighthouse
     count: 2
-snooper_enabled: true
+snooper_params:
+  enabled: true
 additional_services:
   - prometheus
   - grafana
@@ -2002,6 +2047,44 @@ Here's a table of the private keys that can be used to create the nodes:
 | 0x3f2b...0db3 | 0xbcde...0608 | 23, 59, 96, 100, 102, 104, 106, 127 |
 
 Private keys can be found in the `static_files/peerdas-node-keys` directory.
+
+## AI Agent Skill (Claude Code & Codex)
+
+This repository ships with an AI agent skill called `kurtosis-ethereum` that lets AI coding agents spin up and manage Ethereum devnets. The skill is automatically discovered by both [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and [OpenAI Codex](https://developers.openai.com/codex/skills/) when working in this repo.
+
+The canonical skill lives at `.claude/skills/kurtosis-ethereum/` with a symlink at `.agents/skills/kurtosis-ethereum/` for Codex compatibility. The same `SKILL.md` works for both agents.
+
+### Installation
+
+**Claude Code:**
+
+Clone the repo and copy the skill to your personal Claude skills folder:
+
+```bash
+git clone https://github.com/ethpandaops/ethereum-package.git
+cp -r ethereum-package/.claude/skills/kurtosis-ethereum ~/.claude/skills/
+```
+
+Claude Code auto-discovers skills in `~/.claude/skills/`. Once copied, invoke with `/kurtosis-ethereum`.
+
+**Codex:** The skill is auto-discovered from `.agents/skills/` when working in this repo. No extra installation needed.
+
+### Usage
+
+Once available, invoke the skill with a natural language prompt:
+
+```
+# Claude Code
+/kurtosis-ethereum spin up a 4-node devnet with geth+lighthouse and reth+prysm with assertoor stability checks
+
+# Codex — the skill is invoked implicitly or via /skills
+spin up a 4-node devnet with geth+lighthouse and reth+prysm with assertoor stability checks
+```
+
+The skill provides:
+- Configuration generation for multi-client devnets
+- A reference tool (`kurtosis-ref.sh`) for looking up supported clients, parameters, fork epochs, MEV options, and CI test examples
+- Templates for common setups (mixed clients, custom images, observer nodes, MEV infrastructure)
 
 <!------------------------ Only links below here -------------------------------->
 
