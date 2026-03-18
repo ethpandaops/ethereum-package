@@ -59,6 +59,8 @@ jobs:
       matrix:
         include:
           - preset: mainnet
+            args_file: .
+          - preset: mainnet
             args_file: network_params.yaml
           - preset: minimal
             args_file: .github/tests/minimal.yaml
