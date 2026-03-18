@@ -1,0 +1,48 @@
+name: Check consensus spec values
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-consensus-spec-values:
+    name: Check consensus spec values (${{ matrix.preset }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: mainnet
+            args_file: network_params.yaml
+          - preset: minimal
+            args_file: .github/tests/minimal.yaml
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/docker-login
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Setup Kurtosis
+        uses: ./.github/actions/kurtosis-install
+      - name: Run genesis
+        run: |
+          kurtosis run ${{ github.workspace }} --enclave spec-check-${{ matrix.preset }} --args-file ${{ matrix.args_file }} --verbosity detailed --image-download always
+      - name: Install pyyaml
+        run: pip install pyyaml --quiet
+      - name: Download genesis artifact
+        run: kurtosis files download spec-check-${{ matrix.preset }} el_cl_genesis_data /tmp/genesis
+      - name: Download upstream consensus-specs config
+        run: |
+          curl -fsSL \
+            "https://raw.githubusercontent.com/ethereum/consensus-specs/master/configs/${{ matrix.preset }}.yaml" \
+            -o /tmp/spec.yaml
+      - name: Compare config.yaml against upstream spec
+        run: |
+          python3 .github/check-consensus-spec-values.py \
+            --our-config /tmp/genesis/config.yaml \
+            --spec-config /tmp/spec.yaml
