@@ -34,14 +34,22 @@ jobs:
         uses: ./.github/actions/kurtosis-install
       - name: Run Starlark
         run: |
-          enclave=$(basename "${{ matrix.file_name }}" .yaml | tr '_.' '--')
-          kurtosis run ${{ github.workspace }} --enclave "$enclave" --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
+          if [[ "${{ matrix.file_name }}" == "." ]]; then
+            kurtosis run ${{ github.workspace }} --enclave "default" --verbosity detailed --image-download always
+          else
+            enclave=$(basename "${{ matrix.file_name }}" .yaml | tr '_.' '--')
+            kurtosis run ${{ github.workspace }} --enclave "$enclave" --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
+          fi
       - name: Check consensus spec values
         continue-on-error: true
-        if: matrix.file_name == './network_params.yaml' || matrix.file_name == './.github/tests/minimal.yaml'
+        if: matrix.file_name == './network_params.yaml' || matrix.file_name == './.github/tests/minimal.yaml' || matrix.file_name == '.'
         run: |
-          enclave=$(basename "${{ matrix.file_name }}" .yaml | tr '_.' '--')
-          if [[ "${{ matrix.file_name }}" == "./network_params.yaml" ]]; then
+          if [[ "${{ matrix.file_name }}" == "." ]]; then
+            enclave="default"
+          else
+            enclave=$(basename "${{ matrix.file_name }}" .yaml | tr '_.' '--')
+          fi
+          if [[ "${{ matrix.file_name }}" == "./network_params.yaml" || "${{ matrix.file_name }}" == "." ]]; then
             preset="mainnet"
           else
             preset="minimal"
