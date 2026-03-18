@@ -35,30 +35,57 @@ jobs:
       - name: Run Starlark
         run: |
           if [[ "${{ matrix.file_name }}" == "." ]]; then
+            echo "ENCLAVE=default" >> "$GITHUB_ENV"
             kurtosis run ${{ github.workspace }} --enclave "default" --verbosity detailed --image-download always
           else
             enclave=$(basename "${{ matrix.file_name }}" .yaml | tr '_.' '--')
+            echo "ENCLAVE=$enclave" >> "$GITHUB_ENV"
             kurtosis run ${{ github.workspace }} --enclave "$enclave" --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
           fi
-      - name: Check consensus spec values
-        continue-on-error: true
-        if: matrix.file_name == './network_params.yaml' || matrix.file_name == './.github/tests/minimal.yaml' || matrix.file_name == '.'
+      - name: Upload genesis config
+        if: matrix.file_name == '.' || matrix.file_name == './network_params.yaml' || matrix.file_name == './.github/tests/minimal.yaml'
+        run: kurtosis files download "$ENCLAVE" el_cl_genesis_data /tmp/genesis-$ENCLAVE
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: matrix.file_name == '.' || matrix.file_name == './network_params.yaml' || matrix.file_name == './.github/tests/minimal.yaml'
+        with:
+          name: genesis-config-${{ env.ENCLAVE }}
+          path: /tmp/genesis-${{ env.ENCLAVE }}/config.yaml
+          retention-days: 1
+
+  check-consensus-spec-values:
+    name: Check consensus spec values (${{ matrix.label }})
+    needs: run_with_args
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: default
+            artifact: genesis-config-default
+            preset: mainnet
+          - label: network-params
+            artifact: genesis-config-network-params
+            preset: mainnet
+          - label: minimal
+            artifact: genesis-config-minimal
+            preset: minimal
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ matrix.artifact }}
+          path: /tmp/genesis
+      - name: Install pyyaml
+        run: pip install pyyaml --quiet
+      - name: Download upstream consensus-specs config
         run: |
-          if [[ "${{ matrix.file_name }}" == "." ]]; then
-            enclave="default"
-          else
-            enclave=$(basename "${{ matrix.file_name }}" .yaml | tr '_.' '--')
-          fi
-          if [[ "${{ matrix.file_name }}" == "./network_params.yaml" || "${{ matrix.file_name }}" == "." ]]; then
-            preset="mainnet"
-          else
-            preset="minimal"
-          fi
-          pip install pyyaml --quiet
           curl -fsSL \
-            "https://raw.githubusercontent.com/ethereum/consensus-specs/master/configs/${preset}.yaml" \
+            "https://raw.githubusercontent.com/ethereum/consensus-specs/master/configs/${{ matrix.preset }}.yaml" \
             -o /tmp/spec.yaml
-          kurtosis files download "$enclave" el_cl_genesis_data /tmp/genesis
+      - name: Compare genesis config.yaml against upstream spec
+        run: |
           python3 .github/check-consensus-spec-values.py \
             --our-config /tmp/genesis/config.yaml \
             --spec-config /tmp/spec.yaml
