@@ -19,6 +19,9 @@ participants:
       - --target-peers=3
       - --proof-engine-endpoint=http://zkboost:3000
       - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost:3000
+      - --proof-types=6
     count: 2
 
 additional_services:

@@ -5,13 +5,11 @@
 # Run with:
 #   kurtosis run --enclave eip8025-in-process-verifier \
 #       . \
-#       --args-file .github/tests/zkboost_in_process_verifier.yaml_norun
+#       --args-file .github/tests/examples/zkboost_in_process_verifier.yaml
 #
 # Prerequisites:
-#   - 1 NVIDIA GPU
-#   - Custom zkboost image with `--features verifier-zisk` (default in
-#     qu0b/zkboost@qu0b/in-process-verifier). Build locally:
-#       docker build -t zkboost:cpu-verify-experiment -f docker/Dockerfile .
+#   - 1 NVIDIA GPU (for zkboost_params.instances.zkvms.kind: ere)
+#   - zkboost with ere-verifier crate(latest)
 
 participants:
   # Prover-side: uses zkboost-prover (real ere-server + GPU).
@@ -29,10 +27,10 @@ participants:
       - --proof-types=6
     count: 1
   # Verifier-only side: uses zkboost-verifier (no ere-server, in-process
-  # ere-verifier-zisk). Listens for gossipped proofs and verifies them.
+  # verifier). Listens for gossipped proofs and verifies them.
   # Lighthouse's gossip subscription is enabled by --proof-engine-endpoint (not
   # --proof-types). The --proof-types flag controls which types to request/sign.
-  # zkboost-verifier rejects prove requests with an error (verifier-only mode).
+  # VC has no --proof-engine-endpoint: verifier-only nodes don't produce proofs.
   - cl_type: lighthouse
     cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
     el_type: reth
@@ -40,9 +38,6 @@ participants:
     supernode: false
     cl_extra_params:
       - --target-peers=3
-      - --proof-engine-endpoint=http://zkboost-verifier:3000
-      - --proof-types=6
-    vc_extra_params:
       - --proof-engine-endpoint=http://zkboost-verifier:3000
       - --proof-types=6
     count: 1
@@ -58,9 +53,7 @@ additional_services:
   - tempo
 
 zkboost_params:
-  # Locally-built image; auto-resolution of ere/ere-guests versions is bypassed,
-  # so each zkvm entry sets its artifact URLs explicitly.
-  image: zkboost:cpu-verify-experiment
+  image: ghcr.io/eth-act/zkboost/zkboost:latest
   env:
     RUST_LOG: info,zkboost=debug
   instances:
