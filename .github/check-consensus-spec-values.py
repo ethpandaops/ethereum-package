@@ -1,96 +1,56 @@
 #!/usr/bin/env python3
 """
-Compares default consensus spec values in input_parser.star against
-the upstream ethereum/consensus-specs configs.
+Compares a generated config.yaml against the upstream consensus-specs config.
 
-Exits non-zero if any tracked fields have different values or are missing
-from our defaults relative to the upstream spec.
+Exits non-zero if any non-excluded fields have different values or are missing
+from our config relative to the upstream spec.
 """
 
 import argparse
-import re
 import sys
 import urllib.request
 
 import yaml
 
-FAR_FUTURE_EPOCH = 18446744073709551615
 
-# Mapping from consensus-spec YAML keys to input_parser.star field names.
-# Only fields that are directly hardcoded in the defaults dicts are tracked.
-SPEC_TO_STARLARK = {
-    "AGGREGATE_DUE_BPS_GLOAS": "aggregate_due_bps_gloas",
-    "ATTESTATION_DUE_BPS_GLOAS": "attestation_due_bps_gloas",
-    "CHURN_LIMIT_QUOTIENT": "churn_limit_quotient",
-    "CONTRIBUTION_DUE_BPS_GLOAS": "contribution_due_bps_gloas",
-    "CUSTODY_REQUIREMENT": "custody_requirement",
-    "DATA_COLUMN_SIDECAR_SUBNET_COUNT": "data_column_sidecar_subnet_count",
-    "EJECTION_BALANCE": "ejection_balance",
-    "ETH1_FOLLOW_DISTANCE": "eth1_follow_distance",
-    "INCLUSION_LIST_SUBMISSION_DUE_BPS": "inclusion_list_submission_due_bps",
-    "MAX_BLOBS_PER_BLOCK_ELECTRA": "max_blobs_per_block_electra",
-    "MAX_PAYLOAD_SIZE": "max_payload_size",
-    "MAX_PER_EPOCH_ACTIVATION_CHURN_LIMIT": "max_per_epoch_activation_churn_limit",
-    "MAX_REQUEST_BLOCKS_DENEB": "max_request_blocks_deneb",
-    "MIN_BUILDER_WITHDRAWABILITY_DELAY": "min_builder_withdrawability_delay",
-    "MIN_EPOCHS_FOR_DATA_COLUMN_SIDECARS_REQUESTS": "min_epochs_for_data_column_sidecars_requests",
-    "MIN_VALIDATOR_WITHDRAWABILITY_DELAY": "min_validator_withdrawability_delay",
-    "PAYLOAD_ATTESTATION_DUE_BPS": "payload_attestation_due_bps",
-    "PROPOSER_INCLUSION_LIST_CUTOFF_BPS": "proposer_inclusion_list_cutoff_bps",
-    "SAMPLES_PER_SLOT": "samples_per_slot",
-    "SHARD_COMMITTEE_PERIOD": "shard_committee_period",
-    "SLOT_DURATION_MS": "slot_duration_ms",
-    "SYNC_MESSAGE_DUE_BPS_GLOAS": "sync_message_due_bps_gloas",
-    "VIEW_FREEZE_CUTOFF_BPS": "view_freeze_cutoff_bps",
+# Fields that are intentionally testnet-specific or explicitly excluded from comparison.
+EXCLUDED_FIELDS = {
+    # Network identity - intentionally differs for testnets
+    "CONFIG_NAME",
+    # Merge transition - testnets start post-merge with TTD=0
+    "TERMINAL_TOTAL_DIFFICULTY",
+    # Genesis params - testnet-configurable
+    "MIN_GENESIS_ACTIVE_VALIDATOR_COUNT",
+    "MIN_GENESIS_TIME",
+    "GENESIS_FORK_VERSION",
+    "GENESIS_DELAY",
+    # Fork versions - testnet-specific values
+    "ALTAIR_FORK_VERSION",
+    "BELLATRIX_FORK_VERSION",
+    "CAPELLA_FORK_VERSION",
+    "DENEB_FORK_VERSION",
+    "ELECTRA_FORK_VERSION",
+    "FULU_FORK_VERSION",
+    "GLOAS_FORK_VERSION",
+    "HEZE_FORK_VERSION",
+    "EIP7928_FORK_VERSION",
+    "EIP8025_FORK_VERSION",
+    # Fork activation epochs - testnets activate all forks at epoch 0
+    "ALTAIR_FORK_EPOCH",
+    "BELLATRIX_FORK_EPOCH",
+    "CAPELLA_FORK_EPOCH",
+    "DENEB_FORK_EPOCH",
+    "ELECTRA_FORK_EPOCH",
+    "FULU_FORK_EPOCH",
+    # Deposit contract - testnet-configurable
+    "DEPOSIT_CHAIN_ID",
+    "DEPOSIT_NETWORK_ID",
+    "DEPOSIT_CONTRACT_ADDRESS",
+    # Blob schedule - explicitly excluded
+    "BLOB_SCHEDULE",
+    # Deprecated field moved to preset files, not present in spec configs
+    "SECONDS_PER_SLOT",
 }
-
-FUNC_FOR_PRESET = {
-    "mainnet": "default_network_params",
-    "minimal": "default_minimal_network_params",
-}
-
-
-def extract_function_body(star_content: str, func_name: str) -> str:
-    """Return the text between 'return {' and the matching closing '}' for func_name."""
-    func_pattern = re.compile(
-        rf"^def {re.escape(func_name)}\(\):", re.MULTILINE
-    )
-    match = func_pattern.search(star_content)
-    if not match:
-        raise ValueError(f"Function {func_name!r} not found in Starlark file")
-
-    tail = star_content[match.start():]
-    return_match = re.search(r"\n    return \{", tail)
-    if not return_match:
-        raise ValueError(f"No 'return {{' found in {func_name!r}")
-
-    body_start = return_match.end()
-    depth = 1
-    pos = body_start
-    while pos < len(tail) and depth > 0:
-        c = tail[pos]
-        if c == "{":
-            depth += 1
-        elif c == "}":
-            depth -= 1
-        pos += 1
-
-    return tail[body_start : pos - 1]
-
-
-def extract_defaults(star_content: str, preset: str) -> dict:
-    """Extract integer default values for the given preset from input_parser.star."""
-    func_name = FUNC_FOR_PRESET[preset]
-    body = extract_function_body(star_content, func_name)
-
-    # Replace the FAR_FUTURE_EPOCH constant so integer regex can match it
-    body = body.replace("constants.FAR_FUTURE_EPOCH", str(FAR_FUTURE_EPOCH))
-
-    result = {}
-    # Match lines like:   "key": 12345,
-    for m in re.finditer(r'"(\w+)":\s*(\d+)', body):
-        result[m.group(1)] = int(m.group(2))
-    return result
 
 
 def load_yaml(path_or_url: str) -> dict:
@@ -101,55 +61,57 @@ def load_yaml(path_or_url: str) -> dict:
         return yaml.safe_load(f)
 
 
-def compare(starlark_defaults: dict, spec_config: dict) -> bool:
+def compare_configs(our_config: dict, spec_config: dict) -> bool:
     failures = []
+    warnings = []
 
-    for spec_key, starlark_key in sorted(SPEC_TO_STARLARK.items()):
-        if spec_key not in spec_config:
-            # Field not present in this version of the spec — skip silently
-            continue
+    spec_keys = {k for k in spec_config if k not in EXCLUDED_FIELDS}
+    our_keys = {k for k in our_config if k not in EXCLUDED_FIELDS}
 
-        spec_val = spec_config[spec_key]
+    for key in sorted(spec_keys - our_keys):
+        failures.append(
+            f"  MISSING in our config: {key!r}  (spec has: {spec_config[key]!r})"
+        )
 
-        if starlark_key not in starlark_defaults:
+    for key in sorted(spec_keys & our_keys):
+        spec_val = spec_config[key]
+        our_val = our_config[key]
+        if spec_val != our_val:
             failures.append(
-                f"  MISSING {starlark_key!r} in input_parser.star"
-                f"  (spec has {spec_key}: {spec_val!r})"
-            )
-            continue
-
-        our_val = starlark_defaults[starlark_key]
-        if our_val != spec_val:
-            failures.append(
-                f"  MISMATCH {spec_key!r}:\n"
-                f"    ours ({starlark_key}): {our_val!r}\n"
+                f"  MISMATCH {key!r}:\n"
+                f"    ours: {our_val!r}\n"
                 f"    spec: {spec_val!r}"
             )
 
+    for key in sorted(our_keys - spec_keys):
+        warnings.append(
+            f"  EXTRA field in our config (not in spec): {key!r} = {our_config[key]!r}"
+        )
+
+    if warnings:
+        print("Warnings (fields present in our config but not in the upstream spec):")
+        for w in warnings:
+            print(w)
+        print()
+
     if failures:
         print(f"FAILED: {len(failures)} issue(s) found:")
-        for f in failures:
-            print(f)
+        for failure in failures:
+            print(failure)
         return False
 
-    print(f"OK: all {len(SPEC_TO_STARLARK)} tracked spec fields match.")
+    print(f"OK: all {len(spec_keys & our_keys)} comparable spec fields match.")
     return True
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Compare input_parser.star defaults against the upstream consensus-specs config"
+        description="Compare our generated config.yaml against the upstream consensus-specs config"
     )
     parser.add_argument(
-        "--star-file",
+        "--our-config",
         required=True,
-        help="Path to src/package_io/input_parser.star",
-    )
-    parser.add_argument(
-        "--preset",
-        required=True,
-        choices=list(FUNC_FOR_PRESET),
-        help="Preset to check (mainnet or minimal)",
+        help="Path to our generated config.yaml",
     )
     parser.add_argument(
         "--spec-config",
@@ -158,13 +120,10 @@ def main():
     )
     args = parser.parse_args()
 
-    with open(args.star_file) as f:
-        star_content = f.read()
-
-    starlark_defaults = extract_defaults(star_content, args.preset)
+    our_config = load_yaml(args.our_config)
     spec_config = load_yaml(args.spec_config)
 
-    if not compare(starlark_defaults, spec_config):
+    if not compare_configs(our_config, spec_config):
         sys.exit(1)
 
 
