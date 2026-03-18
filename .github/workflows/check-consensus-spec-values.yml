@@ -1,0 +1,35 @@
+name: Check consensus spec values
+
+on:
+  pull_request:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-consensus-spec-values:
+    name: Check consensus spec values (${{ matrix.preset }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [mainnet, minimal]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install pyyaml
+        run: pip install pyyaml --quiet
+      - name: Download upstream consensus-specs config
+        run: |
+          curl -fsSL \
+            "https://raw.githubusercontent.com/ethereum/consensus-specs/master/configs/${{ matrix.preset }}.yaml" \
+            -o /tmp/spec-${{ matrix.preset }}.yaml
+      - name: Compare input_parser.star defaults against upstream spec
+        run: |
+          python3 .github/check-consensus-spec-values.py \
+            --star-file src/package_io/input_parser.star \
+            --preset ${{ matrix.preset }} \
+            --spec-config /tmp/spec-${{ matrix.preset }}.yaml
