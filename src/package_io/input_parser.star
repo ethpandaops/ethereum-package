@@ -91,7 +91,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "slashoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
-    "ews_params",
+    "zkboost_params",
     "buildoor_params",
     "ethereum_genesis_generator_params",
 )
@@ -133,7 +133,7 @@ def input_parser(plan, input_args):
     result["spamoor_params"] = get_default_spamoor_params()
     result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
-    result["ews_params"] = get_default_ews_params()
+    result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
@@ -232,10 +232,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["checkpointz_params"]:
                 sub_value = input_args["checkpointz_params"][sub_attr]
                 result["checkpointz_params"][sub_attr] = sub_value
-        elif attr == "ews_params":
-            for sub_attr in input_args["ews_params"]:
-                sub_value = input_args["ews_params"][sub_attr]
-                result["ews_params"][sub_attr] = sub_value
+        elif attr == "zkboost_params":
+            for sub_attr in input_args["zkboost_params"]:
+                sub_value = input_args["zkboost_params"][sub_attr]
+                result["zkboost_params"][sub_attr] = sub_value
         elif attr == "buildoor_params":
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
@@ -976,11 +976,14 @@ def input_parser(plan, input_args):
             max_mem=result["bootnodoor_params"]["max_mem"],
             extra_args=result["bootnodoor_params"]["extra_args"],
         ),
-        ews_params=struct(
-            image=result["ews_params"]["image"],
-            retain=result["ews_params"]["retain"],
-            num_proofs=result["ews_params"]["num_proofs"],
-            env=result["ews_params"]["env"],
+        zkboost_params=struct(
+            image=result["zkboost_params"]["image"],
+            witness_timeout_secs=result["zkboost_params"]["witness_timeout_secs"],
+            proof_timeout_secs=result["zkboost_params"]["proof_timeout_secs"],
+            proof_cache_size=result["zkboost_params"]["proof_cache_size"],
+            witness_cache_size=result["zkboost_params"]["witness_cache_size"],
+            zkvms=result["zkboost_params"]["zkvms"],
+            env=result["zkboost_params"]["env"],
         ),
         buildoor_params=struct(
             image=result["buildoor_params"]["image"],
@@ -1985,11 +1988,14 @@ def get_default_bootnodoor_params():
     }
 
 
-def get_default_ews_params():
+def get_default_zkboost_params():
     return {
-        "image": constants.DEFAULT_EWS_IMAGE,
-        "retain": 10,
-        "num_proofs": 1,
+        "image": constants.DEFAULT_ZKBOOST_IMAGE,
+        "witness_timeout_secs": 12,
+        "proof_timeout_secs": 12,
+        "proof_cache_size": 128,
+        "witness_cache_size": 128,
+        "zkvms": [],
         "env": {},
     }
 
