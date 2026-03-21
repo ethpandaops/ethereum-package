@@ -3,19 +3,22 @@ chain = "{{ .Network }}"
 retain = {{ .Retain }}
 num_proofs = {{ .NumProofs }}
 
-[[endpoints]]
+[proof_engine]
+url = "{{ .ZkboostInfo.HTTP_URL }}"
+proof_types = [{{ range $pt := .ProofTypes }}"{{ $pt }}", {{ end }}]
+webhook_port = 3000
+
+[[el_endpoints]]
 name = "{{ .ELClientInfo.FullName }}"
-el_url = "{{ .ELClientInfo.EL_HTTP_URL }}"
-el_ws_url = "{{ .ELClientInfo.EL_WS_URL }}"
+url = "{{ .ELClientInfo.EL_HTTP_URL }}"
+ws_url = "{{ .ELClientInfo.EL_WS_URL }}"
 
 [[cl_endpoints]]
 name = "{{ .HeadSubscriptionCLInfo.FullName }}"
 url = "{{ .HeadSubscriptionCLInfo.CL_HTTP_URL }}"
-zkvm = false
 
 {{ range $clClient := .ZkvmCLClientInfo }}
 [[cl_endpoints]]
 name = "{{ $clClient.FullName }}"
 url = "{{ $clClient.CL_HTTP_URL }}"
-zkvm = true
 {{ end }}

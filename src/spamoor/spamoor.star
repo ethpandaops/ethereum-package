@@ -193,6 +193,8 @@ def new_hosts_template_data(
         ) = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
+        if el_client.client_name == constants.EL_TYPE.dummy:
+            continue
         if participant.snooper_el_rpc_context:
             rpchost = "http://{0}:{1}".format(
                 participant.snooper_el_rpc_context.ip_addr,
