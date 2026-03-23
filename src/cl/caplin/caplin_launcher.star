@@ -162,7 +162,7 @@ def get_beacon_config(
         "--engine.api.host=" + engine_host,
         "--engine.api.port={0}".format(engine_port),
         "--engine.api.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--beacon.api",
+        "--beacon.api=beacon,builder,config,debug,events,node,validator,lighthouse",
         "--beacon.api.addr=0.0.0.0",
         "--beacon.api.port={0}".format(BEACON_HTTP_PORT_NUM),
         "--sentinel.addr=0.0.0.0",
