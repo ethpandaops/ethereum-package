@@ -446,10 +446,13 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "extra_args",
     ],
-    "ews_params": [
+    "zkboost_params": [
         "image",
-        "retain",
-        "num_proofs",
+        "witness_timeout_secs",
+        "proof_timeout_secs",
+        "witness_cache_size",
+        "proof_cache_size",
+        "zkvms",
         "env",
     ],
     "buildoor_params": [
@@ -487,7 +490,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "rakoon",
     "slashoor",
     "spamoor",
-    "ews",
+    "zkboost",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
