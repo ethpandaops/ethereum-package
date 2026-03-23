@@ -19,6 +19,7 @@ CL_TYPE = struct(
     lodestar="lodestar",
     grandine="grandine",
     consensoor="consensoor",
+    caplin="caplin",
 )
 
 VC_TYPE = struct(
