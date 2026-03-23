@@ -6,13 +6,13 @@ cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
 
-BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/caplin"
+BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/caplin/caplin-beacon-data"
 
-BEACON_DISCOVERY_PORT_NUM = 9000
+BEACON_SENTINEL_PORT_NUM = 7777
 BEACON_HTTP_PORT_NUM = 5555
 BEACON_METRICS_PORT_NUM = 6060
 
-METRICS_PATH = "/metrics"
+METRICS_PATH = "/debug/metrics/prometheus"
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "1",
@@ -121,15 +121,11 @@ def get_beacon_config(
     )
 
     if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
+        engine_host = "http://{0}".format(snooper_el_engine_context.ip_addr)
+        engine_port = snooper_el_engine_context.engine_rpc_port_num
     else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+        engine_host = "http://{0}".format(el_context.dns_name)
+        engine_port = el_context.engine_rpc_port_num
 
     public_ports = {}
     public_ports_for_component = None
@@ -139,36 +135,19 @@ def get_beacon_config(
             port_publisher,
             participant_index,
         )
-        public_ports = {
-            constants.TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                public_ports_for_component[0],
-                shared_utils.TCP_PROTOCOL,
-            ),
-            constants.UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                public_ports_for_component[0],
-                shared_utils.UDP_PROTOCOL,
-            ),
-            constants.HTTP_PORT_ID: shared_utils.new_port_spec(
-                public_ports_for_component[1],
-                shared_utils.TCP_PROTOCOL,
-                shared_utils.HTTP_APPLICATION_PROTOCOL,
-            ),
-            constants.METRICS_PORT_ID: shared_utils.new_port_spec(
-                public_ports_for_component[2],
-                shared_utils.TCP_PROTOCOL,
-                shared_utils.HTTP_APPLICATION_PROTOCOL,
-            ),
-        }
+        public_ports = cl_shared.get_general_cl_public_port_specs(
+            public_ports_for_component
+        )
 
-    discovery_port = (
+    sentinel_port = (
         public_ports_for_component[0]
         if public_ports_for_component
-        else BEACON_DISCOVERY_PORT_NUM
+        else BEACON_SENTINEL_PORT_NUM
     )
 
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: sentinel_port,
+        constants.UDP_DISCOVERY_PORT_ID: sentinel_port,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -179,26 +158,31 @@ def get_beacon_config(
         "caplin",
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
         "--verbosity=" + log_level,
-        "--execution.addr=" + EXECUTION_ENGINE_ENDPOINT,
-        "--execution.jwtSecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--beacon.addr=0.0.0.0:{0}".format(BEACON_HTTP_PORT_NUM),
-        "--sentinel.addr=0.0.0.0:{0}".format(discovery_port),
-        "--metrics",
-        "--metrics.addr=0.0.0.0",
-        "--metrics.port={0}".format(BEACON_METRICS_PORT_NUM),
+        "--engine.api",
+        "--engine.api.host=" + engine_host,
+        "--engine.api.port={0}".format(engine_port),
+        "--engine.api.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--beacon.api",
+        "--beacon.api.addr=0.0.0.0",
+        "--beacon.api.port={0}".format(BEACON_HTTP_PORT_NUM),
+        "--sentinel.addr=0.0.0.0",
+        "--sentinel.port={0}".format(sentinel_port),
+        "--pprof",
+        "--pprof.addr=0.0.0.0",
+        "--pprof.port={0}".format(BEACON_METRICS_PORT_NUM),
     ]
 
     if checkpoint_sync_enabled and checkpoint_sync_url:
-        cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
+        cmd.append("--caplin.checkpoint-sync-url=" + checkpoint_sync_url)
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
-            "--beacon-cfg="
+            "--custom-config="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/config.yaml"
         )
         cmd.append(
-            "--genesis-ssz="
+            "--custom-genesis-state="
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
@@ -208,11 +192,14 @@ def get_beacon_config(
         ):
             bootnode_arg = bootnode_enr_override
             if bootnode_arg == None and bootnode_contexts != None:
+                bootnodes = []
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     if ctx.enr:
-                        cmd.append("--sentinel.bootnodes=" + ctx.enr)
+                        bootnodes.append(ctx.enr)
                     elif ctx.multiaddr:
-                        cmd.append("--sentinel.bootnodes=" + ctx.multiaddr)
+                        bootnodes.append(ctx.multiaddr)
+                if bootnodes:
+                    cmd.append("--sentinel.bootnodes=" + ",".join(bootnodes))
     else:
         cmd.append("--chain=" + network_params.network)
 
@@ -263,6 +250,7 @@ def get_beacon_config(
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
+        "user": User(uid=0, gid=0),
         "entrypoint": ["sh", "-c"],
         "cmd": [cmd_str],
         "files": files,
