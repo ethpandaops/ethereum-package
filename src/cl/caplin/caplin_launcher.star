@@ -8,7 +8,7 @@ constants = import_module("../../package_io/constants.star")
 
 BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/caplin/caplin-beacon-data"
 
-BEACON_SENTINEL_PORT_NUM = 7777
+BEACON_P2P_PORT_NUM = 4001
 BEACON_HTTP_PORT_NUM = 5555
 BEACON_METRICS_PORT_NUM = 6060
 
@@ -139,15 +139,15 @@ def get_beacon_config(
             public_ports_for_component
         )
 
-    sentinel_port = (
+    p2p_port = (
         public_ports_for_component[0]
         if public_ports_for_component
-        else BEACON_SENTINEL_PORT_NUM
+        else BEACON_P2P_PORT_NUM
     )
 
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: sentinel_port,
-        constants.UDP_DISCOVERY_PORT_ID: sentinel_port,
+        constants.TCP_DISCOVERY_PORT_ID: p2p_port,
+        constants.UDP_DISCOVERY_PORT_ID: p2p_port,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -165,8 +165,9 @@ def get_beacon_config(
         "--beacon.api=beacon,builder,config,debug,events,node,validator,lighthouse",
         "--beacon.api.addr=0.0.0.0",
         "--beacon.api.port={0}".format(BEACON_HTTP_PORT_NUM),
-        "--sentinel.addr=0.0.0.0",
-        "--sentinel.port={0}".format(sentinel_port),
+        "--sentinel.tcp.port={0}".format(p2p_port),
+        "--discovery.port={0}".format(p2p_port),
+        "--discovery.addr=0.0.0.0",
         "--pprof",
         "--pprof.addr=0.0.0.0",
         "--pprof.port={0}".format(BEACON_METRICS_PORT_NUM),
