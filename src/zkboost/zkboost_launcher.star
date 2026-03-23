@@ -65,8 +65,8 @@ def launch_zkboost(
         "ELEndpoint": first_real_el_endpoint,
         "WitnessTimeoutSecs": zkboost_params.witness_timeout_secs,
         "ProofTimeoutSecs": zkboost_params.proof_timeout_secs,
-        "ProofCacheSize": zkboost_params.proof_cache_size,
         "WitnessCacheSize": zkboost_params.witness_cache_size,
+        "ProofCacheSize": zkboost_params.proof_cache_size,
         "Zkvms": zkvms,
     }
 

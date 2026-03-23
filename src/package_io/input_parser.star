@@ -475,21 +475,14 @@ def input_parser(plan, input_args):
                 )
             )
 
-    if "ews" in result["additional_services"]:
+    if "zkboost" in result["additional_services"]:
         has_non_dummy_el = False
-        has_dummy_el = False
         for participant in result["participants"]:
             if participant["el_type"] != "dummy":
                 has_non_dummy_el = True
-            else:
-                has_dummy_el = True
         if not has_non_dummy_el:
             fail(
-                "ews (execution-witness-sentry) is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
-            )
-        if not has_dummy_el:
-            fail(
-                "ews (execution-witness-sentry) is enabled but no participants are using dummy EL. At least one participant must use dummy EL to receive execution witnesses."
+                "zkboost is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
             )
 
     if (
@@ -980,8 +973,8 @@ def input_parser(plan, input_args):
             image=result["zkboost_params"]["image"],
             witness_timeout_secs=result["zkboost_params"]["witness_timeout_secs"],
             proof_timeout_secs=result["zkboost_params"]["proof_timeout_secs"],
-            proof_cache_size=result["zkboost_params"]["proof_cache_size"],
             witness_cache_size=result["zkboost_params"]["witness_cache_size"],
+            proof_cache_size=result["zkboost_params"]["proof_cache_size"],
             zkvms=result["zkboost_params"]["zkvms"],
             env=result["zkboost_params"]["env"],
         ),
@@ -1993,8 +1986,8 @@ def get_default_zkboost_params():
         "image": constants.DEFAULT_ZKBOOST_IMAGE,
         "witness_timeout_secs": 12,
         "proof_timeout_secs": 12,
-        "proof_cache_size": 128,
         "witness_cache_size": 128,
+        "proof_cache_size": 128,
         "zkvms": [],
         "env": {},
     }
