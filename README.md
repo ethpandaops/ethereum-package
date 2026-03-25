@@ -952,7 +952,7 @@ additional_services:
   - dora
   - dugtrio
   - erpc
-  - ews
+  - zkboost
   - forkmon
   - forky
   - full_beaconchain_explorer
@@ -1075,18 +1075,33 @@ bootnodoor_params:
   # A list of optional extra args the bootnodoor container should spin up with
   extra_args: []
 
-# Configuration place for execution-witness-sentry (ews) - https://github.com/eth-act/zkboost
-ews_params:
-  # EWS docker image to use
+# Configuration place for zkboost - https://github.com/eth-act/zkboost
+zkboost_params:
+  # zkboost docker image to use
   # Defaults to the latest image
-  image: "ghcr.io/eth-act/zkboost/execution-witness-sentry:latest"
-  # Number of execution witnesses to retain
-  # Defaults to 10
-  retain: 10
-  # Number of proofs to generate
-  # Defaults to 1
-  num_proofs: 1
-  # A list of optional extra env_vars the ews container should spin up with
+  image: "ghcr.io/eth-act/zkboost/zkboost-server:latest"
+  # Timeout in seconds for witness fetching
+  # Defaults to 12
+  witness_timeout_secs: 12
+  # Timeout in seconds for proof generation
+  # Defaults to 12
+  proof_timeout_secs: 12
+  # Number of witnesses to cache
+  # Defaults to 128
+  witness_cache_size: 128
+  # Number of proofs to cache
+  # Defaults to 128
+  proof_cache_size: 128
+  # List of zkVM configurations
+  # Each entry has: kind (mock/external), proof_type, and kind-specific options
+  # Example:
+  # zkvms:
+  #   - kind: mock
+  #     proof_type: reth-zisk
+  #     mock_proving_time_ms: 5000
+  #     mock_proof_size: 1024
+  zkvms: []
+  # A list of optional extra env_vars the zkboost container should spin up with
   env: {}
 
 # Configuration place for tempo tracing backend
