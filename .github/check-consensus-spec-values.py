@@ -41,6 +41,8 @@ EXCLUDED_FIELDS = {
     "DENEB_FORK_EPOCH",
     "ELECTRA_FORK_EPOCH",
     "FULU_FORK_EPOCH",
+    "GLOAS_FORK_EPOCH",
+    "HEZE_FORK_EPOCH",
     # Deposit contract - testnet-configurable
     "DEPOSIT_CHAIN_ID",
     "DEPOSIT_NETWORK_ID",
