@@ -491,6 +491,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "slashoor",
     "spamoor",
     "zkboost",
+    "shark_snooper",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

@@ -502,6 +502,12 @@ def input_parser(plan, input_args):
             "Mempool bridge is enabled but network is not mainnet, sepolia, hoodi or shadowfork, please set network to mainnet, sepolia, hoodi or shadowfork"
         )
 
+    if "shark_snooper" in result["additional_services"]:
+        for participant in result["participants"]:
+            if participant["cl_type"] == constants.CL_TYPE.prysm:
+                participant["cl_extra_env_vars"]["SSLKEYLOGFILE"] = "/data/prysm/beacon-data/tls-keys.log"
+                participant["cl_extra_env_vars"]["CAPTURE_DURATION"] = "300"
+
     return struct(
         participants=[
             struct(

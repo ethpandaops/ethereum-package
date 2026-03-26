@@ -65,6 +65,7 @@ get_prefunded_accounts = import_module(
 spamoor = import_module("./src/spamoor/spamoor.star")
 slashoor = import_module("./src/slashoor/slashoor_launcher.star")
 zkboost = import_module("./src/zkboost/zkboost_launcher.star")
+shark_snooper = import_module("./src/shark_snooper/shark_snooper_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -247,6 +248,18 @@ def run(plan, args={}):
             global_node_selectors,
         )
 
+    if "shark_snooper" in args_with_right_defaults.additional_services:
+        plan.print("Launching shark-snooper before participant network (to capture QUIC handshakes)")
+        shark_snooper.launch_shark_snooper(
+            plan,
+            global_node_selectors,
+            global_tolerations,
+            args_with_right_defaults.port_publisher,
+            args_with_right_defaults.additional_services.index("shark_snooper"),
+            args_with_right_defaults.docker_cache_params,
+        )
+        plan.print("Successfully launched shark-snooper")
+
     plan.print(
         "Launching participant network with {0} participants and the following network params {1}".format(
             num_participants, network_params
@@ -276,6 +289,9 @@ def run(plan, args={}):
         tempo_otlp_grpc_url,
         detected_backend,
     )
+
+    if "shark_snooper" in args_with_right_defaults.additional_services:
+        shark_snooper.start_key_fetcher(plan, all_participants)
 
     plan.print(
         "NODE JSON RPC URI: '{0}:{1}'".format(
@@ -1037,6 +1053,8 @@ def run(plan, args={}):
                 {},
             )
             plan.print("Successfully launched zkboost")
+        elif additional_service == "shark_snooper":
+            pass
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:
