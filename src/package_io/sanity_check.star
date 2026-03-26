@@ -248,7 +248,6 @@ SUBCATEGORY_PARAMS = {
         "fulu_fork_epoch",
         "gloas_fork_epoch",
         "heze_fork_epoch",
-        "eip8025_fork_epoch",
         "network_sync_base_url",
         "force_snapshot_sync",
         "shadowfork_block_height",
