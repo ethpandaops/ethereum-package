@@ -20,7 +20,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "offchainlabs/prysm-beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
@@ -43,7 +43,7 @@ DEFAULT_VC_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "offchainlabs/prysm-validator:stable",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
