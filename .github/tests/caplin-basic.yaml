@@ -1,0 +1,7 @@
+participants:
+  - el_type: erigon
+    cl_type: caplin
+    use_separate_vc: true
+    vc_type: lighthouse
+  - el_type: geth
+    cl_type: lighthouse

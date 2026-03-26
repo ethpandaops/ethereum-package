@@ -26,6 +26,7 @@ DEFAULT_CL_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
+    "caplin": "ethpandaops/caplin:main",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -36,6 +37,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "lodestar": "ethpandaops/lodestar:unstable",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "consensoor": "ethpandaops/consensoor:main",
+    "caplin": "ethpandaops/caplin:main",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -1158,8 +1160,11 @@ def parse_network_params(plan, input_args):
             fail("`use_remote_signer` requires `use_separate_vc`")
 
         if vc_type == "":
-            # Defaults to matching the chosen CL client
-            vc_type = cl_type
+            # Caplin doesn't include a built-in VC, default to lighthouse
+            if cl_type == constants.CL_TYPE.caplin:
+                vc_type = "lighthouse"
+            else:
+                vc_type = cl_type
             participant["vc_type"] = vc_type
 
         vc_image = participant["vc_image"]
