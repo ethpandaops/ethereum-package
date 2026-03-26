@@ -26,7 +26,7 @@ DEFAULT_CL_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
-    "caplin": "erigontech/erigon:latest",
+    "caplin": "ethpandaops/caplin:main",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -37,7 +37,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "lodestar": "ethpandaops/lodestar:unstable",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "consensoor": "ethpandaops/consensoor:main",
-    "caplin": "erigontech/erigon:latest",
+    "caplin": "ethpandaops/caplin:main",
 }
 
 DEFAULT_VC_IMAGES = {
