@@ -34,7 +34,6 @@ EXCLUDED_FIELDS = {
     "GLOAS_FORK_VERSION",
     "HEZE_FORK_VERSION",
     "EIP7928_FORK_VERSION",
-    "EIP8025_FORK_VERSION",
     # Fork activation epochs - testnets activate all forks at epoch 0
     "ALTAIR_FORK_EPOCH",
     "BELLATRIX_FORK_EPOCH",
