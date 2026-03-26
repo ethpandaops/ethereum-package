@@ -7,6 +7,7 @@ prysm = import_module("./prysm/prysm_launcher.star")
 teku = import_module("./teku/teku_launcher.star")
 grandine = import_module("./grandine/grandine_launcher.star")
 consensoor = import_module("./consensoor/consensoor_launcher.star")
+caplin = import_module("./caplin/caplin_launcher.star")
 
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
@@ -107,6 +108,16 @@ def launch(
             "get_beacon_config": consensoor.get_beacon_config,
             "get_cl_context": consensoor.get_cl_context,
             "get_blobber_config": consensoor.get_blobber_config,
+        },
+        constants.CL_TYPE.caplin: {
+            "launcher": caplin.new_caplin_launcher(
+                el_cl_data,
+                jwt_file,
+            ),
+            "launch_method": caplin.launch,
+            "get_beacon_config": caplin.get_beacon_config,
+            "get_cl_context": caplin.get_cl_context,
+            "get_blobber_config": caplin.get_blobber_config,
         },
     }
 

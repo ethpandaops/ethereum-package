@@ -30,7 +30,7 @@ runs:
         password: ${{ inputs.password }}
 
     - name: Install regctl
-      uses: regclient/actions/regctl-installer@ce5fd131e371ffcdd7508b478cb223b3511a9183
+      uses: regclient/actions/regctl-installer@1b705e32d40851370799ea5814e83d0a5f6a70dc # v0.1.0
 
     - name: Check Docker Hub Rate Limits
       shell: bash
