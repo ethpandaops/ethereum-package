@@ -16,6 +16,7 @@ DEFAULT_EL_IMAGES = {
     "nimbus": "statusim/nimbus-eth1:master",
     "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
     "dummy": "ethpandaops/dummy-el:master",
+    "mock-el": "sigp/lcli:latest",
 }
 
 DEFAULT_CL_IMAGES = {

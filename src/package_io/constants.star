@@ -9,6 +9,7 @@ EL_TYPE = struct(
     nimbus="nimbus",
     ethrex="ethrex",
     dummy="dummy",
+    mock_el="mock-el",
 )
 
 CL_TYPE = struct(
@@ -225,6 +226,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 500000,  # 500GB
         "grandine_volume_size": 500000,  # 500GB
         "ethrex_volume_size": 500000,  # 500GB
+        "mock_el_volume_size": 1000,  # 1GB
     },
     "sepolia": {
         "geth_volume_size": 300000,  # 300GB
@@ -242,6 +244,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 150000,  # 150GB
         "grandine_volume_size": 150000,  # 150GB
         "ethrex_volume_size": 150000,  # 150GB
+        "mock_el_volume_size": 1000,  # 1GB
     },
     "holesky": {
         "geth_volume_size": 100000,  # 100GB
@@ -259,6 +262,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
         "ethrex_volume_size": 100000,  # 100GB
+        "mock_el_volume_size": 1000,  # 1GB
     },
     "devnets": {
         "geth_volume_size": 100000,  # 100GB
@@ -276,6 +280,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
         "ethrex_volume_size": 100000,  # 100GB
+        "mock_el_volume_size": 1000,  # 1GB
     },
     "ephemery": {
         "geth_volume_size": 5000,  # 5GB
@@ -293,6 +298,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 1000,  # 1GB
         "grandine_volume_size": 1000,  # 1GB
         "ethrex_volume_size": 1000,  # 1GB
+        "mock_el_volume_size": 1000,  # 1GB
     },
     "kurtosis": {
         "geth_volume_size": 5000,  # 5GB
@@ -310,6 +316,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 1000,  # 1GB
         "grandine_volume_size": 1000,  # 1GB
         "ethrex_volume_size": 1000,  # 1GB
+        "mock_el_volume_size": 1000,  # 1GB
     },
     "hoodi": {
         "geth_volume_size": 100000,  # 100GB
@@ -327,6 +334,7 @@ VOLUME_SIZE = {
         "lodestar_volume_size": 100000,  # 100GB
         "grandine_volume_size": 100000,  # 100GB
         "ethrex_volume_size": 100000,  # 100GB
+        "mock_el_volume_size": 1000,  # 1GB
     },
 }
 # Language mapping for client implementations
@@ -341,6 +349,7 @@ CLIENT_LANGUAGES = {
     "ethereumjs": "javascript",
     "nimbus": "nim",
     "dummy": "rust",
+    "mock-el": "rust",
     # Consensus Layer (CL) clients
     "lighthouse": "rust",
     "teku": "java",
