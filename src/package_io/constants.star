@@ -33,6 +33,10 @@ VC_TYPE = struct(
     consensoor="consensoor",
 )
 
+PROVER_TYPE = struct(
+    dummy="dummy",
+)
+
 REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
 
 GLOBAL_LOG_LEVEL = struct(
@@ -49,6 +53,7 @@ CLIENT_TYPES = struct(
     cl="beacon",
     validator="validator",
     remote_signer="remote-signer",
+    prover="prover",
 )
 
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
