@@ -78,6 +78,116 @@ jobs:
           ethereum_package_args: .github/tests/mix-assert.yaml
 
 
+  speed_benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: ./.github/actions/docker-login
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Setup Kurtosis
+        uses: ./.github/actions/kurtosis-install
+      - name: Pre-pull Docker images
+        run: |
+          # Pre-pull images in parallel so kurtosis finds them cached (with --image-download missing)
+          docker pull ethereum/client-go:latest &
+          docker pull ethpandaops/lighthouse:unstable &
+          docker pull ethpandaops/ethereum-genesis-generator:5.2.4 &
+          docker pull protolambda/eth2-val-tools:latest &
+          wait
+      - name: Run Speed Benchmark
+        run: |
+          set -euo pipefail
+
+          echo "=== Speed Benchmark ==="
+          echo "Start time: $(date -u +%Y-%m-%dT%H:%M:%S%Z)"
+          START_TIME=$(date +%s)
+
+          kurtosis run ${{ github.workspace }} \
+            --args-file .github/tests/speed.yaml \
+            --verbosity detailed \
+            --image-download missing 2>&1 | tee /tmp/speed-benchmark-output.log
+
+          END_TIME=$(date +%s)
+          TOTAL_DURATION=$((END_TIME - START_TIME))
+
+          echo ""
+          echo "========================================="
+          echo "=== SPEED BENCHMARK RESULTS ==="
+          echo "========================================="
+          echo "Total wall-clock time: ${TOTAL_DURATION}s"
+          echo "Target: 60s"
+          echo ""
+          echo "=== Phase Timing Markers ==="
+          grep "TIMING:" /tmp/speed-benchmark-output.log || echo "No timing markers found"
+          echo ""
+          if [ "$TOTAL_DURATION" -le 60 ]; then
+            echo "PASS: Network created within 60s target"
+          else
+            echo "OVER TARGET: ${TOTAL_DURATION}s exceeds 60s target by $((TOTAL_DURATION - 60))s"
+          fi
+          echo "========================================="
+
+  speed_benchmark_3x3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: ./.github/actions/docker-login
+        with:
+          username: ethpandaops
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Setup Kurtosis
+        uses: ./.github/actions/kurtosis-install
+      - name: Pre-pull Docker images
+        run: |
+          # Pre-pull images in parallel so kurtosis finds them cached (with --image-download missing)
+          docker pull ethereum/client-go:latest &
+          docker pull ghcr.io/paradigmxyz/reth &
+          docker pull nethermind/nethermind:latest &
+          docker pull ethpandaops/lighthouse:unstable &
+          docker pull ethpandaops/teku:master &
+          docker pull ethpandaops/nimbus-eth2:unstable-minimal &
+          docker pull ethpandaops/ethereum-genesis-generator:5.2.4 &
+          docker pull protolambda/eth2-val-tools:latest &
+          wait
+      - name: Run Speed Benchmark 3x3
+        run: |
+          set -euo pipefail
+
+          echo "=== Speed Benchmark 3x3 (9 participants) ==="
+          echo "Start time: $(date -u +%Y-%m-%dT%H:%M:%S%Z)"
+          START_TIME=$(date +%s)
+
+          kurtosis run ${{ github.workspace }} \
+            --args-file .github/tests/speed-3x3.yaml \
+            --verbosity detailed \
+            --image-download missing 2>&1 | tee /tmp/speed-benchmark-3x3-output.log
+
+          END_TIME=$(date +%s)
+          TOTAL_DURATION=$((END_TIME - START_TIME))
+
+          echo ""
+          echo "========================================="
+          echo "=== SPEED BENCHMARK 3x3 RESULTS ==="
+          echo "========================================="
+          echo "Total wall-clock time: ${TOTAL_DURATION}s"
+          echo "Target: 120s"
+          echo ""
+          echo "=== Phase Timing Markers ==="
+          grep "TIMING:" /tmp/speed-benchmark-3x3-output.log || echo "No timing markers found"
+          echo ""
+          if [ "$TOTAL_DURATION" -le 120 ]; then
+            echo "PASS: Network created within 120s target"
+          else
+            echo "OVER TARGET: ${TOTAL_DURATION}s exceeds 120s target by $((TOTAL_DURATION - 120))s"
+          fi
+          echo "========================================="
+
   #check_optimism_package:
   #  runs-on: ubuntu-latest
   #  steps:

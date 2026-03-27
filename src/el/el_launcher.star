@@ -165,9 +165,8 @@ def launch(
                 )
             )
 
-        el_launcher, launch_method, get_config = (
+        el_launcher, get_config = (
             el_launchers[el_type]["launcher"],
-            el_launchers[el_type]["launch_method"],
             el_launchers[el_type]["get_config"],
         )
 
@@ -178,13 +177,21 @@ def launch(
         el_binary_artifact = binary_artifacts.get(index, {}).get("el", None)
 
         if index == 0:
-            el_context = launch_method(
+            # When there's only 1 participant, skip the enode extraction (plan.wait
+            # on admin_nodeInfo) since the enode is only used as a bootnode for
+            # subsequent EL nodes. This avoids a blocking wait and allows the CL
+            # boot node to start sooner.
+            skip_enode = num_participants == 1
+            cl_client_name = el_service_name.split("-")[3]
+
+            config = get_config(
                 plan,
                 el_launcher,
-                el_service_name,
                 participant,
-                global_log_level,
+                el_service_name,
                 all_el_contexts,
+                cl_client_name,
+                global_log_level,
                 persistent,
                 tolerations,
                 node_selectors,
@@ -194,6 +201,19 @@ def launch(
                 extra_files_artifacts,
                 bootnodoor_enode,
                 el_binary_artifact,
+            )
+
+            service = plan.add_service(
+                el_service_name, config, force_update=participant.el_force_restart
+            )
+
+            get_el_context = el_launchers[el_type]["get_el_context"]
+            el_context = get_el_context(
+                plan,
+                el_service_name,
+                service,
+                el_launcher,
+                skip_enode,
             )
 
             # Add participant el additional prometheus metrics
@@ -247,6 +267,7 @@ def launch(
             el_service_name,
             el_service,
             el_launchers[el_type]["launcher"],
+            True,
         )
 
         # Add participant el additional prometheus metrics
@@ -263,3 +284,48 @@ def launch(
 
     plan.print("Successfully added {0} EL participants".format(num_participants))
     return all_el_contexts
+
+
+def collect_enodes(plan, all_el_contexts):
+    """Fill in missing enodes for contexts that were created with skip_enode=True."""
+    # Clients that use WS_RPC_PORT_ID instead of RPC_PORT_ID for admin_nodeInfo
+    ws_rpc_clients = ["erigon", "nimbus"]
+    # Clients that also extract ENR from admin_nodeInfo
+    enr_clients = ["geth", "erigon", "dummy", "ethrex"]
+
+    enriched = []
+    for ctx in all_el_contexts:
+        if ctx.enode == "":
+            port_id = (
+                constants.WS_RPC_PORT_ID
+                if ctx.client_name in ws_rpc_clients
+                else constants.RPC_PORT_ID
+            )
+            if ctx.client_name in enr_clients:
+                enode, enr = el_admin_node_info.get_enode_enr_for_node(
+                    plan, ctx.service_name, port_id
+                )
+            else:
+                enode = el_admin_node_info.get_enode_for_node(
+                    plan, ctx.service_name, port_id
+                )
+                enr = ctx.enr
+            enriched.append(
+                el_context_l.new_el_context(
+                    client_name=ctx.client_name,
+                    enode=enode,
+                    dns_name=ctx.dns_name,
+                    rpc_port_num=ctx.rpc_port_num,
+                    ws_port_num=ctx.ws_port_num,
+                    engine_rpc_port_num=ctx.engine_rpc_port_num,
+                    rpc_http_url=ctx.rpc_http_url,
+                    ws_url=ctx.ws_url,
+                    enr=enr,
+                    service_name=ctx.service_name,
+                    el_metrics_info=ctx.el_metrics_info,
+                    ip_addr=ctx.ip_addr,
+                )
+            )
+        else:
+            enriched.append(ctx)
+    return enriched
