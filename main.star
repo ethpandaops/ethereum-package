@@ -1023,19 +1023,18 @@ def run(plan, args={}):
             zkboost_config_template = read_file(
                 static_files.ZKBOOST_CONFIG_TEMPLATE_FILEPATH
             )
-            zkboost.launch_zkboost(
+            zkboost_metrics_jobs = zkboost.launch_zkboost(
                 plan,
                 zkboost_config_template,
                 all_participants,
-                args_with_right_defaults.participants,
                 args_with_right_defaults.zkboost_params,
                 global_node_selectors,
                 global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
-                {},
             )
+            prometheus_additional_metrics_jobs.extend(zkboost_metrics_jobs)
             plan.print("Successfully launched zkboost")
         else:
             fail("Invalid additional service %s" % (additional_service))

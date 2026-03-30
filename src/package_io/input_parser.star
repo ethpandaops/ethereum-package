@@ -973,10 +973,12 @@ def input_parser(plan, input_args):
         ),
         zkboost_params=struct(
             image=result["zkboost_params"]["image"],
+            port=result["zkboost_params"]["port"],
             witness_timeout_secs=result["zkboost_params"]["witness_timeout_secs"],
             proof_timeout_secs=result["zkboost_params"]["proof_timeout_secs"],
             witness_cache_size=result["zkboost_params"]["witness_cache_size"],
             proof_cache_size=result["zkboost_params"]["proof_cache_size"],
+            instances=result["zkboost_params"]["instances"],
             zkvms=result["zkboost_params"]["zkvms"],
             env=result["zkboost_params"]["env"],
         ),
@@ -1989,10 +1991,12 @@ def get_default_bootnodoor_params():
 def get_default_zkboost_params():
     return {
         "image": constants.DEFAULT_ZKBOOST_IMAGE,
+        "port": 3000,
         "witness_timeout_secs": 12,
         "proof_timeout_secs": 12,
         "witness_cache_size": 128,
         "proof_cache_size": 128,
+        "instances": [{"name": "zkboost", "el_participant_index": 0}],
         "zkvms": [],
         "env": {},
     }
