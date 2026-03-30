@@ -20,7 +20,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "offchainlabs/prysm-beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
@@ -45,7 +45,7 @@ DEFAULT_VC_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "offchainlabs/prysm-validator:stable",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
@@ -627,7 +627,6 @@ def input_parser(plan, input_args):
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
             gloas_fork_epoch=result["network_params"]["gloas_fork_epoch"],
             heze_fork_epoch=result["network_params"]["heze_fork_epoch"],
-            eip7441_fork_epoch=result["network_params"]["eip7441_fork_epoch"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
@@ -659,9 +658,6 @@ def input_parser(plan, input_args):
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
             force_snapshot_sync=result["network_params"]["force_snapshot_sync"],
             shadowfork_block_height=result["network_params"]["shadowfork_block_height"],
-            data_column_sidecar_subnet_count=result["network_params"][
-                "data_column_sidecar_subnet_count"
-            ],
             samples_per_slot=result["network_params"]["samples_per_slot"],
             custody_requirement=result["network_params"]["custody_requirement"],
             max_blobs_per_block_electra=result["network_params"][
@@ -672,9 +668,6 @@ def input_parser(plan, input_args):
             ],
             max_request_blocks_deneb=result["network_params"][
                 "max_request_blocks_deneb"
-            ],
-            max_request_blob_sidecars_electra=result["network_params"][
-                "max_request_blob_sidecars_electra"
             ],
             base_fee_update_fraction_electra=result["network_params"][
                 "base_fee_update_fraction_electra"
@@ -724,9 +717,6 @@ def input_parser(plan, input_args):
             validator_balance=result["network_params"]["validator_balance"],
             min_epochs_for_data_column_sidecars_requests=result["network_params"][
                 "min_epochs_for_data_column_sidecars_requests"
-            ],
-            min_epochs_for_block_requests=result["network_params"][
-                "min_epochs_for_block_requests"
             ],
         ),
         mev_params=struct(
@@ -1436,7 +1426,7 @@ def default_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
-        "min_builder_withdrawability_delay": 4096,
+        "min_builder_withdrawability_delay": 64,
         "shard_committee_period": 256,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
@@ -1454,17 +1444,14 @@ def default_network_params():
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
         "shadowfork_block_height": "latest",
-        "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "max_request_blocks_deneb": 128,
-        "max_request_blob_sidecars_electra": 1152,
         "base_fee_update_fraction_electra": 5007716,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
@@ -1498,7 +1485,6 @@ def default_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
-        "min_epochs_for_block_requests": 33024,
     }
 
 
@@ -1520,7 +1506,7 @@ def default_minimal_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
-        "min_builder_withdrawability_delay": 8,
+        "min_builder_withdrawability_delay": 2,
         "shard_committee_period": 64,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
@@ -1538,17 +1524,14 @@ def default_minimal_network_params():
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
         "shadowfork_block_height": "latest",
-        "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "max_request_blocks_deneb": 128,
-        "max_request_blob_sidecars_electra": 1152,
         "base_fee_update_fraction_electra": 5007716,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
@@ -1582,7 +1565,6 @@ def default_minimal_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
-        "min_epochs_for_block_requests": 272,
     }
 
 
