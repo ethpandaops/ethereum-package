@@ -112,6 +112,22 @@ def get_config(
     )
 
     IMAGE_NAME = checkpointz_params.image
+    default_checkpointz_image = (
+        docker_cache_params.url
+        + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
+        + constants.DEFAULT_CHECKPOINTZ_IMAGE
+    )
+    if checkpointz_params.image == default_checkpointz_image:
+        if network_params.gloas_fork_epoch < constants.FAR_FUTURE_EPOCH:
+            IMAGE_NAME = (
+                docker_cache_params.url
+                + (
+                    docker_cache_params.dockerhub_prefix
+                    if docker_cache_params.enabled
+                    else ""
+                )
+                + "ethpandaops/checkpointz:gloas-latest"
+            )
 
     return ServiceConfig(
         image=IMAGE_NAME,
