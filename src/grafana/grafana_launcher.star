@@ -50,7 +50,6 @@ def launch_grafana(
     port_publisher,
     index,
     tempo_query_url=None,
-    conditional_dashboards=[],
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -64,7 +63,7 @@ def launch_grafana(
         dashboard_providers_config_template,
         prometheus_private_url,
         tempo_query_url,
-        additional_dashboards=grafana_params.additional_dashboards + conditional_dashboards,
+        additional_dashboards=grafana_params.additional_dashboards,
     )
 
     merged_dashboards_artifact_name = merge_dashboards_artifacts(

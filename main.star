@@ -622,20 +622,6 @@ def run(plan, args={}):
 
         return output
 
-    conditional_dashboards = []
-    has_lighthouse = any([
-        p.cl_type == constants.CL_TYPE.lighthouse
-        for p in args_with_right_defaults.participants
-    ])
-    if has_lighthouse:
-        conditional_dashboards.append(
-            static_files.GRAFANA_LIGHTHOUSE_DASHBOARDS_CONFIG_DIRPATH
-        )
-    if "zkboost" in args_with_right_defaults.additional_services:
-        conditional_dashboards.append(
-            static_files.GRAFANA_ZKBOOST_DASHBOARDS_CONFIG_DIRPATH
-        )
-
     launch_prometheus_grafana = False
     for index, additional_service in enumerate(
         args_with_right_defaults.additional_services
@@ -926,7 +912,6 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 tempo_query_url,
-                conditional_dashboards,
             )
             plan.print("Successfully launched grafana")
         elif additional_service == "tempo":
@@ -1082,7 +1067,6 @@ def run(plan, args={}):
             args_with_right_defaults.port_publisher,
             prometheus_grafana_index,
             tempo_query_url,
-            conditional_dashboards,
         )
         plan.print("Successfully launched grafana")
 
