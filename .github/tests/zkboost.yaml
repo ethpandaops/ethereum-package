@@ -6,6 +6,8 @@ participants:
 additional_services:
   - zkboost
   - dora
+  - prometheus
+  - grafana
 
 zkboost_params:
   zkvms:
