@@ -997,19 +997,18 @@ def parse_network_params(plan, input_args):
         vc_matrix = []
         if "vc" in input_args["participants_matrix"]:
             vc_matrix = input_args["participants_matrix"]["vc"]
+        count = input_args["participants_matrix"].get("count", 1)
 
         for el in el_matrix:
             for cl in cl_matrix:
-                participant = {k: v for k, v in el.items()}
-                for k, v in cl.items():
-                    participant[k] = v
-
-                participants.append(participant)
-
-        for index, participant in enumerate(participants):
-            for vc in vc_matrix:
-                for k, v in vc.items():
-                    participants[index][k] = v
+                for vc in vc_matrix if vc_matrix else [{}]:
+                    for _ in range(count):
+                        participant = {k: v for k, v in el.items()}
+                        for k, v in cl.items():
+                            participant[k] = v
+                        for k, v in vc.items():
+                            participant[k] = v
+                        participants.append(participant)
 
         if "participants" in input_args:
             input_args["participants"].extend(participants)
