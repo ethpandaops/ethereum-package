@@ -378,11 +378,11 @@ def run(plan, args={}):
             all_cl_contexts[-1].http_port,
         )
         el_rpc_uri = "http://{0}:{1}".format(
-            all_el_contexts[-1].ip_addr,
+            all_el_contexts[-1].dns_name,
             all_el_contexts[-1].rpc_port_num,
         )
         engine_rpc_uri = "http://{0}:{1}".format(
-            all_el_contexts[-1].ip_addr,
+            all_el_contexts[-1].dns_name,
             all_el_contexts[-1].engine_rpc_port_num,
         )
         endpoint = buildoor.launch_buildoor(
