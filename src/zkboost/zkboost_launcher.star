@@ -95,9 +95,9 @@ def launch_zkboost(
             config_template, template_data
         )
         template_and_data_by_rel_dest_filepath = {}
-        template_and_data_by_rel_dest_filepath[ZKBOOST_CONFIG_FILENAME] = (
-            template_and_data
-        )
+        template_and_data_by_rel_dest_filepath[
+            ZKBOOST_CONFIG_FILENAME
+        ] = template_and_data
 
         config_files_artifact_name = plan.render_templates(
             template_and_data_by_rel_dest_filepath, name + "-config"
@@ -254,6 +254,7 @@ def _launch_ere_server(plan, zkvm, global_node_selectors, tolerations):
             shm_size=zkvm.get("shm_size_mb", 0),
             ulimits=zkvm.get("ulimits", {}),
             gpus=zkvm.get("gpu_count", 0),
+            gpu_device_ids=zkvm.get("gpu_device_ids", []),
             node_selectors=global_node_selectors,
             tolerations=tolerations,
             ready_conditions=ReadyCondition(
