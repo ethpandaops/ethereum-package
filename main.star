@@ -292,7 +292,7 @@ def run(plan, args={}):
         builder_key_result = plan.run_sh(
             name="derive-builder-bls-key",
             description="Deriving builder BLS private key from mnemonic",
-            run='ethdo account derive --mnemonic="{0}" --path="m/12381/3600/{1}/0/0" --show-private-key | grep "Private key" | sed "s/Private key: 0x//" | tr -d "\n"'.format(
+            run='/app/ethdo account derive --mnemonic="{0}" --path="m/12381/3600/{1}/0/0" --show-private-key | grep "Private key" | sed "s/Private key: 0x//" | tr -d "\n"'.format(
                 network_params.preregistered_validator_keys_mnemonic,
                 total_validator_count,
             ),
