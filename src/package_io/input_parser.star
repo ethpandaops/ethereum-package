@@ -1000,7 +1000,7 @@ def parse_network_params(plan, input_args):
 
         for el in el_matrix:
             for cl in cl_matrix:
-                for vc in (vc_matrix if vc_matrix else [{}]):
+                for vc in vc_matrix if vc_matrix else [{}]:
                     participant = {k: v for k, v in el.items()}
                     for k, v in cl.items():
                         participant[k] = v
