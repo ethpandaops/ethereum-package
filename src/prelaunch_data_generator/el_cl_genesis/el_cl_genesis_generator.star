@@ -219,6 +219,8 @@ def new_env_file_for_el_cl_genesis_data(
         "WithdrawalType": "{0}".format(network_params.withdrawal_type),
         "WithdrawalAddress": network_params.withdrawal_address,
         "ValidatorBalance": int(network_params.validator_balance * 1000000000),
+        "BuilderCount": network_params.builder_count,
+        "BuilderBalance": int(network_params.builder_balance * 1000000000) if network_params.builder_balance > 0 else 0,
         "MinEpochsForDataColumnSidecarsRequests": network_params.min_epochs_for_data_column_sidecars_requests,
         "ExtraEnvVars": extra_env_safe,
     }

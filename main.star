@@ -284,6 +284,16 @@ def run(plan, args={}):
         )
     )
 
+    if network_params.builder_count > 0:
+        plan.print(
+            "Builder configuration: {0} builder(s) registered at genesis with 0x03 credentials".format(
+                network_params.builder_count
+            )
+        )
+        plan.print(
+            "Builder mnemonic: '{0}'".format(constants.DEFAULT_BUILDER_MNEMONIC)
+        )
+
     all_el_contexts = []
     all_cl_contexts = []
     all_vc_contexts = []
