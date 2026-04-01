@@ -284,6 +284,33 @@ def run(plan, args={}):
         )
     )
 
+    builder_bls_secret_key = None
+    if network_params.builder_count > 0:
+        total_validator_count = 0
+        for participant in args_with_right_defaults.participants:
+            total_validator_count += participant.validator_count
+        builder_key_result = plan.run_sh(
+            name="derive-builder-bls-key",
+            description="Deriving builder BLS private key from mnemonic",
+            run='/app/ethdo account derive --mnemonic="{0}" --path="m/12381/3600/{1}/0/0" --show-private-key | grep "Private key" | sed "s/Private key: 0x//" | tr -d "\n"'.format(
+                network_params.preregistered_validator_keys_mnemonic,
+                total_validator_count,
+            ),
+            image="wealdtech/ethdo:latest",
+            tolerations=shared_utils.get_tolerations(
+                global_tolerations=global_tolerations
+            ),
+            node_selectors=global_node_selectors,
+        )
+        builder_bls_secret_key = builder_key_result.output
+        plan.print(
+            "Builder configuration: {0} builder(s) registered at genesis with 0x03 credentials".format(
+                network_params.builder_count
+            )
+        )
+        plan.print("Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC))
+        plan.print("Builder BLS private key: {0}".format(builder_bls_secret_key))
+
     all_el_contexts = []
     all_cl_contexts = []
     all_vc_contexts = []
@@ -395,6 +422,7 @@ def run(plan, args={}):
             args_with_right_defaults.buildoor_params,
             global_node_selectors,
             global_tolerations,
+            builder_bls_secret_key,
         )
         mev_endpoints.append(endpoint)
         mev_endpoint_names.append(constants.BUILDOOR_MEV_TYPE)
