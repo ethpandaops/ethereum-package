@@ -290,9 +290,7 @@ def run(plan, args={}):
                 network_params.builder_count
             )
         )
-        plan.print(
-            "Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC)
-        )
+        plan.print("Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC))
 
     all_el_contexts = []
     all_cl_contexts = []
