@@ -284,6 +284,7 @@ def run(plan, args={}):
         )
     )
 
+<<<<<<< feat/buildoor-default-support
     builder_bls_secret_key = None
     if network_params.builder_count > 0:
         total_validator_count = 0
@@ -303,13 +304,19 @@ def run(plan, args={}):
             node_selectors=global_node_selectors,
         )
         builder_bls_secret_key = builder_key_result.output
+=======
+    if network_params.builder_count > 0:
+>>>>>>> main
         plan.print(
             "Builder configuration: {0} builder(s) registered at genesis with 0x03 credentials".format(
                 network_params.builder_count
             )
         )
         plan.print("Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC))
+<<<<<<< feat/buildoor-default-support
         plan.print("Builder BLS private key: {0}".format(builder_bls_secret_key))
+=======
+>>>>>>> main
 
     all_el_contexts = []
     all_cl_contexts = []
