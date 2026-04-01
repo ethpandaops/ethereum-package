@@ -1340,6 +1340,7 @@ def parse_network_params(plan, input_args):
             "start": actual_num_validators,
             "count": result["network_params"]["builder_count"],
             "wd_prefix": "0x03",
+            "wd_address": result["network_params"]["withdrawal_address"],
         }
         if result["network_params"]["builder_balance"] > 0:
             builder_mnemonic_entry["balance"] = int(
