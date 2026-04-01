@@ -707,6 +707,8 @@ def input_parser(plan, input_args):
                 "additional_preloaded_contracts"
             ],
             additional_mnemonics=result["network_params"]["additional_mnemonics"],
+            builder_count=result["network_params"]["builder_count"],
+            builder_balance=result["network_params"]["builder_balance"],
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
             max_payload_size=result["network_params"]["max_payload_size"],
@@ -1045,6 +1047,7 @@ def parse_network_params(plan, input_args):
                         result["network_params"][target_key] * 3.0 / 2.0 + 0.5
                     )
                 # If both are set or both are 0, don't override
+
         elif attr == "participants":
             participants = []
             for participant in input_args["participants"]:
@@ -1324,6 +1327,28 @@ def parse_network_params(plan, input_args):
             + " is not supported, it can only be mainnet or minimal"
         )
 
+    if result["network_params"]["builder_count"] > 0:
+        if result["network_params"]["gloas_fork_epoch"] != 0:
+            fail(
+                "builder_count is {0} but gloas_fork_epoch is {1}. Builders are only supported when gloas_fork_epoch is 0 (GLOAS at genesis).".format(
+                    result["network_params"]["builder_count"],
+                    result["network_params"]["gloas_fork_epoch"],
+                )
+            )
+        builder_mnemonic_entry = {
+            "mnemonic": constants.DEFAULT_MNEMONIC,
+            "start": actual_num_validators,
+            "count": result["network_params"]["builder_count"],
+            "wd_prefix": "0x03",
+        }
+        if result["network_params"]["builder_balance"] > 0:
+            builder_mnemonic_entry["balance"] = int(
+                result["network_params"]["builder_balance"] * 1000000000
+            )
+        result["network_params"]["additional_mnemonics"] = result["network_params"][
+            "additional_mnemonics"
+        ] + [builder_mnemonic_entry]
+
     return result
 
 
@@ -1484,6 +1509,8 @@ def default_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
+        "builder_count": 0,
+        "builder_balance": 100,
     }
 
 
@@ -1564,6 +1591,8 @@ def default_minimal_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
+        "builder_count": 0,
+        "builder_balance": 100,
     }
 
 
