@@ -1506,7 +1506,7 @@ def default_network_params():
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
         "builder_count": 0,
-        "builder_balance": 0,
+        "builder_balance": 100,
     }
 
 
@@ -1588,7 +1588,7 @@ def default_minimal_network_params():
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
         "builder_count": 0,
-        "builder_balance": 0,
+        "builder_balance": 100,
     }
 
 

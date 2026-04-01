@@ -940,8 +940,8 @@ network_params:
   builder_count: 0
 
   # Balance of each builder in ETH
-  # Default to 0
-  builder_balance: 0
+  # Default to 100
+  builder_balance: 100
 
 
 # Global parameters for the network
