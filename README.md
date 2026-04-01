@@ -939,8 +939,8 @@ network_params:
   # Default to 0
   builder_count: 0
 
-  # Balance of each builder in ETH
-  # Default to 100
+  # Balance of each builder in ETH (available ranges: 32-2048)
+  # Default to 100 ETH
   builder_balance: 100
 
 
