@@ -401,15 +401,15 @@ def run(plan, args={}):
         and args_with_right_defaults.mev_type == constants.BUILDOOR_MEV_TYPE
     ):
         beacon_uri = "http://{0}:{1}".format(
-            all_cl_contexts[0].ip_address,
+            all_cl_contexts[0].beacon_service_name,
             all_cl_contexts[0].http_port,
         )
         el_rpc_uri = "http://{0}:{1}".format(
-            all_el_contexts[0].ip_addr,
+            all_el_contexts[0].dns_name,
             all_el_contexts[0].rpc_port_num,
         )
         engine_rpc_uri = "http://{0}:{1}".format(
-            all_el_contexts[0].ip_addr,
+            all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
         endpoint = buildoor.launch_buildoor(
