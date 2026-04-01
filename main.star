@@ -291,7 +291,7 @@ def run(plan, args={}):
             )
         )
         plan.print(
-            "Builder mnemonic: '{0}'".format(constants.DEFAULT_BUILDER_MNEMONIC)
+            "Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC)
         )
 
     all_el_contexts = []

@@ -1057,7 +1057,7 @@ def parse_network_params(plan, input_args):
                         )
                     )
                 builder_mnemonic_entry = {
-                    "mnemonic": constants.DEFAULT_BUILDER_MNEMONIC,
+                    "mnemonic": constants.DEFAULT_MNEMONIC,
                     "start": 0,
                     "count": result["network_params"]["builder_count"],
                     "wd_prefix": "0x03",

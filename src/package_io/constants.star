@@ -129,7 +129,6 @@ MEV_BOOST_SERVICE_NAME_PREFIX = "mev-boost"
 COMMIT_BOOST_SERVICE_NAME_PREFIX = "commit-boost"
 MEV_BOOST_PORT = 18550
 DEFAULT_MNEMONIC = "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete"
-DEFAULT_BUILDER_MNEMONIC = "sibling lend brave explain wait orbit mom alcohol hole museum gospel three elder exchange again math engine husband round gaze flock trumpet number remain"
 
 PRIVATE_IP_ADDRESS_PLACEHOLDER = "KURTOSIS_IP_ADDR_PLACEHOLDER"
 
