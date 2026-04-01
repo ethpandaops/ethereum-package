@@ -169,6 +169,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "remote_signer_min_mem",
             "remote_signer_max_mem",
         ],
+        "count": [],
     },
 }
 
@@ -581,6 +582,9 @@ def sanity_check(plan, input_args):
                         PARTICIPANT_MATRIX_PARAMS["participants_matrix"].keys(),
                     )
                 )
+            elif sub_matrix_participant == "count":
+                if type(input_args["participants_matrix"]["count"]) != "int":
+                    fail("participants_matrix count must be an integer")
             else:
                 deep_validate_params(
                     plan,
