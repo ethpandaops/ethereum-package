@@ -70,9 +70,9 @@ def launch_zkboost(
             config_template, template_data
         )
         template_and_data_by_rel_dest_filepath = {}
-        template_and_data_by_rel_dest_filepath[ZKBOOST_CONFIG_FILENAME] = (
-            template_and_data
-        )
+        template_and_data_by_rel_dest_filepath[
+            ZKBOOST_CONFIG_FILENAME
+        ] = template_and_data
 
         config_files_artifact_name = plan.render_templates(
             template_and_data_by_rel_dest_filepath, name + "-config"
