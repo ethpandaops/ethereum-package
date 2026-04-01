@@ -297,7 +297,9 @@ def run(plan, args={}):
                 total_validator_count,
             ),
             image="wealdtech/ethdo:latest",
-            tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+            tolerations=shared_utils.get_tolerations(
+                global_tolerations=global_tolerations
+            ),
             node_selectors=global_node_selectors,
         )
         builder_bls_secret_key = builder_key_result.output
@@ -306,12 +308,8 @@ def run(plan, args={}):
                 network_params.builder_count
             )
         )
-        plan.print(
-            "Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC)
-        )
-        plan.print(
-            "Builder BLS private key: {0}".format(builder_bls_secret_key)
-        )
+        plan.print("Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC))
+        plan.print("Builder BLS private key: {0}".format(builder_bls_secret_key))
 
     all_el_contexts = []
     all_cl_contexts = []
