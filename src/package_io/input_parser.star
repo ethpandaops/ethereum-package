@@ -1342,8 +1342,12 @@ def parse_network_params(plan, input_args):
             "wd_prefix": "0x03",
         }
         if result["network_params"]["builder_balance"] > 0:
-            builder_mnemonic_entry["balance"] = int(result["network_params"]["builder_balance"] * 1000000000)
-        result["network_params"]["additional_mnemonics"] = result["network_params"]["additional_mnemonics"] + [builder_mnemonic_entry]
+            builder_mnemonic_entry["balance"] = int(
+                result["network_params"]["builder_balance"] * 1000000000
+            )
+        result["network_params"]["additional_mnemonics"] = result["network_params"][
+            "additional_mnemonics"
+        ] + [builder_mnemonic_entry]
 
     return result
 
