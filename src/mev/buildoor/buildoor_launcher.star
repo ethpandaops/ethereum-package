@@ -21,7 +21,7 @@ def launch_buildoor(
     buildoor_params,
     global_node_selectors,
     global_tolerations,
-    builder_bls_secret_key="",
+    builder_bls_secret_key=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -31,10 +31,8 @@ def launch_buildoor(
         wallet_key = wallet_key[2:]
 
     # Use injected builder BLS key if provided, otherwise fall back to default
-    if builder_bls_secret_key != "":
+    if builder_bls_secret_key != None:
         builder_bls_key = builder_bls_secret_key
-        if builder_bls_key.startswith("0x"):
-            builder_bls_key = builder_bls_key[2:]
     else:
         builder_bls_key = constants.DEFAULT_MEV_SECRET_KEY[2:]
 

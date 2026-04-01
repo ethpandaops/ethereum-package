@@ -284,7 +284,7 @@ def run(plan, args={}):
         )
     )
 
-    builder_bls_secret_key = ""
+    builder_bls_secret_key = None
     if network_params.builder_count > 0:
         total_validator_count = 0
         for participant in args_with_right_defaults.participants:
@@ -292,7 +292,7 @@ def run(plan, args={}):
         builder_key_result = plan.run_sh(
             name="derive-builder-bls-key",
             description="Deriving builder BLS private key from mnemonic",
-            run='/app/eth2-val-tools keystores --insecure --prysm-pass "" --out-loc /tmp/builder-keys --source-mnemonic "{0}" --source-min {1} --source-max {2} && cat /tmp/builder-keys/secrets/* | tr -d "\n"'.format(
+            run='/app/eth2-val-tools keystores --insecure --prysm-pass "" --out-loc /tmp/builder-keys --source-mnemonic "{0}" --source-min {1} --source-max {2} && cat /tmp/builder-keys/secrets/* | tr -d "\n" | sed "s/^0x//"'.format(
                 network_params.preregistered_validator_keys_mnemonic,
                 total_validator_count,
                 total_validator_count + 1,
