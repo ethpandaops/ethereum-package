@@ -1048,24 +1048,6 @@ def parse_network_params(plan, input_args):
                     )
                 # If both are set or both are 0, don't override
 
-            if result["network_params"]["builder_count"] > 0:
-                if result["network_params"]["gloas_fork_epoch"] != 0:
-                    fail(
-                        "builder_count is {0} but gloas_fork_epoch is {1}. Builders are only supported when gloas_fork_epoch is 0 (GLOAS at genesis).".format(
-                            result["network_params"]["builder_count"],
-                            result["network_params"]["gloas_fork_epoch"],
-                        )
-                    )
-                builder_mnemonic_entry = {
-                    "mnemonic": constants.DEFAULT_MNEMONIC,
-                    "start": 0,
-                    "count": result["network_params"]["builder_count"],
-                    "wd_prefix": "0x03",
-                }
-                if result["network_params"]["builder_balance"] > 0:
-                    builder_mnemonic_entry["balance"] = result["network_params"]["builder_balance"]
-                result["network_params"]["additional_mnemonics"] = result["network_params"]["additional_mnemonics"] + [builder_mnemonic_entry]
-
         elif attr == "participants":
             participants = []
             for participant in input_args["participants"]:
@@ -1344,6 +1326,24 @@ def parse_network_params(plan, input_args):
             + result["network_params"]["preset"]
             + " is not supported, it can only be mainnet or minimal"
         )
+
+    if result["network_params"]["builder_count"] > 0:
+        if result["network_params"]["gloas_fork_epoch"] != 0:
+            fail(
+                "builder_count is {0} but gloas_fork_epoch is {1}. Builders are only supported when gloas_fork_epoch is 0 (GLOAS at genesis).".format(
+                    result["network_params"]["builder_count"],
+                    result["network_params"]["gloas_fork_epoch"],
+                )
+            )
+        builder_mnemonic_entry = {
+            "mnemonic": constants.DEFAULT_MNEMONIC,
+            "start": actual_num_validators,
+            "count": result["network_params"]["builder_count"],
+            "wd_prefix": "0x03",
+        }
+        if result["network_params"]["builder_balance"] > 0:
+            builder_mnemonic_entry["balance"] = result["network_params"]["builder_balance"]
+        result["network_params"]["additional_mnemonics"] = result["network_params"]["additional_mnemonics"] + [builder_mnemonic_entry]
 
     return result
 
