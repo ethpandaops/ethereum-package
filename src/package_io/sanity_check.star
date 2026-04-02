@@ -290,6 +290,8 @@ SUBCATEGORY_PARAMS = {
         "withdrawal_address",
         "validator_balance",
         "min_epochs_for_data_column_sidecars_requests",
+        "builder_count",
+        "builder_balance",
     ],
     "blockscout_params": ["image", "verif_image", "frontend_image", "env"],
     "dora_params": [
