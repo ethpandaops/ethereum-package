@@ -447,10 +447,12 @@ SUBCATEGORY_PARAMS = {
     ],
     "zkboost_params": [
         "image",
+        "port",
         "witness_timeout_secs",
         "proof_timeout_secs",
         "witness_cache_size",
         "proof_cache_size",
+        "instances",
         "zkvms",
         "env",
     ],
