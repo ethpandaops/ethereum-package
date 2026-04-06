@@ -979,6 +979,8 @@ def input_parser(plan, input_args):
             extra_args=result["buildoor_params"]["extra_args"],
             builder_api=result["buildoor_params"]["builder_api"],
             epbs_builder=result["buildoor_params"]["epbs_builder"],
+            el_image=result["buildoor_params"]["el_image"],
+            cl_image=result["buildoor_params"]["cl_image"],
         ),
     )
 
@@ -2019,6 +2021,8 @@ def get_default_buildoor_params():
         "extra_args": [],
         "builder_api": True,
         "epbs_builder": True,
+        "el_image": "",
+        "cl_image": "",
     }
 
 
@@ -2210,6 +2214,26 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "el_extra_params": parsed_arguments_dict["mev_params"][
                     "mev_builder_extra_args"
                 ],
+                "validator_count": 0,
+            }
+        )
+        parsed_arguments_dict["participants"].append(mev_participant)
+    if mev_type == constants.BUILDOOR_MEV_TYPE:
+        el_image = parsed_arguments_dict["buildoor_params"]["el_image"]
+        if el_image == "":
+            el_image = DEFAULT_EL_IMAGES.get("geth", "")
+        cl_image = parsed_arguments_dict["buildoor_params"]["cl_image"]
+        if cl_image == "":
+            cl_image = DEFAULT_CL_IMAGES.get(constants.CL_TYPE.prysm, "")
+        mev_participant = default_participant()
+        mev_participant["el_type"] = "geth"
+        mev_participant["cl_type"] = constants.CL_TYPE.prysm
+        mev_participant.update(
+            {
+                "el_image": el_image,
+                "cl_image": cl_image,
+                "cl_log_level": parsed_arguments_dict["global_log_level"],
+                "cl_extra_params": ["--prepare-all-payloads"],
                 "validator_count": 0,
             }
         )
