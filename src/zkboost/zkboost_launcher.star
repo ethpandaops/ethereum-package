@@ -45,7 +45,6 @@ def launch_zkboost(
                 )
                 ere_server_endpoints[proof_type] = endpoint
 
-
     metrics_jobs = []
     for instance_index, instance in enumerate(zkboost_params.instances):
         name = instance["name"]
