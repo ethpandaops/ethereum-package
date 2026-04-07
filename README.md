@@ -934,6 +934,15 @@ network_params:
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
+  # Number of ePBS builders to register at genesis with 0x03 withdrawal credentials
+  # Requires gloas_fork_epoch to be 0 (GLOAS at genesis)
+  # Default to 0
+  builder_count: 0
+
+  # Balance of each builder in ETH
+  # Default to 100 ETH
+  builder_balance: 100
+
 
 # Global parameters for the network
 
