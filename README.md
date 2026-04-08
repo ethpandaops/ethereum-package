@@ -1089,6 +1089,9 @@ zkboost_params:
   # zkboost docker image to use
   # Defaults to the latest image
   image: "ghcr.io/eth-act/zkboost/zkboost-server:latest"
+  # Port the zkboost HTTP server listens on
+  # Defaults to 3000
+  port: 3000
   # Timeout in seconds for witness fetching
   # Defaults to 12
   witness_timeout_secs: 12
@@ -1101,14 +1104,52 @@ zkboost_params:
   # Number of proofs to cache
   # Defaults to 128
   proof_cache_size: 128
+  # List of zkboost instances to launch. Each instance connects to a specific EL participant
+  # and exposes an independent zkboost server. Useful for running one prover per EL client.
+  # - name: service name for the instance
+  # - el_participant_index: index into the participants list for the EL client to connect to
+  # Defaults to a single instance connected to the first participant
+  instances:
+    - name: zkboost
+      el_participant_index: 0
   # List of zkVM configurations
-  # Each entry has: kind (mock/external), proof_type, and kind-specific options
+  # Each entry requires: kind, proof_type, and kind-specific options
+  #
+  # kind: mock — software prover for testing, no GPU required
+  #   - mock_proving_time_ms: simulated proving time in milliseconds (default 5000)
+  #   - mock_proof_size: simulated proof size in bytes (default 1024)
+  #
+  # kind: ere_server — GPU prover backend (ere-server-zisk). Launched as a separate
+  #   long-lived service shared across all zkboost instances.
+  #   Required fields:
+  #   - image: docker image for the ere-server
+  #   - program_url: URL to download the EVM program binary (or use program_path for a path
+  #     already present in the image)
+  #   Optional fields:
+  #   - port: port the ere-server listens on (default 3000)
+  #   - gpu_count: number of GPUs to allocate (default 0)
+  #   - gpu_device_ids: list of specific GPU device IDs to assign (default [])
+  #   - shm_size_mb: shared memory size in MB (default 0)
+  #   - ulimits: ulimit overrides as a map (default {})
+  #   - env: extra environment variables as a map (default {})
+  #
+  # kind: external — externally managed prover reachable via HTTP
+  #   - endpoint: full HTTP URL of the external prover (required)
+  #
   # Example:
   # zkvms:
   #   - kind: mock
   #     proof_type: reth-zisk
   #     mock_proving_time_ms: 5000
   #     mock_proof_size: 1024
+  #   - kind: ere_server
+  #     proof_type: reth-zisk
+  #     image: "ghcr.io/eth-act/ere-server-zisk:latest"
+  #     program_url: "https://example.com/reth-zisk.bin"
+  #     gpu_count: 1
+  #   - kind: external
+  #     proof_type: reth-zisk
+  #     endpoint: "http://my-prover:3000"
   zkvms: []
   # A list of optional extra env_vars the zkboost container should spin up with
   env: {}
