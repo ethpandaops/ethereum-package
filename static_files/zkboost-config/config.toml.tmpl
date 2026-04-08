@@ -4,15 +4,26 @@ witness_timeout_secs = {{ .WitnessTimeoutSecs }}
 proof_timeout_secs = {{ .ProofTimeoutSecs }}
 proof_cache_size = {{ .ProofCacheSize }}
 witness_cache_size = {{ .WitnessCacheSize }}
+
+[dashboard]
+enabled = {{ .DashboardEnabled }}
+retention = {{ .DashboardRetention }}
 {{ range $zkvm := .Zkvms }}
 [[zkvm]]
 kind = "{{ $zkvm.Kind }}"
 proof_type = "{{ $zkvm.ProofType }}"
-{{- if eq $zkvm.Kind "external" }}
+{{- if eq $zkvm.Kind "ere" }}
 endpoint = "{{ $zkvm.Endpoint }}"
 {{- end }}
 {{- if eq $zkvm.Kind "mock" }}
-mock_proving_time_ms = {{ $zkvm.MockProvingTimeMs }}
+{{- if eq $zkvm.MockProvingTimeKind "constant" }}
+mock_proving_time = { kind = "constant", ms = {{ $zkvm.MockProvingTimeConstantMs }} }
+{{- else if eq $zkvm.MockProvingTimeKind "random" }}
+mock_proving_time = { kind = "random", min_ms = {{ $zkvm.MockProvingTimeRandomMinMs }}, max_ms = {{ $zkvm.MockProvingTimeRandomMaxMs }} }
+{{- else if eq $zkvm.MockProvingTimeKind "linear" }}
+mock_proving_time = { kind = "linear", ms_per_mgas = {{ $zkvm.MockProvingTimeLinearMsPerMgas }} }
+{{- end }}
 mock_proof_size = {{ $zkvm.MockProofSize }}
+mock_failure = {{ $zkvm.MockFailure }}
 {{- end }}
 {{ end }}

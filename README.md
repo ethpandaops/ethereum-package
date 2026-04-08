@@ -1088,7 +1088,7 @@ bootnodoor_params:
 zkboost_params:
   # zkboost docker image to use
   # Defaults to the latest image
-  image: "ghcr.io/eth-act/zkboost/zkboost-server:latest"
+  image: "ghcr.io/eth-act/zkboost/zkboost:latest"
   # Timeout in seconds for witness fetching
   # Defaults to 12
   witness_timeout_secs: 12
@@ -1101,14 +1101,28 @@ zkboost_params:
   # Number of proofs to cache
   # Defaults to 128
   proof_cache_size: 128
+  # Whether the live dashboard UI is enabled
+  # Defaults to false
+  dashboard_enabled: false
+  # Maximum number of recent block records to keep in the dashboard
+  # Defaults to 256
+  dashboard_retention: 256
   # List of zkVM configurations
-  # Each entry has: kind (mock/external), proof_type, and kind-specific options
-  # Example:
-  # zkvms:
-  #   - kind: mock
-  #     proof_type: reth-zisk
-  #     mock_proving_time_ms: 5000
-  #     mock_proof_size: 1024
+  # Each entry has: kind (mock/ere), proof_type, and kind-specific options
+  # example:
+  # - kind: mock
+  #   proof_type: ethrex-zisk
+  #   mock_proving_time: { kind: constant, ms: 5000 }
+  #   mock_proof_size: 1024
+  #   mock_failure: false
+  # - kind: mock
+  #   proof_type: reth-zisk
+  #   mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
+  # - kind: mock
+  #   proof_type: reth-sp1
+  #   mock_proving_time: { kind: linear, ms_per_mgas: 150 }
+  # - kind: ere  # not yet supported
+  #   proof_type: ethrex-risc0
   zkvms: []
   # A list of optional extra env_vars the zkboost container should spin up with
   env: {}
