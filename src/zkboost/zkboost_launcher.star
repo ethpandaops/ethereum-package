@@ -33,6 +33,7 @@ def launch_zkboost(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    tempo_otlp_grpc_url=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -108,6 +109,7 @@ def launch_zkboost(
             port_publisher,
             additional_service_index + instance_index,
             docker_cache_params,
+            tempo_otlp_grpc_url,
         )
 
         plan.add_service(name, config)
@@ -138,6 +140,7 @@ def get_config(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    tempo_otlp_grpc_url,
 ):
     config_file_path = shared_utils.path_join(
         ZKBOOST_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -151,6 +154,11 @@ def get_config(
         0,
     )
 
+    env_vars = dict(zkboost_params.env)
+    if tempo_otlp_grpc_url != None:
+        env_vars["OTEL_EXPORTER_OTLP_ENDPOINT"] = tempo_otlp_grpc_url
+        env_vars["OTEL_SERVICE_NAME"] = service_name
+
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(
             docker_cache_params,
@@ -163,7 +171,7 @@ def get_config(
         },
         entrypoint=["/usr/local/bin/zkboost"],
         cmd=["--config", config_file_path],
-        env_vars=zkboost_params.env,
+        env_vars=env_vars,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
