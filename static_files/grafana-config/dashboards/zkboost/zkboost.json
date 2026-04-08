@@ -982,6 +982,408 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "proofs",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 0,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 27,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 1,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "none",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"0.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"1.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"0.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"1.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"1.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"2.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"1.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"2.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"2.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"3.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"2.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "F"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"3.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"3.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "G"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"4.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"3.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "H"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"4.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"4.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "I"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"5.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"4.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "J"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"5.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"5.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "K"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"6.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"5.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "L"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"6.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"6.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "M"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"7.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"6.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "N"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"7.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"7.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "O"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"8.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"7.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "P"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"8.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"8.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "Q"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"9.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"8.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "R"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"9.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"9.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "S"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"10.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"9.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "T"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"10.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"10.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "U"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"11.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"10.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "V"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"11.5\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"11.0\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "W"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"12.0\"}[$__range])) - sum by (proof_type) (increase(zkboost_prove_duration_seconds_bucket{le=\"11.5\"}[$__range]))",
+          "format": "table",
+          "instant": true,
+          "refId": "X"
+        }
+      ],
+      "title": "Prove Duration Distribution",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "instance": true,
+              "job": true,
+              "le": true,
+              "status": true
+            },
+            "indexByName": {
+              "Value #A": 1,
+              "Value #B": 2,
+              "Value #C": 3,
+              "Value #D": 4,
+              "Value #E": 5,
+              "Value #F": 6,
+              "Value #G": 7,
+              "Value #H": 8,
+              "Value #I": 9,
+              "Value #J": 10,
+              "Value #K": 11,
+              "Value #L": 12,
+              "Value #M": 13,
+              "Value #N": 14,
+              "Value #O": 15,
+              "Value #P": 16,
+              "Value #Q": 17,
+              "Value #R": 18,
+              "Value #S": 19,
+              "Value #T": 20,
+              "Value #U": 21,
+              "Value #V": 22,
+              "Value #W": 23,
+              "Value #X": 24,
+              "proof_type": 0
+            },
+            "renameByName": {
+              "Value #A": "0.5s",
+              "Value #B": "1.0s",
+              "Value #C": "1.5s",
+              "Value #D": "2.0s",
+              "Value #E": "2.5s",
+              "Value #F": "3.0s",
+              "Value #G": "3.5s",
+              "Value #H": "4.0s",
+              "Value #I": "4.5s",
+              "Value #J": "5.0s",
+              "Value #K": "5.5s",
+              "Value #L": "6.0s",
+              "Value #M": "6.5s",
+              "Value #N": "7.0s",
+              "Value #O": "7.5s",
+              "Value #P": "8.0s",
+              "Value #Q": "8.5s",
+              "Value #R": "9.0s",
+              "Value #S": "9.5s",
+              "Value #T": "10.0s",
+              "Value #U": "10.5s",
+              "Value #V": "11.0s",
+              "Value #W": "11.5s",
+              "Value #X": "12.0s",
+              "proof_type": "Proof Type"
+            }
+          }
+        },
+        {
+          "id": "transpose",
+          "options": {}
+        }
+      ],
+      "type": "barchart"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -1180,6 +1582,363 @@
       ],
       "title": "Verify Duration",
       "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "id": 103,
+      "panels": [],
+      "title": "Proof Traces",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "${tempo_datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Trace ID"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": false,
+                    "title": "show below",
+                    "url": "/d/zkboost-dashboard/zkboost?var-traceId=${__value.raw}&${__url_time_range}"
+                  }
+                ]
+              },
+              {
+                "id": "custom.width",
+                "value": 326
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ns"
+              },
+              {
+                "id": "custom.width",
+                "value": 74
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Block"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Gas Used"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "unit",
+                "value": "si:"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Start time"
+            },
+            "properties": [
+              {
+                "id": "custom.width"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Request latency"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: s"
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              },
+              {
+                "id": "custom.width",
+                "value": 124
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 49
+      },
+      "id": 25,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Start time"
+          }
+        ]
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "${tempo_datasource}"
+          },
+          "limit": 500,
+          "metricsQueryType": "range",
+          "query": "{resource.service.name=\"zkboost\" && name=~\"request_proof\"} | select(span.block_number, span.gas_used, span.timestamp)",
+          "queryType": "traceql",
+          "refId": "A",
+          "serviceMapUseNativeHistograms": false,
+          "tableType": "spans"
+        }
+      ],
+      "title": "Recent Proof Traces",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Trace ID",
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [
+                "traceIdHidden"
+              ],
+              "reducer": "first"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "timestamp_ms",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "timestamp"
+                }
+              },
+              "operator": "*",
+              "right": {
+                "fixed": "1000"
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "latency_ms",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Start time"
+                }
+              },
+              "operator": "-",
+              "right": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "timestamp_ms"
+                }
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "Request latency",
+            "binary": {
+              "left": {
+                "matcher": {
+                  "id": "byName",
+                  "options": "latency_ms"
+                }
+              },
+              "operator": "/",
+              "right": {
+                "fixed": "1000"
+              }
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "block_number",
+                "gas_used",
+                "Duration",
+                "Trace ID",
+                "Start time",
+                "Request latency"
+              ]
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {
+              "Duration": 4,
+              "Request latency": 3,
+              "Start time": 5,
+              "Trace ID": 0,
+              "block_number": 1,
+              "gas_used": 2
+            },
+            "renameByName": {
+              "block_number": "Block",
+              "duration": "Duration",
+              "gas_used": "Gas Used",
+              "time": "Start time"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "${tempo_datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 24,
+        "x": 0,
+        "y": 57
+      },
+      "id": 23,
+      "options": {
+        "spanFilters": {
+          "adhocFilters": [],
+          "criticalPathOnly": false,
+          "matchesOnly": false
+        }
+      },
+      "pluginVersion": "12.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "tempo",
+            "uid": "${tempo_datasource}"
+          },
+          "limit": 20,
+          "query": "${traceId}",
+          "queryType": "traceql",
+          "refId": "A",
+          "tableType": "traces"
+        }
+      ],
+      "title": "Proof Trace",
+      "type": "traces"
     }
   ],
   "refresh": "10s",
@@ -1231,6 +1990,35 @@
         "regex": "",
         "sort": 1,
         "type": "query"
+      },
+      {
+        "current": {
+          "text": "Tempo",
+          "value": "Tempo"
+        },
+        "label": "Tempo",
+        "name": "tempo_datasource",
+        "options": [],
+        "query": "tempo",
+        "refresh": 1,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "label": "Trace ID",
+        "name": "traceId",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "type": "textbox"
       }
     ]
   },

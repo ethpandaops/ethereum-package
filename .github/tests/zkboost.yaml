@@ -8,9 +8,12 @@ additional_services:
   - dora
   - prometheus
   - grafana
+  - tempo
 
 zkboost_params:
   dashboard_enabled: true
+  env:
+    RUST_LOG: info
   zkvms:
     - kind: mock
       proof_type: reth-zisk
