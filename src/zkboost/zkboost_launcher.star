@@ -251,10 +251,12 @@ def _launch_ere_server(plan, zkvm, global_node_selectors, tolerations):
             files=files,
             cmd=["--port", "{0}".format(port), "--program-path", program_path, "gpu"],
             env_vars=env_vars,
-            shm_size=zkvm.get("shm_size_mb", 0),
-            ulimits=zkvm.get("ulimits", {}),
-            gpus=zkvm.get("gpu_count", 0),
-            gpu_device_ids=zkvm.get("gpu_device_ids", []),
+            gpu=GpuConfig(
+                count=zkvm.get("gpu", {}).get("count", 0),
+                device_ids=zkvm.get("gpu", {}).get("device_ids", []),
+                shm_size=zkvm.get("gpu", {}).get("shm_size", 0),
+                ulimits=zkvm.get("gpu", {}).get("ulimits", {}),
+            ),
             node_selectors=global_node_selectors,
             tolerations=tolerations,
             ready_conditions=ReadyCondition(
