@@ -59,12 +59,13 @@ def launch_zkboost(
             entry = {
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
+                "ProofTimeoutSecs": zkvm.get("proof_timeout_secs", 12),
             }
             if zkvm["kind"] == "ere":
                 fail("TODO: Ere zkvm kind is not yet supported")
             elif zkvm["kind"] == "mock":
                 mock_proving_time = zkvm.get(
-                    "mock_proving_time", {"kind": "constant", "ms": 3000}
+                    "mock_proving_time", {"kind": "constant", "ms": 6000}
                 )
                 entry["MockProvingTimeKind"] = mock_proving_time.get("kind", "constant")
                 entry["MockProvingTimeConstantMs"] = mock_proving_time.get("ms", 0)
@@ -73,19 +74,18 @@ def launch_zkboost(
                 entry["MockProvingTimeLinearMsPerMgas"] = mock_proving_time.get(
                     "ms_per_mgas", 0
                 )
-                entry["MockProofSize"] = zkvm.get("mock_proof_size", 1024)
+                entry["MockProofSize"] = zkvm.get("mock_proof_size", 128 << 10)
                 entry["MockFailure"] = zkvm.get("mock_failure", False)
             zkvms.append(entry)
 
         template_data = {
             "Port": HTTP_PORT_NUMBER,
             "ELEndpoint": el_endpoint,
-            "WitnessTimeoutSecs": zkboost_params.witness_timeout_secs,
-            "ProofTimeoutSecs": zkboost_params.proof_timeout_secs,
-            "WitnessCacheSize": zkboost_params.witness_cache_size,
-            "ProofCacheSize": zkboost_params.proof_cache_size,
+            "WitnessTimeoutSecs": 12,
+            "WitnessCacheSize": 128,
+            "ProofCacheSize": 128,
             "DashboardEnabled": zkboost_params.dashboard_enabled,
-            "DashboardRetention": zkboost_params.dashboard_retention,
+            "DashboardRetention": 256,
             "Zkvms": zkvms,
         }
 

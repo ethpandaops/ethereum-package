@@ -1085,46 +1085,53 @@ bootnodoor_params:
   extra_args: []
 
 # Configuration place for zkboost - https://github.com/eth-act/zkboost
+# The dashboard is automatically enabled when grafana is in additional_services.
 zkboost_params:
   # zkboost docker image to use
   # Defaults to the latest image
   image: "ghcr.io/eth-act/zkboost/zkboost:latest"
-  # Timeout in seconds for witness fetching
-  # Defaults to 12
-  witness_timeout_secs: 12
-  # Timeout in seconds for proof generation
-  # Defaults to 12
-  proof_timeout_secs: 12
-  # Number of witnesses to cache
-  # Defaults to 128
-  witness_cache_size: 128
-  # Number of proofs to cache
-  # Defaults to 128
-  proof_cache_size: 128
-  # Whether the live dashboard UI is enabled
-  # Defaults to false
-  dashboard_enabled: false
-  # Maximum number of recent block records to keep in the dashboard
-  # Defaults to 256
-  dashboard_retention: 256
-  # List of zkVM configurations
-  # Each entry has: kind (mock/ere), proof_type, and kind-specific options
+  # List of zkboost instances, each running a separate zkboost container.
+  # Each instance watches one EL participant for new blocks.
+  #   name (required): Kurtosis service name, must be unique across instances
+  #   el_participant_index (required): index of the EL participant to connect to (must not be dummy)
+  # Defaults to a single instance named "zkboost" connected to the first EL participant.
+  instances:
+    - name: zkboost
+      el_participant_index: 0
+  # List of zkVM backend configurations.
+  # If empty or not set, a default mock zkvm is auto-configured:
+  #   { kind: mock, proof_type: ethrex-zisk, mock_proving_time: { kind: constant, ms: 6000 }, mock_proof_size: 131072 }
+  # Each entry must have a unique proof_type.
+  #
+  # Common fields for all entries:
+  #   kind (required): the zkVM backend type
+  #     "mock" - in-process mock backend for testing, no real proving
+  #     "ere"  - remote ere-server backend (not yet supported)
+  #   proof_type (required): identifies the EL client + zkVM combination
+  #     "ethrex-risc0", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-risc0", "reth-sp1", "reth-zisk"
+  #   proof_timeout_secs: timeout for proof generation in seconds (default: 12, must be > 0)
+  #
+  # Mock-specific fields (only for kind: mock):
+  #   mock_proving_time: controls simulated proving duration (default: { kind: constant, ms: 6000 })
+  #     { kind: constant, ms: <ms> }                   - fixed duration
+  #     { kind: random, min_ms: <min>, max_ms: <max> } - uniformly random, min_ms must be <= max_ms
+  #     { kind: linear, ms_per_mgas: <ms> }            - proportional to block per million gas usage
+  #   mock_proof_size: simulated proof size in bytes, must be >= 32 (default: 131072 / 128 KiB)
+  #   mock_failure: whether to simulate proving failures (default: false)
+  #
   # example:
   # - kind: mock
   #   proof_type: ethrex-zisk
   #   mock_proving_time: { kind: constant, ms: 5000 }
   #   mock_proof_size: 1024
-  #   mock_failure: false
   # - kind: mock
   #   proof_type: reth-zisk
   #   mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
   # - kind: mock
   #   proof_type: reth-sp1
   #   mock_proving_time: { kind: linear, ms_per_mgas: 150 }
-  # - kind: ere  # not yet supported
-  #   proof_type: ethrex-risc0
   zkvms: []
-  # A list of optional extra env_vars the zkboost container should spin up with
+  # Defaults RUST_LOG to "info" if not set.
   env: {}
 
 # Configuration place for tempo tracing backend
