@@ -29,36 +29,6 @@ ERE_SERVER_READY_TIMEOUT = "600s"
 ERE_SERVER_READY_INTERVAL = "10s"
 
 
-def _validate_ere_gpu_config(zkvms):
-    """Validate that at most one ere zkvm uses gpu.count without gpu.device_ids.
-
-    When gpu.count is specified without device_ids, Docker draws from the same shared
-    GPU pool for every service that does this — resulting in the same physical GPU(s)
-    being assigned to multiple containers. If more than one ere service needs a GPU,
-    each one must use gpu.device_ids to pin it to a distinct set of devices.
-    """
-    services_using_count = []
-    for zkvm in zkvms:
-        if zkvm["kind"] != "ere":
-            continue
-        gpu_cfg = zkvm.get("gpu", {})
-        count = gpu_cfg.get("count", 0)
-        device_ids = gpu_cfg.get("device_ids", [])
-        if count > 0 and len(device_ids) == 0:
-            services_using_count.append(zkvm["proof_type"])
-
-    if len(services_using_count) > 1:
-        fail(
-            "Multiple ere services specify gpu.count without gpu.device_ids: [{0}]. ".format(
-                ", ".join(services_using_count)
-            )
-            + "Docker assigns GPUs from the same pool when gpu.count is used, so all services "
-            + "requesting GPUs this way will receive the same device(s). "
-            + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each service instead "
-            + '(e.g. gpu: {{device_ids: ["0"]}} and gpu: {{device_ids: ["1"]}}).'
-        )
-
-
 def launch_zkboost(
     plan,
     config_template,
@@ -71,8 +41,6 @@ def launch_zkboost(
     docker_cache_params,
     tempo_otlp_grpc_url=None,
 ):
-    _validate_ere_gpu_config(zkboost_params.zkvms)
-
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     # Launch ere-server services once — shared across all zkboost instances.

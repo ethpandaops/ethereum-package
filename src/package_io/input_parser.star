@@ -604,6 +604,8 @@ def input_parser(plan, input_args):
                         )
                     )
 
+        _validate_ere_gpu_config(result["zkboost_params"]["zkvms"])
+
     if (
         "bootnodoor" not in result["additional_services"]
         and result["participants"][0]["el_type"] == "dummy"
@@ -1095,6 +1097,30 @@ def input_parser(plan, input_args):
             epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
     )
+
+
+def _validate_ere_gpu_config(zkvms):
+    """Validate that at most one ere zkvm uses gpu.count without gpu.device_ids."""
+    services_using_count = []
+    for zkvm in zkvms:
+        if zkvm.get("kind") != "ere":
+            continue
+        gpu_cfg = zkvm.get("gpu", {})
+        count = gpu_cfg.get("count", 0)
+        device_ids = gpu_cfg.get("device_ids", [])
+        if count > 0 and len(device_ids) == 0:
+            services_using_count.append(zkvm["proof_type"])
+
+    if len(services_using_count) > 1:
+        fail(
+            "Multiple ere services specify gpu.count without gpu.device_ids: [{0}]. ".format(
+                ", ".join(services_using_count)
+            )
+            + "Docker assigns GPUs from the same pool when gpu.count is used, so all services "
+            + "requesting GPUs this way will receive the same device(s). "
+            + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each service instead "
+            + '(e.g. gpu: {{device_ids: ["0"]}} and gpu: {{device_ids: ["1"]}}).'
+        )
 
 
 def parse_network_params(plan, input_args):
