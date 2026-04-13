@@ -478,6 +478,19 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
+        # Inject default mock zkvm if none configured
+        if len(result["zkboost_params"]["zkvms"]) == 0:
+            result["zkboost_params"]["zkvms"] = [
+                {
+                    "kind": "mock",
+                    "proof_type": "ethrex-zisk",
+                    "mock_proving_time": {"kind": "constant", "ms": 6000},
+                    "mock_proof_size": 128 << 10,
+                },
+            ]
+        if "RUST_LOG" not in result["zkboost_params"]["env"]:
+            result["zkboost_params"]["env"]["RUST_LOG"] = "info"
+
         has_non_dummy_el = False
         for participant in result["participants"]:
             if participant["el_type"] != "dummy":
@@ -486,6 +499,95 @@ def input_parser(plan, input_args):
             fail(
                 "zkboost is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
             )
+
+        for idx, instance in enumerate(result["zkboost_params"]["instances"]):
+            el_idx = instance.get("el_participant_index", 0)
+            if el_idx >= len(result["participants"]):
+                fail(
+                    "zkboost_params.instances[{0}]: el_participant_index {1} is out of range, only {2} participants exist".format(
+                        idx, el_idx, len(result["participants"])
+                    )
+                )
+
+        # Validate zkvm configurations
+        valid_proof_types = [
+            "ethrex-risc0",
+            "ethrex-sp1",
+            "ethrex-zisk",
+            "reth-openvm",
+            "reth-risc0",
+            "reth-sp1",
+            "reth-zisk",
+        ]
+        configured_proof_types = []
+        for idx, zkvm in enumerate(result["zkboost_params"]["zkvms"]):
+            kind = zkvm.get("kind")
+            proof_type = zkvm.get("proof_type")
+
+            if kind not in ["mock", "ere"]:
+                fail(
+                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock' or 'ere'".format(
+                        idx, kind
+                    )
+                )
+
+            if proof_type not in valid_proof_types:
+                fail(
+                    "zkboost_params.zkvms[{0}]: unsupported proof_type '{1}', please use one of: {2}".format(
+                        idx, proof_type, ", ".join(valid_proof_types)
+                    )
+                )
+
+            if proof_type in configured_proof_types:
+                fail(
+                    "zkboost_params.zkvms[{0}]: duplicate proof_type '{1}'".format(
+                        idx, proof_type
+                    )
+                )
+            configured_proof_types.append(proof_type)
+
+            proof_timeout = zkvm.get("proof_timeout_secs", 12)
+            if proof_timeout <= 0:
+                fail(
+                    "zkboost_params.zkvms[{0}]: proof_timeout_secs must be > 0, got {1}".format(
+                        idx, proof_timeout
+                    )
+                )
+
+            if kind == "ere":
+                fail(
+                    "zkboost_params.zkvms[{0}]: ere zkvm kind is not yet supported".format(
+                        idx
+                    )
+                )
+
+            if kind == "mock":
+                mock_proving_time = zkvm.get("mock_proving_time")
+                if mock_proving_time != None:
+                    pt_kind = mock_proving_time.get("kind", "constant")
+                    if pt_kind not in ["constant", "random", "linear"]:
+                        fail(
+                            "zkboost_params.zkvms[{0}]: unsupported mock_proving_time kind '{1}', please use 'constant', 'random' or 'linear'".format(
+                                idx, pt_kind
+                            )
+                        )
+                    if pt_kind == "random":
+                        min_ms = mock_proving_time.get("min_ms", 0)
+                        max_ms = mock_proving_time.get("max_ms", 0)
+                        if min_ms > max_ms:
+                            fail(
+                                "zkboost_params.zkvms[{0}]: mock_proving_time random min_ms ({1}) must be <= max_ms ({2})".format(
+                                    idx, min_ms, max_ms
+                                )
+                            )
+
+                mock_proof_size = zkvm.get("mock_proof_size", 128 << 10)
+                if mock_proof_size < 32:
+                    fail(
+                        "zkboost_params.zkvms[{0}]: mock_proof_size must be >= 32, got {1}".format(
+                            idx, mock_proof_size
+                        )
+                    )
 
     if (
         "bootnodoor" not in result["additional_services"]
@@ -966,11 +1068,8 @@ def input_parser(plan, input_args):
         ),
         zkboost_params=struct(
             image=result["zkboost_params"]["image"],
-            port=result["zkboost_params"]["port"],
-            witness_timeout_secs=result["zkboost_params"]["witness_timeout_secs"],
-            proof_timeout_secs=result["zkboost_params"]["proof_timeout_secs"],
-            witness_cache_size=result["zkboost_params"]["witness_cache_size"],
-            proof_cache_size=result["zkboost_params"]["proof_cache_size"],
+            dashboard_enabled="grafana" in result["additional_services"]
+            or "prometheus_grafana" in result["additional_services"],
             instances=result["zkboost_params"]["instances"],
             zkvms=result["zkboost_params"]["zkvms"],
             env=result["zkboost_params"]["env"],
@@ -2004,11 +2103,6 @@ def get_default_bootnodoor_params():
 def get_default_zkboost_params():
     return {
         "image": constants.DEFAULT_ZKBOOST_IMAGE,
-        "port": 3000,
-        "witness_timeout_secs": 12,
-        "proof_timeout_secs": 12,
-        "witness_cache_size": 128,
-        "proof_cache_size": 128,
         "instances": [{"name": "zkboost", "el_participant_index": 0}],
         "zkvms": [],
         "env": {},

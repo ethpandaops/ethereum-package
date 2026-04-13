@@ -1061,6 +1061,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                tempo_otlp_grpc_url,
             )
             prometheus_additional_metrics_jobs.extend(zkboost_metrics_jobs)
             plan.print("Successfully launched zkboost")

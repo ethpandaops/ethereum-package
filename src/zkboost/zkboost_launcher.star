@@ -3,6 +3,8 @@ constants = import_module("../package_io/constants.star")
 
 SERVICE_NAME_PREFIX = "zkboost"
 
+HTTP_PORT_NUMBER = 3000
+
 ZKBOOST_CONFIG_FILENAME = "config.toml"
 
 ZKBOOST_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
@@ -11,6 +13,14 @@ MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 256
 MAX_MEMORY = 2048
+
+USED_PORTS = {
+    constants.HTTP_PORT_ID: shared_utils.new_port_spec(
+        HTTP_PORT_NUMBER,
+        shared_utils.TCP_PROTOCOL,
+        shared_utils.HTTP_APPLICATION_PROTOCOL,
+    ),
+}
 
 
 def launch_zkboost(
@@ -23,6 +33,7 @@ def launch_zkboost(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    tempo_otlp_grpc_url=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -48,21 +59,33 @@ def launch_zkboost(
             entry = {
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
+                "ProofTimeoutSecs": zkvm.get("proof_timeout_secs", 12),
             }
-            if zkvm["kind"] == "external":
-                fail("TODO: external zkvm kind is not yet supported")
+            if zkvm["kind"] == "ere":
+                fail("TODO: Ere zkvm kind is not yet supported")
             elif zkvm["kind"] == "mock":
-                entry["MockProvingTimeMs"] = zkvm.get("mock_proving_time_ms", 5000)
-                entry["MockProofSize"] = zkvm.get("mock_proof_size", 1024)
+                mock_proving_time = zkvm.get(
+                    "mock_proving_time", {"kind": "constant", "ms": 6000}
+                )
+                entry["MockProvingTimeKind"] = mock_proving_time.get("kind", "constant")
+                entry["MockProvingTimeConstantMs"] = mock_proving_time.get("ms", 0)
+                entry["MockProvingTimeRandomMinMs"] = mock_proving_time.get("min_ms", 0)
+                entry["MockProvingTimeRandomMaxMs"] = mock_proving_time.get("max_ms", 0)
+                entry["MockProvingTimeLinearMsPerMgas"] = mock_proving_time.get(
+                    "ms_per_mgas", 0
+                )
+                entry["MockProofSize"] = zkvm.get("mock_proof_size", 128 << 10)
+                entry["MockFailure"] = zkvm.get("mock_failure", False)
             zkvms.append(entry)
 
         template_data = {
-            "Port": zkboost_params.port,
+            "Port": HTTP_PORT_NUMBER,
             "ELEndpoint": el_endpoint,
-            "WitnessTimeoutSecs": zkboost_params.witness_timeout_secs,
-            "ProofTimeoutSecs": zkboost_params.proof_timeout_secs,
-            "WitnessCacheSize": zkboost_params.witness_cache_size,
-            "ProofCacheSize": zkboost_params.proof_cache_size,
+            "WitnessTimeoutSecs": 12,
+            "WitnessCacheSize": 128,
+            "ProofCacheSize": 128,
+            "DashboardEnabled": zkboost_params.dashboard_enabled,
+            "DashboardRetention": 256,
             "Zkvms": zkvms,
         }
 
@@ -86,18 +109,19 @@ def launch_zkboost(
             port_publisher,
             additional_service_index + instance_index,
             docker_cache_params,
+            tempo_otlp_grpc_url,
         )
 
         plan.add_service(name, config)
-        metrics_jobs.append(get_metrics_job(name, zkboost_params.port))
+        metrics_jobs.append(get_metrics_job(name))
 
     return metrics_jobs
 
 
-def get_metrics_job(service_name, port):
+def get_metrics_job(service_name):
     return {
         "Name": service_name,
-        "Endpoint": "{0}:{1}".format(service_name, port),
+        "Endpoint": "{0}:{1}".format(service_name, HTTP_PORT_NUMBER),
         "MetricsPath": "/metrics",
         "Labels": {
             "service": service_name,
@@ -116,20 +140,12 @@ def get_config(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    tempo_otlp_grpc_url,
 ):
     config_file_path = shared_utils.path_join(
         ZKBOOST_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
         ZKBOOST_CONFIG_FILENAME,
     )
-
-    used_ports = {
-        constants.HTTP_PORT_ID: shared_utils.new_port_spec(
-            zkboost_params.port,
-            shared_utils.TCP_PROTOCOL,
-            shared_utils.HTTP_APPLICATION_PROTOCOL,
-            wait=None,
-        )
-    }
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
@@ -138,21 +154,24 @@ def get_config(
         0,
     )
 
-    IMAGE_NAME = shared_utils.docker_cache_image_calc(
-        docker_cache_params,
-        zkboost_params.image,
-    )
+    env_vars = dict(zkboost_params.env)
+    if tempo_otlp_grpc_url != None:
+        env_vars["OTEL_EXPORTER_OTLP_ENDPOINT"] = tempo_otlp_grpc_url
+        env_vars["OTEL_SERVICE_NAME"] = service_name
 
     return ServiceConfig(
-        image=IMAGE_NAME,
-        ports=used_ports,
+        image=shared_utils.docker_cache_image_calc(
+            docker_cache_params,
+            zkboost_params.image,
+        ),
+        ports=USED_PORTS,
         public_ports=public_ports,
         files={
             ZKBOOST_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
         },
-        entrypoint=["/usr/local/bin/zkboost-server"],
+        entrypoint=["/usr/local/bin/zkboost"],
         cmd=["--config", config_file_path],
-        env_vars=zkboost_params.env,
+        env_vars=env_vars,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
