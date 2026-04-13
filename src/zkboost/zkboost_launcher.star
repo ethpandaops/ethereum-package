@@ -113,14 +113,12 @@ def launch_zkboost(
                 "ProofTimeoutSecs": zkvm.get("proof_timeout_secs", 12),
             }
             if zkvm["kind"] == "ere":
-                entry["Kind"] = "ere"
                 entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
             elif zkvm["kind"] == "external":
-                entry["Kind"] = "ere"
-                endpoint = zkvm.get("endpoint", "")
-                if endpoint == "":
-                    fail("zkvm kind 'external' requires an 'endpoint' field")
-                entry["Endpoint"] = endpoint
+                entry[
+                    "Kind"
+                ] = "ere"  # zkboost config kind for any external prover connection
+                entry["Endpoint"] = zkvm["endpoint"]
             elif zkvm["kind"] == "mock":
                 mock_proving_time = zkvm.get(
                     "mock_proving_time", {"kind": "constant", "ms": 6000}

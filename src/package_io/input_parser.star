@@ -557,17 +557,23 @@ def input_parser(plan, input_args):
             if kind == "ere":
                 if "image" not in zkvm:
                     fail(
-                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'image'".format(idx)
+                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'image'".format(
+                            idx
+                        )
                     )
                 if "program_url" not in zkvm and "program_path" not in zkvm:
                     fail(
-                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'program_url' or 'program_path'".format(idx)
+                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'program_url' or 'program_path'".format(
+                            idx
+                        )
                     )
 
             if kind == "external":
                 if zkvm.get("endpoint", "") == "":
                     fail(
-                        "zkboost_params.zkvms[{0}]: external zkvm requires 'endpoint'".format(idx)
+                        "zkboost_params.zkvms[{0}]: external zkvm requires 'endpoint'".format(
+                            idx
+                        )
                     )
 
             if kind == "mock":
