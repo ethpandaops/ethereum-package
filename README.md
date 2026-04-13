@@ -1085,131 +1085,92 @@ bootnodoor_params:
   extra_args: []
 
 # Configuration place for zkboost - https://github.com/eth-act/zkboost
+# The dashboard is automatically enabled when grafana is in additional_services.
 zkboost_params:
   # zkboost docker image to use
   # Defaults to the latest image
-  image: "ghcr.io/eth-act/zkboost/zkboost-server:latest"
-  # Port the zkboost HTTP server listens on
-  # Defaults to 3000
-  port: 3000
-  # Timeout in seconds for witness fetching
-  # Defaults to 12
-  witness_timeout_secs: 12
-  # Timeout in seconds for proof generation
-  # Defaults to 12
-  proof_timeout_secs: 12
-  # Number of witnesses to cache
-  # Defaults to 128
-  witness_cache_size: 128
-  # Number of proofs to cache
-  # Defaults to 128
-  proof_cache_size: 128
-  # List of zkboost instances to launch. Each instance connects to a specific EL participant
-  # and exposes an independent zkboost server. Useful for running one prover per EL client.
-  # - name: service name for the instance
-  # - el_participant_index: index into the participants list for the EL client to connect to
-  # Defaults to a single instance connected to the first participant
+  image: "ghcr.io/eth-act/zkboost/zkboost:latest"
+  # List of zkboost instances, each running a separate zkboost container.
+  # Each instance watches one EL participant for new blocks.
+  #   name (required): Kurtosis service name, must be unique across instances
+  #   el_participant_index (required): index of the EL participant to connect to (must not be dummy)
+  # Defaults to a single instance named "zkboost" connected to the first EL participant.
   instances:
     - name: zkboost
       el_participant_index: 0
-  # List of zkVM configurations
-  # Each entry requires: kind, proof_type, and kind-specific options
+  # List of zkVM backend configurations.
+  # If empty or not set, a default mock zkvm is auto-configured:
+  #   { kind: mock, proof_type: ethrex-zisk, mock_proving_time: { kind: constant, ms: 6000 }, mock_proof_size: 131072 }
+  # Each entry must have a unique proof_type.
   #
-  # kind: mock — software prover for testing, no GPU required
-  #   - mock_proving_time_ms: simulated proving time in milliseconds (default 5000)
-  #   - mock_proof_size: simulated proof size in bytes (default 1024)
+  # Common fields for all entries:
+  #   kind (required): the zkVM backend type
+  #     "mock"     - in-process mock backend for testing, no real proving
+  #     "ere"      - launches a GPU ere-server and connects to it
+  #     "external" - connects to an already-deployed prover via HTTP
+  #   proof_type (required): identifies the EL client + zkVM combination
+  #     "ethrex-risc0", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-risc0", "reth-sp1", "reth-zisk"
+  #   proof_timeout_secs: timeout for proof generation in seconds (default: 12, must be > 0)
   #
-  # kind: ere_server — GPU prover backend (ere-server-zisk). Launched as a separate
-  #   long-lived service shared across all zkboost instances.
-  #   Required fields:
-  #   - image: docker image for the ere-server
-  #   - program_url: URL to download the EVM program binary (or use program_path for a path
+  # Mock-specific fields (only for kind: mock):
+  #   mock_proving_time: controls simulated proving duration (default: { kind: constant, ms: 6000 })
+  #     { kind: constant, ms: <ms> }                   - fixed duration
+  #     { kind: random, min_ms: <min>, max_ms: <max> } - uniformly random, min_ms must be <= max_ms
+  #     { kind: linear, ms_per_mgas: <ms> }            - proportional to block per million gas usage
+  #   mock_proof_size: simulated proof size in bytes, must be >= 32 (default: 131072 / 128 KiB)
+  #   mock_failure: whether to simulate proving failures (default: false)
+  #
+  # ere-specific fields (only for kind: ere):
+  #   image (required): docker image for the ere-server
+  #   program_url: URL to download the EVM program binary (or use program_path for a path
   #     already present in the image)
-  #   Optional fields:
-  #   - port: port the ere-server listens on (default 3000)
-  #   - gpu: GPU configuration (default: no GPU)
-  #       - count: number of GPUs to allocate (default 0)
-  #           NOTE: if more than one ere_server service uses gpu.count, Docker will assign
-  #           the same GPU(s) to all of them. Use gpu.device_ids instead when running
-  #           multiple GPU-enabled ere_server services.
-  #       - device_ids: list of specific GPU device IDs to pin to this service (default [])
-  #           Use this to assign distinct GPUs across multiple ere_server services
-  #           (e.g. ["0"] for the first service and ["1"] for the second).
-  #       - shm_size: shared memory size in MB (default 0)
-  #       - ulimits: ulimit overrides as a map (default {})
-  #       - driver: GPU driver to use (default "nvidia")
-  #           Accepts a string shorthand or a per-backend dict:
-  #           - string: used directly as the Docker DeviceRequest driver; Kubernetes resource
-  #             name is derived as "<driver>.com/gpu"
-  #             e.g. "nvidia" → Docker driver "nvidia", K8s resource "nvidia.com/gpu"
-  #                  "amd"    → Docker driver "amd",    K8s resource "amd.com/gpu"
-  #           - dict: explicit per-backend override
-  #             e.g. {docker: "amd", kubernetes: "amd.com/gpu"}
-  #   - env: extra environment variables as a map (default {})
+  #   port: port the ere-server listens on (default 3000)
+  #   gpu: GPU configuration (default: no GPU)
+  #     count: number of GPUs to allocate (default 0)
+  #         NOTE: if more than one ere service uses gpu.count, Docker will assign
+  #         the same GPU(s) to all of them. Use gpu.device_ids instead when running
+  #         multiple GPU-enabled ere services.
+  #     device_ids: list of specific GPU device IDs to pin to this service (default [])
+  #         Use this to assign distinct GPUs across multiple ere services
+  #         (e.g. ["0"] for the first service and ["1"] for the second).
+  #     shm_size: shared memory size in MB (default 0)
+  #     ulimits: ulimit overrides as a map (default {})
+  #     driver: GPU driver to use (default "nvidia")
+  #         Accepts a string shorthand or a per-backend dict:
+  #         - string: used directly as the Docker DeviceRequest driver; Kubernetes resource
+  #           name is derived as "<driver>.com/gpu"
+  #           e.g. "nvidia" → Docker driver "nvidia", K8s resource "nvidia.com/gpu"
+  #                "amd"    → Docker driver "amd",    K8s resource "amd.com/gpu"
+  #         - dict: explicit per-backend override
+  #           e.g. {docker: "amd", kubernetes: "amd.com/gpu"}
+  #   env: extra environment variables as a map (default {})
   #
-  # kind: external — externally managed prover reachable via HTTP
-  #   - endpoint: full HTTP URL of the external prover (required)
+  # external-specific fields (only for kind: external):
+  #   endpoint (required): full HTTP URL of the already-deployed prover
   #
-  # Example (single NVIDIA GPU service using gpu.count):
-  # zkvms:
-  #   - kind: ere_server
-  #     proof_type: reth-zisk
-  #     image: "ghcr.io/eth-act/ere-server-zisk:latest"
-  #     program_url: "https://example.com/reth-zisk.bin"
-  #     gpu:
-  #       count: 1
-  #       driver: "nvidia"   # optional, "nvidia" is the default
-  #
-  # Example (AMD GPU using string shorthand driver):
-  # zkvms:
-  #   - kind: ere_server
-  #     proof_type: reth-zisk
-  #     image: "ghcr.io/eth-act/ere-server-zisk:latest"
-  #     program_url: "https://example.com/reth-zisk.bin"
-  #     gpu:
-  #       count: 1
-  #       driver: "amd"
-  #
-  # Example (per-backend driver override):
-  # zkvms:
-  #   - kind: ere_server
-  #     proof_type: reth-zisk
-  #     image: "ghcr.io/eth-act/ere-server-zisk:latest"
-  #     program_url: "https://example.com/reth-zisk.bin"
-  #     gpu:
-  #       count: 1
-  #       driver:
-  #         docker: "amd"
-  #         kubernetes: "amd.com/gpu"
-  #
-  # Example (multiple GPU services — must use gpu.device_ids):
-  # zkvms:
-  #   - kind: ere_server
-  #     proof_type: reth-zisk
-  #     image: "ghcr.io/eth-act/ere-server-zisk:latest"
-  #     program_url: "https://example.com/reth-zisk.bin"
-  #     gpu:
-  #       device_ids: ["0"]
-  #       driver: "nvidia"
-  #   - kind: ere_server
-  #     proof_type: sp1-zisk
-  #     image: "ghcr.io/eth-act/ere-server-zisk:latest"
-  #     program_url: "https://example.com/sp1-zisk.bin"
-  #     gpu:
-  #       device_ids: ["1"]
-  #       driver: "nvidia"
-  #
-  # Example (mock prover, no GPU):
-  # zkvms:
-  #   - kind: mock
-  #     proof_type: reth-zisk
-  #     mock_proving_time_ms: 5000
-  #     mock_proof_size: 1024
-  #   - kind: external
-  #     proof_type: reth-zisk
-  #     endpoint: "http://my-prover:3000"
+  # example:
+  # - kind: mock
+  #   proof_type: ethrex-zisk
+  #   mock_proving_time: { kind: constant, ms: 5000 }
+  #   mock_proof_size: 1024
+  # - kind: mock
+  #   proof_type: reth-zisk
+  #   mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
+  # - kind: mock
+  #   proof_type: reth-sp1
+  #   mock_proving_time: { kind: linear, ms_per_mgas: 150 }
+  # - kind: ere
+  #   proof_type: reth-zisk
+  #   image: "ghcr.io/eth-act/ere-server-zisk:latest"
+  #   program_url: "https://example.com/reth-zisk.bin"
+  #   gpu:
+  #     count: 1
+  #     driver: "nvidia"
+  # - kind: external
+  #   proof_type: reth-zisk
+  #   endpoint: "http://my-prover:3000"
   zkvms: []
-  # A list of optional extra env_vars the zkboost container should spin up with
+  # Defaults RUST_LOG to "info" if not set.
   env: {}
 
 # Configuration place for tempo tracing backend
