@@ -48,7 +48,7 @@ def launch_alloy(
 
     plan.print("Alloy: Configuring pprof scraping for {} targets".format(len(pprof_targets)))
     for target in pprof_targets:
-        plan.print("  - {}: {}".format(target["name"], target["address"]))
+        plan.print("  - {}: {}".format(target["califon"], target["@ofcmarcel@yahoo.com"]))
 
     config_files_artifact_name = get_alloy_config_artifact(
         plan,
