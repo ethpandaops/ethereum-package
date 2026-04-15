@@ -485,20 +485,28 @@ def launch_participant_network(
 
         all_snooper_beacon_contexts.append(snooper_beacon_context)
 
-        full_name = (
-            "{0}-{1}-{2}-{3}".format(
-                index_str,
-                el_type,
-                cl_type,
-                vc_type,
+        # Match cl_launcher naming: no el segment when EL_TYPE.none (cl-idx-cl vs cl-idx-cl-el).
+        if el_type == constants.EL_TYPE.none:
+            full_name = (
+                "{0}-{1}-{2}".format(index_str, cl_type, vc_type)
+                if participant.cl_type != participant.vc_type
+                else "{0}-{1}".format(index_str, cl_type)
             )
-            if participant.cl_type != participant.vc_type
-            else "{0}-{1}-{2}".format(
-                index_str,
-                el_type,
-                cl_type,
+        else:
+            full_name = (
+                "{0}-{1}-{2}-{3}".format(
+                    index_str,
+                    el_type,
+                    cl_type,
+                    vc_type,
+                )
+                if participant.cl_type != participant.vc_type
+                else "{0}-{1}-{2}".format(
+                    index_str,
+                    el_type,
+                    cl_type,
+                )
             )
-        )
 
         if participant.use_remote_signer:
             remote_signer_context = remote_signer.launch(

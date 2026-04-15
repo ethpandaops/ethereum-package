@@ -1210,6 +1210,9 @@ def parse_network_params(plan, input_args):
     # validation of the above defaults
     for index, participant in enumerate(result["participants"]):
         el_type = participant["el_type"]
+        if el_type == None or el_type in ("None", "null", "Null"):
+            participant["el_type"] = constants.EL_TYPE.none
+            el_type = constants.EL_TYPE.none
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
         remote_signer_type = participant["remote_signer_type"]

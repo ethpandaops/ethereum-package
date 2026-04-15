@@ -8,7 +8,7 @@ EL_TYPE = struct(
     ethereumjs="ethereumjs",
     nimbus="nimbus",
     ethrex="ethrex",
-    none="None",
+    none="none",
 )
 
 CL_TYPE = struct(
