@@ -177,7 +177,8 @@ To configure the package behaviour, you can modify your `network_params.yaml` fi
 participants:
   # EL(Execution Layer) Specific flags
     # The type of EL client that should be started
-    # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1, ethrex, dummy
+    # Valid values are geth, nethermind, erigon, besu, ethereumjs, reth, nimbus-eth1, ethrex, None
+    # Use el_type: None to run the participant without an execution client (CL-only; execution-endpoint and JWT secret are omitted)
   - el_type: geth
 
     # The Docker image that should be used for the EL client; leave blank to use the default for the client type
@@ -190,7 +191,6 @@ participants:
     # - ethereumjs: ethpandaops/ethereumjs:master
     # - nimbus-eth1: statusim/nimbus-eth1:master
     # - ethrex: ghcr.io/lambdaclass/ethrex:latest
-    # - dummy: ethpandaops/dummy-el:master
     el_image: ""
 
     # Path to a local EL binary to inject into the container (Docker only)
@@ -222,7 +222,7 @@ participants:
     # If this is emptystring, each client will use its default behavior:
     #   - reth, erigon: default to archive (use "full" to save space)
     #   - geth, besu, nethermind: default to full (use "archive" to keep historical data)
-    #   - ethereumjs, ethrex, nimbus-eth1, dummy: unused (full only?)
+    #   - ethereumjs, ethrex, nimbus-eth1: unused (full only?)
     # Example: el_storage_type: "full" or "archive"
     el_storage_type: ""
 
@@ -1093,7 +1093,7 @@ zkboost_params:
   # List of zkboost instances, each running a separate zkboost container.
   # Each instance watches one EL participant for new blocks.
   #   name (required): Kurtosis service name, must be unique across instances
-  #   el_participant_index (required): index of the EL participant to connect to (must not be dummy)
+  #   el_participant_index (required): index of the EL participant to connect to (must not be el_type=None)
   # Defaults to a single instance named "zkboost" connected to the first EL participant.
   instances:
     - name: zkboost

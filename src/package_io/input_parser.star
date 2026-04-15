@@ -15,7 +15,6 @@ DEFAULT_EL_IMAGES = {
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
     "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
-    "dummy": "ethpandaops/dummy-el:master",
 }
 
 DEFAULT_CL_IMAGES = {
@@ -294,7 +293,7 @@ def input_parser(plan, input_args):
 
     # Check for shadowfork + archive mode and unsupported client + archive mode combinations
     is_shadowfork = "shadowfork" in result["network_params"]["network"]
-    unsupported_archive_clients = ["dummy", "ethrex", "ethereumjs", "nimbus"]
+    unsupported_archive_clients = ["ethrex", "ethereumjs", "nimbus"]
 
     for idx, participant in enumerate(result["participants"]):
         el_type = participant["el_type"]
@@ -491,13 +490,13 @@ def input_parser(plan, input_args):
         if "RUST_LOG" not in result["zkboost_params"]["env"]:
             result["zkboost_params"]["env"]["RUST_LOG"] = "info"
 
-        has_non_dummy_el = False
+        has_real_el = False
         for participant in result["participants"]:
-            if participant["el_type"] != "dummy":
-                has_non_dummy_el = True
-        if not has_non_dummy_el:
+            if participant["el_type"] != constants.EL_TYPE.none:
+                has_real_el = True
+        if not has_real_el:
             fail(
-                "zkboost is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
+                "zkboost is enabled but no participants have an EL client. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
             )
 
         for idx, instance in enumerate(result["zkboost_params"]["instances"]):
@@ -591,10 +590,10 @@ def input_parser(plan, input_args):
 
     if (
         "bootnodoor" not in result["additional_services"]
-        and result["participants"][0]["el_type"] == "dummy"
+        and result["participants"][0]["el_type"] == constants.EL_TYPE.none
     ):
         fail(
-            "First participant cannot use dummy EL without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
+            "First participant cannot have el_type=None without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
         )
 
     if (
@@ -1197,7 +1196,7 @@ def parse_network_params(plan, input_args):
             )
 
         el_image = participant["el_image"]
-        if el_image == "":
+        if el_image == "" and el_type != constants.EL_TYPE.none:
             # Get devnet-modified images if network contains 'devnet'
             effective_el_images = get_devnet_modified_images(
                 result["network_params"]["network"], DEFAULT_EL_IMAGES

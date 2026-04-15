@@ -277,12 +277,15 @@ def run(plan, args={}):
         detected_backend,
     )
 
-    plan.print(
-        "NODE JSON RPC URI: '{0}:{1}'".format(
-            all_participants[0].el_context.dns_name,
-            all_participants[0].el_context.rpc_port_num,
-        )
-    )
+    for p in all_participants:
+        if p.el_context != None:
+            plan.print(
+                "NODE JSON RPC URI: '{0}:{1}'".format(
+                    p.el_context.dns_name,
+                    p.el_context.rpc_port_num,
+                )
+            )
+            break
 
     builder_bls_secret_key = None
     if network_params.builder_count > 0:

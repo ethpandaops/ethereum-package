@@ -341,7 +341,7 @@ def launch_participant_network(
             participant.node_selectors,
             global_node_selectors,
         )
-        if participant.ethereum_metrics_exporter_enabled:
+        if participant.ethereum_metrics_exporter_enabled and el_context != None:
             pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
             ethereum_metrics_exporter_service_name = (
@@ -375,7 +375,10 @@ def launch_participant_network(
             xatu_sentry_context = None
 
         if participant.xatu_sentry_enabled:
-            pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
+            if el_type == constants.EL_TYPE.none:
+                pair_name = "{0}-{1}".format(index_str, cl_type)
+            else:
+                pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
             xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
 
@@ -399,7 +402,7 @@ def launch_participant_network(
 
         # Create snooper RPC context for all participants if snooper is enabled
         snooper_el_rpc_context = None
-        if participant.snooper_enabled:
+        if participant.snooper_enabled and el_context != None:
             snooper_service_name = "snooper-rpc-{0}-{1}".format(
                 index_str,
                 el_type,
