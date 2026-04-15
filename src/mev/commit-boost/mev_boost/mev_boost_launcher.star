@@ -59,7 +59,9 @@ def launch(
     if mev_params.commit_boost_config:
         commit_boost_config_template = mev_params.commit_boost_config
     else:
-        commit_boost_config_template = read_file(static_files.COMMIT_BOOST_CONFIG_FILEPATH)
+        commit_boost_config_template = read_file(
+            static_files.COMMIT_BOOST_CONFIG_FILEPATH
+        )
 
     template_and_data = shared_utils.new_template_and_data(
         commit_boost_config_template, template_data
