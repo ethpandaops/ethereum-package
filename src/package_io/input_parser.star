@@ -496,7 +496,7 @@ def input_parser(plan, input_args):
                 has_real_el = True
         if not has_real_el:
             fail(
-                "zkboost is enabled but no participants have an EL client. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
+                "zkboost requires at least one participant with a real EL client (geth, reth, nethermind, etc.) to connect to, but all participants have el_type=None."
             )
 
         for idx, instance in enumerate(result["zkboost_params"]["instances"]):
