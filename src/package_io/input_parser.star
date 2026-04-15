@@ -523,9 +523,9 @@ def input_parser(plan, input_args):
             kind = zkvm.get("kind")
             proof_type = zkvm.get("proof_type")
 
-            if kind not in ["mock", "ere"]:
+            if kind not in ["mock", "ere", "external"]:
                 fail(
-                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock' or 'ere'".format(
+                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock', 'ere', or 'external'".format(
                         idx, kind
                     )
                 )
@@ -554,11 +554,26 @@ def input_parser(plan, input_args):
                 )
 
             if kind == "ere":
-                fail(
-                    "zkboost_params.zkvms[{0}]: ere zkvm kind is not yet supported".format(
-                        idx
+                if "image" not in zkvm:
+                    fail(
+                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'image'".format(
+                            idx
+                        )
                     )
-                )
+                if "program_url" not in zkvm and "program_path" not in zkvm:
+                    fail(
+                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'program_url' or 'program_path'".format(
+                            idx
+                        )
+                    )
+
+            if kind == "external":
+                if zkvm.get("endpoint", "") == "":
+                    fail(
+                        "zkboost_params.zkvms[{0}]: external zkvm requires 'endpoint'".format(
+                            idx
+                        )
+                    )
 
             if kind == "mock":
                 mock_proving_time = zkvm.get("mock_proving_time")
@@ -587,6 +602,8 @@ def input_parser(plan, input_args):
                             idx, mock_proof_size
                         )
                     )
+
+        _validate_ere_gpu_config(result["zkboost_params"]["zkvms"])
 
     if (
         "bootnodoor" not in result["additional_services"]
@@ -1079,6 +1096,30 @@ def input_parser(plan, input_args):
             epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
     )
+
+
+def _validate_ere_gpu_config(zkvms):
+    """Validate that at most one ere zkvm uses gpu.count without gpu.device_ids."""
+    services_using_count = []
+    for zkvm in zkvms:
+        if zkvm.get("kind") != "ere":
+            continue
+        gpu_cfg = zkvm.get("gpu", {})
+        count = gpu_cfg.get("count", 0)
+        device_ids = gpu_cfg.get("device_ids", [])
+        if count > 0 and len(device_ids) == 0:
+            services_using_count.append(zkvm["proof_type"])
+
+    if len(services_using_count) > 1:
+        fail(
+            "Multiple ere services specify gpu.count without gpu.device_ids: [{0}]. ".format(
+                ", ".join(services_using_count)
+            )
+            + "Docker assigns GPUs from the same pool when gpu.count is used, so all services "
+            + "requesting GPUs this way will receive the same device(s). "
+            + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each service instead "
+            + '(e.g. gpu: {{device_ids: ["0"]}} and gpu: {{device_ids: ["1"]}}).'
+        )
 
 
 def parse_network_params(plan, input_args):
