@@ -254,10 +254,7 @@ def launch(
         el_contexts_temp[participant_index] = el_context
 
     el_context_for_participant_zero = None
-    if (
-        len(participants) > 0
-        and participants[0].el_type != constants.EL_TYPE.none
-    ):
+    if len(participants) > 0 and participants[0].el_type != constants.EL_TYPE.none:
         if len(all_el_contexts) != 1:
             fail(
                 "Internal error: expected one EL context after launching participant 0, got {0}".format(
@@ -276,9 +273,7 @@ def launch(
             ordered_el_contexts.append(el_contexts_temp[i])
         else:
             fail(
-                "Internal error: missing EL context for participant index {0}".format(
-                    i
-                )
+                "Internal error: missing EL context for participant index {0}".format(i)
             )
 
     all_el_contexts = ordered_el_contexts
