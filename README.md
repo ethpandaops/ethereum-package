@@ -678,10 +678,6 @@ network_params:
   # Defaults to 128
   max_request_blocks_deneb: 128
 
-  # Maximum request blob sidecars for Electra fork
-  # Defaults to 1152 (128 * 9 blobs)
-  max_request_blob_sidecars_electra: 1152
-
   # The number of validator keys that each CL validator node should get
   num_validator_keys_per_node: 128
 
@@ -813,8 +809,6 @@ network_params:
   # Example: shadowfork_block_height: 340000 for hoodi
   shadowfork_block_height: "latest"
 
-  # The number of data column sidecar subnets used in the gossipsub protocol
-  data_column_sidecar_subnet_count: 128
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
 
@@ -940,9 +934,15 @@ network_params:
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
-  # Minimum number of epochs for block requests
-  # Default to 33024
-  min_epochs_for_block_requests: 33024
+  # Number of ePBS builders to register at genesis with 0x03 withdrawal credentials
+  # Requires gloas_fork_epoch to be 0 (GLOAS at genesis)
+  # Default to 0
+  builder_count: 0
+
+  # Balance of each builder in ETH
+  # Default to 100 ETH
+  builder_balance: 100
+
 
 # Global parameters for the network
 
@@ -961,7 +961,7 @@ additional_services:
   - dora
   - dugtrio
   - erpc
-  - ews
+  - zkboost
   - forkmon
   - forky
   - full_beaconchain_explorer
@@ -1084,18 +1084,93 @@ bootnodoor_params:
   # A list of optional extra args the bootnodoor container should spin up with
   extra_args: []
 
-# Configuration place for execution-witness-sentry (ews) - https://github.com/eth-act/zkboost
-ews_params:
-  # EWS docker image to use
+# Configuration place for zkboost - https://github.com/eth-act/zkboost
+# The dashboard is automatically enabled when grafana is in additional_services.
+zkboost_params:
+  # zkboost docker image to use
   # Defaults to the latest image
-  image: "ghcr.io/eth-act/zkboost/execution-witness-sentry:latest"
-  # Number of execution witnesses to retain
-  # Defaults to 10
-  retain: 10
-  # Number of proofs to generate
-  # Defaults to 1
-  num_proofs: 1
-  # A list of optional extra env_vars the ews container should spin up with
+  image: "ghcr.io/eth-act/zkboost/zkboost:latest"
+  # List of zkboost instances, each running a separate zkboost container.
+  # Each instance watches one EL participant for new blocks.
+  #   name (required): Kurtosis service name, must be unique across instances
+  #   el_participant_index (required): index of the EL participant to connect to (must not be dummy)
+  # Defaults to a single instance named "zkboost" connected to the first EL participant.
+  instances:
+    - name: zkboost
+      el_participant_index: 0
+  # List of zkVM backend configurations.
+  # If empty or not set, a default mock zkvm is auto-configured:
+  #   { kind: mock, proof_type: ethrex-zisk, mock_proving_time: { kind: constant, ms: 6000 }, mock_proof_size: 131072 }
+  # Each entry must have a unique proof_type.
+  #
+  # Common fields for all entries:
+  #   kind (required): the zkVM backend type
+  #     "mock"     - in-process mock backend for testing, no real proving
+  #     "ere"      - launches a GPU ere-server and connects to it
+  #     "external" - connects to an already-deployed prover via HTTP
+  #   proof_type (required): identifies the EL client + zkVM combination
+  #     "ethrex-risc0", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-risc0", "reth-sp1", "reth-zisk"
+  #   proof_timeout_secs: timeout for proof generation in seconds (default: 12, must be > 0)
+  #
+  # Mock-specific fields (only for kind: mock):
+  #   mock_proving_time: controls simulated proving duration (default: { kind: constant, ms: 6000 })
+  #     { kind: constant, ms: <ms> }                   - fixed duration
+  #     { kind: random, min_ms: <min>, max_ms: <max> } - uniformly random, min_ms must be <= max_ms
+  #     { kind: linear, ms_per_mgas: <ms> }            - proportional to block per million gas usage
+  #   mock_proof_size: simulated proof size in bytes, must be >= 32 (default: 131072 / 128 KiB)
+  #   mock_failure: whether to simulate proving failures (default: false)
+  #
+  # ere-specific fields (only for kind: ere):
+  #   image (required): docker image for the ere-server
+  #   program_url: URL to download the EVM program binary (or use program_path for a path
+  #     already present in the image)
+  #   port: port the ere-server listens on (default 3000)
+  #   gpu: GPU configuration (default: no GPU)
+  #     count: number of GPUs to allocate (default 0)
+  #         NOTE: if more than one ere service uses gpu.count, Docker will assign
+  #         the same GPU(s) to all of them. Use gpu.device_ids instead when running
+  #         multiple GPU-enabled ere services.
+  #     device_ids: list of specific GPU device IDs to pin to this service (default [])
+  #         Use this to assign distinct GPUs across multiple ere services
+  #         (e.g. ["0"] for the first service and ["1"] for the second).
+  #     shm_size: shared memory size in MB (default 0)
+  #     ulimits: ulimit overrides as a map (default {})
+  #     driver: GPU driver to use (default "nvidia")
+  #         Accepts a string shorthand or a per-backend dict:
+  #         - string: used directly as the Docker DeviceRequest driver; Kubernetes resource
+  #           name is derived as "<driver>.com/gpu"
+  #           e.g. "nvidia" → Docker driver "nvidia", K8s resource "nvidia.com/gpu"
+  #                "amd"    → Docker driver "amd",    K8s resource "amd.com/gpu"
+  #         - dict: explicit per-backend override
+  #           e.g. {docker: "amd", kubernetes: "amd.com/gpu"}
+  #   env: extra environment variables as a map (default {})
+  #
+  # external-specific fields (only for kind: external):
+  #   endpoint (required): full HTTP URL of the already-deployed prover
+  #
+  # example:
+  # - kind: mock
+  #   proof_type: ethrex-zisk
+  #   mock_proving_time: { kind: constant, ms: 5000 }
+  #   mock_proof_size: 1024
+  # - kind: mock
+  #   proof_type: reth-zisk
+  #   mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
+  # - kind: mock
+  #   proof_type: reth-sp1
+  #   mock_proving_time: { kind: linear, ms_per_mgas: 150 }
+  # - kind: ere
+  #   proof_type: reth-zisk
+  #   image: "ghcr.io/eth-act/ere-server-zisk:latest"
+  #   program_url: "https://example.com/reth-zisk.bin"
+  #   gpu:
+  #     count: 1
+  #     driver: "nvidia"
+  # - kind: external
+  #   proof_type: reth-zisk
+  #   endpoint: "http://my-prover:3000"
+  zkvms: []
+  # Defaults RUST_LOG to "info" if not set.
   env: {}
 
 # Configuration place for tempo tracing backend
@@ -1338,6 +1413,24 @@ mev_params:
   run_multiple_relays: false
   # The image to use for helix relay (used when run_multiple_relays is true or mev_type is helix)
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  # Inline Commit-Boost config template. When set, replaces the default auto-generated
+  # config. Template variables {{ .Timestamp }}, {{ .Network }}, {{ .Port }}, {{ .Relays }}
+  # are rendered at enclave creation. Only used when mev_type is "commit-boost".
+  # Example:
+  #   commit_boost_config: |
+  #     chain = { genesis_time_secs = {{ .Timestamp }}, path = "{{ .Network }}" }
+  #     [pbs]
+  #     host = "0.0.0.0"
+  #     port = {{ .Port }}
+  #     skip_sigverify = true
+  #     {{ range $index, $relay := .Relays }}
+  #     [[relays]]
+  #     id = "mev_relay_{{$index}}"
+  #     url = "{{ $relay }}"
+  #     {{- end }}
+  #     [logs.stdout]
+  #     level = "debug"
+  commit_boost_config: ""
 
 # Parameters for the buildoor builder+relay service (used when mev_type is "buildoor")
 buildoor_params:
@@ -1476,7 +1569,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.3.1
+  image: ethpandaops/ethereum-genesis-generator:5.3.5
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 

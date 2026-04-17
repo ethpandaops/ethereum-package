@@ -111,12 +111,10 @@ network_params:
   gloas_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
   force_snapshot_sync: false
-  data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
   custody_requirement: 4
   max_blobs_per_block_electra: 9
   max_request_blocks_deneb: 128
-  max_request_blob_sidecars_electra: 1152
   target_blobs_per_block_electra: 6
   base_fee_update_fraction_electra: 5007716
   additional_preloaded_contracts: {}
@@ -146,7 +144,8 @@ network_params:
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
   validator_balance: 32
   min_epochs_for_data_column_sidecars_requests: 4096
-  min_epochs_for_block_requests: 33024
+  builder_count: 0
+  builder_balance: 100
 
 additional_services: []
 dora_params:
@@ -231,6 +230,7 @@ mev_params:
       enable_timing_games: false
       target_first_request_ms: 200
       frequency_get_header_ms: 100
+  commit_boost_config: ""
   custom_flood_params:
     interval_between_transactions: 1
 buildoor_params:
@@ -271,7 +271,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.3.1
+  image: ethpandaops/ethereum-genesis-generator:5.3.5
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER

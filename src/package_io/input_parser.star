@@ -20,12 +20,13 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "offchainlabs/prysm-beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
+    "caplin": "ethpandaops/caplin:main",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -36,6 +37,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "lodestar": "ethpandaops/lodestar:unstable",
     "grandine": "ethpandaops/grandine:develop-minimal",
     "consensoor": "ethpandaops/consensoor:main",
+    "caplin": "ethpandaops/caplin:main",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -43,7 +45,7 @@ DEFAULT_VC_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "offchainlabs/prysm-validator:stable",
-    "teku": "consensys/teku:latest",
+    "teku": "ethpandaops/teku:master",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
@@ -91,7 +93,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "slashoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
-    "ews_params",
+    "zkboost_params",
     "buildoor_params",
     "ethereum_genesis_generator_params",
 )
@@ -133,7 +135,7 @@ def input_parser(plan, input_args):
     result["spamoor_params"] = get_default_spamoor_params()
     result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
-    result["ews_params"] = get_default_ews_params()
+    result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
@@ -232,10 +234,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["checkpointz_params"]:
                 sub_value = input_args["checkpointz_params"][sub_attr]
                 result["checkpointz_params"][sub_attr] = sub_value
-        elif attr == "ews_params":
-            for sub_attr in input_args["ews_params"]:
-                sub_value = input_args["ews_params"][sub_attr]
-                result["ews_params"][sub_attr] = sub_value
+        elif attr == "zkboost_params":
+            for sub_attr in input_args["zkboost_params"]:
+                sub_value = input_args["zkboost_params"][sub_attr]
+                result["zkboost_params"][sub_attr] = sub_value
         elif attr == "buildoor_params":
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
@@ -475,22 +477,134 @@ def input_parser(plan, input_args):
                 )
             )
 
-    if "ews" in result["additional_services"]:
+    if "zkboost" in result["additional_services"]:
+        # Inject default mock zkvm if none configured
+        if len(result["zkboost_params"]["zkvms"]) == 0:
+            result["zkboost_params"]["zkvms"] = [
+                {
+                    "kind": "mock",
+                    "proof_type": "ethrex-zisk",
+                    "mock_proving_time": {"kind": "constant", "ms": 6000},
+                    "mock_proof_size": 128 << 10,
+                },
+            ]
+        if "RUST_LOG" not in result["zkboost_params"]["env"]:
+            result["zkboost_params"]["env"]["RUST_LOG"] = "info"
+
         has_non_dummy_el = False
-        has_dummy_el = False
         for participant in result["participants"]:
             if participant["el_type"] != "dummy":
                 has_non_dummy_el = True
-            else:
-                has_dummy_el = True
         if not has_non_dummy_el:
             fail(
-                "ews (execution-witness-sentry) is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
+                "zkboost is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
             )
-        if not has_dummy_el:
-            fail(
-                "ews (execution-witness-sentry) is enabled but no participants are using dummy EL. At least one participant must use dummy EL to receive execution witnesses."
-            )
+
+        for idx, instance in enumerate(result["zkboost_params"]["instances"]):
+            el_idx = instance.get("el_participant_index", 0)
+            if el_idx >= len(result["participants"]):
+                fail(
+                    "zkboost_params.instances[{0}]: el_participant_index {1} is out of range, only {2} participants exist".format(
+                        idx, el_idx, len(result["participants"])
+                    )
+                )
+
+        # Validate zkvm configurations
+        valid_proof_types = [
+            "ethrex-risc0",
+            "ethrex-sp1",
+            "ethrex-zisk",
+            "reth-openvm",
+            "reth-risc0",
+            "reth-sp1",
+            "reth-zisk",
+        ]
+        configured_proof_types = []
+        for idx, zkvm in enumerate(result["zkboost_params"]["zkvms"]):
+            kind = zkvm.get("kind")
+            proof_type = zkvm.get("proof_type")
+
+            if kind not in ["mock", "ere", "external"]:
+                fail(
+                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock', 'ere', or 'external'".format(
+                        idx, kind
+                    )
+                )
+
+            if proof_type not in valid_proof_types:
+                fail(
+                    "zkboost_params.zkvms[{0}]: unsupported proof_type '{1}', please use one of: {2}".format(
+                        idx, proof_type, ", ".join(valid_proof_types)
+                    )
+                )
+
+            if proof_type in configured_proof_types:
+                fail(
+                    "zkboost_params.zkvms[{0}]: duplicate proof_type '{1}'".format(
+                        idx, proof_type
+                    )
+                )
+            configured_proof_types.append(proof_type)
+
+            proof_timeout = zkvm.get("proof_timeout_secs", 12)
+            if proof_timeout <= 0:
+                fail(
+                    "zkboost_params.zkvms[{0}]: proof_timeout_secs must be > 0, got {1}".format(
+                        idx, proof_timeout
+                    )
+                )
+
+            if kind == "ere":
+                if "image" not in zkvm:
+                    fail(
+                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'image'".format(
+                            idx
+                        )
+                    )
+                if "program_url" not in zkvm and "program_path" not in zkvm:
+                    fail(
+                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'program_url' or 'program_path'".format(
+                            idx
+                        )
+                    )
+
+            if kind == "external":
+                if zkvm.get("endpoint", "") == "":
+                    fail(
+                        "zkboost_params.zkvms[{0}]: external zkvm requires 'endpoint'".format(
+                            idx
+                        )
+                    )
+
+            if kind == "mock":
+                mock_proving_time = zkvm.get("mock_proving_time")
+                if mock_proving_time != None:
+                    pt_kind = mock_proving_time.get("kind", "constant")
+                    if pt_kind not in ["constant", "random", "linear"]:
+                        fail(
+                            "zkboost_params.zkvms[{0}]: unsupported mock_proving_time kind '{1}', please use 'constant', 'random' or 'linear'".format(
+                                idx, pt_kind
+                            )
+                        )
+                    if pt_kind == "random":
+                        min_ms = mock_proving_time.get("min_ms", 0)
+                        max_ms = mock_proving_time.get("max_ms", 0)
+                        if min_ms > max_ms:
+                            fail(
+                                "zkboost_params.zkvms[{0}]: mock_proving_time random min_ms ({1}) must be <= max_ms ({2})".format(
+                                    idx, min_ms, max_ms
+                                )
+                            )
+
+                mock_proof_size = zkvm.get("mock_proof_size", 128 << 10)
+                if mock_proof_size < 32:
+                    fail(
+                        "zkboost_params.zkvms[{0}]: mock_proof_size must be >= 32, got {1}".format(
+                            idx, mock_proof_size
+                        )
+                    )
+
+        _validate_ere_gpu_config(result["zkboost_params"]["zkvms"])
 
     if (
         "bootnodoor" not in result["additional_services"]
@@ -632,7 +746,6 @@ def input_parser(plan, input_args):
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
             gloas_fork_epoch=result["network_params"]["gloas_fork_epoch"],
             heze_fork_epoch=result["network_params"]["heze_fork_epoch"],
-            eip7441_fork_epoch=result["network_params"]["eip7441_fork_epoch"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
                 "min_validator_withdrawability_delay"
@@ -664,9 +777,6 @@ def input_parser(plan, input_args):
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
             force_snapshot_sync=result["network_params"]["force_snapshot_sync"],
             shadowfork_block_height=result["network_params"]["shadowfork_block_height"],
-            data_column_sidecar_subnet_count=result["network_params"][
-                "data_column_sidecar_subnet_count"
-            ],
             samples_per_slot=result["network_params"]["samples_per_slot"],
             custody_requirement=result["network_params"]["custody_requirement"],
             max_blobs_per_block_electra=result["network_params"][
@@ -677,9 +787,6 @@ def input_parser(plan, input_args):
             ],
             max_request_blocks_deneb=result["network_params"][
                 "max_request_blocks_deneb"
-            ],
-            max_request_blob_sidecars_electra=result["network_params"][
-                "max_request_blob_sidecars_electra"
             ],
             base_fee_update_fraction_electra=result["network_params"][
                 "base_fee_update_fraction_electra"
@@ -719,6 +826,8 @@ def input_parser(plan, input_args):
                 "additional_preloaded_contracts"
             ],
             additional_mnemonics=result["network_params"]["additional_mnemonics"],
+            builder_count=result["network_params"]["builder_count"],
+            builder_balance=result["network_params"]["builder_balance"],
             devnet_repo=result["network_params"]["devnet_repo"],
             prefunded_accounts=result["network_params"]["prefunded_accounts"],
             max_payload_size=result["network_params"]["max_payload_size"],
@@ -729,9 +838,6 @@ def input_parser(plan, input_args):
             validator_balance=result["network_params"]["validator_balance"],
             min_epochs_for_data_column_sidecars_requests=result["network_params"][
                 "min_epochs_for_data_column_sidecars_requests"
-            ],
-            min_epochs_for_block_requests=result["network_params"][
-                "min_epochs_for_block_requests"
             ],
         ),
         mev_params=struct(
@@ -772,6 +878,7 @@ def input_parser(plan, input_args):
             mev_boost_timing_games_params=result["mev_params"][
                 "mev_boost_timing_games_params"
             ],
+            commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
         )
         if result["mev_params"]
         else None,
@@ -979,11 +1086,13 @@ def input_parser(plan, input_args):
             max_mem=result["bootnodoor_params"]["max_mem"],
             extra_args=result["bootnodoor_params"]["extra_args"],
         ),
-        ews_params=struct(
-            image=result["ews_params"]["image"],
-            retain=result["ews_params"]["retain"],
-            num_proofs=result["ews_params"]["num_proofs"],
-            env=result["ews_params"]["env"],
+        zkboost_params=struct(
+            image=result["zkboost_params"]["image"],
+            dashboard_enabled="grafana" in result["additional_services"]
+            or "prometheus_grafana" in result["additional_services"],
+            instances=result["zkboost_params"]["instances"],
+            zkvms=result["zkboost_params"]["zkvms"],
+            env=result["zkboost_params"]["env"],
         ),
         buildoor_params=struct(
             image=result["buildoor_params"]["image"],
@@ -992,6 +1101,30 @@ def input_parser(plan, input_args):
             epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
     )
+
+
+def _validate_ere_gpu_config(zkvms):
+    """Validate that at most one ere zkvm uses gpu.count without gpu.device_ids."""
+    services_using_count = []
+    for zkvm in zkvms:
+        if zkvm.get("kind") != "ere":
+            continue
+        gpu_cfg = zkvm.get("gpu", {})
+        count = gpu_cfg.get("count", 0)
+        device_ids = gpu_cfg.get("device_ids", [])
+        if count > 0 and len(device_ids) == 0:
+            services_using_count.append(zkvm["proof_type"])
+
+    if len(services_using_count) > 1:
+        fail(
+            "Multiple ere services specify gpu.count without gpu.device_ids: [{0}]. ".format(
+                ", ".join(services_using_count)
+            )
+            + "Docker assigns GPUs from the same pool when gpu.count is used, so all services "
+            + "requesting GPUs this way will receive the same device(s). "
+            + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each service instead "
+            + '(e.g. gpu: {{device_ids: ["0"]}} and gpu: {{device_ids: ["1"]}}).'
+        )
 
 
 def parse_network_params(plan, input_args):
@@ -1012,19 +1145,18 @@ def parse_network_params(plan, input_args):
         vc_matrix = []
         if "vc" in input_args["participants_matrix"]:
             vc_matrix = input_args["participants_matrix"]["vc"]
+        count = input_args["participants_matrix"].get("count", 1)
 
         for el in el_matrix:
             for cl in cl_matrix:
-                participant = {k: v for k, v in el.items()}
-                for k, v in cl.items():
-                    participant[k] = v
-
-                participants.append(participant)
-
-        for index, participant in enumerate(participants):
-            for vc in vc_matrix:
-                for k, v in vc.items():
-                    participants[index][k] = v
+                for vc in vc_matrix if vc_matrix else [{}]:
+                    for _ in range(count):
+                        participant = {k: v for k, v in el.items()}
+                        for k, v in cl.items():
+                            participant[k] = v
+                        for k, v in vc.items():
+                            participant[k] = v
+                        participants.append(participant)
 
         if "participants" in input_args:
             input_args["participants"].extend(participants)
@@ -1061,6 +1193,7 @@ def parse_network_params(plan, input_args):
                         result["network_params"][target_key] * 3.0 / 2.0 + 0.5
                     )
                 # If both are set or both are 0, don't override
+
         elif attr == "participants":
             participants = []
             for participant in input_args["participants"]:
@@ -1165,8 +1298,11 @@ def parse_network_params(plan, input_args):
             fail("`use_remote_signer` requires `use_separate_vc`")
 
         if vc_type == "":
-            # Defaults to matching the chosen CL client
-            vc_type = cl_type
+            # Caplin doesn't include a built-in VC, default to lighthouse
+            if cl_type == constants.CL_TYPE.caplin:
+                vc_type = "lighthouse"
+            else:
+                vc_type = cl_type
             participant["vc_type"] = vc_type
 
         vc_image = participant["vc_image"]
@@ -1337,6 +1473,29 @@ def parse_network_params(plan, input_args):
             + " is not supported, it can only be mainnet or minimal"
         )
 
+    if result["network_params"]["builder_count"] > 0:
+        if result["network_params"]["gloas_fork_epoch"] != 0:
+            fail(
+                "builder_count is {0} but gloas_fork_epoch is {1}. Builders are only supported when gloas_fork_epoch is 0 (GLOAS at genesis).".format(
+                    result["network_params"]["builder_count"],
+                    result["network_params"]["gloas_fork_epoch"],
+                )
+            )
+        builder_mnemonic_entry = {
+            "mnemonic": constants.DEFAULT_MNEMONIC,
+            "start": actual_num_validators,
+            "count": result["network_params"]["builder_count"],
+            "wd_prefix": "0x03",
+            "wd_address": result["network_params"]["withdrawal_address"],
+        }
+        if result["network_params"]["builder_balance"] > 0:
+            builder_mnemonic_entry["balance"] = int(
+                result["network_params"]["builder_balance"] * 1000000000
+            )
+        result["network_params"]["additional_mnemonics"] = result["network_params"][
+            "additional_mnemonics"
+        ] + [builder_mnemonic_entry]
+
     return result
 
 
@@ -1438,7 +1597,7 @@ def default_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
-        "min_builder_withdrawability_delay": 4096,
+        "min_builder_withdrawability_delay": 64,
         "shard_committee_period": 256,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
@@ -1456,17 +1615,14 @@ def default_network_params():
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
         "shadowfork_block_height": "latest",
-        "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "max_request_blocks_deneb": 128,
-        "max_request_blob_sidecars_electra": 1152,
         "base_fee_update_fraction_electra": 5007716,
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
@@ -1500,7 +1656,8 @@ def default_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
-        "min_epochs_for_block_requests": 33024,
+        "builder_count": 0,
+        "builder_balance": 100,
     }
 
 
@@ -1522,7 +1679,7 @@ def default_minimal_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
-        "min_builder_withdrawability_delay": 8,
+        "min_builder_withdrawability_delay": 2,
         "shard_committee_period": 64,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
@@ -1540,17 +1697,14 @@ def default_minimal_network_params():
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip7441_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
         "shadowfork_block_height": "latest",
-        "data_column_sidecar_subnet_count": 128,
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
         "target_blobs_per_block_electra": 6,
         "max_request_blocks_deneb": 128,
-        "max_request_blob_sidecars_electra": 1152,
         "base_fee_update_fraction_electra": 5007716,
         "preset": "minimal",
         "additional_preloaded_contracts": {},
@@ -1584,7 +1738,8 @@ def default_minimal_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
-        "min_epochs_for_block_requests": 272,
+        "builder_count": 0,
+        "builder_balance": 100,
     }
 
 
@@ -1807,6 +1962,7 @@ def get_default_mev_params(mev_type, preset):
                 "frequency_get_header_ms": 100,
             },
         },
+        "commit_boost_config": "",
     }
 
 
@@ -2000,11 +2156,11 @@ def get_default_bootnodoor_params():
     }
 
 
-def get_default_ews_params():
+def get_default_zkboost_params():
     return {
-        "image": constants.DEFAULT_EWS_IMAGE,
-        "retain": 10,
-        "num_proofs": 1,
+        "image": constants.DEFAULT_ZKBOOST_IMAGE,
+        "instances": [{"name": "zkboost", "el_participant_index": 0}],
+        "zkvms": [],
         "env": {},
     }
 

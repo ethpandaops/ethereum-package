@@ -169,6 +169,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "remote_signer_min_mem",
             "remote_signer_max_mem",
         ],
+        "count": [],
     },
 }
 
@@ -248,17 +249,14 @@ SUBCATEGORY_PARAMS = {
         "fulu_fork_epoch",
         "gloas_fork_epoch",
         "heze_fork_epoch",
-        "eip7441_fork_epoch",
         "network_sync_base_url",
         "force_snapshot_sync",
         "shadowfork_block_height",
-        "data_column_sidecar_subnet_count",
         "samples_per_slot",
         "custody_requirement",
         "max_blobs_per_block_electra",
         "target_blobs_per_block_electra",
         "max_request_blocks_deneb",
-        "max_request_blob_sidecars_electra",
         "base_fee_update_fraction_electra",
         "preset",
         "additional_preloaded_contracts",
@@ -292,7 +290,8 @@ SUBCATEGORY_PARAMS = {
         "withdrawal_address",
         "validator_balance",
         "min_epochs_for_data_column_sidecars_requests",
-        "min_epochs_for_block_requests",
+        "builder_count",
+        "builder_balance",
     ],
     "blockscout_params": ["image", "verif_image", "frontend_image", "env"],
     "dora_params": [
@@ -384,6 +383,7 @@ SUBCATEGORY_PARAMS = {
         "run_multiple_relays",
         "helix_relay_image",
         "mev_boost_timing_games_params",
+        "commit_boost_config",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
@@ -447,10 +447,10 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "extra_args",
     ],
-    "ews_params": [
+    "zkboost_params": [
         "image",
-        "retain",
-        "num_proofs",
+        "instances",
+        "zkvms",
         "env",
     ],
     "buildoor_params": [
@@ -488,7 +488,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "rakoon",
     "slashoor",
     "spamoor",
-    "ews",
+    "zkboost",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
@@ -581,6 +581,9 @@ def sanity_check(plan, input_args):
                         PARTICIPANT_MATRIX_PARAMS["participants_matrix"].keys(),
                     )
                 )
+            elif sub_matrix_participant == "count":
+                if type(input_args["participants_matrix"]["count"]) != "int":
+                    fail("participants_matrix count must be an integer")
             else:
                 deep_validate_params(
                     plan,
