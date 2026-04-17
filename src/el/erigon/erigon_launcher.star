@@ -15,6 +15,7 @@ WS_RPC_PORT_NUM = 8545
 DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
+TORRENT_PORT_NUM = 42069
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
@@ -39,11 +40,11 @@ def launch(
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
+    extra_files_artifacts,
+    bootnodoor_enode=None,
+    el_binary_artifact=None,
 ):
-    log_level = input_parser.get_client_log_level_or_default(
-        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
-    )
-
     cl_client_name = service_name.split("-")[3]
 
     config = get_config(
@@ -53,40 +54,27 @@ def launch(
         service_name,
         existing_el_clients,
         cl_client_name,
-        log_level,
+        global_log_level,
         persistent,
         tolerations,
         node_selectors,
         port_publisher,
         participant_index,
+        network_params,
+        extra_files_artifacts,
+        bootnodoor_enode,
+        el_binary_artifact,
     )
 
-    service = plan.add_service(service_name, config)
-
-    enode, enr = el_admin_node_info.get_enode_enr_for_node(
-        plan, service_name, constants.WS_RPC_PORT_ID
+    service = plan.add_service(
+        service_name, config, force_update=participant.el_force_restart
     )
 
-    metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    erigon_metrics_info = node_metrics.new_node_metrics_info(
-        service_name, METRICS_PATH, metrics_url
-    )
-
-    http_url = "http://{0}:{1}".format(service.ip_address, WS_RPC_PORT_NUM)
-    ws_url = "ws://{0}:{1}".format(service.ip_address, WS_RPC_PORT_NUM)
-
-    return el_context.new_el_context(
-        client_name="erigon",
-        enode=enode,
-        ip_addr=service.ip_address,
-        rpc_port_num=WS_RPC_PORT_NUM,
-        ws_port_num=WS_RPC_PORT_NUM,
-        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
-        rpc_http_url=http_url,
-        ws_url=ws_url,
-        enr=enr,
-        service_name=service_name,
-        el_metrics_info=[erigon_metrics_info],
+    return get_el_context(
+        plan,
+        service_name,
+        service,
+        launcher,
     )
 
 
@@ -97,60 +85,80 @@ def get_config(
     service_name,
     existing_el_clients,
     cl_client_name,
-    log_level,
+    global_log_level,
     persistent,
     tolerations,
     node_selectors,
     port_publisher,
     participant_index,
+    network_params,
+    extra_files_artifacts,
+    bootnodoor_enode=None,
+    el_binary_artifact=None,
 ):
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     init_datadir_cmd_str = "erigon init --datadir={0} {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json",
     )
 
     public_ports = {}
-    discovery_port = DISCOVERY_PORT_NUM
+    public_ports_for_component = None
     if port_publisher.el_enabled:
         public_ports_for_component = shared_utils.get_public_ports_for_component(
             "el", port_publisher, participant_index
         )
-        public_ports, discovery_port = el_shared.get_general_el_public_port_specs(
+        public_ports = el_shared.get_general_el_public_port_specs(
             public_ports_for_component
         )
         additional_public_port_assignments = {
-            constants.WS_RPC_PORT_ID: public_ports_for_component[2],
-            constants.METRICS_PORT_ID: public_ports_for_component[3],
+            constants.WS_RPC_PORT_ID: public_ports_for_component[3],
+            constants.TORRENT_PORT_ID: public_ports_for_component[4],
         }
         public_ports.update(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
 
+    discovery_port_tcp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    discovery_port_udp = (
+        public_ports_for_component[0]
+        if public_ports_for_component
+        else DISCOVERY_PORT_NUM
+    )
+    torrent_port = (
+        public_ports_for_component[4]
+        if public_ports_for_component
+        else TORRENT_PORT_NUM
+    )
+
     used_port_assignments = {
-        constants.TCP_DISCOVERY_PORT_ID: discovery_port,
-        constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
+        constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
         constants.ENGINE_RPC_PORT_ID: ENGINE_RPC_PORT_NUM,
         constants.WS_RPC_PORT_ID: WS_RPC_PORT_NUM,
         constants.METRICS_PORT_ID: METRICS_PORT_NUM,
+        constants.TORRENT_PORT_ID: torrent_port,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         "erigon",
-        "{0}".format(
-            "--override.prague=" + str(launcher.prague_time)
-            if constants.NETWORK_NAME.shadowfork in launcher.network
-            else ""
-        ),
         "--networkid={0}".format(launcher.networkid),
         "--log.console.verbosity=" + log_level,
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        "--port={0}".format(discovery_port),
+        "--port={0}".format(discovery_port_tcp),
         "--http.api=eth,erigon,engine,web3,net,debug,trace,txpool,admin",
         "--http.vhosts=*",
         "--ws",
         "--allow-insecure-unlock",
-        "--nat=extip:" + port_publisher.nat_exit_ip,
+        "--nat=extip:" + port_publisher.el_nat_exit_ip,
         "--http",
         "--http.addr=0.0.0.0",
         "--http.corsdomain=*",
@@ -159,17 +167,22 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.vhosts=*",
+        "--externalcl",
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
-        "--db.size.limit={0}MB".format(
-            int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.besu + "_volume_size"
-            ],
-        ),
+        "--torrent.port={0}".format(torrent_port),
     ]
+
+    # Configure storage type - erigon defaults to archive, use --prune.mode=full for full node
+    if participant.el_storage_type == "full":
+        cmd.append("--prune.mode=full")
+
+    if network_params.gas_limit > 0:
+        cmd.append("--miner.gaslimit={0}".format(network_params.gas_limit))
+
+    if constants.NETWORK_NAME.shadowfork in network_params.network:  # shadowfork
+        cmd.append("--keep.stored.chain.config=true")
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
@@ -177,16 +190,41 @@ def get_config(
     }
 
     if persistent:
+        volume_size_key = (
+            "devnets" if "devnet" in network_params.network else network_params.network
+        )
+        cmd.append(
+            "--db.size.limit={0}MB".format(
+                int(participant.el_volume_size)
+                if int(participant.el_volume_size) > 0
+                else constants.VOLUME_SIZE[volume_size_key][
+                    constants.EL_TYPE.erigon + "_volume_size"
+                ],
+            )
+        )
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=int(participant.el_volume_size)
             if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
+            else constants.VOLUME_SIZE[volume_size_key][
                 constants.EL_TYPE.erigon + "_volume_size"
             ],
         )
 
-    if launcher.network == constants.NETWORK_NAME.kurtosis:
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.el_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
+    # Handle bootnode configuration with bootnodoor_enode override
+    if bootnodoor_enode != None:
+        cmd.append("--bootnodes=" + bootnodoor_enode)
+    elif (
+        network_params.network == constants.NETWORK_NAME.kurtosis
+        or constants.NETWORK_NAME.shadowfork in network_params.network
+    ):
         if len(existing_el_clients) > 0:
             cmd.append(
                 "--bootnodes="
@@ -198,8 +236,8 @@ def get_config(
                 )
             )
     elif (
-        launcher.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in launcher.network
+        network_params.network not in constants.PUBLIC_NETWORKS
+        and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
@@ -211,17 +249,40 @@ def get_config(
     if len(participant.el_extra_params) > 0:
         cmd.extend([param for param in participant.el_extra_params])
 
-    if launcher.network not in constants.PUBLIC_NETWORKS:
-        command_arg = [init_datadir_cmd_str, " ".join(cmd)]
-        command_arg_str = " && ".join(command_arg)
+    # Binary injection - mount custom binary directory if provided
+    if el_binary_artifact != None:
+        files["/opt/bin"] = el_binary_artifact.artifact
+
+    # Build command with optional binary copy
+    cmd_str = " ".join(cmd)
+    if network_params.network not in constants.PUBLIC_NETWORKS:
+        if el_binary_artifact != None:
+            command_arg_str = (
+                init_datadir_cmd_str
+                + " && cp /opt/bin/{0} /usr/local/bin/erigon && ".format(
+                    el_binary_artifact.filename
+                )
+                + cmd_str
+            )
+        else:
+            command_arg_str = init_datadir_cmd_str + " && " + cmd_str
     else:
-        command_arg_str = " ".join(cmd)
+        if el_binary_artifact != None:
+            command_arg_str = (
+                "cp /opt/bin/{0} /usr/local/bin/erigon && ".format(
+                    el_binary_artifact.filename
+                )
+                + cmd_str
+            )
+        else:
+            command_arg_str = cmd_str
 
     env_vars = participant.el_extra_env_vars
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.el_enabled,
         "cmd": [command_arg_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
@@ -232,7 +293,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_client_name,
-            extra_labels=participant.el_extra_labels,
+            extra_labels=participant.el_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
@@ -248,14 +310,49 @@ def get_config(
         config_args["min_memory"] = participant.el_min_mem
     if participant.el_max_mem > 0:
         config_args["max_memory"] = participant.el_max_mem
+    if len(participant.el_devices) > 0:
+        config_args["devices"] = participant.el_devices
     return ServiceConfig(**config_args)
 
 
-def new_erigon_launcher(el_cl_genesis_data, jwt_file, network, networkid, prague_time):
+# makes request to [service_name] for enode and enr and returns a full el_context
+def get_el_context(
+    plan,
+    service_name,
+    service,
+    launcher,
+):
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
+        plan, service_name, constants.WS_RPC_PORT_ID
+    )
+
+    metrics_url = "{0}:{1}".format(service.name, METRICS_PORT_NUM)
+    erigon_metrics_info = node_metrics.new_node_metrics_info(
+        service_name, METRICS_PATH, metrics_url
+    )
+
+    http_url = "http://{0}:{1}".format(service.name, WS_RPC_PORT_NUM)
+    ws_url = "ws://{0}:{1}".format(service.name, WS_RPC_PORT_NUM)
+
+    return el_context.new_el_context(
+        client_name="erigon",
+        enode=enode,
+        dns_name=service.name,
+        rpc_port_num=WS_RPC_PORT_NUM,
+        ws_port_num=WS_RPC_PORT_NUM,
+        engine_rpc_port_num=ENGINE_RPC_PORT_NUM,
+        rpc_http_url=http_url,
+        ws_url=ws_url,
+        enr=enr,
+        service_name=service_name,
+        el_metrics_info=[erigon_metrics_info],
+        ip_addr=service.ip_address,
+    )
+
+
+def new_erigon_launcher(el_cl_genesis_data, jwt_file, networkid):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
-        network=network,
         networkid=networkid,
-        prague_time=prague_time,
     )

@@ -151,7 +151,10 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
             keystore_stop_index - 1,
         )
         artifact_name = plan.store_service_files(
-            service_name, output_dirpath, name=artifact_name
+            service_name,
+            output_dirpath,
+            name=artifact_name,
+            depends_on=command_result["output"],
         )
 
         base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
@@ -190,7 +193,10 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
     )
 
     prysm_password_artifact_name = plan.store_service_files(
-        service_name, PRYSM_PASSWORD_FILEPATH_ON_GENERATOR, name="prysm-password"
+        service_name,
+        PRYSM_PASSWORD_FILEPATH_ON_GENERATOR,
+        name="prysm-password",
+        depends_on=write_prysm_password_file_cmd_result["output"],
     )
 
     result = keystores_result.new_generate_keystores_result(
@@ -203,7 +209,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
 
 
 # this is like above but runs things in parallel - for large networks that run on k8s or gigantic dockers
-def generate_valdiator_keystores_in_parallel(
+def generate_validator_keystores_in_parallel(
     plan, mnemonic, participants, docker_cache_params
 ):
     service_names = launch_prelaunch_data_generator_parallel(

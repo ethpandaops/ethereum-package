@@ -31,7 +31,7 @@ def launch(
             args_with_right_defaults.docker_cache_params,
         )
     else:
-        validator_data = validator_keystores.generate_valdiator_keystores_in_parallel(
+        validator_data = validator_keystores.generate_validator_keystores_in_parallel(
             plan,
             network_params.preregistered_validator_keys_mnemonic,
             args_with_right_defaults.participants,
@@ -41,11 +41,16 @@ def launch(
     plan.print(json.indent(json.encode(validator_data)))
 
     # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
-    final_genesis_timestamp = shared_utils.get_final_genesis_timestamp(
-        plan,
-        network_params.genesis_delay
-        + CL_GENESIS_DATA_GENERATION_TIME
-        + num_participants * CL_NODE_STARTUP_TIME,
+    # If genesis_time is specified (non-zero), use it; otherwise, derive it from genesis_delay
+    final_genesis_timestamp = (
+        str(network_params.genesis_time)
+        if network_params.genesis_time > 0
+        else shared_utils.get_final_genesis_timestamp(
+            plan,
+            network_params.genesis_delay
+            + CL_GENESIS_DATA_GENERATION_TIME
+            + num_participants * CL_NODE_STARTUP_TIME,
+        )
     )
 
     # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants

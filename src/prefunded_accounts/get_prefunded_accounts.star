@@ -1,11 +1,14 @@
 new_prefunded_account = import_module(
     "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
+shared_utils = import_module("../shared_utils/shared_utils.star")
 
 IMAGE = "wealdtech/ethereal:latest"
 
 
-def get_accounts(plan, mnemonic, num_of_keys=21):
+def get_accounts(
+    plan, mnemonic, num_of_keys=21, global_tolerations=[], global_node_selectors={}
+):
     PRE_FUNDED_ACCOUNTS = []
     plan.print("mnemonic: {0}".format(mnemonic))
     for current_key in range(num_of_keys):
@@ -21,6 +24,10 @@ def get_accounts(plan, mnemonic, num_of_keys=21):
             run="private_key=$(/app/ethereal hd keys --seed=\"{0}\" --path=\"m/44'/60'/0'/0/{1}\" | awk '/Private key/{{print substr($NF, 3)}}'); echo -n $private_key".format(
                 mnemonic, current_key
             ),
+            tolerations=shared_utils.get_tolerations(
+                global_tolerations=global_tolerations
+            ),
+            node_selectors=global_node_selectors,
         )
         eth_address = plan.run_sh(
             name=eth_address_service_name,
@@ -31,6 +38,10 @@ def get_accounts(plan, mnemonic, num_of_keys=21):
             run="eth_addr=$(/app/ethereal hd keys --seed=\"{0}\" --path=\"m/44'/60'/0'/0/{1}\" | awk '/Ethereum address/{{print $NF}}'); echo -n $eth_addr".format(
                 mnemonic, current_key
             ),
+            tolerations=shared_utils.get_tolerations(
+                global_tolerations=global_tolerations
+            ),
+            node_selectors=global_node_selectors,
         )
 
         PRE_FUNDED_ACCOUNTS.append(

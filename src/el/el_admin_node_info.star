@@ -14,7 +14,7 @@ def get_enode_enr_for_node(plan, service_name, port_id):
         field="extract.enode",
         assertion="!=",
         target_value="",
-        timeout="15m",
+        timeout="30m",
         service_name=service_name,
     )
     return (response["extract.enode"], response["extract.enr"])
@@ -35,7 +35,7 @@ def get_enode_for_node(plan, service_name, port_id):
         field="extract.enode",
         assertion="!=",
         target_value="",
-        timeout="15m",
+        timeout="30m",
         service_name=service_name,
     )
     return response["extract.enode"]

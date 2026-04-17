@@ -9,8 +9,8 @@ participants:
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: ethereumjs
-    cl_type: teku
+  - el_type: ethrex
+    cl_type: prysm
 network_params:
   altair_fork_epoch: 0
   bellatrix_fork_epoch: 0
@@ -18,4 +18,6 @@ network_params:
   deneb_fork_epoch: 0
   electra_fork_epoch: 1
   fulu_fork_epoch: 2
+  bpo_1_epoch: 3
+  gloas_fork_epoch: 4
   genesis_delay: 120

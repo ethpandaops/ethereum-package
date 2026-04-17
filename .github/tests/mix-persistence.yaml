@@ -11,6 +11,6 @@ participants:
     cl_type: lodestar
   - el_type: besu
     cl_type: lighthouse
-  - el_type: ethereumjs
+  - el_type: ethrex
     cl_type: nimbus
 persistent: true

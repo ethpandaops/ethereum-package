@@ -26,21 +26,39 @@ def launch(
     service_name,
     cl_context,
     node_selectors,
+    global_tolerations,
+    port_publisher,
+    global_other_index,
     docker_cache_params,
+    snooper_params,
 ):
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
     snooper_service_name = "{0}".format(service_name)
+
+    public_ports = shared_utils.get_other_public_port(
+        port_publisher,
+        SNOOPER_BEACON_RPC_PORT_ID,
+        global_other_index,
+        0,
+    )
 
     snooper_config = get_config(
         service_name,
         cl_context,
         node_selectors,
+        tolerations,
         docker_cache_params,
+        public_ports,
+        snooper_params,
     )
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
     snooper_http_port = snooper_service.ports[SNOOPER_BEACON_RPC_PORT_ID]
     return snooper_beacon_context.new_snooper_beacon_client_context(
-        snooper_service.ip_address, SNOOPER_BEACON_RPC_PORT_NUM
+        snooper_service.ip_address,
+        SNOOPER_BEACON_RPC_PORT_NUM,
+        snooper_service.name,
     )
 
 
@@ -48,8 +66,17 @@ def get_config(
     service_name,
     cl_context,
     node_selectors,
+    tolerations,
     docker_cache_params,
+    public_ports,
+    snooper_params,
 ):
+    image = (
+        snooper_params.image
+        if snooper_params.image
+        else constants.DEFAULT_SNOOPER_IMAGE
+    )
+
     beacon_rpc_port_num = "{0}".format(
         cl_context.beacon_http_url,
     )
@@ -58,17 +85,22 @@ def get_config(
         "-b=0.0.0.0",
         "-p={0}".format(SNOOPER_BEACON_RPC_PORT_NUM),
         "{0}".format(beacon_rpc_port_num),
-    ]
+    ] + snooper_params.extra_args
+
+    env_vars = (
+        dict(snooper_params.extra_env_vars) if snooper_params.extra_env_vars else {}
+    )
 
     return ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
-            docker_cache_params, constants.DEFAULT_SNOOPER_IMAGE
-        ),
+        image=shared_utils.docker_cache_image_calc(docker_cache_params, image),
         ports=SNOOPER_USED_PORTS,
+        public_ports=public_ports,
         cmd=cmd,
+        env_vars=env_vars,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
     )

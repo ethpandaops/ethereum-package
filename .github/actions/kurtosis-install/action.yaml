@@ -10,7 +10,7 @@ runs:
     - name: Install
       shell: bash
       run: |
-        echo "deb [trusted=yes] https://apt.fury.io/kurtosis-tech/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
+        echo "deb [trusted=yes] https://sdk.kurtosis.com/kurtosis-cli-release-artifacts/ /" | sudo tee /etc/apt/sources.list.d/kurtosis.list
         sudo apt update
         if [ "${{ inputs.version }}" = "latest" ]; then
           sudo apt install kurtosis-cli
@@ -19,3 +19,8 @@ runs:
         fi
         kurtosis analytics disable
         echo "$(dirname $(which kurtosis))" >> $GITHUB_PATH
+
+        # Get the installed version and save it as an environment variable
+        KURTOSIS_VERSION=$(kurtosis version | grep -o 'Version:[[:space:]]*[^[:space:]]*' | cut -d':' -f2 | tr -d ' ')
+        echo "KURTOSIS_VERSION=$KURTOSIS_VERSION" >> $GITHUB_ENV
+        echo "Installed Kurtosis version: $KURTOSIS_VERSION"

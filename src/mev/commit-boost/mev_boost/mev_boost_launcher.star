@@ -10,7 +10,7 @@ CB_CONFIG_FILES_ARTIFACT_NAME = "commit-boost-config"
 
 USED_PORTS = {
     "http": shared_utils.new_port_spec(
-        input_parser.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL
+        constants.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL
     )
 }
 
@@ -29,18 +29,30 @@ def launch(
     mev_params,
     relays,
     el_cl_genesis_data,
+    port_publisher,
+    index,
     global_node_selectors,
+    global_tolerations,
     final_genesis_timestamp,
 ):
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
     network = (
         network
         if network in constants.PUBLIC_NETWORKS
         else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/config.yaml"
     )
 
+    public_ports = shared_utils.get_mev_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
+
     image = mev_params.mev_boost_image
     template_data = new_config_template_data(
-        network, input_parser.MEV_BOOST_PORT, relays, final_genesis_timestamp
+        network, constants.MEV_BOOST_PORT, relays, final_genesis_timestamp
     )
 
     commit_boost_config_template = read_file(static_files.COMMIT_BOOST_CONFIG_FILEPATH)
@@ -68,12 +80,15 @@ def launch(
         config_files_artifact_name,
         el_cl_genesis_data,
         global_node_selectors,
+        tolerations,
+        public_ports,
+        index,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
 
     return mev_boost_context_module.new_mev_boost_context(
-        mev_boost_service.ip_address, input_parser.MEV_BOOST_PORT
+        mev_boost_service.name, constants.MEV_BOOST_PORT
     )
 
 
@@ -84,14 +99,17 @@ def get_config(
     config_file,
     el_cl_genesis_data,
     node_selectors,
+    tolerations,
+    public_ports,
+    participant_index,
 ):
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
+        public_ports=public_ports,
         cmd=[],
         env_vars={
             "CB_CONFIG": config_file_path,
-            "RUST_LOG": "debug",
         },
         files={
             CB_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_file,
@@ -102,6 +120,8 @@ def get_config(
         min_memory=MIN_MEMORY,
         max_memory=MAX_MEMORY,
         node_selectors=node_selectors,
+        tolerations=tolerations,
+        labels={constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
     )
 
 

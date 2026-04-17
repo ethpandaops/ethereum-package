@@ -1,5 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 prometheus = import_module("github.com/kurtosis-tech/prometheus-package/main.star")
+constants = import_module("../package_io/constants.star")
 
 EXECUTION_CLIENT_TYPE = "execution"
 BEACON_CLIENT_TYPE = "beacon"
@@ -19,22 +20,34 @@ def launch_prometheus(
     el_contexts,
     cl_contexts,
     vc_contexts,
+    network_params,
     remote_signer_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
     xatu_sentry_contexts,
     global_node_selectors,
     prometheus_params,
+    port_publisher,
+    index,
 ):
     metrics_jobs = get_metrics_jobs(
         el_contexts,
         cl_contexts,
         vc_contexts,
+        network_params,
         remote_signer_contexts,
         additional_metrics_jobs,
         ethereum_metrics_exporter_contexts,
         xatu_sentry_contexts,
     )
+
+    public_ports = shared_utils.get_additional_service_standard_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
+
     prometheus_url = prometheus.run(
         plan,
         metrics_jobs,
@@ -47,6 +60,7 @@ def launch_prometheus(
         storage_tsdb_retention_time=prometheus_params.storage_tsdb_retention_time,
         storage_tsdb_retention_size=prometheus_params.storage_tsdb_retention_size,
         image=prometheus_params.image,
+        public_ports=public_ports,
     )
 
     return prometheus_url
@@ -56,6 +70,7 @@ def get_metrics_jobs(
     el_contexts,
     cl_contexts,
     vc_contexts,
+    network_params,
     remote_signer_contexts,
     additional_metrics_jobs,
     ethereum_metrics_exporter_contexts,
@@ -187,6 +202,13 @@ def get_metrics_jobs(
                         "instance": context.pair_name,
                         "consensus_client": context.cl_name,
                         "execution_client": context.el_name,
+                        "network": network_params.network,
+                        "testnet": network_params.network,
+                        "chain_id": "{0}".format(
+                            network_params.network_id
+                            if network_params.network == constants.NETWORK_NAME.kurtosis
+                            else constants.NETWORK_ID[network_params.network]
+                        ),
                     },
                 )
             )

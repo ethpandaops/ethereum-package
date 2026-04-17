@@ -1,0 +1,12 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: teku
+additional_services:
+  - rakoon
+  - dora
+rakoon_params:
+  tx_type: "eip7702"
+  workers: 50
+  batch_size: 100

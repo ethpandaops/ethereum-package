@@ -7,11 +7,12 @@ PRYSM_BEACON_RPC_PORT = 4000
 
 
 def get_config(
+    plan,
     participant,
     el_cl_genesis_data,
     keymanager_file,
     image,
-    beacon_http_url,
+    beacon_http_urls,
     cl_context,
     el_context,
     remote_signer_context,
@@ -22,8 +23,11 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    network_params,
     port_publisher,
     vc_index,
+    extra_files_artifacts,
+    vc_binary_artifact=None,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
@@ -40,15 +44,18 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--beacon-rpc-provider=" + cl_context.beacon_grpc_url,
-        "--beacon-rest-api-provider=" + beacon_http_url,
+        "--beacon-rest-api-provider=" + ",".join(beacon_http_urls),
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
         "--monitoring-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
-        "--graffiti=" + full_name,
     ]
+
+    # Only add RPC provider if we're not using a blobber (blobber doesn't proxy RPC)
+    # Blobber uses port 5000, so check if that's in the URL
+    if ":5000" not in beacon_http_urls[0]:
+        cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
 
     if remote_signer_context == None:
         cmd.extend(
@@ -67,6 +74,9 @@ def get_config(
             ]
         )
 
+    if network_params.gas_limit > 0:
+        cmd.append("--suggested-gas-limit={0}".format(network_params.gas_limit))
+
     keymanager_api_cmd = [
         "--rpc",
         "--http-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
@@ -74,8 +84,13 @@ def get_config(
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
 
-    if cl_context.client_name != constants.CL_TYPE.prysm:
-        # Use Beacon API if a Prysm VC wants to connect to a non-Prysm BN
+    # Check if we're using a blobber by checking for port 5000
+    is_using_blobber = ":5000" in beacon_http_urls[0]
+
+    if cl_context.client_name != constants.CL_TYPE.prysm or is_using_blobber:
+        # Use Beacon API if:
+        # 1. Prysm VC wants to connect to a non-Prysm BN, OR
+        # 2. Blobber is enabled (since blobber only proxies REST, not RPC)
         cmd.append("--enable-beacon-rest-api")
 
     if len(participant.vc_extra_params) > 0:
@@ -113,10 +128,22 @@ def get_config(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.vc_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
+    # Binary injection - mount custom binary directory if provided
+    if vc_binary_artifact != None:
+        files["/opt/bin"] = vc_binary_artifact.artifact
+
     config_args = {
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.vc_enabled,
         "cmd": cmd,
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
@@ -125,12 +152,24 @@ def get_config(
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=participant.vc_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
+        "tty_enabled": True,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if vc_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/{0} /app/cmd/validator/validator && /app/cmd/validator/validator ".format(
+                vc_binary_artifact.filename
+            )
+            + " ".join(cmd)
+        ]
 
     if participant.vc_min_cpu > 0:
         config_args["min_cpu"] = participant.vc_min_cpu
@@ -140,4 +179,6 @@ def get_config(
         config_args["min_memory"] = participant.vc_min_mem
     if participant.vc_max_mem > 0:
         config_args["max_memory"] = participant.vc_max_mem
+    if len(participant.vc_devices) > 0:
+        config_args["devices"] = participant.vc_devices
     return ServiceConfig(**config_args)

@@ -48,10 +48,10 @@ def launch(
     port_publisher,
     remote_signer_index,
 ):
-    tolerations = input_parser.get_client_tolerations(
-        participant.remote_signer_tolerations,
-        participant.tolerations,
-        global_tolerations,
+    tolerations = shared_utils.get_tolerations(
+        specific_container_tolerations=participant.remote_signer_tolerations,
+        participant_tolerations=participant.tolerations,
+        global_tolerations=global_tolerations,
     )
 
     config = get_config(
@@ -70,14 +70,14 @@ def launch(
 
     remote_signer_http_port = remote_signer_service.ports[REMOTE_SIGNER_HTTP_PORT_ID]
     remote_signer_http_url = "http://{0}:{1}".format(
-        remote_signer_service.ip_address, remote_signer_http_port.number
+        remote_signer_service.name, remote_signer_http_port.number
     )
 
     remote_signer_metrics_port = remote_signer_service.ports[
         REMOTE_SIGNER_METRICS_PORT_ID
     ]
     validator_metrics_url = "{0}:{1}".format(
-        remote_signer_service.ip_address, remote_signer_metrics_port.number
+        remote_signer_service.name, remote_signer_metrics_port.number
     )
     remote_signer_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, METRICS_PATH, validator_metrics_url
@@ -156,6 +156,7 @@ def get_config(
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.remote_signer_enabled,
         "cmd": cmd,
         "files": files,
         "env_vars": participant.remote_signer_extra_env_vars,
@@ -164,7 +165,8 @@ def get_config(
             client_type=constants.CLIENT_TYPES.remote_signer,
             image=image,
             connected_client=vc_type,
-            extra_labels=participant.remote_signer_extra_labels,
+            extra_labels=participant.remote_signer_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(remote_signer_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,

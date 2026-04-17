@@ -9,5 +9,7 @@ participants:
     cl_type: prysm
   - el_type: reth
     cl_type: prysm
-  - el_type: ethereumjs
+  - el_type: ethrex
+    cl_type: prysm
+  - el_type: nimbus
     cl_type: prysm

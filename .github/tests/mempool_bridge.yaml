@@ -1,0 +1,24 @@
+participants:
+  - el_type: geth
+    cl_type: teku
+    count: 2
+
+additional_services:
+  - mempool_bridge
+  - dora
+
+network_params:
+  network: sepolia
+  shadowfork_block_height: 340000
+  withdrawal_type: "0x01"
+  validator_balance: 1000000
+  withdrawal_address: "0x4d1CB4eB7969f8806E2CaAc0cbbB71f88C8ec413"
+
+persistent: true
+
+mempool_bridge_params:
+  log_level: "debug"
+  mode: "rpc"
+  source_enodes:
+    - http://127.0.0.1:8545
+    - http://127.0.0.1:8546

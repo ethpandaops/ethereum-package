@@ -13,11 +13,12 @@ VERBOSITY_LEVELS = {
 
 
 def get_config(
+    plan,
     participant,
     el_cl_genesis_data,
     image,
     global_log_level,
-    beacon_http_url,
+    beacon_http_urls,
     cl_context,
     remote_signer_context,
     full_name,
@@ -25,6 +26,8 @@ def get_config(
     node_selectors,
     port_publisher,
     vc_index,
+    extra_files_artifacts,
+    vc_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
@@ -36,9 +39,8 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--remote-signer-url={0}".format(remote_signer_context.http_url),
-        "--beacon-node-urls=" + beacon_http_url,
+        "--beacon-node-urls=" + ",".join(beacon_http_urls),
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=" + full_name,
         "--metrics-address=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
         "--log-level=" + log_level,
@@ -65,10 +67,22 @@ def get_config(
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.vc_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
+    # Binary injection - mount custom binary directory if provided
+    if vc_binary_artifact != None:
+        files["/opt/bin"] = vc_binary_artifact.artifact
+
     config_args = {
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.vc_enabled,
         "cmd": cmd,
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
@@ -77,12 +91,23 @@ def get_config(
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=participant.vc_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if vc_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/{0} /usr/local/bin/vero && vero ".format(
+                vc_binary_artifact.filename
+            )
+            + " ".join(cmd)
+        ]
 
     if participant.vc_min_cpu > 0:
         config_args["min_cpu"] = participant.vc_min_cpu
@@ -92,4 +117,6 @@ def get_config(
         config_args["min_memory"] = participant.vc_min_mem
     if participant.vc_max_mem > 0:
         config_args["max_memory"] = participant.vc_max_mem
+    if len(participant.vc_devices) > 0:
+        config_args["devices"] = participant.vc_devices
     return ServiceConfig(**config_args)

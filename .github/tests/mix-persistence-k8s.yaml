@@ -11,6 +11,6 @@ participants:
     cl_type: lighthouse
   - el_type: reth
     cl_type: lodestar
-  - el_type: ethereumjs
+  - el_type: ethrex
     cl_type: nimbus
 persistent: true

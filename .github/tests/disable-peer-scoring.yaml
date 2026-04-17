@@ -9,6 +9,6 @@ participants:
     cl_type: nimbus
   - el_type: nethermind
     cl_type: prysm
-  - el_type: ethereumjs
+  - el_type: ethrex
     cl_type: teku
 disable_peer_scoring: true

@@ -1,0 +1,18 @@
+participants:
+  - supernode: true
+  - cl_type: lighthouse
+    vc_beacon_node_indices: []  # Connect to its own beacon node
+  - cl_type: lighthouse
+    vc_beacon_node_indices: [0, 1, 2]  # Connect to both beacon nodes (indices 0, 1 and its own beacon)
+  - cl_type: lodestar
+    vc_beacon_node_indices: [0, 1, 2]  # Connect to both beacon nodes (indices 0, 1 and 2)
+  - cl_type: prysm
+    vc_beacon_node_indices: [0, 1, 2]  # Connect to both beacon nodes (indices 0, 1 and 2)
+  - cl_type: teku
+    use_separate_vc: true
+    vc_beacon_node_indices: [0, 1, 2]  # Connect to both beacon nodes (indices 0, 1 and 2)
+  - cl_type: nimbus
+    use_separate_vc: true
+    vc_beacon_node_indices: [0, 1, 2]  # Connect to both beacon nodes (indices 0, 1 and 2)
+additional_services:
+  - dora

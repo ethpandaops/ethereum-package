@@ -4,11 +4,12 @@ vc_shared = import_module("./shared.star")
 
 
 def get_config(
+    plan,
     participant,
     el_cl_genesis_data,
     keymanager_file,
     image,
-    beacon_http_url,
+    beacon_http_urls,
     cl_context,
     el_context,
     remote_signer_context,
@@ -17,8 +18,11 @@ def get_config(
     tolerations,
     node_selectors,
     keymanager_enabled,
+    network_params,
     port_publisher,
     vc_index,
+    extra_files_artifacts,
+    vc_binary_artifact=None,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -37,16 +41,22 @@ def get_config(
         "--network="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
-        "--beacon-node-api-endpoint=" + beacon_http_url,
+        "--beacon-node-api-endpoint=" + ",".join(beacon_http_urls),
         "--validators-proposer-default-fee-recipient="
         + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--validators-graffiti=" + full_name,
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--metrics-enabled=true",
         "--metrics-host-allowlist=*",
         "--metrics-interface=0.0.0.0",
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
     ]
+
+    if network_params.gas_limit > 0:
+        cmd.append(
+            "--validators-builder-registration-default-gas-limit={0}".format(
+                network_params.gas_limit
+            )
+        )
 
     if remote_signer_context == None:
         cmd.extend(
@@ -111,10 +121,22 @@ def get_config(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
 
+    # Add extra mounts - automatically handle file uploads
+    processed_mounts = shared_utils.process_extra_mounts(
+        plan, participant.vc_extra_mounts, extra_files_artifacts
+    )
+    for mount_path, artifact in processed_mounts.items():
+        files[mount_path] = artifact
+
+    # Binary injection - mount custom binary directory if provided
+    if vc_binary_artifact != None:
+        files["/opt/bin"] = vc_binary_artifact.artifact
+
     config_args = {
         "image": image,
         "ports": ports,
         "public_ports": public_ports,
+        "publish_udp": port_publisher.vc_enabled,
         "cmd": cmd,
         "files": files,
         "env_vars": participant.vc_extra_env_vars,
@@ -123,12 +145,23 @@ def get_config(
             client_type=constants.CLIENT_TYPES.validator,
             image=image[-constants.MAX_LABEL_LENGTH :],
             connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels,
+            extra_labels=participant.vc_extra_labels
+            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
             supernode=participant.supernode,
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
+
+    # Binary injection - override entrypoint and cmd only when binary is provided
+    if vc_binary_artifact != None:
+        config_args["entrypoint"] = ["sh", "-c"]
+        config_args["cmd"] = [
+            "cp /opt/bin/{0} /opt/teku/bin/teku && /opt/teku/bin/teku ".format(
+                vc_binary_artifact.filename
+            )
+            + " ".join(cmd)
+        ]
 
     if participant.vc_min_cpu > 0:
         config_args["min_cpu"] = participant.vc_min_cpu
@@ -138,4 +171,6 @@ def get_config(
         config_args["min_memory"] = participant.vc_min_mem
     if participant.vc_max_mem > 0:
         config_args["max_memory"] = participant.vc_max_mem
+    if len(participant.vc_devices) > 0:
+        config_args["devices"] = participant.vc_devices
     return ServiceConfig(**config_args)

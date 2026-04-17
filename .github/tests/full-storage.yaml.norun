@@ -1,0 +1,8 @@
+# Test full mode for clients that default to archive (reth, erigon)
+participants:
+  - el_type: reth
+    el_storage_type: full
+    cl_type: lighthouse
+  - el_type: erigon
+    el_storage_type: full
+    cl_type: teku

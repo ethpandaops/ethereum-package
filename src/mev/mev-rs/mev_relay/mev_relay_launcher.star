@@ -29,8 +29,12 @@ def launch_mev_relay(
     network,
     beacon_uri,
     el_cl_genesis_data,
+    port_publisher,
+    index,
     global_node_selectors,
+    global_tolerations,
 ):
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     node_selectors = global_node_selectors
     image = mev_params.mev_relay_image
     network = (
@@ -39,6 +43,12 @@ def launch_mev_relay(
         else constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
     )
 
+    public_ports = shared_utils.get_mev_public_port(
+        port_publisher,
+        constants.HTTP_PORT_ID,
+        index,
+        0,
+    )
     relay_template_data = new_relay_config_template_data(
         network,
         MEV_RELAY_ENDPOINT_PORT,
@@ -81,11 +91,13 @@ def launch_mev_relay(
                 constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: el_cl_genesis_data,
             },
             ports=USED_PORTS,
+            public_ports=public_ports,
             min_cpu=MIN_CPU,
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
             max_memory=MAX_MEMORY,
             node_selectors=node_selectors,
+            tolerations=tolerations,
             env_vars={"RUST_BACKTRACE": "1"},
         ),
     )
@@ -93,10 +105,10 @@ def launch_mev_relay(
     return (
         "http://{0}@{1}:{2}".format(
             constants.DEFAULT_MEV_PUBKEY,
-            mev_relay_service.ip_address,
+            mev_relay_service.name,
             MEV_RELAY_ENDPOINT_PORT,
         ),
-        mev_relay_service.ip_address,
+        mev_relay_service.name,
         MEV_RELAY_ENDPOINT_PORT,
     )
 

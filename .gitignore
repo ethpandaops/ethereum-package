@@ -87,3 +87,10 @@ yarn-error.log
 
 # enclave dumps
 dump/
+
+# binary files
+binary
+binaries
+
+# Claude file
+CLAUDE.md
