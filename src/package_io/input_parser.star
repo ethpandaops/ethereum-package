@@ -875,6 +875,7 @@ def input_parser(plan, input_args):
             launch_adminer=result["mev_params"]["launch_adminer"],
             run_multiple_relays=result["mev_params"]["run_multiple_relays"],
             helix_relay_image=result["mev_params"]["helix_relay_image"],
+            commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
         )
         if result["mev_params"]
         else None,
@@ -1946,6 +1947,7 @@ def get_default_mev_params(mev_type, preset):
         "launch_adminer": launch_adminer,
         "run_multiple_relays": False,
         "helix_relay_image": constants.DEFAULT_HELIX_RELAY_IMAGE,
+        "commit_boost_config": "",
     }
 
 

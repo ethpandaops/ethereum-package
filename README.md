@@ -1413,6 +1413,24 @@ mev_params:
   run_multiple_relays: false
   # The image to use for helix relay (used when run_multiple_relays is true or mev_type is helix)
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  # Inline Commit-Boost config template. When set, replaces the default auto-generated
+  # config. Template variables {{ .Timestamp }}, {{ .Network }}, {{ .Port }}, {{ .Relays }}
+  # are rendered at enclave creation. Only used when mev_type is "commit-boost".
+  # Example:
+  #   commit_boost_config: |
+  #     chain = { genesis_time_secs = {{ .Timestamp }}, path = "{{ .Network }}" }
+  #     [pbs]
+  #     host = "0.0.0.0"
+  #     port = {{ .Port }}
+  #     skip_sigverify = true
+  #     {{ range $index, $relay := .Relays }}
+  #     [[relays]]
+  #     id = "mev_relay_{{$index}}"
+  #     url = "{{ $relay }}"
+  #     {{- end }}
+  #     [logs.stdout]
+  #     level = "debug"
+  commit_boost_config: ""
 
 # Parameters for the buildoor builder+relay service (used when mev_type is "buildoor")
 buildoor_params:

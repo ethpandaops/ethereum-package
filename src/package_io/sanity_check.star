@@ -382,6 +382,7 @@ SUBCATEGORY_PARAMS = {
         "launch_adminer",
         "run_multiple_relays",
         "helix_relay_image",
+        "commit_boost_config",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
