@@ -15,6 +15,9 @@ Run Ethereum consensus/execution client devnets via [kurtosis](https://github.co
 ## Quick Start
 
 ```bash
+# ALWAYS start grafloki first — enables Loki log collection for debugging
+kurtosis loki start
+
 # Write a network_params.yaml, then:
 kurtosis run github.com/ethpandaops/ethereum-package \
   --enclave <name> \
