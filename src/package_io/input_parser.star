@@ -735,6 +735,9 @@ def input_parser(plan, input_args):
                 "max_per_epoch_activation_churn_limit"
             ],
             churn_limit_quotient=result["network_params"]["churn_limit_quotient"],
+            confirmation_byzantine_threshold=result["network_params"][
+                "confirmation_byzantine_threshold"
+            ],
             ejection_balance=result["network_params"]["ejection_balance"],
             eth1_follow_distance=result["network_params"]["eth1_follow_distance"],
             altair_fork_epoch=result["network_params"]["altair_fork_epoch"],
@@ -874,6 +877,7 @@ def input_parser(plan, input_args):
             launch_adminer=result["mev_params"]["launch_adminer"],
             run_multiple_relays=result["mev_params"]["run_multiple_relays"],
             helix_relay_image=result["mev_params"]["helix_relay_image"],
+            commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
         )
         if result["mev_params"]
         else None,
@@ -1592,6 +1596,7 @@ def default_network_params():
         "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 8,
         "churn_limit_quotient": 65536,
+        "confirmation_byzantine_threshold": 25,
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
@@ -1674,6 +1679,7 @@ def default_minimal_network_params():
         "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 4,
         "churn_limit_quotient": 32,
+        "confirmation_byzantine_threshold": 25,
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
@@ -1948,6 +1954,7 @@ def get_default_mev_params(mev_type, preset):
         "launch_adminer": launch_adminer,
         "run_multiple_relays": False,
         "helix_relay_image": constants.DEFAULT_HELIX_RELAY_IMAGE,
+        "commit_boost_config": "",
     }
 
 

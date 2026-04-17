@@ -151,32 +151,6 @@ def get_config(
 
     IMAGE_NAME = dora_params.image
     env_vars = dora_params.env
-    default_dora_image = (
-        docker_cache_params.url
-        + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
-        + constants.DEFAULT_DORA_IMAGE
-    )
-    if dora_params.image == default_dora_image:
-        if network_params.gloas_fork_epoch < constants.FAR_FUTURE_EPOCH:
-            IMAGE_NAME = (
-                docker_cache_params.url
-                + (
-                    docker_cache_params.dockerhub_prefix
-                    if docker_cache_params.enabled
-                    else ""
-                )
-                + "ethpandaops/dora:gloas-support"
-            )
-        if network_params.heze_fork_epoch < constants.FAR_FUTURE_EPOCH:
-            IMAGE_NAME = (
-                docker_cache_params.url
-                + (
-                    docker_cache_params.dockerhub_prefix
-                    if docker_cache_params.enabled
-                    else ""
-                )
-                + "ethpandaops/dora:heze-support"
-            )
 
     return ServiceConfig(
         image=IMAGE_NAME,

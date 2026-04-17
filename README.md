@@ -740,6 +740,10 @@ network_params:
   # Defaults to 65536
   churn_limit_quotient: 65536
 
+  # Byzantine threshold (in percent) used by the confirmation rule
+  # Defaults to 25
+  confirmation_byzantine_threshold: 25
+
   # Ejection balance
   # Defaults to 16ETH
   # 16000000000 gwei
@@ -1413,6 +1417,24 @@ mev_params:
   run_multiple_relays: false
   # The image to use for helix relay (used when run_multiple_relays is true or mev_type is helix)
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  # Inline Commit-Boost config template. When set, replaces the default auto-generated
+  # config. Template variables {{ .Timestamp }}, {{ .Network }}, {{ .Port }}, {{ .Relays }}
+  # are rendered at enclave creation. Only used when mev_type is "commit-boost".
+  # Example:
+  #   commit_boost_config: |
+  #     chain = { genesis_time_secs = {{ .Timestamp }}, path = "{{ .Network }}" }
+  #     [pbs]
+  #     host = "0.0.0.0"
+  #     port = {{ .Port }}
+  #     skip_sigverify = true
+  #     {{ range $index, $relay := .Relays }}
+  #     [[relays]]
+  #     id = "mev_relay_{{$index}}"
+  #     url = "{{ $relay }}"
+  #     {{- end }}
+  #     [logs.stdout]
+  #     level = "debug"
+  commit_boost_config: ""
 
 # Parameters for the buildoor builder+relay service (used when mev_type is "buildoor")
 buildoor_params:
@@ -1551,7 +1573,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.3.3
+  image: ethpandaops/ethereum-genesis-generator:5.3.6
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 

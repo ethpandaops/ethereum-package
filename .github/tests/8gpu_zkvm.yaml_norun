@@ -50,6 +50,7 @@ additional_services:
   - dora
   - prometheus
   - grafana
+  - tempo
 
 zkboost_params:
   image: ghcr.io/eth-act/zkboost/zkboost:0.5.0

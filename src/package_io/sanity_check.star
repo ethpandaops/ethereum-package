@@ -228,6 +228,7 @@ SUBCATEGORY_PARAMS = {
         "genesis_gaslimit",
         "max_per_epoch_activation_churn_limit",
         "churn_limit_quotient",
+        "confirmation_byzantine_threshold",
         "ejection_balance",
         "eth1_follow_distance",
         "min_validator_withdrawability_delay",
@@ -382,6 +383,7 @@ SUBCATEGORY_PARAMS = {
         "launch_adminer",
         "run_multiple_relays",
         "helix_relay_image",
+        "commit_boost_config",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
