@@ -228,6 +228,7 @@ SUBCATEGORY_PARAMS = {
         "genesis_gaslimit",
         "max_per_epoch_activation_churn_limit",
         "churn_limit_quotient",
+        "confirmation_byzantine_threshold",
         "ejection_balance",
         "eth1_follow_distance",
         "min_validator_withdrawability_delay",
