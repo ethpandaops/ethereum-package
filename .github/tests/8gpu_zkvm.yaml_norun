@@ -1,0 +1,89 @@
+# EIP-8025 testnet with zkboost backed by two GPU ZisK provers across 8 GPUs.
+#
+#
+# Run with:
+#   kurtosis run --enclave eip8025-zkboost-8gpu \
+#       . \
+#       --args-file .github/tests/8gpu_zkvm.yaml_norun
+#
+# Prerequisites:
+#   - NVIDIA GPUs with drivers installed (8 GPUs: 4 per prover type)
+#   - NVIDIA Container Toolkit configured for Docker
+
+participants:
+  - cl_type: lighthouse
+    cl_image: ghcr.io/eth-act/lighthouse/lighthouse
+    el_type: reth
+    el_image: ghcr.io/paradigmxyz/reth
+    supernode: true
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    count: 2
+  - cl_type: lighthouse
+    cl_image: ghcr.io/eth-act/lighthouse/lighthouse
+    el_type: reth
+    el_image: ghcr.io/paradigmxyz/reth
+    supernode: false
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    count: 2
+
+network_params:
+  fulu_fork_epoch: 0
+  seconds_per_slot: 6
+
+snooper_enabled: false
+global_log_level: debug
+
+additional_services:
+  - zkboost
+  - dora
+  - prometheus
+  - grafana
+
+zkboost_params:
+  image: ghcr.io/eth-act/zkboost/zkboost:0.5.0
+  env:
+    RUST_LOG: info,zkboost=debug
+  instances:
+    - name: zkboost-1
+      el_participant_index: 0
+  zkvms:
+    - kind: ere
+      proof_type: reth-zisk
+      image: ghcr.io/eth-act/ere/ere-server-zisk:0.6.1-cuda
+      program_url: https://github.com/eth-act/ere-guests/releases/download/v0.7.0/stateless-validator-reth-zisk
+      port: 3000
+      gpu:
+        device_ids: ["0", "1", "2", "3"]
+        shm_size: 32768
+        ulimits:
+          memlock: -1
+      env:
+        RUST_LOG: info
+        ERE_ZISK_SETUP_ON_INIT: "1"
+        ERE_ZISK_START_SERVER_TIMEOUT_SEC: "600"
+    - kind: ere
+      proof_type: ethrex-zisk
+      image: ghcr.io/eth-act/ere/ere-server-zisk:0.6.1-cuda
+      program_url: https://github.com/eth-act/ere-guests/releases/download/v0.7.0/stateless-validator-ethrex-zisk
+      port: 3000
+      gpu:
+        device_ids: ["4", "5", "6", "7"]
+        shm_size: 32768
+        ulimits:
+          memlock: -1
+      env:
+        RUST_LOG: info
+        ERE_ZISK_SETUP_ON_INIT: "1"
+        ERE_ZISK_START_SERVER_TIMEOUT_SEC: "600"

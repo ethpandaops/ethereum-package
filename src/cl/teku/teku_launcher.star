@@ -29,6 +29,7 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.info: "INFO",
     constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
     constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.custom: "CUSTOM",
 }
 
 
@@ -189,8 +190,6 @@ def get_beacon_config(
 
     cmd = [
         TEKU_ENTRYPOINT_COMMAND,
-        "--logging=" + log_level,
-        "--log-destination=CONSOLE",
         "--network={0}".format(
             network_params.network
             if network_params.network in constants.PUBLIC_NETWORKS
@@ -225,6 +224,13 @@ def get_beacon_config(
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
+
+    if log_level == "CUSTOM":
+        cmd.append("--log-destination=CUSTOM")
+    else:
+        cmd.append("--logging=" + log_level)
+        cmd.append("--log-destination=CONSOLE")
+
     validator_default_cmd = [
         "--validator-keys={0}:{1}".format(
             validator_keys_dirpath,

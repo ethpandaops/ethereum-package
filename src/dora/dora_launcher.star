@@ -167,7 +167,7 @@ def get_config(
                 )
                 + "ethpandaops/dora:gloas-support"
             )
-        if network_params.eip7805_fork_epoch < constants.FAR_FUTURE_EPOCH:
+        if network_params.heze_fork_epoch < constants.FAR_FUTURE_EPOCH:
             IMAGE_NAME = (
                 docker_cache_params.url
                 + (
@@ -175,7 +175,7 @@ def get_config(
                     if docker_cache_params.enabled
                     else ""
                 )
-                + "ethpandaops/dora:eip7805-support"
+                + "ethpandaops/dora:heze-support"
             )
 
     return ServiceConfig(

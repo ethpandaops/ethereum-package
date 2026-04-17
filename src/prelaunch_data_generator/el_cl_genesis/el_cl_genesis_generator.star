@@ -178,8 +178,7 @@ def new_env_file_for_el_cl_genesis_data(
         "ElectraForkEpoch": "{0}".format(network_params.electra_fork_epoch),
         "FuluForkEpoch": "{0}".format(network_params.fulu_fork_epoch),
         "GloasForkEpoch": "{0}".format(network_params.gloas_fork_epoch),
-        "Eip7805ForkEpoch": "{0}".format(network_params.eip7805_fork_epoch),
-        "Eip7441ForkEpoch": "{0}".format(network_params.eip7441_fork_epoch),
+        "HezeForkEpoch": "{0}".format(network_params.heze_fork_epoch),
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
         "BellatrixForkVersion": constants.BELLATRIX_FORK_VERSION,
@@ -188,8 +187,7 @@ def new_env_file_for_el_cl_genesis_data(
         "ElectraForkVersion": constants.ELECTRA_FORK_VERSION,
         "FuluForkVersion": constants.FULU_FORK_VERSION,
         "GloasForkVersion": constants.GLOAS_FORK_VERSION,
-        "Eip7805ForkVersion": constants.EIP7805_FORK_VERSION,
-        "Eip7441ForkVersion": constants.EIP7441_FORK_VERSION,
+        "HezeForkVersion": constants.HEZE_FORK_VERSION,
         "ShadowForkFile": shadowfork_file,
         "AdditionalValidatorMnemonics": get_additional_mnemonics_json(network_params),
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
@@ -203,13 +201,11 @@ def new_env_file_for_el_cl_genesis_data(
         "ViewFreezeCutoffBps": network_params.view_freeze_cutoff_bps,
         "InclusionListSubmissionDueBps": network_params.inclusion_list_submission_due_bps,
         "ProposerInclusionListCutoffBps": network_params.proposer_inclusion_list_cutoff_bps,
-        "DataColumnSidecarSubnetCount": network_params.data_column_sidecar_subnet_count,
         "SamplesPerSlot": network_params.samples_per_slot,
         "CustodyRequirement": network_params.custody_requirement,
         "MaxBlobsPerBlockElectra": network_params.max_blobs_per_block_electra,
         "TargetBlobsPerBlockElectra": network_params.target_blobs_per_block_electra,
         "MaxRequestBlocksDeneb": network_params.max_request_blocks_deneb,
-        "MaxRequestBlobSidecarsElectra": network_params.max_request_blob_sidecars_electra,
         "BaseFeeUpdateFractionElectra": network_params.base_fee_update_fraction_electra,
         "Preset": network_params.preset,
         "AdditionalPreloadedContractsFile": GENESIS_VALUES_PATH
@@ -240,8 +236,11 @@ def new_env_file_for_el_cl_genesis_data(
         "WithdrawalType": "{0}".format(network_params.withdrawal_type),
         "WithdrawalAddress": network_params.withdrawal_address,
         "ValidatorBalance": int(network_params.validator_balance * 1000000000),
+        "BuilderCount": network_params.builder_count,
+        "BuilderBalance": int(network_params.builder_balance * 1000000000)
+        if network_params.builder_balance > 0
+        else 0,
         "MinEpochsForDataColumnSidecarsRequests": network_params.min_epochs_for_data_column_sidecars_requests,
-        "MinEpochsForBlockRequests": network_params.min_epochs_for_block_requests,
         "ExtraEnvVars": extra_env_safe,
     }
 
