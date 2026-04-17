@@ -142,6 +142,9 @@ MEMPOOL_BRIDGE_CONFIG_TEMPLATE_FILEPATH = (
 )
 HELIX_RELAY_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/mev/helix/config.yaml.tmpl"
 
+EWS_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/ews-config/config.toml.tmpl"
+FLASHBOTS_MEV_BOOST_CONFIG_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/mev/flashbots/mev_boost/config.yaml.tmpl"
 ZKBOOST_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/zkboost-config/config.toml.tmpl"
 )
