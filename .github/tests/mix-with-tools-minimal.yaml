@@ -13,6 +13,10 @@ participants:
     cl_type: grandine
   - el_type: ethrex
     cl_type: lodestar
+  - el_type: erigon
+    cl_type: caplin
+    use_separate_vc: true
+    vc_type: lighthouse
 network_params:
   preset: minimal
 additional_services:
