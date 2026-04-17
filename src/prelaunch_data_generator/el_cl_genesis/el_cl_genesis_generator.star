@@ -152,6 +152,7 @@ def new_env_file_for_el_cl_genesis_data(
         "GenesisGasLimit": network_params.genesis_gaslimit,
         "MaxPerEpochActivationChurnLimit": network_params.max_per_epoch_activation_churn_limit,
         "ChurnLimitQuotient": network_params.churn_limit_quotient,
+        "ConfirmationByzantineThreshold": network_params.confirmation_byzantine_threshold,
         "EjectionBalance": network_params.ejection_balance,
         "Eth1FollowDistance": network_params.eth1_follow_distance,
         "AltairForkEpoch": "{0}".format(network_params.altair_fork_epoch),

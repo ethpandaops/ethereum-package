@@ -740,6 +740,10 @@ network_params:
   # Defaults to 65536
   churn_limit_quotient: 65536
 
+  # Byzantine threshold (in percent) used by the confirmation rule
+  # Defaults to 25
+  confirmation_byzantine_threshold: 25
+
   # Ejection balance
   # Defaults to 16ETH
   # 16000000000 gwei
@@ -1569,7 +1573,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.3.5
+  image: ethpandaops/ethereum-genesis-generator:5.3.6
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
