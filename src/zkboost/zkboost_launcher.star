@@ -22,6 +22,12 @@ USED_PORTS = {
     ),
 }
 
+ERE_SERVER_HTTP_PORT_ID = "http"
+ERE_SERVER_DEFAULT_PORT = 3000
+ERE_SERVER_PROGRAMS_DIRPATH = "/programs"
+ERE_SERVER_READY_TIMEOUT = "600s"
+ERE_SERVER_READY_INTERVAL = "10s"
+
 
 def launch_zkboost(
     plan,
@@ -36,6 +42,19 @@ def launch_zkboost(
     tempo_otlp_grpc_url=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
+    # Launch ere-server services once — shared across all zkboost instances.
+    # Each `ere` zkvm entry results in a single long-lived service; all zkboost
+    # instances reference it as an endpoint.
+    ere_server_endpoints = {}
+    for zkvm in zkboost_params.zkvms:
+        if zkvm["kind"] == "ere":
+            proof_type = zkvm["proof_type"]
+            if proof_type not in ere_server_endpoints:
+                endpoint = _launch_ere_server(
+                    plan, zkvm, global_node_selectors, tolerations
+                )
+                ere_server_endpoints[proof_type] = endpoint
 
     metrics_jobs = []
     for instance_index, instance in enumerate(zkboost_params.instances):
@@ -62,7 +81,12 @@ def launch_zkboost(
                 "ProofTimeoutSecs": zkvm.get("proof_timeout_secs", 12),
             }
             if zkvm["kind"] == "ere":
-                fail("TODO: Ere zkvm kind is not yet supported")
+                entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
+            elif zkvm["kind"] == "external":
+                entry[
+                    "Kind"
+                ] = "ere"  # zkboost config kind for any external prover connection
+                entry["Endpoint"] = zkvm["endpoint"]
             elif zkvm["kind"] == "mock":
                 mock_proving_time = zkvm.get(
                     "mock_proving_time", {"kind": "constant", "ms": 6000}
@@ -188,3 +212,84 @@ def get_config(
             target_value=200,
         ),
     )
+
+
+def _launch_ere_server(plan, zkvm, global_node_selectors, tolerations):
+    """Launch an ere-server-zisk GPU prover service and return its HTTP endpoint.
+
+    If 'program_url' is specified, the program binary is downloaded via a
+    preparation task and mounted into the service at ERE_SERVER_PROGRAMS_DIRPATH.
+    """
+    proof_type = zkvm["proof_type"]
+    service_name = "ere-server-{0}".format(proof_type)
+    port = zkvm.get("port", ERE_SERVER_DEFAULT_PORT)
+
+    # Download program binary if a URL is provided
+    files = {}
+    if "program_url" in zkvm:
+        program_url = zkvm["program_url"]
+        binary_name = program_url.split("/")[-1]
+        artifact_name = service_name + "-program"
+        plan.run_sh(
+            name="download-" + service_name,
+            description="Downloading {0} program binary".format(proof_type),
+            run="mkdir -p /programs && wget -q -O /programs/{0} {1} && chmod +x /programs/{0}".format(
+                binary_name, program_url
+            ),
+            image="alpine:latest",
+            store=[StoreSpec(src="/programs", name=artifact_name)],
+        )
+        files[ERE_SERVER_PROGRAMS_DIRPATH] = artifact_name
+        program_path = "{0}/{1}".format(ERE_SERVER_PROGRAMS_DIRPATH, binary_name)
+    else:
+        program_path = zkvm.get("program_path", "")
+        if program_path == "":
+            fail(
+                "ere zkvm '{0}' requires either 'program_url' or 'program_path'".format(
+                    proof_type
+                )
+            )
+
+    used_ports = {
+        ERE_SERVER_HTTP_PORT_ID: shared_utils.new_port_spec(
+            port,
+            shared_utils.TCP_PROTOCOL,
+            shared_utils.HTTP_APPLICATION_PROTOCOL,
+            wait=None,
+        )
+    }
+
+    env_vars = dict(zkvm.get("env", {}))
+
+    plan.add_service(
+        name=service_name,
+        config=ServiceConfig(
+            image=zkvm["image"],
+            ports=used_ports,
+            files=files,
+            cmd=["--port", "{0}".format(port), "--program-path", program_path, "gpu"],
+            env_vars=env_vars,
+            gpu=GpuConfig(
+                count=zkvm.get("gpu", {}).get("count", 0),
+                device_ids=zkvm.get("gpu", {}).get("device_ids", []),
+                shm_size=zkvm.get("gpu", {}).get("shm_size", 0),
+                ulimits=zkvm.get("gpu", {}).get("ulimits", {}),
+                driver=zkvm.get("gpu", {}).get("driver", "nvidia"),
+            ),
+            node_selectors=global_node_selectors,
+            tolerations=tolerations,
+            ready_conditions=ReadyCondition(
+                recipe=GetHttpRequestRecipe(
+                    port_id=ERE_SERVER_HTTP_PORT_ID,
+                    endpoint="/health",
+                ),
+                field="code",
+                assertion="==",
+                target_value=200,
+                timeout=ERE_SERVER_READY_TIMEOUT,
+                interval=ERE_SERVER_READY_INTERVAL,
+            ),
+        ),
+    )
+
+    return "http://{0}:{1}".format(service_name, port)
