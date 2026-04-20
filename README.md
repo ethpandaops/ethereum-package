@@ -1103,9 +1103,8 @@ zkboost_params:
     - name: zkboost
       el_participant_index: 0
   # List of zkVM backend configurations.
-  # If empty or not set, a default mock zkvm is auto-configured:
-  #   { kind: mock, proof_type: ethrex-zisk, mock_proving_time: { kind: constant, ms: 6000 }, mock_proof_size: 131072 }
-  # Each entry must have a unique proof_type.
+  # If empty or not set, the default shown below (a mock reth-zisk zkvm) is
+  # auto-configured. Each entry must have a unique proof_type.
   #
   # Common fields for all entries:
   #   kind (required): the zkVM backend type
@@ -1173,9 +1172,14 @@ zkboost_params:
   # - kind: external
   #   proof_type: reth-zisk
   #   endpoint: "http://my-prover:3000"
-  zkvms: []
-  # Defaults RUST_LOG to "info" if not set.
-  env: {}
+  zkvms:
+    - kind: mock
+      proof_type: reth-zisk
+      mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
+      mock_proof_size: 1024
+  # RUST_LOG defaults to "info,zkboost=debug" if not set; other vars pass through unchanged.
+  env:
+    RUST_LOG: "info,zkboost=debug"
 
 # Configuration place for tempo tracing backend
 tempo_params:

@@ -478,18 +478,22 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
-        # Inject default mock zkvm if none configured
+        # Inject default mock zkvm if none configured.
         if len(result["zkboost_params"]["zkvms"]) == 0:
             result["zkboost_params"]["zkvms"] = [
                 {
                     "kind": "mock",
-                    "proof_type": "ethrex-zisk",
-                    "mock_proving_time": {"kind": "constant", "ms": 6000},
+                    "proof_type": "reth-zisk",
+                    "mock_proving_time": {
+                        "kind": "random",
+                        "min_ms": 2000,
+                        "max_ms": 8000,
+                    },
                     "mock_proof_size": 128 << 10,
                 },
             ]
         if "RUST_LOG" not in result["zkboost_params"]["env"]:
-            result["zkboost_params"]["env"]["RUST_LOG"] = "info"
+            result["zkboost_params"]["env"]["RUST_LOG"] = "info,zkboost=debug"
 
         has_non_dummy_el = False
         for participant in result["participants"]:
