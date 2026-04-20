@@ -2023,7 +2023,7 @@ def get_default_tempo_params():
         "max_cpu": 1000,
         "min_mem": 128,
         "max_mem": 2048,
-        "image": "grafana/tempo:latest",
+        "image": "grafana/tempo:2.10.4",
     }
 
 
