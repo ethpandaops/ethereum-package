@@ -321,7 +321,8 @@ def run(plan, args={}):
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     for participant in all_participants:
-        all_el_contexts.append(participant.el_context)
+        if participant.el_context != None:
+            all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
         all_vc_contexts.append(participant.vc_context)
         all_remote_signer_contexts.append(participant.remote_signer_context)
