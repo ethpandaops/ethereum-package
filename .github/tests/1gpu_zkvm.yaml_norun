@@ -35,7 +35,9 @@ participants:
     count: 1
 
 network_params:
+  preset: minimal
   seconds_per_slot: 30
+  prefunded_accounts: '{"0xb9e79D19f651a941757b35830232E7EFC77E1c79": {"balance": "100000ETH"}}'
 
 additional_services:
   - zkboost
@@ -43,6 +45,27 @@ additional_services:
   - prometheus
   - grafana
   - tempo
+  - spamoor
+
+mev_type: flashbots
+mev_params:
+  mev_builder_subsidy: 1
+  mev_builder_cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+  mev_builder_cl_extra_params:
+    - --proof-engine-endpoint=http://zkboost-1:3000
+    - --proof-types=6
+
+spamoor_params:
+  spammers:
+    - name: "Blob Spammer (Kurtosis Package)"
+      scenario: "blobs"
+      config:
+        throughput: 1
+    - name: "ERC txs"
+      scenario: "erctx"
+      config:
+        throughput: 1
+
 
 zkboost_params:
   image: ghcr.io/eth-act/zkboost/zkboost:0.5.0
