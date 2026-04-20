@@ -554,6 +554,8 @@ def run(plan, args={}):
                     args_with_right_defaults.participants[index].validator_count
                 )
             )
+            if args_with_right_defaults.participants[index].el_type == constants.EL_TYPE.none:
+                continue
             if args_with_right_defaults.participants[index].validator_count != 0:
                 if (
                     args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
