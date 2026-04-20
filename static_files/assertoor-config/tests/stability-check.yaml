@@ -41,5 +41,4 @@ tasks:
     - name: check_consensus_forks
       title: "Check consensus forks"
       config:
-        maxForkCount: 3
         maxForkDistance: 3
