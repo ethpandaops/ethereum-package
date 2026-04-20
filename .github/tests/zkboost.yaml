@@ -1,7 +1,25 @@
 participants:
-  - count: 2
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
     el_type: reth
-    cl_type: lighthouse
+    supernode: true
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost:3000
+      - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost:3000
+      - --proof-types=6
+    count: 2
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: reth
+    supernode: false
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost:3000
+      - --proof-types=6
+    count: 2
 
 additional_services:
   - zkboost
@@ -11,9 +29,11 @@ additional_services:
   - tempo
 
 zkboost_params:
+  image: ghcr.io/eth-act/zkboost/zkboost:0.5.0
+  env:
+    RUST_LOG: info,zkboost=debug
   zkvms:
     - kind: mock
       proof_type: reth-zisk
-    - kind: mock
-      proof_type: ethrex-zisk
       mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
+      mock_proof_size: 1024

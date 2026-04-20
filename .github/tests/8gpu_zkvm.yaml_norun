@@ -1,4 +1,4 @@
-# EIP-8025 testnet with zkboost backed by two GPU ZisK provers across 8 GPUs.
+# EIP-8025 testnet with zkboost backed by GPU (ZisK) provers.
 #
 #
 # Run with:
@@ -12,7 +12,7 @@
 
 participants:
   - cl_type: lighthouse
-    cl_image: ghcr.io/eth-act/lighthouse/lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
     el_type: reth
     el_image: ghcr.io/paradigmxyz/reth
     supernode: true
@@ -25,7 +25,7 @@ participants:
       - --proof-types=6
     count: 2
   - cl_type: lighthouse
-    cl_image: ghcr.io/eth-act/lighthouse/lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
     el_type: reth
     el_image: ghcr.io/paradigmxyz/reth
     supernode: false
