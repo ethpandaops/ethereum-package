@@ -341,11 +341,6 @@ SUBCATEGORY_PARAMS = {
         "image",
     ],
     "tempo_params": [
-        "retention_duration",
-        "ingestion_rate_limit",
-        "ingestion_burst_limit",
-        "max_search_duration",
-        "max_bytes_per_trace",
         "min_cpu",
         "max_cpu",
         "min_mem",
