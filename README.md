@@ -1125,6 +1125,14 @@ zkboost_params:
   #   mock_failure: whether to simulate proving failures (default: false)
   #
   # ere-specific fields (only for kind: ere):
+  #   PREREQUISITE: Running an ere-server with GPU support requires the
+  #   NVIDIA Container Toolkit to be installed on the Docker host.
+  #   Install it by following the official guide:
+  #   https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+  #   After installation, configure the Docker daemon (/etc/docker/daemon.json) with:
+  #     "default-runtime": "nvidia"
+  #   and restart Docker.
+  #
   #   image (required): docker image for the ere-server
   #   program_url: URL to download the EVM program binary (or use program_path for a path
   #     already present in the image)
