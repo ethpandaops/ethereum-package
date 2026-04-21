@@ -40,3 +40,5 @@ tasks:
         minCheckEpochCount: 1
     - name: check_consensus_forks
       title: "Check consensus forks"
+      config:
+        maxForkDistance: 3
