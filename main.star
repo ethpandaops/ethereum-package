@@ -64,7 +64,6 @@ get_prefunded_accounts = import_module(
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
 slashoor = import_module("./src/slashoor/slashoor_launcher.star")
-zkboost = import_module("./src/zkboost/zkboost_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -1048,6 +1047,8 @@ def run(plan, args={}):
             plan.print("Successfully launched slashoor")
         elif additional_service == "zkboost":
             plan.print("Launching zkboost")
+            # Lazy import: zkboost_launcher.star references GpuConfig, which requires Kurtosis >= 1.18.1.
+            zkboost = import_module("./src/zkboost/zkboost_launcher.star")
             zkboost_config_template = read_file(
                 static_files.ZKBOOST_CONFIG_TEMPLATE_FILEPATH
             )
