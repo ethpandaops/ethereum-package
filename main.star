@@ -85,6 +85,7 @@ def run(plan, args={}):
     """
 
     args_with_right_defaults = input_parser.input_parser(plan, args)
+    plan.print("TIMING:run:start")
 
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
@@ -639,6 +640,7 @@ def run(plan, args={}):
                 all_mevboost_contexts.append(mev_boost_context)
 
     if len(args_with_right_defaults.additional_services) == 0:
+        plan.print("TIMING:run:end")
         output = struct(
             all_participants=all_participants,
             pre_funded_accounts=prefunded_accounts,
@@ -1124,6 +1126,7 @@ def run(plan, args={}):
         password=GRAFANA_PASSWORD,
     )
 
+    plan.print("TIMING:run:end")
     output = struct(
         grafana_info=grafana_info,
         blockscout_sc_verif_url=None

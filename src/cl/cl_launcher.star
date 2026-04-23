@@ -329,6 +329,7 @@ def launch(
                 tempo_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
+                skip_ready_conditions=True,
             )
 
             cl_participant_info[cl_service_name] = {
@@ -365,6 +366,7 @@ def launch(
             info["snooper_el_engine_context"],
             info["new_cl_node_validator_keystores"],
             info["node_selectors"],
+            skip_identity=True,
         )
 
         blobber_config = get_blobber_config(
@@ -403,3 +405,71 @@ def launch(
         global_other_index,
         blobber_configs_with_contexts,
     )
+
+
+def collect_identities(plan, all_cl_contexts, participants):
+    """Fill in missing ENRs/multiaddrs/peer_ids for contexts created with skip_identity=True.
+    Uses plan.wait to retry until CLs are healthy (health checks are deferred for non-boot nodes).
+    """
+    enriched = []
+    for index, ctx in enumerate(all_cl_contexts):
+        participant = participants[index] if index < len(participants) else None
+        skip_start = participant.skip_start if participant else False
+        if ctx.enr == "" and ctx.beacon_service_name != "" and not skip_start:
+            # Determine multiaddr jq based on client type
+            multiaddr_jq = ".data.p2p_addresses[0]"
+            headers = {}
+            if ctx.client_name == "lodestar":
+                multiaddr_jq = ".data.p2p_addresses[-1]"
+            if ctx.client_name == "prysm":
+                headers = {"Accept-Encoding": "identity"}
+
+            extract = {
+                "enr": ".data.enr",
+                "multiaddr": multiaddr_jq,
+                "peer_id": ".data.peer_id",
+            }
+            if headers:
+                beacon_node_identity_recipe = GetHttpRequestRecipe(
+                    endpoint="/eth/v1/node/identity",
+                    port_id=constants.HTTP_PORT_ID,
+                    extract=extract,
+                    headers=headers,
+                )
+            else:
+                beacon_node_identity_recipe = GetHttpRequestRecipe(
+                    endpoint="/eth/v1/node/identity",
+                    port_id=constants.HTTP_PORT_ID,
+                    extract=extract,
+                )
+            response = plan.wait(
+                recipe=beacon_node_identity_recipe,
+                service_name=ctx.beacon_service_name,
+                field="code",
+                assertion="IN",
+                target_value=[200],
+                interval="1s",
+                timeout="5m",
+            )
+            enriched.append(
+                cl_context_l.new_cl_context(
+                    client_name=ctx.client_name,
+                    enr=response["extract.enr"],
+                    ip_addr=ctx.ip_addr,
+                    ip_address=ctx.ip_address,
+                    http_port=ctx.http_port,
+                    beacon_http_url=ctx.beacon_http_url,
+                    cl_nodes_metrics_info=ctx.cl_nodes_metrics_info,
+                    beacon_service_name=ctx.beacon_service_name,
+                    beacon_grpc_url=ctx.beacon_grpc_url,
+                    multiaddr=response["extract.multiaddr"],
+                    peer_id=response["extract.peer_id"],
+                    snooper_enabled=ctx.snooper_enabled,
+                    snooper_el_engine_context=ctx.snooper_el_engine_context,
+                    validator_keystore_files_artifact_uuid=ctx.validator_keystore_files_artifact_uuid,
+                    supernode=ctx.supernode,
+                )
+            )
+        else:
+            enriched.append(ctx)
+    return enriched
