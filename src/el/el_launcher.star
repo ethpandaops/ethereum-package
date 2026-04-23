@@ -14,6 +14,7 @@ ethereumjs = import_module("./ethereumjs/ethereumjs_launcher.star")
 nimbus_eth1 = import_module("./nimbus-eth1/nimbus_launcher.star")
 ethrex = import_module("./ethrex/ethrex_launcher.star")
 dummy = import_module("./dummy/dummy_launcher.star")
+mock_el = import_module("./mock-el/mock_el_launcher.star")
 
 
 def launch(
@@ -129,6 +130,15 @@ def launch(
             "launch_method": dummy.launch,
             "get_config": dummy.get_config,
             "get_el_context": dummy.get_el_context,
+        },
+        constants.EL_TYPE.mock_el: {
+            "launcher": mock_el.new_mock_el_launcher(
+                el_cl_data,
+                jwt_file,
+            ),
+            "launch_method": mock_el.launch,
+            "get_config": mock_el.get_config,
+            "get_el_context": mock_el.get_el_context,
         },
     }
 
