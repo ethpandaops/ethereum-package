@@ -1,5 +1,29 @@
 # Changelog
 
+## [6.2.0](https://github.com/ethpandaops/ethereum-package/compare/6.1.0...6.2.0) (2026-04-25)
+
+
+### Features
+
+* add confirmation_byzantine_threshold, bump genesis-generator to 5.3.6, tempo in zkvm tests ([#1359](https://github.com/ethpandaops/ethereum-package/issues/1359)) ([7a3c999](https://github.com/ethpandaops/ethereum-package/commit/7a3c9991f081803182bb8aecbfb000f2c7b8f14d))
+* add grafloki ([#1328](https://github.com/ethpandaops/ethereum-package/issues/1328)) ([3b8b912](https://github.com/ethpandaops/ethereum-package/commit/3b8b912ab27ca00123717308eaa63d50b487dd64))
+* add native ePBS builder support via network_params ([#1348](https://github.com/ethpandaops/ethereum-package/issues/1348)) ([8ef4f0f](https://github.com/ethpandaops/ethereum-package/commit/8ef4f0fc3328d3c29a5e1ffd5ecee906ef37517a))
+* derive and inject builder BLS key into buildoor ([#1349](https://github.com/ethpandaops/ethereum-package/issues/1349)) ([b7ca0aa](https://github.com/ethpandaops/ethereum-package/commit/b7ca0aa4131ec8f6fc2d5f26430100c2a1b0f307))
+* **mev:** add commit_boost_config param for custom CB config templates ([#1355](https://github.com/ethpandaops/ethereum-package/issues/1355)) ([efaf138](https://github.com/ethpandaops/ethereum-package/commit/efaf138eba93c3ef4f2a801086550b90df6d3810))
+* support gpu ere prover in zkboost ([#1353](https://github.com/ethpandaops/ethereum-package/issues/1353)) ([835dd9b](https://github.com/ethpandaops/ethereum-package/commit/835dd9b69913af76920768c019a6ad988bf1b42a))
+* update `zkboost` to `v0.5.0` config and image ([#1354](https://github.com/ethpandaops/ethereum-package/issues/1354)) ([e07503d](https://github.com/ethpandaops/ethereum-package/commit/e07503d16b292a4a0d0dde267b461c22eb394852))
+* update `zkboost` usage to `v0.6.0` ([#1368](https://github.com/ethpandaops/ethereum-package/issues/1368)) ([c0aaa60](https://github.com/ethpandaops/ethereum-package/commit/c0aaa60fd761cb3198e5215cd03004acab8cdf7a))
+* zkboost prom ([#1345](https://github.com/ethpandaops/ethereum-package/issues/1345)) ([6efe92e](https://github.com/ethpandaops/ethereum-package/commit/6efe92e5ccb5706753cffea40c5054f0cf87219a))
+
+
+### Bug Fixes
+
+* drop gloas-support and heze-support image overrides ([#1357](https://github.com/ethpandaops/ethereum-package/issues/1357)) ([c2f6028](https://github.com/ethpandaops/ethereum-package/commit/c2f602863236967327cc0e416fcba7b2763cd0c6))
+* pin tempo image to 2.10.4 ([#1362](https://github.com/ethpandaops/ethereum-package/issues/1362)) ([bc233e7](https://github.com/ethpandaops/ethereum-package/commit/bc233e7548a9013e4f1aa1687125eb761533cb60))
+* remove gitpod references as the service has been deprecated ([#1364](https://github.com/ethpandaops/ethereum-package/issues/1364)) ([51e1ddc](https://github.com/ethpandaops/ethereum-package/commit/51e1ddc1d10624dcadb2fa3027f8d6c7bc1739cf))
+* **stability-check:** set maxForkDistance to 3 to tolerate transient head disagreements ([#1360](https://github.com/ethpandaops/ethereum-package/issues/1360)) ([874371c](https://github.com/ethpandaops/ethereum-package/commit/874371c3b5bf4f2c1cf963f646a6b30763ee1867))
+* Use beacon service name instead of ip_address to set cl-client url for buildoor ([#1346](https://github.com/ethpandaops/ethereum-package/issues/1346)) ([b2921f9](https://github.com/ethpandaops/ethereum-package/commit/b2921f99bd9cda1f3507195e1505fa3624d37504))
+
 ## [6.1.0](https://github.com/ethpandaops/ethereum-package/compare/6.0.0...6.1.0) (2026-04-01)
 
 
