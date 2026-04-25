@@ -277,12 +277,15 @@ def run(plan, args={}):
         detected_backend,
     )
 
-    plan.print(
-        "NODE JSON RPC URI: '{0}:{1}'".format(
-            all_participants[0].el_context.dns_name,
-            all_participants[0].el_context.rpc_port_num,
-        )
-    )
+    for p in all_participants:
+        if p.el_context != None:
+            plan.print(
+                "NODE JSON RPC URI: '{0}:{1}'".format(
+                    p.el_context.dns_name,
+                    p.el_context.rpc_port_num,
+                )
+            )
+            break
 
     builder_bls_secret_key = None
     if network_params.builder_count > 0:
@@ -318,7 +321,8 @@ def run(plan, args={}):
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     for participant in all_participants:
-        all_el_contexts.append(participant.el_context)
+        if participant.el_context != None:
+            all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
         all_vc_contexts.append(participant.vc_context)
         all_remote_signer_contexts.append(participant.remote_signer_context)

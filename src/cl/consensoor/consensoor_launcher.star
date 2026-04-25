@@ -120,16 +120,18 @@ def get_beacon_config(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     public_ports_for_component = None
@@ -180,8 +182,6 @@ def get_beacon_config(
         "run",
         "--log-level=" + log_level,
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--engine-api-url=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--genesis-state="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/genesis.ssz",
@@ -196,6 +196,10 @@ def get_beacon_config(
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         "--graffiti=consensoor",
     ]
+
+    if el_context != None:
+        cmd.append("--engine-api-url=" + EXECUTION_ENGINE_ENDPOINT)
+        cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 
     if checkpoint_sync_enabled and checkpoint_sync_url:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
@@ -237,8 +241,9 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+    if el_context != None:
+        files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
     if node_keystore_files != None:
         files[
@@ -282,7 +287,7 @@ def get_beacon_config(
             client=constants.CL_TYPE.consensoor,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=el_context.client_name,
+            connected_client=el_context.client_name if el_context != None else "none",
             extra_labels=participant.cl_extra_labels
             | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,

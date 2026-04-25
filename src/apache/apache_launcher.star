@@ -60,7 +60,8 @@ def launch_apache(
             participant, index, participant_contexts, participant_configs
         )
         all_cl_client_info.append(new_cl_client_info(cl_client.enr))
-        all_el_client_info.append(new_el_client_info(el_client.enode))
+        if el_client != None:
+            all_el_client_info.append(new_el_client_info(el_client.enode))
 
     template_data = new_config_template_data(
         all_cl_client_info,

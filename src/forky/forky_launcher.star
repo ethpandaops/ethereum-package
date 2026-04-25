@@ -56,15 +56,16 @@ def launch_forky(
                 full_name,
             )
         )
-        all_el_client_info.append(
-            new_el_client_info(
-                "http://{0}:{1}".format(
-                    el_client.dns_name,
-                    el_client.rpc_port_num,
-                ),
-                full_name,
+        if el_client != None:
+            all_el_client_info.append(
+                new_el_client_info(
+                    "http://{0}:{1}".format(
+                        el_client.dns_name,
+                        el_client.rpc_port_num,
+                    ),
+                    full_name,
+                )
             )
-        )
 
     template_data = new_config_template_data(
         network_params.network,

@@ -127,16 +127,18 @@ def get_beacon_config(
     )
 
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     public_ports_for_component = None
@@ -204,7 +206,6 @@ def get_beacon_config(
         PRYSM_ENTRYPOINT_COMMAND,
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
         "--rpc-port={0}".format(RPC_PORT_NUM),
         "--http-host=0.0.0.0",
@@ -222,7 +223,6 @@ def get_beacon_config(
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -232,6 +232,10 @@ def get_beacon_config(
         "--pprofaddr=0.0.0.0",
         "--pprofport={0}".format(PROFILING_PORT_NUM),
     ]
+
+    if el_context != None:
+        cmd.append("--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT)
+        cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 
     supernode_cmd = [
         "--subscribe-all-data-subnets=true",
@@ -304,8 +308,9 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+    if el_context != None:
+        files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
     if network_params.perfect_peerdas_enabled and participant_index < 16:
         files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
             artifact_names=["node-key-file-{0}".format(participant_index + 1)]
@@ -358,7 +363,7 @@ def get_beacon_config(
             client=constants.CL_TYPE.prysm,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=el_context.client_name,
+            connected_client=el_context.client_name if el_context != None else "none",
             extra_labels=participant.cl_extra_labels
             | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
