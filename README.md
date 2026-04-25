@@ -1122,10 +1122,11 @@ zkboost_params:
   #   mock_failure: whether to simulate proving failures (default: false)
   #
   # ere-specific fields (only for kind: ere):
-  #   image (required): docker image for the ere-server
-  #   program_url: URL to download the EVM program binary (or use program_path for a path
-  #     already present in the image)
-  #   port: port the ere-server listens on (default 3000)
+  #   image: docker image for the ere-server (default: resolved from zkboost's
+  #     pinned ere version in its Cargo.toml)
+  #   elf_url: HTTPS URL of the guest ELF to prove. ere-server fetches it
+  #     itself at startup. (default: resolved from zkboost's pinned ere-guests
+  #     version).
   #   gpu: GPU configuration (default: no GPU)
   #     count: number of GPUs to allocate (default 0)
   #         NOTE: if more than one ere service uses gpu.count, Docker will assign
@@ -1162,8 +1163,8 @@ zkboost_params:
   #   mock_proving_time: { kind: linear, ms_per_mgas: 150 }
   # - kind: ere
   #   proof_type: reth-zisk
-  #   image: "ghcr.io/eth-act/ere-server-zisk:latest"
-  #   program_url: "https://example.com/reth-zisk.bin"
+  #   image: "ghcr.io/eth-act/ere/ere-server-zisk:latest"
+  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.8.0/stateless-validator-reth-zisk.elf"
   #   gpu:
   #     count: 1
   #     driver: "nvidia"
