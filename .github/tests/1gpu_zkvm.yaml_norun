@@ -68,7 +68,7 @@ spamoor_params:
 
 
 zkboost_params:
-  image: ghcr.io/eth-act/zkboost/zkboost:0.5.0
+  image: ghcr.io/eth-act/zkboost/zkboost:0.6.0
   env:
     RUST_LOG: info,zkboost=debug
   instances:
@@ -77,15 +77,5 @@ zkboost_params:
   zkvms:
     - kind: ere
       proof_type: reth-zisk
-      image: ghcr.io/eth-act/ere/ere-server-zisk:0.6.1-cuda
-      program_url: https://github.com/eth-act/ere-guests/releases/download/v0.7.0/stateless-validator-reth-zisk
-      port: 3000
       gpu:
         device_ids: ["0"]
-        shm_size: 32768
-        ulimits:
-          memlock: -1
-      env:
-        RUST_LOG: info
-        ERE_ZISK_SETUP_ON_INIT: "1"
-        ERE_ZISK_START_SERVER_TIMEOUT_SEC: "600"

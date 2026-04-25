@@ -2064,7 +2064,7 @@
           },
           "limit": 500,
           "metricsQueryType": "range",
-          "query": "{resource.service.name=\"zkboost\" && name=~\"request_proof\"} | select(span.block_number, span.gas_used, span.timestamp)",
+          "query": "{resource.service.name=~\"$service\" && name=~\"request_proof\"} | select(span.block_number, span.gas_used, span.timestamp)",
           "queryType": "traceql",
           "refId": "A",
           "serviceMapUseNativeHistograms": false,

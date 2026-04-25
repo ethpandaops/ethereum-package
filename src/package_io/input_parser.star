@@ -19,7 +19,7 @@ DEFAULT_EL_IMAGES = {
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "teku": "ethpandaops/teku:master",
+    "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "offchainlabs/prysm-beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
@@ -44,7 +44,7 @@ DEFAULT_VC_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "offchainlabs/prysm-validator:stable",
-    "teku": "ethpandaops/teku:master",
+    "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
@@ -477,18 +477,22 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
-        # Inject default mock zkvm if none configured
+        # Inject default mock zkvm if none configured.
         if len(result["zkboost_params"]["zkvms"]) == 0:
             result["zkboost_params"]["zkvms"] = [
                 {
                     "kind": "mock",
-                    "proof_type": "ethrex-zisk",
-                    "mock_proving_time": {"kind": "constant", "ms": 6000},
+                    "proof_type": "reth-zisk",
+                    "mock_proving_time": {
+                        "kind": "random",
+                        "min_ms": 2000,
+                        "max_ms": 8000,
+                    },
                     "mock_proof_size": 128 << 10,
                 },
             ]
         if "RUST_LOG" not in result["zkboost_params"]["env"]:
-            result["zkboost_params"]["env"]["RUST_LOG"] = "info"
+            result["zkboost_params"]["env"]["RUST_LOG"] = "info,zkboost=debug"
 
         has_real_el = False
         for participant in result["participants"]:
@@ -552,20 +556,6 @@ def input_parser(plan, input_args):
                         idx, proof_timeout
                     )
                 )
-
-            if kind == "ere":
-                if "image" not in zkvm:
-                    fail(
-                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'image'".format(
-                            idx
-                        )
-                    )
-                if "program_url" not in zkvm and "program_path" not in zkvm:
-                    fail(
-                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'program_url' or 'program_path'".format(
-                            idx
-                        )
-                    )
 
             if kind == "external":
                 if zkvm.get("endpoint", "") == "":

@@ -33,8 +33,6 @@ Optional features (enabled via flags or parameter files at runtime):
 
 ## Quickstart
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/new/?editor=code#https://github.com/ethpandaops/ethereum-package)
-
 1. [Install Docker & start the Docker Daemon if you haven't done so already][docker-installation]
 2. [Install the Kurtosis CLI, or upgrade it to the latest version if it's already installed][kurtosis-cli-installation]
 3. Run the package with default configurations from the command line:
@@ -1103,9 +1101,8 @@ zkboost_params:
     - name: zkboost
       el_participant_index: 0
   # List of zkVM backend configurations.
-  # If empty or not set, a default mock zkvm is auto-configured:
-  #   { kind: mock, proof_type: ethrex-zisk, mock_proving_time: { kind: constant, ms: 6000 }, mock_proof_size: 131072 }
-  # Each entry must have a unique proof_type.
+  # If empty or not set, the default shown below (a mock reth-zisk zkvm) is
+  # auto-configured. Each entry must have a unique proof_type.
   #
   # Common fields for all entries:
   #   kind (required): the zkVM backend type
@@ -1137,6 +1134,11 @@ zkboost_params:
   #   program_url: URL to download the EVM program binary (or use program_path for a path
   #     already present in the image)
   #   port: port the ere-server listens on (default 3000)
+  #   image: docker image for the ere-server (default: resolved from zkboost's
+  #     pinned ere version in its Cargo.toml)
+  #   elf_url: HTTPS URL of the guest ELF to prove. ere-server fetches it
+  #     itself at startup. (default: resolved from zkboost's pinned ere-guests
+  #     version).
   #   gpu: GPU configuration (default: no GPU)
   #     count: number of GPUs to allocate (default 0)
   #         NOTE: if more than one ere service uses gpu.count, Docker will assign
@@ -1173,17 +1175,22 @@ zkboost_params:
   #   mock_proving_time: { kind: linear, ms_per_mgas: 150 }
   # - kind: ere
   #   proof_type: reth-zisk
-  #   image: "ghcr.io/eth-act/ere-server-zisk:latest"
-  #   program_url: "https://example.com/reth-zisk.bin"
+  #   image: "ghcr.io/eth-act/ere/ere-server-zisk:latest"
+  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.8.0/stateless-validator-reth-zisk.elf"
   #   gpu:
   #     count: 1
   #     driver: "nvidia"
   # - kind: external
   #   proof_type: reth-zisk
   #   endpoint: "http://my-prover:3000"
-  zkvms: []
-  # Defaults RUST_LOG to "info" if not set.
-  env: {}
+  zkvms:
+    - kind: mock
+      proof_type: reth-zisk
+      mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
+      mock_proof_size: 1024
+  # RUST_LOG defaults to "info,zkboost=debug" if not set; other vars pass through unchanged.
+  env:
+    RUST_LOG: "info,zkboost=debug"
 
 # Configuration place for tempo tracing backend
 tempo_params:
@@ -1571,7 +1578,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:5.3.6
+  image: ethpandaops/ethereum-genesis-generator:6.0.2
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
