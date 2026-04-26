@@ -91,3 +91,6 @@ dump/
 # binary files
 binary
 binaries
+
+# Claude file
+CLAUDE.md

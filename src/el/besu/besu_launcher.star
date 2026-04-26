@@ -27,6 +27,7 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.info: "INFO",
     constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
     constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.custom: "CUSTOM",
 }
 
 
@@ -142,19 +143,24 @@ def get_config(
 
     cmd = [
         "besu",
-        "--logging=" + log_level,
+    ]
+
+    if log_level != "CUSTOM":
+        cmd.append("--logging=" + log_level)
+
+    cmd += [
         "--data-path=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--host-allowlist=*",
         "--rpc-http-enabled=true",
         "--rpc-http-host=0.0.0.0",
         "--rpc-http-port={0}".format(RPC_PORT_NUM),
-        "--rpc-http-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
+        "--rpc-http-api=ADMIN,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--rpc-http-cors-origins=*",
         "--rpc-http-max-active-connections=300",
         "--rpc-ws-enabled=true",
         "--rpc-ws-host=0.0.0.0",
         "--rpc-ws-port={0}".format(WS_PORT_NUM),
-        "--rpc-ws-api=ADMIN,CLIQUE,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
+        "--rpc-ws-api=ADMIN,ETH,NET,DEBUG,TXPOOL,ENGINE,TRACE,WEB3",
         "--p2p-enabled=true",
         "--p2p-host=" + port_publisher.el_nat_exit_ip,
         "--p2p-port={0}".format(discovery_port_tcp),

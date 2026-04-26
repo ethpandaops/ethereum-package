@@ -1,0 +1,29 @@
+participants:
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: reth
+    supernode: true
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost:3000
+      - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost:3000
+      - --proof-types=6
+    count: 2
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: reth
+    supernode: false
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost:3000
+      - --proof-types=6
+    count: 2
+
+additional_services:
+  - zkboost
+  - dora
+  - prometheus
+  - grafana
+  - tempo

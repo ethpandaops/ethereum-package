@@ -1,0 +1,58 @@
+# EIP-8025 testnet with zkboost backed by a single GPU ZisK prover.
+#
+#
+# Run with:
+#   kurtosis run --enclave eip8025-zkboost-1gpu \
+#       . \
+#       --args-file .github/tests/1gpu_zkvm.yaml_norun
+#
+# Prerequisites:
+#   - NVIDIA GPU with drivers installed
+#   - NVIDIA Container Toolkit configured for Docker
+
+participants:
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: reth
+    el_image: ghcr.io/paradigmxyz/reth
+    supernode: true
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    count: 2
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: dummy
+    supernode: false
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    count: 2
+
+network_params:
+  seconds_per_slot: 30
+
+additional_services:
+  - zkboost
+  - dora
+  - prometheus
+  - grafana
+  - tempo
+
+zkboost_params:
+  image: ghcr.io/eth-act/zkboost/zkboost:0.6.0
+  env:
+    RUST_LOG: info,zkboost=debug
+  instances:
+    - name: zkboost-1
+      el_participant_index: 0
+  zkvms:
+    - kind: ere
+      proof_type: reth-zisk
+      gpu:
+        device_ids: ["0"]
