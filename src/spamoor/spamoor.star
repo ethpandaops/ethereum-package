@@ -135,7 +135,6 @@ def get_config(
         "--privkey={}".format(prefunded_addresses[13].private_key),
         "--rpchost-file={}".format(hosts_file_path),
         "--startup-spammer={}".format(config_file_path),
-        "--without-batcher",  # Temp fix, remove later
     ]
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
