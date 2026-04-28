@@ -218,7 +218,6 @@ def get_beacon_config(
         "--p2p-tcp-port={0}".format(discovery_port_tcp),
         "--p2p-udp-port={0}".format(discovery_port_udp),
         "--p2p-quic-port={0}".format(discovery_port_quic),
-        "--min-sync-peers={0}".format(constants.MIN_PEERS),
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
