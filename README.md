@@ -159,12 +159,83 @@ kurtosis files download my-testnet el-genesis-data ~/Downloads
 
 ## Basic file sharing
 
-Apache is included in the package to allow for basic file sharing. The Apache service is started when additional services are enabled. It will expose the network-configs directory, which might needed if you want to share the network config publicly.
+Apache is included in the package to allow for basic file sharing. The Apache service is started when additional services are enabled. It exposes the contents of the `network-configs` directory at the URL root, including the canonical metadata files used by the bal-devnets layout:
+
+- `/enodes.txt` — newline-separated EL enodes
+- `/bootstrap_nodes.txt` — newline-separated CL ENRs
+- `/bootstrap_nodes.yaml` — same ENRs as a YAML list
+- `/network-config.tar` — full genesis bundle (`config.yaml`, `genesis.ssz`, `genesis.json`, etc.) plus the three files above
 
 ```yaml
 additional_services:
   - apache
 ```
+
+## Syncing one enclave from another
+
+You can have a target enclave (B) sync from a running source enclave (A). Source A runs `apache` and publishes its enodes/ENRs/genesis bundle; target B sets `network: kt-<A-host>:<A-apache-port>` and bootstraps off A.
+
+Source enclave A — must publish EL/CL ports with a routable NAT IP, otherwise the published enodes advertise unreachable docker-internal IPs:
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: teku
+
+apache_port: 9128
+
+port_publisher:
+  nat_exit_ip: <A-routable-host-ip>  # or "auto"
+  el:
+    enabled: true
+  cl:
+    enabled: true
+
+additional_services:
+  - apache
+```
+
+Target enclave B — point `network` at A's apache:
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    el_extra_params:
+      - --syncmode=full   # see caveat below
+
+network_params:
+  network: kt-<A-host>:9128
+```
+
+Validator counts are auto-zeroed for `kt-` networks, so B is observer-mode by default.
+
+> [!NOTE]
+> Geth's snap-sync wedges with `missing trie node ... layer stale` when joining a fresh devnet that's still building state. Either set `el_extra_params: [--syncmode=full]` on the target, or wait until the source has finalized at least one epoch before launching the target.
+
+### How it works
+
+The flow is intentionally a thin wrapper around the existing devnet-sync path:
+
+1. **Source A's apache** mounts the `el_cl_genesis_data` artifact at `/network-configs/`, generates `enodes.txt` / `bootstrap_nodes.txt` / `bootstrap_nodes.yaml` from the live EL/CL contexts at startup (so the addresses inside reflect the actual NAT IPs and published ports), bundles everything into `network-config.tar`, and serves the tar plus the three loose files from the apache root URL.
+2. **Source A's EL clients** advertise their enodes using `port_publisher.el.nat_exit_ip` (e.g. `geth --nat=extip:<ip>`). That's why the warning fires when `nat_exit_ip` is unset: without it, every enode in `enodes.txt` points at a docker-internal address that nobody else can reach.
+3. **Target B's network launcher** sees `network: kt-<host>:<port>`, curls `http://<host>:<port>/network-config.tar`, and extracts it into the same `el_cl_genesis_data` files artifact name the other launchers use. From here, B's EL/CL launchers fall through to the existing devnet code paths — they read `/network-configs/enodes.txt` and `/network-configs/bootstrap_nodes.txt` to populate `--bootnodes` / `--boot-nodes` flags on the clients. **No client launcher code is aware of cross-enclave sync.**
+4. **Validator counts are zeroed on B** by the existing logic that already excludes non-`kurtosis`/`shadowfork` networks from validator key generation, so B starts as an observer.
+
+In effect, A's apache plays the same role for B that the GitHub-hosted `network-configs/<devnet>/metadata` directory plays for a normal `network: foo-devnet-N` config — it's the canonical bundle of "everything you need to join this network."
+
+#### What gets reused vs. what's new
+
+- **Reused:** EL/CL bootnode wiring (`shared_utils.get_devnet_enodes` / `get_devnet_enrs_list`), genesis-bundle file layout, port publishing, NAT-IP enode advertisement.
+- **New:** `kt-<host>:<port>` parsing (`src/network_launcher/remote_enclave.star`), apache file naming + URL layout match the bal-devnets metadata convention.
+
+#### Limits / gotchas
+
+- The two enclaves must reside on a network where B's curl/discovery containers can reach A's published apache port and EL/CL public ports. Same-host works because Docker publishes ports on the host's interfaces; cross-host works as long as the NAT IP set on A is routable from B.
+- A's apache snapshot is taken at A's startup. If A restarts and gets new node identities, B must be torn down and redeployed against the new bundle.
+- Geth snap-sync brittleness applies as noted above; CL sync is unaffected.
 
 ## Configuration
 
@@ -623,6 +694,8 @@ network_params:
   # Defaults to "kurtosis"
   # You can sync any public network by setting this to the network name (e.g. "mainnet", "sepolia", "holesky", "hoodi")
   # You can sync any devnet by setting this to the network name (e.g. "dencun-devnet-12", "verkle-gen-devnet-2")
+  # You can sync from another running kurtosis enclave by setting this to "kt-<host>:<apache-port>"
+  # (see "Syncing one enclave from another" above)
   network: "kurtosis"
 
   # The network ID of the network.
