@@ -219,6 +219,7 @@ def get_beacon_config(
         "--p2p-udp-port={0}".format(discovery_port_udp),
         "--p2p-quic-port={0}".format(discovery_port_quic),
         "--min-sync-peers={0}".format(constants.MIN_PEERS),
+        "--p2p-max-peers={0}".format(launcher.num_participants),
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
@@ -455,10 +456,12 @@ def get_cl_context(
 def new_prysm_launcher(
     el_cl_genesis_data,
     jwt_file,
+    num_participants,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
+        num_participants=num_participants,
     )
 
 

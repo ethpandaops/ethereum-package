@@ -72,6 +72,7 @@ def launch(
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
                 jwt_file,
+                num_participants,
             ),
             "launch_method": prysm.launch,
             "get_beacon_config": prysm.get_beacon_config,
