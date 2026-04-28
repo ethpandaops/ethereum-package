@@ -6,8 +6,8 @@ SERVICE_NAME = "apache"
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 80
 APACHE_CONFIG_FILENAME = "index.html"
-APACHE_ENR_FILENAME = "boot_enr.yaml"
-APACHE_ENODE_FILENAME = "bootnode.txt"
+APACHE_ENR_FILENAME = "bootstrap_nodes.yaml"
+APACHE_ENODE_FILENAME = "enodes.txt"
 APACHE_ENR_LIST_FILENAME = "bootstrap_nodes.txt"
 
 APACHE_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/usr/local/apache2/htdocs/"
@@ -114,6 +114,20 @@ def launch_apache(
 
     plan.add_service(SERVICE_NAME, config)
 
+    if port_publisher.el_nat_exit_ip == constants.PRIVATE_IP_ADDRESS_PLACEHOLDER:
+        plan.print(
+            "[apache] WARNING: port_publisher.el.nat_exit_ip is not set; published "
+            + "enodes.txt advertises docker-internal IPs and will not be reachable "
+            + "from another host or enclave. Set port_publisher.el.nat_exit_ip to "
+            + "'auto' or a routable address to enable cross-enclave peering."
+        )
+
+    apache_host_port = apache_port if apache_port != None else HTTP_PORT_NUMBER
+    plan.print(
+        "[apache] To sync another enclave from this one, set network in the "
+        + "target enclave to: kt-<this-host>:{0}".format(apache_host_port)
+    )
+
 
 def get_config(
     config_files_artifact_name,
@@ -149,7 +163,7 @@ def get_config(
         "/network-configs/boot/" + APACHE_ENR_LIST_FILENAME,
         "/network-configs/" + APACHE_ENR_LIST_FILENAME,
         "&&",
-        "cp -R /network-configs /usr/local/apache2/htdocs/",
+        "cp -R /network-configs/. /usr/local/apache2/htdocs/",
         "&&",
         "tar",
         "-czvf",

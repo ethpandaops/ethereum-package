@@ -19,6 +19,7 @@ launch_public_network = import_module("./network_launcher/public_network.star")
 launch_devnet = import_module("./network_launcher/devnet.star")
 launch_kurtosis = import_module("./network_launcher/kurtosis.star")
 launch_shadowfork = import_module("./network_launcher/shadowfork.star")
+launch_remote_enclave = import_module("./network_launcher/remote_enclave.star")
 
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
@@ -99,6 +100,19 @@ def launch_participant_network(
             network_params,
             total_number_of_validator_keys,
             latest_block.files_artifacts[0] if latest_block != "" else "",
+            global_tolerations,
+            global_node_selectors,
+        )
+    elif network_params.network.startswith(constants.NETWORK_NAME.remote_enclave):
+        # We are syncing from another running kurtosis enclave
+        (
+            el_cl_data,
+            final_genesis_timestamp,
+            network_id,
+            validator_data,
+        ) = launch_remote_enclave.launch(
+            plan,
+            network_params.network,
             global_tolerations,
             global_node_selectors,
         )

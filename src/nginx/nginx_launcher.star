@@ -6,8 +6,8 @@ SERVICE_NAME = "nginx"
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 80
 NGINX_CONFIG_FILENAME = "index.html"
-NGINX_ENR_FILENAME = "boot_enr.yaml"
-NGINX_ENODE_FILENAME = "bootnode.txt"
+NGINX_ENR_FILENAME = "bootstrap_nodes.yaml"
+NGINX_ENODE_FILENAME = "enodes.txt"
 NGINX_ENR_LIST_FILENAME = "bootstrap_nodes.txt"
 
 NGINX_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/usr/share/nginx/html/"
@@ -144,7 +144,7 @@ def get_config(
         "/network-configs/boot/" + NGINX_ENR_LIST_FILENAME,
         "/network-configs/" + NGINX_ENR_LIST_FILENAME,
         "&&",
-        "cp -R /network-configs /usr/share/nginx/html/",
+        "cp -R /network-configs/. /usr/share/nginx/html/",
         "&&",
         "tar",
         "-czvf",

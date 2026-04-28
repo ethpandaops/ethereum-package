@@ -161,6 +161,7 @@ NETWORK_NAME = struct(
     kurtosis="kurtosis",
     verkle="verkle",
     shadowfork="shadowfork",
+    remote_enclave="kt-",
 )
 
 PUBLIC_NETWORKS = (
