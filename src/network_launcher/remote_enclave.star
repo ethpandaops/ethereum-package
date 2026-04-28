@@ -10,10 +10,8 @@ def parse_remote_enclave_url(network):
     #   kt-http://<host>:<port>
     #   kt-https://<host>:<port>
     if not network.startswith("kt-"):
-        fail(
-            "Remote enclave network must start with 'kt-', got: {0}".format(network)
-        )
-    target = network[len("kt-"):]
+        fail("Remote enclave network must start with 'kt-', got: {0}".format(network))
+    target = network[len("kt-") :]
     if target.startswith("http://") or target.startswith("https://"):
         return target.rstrip("/")
     return "http://{0}".format(target.rstrip("/"))
