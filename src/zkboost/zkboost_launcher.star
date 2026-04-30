@@ -48,11 +48,47 @@ ZISK_DEFAULT_ENV = {
     "ERE_ZISK_SETUP_ON_INIT": "1",
 }
 
+# Mapping from numeric proof-type IDs (used in --proof-types CL flag) to zkvm
+# proof_type names (used in zkboost_params.zkvms).
+PROOF_TYPE_ID_TO_NAME = {
+    0: "ethrex-risc0",
+    1: "ethrex-sp1",
+    2: "ethrex-zisk",
+    3: "reth-openvm",
+    4: "reth-risc0",
+    5: "reth-sp1",
+    6: "reth-zisk",
+}
+
+
+def _extract_requested_proof_types(participants):
+    """Extract the set of proof_type names requested by participants via
+    --proof-types flags in cl_extra_params and vc_extra_params.
+
+    Returns a set of proof_type names (e.g. {"ethrex-zisk", "reth-zisk"}).
+    """
+    requested = {}
+    for participant in participants:
+        for params_key in ["cl_extra_params", "vc_extra_params"]:
+            for param in participant.get(params_key, []):
+                if not param.startswith("--proof-types="):
+                    continue
+                ids_str = param.split("=", 1)[1]
+                for id_str in ids_str.split(","):
+                    id_str = id_str.strip()
+                    if not id_str:
+                        continue
+                    proof_type_id = int(id_str)
+                    if proof_type_id in PROOF_TYPE_ID_TO_NAME:
+                        requested[PROOF_TYPE_ID_TO_NAME[proof_type_id]] = True
+    return requested
+
 
 def launch_zkboost(
     plan,
     config_template,
     participant_contexts,
+    participants,
     zkboost_params,
     global_node_selectors,
     global_tolerations,
@@ -62,6 +98,10 @@ def launch_zkboost(
     tempo_otlp_grpc_url=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
+    # Extract proof types requested by participants via --proof-types flags.
+    # Only launch ere-server instances for proof types that are actually requested.
+    requested_proof_types = _extract_requested_proof_types(participants)
 
     # Launch ere-server services once - shared across all zkboost instances.
     # Each `ere` zkvm entry results in a single long-lived service; all zkboost
@@ -76,6 +116,15 @@ def launch_zkboost(
 
         proof_type = zkvm["proof_type"]
         if proof_type in ere_server_endpoints:
+            continue
+
+        # Skip launching ere-server if proof type is not requested by any participant.
+        if len(requested_proof_types) > 0 and proof_type not in requested_proof_types:
+            plan.print(
+                "Skipping ere-server for '{0}': not requested by any participant (requested: {1})".format(
+                    proof_type, ", ".join(requested_proof_types.keys())
+                )
+            )
             continue
 
         endpoint = _launch_ere_server(
@@ -102,6 +151,10 @@ def launch_zkboost(
 
         zkvms = []
         for zkvm in zkboost_params.zkvms:
+            # Skip zkvm entries for ere-servers that were not launched.
+            if zkvm["kind"] == "ere" and zkvm["proof_type"] not in ere_server_endpoints:
+                continue
+
             entry = {
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
