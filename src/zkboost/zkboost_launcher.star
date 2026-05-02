@@ -48,8 +48,8 @@ ZISK_DEFAULT_ENV = {
     "ERE_ZISK_SETUP_ON_INIT": "1",
 }
 
-# Mapping from numeric proof-type IDs (used in --proof-types CL flag) to zkvm
-# proof_type names (used in zkboost_params.zkvms).
+# Mapping from numeric proof-type IDs (used in --proof-types CL/VC flags) to
+# proof_type names (EL + zkVM combination, e.g., "reth-zisk" = Reth + Zisk).
 PROOF_TYPE_ID_TO_NAME = {
     0: "ethrex-risc0",
     1: "ethrex-sp1",
@@ -64,6 +64,13 @@ PROOF_TYPE_ID_TO_NAME = {
 def _extract_requested_proof_types(participants):
     """Extract the set of proof_type names requested by participants via
     --proof-types flags in cl_extra_params and vc_extra_params.
+
+    Both CL and VC proof-types are checked because:
+    - VC generates proofs (needs ere-server + GPU)
+    - CL verifies proofs received from network (needs ere-server for verification)
+
+    On live networks, nodes may receive proof types from external peers that
+    local VCs don't generate, so CL's proof-types must also be considered.
 
     Returns a set of proof_type names (e.g. {"ethrex-zisk", "reth-zisk"}).
     """
@@ -104,8 +111,8 @@ def launch_zkboost(
     requested_proof_types = _extract_requested_proof_types(participants)
 
     # Launch ere-server services once - shared across all zkboost instances.
-    # Each `ere` zkvm entry results in a single long-lived service; all zkboost
-    # instances reference it as an endpoint.
+    # Each `kind: ere` entry in zkvms config results in a single long-lived ere-server
+    # that handles proof generation; all zkboost instances reference it as an endpoint.
     # `_resolve_image_and_elf_url` fills in `image` and `elf_url` from zkboost's
     # pinned ere/ere-guests versions when the user didn't provide them.
     ere_server_endpoints = {}
@@ -151,7 +158,7 @@ def launch_zkboost(
 
         zkvms = []
         for zkvm in zkboost_params.zkvms:
-            # Skip zkvm entries for ere-servers that were not launched.
+            # Skip ere entries whose ere-server was not launched (proof type not requested).
             if zkvm["kind"] == "ere" and zkvm["proof_type"] not in ere_server_endpoints:
                 continue
 
