@@ -30,6 +30,9 @@ participants:
     count: 1
   # Verifier-only side: uses zkboost-verifier (no ere-server, in-process
   # ere-verifier-zisk). Listens for gossipped proofs and verifies them.
+  # Lighthouse's optional-proofs subscribe path needs `--proof-types` on both
+  # cl_extra_params and vc_extra_params to enable the gossip subscription, even
+  # though zkboost-verifier rejects prove requests with an error (verifier-only).
   - cl_type: lighthouse
     cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
     el_type: reth
@@ -37,6 +40,9 @@ participants:
     supernode: false
     cl_extra_params:
       - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-verifier:3000
+      - --proof-types=6
+    vc_extra_params:
       - --proof-engine-endpoint=http://zkboost-verifier:3000
       - --proof-types=6
     count: 1
