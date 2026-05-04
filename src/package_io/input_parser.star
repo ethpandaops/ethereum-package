@@ -528,9 +528,9 @@ def input_parser(plan, input_args):
             kind = zkvm.get("kind")
             proof_type = zkvm.get("proof_type")
 
-            if kind not in ["mock", "ere", "external"]:
+            if kind not in ["mock", "ere", "external", "verifier"]:
                 fail(
-                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock', 'ere', or 'external'".format(
+                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock', 'ere', 'external', or 'verifier'".format(
                         idx, kind
                     )
                 )
