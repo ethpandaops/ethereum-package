@@ -37,7 +37,7 @@ router_config:
     - route: GetValidators
     - route: SubmitBlock
     - route: GetTopBid
-    
+
     # Proposer API routes
     - route: GetHeader
       rate_limit:
@@ -46,12 +46,12 @@ router_config:
     - route: GetPayload
     - route: RegisterValidators
     - route: Status
-    
+
     # Data API routes
     - route: ProposerPayloadDelivered
     - route: BuilderBidsReceived
     - route: ValidatorRegistration
-  
+
   # Graceful shutdown delay (milliseconds)
   shutdown_delay_ms: 12000
 
@@ -82,6 +82,7 @@ cores:
   sub_workers: [0]  # Cores for submission workers
   reg_workers: [0]  # Cores for registration workers
   tokio: [0]    # Cores for Tokio async runtime
+  tcp_bid_submissions_tile: 2
 
 # Optional: Enable local development mode (disables some checks)
 is_local_dev: false
