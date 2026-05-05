@@ -3,6 +3,7 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 genesis_constants = import_module(
     "../prelaunch_data_generator/genesis_constants/genesis_constants.star"
 )
+mev_resolver = import_module("./mev_resolver.star")
 
 sanity_check = import_module("./sanity_check.star")
 
@@ -252,28 +253,20 @@ def input_parser(plan, input_args):
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
 
-    if result.get("mev_type") in (
-        constants.MOCK_MEV_TYPE,
-        constants.FLASHBOTS_MEV_TYPE,
-        constants.MEV_RS_MEV_TYPE,
-        constants.COMMIT_BOOST_MEV_TYPE,
-        constants.HELIX_MEV_TYPE,
-        constants.BUILDOOR_MEV_TYPE,
-    ):
+    # Resolve mev_type into (relay, sidecar, builder) components
+    mev_components = mev_resolver.resolve_mev_components(
+        result.get("mev_type"), result["mev_params"]
+    )
+    result["mev_components"] = mev_components
+
+    if mev_components != None:
         result = enrich_mev_extra_params(
             result,
-            constants.MEV_BOOST_SERVICE_NAME_PREFIX,
             constants.MEV_BOOST_PORT,
-            result.get("mev_type"),
+            mev_components,
         )
     elif result.get("mev_type") == None:
         pass
-    else:
-        fail(
-            "Unsupported MEV type: {0}, please use 'mock', 'flashbots', 'mev-rs', 'commit-boost', 'helix' or 'buildoor' type".format(
-                result.get("mev_type")
-            )
-        )
 
     if (
         result["mev_params"].get("mev_builder_subsidy") != 0
@@ -879,6 +872,10 @@ def input_parser(plan, input_args):
             run_multiple_relays=result["mev_params"]["run_multiple_relays"],
             helix_relay_image=result["mev_params"]["helix_relay_image"],
             commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
+            helix_relay_config=result["mev_params"].get("helix_relay_config", ""),
+            mev_relay=result["mev_params"].get("mev_relay"),
+            mev_sidecar=result["mev_params"].get("mev_sidecar"),
+            mev_builder=result["mev_params"].get("mev_builder"),
         )
         if result["mev_params"]
         else None,
@@ -1008,6 +1005,7 @@ def input_parser(plan, input_args):
         wait_for_finalization=result["wait_for_finalization"],
         global_log_level=result["global_log_level"],
         mev_type=result["mev_type"],
+        mev_components=result["mev_components"],
         snooper_enabled=result["snooper_enabled"],
         snooper_params=struct(
             enabled=result["snooper_params"]["enabled"],
@@ -1948,6 +1946,10 @@ def get_default_mev_params(mev_type, preset):
         "run_multiple_relays": False,
         "helix_relay_image": constants.DEFAULT_HELIX_RELAY_IMAGE,
         "commit_boost_config": "",
+        "helix_relay_config": "",
+        "mev_relay": None,
+        "mev_sidecar": None,
+        "mev_builder": None,
     }
 
 
@@ -2226,77 +2228,83 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
     return parsed_arguments_dict
 
 
-# TODO perhaps clean this up into a map
-def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
-    for index, participant in enumerate(parsed_arguments_dict["participants"]):
-        index_str = shared_utils.zfill_custom(
-            index + 1, len(str(len(parsed_arguments_dict["participants"])))
-        )
+def enrich_mev_extra_params(parsed_arguments_dict, mev_port, mev_components):
+    """
+    Enrich participant CL/VC params with builder configuration.
+    Two responsibilities:
+      1. Inject --builder=<sidecar_url> into CL/VC params (only when sidecar != "none")
+      2. Append builder participant to participant list (for flashbots/mev-rs builders)
 
-        if mev_type == constants.COMMIT_BOOST_MEV_TYPE:
-            prefix = constants.COMMIT_BOOST_SERVICE_NAME_PREFIX
-        else:
-            prefix = constants.MEV_BOOST_SERVICE_NAME_PREFIX
+    Args:
+        parsed_arguments_dict: The full parsed arguments dict
+        mev_port: The MEV boost port number
+        mev_components: Resolved struct with .relay, .sidecar, .builder
+    """
+    # Part 1: CL/VC builder flags (only when there IS a sidecar to point them at)
+    if mev_components.sidecar != "none":
+        prefix = mev_resolver.get_sidecar_service_prefix(mev_components.sidecar)
 
-        mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
-            prefix,
-            index_str,
-            participant["cl_type"],
-            participant["el_type"],
-            mev_port,
-        )
+        for index, participant in enumerate(parsed_arguments_dict["participants"]):
+            index_str = shared_utils.zfill_custom(
+                index + 1, len(str(len(parsed_arguments_dict["participants"])))
+            )
 
-        if participant["cl_type"] == "lighthouse":
-            participant["cl_extra_params"].append("--builder={0}".format(mev_url))
-        if participant["vc_type"] == "lighthouse":
-            if (
-                parsed_arguments_dict["network_params"]["gas_limit"] == 0
-            ):  # if the gas limit is set we already enable builder-proposals
-                participant["vc_extra_params"].append("--builder-proposals")
-        if participant["cl_type"] == "lodestar":
-            participant["cl_extra_params"].append("--builder")
-            participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
-        if participant["vc_type"] == "lodestar":
-            participant["vc_extra_params"].append("--builder")
-        if participant["cl_type"] == "nimbus":
-            participant["cl_extra_params"].append("--payload-builder=true")
-            participant["cl_extra_params"].append(
-                "--payload-builder-url={0}".format(mev_url)
+            mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
+                prefix,
+                index_str,
+                participant["cl_type"],
+                participant["el_type"],
+                mev_port,
             )
-        if participant["vc_type"] == "nimbus":
-            participant["vc_extra_params"].append("--payload-builder=true")
-        if participant["cl_type"] == "teku":
-            participant["cl_extra_params"].append(
-                "--builder-endpoint={0}".format(mev_url)
-            )
-            participant["cl_extra_params"].append(
-                "--validators-builder-registration-default-enabled=true"
-            )
-        if participant["vc_type"] == "teku":
-            participant["vc_extra_params"].append(
-                "--validators-builder-registration-default-enabled=true"
-            )
-        if participant["cl_type"] == "prysm":
-            participant["cl_extra_params"].append(
-                "--http-mev-relay={0}".format(mev_url)
-            )
-        if participant["vc_type"] == "prysm":
-            participant["vc_extra_params"].append("--enable-builder")
-        if participant["cl_type"] == "grandine":
-            participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
 
-        if participant["vc_type"] == "vero":
-            participant["vc_extra_params"].append("--use-external-builder")
+            if participant["cl_type"] == "lighthouse":
+                participant["cl_extra_params"].append("--builder={0}".format(mev_url))
+            if participant["vc_type"] == "lighthouse":
+                if (
+                    parsed_arguments_dict["network_params"]["gas_limit"] == 0
+                ):  # if the gas limit is set we already enable builder-proposals
+                    participant["vc_extra_params"].append("--builder-proposals")
+            if participant["cl_type"] == "lodestar":
+                participant["cl_extra_params"].append("--builder")
+                participant["cl_extra_params"].append(
+                    "--builder.urls={0}".format(mev_url)
+                )
+            if participant["vc_type"] == "lodestar":
+                participant["vc_extra_params"].append("--builder")
+            if participant["cl_type"] == "nimbus":
+                participant["cl_extra_params"].append("--payload-builder=true")
+                participant["cl_extra_params"].append(
+                    "--payload-builder-url={0}".format(mev_url)
+                )
+            if participant["vc_type"] == "nimbus":
+                participant["vc_extra_params"].append("--payload-builder=true")
+            if participant["cl_type"] == "teku":
+                participant["cl_extra_params"].append(
+                    "--builder-endpoint={0}".format(mev_url)
+                )
+                participant["cl_extra_params"].append(
+                    "--validators-builder-registration-default-enabled=true"
+                )
+            if participant["vc_type"] == "teku":
+                participant["vc_extra_params"].append(
+                    "--validators-builder-registration-default-enabled=true"
+                )
+            if participant["cl_type"] == "prysm":
+                participant["cl_extra_params"].append(
+                    "--http-mev-relay={0}".format(mev_url)
+                )
+            if participant["vc_type"] == "prysm":
+                participant["vc_extra_params"].append("--enable-builder")
+            if participant["cl_type"] == "grandine":
+                participant["cl_extra_params"].append(
+                    "--builder-url={0}".format(mev_url)
+                )
 
-    num_participants = len(parsed_arguments_dict["participants"])
-    index_str = shared_utils.zfill_custom(
-        num_participants + 1, len(str(num_participants + 1))
-    )
-    if (
-        mev_type == constants.FLASHBOTS_MEV_TYPE
-        or mev_type == constants.COMMIT_BOOST_MEV_TYPE
-        or mev_type == constants.HELIX_MEV_TYPE
-    ):
+            if participant["vc_type"] == "vero":
+                participant["vc_extra_params"].append("--use-external-builder")
+
+    # Part 2: Builder participant (add a dedicated builder EL+CL pair)
+    if mev_components.builder == "flashbots":
         mev_participant = default_participant()
         mev_participant["el_type"] = "reth-builder"
         mev_participant.update(
@@ -2321,10 +2329,8 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 ],
             }
         )
-
         parsed_arguments_dict["participants"].append(mev_participant)
-
-    if mev_type == constants.MEV_RS_MEV_TYPE:
+    elif mev_components.builder == "mev-rs":
         mev_participant = default_participant()
         mev_participant["el_type"] = "reth-builder"
         mev_participant.update(
@@ -2346,10 +2352,12 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
             }
         )
         parsed_arguments_dict["participants"].append(mev_participant)
-    if mev_type == constants.MOCK_MEV_TYPE:
+    elif mev_components.builder == "mock":
         parsed_arguments_dict["mev_params"]["mock_mev_image"] = parsed_arguments_dict[
             "mev_params"
         ]["mock_mev_image"]
+    # builder in ("buildoor", "none") -> no builder participant added
+
     return parsed_arguments_dict
 
 

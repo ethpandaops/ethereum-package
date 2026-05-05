@@ -10,7 +10,9 @@ CB_CONFIG_FILES_ARTIFACT_NAME = "commit-boost-config"
 
 USED_PORTS = {
     "http": shared_utils.new_port_spec(
-        constants.MEV_BOOST_PORT, shared_utils.TCP_PROTOCOL
+        constants.MEV_BOOST_PORT,
+        shared_utils.TCP_PROTOCOL,
+        wait="15s",
     )
 }
 

@@ -120,11 +120,7 @@ def get_config(
             constants.RPC_PORT_ID: public_ports_for_component[3],
             constants.WS_PORT_ID: public_ports_for_component[4],
         }
-        if (
-            launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
-            or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
-            or launcher.builder_type == constants.HELIX_MEV_TYPE
-        ):
+        if launcher.builder_type == "flashbots":
             additional_public_port_assignments[
                 constants.RBUILDER_PORT_ID
             ] = public_ports_for_component[5]
@@ -155,11 +151,7 @@ def get_config(
         constants.METRICS_PORT_ID: METRICS_PORT_NUM,
     }
 
-    if (
-        launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
-        or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
-        or launcher.builder_type == constants.HELIX_MEV_TYPE
-    ):
+    if launcher.builder_type == "flashbots":
         used_port_assignments[constants.RBUILDER_PORT_ID] = RBUILDER_PORT_NUM
         used_port_assignments[
             constants.RBUILDER_METRICS_PORT_ID
@@ -187,11 +179,7 @@ def get_config(
             "--http.addr=0.0.0.0",
             "--http.corsdomain=*",
             "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
-                ",flashbots"
-                if launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
-                or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
-                or launcher.builder_type == constants.HELIX_MEV_TYPE
-                else ""
+                ",flashbots" if launcher.builder_type == "flashbots" else ""
             ),
             "--ws",
             "--ws.addr=0.0.0.0",
@@ -279,15 +267,11 @@ def get_config(
 
     env_vars = {}
     image = participant.el_image
-    if launcher.builder_type == constants.MEV_RS_MEV_TYPE:
+    if launcher.builder_type == "mev-rs":
         files[
             mev_rs_builder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = mev_rs_builder.MEV_BUILDER_FILES_ARTIFACT_NAME
-    elif (
-        launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
-        or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE
-        or launcher.builder_type == constants.HELIX_MEV_TYPE
-    ):
+    elif launcher.builder_type == "flashbots":
         image = launcher.mev_params.mev_builder_image
         cl_client_name = service_name.split("-")[4]
         cmd.append("--rbuilder.config=" + flashbots_rbuilder.MEV_FILE_PATH_ON_CONTAINER)

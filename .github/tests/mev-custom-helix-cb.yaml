@@ -1,0 +1,112 @@
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:master
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    vc_image: ethpandaops/lighthouse:unstable
+    supernode: true
+    count: 2
+
+additional_services:
+  - dora
+  - spamoor
+
+# Custom MEV config: Helix relay + Commit-Boost sidecar + Flashbots builder
+# Tests inline helix_relay_config override. commit-boost uses default template.
+mev_type: custom
+mev_params:
+  mev_relay: helix
+  mev_sidecar: commit-boost
+  mev_builder: flashbots
+  helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  mev_boost_image: ghcr.io/commit-boost/pbs:latest
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
+  mev_builder_cl_image: ethpandaops/lighthouse:unstable
+  mev_builder_subsidy: 1
+  helix_relay_config: |
+    instance_id: "custom-helix-cb-test"
+
+    network_config: !Custom
+      dir_path: "{{ .GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER }}/config.json"
+      genesis_validator_root: "{{ .GENESIS_VALIDATORS_ROOT }}"
+      genesis_time: {{ .GENESIS_TIME }}
+
+    postgres:
+      hostname: "{{ .POSTGRES_HOST_NAME }}"
+      port: {{ .POSTGRES_PORT }}
+      db_name: "{{ .POSTGRES_DB }}"
+      user: "{{ .POSTGRES_USER }}"
+      password: "{{ .POSTGRES_PASS }}"
+      region: 0
+      region_name: "LOCAL"
+
+    beacon_clients:
+      - url: "{{ .BEACON_URI }}"
+
+    gossip_payload_on_header: false
+
+    simulators:
+      - url: "{{ .BLOCKSIM_URI }}"
+        namespace: flashbots
+        is_merging_simulator: false
+        max_concurrent_tasks: 32
+
+    router_config:
+      enabled_routes:
+        - route: GetValidators
+        - route: SubmitBlock
+        - route: GetTopBid
+        - route: GetHeader
+          rate_limit:
+            replenish_ms: 50
+            burst_size: 20
+        - route: GetPayload
+        - route: RegisterValidators
+        - route: Status
+        - route: ProposerPayloadDelivered
+        - route: BuilderBidsReceived
+        - route: ValidatorRegistration
+        - route: WebSocket
+      shutdown_delay_ms: 12000
+
+    timing_game_config:
+      max_header_delay_ms: 400
+      latest_header_delay_ms_in_slot: 1500
+      default_client_latency_ms: 50
+
+    target_get_payload_propagation_duration_ms: 500
+
+    is_submission_instance: true
+    is_registration_instance: true
+
+    admin_token: "test_admin_token"
+
+    logging:
+      type: Console
+
+    cores:
+      auctioneer: 0
+      sub_workers: [0]
+      reg_workers: [0]
+      tokio: [0]
+
+    is_local_dev: false
+
+
+spamoor_params:
+  spammers:
+    - name: "Blob Spammer"
+      scenario: "blobs"
+      config:
+        throughput: 10
+    - name: "ERC txs"
+      scenario: "erctx"
+      config:
+        throughput: 50
+        max_pending: 400
+
+network_params:
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  churn_limit_quotient: 16
+  prefunded_accounts: '{"0xb9e79d19f651a941757b35830232e7efc77e1c79": {"balance": "100000ETH"}}'

@@ -75,18 +75,6 @@ admin_token: "admin_token"
 logging:
   type: Console
 
-# Optional: Website/dashboard
-website:
-  enabled: true
-  port: {{ .HELIX_RELAY_WEBSITE_PORT }}
-  listen_address: "0.0.0.0"
-  show_config_details: false
-  network_name: "Kurtosis Helix Relay" # TODO - we can configure this to show network
-  relay_url: "https://{{ .HELIX_RELAY_ENDPOINT_URL }}"
-  relay_pubkey: "{{ .HELIX_RELAY_PUBKEY }}"
-  link_beaconchain: "https://holesky.beaconcha.in"
-  link_etherscan: "https://holesky.etherscan.io"
-  link_data_api: "https://relay.example.com/relay/v1/data"
 
 # CPU Core Pinning (CRITICAL for production performance)
 cores:

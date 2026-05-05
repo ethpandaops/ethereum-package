@@ -1355,6 +1355,7 @@ mempool_bridge_params:
 #            Note: Helix uses TimescaleDB (PostgreSQL with time-series extension) for data storage
 # "buildoor" - a self-contained builder+relay service & mev-boost are spun up, powered by [buildoor](https://github.com/ethpandaops/buildoor)
 #              Supports both legacy builder API and ePBS bidding. No separate relay infrastructure or builder participant needed.
+# "custom" - mix and match relay, sidecar, and builder components via mev_params.mev_relay, mev_params.mev_sidecar, mev_params.mev_builder
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -1423,6 +1424,20 @@ mev_params:
   #     [logs.stdout]
   #     level = "debug"
   commit_boost_config: ""
+  # Inline Helix relay config template. When set, replaces the default auto-generated config.
+  # Template variables {{ .GENESIS_TIME }}, {{ .BEACON_URI }}, {{ .GENESIS_VALIDATORS_ROOT }},
+  # {{ .POSTGRES_HOST_NAME }}, {{ .POSTGRES_PORT }}, {{ .POSTGRES_DB }}, {{ .POSTGRES_USER }},
+  # {{ .POSTGRES_PASS }}, {{ .BLOCKSIM_URI }}, {{ .GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER }}
+  # are rendered at enclave creation.
+  helix_relay_config: ""
+  # Component overrides for custom mev_type (required when mev_type is "custom", optional otherwise)
+  # mev_relay: which relay to launch. Valid: "flashbots", "helix", "mev-rs", "mock", "none"
+  # mev_sidecar: which per-validator PBS service. Valid: "mev-boost", "commit-boost", "mev-rs", "none"
+  # mev_builder: which block builder. Valid: "flashbots", "mev-rs", "buildoor", "mock", "none"
+  # When used with a preset mev_type (e.g. "flashbots"), these override individual components.
+  mev_relay: ""
+  mev_sidecar: ""
+  mev_builder: ""
 
 # Parameters for the buildoor builder+relay service (used when mev_type is "buildoor")
 buildoor_params:
@@ -1858,6 +1873,42 @@ network_params:
 </details>
 
 <details>
+    <summary>Custom MEV: Helix relay + Commit-Boost sidecar + Flashbots builder</summary>
+
+```yaml
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:master
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable
+    vc_image: ethpandaops/lighthouse:unstable
+    supernode: true
+    count: 2
+
+mev_type: custom
+mev_params:
+  mev_relay: helix
+  mev_sidecar: commit-boost
+  mev_builder: flashbots
+  helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  mev_boost_image: ghcr.io/commit-boost/pbs:latest
+  mev_builder_image: ethpandaops/reth-rbuilder:develop
+  mev_builder_cl_image: ethpandaops/lighthouse:unstable
+  mev_builder_subsidy: 1
+
+additional_services:
+  - dora
+  - spamoor
+
+network_params:
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  prefunded_accounts: '{"0xb9e79d19f651a941757b35830232e7efc77e1c79": {"balance": "100000ETH"}}'
+```
+
+</details>
+
+<details>
     <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper)</summary>
 
 ```yaml
@@ -2028,8 +2079,18 @@ The package also supports other MEV implementations:
 - `"mev_type": "mev-rs"` - Alternative relay implementation powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 - `"mev_type": "commit-boost"` - Infrastructure powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
 - `"mev_type": "buildoor"` - A self-contained builder+relay service powered by [buildoor](https://github.com/ethpandaops/buildoor). Supports both legacy builder API and ePBS bidding without requiring separate relay infrastructure or a dedicated builder participant.
+- `"mev_type": "custom"` - Mix and match any relay, sidecar, and builder via `mev_params.mev_relay`, `mev_params.mev_sidecar`, `mev_params.mev_builder`. For example, Helix relay + Commit-Boost sidecar + Flashbots builder.
 
 Each implementation provides different features and performance characteristics suitable for various testing and development scenarios.
+
+You can also override individual components on any preset. For example, to use commit-boost as the sidecar with an otherwise-standard flashbots setup:
+
+```yaml
+mev_type: flashbots
+mev_params:
+  mev_sidecar: commit-boost
+  mev_boost_image: ghcr.io/commit-boost/pbs:latest
+```
 
 <details>
     <summary>Caveats when using "mev_type": "flashbots"</summary>
