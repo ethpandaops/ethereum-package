@@ -88,6 +88,7 @@ mev_params:
       sub_workers: [0]
       reg_workers: [0]
       tokio: [0]
+      tcp_bid_submissions_tile: 2
 
     is_local_dev: false
 
