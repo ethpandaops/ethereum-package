@@ -66,7 +66,6 @@ mev_params:
         - route: ProposerPayloadDelivered
         - route: BuilderBidsReceived
         - route: ValidatorRegistration
-        - route: WebSocket
       shutdown_delay_ms: 12000
 
     timing_game_config:
