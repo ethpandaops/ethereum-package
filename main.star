@@ -1055,6 +1055,7 @@ def run(plan, args={}):
                 plan,
                 zkboost_config_template,
                 all_participants,
+                args_with_right_defaults.participants,
                 args_with_right_defaults.zkboost_params,
                 global_node_selectors,
                 global_tolerations,
