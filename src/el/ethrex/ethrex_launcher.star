@@ -158,6 +158,7 @@ def get_config(
             if network_params.network in constants.PUBLIC_NETWORKS
             else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
         ),
+        "--syncmode=full",
         "--log.level={0}".format(VERBOSITY_LEVELS[global_log_level]),
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",

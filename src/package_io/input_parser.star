@@ -471,18 +471,22 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
-        # Inject default mock zkvm if none configured
+        # Inject default mock zkvm if none configured.
         if len(result["zkboost_params"]["zkvms"]) == 0:
             result["zkboost_params"]["zkvms"] = [
                 {
                     "kind": "mock",
-                    "proof_type": "ethrex-zisk",
-                    "mock_proving_time": {"kind": "constant", "ms": 6000},
+                    "proof_type": "reth-zisk",
+                    "mock_proving_time": {
+                        "kind": "random",
+                        "min_ms": 2000,
+                        "max_ms": 8000,
+                    },
                     "mock_proof_size": 128 << 10,
                 },
             ]
         if "RUST_LOG" not in result["zkboost_params"]["env"]:
-            result["zkboost_params"]["env"]["RUST_LOG"] = "info"
+            result["zkboost_params"]["env"]["RUST_LOG"] = "info,zkboost=debug"
 
         has_non_dummy_el = False
         for participant in result["participants"]:
@@ -546,20 +550,6 @@ def input_parser(plan, input_args):
                         idx, proof_timeout
                     )
                 )
-
-            if kind == "ere":
-                if "image" not in zkvm:
-                    fail(
-                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'image'".format(
-                            idx
-                        )
-                    )
-                if "program_url" not in zkvm and "program_path" not in zkvm:
-                    fail(
-                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'program_url' or 'program_path'".format(
-                            idx
-                        )
-                    )
 
             if kind == "external":
                 if zkvm.get("endpoint", "") == "":
@@ -2076,7 +2066,7 @@ def get_default_spamoor_params():
                 "description": "3 type-4 blob transactions per slot with 1-2 sidecars each, gas/blobgas limit 20 gwei",
                 "scenario": "blob-combined",
                 "config": {
-                    "throughput": 3,
+                    "throughput": 6,
                     "sidecars": 2,
                     "max_pending": 6,
                     "max_wallets": 20,
