@@ -1,0 +1,24 @@
+# Test: Should fail with "GPU device overlap" error
+# Expected error: GPU device '0' is used by multiple ere entries
+participants:
+  - count: 1
+    el_type: reth
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    cl_extra_params:
+      - --proof-engine-endpoint=http://zkboost:3000
+      - --proof-types=5,6
+
+additional_services:
+  - zkboost
+
+zkboost_params:
+  zkvms:
+    - kind: ere
+      proof_type: reth-sp1
+      gpu:
+        device_ids: ["0"]
+    - kind: ere
+      proof_type: reth-zisk
+      gpu:
+        device_ids: ["0"]  # Same GPU - should fail

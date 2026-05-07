@@ -1,0 +1,20 @@
+# Test: Should fail with "Duplicate proof_type" error
+# Expected error: Duplicate proof_type 'reth-zisk' in zkboost_params.zkvms
+participants:
+  - count: 1
+    el_type: reth
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    cl_extra_params:
+      - --proof-engine-endpoint=http://zkboost:3000
+      - --proof-types=6
+
+additional_services:
+  - zkboost
+
+zkboost_params:
+  zkvms:
+    - kind: mock
+      proof_type: reth-zisk
+    - kind: mock
+      proof_type: reth-zisk  # Duplicate - should fail
