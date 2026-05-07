@@ -75,18 +75,6 @@ def _validate_zkboost_config(plan, zkvms, requested_proof_types):
     for zkvm in zkvms:
         kind = zkvm.get("kind", "")
         proof_type = zkvm.get("proof_type", "")
-
-        # Check: Duplicate proof_type
-        if proof_type in configured_proof_types:
-            fail(
-                "Duplicate proof_type '{0}' in zkboost_params.zkvms. ".format(
-                    proof_type
-                )
-                + "Each proof_type can only appear once. "
-                + "Found kinds: '{0}' and '{1}'.".format(
-                    configured_proof_types[proof_type], kind
-                )
-            )
         configured_proof_types[proof_type] = kind
 
         # Checks for kind=ere
@@ -157,18 +145,21 @@ def _extract_requested_proof_types(participants):
     """
     requested = {}
     for participant in participants:
-        for params_key in ["cl_extra_params", "vc_extra_params"]:
-            for param in participant.get(params_key, []):
-                if not param.startswith("--proof-types="):
+        # Check both CL and VC extra params for --proof-types flag
+        all_params = list(participant.cl_extra_params) + list(
+            participant.vc_extra_params
+        )
+        for param in all_params:
+            if not param.startswith("--proof-types="):
+                continue
+            ids_str = param.split("=", 1)[1]
+            for id_str in ids_str.split(","):
+                id_str = id_str.strip()
+                if not id_str:
                     continue
-                ids_str = param.split("=", 1)[1]
-                for id_str in ids_str.split(","):
-                    id_str = id_str.strip()
-                    if not id_str:
-                        continue
-                    proof_type_id = int(id_str)
-                    if proof_type_id in PROOF_TYPE_ID_TO_NAME:
-                        requested[PROOF_TYPE_ID_TO_NAME[proof_type_id]] = True
+                proof_type_id = int(id_str)
+                if proof_type_id in PROOF_TYPE_ID_TO_NAME:
+                    requested[PROOF_TYPE_ID_TO_NAME[proof_type_id]] = True
     return requested
 
 
