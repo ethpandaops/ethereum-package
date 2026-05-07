@@ -61,6 +61,87 @@ PROOF_TYPE_ID_TO_NAME = {
 }
 
 
+def _validate_zkboost_config(plan, zkvms, requested_proof_types):
+    """Validate zkboost configuration and fail fast with clear error messages.
+
+    Args:
+        plan: Kurtosis plan for printing info
+        zkvms: List of zkvm configurations from zkboost_params.zkvms
+        requested_proof_types: Dict of proof_type names requested by participants
+    """
+    configured_proof_types = {}  # proof_type -> kind
+    gpu_device_usage = {}  # device_id -> proof_type
+
+    for zkvm in zkvms:
+        kind = zkvm.get("kind", "")
+        proof_type = zkvm.get("proof_type", "")
+
+        # Check: Duplicate proof_type
+        if proof_type in configured_proof_types:
+            fail(
+                "Duplicate proof_type '{0}' in zkboost_params.zkvms. ".format(
+                    proof_type
+                )
+                + "Each proof_type can only appear once. "
+                + "Found kinds: '{0}' and '{1}'.".format(
+                    configured_proof_types[proof_type], kind
+                )
+            )
+        configured_proof_types[proof_type] = kind
+
+        # Checks for kind=ere
+        if kind == "ere":
+            gpu = zkvm.get("gpu", {})
+            device_ids = gpu.get("device_ids", [])
+            has_gpu = len(device_ids) > 0 or gpu.get("count", 0) > 0
+
+            # Check: GPU device overlap
+            for device_id in device_ids:
+                if device_id in gpu_device_usage:
+                    fail(
+                        "GPU device '{0}' is used by multiple ere entries: ".format(
+                            device_id
+                        )
+                        + "'{0}' and '{1}'. ".format(
+                            gpu_device_usage[device_id], proof_type
+                        )
+                        + "Each ere-server requires exclusive GPU access."
+                    )
+                gpu_device_usage[device_id] = proof_type
+
+            # Check: ere requires GPU
+            # Pre-built ere-server images are CUDA-enabled and require GPU for proving.
+            # Once 'kind: verifier' is supported, verification-only nodes won't need
+            # ere-server or GPU at all.
+            if not has_gpu:
+                fail(
+                    "proof_type '{0}' has kind=ere but no GPU configured. ".format(
+                        proof_type
+                    )
+                    + "ere-server requires GPU for proving. "
+                    + "Either add gpu.device_ids or gpu.count, or use 'kind: mock' for testing. "
+                    + "For verification-only use cases, 'kind: verifier' support is coming."
+                )
+
+    # Check: Missing zkvm for requested proof types
+    for proof_type in requested_proof_types:
+        if proof_type not in configured_proof_types:
+            fail(
+                "Participant requests proof_type '{0}' via --proof-types flag, ".format(
+                    proof_type
+                )
+                + "but no zkvm is configured for it in zkboost_params.zkvms. "
+                + "Either add a zkvm entry for '{0}' or remove it from --proof-types. ".format(
+                    proof_type
+                )
+                + "Configured proof_types: {0}.".format(
+                    ", ".join(configured_proof_types.keys())
+                    if configured_proof_types
+                    else "(none)"
+                )
+            )
+
+
 def _extract_requested_proof_types(participants):
     """Extract the set of proof_type names requested by participants via
     --proof-types flags in cl_extra_params and vc_extra_params.
@@ -107,8 +188,10 @@ def launch_zkboost(
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
     # Extract proof types requested by participants via --proof-types flags.
-    # Only launch ere-server instances for proof types that are actually requested.
     requested_proof_types = _extract_requested_proof_types(participants)
+
+    # Validate configuration before launching anything.
+    _validate_zkboost_config(plan, zkboost_params.zkvms, requested_proof_types)
 
     # Launch ere-server services once - shared across all zkboost instances.
     # Each `kind: ere` entry in zkvms config results in a single long-lived ere-server
@@ -123,15 +206,6 @@ def launch_zkboost(
 
         proof_type = zkvm["proof_type"]
         if proof_type in ere_server_endpoints:
-            continue
-
-        # Skip launching ere-server if proof type is not requested by any participant.
-        if len(requested_proof_types) > 0 and proof_type not in requested_proof_types:
-            plan.print(
-                "Skipping ere-server for '{0}': not requested by any participant (requested: {1})".format(
-                    proof_type, ", ".join(requested_proof_types.keys())
-                )
-            )
             continue
 
         endpoint = _launch_ere_server(
@@ -158,10 +232,6 @@ def launch_zkboost(
 
         zkvms = []
         for zkvm in zkboost_params.zkvms:
-            # Skip ere entries whose ere-server was not launched (proof type not requested).
-            if zkvm["kind"] == "ere" and zkvm["proof_type"] not in ere_server_endpoints:
-                continue
-
             entry = {
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
