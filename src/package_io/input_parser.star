@@ -513,6 +513,30 @@ def input_parser(plan, input_args):
                     )
                 )
 
+        # Normalize per-instance zkvms: default `kind: ere` for declared
+        # entries missing it, and synthesize verifier-only zkvms for instances
+        # that omit `zkvms` entirely (covering every proof_type declared by
+        # other instances). Lets a verifier instance be declared with just
+        # `name` + `el_participant_index`.
+        declared_proof_types = []
+        for instance in result["zkboost_params"]["instances"]:
+            if "zkvms" not in instance:
+                continue
+            for zkvm in instance["zkvms"]:
+                if "kind" not in zkvm:
+                    zkvm["kind"] = "ere"
+                pt = zkvm.get("proof_type")
+                if pt and pt not in declared_proof_types:
+                    declared_proof_types.append(pt)
+        if len(declared_proof_types) > 0:
+            for instance in result["zkboost_params"]["instances"]:
+                if "zkvms" in instance:
+                    continue
+                instance["zkvms"] = [
+                    {"kind": "verifier", "proof_type": pt}
+                    for pt in declared_proof_types
+                ]
+
         # Validate zkvm configurations
         valid_proof_types = [
             "ethrex-risc0",

@@ -7,19 +7,13 @@
 #       . \
 #       --args-file .github/tests/zkboost_in_process_verifier.yaml_norun
 #
-# Prerequisites:
-#   - 1 NVIDIA GPU (Blackwell, sm_120 — ethpandaops/ere-server-zisk:master is
-#     compiled for CUDA_ARCH=sm_120; use ghcr.io/eth-act/ere/ere-server-zisk
-#     for broader GPU support).
+# Prerequisites: 1 NVIDIA GPU.
 #
-# Both zkboost and ere-server-zisk are pulled from the ethpandaops mirror at
-# the moving `:master` tag (auto-tracks eth-act upstream master). The mirror
-# for zkboost lands with ethpandaops/eth-client-docker-image-builder#377.
-#
-# `_resolve_ere_versions` only auto-resolves for the official eth-act zkboost
-# image, so we bypass it by setting `image`/`elf_url`/`program_vk_url`
-# explicitly per zkvm. Bump the ere-guests version (v0.9.0 below) when the
-# upstream `:master` zkboost binary bumps its Cargo-pinned ere-guests dep.
+# Tracks upstream zkboost `:latest`. Merge this PR once the upstream release
+# containing the in-process verifier kind (eth-act/zkboost#61) is cut. The
+# launcher auto-derives ere-server-zisk image + ELF + VK URLs from the zkboost
+# image's pinned Cargo.toml; the verifier instance omits `zkvms` and inherits
+# the prover's proof types automatically.
 
 participants:
   # Prover-side: uses zkboost-prover (real ere-server + GPU).
@@ -66,22 +60,15 @@ additional_services:
   - tempo
 
 zkboost_params:
-  image: ethpandaops/zkboost:master
+  image: ghcr.io/eth-act/zkboost/zkboost:latest
   env:
     RUST_LOG: info,zkboost=debug
   instances:
     - name: zkboost-prover
       el_participant_index: 0
       zkvms:
-        - kind: ere
-          proof_type: reth-zisk
-          image: ethpandaops/ere-server-zisk:master
-          elf_url: https://github.com/eth-act/ere-guests/releases/download/v0.9.0/stateless-validator-reth-zisk.elf
+        - proof_type: reth-zisk
           gpu:
             device_ids: ["0"]
     - name: zkboost-verifier
       el_participant_index: 1
-      zkvms:
-        - kind: verifier
-          proof_type: reth-zisk
-          program_vk_url: https://github.com/eth-act/ere-guests/releases/download/v0.9.0/stateless-validator-reth-zisk.vk
