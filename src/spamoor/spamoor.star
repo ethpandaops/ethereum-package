@@ -208,7 +208,7 @@ def new_hosts_template_data(
             index + 1, len(str(len(participant_contexts)))
         )
         rpchost = (
-            "group({0},{1},{2})name({3})".format(
+            "group({0},{1},{2},{1}-{2}-{0},{3})name({3})".format(
                 index_str,
                 cl_client.client_name,
                 el_client.client_name,
