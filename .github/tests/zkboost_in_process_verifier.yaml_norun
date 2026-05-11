@@ -8,10 +8,18 @@
 #       --args-file .github/tests/zkboost_in_process_verifier.yaml_norun
 #
 # Prerequisites:
-#   - 1 NVIDIA GPU
-#   - Custom zkboost image with `--features verifier-zisk` (default in
-#     qu0b/zkboost@qu0b/in-process-verifier). Build locally:
-#       docker build -t zkboost:cpu-verify-experiment -f docker/Dockerfile .
+#   - 1 NVIDIA GPU (Blackwell, sm_120 — ethpandaops/ere-server-zisk:master is
+#     compiled for CUDA_ARCH=sm_120; use ghcr.io/eth-act/ere/ere-server-zisk
+#     for broader GPU support).
+#
+# Both zkboost and ere-server-zisk are pulled from the ethpandaops mirror at
+# the moving `:master` tag (auto-tracks eth-act upstream master). The mirror
+# for zkboost lands with ethpandaops/eth-client-docker-image-builder#377.
+#
+# `_resolve_ere_versions` only auto-resolves for the official eth-act zkboost
+# image, so we bypass it by setting `image`/`elf_url`/`program_vk_url`
+# explicitly per zkvm. Bump the ere-guests version (v0.9.0 below) when the
+# upstream `:master` zkboost binary bumps its Cargo-pinned ere-guests dep.
 
 participants:
   # Prover-side: uses zkboost-prover (real ere-server + GPU).
@@ -58,9 +66,7 @@ additional_services:
   - tempo
 
 zkboost_params:
-  # Locally-built image; auto-resolution of ere/ere-guests versions is bypassed,
-  # so each zkvm entry sets its artifact URLs explicitly.
-  image: zkboost:cpu-verify-experiment
+  image: ethpandaops/zkboost:master
   env:
     RUST_LOG: info,zkboost=debug
   instances:
@@ -69,7 +75,7 @@ zkboost_params:
       zkvms:
         - kind: ere
           proof_type: reth-zisk
-          image: ghcr.io/eth-act/ere/ere-server-zisk:0.8.1-cuda
+          image: ethpandaops/ere-server-zisk:master
           elf_url: https://github.com/eth-act/ere-guests/releases/download/v0.9.0/stateless-validator-reth-zisk.elf
           gpu:
             device_ids: ["0"]
