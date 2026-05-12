@@ -4,16 +4,15 @@
 
 This is a [Kurtosis][kurtosis-repo] package that will spin up a private Ethereum testnet over Docker or Kubernetes with multi-client support, Flashbot's `mev-boost` infrastructure for PBS-related testing/validation, and other useful network tools (transaction spammer, monitoring tools, etc). Kurtosis packages are entirely reproducible and composable, so this will work the same way over Docker or Kubernetes, in the cloud or locally on your machine.
 
-You now have the ability to spin up a private Ethereum testnet or public devnet/testnet (e.g. Goerli, Holesky, Sepolia, dencun-devnet-12, verkle-gen-devnet-2 etc) with a single command. This package is designed to be used for testing, validation, and development of Ethereum clients, and is not intended for production use. For more details check network_params.network in the [configuration section](./README.md#configuration).
+You now have the ability to spin up a private Ethereum testnet or public network (e.g. mainnet, sepolia, hoodi) with a single command. This package is designed to be used for testing, validation, and development of Ethereum clients, and is not intended for production use. For more details check network_params.network in the [configuration section](./README.md#configuration).
 
 Specifically, this [package][package-reference] will:
 
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
 2. Configure & bootstrap a network of Ethereum nodes of *n* size using the genesis data generated above
 3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
-4. Spin up and connect a [testnet verifier](https://github.com/ethereum/merge-testnet-verifier)
-5. Spin up a Grafana and Prometheus instance to observe the network
-6. Spin up a Blobscan instance to analyze blob transactions (EIP-4844)
+4. Spin up a Grafana and Prometheus instance to observe the network
+5. Spin up a Blobscan instance to analyze blob transactions (EIP-4844)
 
 Optional features (enabled via flags or parameter files at runtime):
 
@@ -25,7 +24,6 @@ Optional features (enabled via flags or parameter files at runtime):
   - `commit-boost` - Commit-boost based infrastructure
   - `mock` - Mock builder for testing
   - [More details on PBS implementation](./README.md#proposer-builder-separation-pbs-emulation).
-- Spin up & connect the network to a [beacon metrics gazer service](https://github.com/dapplion/beacon-metrics-gazer) to collect network-wide participation metrics.
 - Spin up and connect a [JSON RPC Snooper](https://github.com/ethDreamer/json_rpc_snoop) to the network log responses & requests between the EL engine API and the CL client.
 - Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
 - Specify the required parameters for the nodes to reach an external block building network
@@ -71,25 +69,12 @@ For optimal performance, we recommend using a cloud provider that allows you to 
 
 ### Shadowforking
 
-In order to enable shadowfork capabilities, you can use the `network_params.network` flag. The expected value is the name of the network you want to shadowfork followed by `-shadowfork`. Please note that `persistent` configuration parameter has to be enabled for shadowforks to work! Current limitation on k8s is it is only working on a single node cluster. For example, to shadowfork the Holesky testnet, you can use the following command:
+In order to enable shadowfork capabilities, you can use the `network_params.network` flag. The expected value is the name of the network you want to shadowfork followed by `-shadowfork`. Please note that `persistent` configuration parameter has to be enabled for shadowforks to work! Current limitation on k8s is it is only working on a single node cluster. For example, to shadowfork the Hoodi testnet, you can use the following command:
 
 ```yaml
 ...
 network_params:
-  network: "holesky-shadowfork"
-persistent: true
-...
-```
-
-#### Shadowforking custom verkle networks
-
-In order to enable shadowfork capabilities for verkle networks, you need to define electra and mention verkle in the network name after shadowfork.
-
-```yaml
-...
-network_params:
-  electra_fork_epoch: 1
-  network: "holesky-shadowfork-verkle"
+  network: "hoodi-shadowfork"
 persistent: true
 ...
 ```
@@ -159,7 +144,7 @@ kurtosis files download my-testnet el-genesis-data ~/Downloads
 
 ## Basic file sharing
 
-Apache is included in the package to allow for basic file sharing. The Apache service is started when additional services are enabled. It exposes the contents of the `network-configs` directory at the URL root, including the canonical metadata files used by the bal-devnets layout:
+Nginx is included in the package to allow for basic file sharing. The nginx service is started when additional services are enabled. It exposes the contents of the `network-configs` directory at the URL root, including the canonical metadata files used by the bal-devnets layout:
 
 - `/enodes.txt` — newline-separated EL enodes
 - `/bootstrap_nodes.txt` — newline-separated CL ENRs
@@ -168,12 +153,12 @@ Apache is included in the package to allow for basic file sharing. The Apache se
 
 ```yaml
 additional_services:
-  - apache
+  - nginx
 ```
 
 ## Syncing one enclave from another
 
-You can have a target enclave (B) sync from a running source enclave (A). Source A runs `apache` and publishes its enodes/ENRs/genesis bundle; target B sets `network: kt-<A-host>:<A-apache-port>` and bootstraps off A.
+You can have a target enclave (B) sync from a running source enclave (A). Source A runs `nginx` and publishes its enodes/ENRs/genesis bundle; target B sets `network: kt-<A-host>:<A-nginx-port>` and bootstraps off A.
 
 Source enclave A — must publish EL/CL ports with a routable NAT IP, otherwise the published enodes advertise unreachable docker-internal IPs:
 
@@ -184,7 +169,7 @@ participants:
   - el_type: reth
     cl_type: teku
 
-apache_port: 9128
+# nginx_port defaults to 9090 — set it here only if you want a different port
 
 port_publisher:
   nat_exit_ip: <A-routable-host-ip>  # or "auto"
@@ -194,10 +179,10 @@ port_publisher:
     enabled: true
 
 additional_services:
-  - apache
+  - nginx
 ```
 
-Target enclave B — point `network` at A's apache:
+Target enclave B — point `network` at A's nginx:
 
 ```yaml
 participants:
@@ -207,7 +192,7 @@ participants:
       - --syncmode=full   # see caveat below
 
 network_params:
-  network: kt-<A-host>:9128
+  network: kt-<A-host>:9090
 ```
 
 Validator counts are auto-zeroed for `kt-` networks, so B is observer-mode by default.
@@ -219,23 +204,32 @@ Validator counts are auto-zeroed for `kt-` networks, so B is observer-mode by de
 
 The flow is intentionally a thin wrapper around the existing devnet-sync path:
 
-1. **Source A's apache** mounts the `el_cl_genesis_data` artifact at `/network-configs/`, generates `enodes.txt` / `bootstrap_nodes.txt` / `bootstrap_nodes.yaml` from the live EL/CL contexts at startup (so the addresses inside reflect the actual NAT IPs and published ports), bundles everything into `network-config.tar`, and serves the tar plus the three loose files from the apache root URL.
+1. **Source A's nginx** mounts the `el_cl_genesis_data` artifact at `/network-configs/`, generates `enodes.txt` / `bootstrap_nodes.txt` / `bootstrap_nodes.yaml` from the live EL/CL contexts at startup (so the addresses inside reflect the actual NAT IPs and published ports), bundles everything into `network-config.tar`, and serves the tar plus the three loose files from the nginx root URL.
 2. **Source A's EL clients** advertise their enodes using `port_publisher.el.nat_exit_ip` (e.g. `geth --nat=extip:<ip>`). That's why the warning fires when `nat_exit_ip` is unset: without it, every enode in `enodes.txt` points at a docker-internal address that nobody else can reach.
 3. **Target B's network launcher** sees `network: kt-<host>:<port>`, curls `http://<host>:<port>/network-config.tar`, and extracts it into the same `el_cl_genesis_data` files artifact name the other launchers use. From here, B's EL/CL launchers fall through to the existing devnet code paths — they read `/network-configs/enodes.txt` and `/network-configs/bootstrap_nodes.txt` to populate `--bootnodes` / `--boot-nodes` flags on the clients. **No client launcher code is aware of cross-enclave sync.**
 4. **Validator counts are zeroed on B** by the existing logic that already excludes non-`kurtosis`/`shadowfork` networks from validator key generation, so B starts as an observer.
 
-In effect, A's apache plays the same role for B that the GitHub-hosted `network-configs/<devnet>/metadata` directory plays for a normal `network: foo-devnet-N` config — it's the canonical bundle of "everything you need to join this network."
+In effect, A's nginx plays the same role for B that the GitHub-hosted `network-configs/<devnet>/metadata` directory plays for a normal `network: foo-devnet-N` config — it's the canonical bundle of "everything you need to join this network."
 
 #### What gets reused vs. what's new
 
 - **Reused:** EL/CL bootnode wiring (`shared_utils.get_devnet_enodes` / `get_devnet_enrs_list`), genesis-bundle file layout, port publishing, NAT-IP enode advertisement.
-- **New:** `kt-<host>:<port>` parsing (`src/network_launcher/remote_enclave.star`), apache file naming + URL layout match the bal-devnets metadata convention.
+- **New:** `kt-<host>:<port>` parsing (`src/network_launcher/remote_enclave.star`), nginx file naming + URL layout match the bal-devnets metadata convention.
 
 #### Limits / gotchas
 
-- The two enclaves must reside on a network where B's curl/discovery containers can reach A's published apache port and EL/CL public ports. Same-host works because Docker publishes ports on the host's interfaces; cross-host works as long as the NAT IP set on A is routable from B.
-- A's apache snapshot is taken at A's startup. If A restarts and gets new node identities, B must be torn down and redeployed against the new bundle.
+- The two enclaves must reside on a network where B's curl/discovery containers can reach A's published nginx port and EL/CL public ports. Same-host works because Docker publishes ports on the host's interfaces; cross-host works as long as the NAT IP set on A is routable from B.
+- A's nginx snapshot is taken at A's startup. If A restarts and gets new node identities, B must be torn down and redeployed against the new bundle.
 - Geth snap-sync brittleness applies as noted above; CL sync is unaffected.
+
+## More config examples
+
+Looking for ready-to-run YAML configs beyond the snippets above?
+
+- [`.github/tests/`](https://github.com/ethpandaops/ethereum-package/tree/main/.github/tests) — every config in this directory is exercised by CI (`per-pr.yml` / `nightly.yml`), so they're the broadest source of known-working examples (single-client, MEV, mix-with-tools, persistence, shadowforks, etc.).
+- [`.github/tests/examples/`](https://github.com/ethpandaops/ethereum-package/tree/main/.github/tests/examples) — opt-in examples that CI does not auto-run (large GPU configs, mainnet/shadowfork setups, the `source-enclave-nginx.yaml` / `remote-enclave-nginx.yaml` pair from the section above).
+
+Copy any of them to your local working directory and run with `kurtosis run --enclave <name> . --args-file <path>`.
 
 ## Configuration
 
@@ -692,9 +686,9 @@ participants_matrix: {}
 network_params:
   # Network name, used to enable syncing of alternative networks
   # Defaults to "kurtosis"
-  # You can sync any public network by setting this to the network name (e.g. "mainnet", "sepolia", "holesky", "hoodi")
-  # You can sync any devnet by setting this to the network name (e.g. "dencun-devnet-12", "verkle-gen-devnet-2")
-  # You can sync from another running kurtosis enclave by setting this to "kt-<host>:<apache-port>"
+  # You can sync any public network by setting this to the network name (e.g. "mainnet", "sepolia", "hoodi")
+  # You can sync any devnet by setting this to its name (e.g. "peerdas-devnet-N", "fusaka-devnet-N", "berlinterop-devnet-N")
+  # You can sync from another running kurtosis enclave by setting this to "kt-<host>:<nginx-port>"
   # (see "Syncing one enclave from another" above)
   network: "kurtosis"
 
@@ -1024,7 +1018,6 @@ network_params:
 # By default we do not launch anything
 # - Default: []
 additional_services:
-  - apache
   - assertoor
   - blobscan
   - blockscout
@@ -1042,6 +1035,7 @@ additional_services:
   - full_beaconchain_explorer
   - grafana
   - mempool_bridge
+  - nginx
   - prometheus
   - rakoon
   - slashoor
@@ -1552,10 +1546,10 @@ xatu_sentry_params:
     - contribution_and_proof
     - blob_sidecar
     - data_column_sidecar
-# Apache params
-# Apache public port to port forward to local machine
-# Default to port None, only set if apache additional service is activated
-apache_port: null
+# Nginx params
+# Nginx public port to port forward to local machine
+# Defaults to 9090; only takes effect when the nginx additional service is enabled
+nginx_port: 9090
 
 # Global tolerations that will be passed to all containers (unless overridden by a more specific toleration)
 # Only works with Kubernetes
@@ -1812,38 +1806,6 @@ port_publisher:
     enabled: true
     public_port_start: 36000
     # Uses default KURTOSIS_IP_ADDR_PLACEHOLDER for additional services
-```
-
-</details>
-
-<details>
-    <summary>Verkle configuration example</summary>
-
-```yaml
-participants:
-  - el_type: geth
-    el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    el_extra_params:
-    - "--override.verkle=<UNIXTIMESTAMP>"
-    cl_type: lighthouse
-    cl_image: sigp/lighthouse:latest
-  - el_type: geth
-    el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    el_extra_params:
-    - "--override.verkle=<UNIXTIMESTAMP>"
-    cl_type: lighthouse
-    cl_image: sigp/lighthouse:latest
-  - el_type: geth
-    el_image: ethpandaops/geth:<VERKLE_IMAGE>
-    el_extra_params:
-    - "--override.verkle=<UNIXTIMESTAMP>"
-    cl_type: lighthouse
-    cl_image: sigp/lighthouse:latest
-network_params:
-  deneb_fork_epoch: 0
-wait_for_finalization: false
-global_log_level: info
-
 ```
 
 </details>
