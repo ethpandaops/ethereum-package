@@ -280,6 +280,7 @@ def get_config(
         cmd.append(
             "--txpool.no-local-transactions-propagation"
         )  # disable tx propagation so that builder will have juicy blocks
+        cmd.append("--rpc.eth-proof-window=3")
         files[
             flashbots_rbuilder.MEV_BUILDER_MOUNT_DIRPATH_ON_SERVICE
         ] = flashbots_rbuilder.MEV_BUILDER_FILES_ARTIFACT_NAME

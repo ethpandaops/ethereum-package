@@ -30,7 +30,7 @@ additional_services:
   - blockscout
   - dugtrio
   - erpc
-  - apache
+  - nginx
   - tracoor
   - spamoor
   - bootnodoor
