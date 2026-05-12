@@ -6,8 +6,8 @@ SERVICE_NAME = "nginx"
 HTTP_PORT_ID = "http"
 HTTP_PORT_NUMBER = 80
 NGINX_CONFIG_FILENAME = "index.html"
-NGINX_ENR_FILENAME = "boot_enr.yaml"
-NGINX_ENODE_FILENAME = "bootnode.txt"
+NGINX_ENR_FILENAME = "bootstrap_nodes.yaml"
+NGINX_ENODE_FILENAME = "enodes.txt"
 NGINX_ENR_LIST_FILENAME = "bootstrap_nodes.txt"
 
 NGINX_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/usr/share/nginx/html/"
@@ -60,7 +60,8 @@ def launch_nginx(
             participant, index, participant_contexts, participant_configs
         )
         all_cl_client_info.append(new_cl_client_info(cl_client.enr))
-        all_el_client_info.append(new_el_client_info(el_client.enode))
+        if el_client != None:
+            all_el_client_info.append(new_el_client_info(el_client.enode))
 
     template_data = new_config_template_data(
         all_cl_client_info,
@@ -144,7 +145,7 @@ def get_config(
         "/network-configs/boot/" + NGINX_ENR_LIST_FILENAME,
         "/network-configs/" + NGINX_ENR_LIST_FILENAME,
         "&&",
-        "cp -R /network-configs /usr/share/nginx/html/",
+        "cp -R /network-configs/. /usr/share/nginx/html/",
         "&&",
         "tar",
         "-czvf",

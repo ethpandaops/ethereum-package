@@ -1,3 +1,5 @@
+stream_over_http_enabled: true
+
 server:
   http_listen_port: {{ .HTTPPort }}
 
@@ -10,14 +12,6 @@ distributor:
         http:
           endpoint: 0.0.0.0:{{ .OTLPHTTPPort }}
 
-ingester:
-  trace_idle_period: 10s
-  max_block_duration: 5m
-
-compactor:
-  compaction:
-    block_retention: {{ .RetentionDuration }}
-
 storage:
   trace:
     backend: local
@@ -25,5 +19,3 @@ storage:
       path: /tmp/tempo/wal
     local:
       path: /tmp/tempo/traces
-
-stream_over_http_enabled: true

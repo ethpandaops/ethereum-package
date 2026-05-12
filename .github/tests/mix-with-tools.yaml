@@ -28,7 +28,7 @@ additional_services:
   - grafana
   - dugtrio
   - erpc
-  - apache
+  - nginx
   - tracoor
   - spamoor
 ethereum_metrics_exporter_enabled: true

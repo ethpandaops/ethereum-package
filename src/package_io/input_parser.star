@@ -15,12 +15,11 @@ DEFAULT_EL_IMAGES = {
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
     "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
-    "dummy": "ethpandaops/dummy-el:master",
 }
 
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
-    "teku": "ethpandaops/teku:master",
+    "teku": "consensys/teku:latest",
     "nimbus": "statusim/nimbus-eth2:multiarch-latest",
     "prysm": "offchainlabs/prysm-beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
@@ -45,7 +44,7 @@ DEFAULT_VC_IMAGES = {
     "lodestar": "chainsafe/lodestar:latest",
     "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
     "prysm": "offchainlabs/prysm-validator:stable",
-    "teku": "ethpandaops/teku:master",
+    "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
@@ -294,7 +293,7 @@ def input_parser(plan, input_args):
 
     # Check for shadowfork + archive mode and unsupported client + archive mode combinations
     is_shadowfork = "shadowfork" in result["network_params"]["network"]
-    unsupported_archive_clients = ["dummy", "ethrex", "ethereumjs", "nimbus"]
+    unsupported_archive_clients = ["ethrex", "ethereumjs", "nimbus"]
 
     for idx, participant in enumerate(result["participants"]):
         el_type = participant["el_type"]
@@ -478,26 +477,30 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
-        # Inject default mock zkvm if none configured
+        # Inject default mock zkvm if none configured.
         if len(result["zkboost_params"]["zkvms"]) == 0:
             result["zkboost_params"]["zkvms"] = [
                 {
                     "kind": "mock",
-                    "proof_type": "ethrex-zisk",
-                    "mock_proving_time": {"kind": "constant", "ms": 6000},
+                    "proof_type": "reth-zisk",
+                    "mock_proving_time": {
+                        "kind": "random",
+                        "min_ms": 2000,
+                        "max_ms": 8000,
+                    },
                     "mock_proof_size": 128 << 10,
                 },
             ]
         if "RUST_LOG" not in result["zkboost_params"]["env"]:
-            result["zkboost_params"]["env"]["RUST_LOG"] = "info"
+            result["zkboost_params"]["env"]["RUST_LOG"] = "info,zkboost=debug"
 
-        has_non_dummy_el = False
+        has_real_el = False
         for participant in result["participants"]:
-            if participant["el_type"] != "dummy":
-                has_non_dummy_el = True
-        if not has_non_dummy_el:
+            if participant["el_type"] != constants.EL_TYPE.none:
+                has_real_el = True
+        if not has_real_el:
             fail(
-                "zkboost is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
+                "zkboost requires at least one participant with a real EL client (geth, reth, nethermind, etc.) to connect to, but all participants have el_type=None."
             )
 
         for idx, instance in enumerate(result["zkboost_params"]["instances"]):
@@ -554,20 +557,6 @@ def input_parser(plan, input_args):
                     )
                 )
 
-            if kind == "ere":
-                if "image" not in zkvm:
-                    fail(
-                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'image'".format(
-                            idx
-                        )
-                    )
-                if "program_url" not in zkvm and "program_path" not in zkvm:
-                    fail(
-                        "zkboost_params.zkvms[{0}]: ere zkvm requires 'program_url' or 'program_path'".format(
-                            idx
-                        )
-                    )
-
             if kind == "external":
                 if zkvm.get("endpoint", "") == "":
                     fail(
@@ -608,10 +597,10 @@ def input_parser(plan, input_args):
 
     if (
         "bootnodoor" not in result["additional_services"]
-        and result["participants"][0]["el_type"] == "dummy"
+        and result["participants"][0]["el_type"] == constants.EL_TYPE.none
     ):
         fail(
-            "First participant cannot use dummy EL without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
+            "First participant cannot have el_type=None without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
         )
 
     if (
@@ -621,6 +610,22 @@ def input_parser(plan, input_args):
     ):
         fail(
             "Mempool bridge is enabled but network is not mainnet, sepolia, hoodi or shadowfork, please set network to mainnet, sepolia, hoodi or shadowfork"
+        )
+
+    apache_deprecation_warning = False
+    if result.get("apache_port") != None and "nginx_port" not in input_args:
+        result["nginx_port"] = result["apache_port"]
+        apache_deprecation_warning = True
+    if "additional_services" in result and "apache" in result["additional_services"]:
+        result["additional_services"] = [
+            "nginx" if svc == "apache" else svc for svc in result["additional_services"]
+        ]
+        apache_deprecation_warning = True
+    if apache_deprecation_warning:
+        plan.print(
+            "WARNING: 'apache' is deprecated and has been removed. "
+            + "Use 'nginx' / 'nginx_port' instead; "
+            + "your apache settings have been silently routed to nginx."
         )
 
     return struct(
@@ -736,6 +741,9 @@ def input_parser(plan, input_args):
                 "max_per_epoch_activation_churn_limit"
             ],
             churn_limit_quotient=result["network_params"]["churn_limit_quotient"],
+            confirmation_byzantine_threshold=result["network_params"][
+                "confirmation_byzantine_threshold"
+            ],
             ejection_balance=result["network_params"]["ejection_balance"],
             eth1_follow_distance=result["network_params"]["eth1_follow_distance"],
             altair_fork_epoch=result["network_params"]["altair_fork_epoch"],
@@ -875,6 +883,7 @@ def input_parser(plan, input_args):
             launch_adminer=result["mev_params"]["launch_adminer"],
             run_multiple_relays=result["mev_params"]["run_multiple_relays"],
             helix_relay_image=result["mev_params"]["helix_relay_image"],
+            commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
         )
         if result["mev_params"]
         else None,
@@ -934,18 +943,12 @@ def input_parser(plan, input_args):
             image=result["grafana_params"]["image"],
         ),
         tempo_params=struct(
-            retention_duration=result["tempo_params"]["retention_duration"],
-            ingestion_rate_limit=result["tempo_params"]["ingestion_rate_limit"],
-            ingestion_burst_limit=result["tempo_params"]["ingestion_burst_limit"],
-            max_search_duration=result["tempo_params"]["max_search_duration"],
-            max_bytes_per_trace=result["tempo_params"]["max_bytes_per_trace"],
             min_cpu=result["tempo_params"]["min_cpu"],
             max_cpu=result["tempo_params"]["max_cpu"],
             min_mem=result["tempo_params"]["min_mem"],
             max_mem=result["tempo_params"]["max_mem"],
             image=result["tempo_params"]["image"],
         ),
-        apache_port=result["apache_port"],
         nginx_port=result["nginx_port"],
         assertoor_params=struct(
             image=result["assertoor_params"]["image"],
@@ -1211,6 +1214,9 @@ def parse_network_params(plan, input_args):
     # validation of the above defaults
     for index, participant in enumerate(result["participants"]):
         el_type = participant["el_type"]
+        if el_type == None or el_type in ("None", "null", "Null"):
+            participant["el_type"] = constants.EL_TYPE.none
+            el_type = constants.EL_TYPE.none
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
         remote_signer_type = participant["remote_signer_type"]
@@ -1238,7 +1244,7 @@ def parse_network_params(plan, input_args):
             )
 
         el_image = participant["el_image"]
-        if el_image == "":
+        if el_image == "" and el_type != constants.EL_TYPE.none:
             # Get devnet-modified images if network contains 'devnet'
             effective_el_images = get_devnet_modified_images(
                 result["network_params"]["network"], DEFAULT_EL_IMAGES
@@ -1556,8 +1562,8 @@ def default_input_args(input_args):
         "persistent": False,
         "mev_type": None,
         "xatu_sentry_enabled": False,
-        "apache_port": None,
-        "nginx_port": None,
+        "apache_port": None,  # backwards-compat: silently mapped to nginx_port
+        "nginx_port": 9090,
         "global_tolerations": [],
         "global_node_selectors": {},
         "use_remote_signer": False,
@@ -1590,6 +1596,7 @@ def default_network_params():
         "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 8,
         "churn_limit_quotient": 65536,
+        "confirmation_byzantine_threshold": 25,
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
@@ -1672,6 +1679,7 @@ def default_minimal_network_params():
         "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 4,
         "churn_limit_quotient": 32,
+        "confirmation_byzantine_threshold": 25,
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
@@ -1946,6 +1954,7 @@ def get_default_mev_params(mev_type, preset):
         "launch_adminer": launch_adminer,
         "run_multiple_relays": False,
         "helix_relay_image": constants.DEFAULT_HELIX_RELAY_IMAGE,
+        "commit_boost_config": "",
     }
 
 
@@ -2007,11 +2016,6 @@ def get_default_grafana_params():
 
 def get_default_tempo_params():
     return {
-        "retention_duration": "12h",
-        "ingestion_rate_limit": 20971520,  # 20MB
-        "ingestion_burst_limit": 52428800,  # 50MB
-        "max_search_duration": "30s",
-        "max_bytes_per_trace": 52428800,  # 50MB
         "min_cpu": 10,
         "max_cpu": 1000,
         "min_mem": 128,
@@ -2077,7 +2081,7 @@ def get_default_spamoor_params():
                 "description": "3 type-4 blob transactions per slot with 1-2 sidecars each, gas/blobgas limit 20 gwei",
                 "scenario": "blob-combined",
                 "config": {
-                    "throughput": 3,
+                    "throughput": 6,
                     "sidecars": 2,
                     "max_pending": 6,
                     "max_wallets": 20,
