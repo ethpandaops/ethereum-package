@@ -341,7 +341,7 @@ def launch_participant_network(
             participant.node_selectors,
             global_node_selectors,
         )
-        if participant.ethereum_metrics_exporter_enabled:
+        if participant.ethereum_metrics_exporter_enabled and el_context != None:
             pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
             ethereum_metrics_exporter_service_name = (
@@ -375,7 +375,10 @@ def launch_participant_network(
             xatu_sentry_context = None
 
         if participant.xatu_sentry_enabled:
-            pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
+            if el_type == constants.EL_TYPE.none:
+                pair_name = "{0}-{1}".format(index_str, cl_type)
+            else:
+                pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
             xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
 
@@ -399,7 +402,7 @@ def launch_participant_network(
 
         # Create snooper RPC context for all participants if snooper is enabled
         snooper_el_rpc_context = None
-        if participant.snooper_enabled:
+        if participant.snooper_enabled and el_context != None:
             snooper_service_name = "snooper-rpc-{0}-{1}".format(
                 index_str,
                 el_type,
@@ -482,20 +485,28 @@ def launch_participant_network(
 
         all_snooper_beacon_contexts.append(snooper_beacon_context)
 
-        full_name = (
-            "{0}-{1}-{2}-{3}".format(
-                index_str,
-                el_type,
-                cl_type,
-                vc_type,
+        # Match cl_launcher naming: no el segment when EL_TYPE.none (cl-idx-cl vs cl-idx-cl-el).
+        if el_type == constants.EL_TYPE.none:
+            full_name = (
+                "{0}-{1}-{2}".format(index_str, cl_type, vc_type)
+                if participant.cl_type != participant.vc_type
+                else "{0}-{1}".format(index_str, cl_type)
             )
-            if participant.cl_type != participant.vc_type
-            else "{0}-{1}-{2}".format(
-                index_str,
-                el_type,
-                cl_type,
+        else:
+            full_name = (
+                "{0}-{1}-{2}-{3}".format(
+                    index_str,
+                    el_type,
+                    cl_type,
+                    vc_type,
+                )
+                if participant.cl_type != participant.vc_type
+                else "{0}-{1}-{2}".format(
+                    index_str,
+                    el_type,
+                    cl_type,
+                )
             )
-        )
 
         if participant.use_remote_signer:
             remote_signer_context = remote_signer.launch(
