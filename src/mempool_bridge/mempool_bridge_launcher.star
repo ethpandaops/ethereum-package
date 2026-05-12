@@ -91,6 +91,8 @@ def launch_mempool_bridge(
     # Build target endpoints from all EL contexts based on mode
     target_endpoints = []
     for context in all_el_contexts:
+        if context == None:
+            continue
         if mode == "rpc":
             # For RPC mode, use HTTP RPC endpoint
             rpc_url = "http://{0}:{1}".format(context.dns_name, context.rpc_port_num)

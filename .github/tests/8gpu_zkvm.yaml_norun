@@ -26,24 +26,24 @@ participants:
     count: 2
   - cl_type: lighthouse
     cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
-    el_type: reth
-    el_image: ghcr.io/paradigmxyz/reth
+    el_type: None
     supernode: false
     cl_extra_params:
       - --target-peers=3
       - --proof-engine-endpoint=http://zkboost-1:3000
       - --proof-types=6
-    vc_extra_params:
-      - --proof-engine-endpoint=http://zkboost-1:3000
-      - --proof-types=6
-    count: 2
+    count: 1
+  - cl_type: prysm
+    cl_image: ethpandaops/prysm-beacon-chain:optional-proofs
+    el_type: None
+    supernode: false
+    cl_extra_params:
+      - --enable-zkvm
+      - --verifier-rest-api-provider=http://zkboost-1:3000
+    count: 1
 
 network_params:
-  fulu_fork_epoch: 0
-  seconds_per_slot: 6
-
-snooper_enabled: false
-global_log_level: debug
+  seconds_per_slot: 30
 
 additional_services:
   - zkboost
