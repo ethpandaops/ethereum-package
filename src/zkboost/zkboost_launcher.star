@@ -96,6 +96,12 @@ def launch_zkboost(
             )
 
         el_client = participant_contexts[el_participant_index].el_context
+        if el_client == None:
+            fail(
+                "zkboost instance '{0}' references el_participant_index {1} which has el_type=None".format(
+                    name, el_participant_index
+                )
+            )
         el_endpoint = "http://{0}:{1}".format(
             el_client.dns_name, el_client.rpc_port_num
         )
