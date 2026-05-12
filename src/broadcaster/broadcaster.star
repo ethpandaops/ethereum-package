@@ -30,6 +30,7 @@ def get_config(
         cmd=[
             "http://{0}:{1}".format(context.dns_name, context.rpc_port_num)
             for context in all_el_contexts
+            if context != None
         ],
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,

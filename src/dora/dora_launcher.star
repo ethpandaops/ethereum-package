@@ -58,9 +58,9 @@ def launch_dora(
             )
         )
 
-        # Skip dummy EL clients - they don't have real execution endpoints
+        # Skip participants without an EL client
         el_type = participant_configs[index].el_type
-        if el_type == "dummy":
+        if el_type == constants.EL_TYPE.none or el_client == None:
             continue
 
         snooper_el_engine_context = participant_contexts[
