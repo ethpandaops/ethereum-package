@@ -946,13 +946,13 @@ network_params:
   perfect_peerdas_enabled: false
 
   # Gas limit for the network
-  # Default to 0
+  # Default to 200000000
   # If set to 0, the gas limit will be set to the default gas limit for the clients
   # Set this value to gas limit in millionths of a gwei
-  # Example: gas_limit: 60000000
+  # Example: gas_limit: 200000000
   # This will override the gas limit for each EL client
   # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
-  gas_limit: 0
+  gas_limit: 200000000
 
 
   # BPO
