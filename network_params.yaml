@@ -90,7 +90,7 @@ network_params:
   additional_mnemonics: []
   genesis_delay: 20
   genesis_time: 0
-  genesis_gaslimit: 60000000
+  genesis_gaslimit: 200000000
   max_per_epoch_activation_churn_limit: 8
   churn_limit_quotient: 65536
   confirmation_byzantine_threshold: 25
