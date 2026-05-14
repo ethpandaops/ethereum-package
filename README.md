@@ -792,9 +792,9 @@ network_params:
   genesis_time: 0
 
   # The gas limit of the network set at genesis
-  # Defaults to 200000000
+  # Defaults to 60000000, but bumped to 200000000 when gloas_fork_epoch is set (not far-future)
 
-  genesis_gaslimit: 200000000
+  genesis_gaslimit: 60000000
 
   # Max churn rate for the network introduced by
   # EIP-7514 https://eips.ethereum.org/EIPS/eip-7514
@@ -946,13 +946,13 @@ network_params:
   perfect_peerdas_enabled: false
 
   # Gas limit for the network
-  # Default to 200000000
+  # Default to 0, but bumped to 200000000 when gloas_fork_epoch is set (not far-future)
   # If set to 0, the gas limit will be set to the default gas limit for the clients
   # Set this value to gas limit in millionths of a gwei
-  # Example: gas_limit: 200000000
+  # Example: gas_limit: 60000000
   # This will override the gas limit for each EL client
   # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
-  gas_limit: 200000000
+  gas_limit: 0
 
 
   # BPO

@@ -1205,6 +1205,14 @@ def parse_network_params(plan, input_args):
                     participants.append(participant_copy)
             result["participants"] = participants
 
+    # When GLOAS is scheduled, default the gas limits to 200M unless the user set them explicitly.
+    if result["network_params"]["gloas_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
+        user_network_params = input_args.get("network_params", {})
+        if "genesis_gaslimit" not in user_network_params:
+            result["network_params"]["genesis_gaslimit"] = 200000000
+        if "gas_limit" not in user_network_params:
+            result["network_params"]["gas_limit"] = 200000000
+
     if "snooper_params" in input_args:
         for sub_attr in input_args["snooper_params"]:
             result["snooper_params"][sub_attr] = input_args["snooper_params"][sub_attr]
@@ -1593,7 +1601,7 @@ def default_network_params():
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
         "genesis_time": 0,
-        "genesis_gaslimit": 200000000,
+        "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 8,
         "churn_limit_quotient": 65536,
         "confirmation_byzantine_threshold": 25,
@@ -1634,7 +1642,7 @@ def default_network_params():
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
-        "gas_limit": 200000000,
+        "gas_limit": 0,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
@@ -1676,7 +1684,7 @@ def default_minimal_network_params():
         "preregistered_validator_count": 0,
         "genesis_delay": 20,
         "genesis_time": 0,
-        "genesis_gaslimit": 200000000,
+        "genesis_gaslimit": 60000000,
         "max_per_epoch_activation_churn_limit": 4,
         "churn_limit_quotient": 32,
         "confirmation_byzantine_threshold": 25,
@@ -1717,7 +1725,7 @@ def default_minimal_network_params():
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
-        "gas_limit": 200000000,
+        "gas_limit": 0,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
