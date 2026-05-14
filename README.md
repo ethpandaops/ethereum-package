@@ -792,7 +792,7 @@ network_params:
   genesis_time: 0
 
   # The gas limit of the network set at genesis
-  # Defaults to 60000000
+  # Defaults to 60000000, but bumped to 200000000 when gloas_fork_epoch is set (not far-future)
 
   genesis_gaslimit: 60000000
 
@@ -946,7 +946,7 @@ network_params:
   perfect_peerdas_enabled: false
 
   # Gas limit for the network
-  # Default to 0
+  # Default to 0, but bumped to 200000000 when gloas_fork_epoch is set (not far-future)
   # If set to 0, the gas limit will be set to the default gas limit for the clients
   # Set this value to gas limit in millionths of a gwei
   # Example: gas_limit: 60000000
