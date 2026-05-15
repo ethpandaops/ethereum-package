@@ -50,6 +50,7 @@ def launch_participant_network(
     parallel_keystore_generation,
     extra_files_artifacts,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url,
     backend,
 ):
     network_id = network_params.network_id

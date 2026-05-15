@@ -220,9 +220,13 @@ def run(plan, args={}):
 
     otel_clickhouse_host = None
     otel_clickhouse_port = None
+    otel_otlp_grpc_url = None
     if "otel" in args_with_right_defaults.additional_services:
         otel_clickhouse_host = otel.CLICKHOUSE_SERVICE_NAME
         otel_clickhouse_port = otel.CLICKHOUSE_HTTP_PORT
+        otel_otlp_grpc_url = "http://{}:{}".format(
+            otel.COLLECTOR_SERVICE_NAME, otel.COLLECTOR_OTLP_GRPC_PORT
+        )
 
     if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
         plan.print("Generating mev-rs builder config file")
@@ -279,6 +283,7 @@ def run(plan, args={}):
         parallel_keystore_generation,
         extra_files_artifacts,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
         detected_backend,
     )
 
