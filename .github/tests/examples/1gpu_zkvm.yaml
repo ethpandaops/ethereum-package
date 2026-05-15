@@ -1,0 +1,81 @@
+# EIP-8025 testnet with zkboost backed by a single GPU ZisK prover.
+#
+#
+# Run with:
+#   kurtosis run --enclave eip8025-zkboost-1gpu \
+#       . \
+#       --args-file .github/tests/1gpu_zkvm.yaml_norun
+#
+# Prerequisites:
+#   - NVIDIA GPU with drivers installed
+#   - NVIDIA Container Toolkit configured for Docker
+
+participants:
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: reth
+    el_image: ghcr.io/paradigmxyz/reth
+    supernode: true
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    count: 2
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: None
+    supernode: false
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-1:3000
+      - --proof-types=6
+    count: 1
+
+network_params:
+  preset: minimal
+  seconds_per_slot: 30
+  prefunded_accounts: '{"0xb9e79D19f651a941757b35830232E7EFC77E1c79": {"balance": "100000ETH"}}'
+
+additional_services:
+  - zkboost
+  - dora
+  - prometheus
+  - grafana
+  - tempo
+  - spamoor
+
+mev_type: flashbots
+mev_params:
+  mev_builder_subsidy: 1
+  mev_builder_cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+  mev_builder_cl_extra_params:
+    - --proof-engine-endpoint=http://zkboost-1:3000
+    - --proof-types=6
+
+spamoor_params:
+  spammers:
+    - name: "Blob Spammer (Kurtosis Package)"
+      scenario: "blobs"
+      config:
+        throughput: 1
+    - name: "ERC txs"
+      scenario: "erctx"
+      config:
+        throughput: 1
+
+
+zkboost_params:
+  image: ghcr.io/eth-act/zkboost/zkboost:0.6.0
+  env:
+    RUST_LOG: info,zkboost=debug
+  instances:
+    - name: zkboost-1
+      el_participant_index: 0
+  zkvms:
+    - kind: ere
+      proof_type: reth-zisk
+      gpu:
+        device_ids: ["0"]

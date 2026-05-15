@@ -69,8 +69,8 @@ def launch_assertoor(
 
         client_info = new_client_info(
             cl_client.beacon_http_url,
-            el_client.dns_name,
-            el_client.rpc_port_num,
+            el_client.dns_name if el_client != None else "",
+            el_client.rpc_port_num if el_client != None else 0,
             participant.snooper_el_engine_context,
             participant.snooper_beacon_context,
             full_name,
@@ -140,22 +140,6 @@ def get_config(
     )
 
     IMAGE_NAME = assertoor_params.image
-    default_assertoor_image = (
-        docker_cache_params.url
-        + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
-        + constants.DEFAULT_ASSERTOOR_IMAGE
-    )
-    if assertoor_params.image == default_assertoor_image:
-        if network_params.gloas_fork_epoch < constants.FAR_FUTURE_EPOCH:
-            IMAGE_NAME = (
-                docker_cache_params.url
-                + (
-                    docker_cache_params.dockerhub_prefix
-                    if docker_cache_params.enabled
-                    else ""
-                )
-                + "ethpandaops/assertoor:gloas-support"
-            )
 
     return ServiceConfig(
         image=IMAGE_NAME,

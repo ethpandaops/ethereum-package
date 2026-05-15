@@ -24,13 +24,13 @@ runs:
 
     - name: Login to Docker Hub
       if: env.AUTH_EXISTS == 'true'
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+      uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
       with:
         username: ${{ inputs.username }}
         password: ${{ inputs.password }}
 
     - name: Install regctl
-      uses: regclient/actions/regctl-installer@ce5fd131e371ffcdd7508b478cb223b3511a9183
+      uses: regclient/actions/regctl-installer@1b705e32d40851370799ea5814e83d0a5f6a70dc # v0.1.0
 
     - name: Check Docker Hub Rate Limits
       shell: bash

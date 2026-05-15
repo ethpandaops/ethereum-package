@@ -1,0 +1,18 @@
+# Example: sync a target enclave (B) from a source enclave (A) over nginx.
+#
+# 1) Start source enclave A first, using `source-enclave-nginx.yaml` (or any
+#    config with `nginx` in `additional_services`; `nginx_port` defaults to 9090).
+#    Note A's host IP.
+# 2) Then start target enclave B with this file, replacing the IP below with
+#    the routable host/IP from step 1. B will curl
+#    `http://<A-host>:9090/network-config.tar` and bootstrap off A.
+#
+# Validator counts are auto-zeroed for `kt-` networks, so B starts as an
+# observer.
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    el_extra_params:
+      - --syncmode=full
+network_params:
+  network: kt-192.168.58.159:9090

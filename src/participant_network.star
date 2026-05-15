@@ -19,6 +19,7 @@ launch_public_network = import_module("./network_launcher/public_network.star")
 launch_devnet = import_module("./network_launcher/devnet.star")
 launch_kurtosis = import_module("./network_launcher/kurtosis.star")
 launch_shadowfork = import_module("./network_launcher/shadowfork.star")
+launch_remote_enclave = import_module("./network_launcher/remote_enclave.star")
 
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
@@ -99,6 +100,19 @@ def launch_participant_network(
             network_params,
             total_number_of_validator_keys,
             latest_block.files_artifacts[0] if latest_block != "" else "",
+            global_tolerations,
+            global_node_selectors,
+        )
+    elif network_params.network.startswith(constants.NETWORK_NAME.remote_enclave):
+        # We are syncing from another running kurtosis enclave
+        (
+            el_cl_data,
+            final_genesis_timestamp,
+            network_id,
+            validator_data,
+        ) = launch_remote_enclave.launch(
+            plan,
+            network_params.network,
             global_tolerations,
             global_node_selectors,
         )
@@ -341,7 +355,7 @@ def launch_participant_network(
             participant.node_selectors,
             global_node_selectors,
         )
-        if participant.ethereum_metrics_exporter_enabled:
+        if participant.ethereum_metrics_exporter_enabled and el_context != None:
             pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
             ethereum_metrics_exporter_service_name = (
@@ -375,7 +389,10 @@ def launch_participant_network(
             xatu_sentry_context = None
 
         if participant.xatu_sentry_enabled:
-            pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
+            if el_type == constants.EL_TYPE.none:
+                pair_name = "{0}-{1}".format(index_str, cl_type)
+            else:
+                pair_name = "{0}-{1}-{2}".format(index_str, cl_type, el_type)
 
             xatu_sentry_service_name = "xatu-sentry-{0}".format(pair_name)
 
@@ -399,7 +416,7 @@ def launch_participant_network(
 
         # Create snooper RPC context for all participants if snooper is enabled
         snooper_el_rpc_context = None
-        if participant.snooper_enabled:
+        if participant.snooper_enabled and el_context != None:
             snooper_service_name = "snooper-rpc-{0}-{1}".format(
                 index_str,
                 el_type,
@@ -413,6 +430,7 @@ def launch_participant_network(
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.snooper_params,
             )
             global_other_index += 1
             plan.print(
@@ -470,6 +488,7 @@ def launch_participant_network(
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.snooper_params,
             )
             plan.print(
                 "Successfully added {0} snooper participants".format(
@@ -480,20 +499,28 @@ def launch_participant_network(
 
         all_snooper_beacon_contexts.append(snooper_beacon_context)
 
-        full_name = (
-            "{0}-{1}-{2}-{3}".format(
-                index_str,
-                el_type,
-                cl_type,
-                vc_type,
+        # Match cl_launcher naming: no el segment when EL_TYPE.none (cl-idx-cl vs cl-idx-cl-el).
+        if el_type == constants.EL_TYPE.none:
+            full_name = (
+                "{0}-{1}-{2}".format(index_str, cl_type, vc_type)
+                if participant.cl_type != participant.vc_type
+                else "{0}-{1}".format(index_str, cl_type)
             )
-            if participant.cl_type != participant.vc_type
-            else "{0}-{1}-{2}".format(
-                index_str,
-                el_type,
-                cl_type,
+        else:
+            full_name = (
+                "{0}-{1}-{2}-{3}".format(
+                    index_str,
+                    el_type,
+                    cl_type,
+                    vc_type,
+                )
+                if participant.cl_type != participant.vc_type
+                else "{0}-{1}-{2}".format(
+                    index_str,
+                    el_type,
+                    cl_type,
+                )
             )
-        )
 
         if participant.use_remote_signer:
             remote_signer_context = remote_signer.launch(

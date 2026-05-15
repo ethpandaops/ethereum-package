@@ -7,6 +7,7 @@ prysm = import_module("./prysm/prysm_launcher.star")
 teku = import_module("./teku/teku_launcher.star")
 grandine = import_module("./grandine/grandine_launcher.star")
 consensoor = import_module("./consensoor/consensoor_launcher.star")
+caplin = import_module("./caplin/caplin_launcher.star")
 
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
@@ -108,6 +109,16 @@ def launch(
             "get_cl_context": consensoor.get_cl_context,
             "get_blobber_config": consensoor.get_blobber_config,
         },
+        constants.CL_TYPE.caplin: {
+            "launcher": caplin.new_caplin_launcher(
+                el_cl_data,
+                jwt_file,
+            ),
+            "launch_method": caplin.launch,
+            "get_beacon_config": caplin.get_beacon_config,
+            "get_cl_context": caplin.get_cl_context,
+            "get_blobber_config": caplin.get_blobber_config,
+        },
     }
 
     all_snooper_el_engine_contexts = []
@@ -172,7 +183,10 @@ def launch(
             index + 1, len(str(len(args_with_right_defaults.participants)))
         )
 
-        cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
+        if el_type == constants.EL_TYPE.none:
+            cl_service_name = "cl-{0}-{1}".format(index_str, cl_type)
+        else:
+            cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
         if participant.validator_count != 0:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
@@ -183,7 +197,7 @@ def launch(
 
         cl_context = None
         snooper_el_engine_context = None
-        if participant.snooper_enabled:
+        if participant.snooper_enabled and el_context != None:
             snooper_service_name = "snooper-engine-{0}-{1}-{2}".format(
                 index_str, cl_type, el_type
             )
@@ -196,6 +210,7 @@ def launch(
                 args_with_right_defaults.port_publisher,
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.snooper_params,
             )
             global_other_index += 1
             plan.print(
@@ -236,7 +251,10 @@ def launch(
                     )
 
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
-        full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
+        if el_type == constants.EL_TYPE.none:
+            full_name = "{0}-{1}".format(index_str, cl_type)
+        else:
+            full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
         cl_binary_artifact = binary_artifacts.get(index, {}).get("cl", None)
 

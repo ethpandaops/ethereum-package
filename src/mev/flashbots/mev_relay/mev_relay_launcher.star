@@ -15,7 +15,6 @@ MEV_RELAY_WEBSITE_PORT = 9060
 MEV_RELAY_PPROF_PORT = 6060
 NETWORK_ID_TO_NAME = {
     "1": "mainnet",
-    "17000": "holesky",
     "11155111": "sepolia",
     "560048": "hoodi",
 }

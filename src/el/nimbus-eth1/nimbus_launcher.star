@@ -135,6 +135,7 @@ def get_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
+        "executionClient",
         "--log-level={0}".format(log_level),
         "--data-dir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--net-key={0}/nodekey".format(EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER),
@@ -256,7 +257,7 @@ def get_config(
     if el_binary_artifact != None:
         config_args["entrypoint"] = ["sh", "-c"]
         config_args["cmd"] = [
-            "cp /opt/bin/{0} /home/user/nimbus-eth1/build/nimbus_execution_client && /home/user/nimbus-eth1/build/nimbus_execution_client ".format(
+            "cp /opt/bin/{0} /usr/local/bin/nimbus && nimbus ".format(
                 el_binary_artifact.filename
             )
             + " ".join(cmd)

@@ -93,6 +93,7 @@ network_params:
   genesis_gaslimit: 60000000
   max_per_epoch_activation_churn_limit: 8
   churn_limit_quotient: 65536
+  confirmation_byzantine_threshold: 25
   ejection_balance: 16000000000
   eth1_follow_distance: 2048
   min_validator_withdrawability_delay: 256
@@ -111,12 +112,10 @@ network_params:
   gloas_fork_epoch: 18446744073709551615
   network_sync_base_url: https://snapshots.ethpandaops.io/
   force_snapshot_sync: false
-  data_column_sidecar_subnet_count: 128
   samples_per_slot: 8
   custody_requirement: 4
   max_blobs_per_block_electra: 9
   max_request_blocks_deneb: 128
-  max_request_blob_sidecars_electra: 1152
   target_blobs_per_block_electra: 6
   base_fee_update_fraction_electra: 5007716
   additional_preloaded_contracts: {}
@@ -146,7 +145,8 @@ network_params:
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
   validator_balance: 32
   min_epochs_for_data_column_sidecars_requests: 4096
-  min_epochs_for_block_requests: 33024
+  builder_count: 0
+  builder_balance: 100
 
 additional_services: []
 dora_params:
@@ -185,7 +185,11 @@ checkpointz_params:
   image: "ethpandaops/checkpointz:latest"
 wait_for_finalization: false
 global_log_level: info
-snooper_enabled: false
+snooper_params:
+  enabled: false
+  image: ""
+  extra_args: []
+  extra_env_vars: {}
 ethereum_metrics_exporter_enabled: false
 parallel_keystore_generation: false
 disable_peer_scoring: false
@@ -211,6 +215,7 @@ mev_params:
     labels: {}
   run_multiple_relays: false
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
+  commit_boost_config: ""
   custom_flood_params:
     interval_between_transactions: 1
 buildoor_params:
@@ -243,15 +248,14 @@ xatu_sentry_params:
     - contribution_and_proof
     - blob_sidecar
     - data_column_sidecar
-apache_port: 40000
-nginx_port: 50000
+nginx_port: 9090
 global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.2.4
+  image: ethpandaops/ethereum-genesis-generator:6.0.6
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER

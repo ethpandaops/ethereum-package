@@ -23,7 +23,6 @@ erpc = import_module("./src/erpc/erpc_launcher.star")
 blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 forky = import_module("./src/forky/forky_launcher.star")
 tracoor = import_module("./src/tracoor/tracoor_launcher.star")
-apache = import_module("./src/apache/apache_launcher.star")
 nginx = import_module("./src/nginx/nginx_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
@@ -65,7 +64,7 @@ get_prefunded_accounts = import_module(
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
 slashoor = import_module("./src/slashoor/slashoor_launcher.star")
-ews = import_module("./src/ews/ews_launcher.star")
+zkboost = import_module("./src/zkboost/zkboost_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -125,7 +124,6 @@ def run(plan, args={}):
     global_tolerations = args_with_right_defaults.global_tolerations
     global_node_selectors = args_with_right_defaults.global_node_selectors
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
-    apache_port = args_with_right_defaults.apache_port
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
 
@@ -278,12 +276,42 @@ def run(plan, args={}):
         detected_backend,
     )
 
-    plan.print(
-        "NODE JSON RPC URI: '{0}:{1}'".format(
-            all_participants[0].el_context.dns_name,
-            all_participants[0].el_context.rpc_port_num,
+    for p in all_participants:
+        if p.el_context != None:
+            plan.print(
+                "NODE JSON RPC URI: '{0}:{1}'".format(
+                    p.el_context.dns_name,
+                    p.el_context.rpc_port_num,
+                )
+            )
+            break
+
+    builder_bls_secret_key = None
+    if network_params.builder_count > 0:
+        total_validator_count = 0
+        for participant in args_with_right_defaults.participants:
+            total_validator_count += participant.validator_count
+        builder_key_result = plan.run_sh(
+            name="derive-builder-bls-key",
+            description="Deriving builder BLS private key from mnemonic",
+            run='/app/ethdo account derive --mnemonic="{0}" --path="m/12381/3600/{1}/0/0" --show-private-key | grep "Private key" | sed "s/Private key: 0x//" | tr -d "\n"'.format(
+                network_params.preregistered_validator_keys_mnemonic,
+                total_validator_count,
+            ),
+            image="wealdtech/ethdo:latest",
+            tolerations=shared_utils.get_tolerations(
+                global_tolerations=global_tolerations
+            ),
+            node_selectors=global_node_selectors,
         )
-    )
+        builder_bls_secret_key = builder_key_result.output
+        plan.print(
+            "Builder configuration: {0} builder(s) registered at genesis with 0x03 credentials".format(
+                network_params.builder_count
+            )
+        )
+        plan.print("Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC))
+        plan.print("Builder BLS private key: {0}".format(builder_bls_secret_key))
 
     all_el_contexts = []
     all_cl_contexts = []
@@ -292,7 +320,8 @@ def run(plan, args={}):
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     for participant in all_participants:
-        all_el_contexts.append(participant.el_context)
+        if participant.el_context != None:
+            all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
         all_vc_contexts.append(participant.vc_context)
         all_remote_signer_contexts.append(participant.remote_signer_context)
@@ -375,15 +404,15 @@ def run(plan, args={}):
         and args_with_right_defaults.mev_type == constants.BUILDOOR_MEV_TYPE
     ):
         beacon_uri = "http://{0}:{1}".format(
-            all_cl_contexts[0].ip_address,
+            all_cl_contexts[0].beacon_service_name,
             all_cl_contexts[0].http_port,
         )
         el_rpc_uri = "http://{0}:{1}".format(
-            all_el_contexts[0].ip_addr,
+            all_el_contexts[0].dns_name,
             all_el_contexts[0].rpc_port_num,
         )
         engine_rpc_uri = "http://{0}:{1}".format(
-            all_el_contexts[0].ip_addr,
+            all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
         endpoint = buildoor.launch_buildoor(
@@ -396,6 +425,7 @@ def run(plan, args={}):
             args_with_right_defaults.buildoor_params,
             global_node_selectors,
             global_tolerations,
+            builder_bls_secret_key,
         )
         mev_endpoints.append(endpoint)
         mev_endpoint_names.append(constants.BUILDOOR_MEV_TYPE)
@@ -834,22 +864,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched tracoor")
-        elif additional_service == "apache":
-            plan.print("Launching apache")
-            apache.launch_apache(
-                plan,
-                el_cl_data_files_artifact_uuid,
-                apache_port,
-                all_participants,
-                args_with_right_defaults.participants,
-                args_with_right_defaults.port_publisher,
-                index,
-                global_node_selectors,
-                global_tolerations,
-                args_with_right_defaults.docker_cache_params,
-            )
-            plan.print("Successfully launched apache")
-        elif additional_service == "nginx":
+        elif additional_service == "nginx" or additional_service == "apache":
             plan.print("Launching nginx")
             nginx.launch_nginx(
                 plan,
@@ -1023,23 +1038,25 @@ def run(plan, args={}):
                 args_with_right_defaults.additional_services,
             )
             plan.print("Successfully launched slashoor")
-        elif additional_service == "ews":
-            plan.print("Launching execution-witness-sentry")
-            ews_config_template = read_file(static_files.EWS_CONFIG_TEMPLATE_FILEPATH)
-            ews.launch_ews(
+        elif additional_service == "zkboost":
+            plan.print("Launching zkboost")
+            zkboost_config_template = read_file(
+                static_files.ZKBOOST_CONFIG_TEMPLATE_FILEPATH
+            )
+            zkboost_metrics_jobs = zkboost.launch_zkboost(
                 plan,
-                ews_config_template,
+                zkboost_config_template,
                 all_participants,
-                args_with_right_defaults.participants,
-                network_params,
-                args_with_right_defaults.ews_params,
+                args_with_right_defaults.zkboost_params,
                 global_node_selectors,
                 global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                tempo_otlp_grpc_url,
             )
-            plan.print("Successfully launched execution-witness-sentry")
+            prometheus_additional_metrics_jobs.extend(zkboost_metrics_jobs)
+            plan.print("Successfully launched zkboost")
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:

@@ -20,11 +20,6 @@ VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/validator-ranges/config.yaml.tmpl"
 )
 
-APACHE_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/index.html"
-APACHE_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enr.txt.tmpl"
-APACHE_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enr_list.txt.tmpl"
-APACHE_ENODE_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enode.txt.tmpl"
-
 NGINX_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/index.html"
 NGINX_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr.txt.tmpl"
 NGINX_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr_list.txt.tmpl"
@@ -142,4 +137,6 @@ MEMPOOL_BRIDGE_CONFIG_TEMPLATE_FILEPATH = (
 )
 HELIX_RELAY_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/mev/helix/config.yaml.tmpl"
 
-EWS_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/ews-config/config.toml.tmpl"
+ZKBOOST_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/zkboost-config/config.toml.tmpl"
+)
