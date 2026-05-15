@@ -14,24 +14,17 @@ import click
 
 VALUE_TO_SEND = 0x9184
 
-logging.basicConfig(
-    filename="/tmp/sender.log",
-    filemode="a",
-    format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
-    datefmt="%H:%M:%S",
-    level=logging.DEBUG,
-)
+logging.basicConfig(filename="/tmp/sender.log",
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
 
 # this is the last prefunded address
-SENDER = os.getenv(
-    "SENDER_PRIVATE_KEY",
-    "17fdf89989597e8bcac6cdfcc001b6241c64cece2c358ffc818b72ca70f5e1ce",
-)
+SENDER = os.getenv("SENDER_PRIVATE_KEY", "17fdf89989597e8bcac6cdfcc001b6241c64cece2c358ffc818b72ca70f5e1ce")
 # this is the first prefunded address
-RECEIVER = os.getenv(
-    "RECEIVER_PUBLIC_KEY", "0x878705ba3f8Bc32FCf7F4CAa1A35E72AF65CF766"
-)
-EL_URI = os.getenv("EL_RPC_URI", "http://0.0.0.0:53913")
+RECEIVER = os.getenv("RECEIVER_PUBLIC_KEY", "0x878705ba3f8Bc32FCf7F4CAa1A35E72AF65CF766")
+EL_URI = os.getenv("EL_RPC_URI", 'http://0.0.0.0:53913')
 
 
 def send_transaction():
@@ -67,18 +60,10 @@ def delayed_send(interval_between_transactions):
 
 
 @click.command()
-@click.option(
-    "--interval_between_transactions",
-    default=0.5,
-    help="Interval between successive transaction sends (in seconds). The value may be an integer or decimal",
-)
+@click.option('--interval_between_transactions', default=0.5, help='Interval between successive transaction sends (in seconds). The value may be an integer or decimal')
 def run_infinitely(interval_between_transactions):
     logging.info(f"Using sender {SENDER} receiver {RECEIVER} and el_uri {EL_URI}")
-    spam = (
-        send_transaction
-        if interval_between_transactions == 0
-        else partial(delayed_send, interval_between_transactions)
-    )
+    spam = send_transaction if interval_between_transactions == 0 else partial(delayed_send, interval_between_transactions)
     while True:
         try:
             spam()
