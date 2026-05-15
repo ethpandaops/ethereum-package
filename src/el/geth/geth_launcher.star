@@ -259,7 +259,11 @@ def get_config(
 
     if otel_otlp_grpc_url != None:
         cmd.append("--rpc.telemetry")
-        cmd.append("--rpc.telemetry.endpoint={}".format(otel_otlp_grpc_url.replace("http://", "grpc://")))
+        cmd.append(
+            "--rpc.telemetry.endpoint={}".format(
+                otel_otlp_grpc_url.replace("http://", "grpc://")
+            )
+        )
 
     if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

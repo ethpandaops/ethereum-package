@@ -28,7 +28,9 @@ def with_otel_env_vars(env_vars, otel_otlp_grpc_url, service_name):
         "OTEL_EXPORTER_OTLP_ENDPOINT": otel_otlp_grpc_url,
         "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
         "OTEL_SERVICE_NAME": service_name,
-        "OTEL_RESOURCE_ATTRIBUTES": "service.name={},service.namespace=ethereum-package".format(service_name),
+        "OTEL_RESOURCE_ATTRIBUTES": "service.name={},service.namespace=ethereum-package".format(
+            service_name
+        ),
     }
     for k, v in env_vars.items():
         merged[k] = v

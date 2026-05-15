@@ -3,9 +3,11 @@
 
 import sys
 
+
 def remove():
     line = sys.argv[1]
     return line.strip()
+
 
 if __name__ == "__main__":
     print(remove())

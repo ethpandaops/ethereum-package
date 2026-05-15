@@ -280,7 +280,9 @@ def get_beacon_config(
         cmd.append("--boot-nodes=" + bootnode_arg)
 
     # otel-collector wins over tempo when both are enabled.
-    telemetry_url = otel_otlp_grpc_url if otel_otlp_grpc_url != None else tempo_otlp_grpc_url
+    telemetry_url = (
+        otel_otlp_grpc_url if otel_otlp_grpc_url != None else tempo_otlp_grpc_url
+    )
     if telemetry_url != None:
         cmd.append("--telemetry-collector-url={}".format(telemetry_url))
         cmd.append("--telemetry-service-name={}".format(beacon_service_name))

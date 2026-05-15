@@ -185,7 +185,9 @@ def get_config(
     )
 
 
-def new_datasource_config_template_data(prometheus_url, tempo_query_url, clickhouse_host, clickhouse_port):
+def new_datasource_config_template_data(
+    prometheus_url, tempo_query_url, clickhouse_host, clickhouse_port
+):
     data = {"PrometheusURL": prometheus_url}
     if tempo_query_url != None:
         data["TempoURL"] = tempo_query_url

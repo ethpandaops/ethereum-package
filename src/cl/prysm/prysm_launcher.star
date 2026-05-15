@@ -310,9 +310,12 @@ def get_beacon_config(
     # Prysm exports OTLP/HTTP-protobuf via --tracing-endpoint (recent versions).
     if otel_otlp_grpc_url != None:
         cmd.append("--enable-tracing")
-        cmd.append("--tracing-endpoint=http://{}:{}/v1/traces".format(
-            otel.COLLECTOR_SERVICE_NAME, otel.COLLECTOR_OTLP_HTTP_PORT,
-        ))
+        cmd.append(
+            "--tracing-endpoint=http://{}:{}/v1/traces".format(
+                otel.COLLECTOR_SERVICE_NAME,
+                otel.COLLECTOR_OTLP_HTTP_PORT,
+            )
+        )
         cmd.append("--tracing-process-name={}".format(beacon_service_name))
 
     if len(participant.cl_extra_params) > 0:
