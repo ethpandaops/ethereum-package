@@ -1,5 +1,5 @@
 SERVICE_NAME = "otel-clickhouse"
-IMAGE = "clickhouse/clickhouse-server:24.8-alpine"
+IMAGE = "clickhouse/clickhouse-server:26.3-alpine"
 
 HTTP_PORT = 8123
 NATIVE_PORT = 9000

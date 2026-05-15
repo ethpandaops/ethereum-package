@@ -1,6 +1,9 @@
 clickhouse_launcher = import_module("./clickhouse/launcher.star")
 bridge_launcher = import_module("./bridge/launcher.star")
 
+CLICKHOUSE_SERVICE_NAME = clickhouse_launcher.SERVICE_NAME
+CLICKHOUSE_HTTP_PORT = clickhouse_launcher.HTTP_PORT
+
 
 def launch(plan):
     plan.print("Launching ClickHouse for OTel log capture...")

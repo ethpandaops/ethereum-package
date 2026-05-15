@@ -50,6 +50,8 @@ def launch_grafana(
     port_publisher,
     index,
     tempo_query_url=None,
+    clickhouse_host=None,
+    clickhouse_port=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -63,6 +65,8 @@ def launch_grafana(
         dashboard_providers_config_template,
         prometheus_private_url,
         tempo_query_url,
+        clickhouse_host,
+        clickhouse_port,
         additional_dashboards=grafana_params.additional_dashboards,
     )
 
@@ -99,10 +103,12 @@ def get_grafana_config_dir_artifact_uuid(
     dashboard_providers_config_template,
     prometheus_private_url,
     tempo_query_url,
+    clickhouse_host,
+    clickhouse_port,
     additional_dashboards=[],
 ):
     datasource_data = new_datasource_config_template_data(
-        prometheus_private_url, tempo_query_url
+        prometheus_private_url, tempo_query_url, clickhouse_host, clickhouse_port
     )
     datasource_template_and_data = shared_utils.new_template_and_data(
         datasource_config_template, datasource_data
@@ -159,6 +165,7 @@ def get_config(
             "GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
             "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
             "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
+            "GF_INSTALL_PLUGINS": "grafana-clickhouse-datasource",
         },
         files={
             GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
@@ -174,10 +181,13 @@ def get_config(
     )
 
 
-def new_datasource_config_template_data(prometheus_url, tempo_query_url):
+def new_datasource_config_template_data(prometheus_url, tempo_query_url, clickhouse_host, clickhouse_port):
     data = {"PrometheusURL": prometheus_url}
     if tempo_query_url != None:
         data["TempoURL"] = tempo_query_url
+    if clickhouse_host != None:
+        data["ClickHouseHost"] = clickhouse_host
+        data["ClickHousePort"] = clickhouse_port
     return data
 
 

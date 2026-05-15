@@ -218,6 +218,12 @@ def run(plan, args={}):
             tempo.SERVICE_NAME, tempo.HTTP_PORT_NUMBER
         )
 
+    otel_clickhouse_host = None
+    otel_clickhouse_port = None
+    if "otel" in args_with_right_defaults.additional_services:
+        otel_clickhouse_host = otel.CLICKHOUSE_SERVICE_NAME
+        otel_clickhouse_port = otel.CLICKHOUSE_HTTP_PORT
+
     if args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE:
         plan.print("Generating mev-rs builder config file")
         mev_rs_builder_config_file = mev_rs_mev_builder.new_builder_config(
@@ -928,6 +934,8 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 tempo_query_url,
+                otel_clickhouse_host,
+                otel_clickhouse_port,
             )
             plan.print("Successfully launched grafana")
         elif additional_service == "tempo":
@@ -1088,6 +1096,8 @@ def run(plan, args={}):
             args_with_right_defaults.port_publisher,
             prometheus_grafana_index,
             tempo_query_url,
+            otel_clickhouse_host,
+            otel_clickhouse_port,
         )
         plan.print("Successfully launched grafana")
 
