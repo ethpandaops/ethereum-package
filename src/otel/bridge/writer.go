@@ -22,9 +22,8 @@ type otelLogRecord struct {
 	LogAttributes      map[string]string `json:"LogAttributes"`
 }
 
-// runWriter drains the records channel into batched JSONEachRow POSTs. Exits
-// only when the channel closes; main() closes it after every stream worker has
-// stopped, so SIGTERM doesn't drop records still in flight.
+// runWriter batches records into JSONEachRow POSTs. Exits only on channel close
+// (after all streams have stopped) so SIGTERM doesn't drop in-flight records.
 func runWriter(chEndpoint string, in <-chan otelLogRecord) {
 	insertURL := mustInsertURL(chEndpoint)
 	client := &http.Client{Timeout: chHTTPTimeout}

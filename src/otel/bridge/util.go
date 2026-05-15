@@ -36,7 +36,7 @@ func resetTimer(t *time.Timer, d time.Duration) {
 
 func boolPtr(b bool) *bool { return &b }
 
-// counter rate-limits drop warnings so backpressure doesn't fill stdout.
+// counter rate-limits drop warnings under backpressure.
 type counter struct {
 	mu       sync.Mutex
 	count    uint64

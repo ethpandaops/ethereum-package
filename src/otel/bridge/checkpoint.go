@@ -11,9 +11,9 @@ import (
 	"time"
 )
 
-// checkpointStore persists per-service "last batch timestamp seen" so a bridge
-// restart doesn't reprocess the entire engine log file. ReplacingMergeTree at
-// the ClickHouse side absorbs records that slip through between flush and crash.
+// checkpointStore persists "last seen timestamp" per service so restarts skip
+// already-processed history. ReplacingMergeTree absorbs records that slip
+// through between flush and crash.
 type checkpointStore struct {
 	mu    sync.Mutex
 	data  map[string]int64 // service_uuid -> unix nanos

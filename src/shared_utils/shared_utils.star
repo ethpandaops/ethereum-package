@@ -21,9 +21,7 @@ def new_template_and_data(template, template_data_json):
 
 
 def with_otel_env_vars(env_vars, otel_otlp_grpc_url, service_name):
-    """Returns env_vars merged with standard OTel SDK env vars when
-    otel_otlp_grpc_url is set. Participant-provided keys win on conflict.
-    """
+    """Merge standard OTel SDK env vars in. Participant keys win."""
     if otel_otlp_grpc_url == None:
         return env_vars
     merged = {

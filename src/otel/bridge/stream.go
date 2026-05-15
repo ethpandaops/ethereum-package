@@ -13,11 +13,9 @@ import (
 	engineconnect "github.com/kurtosis-tech/kurtosis/api/golang/engine/kurtosis_engine_rpc_api_bindings/kurtosis_engine_rpc_api_bindingsconnect"
 )
 
-// streamServiceLogs holds one long-lived GetServiceLogs stream for a service,
-// reconnecting with exponential backoff. Records older than the persisted
-// checkpoint are dropped, so a restart doesn't reprocess the entire engine log
-// file. When the engine reports the service has no log files, markNoLogs is
-// called and the worker exits.
+// streamServiceLogs holds one GetServiceLogs stream per service. Records older
+// than the persisted checkpoint are dropped on replay. If the engine reports
+// "no log files" (one-shot tasks), the worker calls markNoLogs and exits.
 func streamServiceLogs(
 	ctx context.Context,
 	engineClient engineconnect.EngineServiceClient,
@@ -43,8 +41,7 @@ func streamServiceLogs(
 	}
 
 	backoff := streamBackoffMin
-	// historicalReplayed flips only after the first Receive, so transient open
-	// errors don't skip backfill on retry.
+	// Flip only after a confirmed Receive so a transient open error doesn't skip backfill.
 	historicalReplayed := false
 	for ctx.Err() == nil {
 		req := connect.NewRequest(&engineapi.GetServiceLogsArgs{
@@ -85,8 +82,7 @@ func streamServiceLogs(
 					ServiceName:        meta.name,
 					Body:               line,
 					ResourceAttributes: resourceAttrs,
-					// line_index makes the dedup key distinguish identical
-					// bodies in one Kurtosis batch (one timestamp, many lines).
+					// line_index separates identical bodies in one batch (one timestamp, many lines).
 					LogAttributes: map[string]string{"kurtosis.line_index": strconv.Itoa(i)},
 				}
 				select {

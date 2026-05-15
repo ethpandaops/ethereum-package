@@ -18,8 +18,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// newHTTP2Client returns an h2c HTTP client so Connect streaming works against
-// engines published over plain HTTP.
+// newHTTP2Client returns an h2c client for Connect streaming over plain HTTP.
 func newHTTP2Client() *http.Client {
 	return &http.Client{
 		Transport: &http2.Transport{
@@ -36,8 +35,8 @@ func newEngineClient(httpClient *http.Client, endpoint string) engineconnect.Eng
 	return engineconnect.NewEngineServiceClient(httpClient, endpoint)
 }
 
-// newAPICClient dials the per-enclave API container, which speaks gRPC only
-// (HTTP/2 + application/grpc), not Connect's JSON/proto-over-HTTP/1.
+// newAPICClient dials the per-enclave API container. It only speaks gRPC,
+// not Connect's other transports — confirmed empirically (HTTP 415 otherwise).
 func newAPICClient(httpClient *http.Client, addr string) apicconnect.ApiContainerServiceClient {
 	return apicconnect.NewApiContainerServiceClient(httpClient, addr, connect.WithGRPC())
 }
@@ -66,8 +65,8 @@ func waitForEngine(ctx context.Context, engineClient engineconnect.EngineService
 	return errors.New("engine probe timed out")
 }
 
-// discoverSelf finds the enclave the bridge is running in by matching its own
-// IPv4 to a service's private_ip_addr returned by each enclave's API container.
+// discoverSelf identifies the bridge's own enclave by matching its IPv4 to a
+// service's private_ip_addr in each enclave's GetServices response.
 func discoverSelf(ctx context.Context, engineClient engineconnect.EngineServiceClient, httpClient *http.Client) (string, string, string, error) {
 	ownIPs, err := ownIPv4s()
 	if err != nil {

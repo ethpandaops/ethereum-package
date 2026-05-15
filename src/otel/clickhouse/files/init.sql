@@ -28,10 +28,8 @@ CREATE TABLE IF NOT EXISTS otel.otel_logs
     INDEX idx_log_attr_key     mapKeys(LogAttributes)        TYPE bloom_filter(0.01)     GRANULARITY 1,
     INDEX idx_log_attr_value   mapValues(LogAttributes)      TYPE bloom_filter(0.01)     GRANULARITY 1
 )
--- ReplacingMergeTree dedupes restart-replay duplicates at merge time. Dedup
--- key includes LogAttributes['kurtosis.line_index'] because Kurtosis stamps
--- one timestamp on a batch of lines, so identical bodies in one batch would
--- collapse wrongly under (timestamp, service, body) alone.
+-- ReplacingMergeTree handles restart-replay dedup. line_index keeps identical
+-- bodies in one Kurtosis batch (shared timestamp) from collapsing.
 ENGINE = ReplacingMergeTree
 PARTITION BY toDate(Timestamp)
 ORDER BY (

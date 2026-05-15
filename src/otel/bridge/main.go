@@ -55,8 +55,7 @@ func main() {
 	writerWg.Add(1)
 	go func() { defer writerWg.Done(); runWriter(cfg.clickhouseEndpoint, records) }()
 
-	// Wait for all stream workers before closing records, otherwise a worker
-	// mid-send hits "send on closed channel".
+	// Drain streams before closing records — otherwise mid-send panics.
 	var streamWg sync.WaitGroup
 	runServiceMux(ctx, engineClient, httpClient, enclaveUUID, enclaveName, ownUUID, cfg.excludeNames, checkpoints, records, &streamWg)
 	streamWg.Wait()

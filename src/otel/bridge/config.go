@@ -71,9 +71,8 @@ func mapKeys(m map[string]bool) []string {
 	return out
 }
 
-// defaultGateway returns the IPv4 address of the container's default gateway.
-// On Docker bridge networks this is the host where the Kurtosis engine has
-// its port published.
+// defaultGateway returns the IPv4 of the container's default gateway — i.e.
+// the Docker host, where the Kurtosis engine publishes its gRPC port.
 func defaultGateway() (string, error) {
 	f, err := os.Open("/proc/net/route")
 	if err != nil {
