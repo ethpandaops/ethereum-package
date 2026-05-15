@@ -30,9 +30,9 @@ participants:
     count: 1
   # Verifier-only side: uses zkboost-verifier (no ere-server, in-process
   # ere-verifier-zisk). Listens for gossipped proofs and verifies them.
-  # Lighthouse's optional-proofs subscribe path needs `--proof-types` on both
-  # cl_extra_params and vc_extra_params to enable the gossip subscription, even
-  # though zkboost-verifier rejects prove requests with an error (verifier-only).
+  # Lighthouse's gossip subscription is enabled by --proof-engine-endpoint (not
+  # --proof-types). The --proof-types flag controls which types to request/sign.
+  # zkboost-verifier rejects prove requests with an error (verifier-only mode).
   - cl_type: lighthouse
     cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
     el_type: reth
@@ -69,8 +69,8 @@ zkboost_params:
       zkvms:
         - kind: ere
           proof_type: reth-zisk
-          image: ghcr.io/eth-act/ere/ere-server-zisk:0.8.1-cuda
-          elf_url: https://github.com/eth-act/ere-guests/releases/download/v0.9.0/stateless-validator-reth-zisk.elf
+          image: ghcr.io/eth-act/ere/ere-server-zisk:0.9.1-cuda
+          elf_url: https://github.com/eth-act/ere-guests/releases/download/v0.10.0/stateless-validator-reth-zisk.elf
           gpu:
             device_ids: ["0"]
     - name: zkboost-verifier
@@ -78,4 +78,4 @@ zkboost_params:
       zkvms:
         - kind: verifier
           proof_type: reth-zisk
-          program_vk_url: https://github.com/eth-act/ere-guests/releases/download/v0.9.0/stateless-validator-reth-zisk.vk
+          program_vk_url: https://github.com/eth-act/ere-guests/releases/download/v0.10.0/stateless-validator-reth-zisk.vk
