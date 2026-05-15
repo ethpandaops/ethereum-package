@@ -21,9 +21,15 @@ CREATE TABLE IF NOT EXISTS otel.otel_logs
     INDEX idx_trace_id TraceId TYPE bloom_filter(0.001)     GRANULARITY 1,
     INDEX idx_body     Body    TYPE tokenbf_v1(32768, 3, 0) GRANULARITY 4
 )
-ENGINE = ReplacingMergeTree
+-- Plain MergeTree, not Replacing: the engine RPC has no since-timestamp
+-- parameter, so a bridge restart replays history. We accept duplicate rows
+-- rather than risk collapsing legitimate repeated log lines that happen to
+-- share (timestamp, service, body) — the engine assigns one timestamp to a
+-- whole batch of lines, so identical bodies in a batch would dedupe wrongly.
+-- Query with GROUP BY or argMax when strict dedup matters.
+ENGINE = MergeTree
 PARTITION BY toDate(Timestamp)
-ORDER BY (toStartOfFiveMinutes(Timestamp), ServiceName, Timestamp, cityHash64(Body))
+ORDER BY (toStartOfFiveMinutes(Timestamp), ServiceName, Timestamp)
 -- TTL is approximate, not strict: ttl_only_drop_parts=1 means whole parts are
 -- dropped when their max Timestamp is past TTL, so retention can lag by up to
 -- one part's age (minutes-to-hours on a busy devnet). Fine for devnets.

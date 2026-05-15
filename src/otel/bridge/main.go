@@ -115,7 +115,7 @@ func main() {
 	writerWg.Add(1)
 	go func() {
 		defer writerWg.Done()
-		runWriter(ctx, cfg.clickhouseEndpoint, records)
+		runWriter(cfg.clickhouseEndpoint, records)
 	}()
 
 	// streamWg tracks every stream goroutine started inside runServiceMux. We
@@ -505,8 +505,10 @@ func streamServiceLogs(
 	}
 }
 
-// runWriter drains the bounded channel into batched JSONEachRow POSTs.
-func runWriter(ctx context.Context, chEndpoint string, in <-chan otelLogRecord) {
+// runWriter drains the bounded channel into batched JSONEachRow POSTs. Exits
+// only when `in` is closed; main() closes the channel after every stream has
+// stopped, so SIGTERM doesn't drop records still queued by stream workers.
+func runWriter(chEndpoint string, in <-chan otelLogRecord) {
 	insertURL := mustInsertURL(chEndpoint)
 	client := &http.Client{Timeout: chHTTPTimeout}
 
@@ -534,9 +536,6 @@ func runWriter(ctx context.Context, chEndpoint string, in <-chan otelLogRecord) 
 
 	for {
 		select {
-		case <-ctx.Done():
-			flush()
-			return
 		case rec, ok := <-in:
 			if !ok {
 				flush()
