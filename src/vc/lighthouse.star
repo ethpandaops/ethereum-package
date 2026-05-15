@@ -85,9 +85,10 @@ def get_config(
         cmd.append("--gas-limit={0}".format(network_params.gas_limit))
         cmd.append("--builder-proposals")
 
-    # Add tempo telemetry integration if tempo is enabled
-    if tempo_otlp_grpc_url != None:
-        cmd.append("--telemetry-collector-url={}".format(tempo_otlp_grpc_url))
+    # otel-collector wins over tempo when both are enabled.
+    telemetry_url = otel_otlp_grpc_url if otel_otlp_grpc_url != None else tempo_otlp_grpc_url
+    if telemetry_url != None:
+        cmd.append("--telemetry-collector-url={}".format(telemetry_url))
         cmd.append("--telemetry-service-name={}".format(service_name))
 
     if len(participant.vc_extra_params):

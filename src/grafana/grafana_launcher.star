@@ -92,6 +92,7 @@ def launch_grafana(
         tolerations,
         grafana_params,
         public_ports,
+        clickhouse_host,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -155,18 +156,21 @@ def get_config(
     tolerations,
     grafana_params,
     public_ports,
+    clickhouse_host=None,
 ):
+    env_vars = {
+        CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
+        "GF_AUTH_ANONYMOUS_ENABLED": "true",
+        "GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
+        "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
+        "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
+    }
+    if clickhouse_host != None:
+        env_vars["GF_INSTALL_PLUGINS"] = "grafana-clickhouse-datasource 4.6.0"
     return ServiceConfig(
         image=grafana_params.image,
         ports=USED_PORTS,
-        env_vars={
-            CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
-            "GF_AUTH_ANONYMOUS_ENABLED": "true",
-            "GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
-            "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
-            "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
-            "GF_INSTALL_PLUGINS": "grafana-clickhouse-datasource",
-        },
+        env_vars=env_vars,
         files={
             GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
             GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
