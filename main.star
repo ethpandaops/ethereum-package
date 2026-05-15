@@ -222,6 +222,12 @@ def run(plan, args={}):
     otel_clickhouse_port = None
     otel_otlp_grpc_url = None
     if "otel" in args_with_right_defaults.additional_services:
+        # Launch otel before participants so they can resolve otel-collector on
+        # their first OTLP export attempt. Some client SDKs (e.g. Prysm) cache
+        # DNS failures and don't retry.
+        plan.print("Launching otel observability stack early...")
+        otel.launch(plan)
+        plan.print("Successfully launched otel observability stack")
         otel_clickhouse_host = otel.CLICKHOUSE_SERVICE_NAME
         otel_clickhouse_port = otel.CLICKHOUSE_HTTP_PORT
         otel_otlp_grpc_url = "http://{}:{}".format(
@@ -956,9 +962,8 @@ def run(plan, args={}):
             )
             plan.print("Successfully launched tempo")
         elif additional_service == "otel":
-            plan.print("Launching otel observability stack...")
-            otel.launch(plan)
-            plan.print("Successfully launched otel observability stack")
+            # Already launched early (before participants); skip.
+            pass
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True

@@ -6,6 +6,7 @@ CLICKHOUSE_SERVICE_NAME = clickhouse_launcher.SERVICE_NAME
 CLICKHOUSE_HTTP_PORT = clickhouse_launcher.HTTP_PORT
 COLLECTOR_SERVICE_NAME = collector_launcher.SERVICE_NAME
 COLLECTOR_OTLP_GRPC_PORT = collector_launcher.OTLP_GRPC_PORT
+COLLECTOR_OTLP_HTTP_PORT = collector_launcher.OTLP_HTTP_PORT
 
 
 def launch(plan):
