@@ -279,9 +279,11 @@ def get_beacon_config(
     if bootnode_arg != None:
         cmd.append("--boot-nodes=" + bootnode_arg)
 
-    # Add tempo telemetry integration if tempo is enabled
-    if tempo_otlp_grpc_url != None:
-        cmd.append("--telemetry-collector-url={}".format(tempo_otlp_grpc_url))
+    # Trace export: when both are enabled, the otel collector wins. Users who
+    # need both backends should configure the otel-collector to fan out to Tempo.
+    telemetry_url = otel_otlp_grpc_url if otel_otlp_grpc_url != None else tempo_otlp_grpc_url
+    if telemetry_url != None:
+        cmd.append("--telemetry-collector-url={}".format(telemetry_url))
         cmd.append("--telemetry-service-name={}".format(beacon_service_name))
 
     if len(participant.cl_extra_params) > 0:
