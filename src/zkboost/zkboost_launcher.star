@@ -44,6 +44,11 @@ def launch_zkboost(
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
+    # The worst case proving time is from block proposed to PTC deadline, prover
+    # don't get the full slot time to do the proving. So here we use a tentative
+    # fixed 3/4 as the default portion of proving time we can get in a slot.
+    default_proof_timeout_secs = network_params.seconds_per_slot * 3 // 4
+
     # Launch ere-server services once — shared across all zkboost instances.
     # Each `ere` zkvm entry results in a single long-lived service; all zkboost
     # instances reference it as an endpoint.
@@ -80,7 +85,7 @@ def launch_zkboost(
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
                 "ProofTimeoutSecs": zkvm.get(
-                    "proof_timeout_secs", network_params.seconds_per_slot
+                    "proof_timeout_secs", default_proof_timeout_secs
                 ),
             }
             if zkvm["kind"] == "ere":
