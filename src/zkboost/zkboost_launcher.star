@@ -39,6 +39,7 @@ def launch_zkboost(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    network_params,
     tempo_otlp_grpc_url=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
@@ -78,7 +79,9 @@ def launch_zkboost(
             entry = {
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
-                "ProofTimeoutSecs": zkvm.get("proof_timeout_secs", 12),
+                "ProofTimeoutSecs": zkvm.get(
+                    "proof_timeout_secs", network_params.seconds_per_slot
+                ),
             }
             if zkvm["kind"] == "ere":
                 entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
