@@ -143,16 +143,18 @@ def get_beacon_config(
             node_keystore_files.teku_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     validator_public_port_assignment = {}
@@ -214,8 +216,6 @@ def get_beacon_config(
         "--http-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--libp2p-port={0}".format(discovery_port_tcp),
         "--discovery-port={0}".format(discovery_port_tcp),
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--eth1-rpc-urls=" + EXECUTION_ENGINE_ENDPOINT,
         # ENR
         "--disable-enr-auto-update",
         "--enr-address={0}".format(
@@ -248,6 +248,10 @@ def get_beacon_config(
         "--validator-api-allowed-origins=*",
         # "--validator-api-bearer-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER, Not yet supported
     ]
+
+    if el_context != None:
+        cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
+        cmd.append("--eth1-rpc-urls=" + EXECUTION_ENGINE_ENDPOINT)
 
     supernode_cmd = [
         "--subscribe-all-data-column-subnets",
@@ -302,8 +306,9 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+    if el_context != None:
+        files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
     if node_keystore_files != None and not participant.use_separate_vc:
         cmd.extend(validator_default_cmd)
@@ -371,7 +376,7 @@ def get_beacon_config(
             client=constants.CL_TYPE.grandine,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=el_context.client_name,
+            connected_client=el_context.client_name if el_context != None else "none",
             extra_labels=participant.cl_extra_labels
             | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,

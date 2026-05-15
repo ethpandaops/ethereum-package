@@ -23,7 +23,6 @@ erpc = import_module("./src/erpc/erpc_launcher.star")
 blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 forky = import_module("./src/forky/forky_launcher.star")
 tracoor = import_module("./src/tracoor/tracoor_launcher.star")
-apache = import_module("./src/apache/apache_launcher.star")
 nginx = import_module("./src/nginx/nginx_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
@@ -124,7 +123,6 @@ def run(plan, args={}):
     global_tolerations = args_with_right_defaults.global_tolerations
     global_node_selectors = args_with_right_defaults.global_node_selectors
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
-    apache_port = args_with_right_defaults.apache_port
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
 
@@ -277,12 +275,15 @@ def run(plan, args={}):
         detected_backend,
     )
 
-    plan.print(
-        "NODE JSON RPC URI: '{0}:{1}'".format(
-            all_participants[0].el_context.dns_name,
-            all_participants[0].el_context.rpc_port_num,
-        )
-    )
+    for p in all_participants:
+        if p.el_context != None:
+            plan.print(
+                "NODE JSON RPC URI: '{0}:{1}'".format(
+                    p.el_context.dns_name,
+                    p.el_context.rpc_port_num,
+                )
+            )
+            break
 
     builder_bls_secret_key = None
     if network_params.builder_count > 0:
@@ -318,7 +319,8 @@ def run(plan, args={}):
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     for participant in all_participants:
-        all_el_contexts.append(participant.el_context)
+        if participant.el_context != None:
+            all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
         all_vc_contexts.append(participant.vc_context)
         all_remote_signer_contexts.append(participant.remote_signer_context)
@@ -861,22 +863,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched tracoor")
-        elif additional_service == "apache":
-            plan.print("Launching apache")
-            apache.launch_apache(
-                plan,
-                el_cl_data_files_artifact_uuid,
-                apache_port,
-                all_participants,
-                args_with_right_defaults.participants,
-                args_with_right_defaults.port_publisher,
-                index,
-                global_node_selectors,
-                global_tolerations,
-                args_with_right_defaults.docker_cache_params,
-            )
-            plan.print("Successfully launched apache")
-        elif additional_service == "nginx":
+        elif additional_service == "nginx" or additional_service == "apache":
             plan.print("Launching nginx")
             nginx.launch_nginx(
                 plan,

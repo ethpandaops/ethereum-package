@@ -22,7 +22,7 @@ additional_services:
   - blockscout
   - dugtrio
   - erpc
-  - apache
+  - nginx
   - tracoor
   - spamoor
 ethereum_metrics_exporter_enabled: true
