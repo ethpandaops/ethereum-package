@@ -21,15 +21,24 @@ CREATE TABLE IF NOT EXISTS otel.otel_logs
     INDEX idx_trace_id TraceId TYPE bloom_filter(0.001)     GRANULARITY 1,
     INDEX idx_body     Body    TYPE tokenbf_v1(32768, 3, 0) GRANULARITY 4
 )
--- Plain MergeTree, not Replacing: the engine RPC has no since-timestamp
--- parameter, so a bridge restart replays history. We accept duplicate rows
--- rather than risk collapsing legitimate repeated log lines that happen to
--- share (timestamp, service, body) — the engine assigns one timestamp to a
--- whole batch of lines, so identical bodies in a batch would dedupe wrongly.
--- Query with GROUP BY or argMax when strict dedup matters.
-ENGINE = MergeTree
+-- ReplacingMergeTree dedupes restart-replay duplicates at merge time. The bridge
+-- also persists a per-service checkpoint to bound how far it replays, so this
+-- is a safety net, not the primary mechanism. Use SELECT ... FINAL for strict
+-- dedup at query time.
+--
+-- Dedup key includes LogAttributes['kurtosis.line_index']: Kurtosis stamps one
+-- timestamp on a whole batch of lines, so two identical bodies in one batch
+-- would collapse under (timestamp, service, body) alone. The line-index in
+-- the hash keeps legitimately-repeated lines distinct while still letting
+-- replay collapse the same line at the same batch position.
+ENGINE = ReplacingMergeTree
 PARTITION BY toDate(Timestamp)
-ORDER BY (toStartOfFiveMinutes(Timestamp), ServiceName, Timestamp)
+ORDER BY (
+    toStartOfFiveMinutes(Timestamp),
+    ServiceName,
+    Timestamp,
+    cityHash64(concat(Body, LogAttributes['kurtosis.line_index']))
+)
 -- TTL is approximate, not strict: ttl_only_drop_parts=1 means whole parts are
 -- dropped when their max Timestamp is past TTL, so retention can lag by up to
 -- one part's age (minutes-to-hours on a busy devnet). Fine for devnets.

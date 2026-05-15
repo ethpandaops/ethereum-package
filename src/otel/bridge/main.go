@@ -27,6 +27,8 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -51,6 +53,8 @@ const (
 	streamBackoffMax    = 30 * time.Second
 	chHTTPTimeout       = 15 * time.Second
 	chReadyTimeout      = 2 * time.Minute
+	checkpointFlushAge  = 30 * time.Second
+	checkpointFileName  = "checkpoints.json"
 )
 
 type otelLogRecord struct {
@@ -70,6 +74,7 @@ type config struct {
 	engineEndpoint     string
 	clickhouseEndpoint string
 	excludeNames       map[string]bool
+	stateDir           string
 }
 
 func main() {
@@ -110,6 +115,16 @@ func main() {
 	log.Printf("self-discovered: enclave=%s (%s), own_service_uuid=%s",
 		enclaveName, enclaveUUID, ownUUID)
 
+	checkpoints := loadCheckpoints(filepath.Join(cfg.stateDir, checkpointFileName))
+	log.Printf("loaded checkpoints for %d services from %s", checkpoints.size(), checkpoints.path)
+
+	var checkpointWg sync.WaitGroup
+	checkpointWg.Add(1)
+	go func() {
+		defer checkpointWg.Done()
+		runCheckpointFlusher(ctx, checkpoints)
+	}()
+
 	records := make(chan otelLogRecord, channelCapacity)
 	var writerWg sync.WaitGroup
 	writerWg.Add(1)
@@ -122,11 +137,15 @@ func main() {
 	// must drain them all before closing records, otherwise a worker still
 	// mid-send hits "send on closed channel".
 	var streamWg sync.WaitGroup
-	runServiceMux(ctx, engineClient, httpClient, enclaveUUID, enclaveName, ownUUID, cfg.excludeNames, records, &streamWg)
+	runServiceMux(ctx, engineClient, httpClient, enclaveUUID, enclaveName, ownUUID, cfg.excludeNames, checkpoints, records, &streamWg)
 	streamWg.Wait()
 
 	close(records)
 	writerWg.Wait()
+	checkpointWg.Wait()
+	if err := checkpoints.flush(); err != nil {
+		log.Printf("final checkpoint flush: %v", err)
+	}
 	log.Printf("shutdown complete")
 }
 
@@ -150,6 +169,7 @@ func loadConfig() config {
 		engineEndpoint:     endpoint,
 		clickhouseEndpoint: getenv("CLICKHOUSE_ENDPOINT", "http://otel-clickhouse:8123"),
 		excludeNames:       exclude,
+		stateDir:           getenv("BRIDGE_STATE_DIR", "/state"),
 	}
 }
 
@@ -289,6 +309,7 @@ func runServiceMux(
 	httpClient *http.Client,
 	enclaveUUID, enclaveName, ownUUID string,
 	excludeNames map[string]bool,
+	checkpoints *checkpointStore,
 	out chan<- otelLogRecord,
 	streamWg *sync.WaitGroup,
 ) {
@@ -333,7 +354,7 @@ func runServiceMux(
 		go func() {
 			defer streamWg.Done()
 			defer removeWorker(meta.uuid)
-			streamServiceLogs(workerCtx, engineClient, enclaveUUID, enclaveName, meta, out, markNoLogs)
+			streamServiceLogs(workerCtx, engineClient, enclaveUUID, enclaveName, meta, checkpoints, out, markNoLogs)
 		}()
 	}
 
@@ -417,6 +438,7 @@ func streamServiceLogs(
 	engineClient engineconnect.EngineServiceClient,
 	enclaveUUID, enclaveName string,
 	meta serviceMeta,
+	checkpoints *checkpointStore,
 	out chan<- otelLogRecord,
 	markNoLogs func(string),
 ) {
@@ -428,6 +450,11 @@ func streamServiceLogs(
 		"kurtosis.enclave_uuid": enclaveUUID,
 		"kurtosis.enclave_name": enclaveName,
 		"kurtosis.service_uuid": meta.uuid,
+	}
+
+	skipBefore := checkpoints.get(meta.uuid)
+	if !skipBefore.IsZero() {
+		log.Printf("service=%s: skipping records at or before checkpoint %s", meta.name, skipBefore.Format(time.RFC3339Nano))
 	}
 
 	backoff := streamBackoffMin
@@ -468,14 +495,24 @@ func streamServiceLogs(
 			if lines.Timestamp != nil {
 				ts = lines.Timestamp.AsTime().UTC()
 			}
+			// Bound replay: drop batches at or before the persisted checkpoint.
+			// ReplacingMergeTree handles any leak between flush and crash.
+			if !ts.After(skipBefore) {
+				continue
+			}
 			tsStr := ts.Format("2006-01-02 15:04:05.000000000")
-			for _, line := range lines.Line {
+			for i, line := range lines.Line {
 				rec := otelLogRecord{
 					Timestamp:          tsStr,
 					ServiceName:        meta.name,
 					Body:               line,
 					ResourceAttributes: resourceAttrs,
-					LogAttributes:      map[string]string{},
+					// kurtosis.line_index lets the ReplacingMergeTree dedup
+					// key distinguish identical bodies in the same batch
+					// while still collapsing the same line on replay.
+					LogAttributes: map[string]string{
+						"kurtosis.line_index": strconv.Itoa(i),
+					},
 				}
 				select {
 				case out <- rec:
@@ -486,6 +523,7 @@ func streamServiceLogs(
 					dropCounter.inc()
 				}
 			}
+			checkpoints.update(meta.uuid, ts)
 		}
 		streamErr := stream.Err()
 		_ = stream.Close()
@@ -707,3 +745,98 @@ var (
 	dropCounter      = &counter{logEvery: time.Minute, prefix: "WARN dropped record (channel full)"}
 	batchDropCounter = &counter{logEvery: time.Minute, prefix: "WARN dropped batch (clickhouse insert failed)"}
 )
+
+// checkpointStore persists per-service "last batch timestamp seen" to a small
+// JSON file so a bridge restart doesn't re-process the entire engine log file.
+// In-memory updates are immediate; flush-to-disk is periodic (30s) plus a
+// final flush at shutdown. ReplacingMergeTree absorbs any records that slip
+// through between flush and crash.
+type checkpointStore struct {
+	mu    sync.Mutex
+	data  map[string]int64 // service_uuid -> last seen timestamp in unix nanos
+	path  string
+	dirty bool
+}
+
+func loadCheckpoints(path string) *checkpointStore {
+	s := &checkpointStore{path: path, data: map[string]int64{}}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
+			log.Printf("checkpoint load: %v (starting fresh)", err)
+		}
+		return s
+	}
+	if err := json.Unmarshal(b, &s.data); err != nil {
+		log.Printf("checkpoint parse: %v (starting fresh)", err)
+		s.data = map[string]int64{}
+	}
+	return s
+}
+
+func (s *checkpointStore) get(uuid string) time.Time {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	ns, ok := s.data[uuid]
+	if !ok {
+		return time.Time{}
+	}
+	return time.Unix(0, ns).UTC()
+}
+
+func (s *checkpointStore) update(uuid string, ts time.Time) {
+	tsNs := ts.UnixNano()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if cur, ok := s.data[uuid]; !ok || tsNs > cur {
+		s.data[uuid] = tsNs
+		s.dirty = true
+	}
+}
+
+func (s *checkpointStore) size() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return len(s.data)
+}
+
+func (s *checkpointStore) flush() error {
+	s.mu.Lock()
+	if !s.dirty {
+		s.mu.Unlock()
+		return nil
+	}
+	b, err := json.Marshal(s.data)
+	s.mu.Unlock()
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
+	tmp := s.path + ".tmp"
+	if err := os.WriteFile(tmp, b, 0o644); err != nil {
+		return fmt.Errorf("write tmp: %w", err)
+	}
+	if err := os.Rename(tmp, s.path); err != nil {
+		return fmt.Errorf("rename: %w", err)
+	}
+	s.mu.Lock()
+	s.dirty = false
+	s.mu.Unlock()
+	return nil
+}
+
+// runCheckpointFlusher persists the checkpoint store every checkpointFlushAge
+// until ctx is cancelled. A final flush happens in main() after streams stop.
+func runCheckpointFlusher(ctx context.Context, s *checkpointStore) {
+	ticker := time.NewTicker(checkpointFlushAge)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			if err := s.flush(); err != nil {
+				log.Printf("checkpoint flush: %v", err)
+			}
+		}
+	}
+}
