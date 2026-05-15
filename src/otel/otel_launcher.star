@@ -22,8 +22,13 @@ def launch(plan):
     plan.print("Launching otel-collector (OTLP receiver for traces)")
     collector_launcher.launch(plan)
 
+    otlp_endpoint = "http://{}:{}".format(
+        collector_launcher.SERVICE_NAME, collector_launcher.OTLP_GRPC_PORT,
+    )
     plan.print(
-        "otel ready. Logs: otel.otel_logs (ReplacingMergeTree). " +
-        "Traces: otel.otel_traces (MergeTree). " +
-        "OTLP endpoint for clients: {}:{}".format(collector_launcher.SERVICE_NAME, collector_launcher.OTLP_GRPC_PORT),
+        "otel ready. " +
+        "Logs auto-collected into otel.otel_logs (via bridge). " +
+        "Traces table otel.otel_traces accepts OTLP at " + otlp_endpoint + " — " +
+        "point your clients at it via cl_extra_env_vars/el_extra_env_vars " +
+        "(e.g. OTEL_EXPORTER_OTLP_ENDPOINT=" + otlp_endpoint + ").",
     )
