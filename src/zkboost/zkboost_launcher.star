@@ -60,9 +60,12 @@ def launch_zkboost(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    network_params,
     tempo_otlp_grpc_url=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
+    default_proof_timeout_secs = network_params.seconds_per_slot * 3 // 4
 
     # Per-instance zkvms: each instance falls back to the global
     # `zkboost_params.zkvms` if no per-instance list is set. Resolve artifacts
@@ -104,6 +107,12 @@ def launch_zkboost(
             )
 
         el_client = participant_contexts[el_participant_index].el_context
+        if el_client == None:
+            fail(
+                "zkboost instance '{0}' references el_participant_index {1} which has el_type=None".format(
+                    name, el_participant_index
+                )
+            )
         el_endpoint = "http://{0}:{1}".format(
             el_client.dns_name, el_client.rpc_port_num
         )
@@ -113,7 +122,9 @@ def launch_zkboost(
             entry = {
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
-                "ProofTimeoutSecs": zkvm.get("proof_timeout_secs", 12),
+                "ProofTimeoutSecs": zkvm.get(
+                    "proof_timeout_secs", default_proof_timeout_secs
+                ),
             }
             if zkvm["kind"] == "ere":
                 entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
