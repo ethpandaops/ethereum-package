@@ -64,7 +64,6 @@ def launch_zkboost(
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
-
     default_proof_timeout_secs = network_params.seconds_per_slot * 3 // 4
 
     ere_server_endpoints = {}
