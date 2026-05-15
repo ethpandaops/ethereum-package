@@ -22,6 +22,7 @@ def get_config(
     port_publisher,
     vc_index,
     extra_files_artifacts,
+    otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
 ):
     validator_keys_dirpath = ""
@@ -139,7 +140,11 @@ def get_config(
         "publish_udp": port_publisher.vc_enabled,
         "cmd": cmd,
         "files": files,
-        "env_vars": participant.vc_extra_env_vars,
+        "env_vars": shared_utils.with_otel_env_vars(
+            participant.vc_extra_env_vars,
+            otel_otlp_grpc_url,
+            full_name,
+        ),
         "labels": shared_utils.label_maker(
             client=constants.VC_TYPE.teku,
             client_type=constants.CLIENT_TYPES.validator,

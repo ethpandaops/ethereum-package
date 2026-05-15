@@ -30,6 +30,7 @@ def launch(
     global_tolerations,
     persistent,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url,
     num_participants,
     validator_data,
     prysm_password_relative_filepath,
@@ -281,6 +282,7 @@ def launch(
                 extra_files_artifacts,
                 backend,
                 tempo_otlp_grpc_url,
+                otel_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
             )
@@ -333,6 +335,7 @@ def launch(
                 extra_files_artifacts,
                 backend,
                 tempo_otlp_grpc_url,
+                otel_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
             )

@@ -53,6 +53,7 @@ def launch(
     extra_files_artifacts,
     bootnodoor_enode=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -73,6 +74,7 @@ def launch(
         extra_files_artifacts,
         bootnodoor_enode,
         el_binary_artifact,
+        otel_otlp_grpc_url,
     )
 
     service = plan.add_service(
@@ -104,6 +106,7 @@ def get_config(
     extra_files_artifacts,
     bootnodoor_enode=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -297,7 +300,11 @@ def get_config(
     else:
         cmd_str = command_str
 
-    env_vars = participant.el_extra_env_vars
+    env_vars = shared_utils.with_otel_env_vars(
+        participant.el_extra_env_vars,
+        otel_otlp_grpc_url,
+        service_name,
+    )
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,

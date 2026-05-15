@@ -20,6 +20,23 @@ def new_template_and_data(template, template_data_json):
     return struct(template=template, data=template_data_json)
 
 
+def with_otel_env_vars(env_vars, otel_otlp_grpc_url, service_name):
+    """Returns env_vars merged with standard OTel SDK env vars when
+    otel_otlp_grpc_url is set. Participant-provided keys win on conflict.
+    """
+    if otel_otlp_grpc_url == None:
+        return env_vars
+    merged = {
+        "OTEL_EXPORTER_OTLP_ENDPOINT": otel_otlp_grpc_url,
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+        "OTEL_SERVICE_NAME": service_name,
+        "OTEL_RESOURCE_ATTRIBUTES": "service.name={},service.namespace=ethereum-package".format(service_name),
+    }
+    for k, v in env_vars.items():
+        merged[k] = v
+    return merged
+
+
 def path_join(*args):
     joined_path = "/".join(args)
     return joined_path.replace("//", "/")

@@ -39,6 +39,7 @@ def get_vc_config(
     vc_index,
     extra_files_artifacts,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
 ):
     if node_keystore_files == None:
@@ -95,6 +96,7 @@ def get_vc_config(
             vc_index=vc_index,
             extra_files_artifacts=extra_files_artifacts,
             tempo_otlp_grpc_url=tempo_otlp_grpc_url,
+            otel_otlp_grpc_url=otel_otlp_grpc_url,
             vc_binary_artifact=vc_binary_artifact,
         )
     elif vc_type == constants.VC_TYPE.lodestar:
@@ -118,6 +120,7 @@ def get_vc_config(
             port_publisher=port_publisher,
             vc_index=vc_index,
             extra_files_artifacts=extra_files_artifacts,
+            otel_otlp_grpc_url=otel_otlp_grpc_url,
             vc_binary_artifact=vc_binary_artifact,
         )
     elif vc_type == constants.VC_TYPE.teku:
@@ -140,6 +143,7 @@ def get_vc_config(
             port_publisher=port_publisher,
             vc_index=vc_index,
             extra_files_artifacts=extra_files_artifacts,
+            otel_otlp_grpc_url=otel_otlp_grpc_url,
             vc_binary_artifact=vc_binary_artifact,
         )
     elif vc_type == constants.VC_TYPE.nimbus:
@@ -162,6 +166,7 @@ def get_vc_config(
             port_publisher=port_publisher,
             vc_index=vc_index,
             extra_files_artifacts=extra_files_artifacts,
+            otel_otlp_grpc_url=otel_otlp_grpc_url,
             vc_binary_artifact=vc_binary_artifact,
         )
     elif vc_type == constants.VC_TYPE.prysm:
@@ -186,6 +191,7 @@ def get_vc_config(
             port_publisher=port_publisher,
             vc_index=vc_index,
             extra_files_artifacts=extra_files_artifacts,
+            otel_otlp_grpc_url=otel_otlp_grpc_url,
             vc_binary_artifact=vc_binary_artifact,
         )
     elif vc_type == constants.VC_TYPE.vero:
@@ -208,6 +214,7 @@ def get_vc_config(
             port_publisher=port_publisher,
             vc_index=vc_index,
             extra_files_artifacts=extra_files_artifacts,
+            otel_otlp_grpc_url=otel_otlp_grpc_url,
             vc_binary_artifact=vc_binary_artifact,
         )
     elif vc_type == constants.VC_TYPE.grandine:
