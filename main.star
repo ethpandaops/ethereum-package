@@ -32,6 +32,7 @@ blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
 tempo = import_module("./src/tempo/tempo_launcher.star")
+otel = import_module("./src/otel/otel_launcher.star")
 commit_boost_mev_boost = import_module(
     "./src/mev/commit-boost/mev_boost/mev_boost_launcher.star"
 )
@@ -926,6 +927,10 @@ def run(plan, args={}):
                 index,
             )
             plan.print("Successfully launched tempo")
+        elif additional_service == "otel":
+            plan.print("Launching otel observability stack...")
+            otel.launch(plan)
+            plan.print("Successfully launched otel observability stack")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True

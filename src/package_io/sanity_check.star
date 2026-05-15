@@ -482,6 +482,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "slashoor",
     "spamoor",
     "ews",
+    "otel",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
