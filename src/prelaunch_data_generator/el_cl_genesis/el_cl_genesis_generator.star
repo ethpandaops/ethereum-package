@@ -181,6 +181,7 @@ def new_env_file_for_el_cl_genesis_data(
         "AggregateDueBpsGloas": network_params.aggregate_due_bps_gloas,
         "SyncMessageDueBpsGloas": network_params.sync_message_due_bps_gloas,
         "ContributionDueBpsGloas": network_params.contribution_due_bps_gloas,
+        "PayloadDueBps": network_params.payload_due_bps,
         "PayloadAttestationDueBps": network_params.payload_attestation_due_bps,
         "ViewFreezeCutoffBps": network_params.view_freeze_cutoff_bps,
         "InclusionListSubmissionDueBps": network_params.inclusion_list_submission_due_bps,
