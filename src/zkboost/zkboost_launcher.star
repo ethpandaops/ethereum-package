@@ -59,15 +59,13 @@ def launch_zkboost(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    network_params,
     tempo_otlp_grpc_url=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
-    # Launch ere-server services once - shared across all zkboost instances.
-    # Each `ere` zkvm entry results in a single long-lived service; all zkboost
-    # instances reference it as an endpoint.
-    # `_resolve_image_and_elf_url` fills in `image` and `elf_url` from zkboost's
-    # pinned ere/ere-guests versions when the user didn't provide them.
+    default_proof_timeout_secs = network_params.seconds_per_slot * 3 // 4
+
     ere_server_endpoints = {}
     metrics_jobs = []
     for zkvm in _resolve_image_and_elf_url(zkboost_params.zkvms, zkboost_params.image):
@@ -111,7 +109,9 @@ def launch_zkboost(
             entry = {
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
-                "ProofTimeoutSecs": zkvm.get("proof_timeout_secs", 12),
+                "ProofTimeoutSecs": zkvm.get(
+                    "proof_timeout_secs", default_proof_timeout_secs
+                ),
             }
             if zkvm["kind"] == "ere":
                 entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
