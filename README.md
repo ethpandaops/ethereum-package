@@ -722,6 +722,10 @@ network_params:
   # Defaults to 5000 basis points (50% of slot duration)
   contribution_due_bps_gloas: 5000
 
+  # Payload availability deadline for Gloas fork
+  # Defaults to 7500 basis points (75% of slot duration)
+  payload_due_bps: 7500
+
   # Payload attestation due timing for Gloas fork
   # Defaults to 7500 basis points (75% of slot duration)
   payload_attestation_due_bps: 7500
@@ -823,8 +827,8 @@ network_params:
   min_validator_withdrawability_delay: 256
 
   # The minimum number of epochs for builder withdrawability delay
-  # Defaults to 4096, 8 for minimal preset
-  min_builder_withdrawability_delay: 4096
+  # Defaults to 8192, 2 for minimal preset
+  min_builder_withdrawability_delay: 8192
 
   # The period of the shard committee
   # Defaults to 256 epoch ~27 hours
