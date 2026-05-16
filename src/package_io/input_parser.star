@@ -773,6 +773,7 @@ def input_parser(plan, input_args):
             contribution_due_bps_gloas=result["network_params"][
                 "contribution_due_bps_gloas"
             ],
+            payload_due_bps=result["network_params"]["payload_due_bps"],
             payload_attestation_due_bps=result["network_params"][
                 "payload_attestation_due_bps"
             ],
@@ -1703,12 +1704,13 @@ def default_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
-        "min_builder_withdrawability_delay": 64,
+        "min_builder_withdrawability_delay": 8192,
         "shard_committee_period": 256,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
         "sync_message_due_bps_gloas": 2500,
         "contribution_due_bps_gloas": 5000,
+        "payload_due_bps": 7500,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
         "inclusion_list_submission_due_bps": 6667,
@@ -1792,6 +1794,7 @@ def default_minimal_network_params():
         "aggregate_due_bps_gloas": 5000,
         "sync_message_due_bps_gloas": 2500,
         "contribution_due_bps_gloas": 5000,
+        "payload_due_bps": 7500,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
         "inclusion_list_submission_due_bps": 6667,

@@ -238,6 +238,7 @@ SUBCATEGORY_PARAMS = {
         "aggregate_due_bps_gloas",
         "sync_message_due_bps_gloas",
         "contribution_due_bps_gloas",
+        "payload_due_bps",
         "payload_attestation_due_bps",
         "view_freeze_cutoff_bps",
         "inclusion_list_submission_due_bps",
