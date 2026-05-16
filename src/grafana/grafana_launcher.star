@@ -220,7 +220,6 @@ os.makedirs("/dashboards-dl", exist_ok=True)
 urllib.request.urlretrieve(sys.argv[1], "/dashboards-dl/" + sys.argv[2])
         """,
         args = [url, name],
-        image = "python:3.12-alpine",
         store = [StoreSpec(src = "/dashboards-dl/", name = name)],
     )
     return result.files_artifacts[0]
