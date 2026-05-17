@@ -160,6 +160,18 @@ spamoor_params:
   min_mem: 20
   max_mem: 300
   extra_args: []
+disruptoor_params:
+  image: ethpandaops/disruptoor:master-latest
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  log_level: info
+  log_format: json
+  partitions: []
+  shaping: []
+  config: {}
+  extra_args: []
 prometheus_params:
   storage_tsdb_retention_time: "1d"
   storage_tsdb_retention_size: "512MB"

@@ -1031,6 +1031,7 @@ additional_services:
   - checkpointz
   - custom_flood
   - dora
+  - disruptoor
   - dugtrio
   - erpc
   - zkboost
@@ -1606,6 +1607,50 @@ spamoor_params:
   #     throughput: 10  # 10 tx per block
   spammers: []
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
+  extra_args: []
+
+# Configuration place for disruptoor - https://github.com/ethpandaops/disruptoor
+# Disruptoor is Docker-only and requires running Kurtosis with privileged mode enabled.
+disruptoor_params:
+  # The image to use for disruptoor
+  image: ethpandaops/disruptoor:master-latest
+  # Resource management for disruptoor
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  # Log level for disruptoor (error, warn, info, debug)
+  log_level: info
+  # Log format for disruptoor (json or text)
+  log_format: json
+  # Optional partitions applied at startup. Leave empty to use the HTTP API only.
+  # participants are ethereum-package participant/node indexes; components can be el, cl, or vc.
+  # Example:
+  # partitions:
+  #   - name: split-node-1-node-2
+  #     groups:
+  #       - participants: [1]
+  #       - participants: [2]
+  #     components: [el, cl]
+  partitions: []
+  # Optional traffic shaping applied at startup.
+  # include_control must be true because disruptoor v0 shaping requires explicit control traffic acknowledgement.
+  # Example:
+  # shaping:
+  #   - name: jitter-node-1
+  #     participants: [1]
+  #     components: [el, cl]
+  #     delay: 50ms
+  #     jitter: 10ms
+  #     include_control: true
+  shaping: []
+  # Optional native disruptoor v1 state applied at startup.
+  # Cannot be used together with partitions or shaping. Leave empty to use the HTTP API only.
+  # Selectors use ethereum-package labels without the full Kurtosis prefix.
+  config: {}
+  # A list of optional params that will be passed to disruptoor
   extra_args: []
 
 # Configuration place for slashoor - https://github.com/ethpandaops/slashoor

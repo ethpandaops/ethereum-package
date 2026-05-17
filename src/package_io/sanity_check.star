@@ -403,6 +403,19 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "spammers",
     ],
+    "disruptoor_params": [
+        "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "log_level",
+        "log_format",
+        "config",
+        "partitions",
+        "shaping",
+        "extra_args",
+    ],
     "slashoor_params": [
         "image",
         "min_cpu",
@@ -484,6 +497,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "rakoon",
     "slashoor",
     "spamoor",
+    "disruptoor",
     "zkboost",
 ]
 
