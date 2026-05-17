@@ -1157,19 +1157,6 @@ def _validate_ere_gpu_config(zkvms):
         )
 
 
-# Mapping from numeric proof-type IDs (used in --proof-types CL/VC flags) to
-# proof_type names (EL + zkVM combination, e.g., "reth-zisk" = Reth + Zisk).
-PROOF_TYPE_ID_TO_NAME = {
-    0: "ethrex-risc0",
-    1: "ethrex-sp1",
-    2: "ethrex-zisk",
-    3: "reth-openvm",
-    4: "reth-risc0",
-    5: "reth-sp1",
-    6: "reth-zisk",
-}
-
-
 def _validate_requested_proof_types(participants, configured_proof_types):
     """Validate that proof types requested by participants have zkvms configured.
 
@@ -1190,16 +1177,16 @@ def _validate_requested_proof_types(participants, configured_proof_types):
                 if not id_str:
                     continue
                 proof_type_id = int(id_str)
-                if proof_type_id not in PROOF_TYPE_ID_TO_NAME:
+                if proof_type_id not in constants.PROOF_TYPE_ID_TO_NAME:
                     fail(
                         "participants[{0}]: unknown proof-type ID '{1}' in --proof-types flag. ".format(
                             idx, proof_type_id
                         )
                         + "Valid IDs are: {0}.".format(
-                            ", ".join(["{0}={1}".format(k, v) for k, v in PROOF_TYPE_ID_TO_NAME.items()])
+                            ", ".join(["{0}={1}".format(k, v) for k, v in constants.PROOF_TYPE_ID_TO_NAME.items()])
                         )
                     )
-                proof_type = PROOF_TYPE_ID_TO_NAME[proof_type_id]
+                proof_type = constants.PROOF_TYPE_ID_TO_NAME[proof_type_id]
                 if proof_type not in configured_proof_types:
                     fail(
                         "participants[{0}] requests proof_type '{1}' (ID {2}) via --proof-types flag, ".format(
