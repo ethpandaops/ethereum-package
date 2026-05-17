@@ -1105,13 +1105,6 @@ def input_parser(plan, input_args):
 
 
 def _validate_ere_gpu_config(zkvms):
-    """Validate ere zkvm GPU configuration.
-
-    Checks:
-    1. ere entries require GPU (device_ids or count > 0)
-    2. GPU device_id overlap between ere entries
-    3. At most one ere zkvm uses gpu.count without gpu.device_ids
-    """
     services_using_count = []
     gpu_device_usage = {}  # device_id -> proof_type
 
