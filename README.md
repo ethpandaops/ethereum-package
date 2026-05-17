@@ -1626,7 +1626,7 @@ disruptoor_params:
   # Log format for disruptoor (json or text)
   log_format: json
   # Optional partitions applied at startup. Leave empty to use the HTTP API only.
-  # participants are ethereum-package participant/node indexes; components can be el, cl, or vc.
+  # participants are ethereum-package participant/node indexes; components can be el, cl, vc, or all.
   # Example:
   # partitions:
   #   - name: split-node-1-node-2

@@ -8,6 +8,7 @@ DISRUPTOOR_CONFIG_FILENAME = "config.json"
 DISRUPTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 DOCKER_SOCKET_PATH = "/var/run/docker.sock"
 DEFAULT_COMPONENTS = ["el", "cl"]
+ALL_COMPONENTS = ["el", "cl", "vc"]
 
 COMPONENT_TO_CLIENT_TYPE = {
     "el": constants.CLIENT_TYPES.el,
@@ -309,7 +310,17 @@ def get_components(config, default_components, field_path):
     components = config.get("components", default_components)
     if components == None:
         components = default_components
-    return normalize_list(components, field_path)
+
+    if components == "all":
+        return ALL_COMPONENTS
+
+    components = normalize_list(components, field_path)
+    if "all" in components:
+        if len(components) != 1:
+            fail("{0} cannot mix all with specific components".format(field_path))
+        return ALL_COMPONENTS
+
+    return components
 
 
 def get_client_types(components, field_path):
