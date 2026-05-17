@@ -129,9 +129,15 @@ def get_config(
 
 
 def get_disruptoor_state(disruptoor_params):
-    has_native_config = disruptoor_params.config != None and disruptoor_params.config != {}
-    has_friendly_partitions = disruptoor_params.partitions != None and disruptoor_params.partitions != []
-    has_friendly_shaping = disruptoor_params.shaping != None and disruptoor_params.shaping != []
+    has_native_config = (
+        disruptoor_params.config != None and disruptoor_params.config != {}
+    )
+    has_friendly_partitions = (
+        disruptoor_params.partitions != None and disruptoor_params.partitions != []
+    )
+    has_friendly_shaping = (
+        disruptoor_params.shaping != None and disruptoor_params.shaping != []
+    )
 
     if has_native_config:
         if has_friendly_partitions or has_friendly_shaping:
@@ -165,16 +171,24 @@ def translate_partitions(partitions):
         if type(groups) != "list" or len(groups) < 2:
             fail("{0}.groups must contain at least two groups".format(field_path))
 
-        components = get_components(partition, DEFAULT_COMPONENTS, "{0}.components".format(field_path))
+        components = get_components(
+            partition, DEFAULT_COMPONENTS, "{0}.components".format(field_path)
+        )
 
         native_groups = []
         for group_index, group in enumerate(groups):
             group_path = "{0}.groups[{1}]".format(field_path, group_index)
             if type(group) != "dict":
                 fail("{0} must be a map".format(group_path))
-            if "participants" not in group and "labels" not in group and "selector" not in group:
+            if (
+                "participants" not in group
+                and "labels" not in group
+                and "selector" not in group
+            ):
                 fail(
-                    "{0} must define participants, labels, or selector".format(group_path)
+                    "{0} must define participants, labels, or selector".format(
+                        group_path
+                    )
                 )
             native_groups.append(get_selector(group, components, group_path))
 
@@ -214,26 +228,34 @@ def translate_shaping(shaping_rules):
 
         if not has_any_key(shaping_rule, ["delay", "loss", "bandwidth"]):
             fail(
-                "{0} must define at least one of delay, loss, or bandwidth".format(field_path)
+                "{0} must define at least one of delay, loss, or bandwidth".format(
+                    field_path
+                )
             )
         if "jitter" in shaping_rule and "delay" not in shaping_rule:
             fail("{0}.jitter requires delay to be set".format(field_path))
 
-        components = get_components(shaping_rule, DEFAULT_COMPONENTS, "{0}.components".format(field_path))
+        components = get_components(
+            shaping_rule, DEFAULT_COMPONENTS, "{0}.components".format(field_path)
+        )
         native_rule = {
             "name": shaping_rule.get("name", "shaping-{0}".format(index + 1)),
             "target": get_shaping_target(shaping_rule, components, field_path),
         }
 
         if "scope" in shaping_rule:
-            scope = normalize_list(shaping_rule["scope"], "{0}.scope".format(field_path))
+            scope = normalize_list(
+                shaping_rule["scope"], "{0}.scope".format(field_path)
+            )
             if "include_control" not in scope:
                 fail("{0}.scope must include include_control".format(field_path))
             native_rule["scope"] = scope
         else:
             if shaping_rule.get("include_control", False) != True:
                 fail(
-                    "{0}.include_control must be true because disruptoor v0 shaping currently requires control traffic acknowledgement".format(field_path)
+                    "{0}.include_control must be true because disruptoor v0 shaping currently requires control traffic acknowledgement".format(
+                        field_path
+                    )
                 )
             native_rule["scope"] = ["include_control"]
 
@@ -250,17 +272,23 @@ def get_shaping_target(shaping_rule, components, field_path):
     if "target" in shaping_rule:
         if has_any_key(shaping_rule, ["participants", "labels", "selector"]):
             fail(
-                "{0}.target cannot be combined with participants, labels, or selector".format(field_path)
+                "{0}.target cannot be combined with participants, labels, or selector".format(
+                    field_path
+                )
             )
 
         target = shaping_rule["target"]
-        if type(target) == "dict" and has_any_key(target, ["participants", "components", "labels", "selector"]):
+        if type(target) == "dict" and has_any_key(
+            target, ["participants", "components", "labels", "selector"]
+        ):
             return get_selector(target, components, "{0}.target".format(field_path))
         return target
 
     if not has_any_key(shaping_rule, ["participants", "labels", "selector"]):
         fail(
-            "{0} must define participants, labels, selector, or target".format(field_path)
+            "{0} must define participants, labels, selector, or target".format(
+                field_path
+            )
         )
 
     return get_selector(shaping_rule, components, field_path)
@@ -270,7 +298,9 @@ def get_selector(config, default_components, field_path):
     if "selector" in config:
         if has_any_key(config, ["participants", "components", "labels"]):
             fail(
-                "{0}.selector cannot be combined with participants, components, or labels".format(field_path)
+                "{0}.selector cannot be combined with participants, components, or labels".format(
+                    field_path
+                )
             )
         return config["selector"]
 
@@ -286,7 +316,11 @@ def get_selector(config, default_components, field_path):
 
     if "participants" in config:
         if "node-index" in selector:
-            fail("{0}.labels cannot include node-index when participants is set".format(field_path))
+            fail(
+                "{0}.labels cannot include node-index when participants is set".format(
+                    field_path
+                )
+            )
         participants = config["participants"]
         if participants != "all":
             selector["node-index"] = normalize_list(
@@ -294,11 +328,17 @@ def get_selector(config, default_components, field_path):
                 "{0}.participants".format(field_path),
             )
 
-    components = get_components(config, default_components, "{0}.components".format(field_path))
+    components = get_components(
+        config, default_components, "{0}.components".format(field_path)
+    )
     client_types = get_client_types(components, "{0}.components".format(field_path))
     if client_types != []:
         if "client-type" in selector:
-            fail("{0}.labels cannot include client-type when components is set".format(field_path))
+            fail(
+                "{0}.labels cannot include client-type when components is set".format(
+                    field_path
+                )
+            )
         selector["client-type"] = client_types
 
     if selector == {}:
@@ -348,12 +388,17 @@ def get_partition_scope(components, field_path):
                     component,
                 )
             )
-        if component in COMPONENT_TO_PARTITION_SCOPE and COMPONENT_TO_PARTITION_SCOPE[component] not in scope:
+        if (
+            component in COMPONENT_TO_PARTITION_SCOPE
+            and COMPONENT_TO_PARTITION_SCOPE[component] not in scope
+        ):
             scope.append(COMPONENT_TO_PARTITION_SCOPE[component])
 
     if scope == []:
         fail(
-            "{0} must include el or cl for partitions, or set scope explicitly".format(field_path)
+            "{0} must include el or cl for partitions, or set scope explicitly".format(
+                field_path
+            )
         )
     return scope
 
