@@ -1,0 +1,30 @@
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: teku
+
+additional_services:
+  - disruptoor
+  - dora
+
+disruptoor_params:
+  log_level: debug
+  log_format: text
+  partitions:
+    - name: split-node-1-from-node-2
+      groups:
+        - participants: [1]
+        - participants: [2]
+      components: [cl]
+  shaping:
+    - name: delay-node-1-p2p
+      participants: [1]
+      components: [el, cl]
+      delay: 50ms
+      jitter: 10ms
+      include_control: true
+
+port_publisher:
+  additional_services:
+    enabled: true

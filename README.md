@@ -231,6 +231,27 @@ Looking for ready-to-run YAML configs beyond the snippets above?
 
 Copy any of them to your local working directory and run with `kurtosis run --enclave <name> . --args-file <path>`.
 
+### Disruptoor example
+
+Use [`.github/tests/examples/disruptoor.yaml`](.github/tests/examples/disruptoor.yaml) to launch a small two-node network with Disruptoor and Dora. The example applies a CL partition between node 1 and node 2 at startup, then adds latency and jitter to node 1's EL/CL P2P traffic.
+
+```bash
+kurtosis run --enclave disruptoor-example . --args-file .github/tests/examples/disruptoor.yaml --privileged --verbosity detailed
+```
+
+Disruptoor is Docker-only. The package fails early on Kubernetes because Disruptoor needs privileged mode, `/var/run/docker.sock`, and the host PID namespace to shape peer traffic. The `--privileged` run flag is required so Kurtosis allows those Docker-only service settings.
+
+The friendly Disruptoor config in `disruptoor_params` uses ethereum-package participant numbers. `participants: [1]` targets the first configured node, `participants: [2]` targets the second, and `components` can be `el`, `cl`, `vc`, or `all`. The example enables `port_publisher.additional_services` so `kurtosis enclave inspect disruptoor-example` shows forwarded HTTP ports for additional services such as Disruptoor and Dora.
+
+Common issues:
+
+- `unknown flag: --privileged` or `ServiceConfig: unexpected keyword argument "privileged"`: upgrade both the Kurtosis CLI and engine to a build that supports privileged runs for Docker-only services.
+- `disruptoor requires Kurtosis' Docker backend`: switch Kurtosis to the Docker backend and rerun the package.
+- Shaping rules fail with `include_control must be true`: add `include_control: true`, or set `scope` explicitly with `include_control` included.
+- `disruptoor_params.config cannot be used together with disruptoor_params.partitions or disruptoor_params.shaping`: use either native Disruptoor state under `config` or the friendly `partitions` / `shaping` fields, not both.
+- A partition using only `components: [vc]` fails unless you set `scope` explicitly; the default partition scope is derived from EL/CL P2P traffic.
+- Participant indexes are 1-based and follow the expanded participant list, so `count` entries create multiple targetable nodes.
+
 ## Configuration
 
 To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
