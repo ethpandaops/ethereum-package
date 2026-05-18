@@ -527,9 +527,9 @@ def input_parser(plan, input_args):
             kind = zkvm.get("kind")
             proof_type = zkvm.get("proof_type")
 
-            if kind not in ["mock", "ere", "external"]:
+            if kind not in ["mock", "ere", "external", "verifier"]:
                 fail(
-                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock', 'ere', or 'external'".format(
+                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock', 'ere', 'external', or 'verifier'".format(
                         idx, kind
                     )
                 )
@@ -594,6 +594,7 @@ def input_parser(plan, input_args):
                     )
 
         _validate_ere_gpu_config(result["zkboost_params"]["zkvms"])
+        _validate_requested_proof_types(result["participants"], configured_proof_types)
 
     if (
         "bootnodoor" not in result["additional_services"]
@@ -1104,17 +1105,46 @@ def input_parser(plan, input_args):
 
 
 def _validate_ere_gpu_config(zkvms):
-    """Validate that at most one ere zkvm uses gpu.count without gpu.device_ids."""
     services_using_count = []
+    gpu_device_usage = {}  # device_id -> proof_type
+
     for zkvm in zkvms:
         if zkvm.get("kind") != "ere":
             continue
+
+        proof_type = zkvm.get("proof_type")
         gpu_cfg = zkvm.get("gpu", {})
         count = gpu_cfg.get("count", 0)
         device_ids = gpu_cfg.get("device_ids", [])
-        if count > 0 and len(device_ids) == 0:
-            services_using_count.append(zkvm["proof_type"])
+        has_gpu = len(device_ids) > 0 or count > 0
 
+        # Check: ere requires GPU
+        # Pre-built ere-server images are CUDA-enabled and require GPU for proving.
+        if not has_gpu:
+            fail(
+                "proof_type '{0}' has kind=ere but no GPU configured. ".format(
+                    proof_type
+                )
+                + "ere-server requires GPU for proving. "
+                + "Either add gpu.device_ids or gpu.count, or use 'kind: mock' for testing. "
+                + "For verification-only use cases, use 'kind: verifier' instead."
+            )
+
+        # Check: GPU device_id overlap
+        for device_id in device_ids:
+            if device_id in gpu_device_usage:
+                fail(
+                    "GPU device '{0}' is used by multiple ere entries: '{1}' and '{2}'. ".format(
+                        device_id, gpu_device_usage[device_id], proof_type
+                    )
+                    + "Each ere-server requires exclusive GPU access."
+                )
+            gpu_device_usage[device_id] = proof_type
+
+        if count > 0 and len(device_ids) == 0:
+            services_using_count.append(proof_type)
+
+    # Check: Multiple services using gpu.count without device_ids
     if len(services_using_count) > 1:
         fail(
             "Multiple ere services specify gpu.count without gpu.device_ids: [{0}]. ".format(
@@ -1125,6 +1155,58 @@ def _validate_ere_gpu_config(zkvms):
             + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each service instead "
             + '(e.g. gpu: {{device_ids: ["0"]}} and gpu: {{device_ids: ["1"]}}).'
         )
+
+
+def _validate_requested_proof_types(participants, configured_proof_types):
+    """Validate that proof types requested by participants have zkvms configured.
+
+    Parses --proof-types flags from cl_extra_params and vc_extra_params to find
+    which proof types participants need, then checks each is in configured_proof_types.
+    """
+    for idx, participant in enumerate(participants):
+        cl_extra_params = participant.get("cl_extra_params", [])
+        vc_extra_params = participant.get("vc_extra_params", [])
+        all_params = list(cl_extra_params) + list(vc_extra_params)
+
+        for param in all_params:
+            if not param.startswith("--proof-types="):
+                continue
+            ids_str = param.split("=", 1)[1]
+            for id_str in ids_str.split(","):
+                id_str = id_str.strip()
+                if not id_str:
+                    continue
+                proof_type_id = int(id_str)
+                if proof_type_id not in constants.PROOF_TYPE_ID_TO_NAME:
+                    fail(
+                        "participants[{0}]: unknown proof-type ID '{1}' in --proof-types flag. ".format(
+                            idx, proof_type_id
+                        )
+                        + "Valid IDs are: {0}.".format(
+                            ", ".join(
+                                [
+                                    "{0}={1}".format(k, v)
+                                    for k, v in constants.PROOF_TYPE_ID_TO_NAME.items()
+                                ]
+                            )
+                        )
+                    )
+                proof_type = constants.PROOF_TYPE_ID_TO_NAME[proof_type_id]
+                if proof_type not in configured_proof_types:
+                    fail(
+                        "participants[{0}] requests proof_type '{1}' (ID {2}) via --proof-types flag, ".format(
+                            idx, proof_type, proof_type_id
+                        )
+                        + "but no zkvm is configured for it in zkboost_params.zkvms. "
+                        + "Either add a zkvm entry for '{0}' or remove ID {1} from --proof-types. ".format(
+                            proof_type, proof_type_id
+                        )
+                        + "Configured proof_types: {0}.".format(
+                            ", ".join(configured_proof_types)
+                            if configured_proof_types
+                            else "(none)"
+                        )
+                    )
 
 
 def parse_network_params(plan, input_args):

@@ -1,0 +1,81 @@
+# EIP-8025 testnet demonstrating zkboost's in-process verifier path:
+# one prover instance (real ZisK ere-server, GPU) + one verifier-only instance
+# (no ere-server, ere-verifier-zisk linked into zkboost).
+#
+# Run with:
+#   kurtosis run --enclave eip8025-in-process-verifier \
+#       . \
+#       --args-file .github/tests/zkboost_in_process_verifier.yaml_norun
+#
+# Prerequisites:
+#   - 1 NVIDIA GPU
+#   - Custom zkboost image with `--features verifier-zisk` (default in
+#     qu0b/zkboost@qu0b/in-process-verifier). Build locally:
+#       docker build -t zkboost:cpu-verify-experiment -f docker/Dockerfile .
+
+participants:
+  # Prover-side: uses zkboost-prover (real ere-server + GPU).
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: reth
+    el_image: ghcr.io/paradigmxyz/reth
+    supernode: true
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-prover:3000
+      - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost-prover:3000
+      - --proof-types=6
+    count: 1
+  # Verifier-only side: uses zkboost-verifier (no ere-server, in-process
+  # ere-verifier-zisk). Listens for gossipped proofs and verifies them.
+  # Lighthouse's gossip subscription is enabled by --proof-engine-endpoint (not
+  # --proof-types). The --proof-types flag controls which types to request/sign.
+  # zkboost-verifier rejects prove requests with an error (verifier-only mode).
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: reth
+    el_image: ghcr.io/paradigmxyz/reth
+    supernode: false
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-verifier:3000
+      - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost-verifier:3000
+      - --proof-types=6
+    count: 1
+
+network_params:
+  seconds_per_slot: 30
+
+additional_services:
+  - zkboost
+  - dora
+  - prometheus
+  - grafana
+  - tempo
+
+zkboost_params:
+  # Locally-built image; auto-resolution of ere/ere-guests versions is bypassed,
+  # so each zkvm entry sets its artifact URLs explicitly.
+  image: zkboost:cpu-verify-experiment
+  env:
+    RUST_LOG: info,zkboost=debug
+  instances:
+    - name: zkboost-prover
+      el_participant_index: 0
+      zkvms:
+        - kind: ere
+          proof_type: reth-zisk
+          image: ghcr.io/eth-act/ere/ere-server-zisk:0.9.1-cuda
+          elf_url: https://github.com/eth-act/ere-guests/releases/download/v0.10.0/stateless-validator-reth-zisk.elf
+          gpu:
+            device_ids: ["0"]
+    - name: zkboost-verifier
+      el_participant_index: 1
+      zkvms:
+        - kind: verifier
+          proof_type: reth-zisk
+          program_vk_url: https://github.com/eth-act/ere-guests/releases/download/v0.10.0/stateless-validator-reth-zisk.vk

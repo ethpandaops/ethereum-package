@@ -11,9 +11,14 @@ retention = {{ .DashboardRetention }}
 [[zkvm]]
 kind = "{{ $zkvm.Kind }}"
 proof_type = "{{ $zkvm.ProofType }}"
+{{- if ne $zkvm.Kind "verifier" }}
 proof_timeout_secs = {{ $zkvm.ProofTimeoutSecs }}
+{{- end }}
 {{- if eq $zkvm.Kind "ere" }}
 endpoint = "{{ $zkvm.Endpoint }}"
+{{- end }}
+{{- if eq $zkvm.Kind "verifier" }}
+program_vk_url = "{{ $zkvm.ProgramVkUrl }}"
 {{- end }}
 {{- if eq $zkvm.Kind "mock" }}
 {{- if eq $zkvm.MockProvingTimeKind "constant" }}
