@@ -103,6 +103,7 @@ BUILDOOR_MEV_TYPE = "buildoor"
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_CHECKPOINTZ_IMAGE = "ethpandaops/checkpointz:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:latest"
+DEFAULT_DISRUPTOOR_IMAGE = "ethpandaops/disruptoor:latest"
 DEFAULT_SLASHOOR_IMAGE = "ethpandaops/slashoor:latest"
 DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
@@ -121,6 +122,18 @@ DEFAULT_MOCK_MEV_IMAGE = "ethpandaops/rustic-builder:main"
 DEFAULT_BUILDOOR_IMAGE = "ethpandaops/buildoor:main"
 DEFAULT_HELIX_RELAY_IMAGE = "ghcr.io/gattaca-com/helix-relay:main"
 DEFAULT_ZKBOOST_IMAGE = "ghcr.io/eth-act/zkboost/zkboost:latest"
+
+# Mapping from numeric proof-type IDs (used in --proof-types CL/VC flags) to
+# proof_type names (EL + zkVM combination, e.g., "reth-zisk" = Reth + Zisk).
+PROOF_TYPE_ID_TO_NAME = {
+    0: "ethrex-risc0",
+    1: "ethrex-sp1",
+    2: "ethrex-zisk",
+    3: "reth-openvm",
+    4: "reth-risc0",
+    5: "reth-sp1",
+    6: "reth-zisk",
+}
 DEFAULT_MEV_PUBKEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
 DEFAULT_MEV_SECRET_KEY = (
     "0x607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"

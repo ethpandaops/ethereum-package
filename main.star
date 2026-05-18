@@ -62,6 +62,7 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
+disruptoor = import_module("./src/disruptoor/disruptoor_launcher.star")
 slashoor = import_module("./src/slashoor/slashoor_launcher.star")
 zkboost = import_module("./src/zkboost/zkboost_launcher.star")
 
@@ -90,6 +91,16 @@ def run(plan, args={}):
 
     # Detect the backend type early - needed for binary injection validation
     detected_backend = plan.get_cluster_type()
+
+    if (
+        "disruptoor" in args_with_right_defaults.additional_services
+        and detected_backend != "docker"
+    ):
+        fail(
+            "disruptoor requires Kurtosis' Docker backend because it uses privileged mode, /var/run/docker.sock, and the host PID namespace; detected: {0}".format(
+                detected_backend
+            )
+        )
 
     # Process extra_files - create artifacts from provided content
     extra_files_artifacts = {}
@@ -1016,6 +1027,18 @@ def run(plan, args={}):
                 osaka_time,
             )
             plan.print("Successfully launched spamoor")
+        elif additional_service == "disruptoor":
+            plan.print("Launching disruptoor")
+            disruptoor.launch_disruptoor(
+                plan,
+                args_with_right_defaults.disruptoor_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched disruptoor")
         elif additional_service == "slashoor":
             plan.print("Launching slashoor")
             slashoor_config_template = read_file(
