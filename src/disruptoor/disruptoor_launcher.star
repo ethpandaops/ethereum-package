@@ -42,9 +42,11 @@ def launch_disruptoor(
     global_tolerations,
     port_publisher,
     additional_service_index,
+    docker_cache_params,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
+    validate_disruptoor_params(disruptoor_params)
     disruptoor_state = get_disruptoor_state(disruptoor_params)
 
     config_files_artifact_name = None
@@ -66,6 +68,7 @@ def launch_disruptoor(
         tolerations,
         port_publisher,
         additional_service_index,
+        docker_cache_params,
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -77,6 +80,7 @@ def get_config(
     tolerations,
     port_publisher,
     additional_service_index,
+    docker_cache_params,
 ):
     cmd = [
         "--addr=:{0}".format(HTTP_PORT_NUMBER),
@@ -105,7 +109,10 @@ def get_config(
     )
 
     config_args = {
-        "image": disruptoor_params.image,
+        "image": shared_utils.docker_cache_image_calc(
+            docker_cache_params,
+            disruptoor_params.image,
+        ),
         "cmd": cmd,
         "ports": USED_PORTS,
         "public_ports": public_ports,
@@ -126,6 +133,24 @@ def get_config(
         config_args["files"] = files
 
     return ServiceConfig(**config_args)
+
+
+def validate_disruptoor_params(disruptoor_params):
+    if disruptoor_params.config != None and type(disruptoor_params.config) != "dict":
+        fail("disruptoor_params.config must be a map")
+    if (
+        disruptoor_params.partitions != None
+        and type(disruptoor_params.partitions) != "list"
+    ):
+        fail("disruptoor_params.partitions must be a list")
+    if disruptoor_params.shaping != None and type(disruptoor_params.shaping) != "list":
+        fail("disruptoor_params.shaping must be a list")
+    if type(disruptoor_params.extra_args) != "list":
+        fail("disruptoor_params.extra_args must be a list")
+
+    for index, extra_arg in enumerate(disruptoor_params.extra_args):
+        if type(extra_arg) != "string":
+            fail("disruptoor_params.extra_args[{0}] must be a string".format(index))
 
 
 def get_disruptoor_state(disruptoor_params):

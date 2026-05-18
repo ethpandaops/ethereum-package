@@ -1036,6 +1036,7 @@ def run(plan, args={}):
                 global_tolerations,
                 args_with_right_defaults.port_publisher,
                 index,
+                args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched disruptoor")
         elif additional_service == "slashoor":
