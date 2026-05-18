@@ -18,9 +18,9 @@ disruptoor_params:
         - participants: [2]
       components: [cl]
   shaping:
-    - name: delay-node-1-p2p
+    - name: delay-node-1
       participants: [1]
-      components: [el, cl]
+      components: all
       delay: 50ms
       jitter: 10ms
       include_control: true

@@ -233,7 +233,7 @@ Copy any of them to your local working directory and run with `kurtosis run --en
 
 ### Disruptoor example
 
-Use [`.github/tests/examples/disruptoor.yaml`](.github/tests/examples/disruptoor.yaml) to launch a small two-node network with Disruptoor and Dora. The example applies a CL partition between node 1 and node 2 at startup, then adds latency and jitter to node 1's EL/CL P2P traffic.
+Use [`.github/tests/examples/disruptoor.yaml`](.github/tests/examples/disruptoor.yaml) to launch a small two-node network with Disruptoor and Dora. The example applies a CL partition between node 1 and node 2 at startup, then adds latency and jitter to every component on node 1.
 
 ```bash
 kurtosis run --enclave disruptoor-example . --args-file .github/tests/examples/disruptoor.yaml --privileged --verbosity detailed
@@ -241,7 +241,13 @@ kurtosis run --enclave disruptoor-example . --args-file .github/tests/examples/d
 
 Disruptoor is Docker-only. The package fails early on Kubernetes because Disruptoor needs privileged mode, `/var/run/docker.sock`, and the host PID namespace to shape peer traffic. The `--privileged` run flag is required so Kurtosis allows those Docker-only service settings.
 
-The friendly Disruptoor config in `disruptoor_params` uses ethereum-package participant numbers. `participants: [1]` targets the first configured node, `participants: [2]` targets the second, and `components` can be `el`, `cl`, `vc`, or `all`. The example enables `port_publisher.additional_services` so `kurtosis enclave inspect disruptoor-example` shows forwarded HTTP ports for additional services such as Disruptoor and Dora.
+The friendly Disruptoor config in `disruptoor_params` uses ethereum-package participant numbers. `participants: [1]` targets the first configured node, `participants: [2]` targets the second, and `participants: all` targets all nodes. `components` can be `el`, `cl`, `vc`, or `all`; `components: all` expands to all three and cannot be mixed with other component names. The example enables `port_publisher.additional_services` so `kurtosis enclave inspect disruptoor-example` shows forwarded HTTP ports for additional services such as Disruptoor and Dora.
+
+`partitions` split selected peer traffic into isolated groups. In the example, the partition targets only `components: [cl]`, so the beacon-node P2P traffic for node 1 and node 2 is separated while their EL and VC services are not part of that partition. If no explicit `scope` is provided, the package derives the partition scope from the selected EL/CL components (`el_p2p` and/or `cl_p2p`). VC-only partitions need an explicit native `scope` because validators do not add a default P2P partition scope.
+
+`shaping` changes network conditions for selected services without fully disconnecting them. A shaping rule can add `delay`, add `jitter` when `delay` is set, inject `loss`, cap `bandwidth`, and optionally set `direction`. In the example, `components: all` selects node 1's EL, CL, and VC services, then adds 50ms of delay plus 10ms of jitter to matching traffic.
+
+`include_control: true` tells the friendly config translator to include Disruptoor's control/acknowledgement traffic in the generated shaping scope. Disruptoor v0 shaping requires that control traffic so the shaper can apply and acknowledge the rule. If you set `scope` yourself instead of using `include_control`, include `include_control` in that scope explicitly.
 
 Common issues:
 
