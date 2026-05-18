@@ -1183,7 +1183,12 @@ def _validate_requested_proof_types(participants, configured_proof_types):
                             idx, proof_type_id
                         )
                         + "Valid IDs are: {0}.".format(
-                            ", ".join(["{0}={1}".format(k, v) for k, v in constants.PROOF_TYPE_ID_TO_NAME.items()])
+                            ", ".join(
+                                [
+                                    "{0}={1}".format(k, v)
+                                    for k, v in constants.PROOF_TYPE_ID_TO_NAME.items()
+                                ]
+                            )
                         )
                     )
                 proof_type = constants.PROOF_TYPE_ID_TO_NAME[proof_type_id]
@@ -1197,7 +1202,9 @@ def _validate_requested_proof_types(participants, configured_proof_types):
                             proof_type, proof_type_id
                         )
                         + "Configured proof_types: {0}.".format(
-                            ", ".join(configured_proof_types) if configured_proof_types else "(none)"
+                            ", ".join(configured_proof_types)
+                            if configured_proof_types
+                            else "(none)"
                         )
                     )
 
