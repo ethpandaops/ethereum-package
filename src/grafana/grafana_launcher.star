@@ -196,33 +196,16 @@ def upload_additional_dashboards(plan, additional_dashboards):
                 additional_dashboard_folder_name,
             )
         )
-
-        af_name = "additional-grafana-dashboard-{0}.json".format(index)
-        if dashboard_src.startswith("http://") or dashboard_src.startswith("https://"):
-            file = download_dashboard_file(plan, url=dashboard_src, name=af_name)
-        else:
-            file = plan.upload_files(dashboard_src, name=af_name)
-
-        data.append({
-            GRAFANA_ADDITIONAL_DASHBOARDS_SERVICE_PATH_KEY: additional_dashboard_service_path,
-            GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY: file,
-        })
-
+        additional_dashboard_artifact_name = plan.upload_files(
+            dashboard_src, name="additional-grafana-dashboard-{0}".format(index)
+        )
+        data.append(
+            {
+                GRAFANA_ADDITIONAL_DASHBOARDS_SERVICE_PATH_KEY: additional_dashboard_service_path,
+                GRANAFA_ADDITIONAL_DASHBOARDS_ARTIFACT_NAME_KEY: additional_dashboard_artifact_name,
+            }
+        )
     return data
-
-
-def download_dashboard_file(plan, url, name):
-    result = plan.run_python(
-        description = "Downloading Grafana dashboard: {0}".format(url),
-        run = """
-import sys, urllib.request, os
-os.makedirs("/dashboards-dl", exist_ok=True)
-urllib.request.urlretrieve(sys.argv[1], "/dashboards-dl/" + sys.argv[2])
-        """,
-        args = [url, name],
-        store = [StoreSpec(src = "/dashboards-dl/", name = name)],
-    )
-    return result.files_artifacts[0]
 
 
 def merge_dashboards_artifacts(
