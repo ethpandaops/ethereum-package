@@ -14,7 +14,7 @@ DEFAULT_EL_IMAGES = {
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
-    "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
+    "ethrex": "ethpandaops/ethrex:main",
 }
 
 DEFAULT_CL_IMAGES = {
