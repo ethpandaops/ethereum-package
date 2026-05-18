@@ -247,7 +247,7 @@ The friendly Disruptoor config in `disruptoor_params` uses ethereum-package part
 
 `shaping` changes network conditions for selected services without fully disconnecting them. A shaping rule can add `delay`, add `jitter` when `delay` is set, inject `loss`, cap `bandwidth`, and optionally set `direction`. In the example, `components: all` selects node 1's EL, CL, and VC services, then adds 50ms of delay plus 10ms of jitter to matching traffic.
 
-`include_control: true` tells the friendly config translator to include Disruptoor's control/acknowledgement traffic in the generated shaping scope. Disruptoor v0 shaping requires that control traffic so the shaper can apply and acknowledge the rule. If you set `scope` yourself instead of using `include_control`, include `include_control` in that scope explicitly.
+`include_control: true` tells the friendly config translator to include Disruptoor's control/acknowledgement traffic in the generated shaping scope. Disruptoor v0 shaping requires that control traffic so the shaper can apply and acknowledge the rule.
 
 Common issues:
 
@@ -256,7 +256,6 @@ Common issues:
 - Shaping rules fail with `include_control must be true`: add `include_control: true`, or set `scope` explicitly with `include_control` included.
 - `disruptoor_params.config cannot be used together with disruptoor_params.partitions or disruptoor_params.shaping`: use either native Disruptoor state under `config` or the friendly `partitions` / `shaping` fields, not both.
 - A partition using only `components: [vc]` fails unless you set `scope` explicitly; the default partition scope is derived from EL/CL P2P traffic.
-- Participant indexes are 1-based and follow the expanded participant list, so `count` entries create multiple targetable nodes.
 
 ## Configuration
 
@@ -1656,14 +1655,15 @@ disruptoor_params:
   # participants are ethereum-package participant/node indexes; components can be el, cl, vc, or all.
   # Example:
   # partitions:
-  #   - name: split-node-1-node-2
+  #   - name: three-way-split
   #     groups:
-  #       - participants: [1]
-  #       - participants: [2]
+  #       - participants: [1, 2]
+  #       - participants: [3, 4]
+  #       - participants: [5, 6]
   #     components: [el, cl]
   partitions: []
   # Optional traffic shaping applied at startup.
-  # include_control must be true because disruptoor v0 shaping requires explicit control traffic acknowledgement.
+  # include_control must be true because disruptoor shaping requires explicit control traffic acknowledgement.
   # Example:
   # shaping:
   #   - name: jitter-node-1
@@ -1673,8 +1673,8 @@ disruptoor_params:
   #     jitter: 10ms
   #     include_control: true
   shaping: []
-  # Optional native disruptoor v1 state applied at startup.
-  # Cannot be used together with partitions or shaping. Leave empty to use the HTTP API only.
+  # Optional native disruptoor state applied at startup.
+  # Cannot be used together with partitions or shaping.
   # Selectors use ethereum-package labels without the full Kurtosis prefix.
   config: {}
   # A list of optional params that will be passed to disruptoor
