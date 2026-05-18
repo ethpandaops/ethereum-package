@@ -88,6 +88,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "disruptoor_params",
     "snooper_params",
     "slashoor_params",
     "bootnodoor_params",
@@ -132,6 +133,7 @@ def input_parser(plan, input_args):
     result["port_publisher"] = get_port_publisher_params("default")
     result["snooper_params"] = get_default_snooper_params()
     result["spamoor_params"] = get_default_spamoor_params()
+    result["disruptoor_params"] = get_default_disruptoor_params()
     result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["zkboost_params"] = get_default_zkboost_params()
@@ -213,6 +215,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "disruptoor_params":
+            for sub_attr in input_args["disruptoor_params"]:
+                sub_value = input_args["disruptoor_params"][sub_attr]
+                result["disruptoor_params"][sub_attr] = sub_value
         elif attr == "slashoor_params":
             for sub_attr in input_args["slashoor_params"]:
                 sub_value = input_args["slashoor_params"][sub_attr]
@@ -982,6 +988,19 @@ def input_parser(plan, input_args):
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
         ),
+        disruptoor_params=struct(
+            image=result["disruptoor_params"]["image"],
+            min_cpu=result["disruptoor_params"]["min_cpu"],
+            max_cpu=result["disruptoor_params"]["max_cpu"],
+            min_mem=result["disruptoor_params"]["min_mem"],
+            max_mem=result["disruptoor_params"]["max_mem"],
+            log_level=result["disruptoor_params"]["log_level"],
+            log_format=result["disruptoor_params"]["log_format"],
+            config=result["disruptoor_params"]["config"],
+            partitions=result["disruptoor_params"]["partitions"],
+            shaping=result["disruptoor_params"]["shaping"],
+            extra_args=result["disruptoor_params"]["extra_args"],
+        ),
         slashoor_params=struct(
             image=result["slashoor_params"]["image"],
             min_cpu=result["slashoor_params"]["min_cpu"],
@@ -1668,6 +1687,7 @@ def default_input_args(input_args):
         },
         "snooper_params": get_default_snooper_params(),
         "spamoor_params": get_default_spamoor_params(),
+        "disruptoor_params": get_default_disruptoor_params(),
         "bootnodoor_params": get_default_bootnodoor_params(),
     }
 
@@ -2186,6 +2206,22 @@ def get_default_spamoor_params():
     }
 
 
+def get_default_disruptoor_params():
+    return {
+        "image": constants.DEFAULT_DISRUPTOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 512,
+        "log_level": "info",
+        "log_format": "json",
+        "config": {},
+        "partitions": [],
+        "shaping": [],
+        "extra_args": [],
+    }
+
+
 def get_default_slashoor_params():
     return {
         "image": constants.DEFAULT_SLASHOOR_IMAGE,
@@ -2498,6 +2534,7 @@ def docker_cache_image_override(plan, result):
         "grafana_params.image",
         "tempo_params.image",
         "spamoor_params.image",
+        "disruptoor_params.image",
         "ethereum_genesis_generator_params.image",
     ]
 
