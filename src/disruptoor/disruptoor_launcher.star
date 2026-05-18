@@ -55,7 +55,8 @@ def launch_disruptoor(
         config_files_artifact_name = plan.render_templates(
             {
                 DISRUPTOOR_CONFIG_FILENAME: shared_utils.new_template_and_data(
-                    config_template, {}
+                    "{{ .DisruptoorConfig }}",
+                    {"DisruptoorConfig": config_template},
                 ),
             },
             "disruptoor-config",
