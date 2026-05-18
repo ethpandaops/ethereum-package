@@ -238,6 +238,7 @@ SUBCATEGORY_PARAMS = {
         "aggregate_due_bps_gloas",
         "sync_message_due_bps_gloas",
         "contribution_due_bps_gloas",
+        "payload_due_bps",
         "payload_attestation_due_bps",
         "view_freeze_cutoff_bps",
         "inclusion_list_submission_due_bps",
@@ -406,6 +407,19 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "spammers",
     ],
+    "disruptoor_params": [
+        "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+        "log_level",
+        "log_format",
+        "config",
+        "partitions",
+        "shaping",
+        "extra_args",
+    ],
     "slashoor_params": [
         "image",
         "min_cpu",
@@ -487,6 +501,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "rakoon",
     "slashoor",
     "spamoor",
+    "disruptoor",
     "zkboost",
 ]
 

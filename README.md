@@ -231,6 +231,32 @@ Looking for ready-to-run YAML configs beyond the snippets above?
 
 Copy any of them to your local working directory and run with `kurtosis run --enclave <name> . --args-file <path>`.
 
+### Disruptoor example
+
+Use [`.github/tests/examples/disruptoor.yaml`](.github/tests/examples/disruptoor.yaml) to launch a small two-node network with Disruptoor and Dora. The example applies a CL partition between node 1 and node 2 at startup, then adds latency and jitter to every component on node 1.
+
+```bash
+kurtosis run --enclave disruptoor-example . --args-file .github/tests/examples/disruptoor.yaml --privileged --verbosity detailed
+```
+
+Disruptoor is Docker-only. The package fails early on Kubernetes because Disruptoor needs privileged mode, `/var/run/docker.sock`, and the host PID namespace to shape peer traffic. The `--privileged` run flag is required so Kurtosis allows those Docker-only service settings.
+
+The friendly Disruptoor config in `disruptoor_params` uses ethereum-package participant numbers. `participants: [1]` targets the first configured node, `participants: [2]` targets the second, and `participants: all` targets all nodes. `components` can be `el`, `cl`, `vc`, or `all`; `components: all` expands to all three and cannot be mixed with other component names. The example enables `port_publisher.additional_services` so `kurtosis enclave inspect disruptoor-example` shows forwarded HTTP ports for additional services such as Disruptoor and Dora.
+
+`partitions` split selected peer traffic into isolated groups. In the example, the partition targets only `components: [cl]`, so the beacon-node P2P traffic for node 1 and node 2 is separated while their EL and VC services are not part of that partition. If no explicit `scope` is provided, the package derives the partition scope from the selected EL/CL components (`el_p2p` and/or `cl_p2p`). VC-only partitions need an explicit native `scope` because validators do not add a default P2P partition scope.
+
+`shaping` changes network conditions for selected services without fully disconnecting them. A shaping rule can add `delay`, add `jitter` when `delay` is set, inject `loss`, cap `bandwidth`, and optionally set `direction`. In the example, `components: all` selects node 1's EL, CL, and VC services, then adds 50ms of delay plus 10ms of jitter to matching traffic.
+
+`include_control: true` tells the friendly config translator to include Disruptoor's control/acknowledgement traffic in the generated shaping scope. Disruptoor v0 shaping requires that control traffic so the shaper can apply and acknowledge the rule.
+
+Common issues:
+
+- `unknown flag: --privileged` or `ServiceConfig: unexpected keyword argument "privileged"`: upgrade both the Kurtosis CLI and engine to a build that supports privileged runs for Docker-only services.
+- `disruptoor requires Kurtosis' Docker backend`: switch Kurtosis to the Docker backend and rerun the package.
+- Shaping rules fail with `include_control must be true`: add `include_control: true`, or set `scope` explicitly with `include_control` included.
+- `disruptoor_params.config cannot be used together with disruptoor_params.partitions or disruptoor_params.shaping`: use either native Disruptoor state under `config` or the friendly `partitions` / `shaping` fields, not both.
+- A partition using only `components: [vc]` fails unless you set `scope` explicitly; the default partition scope is derived from EL/CL P2P traffic.
+
 ## Configuration
 
 To configure the package behaviour, you can modify your `network_params.yaml` file. The full YAML schema that can be passed in is as follows with the defaults provided:
@@ -253,7 +279,7 @@ participants:
     # - reth: ghcr.io/paradigmxyz/reth
     # - ethereumjs: ethpandaops/ethereumjs:master
     # - nimbus-eth1: statusim/nimbus-eth1:master
-    # - ethrex: ghcr.io/lambdaclass/ethrex:latest
+    # - ethrex: ethpandaops/ethrex:main
     el_image: ""
 
     # Path to a local EL binary to inject into the container (Docker only)
@@ -722,6 +748,10 @@ network_params:
   # Defaults to 5000 basis points (50% of slot duration)
   contribution_due_bps_gloas: 5000
 
+  # Payload availability deadline for Gloas fork
+  # Defaults to 7500 basis points (75% of slot duration)
+  payload_due_bps: 7500
+
   # Payload attestation due timing for Gloas fork
   # Defaults to 7500 basis points (75% of slot duration)
   payload_attestation_due_bps: 7500
@@ -823,8 +853,8 @@ network_params:
   min_validator_withdrawability_delay: 256
 
   # The minimum number of epochs for builder withdrawability delay
-  # Defaults to 4096, 8 for minimal preset
-  min_builder_withdrawability_delay: 4096
+  # Defaults to 8192, 2 for minimal preset
+  min_builder_withdrawability_delay: 8192
 
   # The period of the shard committee
   # Defaults to 256 epoch ~27 hours
@@ -1027,6 +1057,7 @@ additional_services:
   - checkpointz
   - custom_flood
   - dora
+  - disruptoor
   - dugtrio
   - erpc
   - zkboost
@@ -1617,6 +1648,51 @@ spamoor_params:
   #     throughput: 10  # 10 tx per block
   spammers: []
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
+  extra_args: []
+
+# Configuration place for disruptoor - https://github.com/ethpandaops/disruptoor
+# Disruptoor is Docker-only and requires running Kurtosis with privileged mode enabled.
+disruptoor_params:
+  # The image to use for disruptoor
+  image: ethpandaops/disruptoor:latest
+  # Resource management for disruptoor
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  # Log level for disruptoor (error, warn, info, debug)
+  log_level: info
+  # Log format for disruptoor (json or text)
+  log_format: json
+  # Optional partitions applied at startup. Leave empty to use the HTTP API only.
+  # participants are ethereum-package participant/node indexes; components can be el, cl, vc, or all.
+  # Example:
+  # partitions:
+  #   - name: three-way-split
+  #     groups:
+  #       - participants: [1, 2]
+  #       - participants: [3, 4]
+  #       - participants: [5, 6]
+  #     components: [el, cl]
+  partitions: []
+  # Optional traffic shaping applied at startup.
+  # include_control must be true because disruptoor shaping requires explicit control traffic acknowledgement.
+  # Example:
+  # shaping:
+  #   - name: jitter-node-1
+  #     participants: [1]
+  #     components: [el, cl]
+  #     delay: 50ms
+  #     jitter: 10ms
+  #     include_control: true
+  shaping: []
+  # Optional native disruptoor state applied at startup.
+  # Cannot be used together with partitions or shaping.
+  # Selectors use ethereum-package labels without the full Kurtosis prefix.
+  config: {}
+  # A list of optional params that will be passed to disruptoor
   extra_args: []
 
 # Configuration place for slashoor - https://github.com/ethpandaops/slashoor

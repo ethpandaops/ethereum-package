@@ -102,6 +102,7 @@ network_params:
   aggregate_due_bps_gloas: 5000
   sync_message_due_bps_gloas: 2500
   contribution_due_bps_gloas: 5000
+  payload_due_bps: 7500
   payload_attestation_due_bps: 7500
   view_freeze_cutoff_bps: 7500
   inclusion_list_submission_due_bps: 6667
@@ -158,6 +159,18 @@ spamoor_params:
   max_cpu: 1000
   min_mem: 20
   max_mem: 300
+  extra_args: []
+disruptoor_params:
+  image: ethpandaops/disruptoor:latest
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  log_level: info
+  log_format: json
+  partitions: []
+  shaping: []
+  config: {}
   extra_args: []
 prometheus_params:
   storage_tsdb_retention_time: "1d"
@@ -256,7 +269,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:6.0.6
+  image: ethpandaops/ethereum-genesis-generator:6.0.7
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
