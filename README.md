@@ -1639,7 +1639,7 @@ spamoor_params:
 # Disruptoor is Docker-only and requires running Kurtosis with privileged mode enabled.
 disruptoor_params:
   # The image to use for disruptoor
-  image: ethpandaops/disruptoor:master-latest
+  image: ethpandaops/disruptoor:latest
   # Resource management for disruptoor
   # CPU is milicores
   # RAM is in MB

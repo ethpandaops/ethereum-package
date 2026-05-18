@@ -161,7 +161,7 @@ spamoor_params:
   max_mem: 300
   extra_args: []
 disruptoor_params:
-  image: ethpandaops/disruptoor:master-latest
+  image: ethpandaops/disruptoor:latest
   min_cpu: 100
   max_cpu: 1000
   min_mem: 128
