@@ -279,7 +279,7 @@ participants:
     # - reth: ghcr.io/paradigmxyz/reth
     # - ethereumjs: ethpandaops/ethereumjs:master
     # - nimbus-eth1: statusim/nimbus-eth1:master
-    # - ethrex: ghcr.io/lambdaclass/ethrex:latest
+    # - ethrex: ethpandaops/ethrex:main
     el_image: ""
 
     # Path to a local EL binary to inject into the container (Docker only)
