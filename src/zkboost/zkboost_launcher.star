@@ -141,7 +141,7 @@ def launch_zkboost(
                     "mock_proving_time", {"kind": "constant", "ms": 6000}
                 )
                 entry["MockProvingTimeKind"] = mock_proving_time.get("kind", "constant")
-                entry["MockProvingTimeConstantMs"] = mock_proving_time.get("ms", 0)
+                entry["MockProvingTimeConstantMs"] = mock_proving_time.get("ms", 6000)
                 entry["MockProvingTimeRandomMinMs"] = mock_proving_time.get("min_ms", 0)
                 entry["MockProvingTimeRandomMaxMs"] = mock_proving_time.get("max_ms", 0)
                 entry["MockProvingTimeLinearMsPerMgas"] = mock_proving_time.get(
