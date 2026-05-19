@@ -500,14 +500,15 @@ def input_parser(plan, input_args):
 
         # Inject default mock zkvm if none configured globally or per instance.
         if len(result["zkboost_params"]["zkvms"]) == 0 and not has_instance_zkvms:
+            default_ms = result["network_params"]["slot_duration_ms"] * 2 // 3
             result["zkboost_params"]["zkvms"] = [
                 {
                     "kind": "mock",
                     "proof_type": "reth-zisk",
                     "mock_proving_time": {
                         "kind": "random",
-                        "min_ms": 2000,
-                        "max_ms": 8000,
+                        "min_ms": default_ms // 2,
+                        "max_ms": default_ms * 2,
                     },
                     "mock_proof_size": 128 << 10,
                 },
@@ -614,15 +615,36 @@ def input_parser(plan, input_args):
                                 zkvm_path, pt_kind
                             )
                         )
-                    if pt_kind == "random":
-                        min_ms = mock_proving_time.get("min_ms", 0)
-                        max_ms = mock_proving_time.get("max_ms", 0)
-                        if min_ms > max_ms:
+                    # Fill in kind-appropriate defaults so a partial override
+                    # like `mock_proving_time: { kind: constant }` doesn't
+                    # silently become 0ms because of missing dict keys.
+                    # Defaults scale with slot duration (2/3 of slot).
+                    default_ms = result["network_params"]["slot_duration_ms"] * 2 // 3
+                    mock_proving_time["kind"] = pt_kind
+                    if pt_kind == "constant":
+                        mock_proving_time["ms"] = mock_proving_time.get(
+                            "ms", default_ms
+                        )
+                    elif pt_kind == "random":
+                        mock_proving_time["min_ms"] = mock_proving_time.get(
+                            "min_ms", default_ms // 2
+                        )
+                        mock_proving_time["max_ms"] = mock_proving_time.get(
+                            "max_ms", default_ms * 2
+                        )
+                        if mock_proving_time["min_ms"] > mock_proving_time["max_ms"]:
                             fail(
                                 "{0}: mock_proving_time random min_ms ({1}) must be <= max_ms ({2})".format(
-                                    zkvm_path, min_ms, max_ms
+                                    zkvm_path,
+                                    mock_proving_time["min_ms"],
+                                    mock_proving_time["max_ms"],
                                 )
                             )
+                    elif pt_kind == "linear":
+                        mock_proving_time["ms_per_mgas"] = mock_proving_time.get(
+                            "ms_per_mgas", default_ms
+                        )
+                    zkvm["mock_proving_time"] = mock_proving_time
 
                 mock_proof_size = zkvm.get("mock_proof_size", 128 << 10)
                 if mock_proof_size < 32:

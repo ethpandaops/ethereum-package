@@ -138,7 +138,11 @@ def launch_zkboost(
                 entry["ProgramVkUrl"] = zkvm["program_vk_url"]
             elif zkvm["kind"] == "mock":
                 mock_proving_time = zkvm.get(
-                    "mock_proving_time", {"kind": "constant", "ms": 6000}
+                    "mock_proving_time",
+                    {
+                        "kind": "constant",
+                        "ms": network_params.slot_duration_ms * 2 // 3,
+                    },
                 )
                 entry["MockProvingTimeKind"] = mock_proving_time.get("kind", "constant")
                 entry["MockProvingTimeConstantMs"] = mock_proving_time.get("ms", 6000)
