@@ -6,26 +6,28 @@ static_files = import_module("../../static_files/static_files.star")
 
 HELIX_RELAY_NAME = "helix-relay"
 
-HTTP_PORT_ID = "http"
 ENDPOINT_PORT_ID = "endpoint"
+ADMIN_PORT_ID = "admin"
 
 HELIX_RELAY_CONFIG_FILENAME = "config.yaml"
 HELIX_RELAY_MOUNT_DIRPATH_ON_SERVICE = "/config/"
 HELIX_RELAY_FILES_ARTIFACT_NAME = "helix-relay-config"
 
 HELIX_RELAY_ENDPOINT_PORT = 4040
-HELIX_RELAY_WEBSITE_PORT = 9060
+HELIX_RELAY_ADMIN_PORT = 4050
 
 USED_PORTS = {
     ENDPOINT_PORT_ID: shared_utils.new_port_spec(
         HELIX_RELAY_ENDPOINT_PORT,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        wait="60s",
     ),
-    HTTP_PORT_ID: shared_utils.new_port_spec(
-        HELIX_RELAY_WEBSITE_PORT,
+    ADMIN_PORT_ID: shared_utils.new_port_spec(
+        HELIX_RELAY_ADMIN_PORT,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        wait="60s",
     ),
 }
 
@@ -67,14 +69,6 @@ def launch_helix_relay(
         0,
     )
     public_ports.update(endpoint_public_port)
-    website_public_port = shared_utils.get_mev_public_port(
-        port_publisher,
-        HTTP_PORT_ID,
-        index,
-        1,
-    )
-    public_ports.update(website_public_port)
-
     node_selectors = global_node_selectors
 
     postgres = postgres_module.run(
@@ -104,8 +98,11 @@ def launch_helix_relay(
         postgres,
     )
 
-    # Read the helix config template
-    helix_config_template = read_file(static_files.HELIX_RELAY_CONFIG_FILEPATH)
+    # Read the helix config template (allow inline override)
+    if hasattr(mev_params, "helix_relay_config") and mev_params.helix_relay_config:
+        helix_config_template = mev_params.helix_relay_config
+    else:
+        helix_config_template = read_file(static_files.HELIX_RELAY_CONFIG_FILEPATH)
     template_and_data = shared_utils.new_template_and_data(
         helix_config_template, helix_template_data
     )
@@ -128,10 +125,12 @@ def launch_helix_relay(
 
     env_vars = {
         "RELAY_KEY": constants.DEFAULT_MEV_SECRET_KEY,
+        "POSTGRES_PASSWORD": "postgres",
+        "ADMIN_TOKEN": "admin_token",
     }
 
-    # Use provided relay_image if available, otherwise use mev_params.mev_relay_image
-    helix_image = relay_image if relay_image else mev_params.mev_relay_image
+    # Use provided relay_image if available, otherwise use mev_params.helix_relay_image
+    helix_image = relay_image if relay_image else mev_params.helix_relay_image
 
     endpoint = plan.add_service(
         name=HELIX_RELAY_NAME,
@@ -179,7 +178,6 @@ def new_helix_relay_config_template_data(
         "POSTGRES_USER": "postgres",
         "POSTGRES_PASS": "postgres",
         "HELIX_RELAY_ENDPOINT_PORT": HELIX_RELAY_ENDPOINT_PORT,
-        "HELIX_RELAY_WEBSITE_PORT": HELIX_RELAY_WEBSITE_PORT,
         "HELIX_RELAY_ENDPOINT_URL": "helix-relay:{}".format(HELIX_RELAY_ENDPOINT_PORT),
         "HELIX_RELAY_PUBKEY": constants.DEFAULT_MEV_PUBKEY,
         "GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER": constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,

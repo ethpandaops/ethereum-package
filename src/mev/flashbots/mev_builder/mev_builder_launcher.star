@@ -17,7 +17,7 @@ MEV_FILE_PATH_ON_CONTAINER = (
 
 def new_builder_config(
     plan,
-    mev_type,
+    relay_list,
     network_params,
     fee_recipient,
     mnemonic,
@@ -25,6 +25,12 @@ def new_builder_config(
     participants,
     global_node_selectors,
 ):
+    """
+    Generate rbuilder config file.
+
+    Args:
+        relay_list: List of relay name strings (e.g., ["flashbots"], ["flashbots", "helix"])
+    """
     num_of_participants = shared_utils.zfill_custom(
         len(participants), len(str(len(participants)))
     )
@@ -37,8 +43,7 @@ def new_builder_config(
         mev_params.mev_builder_extra_data,
         num_of_participants,
         mev_params.mev_builder_subsidy,
-        mev_type,
-        mev_params.run_multiple_relays,
+        relay_list,
     )
     flashbots_builder_config_template = read_file(
         static_files.FLASHBOTS_RBUILDER_CONFIG_FILEPATH
@@ -73,48 +78,37 @@ def new_builder_config_template_data(
     extra_data,
     num_of_participants,
     subsidy,
-    mev_type,
-    run_multiple_relays=False,
+    relay_list,
 ):
-    # Build the list of relays based on configuration
-    relays = []
+    """
+    Build template data using the resolved relay list directly.
 
-    if run_multiple_relays:
-        # Add both flashbots and helix relays
-        relays.append(
-            {
-                "Name": "flashbots",
-                "Service": "mev-relay-api",
-                "Port": flashbots_relay.MEV_RELAY_ENDPOINT_PORT,
-                "Priority": 0,
-            }
-        )
-        relays.append(
-            {
-                "Name": "helix",
-                "Service": "helix-relay",
-                "Port": helix_relay.HELIX_RELAY_ENDPOINT_PORT,
-                "Priority": 1,
-            }
-        )
-    elif mev_type == constants.HELIX_MEV_TYPE:
-        relays.append(
-            {
-                "Name": "helix",
-                "Service": "helix-relay",
-                "Port": helix_relay.HELIX_RELAY_ENDPOINT_PORT,
-                "Priority": 0,
-            }
-        )
-    else:
-        relays.append(
-            {
-                "Name": "flashbots",
-                "Service": "mev-relay-api",
-                "Port": flashbots_relay.MEV_RELAY_ENDPOINT_PORT,
-                "Priority": 0,
-            }
-        )
+    Args:
+        relay_list: List of relay name strings (e.g., ["flashbots", "helix"])
+    """
+    relays = []
+    for priority, relay_name in enumerate(relay_list):
+        if relay_name == "none":
+            continue
+        elif relay_name == "flashbots":
+            relays.append(
+                {
+                    "Name": "flashbots",
+                    "Service": "mev-relay-api",
+                    "Port": flashbots_relay.MEV_RELAY_ENDPOINT_PORT,
+                    "Priority": priority,
+                }
+            )
+        elif relay_name == "helix":
+            relays.append(
+                {
+                    "Name": "helix",
+                    "Service": "helix-relay",
+                    "Port": helix_relay.HELIX_RELAY_ENDPOINT_PORT,
+                    "Priority": priority,
+                }
+            )
+        # mev-rs relay is not supported in rbuilder config (different protocol)
 
     # Build enabled_relays string for the config: "relay1", "relay2"
     enabled_relays = ", ".join(['"{}"'.format(r["Name"]) for r in relays])

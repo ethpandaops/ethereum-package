@@ -208,7 +208,9 @@ def launch_participant_network(
         network_id,
         num_participants,
         args_with_right_defaults.port_publisher,
-        args_with_right_defaults.mev_type,
+        args_with_right_defaults.mev_components.builder
+        if args_with_right_defaults.mev_components
+        else False,
         args_with_right_defaults.mev_params,
         extra_files_artifacts,
         bootnodoor_enode,

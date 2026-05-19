@@ -37,7 +37,7 @@ router_config:
     - route: GetValidators
     - route: SubmitBlock
     - route: GetTopBid
-    
+
     # Proposer API routes
     - route: GetHeader
       rate_limit:
@@ -46,12 +46,12 @@ router_config:
     - route: GetPayload
     - route: RegisterValidators
     - route: Status
-    
+
     # Data API routes
     - route: ProposerPayloadDelivered
     - route: BuilderBidsReceived
     - route: ValidatorRegistration
-  
+
   # Graceful shutdown delay (milliseconds)
   shutdown_delay_ms: 12000
 
@@ -75,25 +75,13 @@ admin_token: "admin_token"
 logging:
   type: Console
 
-# Optional: Website/dashboard
-website:
-  enabled: true
-  port: {{ .HELIX_RELAY_WEBSITE_PORT }}
-  listen_address: "0.0.0.0"
-  show_config_details: false
-  network_name: "Kurtosis Helix Relay" # TODO - we can configure this to show network
-  relay_url: "https://{{ .HELIX_RELAY_ENDPOINT_URL }}"
-  relay_pubkey: "{{ .HELIX_RELAY_PUBKEY }}"
-  link_beaconchain: "https://hoodi.beaconcha.in"
-  link_etherscan: "https://hoodi.etherscan.io"
-  link_data_api: "https://relay.example.com/relay/v1/data"
-
 # CPU Core Pinning (CRITICAL for production performance)
 cores:
   auctioneer: 0             # Single core for main auctioneer thread
   sub_workers: [0]  # Cores for submission workers
   reg_workers: [0]  # Cores for registration workers
   tokio: [0]    # Cores for Tokio async runtime
+  tcp_bid_submissions_tile: 2
 
 # Optional: Enable local development mode (disables some checks)
 is_local_dev: false

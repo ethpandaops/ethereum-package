@@ -380,6 +380,10 @@ SUBCATEGORY_PARAMS = {
         "run_multiple_relays",
         "helix_relay_image",
         "commit_boost_config",
+        "helix_relay_config",
+        "mev_relay",
+        "mev_sidecar",
+        "mev_builder",
     ],
     "xatu_sentry_params": [
         "xatu_sentry_image",
