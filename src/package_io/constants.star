@@ -120,7 +120,7 @@ DEFAULT_MEV_RS_IMAGE_MINIMAL = "ethpandaops/mev-rs:main-minimal"
 DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE = "ghcr.io/commit-boost/pbs:latest"
 DEFAULT_MOCK_MEV_IMAGE = "ethpandaops/rustic-builder:main"
 DEFAULT_BUILDOOR_IMAGE = "ethpandaops/buildoor:main"
-DEFAULT_TRUEBLOCKS_VERSION = "v5.9.3"
+DEFAULT_TRUEBLOCKS_IMAGE = "ethpandaops/trueblocks:v5.9.3"
 DEFAULT_HELIX_RELAY_IMAGE = "ghcr.io/gattaca-com/helix-relay:main"
 DEFAULT_ZKBOOST_IMAGE = "ghcr.io/eth-act/zkboost/zkboost:latest"
 

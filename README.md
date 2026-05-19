@@ -28,7 +28,7 @@ Optional features (enabled via flags or parameter files at runtime):
 - Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
 - Specify the required parameters for the nodes to reach an external block building network
 - Generate keystores for each node in parallel
-- Spin up [TrueBlocks](https://github.com/TrueBlocks/trueblocks-core) (`chifra daemon` + `chifra scrape`) to build a local [Unchained Index](https://trueblocks.io/docs/install/get-the-index/) of address appearances against the running network and serve it over a REST API on port 8080 (`/status`, `/blocks`, `/list`, `/chunks`, etc.). Auto-tunes scrape parameters for devnets vs public networks; chifra is built from source via `ImageBuildSpec` since TrueBlocks stopped publishing Docker images after v5.0.0.
+- Spin up [TrueBlocks](https://github.com/TrueBlocks/trueblocks-core) (`chifra daemon` + `chifra scrape`) to build a local [Unchained Index](https://trueblocks.io/docs/install/get-the-index/) of address appearances against the running network and serve it over a REST API on port 8080 (`/status`, `/blocks`, `/list`, `/chunks`, etc.). Auto-tunes scrape parameters for devnets vs public networks.
 
 ## Quickstart
 
@@ -1106,34 +1106,22 @@ checkpointz_params:
   image: "ethpandaops/checkpointz:latest"
 
 # Configuration place for trueblocks-core (chifra daemon) - https://github.com/TrueBlocks/trueblocks-core
-# TrueBlocks stopped publishing official images after v5.0.0, so the
-# ethereum-package builds chifra from source via Kurtosis ImageBuildSpec
-# using src/trueblocks/Dockerfile.
 trueblocks_params:
-  # git ref (tag/branch/sha) to check out when building chifra
-  version: "v5.9.3"
-  # If set, skips the source build and uses this prebuilt image instead.
-  image: ""
-  # Which EL participant chifra should point at. Leave target_rpc_url empty
-  # to use all_el_contexts[target_index] (default: first participant), or
-  # set target_rpc_url to a verbatim URL (useful when the in-cluster
-  # participants don't expose archive/tracing — e.g., to point chifra at an
-  # external archive node while the devnet runs alongside).
+  # chifra docker image
+  image: "ethpandaops/trueblocks:v5.9.3"
+  # Verbatim RPC URL chifra should target. Leave empty to use
+  # all_el_contexts[target_index] (the in-cluster participant).
   target_rpc_url: ""
   target_index: 0
-  # Per-chain scrape tuning. Any field left at 0 falls back to a
-  # network-aware default — chifra's mainnet values on public networks,
-  # small/responsive values on devnets and shadowforks. sleep_seconds
-  # controls how long chifra waits between scraper passes.
+  # Per-chain scrape tuning. 0 means "network-aware default" — chifra's
+  # mainnet values on public networks, small/responsive values on devnets.
   scrape:
     apps_per_chunk: 0
     snap_to_grid: 0
     first_snap: 0
     unripe_dist: 0
     sleep_seconds: 3
-  # Extra env vars passed to the chifra container. The launcher renders a
-  # trueBlocks.toml that registers the active network (network_params.network
-  # / network_id) and points rpcProvider at the resolved target.
+  # Extra env vars passed to the chifra container.
   env: {}
 
 # Define custom file contents to be mounted into containers

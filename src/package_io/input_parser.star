@@ -1131,7 +1131,6 @@ def input_parser(plan, input_args):
             epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
         trueblocks_params=struct(
-            version=result["trueblocks_params"]["version"],
             image=result["trueblocks_params"]["image"],
             target_rpc_url=result["trueblocks_params"]["target_rpc_url"],
             target_index=result["trueblocks_params"]["target_index"],
@@ -1987,21 +1986,10 @@ def get_default_dora_params():
 
 def get_default_trueblocks_params():
     return {
-        # TrueBlocks stopped publishing official images after v5.0.0, so we
-        # build chifra from source. `version` is the git ref (tag/branch/sha)
-        # checked out during the image build. Override `image` to skip the
-        # build and use a prebuilt image instead.
-        "version": constants.DEFAULT_TRUEBLOCKS_VERSION,
-        "image": "",
-        # Which EL participant to point chifra at. Empty string means "use
-        # all_el_contexts[target_index]"; if set, this URL is used verbatim
-        # (useful for pointing at an external archive node when the in-cluster
-        # participants don't expose tracing/archive).
+        "image": constants.DEFAULT_TRUEBLOCKS_IMAGE,
         "target_rpc_url": "",
         "target_index": 0,
-        # Per-chain scrape tuning. Leaving an entry as 0 falls back to the
-        # network-aware default (chifra's mainnet values for public networks,
-        # small/responsive values for devnets).
+        # 0 means "use the network-aware default".
         "scrape": {
             "apps_per_chunk": 0,
             "snap_to_grid": 0,

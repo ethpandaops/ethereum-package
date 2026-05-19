@@ -469,7 +469,6 @@ SUBCATEGORY_PARAMS = {
         "epbs_builder",
     ],
     "trueblocks_params": [
-        "version",
         "image",
         "target_rpc_url",
         "target_index",
@@ -636,7 +635,7 @@ def sanity_check(plan, input_args):
         input_args,
         "trueblocks_params",
         TRUEBLOCKS_NESTED_PARAMS,
-        ["version", "image", "target_rpc_url", "target_index", "env"],
+        ["image", "target_rpc_url", "target_index", "env"],
     )
 
     # Checks additional services
