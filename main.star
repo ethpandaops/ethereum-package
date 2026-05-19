@@ -65,6 +65,7 @@ spamoor = import_module("./src/spamoor/spamoor.star")
 disruptoor = import_module("./src/disruptoor/disruptoor_launcher.star")
 slashoor = import_module("./src/slashoor/slashoor_launcher.star")
 zkboost = import_module("./src/zkboost/zkboost_launcher.star")
+trueblocks = import_module("./src/trueblocks/trueblocks_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -1076,6 +1077,25 @@ def run(plan, args={}):
             )
             prometheus_additional_metrics_jobs.extend(zkboost_metrics_jobs)
             plan.print("Successfully launched zkboost")
+        elif additional_service == "trueblocks":
+            plan.print("Launching trueblocks")
+            trueblocks_config_template = read_file(
+                static_files.TRUEBLOCKS_CONFIG_TEMPLATE_FILEPATH
+            )
+            trueblocks.launch_trueblocks(
+                plan,
+                trueblocks_config_template,
+                all_el_contexts,
+                network_params,
+                args_with_right_defaults.trueblocks_params,
+                prefunded_accounts,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched trueblocks")
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:
