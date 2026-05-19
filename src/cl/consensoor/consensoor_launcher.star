@@ -194,7 +194,6 @@ def get_beacon_config(
         "--beacon-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=consensoor",
     ]
 
     if el_context != None:
