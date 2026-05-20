@@ -534,7 +534,6 @@ TRUEBLOCKS_NESTED_PARAMS = {
         "snap_to_grid",
         "first_snap",
         "unripe_dist",
-        "sleep_seconds",
     ],
 }
 

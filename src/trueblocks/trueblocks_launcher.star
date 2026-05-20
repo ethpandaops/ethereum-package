@@ -5,8 +5,8 @@ SERVICE_NAME = "trueblocks"
 
 HTTP_PORT_NUMBER = 8080
 
+TRUEBLOCKS_DATA_DIR = "/root/.local/share/trueblocks"
 TRUEBLOCKS_CONFIG_FILENAME = "trueBlocks.toml"
-TRUEBLOCKS_CONFIG_STAGING_DIRPATH = "/tb-config"
 
 MIN_CPU = 100
 MAX_CPU = 1000
@@ -53,23 +53,38 @@ def launch_trueblocks(
     rpc_url = _resolve_rpc_url(trueblocks_params, all_el_contexts)
     scrape = _resolve_scrape_params(trueblocks_params, network_params.network)
 
-    template_data = {
-        "ChainName": network_params.network,
-        "ChainId": str(network_params.network_id),
-        "RpcProvider": rpc_url,
-        "BlockTime": "{0}.0".format(network_params.seconds_per_slot),
-        "AppsPerChunk": scrape["apps_per_chunk"],
-        "SnapToGrid": scrape["snap_to_grid"],
-        "FirstSnap": scrape["first_snap"],
-        "UnripeDist": scrape["unripe_dist"],
-    }
-    config_files_artifact_name = plan.render_templates(
+    toml_artifact = plan.render_templates(
         {
             TRUEBLOCKS_CONFIG_FILENAME: shared_utils.new_template_and_data(
-                config_template, template_data
+                config_template,
+                {
+                    "ChainName": network_params.network,
+                    "ChainId": str(network_params.network_id),
+                    "RpcProvider": rpc_url,
+                    "BlockTime": "{0}.0".format(network_params.seconds_per_slot),
+                    "AppsPerChunk": scrape["apps_per_chunk"],
+                    "SnapToGrid": scrape["snap_to_grid"],
+                    "FirstSnap": scrape["first_snap"],
+                    "UnripeDist": scrape["unripe_dist"],
+                },
             ),
         },
-        "trueblocks-config",
+        "trueblocks-toml",
+    )
+
+    image = shared_utils.docker_cache_image_calc(
+        docker_cache_params,
+        trueblocks_params.image,
+    )
+    data_artifact = _bootstrap_data_dir(
+        plan,
+        image,
+        toml_artifact,
+        network_params.network,
+        rpc_url,
+        prefunded_accounts[0].address.lower() if prefunded_accounts else "",
+        global_node_selectors,
+        tolerations,
     )
 
     public_ports = shared_utils.get_additional_service_standard_public_port(
@@ -79,45 +94,87 @@ def launch_trueblocks(
         0,
     )
 
-    probe_addr = prefunded_accounts[0].address if prefunded_accounts else ""
-
-    env_vars = dict(trueblocks_params.env)
-    env_vars["TB_CHAIN"] = network_params.network
-    env_vars["TB_RPC_URL"] = rpc_url
-    env_vars["TB_PROBE_ADDR"] = probe_addr.lower() if probe_addr else ""
-    env_vars["TB_SCRAPE_SLEEP"] = str(trueblocks_params.scrape.sleep_seconds)
-    env_vars["TB_HTTP_PORT"] = str(HTTP_PORT_NUMBER)
-    env_vars["TB_CONFIG_STAGING"] = TRUEBLOCKS_CONFIG_STAGING_DIRPATH
-
-    config = ServiceConfig(
-        image=shared_utils.docker_cache_image_calc(
-            docker_cache_params,
-            trueblocks_params.image,
-        ),
-        ports=USED_PORTS,
-        public_ports=public_ports,
-        files={
-            TRUEBLOCKS_CONFIG_STAGING_DIRPATH: config_files_artifact_name,
-        },
-        env_vars=env_vars,
-        min_cpu=MIN_CPU,
-        max_cpu=MAX_CPU,
-        min_memory=MIN_MEMORY,
-        max_memory=MAX_MEMORY,
-        node_selectors=global_node_selectors,
-        tolerations=tolerations,
-        ready_conditions=ReadyCondition(
-            recipe=GetHttpRequestRecipe(
-                port_id=constants.HTTP_PORT_ID,
-                endpoint="/status",
+    plan.add_service(
+        SERVICE_NAME,
+        ServiceConfig(
+            image=image,
+            ports=USED_PORTS,
+            public_ports=public_ports,
+            files={TRUEBLOCKS_DATA_DIR: data_artifact},
+            cmd=["daemon", "--url", ":{0}".format(HTTP_PORT_NUMBER)],
+            env_vars=trueblocks_params.env,
+            min_cpu=MIN_CPU,
+            max_cpu=MAX_CPU,
+            min_memory=MIN_MEMORY,
+            max_memory=MAX_MEMORY,
+            node_selectors=global_node_selectors,
+            tolerations=tolerations,
+            ready_conditions=ReadyCondition(
+                recipe=GetHttpRequestRecipe(
+                    port_id=constants.HTTP_PORT_ID,
+                    endpoint="/status",
+                ),
+                field="code",
+                assertion="==",
+                target_value=200,
             ),
-            field="code",
-            assertion="==",
-            target_value=200,
         ),
     )
 
-    plan.add_service(SERVICE_NAME, config)
+
+def _bootstrap_data_dir(
+    plan,
+    image,
+    toml_artifact,
+    chain,
+    rpc_url,
+    probe_addr,
+    node_selectors,
+    tolerations,
+):
+    # Assembles chifra's $XDG_DATA_HOME/trueblocks/ dir as a single files
+    # artifact. Starts from the bundled per-chain configs in the image, drops
+    # the rendered trueBlocks.toml in place, and (for chains that don't ship
+    # a bundled allocs.csv) writes one keyed off the probe address's actual
+    # block-0 balance — works around chifra IsNodeArchive (see
+    # TrueBlocks/trueblocks-core#4044).
+    run = (
+        "set -eu; "
+        + "cp -r /root/.local/share/trueblocks /out; "
+        + "cp /tb-toml/{0} /out/{0}; ".format(TRUEBLOCKS_CONFIG_FILENAME)
+        + "mkdir -p /out/config/$CHAIN; "
+    )
+    if probe_addr:
+        run += (
+            "if [ ! -f /out/config/$CHAIN/allocs.csv ]; then "
+            + "  for i in $(seq 1 60); do "
+            + "    BAL=$(curl -fsS -X POST -H 'Content-Type: application/json' "
+            + '          -d "{\\"jsonrpc\\":\\"2.0\\",\\"method\\":\\"eth_getBalance\\",\\"params\\":[\\"$PROBE_ADDR\\",\\"0x0\\"],\\"id\\":1}" '
+            + '          "$RPC_URL" 2>/dev/null | sed -n \'s/.*"result":"\\([^"]*\\)".*/\\1/p\'); '
+            + "    echo \"$BAL\" | grep -qE '^0x[0-9a-fA-F]+$' && break; "
+            + "    sleep 2; "
+            + "  done; "
+            + "  echo \"$BAL\" | grep -qE '^0x[0-9a-fA-F]+$' || { echo 'trueblocks: balance probe failed' >&2; exit 1; }; "
+            + '  printf \'address,balance\\n%s,%s\\n\' "$PROBE_ADDR" "$BAL" > /out/config/$CHAIN/allocs.csv; '
+            + "fi"
+        )
+
+    result = plan.run_sh(
+        name="trueblocks-bootstrap",
+        description="Render chifra config dir + probe RPC for the chain's prefund balance",
+        image=image,
+        run=run,
+        files={"/tb-toml": toml_artifact},
+        env_vars={
+            "CHAIN": chain,
+            "RPC_URL": rpc_url,
+            "PROBE_ADDR": probe_addr,
+        },
+        store=[StoreSpec(src="/out", name="trueblocks-data")],
+        node_selectors=node_selectors,
+        tolerations=tolerations,
+    )
+    return result.files_artifacts[0]
 
 
 def _resolve_rpc_url(trueblocks_params, all_el_contexts):

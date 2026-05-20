@@ -28,7 +28,7 @@ Optional features (enabled via flags or parameter files at runtime):
 - Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
 - Specify the required parameters for the nodes to reach an external block building network
 - Generate keystores for each node in parallel
-- Spin up [TrueBlocks](https://github.com/TrueBlocks/trueblocks-core) (`chifra daemon` + `chifra scrape`) to build a local [Unchained Index](https://trueblocks.io/docs/install/get-the-index/) of address appearances against the running network and serve it over a REST API on port 8080 (`/status`, `/blocks`, `/list`, `/chunks`, etc.). Auto-tunes scrape parameters for devnets vs public networks.
+- Spin up [TrueBlocks](https://github.com/TrueBlocks/trueblocks-core) (`chifra daemon`) to serve the chifra REST API on port 8080 (`/status`, `/blocks`, `/list`, `/chunks`, etc.). The scraper isn't started automatically; POST `/scrape` (or run `chifra scrape` against the same data dir) when you want to build the local [Unchained Index](https://trueblocks.io/docs/install/get-the-index/). Auto-tunes scrape parameters for devnets vs public networks.
 
 ## Quickstart
 
@@ -1113,14 +1113,17 @@ trueblocks_params:
   # all_el_contexts[target_index] (the in-cluster participant).
   target_rpc_url: ""
   target_index: 0
-  # Per-chain scrape tuning. 0 means "network-aware default" — chifra's
-  # mainnet values on public networks, small/responsive values on devnets.
+  # Per-chain scrape tuning, written into the rendered trueBlocks.toml.
+  # 0 means "network-aware default" — chifra's mainnet values on public
+  # networks, small/responsive values on devnets. The package runs only
+  # chifra daemon; the scraper is not started automatically. Hit POST
+  # /scrape on the daemon (or run `chifra scrape` against the same data
+  # dir) when you want to build the local Unchained Index.
   scrape:
     apps_per_chunk: 0
     snap_to_grid: 0
     first_snap: 0
     unripe_dist: 0
-    sleep_seconds: 3
   # Extra env vars passed to the chifra container.
   env: {}
 

@@ -1139,7 +1139,6 @@ def input_parser(plan, input_args):
                 snap_to_grid=result["trueblocks_params"]["scrape"]["snap_to_grid"],
                 first_snap=result["trueblocks_params"]["scrape"]["first_snap"],
                 unripe_dist=result["trueblocks_params"]["scrape"]["unripe_dist"],
-                sleep_seconds=result["trueblocks_params"]["scrape"]["sleep_seconds"],
             ),
             env=result["trueblocks_params"]["env"],
         ),
@@ -1989,13 +1988,14 @@ def get_default_trueblocks_params():
         "image": constants.DEFAULT_TRUEBLOCKS_IMAGE,
         "target_rpc_url": "",
         "target_index": 0,
-        # 0 means "use the network-aware default".
+        # 0 means "use the network-aware default". These end up in the rendered
+        # trueBlocks.toml and govern any future `chifra scrape` invocations
+        # (e.g. via the POST /scrape API).
         "scrape": {
             "apps_per_chunk": 0,
             "snap_to_grid": 0,
             "first_snap": 0,
             "unripe_dist": 0,
-            "sleep_seconds": 3,
         },
         "env": {},
     }
