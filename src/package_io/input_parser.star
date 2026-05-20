@@ -1132,6 +1132,7 @@ def input_parser(plan, input_args):
         ),
         trueblocks_params=struct(
             image=result["trueblocks_params"]["image"],
+            config_version=result["trueblocks_params"]["config_version"],
             target_rpc_url=result["trueblocks_params"]["target_rpc_url"],
             target_index=result["trueblocks_params"]["target_index"],
             scrape=struct(
@@ -1986,6 +1987,7 @@ def get_default_dora_params():
 def get_default_trueblocks_params():
     return {
         "image": constants.DEFAULT_TRUEBLOCKS_IMAGE,
+        "config_version": "v5.0.0",
         "target_rpc_url": "",
         "target_index": 0,
         # 0 means "use the network-aware default". These end up in the rendered

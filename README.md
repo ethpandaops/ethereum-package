@@ -1109,6 +1109,9 @@ checkpointz_params:
 trueblocks_params:
   # chifra docker image
   image: "ethpandaops/trueblocks:v5.9.3"
+  # Written into [version].current in the rendered trueBlocks.toml. Bump if
+  # you point `image` at a chifra release that requires a newer config schema.
+  config_version: "v5.0.0"
   # Verbatim RPC URL chifra should target. Leave empty to use
   # all_el_contexts[target_index] (the in-cluster participant).
   target_rpc_url: ""

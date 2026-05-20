@@ -470,6 +470,7 @@ SUBCATEGORY_PARAMS = {
     ],
     "trueblocks_params": [
         "image",
+        "config_version",
         "target_rpc_url",
         "target_index",
         "scrape",

@@ -58,6 +58,7 @@ def launch_trueblocks(
             TRUEBLOCKS_CONFIG_FILENAME: shared_utils.new_template_and_data(
                 config_template,
                 {
+                    "ConfigVersion": trueblocks_params.config_version,
                     "ChainName": network_params.network,
                     "ChainId": str(network_params.network_id),
                     "RpcProvider": rpc_url,
