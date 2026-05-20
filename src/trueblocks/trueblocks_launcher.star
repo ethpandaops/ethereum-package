@@ -5,7 +5,7 @@ SERVICE_NAME = "trueblocks"
 
 HTTP_PORT_NUMBER = 8080
 
-TRUEBLOCKS_DATA_DIR = "/root/.local/share/trueblocks"
+TRUEBLOCKS_DATA_DIR = "/config"
 TRUEBLOCKS_CONFIG_FILENAME = "trueBlocks.toml"
 
 MIN_CPU = 100
@@ -94,6 +94,11 @@ def launch_trueblocks(
         0,
     )
 
+    env_vars = dict(trueblocks_params.env)
+    # Defensive: the image bakes this in, but set it here too so a
+    # user-overridden image still reads from /config.
+    env_vars["XDG_CONFIG_HOME"] = TRUEBLOCKS_DATA_DIR
+
     plan.add_service(
         SERVICE_NAME,
         ServiceConfig(
@@ -102,7 +107,7 @@ def launch_trueblocks(
             public_ports=public_ports,
             files={TRUEBLOCKS_DATA_DIR: data_artifact},
             cmd=["daemon", "--url", ":{0}".format(HTTP_PORT_NUMBER)],
-            env_vars=trueblocks_params.env,
+            env_vars=env_vars,
             min_cpu=MIN_CPU,
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
@@ -140,7 +145,7 @@ def _bootstrap_data_dir(
     # TrueBlocks/trueblocks-core#4044).
     run = (
         "set -eu; "
-        + "cp -r /root/.local/share/trueblocks /out; "
+        + "cp -r {0} /out; ".format(TRUEBLOCKS_DATA_DIR)
         + "cp /tb-toml/{0} /out/{0}; ".format(TRUEBLOCKS_CONFIG_FILENAME)
         + "mkdir -p /out/config/$CHAIN; "
     )
