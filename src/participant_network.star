@@ -50,6 +50,8 @@ def launch_participant_network(
     parallel_keystore_generation,
     extra_files_artifacts,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url,
+    otel_otlp_http_traces_url,
     backend,
 ):
     network_id = network_params.network_id
@@ -213,6 +215,7 @@ def launch_participant_network(
         extra_files_artifacts,
         bootnodoor_enode,
         binary_artifacts,
+        otel_otlp_grpc_url,
     )
 
     # Launch all consensus layer clients
@@ -245,6 +248,8 @@ def launch_participant_network(
         global_tolerations,
         persistent,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
+        otel_otlp_http_traces_url,
         num_participants,
         validator_data,
         prysm_password_relative_filepath,
@@ -573,6 +578,7 @@ def launch_participant_network(
             vc_index=current_vc_index,
             extra_files_artifacts=extra_files_artifacts,
             tempo_otlp_grpc_url=tempo_otlp_grpc_url,
+            otel_otlp_grpc_url=otel_otlp_grpc_url,
             vc_binary_artifact=vc_binary_artifact,
         )
         if vc_service_config == None:

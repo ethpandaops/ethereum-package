@@ -508,6 +508,7 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "ethereum_metrics_exporter_enabled": "",
     "parallel_keystore_generation": "",
     "disable_peer_scoring": "",
+    "otel_tracing": "",
     "persistent": "",
     "mev_type": "",
     "xatu_sentry_enabled": "",

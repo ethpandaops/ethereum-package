@@ -76,6 +76,243 @@ HTTP_PORT_ID_FOR_FACT = "http"
 MEV_BOOST_SHOULD_CHECK_RELAY = True
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
+ENGINE_OTEL_OTLP_GRPC_PORT = 4317
+ENGINE_OTEL_OTLP_HTTP_PORT = 4318
+ENGINE_OTEL_CLICKHOUSE_HTTP_PORT = 8123
+ENGINE_OTEL_DISCOVERY_OUTPUT_FILE = "/tmp/engine-otel-discovery.json"
+ENGINE_OTEL_DISCOVERY_ARTIFACT_NAME = "engine-otel-discovery"
+ENGINE_OTEL_DISCOVERY_MOUNT_DIR = "/engine-otel-discovery"
+ENGINE_OTEL_DISCOVERY_SCRIPT_FILENAME = "engine-otel-discovery.sh"
+ENGINE_OTEL_DISCOVERY_SCRIPT_ARTIFACT_NAME = "engine-otel-discovery-script"
+ENGINE_OTEL_DISCOVERY_SCRIPT_MOUNT_DIR = "/engine-otel-discovery-script"
+
+ENGINE_OTEL_DISCOVERY_SCRIPT = r"""#!/bin/sh
+set -eu
+
+route_line=$(awk "\$2 == \"00000000\" { print \$1 \" \" \$3; exit }" /proc/net/route)
+if [ -z "$route_line" ]; then
+    echo "default route not found" >&2
+    exit 1
+fi
+
+iface=$(printf "%s" "$route_line" | awk "{ print \$1 }")
+gateway_hex=$(printf "%s" "$route_line" | awk "{ print \$2 }")
+if [ -z "$gateway_hex" ]; then
+    echo "default gateway not found" >&2
+    exit 1
+fi
+
+gateway=$(printf "%d.%d.%d.%d" \
+    "0x$(printf "%s" "$gateway_hex" | cut -c7-8)" \
+    "0x$(printf "%s" "$gateway_hex" | cut -c5-6)" \
+    "0x$(printf "%s" "$gateway_hex" | cut -c3-4)" \
+    "0x$(printf "%s" "$gateway_hex" | cut -c1-2)")
+
+own_ip=""
+if command -v ip >/dev/null 2>&1; then
+    own_ip=$(ip -4 -o addr show dev "$iface" scope global | awk "{ split(\$4, a, \"/\"); print a[1]; exit }")
+fi
+if [ -z "$own_ip" ]; then
+    own_ip=$(hostname -i 2>/dev/null | tr " " "\n" | awk "split(\$1, a, \".\") == 4 && a[1] != \"127\" { print; exit }")
+fi
+if [ -z "$own_ip" ]; then
+    echo "probe IPv4 not found" >&2
+    exit 1
+fi
+
+clickhouse_ping_url="http://${gateway}:8123/ping"
+if ! curl -fsS "$clickhouse_ping_url" >/dev/null; then
+    echo "engine OTel stack is not reachable at ${clickhouse_ping_url}; run 'kurtosis otel start' before enabling otel_tracing" >&2
+    exit 1
+fi
+
+enclaves_json=$(curl -fsS -XPOST \
+    -H "Content-Type: application/json" \
+    -d "{}" \
+    "http://${gateway}:9710/engine_api.EngineService/GetEnclaves")
+
+cat > /tmp/engine-otel-discovery.jq <<\JQ
+def prefix16($ip):
+    ($ip | split(".")[0:2] | join("."));
+
+def prefix22($ip):
+    ($ip | split(".")) as $octets
+    | "\($octets[0]).\($octets[1]).\((($octets[2] | tonumber) / 4 | floor) * 4)";
+
+(.enclaveInfo // {})
+| to_entries
+| map(.value | select(.apiContainerInfo.ipInsideEnclave != null))
+| (
+    map(select(prefix22(.apiContainerInfo.ipInsideEnclave) == prefix22($own_ip))) as $matches22
+    | if ($matches22 | length) == 1 then
+        $matches22[0]
+      else
+        map(select(prefix16(.apiContainerInfo.ipInsideEnclave) == prefix16($own_ip))) as $matches16
+        | if ($matches16 | length) == 1 then
+            $matches16[0]
+          else
+            error("unable to identify enclave for probe IP \($own_ip)")
+          end
+      end
+  )
+| {
+    gateway: $gateway,
+    enclave_uuid: .enclaveUuid,
+    enclave_name: .name
+  }
+JQ
+
+printf "%s" "$enclaves_json" | jq -c \
+    --arg gateway "$gateway" \
+    --arg own_ip "$own_ip" \
+    -f /tmp/engine-otel-discovery.jq > /tmp/engine-otel-discovery.json
+cat /tmp/engine-otel-discovery.json
+"""
+
+
+def new_engine_otel_endpoints(gateway=None, enclave_uuid=None, enclave_name=None):
+    if gateway == None:
+        return struct(
+            gateway=None,
+            enclave_uuid=None,
+            enclave_name=None,
+            resource_attributes=None,
+            otlp_grpc_url=None,
+            otlp_http_traces_url=None,
+            clickhouse_host=None,
+            clickhouse_port=None,
+        )
+
+    return struct(
+        gateway=gateway,
+        enclave_uuid=enclave_uuid,
+        enclave_name=enclave_name,
+        resource_attributes="kurtosis.enclave.name={},kurtosis.enclave.uuid={}".format(
+            enclave_name,
+            enclave_uuid,
+        ),
+        otlp_grpc_url="http://{}:{}".format(gateway, ENGINE_OTEL_OTLP_GRPC_PORT),
+        otlp_http_traces_url="http://{}:{}/v1/traces".format(
+            gateway,
+            ENGINE_OTEL_OTLP_HTTP_PORT,
+        ),
+        clickhouse_host=gateway,
+        clickhouse_port=ENGINE_OTEL_CLICKHOUSE_HTTP_PORT,
+    )
+
+
+def detect_engine_otel_endpoints(plan, global_tolerations, global_node_selectors):
+    script_artifact = plan.render_templates(
+        {
+            ENGINE_OTEL_DISCOVERY_SCRIPT_FILENAME: shared_utils.new_template_and_data(
+                ENGINE_OTEL_DISCOVERY_SCRIPT,
+                {},
+            ),
+        },
+        name=ENGINE_OTEL_DISCOVERY_SCRIPT_ARTIFACT_NAME,
+    )
+    result = plan.run_sh(
+        name="detect-engine-otel",
+        description="Detecting enclave identity and engine OTel endpoints",
+        run="/bin/sh {}/{}".format(
+            ENGINE_OTEL_DISCOVERY_SCRIPT_MOUNT_DIR,
+            ENGINE_OTEL_DISCOVERY_SCRIPT_FILENAME,
+        ),
+        files={
+            ENGINE_OTEL_DISCOVERY_SCRIPT_MOUNT_DIR: script_artifact,
+        },
+        store=[
+            StoreSpec(
+                src=ENGINE_OTEL_DISCOVERY_OUTPUT_FILE,
+                name=ENGINE_OTEL_DISCOVERY_ARTIFACT_NAME,
+            ),
+        ],
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
+    )
+    discovery_artifact = result.files_artifacts[0]
+    gateway = read_engine_otel_discovery_field(
+        plan,
+        discovery_artifact,
+        "gateway",
+        global_tolerations,
+        global_node_selectors,
+    )
+    enclave_uuid = read_engine_otel_discovery_field(
+        plan,
+        discovery_artifact,
+        "enclave_uuid",
+        global_tolerations,
+        global_node_selectors,
+    )
+    enclave_name = read_engine_otel_discovery_field(
+        plan,
+        discovery_artifact,
+        "enclave_name",
+        global_tolerations,
+        global_node_selectors,
+    )
+    plan.print(
+        "Using engine-level OTel collector via enclave gateway {} for enclave {} ({})".format(
+            gateway,
+            enclave_name,
+            enclave_uuid,
+        )
+    )
+    return new_engine_otel_endpoints(gateway, enclave_uuid, enclave_name)
+
+
+def read_engine_otel_discovery_field(
+    plan,
+    discovery_artifact,
+    field,
+    global_tolerations,
+    global_node_selectors,
+):
+    result = plan.run_sh(
+        name="read-engine-otel-{}".format(field.replace("_", "-")),
+        description="Reading engine OTel discovery field {}".format(field),
+        run='value=$(jq -er ".{}" {}/engine-otel-discovery.json) && printf "%s" "$value"'.format(
+            field,
+            ENGINE_OTEL_DISCOVERY_MOUNT_DIR,
+        ),
+        files={
+            ENGINE_OTEL_DISCOVERY_MOUNT_DIR: discovery_artifact,
+        },
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
+    )
+    return result.output
+
+
+def append_otel_resource_attributes(env_vars, resource_attributes):
+    existing = env_vars.get("OTEL_RESOURCE_ATTRIBUTES", "")
+    if existing == "":
+        env_vars["OTEL_RESOURCE_ATTRIBUTES"] = resource_attributes
+    elif resource_attributes not in existing:
+        env_vars["OTEL_RESOURCE_ATTRIBUTES"] = "{},{}".format(
+            existing,
+            resource_attributes,
+        )
+
+
+def add_otel_resource_attributes_to_participants(participants, resource_attributes):
+    if resource_attributes == None:
+        return
+    for participant in participants:
+        append_otel_resource_attributes(
+            participant.el_extra_env_vars,
+            resource_attributes,
+        )
+        append_otel_resource_attributes(
+            participant.cl_extra_env_vars,
+            resource_attributes,
+        )
+        append_otel_resource_attributes(
+            participant.vc_extra_env_vars,
+            resource_attributes,
+        )
+
 
 def run(plan, args={}):
     """Launches an arbitrarily complex ethereum testnet based on the arguments provided
@@ -89,8 +326,13 @@ def run(plan, args={}):
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
 
-    # Detect the backend type early - needed for binary injection validation
     detected_backend = plan.get_cluster_type()
+    if args_with_right_defaults.otel_tracing and detected_backend != "docker":
+        fail(
+            "otel_tracing requires the Docker backend because it uses the engine OTel stack published on the Docker host; detected backend: {}. Run with the Docker backend or disable otel_tracing.".format(
+                detected_backend
+            )
+        )
 
     if (
         "disruptoor" in args_with_right_defaults.additional_services
@@ -113,7 +355,6 @@ def run(plan, args={}):
             artifact = plan.render_templates(template_data, name + "_artifact")
             extra_files_artifacts[name] = artifact
 
-    # Validate binary injection - only supported with Docker backend
     for participant in args_with_right_defaults.participants:
         for bin_path in [
             participant.el_binary_path,
@@ -136,6 +377,22 @@ def run(plan, args={}):
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
+
+    engine_otel_endpoints = new_engine_otel_endpoints()
+    if args_with_right_defaults.otel_tracing:
+        engine_otel_endpoints = detect_engine_otel_endpoints(
+            plan,
+            global_tolerations,
+            global_node_selectors,
+        )
+        add_otel_resource_attributes_to_participants(
+            args_with_right_defaults.participants,
+            engine_otel_endpoints.resource_attributes,
+        )
+    otel_clickhouse_host = engine_otel_endpoints.clickhouse_host
+    otel_clickhouse_port = engine_otel_endpoints.clickhouse_port
+    otel_otlp_grpc_url = engine_otel_endpoints.otlp_grpc_url
+    otel_otlp_http_traces_url = engine_otel_endpoints.otlp_http_traces_url
 
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (
@@ -283,6 +540,8 @@ def run(plan, args={}):
         parallel_keystore_generation,
         extra_files_artifacts,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
+        otel_otlp_http_traces_url,
         detected_backend,
     )
 
@@ -938,6 +1197,8 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 tempo_query_url,
+                otel_clickhouse_host,
+                otel_clickhouse_port,
             )
             plan.print("Successfully launched grafana")
         elif additional_service == "tempo":
@@ -1107,6 +1368,8 @@ def run(plan, args={}):
             args_with_right_defaults.port_publisher,
             prometheus_grafana_index,
             tempo_query_url,
+            otel_clickhouse_host,
+            otel_clickhouse_port,
         )
         plan.print("Successfully launched grafana")
 
@@ -1137,9 +1400,11 @@ def run(plan, args={}):
 
     output = struct(
         grafana_info=grafana_info,
-        blockscout_sc_verif_url=None
-        if ("blockscout" in args_with_right_defaults.additional_services) == False
-        else blockscout_sc_verif_url,
+        blockscout_sc_verif_url=(
+            None
+            if ("blockscout" in args_with_right_defaults.additional_services) == False
+            else blockscout_sc_verif_url
+        ),
         all_participants=all_participants,
         pre_funded_accounts=prefunded_accounts,
         network_params=network_params,

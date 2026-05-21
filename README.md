@@ -1400,6 +1400,10 @@ parallel_keystore_generation: false
 # Default to false
 disable_peer_scoring: false
 
+# Enables tracing to the external Kurtosis OTel stack started with `kurtosis otel start`
+# Defaults to false
+otel_tracing: false
+
 # Whether the environment should be persistent; this is WIP and is slowly being rolled out across services
 # Note this requires Kurtosis greater than 0.85.49 to work
 # Note Erigon, Besu, Teku persistence is not currently supported with docker.

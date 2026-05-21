@@ -121,6 +121,7 @@ def input_parser(plan, input_args):
     result["rakoon_params"] = get_default_rakoon_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
+    result["otel_tracing"] = False
     result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
     result["prometheus_params"] = get_default_prometheus_params()
@@ -856,45 +857,49 @@ def input_parser(plan, input_args):
                 "min_epochs_for_data_column_sidecars_requests"
             ],
         ),
-        mev_params=struct(
-            mev_relay_image=result["mev_params"]["mev_relay_image"],
-            mev_builder_image=result["mev_params"]["mev_builder_image"],
-            mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
-            mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
-            mev_builder_subsidy=result["mev_params"]["mev_builder_subsidy"],
-            mev_boost_image=result["mev_params"]["mev_boost_image"],
-            mev_boost_args=result["mev_params"]["mev_boost_args"],
-            mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
-            mev_relay_api_extra_env_vars=result["mev_params"][
-                "mev_relay_api_extra_env_vars"
-            ],
-            mev_relay_housekeeper_extra_args=result["mev_params"][
-                "mev_relay_housekeeper_extra_args"
-            ],
-            mev_relay_housekeeper_extra_env_vars=result["mev_params"][
-                "mev_relay_housekeeper_extra_env_vars"
-            ],
-            mev_relay_website_extra_args=result["mev_params"][
-                "mev_relay_website_extra_args"
-            ],
-            mev_relay_website_extra_env_vars=result["mev_params"][
-                "mev_relay_website_extra_env_vars"
-            ],
-            mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
-            mev_builder_cl_extra_params=result["mev_params"][
-                "mev_builder_cl_extra_params"
-            ],
-            mev_builder_prometheus_config=result["mev_params"][
-                "mev_builder_prometheus_config"
-            ],
-            mock_mev_image=result["mev_params"]["mock_mev_image"],
-            launch_adminer=result["mev_params"]["launch_adminer"],
-            run_multiple_relays=result["mev_params"]["run_multiple_relays"],
-            helix_relay_image=result["mev_params"]["helix_relay_image"],
-            commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
-        )
-        if result["mev_params"]
-        else None,
+        mev_params=(
+            struct(
+                mev_relay_image=result["mev_params"]["mev_relay_image"],
+                mev_builder_image=result["mev_params"]["mev_builder_image"],
+                mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
+                mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
+                mev_builder_subsidy=result["mev_params"]["mev_builder_subsidy"],
+                mev_boost_image=result["mev_params"]["mev_boost_image"],
+                mev_boost_args=result["mev_params"]["mev_boost_args"],
+                mev_relay_api_extra_args=result["mev_params"][
+                    "mev_relay_api_extra_args"
+                ],
+                mev_relay_api_extra_env_vars=result["mev_params"][
+                    "mev_relay_api_extra_env_vars"
+                ],
+                mev_relay_housekeeper_extra_args=result["mev_params"][
+                    "mev_relay_housekeeper_extra_args"
+                ],
+                mev_relay_housekeeper_extra_env_vars=result["mev_params"][
+                    "mev_relay_housekeeper_extra_env_vars"
+                ],
+                mev_relay_website_extra_args=result["mev_params"][
+                    "mev_relay_website_extra_args"
+                ],
+                mev_relay_website_extra_env_vars=result["mev_params"][
+                    "mev_relay_website_extra_env_vars"
+                ],
+                mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
+                mev_builder_cl_extra_params=result["mev_params"][
+                    "mev_builder_cl_extra_params"
+                ],
+                mev_builder_prometheus_config=result["mev_params"][
+                    "mev_builder_prometheus_config"
+                ],
+                mock_mev_image=result["mev_params"]["mock_mev_image"],
+                launch_adminer=result["mev_params"]["launch_adminer"],
+                run_multiple_relays=result["mev_params"]["run_multiple_relays"],
+                helix_relay_image=result["mev_params"]["helix_relay_image"],
+                commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
+            )
+            if result["mev_params"]
+            else None
+        ),
         blockscout_params=struct(
             image=result["blockscout_params"]["image"],
             verif_image=result["blockscout_params"]["verif_image"],
@@ -1044,6 +1049,7 @@ def input_parser(plan, input_args):
         xatu_sentry_enabled=result["xatu_sentry_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
         disable_peer_scoring=result["disable_peer_scoring"],
+        otel_tracing=result["otel_tracing"],
         persistent=result["persistent"],
         xatu_sentry_params=struct(
             xatu_sentry_image=result["xatu_sentry_params"]["xatu_sentry_image"],
@@ -1669,6 +1675,7 @@ def default_input_args(input_args):
         "ethereum_metrics_exporter_enabled": False,
         "parallel_keystore_generation": False,
         "disable_peer_scoring": False,
+        "otel_tracing": False,
         "persistent": False,
         "mev_type": None,
         "xatu_sentry_enabled": False,
@@ -2047,9 +2054,9 @@ def get_default_mev_params(mev_type, preset):
     return {
         "mev_relay_image": mev_relay_image,
         "mev_builder_image": mev_builder_image,
-        "mock_mev_image": mev_builder_image
-        if mev_type == constants.MOCK_MEV_TYPE
-        else None,
+        "mock_mev_image": (
+            mev_builder_image if mev_type == constants.MOCK_MEV_TYPE else None
+        ),
         "mev_builder_subsidy": mev_builder_subsidy,
         "mev_builder_cl_image": mev_builder_cl_image,
         "mev_builder_extra_data": mev_builder_extra_data,
