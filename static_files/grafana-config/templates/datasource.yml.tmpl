@@ -45,4 +45,16 @@ datasources:
         timeColumn: Timestamp
         levelColumn: SeverityText
         messageColumn: Body
+      traces:
+        defaultTable: otel_traces
+        traceIdColumn: TraceId
+        spanIdColumn: SpanId
+        operationNameColumn: SpanName
+        parentSpanIdColumn: ParentSpanId
+        serviceNameColumn: ServiceName
+        durationColumn: Duration
+        durationUnit: nanoseconds
+        startTimeColumn: Timestamp
+        tagsColumn: SpanAttributes
+        serviceTagsColumn: ResourceAttributes
 {{- end }}
