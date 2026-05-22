@@ -483,8 +483,13 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
-        # Inject default mock zkvm if none configured.
-        if len(result["zkboost_params"]["zkvms"]) == 0:
+        has_instance_zkvms = False
+        for instance in result["zkboost_params"]["instances"]:
+            if len(instance.get("zkvms", [])) > 0:
+                has_instance_zkvms = True
+
+        # Inject default mock zkvm if none configured globally or per instance.
+        if len(result["zkboost_params"]["zkvms"]) == 0 and not has_instance_zkvms:
             result["zkboost_params"]["zkvms"] = [
                 {
                     "kind": "mock",
@@ -529,7 +534,28 @@ def input_parser(plan, input_args):
             "reth-zisk",
         ]
         configured_proof_types = []
-        for idx, zkvm in enumerate(result["zkboost_params"]["zkvms"]):
+        effective_zkvms = []
+        effective_ere_zkvms_by_proof_type = {}
+        for instance_idx, instance in enumerate(result["zkboost_params"]["instances"]):
+            instance_zkvms = instance.get("zkvms", result["zkboost_params"]["zkvms"])
+            instance_proof_types = []
+            for zkvm_idx, zkvm in enumerate(instance_zkvms):
+                proof_type = zkvm.get("proof_type")
+                if proof_type in instance_proof_types:
+                    fail(
+                        "zkboost_params.instances[{0}].zkvms[{1}]: duplicate proof_type '{2}' in instance '{3}'".format(
+                            instance_idx,
+                            zkvm_idx,
+                            proof_type,
+                            instance.get("name", str(instance_idx)),
+                        )
+                    )
+                instance_proof_types.append(proof_type)
+                effective_zkvms.append(zkvm)
+                if zkvm.get("kind") == "ere" and proof_type not in effective_ere_zkvms_by_proof_type:
+                    effective_ere_zkvms_by_proof_type[proof_type] = zkvm
+
+        for idx, zkvm in enumerate(effective_zkvms):
             kind = zkvm.get("kind")
             proof_type = zkvm.get("proof_type")
 
@@ -547,13 +573,8 @@ def input_parser(plan, input_args):
                     )
                 )
 
-            if proof_type in configured_proof_types:
-                fail(
-                    "zkboost_params.zkvms[{0}]: duplicate proof_type '{1}'".format(
-                        idx, proof_type
-                    )
-                )
-            configured_proof_types.append(proof_type)
+            if proof_type not in configured_proof_types:
+                configured_proof_types.append(proof_type)
 
             proof_timeout = zkvm.get("proof_timeout_secs", 12)
             if proof_timeout <= 0:
@@ -599,7 +620,7 @@ def input_parser(plan, input_args):
                         )
                     )
 
-        _validate_ere_gpu_config(result["zkboost_params"]["zkvms"])
+        _validate_ere_gpu_config(effective_ere_zkvms_by_proof_type.values())
         _validate_requested_proof_types(result["participants"], configured_proof_types)
 
     if (
