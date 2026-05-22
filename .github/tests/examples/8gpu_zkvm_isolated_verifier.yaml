@@ -74,6 +74,11 @@ additional_services:
   - assertoor
   - spamoor
 
+assertoor_params:
+  image: assertoor:check-http-metrics
+  tests:
+    - /tests/zkboost-metrics-test.yaml
+
 zkboost_params:
   image: ghcr.io/eth-act/zkboost/zkboost:0.7.0
   env:
