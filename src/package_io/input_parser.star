@@ -535,8 +535,11 @@ def input_parser(plan, input_args):
         ]
         configured_proof_types = []
         effective_zkvms = []
-        effective_ere_zkvms_by_proof_type = {}
+        effective_ere_zkvms = (
+            []
+        )  # All ere zkvms with instance context for GPU validation
         for instance_idx, instance in enumerate(result["zkboost_params"]["instances"]):
+            instance_name = instance.get("name", str(instance_idx))
             instance_zkvms = instance.get("zkvms", result["zkboost_params"]["zkvms"])
             instance_proof_types = []
             for zkvm_idx, zkvm in enumerate(instance_zkvms):
@@ -547,18 +550,27 @@ def input_parser(plan, input_args):
                             instance_idx,
                             zkvm_idx,
                             proof_type,
-                            instance.get("name", str(instance_idx)),
+                            instance_name,
                         )
                     )
                 instance_proof_types.append(proof_type)
                 effective_zkvms.append((instance_idx, zkvm_idx, zkvm))
-                if zkvm.get("kind") == "ere" and proof_type not in effective_ere_zkvms_by_proof_type:
-                    effective_ere_zkvms_by_proof_type[proof_type] = zkvm
+                if zkvm.get("kind") == "ere":
+                    effective_ere_zkvms.append(
+                        {
+                            "instance_idx": instance_idx,
+                            "instance_name": instance_name,
+                            "zkvm_idx": zkvm_idx,
+                            "zkvm": zkvm,
+                        }
+                    )
 
         for inst_idx, zkvm_idx, zkvm in effective_zkvms:
             kind = zkvm.get("kind")
             proof_type = zkvm.get("proof_type")
-            zkvm_path = "zkboost_params.instances[{0}].zkvms[{1}]".format(inst_idx, zkvm_idx)
+            zkvm_path = "zkboost_params.instances[{0}].zkvms[{1}]".format(
+                inst_idx, zkvm_idx
+            )
 
             if kind not in ["mock", "ere", "external", "verifier"]:
                 fail(
@@ -617,7 +629,7 @@ def input_parser(plan, input_args):
                         )
                     )
 
-        _validate_ere_gpu_config(effective_ere_zkvms_by_proof_type.values())
+        _validate_ere_gpu_config(effective_ere_zkvms)
         _validate_requested_proof_types(result["participants"], configured_proof_types)
 
     if (
@@ -1141,13 +1153,23 @@ def input_parser(plan, input_args):
     )
 
 
-def _validate_ere_gpu_config(zkvms):
-    services_using_count = []
-    gpu_device_usage = {}  # device_id -> proof_type
+def _validate_ere_gpu_config(ere_zkvms):
+    """Validate GPU configuration for all ere zkvms.
 
-    for zkvm in zkvms:
-        if zkvm.get("kind") != "ere":
-            continue
+    Args:
+        ere_zkvms: List of dicts with instance_idx, instance_name, zkvm_idx, zkvm
+    """
+    services_using_count = []
+    gpu_device_usage = {}  # device_id -> instance_name (for error messages)
+
+    for entry in ere_zkvms:
+        instance_idx = entry["instance_idx"]
+        instance_name = entry["instance_name"]
+        zkvm_idx = entry["zkvm_idx"]
+        zkvm = entry["zkvm"]
+        zkvm_path = "zkboost_params.instances[{0}].zkvms[{1}]".format(
+            instance_idx, zkvm_idx
+        )
 
         proof_type = zkvm.get("proof_type")
         gpu_cfg = zkvm.get("gpu", {})
@@ -1159,37 +1181,35 @@ def _validate_ere_gpu_config(zkvms):
         # Pre-built ere-server images are CUDA-enabled and require GPU for proving.
         if not has_gpu:
             fail(
-                "proof_type '{0}' has kind=ere but no GPU configured. ".format(
-                    proof_type
-                )
+                "{0}: kind=ere but no GPU configured. ".format(zkvm_path)
                 + "ere-server requires GPU for proving. "
                 + "Either add gpu.device_ids or gpu.count, or use 'kind: mock' for testing. "
                 + "For verification-only use cases, use 'kind: verifier' instead."
             )
 
-        # Check: GPU device_id overlap
+        # Check: GPU device_id overlap across all instances
         for device_id in device_ids:
             if device_id in gpu_device_usage:
                 fail(
-                    "GPU device '{0}' is used by multiple ere entries: '{1}' and '{2}'. ".format(
-                        device_id, gpu_device_usage[device_id], proof_type
+                    "{0}: GPU device '{1}' is already used by instance '{2}'. ".format(
+                        zkvm_path, device_id, gpu_device_usage[device_id]
                     )
                     + "Each ere-server requires exclusive GPU access."
                 )
-            gpu_device_usage[device_id] = proof_type
+            gpu_device_usage[device_id] = instance_name
 
         if count > 0 and len(device_ids) == 0:
-            services_using_count.append(proof_type)
+            services_using_count.append(instance_name)
 
     # Check: Multiple services using gpu.count without device_ids
     if len(services_using_count) > 1:
         fail(
-            "Multiple ere services specify gpu.count without gpu.device_ids: [{0}]. ".format(
+            "Multiple ere instances specify gpu.count without gpu.device_ids: [{0}]. ".format(
                 ", ".join(services_using_count)
             )
             + "Docker assigns GPUs from the same pool when gpu.count is used, so all services "
             + "requesting GPUs this way will receive the same device(s). "
-            + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each service instead "
+            + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each instance instead "
             + '(e.g. gpu: {{device_ids: ["0"]}} and gpu: {{device_ids: ["1"]}}).'
         )
 

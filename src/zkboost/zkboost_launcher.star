@@ -69,8 +69,9 @@ def launch_zkboost(
 
     # Per-instance zkvms: each instance falls back to the global
     # `zkboost_params.zkvms` if no per-instance list is set. Resolve artifacts
-    # (ere image/elf_url, verifier program_vk_url) for each, then collect every
-    # `kind: ere` entry across instances so we launch each ere-server once.
+    # (ere image/elf_url, verifier program_vk_url) for each, then launch an
+    # ere-server for each `kind: ere` entry. Each instance gets its own
+    # ere-server(s), enabling separate GPU pools per instance.
     # `verifier` entries get no ere-server — zkboost links the in-process
     # `ere-verifier-*` crate and only needs the .vk URL downloaded at startup.
     instance_zkvms = []
@@ -78,22 +79,30 @@ def launch_zkboost(
         raw = instance.get("zkvms", zkboost_params.zkvms)
         instance_zkvms.append(_resolve_zkvm_artifacts(raw, zkboost_params.image))
 
-    ere_server_endpoints = {}
+    # Launch ere-servers per instance. Each instance's ere zkvms get their own
+    # ere-server, allowing different GPU configurations per instance.
+    # ere_server_endpoints[instance_index][proof_type] = endpoint
+    ere_server_endpoints = []
     metrics_jobs = []
-    for resolved in instance_zkvms:
-        for zkvm in resolved:
+    for instance_index, instance in enumerate(zkboost_params.instances):
+        instance_name = instance["name"]
+        instance_endpoints = {}
+        for zkvm in instance_zkvms[instance_index]:
             if zkvm["kind"] != "ere":
                 continue
 
             proof_type = zkvm["proof_type"]
-            if proof_type in ere_server_endpoints:
-                continue
-
             endpoint = _launch_ere_server(
-                plan, zkvm, global_node_selectors, tolerations, tempo_otlp_grpc_url
+                plan,
+                zkvm,
+                instance_name,
+                global_node_selectors,
+                tolerations,
+                tempo_otlp_grpc_url,
             )
-            ere_server_endpoints[proof_type] = endpoint
-            metrics_jobs.append(_get_ere_server_metrics_job(proof_type))
+            instance_endpoints[proof_type] = endpoint
+            metrics_jobs.append(_get_ere_server_metrics_job(instance_name, proof_type))
+        ere_server_endpoints.append(instance_endpoints)
 
     for instance_index, instance in enumerate(zkboost_params.instances):
         name = instance["name"]
@@ -127,7 +136,9 @@ def launch_zkboost(
                 ),
             }
             if zkvm["kind"] == "ere":
-                entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
+                entry["Endpoint"] = ere_server_endpoints[instance_index][
+                    zkvm["proof_type"]
+                ]
             elif zkvm["kind"] == "external":
                 entry[
                     "Kind"
@@ -264,11 +275,15 @@ def get_config(
 
 
 def _launch_ere_server(
-    plan, zkvm, global_node_selectors, tolerations, tempo_otlp_grpc_url
+    plan, zkvm, instance_name, global_node_selectors, tolerations, tempo_otlp_grpc_url
 ):
-    """Launch an ere-server prover service and return its HTTP endpoint."""
+    """Launch an ere-server prover service and return its HTTP endpoint.
+
+    Each zkboost instance gets its own ere-server(s), named after the instance
+    and proof_type to allow separate GPU configurations per instance.
+    """
     proof_type = zkvm["proof_type"]
-    service_name = "ere-server-{0}".format(proof_type)
+    service_name = "ere-server-{0}-{1}".format(instance_name, proof_type)
     zkvm_kind = _zkvm_kind_from_proof_type(proof_type)
 
     gpu = dict(zkvm.get("gpu", {}))
@@ -540,8 +555,8 @@ def _parse_cargo_dependency_version(cargo_toml, dependency):
     return None
 
 
-def _get_ere_server_metrics_job(proof_type):
-    service_name = "ere-server-{0}".format(proof_type)
+def _get_ere_server_metrics_job(instance_name, proof_type):
+    service_name = "ere-server-{0}-{1}".format(instance_name, proof_type)
     return {
         "Name": service_name,
         "Endpoint": "{0}:{1}".format(service_name, ERE_SERVER_PORT),
@@ -549,6 +564,7 @@ def _get_ere_server_metrics_job(proof_type):
         "Labels": {
             "service": service_name,
             "client_type": "ere-server",
+            "instance": instance_name,
             "proof_type": proof_type,
         },
         "ScrapeInterval": "15s",
