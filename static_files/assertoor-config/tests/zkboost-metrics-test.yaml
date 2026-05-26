@@ -1,85 +1,86 @@
+---
 id: zkboost-metrics-test
 name: "ZKBoost Metrics Test"
 timeout: 3h
 tasks:
-- name: check_clients_are_healthy
-  title: "Check if clients are ready"
-  timeout: 10m
-  config:
-    minClientCount: 1
+  - name: check_clients_are_healthy
+    title: "Check if clients are ready"
+    timeout: 10m
+    config:
+      minClientCount: 1
 
-- name: run_tasks_concurrent
-  title: "Check zkboost metrics"
-  timeout: 2h
-  config:
-    tasks:
-    - name: check_http_metrics
-      title: "Check reth-zisk prover metrics"
-      timeout: 2h
-      config:
-        url: http://zkboost-reth:3000/metrics
-        pollInterval: 30s
-        requestTimeout: 5s
-        maxResponseSize: 10MB
-        missingMetric: wait
-        missingSeries: wait
-        resetBehavior: fail
-        assertions:
-        - name: reth-zisk prove success increased
-          metric: zkboost_prove_total
-          labels:
-            proof_type: reth-zisk
-            status: success
-          mode: delta
-          operator: gt
-          value: 0
+  - name: run_tasks_concurrent
+    title: "Check zkboost metrics"
+    timeout: 2h
+    config:
+      tasks:
+        - name: check_http_metrics
+          title: "Check reth-zisk prover metrics"
+          timeout: 2h
+          config:
+            url: http://zkboost-reth:3000/metrics
+            pollInterval: 30s
+            requestTimeout: 5s
+            maxResponseSize: 10MB
+            missingMetric: wait
+            missingSeries: wait
+            resetBehavior: fail
+            assertions:
+              - name: reth-zisk prove success increased
+                metric: zkboost_prove_total
+                labels:
+                  proof_type: reth-zisk
+                  status: success
+                mode: delta
+                operator: gt
+                value: 0
 
-    - name: check_http_metrics
-      title: "Check ethrex-zisk prover metrics"
-      timeout: 2h
-      config:
-        url: http://zkboost-ethrex:3000/metrics
-        pollInterval: 30s
-        requestTimeout: 5s
-        maxResponseSize: 10MB
-        missingMetric: wait
-        missingSeries: wait
-        resetBehavior: fail
-        assertions:
-        - name: ethrex-zisk prove success increased
-          metric: zkboost_prove_total
-          labels:
-            proof_type: ethrex-zisk
-            status: success
-          mode: delta
-          operator: gt
-          value: 0
+        - name: check_http_metrics
+          title: "Check ethrex-zisk prover metrics"
+          timeout: 2h
+          config:
+            url: http://zkboost-ethrex:3000/metrics
+            pollInterval: 30s
+            requestTimeout: 5s
+            maxResponseSize: 10MB
+            missingMetric: wait
+            missingSeries: wait
+            resetBehavior: fail
+            assertions:
+              - name: ethrex-zisk prove success increased
+                metric: zkboost_prove_total
+                labels:
+                  proof_type: ethrex-zisk
+                  status: success
+                mode: delta
+                operator: gt
+                value: 0
 
-    - name: check_http_metrics
-      title: "Check isolated verifier metrics"
-      timeout: 2h
-      config:
-        url: http://zkboost-verifier:3000/metrics
-        pollInterval: 30s
-        requestTimeout: 5s
-        maxResponseSize: 10MB
-        missingMetric: wait
-        missingSeries: wait
-        resetBehavior: fail
-        assertions:
-        - name: reth-zisk verify true increased
-          metric: zkboost_verify_total
-          labels:
-            proof_type: reth-zisk
-            verified: "true"
-          mode: delta
-          operator: gt
-          value: 0
-        - name: ethrex-zisk verify true increased
-          metric: zkboost_verify_total
-          labels:
-            proof_type: ethrex-zisk
-            verified: "true"
-          mode: delta
-          operator: gt
-          value: 0
+        - name: check_http_metrics
+          title: "Check isolated verifier metrics"
+          timeout: 2h
+          config:
+            url: http://zkboost-verifier:3000/metrics
+            pollInterval: 30s
+            requestTimeout: 5s
+            maxResponseSize: 10MB
+            missingMetric: wait
+            missingSeries: wait
+            resetBehavior: fail
+            assertions:
+              - name: reth-zisk verify true increased
+                metric: zkboost_verify_total
+                labels:
+                  proof_type: reth-zisk
+                  verified: "true"
+                mode: delta
+                operator: gt
+                value: 0
+              - name: ethrex-zisk verify true increased
+                metric: zkboost_verify_total
+                labels:
+                  proof_type: ethrex-zisk
+                  verified: "true"
+                mode: delta
+                operator: gt
+                value: 0

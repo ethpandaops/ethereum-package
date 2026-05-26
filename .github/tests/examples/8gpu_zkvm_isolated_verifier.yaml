@@ -1,8 +1,11 @@
+---
 # EIP-8025 testnet with GPU provers and isolated CPU verifiers.
 #
 # Architecture:
-#   - zkboost-reth: GPU prover for reth-zisk, fetches witness from reth EL (GPUs 0-3)
-#   - zkboost-ethrex: GPU prover for ethrex-zisk, fetches witness from ethrex EL (GPUs 4-7)
+#   - zkboost-reth: GPU prover for reth-zisk, fetches witness from reth EL
+#     on GPUs 0-3
+#   - zkboost-ethrex: GPU prover for ethrex-zisk, fetches witness from
+#     ethrex EL on GPUs 4-7
 #   - zkboost-verifier: In-process CPU verification for both proof types
 #
 # Run with:
@@ -84,7 +87,7 @@ zkboost_params:
           gpu:
             device_ids: ["0", "1", "2", "3"]
 
-    # Ethrex prover: fetches witness from ethrex EL, generates ethrex-zisk proofs
+    # Ethrex prover: fetches witness from ethrex EL and generates proofs
     - name: zkboost-ethrex
       el_participant_index: 1
       zkvms:
