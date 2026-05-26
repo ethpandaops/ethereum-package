@@ -552,13 +552,18 @@ def input_parser(plan, input_args):
                     )
                 instance_proof_types.append(proof_type)
                 effective_zkvms.append((instance_idx, zkvm_idx, zkvm))
-                if zkvm.get("kind") == "ere" and proof_type not in effective_ere_zkvms_by_proof_type:
+                if (
+                    zkvm.get("kind") == "ere"
+                    and proof_type not in effective_ere_zkvms_by_proof_type
+                ):
                     effective_ere_zkvms_by_proof_type[proof_type] = zkvm
 
         for inst_idx, zkvm_idx, zkvm in effective_zkvms:
             kind = zkvm.get("kind")
             proof_type = zkvm.get("proof_type")
-            zkvm_path = "zkboost_params.instances[{0}].zkvms[{1}]".format(inst_idx, zkvm_idx)
+            zkvm_path = "zkboost_params.instances[{0}].zkvms[{1}]".format(
+                inst_idx, zkvm_idx
+            )
 
             if kind not in ["mock", "ere", "external", "verifier"]:
                 fail(
