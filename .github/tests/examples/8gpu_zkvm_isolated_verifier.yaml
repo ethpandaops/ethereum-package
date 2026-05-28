@@ -69,9 +69,10 @@ additional_services:
   - spamoor
 
 assertoor_params:
-  image: assertoor:check-http-metrics
+  image: assertoor:check-http-json
   tests:
     - /tests/zkboost-metrics-test.yaml
+    - /tests/zkboost-json-test.yaml
 
 zkboost_params:
   image: ghcr.io/eth-act/zkboost/zkboost:0.7.0
