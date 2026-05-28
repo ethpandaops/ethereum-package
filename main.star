@@ -122,7 +122,7 @@ fi
 
 clickhouse_ping_url="http://${gateway}:8123/ping"
 if ! curl -fsS "$clickhouse_ping_url" >/dev/null; then
-    echo "engine OTel stack is not reachable at ${clickhouse_ping_url}; run 'kurtosis otel start' before enabling otel_tracing" >&2
+    echo "engine OTel stack is not reachable at ${clickhouse_ping_url}; run 'kurtosis otel start' before enabling otel.tracing.enabled" >&2
     exit 1
 fi
 
@@ -327,9 +327,9 @@ def run(plan, args={}):
     network_params = args_with_right_defaults.network_params
 
     detected_backend = plan.get_cluster_type()
-    if args_with_right_defaults.otel_tracing and detected_backend != "docker":
+    if args_with_right_defaults.otel.tracing.enabled and detected_backend != "docker":
         fail(
-            "otel_tracing requires the Docker backend because it uses the engine OTel stack published on the Docker host; detected backend: {}. Run with the Docker backend or disable otel_tracing.".format(
+            "otel.tracing.enabled requires the Docker backend because it uses the engine OTel stack published on the Docker host; detected backend: {}. Run with the Docker backend or disable otel.tracing.enabled.".format(
                 detected_backend
             )
         )
@@ -379,7 +379,7 @@ def run(plan, args={}):
     docker_cache_params = args_with_right_defaults.docker_cache_params
 
     engine_otel_endpoints = new_engine_otel_endpoints()
-    if args_with_right_defaults.otel_tracing:
+    if args_with_right_defaults.otel.tracing.enabled:
         engine_otel_endpoints = detect_engine_otel_endpoints(
             plan,
             global_tolerations,

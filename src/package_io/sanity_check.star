@@ -213,6 +213,14 @@ PORT_PUBLISHER_PARAMS = {
     },
 }
 
+OTEL_PARAMS = {
+    "otel": {
+        "tracing": [
+            "enabled",
+        ],
+    },
+}
+
 SUBCATEGORY_PARAMS = {
     "network_params": [
         "network",
@@ -508,7 +516,6 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "ethereum_metrics_exporter_enabled": "",
     "parallel_keystore_generation": "",
     "disable_peer_scoring": "",
-    "otel_tracing": "",
     "persistent": "",
     "mev_type": "",
     "xatu_sentry_enabled": "",
@@ -614,6 +621,13 @@ def sanity_check(plan, input_args):
         ["nat_exit_ip"],
     )
 
+    validate_nested_params(
+        plan,
+        input_args,
+        "otel",
+        OTEL_PARAMS["otel"],
+    )
+
     # Checks additional services
     if "additional_services" in input_args:
         for additional_services in input_args["additional_services"]:
@@ -635,6 +649,7 @@ def sanity_check(plan, input_args):
             PARTICIPANT_CATEGORIES.keys()
             + PARTICIPANT_MATRIX_PARAMS.keys()
             + PORT_PUBLISHER_PARAMS.keys()
+            + OTEL_PARAMS.keys()
             + SUBCATEGORY_PARAMS.keys()
             + ADDITIONAL_CATEGORY_PARAMS.keys()
         )
