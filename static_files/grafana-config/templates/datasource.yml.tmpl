@@ -42,11 +42,16 @@ datasources:
       defaultDatabase: otel
       logs:
         defaultTable: otel_logs
+        otelEnabled: true
+        otelVersion: latest
         timeColumn: Timestamp
         levelColumn: SeverityText
         messageColumn: Body
+        traceIdColumn: TraceId
       traces:
         defaultTable: otel_traces
+        otelEnabled: true
+        otelVersion: latest
         traceIdColumn: TraceId
         spanIdColumn: SpanId
         operationNameColumn: SpanName
