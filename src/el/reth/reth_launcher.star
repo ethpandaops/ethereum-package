@@ -248,7 +248,7 @@ def get_config(
 
     if otel_otlp_grpc_url != None:
         cmd.append("--tracing-otlp={}".format(otel_otlp_grpc_url))
-        cmd.append("--tracing-otlp.protocol=grpc")
+        cmd.append("--tracing-otlp-protocol=grpc")
 
     if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
