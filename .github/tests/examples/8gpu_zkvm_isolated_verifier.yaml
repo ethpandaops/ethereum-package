@@ -1,0 +1,107 @@
+---
+# EIP-8025 testnet with GPU provers and isolated CPU verifiers.
+#
+# Architecture:
+#   - zkboost-reth: GPU prover for reth-zisk, fetches witness from reth EL
+#     on GPUs 0-3
+#   - zkboost-ethrex: GPU prover for ethrex-zisk, fetches witness from
+#     ethrex EL on GPUs 4-7
+#   - zkboost-verifier: In-process CPU verification for both proof types
+#
+# Run with:
+#   kurtosis run --enclave eip8025-zkboost-isolated \
+#       . \
+#       --args-file .github/tests/examples/8gpu_zkvm_isolated_verifier.yaml
+#
+# Prerequisites:
+#   - NVIDIA GPUs with drivers installed (8 GPUs: 4 per prover type)
+#   - NVIDIA Container Toolkit configured for Docker
+
+participants:
+  # Reth full node: requests reth-zisk proofs from zkboost-reth
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: reth
+    el_image: ghcr.io/paradigmxyz/reth
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-verifier:3000
+      - --proof-types=6
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost-reth:3000
+      - --proof-types=6
+    count: 1
+
+  # Ethrex full node: requests ethrex-zisk proofs from zkboost-ethrex
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: ethrex
+    el_image: ghcr.io/lambdaclass/ethrex:latest
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-verifier:3000
+      - --proof-types=2
+    vc_extra_params:
+      - --proof-engine-endpoint=http://zkboost-ethrex:3000
+      - --proof-types=2
+    count: 1
+
+  # CL-only nodes: verify both proof types
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: None
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine-endpoint=http://zkboost-verifier:3000
+      - --proof-types=2,6
+    count: 2
+
+network_params:
+  seconds_per_slot: 30
+
+additional_services:
+  - zkboost
+  - dora
+  - prometheus
+  - grafana
+  - tempo
+  - assertoor
+  - spamoor
+
+assertoor_params:
+  image: assertoor:check-http-json
+  tests:
+    - /tests/zkboost-metrics-test.yaml
+    - /tests/zkboost-json-test.yaml
+
+zkboost_params:
+  image: ghcr.io/eth-act/zkboost/zkboost:0.7.0
+  env:
+    RUST_LOG: info,zkboost=debug
+  instances:
+    # Reth prover: fetches witness from reth EL, generates reth-zisk proofs
+    - name: zkboost-reth
+      el_participant_index: 0
+      zkvms:
+        - kind: ere
+          proof_type: reth-zisk
+          gpu:
+            device_ids: ["0", "1", "2", "3"]
+
+    # Ethrex prover: fetches witness from ethrex EL and generates proofs
+    - name: zkboost-ethrex
+      el_participant_index: 1
+      zkvms:
+        - kind: ere
+          proof_type: ethrex-zisk
+          gpu:
+            device_ids: ["4", "5", "6", "7"]
+
+    # CPU verifier: handles verification for both proof types
+    - name: zkboost-verifier
+      el_participant_index: 0
+      zkvms:
+        - kind: verifier
+          proof_type: reth-zisk
+        - kind: verifier
+          proof_type: ethrex-zisk
