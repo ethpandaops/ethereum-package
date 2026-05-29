@@ -1,0 +1,204 @@
+---
+id: zkboost-json-test
+name: "ZKBoost JSON API Test"
+timeout: 3h
+tasks:
+  - name: check_clients_are_healthy
+    title: "Check if clients are ready"
+    timeout: 10m
+    config:
+      minClientCount: 1
+
+  - name: run_tasks_concurrent
+    title: "Verify zkboost services"
+    timeout: 2h
+    config:
+      tasks:
+        # Health checks (empty body, status-only)
+        - name: check_http_json
+          title: "zkboost-reth: health check"
+          timeout: 5m
+          config:
+            url: http://zkboost-reth:3000/health
+            pollInterval: 10s
+            assertions: []
+
+        - name: check_http_json
+          title: "zkboost-ethrex: health check"
+          timeout: 5m
+          config:
+            url: http://zkboost-ethrex:3000/health
+            pollInterval: 10s
+            assertions: []
+
+        - name: check_http_json
+          title: "zkboost-verifier: health check"
+          timeout: 5m
+          config:
+            url: http://zkboost-verifier:3000/health
+            pollInterval: 10s
+            assertions: []
+
+        # Reth prover configuration
+        - name: check_http_json
+          title: "zkboost-reth: verify proof type configuration"
+          timeout: 5m
+          config:
+            url: http://zkboost-reth:3000/v1/proof_types
+            pollInterval: 10s
+            assertions:
+              - name: has_reth_zisk
+                query: '.proof_types[] | select(.proof_type == "reth-zisk")'
+                exists: true
+              - name: kind_is_ere
+                query: >-
+                  .proof_types[] | select(.proof_type == "reth-zisk") | .kind
+                operator: eq
+                value: "ere"
+              - name: can_prove
+                query: >-
+                  .proof_types[]
+                  | select(.proof_type == "reth-zisk")
+                  | .can_prove
+                operator: eq
+                value: true
+              - name: single_proof_type
+                query: '.proof_types | length'
+                operator: eq
+                value: 1
+
+        # Ethrex prover configuration
+        - name: check_http_json
+          title: "zkboost-ethrex: verify proof type configuration"
+          timeout: 5m
+          config:
+            url: http://zkboost-ethrex:3000/v1/proof_types
+            pollInterval: 10s
+            assertions:
+              - name: has_ethrex_zisk
+                query: '.proof_types[] | select(.proof_type == "ethrex-zisk")'
+                exists: true
+              - name: kind_is_ere
+                query: >-
+                  .proof_types[] | select(.proof_type == "ethrex-zisk") | .kind
+                operator: eq
+                value: "ere"
+              - name: can_prove
+                query: >-
+                  .proof_types[]
+                  | select(.proof_type == "ethrex-zisk")
+                  | .can_prove
+                operator: eq
+                value: true
+              - name: single_proof_type
+                query: '.proof_types | length'
+                operator: eq
+                value: 1
+
+        # Verifier configuration (handles both proof types)
+        - name: check_http_json
+          title: "zkboost-verifier: verify proof type configuration"
+          timeout: 5m
+          config:
+            url: http://zkboost-verifier:3000/v1/proof_types
+            pollInterval: 10s
+            assertions:
+              - name: has_reth_zisk
+                query: '.proof_types[] | select(.proof_type == "reth-zisk")'
+                exists: true
+              - name: has_ethrex_zisk
+                query: '.proof_types[] | select(.proof_type == "ethrex-zisk")'
+                exists: true
+              - name: reth_zisk_can_verify
+                query: >-
+                  .proof_types[]
+                  | select(.proof_type == "reth-zisk")
+                  | .can_verify
+                operator: eq
+                value: true
+              - name: ethrex_zisk_can_verify
+                query: >-
+                  .proof_types[]
+                  | select(.proof_type == "ethrex-zisk")
+                  | .can_verify
+                operator: eq
+                value: true
+              - name: both_are_verifiers
+                query: '.proof_types[] | select(.kind != "verifier")'
+                exists: false
+              - name: two_proof_types
+                query: '.proof_types | length'
+                operator: eq
+                value: 2
+
+        # Dashboard state checks
+        - name: check_http_json
+          title: "zkboost-reth: dashboard state"
+          timeout: 5m
+          config:
+            url: http://zkboost-reth:3000/dashboard/state
+            pollInterval: 10s
+            assertions:
+              - name: has_build_version
+                query: '.buildVersion'
+                exists: true
+              - name: version_format
+                query: '.buildVersion'
+                operator: contains
+                value: "."
+              - name: has_reth_zisk_configured
+                query: '.proofTypes[] | select(. == "reth-zisk")'
+                exists: true
+              - name: retention_configured
+                query: '.retention'
+                operator: gt
+                value: 0
+
+        - name: check_http_json
+          title: "zkboost-ethrex: dashboard state"
+          timeout: 5m
+          config:
+            url: http://zkboost-ethrex:3000/dashboard/state
+            pollInterval: 10s
+            assertions:
+              - name: has_build_version
+                query: '.buildVersion'
+                exists: true
+              - name: has_ethrex_zisk_configured
+                query: '.proofTypes[] | select(. == "ethrex-zisk")'
+                exists: true
+
+        # Wait for proofs from both provers
+        - name: check_http_json
+          title: "zkboost-reth: wait for successful proof"
+          timeout: 2h
+          config:
+            url: http://zkboost-reth:3000/dashboard/state
+            pollInterval: 30s
+            assertions:
+              - name: has_blocks
+                query: '.historicalBlocks | length'
+                operator: gte
+                value: 1
+              - name: proof_succeeded
+                query: >-
+                  .historicalBlocks[].proofs["reth-zisk"].result
+                  | select(. == "success")
+                exists: true
+
+        - name: check_http_json
+          title: "zkboost-ethrex: wait for successful proof"
+          timeout: 2h
+          config:
+            url: http://zkboost-ethrex:3000/dashboard/state
+            pollInterval: 30s
+            assertions:
+              - name: has_blocks
+                query: '.historicalBlocks | length'
+                operator: gte
+                value: 1
+              - name: proof_succeeded
+                query: >-
+                  .historicalBlocks[].proofs["ethrex-zisk"].result
+                  | select(. == "success")
+                exists: true
