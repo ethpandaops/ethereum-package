@@ -5,6 +5,10 @@ BUILDOOR_SERVICE_NAME = "buildoor"
 BUILDOOR_API_PORT = 8080
 BUILDOOR_BUILDER_API_PORT = 9000
 
+VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE = "/validator-ranges"
+VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
+VALIDATOR_RANGES_FILE_NAME = "validator-ranges.yaml"
+
 MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 128
@@ -22,6 +26,7 @@ def launch_buildoor(
     global_node_selectors,
     global_tolerations,
     builder_bls_secret_key=None,
+    validator_ranges_artifact=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -54,7 +59,21 @@ def launch_buildoor(
     if buildoor_params.epbs_builder:
         cmd.append("--epbs-enabled")
 
+    if validator_ranges_artifact != None:
+        cmd.append(
+            "--validator-ranges-file={0}/{1}".format(
+                VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE, VALIDATOR_RANGES_FILE_NAME
+            )
+        )
+
     cmd += buildoor_params.extra_args
+
+    files = {
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
+    }
+
+    if validator_ranges_artifact != None:
+        files[VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE] = validator_ranges_artifact
 
     buildoor_service = plan.add_service(
         name=BUILDOOR_SERVICE_NAME,
@@ -71,9 +90,7 @@ def launch_buildoor(
                 ),
             },
             cmd=cmd,
-            files={
-                constants.JWT_MOUNTPOINT_ON_CLIENTS: jwt_file,
-            },
+            files=files,
             min_cpu=MIN_CPU,
             max_cpu=MAX_CPU,
             min_memory=MIN_MEMORY,
