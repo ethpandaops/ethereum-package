@@ -1226,8 +1226,8 @@ zkboost_params:
     - name: zkboost
       el_participant_index: 0
   # List of zkVM backend configurations.
-  # If empty or not set, the default shown below (a mock reth-zisk zkvm) is
-  # auto-configured. Each entry must have a unique proof_type.
+  # If empty or not set, a mock reth-zisk zkvm is auto-configured with
+  # random timing scaled to slot duration. Each entry must have a unique proof_type.
   #
   # Common fields for all entries:
   #   kind (required): the zkVM backend type
@@ -1236,13 +1236,13 @@ zkboost_params:
   #     "external" - connects to an already-deployed prover via HTTP
   #   proof_type (required): identifies the EL client + zkVM combination
   #     "ethrex-risc0", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-risc0", "reth-sp1", "reth-zisk"
-  #   proof_timeout_secs: timeout for proof generation in seconds (default: 12, must be > 0)
+  #   proof_timeout_secs: timeout for proof generation in seconds (default: 3/4 of slot duration, must be > 0)
   #
   # Mock-specific fields (only for kind: mock):
-  #   mock_proving_time: controls simulated proving duration (default: { kind: constant, ms: 6000 })
-  #     { kind: constant, ms: <ms> }                   - fixed duration
-  #     { kind: random, min_ms: <min>, max_ms: <max> } - uniformly random, min_ms must be <= max_ms
-  #     { kind: linear, ms_per_mgas: <ms> }            - proportional to block per million gas usage
+  #   mock_proving_time: controls simulated proving duration
+  #     { kind: constant, ms: <ms> }                   - fixed duration (default: 2/3 of slot_duration_ms)
+  #     { kind: random, min_ms: <min>, max_ms: <max> } - uniformly random (defaults: min=1/3, max=4/3 of slot)
+  #     { kind: linear, ms_per_mgas: <ms> }            - proportional to block gas (default: 150 ms/Mgas)
   #   mock_proof_size: simulated proof size in bytes, must be >= 32 (default: 131072 / 128 KiB)
   #   mock_failure: whether to simulate proving failures (default: false)
   #

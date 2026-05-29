@@ -65,8 +65,6 @@ def launch_zkboost(
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
-    default_proof_timeout_secs = network_params.seconds_per_slot * 3 // 4
-
     # Per-instance zkvms: each instance falls back to the global
     # `zkboost_params.zkvms` if no per-instance list is set. Resolve artifacts
     # (ere image/elf_url, verifier program_vk_url) for each, then collect every
@@ -122,9 +120,7 @@ def launch_zkboost(
             entry = {
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
-                "ProofTimeoutSecs": zkvm.get(
-                    "proof_timeout_secs", default_proof_timeout_secs
-                ),
+                "ProofTimeoutSecs": zkvm["proof_timeout_secs"],
             }
             if zkvm["kind"] == "ere":
                 entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
@@ -137,22 +133,19 @@ def launch_zkboost(
                 # zkboost loads ere-verifier-* in-process; only the .vk URL is needed.
                 entry["ProgramVkUrl"] = zkvm["program_vk_url"]
             elif zkvm["kind"] == "mock":
-                mock_proving_time = zkvm.get(
-                    "mock_proving_time",
-                    {
-                        "kind": "constant",
-                        "ms": network_params.slot_duration_ms * 2 // 3,
-                    },
-                )
-                entry["MockProvingTimeKind"] = mock_proving_time.get("kind", "constant")
-                entry["MockProvingTimeConstantMs"] = mock_proving_time.get("ms", 6000)
-                entry["MockProvingTimeRandomMinMs"] = mock_proving_time.get("min_ms", 0)
-                entry["MockProvingTimeRandomMaxMs"] = mock_proving_time.get("max_ms", 0)
-                entry["MockProvingTimeLinearMsPerMgas"] = mock_proving_time.get(
-                    "ms_per_mgas", 0
-                )
-                entry["MockProofSize"] = zkvm.get("mock_proof_size", 128 << 10)
-                entry["MockFailure"] = zkvm.get("mock_failure", False)
+                mock_proving_time = zkvm["mock_proving_time"]
+                entry["MockProvingTimeKind"] = mock_proving_time["kind"]
+                if mock_proving_time["kind"] == "constant":
+                    entry["MockProvingTimeConstantMs"] = mock_proving_time["ms"]
+                elif mock_proving_time["kind"] == "random":
+                    entry["MockProvingTimeRandomMinMs"] = mock_proving_time["min_ms"]
+                    entry["MockProvingTimeRandomMaxMs"] = mock_proving_time["max_ms"]
+                elif mock_proving_time["kind"] == "linear":
+                    entry["MockProvingTimeLinearMsPerMgas"] = mock_proving_time[
+                        "ms_per_mgas"
+                    ]
+                entry["MockProofSize"] = zkvm["mock_proof_size"]
+                entry["MockFailure"] = zkvm["mock_failure"]
             zkvms.append(entry)
 
         template_data = {
