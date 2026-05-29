@@ -96,6 +96,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "zkboost_params",
     "buildoor_params",
     "ethereum_genesis_generator_params",
+    "trueblocks_params",
 )
 
 
@@ -138,6 +139,7 @@ def input_parser(plan, input_args):
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
+    result["trueblocks_params"] = get_default_trueblocks_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -247,6 +249,14 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
                 result["buildoor_params"][sub_attr] = sub_value
+        elif attr == "trueblocks_params":
+            for sub_attr in input_args["trueblocks_params"]:
+                sub_value = input_args["trueblocks_params"][sub_attr]
+                if sub_attr == "scrape":
+                    for k, v in sub_value.items():
+                        result["trueblocks_params"]["scrape"][k] = v
+                else:
+                    result["trueblocks_params"][sub_attr] = sub_value
 
     if result.get("snooper_enabled"):
         plan.print(
@@ -1143,6 +1153,19 @@ def input_parser(plan, input_args):
             builder_api=result["buildoor_params"]["builder_api"],
             epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
+        trueblocks_params=struct(
+            image=result["trueblocks_params"]["image"],
+            config_version=result["trueblocks_params"]["config_version"],
+            target_rpc_url=result["trueblocks_params"]["target_rpc_url"],
+            target_index=result["trueblocks_params"]["target_index"],
+            scrape=struct(
+                apps_per_chunk=result["trueblocks_params"]["scrape"]["apps_per_chunk"],
+                snap_to_grid=result["trueblocks_params"]["scrape"]["snap_to_grid"],
+                first_snap=result["trueblocks_params"]["scrape"]["first_snap"],
+                unripe_dist=result["trueblocks_params"]["scrape"]["unripe_dist"],
+            ),
+            env=result["trueblocks_params"]["env"],
+        ),
     )
 
 
@@ -1984,6 +2007,25 @@ def get_default_dora_params():
     }
 
 
+def get_default_trueblocks_params():
+    return {
+        "image": constants.DEFAULT_TRUEBLOCKS_IMAGE,
+        "config_version": "v5.0.0",
+        "target_rpc_url": "",
+        "target_index": 0,
+        # 0 means "use the network-aware default". These end up in the rendered
+        # trueBlocks.toml and govern any future `chifra scrape` invocations
+        # (e.g. via the POST /scrape API).
+        "scrape": {
+            "apps_per_chunk": 0,
+            "snap_to_grid": 0,
+            "first_snap": 0,
+            "unripe_dist": 0,
+        },
+        "env": {},
+    }
+
+
 def get_default_checkpointz_params():
     return {
         "image": constants.DEFAULT_CHECKPOINTZ_IMAGE,
@@ -2559,6 +2601,7 @@ def docker_cache_image_override(plan, result):
         "spamoor_params.image",
         "disruptoor_params.image",
         "ethereum_genesis_generator_params.image",
+        "trueblocks_params.image",
     ]
 
     if result["docker_cache_params"]["url"] == "":
