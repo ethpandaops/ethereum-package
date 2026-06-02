@@ -97,6 +97,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "buildoor_params",
     "ethereum_genesis_generator_params",
     "otel",
+    "trueblocks_params",
 )
 
 
@@ -154,6 +155,7 @@ def input_parser(plan, input_args):
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
+    result["trueblocks_params"] = get_default_trueblocks_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -265,6 +267,14 @@ def input_parser(plan, input_args):
                 result["buildoor_params"][sub_attr] = sub_value
         elif attr == "otel":
             merge_nested_defaults(result, input_args, "otel")
+        elif attr == "trueblocks_params":
+            for sub_attr in input_args["trueblocks_params"]:
+                sub_value = input_args["trueblocks_params"][sub_attr]
+                if sub_attr == "scrape":
+                    for k, v in sub_value.items():
+                        result["trueblocks_params"]["scrape"][k] = v
+                else:
+                    result["trueblocks_params"][sub_attr] = sub_value
 
     if result.get("snooper_enabled"):
         plan.print(
@@ -501,8 +511,13 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
-        # Inject default mock zkvm if none configured.
-        if len(result["zkboost_params"]["zkvms"]) == 0:
+        has_instance_zkvms = False
+        for instance in result["zkboost_params"]["instances"]:
+            if len(instance.get("zkvms", [])) > 0:
+                has_instance_zkvms = True
+
+        # Inject default mock zkvm if none configured globally or per instance.
+        if len(result["zkboost_params"]["zkvms"]) == 0 and not has_instance_zkvms:
             result["zkboost_params"]["zkvms"] = [
                 {
                     "kind": "mock",
@@ -547,47 +562,65 @@ def input_parser(plan, input_args):
             "reth-zisk",
         ]
         configured_proof_types = []
-        for idx, zkvm in enumerate(result["zkboost_params"]["zkvms"]):
+        effective_zkvms = []
+        effective_ere_zkvms_by_proof_type = {}
+        for instance_idx, instance in enumerate(result["zkboost_params"]["instances"]):
+            instance_zkvms = instance.get("zkvms", result["zkboost_params"]["zkvms"])
+            instance_proof_types = []
+            for zkvm_idx, zkvm in enumerate(instance_zkvms):
+                proof_type = zkvm.get("proof_type")
+                if proof_type in instance_proof_types:
+                    fail(
+                        "zkboost_params.instances[{0}].zkvms[{1}]: duplicate proof_type '{2}' in instance '{3}'".format(
+                            instance_idx,
+                            zkvm_idx,
+                            proof_type,
+                            instance.get("name", str(instance_idx)),
+                        )
+                    )
+                instance_proof_types.append(proof_type)
+                effective_zkvms.append((instance_idx, zkvm_idx, zkvm))
+                if (
+                    zkvm.get("kind") == "ere"
+                    and proof_type not in effective_ere_zkvms_by_proof_type
+                ):
+                    effective_ere_zkvms_by_proof_type[proof_type] = zkvm
+
+        for inst_idx, zkvm_idx, zkvm in effective_zkvms:
             kind = zkvm.get("kind")
             proof_type = zkvm.get("proof_type")
+            zkvm_path = "zkboost_params.instances[{0}].zkvms[{1}]".format(
+                inst_idx, zkvm_idx
+            )
 
             if kind not in ["mock", "ere", "external", "verifier"]:
                 fail(
-                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock', 'ere', 'external', or 'verifier'".format(
-                        idx, kind
+                    "{0}: unsupported kind '{1}', please use 'mock', 'ere', 'external', or 'verifier'".format(
+                        zkvm_path, kind
                     )
                 )
 
             if proof_type not in valid_proof_types:
                 fail(
-                    "zkboost_params.zkvms[{0}]: unsupported proof_type '{1}', please use one of: {2}".format(
-                        idx, proof_type, ", ".join(valid_proof_types)
+                    "{0}: unsupported proof_type '{1}', please use one of: {2}".format(
+                        zkvm_path, proof_type, ", ".join(valid_proof_types)
                     )
                 )
 
-            if proof_type in configured_proof_types:
-                fail(
-                    "zkboost_params.zkvms[{0}]: duplicate proof_type '{1}'".format(
-                        idx, proof_type
-                    )
-                )
-            configured_proof_types.append(proof_type)
+            if proof_type not in configured_proof_types:
+                configured_proof_types.append(proof_type)
 
             proof_timeout = zkvm.get("proof_timeout_secs", 12)
             if proof_timeout <= 0:
                 fail(
-                    "zkboost_params.zkvms[{0}]: proof_timeout_secs must be > 0, got {1}".format(
-                        idx, proof_timeout
+                    "{0}: proof_timeout_secs must be > 0, got {1}".format(
+                        zkvm_path, proof_timeout
                     )
                 )
 
             if kind == "external":
                 if zkvm.get("endpoint", "") == "":
-                    fail(
-                        "zkboost_params.zkvms[{0}]: external zkvm requires 'endpoint'".format(
-                            idx
-                        )
-                    )
+                    fail("{0}: external zkvm requires 'endpoint'".format(zkvm_path))
 
             if kind == "mock":
                 mock_proving_time = zkvm.get("mock_proving_time")
@@ -595,8 +628,8 @@ def input_parser(plan, input_args):
                     pt_kind = mock_proving_time.get("kind", "constant")
                     if pt_kind not in ["constant", "random", "linear"]:
                         fail(
-                            "zkboost_params.zkvms[{0}]: unsupported mock_proving_time kind '{1}', please use 'constant', 'random' or 'linear'".format(
-                                idx, pt_kind
+                            "{0}: unsupported mock_proving_time kind '{1}', please use 'constant', 'random' or 'linear'".format(
+                                zkvm_path, pt_kind
                             )
                         )
                     if pt_kind == "random":
@@ -604,20 +637,20 @@ def input_parser(plan, input_args):
                         max_ms = mock_proving_time.get("max_ms", 0)
                         if min_ms > max_ms:
                             fail(
-                                "zkboost_params.zkvms[{0}]: mock_proving_time random min_ms ({1}) must be <= max_ms ({2})".format(
-                                    idx, min_ms, max_ms
+                                "{0}: mock_proving_time random min_ms ({1}) must be <= max_ms ({2})".format(
+                                    zkvm_path, min_ms, max_ms
                                 )
                             )
 
                 mock_proof_size = zkvm.get("mock_proof_size", 128 << 10)
                 if mock_proof_size < 32:
                     fail(
-                        "zkboost_params.zkvms[{0}]: mock_proof_size must be >= 32, got {1}".format(
-                            idx, mock_proof_size
+                        "{0}: mock_proof_size must be >= 32, got {1}".format(
+                            zkvm_path, mock_proof_size
                         )
                     )
 
-        _validate_ere_gpu_config(result["zkboost_params"]["zkvms"])
+        _validate_ere_gpu_config(effective_ere_zkvms_by_proof_type.values())
         _validate_requested_proof_types(result["participants"], configured_proof_types)
 
     if (
@@ -1147,6 +1180,19 @@ def input_parser(plan, input_args):
             builder_api=result["buildoor_params"]["builder_api"],
             epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
+        trueblocks_params=struct(
+            image=result["trueblocks_params"]["image"],
+            config_version=result["trueblocks_params"]["config_version"],
+            target_rpc_url=result["trueblocks_params"]["target_rpc_url"],
+            target_index=result["trueblocks_params"]["target_index"],
+            scrape=struct(
+                apps_per_chunk=result["trueblocks_params"]["scrape"]["apps_per_chunk"],
+                snap_to_grid=result["trueblocks_params"]["scrape"]["snap_to_grid"],
+                first_snap=result["trueblocks_params"]["scrape"]["first_snap"],
+                unripe_dist=result["trueblocks_params"]["scrape"]["unripe_dist"],
+            ),
+            env=result["trueblocks_params"]["env"],
+        ),
     )
 
 
@@ -1243,7 +1289,7 @@ def _validate_requested_proof_types(participants, configured_proof_types):
                         "participants[{0}] requests proof_type '{1}' (ID {2}) via --proof-types flag, ".format(
                             idx, proof_type, proof_type_id
                         )
-                        + "but no zkvm is configured for it in zkboost_params.zkvms. "
+                        + "but no zkvm is configured for it in zkboost_params.instances[*].zkvms. "
                         + "Either add a zkvm entry for '{0}' or remove ID {1} from --proof-types. ".format(
                             proof_type, proof_type_id
                         )
@@ -2000,6 +2046,25 @@ def get_default_dora_params():
     }
 
 
+def get_default_trueblocks_params():
+    return {
+        "image": constants.DEFAULT_TRUEBLOCKS_IMAGE,
+        "config_version": "v5.0.0",
+        "target_rpc_url": "",
+        "target_index": 0,
+        # 0 means "use the network-aware default". These end up in the rendered
+        # trueBlocks.toml and govern any future `chifra scrape` invocations
+        # (e.g. via the POST /scrape API).
+        "scrape": {
+            "apps_per_chunk": 0,
+            "snap_to_grid": 0,
+            "first_snap": 0,
+            "unripe_dist": 0,
+        },
+        "env": {},
+    }
+
+
 def get_default_checkpointz_params():
     return {
         "image": constants.DEFAULT_CHECKPOINTZ_IMAGE,
@@ -2575,6 +2640,7 @@ def docker_cache_image_override(plan, result):
         "spamoor_params.image",
         "disruptoor_params.image",
         "ethereum_genesis_generator_params.image",
+        "trueblocks_params.image",
     ]
 
     if result["docker_cache_params"]["url"] == "":

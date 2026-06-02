@@ -31,6 +31,7 @@ additional_services:
   - nginx
   - tracoor
   - spamoor
+  - trueblocks
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true

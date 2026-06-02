@@ -28,6 +28,7 @@ Optional features (enabled via flags or parameter files at runtime):
 - Specify extra parameters to be passed in for any of the: CL client Beacon, and CL client validator, and/or EL client containers
 - Specify the required parameters for the nodes to reach an external block building network
 - Generate keystores for each node in parallel
+- Spin up [TrueBlocks](https://github.com/TrueBlocks/trueblocks-core) (`chifra daemon`) to serve the chifra REST API on port 8080 (`/status`, `/blocks`, `/list`, `/chunks`, etc.). The scraper isn't started automatically; POST `/scrape` (or run `chifra scrape` against the same data dir) when you want to build the local [Unchained Index](https://trueblocks.io/docs/install/get-the-index/). Auto-tunes scrape parameters for devnets vs public networks.
 
 ## Quickstart
 
@@ -1073,6 +1074,7 @@ additional_services:
   - spamoor
   - tempo
   - tracoor
+  - trueblocks
   - tx_fuzz
 
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
@@ -1102,6 +1104,31 @@ checkpointz_params:
   # Checkpointz docker image to use
   # Defaults to the latest image
   image: "ethpandaops/checkpointz:latest"
+
+# Configuration place for trueblocks-core (chifra daemon) - https://github.com/TrueBlocks/trueblocks-core
+trueblocks_params:
+  # chifra docker image
+  image: "ethpandaops/trueblocks:v5.9.3"
+  # Written into [version].current in the rendered trueBlocks.toml. Bump if
+  # you point `image` at a chifra release that requires a newer config schema.
+  config_version: "v5.0.0"
+  # Verbatim RPC URL chifra should target. Leave empty to use
+  # all_el_contexts[target_index] (the in-cluster participant).
+  target_rpc_url: ""
+  target_index: 0
+  # Per-chain scrape tuning, written into the rendered trueBlocks.toml.
+  # 0 means "network-aware default" — chifra's mainnet values on public
+  # networks, small/responsive values on devnets. The package runs only
+  # chifra daemon; the scraper is not started automatically. Hit POST
+  # /scrape on the daemon (or run `chifra scrape` against the same data
+  # dir) when you want to build the local Unchained Index.
+  scrape:
+    apps_per_chunk: 0
+    snap_to_grid: 0
+    first_snap: 0
+    unripe_dist: 0
+  # Extra env vars passed to the chifra container.
+  env: {}
 
 # Define custom file contents to be mounted into containers
 # These files are referenced by name in el_extra_mounts, cl_extra_mounts, and vc_extra_mounts

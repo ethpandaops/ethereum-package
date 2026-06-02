@@ -140,3 +140,7 @@ HELIX_RELAY_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/mev/helix/config.yaml.tmp
 ZKBOOST_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/zkboost-config/config.toml.tmpl"
 )
+
+TRUEBLOCKS_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/trueblocks-config/trueBlocks.toml.tmpl"
+)

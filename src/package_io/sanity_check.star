@@ -476,6 +476,14 @@ SUBCATEGORY_PARAMS = {
         "builder_api",
         "epbs_builder",
     ],
+    "trueblocks_params": [
+        "image",
+        "config_version",
+        "target_rpc_url",
+        "target_index",
+        "scrape",
+        "env",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
@@ -507,6 +515,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "spamoor",
     "disruptoor",
     "zkboost",
+    "trueblocks",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
@@ -526,6 +535,15 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "keymanager_enabled": "",
     "checkpoint_sync_enabled": "",
     "checkpoint_sync_url": "",
+}
+
+TRUEBLOCKS_NESTED_PARAMS = {
+    "scrape": [
+        "apps_per_chunk",
+        "snap_to_grid",
+        "first_snap",
+        "unripe_dist",
+    ],
 }
 
 
@@ -619,6 +637,13 @@ def sanity_check(plan, input_args):
         "port_publisher",
         PORT_PUBLISHER_PARAMS["port_publisher"],
         ["nat_exit_ip"],
+    )
+    validate_nested_params(
+        plan,
+        input_args,
+        "trueblocks_params",
+        TRUEBLOCKS_NESTED_PARAMS,
+        ["image", "target_rpc_url", "target_index", "env"],
     )
 
     validate_nested_params(
