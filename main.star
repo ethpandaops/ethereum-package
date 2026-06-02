@@ -76,9 +76,11 @@ HTTP_PORT_ID_FOR_FACT = "http"
 MEV_BOOST_SHOULD_CHECK_RELAY = True
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 
-ENGINE_OTEL_OTLP_GRPC_PORT = 4317
-ENGINE_OTEL_OTLP_HTTP_PORT = 4318
-ENGINE_OTEL_CLICKHOUSE_HTTP_PORT = 8123
+# Non-default ports so the engine OTel stack does not collide with a host-level
+# OTLP collector (4317/4318) or ClickHouse (8123). Must match `kurtosis otel start`.
+ENGINE_OTEL_OTLP_GRPC_PORT = 14317
+ENGINE_OTEL_OTLP_HTTP_PORT = 14318
+ENGINE_OTEL_CLICKHOUSE_HTTP_PORT = 18123
 ENGINE_OTEL_DISCOVERY_OUTPUT_FILE = "/tmp/engine-otel-discovery.json"
 ENGINE_OTEL_DISCOVERY_ARTIFACT_NAME = "engine-otel-discovery"
 ENGINE_OTEL_DISCOVERY_MOUNT_DIR = "/engine-otel-discovery"
@@ -120,7 +122,7 @@ if [ -z "$own_ip" ]; then
     exit 1
 fi
 
-clickhouse_ping_url="http://${gateway}:8123/ping"
+clickhouse_ping_url="http://${gateway}:{{ .ClickHousePort }}/ping"
 if ! curl -fsS "$clickhouse_ping_url" >/dev/null; then
     echo "engine OTel stack is not reachable at ${clickhouse_ping_url}; run 'kurtosis otel start' before enabling otel.tracing.enabled" >&2
     exit 1
@@ -206,7 +208,7 @@ def detect_engine_otel_endpoints(plan, global_tolerations, global_node_selectors
         {
             ENGINE_OTEL_DISCOVERY_SCRIPT_FILENAME: shared_utils.new_template_and_data(
                 ENGINE_OTEL_DISCOVERY_SCRIPT,
-                {},
+                {"ClickHousePort": ENGINE_OTEL_CLICKHOUSE_HTTP_PORT},
             ),
         },
         name=ENGINE_OTEL_DISCOVERY_SCRIPT_ARTIFACT_NAME,
