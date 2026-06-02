@@ -125,7 +125,7 @@ fi
 
 clickhouse_ping_url="http://${gateway}:{{ .ClickHousePort }}/ping"
 if ! curl -fsS "$clickhouse_ping_url" >/dev/null; then
-    echo "engine OTel stack is not reachable at ${clickhouse_ping_url}; run 'kurtosis otel start' before enabling otel.tracing.enabled" >&2
+    echo "engine OTel stack is not reachable at ${clickhouse_ping_url}; run 'kurtosis otel start' before adding 'otel' to additional_services" >&2
     exit 1
 fi
 
@@ -330,9 +330,10 @@ def run(plan, args={}):
     network_params = args_with_right_defaults.network_params
 
     detected_backend = plan.get_cluster_type()
-    if args_with_right_defaults.otel.tracing.enabled and detected_backend != "docker":
+    otel_enabled = "otel" in args_with_right_defaults.additional_services
+    if otel_enabled and detected_backend != "docker":
         fail(
-            "otel.tracing.enabled requires the Docker backend because it uses the engine OTel stack published on the Docker host; detected backend: {}. Run with the Docker backend or disable otel.tracing.enabled.".format(
+            "The 'otel' additional_service requires the Docker backend because it uses the engine OTel stack published on the Docker host; detected backend: {}. Run with the Docker backend or remove 'otel' from additional_services.".format(
                 detected_backend
             )
         )
@@ -382,7 +383,7 @@ def run(plan, args={}):
     docker_cache_params = args_with_right_defaults.docker_cache_params
 
     engine_otel_endpoints = new_engine_otel_endpoints()
-    if args_with_right_defaults.otel.tracing.enabled:
+    if otel_enabled:
         engine_otel_endpoints = detect_engine_otel_endpoints(
             plan,
             global_tolerations,
@@ -1360,6 +1361,10 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched trueblocks")
+        elif additional_service == "otel":
+            # Engine OTel reachability is enforced earlier via detect_engine_otel_endpoints();
+            # if discovery succeeded, the per-client OTLP env vars are already wired.
+            plan.print("OTel tracing wired to engine collector")
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:

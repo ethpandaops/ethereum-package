@@ -96,7 +96,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "zkboost_params",
     "buildoor_params",
     "ethereum_genesis_generator_params",
-    "otel",
     "trueblocks_params",
 )
 
@@ -137,7 +136,6 @@ def input_parser(plan, input_args):
     result["rakoon_params"] = get_default_rakoon_params()
     result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
-    result["otel"] = get_default_otel_params()
     result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
     result["prometheus_params"] = get_default_prometheus_params()
@@ -265,8 +263,6 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
                 result["buildoor_params"][sub_attr] = sub_value
-        elif attr == "otel":
-            merge_nested_defaults(result, input_args, "otel")
         elif attr == "trueblocks_params":
             for sub_attr in input_args["trueblocks_params"]:
                 sub_value = input_args["trueblocks_params"][sub_attr]
@@ -1099,11 +1095,6 @@ def input_parser(plan, input_args):
         xatu_sentry_enabled=result["xatu_sentry_enabled"],
         parallel_keystore_generation=result["parallel_keystore_generation"],
         disable_peer_scoring=result["disable_peer_scoring"],
-        otel=struct(
-            tracing=struct(
-                enabled=result["otel"]["tracing"]["enabled"],
-            ),
-        ),
         persistent=result["persistent"],
         xatu_sentry_params=struct(
             xatu_sentry_image=result["xatu_sentry_params"]["xatu_sentry_image"],
@@ -1367,9 +1358,6 @@ def parse_network_params(plan, input_args):
                         result["network_params"][target_key] * 3.0 / 2.0 + 0.5
                     )
                 # If both are set or both are 0, don't override
-
-        elif attr == "otel":
-            merge_nested_defaults(result, input_args, "otel")
 
         elif attr == "participants":
             participants = []
@@ -1745,7 +1733,6 @@ def default_input_args(input_args):
         "ethereum_metrics_exporter_enabled": False,
         "parallel_keystore_generation": False,
         "disable_peer_scoring": False,
-        "otel": get_default_otel_params(),
         "persistent": False,
         "mev_type": None,
         "xatu_sentry_enabled": False,
@@ -1766,14 +1753,6 @@ def default_input_args(input_args):
         "spamoor_params": get_default_spamoor_params(),
         "disruptoor_params": get_default_disruptoor_params(),
         "bootnodoor_params": get_default_bootnodoor_params(),
-    }
-
-
-def get_default_otel_params():
-    return {
-        "tracing": {
-            "enabled": False,
-        },
     }
 
 
