@@ -33,6 +33,7 @@ def launch(
     extra_files_artifacts={},
     bootnodoor_enode=None,
     binary_artifacts={},
+    otel_otlp_grpc_url=None,
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -191,6 +192,7 @@ def launch(
                 extra_files_artifacts,
                 bootnodoor_enode,
                 el_binary_artifact,
+                otel_otlp_grpc_url,
             )
 
             # Add participant el additional prometheus metrics
@@ -217,6 +219,7 @@ def launch(
                 extra_files_artifacts,
                 bootnodoor_enode,
                 el_binary_artifact,
+                otel_otlp_grpc_url,
             )
 
             el_participant_info[el_service_name] = {

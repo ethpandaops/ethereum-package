@@ -61,6 +61,7 @@ def launch(
     extra_files_artifacts,
     bootnodoor_enode=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -81,6 +82,7 @@ def launch(
         extra_files_artifacts,
         bootnodoor_enode,
         el_binary_artifact,
+        otel_otlp_grpc_url,
     )
 
     service = plan.add_service(
@@ -112,6 +114,7 @@ def get_config(
     extra_files_artifacts,
     bootnodoor_enode=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     public_ports = {}
     public_ports_for_component = None
@@ -249,7 +252,11 @@ def get_config(
         "cmd": cmd,
         "files": files,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "env_vars": participant.el_extra_env_vars,
+        "env_vars": shared_utils.with_otel_env_vars(
+            participant.el_extra_env_vars,
+            otel_otlp_grpc_url,
+            service_name,
+        ),
         "labels": shared_utils.label_maker(
             client=constants.EL_TYPE.ethrex,
             client_type=constants.CLIENT_TYPES.el,

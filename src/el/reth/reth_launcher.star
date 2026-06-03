@@ -51,6 +51,7 @@ def launch(
     extra_files_artifacts,
     bootnodoor_enode=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -71,6 +72,7 @@ def launch(
         extra_files_artifacts,
         bootnodoor_enode,
         el_binary_artifact,
+        otel_otlp_grpc_url,
     )
 
     service = plan.add_service(
@@ -102,6 +104,7 @@ def get_config(
     extra_files_artifacts,
     bootnodoor_enode=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -243,6 +246,10 @@ def get_config(
             )
         )
 
+    if otel_otlp_grpc_url != None:
+        cmd.append("--tracing-otlp={}".format(otel_otlp_grpc_url))
+        cmd.append("--tracing-otlp-protocol=grpc")
+
     if len(participant.el_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.el_extra_params])
@@ -319,7 +326,12 @@ def get_config(
         "cmd": cmd,
         "files": files,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "env_vars": env_vars | participant.el_extra_env_vars,
+        "env_vars": env_vars
+        | shared_utils.with_otel_env_vars(
+            participant.el_extra_env_vars,
+            otel_otlp_grpc_url,
+            service_name,
+        ),
         "labels": shared_utils.label_maker(
             client=constants.EL_TYPE.reth,
             client_type=constants.CLIENT_TYPES.el,

@@ -29,6 +29,7 @@ Optional features (enabled via flags or parameter files at runtime):
 - Specify the required parameters for the nodes to reach an external block building network
 - Generate keystores for each node in parallel
 - Spin up [TrueBlocks](https://github.com/TrueBlocks/trueblocks-core) (`chifra daemon`) to serve the chifra REST API on port 8080 (`/status`, `/blocks`, `/list`, `/chunks`, etc.). The scraper isn't started automatically; POST `/scrape` (or run `chifra scrape` against the same data dir) when you want to build the local [Unchained Index](https://trueblocks.io/docs/install/get-the-index/). Auto-tunes scrape parameters for devnets vs public networks.
+- Ship traces from every EL/CL/VC to the engine-level Kurtosis OTel stack started with `kurtosis otel start` by adding `otel` to `additional_services`. Traces land in the shared ClickHouse tenanted by enclave; requires the Docker backend.
 
 ## Quickstart
 
@@ -1068,6 +1069,7 @@ additional_services:
   - grafana
   - mempool_bridge
   - nginx
+  - otel
   - prometheus
   - rakoon
   - slashoor

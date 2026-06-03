@@ -508,6 +508,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "disruptoor",
     "zkboost",
     "trueblocks",
+    "otel",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

@@ -100,6 +100,20 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 
+def merge_nested_defaults(result, input_args, category):
+    for sub_attr in input_args[category]:
+        sub_value = input_args[category][sub_attr]
+        if (
+            type(sub_value) == "dict"
+            and sub_attr in result[category]
+            and type(result[category][sub_attr]) == "dict"
+        ):
+            for nested_attr in sub_value:
+                result[category][sub_attr][nested_attr] = sub_value[nested_attr]
+        else:
+            result[category][sub_attr] = sub_value
+
+
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
@@ -919,45 +933,49 @@ def input_parser(plan, input_args):
                 "min_epochs_for_data_column_sidecars_requests"
             ],
         ),
-        mev_params=struct(
-            mev_relay_image=result["mev_params"]["mev_relay_image"],
-            mev_builder_image=result["mev_params"]["mev_builder_image"],
-            mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
-            mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
-            mev_builder_subsidy=result["mev_params"]["mev_builder_subsidy"],
-            mev_boost_image=result["mev_params"]["mev_boost_image"],
-            mev_boost_args=result["mev_params"]["mev_boost_args"],
-            mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
-            mev_relay_api_extra_env_vars=result["mev_params"][
-                "mev_relay_api_extra_env_vars"
-            ],
-            mev_relay_housekeeper_extra_args=result["mev_params"][
-                "mev_relay_housekeeper_extra_args"
-            ],
-            mev_relay_housekeeper_extra_env_vars=result["mev_params"][
-                "mev_relay_housekeeper_extra_env_vars"
-            ],
-            mev_relay_website_extra_args=result["mev_params"][
-                "mev_relay_website_extra_args"
-            ],
-            mev_relay_website_extra_env_vars=result["mev_params"][
-                "mev_relay_website_extra_env_vars"
-            ],
-            mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
-            mev_builder_cl_extra_params=result["mev_params"][
-                "mev_builder_cl_extra_params"
-            ],
-            mev_builder_prometheus_config=result["mev_params"][
-                "mev_builder_prometheus_config"
-            ],
-            mock_mev_image=result["mev_params"]["mock_mev_image"],
-            launch_adminer=result["mev_params"]["launch_adminer"],
-            run_multiple_relays=result["mev_params"]["run_multiple_relays"],
-            helix_relay_image=result["mev_params"]["helix_relay_image"],
-            commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
-        )
-        if result["mev_params"]
-        else None,
+        mev_params=(
+            struct(
+                mev_relay_image=result["mev_params"]["mev_relay_image"],
+                mev_builder_image=result["mev_params"]["mev_builder_image"],
+                mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
+                mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
+                mev_builder_subsidy=result["mev_params"]["mev_builder_subsidy"],
+                mev_boost_image=result["mev_params"]["mev_boost_image"],
+                mev_boost_args=result["mev_params"]["mev_boost_args"],
+                mev_relay_api_extra_args=result["mev_params"][
+                    "mev_relay_api_extra_args"
+                ],
+                mev_relay_api_extra_env_vars=result["mev_params"][
+                    "mev_relay_api_extra_env_vars"
+                ],
+                mev_relay_housekeeper_extra_args=result["mev_params"][
+                    "mev_relay_housekeeper_extra_args"
+                ],
+                mev_relay_housekeeper_extra_env_vars=result["mev_params"][
+                    "mev_relay_housekeeper_extra_env_vars"
+                ],
+                mev_relay_website_extra_args=result["mev_params"][
+                    "mev_relay_website_extra_args"
+                ],
+                mev_relay_website_extra_env_vars=result["mev_params"][
+                    "mev_relay_website_extra_env_vars"
+                ],
+                mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
+                mev_builder_cl_extra_params=result["mev_params"][
+                    "mev_builder_cl_extra_params"
+                ],
+                mev_builder_prometheus_config=result["mev_params"][
+                    "mev_builder_prometheus_config"
+                ],
+                mock_mev_image=result["mev_params"]["mock_mev_image"],
+                launch_adminer=result["mev_params"]["launch_adminer"],
+                run_multiple_relays=result["mev_params"]["run_multiple_relays"],
+                helix_relay_image=result["mev_params"]["helix_relay_image"],
+                commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
+            )
+            if result["mev_params"]
+            else None
+        ),
         blockscout_params=struct(
             image=result["blockscout_params"]["image"],
             verif_image=result["blockscout_params"]["verif_image"],
@@ -2142,9 +2160,9 @@ def get_default_mev_params(mev_type, preset):
     return {
         "mev_relay_image": mev_relay_image,
         "mev_builder_image": mev_builder_image,
-        "mock_mev_image": mev_builder_image
-        if mev_type == constants.MOCK_MEV_TYPE
-        else None,
+        "mock_mev_image": (
+            mev_builder_image if mev_type == constants.MOCK_MEV_TYPE else None
+        ),
         "mev_builder_subsidy": mev_builder_subsidy,
         "mev_builder_cl_image": mev_builder_cl_image,
         "mev_builder_extra_data": mev_builder_extra_data,
