@@ -635,6 +635,7 @@ def run(plan, args={}):
 
     mev_endpoints = []
     mev_endpoint_names = []
+    buildoor_api_urls = []
     # passed external relays get priority
     # perhaps add mev_type External or remove this
     if (
@@ -688,7 +689,7 @@ def run(plan, args={}):
             all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
-        endpoint = buildoor.launch_buildoor(
+        buildoor_endpoints = buildoor.launch_buildoor(
             plan,
             beacon_uri,
             el_rpc_uri,
@@ -701,8 +702,9 @@ def run(plan, args={}):
             builder_bls_secret_key,
             ranges,
         )
-        mev_endpoints.append(endpoint)
+        mev_endpoints.append(buildoor_endpoints["mev_endpoint"])
         mev_endpoint_names.append(constants.BUILDOOR_MEV_TYPE)
+        buildoor_api_urls.append(buildoor_endpoints["api_url"])
     elif args_with_right_defaults.mev_type and (
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
@@ -1007,6 +1009,7 @@ def run(plan, args={}):
                 index,
                 args_with_right_defaults.docker_cache_params,
                 el_cl_data_files_artifact_uuid,
+                buildoor_api_urls,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "checkpointz":

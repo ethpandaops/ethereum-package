@@ -32,6 +32,14 @@ frontend:
   validatorNamesYaml: "/validator-ranges/validator-ranges.yaml"
 {{- end }}
 
+{{- if .BuildoorAPIURLs }}
+  buildoorUrls:
+{{- range $url := .BuildoorAPIURLs }}
+    - "{{ $url }}"
+{{- end }}
+  buildoorRefreshInterval: 5m
+{{- end }}
+
   rainbowkitProjectId: "15fe4ab4d5c0bcb6f0dc7c398301ff0e"
   showSubmitDeposit: true
   showSubmitElRequests: true

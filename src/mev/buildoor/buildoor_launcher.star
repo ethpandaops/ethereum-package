@@ -99,6 +99,14 @@ def launch_buildoor(
             tolerations=tolerations,
         ),
     )
-    return "http://{0}@{1}:{2}".format(
-        constants.DEFAULT_MEV_PUBKEY, BUILDOOR_SERVICE_NAME, BUILDOOR_BUILDER_API_PORT
-    )
+    return {
+        "mev_endpoint": "http://{0}@{1}:{2}".format(
+            constants.DEFAULT_MEV_PUBKEY,
+            BUILDOOR_SERVICE_NAME,
+            BUILDOOR_BUILDER_API_PORT,
+        ),
+        "api_url": "http://{0}:{1}".format(
+            BUILDOOR_SERVICE_NAME,
+            BUILDOOR_API_PORT,
+        ),
+    }
