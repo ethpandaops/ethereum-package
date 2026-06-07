@@ -14,8 +14,7 @@ DEFAULT_EL_IMAGES = {
     "reth": "ghcr.io/paradigmxyz/reth",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
-    "ethrex": "ghcr.io/lambdaclass/ethrex:latest",
-    "dummy": "ethpandaops/dummy-el:master",
+    "ethrex": "ethpandaops/ethrex:main",
 }
 
 DEFAULT_CL_IMAGES = {
@@ -89,6 +88,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
+    "disruptoor_params",
     "snooper_params",
     "slashoor_params",
     "bootnodoor_params",
@@ -96,7 +96,22 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "zkboost_params",
     "buildoor_params",
     "ethereum_genesis_generator_params",
+    "trueblocks_params",
 )
+
+
+def merge_nested_defaults(result, input_args, category):
+    for sub_attr in input_args[category]:
+        sub_value = input_args[category][sub_attr]
+        if (
+            type(sub_value) == "dict"
+            and sub_attr in result[category]
+            and type(result[category][sub_attr]) == "dict"
+        ):
+            for nested_attr in sub_value:
+                result[category][sub_attr][nested_attr] = sub_value[nested_attr]
+        else:
+            result[category][sub_attr] = sub_value
 
 
 def input_parser(plan, input_args):
@@ -133,10 +148,12 @@ def input_parser(plan, input_args):
     result["port_publisher"] = get_port_publisher_params("default")
     result["snooper_params"] = get_default_snooper_params()
     result["spamoor_params"] = get_default_spamoor_params()
+    result["disruptoor_params"] = get_default_disruptoor_params()
     result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
+    result["trueblocks_params"] = get_default_trueblocks_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -214,6 +231,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["spamoor_params"]:
                 sub_value = input_args["spamoor_params"][sub_attr]
                 result["spamoor_params"][sub_attr] = sub_value
+        elif attr == "disruptoor_params":
+            for sub_attr in input_args["disruptoor_params"]:
+                sub_value = input_args["disruptoor_params"][sub_attr]
+                result["disruptoor_params"][sub_attr] = sub_value
         elif attr == "slashoor_params":
             for sub_attr in input_args["slashoor_params"]:
                 sub_value = input_args["slashoor_params"][sub_attr]
@@ -242,6 +263,14 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
                 result["buildoor_params"][sub_attr] = sub_value
+        elif attr == "trueblocks_params":
+            for sub_attr in input_args["trueblocks_params"]:
+                sub_value = input_args["trueblocks_params"][sub_attr]
+                if sub_attr == "scrape":
+                    for k, v in sub_value.items():
+                        result["trueblocks_params"]["scrape"][k] = v
+                else:
+                    result["trueblocks_params"][sub_attr] = sub_value
 
     if result.get("snooper_enabled"):
         plan.print(
@@ -294,7 +323,7 @@ def input_parser(plan, input_args):
 
     # Check for shadowfork + archive mode and unsupported client + archive mode combinations
     is_shadowfork = "shadowfork" in result["network_params"]["network"]
-    unsupported_archive_clients = ["dummy", "ethrex", "ethereumjs", "nimbus"]
+    unsupported_archive_clients = ["ethrex", "ethereumjs", "nimbus"]
 
     for idx, participant in enumerate(result["participants"]):
         el_type = participant["el_type"]
@@ -478,16 +507,22 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
-        # Inject default mock zkvm if none configured.
-        if len(result["zkboost_params"]["zkvms"]) == 0:
+        has_instance_zkvms = False
+        for instance in result["zkboost_params"]["instances"]:
+            if len(instance.get("zkvms", [])) > 0:
+                has_instance_zkvms = True
+
+        # Inject default mock zkvm if none configured globally or per instance.
+        if len(result["zkboost_params"]["zkvms"]) == 0 and not has_instance_zkvms:
+            default_ms = result["network_params"]["slot_duration_ms"] * 2 // 3
             result["zkboost_params"]["zkvms"] = [
                 {
                     "kind": "mock",
                     "proof_type": "reth-zisk",
                     "mock_proving_time": {
                         "kind": "random",
-                        "min_ms": 2000,
-                        "max_ms": 8000,
+                        "min_ms": default_ms // 2,
+                        "max_ms": default_ms * 2,
                     },
                     "mock_proof_size": 128 << 10,
                 },
@@ -495,13 +530,13 @@ def input_parser(plan, input_args):
         if "RUST_LOG" not in result["zkboost_params"]["env"]:
             result["zkboost_params"]["env"]["RUST_LOG"] = "info,zkboost=debug"
 
-        has_non_dummy_el = False
+        has_real_el = False
         for participant in result["participants"]:
-            if participant["el_type"] != "dummy":
-                has_non_dummy_el = True
-        if not has_non_dummy_el:
+            if participant["el_type"] != constants.EL_TYPE.none:
+                has_real_el = True
+        if not has_real_el:
             fail(
-                "zkboost is enabled but all participants are using dummy EL. At least one participant must use a real EL client (geth, reth, nethermind, etc.) to produce blocks."
+                "zkboost requires at least one participant with a real EL client (geth, reth, nethermind, etc.) to connect to, but all participants have el_type=None."
             )
 
         for idx, instance in enumerate(result["zkboost_params"]["instances"]):
@@ -524,84 +559,132 @@ def input_parser(plan, input_args):
             "reth-zisk",
         ]
         configured_proof_types = []
-        for idx, zkvm in enumerate(result["zkboost_params"]["zkvms"]):
+        effective_zkvms = []
+        effective_ere_zkvms_by_proof_type = {}
+        for instance_idx, instance in enumerate(result["zkboost_params"]["instances"]):
+            instance_zkvms = instance.get("zkvms", result["zkboost_params"]["zkvms"])
+            instance_proof_types = []
+            for zkvm_idx, zkvm in enumerate(instance_zkvms):
+                proof_type = zkvm.get("proof_type")
+                if proof_type in instance_proof_types:
+                    fail(
+                        "zkboost_params.instances[{0}].zkvms[{1}]: duplicate proof_type '{2}' in instance '{3}'".format(
+                            instance_idx,
+                            zkvm_idx,
+                            proof_type,
+                            instance.get("name", str(instance_idx)),
+                        )
+                    )
+                instance_proof_types.append(proof_type)
+                effective_zkvms.append((instance_idx, zkvm_idx, zkvm))
+                if (
+                    zkvm.get("kind") == "ere"
+                    and proof_type not in effective_ere_zkvms_by_proof_type
+                ):
+                    effective_ere_zkvms_by_proof_type[proof_type] = zkvm
+
+        for inst_idx, zkvm_idx, zkvm in effective_zkvms:
             kind = zkvm.get("kind")
             proof_type = zkvm.get("proof_type")
+            zkvm_path = "zkboost_params.instances[{0}].zkvms[{1}]".format(
+                inst_idx, zkvm_idx
+            )
 
-            if kind not in ["mock", "ere", "external"]:
+            if kind not in ["mock", "ere", "external", "verifier"]:
                 fail(
-                    "zkboost_params.zkvms[{0}]: unsupported kind '{1}', please use 'mock', 'ere', or 'external'".format(
-                        idx, kind
+                    "{0}: unsupported kind '{1}', please use 'mock', 'ere', 'external', or 'verifier'".format(
+                        zkvm_path, kind
                     )
                 )
 
             if proof_type not in valid_proof_types:
                 fail(
-                    "zkboost_params.zkvms[{0}]: unsupported proof_type '{1}', please use one of: {2}".format(
-                        idx, proof_type, ", ".join(valid_proof_types)
+                    "{0}: unsupported proof_type '{1}', please use one of: {2}".format(
+                        zkvm_path, proof_type, ", ".join(valid_proof_types)
                     )
                 )
 
-            if proof_type in configured_proof_types:
-                fail(
-                    "zkboost_params.zkvms[{0}]: duplicate proof_type '{1}'".format(
-                        idx, proof_type
-                    )
-                )
-            configured_proof_types.append(proof_type)
+            if proof_type not in configured_proof_types:
+                configured_proof_types.append(proof_type)
 
-            proof_timeout = zkvm.get("proof_timeout_secs", 12)
-            if proof_timeout <= 0:
+            # Default proof_timeout_secs to 3/4 of slot duration (minimum 1 second)
+            default_proof_timeout = max(
+                1, result["network_params"]["slot_duration_ms"] * 3 // 4000
+            )
+            zkvm["proof_timeout_secs"] = zkvm.get(
+                "proof_timeout_secs", default_proof_timeout
+            )
+            if zkvm["proof_timeout_secs"] <= 0:
                 fail(
-                    "zkboost_params.zkvms[{0}]: proof_timeout_secs must be > 0, got {1}".format(
-                        idx, proof_timeout
+                    "{0}: proof_timeout_secs must be > 0, got {1}".format(
+                        zkvm_path, zkvm["proof_timeout_secs"]
                     )
                 )
 
             if kind == "external":
                 if zkvm.get("endpoint", "") == "":
-                    fail(
-                        "zkboost_params.zkvms[{0}]: external zkvm requires 'endpoint'".format(
-                            idx
-                        )
-                    )
+                    fail("{0}: external zkvm requires 'endpoint'".format(zkvm_path))
 
             if kind == "mock":
+                # Normalize mock_proving_time - handle omitted, null, and partial cases
                 mock_proving_time = zkvm.get("mock_proving_time")
-                if mock_proving_time != None:
-                    pt_kind = mock_proving_time.get("kind", "constant")
-                    if pt_kind not in ["constant", "random", "linear"]:
-                        fail(
-                            "zkboost_params.zkvms[{0}]: unsupported mock_proving_time kind '{1}', please use 'constant', 'random' or 'linear'".format(
-                                idx, pt_kind
-                            )
-                        )
-                    if pt_kind == "random":
-                        min_ms = mock_proving_time.get("min_ms", 0)
-                        max_ms = mock_proving_time.get("max_ms", 0)
-                        if min_ms > max_ms:
-                            fail(
-                                "zkboost_params.zkvms[{0}]: mock_proving_time random min_ms ({1}) must be <= max_ms ({2})".format(
-                                    idx, min_ms, max_ms
-                                )
-                            )
-
-                mock_proof_size = zkvm.get("mock_proof_size", 128 << 10)
-                if mock_proof_size < 32:
+                if mock_proving_time == None:
+                    mock_proving_time = {}
+                pt_kind = mock_proving_time.get("kind", "constant")
+                if pt_kind not in ["constant", "random", "linear"]:
                     fail(
-                        "zkboost_params.zkvms[{0}]: mock_proof_size must be >= 32, got {1}".format(
-                            idx, mock_proof_size
+                        "{0}: unsupported mock_proving_time kind '{1}', please use 'constant', 'random' or 'linear'".format(
+                            zkvm_path, pt_kind
                         )
                     )
+                # Fill in kind-appropriate defaults so partial or omitted
+                # mock_proving_time doesn't silently become 0ms.
+                # Duration defaults scale with slot duration (2/3 of slot).
+                default_ms = result["network_params"]["slot_duration_ms"] * 2 // 3
+                mock_proving_time["kind"] = pt_kind
+                if pt_kind == "constant":
+                    mock_proving_time["ms"] = mock_proving_time.get("ms", default_ms)
+                elif pt_kind == "random":
+                    mock_proving_time["min_ms"] = mock_proving_time.get(
+                        "min_ms", default_ms // 2
+                    )
+                    mock_proving_time["max_ms"] = mock_proving_time.get(
+                        "max_ms", default_ms * 2
+                    )
+                    if mock_proving_time["min_ms"] > mock_proving_time["max_ms"]:
+                        fail(
+                            "{0}: mock_proving_time random min_ms ({1}) must be <= max_ms ({2})".format(
+                                zkvm_path,
+                                mock_proving_time["min_ms"],
+                                mock_proving_time["max_ms"],
+                            )
+                        )
+                elif pt_kind == "linear":
+                    # ms_per_mgas is a rate (ms per mega-gas), not a duration
+                    mock_proving_time["ms_per_mgas"] = mock_proving_time.get(
+                        "ms_per_mgas", 150
+                    )
+                zkvm["mock_proving_time"] = mock_proving_time
 
-        _validate_ere_gpu_config(result["zkboost_params"]["zkvms"])
+                # Set mock_proof_size and mock_failure defaults
+                zkvm["mock_proof_size"] = zkvm.get("mock_proof_size", 128 << 10)
+                if zkvm["mock_proof_size"] < 32:
+                    fail(
+                        "{0}: mock_proof_size must be >= 32, got {1}".format(
+                            zkvm_path, zkvm["mock_proof_size"]
+                        )
+                    )
+                zkvm["mock_failure"] = zkvm.get("mock_failure", False)
+
+        _validate_ere_gpu_config(effective_ere_zkvms_by_proof_type.values())
+        _validate_requested_proof_types(result["participants"], configured_proof_types)
 
     if (
         "bootnodoor" not in result["additional_services"]
-        and result["participants"][0]["el_type"] == "dummy"
+        and result["participants"][0]["el_type"] == constants.EL_TYPE.none
     ):
         fail(
-            "First participant cannot use dummy EL without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
+            "First participant cannot have el_type=None without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
         )
 
     if (
@@ -611,6 +694,22 @@ def input_parser(plan, input_args):
     ):
         fail(
             "Mempool bridge is enabled but network is not mainnet, sepolia, hoodi or shadowfork, please set network to mainnet, sepolia, hoodi or shadowfork"
+        )
+
+    apache_deprecation_warning = False
+    if result.get("apache_port") != None and "nginx_port" not in input_args:
+        result["nginx_port"] = result["apache_port"]
+        apache_deprecation_warning = True
+    if "additional_services" in result and "apache" in result["additional_services"]:
+        result["additional_services"] = [
+            "nginx" if svc == "apache" else svc for svc in result["additional_services"]
+        ]
+        apache_deprecation_warning = True
+    if apache_deprecation_warning:
+        plan.print(
+            "WARNING: 'apache' is deprecated and has been removed. "
+            + "Use 'nginx' / 'nginx_port' instead; "
+            + "your apache settings have been silently routed to nginx."
         )
 
     return struct(
@@ -757,6 +856,7 @@ def input_parser(plan, input_args):
             contribution_due_bps_gloas=result["network_params"][
                 "contribution_due_bps_gloas"
             ],
+            payload_due_bps=result["network_params"]["payload_due_bps"],
             payload_attestation_due_bps=result["network_params"][
                 "payload_attestation_due_bps"
             ],
@@ -834,45 +934,49 @@ def input_parser(plan, input_args):
                 "min_epochs_for_data_column_sidecars_requests"
             ],
         ),
-        mev_params=struct(
-            mev_relay_image=result["mev_params"]["mev_relay_image"],
-            mev_builder_image=result["mev_params"]["mev_builder_image"],
-            mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
-            mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
-            mev_builder_subsidy=result["mev_params"]["mev_builder_subsidy"],
-            mev_boost_image=result["mev_params"]["mev_boost_image"],
-            mev_boost_args=result["mev_params"]["mev_boost_args"],
-            mev_relay_api_extra_args=result["mev_params"]["mev_relay_api_extra_args"],
-            mev_relay_api_extra_env_vars=result["mev_params"][
-                "mev_relay_api_extra_env_vars"
-            ],
-            mev_relay_housekeeper_extra_args=result["mev_params"][
-                "mev_relay_housekeeper_extra_args"
-            ],
-            mev_relay_housekeeper_extra_env_vars=result["mev_params"][
-                "mev_relay_housekeeper_extra_env_vars"
-            ],
-            mev_relay_website_extra_args=result["mev_params"][
-                "mev_relay_website_extra_args"
-            ],
-            mev_relay_website_extra_env_vars=result["mev_params"][
-                "mev_relay_website_extra_env_vars"
-            ],
-            mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
-            mev_builder_cl_extra_params=result["mev_params"][
-                "mev_builder_cl_extra_params"
-            ],
-            mev_builder_prometheus_config=result["mev_params"][
-                "mev_builder_prometheus_config"
-            ],
-            mock_mev_image=result["mev_params"]["mock_mev_image"],
-            launch_adminer=result["mev_params"]["launch_adminer"],
-            run_multiple_relays=result["mev_params"]["run_multiple_relays"],
-            helix_relay_image=result["mev_params"]["helix_relay_image"],
-            commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
-        )
-        if result["mev_params"]
-        else None,
+        mev_params=(
+            struct(
+                mev_relay_image=result["mev_params"]["mev_relay_image"],
+                mev_builder_image=result["mev_params"]["mev_builder_image"],
+                mev_builder_cl_image=result["mev_params"]["mev_builder_cl_image"],
+                mev_builder_extra_data=result["mev_params"]["mev_builder_extra_data"],
+                mev_builder_subsidy=result["mev_params"]["mev_builder_subsidy"],
+                mev_boost_image=result["mev_params"]["mev_boost_image"],
+                mev_boost_args=result["mev_params"]["mev_boost_args"],
+                mev_relay_api_extra_args=result["mev_params"][
+                    "mev_relay_api_extra_args"
+                ],
+                mev_relay_api_extra_env_vars=result["mev_params"][
+                    "mev_relay_api_extra_env_vars"
+                ],
+                mev_relay_housekeeper_extra_args=result["mev_params"][
+                    "mev_relay_housekeeper_extra_args"
+                ],
+                mev_relay_housekeeper_extra_env_vars=result["mev_params"][
+                    "mev_relay_housekeeper_extra_env_vars"
+                ],
+                mev_relay_website_extra_args=result["mev_params"][
+                    "mev_relay_website_extra_args"
+                ],
+                mev_relay_website_extra_env_vars=result["mev_params"][
+                    "mev_relay_website_extra_env_vars"
+                ],
+                mev_builder_extra_args=result["mev_params"]["mev_builder_extra_args"],
+                mev_builder_cl_extra_params=result["mev_params"][
+                    "mev_builder_cl_extra_params"
+                ],
+                mev_builder_prometheus_config=result["mev_params"][
+                    "mev_builder_prometheus_config"
+                ],
+                mock_mev_image=result["mev_params"]["mock_mev_image"],
+                launch_adminer=result["mev_params"]["launch_adminer"],
+                run_multiple_relays=result["mev_params"]["run_multiple_relays"],
+                helix_relay_image=result["mev_params"]["helix_relay_image"],
+                commit_boost_config=result["mev_params"].get("commit_boost_config", ""),
+            )
+            if result["mev_params"]
+            else None
+        ),
         blockscout_params=struct(
             image=result["blockscout_params"]["image"],
             verif_image=result["blockscout_params"]["verif_image"],
@@ -935,7 +1039,6 @@ def input_parser(plan, input_args):
             max_mem=result["tempo_params"]["max_mem"],
             image=result["tempo_params"]["image"],
         ),
-        apache_port=result["apache_port"],
         nginx_port=result["nginx_port"],
         assertoor_params=struct(
             image=result["assertoor_params"]["image"],
@@ -966,6 +1069,19 @@ def input_parser(plan, input_args):
             max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
+        ),
+        disruptoor_params=struct(
+            image=result["disruptoor_params"]["image"],
+            min_cpu=result["disruptoor_params"]["min_cpu"],
+            max_cpu=result["disruptoor_params"]["max_cpu"],
+            min_mem=result["disruptoor_params"]["min_mem"],
+            max_mem=result["disruptoor_params"]["max_mem"],
+            log_level=result["disruptoor_params"]["log_level"],
+            log_format=result["disruptoor_params"]["log_format"],
+            config=result["disruptoor_params"]["config"],
+            partitions=result["disruptoor_params"]["partitions"],
+            shaping=result["disruptoor_params"]["shaping"],
+            extra_args=result["disruptoor_params"]["extra_args"],
         ),
         slashoor_params=struct(
             image=result["slashoor_params"]["image"],
@@ -1086,21 +1202,63 @@ def input_parser(plan, input_args):
             builder_api=result["buildoor_params"]["builder_api"],
             epbs_builder=result["buildoor_params"]["epbs_builder"],
         ),
+        trueblocks_params=struct(
+            image=result["trueblocks_params"]["image"],
+            config_version=result["trueblocks_params"]["config_version"],
+            target_rpc_url=result["trueblocks_params"]["target_rpc_url"],
+            target_index=result["trueblocks_params"]["target_index"],
+            scrape=struct(
+                apps_per_chunk=result["trueblocks_params"]["scrape"]["apps_per_chunk"],
+                snap_to_grid=result["trueblocks_params"]["scrape"]["snap_to_grid"],
+                first_snap=result["trueblocks_params"]["scrape"]["first_snap"],
+                unripe_dist=result["trueblocks_params"]["scrape"]["unripe_dist"],
+            ),
+            env=result["trueblocks_params"]["env"],
+        ),
     )
 
 
 def _validate_ere_gpu_config(zkvms):
-    """Validate that at most one ere zkvm uses gpu.count without gpu.device_ids."""
     services_using_count = []
+    gpu_device_usage = {}  # device_id -> proof_type
+
     for zkvm in zkvms:
         if zkvm.get("kind") != "ere":
             continue
+
+        proof_type = zkvm.get("proof_type")
         gpu_cfg = zkvm.get("gpu", {})
         count = gpu_cfg.get("count", 0)
         device_ids = gpu_cfg.get("device_ids", [])
-        if count > 0 and len(device_ids) == 0:
-            services_using_count.append(zkvm["proof_type"])
+        has_gpu = len(device_ids) > 0 or count > 0
 
+        # Check: ere requires GPU
+        # Pre-built ere-server images are CUDA-enabled and require GPU for proving.
+        if not has_gpu:
+            fail(
+                "proof_type '{0}' has kind=ere but no GPU configured. ".format(
+                    proof_type
+                )
+                + "ere-server requires GPU for proving. "
+                + "Either add gpu.device_ids or gpu.count, or use 'kind: mock' for testing. "
+                + "For verification-only use cases, use 'kind: verifier' instead."
+            )
+
+        # Check: GPU device_id overlap
+        for device_id in device_ids:
+            if device_id in gpu_device_usage:
+                fail(
+                    "GPU device '{0}' is used by multiple ere entries: '{1}' and '{2}'. ".format(
+                        device_id, gpu_device_usage[device_id], proof_type
+                    )
+                    + "Each ere-server requires exclusive GPU access."
+                )
+            gpu_device_usage[device_id] = proof_type
+
+        if count > 0 and len(device_ids) == 0:
+            services_using_count.append(proof_type)
+
+    # Check: Multiple services using gpu.count without device_ids
     if len(services_using_count) > 1:
         fail(
             "Multiple ere services specify gpu.count without gpu.device_ids: [{0}]. ".format(
@@ -1111,6 +1269,58 @@ def _validate_ere_gpu_config(zkvms):
             + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each service instead "
             + '(e.g. gpu: {{device_ids: ["0"]}} and gpu: {{device_ids: ["1"]}}).'
         )
+
+
+def _validate_requested_proof_types(participants, configured_proof_types):
+    """Validate that proof types requested by participants have zkvms configured.
+
+    Parses --proof-types flags from cl_extra_params and vc_extra_params to find
+    which proof types participants need, then checks each is in configured_proof_types.
+    """
+    for idx, participant in enumerate(participants):
+        cl_extra_params = participant.get("cl_extra_params", [])
+        vc_extra_params = participant.get("vc_extra_params", [])
+        all_params = list(cl_extra_params) + list(vc_extra_params)
+
+        for param in all_params:
+            if not param.startswith("--proof-types="):
+                continue
+            ids_str = param.split("=", 1)[1]
+            for id_str in ids_str.split(","):
+                id_str = id_str.strip()
+                if not id_str:
+                    continue
+                proof_type_id = int(id_str)
+                if proof_type_id not in constants.PROOF_TYPE_ID_TO_NAME:
+                    fail(
+                        "participants[{0}]: unknown proof-type ID '{1}' in --proof-types flag. ".format(
+                            idx, proof_type_id
+                        )
+                        + "Valid IDs are: {0}.".format(
+                            ", ".join(
+                                [
+                                    "{0}={1}".format(k, v)
+                                    for k, v in constants.PROOF_TYPE_ID_TO_NAME.items()
+                                ]
+                            )
+                        )
+                    )
+                proof_type = constants.PROOF_TYPE_ID_TO_NAME[proof_type_id]
+                if proof_type not in configured_proof_types:
+                    fail(
+                        "participants[{0}] requests proof_type '{1}' (ID {2}) via --proof-types flag, ".format(
+                            idx, proof_type, proof_type_id
+                        )
+                        + "but no zkvm is configured for it in zkboost_params.instances[*].zkvms. "
+                        + "Either add a zkvm entry for '{0}' or remove ID {1} from --proof-types. ".format(
+                            proof_type, proof_type_id
+                        )
+                        + "Configured proof_types: {0}.".format(
+                            ", ".join(configured_proof_types)
+                            if configured_proof_types
+                            else "(none)"
+                        )
+                    )
 
 
 def parse_network_params(plan, input_args):
@@ -1192,6 +1402,14 @@ def parse_network_params(plan, input_args):
                     participants.append(participant_copy)
             result["participants"] = participants
 
+    # When GLOAS is scheduled, default the gas limits to 200M unless the user set them explicitly.
+    if result["network_params"]["gloas_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
+        user_network_params = input_args.get("network_params", {})
+        if "genesis_gaslimit" not in user_network_params:
+            result["network_params"]["genesis_gaslimit"] = 200000000
+        if "gas_limit" not in user_network_params:
+            result["network_params"]["gas_limit"] = 200000000
+
     if "snooper_params" in input_args:
         for sub_attr in input_args["snooper_params"]:
             result["snooper_params"][sub_attr] = input_args["snooper_params"][sub_attr]
@@ -1201,6 +1419,9 @@ def parse_network_params(plan, input_args):
     # validation of the above defaults
     for index, participant in enumerate(result["participants"]):
         el_type = participant["el_type"]
+        if el_type == None or el_type in ("None", "null", "Null"):
+            participant["el_type"] = constants.EL_TYPE.none
+            el_type = constants.EL_TYPE.none
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
         remote_signer_type = participant["remote_signer_type"]
@@ -1228,7 +1449,7 @@ def parse_network_params(plan, input_args):
             )
 
         el_image = participant["el_image"]
-        if el_image == "":
+        if el_image == "" and el_type != constants.EL_TYPE.none:
             # Get devnet-modified images if network contains 'devnet'
             effective_el_images = get_devnet_modified_images(
                 result["network_params"]["network"], DEFAULT_EL_IMAGES
@@ -1546,8 +1767,8 @@ def default_input_args(input_args):
         "persistent": False,
         "mev_type": None,
         "xatu_sentry_enabled": False,
-        "apache_port": None,
-        "nginx_port": None,
+        "apache_port": None,  # backwards-compat: silently mapped to nginx_port
+        "nginx_port": 9090,
         "global_tolerations": [],
         "global_node_selectors": {},
         "use_remote_signer": False,
@@ -1561,6 +1782,7 @@ def default_input_args(input_args):
         },
         "snooper_params": get_default_snooper_params(),
         "spamoor_params": get_default_spamoor_params(),
+        "disruptoor_params": get_default_disruptoor_params(),
         "bootnodoor_params": get_default_bootnodoor_params(),
     }
 
@@ -1584,12 +1806,13 @@ def default_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
-        "min_builder_withdrawability_delay": 64,
+        "min_builder_withdrawability_delay": 8192,
         "shard_committee_period": 256,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
         "sync_message_due_bps_gloas": 2500,
         "contribution_due_bps_gloas": 5000,
+        "payload_due_bps": 7500,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
         "inclusion_list_submission_due_bps": 6667,
@@ -1674,6 +1897,7 @@ def default_minimal_network_params():
         "aggregate_due_bps_gloas": 5000,
         "sync_message_due_bps_gloas": 2500,
         "contribution_due_bps_gloas": 5000,
+        "payload_due_bps": 7500,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
         "inclusion_list_submission_due_bps": 6667,
@@ -1834,6 +2058,25 @@ def get_default_dora_params():
     }
 
 
+def get_default_trueblocks_params():
+    return {
+        "image": constants.DEFAULT_TRUEBLOCKS_IMAGE,
+        "config_version": "v5.0.0",
+        "target_rpc_url": "",
+        "target_index": 0,
+        # 0 means "use the network-aware default". These end up in the rendered
+        # trueBlocks.toml and govern any future `chifra scrape` invocations
+        # (e.g. via the POST /scrape API).
+        "scrape": {
+            "apps_per_chunk": 0,
+            "snap_to_grid": 0,
+            "first_snap": 0,
+            "unripe_dist": 0,
+        },
+        "env": {},
+    }
+
+
 def get_default_checkpointz_params():
     return {
         "image": constants.DEFAULT_CHECKPOINTZ_IMAGE,
@@ -1920,9 +2163,9 @@ def get_default_mev_params(mev_type, preset):
     return {
         "mev_relay_image": mev_relay_image,
         "mev_builder_image": mev_builder_image,
-        "mock_mev_image": mev_builder_image
-        if mev_type == constants.MOCK_MEV_TYPE
-        else None,
+        "mock_mev_image": (
+            mev_builder_image if mev_type == constants.MOCK_MEV_TYPE else None
+        ),
         "mev_builder_subsidy": mev_builder_subsidy,
         "mev_builder_cl_image": mev_builder_cl_image,
         "mev_builder_extra_data": mev_builder_extra_data,
@@ -2076,6 +2319,22 @@ def get_default_spamoor_params():
                 },
             },
         ],
+    }
+
+
+def get_default_disruptoor_params():
+    return {
+        "image": constants.DEFAULT_DISRUPTOOR_IMAGE,
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 512,
+        "log_level": "info",
+        "log_format": "json",
+        "config": {},
+        "partitions": [],
+        "shaping": [],
+        "extra_args": [],
     }
 
 
@@ -2391,7 +2650,9 @@ def docker_cache_image_override(plan, result):
         "grafana_params.image",
         "tempo_params.image",
         "spamoor_params.image",
+        "disruptoor_params.image",
         "ethereum_genesis_generator_params.image",
+        "trueblocks_params.image",
     ]
 
     if result["docker_cache_params"]["url"] == "":

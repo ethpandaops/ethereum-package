@@ -23,7 +23,6 @@ erpc = import_module("./src/erpc/erpc_launcher.star")
 blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 forky = import_module("./src/forky/forky_launcher.star")
 tracoor = import_module("./src/tracoor/tracoor_launcher.star")
-apache = import_module("./src/apache/apache_launcher.star")
 nginx = import_module("./src/nginx/nginx_launcher.star")
 full_beaconchain_explorer = import_module(
     "./src/full_beaconchain/full_beaconchain_launcher.star"
@@ -63,8 +62,10 @@ get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
+disruptoor = import_module("./src/disruptoor/disruptoor_launcher.star")
 slashoor = import_module("./src/slashoor/slashoor_launcher.star")
 zkboost = import_module("./src/zkboost/zkboost_launcher.star")
+trueblocks = import_module("./src/trueblocks/trueblocks_launcher.star")
 
 GRAFANA_USER = "admin"
 GRAFANA_PASSWORD = "admin"
@@ -75,6 +76,245 @@ HTTP_PORT_ID_FOR_FACT = "http"
 
 MEV_BOOST_SHOULD_CHECK_RELAY = True
 PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
+
+# Non-default ports so the engine OTel stack does not collide with a host-level
+# OTLP collector (4317/4318) or ClickHouse (8123). Must match `kurtosis otel start`.
+ENGINE_OTEL_OTLP_GRPC_PORT = 14317
+ENGINE_OTEL_OTLP_HTTP_PORT = 14318
+ENGINE_OTEL_CLICKHOUSE_HTTP_PORT = 18123
+ENGINE_OTEL_DISCOVERY_OUTPUT_FILE = "/tmp/engine-otel-discovery.json"
+ENGINE_OTEL_DISCOVERY_ARTIFACT_NAME = "engine-otel-discovery"
+ENGINE_OTEL_DISCOVERY_MOUNT_DIR = "/engine-otel-discovery"
+ENGINE_OTEL_DISCOVERY_SCRIPT_FILENAME = "engine-otel-discovery.sh"
+ENGINE_OTEL_DISCOVERY_SCRIPT_ARTIFACT_NAME = "engine-otel-discovery-script"
+ENGINE_OTEL_DISCOVERY_SCRIPT_MOUNT_DIR = "/engine-otel-discovery-script"
+
+ENGINE_OTEL_DISCOVERY_SCRIPT = r"""#!/bin/sh
+set -eu
+
+route_line=$(awk "\$2 == \"00000000\" { print \$1 \" \" \$3; exit }" /proc/net/route)
+if [ -z "$route_line" ]; then
+    echo "default route not found" >&2
+    exit 1
+fi
+
+iface=$(printf "%s" "$route_line" | awk "{ print \$1 }")
+gateway_hex=$(printf "%s" "$route_line" | awk "{ print \$2 }")
+if [ -z "$gateway_hex" ]; then
+    echo "default gateway not found" >&2
+    exit 1
+fi
+
+gateway=$(printf "%d.%d.%d.%d" \
+    "0x$(printf "%s" "$gateway_hex" | cut -c7-8)" \
+    "0x$(printf "%s" "$gateway_hex" | cut -c5-6)" \
+    "0x$(printf "%s" "$gateway_hex" | cut -c3-4)" \
+    "0x$(printf "%s" "$gateway_hex" | cut -c1-2)")
+
+own_ip=""
+if command -v ip >/dev/null 2>&1; then
+    own_ip=$(ip -4 -o addr show dev "$iface" scope global | awk "{ split(\$4, a, \"/\"); print a[1]; exit }")
+fi
+if [ -z "$own_ip" ]; then
+    own_ip=$(hostname -i 2>/dev/null | tr " " "\n" | awk "split(\$1, a, \".\") == 4 && a[1] != \"127\" { print; exit }")
+fi
+if [ -z "$own_ip" ]; then
+    echo "probe IPv4 not found" >&2
+    exit 1
+fi
+
+clickhouse_ping_url="http://${gateway}:{{ .ClickHousePort }}/ping"
+if ! curl -fsS "$clickhouse_ping_url" >/dev/null; then
+    echo "engine OTel stack is not reachable at ${clickhouse_ping_url}; run 'kurtosis otel start' before adding 'otel' to additional_services" >&2
+    exit 1
+fi
+
+enclaves_json=$(curl -fsS -XPOST \
+    -H "Content-Type: application/json" \
+    -d "{}" \
+    "http://${gateway}:9710/engine_api.EngineService/GetEnclaves")
+
+cat > /tmp/engine-otel-discovery.jq <<\JQ
+def prefix16($ip):
+    ($ip | split(".")[0:2] | join("."));
+
+def prefix22($ip):
+    ($ip | split(".")) as $octets
+    | "\($octets[0]).\($octets[1]).\((($octets[2] | tonumber) / 4 | floor) * 4)";
+
+(.enclaveInfo // {})
+| to_entries
+| map(.value | select(.apiContainerInfo.ipInsideEnclave != null))
+| (
+    map(select(prefix22(.apiContainerInfo.ipInsideEnclave) == prefix22($own_ip))) as $matches22
+    | if ($matches22 | length) == 1 then
+        $matches22[0]
+      else
+        map(select(prefix16(.apiContainerInfo.ipInsideEnclave) == prefix16($own_ip))) as $matches16
+        | if ($matches16 | length) == 1 then
+            $matches16[0]
+          else
+            error("unable to identify enclave for probe IP \($own_ip)")
+          end
+      end
+  )
+| {
+    gateway: $gateway,
+    enclave_uuid: .enclaveUuid,
+    enclave_name: .name
+  }
+JQ
+
+printf "%s" "$enclaves_json" | jq -c \
+    --arg gateway "$gateway" \
+    --arg own_ip "$own_ip" \
+    -f /tmp/engine-otel-discovery.jq > /tmp/engine-otel-discovery.json
+cat /tmp/engine-otel-discovery.json
+"""
+
+
+def new_engine_otel_endpoints(gateway=None, enclave_uuid=None, enclave_name=None):
+    if gateway == None:
+        return struct(
+            gateway=None,
+            enclave_uuid=None,
+            enclave_name=None,
+            resource_attributes=None,
+            otlp_grpc_url=None,
+            otlp_http_traces_url=None,
+            clickhouse_host=None,
+            clickhouse_port=None,
+        )
+
+    return struct(
+        gateway=gateway,
+        enclave_uuid=enclave_uuid,
+        enclave_name=enclave_name,
+        resource_attributes="kurtosis.enclave.name={},kurtosis.enclave.uuid={}".format(
+            enclave_name,
+            enclave_uuid,
+        ),
+        otlp_grpc_url="http://{}:{}".format(gateway, ENGINE_OTEL_OTLP_GRPC_PORT),
+        otlp_http_traces_url="http://{}:{}/v1/traces".format(
+            gateway,
+            ENGINE_OTEL_OTLP_HTTP_PORT,
+        ),
+        clickhouse_host=gateway,
+        clickhouse_port=ENGINE_OTEL_CLICKHOUSE_HTTP_PORT,
+    )
+
+
+def detect_engine_otel_endpoints(plan, global_tolerations, global_node_selectors):
+    script_artifact = plan.render_templates(
+        {
+            ENGINE_OTEL_DISCOVERY_SCRIPT_FILENAME: shared_utils.new_template_and_data(
+                ENGINE_OTEL_DISCOVERY_SCRIPT,
+                {"ClickHousePort": ENGINE_OTEL_CLICKHOUSE_HTTP_PORT},
+            ),
+        },
+        name=ENGINE_OTEL_DISCOVERY_SCRIPT_ARTIFACT_NAME,
+    )
+    result = plan.run_sh(
+        name="detect-engine-otel",
+        description="Detecting enclave identity and engine OTel endpoints",
+        run="/bin/sh {}/{}".format(
+            ENGINE_OTEL_DISCOVERY_SCRIPT_MOUNT_DIR,
+            ENGINE_OTEL_DISCOVERY_SCRIPT_FILENAME,
+        ),
+        files={
+            ENGINE_OTEL_DISCOVERY_SCRIPT_MOUNT_DIR: script_artifact,
+        },
+        store=[
+            StoreSpec(
+                src=ENGINE_OTEL_DISCOVERY_OUTPUT_FILE,
+                name=ENGINE_OTEL_DISCOVERY_ARTIFACT_NAME,
+            ),
+        ],
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
+    )
+    discovery_artifact = result.files_artifacts[0]
+    gateway = read_engine_otel_discovery_field(
+        plan,
+        discovery_artifact,
+        "gateway",
+        global_tolerations,
+        global_node_selectors,
+    )
+    enclave_uuid = read_engine_otel_discovery_field(
+        plan,
+        discovery_artifact,
+        "enclave_uuid",
+        global_tolerations,
+        global_node_selectors,
+    )
+    enclave_name = read_engine_otel_discovery_field(
+        plan,
+        discovery_artifact,
+        "enclave_name",
+        global_tolerations,
+        global_node_selectors,
+    )
+    plan.print(
+        "Using engine-level OTel collector via enclave gateway {} for enclave {} ({})".format(
+            gateway,
+            enclave_name,
+            enclave_uuid,
+        )
+    )
+    return new_engine_otel_endpoints(gateway, enclave_uuid, enclave_name)
+
+
+def read_engine_otel_discovery_field(
+    plan,
+    discovery_artifact,
+    field,
+    global_tolerations,
+    global_node_selectors,
+):
+    result = plan.run_sh(
+        name="read-engine-otel-{}".format(field.replace("_", "-")),
+        description="Reading engine OTel discovery field {}".format(field),
+        run='value=$(jq -er ".{}" {}/engine-otel-discovery.json) && printf "%s" "$value"'.format(
+            field,
+            ENGINE_OTEL_DISCOVERY_MOUNT_DIR,
+        ),
+        files={
+            ENGINE_OTEL_DISCOVERY_MOUNT_DIR: discovery_artifact,
+        },
+        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
+        node_selectors=global_node_selectors,
+    )
+    return result.output
+
+
+def append_otel_resource_attributes(env_vars, resource_attributes):
+    existing = env_vars.get("OTEL_RESOURCE_ATTRIBUTES", "")
+    if existing == "":
+        env_vars["OTEL_RESOURCE_ATTRIBUTES"] = resource_attributes
+    elif resource_attributes not in existing:
+        env_vars["OTEL_RESOURCE_ATTRIBUTES"] = "{},{}".format(
+            existing,
+            resource_attributes,
+        )
+
+
+def add_otel_resource_attributes_to_participants(participants, resource_attributes):
+    if resource_attributes == None:
+        return
+    for participant in participants:
+        append_otel_resource_attributes(
+            participant.el_extra_env_vars,
+            resource_attributes,
+        )
+        append_otel_resource_attributes(
+            participant.cl_extra_env_vars,
+            resource_attributes,
+        )
+        append_otel_resource_attributes(
+            participant.vc_extra_env_vars,
+            resource_attributes,
+        )
 
 
 def run(plan, args={}):
@@ -89,8 +329,24 @@ def run(plan, args={}):
     num_participants = len(args_with_right_defaults.participants)
     network_params = args_with_right_defaults.network_params
 
-    # Detect the backend type early - needed for binary injection validation
     detected_backend = plan.get_cluster_type()
+    otel_enabled = "otel" in args_with_right_defaults.additional_services
+    if otel_enabled and detected_backend != "docker":
+        fail(
+            "The 'otel' additional_service requires the Docker backend because it uses the engine OTel stack published on the Docker host; detected backend: {}. Run with the Docker backend or remove 'otel' from additional_services.".format(
+                detected_backend
+            )
+        )
+
+    if (
+        "disruptoor" in args_with_right_defaults.additional_services
+        and detected_backend != "docker"
+    ):
+        fail(
+            "disruptoor requires Kurtosis' Docker backend because it uses privileged mode, /var/run/docker.sock, and the host PID namespace; detected: {0}".format(
+                detected_backend
+            )
+        )
 
     # Process extra_files - create artifacts from provided content
     extra_files_artifacts = {}
@@ -103,7 +359,6 @@ def run(plan, args={}):
             artifact = plan.render_templates(template_data, name + "_artifact")
             extra_files_artifacts[name] = artifact
 
-    # Validate binary injection - only supported with Docker backend
     for participant in args_with_right_defaults.participants:
         for bin_path in [
             participant.el_binary_path,
@@ -124,9 +379,24 @@ def run(plan, args={}):
     global_tolerations = args_with_right_defaults.global_tolerations
     global_node_selectors = args_with_right_defaults.global_node_selectors
     keymanager_enabled = args_with_right_defaults.keymanager_enabled
-    apache_port = args_with_right_defaults.apache_port
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
+
+    engine_otel_endpoints = new_engine_otel_endpoints()
+    if otel_enabled:
+        engine_otel_endpoints = detect_engine_otel_endpoints(
+            plan,
+            global_tolerations,
+            global_node_selectors,
+        )
+        add_otel_resource_attributes_to_participants(
+            args_with_right_defaults.participants,
+            engine_otel_endpoints.resource_attributes,
+        )
+    otel_clickhouse_host = engine_otel_endpoints.clickhouse_host
+    otel_clickhouse_port = engine_otel_endpoints.clickhouse_port
+    otel_otlp_grpc_url = engine_otel_endpoints.otlp_grpc_url
+    otel_otlp_http_traces_url = engine_otel_endpoints.otlp_http_traces_url
 
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (
@@ -274,15 +544,20 @@ def run(plan, args={}):
         parallel_keystore_generation,
         extra_files_artifacts,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
+        otel_otlp_http_traces_url,
         detected_backend,
     )
 
-    plan.print(
-        "NODE JSON RPC URI: '{0}:{1}'".format(
-            all_participants[0].el_context.dns_name,
-            all_participants[0].el_context.rpc_port_num,
-        )
-    )
+    for p in all_participants:
+        if p.el_context != None:
+            plan.print(
+                "NODE JSON RPC URI: '{0}:{1}'".format(
+                    p.el_context.dns_name,
+                    p.el_context.rpc_port_num,
+                )
+            )
+            break
 
     builder_bls_secret_key = None
     if network_params.builder_count > 0:
@@ -318,7 +593,8 @@ def run(plan, args={}):
     all_ethereum_metrics_exporter_contexts = []
     all_xatu_sentry_contexts = []
     for participant in all_participants:
-        all_el_contexts.append(participant.el_context)
+        if participant.el_context != None:
+            all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
         all_vc_contexts.append(participant.vc_context)
         all_remote_signer_contexts.append(participant.remote_signer_context)
@@ -359,6 +635,7 @@ def run(plan, args={}):
 
     mev_endpoints = []
     mev_endpoint_names = []
+    buildoor_api_urls = []
     # passed external relays get priority
     # perhaps add mev_type External or remove this
     if (
@@ -412,7 +689,7 @@ def run(plan, args={}):
             all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
-        endpoint = buildoor.launch_buildoor(
+        buildoor_endpoints = buildoor.launch_buildoor(
             plan,
             beacon_uri,
             el_rpc_uri,
@@ -423,9 +700,11 @@ def run(plan, args={}):
             global_node_selectors,
             global_tolerations,
             builder_bls_secret_key,
+            ranges,
         )
-        mev_endpoints.append(endpoint)
+        mev_endpoints.append(buildoor_endpoints["mev_endpoint"])
         mev_endpoint_names.append(constants.BUILDOOR_MEV_TYPE)
+        buildoor_api_urls.append(buildoor_endpoints["api_url"])
     elif args_with_right_defaults.mev_type and (
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE
@@ -730,6 +1009,7 @@ def run(plan, args={}):
                 index,
                 args_with_right_defaults.docker_cache_params,
                 el_cl_data_files_artifact_uuid,
+                buildoor_api_urls,
             )
             plan.print("Successfully launched dora")
         elif additional_service == "checkpointz":
@@ -861,22 +1141,7 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched tracoor")
-        elif additional_service == "apache":
-            plan.print("Launching apache")
-            apache.launch_apache(
-                plan,
-                el_cl_data_files_artifact_uuid,
-                apache_port,
-                all_participants,
-                args_with_right_defaults.participants,
-                args_with_right_defaults.port_publisher,
-                index,
-                global_node_selectors,
-                global_tolerations,
-                args_with_right_defaults.docker_cache_params,
-            )
-            plan.print("Successfully launched apache")
-        elif additional_service == "nginx":
+        elif additional_service == "nginx" or additional_service == "apache":
             plan.print("Launching nginx")
             nginx.launch_nginx(
                 plan,
@@ -940,6 +1205,8 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 tempo_query_url,
+                otel_clickhouse_host,
+                otel_clickhouse_port,
             )
             plan.print("Successfully launched grafana")
         elif additional_service == "tempo":
@@ -1029,6 +1296,18 @@ def run(plan, args={}):
                 osaka_time,
             )
             plan.print("Successfully launched spamoor")
+        elif additional_service == "disruptoor":
+            plan.print("Launching disruptoor")
+            disruptoor.launch_disruptoor(
+                plan,
+                args_with_right_defaults.disruptoor_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched disruptoor")
         elif additional_service == "slashoor":
             plan.print("Launching slashoor")
             slashoor_config_template = read_file(
@@ -1061,10 +1340,34 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                network_params,
                 tempo_otlp_grpc_url,
             )
             prometheus_additional_metrics_jobs.extend(zkboost_metrics_jobs)
             plan.print("Successfully launched zkboost")
+        elif additional_service == "trueblocks":
+            plan.print("Launching trueblocks")
+            trueblocks_config_template = read_file(
+                static_files.TRUEBLOCKS_CONFIG_TEMPLATE_FILEPATH
+            )
+            trueblocks.launch_trueblocks(
+                plan,
+                trueblocks_config_template,
+                all_el_contexts,
+                network_params,
+                args_with_right_defaults.trueblocks_params,
+                prefunded_accounts,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched trueblocks")
+        elif additional_service == "otel":
+            # Engine OTel reachability is enforced earlier via detect_engine_otel_endpoints();
+            # if discovery succeeded, the per-client OTLP env vars are already wired.
+            plan.print("OTel tracing wired to engine collector")
         else:
             fail("Invalid additional service %s" % (additional_service))
     if launch_prometheus_grafana:
@@ -1096,6 +1399,8 @@ def run(plan, args={}):
             args_with_right_defaults.port_publisher,
             prometheus_grafana_index,
             tempo_query_url,
+            otel_clickhouse_host,
+            otel_clickhouse_port,
         )
         plan.print("Successfully launched grafana")
 
@@ -1126,9 +1431,11 @@ def run(plan, args={}):
 
     output = struct(
         grafana_info=grafana_info,
-        blockscout_sc_verif_url=None
-        if ("blockscout" in args_with_right_defaults.additional_services) == False
-        else blockscout_sc_verif_url,
+        blockscout_sc_verif_url=(
+            None
+            if ("blockscout" in args_with_right_defaults.additional_services) == False
+            else blockscout_sc_verif_url
+        ),
         all_participants=all_participants,
         pre_funded_accounts=prefunded_accounts,
         network_params=network_params,

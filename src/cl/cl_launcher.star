@@ -30,6 +30,8 @@ def launch(
     global_tolerations,
     persistent,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url,
+    otel_otlp_http_traces_url,
     num_participants,
     validator_data,
     prysm_password_relative_filepath,
@@ -72,6 +74,7 @@ def launch(
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
                 jwt_file,
+                otel_otlp_http_traces_url,
             ),
             "launch_method": prysm.launch,
             "get_beacon_config": prysm.get_beacon_config,
@@ -183,7 +186,10 @@ def launch(
             index + 1, len(str(len(args_with_right_defaults.participants)))
         )
 
-        cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
+        if el_type == constants.EL_TYPE.none:
+            cl_service_name = "cl-{0}-{1}".format(index_str, cl_type)
+        else:
+            cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
         if participant.validator_count != 0:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
@@ -194,7 +200,7 @@ def launch(
 
         cl_context = None
         snooper_el_engine_context = None
-        if participant.snooper_enabled:
+        if participant.snooper_enabled and el_context != None:
             snooper_service_name = "snooper-engine-{0}-{1}-{2}".format(
                 index_str, cl_type, el_type
             )
@@ -248,7 +254,10 @@ def launch(
                     )
 
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
-        full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
+        if el_type == constants.EL_TYPE.none:
+            full_name = "{0}-{1}".format(index_str, cl_type)
+        else:
+            full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
         cl_binary_artifact = binary_artifacts.get(index, {}).get("cl", None)
 
@@ -275,6 +284,7 @@ def launch(
                 extra_files_artifacts,
                 backend,
                 tempo_otlp_grpc_url,
+                otel_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
             )
@@ -327,6 +337,7 @@ def launch(
                 extra_files_artifacts,
                 backend,
                 tempo_otlp_grpc_url,
+                otel_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
             )

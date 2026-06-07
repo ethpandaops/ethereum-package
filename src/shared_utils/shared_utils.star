@@ -20,6 +20,32 @@ def new_template_and_data(template, template_data_json):
     return struct(template=template, data=template_data_json)
 
 
+def with_otel_env_vars(env_vars, otel_otlp_grpc_url, service_name):
+    """Merge standard OTel SDK env vars in and append participant resource attrs."""
+    if otel_otlp_grpc_url == None:
+        return env_vars
+    resource_attributes = "service.name={},service.namespace=ethereum-package".format(
+        service_name
+    )
+    participant_resource_attributes = env_vars.get("OTEL_RESOURCE_ATTRIBUTES", "")
+    if participant_resource_attributes != "":
+        resource_attributes = "{},{}".format(
+            resource_attributes,
+            participant_resource_attributes,
+        )
+    merged = {
+        "OTEL_EXPORTER_OTLP_ENDPOINT": otel_otlp_grpc_url,
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+        "OTEL_SERVICE_NAME": service_name,
+        "OTEL_RESOURCE_ATTRIBUTES": resource_attributes,
+    }
+    for k, v in env_vars.items():
+        if k == "OTEL_RESOURCE_ATTRIBUTES":
+            continue
+        merged[k] = v
+    return merged
+
+
 def path_join(*args):
     joined_path = "/".join(args)
     return joined_path.replace("//", "/")
@@ -111,7 +137,7 @@ def get_devnet_enodes(plan, filename):
         description="Getting devnet enodes",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="cat /network-configs/enodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+        run="grep -v '^[[:space:]]*$' /network-configs/enodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
     )
     return enode_list.output
 
@@ -121,7 +147,7 @@ def get_devnet_enrs_list(plan, filename):
         description="Creating devnet enrs list",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="cat /network-configs/bootstrap_nodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+        run="grep -v '^[[:space:]]*$' /network-configs/bootstrap_nodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
     )
     return enr_list.output
 
@@ -209,14 +235,16 @@ def get_client_names(participant, index, participant_contexts, participant_confi
     cl_client = participant.cl_context
     el_client = participant.el_context
     vc_client = participant.vc_context
-    full_name = (
-        "{0}-{1}-{2}".format(index_str, el_client.client_name, cl_client.client_name)
-        + "-{0}".format(vc_client.client_name)
-        if vc_client != None and cl_client.client_name != vc_client.client_name
-        else "{0}-{1}-{2}".format(
+    if el_client == None:
+        base_name = "{0}-{1}".format(index_str, cl_client.client_name)
+    else:
+        base_name = "{0}-{1}-{2}".format(
             index_str, el_client.client_name, cl_client.client_name
         )
-    )
+    if vc_client != None and cl_client.client_name != vc_client.client_name:
+        full_name = base_name + "-{0}".format(vc_client.client_name)
+    else:
+        full_name = base_name
     return full_name, cl_client, el_client, participant_config
 
 

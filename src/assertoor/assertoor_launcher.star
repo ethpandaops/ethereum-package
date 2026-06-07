@@ -69,8 +69,8 @@ def launch_assertoor(
 
         client_info = new_client_info(
             cl_client.beacon_http_url,
-            el_client.dns_name,
-            el_client.rpc_port_num,
+            el_client.dns_name if el_client != None else "",
+            el_client.rpc_port_num if el_client != None else 0,
             participant.snooper_el_engine_context,
             participant.snooper_beacon_context,
             full_name,

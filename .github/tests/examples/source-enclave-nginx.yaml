@@ -1,0 +1,19 @@
+# Example: source enclave (A) for cross-enclave sync. Pair with
+# `remote-enclave-nginx.yaml.norun` on a second target enclave.
+#
+# Publishes EL/CL ports with a routable NAT IP so the enodes/ENRs that nginx
+# advertises actually point at reachable addresses. Replace
+# `<A-routable-host-ip>` with the host's routable IP (or use "auto").
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: teku
+port_publisher:
+  nat_exit_ip: 192.168.58.159
+  el:
+    enabled: true
+  cl:
+    enabled: true
+additional_services:
+  - nginx

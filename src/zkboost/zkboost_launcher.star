@@ -34,6 +34,7 @@ ERE_SERVER_IMAGE_TEMPLATE = (
     "ghcr.io/eth-act/ere/ere-server-{zkvm_kind}:{version}{suffix}"
 )
 ERE_GUESTS_ELF_URL_TEMPLATE = "https://github.com/eth-act/ere-guests/releases/download/v{version}/stateless-validator-{proof_type}.elf"
+ERE_GUESTS_VK_URL_TEMPLATE = "https://github.com/eth-act/ere-guests/releases/download/v{version}/stateless-validator-{proof_type}.vk"
 ERE_DEP_NAME = "ere-server-client"
 ERE_GUESTS_DEP_NAME = "ere-guests-stateless-validator-common"
 
@@ -59,30 +60,38 @@ def launch_zkboost(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    network_params,
     tempo_otlp_grpc_url=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
-    # Launch ere-server services once - shared across all zkboost instances.
-    # Each `ere` zkvm entry results in a single long-lived service; all zkboost
-    # instances reference it as an endpoint.
-    # `_resolve_image_and_elf_url` fills in `image` and `elf_url` from zkboost's
-    # pinned ere/ere-guests versions when the user didn't provide them.
+    # Per-instance zkvms: each instance falls back to the global
+    # `zkboost_params.zkvms` if no per-instance list is set. Resolve artifacts
+    # (ere image/elf_url, verifier program_vk_url) for each, then collect every
+    # `kind: ere` entry across instances so we launch each ere-server once.
+    # `verifier` entries get no ere-server — zkboost links the in-process
+    # `ere-verifier-*` crate and only needs the .vk URL downloaded at startup.
+    instance_zkvms = []
+    for instance in zkboost_params.instances:
+        raw = instance.get("zkvms", zkboost_params.zkvms)
+        instance_zkvms.append(_resolve_zkvm_artifacts(raw, zkboost_params.image))
+
     ere_server_endpoints = {}
     metrics_jobs = []
-    for zkvm in _resolve_image_and_elf_url(zkboost_params.zkvms, zkboost_params.image):
-        if zkvm["kind"] != "ere":
-            continue
+    for resolved in instance_zkvms:
+        for zkvm in resolved:
+            if zkvm["kind"] != "ere":
+                continue
 
-        proof_type = zkvm["proof_type"]
-        if proof_type in ere_server_endpoints:
-            continue
+            proof_type = zkvm["proof_type"]
+            if proof_type in ere_server_endpoints:
+                continue
 
-        endpoint = _launch_ere_server(
-            plan, zkvm, global_node_selectors, tolerations, tempo_otlp_grpc_url
-        )
-        ere_server_endpoints[proof_type] = endpoint
-        metrics_jobs.append(_get_ere_server_metrics_job(proof_type))
+            endpoint = _launch_ere_server(
+                plan, zkvm, global_node_selectors, tolerations, tempo_otlp_grpc_url
+            )
+            ere_server_endpoints[proof_type] = endpoint
+            metrics_jobs.append(_get_ere_server_metrics_job(proof_type))
 
     for instance_index, instance in enumerate(zkboost_params.instances):
         name = instance["name"]
@@ -96,16 +105,22 @@ def launch_zkboost(
             )
 
         el_client = participant_contexts[el_participant_index].el_context
+        if el_client == None:
+            fail(
+                "zkboost instance '{0}' references el_participant_index {1} which has el_type=None".format(
+                    name, el_participant_index
+                )
+            )
         el_endpoint = "http://{0}:{1}".format(
             el_client.dns_name, el_client.rpc_port_num
         )
 
         zkvms = []
-        for zkvm in zkboost_params.zkvms:
+        for zkvm in instance_zkvms[instance_index]:
             entry = {
                 "Kind": zkvm["kind"],
                 "ProofType": zkvm["proof_type"],
-                "ProofTimeoutSecs": zkvm.get("proof_timeout_secs", 12),
+                "ProofTimeoutSecs": zkvm["proof_timeout_secs"],
             }
             if zkvm["kind"] == "ere":
                 entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
@@ -114,19 +129,23 @@ def launch_zkboost(
                     "Kind"
                 ] = "ere"  # zkboost config kind for any external prover connection
                 entry["Endpoint"] = zkvm["endpoint"]
+            elif zkvm["kind"] == "verifier":
+                # zkboost loads ere-verifier-* in-process; only the .vk URL is needed.
+                entry["ProgramVkUrl"] = zkvm["program_vk_url"]
             elif zkvm["kind"] == "mock":
-                mock_proving_time = zkvm.get(
-                    "mock_proving_time", {"kind": "constant", "ms": 6000}
-                )
-                entry["MockProvingTimeKind"] = mock_proving_time.get("kind", "constant")
-                entry["MockProvingTimeConstantMs"] = mock_proving_time.get("ms", 0)
-                entry["MockProvingTimeRandomMinMs"] = mock_proving_time.get("min_ms", 0)
-                entry["MockProvingTimeRandomMaxMs"] = mock_proving_time.get("max_ms", 0)
-                entry["MockProvingTimeLinearMsPerMgas"] = mock_proving_time.get(
-                    "ms_per_mgas", 0
-                )
-                entry["MockProofSize"] = zkvm.get("mock_proof_size", 128 << 10)
-                entry["MockFailure"] = zkvm.get("mock_failure", False)
+                mock_proving_time = zkvm["mock_proving_time"]
+                entry["MockProvingTimeKind"] = mock_proving_time["kind"]
+                if mock_proving_time["kind"] == "constant":
+                    entry["MockProvingTimeConstantMs"] = mock_proving_time["ms"]
+                elif mock_proving_time["kind"] == "random":
+                    entry["MockProvingTimeRandomMinMs"] = mock_proving_time["min_ms"]
+                    entry["MockProvingTimeRandomMaxMs"] = mock_proving_time["max_ms"]
+                elif mock_proving_time["kind"] == "linear":
+                    entry["MockProvingTimeLinearMsPerMgas"] = mock_proving_time[
+                        "ms_per_mgas"
+                    ]
+                entry["MockProofSize"] = zkvm["mock_proof_size"]
+                entry["MockFailure"] = zkvm["mock_failure"]
             zkvms.append(entry)
 
         template_data = {
@@ -327,45 +346,58 @@ def _zkvm_kind_from_proof_type(proof_type):
     return proof_type.split("-")[-1]
 
 
-def _resolve_image_and_elf_url(zkvms, zkboost_image):
-    """Return a new zkvms list where every `kind: ere` entry is guaranteed to
-    have `image` and `elf_url` set. Missing fields are resolved from zkboost's
-    Cargo.toml pinned ere/ere-guests versions.
+def _resolve_zkvm_artifacts(zkvms, zkboost_image):
+    """Return a new zkvms list with auto-resolved artifact URLs:
+
+    - `kind: ere` entries get `image` + `elf_url`.
+    - `kind: verifier` entries get `program_vk_url`.
+
+    All resolved from zkboost's Cargo.toml pinned ere/ere-guests versions when
+    the user didn't provide them.
 
     Fails when an auto-resolve is required but the corresponding dep isn't
     tag-pinned in zkboost (uses branch or rev), in which case the user must set
     the field explicitly.
     """
-    if not any(
+    needs_resolution = any(
         [
-            zkvm["kind"] == "ere" and ("image" not in zkvm or "elf_url" not in zkvm)
+            (zkvm["kind"] == "ere" and ("image" not in zkvm or "elf_url" not in zkvm))
+            or (zkvm["kind"] == "verifier" and "program_vk_url" not in zkvm)
             for zkvm in zkvms
         ]
-    ):
+    )
+    if not needs_resolution:
         return zkvms
 
     ere_version, ere_guests_version = _resolve_ere_versions(zkboost_image)
 
     resolved = []
     for zkvm in zkvms:
-        if zkvm["kind"] != "ere":
+        if zkvm["kind"] not in ["ere", "verifier"]:
             resolved.append(zkvm)
             continue
         zkvm = dict(zkvm)
         proof_type = zkvm["proof_type"]
         zkvm_kind = _zkvm_kind_from_proof_type(proof_type)
 
-        if "image" not in zkvm:
-            zkvm["image"] = ERE_SERVER_IMAGE_TEMPLATE.format(
-                zkvm_kind=zkvm_kind,
-                version=ere_version,
-                suffix="-cuda" if _zkvm_has_gpu(zkvm) else "",
-            )
-        if "elf_url" not in zkvm:
-            zkvm["elf_url"] = ERE_GUESTS_ELF_URL_TEMPLATE.format(
-                version=ere_guests_version,
-                proof_type=proof_type,
-            )
+        if zkvm["kind"] == "ere":
+            if "image" not in zkvm:
+                zkvm["image"] = ERE_SERVER_IMAGE_TEMPLATE.format(
+                    zkvm_kind=zkvm_kind,
+                    version=ere_version,
+                    suffix="-cuda" if _zkvm_has_gpu(zkvm) else "",
+                )
+            if "elf_url" not in zkvm:
+                zkvm["elf_url"] = ERE_GUESTS_ELF_URL_TEMPLATE.format(
+                    version=ere_guests_version,
+                    proof_type=proof_type,
+                )
+        elif zkvm["kind"] == "verifier":
+            if "program_vk_url" not in zkvm:
+                zkvm["program_vk_url"] = ERE_GUESTS_VK_URL_TEMPLATE.format(
+                    version=ere_guests_version,
+                    proof_type=proof_type,
+                )
         resolved.append(zkvm)
     return resolved
 

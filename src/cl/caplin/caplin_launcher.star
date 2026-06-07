@@ -45,6 +45,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -70,6 +71,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
         bootnode_enr_override,
         cl_binary_artifact,
     )
@@ -113,6 +115,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -120,12 +123,15 @@ def get_beacon_config(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    if participant.snooper_enabled:
-        engine_host = "http://{0}".format(snooper_el_engine_context.ip_addr)
-        engine_port = snooper_el_engine_context.engine_rpc_port_num
-    else:
-        engine_host = "http://{0}".format(el_context.dns_name)
-        engine_port = el_context.engine_rpc_port_num
+    engine_host = None
+    engine_port = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            engine_host = "http://{0}".format(snooper_el_engine_context.ip_addr)
+            engine_port = snooper_el_engine_context.engine_rpc_port_num
+        else:
+            engine_host = "http://{0}".format(el_context.dns_name)
+            engine_port = el_context.engine_rpc_port_num
 
     public_ports = {}
     public_ports_for_component = None
@@ -158,10 +164,6 @@ def get_beacon_config(
         "caplin",
         "--datadir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
         "--verbosity=" + log_level,
-        "--engine.api",
-        "--engine.api.host=" + engine_host,
-        "--engine.api.port={0}".format(engine_port),
-        "--engine.api.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--beacon.api=beacon,builder,config,debug,events,node,validator,lighthouse",
         "--beacon.api.addr=0.0.0.0",
         "--beacon.api.port={0}".format(BEACON_HTTP_PORT_NUM),
@@ -172,6 +174,12 @@ def get_beacon_config(
         "--pprof.addr=0.0.0.0",
         "--pprof.port={0}".format(BEACON_METRICS_PORT_NUM),
     ]
+
+    if el_context != None:
+        cmd.append("--engine.api")
+        cmd.append("--engine.api.host=" + engine_host)
+        cmd.append("--engine.api.port={0}".format(engine_port))
+        cmd.append("--engine.api.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 
     if checkpoint_sync_enabled and checkpoint_sync_url:
         cmd.append("--caplin.checkpoint-sync-url=" + checkpoint_sync_url)
@@ -209,8 +217,9 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+    if el_context != None:
+        files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
     if persistent:
         volume_size_key = (
@@ -234,7 +243,11 @@ def get_beacon_config(
     if cl_binary_artifact != None:
         files["/opt/bin"] = cl_binary_artifact.artifact
 
-    env_vars = participant.cl_extra_env_vars
+    env_vars = shared_utils.with_otel_env_vars(
+        participant.cl_extra_env_vars,
+        otel_otlp_grpc_url,
+        beacon_service_name,
+    )
 
     cmd_str = " ".join(cmd)
     if cl_binary_artifact != None:
@@ -261,7 +274,7 @@ def get_beacon_config(
             client=constants.CL_TYPE.caplin,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=el_context.client_name,
+            connected_client=el_context.client_name if el_context != None else "none",
             extra_labels=participant.cl_extra_labels
             | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,

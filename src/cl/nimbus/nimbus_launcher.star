@@ -68,6 +68,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -93,6 +94,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
         bootnode_enr_override,
         cl_binary_artifact,
     )
@@ -134,6 +136,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -153,16 +156,18 @@ def get_beacon_config(
             node_keystore_files.raw_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     validator_public_port_assignment = {}
@@ -223,7 +228,6 @@ def get_beacon_config(
             else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         ),
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--web3-url=" + EXECUTION_ENGINE_ENDPOINT,
         "--nat=extip:{0}".format(
             "${K8S_POD_IP}"
             if backend == "kubernetes"
@@ -241,7 +245,6 @@ def get_beacon_config(
         "--doppelganger-detection=false",
         # Nimbus can handle a max of 256 threads, if the host has more then nimbus crashes. Setting it to 4 so it doesn't crash on build servers
         "--num-threads=4",
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # Metrics
         "--metrics",
         "--metrics-address=0.0.0.0",
@@ -261,6 +264,10 @@ def get_beacon_config(
         "--keymanager-allow-origin=*",
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
+
+    if el_context != None:
+        cmd.append("--web3-url=" + EXECUTION_ENGINE_ENDPOINT)
+        cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 
     supernode_cmd = [
         "--peerdas-supernode=true",
@@ -300,8 +307,9 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+    if el_context != None:
+        files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
     if node_keystore_files != None and not participant.use_separate_vc:
         cmd.extend(validator_default_cmd)
@@ -371,13 +379,17 @@ def get_beacon_config(
         "entrypoint": ["sh", "-c"],
         "cmd": [command_str],
         "files": files,
-        "env_vars": participant.cl_extra_env_vars,
+        "env_vars": shared_utils.with_otel_env_vars(
+            participant.cl_extra_env_vars,
+            otel_otlp_grpc_url,
+            beacon_service_name,
+        ),
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.nimbus,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=el_context.client_name,
+            connected_client=el_context.client_name if el_context != None else "none",
             extra_labels=participant.cl_extra_labels
             | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,

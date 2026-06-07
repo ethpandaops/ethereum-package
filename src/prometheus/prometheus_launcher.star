@@ -31,7 +31,7 @@ def launch_prometheus(
     index,
 ):
     metrics_jobs = get_metrics_jobs(
-        el_contexts,
+        el_contexts if len(el_contexts) > 0 else None,
         cl_contexts,
         vc_contexts,
         network_params,
@@ -78,37 +78,42 @@ def get_metrics_jobs(
 ):
     metrics_jobs = []
     # Adding execution clients metrics jobs
-    for context in el_contexts:
-        if len(context.el_metrics_info) >= 1 and context.el_metrics_info[0] != None:
-            execution_metrics_info = context.el_metrics_info[0]
-            scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
-            labels = {
-                "service": context.service_name,
-                "client_type": EXECUTION_CLIENT_TYPE,
-                "client_name": context.client_name,
-            }
-            additional_config = execution_metrics_info[
-                METRICS_INFO_ADDITIONAL_CONFIG_KEY
-            ]
-            if additional_config != None:
-                if additional_config.labels != None:
-                    labels.update(additional_config.labels)
-                if (
-                    additional_config.scrape_interval != None
-                    and additional_config.scrape_interval != ""
-                ):
-                    scrape_interval = additional_config.scrape_interval
-            metrics_jobs.append(
-                new_metrics_job(
-                    job_name=execution_metrics_info[METRICS_INFO_NAME_KEY],
-                    endpoint=execution_metrics_info[METRICS_INFO_URL_KEY],
-                    metrics_path=execution_metrics_info[METRICS_INFO_PATH_KEY],
-                    labels=labels,
-                    scrape_interval=scrape_interval,
+    if el_contexts != None:
+        for context in el_contexts:
+            if context == None:
+                continue
+            if len(context.el_metrics_info) >= 1 and context.el_metrics_info[0] != None:
+                execution_metrics_info = context.el_metrics_info[0]
+                scrape_interval = PROMETHEUS_DEFAULT_SCRAPE_INTERVAL
+                labels = {
+                    "service": context.service_name,
+                    "client_type": EXECUTION_CLIENT_TYPE,
+                    "client_name": context.client_name,
+                }
+                additional_config = execution_metrics_info[
+                    METRICS_INFO_ADDITIONAL_CONFIG_KEY
+                ]
+                if additional_config != None:
+                    if additional_config.labels != None:
+                        labels.update(additional_config.labels)
+                    if (
+                        additional_config.scrape_interval != None
+                        and additional_config.scrape_interval != ""
+                    ):
+                        scrape_interval = additional_config.scrape_interval
+                metrics_jobs.append(
+                    new_metrics_job(
+                        job_name=execution_metrics_info[METRICS_INFO_NAME_KEY],
+                        endpoint=execution_metrics_info[METRICS_INFO_URL_KEY],
+                        metrics_path=execution_metrics_info[METRICS_INFO_PATH_KEY],
+                        labels=labels,
+                        scrape_interval=scrape_interval,
+                    )
                 )
-            )
     # Adding consensus clients metrics jobs
     for context in cl_contexts:
+        if context == None:
+            continue
         if (
             len(context.cl_nodes_metrics_info) >= 1
             and context.cl_nodes_metrics_info[0] != None

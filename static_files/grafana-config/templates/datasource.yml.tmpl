@@ -27,3 +27,39 @@ datasources:
         spanEndTimeShift: '1h'
         filterByTraceID: true
 {{- end }}
+{{- if .ClickHouseHost }}
+  - name: ClickHouse (otel)
+    type: grafana-clickhouse-datasource
+    access: proxy
+    orgId: 1
+    isDefault: false
+    editable: true
+    jsonData:
+      host: {{ .ClickHouseHost }}
+      port: {{ .ClickHousePort }}
+      protocol: http
+      secure: false
+      defaultDatabase: otel
+      logs:
+        defaultTable: otel_logs
+        otelEnabled: true
+        otelVersion: latest
+        timeColumn: Timestamp
+        levelColumn: SeverityText
+        messageColumn: Body
+        traceIdColumn: TraceId
+      traces:
+        defaultTable: otel_traces
+        otelEnabled: true
+        otelVersion: latest
+        traceIdColumn: TraceId
+        spanIdColumn: SpanId
+        operationNameColumn: SpanName
+        parentSpanIdColumn: ParentSpanId
+        serviceNameColumn: ServiceName
+        durationColumn: Duration
+        durationUnit: nanoseconds
+        startTimeColumn: Timestamp
+        tagsColumn: SpanAttributes
+        serviceTagsColumn: ResourceAttributes
+{{- end }}

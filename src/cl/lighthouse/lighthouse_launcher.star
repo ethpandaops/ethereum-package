@@ -60,6 +60,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -85,6 +86,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
         bootnode_enr_override,
         cl_binary_artifact,
     )
@@ -128,6 +130,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -136,16 +139,18 @@ def get_beacon_config(
     )
 
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = None
+    if el_context != None:
+        if participant.snooper_enabled:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                snooper_el_engine_context.ip_addr,
+                snooper_el_engine_context.engine_rpc_port_num,
+            )
+        else:
+            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
+                el_context.dns_name,
+                el_context.engine_rpc_port_num,
+            )
 
     public_ports = {}
     public_ports_for_component = None
@@ -209,9 +214,6 @@ def get_beacon_config(
         #   https://github.com/sigp/lighthouse/blob/7c88f582d955537f7ffff9b2c879dcf5bf80ce13/scripts/local_testnet/beacon_node.sh
         # and the option says it's "useful for testing in smaller networks" (unclear what happens in larger networks)
         "--disable-packet-filter",
-        "--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
         # ENR
         "--disable-enr-auto-update",
         "--enr-address={0}".format(
@@ -231,6 +233,11 @@ def get_beacon_config(
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         "--enable-private-discovery",
     ]
+
+    if el_context != None:
+        cmd.append("--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT)
+        cmd.append("--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
+        cmd.append("--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT)
 
     supernode_cmd = [
         "--supernode",
@@ -272,9 +279,11 @@ def get_beacon_config(
     if bootnode_arg != None:
         cmd.append("--boot-nodes=" + bootnode_arg)
 
-    # Add tempo telemetry integration if tempo is enabled
-    if tempo_otlp_grpc_url != None:
-        cmd.append("--telemetry-collector-url={}".format(tempo_otlp_grpc_url))
+    telemetry_url = (
+        otel_otlp_grpc_url if otel_otlp_grpc_url != None else tempo_otlp_grpc_url
+    )
+    if telemetry_url != None:
+        cmd.append("--telemetry-collector-url={}".format(telemetry_url))
         cmd.append("--telemetry-service-name={}".format(beacon_service_name))
 
     if len(participant.cl_extra_params) > 0:
@@ -286,8 +295,9 @@ def get_beacon_config(
     )
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+    if el_context != None:
+        files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
     if network_params.perfect_peerdas_enabled and participant_index < 16:
         files[NODE_KEY_MOUNTPOINT_ON_CLIENTS] = "node-key-file-{0}".format(
@@ -300,11 +310,13 @@ def get_beacon_config(
         )
         files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.CL_TYPE.lighthouse + "_volume_size"
-            ],
+            size=(
+                int(participant.cl_volume_size)
+                if int(participant.cl_volume_size) > 0
+                else constants.VOLUME_SIZE[volume_size_key][
+                    constants.CL_TYPE.lighthouse + "_volume_size"
+                ]
+            ),
         )
 
     # Add extra mounts - automatically handle file uploads
@@ -320,7 +332,13 @@ def get_beacon_config(
         files["/opt/bin"] = cl_binary_artifact.artifact
 
     env_vars = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
-    env_vars.update(participant.cl_extra_env_vars)
+    env_vars.update(
+        shared_utils.with_otel_env_vars(
+            participant.cl_extra_env_vars,
+            otel_otlp_grpc_url,
+            beacon_service_name,
+        )
+    )
 
     # Build the command string, copying injected binary if provided
     cmd_str = " ".join(cmd)
@@ -348,7 +366,7 @@ def get_beacon_config(
             client=constants.CL_TYPE.lighthouse,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=el_context.client_name,
+            connected_client=el_context.client_name if el_context != None else "none",
             extra_labels=participant.cl_extra_labels
             | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
@@ -430,9 +448,9 @@ def get_cl_context(
         peer_id=beacon_peer_id,
         snooper_enabled=participant.snooper_enabled,
         snooper_el_engine_context=snooper_el_engine_context,
-        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
-        if node_keystore_files
-        else "",
+        validator_keystore_files_artifact_uuid=(
+            node_keystore_files.files_artifact_uuid if node_keystore_files else ""
+        ),
         supernode=participant.supernode,
     )
 

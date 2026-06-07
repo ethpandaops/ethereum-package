@@ -13,7 +13,6 @@ reth = import_module("./reth/reth_launcher.star")
 ethereumjs = import_module("./ethereumjs/ethereumjs_launcher.star")
 nimbus_eth1 = import_module("./nimbus-eth1/nimbus_launcher.star")
 ethrex = import_module("./ethrex/ethrex_launcher.star")
-dummy = import_module("./dummy/dummy_launcher.star")
 
 
 def launch(
@@ -34,6 +33,7 @@ def launch(
     extra_files_artifacts={},
     bootnodoor_enode=None,
     binary_artifacts={},
+    otel_otlp_grpc_url=None,
 ):
     el_launchers = {
         constants.EL_TYPE.geth: {
@@ -121,15 +121,6 @@ def launch(
             "get_el_context": ethrex.get_el_context,
             "launch_method": ethrex.launch,
         },
-        constants.EL_TYPE.dummy: {
-            "launcher": dummy.new_dummy_launcher(
-                el_cl_data,
-                jwt_file,
-            ),
-            "launch_method": dummy.launch,
-            "get_config": dummy.get_config,
-            "get_el_context": dummy.get_el_context,
-        },
     }
 
     all_el_contexts = []
@@ -148,6 +139,13 @@ def launch(
     for index, participant in enumerate(participants):
         cl_type = participant.cl_type
         el_type = participant.el_type
+
+        # Do not append here: Nones must appear only in the final ordered list, after
+        # parallel EL contexts are keyed by index (otherwise indices shift and CL gets
+        # the wrong el_context for participants with EL after a CL-only participant).
+        if el_type == constants.EL_TYPE.none:
+            continue
+
         node_selectors = input_parser.get_client_node_selectors(
             participant.node_selectors,
             global_node_selectors,
@@ -194,6 +192,7 @@ def launch(
                 extra_files_artifacts,
                 bootnodoor_enode,
                 el_binary_artifact,
+                otel_otlp_grpc_url,
             )
 
             # Add participant el additional prometheus metrics
@@ -220,6 +219,7 @@ def launch(
                 extra_files_artifacts,
                 bootnodoor_enode,
                 el_binary_artifact,
+                otel_otlp_grpc_url,
             )
 
             el_participant_info[el_service_name] = {
@@ -256,10 +256,30 @@ def launch(
 
         el_contexts_temp[participant_index] = el_context
 
-    # Add remaining EL contexts in participant order (skipping index 0 which was added earlier)
-    for i in range(1, len(participants)):
-        if i in el_contexts_temp:
-            all_el_contexts.append(el_contexts_temp[i])
+    el_context_for_participant_zero = None
+    if len(participants) > 0 and participants[0].el_type != constants.EL_TYPE.none:
+        if len(all_el_contexts) != 1:
+            fail(
+                "Internal error: expected one EL context after launching participant 0, got {0}".format(
+                    len(all_el_contexts)
+                )
+            )
+        el_context_for_participant_zero = all_el_contexts[0]
+
+    ordered_el_contexts = []
+    for i in range(len(participants)):
+        if participants[i].el_type == constants.EL_TYPE.none:
+            ordered_el_contexts.append(None)
+        elif i == 0:
+            ordered_el_contexts.append(el_context_for_participant_zero)
+        elif i in el_contexts_temp:
+            ordered_el_contexts.append(el_contexts_temp[i])
+        else:
+            fail(
+                "Internal error: missing EL context for participant index {0}".format(i)
+            )
+
+    all_el_contexts = ordered_el_contexts
 
     plan.print("Successfully added {0} EL participants".format(num_participants))
     return all_el_contexts

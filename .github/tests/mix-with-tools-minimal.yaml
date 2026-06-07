@@ -30,10 +30,11 @@ additional_services:
   - blockscout
   - dugtrio
   - erpc
-  - apache
+  - nginx
   - tracoor
   - spamoor
   - bootnodoor
+  - trueblocks
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true
