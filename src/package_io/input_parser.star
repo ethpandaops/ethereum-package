@@ -919,7 +919,9 @@ def input_parser(plan, input_args):
                 "additional_preloaded_contracts"
             ],
             additional_mnemonics=result["network_params"]["additional_mnemonics"],
-            shuffle_genesis_validators=result["network_params"]["shuffle_genesis_validators"],
+            shuffle_genesis_validators=result["network_params"][
+                "shuffle_genesis_validators"
+            ],
             builder_count=result["network_params"]["builder_count"],
             builder_balance=result["network_params"]["builder_balance"],
             devnet_repo=result["network_params"]["devnet_repo"],
