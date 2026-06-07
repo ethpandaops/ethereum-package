@@ -88,6 +88,7 @@ network_params:
     very lucky have athlete"
   preregistered_validator_count: 0
   additional_mnemonics: []
+  shuffle_genesis_validators: true
   genesis_delay: 20
   genesis_time: 0
   genesis_gaslimit: 60000000

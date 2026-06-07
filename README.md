@@ -715,6 +715,9 @@ network_params:
       # 2: exited
       status: 1
 
+  # Shuffle genesis validator ranges to start with a more realistic, non-contiguous validator allocation
+  shuffle_genesis_validators: true
+
   # How long you want the network to wait before starting up
   genesis_delay: 20
 
