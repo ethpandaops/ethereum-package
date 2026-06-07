@@ -604,14 +604,13 @@ def run(plan, args={}):
         all_xatu_sentry_contexts.append(participant.xatu_sentry_context)
 
     # Generate validator ranges
-    validator_ranges_config_template = read_file(
-        static_files.VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH
-    )
     ranges = validator_ranges.generate_validator_ranges(
         plan,
-        validator_ranges_config_template,
         all_participants,
         args_with_right_defaults.participants,
+        el_cl_data_files_artifact_uuid,
+        global_tolerations,
+        global_node_selectors,
     )
 
     fuzz_target = "http://{0}:{1}".format(

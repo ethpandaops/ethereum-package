@@ -15,11 +15,6 @@ FORKMON_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/forkmon-config/config.toml.tmpl"
 )
 
-# Validator Ranges config
-VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/validator-ranges/config.yaml.tmpl"
-)
-
 NGINX_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/index.html"
 NGINX_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr.txt.tmpl"
 NGINX_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr_list.txt.tmpl"
