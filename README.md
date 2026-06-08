@@ -815,7 +815,7 @@ network_params:
       status: 1
 
   # Shuffle genesis validator ranges to start with a more realistic, non-contiguous validator allocation
-  shuffle_genesis_validators: true
+  shuffle_genesis_validators: false
 
   # How long you want the network to wait before starting up
   genesis_delay: 20
