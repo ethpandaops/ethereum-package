@@ -82,6 +82,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "prometheus_params",
     "grafana_params",
     "tempo_params",
+    "observoor_params",
     "tx_fuzz_params",
     "rakoon_params",
     "custom_flood_params",
@@ -140,6 +141,7 @@ def input_parser(plan, input_args):
     result["assertoor_params"] = get_default_assertoor_params()
     result["prometheus_params"] = get_default_prometheus_params()
     result["tempo_params"] = get_default_tempo_params()
+    result["observoor_params"] = get_default_observoor_params()
     result["xatu_sentry_params"] = get_default_xatu_sentry_params()
     result["persistent"] = False
     result["parallel_keystore_generation"] = False
@@ -217,6 +219,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["tempo_params"]:
                 sub_value = input_args["tempo_params"][sub_attr]
                 result["tempo_params"][sub_attr] = sub_value
+        elif attr == "observoor_params":
+            for sub_attr in input_args["observoor_params"]:
+                sub_value = input_args["observoor_params"][sub_attr]
+                result["observoor_params"][sub_attr] = sub_value
         elif attr == "xatu_sentry_params":
             for sub_attr in input_args["xatu_sentry_params"]:
                 sub_value = input_args["xatu_sentry_params"][sub_attr]
@@ -1037,6 +1043,13 @@ def input_parser(plan, input_args):
             min_mem=result["tempo_params"]["min_mem"],
             max_mem=result["tempo_params"]["max_mem"],
             image=result["tempo_params"]["image"],
+        ),
+        observoor_params=struct(
+            image=result["observoor_params"]["image"],
+            min_cpu=result["observoor_params"]["min_cpu"],
+            max_cpu=result["observoor_params"]["max_cpu"],
+            min_mem=result["observoor_params"]["min_mem"],
+            max_mem=result["observoor_params"]["max_mem"],
         ),
         nginx_port=result["nginx_port"],
         assertoor_params=struct(
@@ -2247,6 +2260,16 @@ def get_default_tempo_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "grafana/tempo:latest",
+    }
+
+
+def get_default_observoor_params():
+    return {
+        "image": "ethpandaops/observoor:latest",
+        "min_cpu": 100,
+        "max_cpu": 1000,
+        "min_mem": 128,
+        "max_mem": 1024,
     }
 
 

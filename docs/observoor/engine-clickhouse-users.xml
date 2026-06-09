@@ -1,0 +1,10 @@
+<clickhouse>
+    <users>
+        <default>
+            <!-- Allow connections from any host for observoor -->
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+        </default>
+    </users>
+</clickhouse>
