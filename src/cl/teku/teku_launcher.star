@@ -171,7 +171,7 @@ def get_beacon_config(
         )
         public_ports.update(
             shared_utils.get_port_specs(
-                {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[3]}
+                {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[4]}
             )
         )
 
@@ -186,7 +186,7 @@ def get_beacon_config(
         else BEACON_DISCOVERY_PORT_NUM
     )
     discovery_port_quic = (
-        public_ports_for_component[3]
+        public_ports_for_component[4]
         if public_ports_for_component
         else BEACON_QUIC_PORT_NUM
     )
