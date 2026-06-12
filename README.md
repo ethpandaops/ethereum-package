@@ -814,6 +814,9 @@ network_params:
       # 2: exited
       status: 1
 
+  # Shuffle genesis validator ranges to start with a more realistic, non-contiguous validator allocation
+  shuffle_genesis_validators: false
+
   # How long you want the network to wait before starting up
   genesis_delay: 20
 
@@ -1750,7 +1753,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.0.6
+  image: ethpandaops/ethereum-genesis-generator:6.0.8
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 

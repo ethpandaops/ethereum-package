@@ -919,6 +919,9 @@ def input_parser(plan, input_args):
                 "additional_preloaded_contracts"
             ],
             additional_mnemonics=result["network_params"]["additional_mnemonics"],
+            shuffle_genesis_validators=result["network_params"][
+                "shuffle_genesis_validators"
+            ],
             builder_count=result["network_params"]["builder_count"],
             builder_balance=result["network_params"]["builder_balance"],
             devnet_repo=result["network_params"]["devnet_repo"],
@@ -1836,6 +1839,7 @@ def default_network_params():
         "preset": "mainnet",
         "additional_preloaded_contracts": {},
         "additional_mnemonics": [],
+        "shuffle_genesis_validators": False,
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,
@@ -1920,6 +1924,7 @@ def default_minimal_network_params():
         "preset": "minimal",
         "additional_preloaded_contracts": {},
         "additional_mnemonics": [],
+        "shuffle_genesis_validators": False,
         "devnet_repo": "ethpandaops",
         "prefunded_accounts": {},
         "max_payload_size": 10485760,

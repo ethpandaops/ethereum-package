@@ -263,6 +263,7 @@ SUBCATEGORY_PARAMS = {
         "preset",
         "additional_preloaded_contracts",
         "additional_mnemonics",
+        "shuffle_genesis_validators",
         "devnet_repo",
         "prefunded_accounts",
         "max_payload_size",

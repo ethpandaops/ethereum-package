@@ -88,6 +88,7 @@ network_params:
     very lucky have athlete"
   preregistered_validator_count: 0
   additional_mnemonics: []
+  shuffle_genesis_validators: false
   genesis_delay: 20
   genesis_time: 0
   genesis_gaslimit: 60000000
@@ -268,7 +269,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:6.0.7
+  image: ethpandaops/ethereum-genesis-generator:6.0.8
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
