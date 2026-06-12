@@ -234,6 +234,13 @@ def get_beacon_config(
                         cmd.append("--bootnodes=" + ctx.enr)
                     elif ctx.multiaddr:
                         cmd.append("--bootnodes=" + ctx.multiaddr)
+        elif bootnode_arg == None:  # Ephemery and devnets
+            bootnode_arg = shared_utils.get_devnet_enrs_list(
+                plan, launcher.el_cl_genesis_data.files_artifact_uuid
+            )
+
+    if bootnode_arg != None:
+        cmd.append("--bootnodes=" + bootnode_arg)
 
     if participant.supernode:
         cmd.append("--supernode")
