@@ -2531,8 +2531,14 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 "--validators-builder-registration-default-enabled=true"
             )
         if participant["cl_type"] == "prysm":
+            # Buildoor runs a single builder-API service (not a per-participant
+            # mev-boost sidecar), so point Prysm's builder endpoint at it directly.
+            # Keep in sync with buildoor_launcher.star (BUILDOOR_SERVICE_NAME / BUILDOOR_API_PORT).
+            prysm_mev_url = mev_url
+            if mev_type == constants.BUILDOOR_MEV_TYPE:
+                prysm_mev_url = "http://buildoor:8080"
             participant["cl_extra_params"].append(
-                "--http-mev-relay={0}".format(mev_url)
+                "--http-mev-relay={0}".format(prysm_mev_url)
             )
         if participant["vc_type"] == "prysm":
             participant["vc_extra_params"].append("--enable-builder")
