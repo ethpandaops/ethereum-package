@@ -1,0 +1,9 @@
+# cadvisor runs in privileged mode and bind mounts the host docker socket,
+# so it requires Kurtosis' Docker backend and must be run with --privileged:
+#   kurtosis run --enclave cadvisor . --args-file .github/tests/cadvisor.yaml --privileged
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+additional_services:
+  - cadvisor
+  - prometheus_grafana
