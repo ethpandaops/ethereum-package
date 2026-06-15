@@ -1343,18 +1343,29 @@ def parse_network_params(plan, input_args):
         vc_matrix = []
         if "vc" in input_args["participants_matrix"]:
             vc_matrix = input_args["participants_matrix"]["vc"]
+        remote_signer_matrix = []
+        if "remote_signer" in input_args["participants_matrix"]:
+            remote_signer_matrix = input_args["participants_matrix"]["remote_signer"]
         count = input_args["participants_matrix"].get("count", 1)
 
         for el in el_matrix:
             for cl in cl_matrix:
                 for vc in vc_matrix if vc_matrix else [{}]:
-                    for _ in range(count):
-                        participant = {k: v for k, v in el.items()}
-                        for k, v in cl.items():
-                            participant[k] = v
-                        for k, v in vc.items():
-                            participant[k] = v
-                        participants.append(participant)
+                    for remote_signer in (
+                        remote_signer_matrix if remote_signer_matrix else [{}]
+                    ):
+                        for _ in range(count):
+                            participant = {k: v for k, v in el.items()}
+                            for k, v in cl.items():
+                                participant[k] = v
+                            for k, v in vc.items():
+                                participant[k] = v
+                            for k, v in remote_signer.items():
+                                participant[k] = v
+                            # Defining a remote_signer matrix entry implies using it.
+                            if remote_signer:
+                                participant["use_remote_signer"] = True
+                            participants.append(participant)
 
         if "participants" in input_args:
             input_args["participants"].extend(participants)

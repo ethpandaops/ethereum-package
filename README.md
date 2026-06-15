@@ -696,8 +696,9 @@ participants:
     # Defaults to false
     skip_start: false
 
-# Participants matrix creates a participant for each combination of EL, CL and VC clients
-# Each EL/CL/VC item can provide the same parameters as a standard participant
+# Participants matrix creates a participant for each combination of EL, CL, VC
+# and remote signer clients.
+# Each el/cl/vc/remote_signer item can provide the same parameters as a standard participant.
 participants_matrix: {}
   # el:
   #   - el_type: geth
@@ -708,6 +709,11 @@ participants_matrix: {}
   # vc:
   #   - vc_type: prysm
   #   - vc_type: lighthouse
+  # remote_signer:
+  #   - remote_signer_type: web3signer
+  #     remote_signer_image: consensys/web3signer:develop
+  # Defining a remote_signer entry enables it automatically.
+  # NOTE: a remote signer requires `use_separate_vc: true` on the matching cl item.
 
 
 # Default configuration parameters for the network
