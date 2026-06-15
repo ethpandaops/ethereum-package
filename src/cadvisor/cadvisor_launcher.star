@@ -5,12 +5,13 @@ SERVICE_NAME = "cadvisor"
 HTTP_PORT_NUMBER = 8080
 METRICS_PATH = "/metrics"
 
-# Host paths cAdvisor needs to read container/host metrics. /var/run carries the
-# docker socket, so mounting it covers /var/run/docker.sock as well.
+DOCKER_SOCKET_PATH = "/var/run/docker.sock"
+
+# Kurtosis only permits the docker socket as a host bind mount. Combined with
+# privileged mode and the host PID namespace, cAdvisor reads container metrics
+# via the docker socket and the host cgroup hierarchy.
 CADVISOR_BIND_MOUNTS = {
-    "/var/run": "/var/run",
-    "/sys": "/sys",
-    "/var/lib/docker": "/var/lib/docker",
+    DOCKER_SOCKET_PATH: DOCKER_SOCKET_PATH,
 }
 
 USED_PORTS = {
@@ -68,10 +69,11 @@ def get_config(
         ),
         "ports": USED_PORTS,
         "public_ports": public_ports,
-        # cAdvisor needs privileged access plus the host docker socket, /sys and
-        # /var/lib/docker bind mounts to collect per-container metrics. This is
-        # why cadvisor is Docker-backend only (guarded in main.star).
+        # cAdvisor needs privileged access, the host docker socket, and the host
+        # PID namespace to collect per-container metrics. This is why cadvisor is
+        # Docker-backend only (guarded in main.star).
         "privileged": True,
+        "host_pid_namespace": True,
         "bind_mounts": CADVISOR_BIND_MOUNTS,
         "min_cpu": cadvisor_params.min_cpu,
         "max_cpu": cadvisor_params.max_cpu,
