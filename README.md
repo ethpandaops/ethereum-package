@@ -710,9 +710,10 @@ participants_matrix: {}
   #   - vc_type: prysm
   #   - vc_type: lighthouse
   # remote_signer:
-  #   - use_remote_signer: true
-  #     remote_signer_type: web3signer
+  #   - remote_signer_type: web3signer
   #     remote_signer_image: consensys/web3signer:develop
+  # Defining a remote_signer entry enables it automatically (set
+  # `use_remote_signer: false` to keep the config but disable it).
   # NOTE: a remote signer requires `use_separate_vc: true` on the matching cl item.
 
 

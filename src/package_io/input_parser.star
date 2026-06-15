@@ -1362,6 +1362,13 @@ def parse_network_params(plan, input_args):
                                 participant[k] = v
                             for k, v in remote_signer.items():
                                 participant[k] = v
+                            # Defining a remote_signer matrix entry implies using
+                            # it, unless the user explicitly opted out.
+                            if (
+                                remote_signer
+                                and "use_remote_signer" not in remote_signer
+                            ):
+                                participant["use_remote_signer"] = True
                             participants.append(participant)
 
         if "participants" in input_args:
