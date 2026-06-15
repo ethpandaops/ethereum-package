@@ -70,10 +70,16 @@ def get_config(
         "ports": USED_PORTS,
         "public_ports": public_ports,
         # cAdvisor needs privileged access, the host docker socket, and the host
-        # PID namespace to collect per-container metrics. This is why cadvisor is
-        # Docker-backend only (guarded in main.star).
+        # cgroup namespace to collect per-container metrics. The host cgroup
+        # namespace makes /sys/fs/cgroup reflect the full host hierarchy so
+        # cAdvisor can see sibling containers' cgroups (without it, it only reports
+        # the root cgroup). This is why cadvisor is Docker-backend only (guarded in
+        # main.star).
+        # NOTE: host_cgroup_namespace requires kurtosis-tech/kurtosis#3152 and a
+        # Kurtosis release that includes it.
         "privileged": True,
         "host_pid_namespace": True,
+        "host_cgroup_namespace": True,
         "bind_mounts": CADVISOR_BIND_MOUNTS,
         "min_cpu": cadvisor_params.min_cpu,
         "max_cpu": cadvisor_params.max_cpu,
