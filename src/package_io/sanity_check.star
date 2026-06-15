@@ -158,6 +158,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "validator_count",
         ],
         "remote_signer": [
+            "use_remote_signer",
             "remote_signer_type",
             "remote_signer_image",
             "remote_signer_extra_env_vars",

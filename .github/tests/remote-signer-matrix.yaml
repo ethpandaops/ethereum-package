@@ -1,0 +1,12 @@
+participants_matrix:
+  el:
+    - el_type: geth
+  cl:
+    - cl_type: prysm
+      use_separate_vc: true
+  vc:
+    - vc_type: prysm
+  remote_signer:
+    - use_remote_signer: true
+      remote_signer_type: web3signer
+      remote_signer_image: consensys/web3signer:develop
