@@ -834,12 +834,18 @@ def run(plan, args={}):
                     args_with_right_defaults.participants[index].validator_count
                 )
             )
-            if args_with_right_defaults.participants[index].validator_count != 0:
+            # buildoor needs no per-participant mev-boost sidecar: the CLs talk to
+            # the shared buildoor service directly (see enrich_mev_extra_params), so
+            # the Gloas builder API reaches buildoor instead of dead-ending at
+            # mev-boost (which does not implement execution_payload_bid).
+            if (
+                args_with_right_defaults.participants[index].validator_count != 0
+                and args_with_right_defaults.mev_type != constants.BUILDOOR_MEV_TYPE
+            ):
                 if (
                     args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
                     or args_with_right_defaults.mev_type == constants.MOCK_MEV_TYPE
                     or args_with_right_defaults.mev_type == constants.HELIX_MEV_TYPE
-                    or args_with_right_defaults.mev_type == constants.BUILDOOR_MEV_TYPE
                 ):
                     mev_boost_launcher = flashbots_mev_boost.new_mev_boost_launcher(
                         MEV_BOOST_SHOULD_CHECK_RELAY,

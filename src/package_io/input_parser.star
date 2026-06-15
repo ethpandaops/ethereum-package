@@ -2492,13 +2492,23 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         else:
             prefix = constants.MEV_BOOST_SERVICE_NAME_PREFIX
 
-        mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
-            prefix,
-            index_str,
-            participant["cl_type"],
-            participant["el_type"],
-            mev_port,
-        )
+        if mev_type == constants.BUILDOOR_MEV_TYPE:
+            # buildoor is a single shared builder service that the CLs contact
+            # directly (no per-participant mev-boost sidecar). This is required for
+            # the Gloas builder API (execution_payload_bid / builder_preferences /
+            # beacon_block), which mev-boost does not proxy.
+            mev_url = "http://{0}:{1}".format(
+                constants.BUILDOOR_SERVICE_NAME,
+                constants.BUILDOOR_API_PORT,
+            )
+        else:
+            mev_url = "http://{0}-{1}-{2}-{3}:{4}".format(
+                prefix,
+                index_str,
+                participant["cl_type"],
+                participant["el_type"],
+                mev_port,
+            )
 
         if participant["cl_type"] == "lighthouse":
             participant["cl_extra_params"].append("--builder={0}".format(mev_url))
