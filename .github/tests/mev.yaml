@@ -10,8 +10,6 @@ mev_params:
   mev_boost_image: ethpandaops/mev-boost:develop
 
 additional_services:
-  - tx_fuzz
-  - custom_flood
   - spamoor
   - dora
   - prometheus

@@ -153,8 +153,6 @@ network_params:
 additional_services: []
 dora_params:
   image: "ethpandaops/dora:latest"
-tx_fuzz_params:
-  tx_fuzz_extra_args: []
 spamoor_params:
   min_cpu: 100
   max_cpu: 1000
@@ -230,8 +228,6 @@ mev_params:
   run_multiple_relays: false
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
   commit_boost_config: ""
-  custom_flood_params:
-    interval_between_transactions: 1
 buildoor_params:
   image: ethpandaops/buildoor:main
   builder_api: true
