@@ -712,8 +712,7 @@ participants_matrix: {}
   # remote_signer:
   #   - remote_signer_type: web3signer
   #     remote_signer_image: consensys/web3signer:develop
-  # Defining a remote_signer entry enables it automatically (set
-  # `use_remote_signer: false` to keep the config but disable it).
+  # Defining a remote_signer entry enables it automatically.
   # NOTE: a remote signer requires `use_separate_vc: true` on the matching cl item.
 
 
