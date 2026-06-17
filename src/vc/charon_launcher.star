@@ -1,7 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 input_parser = import_module("../package_io/input_parser.star")
 constants = import_module("../package_io/constants.star")
-cl_context = import_module("../cl/cl_context.star")
 vc_shared = import_module("./shared.star")
 vc_context = import_module("./vc_context.star")
 node_metrics = import_module("../node_metrics_info.star")
@@ -10,10 +9,9 @@ node_metrics = import_module("../node_metrics_info.star")
 CHARON_VALIDATOR_API_PORT = 3600
 CHARON_P2P_TCP_PORT = 3610
 CHARON_MONITORING_PORT = 3620
-CHARON_METRICS_PORT = 8080
 
-# Default Charon image
-DEFAULT_CHARON_IMAGE = input_parser.DEFAULT_VC_IMAGES[constants.VC_TYPE.charon]
+# Fallback node count if the participant doesn't request a valid one.
+DEFAULT_CHARON_NODE_COUNT = 4
 
 # Verbosity levels mapping
 VERBOSITY_LEVELS = {
@@ -26,12 +24,10 @@ VERBOSITY_LEVELS = {
 def launch(
     plan,
     launcher,
-    keymanager_file,
     service_name,
     image,
     global_log_level,
     cl_context,
-    el_context,
     full_name,
     node_keystore_files,
     participant,
@@ -40,52 +36,37 @@ def launch(
     network_params,
     port_publisher,
     vc_index,
-    genesis_timestamp,
 ):
     """
     Launch a Charon distributed validator client
     """
-    VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS = "/validator-keys"
-
     if node_keystore_files == None:
         return None
 
-    tolerations = input_parser.get_client_tolerations(
-        participant.vc_tolerations, participant.tolerations, global_tolerations
+    tolerations = shared_utils.get_tolerations(
+        specific_container_tolerations=participant.vc_tolerations,
+        participant_tolerations=participant.tolerations,
+        global_tolerations=global_tolerations,
     )
 
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    # Get the number of Charon nodes to create (default to 4)
-    charon_node_count = 4
-    if hasattr(participant, "charon_node_count") and participant.charon_node_count > 0:
-        charon_node_count = participant.charon_node_count
+    # Number of Charon nodes to create.
+    charon_node_count = participant.charon_node_count
+    if charon_node_count <= 0:
+        charon_node_count = DEFAULT_CHARON_NODE_COUNT
 
-    # Get Charon validator client parameters
-    vc_type = constants.CL_TYPE.lighthouse # Default
-    vc_image = input_parser.DEFAULT_CL_IMAGES[vc_type]
+    # Validator client type/image to run behind each Charon node.
+    vc_type = constants.CL_TYPE.lighthouse
+    vc_image = input_parser.DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse]
+    if participant.charon_params != None:
+        vc_type = participant.charon_params.get("charon_vc", vc_type)
+        vc_image = participant.charon_params.get("charon_vc_image", vc_image)
 
-    # Extract charon_params (it's a dictionary, not a struct)
-    if hasattr(participant, "charon_params") and participant.charon_params != None:
-        charon_params = participant.charon_params
-        plan.print("DEBUG: charon_params is a dictionary: " + str(charon_params))
-
-        # Access dictionary keys
-        if "charon_vc" in charon_params and charon_params["charon_vc"] != None:
-            vc_type = charon_params["charon_vc"]
-            plan.print("DEBUG: Set vc_type to: " + str(vc_type))
-
-        if "charon_vc_image" in charon_params and charon_params["charon_vc_image"] != None:
-            vc_image = charon_params["charon_vc_image"]
-            plan.print("DEBUG: Set vc_image to: " + str(vc_image))
-
-    # Get the beacon node endpoints for each Charon node
-    beacon_endpoints = []
-    for i in range(charon_node_count):
-        # Just use the same beacon node for all Charon nodes
-        beacon_endpoints.append(cl_context.beacon_http_url)
+    # All Charon nodes connect to the same beacon node.
+    beacon_endpoint = cl_context.beacon_http_url
 
     # Fetch the actual genesis timestamp from the beacon node
     genesis_response = plan.run_sh(
@@ -198,9 +179,6 @@ done
         service_name=key_formatter_service.name, src="/opt/charon/charon-keys", name="charon-keys-" + str(vc_index),
     )
 
-    # Set the path to the formatted keys for the Charon cluster creation
-    # charon_keys_dir = "/opt/charon/charon-keys"
-
     charon_service_name = service_name + "-charon-split-keys-" + str(vc_index)
     CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/charon/"
     persistent_key = "data-{0}".format(charon_service_name)
@@ -211,9 +189,8 @@ done
     )
     files["/opt/charon/charon-keys"] = charon_keys_artifact
 
-    # Create a temporary service to run the Charon cluster creation
-    # Use the Charon image for cluster creation with the direct command
-    temp_service = plan.add_service(
+    # Run the Charon cluster creation (splits the existing keys across nodes).
+    plan.add_service(
         name=charon_service_name,
         config=ServiceConfig(
             image=image,
@@ -221,7 +198,7 @@ done
                 "create", "cluster",
                 "--name=test",
                 "--nodes=" + str(charon_node_count),
-                "--fee-recipient-addresses=" + constants.CHARON_VALIDATING_REWARDS_ACCOUNT,
+                "--fee-recipient-addresses=" + constants.VALIDATING_REWARDS_ACCOUNT,
                 "--withdrawal-addresses=" + constants.CHARON_WITHDRAWAL_ADDRESS,
                 "--split-existing-keys",
                 "--split-keys-dir=/opt/charon/charon-keys",
@@ -236,8 +213,9 @@ done
         ),
     )
 
-    # Restart the temporary service but with busy box image and keep running
-    temp_service = plan.add_service(
+    # Keep a busybox service running on the cluster volume so we can read the
+    # generated per-node files back out as artifacts.
+    cluster_files_service = plan.add_service(
         name=charon_service_name+"-keep-running",
         config=ServiceConfig(
             image="busybox:latest",
@@ -249,50 +227,19 @@ done
 
     # Wait a moment for files to be fully written
     plan.exec(
-        service_name=temp_service.name,
+        service_name=cluster_files_service.name,
         recipe=ExecRecipe(
             command=["sleep", "5"],
         ),
     )
-
-    # Store the Charon cluster files
-    # First store the entire cluster directory to get all shared files
-    charon_cluster_files = plan.store_service_files(
-        service_name=temp_service.name,
-        src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        name="charon-cluster-files-" + str(vc_index)
-    )
-
-    # Then store each node's files separately for individual access
-    charon_node_files = []
-    charon_lock = []
-    for i in range(charon_node_count):
-        charon_node_files.append(plan.store_service_files(
-            service_name=temp_service.name,
-            src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER + "/node" + str(i),
-            name="charon-node-files-" + str(i) + "-" + str(vc_index)
-        ))
 
     # Launch Charon nodes
     charon_services = []
     for i in range(charon_node_count):
         node_name = service_name + "-charon-" + str(i)
 
-        # cmd=["tail", "-f", "/dev/null"]
-
-        # cmd = [
-        #     "run",
-        #     "--testnet-chain-id=" + network_params.network_id,
-        #     "--testnet-fork-version=" + constants.GENESIS_FORK_VERSION,
-        #     "--testnet-genesis-timestamp=" + str(genesis_time),
-        #     "--testnet-name=testnet",
-        # ]
-
-        # if len(participant.vc_extra_params) > 0:
-        #     cmd.extend([param for param in participant.vc_extra_params])
-
         env_vars = {
-            "CHARON_LOG_LEVEL": "debug",
+            "CHARON_LOG_LEVEL": log_level,
             "CHARON_LOG_FORMAT": "console",
             "CHARON_P2P_RELAYS": "https://0.relay.obol.tech",
             "CHARON_BUILDER_API": "true",
@@ -303,7 +250,7 @@ done
             "CHARON_LOCK_FILE": "/opt/charon/.charon/node" + str(i) + "/cluster-lock.json",
             "CHARON_JAEGER_SERVICE": "node" + str(i),
             "CHARON_P2P_EXTERNAL_HOSTNAME": "node" + str(i),
-            "CHARON_BEACON_NODE_ENDPOINTS": beacon_endpoints[i],
+            "CHARON_BEACON_NODE_ENDPOINTS": beacon_endpoint,
             "CHARON_TESTNET_CHAIN_ID": network_params.network_id,
             "CHARON_TESTNET_FORK_VERSION": constants.GENESIS_FORK_VERSION,
             "CHARON_TESTNET_GENESIS_TIMESTAMP": str(genesis_time),
@@ -311,14 +258,8 @@ done
         }
 
         # Add any extra environment variables
-        if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+        if participant.vc_extra_env_vars:
             env_vars.update(participant.vc_extra_env_vars)
-
-        # Files to mount
-        # files = {
-        #     "/opt/charon/.charon/cluster": charon_node_files[i],
-        #     # "/opt/charon/.charon/cluster/cluster-lock.json": charon_lock[i],
-        # }
 
         # Ports configuration
         ports = {
@@ -336,11 +277,6 @@ done
                 transport_protocol="TCP",
                 application_protocol="http",
             ),
-            # constants.METRICS_PORT_ID: PortSpec(
-            #     number=CHARON_METRICS_PORT,
-            #     transport_protocol="TCP",
-            #     application_protocol="http",
-            # ),
         }
 
         # Charon run command
@@ -380,111 +316,49 @@ done
         )
         charon_services.append(charon_service)
 
-    # Now launch the validator clients that will connect to Charon nodes
-    vc_services = []
+    # Map each supported VC type to its launcher function.
+    vc_launchers = {
+        constants.VC_TYPE.lighthouse: launch_lighthouse_vc,
+        constants.VC_TYPE.lodestar: launch_lodestar_vc,
+        constants.VC_TYPE.teku: launch_teku_vc,
+        constants.VC_TYPE.nimbus: launch_nimbus_vc,
+        constants.VC_TYPE.prysm: launch_prysm_vc,
+    }
+    if vc_type not in vc_launchers:
+        fail(
+            "Unsupported Charon validator client '{0}'. Supported clients: {1}".format(
+                vc_type, ", ".join(vc_launchers.keys())
+            )
+        )
+    launch_vc = vc_launchers[vc_type]
+
+    # Launch one validator client per Charon node, connected to that node's validator API.
     for i in range(charon_node_count):
-        # Use the vc_type and vc_image determined earlier
-
-        # Create VC service name
-        vc_service_name = service_name + "-vc-" + str(i) + "-" + vc_type
-
-        # Get the Charon node's validator API URL
         charon_validator_api_url = "http://{0}:{1}".format(
-            charon_services[i].ip_address,
-            CHARON_VALIDATOR_API_PORT
+            charon_services[i].ip_address, CHARON_VALIDATOR_API_PORT
         )
 
-        # Create validator keys directory for this specific node
+        # Each node's validator keys come from the cluster-creation output.
         validator_keys_for_node = plan.store_service_files(
-            service_name=temp_service.name,
+            service_name=cluster_files_service.name,
             src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER + "/node" + str(i) + "/validator_keys",
-            name="validator-keys-node-" + str(i) + "-" + str(vc_index)
+            name="validator-keys-node-" + str(i) + "-" + str(vc_index),
         )
 
-        # Launch the validator client based on type
-        if vc_type == "lighthouse":
-            vc_service = launch_lighthouse_vc(
-                plan=plan,
-                vc_service_name=vc_service_name,
-                charon_validator_api_url=charon_validator_api_url,
-                validator_keys_artifact=validator_keys_for_node,
-                launcher=launcher,
-                participant=participant,
-                tolerations=tolerations,
-                node_selectors=node_selectors,
-                full_name=full_name + "-node" + str(i),
-                vc_index=vc_index,
-                node_index=i,
-                vc_image=vc_image
-            )
-            vc_services.append(vc_service)
-        elif vc_type == "lodestar":
-            vc_service = launch_lodestar_vc(
-                plan=plan,
-                vc_service_name=vc_service_name,
-                charon_validator_api_url=charon_validator_api_url,
-                validator_keys_artifact=validator_keys_for_node,
-                launcher=launcher,
-                participant=participant,
-                tolerations=tolerations,
-                node_selectors=node_selectors,
-                full_name=full_name + "-node" + str(i),
-                vc_index=vc_index,
-                node_index=i,
-                vc_image=vc_image
-            )
-            vc_services.append(vc_service)
-        elif vc_type == "teku":
-            vc_service = launch_teku_vc(
-                plan=plan,
-                vc_service_name=vc_service_name,
-                charon_validator_api_url=charon_validator_api_url,
-                validator_keys_artifact=validator_keys_for_node,
-                launcher=launcher,
-                participant=participant,
-                tolerations=tolerations,
-                node_selectors=node_selectors,
-                full_name=full_name + "-node" + str(i),
-                vc_index=vc_index,
-                node_index=i,
-                vc_image=vc_image
-            )
-            vc_services.append(vc_service)
-        elif vc_type == "nimbus":
-            vc_service = launch_nimbus_vc(
-                plan=plan,
-                vc_service_name=vc_service_name,
-                charon_validator_api_url=charon_validator_api_url,
-                validator_keys_artifact=validator_keys_for_node,
-                launcher=launcher,
-                participant=participant,
-                tolerations=tolerations,
-                node_selectors=node_selectors,
-                full_name=full_name + "-node" + str(i),
-                vc_index=vc_index,
-                node_index=i,
-                vc_image=vc_image
-            )
-            vc_services.append(vc_service)
-        elif vc_type == "prysm":
-            vc_service = launch_prysm_vc(
-                plan=plan,
-                vc_service_name=vc_service_name,
-                charon_validator_api_url=charon_validator_api_url,
-                validator_keys_artifact=validator_keys_for_node,
-                launcher=launcher,
-                participant=participant,
-                tolerations=tolerations,
-                node_selectors=node_selectors,
-                full_name=full_name + "-node" + str(i),
-                vc_index=vc_index,
-                node_index=i,
-                vc_image=vc_image
-            )
-            vc_services.append(vc_service)
-        else:
-            # For now, only lighthouse, lodestar, teku, nimbus, and prysm are supported
-            fail("Only lighthouse, lodestar, teku, nimbus, and prysm validator clients are currently supported with Charon")
+        launch_vc(
+            plan=plan,
+            vc_service_name=service_name + "-vc-" + str(i) + "-" + vc_type,
+            charon_validator_api_url=charon_validator_api_url,
+            validator_keys_artifact=validator_keys_for_node,
+            launcher=launcher,
+            participant=participant,
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            full_name=full_name + "-node" + str(i),
+            vc_index=vc_index,
+            node_index=i,
+            vc_image=vc_image,
+        )
 
     # Return the first Charon service as the main service
     validator_metrics_port = charon_services[0].ports["monitoring"]
@@ -527,14 +401,6 @@ set -e
 # Install required packages
 apt-get update && apt-get install -y curl jq wget
 
-# Wait for Charon node to be available
-# while ! curl "${LIGHTHOUSE_BEACON_NODE_ADDRESS}/eth/v1/node/health" 2>/dev/null; do
-#   echo "Waiting for ${LIGHTHOUSE_BEACON_NODE_ADDRESS} to become available..."
-#   sleep 5
-# done
-
-echo "Charon node is available, proceeding with key import..."
-
 # Stage 1: Import validator keys
 for f in /opt/charon/keys/keystore-*.json; do
   if [ -f "$f" ]; then
@@ -569,7 +435,7 @@ exec lighthouse validator \\
         "NODE": "node" + str(node_index),
         "RUST_BACKTRACE": "full"
     }
-    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+    if participant.vc_extra_env_vars:
         env_vars.update(participant.vc_extra_env_vars)
 
     # Files to mount
@@ -602,8 +468,8 @@ exec lighthouse validator \\
                 client_type=constants.CLIENT_TYPES.validator,
                 image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
-                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+                extra_labels=participant.vc_extra_labels,
+                supernode=participant.supernode,
             ),
             tolerations=tolerations,
             node_selectors=node_selectors,
@@ -695,7 +561,7 @@ exec node /usr/app/packages/cli/bin/lodestar validator \\
 """
 
     # Add extra params if specified
-    if hasattr(participant, "vc_extra_params") and len(participant.vc_extra_params) > 0:
+    if participant.vc_extra_params:
         extra_params = " \\\n    " + " \\\n    ".join(participant.vc_extra_params)
         run_script_content += extra_params
 
@@ -710,17 +576,13 @@ exec node /usr/app/packages/cli/bin/lodestar validator \\
         name="lodestar-run-script-" + str(node_index) + "-" + str(vc_index),
     )
 
-    # Debug: Print that the script artifact has been created
-    plan.print("Created Lodestar run script artifact: lodestar-run-script-" + str(node_index) + "-" + str(vc_index))
-    plan.print("You can download this script using: kurtosis files download <enclave> lodestar-run-script-" + str(node_index) + "-" + str(vc_index))
-
     # Environment variables
     env_vars = {
         "BEACON_NODE_ADDRESS": charon_validator_api_url,
         "BUILDER_API_ENABLED": "true",
         "NODE": "node" + str(node_index),
     }
-    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+    if participant.vc_extra_env_vars:
         env_vars.update(participant.vc_extra_env_vars)
 
     # Files to mount - Charon keys + standard genesis data + run script
@@ -755,8 +617,8 @@ exec node /usr/app/packages/cli/bin/lodestar validator \\
                 client_type=constants.CLIENT_TYPES.validator,
                 image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
-                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+                extra_labels=participant.vc_extra_labels,
+                supernode=participant.supernode,
             ),
             tolerations=tolerations,
             node_selectors=node_selectors,
@@ -806,10 +668,6 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
         name="teku-config-" + str(node_index) + "-" + str(vc_index),
     )
 
-    # Debug: Print that the config artifact has been created
-    plan.print("Created Teku config artifact: teku-config-" + str(node_index) + "-" + str(vc_index))
-    plan.print("You can download this config using: kurtosis files download <enclave> teku-config-" + str(node_index) + "-" + str(vc_index))
-
     # Teku validator command based on standard teku.star but with Charon-specific flags
     cmd = [
         "validator-client",
@@ -827,16 +685,13 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
         "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
     ]
 
-    # print the cmd
-    plan.print("cmd: " + str(cmd))
-
     # Add extra params if specified
-    if hasattr(participant, "vc_extra_params") and len(participant.vc_extra_params) > 0:
+    if participant.vc_extra_params:
         cmd.extend([param for param in participant.vc_extra_params])
 
     # Environment variables
     env_vars = {}
-    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+    if participant.vc_extra_env_vars:
         env_vars.update(participant.vc_extra_env_vars)
 
     # Files to mount - Charon keys + standard genesis data + teku config
@@ -862,9 +717,7 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
         config=ServiceConfig(
             image=vc_image,
             ports=ports,
-            cmd = cmd,
-            # cmd=["tail", "-f", "/dev/null"],
-            # entrypoint= ["sh", "-c"],
+            cmd=cmd,
             env_vars=env_vars,
             files=files,
             labels=shared_utils.label_maker(
@@ -872,8 +725,8 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
                 client_type=constants.CLIENT_TYPES.validator,
                 image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
-                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+                extra_labels=participant.vc_extra_labels,
+                supernode=participant.supernode,
             ),
             tolerations=tolerations,
             node_selectors=node_selectors,
@@ -996,7 +849,6 @@ tail -f /dev/null
     }
 
     # Create the key import service
-    plan.print("Creating Nimbus key import service: " + key_import_service_name)
     key_import_service = plan.add_service(
         name=key_import_service_name,
         config=ServiceConfig(
@@ -1010,8 +862,6 @@ tail -f /dev/null
     )
 
     # Step 2: Wait for key import to complete and then extract the keys as an artifact
-    plan.print("Waiting for key import to complete...")
-
     # Wait for the completion marker file to be created
     plan.exec(
         service_name=key_import_service_name,
@@ -1068,7 +918,7 @@ exec "$NIMBUS_VC_PATH" \\
 """
 
     # Add extra params if specified
-    if hasattr(participant, "vc_extra_params") and len(participant.vc_extra_params) > 0:
+    if participant.vc_extra_params:
         extra_params = " \\\n  " + " \\\n  ".join(participant.vc_extra_params)
         vc_run_script = vc_run_script.replace("--distributed", "--distributed" + extra_params)
 
@@ -1088,7 +938,7 @@ exec "$NIMBUS_VC_PATH" \\
         "BEACON_NODE_ADDRESS": charon_validator_api_url,
         "NODE": "node" + str(node_index),
     }
-    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+    if participant.vc_extra_env_vars:
         vc_env_vars.update(participant.vc_extra_env_vars)
 
     # Files to mount for VC - imported keys + VC script
@@ -1107,7 +957,6 @@ exec "$NIMBUS_VC_PATH" \\
     }
 
     # Create the actual validator client service
-    plan.print("Creating Nimbus validator client service: " + vc_service_name)
     vc_service = plan.add_service(
         name=vc_service_name,
         config=ServiceConfig(
@@ -1122,8 +971,8 @@ exec "$NIMBUS_VC_PATH" \\
                 client_type=constants.CLIENT_TYPES.validator,
                 image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
-                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+                extra_labels=participant.vc_extra_labels,
+                supernode=participant.supernode,
             ),
             tolerations=tolerations,
             node_selectors=node_selectors,
@@ -1212,7 +1061,7 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
 """
 
     # Add extra params if specified
-    if hasattr(participant, "vc_extra_params") and len(participant.vc_extra_params) > 0:
+    if participant.vc_extra_params:
         extra_params = " \\\n    " + " \\\n    ".join(participant.vc_extra_params)
         run_script_content = run_script_content.replace("--distributed", "--distributed" + extra_params)
 
@@ -1227,15 +1076,11 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
         name="prysm-run-script-" + str(node_index) + "-" + str(vc_index),
     )
 
-    # Debug: Print that the script artifact has been created
-    plan.print("Created Prysm run script artifact: prysm-run-script-" + str(node_index) + "-" + str(vc_index))
-    plan.print("You can download this script using: kurtosis files download <enclave> prysm-run-script-" + str(node_index) + "-" + str(vc_index))
-
     # Environment variables
     env_vars = {
         "BEACON_NODE_ADDRESS": charon_validator_api_url,
     }
-    if hasattr(participant, "vc_extra_env_vars") and participant.vc_extra_env_vars:
+    if participant.vc_extra_env_vars:
         env_vars.update(participant.vc_extra_env_vars)
 
     # Files to mount - Charon keys + standard genesis data + run script
@@ -1270,8 +1115,8 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
                 client_type=constants.CLIENT_TYPES.validator,
                 image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels if hasattr(participant, "vc_extra_labels") else {},
-                supernode=participant.supernode if hasattr(participant, "supernode") else False,
+                extra_labels=participant.vc_extra_labels,
+                supernode=participant.supernode,
             ),
             tolerations=tolerations,
             node_selectors=node_selectors,
@@ -1281,8 +1126,7 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
 
     return vc_service
 
-def new_charon_launcher(el_cl_genesis_data, jwt_file):
+def new_charon_launcher(el_cl_genesis_data):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
-        jwt_file=jwt_file,
     )

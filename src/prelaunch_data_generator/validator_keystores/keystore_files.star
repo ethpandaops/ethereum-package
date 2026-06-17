@@ -17,7 +17,7 @@ def new_keystore_files(
         raw_keys_relative_dirpath=raw_keys_relative_dirpath,
         raw_secrets_relative_dirpath=raw_secrets_relative_dirpath,
         nimbus_keys_relative_dirpath=nimbus_keys_relative_dirpath,
-        prysm_relative_dirpath=prysm_relative_dirpath,  
+        prysm_relative_dirpath=prysm_relative_dirpath,
         teku_keys_relative_dirpath=teku_keys_relative_dirpath,
         teku_secrets_relative_dirpath=teku_secrets_relative_dirpath,
         raw_keys_secrets_relative_dirpath=raw_keys_secrets_relative_dirpath,

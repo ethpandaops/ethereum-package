@@ -102,7 +102,8 @@ def get_vc_config(
             fail("vero VC requires `use_remote_signer` to be true")
         if keymanager_enabled:
             fail("vero VC doesn't support the Keymanager API")
-    # Charon is now handled by charon_launcher.star
+    elif vc_type == constants.VC_TYPE.charon:
+        return None
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
     elif vc_type == constants.VC_TYPE.consensoor:
