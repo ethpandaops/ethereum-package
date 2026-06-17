@@ -2026,7 +2026,7 @@ def default_participant():
         "vc_max_cpu": 0,
         "vc_min_mem": 0,
         # Charon-specific parameters
-        "charon_node_count": 3,
+        "charon_node_count": 4,
         "charon_params": {
             "charon_vc": "lighthouse",
             "charon_vc_image": DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse],

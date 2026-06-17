@@ -2230,7 +2230,9 @@ participants:
 # Create your network_params.yaml with Charon configuration
 kurtosis run --enclave charon-testnet github.com/ethpandaops/ethereum-package --args-file network_params.yaml
 ```
+
 ### Running Charon Networks from source code
+
 ```bash
 # Create your network_params.yaml with Charon configuration
 kurtosis run . --args-file network_params_charon_example.yaml
