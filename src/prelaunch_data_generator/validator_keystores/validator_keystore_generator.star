@@ -305,6 +305,28 @@ def generate_validator_keystores_in_parallel(
         )
         generate_keystores_cmd += teku_permissions_cmd
         generate_keystores_cmd += raw_secret_permissions_cmd
+
+        # Collect the raw keys and secrets together in a single folder, which
+        # Charon consumes when splitting keys across its cluster nodes. Only
+        # Charon participants need this, so vanilla VCs skip the extra copy.
+        if participant.vc_type == constants.VC_TYPE.charon:
+            generate_keystores_cmd += (
+                " && cp -r "
+                + output_dirpath
+                + RAW_KEYS_DIRNAME
+                + "/ "
+                + output_dirpath
+                + RAW_KEYS_SECRETS_DIRNAME
+            )
+            generate_keystores_cmd += (
+                " && cp -r "
+                + output_dirpath
+                + RAW_SECRETS_DIRNAME
+                + "/ "
+                + output_dirpath
+                + RAW_KEYS_SECRETS_DIRNAME
+            )
+
         all_generation_commands.append(generate_keystores_cmd)
         all_output_dirpaths.append(output_dirpath)
 
@@ -368,6 +390,13 @@ def generate_validator_keystores_in_parallel(
 
         # This is necessary because the way Kurtosis currently implements artifact-storing is
         base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
+        # The raw-keys-secrets folder is only generated for Charon participants
+        # (see above), so only reference it for them; vanilla VCs leave it empty.
+        raw_keys_secrets_relative_dirpath = ""
+        if participant.vc_type == constants.VC_TYPE.charon:
+            raw_keys_secrets_relative_dirpath = shared_utils.path_join(
+                base_dirname_in_artifact, RAW_KEYS_SECRETS_DIRNAME
+            )
         to_add = keystore_files_module.new_keystore_files(
             artifact_name,
             shared_utils.path_join(base_dirname_in_artifact),
@@ -377,6 +406,7 @@ def generate_validator_keystores_in_parallel(
             shared_utils.path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
+            raw_keys_secrets_relative_dirpath,
         )
 
         keystore_files.append(to_add)
