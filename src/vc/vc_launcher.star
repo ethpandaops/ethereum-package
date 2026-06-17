@@ -217,7 +217,9 @@ def get_vc_config(
             otel_otlp_grpc_url=otel_otlp_grpc_url,
             vc_binary_artifact=vc_binary_artifact,
         )
-    # Charon is now handled by charon_launcher.star
+    elif vc_type == constants.VC_TYPE.charon:
+        # Charon is launched separately by charon_launcher.star.
+        return None
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
     elif vc_type == constants.VC_TYPE.consensoor:

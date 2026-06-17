@@ -140,24 +140,27 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
 
         running_total_validator_count += participant.validator_count
 
-        # add another folder which contains all the raw keys and secret
-        # create the folder
-        all_output_dirpaths.append(output_dirpath + RAW_KEYS_SECRETS_DIRNAME)
-        # copy 
-        all_sub_command_strs.append(
-            "cp -r "
-            + output_dirpath
-            + "keys/ "
-            + output_dirpath
-            + "raw-keys-secrets"
-        )
-        all_sub_command_strs.append(
-            "cp -r "
-            + output_dirpath
-            + "secrets/ "
-            + output_dirpath
-            + "raw-keys-secrets"
-        )
+        # Collect the raw keys and secrets together in a single folder, which
+        # Charon consumes when splitting keys across its cluster nodes. Only
+        # Charon participants need this, so vanilla VCs skip the extra copy.
+        if participant.vc_type == constants.VC_TYPE.charon:
+            all_output_dirpaths.append(output_dirpath + RAW_KEYS_SECRETS_DIRNAME)
+            all_sub_command_strs.append(
+                "cp -r "
+                + output_dirpath
+                + RAW_KEYS_DIRNAME
+                + "/ "
+                + output_dirpath
+                + RAW_KEYS_SECRETS_DIRNAME
+            )
+            all_sub_command_strs.append(
+                "cp -r "
+                + output_dirpath
+                + RAW_SECRETS_DIRNAME
+                + "/ "
+                + output_dirpath
+                + RAW_KEYS_SECRETS_DIRNAME
+            )
 
     command_str = " && ".join(all_sub_command_strs)
 
@@ -190,7 +193,6 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
             keystore_stop_index - 1,
         )
 
-        # copt the keys and secrets into a new directory and store the artifact
         artifact_name = plan.store_service_files(
             service_name,
             output_dirpath,
@@ -199,6 +201,13 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
         )
 
         base_dirname_in_artifact = shared_utils.path_base(output_dirpath)
+        # The raw-keys-secrets folder is only generated for Charon participants
+        # (see above), so only reference it for them; vanilla VCs leave it empty.
+        raw_keys_secrets_relative_dirpath = ""
+        if participant.vc_type == constants.VC_TYPE.charon:
+            raw_keys_secrets_relative_dirpath = shared_utils.path_join(
+                base_dirname_in_artifact, RAW_KEYS_SECRETS_DIRNAME
+            )
         to_add = keystore_files_module.new_keystore_files(
             artifact_name,
             shared_utils.path_join(base_dirname_in_artifact),
@@ -208,7 +217,7 @@ def generate_validator_keystores(plan, mnemonic, participants, docker_cache_para
             shared_utils.path_join(base_dirname_in_artifact, PRYSM_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, TEKU_KEYS_DIRNAME),
             shared_utils.path_join(base_dirname_in_artifact, TEKU_SECRETS_DIRNAME),
-            shared_utils.path_join(base_dirname_in_artifact, RAW_KEYS_SECRETS_DIRNAME),
+            raw_keys_secrets_relative_dirpath,
         )
 
         keystore_files.append(to_add)
