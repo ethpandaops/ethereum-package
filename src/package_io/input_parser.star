@@ -2752,8 +2752,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if mev_type == constants.BUILDOOR_MEV_TYPE and index == 0:
             apply_buildoor_payload_attributes_flags(participant)
 
-        if participant["vc_type"] == "charon":
-            participant["vc_extra_params"].append("--builder-api=true")
+        # Note: Charon enables the builder API via the CHARON_BUILDER_API env var
+        # set in charon_launcher.star, not through vc_extra_params (those flow into
+        # the inner validator client, where "--builder-api" is not a valid flag).
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
