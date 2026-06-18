@@ -2574,8 +2574,9 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if participant["vc_type"] == "vero":
             participant["vc_extra_params"].append("--use-external-builder")
 
-        if participant["vc_type"] == "charon":
-            participant["vc_extra_params"].append("--builder-api=true")
+        # Note: Charon enables the builder API via the CHARON_BUILDER_API env var
+        # set in charon_launcher.star, not through vc_extra_params (those flow into
+        # the inner validator client, where "--builder-api" is not a valid flag).
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(

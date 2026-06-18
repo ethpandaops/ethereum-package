@@ -348,8 +348,11 @@ def launch_participant_network(
     vc_service_info = {}
     # Charon launches its own cluster of services immediately (rather than
     # deferring to the parallel launch below), so its contexts are collected
-    # here keyed by participant index and merged in afterwards.
+    # here keyed by participant index and merged in afterwards. It also produces
+    # extra Prometheus scrape jobs (one per Charon node and validator client)
+    # that are returned to the caller to register with Prometheus.
     charon_vc_contexts = {}
+    charon_metrics_jobs = []
     for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
@@ -562,7 +565,7 @@ def launch_participant_network(
         # vc_context, so it bypasses the deferred config / parallel-launch path
         # used by the other validator clients.
         if vc_type == constants.VC_TYPE.charon:
-            charon_vc_contexts[index] = charon_launcher.launch(
+            charon_vc_contexts[index], charon_jobs = charon_launcher.launch(
                 plan=plan,
                 launcher=charon_launcher.new_charon_launcher(
                     el_cl_genesis_data=el_cl_data
@@ -579,7 +582,9 @@ def launch_participant_network(
                 network_params=network_params,
                 port_publisher=args_with_right_defaults.port_publisher,
                 vc_index=current_vc_index,
+                genesis_timestamp=final_genesis_timestamp,
             )
+            charon_metrics_jobs.extend(charon_jobs)
             current_vc_index += 1
             continue
 
@@ -737,4 +742,5 @@ def launch_participant_network(
         network_id,
         el_cl_data.osaka_time,
         el_cl_data.shadowfork_block_height,
+        charon_metrics_jobs,
     )

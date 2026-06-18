@@ -4,11 +4,13 @@ constants = import_module("../package_io/constants.star")
 vc_shared = import_module("./shared.star")
 vc_context = import_module("./vc_context.star")
 node_metrics = import_module("../node_metrics_info.star")
+prometheus = import_module("../prometheus/prometheus_launcher.star")
 
 # Charon specific ports
 CHARON_VALIDATOR_API_PORT = 3600
 CHARON_P2P_TCP_PORT = 3610
 CHARON_MONITORING_PORT = 3620
+CHARON_RELAY_HTTP_PORT = 3640
 
 # Fallback node count if the participant doesn't request a valid one.
 DEFAULT_CHARON_NODE_COUNT = 4
@@ -36,12 +38,13 @@ def launch(
     network_params,
     port_publisher,
     vc_index,
+    genesis_timestamp,
 ):
     """
     Launch a Charon distributed validator client
     """
     if node_keystore_files == None:
-        return None
+        return None, []
 
     tolerations = shared_utils.get_tolerations(
         specific_container_tolerations=participant.vc_tolerations,
@@ -68,27 +71,20 @@ def launch(
     # All Charon nodes connect to the same beacon node.
     beacon_endpoint = cl_context.beacon_http_url
 
-    # Fetch the actual genesis timestamp from the beacon node
-    genesis_response = plan.run_sh(
-        name="get-genesis-timestamp",
-        description="Get the genesis timestamp from the beacon node",
-        run="curl -s " + cl_context.beacon_http_url + "/eth/v1/beacon/genesis | jq -r '.data.genesis_time' | tr -d '\\n'",
+    # The genesis timestamp is already known from genesis generation, so use it
+    # directly rather than querying the (possibly not-yet-ready) beacon node.
+    genesis_time = genesis_timestamp
+
+    # Raw validator key/secret directory paths. node_keystore_files is non-None
+    # here (we returned early above otherwise).
+    validator_keys_dirpath = shared_utils.path_join(
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+        node_keystore_files.raw_keys_relative_dirpath,
     )
-
-    # Extract the genesis timestamp from the response
-    genesis_time = genesis_response.output
-
-    # Get the raw validator keys directory path
-    validator_keys_dirpath = ""
-    if node_keystore_files:
-        validator_keys_dirpath = shared_utils.path_join(
-            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-            node_keystore_files.raw_keys_relative_dirpath,
-        )
-        validator_secrets_dirpath = shared_utils.path_join(
-            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-            node_keystore_files.raw_secrets_relative_dirpath,
-        )
+    validator_secrets_dirpath = shared_utils.path_join(
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+        node_keystore_files.raw_secrets_relative_dirpath,
+    )
 
     # Create a temporary service to format the validator keys for Charon
     # Use busybox as a lightweight image for key formatting
@@ -179,6 +175,9 @@ done
         service_name=key_formatter_service.name, src="/opt/charon/charon-keys", name="charon-keys-" + str(vc_index),
     )
 
+    # The formatter has served its purpose; tear it down so it doesn't linger.
+    plan.remove_service(name=key_formatter_service.name)
+
     charon_service_name = service_name + "-charon-split-keys-" + str(vc_index)
     CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/charon/"
     persistent_key = "data-{0}".format(charon_service_name)
@@ -233,6 +232,37 @@ done
         ),
     )
 
+    # Spin up a local Charon relay so the nodes can discover each other within
+    # the enclave instead of depending on the public Obol relay network.
+    relay_service = plan.add_service(
+        name=service_name + "-charon-relay-" + str(vc_index),
+        config=ServiceConfig(
+            image=image,
+            cmd=[
+                "relay",
+                "--data-dir=/opt/charon",
+                "--http-address=0.0.0.0:" + str(CHARON_RELAY_HTTP_PORT),
+                "--p2p-tcp-address=0.0.0.0:" + str(CHARON_P2P_TCP_PORT),
+                "--monitoring-address=0.0.0.0:" + str(CHARON_MONITORING_PORT),
+            ],
+            ports={
+                "relay-http": PortSpec(
+                    number=CHARON_RELAY_HTTP_PORT,
+                    transport_protocol="TCP",
+                    application_protocol="http",
+                ),
+                "p2p-tcp": PortSpec(
+                    number=CHARON_P2P_TCP_PORT,
+                    transport_protocol="TCP",
+                ),
+            },
+            user=User(uid=0, gid=0),
+        ),
+    )
+    charon_relay_url = "http://{0}:{1}".format(
+        relay_service.ip_address, CHARON_RELAY_HTTP_PORT
+    )
+
     # Launch Charon nodes
     charon_services = []
     for i in range(charon_node_count):
@@ -241,7 +271,7 @@ done
         env_vars = {
             "CHARON_LOG_LEVEL": log_level,
             "CHARON_LOG_FORMAT": "console",
-            "CHARON_P2P_RELAYS": "https://0.relay.obol.tech",
+            "CHARON_P2P_RELAYS": charon_relay_url,
             "CHARON_BUILDER_API": "true",
             "CHARON_VALIDATOR_API_ADDRESS": "0.0.0.0:" + str(CHARON_VALIDATOR_API_PORT),
             "CHARON_P2P_TCP_ADDRESS": "0.0.0.0:" + str(CHARON_P2P_TCP_PORT),
@@ -333,6 +363,7 @@ done
     launch_vc = vc_launchers[vc_type]
 
     # Launch one validator client per Charon node, connected to that node's validator API.
+    vc_services = []
     for i in range(charon_node_count):
         charon_validator_api_url = "http://{0}:{1}".format(
             charon_services[i].ip_address, CHARON_VALIDATOR_API_PORT
@@ -345,7 +376,7 @@ done
             name="validator-keys-node-" + str(i) + "-" + str(vc_index),
         )
 
-        launch_vc(
+        vc_services.append(launch_vc(
             plan=plan,
             vc_service_name=service_name + "-vc-" + str(i) + "-" + vc_type,
             charon_validator_api_url=charon_validator_api_url,
@@ -358,9 +389,45 @@ done
             vc_index=vc_index,
             node_index=i,
             vc_image=vc_image,
-        )
+        ))
 
-    # Return the first Charon service as the main service
+    # The cluster files have all been extracted as artifacts; drop the busybox
+    # helper that was only kept alive (tail -f) to read them.
+    plan.remove_service(name=cluster_files_service.name)
+
+    # Node 0 is surfaced as the participant's primary vc_context (below). Register
+    # every other Charon node and all validator clients as additional Prometheus
+    # scrape jobs so the whole cluster is monitored, not just node 0.
+    metrics_jobs = []
+    for i in range(charon_node_count):
+        if i != 0:
+            charon_service = charon_services[i]
+            metrics_jobs.append(prometheus.new_metrics_job(
+                job_name=charon_service.name,
+                endpoint="{0}:{1}".format(
+                    charon_service.ip_address, CHARON_MONITORING_PORT
+                ),
+                metrics_path=vc_shared.METRICS_PATH,
+                labels={
+                    "service": charon_service.name,
+                    "client_type": constants.CLIENT_TYPES.validator,
+                    "client_name": constants.VC_TYPE.charon,
+                },
+            ))
+        vc_service = vc_services[i]
+        vc_metrics_port = vc_service.ports[constants.METRICS_PORT_ID]
+        metrics_jobs.append(prometheus.new_metrics_job(
+            job_name=vc_service.name,
+            endpoint="{0}:{1}".format(vc_service.ip_address, vc_metrics_port.number),
+            metrics_path=vc_shared.METRICS_PATH,
+            labels={
+                "service": vc_service.name,
+                "client_type": constants.CLIENT_TYPES.validator,
+                "client_name": vc_type,
+            },
+        ))
+
+    # Surface Charon node 0 as the participant's primary vc_context.
     validator_metrics_port = charon_services[0].ports["monitoring"]
     validator_metrics_url = "{0}:{1}".format(
         charon_services[0].ip_address, validator_metrics_port.number
@@ -373,7 +440,7 @@ done
         client_name=constants.VC_TYPE.charon,
         service_name=charon_services[0].name,
         metrics_info=validator_node_metrics_info,
-    )
+    ), metrics_jobs
 
 def launch_lighthouse_vc(
     plan,
@@ -397,9 +464,6 @@ def launch_lighthouse_vc(
     # Create the startup script that implements the two-stage approach
     startup_script = """#!/bin/bash
 set -e
-
-# Install required packages
-apt-get update && apt-get install -y curl jq wget
 
 # Stage 1: Import validator keys
 for f in /opt/charon/keys/keystore-*.json; do

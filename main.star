@@ -530,6 +530,7 @@ def run(plan, args={}):
         network_id,
         osaka_time,
         shadowfork_block_height,
+        charon_metrics_jobs,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults,
@@ -548,6 +549,10 @@ def run(plan, args={}):
         otel_otlp_http_traces_url,
         detected_backend,
     )
+
+    # Charon clusters expose extra per-node/per-VC metrics endpoints that aren't
+    # captured by the single vc_context per participant; register them directly.
+    prometheus_additional_metrics_jobs.extend(charon_metrics_jobs)
 
     for p in all_participants:
         if p.el_context != None:
