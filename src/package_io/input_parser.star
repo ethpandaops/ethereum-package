@@ -2576,10 +2576,12 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 participant["cl_extra_params"].append(
                     "--features=AlwaysPrepareExecutionPayload"
                 )
-            else:
+            elif participant["cl_type"] != "consensoor":
+                # consensoor emits payload_attributes on every slot natively, so
+                # it needs no flag. teku and nimbus have no way to, so fail.
                 fail(
                     "mev_type 'buildoor' requires the first participant's cl_type to be one of "
-                    + "[lodestar, prysm, lighthouse, grandine]: '{0}' has no flag to build a payload on each slot ".format(
+                    + "[lodestar, prysm, lighthouse, grandine, consensoor]: '{0}' has no flag to build a payload on each slot ".format(
                         participant["cl_type"]
                     )
                     + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
