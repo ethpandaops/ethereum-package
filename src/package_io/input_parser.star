@@ -2563,6 +2563,31 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if participant["vc_type"] == "vero":
             participant["vc_extra_params"].append("--use-external-builder")
 
+        # buildoor builds against the first participant's payload_attributes
+        # SSE stream, so that CL must emit them on every slot.
+        if mev_type == constants.BUILDOOR_MEV_TYPE and index == 0:
+            if participant["cl_type"] == "lodestar":
+                participant["cl_extra_params"].append("--emitPayloadAttributes=true")
+            elif participant["cl_type"] == "prysm":
+                participant["cl_extra_params"].append("--prepare-all-payloads")
+            elif participant["cl_type"] == "lighthouse":
+                participant["cl_extra_params"].append("--always-prepare-payload")
+            elif participant["cl_type"] == "grandine":
+                participant["cl_extra_params"].append(
+                    "--features=AlwaysPrepareExecutionPayload"
+                )
+            elif participant["cl_type"] == "consensoor":
+                participant["cl_extra_params"].append("--emit-payload-attributes")
+            else:
+                # teku and nimbus have no flag to emit payload_attributes.
+                fail(
+                    "mev_type 'buildoor' requires the first participant's cl_type to be one of "
+                    + "[lodestar, prysm, lighthouse, grandine, consensoor]: '{0}' has no flag to build a payload on each slot ".format(
+                        participant["cl_type"]
+                    )
+                    + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
+                )
+
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
         num_participants + 1, len(str(num_participants + 1))
