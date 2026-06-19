@@ -2577,14 +2577,18 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 # lighthouse requires --suggested-fee-recipient alongside this,
                 # which the beacon node always sets when an EL is attached.
                 participant["cl_extra_params"].append("--always-prepare-payload")
+            elif participant["cl_type"] == "grandine":
+                participant["cl_extra_params"].append(
+                    "--features=AlwaysPrepareExecutionPayload"
+                )
             else:
-                # teku, nimbus, grandine and consensoor have no flag to emit
+                # teku, nimbus and consensoor have no flag to emit
                 # payload_attributes for non-proposed slots, so buildoor cannot
                 # reliably trigger block building against them as the first
                 # participant. Fail fast rather than silently misbehave.
                 fail(
                     "mev_type 'buildoor' requires the first participant's cl_type to be one of "
-                    + "[lodestar, prysm, lighthouse]: '{0}' has no flag to build a payload on each slot ".format(
+                    + "[lodestar, prysm, lighthouse, grandine]: '{0}' has no flag to build a payload on each slot ".format(
                         participant["cl_type"]
                     )
                     + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
