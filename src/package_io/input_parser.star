@@ -2563,29 +2563,20 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         if participant["vc_type"] == "vero":
             participant["vc_extra_params"].append("--use-external-builder")
 
-        # buildoor connects directly to the first participant's beacon node and
-        # subscribes to its payload_attributes SSE stream to know when to build.
-        # The CL only emits these events for slots it proposes unless forced to
-        # always prepare payloads, so the relevant flag must be added to the
-        # first participant's CL when buildoor is the MEV type.
+        # buildoor builds against the first participant's payload_attributes
+        # SSE stream, so that CL must emit them on every slot.
         if mev_type == constants.BUILDOOR_MEV_TYPE and index == 0:
             if participant["cl_type"] == "lodestar":
                 participant["cl_extra_params"].append("--emitPayloadAttributes=true")
             elif participant["cl_type"] == "prysm":
                 participant["cl_extra_params"].append("--prepare-all-payloads")
             elif participant["cl_type"] == "lighthouse":
-                # lighthouse requires --suggested-fee-recipient alongside this,
-                # which the beacon node always sets when an EL is attached.
                 participant["cl_extra_params"].append("--always-prepare-payload")
             elif participant["cl_type"] == "grandine":
                 participant["cl_extra_params"].append(
                     "--features=AlwaysPrepareExecutionPayload"
                 )
             else:
-                # teku, nimbus and consensoor have no flag to emit
-                # payload_attributes for non-proposed slots, so buildoor cannot
-                # reliably trigger block building against them as the first
-                # participant. Fail fast rather than silently misbehave.
                 fail(
                     "mev_type 'buildoor' requires the first participant's cl_type to be one of "
                     + "[lodestar, prysm, lighthouse, grandine]: '{0}' has no flag to build a payload on each slot ".format(
