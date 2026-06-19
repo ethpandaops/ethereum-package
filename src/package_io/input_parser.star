@@ -304,6 +304,38 @@ def input_parser(plan, input_args):
             )
         )
 
+    # Per-participant buildoor instances (buildoor_enabled flag). Independent of
+    # the global mev_type. Each flagged participant gets its own buildoor wired
+    # directly to its own CL, so it must not be combined with a global mev_type
+    # (that would double-wire the participant's builder endpoint).
+    buildoor_participant_count = 0
+    for participant in result["participants"]:
+        if participant.get("buildoor_enabled"):
+            buildoor_participant_count += 1
+    if buildoor_participant_count > 0:
+        if result.get("mev_type") != None:
+            fail(
+                "Per-participant buildoor_enabled cannot be combined with a global mev_type ({0}). ".format(
+                    result.get("mev_type")
+                )
+                + "Use buildoor_enabled on participants for dedicated per-participant builders, "
+                + "or mev_type: buildoor for a single shared builder, but not both."
+            )
+        # Every buildoor instance is its own builder and needs its own builder BLS
+        # key registered at genesis. builder_count must cover all of them.
+        if result["network_params"]["builder_count"] < buildoor_participant_count:
+            fail(
+                "buildoor_enabled is set on {0} participant(s) but network_params.builder_count is {1}. ".format(
+                    buildoor_participant_count,
+                    result["network_params"]["builder_count"],
+                )
+                + "Each per-participant buildoor needs its own builder BLS key registered at genesis; "
+                + "set network_params.builder_count to at least {0}.".format(
+                    buildoor_participant_count
+                )
+            )
+        result = enrich_buildoor_per_participant(result)
+
     if (
         result["mev_params"].get("mev_builder_subsidy") != 0
         and result["network_params"].get("prefunded_accounts") == {}
@@ -795,6 +827,7 @@ def input_parser(plan, input_args):
                 blobber_enabled=participant["blobber_enabled"],
                 blobber_extra_params=participant["blobber_extra_params"],
                 blobber_image=participant["blobber_image"],
+                buildoor_enabled=participant["buildoor_enabled"],
                 keymanager_enabled=participant["keymanager_enabled"],
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
                 checkpoint_sync_enabled=participant["checkpoint_sync_enabled"],
@@ -2047,6 +2080,7 @@ def default_participant():
         "blobber_enabled": False,
         "blobber_extra_params": [],
         "blobber_image": "ethpandaops/blobber:latest",
+        "buildoor_enabled": False,
         "builder_network_params": None,
         "keymanager_enabled": None,
         "vc_beacon_node_indices": None,
@@ -2491,6 +2525,98 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
     return parsed_arguments_dict
 
 
+# Wire the CL (and VC) of a single participant to an external builder/relay at
+# mev_url. Shared by the global mev_type flow and the per-participant buildoor
+# flow so both stay in sync as new clients are added.
+def apply_external_builder_flags(participant, mev_url, gas_limit):
+    if participant["cl_type"] == "lighthouse":
+        participant["cl_extra_params"].append("--builder={0}".format(mev_url))
+    if participant["vc_type"] == "lighthouse":
+        if (
+            gas_limit == 0
+        ):  # if the gas limit is set we already enable builder-proposals
+            participant["vc_extra_params"].append("--builder-proposals")
+    if participant["cl_type"] == "lodestar":
+        participant["cl_extra_params"].append("--builder")
+        participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
+    if participant["vc_type"] == "lodestar":
+        participant["vc_extra_params"].append("--builder")
+    if participant["cl_type"] == "nimbus":
+        participant["cl_extra_params"].append("--payload-builder=true")
+        participant["cl_extra_params"].append(
+            "--payload-builder-url={0}".format(mev_url)
+        )
+    if participant["vc_type"] == "nimbus":
+        participant["vc_extra_params"].append("--payload-builder=true")
+    if participant["cl_type"] == "teku":
+        participant["cl_extra_params"].append("--builder-endpoint={0}".format(mev_url))
+        participant["cl_extra_params"].append(
+            "--validators-builder-registration-default-enabled=true"
+        )
+    if participant["vc_type"] == "teku":
+        participant["vc_extra_params"].append(
+            "--validators-builder-registration-default-enabled=true"
+        )
+    if participant["cl_type"] == "prysm":
+        participant["cl_extra_params"].append("--http-mev-relay={0}".format(mev_url))
+    if participant["vc_type"] == "prysm":
+        participant["vc_extra_params"].append("--enable-builder")
+    if participant["cl_type"] == "grandine":
+        participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
+    if participant["vc_type"] == "vero":
+        participant["vc_extra_params"].append("--use-external-builder")
+
+
+# buildoor builds a payload from the CL's payload_attributes SSE stream, so the
+# CL feeding a buildoor instance must emit them on every slot.
+def apply_buildoor_payload_attributes_flags(participant):
+    if participant["cl_type"] == "lodestar":
+        participant["cl_extra_params"].append("--emitPayloadAttributes=true")
+    elif participant["cl_type"] == "prysm":
+        participant["cl_extra_params"].append("--prepare-all-payloads")
+    elif participant["cl_type"] == "lighthouse":
+        participant["cl_extra_params"].append("--always-prepare-payload")
+    elif participant["cl_type"] == "grandine":
+        participant["cl_extra_params"].append(
+            "--features=AlwaysPrepareExecutionPayload"
+        )
+    elif participant["cl_type"] == "consensoor":
+        participant["cl_extra_params"].append("--emit-payload-attributes")
+    elif participant["cl_type"] == "teku":
+        participant["cl_extra_params"].append(
+            "--Xfork-choice-updated-always-send-payload-attributes=true"
+        )
+    else:
+        # nimbus has no flag to emit payload_attributes.
+        fail(
+            "buildoor requires the CL feeding it to be one of "
+            + "[lodestar, prysm, lighthouse, grandine, consensoor, teku]: '{0}' has no flag to build a payload on each slot ".format(
+                participant["cl_type"]
+            )
+            + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
+        )
+
+
+# Per-participant buildoor: every participant with buildoor_enabled gets its own
+# dedicated buildoor service (buildoor-<index>) wired directly to its own CL.
+# This is independent of the global mev_type buildoor flow (which runs a single
+# shared buildoor for the whole network).
+def enrich_buildoor_per_participant(parsed_arguments_dict):
+    participants = parsed_arguments_dict["participants"]
+    gas_limit = parsed_arguments_dict["network_params"]["gas_limit"]
+    for index, participant in enumerate(participants):
+        if not participant.get("buildoor_enabled"):
+            continue
+        mev_url = "http://{0}-{1}:{2}".format(
+            constants.BUILDOOR_SERVICE_NAME,
+            index,
+            constants.BUILDOOR_API_PORT,
+        )
+        apply_external_builder_flags(participant, mev_url, gas_limit)
+        apply_buildoor_payload_attributes_flags(participant)
+    return parsed_arguments_dict
+
+
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
@@ -2521,76 +2647,16 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 mev_port,
             )
 
-        if participant["cl_type"] == "lighthouse":
-            participant["cl_extra_params"].append("--builder={0}".format(mev_url))
-        if participant["vc_type"] == "lighthouse":
-            if (
-                parsed_arguments_dict["network_params"]["gas_limit"] == 0
-            ):  # if the gas limit is set we already enable builder-proposals
-                participant["vc_extra_params"].append("--builder-proposals")
-        if participant["cl_type"] == "lodestar":
-            participant["cl_extra_params"].append("--builder")
-            participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
-        if participant["vc_type"] == "lodestar":
-            participant["vc_extra_params"].append("--builder")
-        if participant["cl_type"] == "nimbus":
-            participant["cl_extra_params"].append("--payload-builder=true")
-            participant["cl_extra_params"].append(
-                "--payload-builder-url={0}".format(mev_url)
-            )
-        if participant["vc_type"] == "nimbus":
-            participant["vc_extra_params"].append("--payload-builder=true")
-        if participant["cl_type"] == "teku":
-            participant["cl_extra_params"].append(
-                "--builder-endpoint={0}".format(mev_url)
-            )
-            participant["cl_extra_params"].append(
-                "--validators-builder-registration-default-enabled=true"
-            )
-        if participant["vc_type"] == "teku":
-            participant["vc_extra_params"].append(
-                "--validators-builder-registration-default-enabled=true"
-            )
-        if participant["cl_type"] == "prysm":
-            participant["cl_extra_params"].append(
-                "--http-mev-relay={0}".format(mev_url)
-            )
-        if participant["vc_type"] == "prysm":
-            participant["vc_extra_params"].append("--enable-builder")
-        if participant["cl_type"] == "grandine":
-            participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
-
-        if participant["vc_type"] == "vero":
-            participant["vc_extra_params"].append("--use-external-builder")
+        apply_external_builder_flags(
+            participant,
+            mev_url,
+            parsed_arguments_dict["network_params"]["gas_limit"],
+        )
 
         # buildoor builds against the first participant's payload_attributes
         # SSE stream, so that CL must emit them on every slot.
         if mev_type == constants.BUILDOOR_MEV_TYPE and index == 0:
-            if participant["cl_type"] == "lodestar":
-                participant["cl_extra_params"].append("--emitPayloadAttributes=true")
-            elif participant["cl_type"] == "prysm":
-                participant["cl_extra_params"].append("--prepare-all-payloads")
-            elif participant["cl_type"] == "lighthouse":
-                participant["cl_extra_params"].append("--always-prepare-payload")
-            elif participant["cl_type"] == "grandine":
-                participant["cl_extra_params"].append(
-                    "--features=AlwaysPrepareExecutionPayload"
-                )
-            elif participant["cl_type"] == "consensoor":
-                participant["cl_extra_params"].append("--emit-payload-attributes")
-            elif participant["cl_type"] == "teku":
-                participant["cl_extra_params"].append(
-                    "--Xfork-choice-updated-always-send-payload-attributes=true"
-                )
-            else:
-                # nimbus has no flag to emit payload_attributes.
-                fail(
-                    "mev_type 'buildoor' requires the first participant's cl_type to be one of "
-                    + "[lodestar, prysm, lighthouse, grandine, consensoor, teku]: '{0}' has no flag to build a payload on each slot ".format(
-                        participant["cl_type"]
-                    )
-                    + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
-                )
+            apply_buildoor_payload_attributes_flags(participant)
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(

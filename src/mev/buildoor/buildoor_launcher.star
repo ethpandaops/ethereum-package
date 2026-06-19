@@ -27,6 +27,7 @@ def launch_buildoor(
     global_tolerations,
     builder_bls_secret_key=None,
     validator_ranges_artifact=None,
+    service_name=BUILDOOR_SERVICE_NAME,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -75,7 +76,7 @@ def launch_buildoor(
         files[VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE] = validator_ranges_artifact
 
     buildoor_service = plan.add_service(
-        name=BUILDOOR_SERVICE_NAME,
+        name=service_name,
         config=ServiceConfig(
             image=buildoor_params.image,
             ports={
@@ -98,11 +99,11 @@ def launch_buildoor(
     return {
         "mev_endpoint": "http://{0}@{1}:{2}".format(
             constants.DEFAULT_MEV_PUBKEY,
-            BUILDOOR_SERVICE_NAME,
+            service_name,
             BUILDOOR_API_PORT,
         ),
         "api_url": "http://{0}:{1}".format(
-            BUILDOOR_SERVICE_NAME,
+            service_name,
             BUILDOOR_API_PORT,
         ),
     }

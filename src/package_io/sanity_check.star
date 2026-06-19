@@ -72,6 +72,7 @@ PARTICIPANT_CATEGORIES = {
         "blobber_enabled",
         "blobber_extra_params",
         "blobber_image",
+        "buildoor_enabled",
         "builder_network_params",
         "keymanager_enabled",
         "vc_beacon_node_indices",

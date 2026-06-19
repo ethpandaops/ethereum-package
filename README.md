@@ -656,6 +656,19 @@ participants:
       # Additional labels to be added. Default to empty
       labels: {}
 
+    # Buildoor can be enabled per participant with the `buildoor_enabled` flag.
+    # When set, a dedicated buildoor builder+relay instance (service
+    # `buildoor-<index>`) is spun up and wired directly to this participant's own
+    # CL/EL, and the CL is configured to emit payload_attributes on every slot.
+    # This is the per-participant alternative to the network-wide `mev_type: buildoor`
+    # (a single shared builder) and the two cannot be combined.
+    # Each enabled participant is its own builder and gets its own builder BLS key,
+    # so `network_params.builder_count` must be >= the number of buildoor-enabled
+    # participants (builders are registered at genesis, which requires gloas at
+    # genesis / gloas_fork_epoch: 0).
+    # Defaults to false
+    buildoor_enabled: false
+
     # Blobber can be enabled with the `blobber_enabled` flag per client or globally
     # Defaults to false
     blobber_enabled: false
