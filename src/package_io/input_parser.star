@@ -2580,7 +2580,7 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 participant["cl_extra_params"].append("--emit-payload-attributes")
             elif participant["cl_type"] == "teku":
                 participant["cl_extra_params"].append(
-                    "-Xfork-choice-updated-always-send-payload-attributes=true"
+                    "--Xfork-choice-updated-always-send-payload-attributes=true"
                 )
             else:
                 # nimbus has no flag to emit payload_attributes.
