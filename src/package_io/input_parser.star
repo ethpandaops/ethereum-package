@@ -2578,11 +2578,15 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 )
             elif participant["cl_type"] == "consensoor":
                 participant["cl_extra_params"].append("--emit-payload-attributes")
+            elif participant["cl_type"] == "teku":
+                participant["cl_extra_params"].append(
+                    "-Xfork-choice-updated-always-send-payload-attributes=true"
+                )
             else:
-                # teku and nimbus have no flag to emit payload_attributes.
+                # nimbus has no flag to emit payload_attributes.
                 fail(
                     "mev_type 'buildoor' requires the first participant's cl_type to be one of "
-                    + "[lodestar, prysm, lighthouse, grandine, consensoor]: '{0}' has no flag to build a payload on each slot ".format(
+                    + "[lodestar, prysm, lighthouse, grandine, consensoor, teku]: '{0}' has no flag to build a payload on each slot ".format(
                         participant["cl_type"]
                     )
                     + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
