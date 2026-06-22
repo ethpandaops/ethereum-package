@@ -1,5 +1,5 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-prometheus = import_module("github.com/kurtosis-tech/prometheus-package/main.star")
+prometheus = import_module("github.com/KaloyanTanev/prometheus-package/main.star@kalo/add-remote-write-kt-package-name")
 constants = import_module("../package_io/constants.star")
 
 EXECUTION_CLIENT_TYPE = "execution"
@@ -13,47 +13,6 @@ METRICS_INFO_PATH_KEY = "path"
 METRICS_INFO_ADDITIONAL_CONFIG_KEY = "config"
 
 PROMETHEUS_DEFAULT_SCRAPE_INTERVAL = "15s"
-
-PROMETHEUS_CONFIG_DIR = "/config"
-PROMETHEUS_CONFIG_FILENAME = "prometheus-config.yml"
-
-# Rendered in-package (rather than via the external prometheus-package) so we can
-# append an optional remote_write block when a token is supplied. The scrape_config
-# section mirrors the upstream prometheus-package template.
-PROMETHEUS_CONFIG_TEMPLATE = """global:
-  scrape_interval: 15s
-scrape_configs:
-  {{- range $job := .MetricsJobs }}
-  - job_name: "{{ $job.Name }}"
-    metrics_path: "{{ $job.MetricsPath }}"
-    {{- if $job.ScrapeInterval }}
-    scrape_interval: {{ $job.ScrapeInterval }}
-    {{- end }}
-    static_configs:
-      - targets: ['{{ $job.Endpoint }}']
-        labels:{{ range $labelName, $labelValue := $job.Labels }}
-          {{ $labelName }}: "{{ $labelValue }}"
-        {{- end }}
-  {{- end }}
-{{- if .RemoteWriteToken }}
-remote_write:
-  - url: {{ .RemoteWriteUrl }}
-    authorization:
-      credentials: "{{ .RemoteWriteToken }}"
-    write_relabel_configs:
-      - source_labels: [job]
-        regex: '{{ .RemoteWriteJobRegex }}'
-        action: keep
-      # Charon dashboards query job="charon". Native scrape jobs are named after
-      # the service, so rewrite the job label to "charon" for Charon-node series
-      # (identified by client_name=charon; VCs keep their own job label).
-      - source_labels: [client_name]
-        regex: 'charon'
-        target_label: job
-        replacement: 'charon'
-        action: replace
-{{- end }}
-"""
 
 
 def launch_prometheus(
@@ -89,70 +48,50 @@ def launch_prometheus(
         0,
     )
 
-    # Render the Prometheus config in-package so a remote_write block can be added
-    # when prometheus_params.remote_write_token is supplied (e.g. via Kurtosis args
-    # for shipping metrics to Obol central monitoring). remote_write stays off when
-    # the token is empty.
-    config_artifact = plan.render_templates(
-        config={
-            PROMETHEUS_CONFIG_FILENAME: struct(
-                template=PROMETHEUS_CONFIG_TEMPLATE,
-                data={
-                    "MetricsJobs": metrics_jobs,
-                    "RemoteWriteUrl": prometheus_params.remote_write_url,
-                    "RemoteWriteToken": prometheus_params.remote_write_token,
-                    "RemoteWriteJobRegex": prometheus_params.remote_write_job_regex,
-                },
-            ),
-        },
-        name="prometheus-config",
-    )
-
-    image = prometheus_params.image
-    if image == "":
-        image = "prom/prometheus:latest"
-
-    prometheus_service = plan.add_service(
-        name="prometheus",
-        config=ServiceConfig(
-            image=image,
-            ports={
-                constants.HTTP_PORT_ID: PortSpec(
-                    number=9090,
-                    transport_protocol="TCP",
-                    application_protocol="http",
-                ),
+    # remote_write is enabled only when a token is supplied (e.g. via Kurtosis args
+    # for shipping Charon metrics to Obol central monitoring); empty token => no
+    # remote_write block, identical to upstream behaviour.
+    remote_write_configs = []
+    if prometheus_params.remote_write_token != "":
+        remote_write_configs = [
+            {
+                "Url": prometheus_params.remote_write_url,
+                "BearerToken": prometheus_params.remote_write_token,
+                "WriteRelabelConfigs": [
+                    # Only ship jobs matching the configured regex (Charon nodes + VCs).
+                    {
+                        "SourceLabels": ["job"],
+                        "Regex": prometheus_params.remote_write_job_regex,
+                        "Action": "keep",
+                    },
+                    # Charon dashboards query job="charon"; native scrape jobs are
+                    # named after the service, so rewrite the job label to "charon"
+                    # for Charon-node series (VCs keep their own job label).
+                    {
+                        "SourceLabels": ["client_name"],
+                        "Regex": "charon",
+                        "TargetLabel": "job",
+                        "Replacement": "charon",
+                        "Action": "replace",
+                    },
+                ],
             },
-            files={
-                PROMETHEUS_CONFIG_DIR: config_artifact,
-            },
-            cmd=[
-                "--config.file="
-                + PROMETHEUS_CONFIG_DIR
-                + "/"
-                + PROMETHEUS_CONFIG_FILENAME,
-                "--storage.tsdb.path=/prometheus",
-                "--storage.tsdb.retention.time="
-                + str(prometheus_params.storage_tsdb_retention_time),
-                "--storage.tsdb.retention.size="
-                + str(prometheus_params.storage_tsdb_retention_size),
-                "--storage.tsdb.wal-compression",
-                "--web.console.libraries=/etc/prometheus/console_libraries",
-                "--web.console.templates=/etc/prometheus/consoles",
-                "--web.enable-lifecycle",
-            ],
-            min_cpu=prometheus_params.min_cpu,
-            max_cpu=prometheus_params.max_cpu,
-            min_memory=prometheus_params.min_mem,
-            max_memory=prometheus_params.max_mem,
-            node_selectors=global_node_selectors,
-            public_ports=public_ports,
-        ),
-    )
+        ]
 
-    return "http://{0}:{1}".format(
-        prometheus_service.ip_address,
-        prometheus_service.ports[constants.HTTP_PORT_ID].number,
+    return prometheus.run(
+        plan,
+        metrics_jobs,
+        "prometheus",
+        min_cpu=prometheus_params.min_cpu,
+        max_cpu=prometheus_params.max_cpu,
+        min_memory=prometheus_params.min_mem,
+        max_memory=prometheus_params.max_mem,
+        node_selectors=global_node_selectors,
+        storage_tsdb_retention_time=prometheus_params.storage_tsdb_retention_time,
+        storage_tsdb_retention_size=prometheus_params.storage_tsdb_retention_size,
+        image=prometheus_params.image,
+        public_ports=public_ports,
+        remote_write_configs=remote_write_configs,
     )
 
 
