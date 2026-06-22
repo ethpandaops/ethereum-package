@@ -32,6 +32,7 @@ VC_TYPE = struct(
     grandine="grandine",
     consensoor="consensoor",
     charon="charon",
+    vouch="vouch",
 )
 
 REMOTE_SIGNER_TYPE = struct(web3signer="web3signer")
