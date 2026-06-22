@@ -195,7 +195,9 @@ done
             image=image,
             cmd=[
                 "create", "cluster",
-                "--name=test",
+                # cluster_name label shown in Charon dashboards; mirror the
+                # docker-compose convention "kurtosis-<cl>-<vc>".
+                "--name=kurtosis-" + cl_context.client_name + "-" + vc_type,
                 "--nodes=" + str(charon_node_count),
                 "--fee-recipient-addresses=" + constants.VALIDATING_REWARDS_ACCOUNT,
                 "--withdrawal-addresses=" + constants.CHARON_WITHDRAWAL_ADDRESS,
@@ -204,7 +206,7 @@ done
                 "--testnet-chain-id=" + network_params.network_id,
                 "--testnet-fork-version=" + constants.GENESIS_FORK_VERSION,
                 "--testnet-genesis-timestamp=" + str(genesis_time),
-                "--testnet-name=kurtosis-testnet",
+                "--testnet-name=kurtosis",
                 "--cluster-dir=" + CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             ],
             files=files,
@@ -244,6 +246,10 @@ done
                 "--http-address=0.0.0.0:" + str(CHARON_RELAY_HTTP_PORT),
                 "--p2p-tcp-address=0.0.0.0:" + str(CHARON_P2P_TCP_PORT),
                 "--monitoring-address=0.0.0.0:" + str(CHARON_MONITORING_PORT),
+                # The relay lives on a private Kurtosis network; without this it
+                # advertises no addresses in its ENR and nodes fail to resolve it
+                # ("timeout resolving bootnode ENR").
+                "--p2p-advertise-private-addresses=true",
             ],
             ports={
                 "relay-http": PortSpec(
@@ -284,7 +290,7 @@ done
             "CHARON_TESTNET_CHAIN_ID": network_params.network_id,
             "CHARON_TESTNET_FORK_VERSION": constants.GENESIS_FORK_VERSION,
             "CHARON_TESTNET_GENESIS_TIMESTAMP": str(genesis_time),
-            "CHARON_TESTNET_NAME": "kurtosis-testnet",
+            "CHARON_TESTNET_NAME": "kurtosis",
         }
 
         # Add any extra environment variables
@@ -315,7 +321,7 @@ done
             "--testnet-chain-id=" + network_params.network_id,
             "--testnet-fork-version=" + constants.GENESIS_FORK_VERSION,
             "--testnet-genesis-timestamp=" + str(genesis_time),
-            "--testnet-name=kurtosis-testnet",
+            "--testnet-name=kurtosis",
         ]
 
         # Add the service
@@ -353,6 +359,7 @@ done
         constants.VC_TYPE.teku: launch_teku_vc,
         constants.VC_TYPE.nimbus: launch_nimbus_vc,
         constants.VC_TYPE.prysm: launch_prysm_vc,
+        constants.VC_TYPE.vouch: launch_vouch_vc,
     }
     if vc_type not in vc_launchers:
         fail(
@@ -515,6 +522,9 @@ exec lighthouse validator \\
             number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
             transport_protocol="TCP",
             application_protocol="http",
+            # Importing 256 keystores sequentially can exceed the default port
+            # readiness timeout; allow plenty of time so the VC isn't rolled back.
+            wait="15m",
         ),
     }
 
@@ -663,6 +673,9 @@ exec node /usr/app/packages/cli/bin/lodestar validator \\
             number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
             transport_protocol="TCP",
             application_protocol="http",
+            # Importing 256 keystores sequentially can exceed the default port
+            # readiness timeout; allow plenty of time so the VC isn't rolled back.
+            wait="15m",
         ),
     }
 
@@ -739,7 +752,6 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
         "--beacon-node-api-endpoint=" + charon_validator_api_url,
         "--config-file=/opt/charon/teku/teku-config.yaml",
         "--validators-external-signer-slashing-protection-enabled=true",
-        "--validators-proposer-blinded-blocks-enabled=true",
         "--validators-builder-registration-default-enabled=true",
         "--Xobol-dvt-integration-enabled=true",
         "--logging=DEBUG",
@@ -772,6 +784,9 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
             number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
             transport_protocol="TCP",
             application_protocol="http",
+            # Importing 256 keystores sequentially can exceed the default port
+            # readiness timeout; allow plenty of time so the VC isn't rolled back.
+            wait="15m",
         ),
     }
 
@@ -1017,6 +1032,9 @@ exec "$NIMBUS_VC_PATH" \\
             number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
             transport_protocol="TCP",
             application_protocol="http",
+            # Importing 256 keystores sequentially can exceed the default port
+            # readiness timeout; allow plenty of time so the VC isn't rolled back.
+            wait="15m",
         ),
     }
 
@@ -1117,7 +1135,6 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
     --enable-beacon-rest-api \\
     --beacon-rest-api-provider="$BEACON_NODE_ADDRESS" \\
     --beacon-rpc-provider="$BEACON_NODE_ADDRESS" \\
-    --beacon-rpc-gateway-provider="$BEACON_NODE_ADDRESS" \\
     --chain-config-file="/opt/prysm/config.yaml" \\
     --monitoring-host=0.0.0.0 \\
     --monitoring-port=""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """ \\
@@ -1161,6 +1178,9 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
             number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
             transport_protocol="TCP",
             application_protocol="http",
+            # Importing 256 keystores sequentially can exceed the default port
+            # readiness timeout; allow plenty of time so the VC isn't rolled back.
+            wait="15m",
         ),
     }
 
@@ -1176,6 +1196,153 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
             files=files,
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.prysm,
+                client_type=constants.CLIENT_TYPES.validator,
+                image=vc_image[-constants.MAX_LABEL_LENGTH:],
+                connected_client="charon-node-" + str(node_index),
+                extra_labels=participant.vc_extra_labels,
+                supernode=participant.supernode,
+            ),
+            tolerations=tolerations,
+            node_selectors=node_selectors,
+            user=User(uid=0, gid=0),
+        ),
+    )
+
+    return vc_service
+
+def launch_vouch_vc(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    validator_keys_artifact,
+    launcher,
+    participant,
+    tolerations,
+    node_selectors,
+    full_name,
+    vc_index,
+    node_index,
+    vc_image
+):
+    """
+    Launch a Vouch validator client that connects to a Charon node.
+
+    Imports the Charon-split keystores into an ethdo wallet,
+    writes ~/.vouch.yml pointing at the Charon validator API, and runs vouch.
+    ethdo/yq are fetched at runtime (the attestant/vouch image ships neither),
+    with arch detection so it works on amd64 and arm64 hosts alike.
+    Prometheus metrics are exposed on the standard VC metrics port so Kurtosis'
+    readiness check passes and the cluster is scraped like every other VC.
+    """
+
+    ETHDO_VERSION = "1.37.3"
+
+    startup_script = """#!/usr/bin/env bash
+set -e
+
+# Only wget+ca-certificates are needed (for the ethdo download). Installing curl
+# pulls a large dependency chain that pushed startup past Kurtosis' port-readiness
+# window, so keep this minimal.
+apt-get update
+apt-get install -y --no-install-recommends wget ca-certificates
+
+# Match the host architecture so the downloaded ethdo binary actually runs.
+ARCH="$(uname -m)"
+case "${ARCH}" in
+  x86_64) DL_ARCH="amd64" ;;
+  aarch64|arm64) DL_ARCH="arm64" ;;
+  *) echo "Unsupported arch ${ARCH}"; exit 1 ;;
+esac
+
+mkdir -p /opt/vouch
+cd /opt/vouch
+
+# Install ethdo (used to import the Charon keystores into a wallet vouch can read).
+wget -q "https://github.com/wealdtech/ethdo/releases/download/v""" + ETHDO_VERSION + """/ethdo-""" + ETHDO_VERSION + """-linux-${DL_ARCH}.tar.gz" -O ethdo.tar.gz
+tar -xf ethdo.tar.gz
+rm ethdo.tar.gz
+
+# Passphrase protecting every account in the local wallet.
+account_passphrase="1234"
+
+./ethdo wallet create --wallet=vals --passphrase=""
+
+accounts_list=()
+for keystore_file in /home/charon/validator_keys/keystore-*.json; do
+    basename="$(basename "${keystore_file%.json}")"
+    password_file="/home/charon/validator_keys/${basename}.txt"
+    index="${basename##*-}"
+    account_name="vals/val${index}"
+    passphrase_content=$(cat "$password_file")
+
+    echo "Importing account ${account_name} from ${keystore_file}"
+    ./ethdo account import \\
+        --account="$account_name" \\
+        --keystore="$keystore_file" \\
+        --keystore-passphrase="$passphrase_content" \\
+        --passphrase="$account_passphrase" --allow-weak-passphrases
+
+    accounts_list+=("$account_name")
+done
+
+yq_accounts=$(printf "      - %s\\n" "${accounts_list[@]}")
+echo -n "$account_passphrase" > /opt/vouch/account_passphrase.txt
+
+cat > ~/.vouch.yml <<EOF
+beacon-node-address: $BEACON_NODE_ADDRESS
+log-level: "debug"
+accountmanager:
+  wallet:
+    accounts:
+$yq_accounts
+    passphrases:
+      - file:///opt/vouch/account_passphrase.txt
+blockrelay:
+  fallback-fee-recipient: \"""" + constants.VALIDATING_REWARDS_ACCOUNT + """\"
+metrics:
+  prometheus:
+    listen-address: "0.0.0.0:""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """"
+EOF
+
+echo "Starting vouch for charon node""" + str(node_index) + """"
+# vouch binary lives at /app/vouch in the attestant/vouch image (not on PATH).
+exec /app/vouch
+"""
+
+    env_vars = {
+        "BEACON_NODE_ADDRESS": charon_validator_api_url,
+    }
+    if participant.vc_extra_env_vars:
+        env_vars.update(participant.vc_extra_env_vars)
+
+    # Vouch reads duties from the Charon validator API and signs with the locally
+    # imported wallet, so it needs the Charon keys but not the genesis data.
+    files = {
+        "/home/charon/validator_keys": validator_keys_artifact,
+    }
+
+    ports = {
+        constants.METRICS_PORT_ID: PortSpec(
+            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
+            transport_protocol="TCP",
+            application_protocol="http",
+            # Importing 256 keystores sequentially can exceed the default port
+            # readiness timeout; allow plenty of time so the VC isn't rolled back.
+            wait="15m",
+        ),
+    }
+
+    vc_service = plan.add_service(
+        name=vc_service_name,
+        config=ServiceConfig(
+            image=vc_image,
+            ports=ports,
+            cmd=[startup_script],
+            entrypoint=["bash", "-c"],
+            env_vars=env_vars,
+            files=files,
+            labels=shared_utils.label_maker(
+                client=constants.VC_TYPE.vouch,
                 client_type=constants.CLIENT_TYPES.validator,
                 image=vc_image[-constants.MAX_LABEL_LENGTH:],
                 connected_client="charon-node-" + str(node_index),
