@@ -1030,6 +1030,11 @@ def input_parser(plan, input_args):
             min_mem=result["prometheus_params"]["min_mem"],
             max_mem=result["prometheus_params"]["max_mem"],
             image=result["prometheus_params"]["image"],
+            remote_write_url=result["prometheus_params"]["remote_write_url"],
+            remote_write_token=result["prometheus_params"]["remote_write_token"],
+            remote_write_job_regex=result["prometheus_params"][
+                "remote_write_job_regex"
+            ],
         ),
         grafana_params=struct(
             additional_dashboards=result["grafana_params"]["additional_dashboards"],
@@ -2253,6 +2258,15 @@ def get_default_prometheus_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "prom/prometheus:v3.2.1",
+        # remote_write: ship metrics to an external endpoint (e.g. Obol central
+        # monitoring). Disabled unless remote_write_token is non-empty. The token
+        # is intended to be supplied at runtime via --args-file / Kurtosis args.
+        "remote_write_url": "https://vm.monitoring.gcp.obol.tech/write",
+        "remote_write_token": "",
+        # Native scrape jobs are named after the Kurtosis service (e.g.
+        # vc-1-geth-lighthouse-charon-charon-0), so match jobs *containing* charon
+        # rather than starting with it; keeps Charon nodes + their VCs, drops EL/CL.
+        "remote_write_job_regex": ".*charon.*",
     }
 
 
