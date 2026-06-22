@@ -1704,13 +1704,6 @@ def parse_network_params(plan, input_args):
         ).get("count", 1)
 
     if result["network_params"]["builder_count"] > 0:
-        if result["network_params"]["gloas_fork_epoch"] != 0:
-            fail(
-                "builder_count is {0} but gloas_fork_epoch is {1}. Builders are only supported when gloas_fork_epoch is 0 (GLOAS at genesis).".format(
-                    result["network_params"]["builder_count"],
-                    result["network_params"]["gloas_fork_epoch"],
-                )
-            )
         builder_mnemonic_entry = {
             "mnemonic": constants.DEFAULT_MNEMONIC,
             "start": actual_num_validators,
