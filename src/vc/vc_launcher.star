@@ -104,6 +104,11 @@ def get_vc_config(
             fail("vero VC doesn't support the Keymanager API")
     elif vc_type == constants.VC_TYPE.charon:
         return None
+    elif vc_type == constants.VC_TYPE.vouch:
+        fail(
+            "vouch VC is only supported as a Charon distributed-validator client; "
+            + "set vc_type=charon with charon_params.charon_vc=vouch"
+        )
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
     elif vc_type == constants.VC_TYPE.consensoor:

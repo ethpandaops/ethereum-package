@@ -1229,7 +1229,7 @@ def launch_vouch_vc(
 
     Imports the Charon-split keystores into an ethdo wallet,
     writes ~/.vouch.yml pointing at the Charon validator API, and runs vouch.
-    ethdo/yq are fetched at runtime (the attestant/vouch image ships neither),
+    ethdo is fetched at runtime (the attestant/vouch image doesn't ship it),
     with arch detection so it works on amd64 and arm64 hosts alike.
     Prometheus metrics are exposed on the standard VC metrics port so Kurtosis'
     readiness check passes and the cluster is scraped like every other VC.
