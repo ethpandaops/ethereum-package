@@ -29,7 +29,6 @@ def launch_buildoor(
     builder_bls_secret_key=None,
     validator_ranges_artifact=None,
     api_port=BUILDOOR_API_PORT,
-    extra_data=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -54,9 +53,6 @@ def launch_buildoor(
         "--wallet-privkey={0}".format(wallet_key),
         "--api-port={0}".format(api_port),
     ]
-
-    if extra_data != None:
-        cmd.append("--extra-data={0}".format(extra_data))
 
     if buildoor_params.builder_api:
         cmd.append("--builder-api-enabled")

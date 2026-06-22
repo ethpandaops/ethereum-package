@@ -1694,6 +1694,12 @@ def parse_network_params(plan, input_args):
             + " is not supported, it can only be mainnet or minimal"
         )
 
+    # buildoor is the only builder, so the number of genesis-registered builders
+    # is driven directly by buildoor_params.count. builder_count never needs to
+    # be set separately when using buildoor.
+    if result.get("mev_type") == constants.BUILDOOR_MEV_TYPE:
+        result["network_params"]["builder_count"] = result["buildoor_params"]["count"]
+
     if result["network_params"]["builder_count"] > 0:
         if result["network_params"]["gloas_fork_epoch"] != 0:
             fail(
