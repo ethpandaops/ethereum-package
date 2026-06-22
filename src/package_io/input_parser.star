@@ -1203,6 +1203,7 @@ def input_parser(plan, input_args):
             extra_args=result["buildoor_params"]["extra_args"],
             builder_api=result["buildoor_params"]["builder_api"],
             epbs_builder=result["buildoor_params"]["epbs_builder"],
+            state_db=result["buildoor_params"]["state_db"],
         ),
         trueblocks_params=struct(
             image=result["trueblocks_params"]["image"],
@@ -2416,6 +2417,7 @@ def get_default_buildoor_params():
         "extra_args": [],
         "builder_api": True,
         "epbs_builder": True,
+        "state_db": False,
     }
 
 

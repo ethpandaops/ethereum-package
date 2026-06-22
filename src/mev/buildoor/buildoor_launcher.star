@@ -9,6 +9,8 @@ VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE = "/validator-ranges"
 VALIDATOR_RANGES_ARTIFACT_NAME = "validator-ranges"
 VALIDATOR_RANGES_FILE_NAME = "validator-ranges.yaml"
 
+STATE_DB_PATH_ON_SERVICE = "/tmp/buildoor-state.db"
+
 MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 128
@@ -57,6 +59,9 @@ def launch_buildoor(
 
     if buildoor_params.epbs_builder:
         cmd.append("--epbs-enabled")
+
+    if buildoor_params.state_db:
+        cmd.append("--state-db={0}".format(STATE_DB_PATH_ON_SERVICE))
 
     if validator_ranges_artifact != None:
         cmd.append(
