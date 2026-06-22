@@ -1,0 +1,100 @@
+participants:
+  # first participant is used as buildoor backend, use custom image till client teams get their apis ready
+  - el_type: nethermind
+    el_image: ethpandaops/nethermind:glamsterdam-devnet-5
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:glamsterdam-devnet-5
+    cl_extra_params:
+      - --emitPayloadAttributes
+    vc_type: lodestar
+    vc_image: ethpandaops/lodestar:glamsterdam-devnet-5
+    cl_log_level: "debug"
+  - el_type: ethrex
+    el_image: ethpandaops/ethrex:glamsterdam-devnet-5
+    cl_type: prysm
+    cl_image: gcr.io/offchainlabs/prysm/beacon-chain:latest
+    vc_type: prysm
+    vc_image: gcr.io/offchainlabs/prysm/validator:latest
+    cl_log_level: "debug"
+    count: 2
+    # Mount the proposer-settings file (defined under top-level extra_files) into
+    # the Prysm validator and tell it to use it. This is how the Gloas builder API
+    # relay URL + max_execution_payment are configured (no CLI flags exist for them).
+    vc_extra_mounts:
+      /proposer: proposer-settings.json
+    vc_extra_params:
+      - --proposer-settings-file=/proposer/proposer-settings.json
+
+network_params:
+  gloas_fork_epoch: 1
+  preset: mainnet
+  min_validator_withdrawability_delay: 1
+  shard_committee_period: 1
+  churn_limit_quotient: 16
+  seconds_per_slot: 6
+  gas_limit: 150000000
+
+mev_type: buildoor
+
+additional_services:
+  - dora
+  - spamoor
+  - assertoor
+
+# The proposer-settings JSON consumed by the Prysm validator above.
+# - relays:                points the validator at the buildoor builder-API service
+# - max_execution_payment: 0.2 ETH expressed in Gwei (0.2 * 1e9 = 200000000)
+extra_files:
+  proposer-settings.json: |
+    {
+      "default_config": {
+        "fee_recipient": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
+        "builder": {
+          "enabled": true,
+          "gas_limit": 150000000,
+          "relays": ["http://buildoor:8080"],
+          "max_execution_payment": 200000000
+        }
+      }
+    }
+
+buildoor_params:
+  image: buildoor:builder-api-gloas-impl-100
+  builder_api: true
+  epbs_builder: false
+  extra_args:
+    - --lifecycle
+    - --builder-api-require-auth
+    - --gloas-builder-api-subsidy=700000000
+
+spamoor_params:
+  image: ethpandaops/spamoor:master
+  spammers:
+    - scenario: evm-fuzz
+      config:
+        throughput: 10
+    - scenario: eoatx
+      config:
+        throughput: 10
+    - scenario: erc20tx
+      config:
+        throughput: 10
+    - scenario: erc721tx
+      config:
+        throughput: 10
+    - scenario: erc1155tx
+      config:
+        throughput: 10
+    - scenario: uniswap-swaps
+      config:
+        throughput: 10
+
+dora_params:
+  image: ethpandaops/dora:latest
+
+assertoor_params:
+  run_stability_check: false
+  run_block_proposal_check: false
+  tests:
+    - { file: "https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/master/playbooks/dev/fund-wallet.yaml", config: { targetAddress: "0x332E43696A505EF45b9319973785F837ce5267b9" } }
+    - { file: "https://raw.githubusercontent.com/ethpandaops/assertoor/refs/heads/gloas-support/playbooks/gloas-dev/builder-lifecycle.yaml" }

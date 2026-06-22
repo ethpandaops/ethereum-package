@@ -468,6 +468,7 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "builder_api",
         "epbs_builder",
+        "state_db",
     ],
     "trueblocks_params": [
         "image",
