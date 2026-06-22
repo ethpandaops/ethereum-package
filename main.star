@@ -559,32 +559,46 @@ def run(plan, args={}):
             )
             break
 
-    builder_bls_secret_key = None
+    builder_bls_secret_keys = []
     if network_params.builder_count > 0:
         total_validator_count = 0
         for participant in args_with_right_defaults.participants:
             total_validator_count += participant.validator_count
-        builder_key_result = plan.run_sh(
-            name="derive-builder-bls-key",
-            description="Deriving builder BLS private key from mnemonic",
-            run='/app/ethdo account derive --mnemonic="{0}" --path="m/12381/3600/{1}/0/0" --show-private-key | grep "Private key" | sed "s/Private key: 0x//" | tr -d "\n"'.format(
-                network_params.preregistered_validator_keys_mnemonic,
-                total_validator_count,
-            ),
-            image="wealdtech/ethdo:latest",
-            tolerations=shared_utils.get_tolerations(
-                global_tolerations=global_tolerations
-            ),
-            node_selectors=global_node_selectors,
-        )
-        builder_bls_secret_key = builder_key_result.output
+
+        # buildoor runs one or more instances, each needing its own builder BLS
+        # key; other mev types only need a single key.
+        num_builder_keys = 1
+        if args_with_right_defaults.mev_type == constants.BUILDOOR_MEV_TYPE:
+            num_builder_keys = args_with_right_defaults.buildoor_params.count
+
+        for i in range(num_builder_keys):
+            builder_key_result = plan.run_sh(
+                name="derive-builder-bls-key-{0}".format(i),
+                description="Deriving builder BLS private key {0} from mnemonic".format(
+                    i
+                ),
+                run='/app/ethdo account derive --mnemonic="{0}" --path="m/12381/3600/{1}/0/0" --show-private-key | grep "Private key" | sed "s/Private key: 0x//" | tr -d "\n"'.format(
+                    network_params.preregistered_validator_keys_mnemonic,
+                    total_validator_count + i,
+                ),
+                image="wealdtech/ethdo:latest",
+                tolerations=shared_utils.get_tolerations(
+                    global_tolerations=global_tolerations
+                ),
+                node_selectors=global_node_selectors,
+            )
+            builder_bls_secret_keys.append(builder_key_result.output)
+
         plan.print(
             "Builder configuration: {0} builder(s) registered at genesis with 0x03 credentials".format(
                 network_params.builder_count
             )
         )
         plan.print("Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC))
-        plan.print("Builder BLS private key: {0}".format(builder_bls_secret_key))
+        for i in range(len(builder_bls_secret_keys)):
+            plan.print(
+                "Builder BLS private key {0}: {1}".format(i, builder_bls_secret_keys[i])
+            )
 
     all_el_contexts = []
     all_cl_contexts = []
@@ -694,22 +708,46 @@ def run(plan, args={}):
             all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
-        buildoor_endpoints = buildoor.launch_buildoor(
-            plan,
-            beacon_uri,
-            el_rpc_uri,
-            engine_rpc_uri,
-            jwt_file,
-            prefunded_accounts[0].private_key,
-            args_with_right_defaults.buildoor_params,
-            global_node_selectors,
-            global_tolerations,
-            builder_bls_secret_key,
-            ranges,
-        )
-        mev_endpoints.append(buildoor_endpoints["mev_endpoint"])
-        mev_endpoint_names.append(constants.BUILDOOR_MEV_TYPE)
-        buildoor_api_urls.append(buildoor_endpoints["api_url"])
+        buildoor_count = args_with_right_defaults.buildoor_params.count
+        for i in range(buildoor_count):
+            # First instance keeps the canonical "buildoor" name (the CLs'
+            # --builder wiring points here); extras are suffixed. Each instance
+            # gets its own port and a distinct extra-data prefix so its blocks
+            # are attributable.
+            if i == 0:
+                buildoor_service_name = constants.BUILDOOR_SERVICE_NAME
+            else:
+                buildoor_service_name = "{0}-{1}".format(
+                    constants.BUILDOOR_SERVICE_NAME, i + 1
+                )
+            buildoor_api_port = constants.BUILDOOR_API_PORT + i
+            buildoor_extra_data = None
+            if buildoor_count > 1:
+                buildoor_extra_data = "{0}-{1}/".format(
+                    constants.BUILDOOR_SERVICE_NAME, i + 1
+                )
+            instance_bls_key = None
+            if i < len(builder_bls_secret_keys):
+                instance_bls_key = builder_bls_secret_keys[i]
+            buildoor_endpoints = buildoor.launch_buildoor(
+                plan,
+                buildoor_service_name,
+                beacon_uri,
+                el_rpc_uri,
+                engine_rpc_uri,
+                jwt_file,
+                prefunded_accounts[0].private_key,
+                args_with_right_defaults.buildoor_params,
+                global_node_selectors,
+                global_tolerations,
+                instance_bls_key,
+                ranges,
+                buildoor_api_port,
+                buildoor_extra_data,
+            )
+            mev_endpoints.append(buildoor_endpoints["mev_endpoint"])
+            mev_endpoint_names.append(buildoor_service_name)
+            buildoor_api_urls.append(buildoor_endpoints["api_url"])
     elif args_with_right_defaults.mev_type and (
         args_with_right_defaults.mev_type == constants.FLASHBOTS_MEV_TYPE
         or args_with_right_defaults.mev_type == constants.MEV_RS_MEV_TYPE

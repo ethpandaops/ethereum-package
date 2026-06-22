@@ -17,6 +17,7 @@ MAX_MEMORY = 1024
 
 def launch_buildoor(
     plan,
+    service_name,
     beacon_uri,
     el_rpc_uri,
     engine_rpc_uri,
@@ -27,6 +28,8 @@ def launch_buildoor(
     global_tolerations,
     builder_bls_secret_key=None,
     validator_ranges_artifact=None,
+    api_port=BUILDOOR_API_PORT,
+    extra_data=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -49,8 +52,11 @@ def launch_buildoor(
         "--el-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--builder-privkey={0}".format(builder_bls_key),
         "--wallet-privkey={0}".format(wallet_key),
-        "--api-port={0}".format(BUILDOOR_API_PORT),
+        "--api-port={0}".format(api_port),
     ]
+
+    if extra_data != None:
+        cmd.append("--extra-data={0}".format(extra_data))
 
     if buildoor_params.builder_api:
         cmd.append("--builder-api-enabled")
@@ -75,12 +81,12 @@ def launch_buildoor(
         files[VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE] = validator_ranges_artifact
 
     buildoor_service = plan.add_service(
-        name=BUILDOOR_SERVICE_NAME,
+        name=service_name,
         config=ServiceConfig(
             image=buildoor_params.image,
             ports={
                 "api": PortSpec(
-                    number=BUILDOOR_API_PORT,
+                    number=api_port,
                     transport_protocol="TCP",
                     application_protocol="http",
                 ),
@@ -98,11 +104,11 @@ def launch_buildoor(
     return {
         "mev_endpoint": "http://{0}@{1}:{2}".format(
             constants.DEFAULT_MEV_PUBKEY,
-            BUILDOOR_SERVICE_NAME,
-            BUILDOOR_API_PORT,
+            service_name,
+            api_port,
         ),
         "api_url": "http://{0}:{1}".format(
-            BUILDOOR_SERVICE_NAME,
-            BUILDOOR_API_PORT,
+            service_name,
+            api_port,
         ),
     }
