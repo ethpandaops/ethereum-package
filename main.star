@@ -720,6 +720,7 @@ def run(plan, args={}):
                     constants.BUILDOOR_SERVICE_NAME, i + 1
                 )
             buildoor_api_port = constants.BUILDOOR_API_PORT + i
+            buildoor_extra_data = "{0}-{1}".format(constants.BUILDOOR_SERVICE_NAME, i)
             instance_bls_key = None
             if i < len(builder_bls_secret_keys):
                 instance_bls_key = builder_bls_secret_keys[i]
@@ -737,6 +738,7 @@ def run(plan, args={}):
                 instance_bls_key,
                 ranges,
                 buildoor_api_port,
+                buildoor_extra_data,
             )
             mev_endpoints.append(buildoor_endpoints["mev_endpoint"])
             mev_endpoint_names.append(buildoor_service_name)
