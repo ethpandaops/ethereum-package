@@ -29,6 +29,7 @@ buildoor_params:
     - participant: 2
       count: 2
 additional_services:
+  - buildoor
   - dora
   - spamoor
 spamoor_params:

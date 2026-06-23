@@ -27,6 +27,7 @@ buildoor_params:
     - participant: 2
       count: 1
 additional_services:
+  - buildoor
   - dora
 dora_params:
   image: ethpandaops/dora:glamsterdam-devnet-6

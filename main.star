@@ -815,13 +815,20 @@ def run(plan, args={}):
         else:
             fail("Invalid MEV type")
 
-    # Per-participant buildoor: launch the dedicated buildoor instances declared
-    # in buildoor_params.instances, each wired to the named participant's own
-    # CL/EL. Builders are configured independently of the participants. The CL
-    # builder endpoint and payload_attributes flags are already set in
+    # buildoor is an additional_service: launch the dedicated buildoor instances
+    # declared in buildoor_params.instances only when "buildoor" is in
+    # additional_services, each wired to the named participant's own CL/EL.
+    # Builders are configured independently of the participants. The CL builder
+    # endpoint and payload_attributes flags are already set in
     # enrich_buildoor_per_participant. No global mev_type is required. Each builder
     # derives its key from the network's validator mnemonic and onboards itself
     # after genesis via its lifecycle deposit (so gloas need not be at genesis).
+    # Remove it from additional_services so the generic dispatch loop below (which
+    # fails on unknown services) skips it.
+    if constants.BUILDOOR_SERVICE_NAME in args_with_right_defaults.additional_services:
+        args_with_right_defaults.additional_services.remove(
+            constants.BUILDOOR_SERVICE_NAME
+        )
     buildoor_builder_index = 0
     for buildoor_instance in args_with_right_defaults.buildoor_params.instances:
         index = buildoor_instance.participant - 1

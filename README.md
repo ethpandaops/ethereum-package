@@ -1582,7 +1582,10 @@ mev_params:
   #     level = "debug"
   commit_boost_config: ""
 
-# Parameters for the buildoor builder service
+# Parameters for the buildoor builder service.
+# buildoor is an additional_service: add "buildoor" to additional_services to spin
+# it up, then configure its targeting here. With "buildoor" enabled and no
+# instances set, a single builder is wired to the first participant by default.
 buildoor_params:
   # The image to use for buildoor
   image: ethpandaops/buildoor:main
@@ -1604,8 +1607,8 @@ buildoor_params:
   # the whole network). Each entry spins up `count` buildoor builder instances
   # wired to the named participant's CL/EL. Services are named
   # `buildoor-<cl>-<el>-<participant>` (with a `-<n>` suffix when count > 1).
-  # No `mev_type` is required - declaring instances is enough to spin buildoor up,
-  # and it cannot be combined with the (deprecated) network-wide `mev_type: buildoor`.
+  # Requires "buildoor" in additional_services; no `mev_type` is needed, and it
+  # cannot be combined with the (deprecated) network-wide `mev_type: buildoor`.
   # Each instance is its own builder; with lifecycle enabled (default) it onboards
   # itself after genesis, so genesis builder registration is not required and gloas
   # may activate at any epoch.
@@ -2019,6 +2022,7 @@ buildoor_params:
     - participant: 2
       count: 2
 additional_services:
+  - buildoor
   - dora
   - spamoor
 ```

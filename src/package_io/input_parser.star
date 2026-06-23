@@ -312,51 +312,59 @@ def input_parser(plan, input_args):
             )
         )
 
-    # Per-participant buildoor instances, configured independently of the
-    # participants via buildoor_params.instances (a builder is independent of the
-    # network - it reads one participant's CL/EL and, in ePBS, gossips bids to all).
-    # No global mev_type is required; configuring instances is enough. Cannot be
-    # combined with the global mev_type flow (that would double-wire the builder).
+    # Per-participant buildoor builders. buildoor is an additional_service: it is
+    # only spun up when "buildoor" is in additional_services. Its targeting is
+    # configured (independently of the participants) via buildoor_params.instances
+    # ([{participant, count}]); a builder is independent of the network - it reads
+    # one participant's CL/EL and, in ePBS, gossips bids to all.
+    buildoor_enabled = constants.BUILDOOR_SERVICE_NAME in result["additional_services"]
     buildoor_instances = result["buildoor_params"]["instances"]
-    total_buildoor_instances = 0
-    seen_buildoor_participants = {}
-    for instance in buildoor_instances:
-        participant_num = instance["participant"]
-        if (
-            type(participant_num) != "int"
-            or participant_num < 1
-            or participant_num > len(result["participants"])
-        ):
-            fail(
-                "buildoor_params.instances participant must be a 1-based participant index between 1 and {0}, got {1}.".format(
-                    len(result["participants"]),
-                    participant_num,
-                )
-            )
-        if participant_num in seen_buildoor_participants:
-            fail(
-                "buildoor_params.instances has duplicate entries for participant {0}; use a single entry with the desired count.".format(
-                    participant_num
-                )
-            )
-        seen_buildoor_participants[participant_num] = True
-        if type(instance["count"]) != "int" or instance["count"] < 1:
-            fail(
-                "buildoor_params.instances count for participant {0} must be an integer >= 1, got {1}.".format(
-                    participant_num,
-                    instance["count"],
-                )
-            )
-        total_buildoor_instances += instance["count"]
-    if total_buildoor_instances > 0:
+    if buildoor_instances and not buildoor_enabled:
+        fail(
+            "buildoor_params.instances is set but 'buildoor' is not in additional_services. "
+            + "Add 'buildoor' to additional_services to spin it up."
+        )
+    if buildoor_enabled:
         if result.get("mev_type") != None:
             fail(
-                "buildoor_params.instances cannot be combined with a global mev_type ({0}). ".format(
+                "additional_services buildoor cannot be combined with a global mev_type ({0}). ".format(
                     result.get("mev_type")
                 )
-                + "Use buildoor_params.instances for dedicated per-participant builders, "
-                + "or mev_type: buildoor for a single shared builder, but not both."
+                + "Use additional_services: [buildoor] with buildoor_params.instances for dedicated "
+                + "per-participant builders, or mev_type: buildoor for a single shared builder, but not both."
             )
+        # Default to a single builder on the first participant when none configured.
+        if not buildoor_instances:
+            buildoor_instances = [{"participant": 1, "count": 1}]
+            result["buildoor_params"]["instances"] = buildoor_instances
+        seen_buildoor_participants = {}
+        for instance in buildoor_instances:
+            participant_num = instance["participant"]
+            if (
+                type(participant_num) != "int"
+                or participant_num < 1
+                or participant_num > len(result["participants"])
+            ):
+                fail(
+                    "buildoor_params.instances participant must be a 1-based participant index between 1 and {0}, got {1}.".format(
+                        len(result["participants"]),
+                        participant_num,
+                    )
+                )
+            if participant_num in seen_buildoor_participants:
+                fail(
+                    "buildoor_params.instances has duplicate entries for participant {0}; use a single entry with the desired count.".format(
+                        participant_num
+                    )
+                )
+            seen_buildoor_participants[participant_num] = True
+            if type(instance["count"]) != "int" or instance["count"] < 1:
+                fail(
+                    "buildoor_params.instances count for participant {0} must be an integer >= 1, got {1}.".format(
+                        participant_num,
+                        instance["count"],
+                    )
+                )
         # Each buildoor instance is its own builder, onboarded after genesis via
         # its lifecycle deposit (buildoor_params.lifecycle) rather than registered
         # at genesis. So no genesis builder registration is needed and gloas does
