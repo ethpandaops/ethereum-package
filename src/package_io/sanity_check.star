@@ -72,7 +72,6 @@ PARTICIPANT_CATEGORIES = {
         "blobber_enabled",
         "blobber_extra_params",
         "blobber_image",
-        "buildoor_enabled",
         "builder_network_params",
         "keymanager_enabled",
         "vc_beacon_node_indices",
@@ -469,6 +468,8 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "builder_api",
         "epbs_builder",
+        "lifecycle",
+        "instances",
     ],
     "trueblocks_params": [
         "image",

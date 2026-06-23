@@ -317,29 +317,6 @@ def add_otel_resource_attributes_to_participants(participants, resource_attribut
         )
 
 
-# Derive a builder BLS private key from the mnemonic at key_index, using the
-# m/12381/3600/{index}/0/0 path convention. Genesis registers builders at
-# consecutive indices starting right after the regular validators, so each
-# builder (and therefore each buildoor instance) gets a distinct key.
-def derive_builder_bls_key(
-    plan, mnemonic, key_index, service_name, global_node_selectors, global_tolerations
-):
-    builder_key_result = plan.run_sh(
-        name=service_name,
-        description="Deriving builder BLS private key (index {0}) from mnemonic".format(
-            key_index
-        ),
-        run='/app/ethdo account derive --mnemonic="{0}" --path="m/12381/3600/{1}/0/0" --show-private-key | grep "Private key" | sed "s/Private key: 0x//" | tr -d "\n"'.format(
-            mnemonic,
-            key_index,
-        ),
-        image="wealdtech/ethdo:latest",
-        tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
-        node_selectors=global_node_selectors,
-    )
-    return builder_key_result.output
-
-
 def run(plan, args={}):
     """Launches an arbitrarily complex ethereum testnet based on the arguments provided
 
@@ -586,23 +563,19 @@ def run(plan, args={}):
     for participant in args_with_right_defaults.participants:
         total_validator_count += participant.validator_count
 
-    builder_bls_secret_key = None
     if network_params.builder_count > 0:
-        builder_bls_secret_key = derive_builder_bls_key(
-            plan,
-            network_params.preregistered_validator_keys_mnemonic,
-            total_validator_count,
-            "derive-builder-bls-key",
-            global_node_selectors,
-            global_tolerations,
-        )
         plan.print(
             "Builder configuration: {0} builder(s) registered at genesis with 0x03 credentials".format(
                 network_params.builder_count
             )
         )
-        plan.print("Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC))
-        plan.print("Builder BLS private key: {0}".format(builder_bls_secret_key))
+        plan.print(
+            "Builder mnemonic: '{0}', keys derived at indices {1}..{2}".format(
+                network_params.preregistered_validator_keys_mnemonic,
+                total_validator_count,
+                total_validator_count + network_params.builder_count - 1,
+            )
+        )
 
     all_el_contexts = []
     all_cl_contexts = []
@@ -722,8 +695,10 @@ def run(plan, args={}):
             args_with_right_defaults.buildoor_params,
             global_node_selectors,
             global_tolerations,
-            builder_bls_secret_key,
+            network_params.preregistered_validator_keys_mnemonic,
+            total_validator_count,
             ranges,
+            constants.BUILDOOR_SERVICE_NAME,
         )
         mev_endpoints.append(buildoor_endpoints["mev_endpoint"])
         mev_endpoint_names.append(constants.BUILDOOR_MEV_TYPE)
@@ -840,16 +815,22 @@ def run(plan, args={}):
         else:
             fail("Invalid MEV type")
 
-    # Per-participant buildoor: launch a dedicated buildoor instance for every
-    # participant with buildoor_enabled, wired directly to that participant's own
-    # CL/EL. The CL builder endpoint and payload_attributes flags are already set
-    # in enrich_buildoor_per_participant. This is independent of the global
-    # mev_type buildoor flow (which spins up a single shared buildoor).
+    # Per-participant buildoor: launch the dedicated buildoor instances declared
+    # in buildoor_params.instances, each wired to the named participant's own
+    # CL/EL. Builders are configured independently of the participants. The CL
+    # builder endpoint and payload_attributes flags are already set in
+    # enrich_buildoor_per_participant. No global mev_type is required. Each builder
+    # derives its key from the network's validator mnemonic and onboards itself
+    # after genesis via its lifecycle deposit (so gloas need not be at genesis).
     buildoor_builder_index = 0
-    for index, participant in enumerate(all_participants):
-        if not args_with_right_defaults.participants[index].buildoor_enabled:
-            continue
-        buildoor_service_name = "{0}-{1}".format(constants.BUILDOOR_SERVICE_NAME, index)
+    for buildoor_instance in args_with_right_defaults.buildoor_params.instances:
+        index = buildoor_instance.participant - 1
+        instance_count = buildoor_instance.count
+        participant = all_participants[index]
+        participant_config = args_with_right_defaults.participants[index]
+        index_str = shared_utils.zfill_custom(
+            index + 1, len(str(len(all_participants)))
+        )
         cl_context = participant.cl_context
         el_context = participant.el_context
         beacon_uri = "http://{0}:{1}".format(
@@ -867,34 +848,44 @@ def run(plan, args={}):
         # Each instance uses a distinct prefunded account so concurrent buildoors
         # do not collide on transaction nonces.
         buildoor_account = prefunded_accounts[index % len(prefunded_accounts)]
-        # Each instance is its own builder, so it needs its own builder BLS key.
-        # Keys are derived at consecutive indices following the regular
-        # validators; the parser guarantees builder_count covers them, so each is
-        # registered at genesis with 0x03 credentials.
-        instance_builder_bls_key = derive_builder_bls_key(
-            plan,
-            network_params.preregistered_validator_keys_mnemonic,
-            total_validator_count + buildoor_builder_index,
-            "derive-buildoor-bls-key-{0}".format(index),
-            global_node_selectors,
-            global_tolerations,
-        )
-        buildoor_builder_index += 1
-        buildoor_endpoints = buildoor.launch_buildoor(
-            plan,
-            beacon_uri,
-            el_rpc_uri,
-            engine_rpc_uri,
-            jwt_file,
-            buildoor_account.private_key,
-            args_with_right_defaults.buildoor_params,
-            global_node_selectors,
-            global_tolerations,
-            instance_builder_bls_key,
-            ranges,
-            buildoor_service_name,
-        )
-        buildoor_api_urls.append(buildoor_endpoints["api_url"])
+        for instance in range(instance_count):
+            # Name the instance after the participant it is wired to, e.g.
+            # buildoor-lighthouse-geth-1, matching the cl/el naming convention.
+            buildoor_service_name = shared_utils.get_buildoor_service_name(
+                constants.BUILDOOR_SERVICE_NAME,
+                participant_config.cl_type,
+                participant_config.el_type,
+                index_str,
+                instance,
+                instance_count,
+            )
+            # Each instance is its own builder with its own builder BLS key,
+            # derived by buildoor from the builder mnemonic at consecutive indices
+            # after the validators and any genesis-registered builders, so they do
+            # not collide. The builder is onboarded after genesis via its lifecycle
+            # deposit (buildoor_params.lifecycle), not registered at genesis.
+            instance_builder_key_index = (
+                total_validator_count
+                + network_params.builder_count
+                + buildoor_builder_index
+            )
+            buildoor_builder_index += 1
+            buildoor_endpoints = buildoor.launch_buildoor(
+                plan,
+                beacon_uri,
+                el_rpc_uri,
+                engine_rpc_uri,
+                jwt_file,
+                buildoor_account.private_key,
+                args_with_right_defaults.buildoor_params,
+                global_node_selectors,
+                global_tolerations,
+                network_params.preregistered_validator_keys_mnemonic,
+                instance_builder_key_index,
+                ranges,
+                buildoor_service_name,
+            )
+            buildoor_api_urls.append(buildoor_endpoints["api_url"])
 
     # spin up the mev boost contexts if some endpoints for relays have been passed
     all_mevboost_contexts = []

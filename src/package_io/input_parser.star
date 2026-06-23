@@ -157,15 +157,15 @@ def input_parser(plan, input_args):
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
-        result["network_params"][
-            "deposit_contract_address"
-        ] = constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        result["network_params"]["deposit_contract_address"] = (
+            constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        )
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
-        result["network_params"][
-            "deposit_contract_address"
-        ] = constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        result["network_params"]["deposit_contract_address"] = (
+            constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
+        )
 
     for attr in input_args:
         value = input_args[attr]
@@ -281,6 +281,14 @@ def input_parser(plan, input_args):
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
 
+    if result.get("mev_type") == constants.BUILDOOR_MEV_TYPE:
+        plan.print(
+            "DEPRECATION WARNING: mev_type: buildoor (single shared builder) is "
+            + "deprecated and will be dropped after the gloas fork. Use the "
+            + "buildoor_params.instances config instead, which spins up dedicated "
+            + "buildoor builders wired to specific participants."
+        )
+
     if result.get("mev_type") in (
         constants.MOCK_MEV_TYPE,
         constants.FLASHBOTS_MEV_TYPE,
@@ -304,36 +312,57 @@ def input_parser(plan, input_args):
             )
         )
 
-    # Per-participant buildoor instances (buildoor_enabled flag). Independent of
-    # the global mev_type. Each flagged participant gets its own buildoor wired
-    # directly to its own CL, so it must not be combined with a global mev_type
-    # (that would double-wire the participant's builder endpoint).
-    buildoor_participant_count = 0
-    for participant in result["participants"]:
-        if participant.get("buildoor_enabled"):
-            buildoor_participant_count += 1
-    if buildoor_participant_count > 0:
+    # Per-participant buildoor instances, configured independently of the
+    # participants via buildoor_params.instances (a builder is independent of the
+    # network - it reads one participant's CL/EL and, in ePBS, gossips bids to all).
+    # No global mev_type is required; configuring instances is enough. Cannot be
+    # combined with the global mev_type flow (that would double-wire the builder).
+    buildoor_instances = result["buildoor_params"]["instances"]
+    total_buildoor_instances = 0
+    seen_buildoor_participants = {}
+    for instance in buildoor_instances:
+        participant_num = instance["participant"]
+        if (
+            type(participant_num) != "int"
+            or participant_num < 1
+            or participant_num > len(result["participants"])
+        ):
+            fail(
+                "buildoor_params.instances participant must be a 1-based participant index between 1 and {0}, got {1}.".format(
+                    len(result["participants"]),
+                    participant_num,
+                )
+            )
+        if participant_num in seen_buildoor_participants:
+            fail(
+                "buildoor_params.instances has duplicate entries for participant {0}; use a single entry with the desired count.".format(
+                    participant_num
+                )
+            )
+        seen_buildoor_participants[participant_num] = True
+        if type(instance["count"]) != "int" or instance["count"] < 1:
+            fail(
+                "buildoor_params.instances count for participant {0} must be an integer >= 1, got {1}.".format(
+                    participant_num,
+                    instance["count"],
+                )
+            )
+        total_buildoor_instances += instance["count"]
+    if total_buildoor_instances > 0:
         if result.get("mev_type") != None:
             fail(
-                "Per-participant buildoor_enabled cannot be combined with a global mev_type ({0}). ".format(
+                "buildoor_params.instances cannot be combined with a global mev_type ({0}). ".format(
                     result.get("mev_type")
                 )
-                + "Use buildoor_enabled on participants for dedicated per-participant builders, "
+                + "Use buildoor_params.instances for dedicated per-participant builders, "
                 + "or mev_type: buildoor for a single shared builder, but not both."
             )
-        # Every buildoor instance is its own builder and needs its own builder BLS
-        # key registered at genesis. builder_count must cover all of them.
-        if result["network_params"]["builder_count"] < buildoor_participant_count:
-            fail(
-                "buildoor_enabled is set on {0} participant(s) but network_params.builder_count is {1}. ".format(
-                    buildoor_participant_count,
-                    result["network_params"]["builder_count"],
-                )
-                + "Each per-participant buildoor needs its own builder BLS key registered at genesis; "
-                + "set network_params.builder_count to at least {0}.".format(
-                    buildoor_participant_count
-                )
-            )
+        # Each buildoor instance is its own builder, onboarded after genesis via
+        # its lifecycle deposit (buildoor_params.lifecycle) rather than registered
+        # at genesis. So no genesis builder registration is needed and gloas does
+        # not have to be at genesis - buildoor works with gloas at any epoch. Its
+        # builder keys are derived at indices after any genesis builders (see
+        # main.star) to avoid colliding with validator/genesis-builder keys.
         result = enrich_buildoor_per_participant(result)
 
     if (
@@ -827,7 +856,6 @@ def input_parser(plan, input_args):
                 blobber_enabled=participant["blobber_enabled"],
                 blobber_extra_params=participant["blobber_extra_params"],
                 blobber_image=participant["blobber_image"],
-                buildoor_enabled=participant["buildoor_enabled"],
                 keymanager_enabled=participant["keymanager_enabled"],
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
                 checkpoint_sync_enabled=participant["checkpoint_sync_enabled"],
@@ -1236,6 +1264,14 @@ def input_parser(plan, input_args):
             extra_args=result["buildoor_params"]["extra_args"],
             builder_api=result["buildoor_params"]["builder_api"],
             epbs_builder=result["buildoor_params"]["epbs_builder"],
+            lifecycle=result["buildoor_params"]["lifecycle"],
+            instances=[
+                struct(
+                    participant=instance["participant"],
+                    count=instance["count"],
+                )
+                for instance in result["buildoor_params"]["instances"]
+            ],
         ),
         trueblocks_params=struct(
             image=result["trueblocks_params"]["image"],
@@ -1735,7 +1771,9 @@ def parse_network_params(plan, input_args):
                 )
             )
         builder_mnemonic_entry = {
-            "mnemonic": constants.DEFAULT_MNEMONIC,
+            "mnemonic": result["network_params"][
+                "preregistered_validator_keys_mnemonic"
+            ],
             "start": actual_num_validators,
             "count": result["network_params"]["builder_count"],
             "wd_prefix": "0x03",
@@ -2080,7 +2118,6 @@ def default_participant():
         "blobber_enabled": False,
         "blobber_extra_params": [],
         "blobber_image": "ethpandaops/blobber:latest",
-        "buildoor_enabled": False,
         "builder_network_params": None,
         "keymanager_enabled": None,
         "vc_beacon_node_indices": None,
@@ -2450,6 +2487,16 @@ def get_default_buildoor_params():
         "extra_args": [],
         "builder_api": True,
         "epbs_builder": True,
+        # Enable buildoor's builder lifecycle (it deposits/onboards its own
+        # builder after genesis and tops it up), so builders work even when gloas
+        # is not at genesis. Requires the EL RPC + wallet key, both already wired.
+        "lifecycle": True,
+        # List of {participant: <1-based index>, count: <n>} entries. Each entry
+        # spins up `count` dedicated buildoor builder instances wired to that
+        # participant's CL/EL. Builders are independent of the participants - a
+        # builder reads one CL's payload_attributes stream and (in ePBS) gossips
+        # bids to the whole network. Empty => no per-participant buildoors.
+        "instances": [],
     }
 
 
@@ -2597,19 +2644,34 @@ def apply_buildoor_payload_attributes_flags(participant):
         )
 
 
-# Per-participant buildoor: every participant with buildoor_enabled gets its own
-# dedicated buildoor service (buildoor-<index>) wired directly to its own CL.
-# This is independent of the global mev_type buildoor flow (which runs a single
+# Per-participant buildoor: each buildoor_params.instances entry spins up
+# `count` dedicated buildoor services wired to the named participant's CL/EL.
+# Builders are configured independently of the participants (a builder reads one
+# CL's payload_attributes stream and, in ePBS, gossips bids to the whole
+# network). This is independent of the global mev_type buildoor flow (a single
 # shared buildoor for the whole network).
 def enrich_buildoor_per_participant(parsed_arguments_dict):
     participants = parsed_arguments_dict["participants"]
     gas_limit = parsed_arguments_dict["network_params"]["gas_limit"]
-    for index, participant in enumerate(participants):
-        if not participant.get("buildoor_enabled"):
-            continue
-        mev_url = "http://{0}-{1}:{2}".format(
+    num_participants = len(participants)
+    for instance in parsed_arguments_dict["buildoor_params"]["instances"]:
+        index = instance["participant"] - 1
+        count = instance["count"]
+        participant = participants[index]
+        index_str = shared_utils.zfill_custom(index + 1, len(str(num_participants)))
+        # The CL has a single external-builder endpoint, so it is wired to the
+        # participant's first buildoor instance. Any additional instances still
+        # spin up (e.g. competing ePBS builders) but are not the CL's builder.
+        service_name = shared_utils.get_buildoor_service_name(
             constants.BUILDOOR_SERVICE_NAME,
-            index,
+            participant["cl_type"],
+            participant["el_type"],
+            index_str,
+            0,
+            count,
+        )
+        mev_url = "http://{0}:{1}".format(
+            service_name,
             constants.BUILDOOR_API_PORT,
         )
         apply_external_builder_flags(participant, mev_url, gas_limit)

@@ -656,18 +656,8 @@ participants:
       # Additional labels to be added. Default to empty
       labels: {}
 
-    # Buildoor can be enabled per participant with the `buildoor_enabled` flag.
-    # When set, a dedicated buildoor builder+relay instance (service
-    # `buildoor-<index>`) is spun up and wired directly to this participant's own
-    # CL/EL, and the CL is configured to emit payload_attributes on every slot.
-    # This is the per-participant alternative to the network-wide `mev_type: buildoor`
-    # (a single shared builder) and the two cannot be combined.
-    # Each enabled participant is its own builder and gets its own builder BLS key,
-    # so `network_params.builder_count` must be >= the number of buildoor-enabled
-    # participants (builders are registered at genesis, which requires gloas at
-    # genesis / gloas_fork_epoch: 0).
-    # Defaults to false
-    buildoor_enabled: false
+    # Buildoor (a self-contained block builder) is configured independently of the
+    # participants via `buildoor_params.instances` (see below), not per participant.
 
     # Blobber can be enabled with the `blobber_enabled` flag per client or globally
     # Defaults to false
@@ -1521,6 +1511,8 @@ mempool_bridge_params:
 #            Note: Helix uses TimescaleDB (PostgreSQL with time-series extension) for data storage
 # "buildoor" - a self-contained builder+relay service & mev-boost are spun up, powered by [buildoor](https://github.com/ethpandaops/buildoor)
 #              Supports both legacy builder API and ePBS bidding. No separate relay infrastructure or builder participant needed.
+#              DEPRECATED: this single shared-builder mode will be dropped after the gloas fork. Use
+#              `buildoor_params.instances` for dedicated per-participant builders instead.
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -1590,7 +1582,7 @@ mev_params:
   #     level = "debug"
   commit_boost_config: ""
 
-# Parameters for the buildoor builder+relay service (used when mev_type is "buildoor")
+# Parameters for the buildoor builder service
 buildoor_params:
   # The image to use for buildoor
   image: ethpandaops/buildoor:main
@@ -1600,6 +1592,31 @@ buildoor_params:
   epbs_builder: true
   # Extra parameters to pass to the buildoor service
   extra_args: []
+  # Enable buildoor's builder lifecycle: each builder deposits/onboards itself
+  # after genesis (and tops itself up) via the EL, so builders work even when
+  # gloas is not at genesis. Built blocks are tagged with the instance's service
+  # name in their extra-data so they can be traced back to the builder.
+  # Defaults to true
+  lifecycle: true
+  # Dedicated per-participant buildoor builders, configured independently of the
+  # participants (a builder is independent of the network: it reads one
+  # participant's CL payload_attributes stream and, under ePBS, gossips bids to
+  # the whole network). Each entry spins up `count` buildoor builder instances
+  # wired to the named participant's CL/EL. Services are named
+  # `buildoor-<cl>-<el>-<participant>` (with a `-<n>` suffix when count > 1).
+  # No `mev_type` is required - declaring instances is enough to spin buildoor up,
+  # and it cannot be combined with the (deprecated) network-wide `mev_type: buildoor`.
+  # Each instance is its own builder; with lifecycle enabled (default) it onboards
+  # itself after genesis, so genesis builder registration is not required and gloas
+  # may activate at any epoch.
+  # Defaults to [] (no per-participant buildoors).
+  # Example:
+  # instances:
+  #   - participant: 1   # 1-based participant index
+  #     count: 1
+  #   - participant: 3
+  #     count: 2
+  instances: []
 
 # Enables Xatu Sentry for all participants
 # Defaults to false
@@ -1984,14 +2001,43 @@ network_params:
 </details>
 
 <details>
-    <summary>A 2-node Ethereum network with buildoor (self-contained builder+relay)</summary>
+    <summary>A 2-node Ethereum network with dedicated per-participant buildoor builders</summary>
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: prysm
+buildoor_params:
+  builder_api: true
+  epbs_builder: true
+  # one buildoor wired to participant 1, two wired to participant 2
+  instances:
+    - participant: 1
+      count: 1
+    - participant: 2
+      count: 2
+additional_services:
+  - dora
+  - spamoor
+```
+
+</details>
+
+<details>
+    <summary>A 2-node Ethereum network with the (deprecated) shared buildoor builder</summary>
 
 ```yaml
 participants:
   - el_type: geth
     cl_type: lighthouse
     count: 2
+# Deprecated: prefer buildoor_params.instances (see example above).
 mev_type: buildoor
+network_params:
+  builder_count: 1
+  gloas_fork_epoch: 0
 buildoor_params:
   builder_api: true
   epbs_builder: true
@@ -2206,7 +2252,7 @@ The package also supports other MEV implementations:
 - `"mev_type": "helix"` - Uses the high-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend for data storage
 - `"mev_type": "mev-rs"` - Alternative relay implementation powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 - `"mev_type": "commit-boost"` - Infrastructure powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
-- `"mev_type": "buildoor"` - A self-contained builder+relay service powered by [buildoor](https://github.com/ethpandaops/buildoor). Supports both legacy builder API and ePBS bidding without requiring separate relay infrastructure or a dedicated builder participant.
+- `"mev_type": "buildoor"` - A self-contained builder+relay service powered by [buildoor](https://github.com/ethpandaops/buildoor). Supports both legacy builder API and ePBS bidding without requiring separate relay infrastructure or a dedicated builder participant. **Deprecated:** this single shared-builder mode will be dropped after the gloas fork - use `buildoor_params.instances` for dedicated per-participant builders instead.
 
 Each implementation provides different features and performance characteristics suitable for various testing and development scenarios.
 
