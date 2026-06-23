@@ -1343,18 +1343,29 @@ def parse_network_params(plan, input_args):
         vc_matrix = []
         if "vc" in input_args["participants_matrix"]:
             vc_matrix = input_args["participants_matrix"]["vc"]
+        remote_signer_matrix = []
+        if "remote_signer" in input_args["participants_matrix"]:
+            remote_signer_matrix = input_args["participants_matrix"]["remote_signer"]
         count = input_args["participants_matrix"].get("count", 1)
 
         for el in el_matrix:
             for cl in cl_matrix:
                 for vc in vc_matrix if vc_matrix else [{}]:
-                    for _ in range(count):
-                        participant = {k: v for k, v in el.items()}
-                        for k, v in cl.items():
-                            participant[k] = v
-                        for k, v in vc.items():
-                            participant[k] = v
-                        participants.append(participant)
+                    for remote_signer in (
+                        remote_signer_matrix if remote_signer_matrix else [{}]
+                    ):
+                        for _ in range(count):
+                            participant = {k: v for k, v in el.items()}
+                            for k, v in cl.items():
+                                participant[k] = v
+                            for k, v in vc.items():
+                                participant[k] = v
+                            for k, v in remote_signer.items():
+                                participant[k] = v
+                            # Defining a remote_signer matrix entry implies using it.
+                            if remote_signer:
+                                participant["use_remote_signer"] = True
+                            participants.append(participant)
 
         if "participants" in input_args:
             input_args["participants"].extend(participants)
@@ -2551,6 +2562,35 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
 
         if participant["vc_type"] == "vero":
             participant["vc_extra_params"].append("--use-external-builder")
+
+        # buildoor builds against the first participant's payload_attributes
+        # SSE stream, so that CL must emit them on every slot.
+        if mev_type == constants.BUILDOOR_MEV_TYPE and index == 0:
+            if participant["cl_type"] == "lodestar":
+                participant["cl_extra_params"].append("--emitPayloadAttributes=true")
+            elif participant["cl_type"] == "prysm":
+                participant["cl_extra_params"].append("--prepare-all-payloads")
+            elif participant["cl_type"] == "lighthouse":
+                participant["cl_extra_params"].append("--always-prepare-payload")
+            elif participant["cl_type"] == "grandine":
+                participant["cl_extra_params"].append(
+                    "--features=AlwaysPrepareExecutionPayload"
+                )
+            elif participant["cl_type"] == "consensoor":
+                participant["cl_extra_params"].append("--emit-payload-attributes")
+            elif participant["cl_type"] == "teku":
+                participant["cl_extra_params"].append(
+                    "--Xfork-choice-updated-always-send-payload-attributes=true"
+                )
+            else:
+                # nimbus has no flag to emit payload_attributes.
+                fail(
+                    "mev_type 'buildoor' requires the first participant's cl_type to be one of "
+                    + "[lodestar, prysm, lighthouse, grandine, consensoor, teku]: '{0}' has no flag to build a payload on each slot ".format(
+                        participant["cl_type"]
+                    )
+                    + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
+                )
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
