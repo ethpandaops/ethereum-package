@@ -174,6 +174,7 @@ def get_config(
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
+        "--nat.extip=" + port_publisher.el_nat_exit_ip,
     ]
     # Handle bootnode configuration with bootnodoor_enode override
     if bootnodoor_enode != None:
