@@ -559,19 +559,25 @@ def run(plan, args={}):
             )
             break
 
+    # Derive one builder BLS key per buildoor instance. These keys are
+    # independent of network_params.builder_count (genesis builder registration):
+    # buildoor builders are onboarded after genesis (e.g. via a prefork-onboard
+    # playbook), not registered at genesis.
+    #
+    # Mnemonic derivation index layout (no overlap):
+    #   [0, total_validator_count)                                 -> validators
+    #   [total_validator_count, +builder_count)                    -> genesis builders
+    #   [total_validator_count + builder_count, +buildoor count)   -> buildoor keys
     builder_bls_secret_keys = []
-    if network_params.builder_count > 0:
+    if args_with_right_defaults.mev_type == constants.BUILDOOR_MEV_TYPE:
         total_validator_count = 0
         for participant in args_with_right_defaults.participants:
             total_validator_count += participant.validator_count
 
-        # buildoor runs one or more instances, each needing its own builder BLS
-        # key; other mev types only need a single key.
-        num_builder_keys = 1
-        if args_with_right_defaults.mev_type == constants.BUILDOOR_MEV_TYPE:
-            num_builder_keys = args_with_right_defaults.buildoor_params.count
+        # Start buildoor keys after any genesis-registered builders.
+        buildoor_key_start_index = total_validator_count + network_params.builder_count
 
-        for i in range(num_builder_keys):
+        for i in range(args_with_right_defaults.buildoor_params.count):
             builder_key_result = plan.run_sh(
                 name="derive-builder-bls-key-{0}".format(i),
                 description="Deriving builder BLS private key {0} from mnemonic".format(
@@ -579,7 +585,7 @@ def run(plan, args={}):
                 ),
                 run='/app/ethdo account derive --mnemonic="{0}" --path="m/12381/3600/{1}/0/0" --show-private-key | grep "Private key" | sed "s/Private key: 0x//" | tr -d "\n"'.format(
                     network_params.preregistered_validator_keys_mnemonic,
-                    total_validator_count + i,
+                    buildoor_key_start_index + i,
                 ),
                 image="wealdtech/ethdo:latest",
                 tolerations=shared_utils.get_tolerations(
@@ -590,11 +596,15 @@ def run(plan, args={}):
             builder_bls_secret_keys.append(builder_key_result.output)
 
         plan.print(
-            "Builder configuration: {0} builder(s) registered at genesis with 0x03 credentials".format(
-                network_params.builder_count
+            "buildoor: derived {0} builder BLS key(s) for {0} instance(s)".format(
+                args_with_right_defaults.buildoor_params.count
             )
         )
-        plan.print("Builder mnemonic: '{0}'".format(constants.DEFAULT_MNEMONIC))
+        plan.print(
+            "Builder mnemonic: '{0}'".format(
+                network_params.preregistered_validator_keys_mnemonic
+            )
+        )
         for i in range(len(builder_bls_secret_keys)):
             plan.print(
                 "Builder BLS private key {0}: {1}".format(i, builder_bls_secret_keys[i])

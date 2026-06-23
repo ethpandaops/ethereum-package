@@ -1694,15 +1694,6 @@ def parse_network_params(plan, input_args):
             + " is not supported, it can only be mainnet or minimal"
         )
 
-    # buildoor is the only builder, so the number of genesis-registered builders
-    # is driven directly by buildoor_params.count. builder_count never needs to
-    # be set separately when using buildoor. (buildoor_params is parsed later, so
-    # read count from the raw input_args here; defaults to 1.)
-    if result.get("mev_type") == constants.BUILDOOR_MEV_TYPE:
-        result["network_params"]["builder_count"] = input_args.get(
-            "buildoor_params", {}
-        ).get("count", 1)
-
     if result["network_params"]["builder_count"] > 0:
         builder_mnemonic_entry = {
             "mnemonic": constants.DEFAULT_MNEMONIC,
