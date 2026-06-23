@@ -38,6 +38,12 @@ def launch_buildoor(
     if wallet_key.startswith("0x"):
         wallet_key = wallet_key[2:]
 
+    # The builder API URL buildoor advertises in its bids. With multiple
+    # instances each one must advertise its OWN service URL; otherwise every
+    # instance but one is rejected by consumers as a builder_url mismatch and
+    # never wins a bid. Computed once and reused as the registered api_url.
+    api_url = "http://{0}:{1}".format(service_name, BUILDOOR_API_PORT)
+
     cmd = [
         "run",
         "--cl-client={0}".format(beacon_uri),
@@ -46,6 +52,7 @@ def launch_buildoor(
         "--el-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--wallet-privkey={0}".format(wallet_key),
         "--api-port={0}".format(BUILDOOR_API_PORT),
+        "--builder-api-url={0}".format(api_url),
     ]
 
     # Builder BLS key: let buildoor derive it from the mnemonic at the given
@@ -118,8 +125,5 @@ def launch_buildoor(
             service_name,
             BUILDOOR_API_PORT,
         ),
-        "api_url": "http://{0}:{1}".format(
-            service_name,
-            BUILDOOR_API_PORT,
-        ),
+        "api_url": api_url,
     }
