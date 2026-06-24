@@ -23,6 +23,7 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.debug: "debug",
 }
 
+
 def launch(
     plan,
     launcher,
@@ -142,14 +143,22 @@ for keystore_dir in $keystore_directories; do
         index=$(($index + 1))
     fi
 done
-""" % (validator_keys_dirpath, validator_secrets_dirpath, validator_secrets_dirpath)
+""" % (
+        validator_keys_dirpath,
+        validator_secrets_dirpath,
+        validator_secrets_dirpath,
+    )
 
     # Save the script to the service
     plan.exec(
         service_name=key_formatter_service.name,
         recipe=ExecRecipe(
             command=[
-                "sh", "-c", "cat > /opt/charon/format_keys.sh << 'EOL'\n" + format_keys_script + "\nEOL"
+                "sh",
+                "-c",
+                "cat > /opt/charon/format_keys.sh << 'EOL'\n"
+                + format_keys_script
+                + "\nEOL",
             ],
         ),
     )
@@ -172,7 +181,9 @@ done
 
     # Store the formatted keys
     charon_keys_artifact = plan.store_service_files(
-        service_name=key_formatter_service.name, src="/opt/charon/charon-keys", name="charon-keys-" + str(vc_index),
+        service_name=key_formatter_service.name,
+        src="/opt/charon/charon-keys",
+        name="charon-keys-" + str(vc_index),
     )
 
     # The formatter has served its purpose; tear it down so it doesn't linger.
@@ -184,7 +195,7 @@ done
 
     files = {}
     files[CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key=persistent_key,
+        persistent_key=persistent_key,
     )
     files["/opt/charon/charon-keys"] = charon_keys_artifact
 
@@ -194,7 +205,8 @@ done
         config=ServiceConfig(
             image=image,
             cmd=[
-                "create", "cluster",
+                "create",
+                "cluster",
                 # cluster_name label shown in Charon dashboards; mirror the
                 # docker-compose convention "kurtosis-<cl>-<vc>".
                 "--name=kurtosis-" + cl_context.client_name + "-" + vc_type,
@@ -210,19 +222,19 @@ done
                 "--cluster-dir=" + CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER,
             ],
             files=files,
-            user = User(uid=0, gid=0),
+            user=User(uid=0, gid=0),
         ),
     )
 
     # Keep a busybox service running on the cluster volume so we can read the
     # generated per-node files back out as artifacts.
     cluster_files_service = plan.add_service(
-        name=charon_service_name+"-keep-running",
+        name=charon_service_name + "-keep-running",
         config=ServiceConfig(
             image="busybox:latest",
             cmd=["tail", "-f", "/dev/null"],  # Keep the service running
             files=files,
-            user = User(uid=0, gid=0),
+            user=User(uid=0, gid=0),
         ),
     )
 
@@ -282,8 +294,12 @@ done
             "CHARON_VALIDATOR_API_ADDRESS": "0.0.0.0:" + str(CHARON_VALIDATOR_API_PORT),
             "CHARON_P2P_TCP_ADDRESS": "0.0.0.0:" + str(CHARON_P2P_TCP_PORT),
             "CHARON_MONITORING_ADDRESS": "0.0.0.0:" + str(CHARON_MONITORING_PORT),
-            "CHARON_PRIVATE_KEY_FILE": "/opt/charon/.charon/node" + str(i) + "/charon-enr-private-key",
-            "CHARON_LOCK_FILE": "/opt/charon/.charon/node" + str(i) + "/cluster-lock.json",
+            "CHARON_PRIVATE_KEY_FILE": "/opt/charon/.charon/node"
+            + str(i)
+            + "/charon-enr-private-key",
+            "CHARON_LOCK_FILE": "/opt/charon/.charon/node"
+            + str(i)
+            + "/cluster-lock.json",
             "CHARON_JAEGER_SERVICE": "node" + str(i),
             "CHARON_P2P_EXTERNAL_HOSTNAME": "node" + str(i),
             "CHARON_BEACON_NODE_ENDPOINTS": beacon_endpoint,
@@ -335,7 +351,7 @@ done
                 labels=shared_utils.label_maker(
                     client=constants.VC_TYPE.charon,
                     client_type=constants.CLIENT_TYPES.validator,
-                    image=image[-constants.MAX_LABEL_LENGTH:],
+                    image=image[-constants.MAX_LABEL_LENGTH :],
                     connected_client=cl_context.client_name,
                     extra_labels=participant.vc_extra_labels,
                     supernode=participant.supernode,
@@ -343,11 +359,9 @@ done
                 tolerations=tolerations,
                 node_selectors=node_selectors,
                 files={
-                    "/opt/charon/.charon/": Directory(
-                        persistent_key=persistent_key
-                    ),
+                    "/opt/charon/.charon/": Directory(persistent_key=persistent_key),
                 },
-                user = User(uid=0, gid=0),
+                user=User(uid=0, gid=0),
             ),
         )
         charon_services.append(charon_service)
@@ -379,24 +393,29 @@ done
         # Each node's validator keys come from the cluster-creation output.
         validator_keys_for_node = plan.store_service_files(
             service_name=cluster_files_service.name,
-            src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER + "/node" + str(i) + "/validator_keys",
+            src=CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER
+            + "/node"
+            + str(i)
+            + "/validator_keys",
             name="validator-keys-node-" + str(i) + "-" + str(vc_index),
         )
 
-        vc_services.append(launch_vc(
-            plan=plan,
-            vc_service_name=service_name + "-vc-" + str(i) + "-" + vc_type,
-            charon_validator_api_url=charon_validator_api_url,
-            validator_keys_artifact=validator_keys_for_node,
-            launcher=launcher,
-            participant=participant,
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            full_name=full_name + "-node" + str(i),
-            vc_index=vc_index,
-            node_index=i,
-            vc_image=vc_image,
-        ))
+        vc_services.append(
+            launch_vc(
+                plan=plan,
+                vc_service_name=service_name + "-vc-" + str(i) + "-" + vc_type,
+                charon_validator_api_url=charon_validator_api_url,
+                validator_keys_artifact=validator_keys_for_node,
+                launcher=launcher,
+                participant=participant,
+                tolerations=tolerations,
+                node_selectors=node_selectors,
+                full_name=full_name + "-node" + str(i),
+                vc_index=vc_index,
+                node_index=i,
+                vc_image=vc_image,
+            )
+        )
 
     # The cluster files have all been extracted as artifacts; drop the busybox
     # helper that was only kept alive (tail -f) to read them.
@@ -409,30 +428,36 @@ done
     for i in range(charon_node_count):
         if i != 0:
             charon_service = charon_services[i]
-            metrics_jobs.append(prometheus.new_metrics_job(
-                job_name=charon_service.name,
+            metrics_jobs.append(
+                prometheus.new_metrics_job(
+                    job_name=charon_service.name,
+                    endpoint="{0}:{1}".format(
+                        charon_service.ip_address, CHARON_MONITORING_PORT
+                    ),
+                    metrics_path=vc_shared.METRICS_PATH,
+                    labels={
+                        "service": charon_service.name,
+                        "client_type": constants.CLIENT_TYPES.validator,
+                        "client_name": constants.VC_TYPE.charon,
+                    },
+                )
+            )
+        vc_service = vc_services[i]
+        vc_metrics_port = vc_service.ports[constants.METRICS_PORT_ID]
+        metrics_jobs.append(
+            prometheus.new_metrics_job(
+                job_name=vc_service.name,
                 endpoint="{0}:{1}".format(
-                    charon_service.ip_address, CHARON_MONITORING_PORT
+                    vc_service.ip_address, vc_metrics_port.number
                 ),
                 metrics_path=vc_shared.METRICS_PATH,
                 labels={
-                    "service": charon_service.name,
+                    "service": vc_service.name,
                     "client_type": constants.CLIENT_TYPES.validator,
-                    "client_name": constants.VC_TYPE.charon,
+                    "client_name": vc_type,
                 },
-            ))
-        vc_service = vc_services[i]
-        vc_metrics_port = vc_service.ports[constants.METRICS_PORT_ID]
-        metrics_jobs.append(prometheus.new_metrics_job(
-            job_name=vc_service.name,
-            endpoint="{0}:{1}".format(vc_service.ip_address, vc_metrics_port.number),
-            metrics_path=vc_shared.METRICS_PATH,
-            labels={
-                "service": vc_service.name,
-                "client_type": constants.CLIENT_TYPES.validator,
-                "client_name": vc_type,
-            },
-        ))
+            )
+        )
 
     # Surface Charon node 0 as the participant's primary vc_context.
     validator_metrics_port = charon_services[0].ports["monitoring"]
@@ -443,11 +468,15 @@ done
         charon_services[0].name, vc_shared.METRICS_PATH, validator_metrics_url
     )
 
-    return vc_context.new_vc_context(
-        client_name=constants.VC_TYPE.charon,
-        service_name=charon_services[0].name,
-        metrics_info=validator_node_metrics_info,
-    ), metrics_jobs
+    return (
+        vc_context.new_vc_context(
+            client_name=constants.VC_TYPE.charon,
+            service_name=charon_services[0].name,
+            metrics_info=validator_node_metrics_info,
+        ),
+        metrics_jobs,
+    )
+
 
 def launch_lighthouse_vc(
     plan,
@@ -461,7 +490,7 @@ def launch_lighthouse_vc(
     full_name,
     vc_index,
     node_index,
-    vc_image
+    vc_image,
 ):
     """
     Launch a Lighthouse validator client that connects to a Charon node
@@ -469,7 +498,8 @@ def launch_lighthouse_vc(
     """
 
     # Create the startup script that implements the two-stage approach
-    startup_script = """#!/bin/bash
+    startup_script = (
+        """#!/bin/bash
 set -e
 
 # Stage 1: Import validator keys
@@ -484,27 +514,34 @@ for f in /opt/charon/keys/keystore-*.json; do
   fi
 done
 
-echo "Starting lighthouse validator client for node""" + str(node_index) + """"
+echo "Starting lighthouse validator client for node"""
+        + str(node_index)
+        + """"
 # Stage 2: Run the validator client
 exec lighthouse validator \\
   --beacon-nodes ${LIGHTHOUSE_BEACON_NODE_ADDRESS} \\
-  --suggested-fee-recipient """ + constants.VALIDATING_REWARDS_ACCOUNT + """ \\
+  --suggested-fee-recipient """
+        + constants.VALIDATING_REWARDS_ACCOUNT
+        + """ \\
   --metrics \\
   --metrics-address "0.0.0.0" \\
   --metrics-allow-origin "*" \\
-  --metrics-port """ + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """ \\
+  --metrics-port """
+        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
+        + """ \\
   --use-long-timeouts \\
   --testnet-dir "/opt/lighthouse/network-configs" \\
   --builder-proposals \\
   --distributed \\
   --debug-level "debug"
 """
+    )
 
     # Environment variables
     env_vars = {
         "LIGHTHOUSE_BEACON_NODE_ADDRESS": charon_validator_api_url,
         "NODE": "node" + str(node_index),
-        "RUST_BACKTRACE": "full"
+        "RUST_BACKTRACE": "full",
     }
     if participant.vc_extra_env_vars:
         env_vars.update(participant.vc_extra_env_vars)
@@ -540,7 +577,7 @@ exec lighthouse validator \\
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.lighthouse,
                 client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH :],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels,
                 supernode=participant.supernode,
@@ -551,6 +588,7 @@ exec lighthouse validator \\
     )
 
     return vc_service
+
 
 def launch_lodestar_vc(
     plan,
@@ -564,7 +602,7 @@ def launch_lodestar_vc(
     full_name,
     vc_index,
     node_index,
-    vc_image
+    vc_image,
 ):
     """
     Launch a Lodestar validator client that connects to a Charon node
@@ -572,7 +610,8 @@ def launch_lodestar_vc(
     """
 
     # Create the run.sh script content
-    run_script_content = """#!/bin/sh
+    run_script_content = (
+        """#!/bin/sh
 
 BUILDER_SELECTION="executiononly"
 
@@ -626,13 +665,16 @@ exec node /usr/app/packages/cli/bin/lodestar validator \\
     --secretsDir="$SECRETS_DIR" \\
     --metrics=true \\
     --metrics.address="0.0.0.0" \\
-    --metrics.port=""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """ \\
+    --metrics.port="""
+        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
+        + """ \\
     --beaconNodes="$BEACON_NODE_ADDRESS" \\
     --builder="$BUILDER_API_ENABLED" \\
     --builder.selection="$BUILDER_SELECTION" \\
     --distributed \\
     --paramsFile="/opt/lodestar/config.yaml"
 """
+    )
 
     # Add extra params if specified
     if participant.vc_extra_params:
@@ -692,7 +734,7 @@ exec node /usr/app/packages/cli/bin/lodestar validator \\
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.lodestar,
                 client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH :],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels,
                 supernode=participant.supernode,
@@ -703,6 +745,7 @@ exec node /usr/app/packages/cli/bin/lodestar validator \\
     )
 
     return vc_service
+
 
 def launch_teku_vc(
     plan,
@@ -716,7 +759,7 @@ def launch_teku_vc(
     full_name,
     vc_index,
     node_index,
-    vc_image
+    vc_image,
 ):
     """
     Launch a Teku validator client that connects to a Charon node
@@ -724,15 +767,21 @@ def launch_teku_vc(
     """
 
     # Create the teku-config.yaml content
-    teku_config_content = """metrics-enabled: true
+    teku_config_content = (
+        """metrics-enabled: true
 metrics-host-allowlist: "*"
 metrics-interface: "0.0.0.0"
-metrics-port: \"""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """\"
+metrics-port: \""""
+        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
+        + """\"
 validators-keystore-locking-enabled: false
 network: "/opt/teku/network-configs/config.yaml"
 validator-keys: "/opt/charon/validator_keys:/opt/charon/validator_keys"
-validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_ACCOUNT + """\"
+validators-proposer-default-fee-recipient: \""""
+        + constants.VALIDATING_REWARDS_ACCOUNT
+        + """\"
 """
+    )
 
     # Create the config file artifact using render_templates
     config_artifact = plan.render_templates(
@@ -802,18 +851,19 @@ validators-proposer-default-fee-recipient: \"""" + constants.VALIDATING_REWARDS_
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.teku,
                 client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH :],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels,
                 supernode=participant.supernode,
             ),
             tolerations=tolerations,
             node_selectors=node_selectors,
-            user = User(uid=0, gid=0),
+            user=User(uid=0, gid=0),
         ),
     )
 
     return vc_service
+
 
 def launch_nimbus_vc(
     plan,
@@ -827,7 +877,7 @@ def launch_nimbus_vc(
     full_name,
     vc_index,
     node_index,
-    vc_image
+    vc_image,
 ):
     """
     Launch a Nimbus validator client that connects to a Charon node
@@ -932,7 +982,9 @@ tail -f /dev/null
         name=key_import_service_name,
         config=ServiceConfig(
             image="statusim/nimbus-eth2:multiarch-latest",
-            cmd=["chmod +x /home/user/scripts/import_keys.sh && /home/user/scripts/import_keys.sh"],
+            cmd=[
+                "chmod +x /home/user/scripts/import_keys.sh && /home/user/scripts/import_keys.sh"
+            ],
             entrypoint=["bash", "-c"],
             env_vars=import_env_vars,
             files=import_files,
@@ -945,7 +997,11 @@ tail -f /dev/null
     plan.exec(
         service_name=key_import_service_name,
         recipe=ExecRecipe(
-            command=["bash", "-c", "while [ ! -f /home/user/data/import_complete.txt ]; do echo 'Waiting for import to complete...'; sleep 2; done; echo 'Import completed! Found completion marker.'"]
+            command=[
+                "bash",
+                "-c",
+                "while [ ! -f /home/user/data/import_complete.txt ]; do echo 'Waiting for import to complete...'; sleep 2; done; echo 'Import completed! Found completion marker.'",
+            ]
         ),
         description="Wait for key import completion",
     )
@@ -961,7 +1017,8 @@ tail -f /dev/null
 
     # Step 3: Create the actual validator client service
     # Create the VC run script
-    vc_run_script = """#!/usr/bin/env bash
+    vc_run_script = (
+        """#!/usr/bin/env bash
 
 # Find the nimbus_validator_client binary
 if [ -f "/home/user/nimbus_validator_client" ]; then
@@ -991,15 +1048,20 @@ exec "$NIMBUS_VC_PATH" \\
   --doppelganger-detection=false \\
   --metrics \\
   --metrics-address=0.0.0.0 \\
-  --metrics-port=""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """ \\
+  --metrics-port="""
+        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
+        + """ \\
   --payload-builder=true \\
   --distributed
 """
+    )
 
     # Add extra params if specified
     if participant.vc_extra_params:
         extra_params = " \\\n  " + " \\\n  ".join(participant.vc_extra_params)
-        vc_run_script = vc_run_script.replace("--distributed", "--distributed" + extra_params)
+        vc_run_script = vc_run_script.replace(
+            "--distributed", "--distributed" + extra_params
+        )
 
     # Create the VC script artifact
     vc_script_artifact = plan.render_templates(
@@ -1044,14 +1106,16 @@ exec "$NIMBUS_VC_PATH" \\
         config=ServiceConfig(
             image=vc_image,
             ports=ports,
-            cmd=["chmod +x /home/user/scripts/run_vc.sh && /home/user/scripts/run_vc.sh"],
+            cmd=[
+                "chmod +x /home/user/scripts/run_vc.sh && /home/user/scripts/run_vc.sh"
+            ],
             entrypoint=["bash", "-c"],
             env_vars=vc_env_vars,
             files=vc_files,
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.nimbus,
                 client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH :],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels,
                 supernode=participant.supernode,
@@ -1063,6 +1127,7 @@ exec "$NIMBUS_VC_PATH" \\
     )
 
     return vc_service
+
 
 def launch_prysm_vc(
     plan,
@@ -1076,7 +1141,7 @@ def launch_prysm_vc(
     full_name,
     vc_index,
     node_index,
-    vc_image
+    vc_image,
 ):
     """
     Launch a Prysm validator client that connects to a Charon node
@@ -1084,7 +1149,8 @@ def launch_prysm_vc(
     """
 
     # Create the run.sh script content
-    run_script_content = """#!/usr/bin/env bash
+    run_script_content = (
+        """#!/usr/bin/env bash
 
 WALLET_DIR="/prysm-wallet"
 
@@ -1137,14 +1203,19 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
     --beacon-rpc-provider="$BEACON_NODE_ADDRESS" \\
     --chain-config-file="/opt/prysm/config.yaml" \\
     --monitoring-host=0.0.0.0 \\
-    --monitoring-port=""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """ \\
+    --monitoring-port="""
+        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
+        + """ \\
     --distributed
 """
+    )
 
     # Add extra params if specified
     if participant.vc_extra_params:
         extra_params = " \\\n    " + " \\\n    ".join(participant.vc_extra_params)
-        run_script_content = run_script_content.replace("--distributed", "--distributed" + extra_params)
+        run_script_content = run_script_content.replace(
+            "--distributed", "--distributed" + extra_params
+        )
 
     # Create the script file artifact using render_templates
     script_artifact = plan.render_templates(
@@ -1197,7 +1268,7 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.prysm,
                 client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH :],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels,
                 supernode=participant.supernode,
@@ -1209,6 +1280,7 @@ exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
     )
 
     return vc_service
+
 
 def launch_vouch_vc(
     plan,
@@ -1222,7 +1294,7 @@ def launch_vouch_vc(
     full_name,
     vc_index,
     node_index,
-    vc_image
+    vc_image,
 ):
     """
     Launch a Vouch validator client that connects to a Charon node.
@@ -1237,7 +1309,8 @@ def launch_vouch_vc(
 
     ETHDO_VERSION = "1.37.3"
 
-    startup_script = """#!/usr/bin/env bash
+    startup_script = (
+        """#!/usr/bin/env bash
 set -e
 
 # Only wget+ca-certificates are needed (for the ethdo download). Installing curl
@@ -1258,7 +1331,11 @@ mkdir -p /opt/vouch
 cd /opt/vouch
 
 # Install ethdo (used to import the Charon keystores into a wallet vouch can read).
-wget -q "https://github.com/wealdtech/ethdo/releases/download/v""" + ETHDO_VERSION + """/ethdo-""" + ETHDO_VERSION + """-linux-${DL_ARCH}.tar.gz" -O ethdo.tar.gz
+wget -q "https://github.com/wealdtech/ethdo/releases/download/v"""
+        + ETHDO_VERSION
+        + """/ethdo-"""
+        + ETHDO_VERSION
+        + """-linux-${DL_ARCH}.tar.gz" -O ethdo.tar.gz
 tar -xf ethdo.tar.gz
 rm ethdo.tar.gz
 
@@ -1298,16 +1375,23 @@ $yq_accounts
     passphrases:
       - file:///opt/vouch/account_passphrase.txt
 blockrelay:
-  fallback-fee-recipient: \"""" + constants.VALIDATING_REWARDS_ACCOUNT + """\"
+  fallback-fee-recipient: \""""
+        + constants.VALIDATING_REWARDS_ACCOUNT
+        + """\"
 metrics:
   prometheus:
-    listen-address: "0.0.0.0:""" + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM) + """"
+    listen-address: "0.0.0.0:"""
+        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
+        + """"
 EOF
 
-echo "Starting vouch for charon node""" + str(node_index) + """"
+echo "Starting vouch for charon node"""
+        + str(node_index)
+        + """"
 # vouch binary lives at /app/vouch in the attestant/vouch image (not on PATH).
 exec /app/vouch
 """
+    )
 
     env_vars = {
         "BEACON_NODE_ADDRESS": charon_validator_api_url,
@@ -1344,7 +1428,7 @@ exec /app/vouch
             labels=shared_utils.label_maker(
                 client=constants.VC_TYPE.vouch,
                 client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH:],
+                image=vc_image[-constants.MAX_LABEL_LENGTH :],
                 connected_client="charon-node-" + str(node_index),
                 extra_labels=participant.vc_extra_labels,
                 supernode=participant.supernode,
@@ -1356,6 +1440,7 @@ exec /app/vouch
     )
 
     return vc_service
+
 
 def new_charon_launcher(el_cl_genesis_data):
     return struct(
