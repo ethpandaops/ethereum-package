@@ -281,6 +281,14 @@ def input_parser(plan, input_args):
     if result.get("disable_peer_scoring"):
         result = enrich_disable_peer_scoring(result)
 
+    if result.get("mev_type") == constants.BUILDOOR_MEV_TYPE:
+        plan.print(
+            "DEPRECATION WARNING: mev_type: buildoor (single shared builder) is "
+            + "deprecated and will be dropped after the gloas fork. Use the "
+            + "buildoor_params.instances config instead, which spins up dedicated "
+            + "buildoor builders wired to specific participants."
+        )
+
     if result.get("mev_type") in (
         constants.MOCK_MEV_TYPE,
         constants.FLASHBOTS_MEV_TYPE,
@@ -303,6 +311,67 @@ def input_parser(plan, input_args):
                 result.get("mev_type")
             )
         )
+
+    # Per-participant buildoor builders. buildoor is an additional_service: it is
+    # only spun up when "buildoor" is in additional_services. Its targeting is
+    # configured (independently of the participants) via buildoor_params.instances
+    # ([{participant, count}]); a builder is independent of the network - it reads
+    # one participant's CL/EL and, in ePBS, gossips bids to all.
+    buildoor_enabled = constants.BUILDOOR_SERVICE_NAME in result["additional_services"]
+    buildoor_instances = result["buildoor_params"]["instances"]
+    if buildoor_instances and not buildoor_enabled:
+        fail(
+            "buildoor_params.instances is set but 'buildoor' is not in additional_services. "
+            + "Add 'buildoor' to additional_services to spin it up."
+        )
+    if buildoor_enabled:
+        if result.get("mev_type") != None:
+            fail(
+                "additional_services buildoor cannot be combined with a global mev_type ({0}). ".format(
+                    result.get("mev_type")
+                )
+                + "Use additional_services: [buildoor] with buildoor_params.instances for dedicated "
+                + "per-participant builders, or mev_type: buildoor for a single shared builder, but not both."
+            )
+        # Default to a single builder on the first participant when none configured.
+        if not buildoor_instances:
+            buildoor_instances = [{"participant": 1, "count": 1}]
+            result["buildoor_params"]["instances"] = buildoor_instances
+        seen_buildoor_participants = {}
+        for instance in buildoor_instances:
+            participant_num = instance["participant"]
+            if (
+                type(participant_num) != "int"
+                or participant_num < 1
+                or participant_num > len(result["participants"])
+            ):
+                fail(
+                    "buildoor_params.instances participant must be a 1-based participant index between 1 and {0}, got {1}.".format(
+                        len(result["participants"]),
+                        participant_num,
+                    )
+                )
+            if participant_num in seen_buildoor_participants:
+                fail(
+                    "buildoor_params.instances has duplicate entries for participant {0}; use a single entry with the desired count.".format(
+                        participant_num
+                    )
+                )
+            seen_buildoor_participants[participant_num] = True
+            if type(instance["count"]) != "int" or instance["count"] < 1:
+                fail(
+                    "buildoor_params.instances count for participant {0} must be an integer >= 1, got {1}.".format(
+                        participant_num,
+                        instance["count"],
+                    )
+                )
+        # Each buildoor instance is its own builder, onboarded after genesis via
+        # its lifecycle deposit (buildoor_params.lifecycle) rather than registered
+        # at genesis. So no genesis builder registration is needed and gloas does
+        # not have to be at genesis - buildoor works with gloas at any epoch. Its
+        # builder keys are derived at indices after any genesis builders (see
+        # main.star) to avoid colliding with validator/genesis-builder keys.
+        result = enrich_buildoor_per_participant(result)
 
     if (
         result["mev_params"].get("mev_builder_subsidy") != 0
@@ -1203,6 +1272,14 @@ def input_parser(plan, input_args):
             extra_args=result["buildoor_params"]["extra_args"],
             builder_api=result["buildoor_params"]["builder_api"],
             epbs_builder=result["buildoor_params"]["epbs_builder"],
+            lifecycle=result["buildoor_params"]["lifecycle"],
+            instances=[
+                struct(
+                    participant=instance["participant"],
+                    count=instance["count"],
+                )
+                for instance in result["buildoor_params"]["instances"]
+            ],
         ),
         trueblocks_params=struct(
             image=result["trueblocks_params"]["image"],
@@ -1702,7 +1779,9 @@ def parse_network_params(plan, input_args):
                 )
             )
         builder_mnemonic_entry = {
-            "mnemonic": constants.DEFAULT_MNEMONIC,
+            "mnemonic": result["network_params"][
+                "preregistered_validator_keys_mnemonic"
+            ],
             "start": actual_num_validators,
             "count": result["network_params"]["builder_count"],
             "wd_prefix": "0x03",
@@ -2416,6 +2495,16 @@ def get_default_buildoor_params():
         "extra_args": [],
         "builder_api": True,
         "epbs_builder": True,
+        # Enable buildoor's builder lifecycle (it deposits/onboards its own
+        # builder after genesis and tops it up), so builders work even when gloas
+        # is not at genesis. Requires the EL RPC + wallet key, both already wired.
+        "lifecycle": True,
+        # List of {participant: <1-based index>, count: <n>} entries. Each entry
+        # spins up `count` dedicated buildoor builder instances wired to that
+        # participant's CL/EL. Builders are independent of the participants - a
+        # builder reads one CL's payload_attributes stream and (in ePBS) gossips
+        # bids to the whole network. Empty => no per-participant buildoors.
+        "instances": [],
     }
 
 
@@ -2491,6 +2580,113 @@ def enrich_disable_peer_scoring(parsed_arguments_dict):
     return parsed_arguments_dict
 
 
+# Wire the CL (and VC) of a single participant to an external builder/relay at
+# mev_url. Shared by the global mev_type flow and the per-participant buildoor
+# flow so both stay in sync as new clients are added.
+def apply_external_builder_flags(participant, mev_url, gas_limit):
+    if participant["cl_type"] == "lighthouse":
+        participant["cl_extra_params"].append("--builder={0}".format(mev_url))
+    if participant["vc_type"] == "lighthouse":
+        if (
+            gas_limit == 0
+        ):  # if the gas limit is set we already enable builder-proposals
+            participant["vc_extra_params"].append("--builder-proposals")
+    if participant["cl_type"] == "lodestar":
+        participant["cl_extra_params"].append("--builder")
+        participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
+    if participant["vc_type"] == "lodestar":
+        participant["vc_extra_params"].append("--builder")
+    if participant["cl_type"] == "nimbus":
+        participant["cl_extra_params"].append("--payload-builder=true")
+        participant["cl_extra_params"].append(
+            "--payload-builder-url={0}".format(mev_url)
+        )
+    if participant["vc_type"] == "nimbus":
+        participant["vc_extra_params"].append("--payload-builder=true")
+    if participant["cl_type"] == "teku":
+        participant["cl_extra_params"].append("--builder-endpoint={0}".format(mev_url))
+        participant["cl_extra_params"].append(
+            "--validators-builder-registration-default-enabled=true"
+        )
+    if participant["vc_type"] == "teku":
+        participant["vc_extra_params"].append(
+            "--validators-builder-registration-default-enabled=true"
+        )
+    if participant["cl_type"] == "prysm":
+        participant["cl_extra_params"].append("--http-mev-relay={0}".format(mev_url))
+    if participant["vc_type"] == "prysm":
+        participant["vc_extra_params"].append("--enable-builder")
+    if participant["cl_type"] == "grandine":
+        participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
+    if participant["vc_type"] == "vero":
+        participant["vc_extra_params"].append("--use-external-builder")
+
+
+# buildoor builds a payload from the CL's payload_attributes SSE stream, so the
+# CL feeding a buildoor instance must emit them on every slot.
+def apply_buildoor_payload_attributes_flags(participant):
+    if participant["cl_type"] == "lodestar":
+        participant["cl_extra_params"].append("--emitPayloadAttributes=true")
+    elif participant["cl_type"] == "prysm":
+        participant["cl_extra_params"].append("--prepare-all-payloads")
+    elif participant["cl_type"] == "lighthouse":
+        participant["cl_extra_params"].append("--always-prepare-payload")
+    elif participant["cl_type"] == "grandine":
+        participant["cl_extra_params"].append(
+            "--features=AlwaysPrepareExecutionPayload"
+        )
+    elif participant["cl_type"] == "consensoor":
+        participant["cl_extra_params"].append("--emit-payload-attributes")
+    elif participant["cl_type"] == "teku":
+        participant["cl_extra_params"].append(
+            "--Xfork-choice-updated-always-send-payload-attributes=true"
+        )
+    else:
+        # nimbus has no flag to emit payload_attributes.
+        fail(
+            "buildoor requires the CL feeding it to be one of "
+            + "[lodestar, prysm, lighthouse, grandine, consensoor, teku]: '{0}' has no flag to build a payload on each slot ".format(
+                participant["cl_type"]
+            )
+            + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
+        )
+
+
+# Per-participant buildoor: each buildoor_params.instances entry spins up
+# `count` dedicated buildoor services wired to the named participant's CL/EL.
+# Builders are configured independently of the participants (a builder reads one
+# CL's payload_attributes stream and, in ePBS, gossips bids to the whole
+# network). This is independent of the global mev_type buildoor flow (a single
+# shared buildoor for the whole network).
+def enrich_buildoor_per_participant(parsed_arguments_dict):
+    participants = parsed_arguments_dict["participants"]
+    gas_limit = parsed_arguments_dict["network_params"]["gas_limit"]
+    num_participants = len(participants)
+    for instance in parsed_arguments_dict["buildoor_params"]["instances"]:
+        index = instance["participant"] - 1
+        count = instance["count"]
+        participant = participants[index]
+        index_str = shared_utils.zfill_custom(index + 1, len(str(num_participants)))
+        # The CL has a single external-builder endpoint, so it is wired to the
+        # participant's first buildoor instance. Any additional instances still
+        # spin up (e.g. competing ePBS builders) but are not the CL's builder.
+        service_name = shared_utils.get_buildoor_service_name(
+            constants.BUILDOOR_SERVICE_NAME,
+            participant["cl_type"],
+            participant["el_type"],
+            index_str,
+            0,
+            count,
+        )
+        mev_url = "http://{0}:{1}".format(
+            service_name,
+            constants.BUILDOOR_API_PORT,
+        )
+        apply_external_builder_flags(participant, mev_url, gas_limit)
+        apply_buildoor_payload_attributes_flags(participant)
+    return parsed_arguments_dict
+
+
 # TODO perhaps clean this up into a map
 def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_type):
     for index, participant in enumerate(parsed_arguments_dict["participants"]):
@@ -2521,76 +2717,16 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
                 mev_port,
             )
 
-        if participant["cl_type"] == "lighthouse":
-            participant["cl_extra_params"].append("--builder={0}".format(mev_url))
-        if participant["vc_type"] == "lighthouse":
-            if (
-                parsed_arguments_dict["network_params"]["gas_limit"] == 0
-            ):  # if the gas limit is set we already enable builder-proposals
-                participant["vc_extra_params"].append("--builder-proposals")
-        if participant["cl_type"] == "lodestar":
-            participant["cl_extra_params"].append("--builder")
-            participant["cl_extra_params"].append("--builder.urls={0}".format(mev_url))
-        if participant["vc_type"] == "lodestar":
-            participant["vc_extra_params"].append("--builder")
-        if participant["cl_type"] == "nimbus":
-            participant["cl_extra_params"].append("--payload-builder=true")
-            participant["cl_extra_params"].append(
-                "--payload-builder-url={0}".format(mev_url)
-            )
-        if participant["vc_type"] == "nimbus":
-            participant["vc_extra_params"].append("--payload-builder=true")
-        if participant["cl_type"] == "teku":
-            participant["cl_extra_params"].append(
-                "--builder-endpoint={0}".format(mev_url)
-            )
-            participant["cl_extra_params"].append(
-                "--validators-builder-registration-default-enabled=true"
-            )
-        if participant["vc_type"] == "teku":
-            participant["vc_extra_params"].append(
-                "--validators-builder-registration-default-enabled=true"
-            )
-        if participant["cl_type"] == "prysm":
-            participant["cl_extra_params"].append(
-                "--http-mev-relay={0}".format(mev_url)
-            )
-        if participant["vc_type"] == "prysm":
-            participant["vc_extra_params"].append("--enable-builder")
-        if participant["cl_type"] == "grandine":
-            participant["cl_extra_params"].append("--builder-url={0}".format(mev_url))
-
-        if participant["vc_type"] == "vero":
-            participant["vc_extra_params"].append("--use-external-builder")
+        apply_external_builder_flags(
+            participant,
+            mev_url,
+            parsed_arguments_dict["network_params"]["gas_limit"],
+        )
 
         # buildoor builds against the first participant's payload_attributes
         # SSE stream, so that CL must emit them on every slot.
         if mev_type == constants.BUILDOOR_MEV_TYPE and index == 0:
-            if participant["cl_type"] == "lodestar":
-                participant["cl_extra_params"].append("--emitPayloadAttributes=true")
-            elif participant["cl_type"] == "prysm":
-                participant["cl_extra_params"].append("--prepare-all-payloads")
-            elif participant["cl_type"] == "lighthouse":
-                participant["cl_extra_params"].append("--always-prepare-payload")
-            elif participant["cl_type"] == "grandine":
-                participant["cl_extra_params"].append(
-                    "--features=AlwaysPrepareExecutionPayload"
-                )
-            elif participant["cl_type"] == "consensoor":
-                participant["cl_extra_params"].append("--emit-payload-attributes")
-            elif participant["cl_type"] == "teku":
-                participant["cl_extra_params"].append(
-                    "--Xfork-choice-updated-always-send-payload-attributes=true"
-                )
-            else:
-                # nimbus has no flag to emit payload_attributes.
-                fail(
-                    "mev_type 'buildoor' requires the first participant's cl_type to be one of "
-                    + "[lodestar, prysm, lighthouse, grandine, consensoor, teku]: '{0}' has no flag to build a payload on each slot ".format(
-                        participant["cl_type"]
-                    )
-                    + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
-                )
+            apply_buildoor_payload_attributes_flags(participant)
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
