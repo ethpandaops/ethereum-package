@@ -1030,11 +1030,6 @@ def input_parser(plan, input_args):
             min_mem=result["prometheus_params"]["min_mem"],
             max_mem=result["prometheus_params"]["max_mem"],
             image=result["prometheus_params"]["image"],
-            remote_write_url=result["prometheus_params"]["remote_write_url"],
-            remote_write_token=result["prometheus_params"]["remote_write_token"],
-            remote_write_relabel_configs=result["prometheus_params"][
-                "remote_write_relabel_configs"
-            ],
         ),
         grafana_params=struct(
             additional_dashboards=result["grafana_params"]["additional_dashboards"],
@@ -2258,15 +2253,6 @@ def get_default_prometheus_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "prom/prometheus:v3.2.1",
-        # remote_write: ship scraped metrics to an external endpoint. Disabled
-        # unless remote_write_url is set. remote_write_token is sent as a bearer
-        # credential (optional). remote_write_relabel_configs is an optional list
-        # of Prometheus write_relabel_configs (each a dict with SourceLabels and
-        # optionally Regex/Action/TargetLabel/Replacement) to filter/rewrite what
-        # is shipped. All are intended to be supplied at runtime via Kurtosis args.
-        "remote_write_url": "",
-        "remote_write_token": "",
-        "remote_write_relabel_configs": [],
     }
 
 
