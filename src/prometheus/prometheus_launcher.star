@@ -1,5 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-prometheus = import_module("github.com/KaloyanTanev/prometheus-package/main.star@kalo/add-remote-write-kt-package-name")
+prometheus = import_module(
+    "github.com/KaloyanTanev/prometheus-package/main.star@kalo/add-remote-write-kt-package-name"
+)
 constants = import_module("../package_io/constants.star")
 
 EXECUTION_CLIENT_TYPE = "execution"
