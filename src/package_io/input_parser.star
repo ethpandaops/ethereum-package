@@ -1032,8 +1032,8 @@ def input_parser(plan, input_args):
             image=result["prometheus_params"]["image"],
             remote_write_url=result["prometheus_params"]["remote_write_url"],
             remote_write_token=result["prometheus_params"]["remote_write_token"],
-            remote_write_job_regex=result["prometheus_params"][
-                "remote_write_job_regex"
+            remote_write_relabel_configs=result["prometheus_params"][
+                "remote_write_relabel_configs"
             ],
         ),
         grafana_params=struct(
@@ -2258,15 +2258,15 @@ def get_default_prometheus_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "prom/prometheus:v3.2.1",
-        # remote_write: ship metrics to an external endpoint (e.g. Obol central
-        # monitoring). Disabled unless remote_write_token is non-empty. The token
-        # is intended to be supplied at runtime via --args-file / Kurtosis args.
-        "remote_write_url": "https://vm.monitoring.gcp.obol.tech/write",
+        # remote_write: ship scraped metrics to an external endpoint. Disabled
+        # unless remote_write_url is set. remote_write_token is sent as a bearer
+        # credential (optional). remote_write_relabel_configs is an optional list
+        # of Prometheus write_relabel_configs (each a dict with SourceLabels and
+        # optionally Regex/Action/TargetLabel/Replacement) to filter/rewrite what
+        # is shipped. All are intended to be supplied at runtime via Kurtosis args.
+        "remote_write_url": "",
         "remote_write_token": "",
-        # Native scrape jobs are named after the Kurtosis service (e.g.
-        # vc-1-geth-lighthouse-charon-charon-0), so match jobs *containing* charon
-        # rather than starting with it; keeps Charon nodes + their VCs, drops EL/CL.
-        "remote_write_job_regex": ".*charon.*",
+        "remote_write_relabel_configs": [],
     }
 
 

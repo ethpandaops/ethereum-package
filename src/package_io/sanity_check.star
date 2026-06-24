@@ -341,7 +341,7 @@ SUBCATEGORY_PARAMS = {
         "image",
         "remote_write_url",
         "remote_write_token",
-        "remote_write_job_regex",
+        "remote_write_relabel_configs",
     ],
     "grafana_params": [
         "additional_dashboards",

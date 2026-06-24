@@ -48,33 +48,17 @@ def launch_prometheus(
         0,
     )
 
-    # remote_write is enabled only when a token is supplied (e.g. via Kurtosis args
-    # for shipping Charon metrics to Obol central monitoring); empty token => no
-    # remote_write block, identical to upstream behaviour.
+    # remote_write is enabled only when a URL is configured; empty => no
+    # remote_write block, identical to upstream behaviour. The relabel configs are
+    # passed through verbatim, so any filtering/rewriting (e.g. for a Charon
+    # cluster) is supplied via args rather than hardcoded here.
     remote_write_configs = []
-    if prometheus_params.remote_write_token != "":
+    if prometheus_params.remote_write_url != "":
         remote_write_configs = [
             {
                 "Url": prometheus_params.remote_write_url,
                 "BearerToken": prometheus_params.remote_write_token,
-                "WriteRelabelConfigs": [
-                    # Only ship jobs matching the configured regex (Charon nodes + VCs).
-                    {
-                        "SourceLabels": ["job"],
-                        "Regex": prometheus_params.remote_write_job_regex,
-                        "Action": "keep",
-                    },
-                    # Charon dashboards query job="charon"; native scrape jobs are
-                    # named after the service, so rewrite the job label to "charon"
-                    # for Charon-node series (VCs keep their own job label).
-                    {
-                        "SourceLabels": ["client_name"],
-                        "Regex": "charon",
-                        "TargetLabel": "job",
-                        "Replacement": "charon",
-                        "Action": "replace",
-                    },
-                ],
+                "WriteRelabelConfigs": prometheus_params.remote_write_relabel_configs,
             },
         ]
 
