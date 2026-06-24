@@ -25,8 +25,11 @@ def launch_buildoor(
     buildoor_params,
     global_node_selectors,
     global_tolerations,
-    builder_bls_secret_key=None,
+    builder_mnemonic=None,
+    builder_key_index=None,
     validator_ranges_artifact=None,
+    service_name=BUILDOOR_SERVICE_NAME,
+    extra_data=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -35,11 +38,11 @@ def launch_buildoor(
     if wallet_key.startswith("0x"):
         wallet_key = wallet_key[2:]
 
-    # Use injected builder BLS key if provided, otherwise fall back to default
-    if builder_bls_secret_key != None:
-        builder_bls_key = builder_bls_secret_key
-    else:
-        builder_bls_key = constants.DEFAULT_MEV_SECRET_KEY[2:]
+    # The builder API URL buildoor advertises in its bids. With multiple
+    # instances each one must advertise its OWN service URL; otherwise every
+    # instance but one is rejected by consumers as a builder_url mismatch and
+    # never wins a bid. Computed once and reused as the registered api_url.
+    api_url = "http://{0}:{1}".format(service_name, BUILDOOR_API_PORT)
 
     cmd = [
         "run",
@@ -47,16 +50,37 @@ def launch_buildoor(
         "--el-rpc={0}".format(el_rpc_uri),
         "--el-engine-api={0}".format(engine_rpc_uri),
         "--el-jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--builder-privkey={0}".format(builder_bls_key),
         "--wallet-privkey={0}".format(wallet_key),
         "--api-port={0}".format(BUILDOOR_API_PORT),
+        "--builder-api-url={0}".format(api_url),
     ]
+
+    # Builder BLS key: let buildoor derive it from the mnemonic at the given
+    # index (matching the 0x03 builder keys registered at genesis) when provided,
+    # otherwise fall back to the default static secret key.
+    if builder_mnemonic != None:
+        cmd.append("--builder-mnemonic={0}".format(builder_mnemonic))
+        cmd.append("--builder-key-index={0}".format(builder_key_index))
+    else:
+        cmd.append("--builder-privkey={0}".format(constants.DEFAULT_MEV_SECRET_KEY[2:]))
+
+    # Tag built blocks so a given block can be traced back to the buildoor
+    # instance that built it. Defaults to the service name (a unique identifier);
+    # buildoor injects it as the extra-data prefix (truncated to 32 bytes).
+    cmd.append(
+        "--extra-data={0}".format(extra_data if extra_data != None else service_name)
+    )
 
     if buildoor_params.builder_api:
         cmd.append("--builder-api-enabled")
 
     if buildoor_params.epbs_builder:
         cmd.append("--epbs-enabled")
+
+    # Lifecycle lets buildoor deposit/onboard its own builder after genesis (and
+    # top it up), so builders work without genesis registration / gloas-at-genesis.
+    if buildoor_params.lifecycle:
+        cmd.append("--lifecycle")
 
     if validator_ranges_artifact != None:
         cmd.append(
@@ -75,7 +99,7 @@ def launch_buildoor(
         files[VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE] = validator_ranges_artifact
 
     buildoor_service = plan.add_service(
-        name=BUILDOOR_SERVICE_NAME,
+        name=service_name,
         config=ServiceConfig(
             image=buildoor_params.image,
             ports={
@@ -98,11 +122,8 @@ def launch_buildoor(
     return {
         "mev_endpoint": "http://{0}@{1}:{2}".format(
             constants.DEFAULT_MEV_PUBKEY,
-            BUILDOOR_SERVICE_NAME,
+            service_name,
             BUILDOOR_API_PORT,
         ),
-        "api_url": "http://{0}:{1}".format(
-            BUILDOOR_SERVICE_NAME,
-            BUILDOOR_API_PORT,
-        ),
+        "api_url": api_url,
     }

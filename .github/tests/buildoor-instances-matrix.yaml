@@ -1,0 +1,33 @@
+# Multiple buildoor builders on top of a participants_matrix. The matrix expands
+# to one participant per el x cl combination; buildoor_params.instances then wires
+# a dedicated builder (by 1-based participant index) to chosen participants. The
+# builder config stays independent of the participants. Builders onboard
+# themselves after genesis via their lifecycle deposit (default on).
+participants_matrix:
+  el:
+    - el_type: geth
+      el_image: ethpandaops/geth:glamsterdam-devnet-6
+  cl:
+    - cl_type: lighthouse
+      cl_image: ethpandaops/lighthouse:glamsterdam-devnet-6
+    - cl_type: lodestar
+      cl_image: ethpandaops/lodestar:glamsterdam-devnet-6
+network_params:
+  preset: minimal
+  gloas_fork_epoch: 6
+  gas_limit: 150000000
+buildoor_params:
+  image: ethpandaops/buildoor:glamsterdam-devnet-6
+  builder_api: true
+  epbs_builder: true
+  lifecycle: true
+  instances:
+    - participant: 1
+      count: 2
+    - participant: 2
+      count: 1
+additional_services:
+  - buildoor
+  - dora
+dora_params:
+  image: ethpandaops/dora:glamsterdam-devnet-6

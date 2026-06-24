@@ -474,6 +474,8 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "builder_api",
         "epbs_builder",
+        "lifecycle",
+        "instances",
     ],
     "trueblocks_params": [
         "image",
@@ -516,6 +518,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "zkboost",
     "trueblocks",
     "otel",
+    "buildoor",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {

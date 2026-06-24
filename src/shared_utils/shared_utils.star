@@ -100,6 +100,18 @@ def zfill_custom(value, width):
     return ("0" * (width - len(str(value)))) + str(value)
 
 
+# Builds the service name for a per-participant buildoor instance, e.g.
+# buildoor-lighthouse-geth-1. When a participant runs more than one buildoor
+# (count > 1) a 1-based instance suffix is appended, e.g.
+# buildoor-lighthouse-geth-1-2. Used by both the input parser (to wire the CL's
+# builder endpoint) and main.star (to add the service), so they never drift.
+def get_buildoor_service_name(prefix, cl_type, el_type, index_str, instance, count):
+    base = "{0}-{1}-{2}-{3}".format(prefix, cl_type, el_type, index_str)
+    if count <= 1:
+        return base
+    return "{0}-{1}".format(base, instance + 1)
+
+
 def label_maker(
     client, client_type, image, connected_client, extra_labels, supernode=False
 ):

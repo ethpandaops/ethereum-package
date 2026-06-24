@@ -1,0 +1,42 @@
+# Multiple dedicated per-participant buildoor builders via buildoor_params.instances.
+# No mev_type: builders are configured independently of the participants and
+# onboard themselves after genesis via their lifecycle deposit (default on), so
+# gloas does not have to be at genesis. This spins up three buildoor services:
+#   buildoor-lighthouse-geth-1     (participant 1)
+#   buildoor-lodestar-geth-2-1     (participant 2, instance 1)
+#   buildoor-lodestar-geth-2-2     (participant 2, instance 2)
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:glamsterdam-devnet-6
+    cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:glamsterdam-devnet-6
+  - el_type: geth
+    el_image: ethpandaops/geth:glamsterdam-devnet-6
+    cl_type: lodestar
+    cl_image: ethpandaops/lodestar:glamsterdam-devnet-6
+network_params:
+  preset: minimal
+  gloas_fork_epoch: 6
+  gas_limit: 150000000
+buildoor_params:
+  image: ethpandaops/buildoor:glamsterdam-devnet-6
+  builder_api: true
+  epbs_builder: true
+  lifecycle: true
+  instances:
+    - participant: 1
+      count: 1
+    - participant: 2
+      count: 2
+additional_services:
+  - buildoor
+  - dora
+  - spamoor
+spamoor_params:
+  image: ethpandaops/spamoor:master
+  spammers:
+    - scenario: eoatx
+      config:
+        throughput: 2
+dora_params:
+  image: ethpandaops/dora:glamsterdam-devnet-6
