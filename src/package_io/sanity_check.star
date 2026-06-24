@@ -339,6 +339,9 @@ SUBCATEGORY_PARAMS = {
         "storage_tsdb_retention_time",
         "storage_tsdb_retention_size",
         "image",
+        "remote_write_url",
+        "remote_write_token",
+        "remote_write_relabel_configs",
     ],
     "grafana_params": [
         "additional_dashboards",
