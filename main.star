@@ -31,6 +31,7 @@ blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
 tempo = import_module("./src/tempo/tempo_launcher.star")
+observoor = import_module("./src/observoor/observoor_launcher.star")
 commit_boost_mev_boost = import_module(
     "./src/mev/commit-boost/mev_boost/mev_boost_launcher.star"
 )
@@ -82,6 +83,7 @@ PATH_TO_PARSED_BEACON_STATE = "/genesis/output/parsedBeaconState.json"
 ENGINE_OTEL_OTLP_GRPC_PORT = 14317
 ENGINE_OTEL_OTLP_HTTP_PORT = 14318
 ENGINE_OTEL_CLICKHOUSE_HTTP_PORT = 18123
+ENGINE_OTEL_CLICKHOUSE_NATIVE_PORT = 19000
 ENGINE_OTEL_DISCOVERY_OUTPUT_FILE = "/tmp/engine-otel-discovery.json"
 ENGINE_OTEL_DISCOVERY_ARTIFACT_NAME = "engine-otel-discovery"
 ENGINE_OTEL_DISCOVERY_MOUNT_DIR = "/engine-otel-discovery"
@@ -184,6 +186,7 @@ def new_engine_otel_endpoints(gateway=None, enclave_uuid=None, enclave_name=None
             otlp_http_traces_url=None,
             clickhouse_host=None,
             clickhouse_port=None,
+            clickhouse_native_endpoint=None,
         )
 
     return struct(
@@ -201,6 +204,11 @@ def new_engine_otel_endpoints(gateway=None, enclave_uuid=None, enclave_name=None
         ),
         clickhouse_host=gateway,
         clickhouse_port=ENGINE_OTEL_CLICKHOUSE_HTTP_PORT,
+        # Native TCP endpoint for clients that speak the ClickHouse binary
+        # protocol (e.g. observoor's clickhouse-rs sink) rather than HTTP.
+        clickhouse_native_endpoint="{}:{}".format(
+            gateway, ENGINE_OTEL_CLICKHOUSE_NATIVE_PORT
+        ),
     )
 
 
@@ -338,6 +346,17 @@ def run(plan, args={}):
             )
         )
 
+    # observoor writes its eBPF profiling data into the engine OTel ClickHouse
+    # over the native protocol, so it relies on the same Docker-host stack as
+    # 'otel' and must run on the Docker backend.
+    observoor_enabled = "observoor" in args_with_right_defaults.additional_services
+    if observoor_enabled and detected_backend != "docker":
+        fail(
+            "The 'observoor' additional_service requires the Docker backend because it ships eBPF profiles to the engine OTel ClickHouse published on the Docker host; detected backend: {}. Run with the Docker backend or remove 'observoor' from additional_services.".format(
+                detected_backend
+            )
+        )
+
     if (
         "disruptoor" in args_with_right_defaults.additional_services
         and detected_backend != "docker"
@@ -382,21 +401,30 @@ def run(plan, args={}):
     nginx_port = args_with_right_defaults.nginx_port
     docker_cache_params = args_with_right_defaults.docker_cache_params
 
+    # Both 'otel' (client traces) and 'observoor' (eBPF profiles) ship data to
+    # the engine OTel stack on the Docker host, so either one triggers discovery.
     engine_otel_endpoints = new_engine_otel_endpoints()
-    if otel_enabled:
+    if otel_enabled or observoor_enabled:
         engine_otel_endpoints = detect_engine_otel_endpoints(
             plan,
             global_tolerations,
             global_node_selectors,
         )
-        add_otel_resource_attributes_to_participants(
-            args_with_right_defaults.participants,
-            engine_otel_endpoints.resource_attributes,
-        )
+        if otel_enabled:
+            add_otel_resource_attributes_to_participants(
+                args_with_right_defaults.participants,
+                engine_otel_endpoints.resource_attributes,
+            )
     otel_clickhouse_host = engine_otel_endpoints.clickhouse_host
     otel_clickhouse_port = engine_otel_endpoints.clickhouse_port
-    otel_otlp_grpc_url = engine_otel_endpoints.otlp_grpc_url
-    otel_otlp_http_traces_url = engine_otel_endpoints.otlp_http_traces_url
+    otel_clickhouse_native_endpoint = engine_otel_endpoints.clickhouse_native_endpoint
+    # Client trace flags (OTLP) are only injected when 'otel' tracing is enabled.
+    # Enabling 'observoor' alone discovers the engine ClickHouse for profiling but
+    # must NOT turn on per-client tracing.
+    otel_otlp_grpc_url = engine_otel_endpoints.otlp_grpc_url if otel_enabled else None
+    otel_otlp_http_traces_url = (
+        engine_otel_endpoints.otlp_http_traces_url if otel_enabled else None
+    )
 
     for index, participant in enumerate(args_with_right_defaults.participants):
         if (
@@ -1304,6 +1332,23 @@ def run(plan, args={}):
                 index,
             )
             plan.print("Successfully launched tempo")
+        elif additional_service == "observoor":
+            plan.print("Launching observoor for eBPF-based profiling...")
+            observoor_config_template = read_file(
+                static_files.OBSERVOOR_CONFIG_TEMPLATE_FILEPATH
+            )
+            observoor.launch_observoor(
+                plan,
+                observoor_config_template,
+                otel_clickhouse_native_endpoint,
+                all_cl_contexts,
+                network_params,
+                args_with_right_defaults.observoor_params,
+                global_node_selectors,
+                global_tolerations,
+                index,
+            )
+            plan.print("Successfully launched observoor")
         elif additional_service == "prometheus_grafana":
             # Allow prometheus to be launched last so is able to collect metrics from other services
             launch_prometheus_grafana = True

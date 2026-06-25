@@ -1,0 +1,54 @@
+<clickhouse>
+    <!-- Listen on all interfaces (required when volume-mounting config.d) -->
+    <listen_host>::</listen_host>
+    <listen_host>0.0.0.0</listen_host>
+    <listen_try>1</listen_try>
+
+    <!-- Macros for single-node "cluster" mode required by observoor migrations -->
+    <macros>
+        <installation>observoor</installation>
+        <cluster>observoor</cluster>
+        <shard>1</shard>
+        <replica>observoor-clickhouse</replica>
+    </macros>
+
+    <!-- Single-node cluster definition (resolved after server starts) -->
+    <remote_servers replace="true">
+        <observoor>
+            <shard>
+                <replica>
+                    <host>localhost</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </observoor>
+    </remote_servers>
+
+    <!-- Embedded ClickHouse Keeper using localhost for single-node raft -->
+    <keeper_server>
+        <tcp_port>9181</tcp_port>
+        <server_id>1</server_id>
+        <log_storage_path>/var/lib/clickhouse/coordination/log</log_storage_path>
+        <snapshot_storage_path>/var/lib/clickhouse/coordination/snapshots</snapshot_storage_path>
+        <coordination_settings>
+            <operation_timeout_ms>10000</operation_timeout_ms>
+            <session_timeout_ms>30000</session_timeout_ms>
+            <raft_logs_level>warning</raft_logs_level>
+        </coordination_settings>
+        <raft_configuration>
+            <server>
+                <id>1</id>
+                <hostname>localhost</hostname>
+                <port>9444</port>
+            </server>
+        </raft_configuration>
+    </keeper_server>
+
+    <!-- ZooKeeper config pointing to local embedded keeper -->
+    <zookeeper>
+        <node>
+            <host>localhost</host>
+            <port>9181</port>
+        </node>
+    </zookeeper>
+</clickhouse>

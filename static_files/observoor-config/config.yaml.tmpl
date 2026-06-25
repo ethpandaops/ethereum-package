@@ -1,0 +1,44 @@
+log_level: info
+
+meta_client_name: "{{.ClientName}}"
+meta_network_name: "{{.NetworkName}}"
+
+beacon:
+  endpoint: "{{.BeaconEndpoint}}"
+  timeout: 10s
+
+pid:
+  process_names:
+    - geth
+    - erigon
+    - besu
+    - nethermind
+    - nimbus_beacon_n
+    - lighthouse
+    - lodestar
+    - prysm
+    - beacon-chain
+    - teku
+    - node
+    - java
+    - dotnet
+
+ring_buffer_size: 4194304
+
+sync_poll_interval: 30s
+
+sinks:
+  aggregated:
+    enabled: true
+    resolution:
+      interval: 1s
+      slot_aligned: true
+    clickhouse:
+      enabled: true
+      endpoint: "{{.ClickHouseNativeEndpoint}}"
+      database: observoor
+      migrations:
+        enabled: true
+
+health:
+  addr: ":9090"

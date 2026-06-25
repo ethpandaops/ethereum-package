@@ -16,6 +16,7 @@ DISCOVERY_PORT_NUM = 30303
 ENGINE_RPC_PORT_NUM = 8551
 METRICS_PORT_NUM = 9001
 TORRENT_PORT_NUM = 42069
+PPROF_PORT_NUM = 6060
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
@@ -148,6 +149,7 @@ def get_config(
         constants.WS_RPC_PORT_ID: WS_RPC_PORT_NUM,
         constants.METRICS_PORT_ID: METRICS_PORT_NUM,
         constants.TORRENT_PORT_ID: torrent_port,
+        constants.PPROF_PORT_ID: PPROF_PORT_NUM,
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
@@ -175,6 +177,9 @@ def get_config(
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--torrent.port={0}".format(torrent_port),
+        "--pprof",
+        "--pprof.addr=0.0.0.0",
+        "--pprof.port={0}".format(PPROF_PORT_NUM),
     ]
 
     # Configure storage type - erigon defaults to archive, use --prune.mode=full for full node
