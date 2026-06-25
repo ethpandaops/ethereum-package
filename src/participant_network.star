@@ -570,6 +570,7 @@ def launch_participant_network(
                 launcher=charon_launcher.new_charon_launcher(
                     el_cl_genesis_data=el_cl_data
                 ),
+                keymanager_file=keymanager_file,
                 service_name=service_name,
                 image=participant.vc_image,
                 global_log_level=args_with_right_defaults.global_log_level,
