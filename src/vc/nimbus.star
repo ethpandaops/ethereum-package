@@ -28,6 +28,7 @@ def get_config(
     tempo_otlp_grpc_url=None,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    distributed=False,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -80,6 +81,10 @@ def get_config(
 
     if network_params.gas_limit > 0:
         cmd.append("--suggested-gas-limit={0}".format(network_params.gas_limit))
+
+    if distributed:
+        cmd.append("--distributed")
+        cmd.append("--payload-builder=true")
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

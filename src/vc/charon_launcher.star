@@ -5,6 +5,15 @@ vc_shared = import_module("./shared.star")
 vc_context = import_module("./vc_context.star")
 node_metrics = import_module("../node_metrics_info.star")
 prometheus = import_module("../prometheus/prometheus_launcher.star")
+lighthouse = import_module("./lighthouse.star")
+lodestar = import_module("./lodestar.star")
+teku = import_module("./teku.star")
+nimbus = import_module("./nimbus.star")
+prysm = import_module("./prysm.star")
+vouch = import_module("./vouch.star")
+keystore_files_module = import_module(
+    "../prelaunch_data_generator/validator_keystores/keystore_files.star"
+)
 
 # Charon specific ports
 CHARON_VALIDATOR_API_PORT = 3600
@@ -14,6 +23,10 @@ CHARON_RELAY_HTTP_PORT = 3640
 
 # Fallback node count if the participant doesn't request a valid one.
 DEFAULT_CHARON_NODE_COUNT = 4
+
+# Official ethdo image, used to build the Vouch wallet from the split keystores
+# (so the Vouch container itself needs no ethdo download).
+ETHDO_IMAGE = "wealdtech/ethdo:latest"
 
 # Verbosity levels mapping
 VERBOSITY_LEVELS = {
@@ -27,6 +40,7 @@ VERBOSITY_LEVELS = {
 def launch(
     plan,
     launcher,
+    keymanager_file,
     service_name,
     image,
     global_log_level,
@@ -366,14 +380,13 @@ done
         )
         charon_services.append(charon_service)
 
-    # Map each supported VC type to its launcher function.
     vc_launchers = {
-        constants.VC_TYPE.lighthouse: launch_lighthouse_vc,
-        constants.VC_TYPE.lodestar: launch_lodestar_vc,
-        constants.VC_TYPE.teku: launch_teku_vc,
-        constants.VC_TYPE.nimbus: launch_nimbus_vc,
-        constants.VC_TYPE.prysm: launch_prysm_vc,
-        constants.VC_TYPE.vouch: launch_vouch_vc,
+        constants.VC_TYPE.lighthouse: launch_lighthouse,
+        constants.VC_TYPE.lodestar: launch_lodestar,
+        constants.VC_TYPE.teku: launch_teku,
+        constants.VC_TYPE.nimbus: launch_nimbus,
+        constants.VC_TYPE.prysm: launch_prysm,
+        constants.VC_TYPE.vouch: launch_vouch,
     }
     if vc_type not in vc_launchers:
         fail(
@@ -381,7 +394,6 @@ done
                 vc_type, ", ".join(vc_launchers.keys())
             )
         )
-    launch_vc = vc_launchers[vc_type]
 
     # Launch one validator client per Charon node, connected to that node's validator API.
     vc_services = []
@@ -389,6 +401,7 @@ done
         charon_validator_api_url = "http://{0}:{1}".format(
             charon_services[i].ip_address, CHARON_VALIDATOR_API_PORT
         )
+        vc_service_name = service_name + "-vc-" + str(i) + "-" + vc_type
 
         # Each node's validator keys come from the cluster-creation output.
         validator_keys_for_node = plan.store_service_files(
@@ -401,15 +414,20 @@ done
         )
 
         vc_services.append(
-            launch_vc(
+            vc_launchers[vc_type](
                 plan=plan,
-                vc_service_name=service_name + "-vc-" + str(i) + "-" + vc_type,
+                vc_service_name=vc_service_name,
                 charon_validator_api_url=charon_validator_api_url,
-                validator_keys_artifact=validator_keys_for_node,
+                split_keys_artifact=validator_keys_for_node,
                 launcher=launcher,
+                keymanager_file=keymanager_file,
                 participant=participant,
+                global_log_level=global_log_level,
+                cl_context=cl_context,
                 tolerations=tolerations,
                 node_selectors=node_selectors,
+                network_params=network_params,
+                port_publisher=port_publisher,
                 full_name=full_name + "-node" + str(i),
                 vc_index=vc_index,
                 node_index=i,
@@ -478,968 +496,488 @@ done
     )
 
 
-def launch_lighthouse_vc(
-    plan,
-    vc_service_name,
-    charon_validator_api_url,
-    validator_keys_artifact,
-    launcher,
-    participant,
-    tolerations,
-    node_selectors,
-    full_name,
-    vc_index,
-    node_index,
-    vc_image,
+def _charon_split_keys_to_keystore_files(
+    plan, split_keys_artifact, vc_index, node_index
 ):
     """
-    Launch a Lighthouse validator client that connects to a Charon node
-    Uses the two-stage approach: import keys, then run validator
-    """
+    Convert a Charon node's split keystores (a flat dir of keystore-N.json +
+    keystore-N.txt) into the on-disk layouts the stock vc/<client>.star launchers
+    consume, and wrap them in a node_keystore_files struct.
 
-    # Create the startup script that implements the two-stage approach
-    startup_script = (
-        """#!/bin/bash
+    Produces, in the returned artifact:
+      keys/<pubkey>/voting-keystore.json + secrets/<pubkey>   (lighthouse, lodestar)
+      nimbus-keys/<pubkey>/keystore.json                      (nimbus; reuses secrets/)
+      teku-keys/<pubkey>.json + teku-secrets/<pubkey>.txt     (teku)
+    matching the eth2-val-tools layouts, so no per-client import step is needed.
+    (prysm and vouch instead need a wallet, built separately in
+    _charon_split_keys_to_prysm_wallet / _charon_split_keys_to_vouch_wallet.)
+    """
+    converter_name = "charon-keys-convert-" + str(node_index) + "-" + str(vc_index)
+    converter = plan.add_service(
+        name=converter_name,
+        config=ServiceConfig(
+            image="busybox:latest",
+            cmd=["tail", "-f", "/dev/null"],
+            files={"/split-keys": split_keys_artifact},
+        ),
+    )
+
+    # Reorganise each keystore-N.json/.txt pair into the on-disk layouts the stock
+    # launchers expect: raw (lighthouse/lodestar), nimbus-keys (nimbus), and
+    # teku-keys/teku-secrets (teku). Prysm needs a wallet, handled separately.
+    convert_script = """#!/bin/sh
 set -e
+mkdir -p /out/keys /out/secrets /out/nimbus-keys /out/teku-keys /out/teku-secrets
+for f in /split-keys/keystore-*.json; do
+    [ -f "$f" ] || continue
+    pubkey="0x$(grep '"pubkey"' "$f" | head -1 | awk -F'"' '{print $4}')"
+    pw="${f%.json}.txt"
 
-# Stage 1: Import validator keys
-for f in /opt/charon/keys/keystore-*.json; do
-  if [ -f "$f" ]; then
-    echo "Importing key ${f}"
-    lighthouse account validator import \\
-      --reuse-password \\
-      --keystore "${f}" \\
-      --password-file "${f//json/txt}" \\
-      --testnet-dir "/opt/lighthouse/network-configs"
-  fi
+    # raw layout (lighthouse, lodestar): <pubkey>/voting-keystore.json + secrets/<pubkey>
+    mkdir -p "/out/keys/${pubkey}"
+    cp "$f" "/out/keys/${pubkey}/voting-keystore.json"
+    cp "$pw" "/out/secrets/${pubkey}"
+
+    # nimbus layout: <pubkey>/keystore.json (secrets reuse the raw secrets dir)
+    mkdir -p "/out/nimbus-keys/${pubkey}"
+    cp "$f" "/out/nimbus-keys/${pubkey}/keystore.json"
+
+    # teku layout: flat <pubkey>.json + <pubkey>.txt
+    cp "$f" "/out/teku-keys/${pubkey}.json"
+    cp "$pw" "/out/teku-secrets/${pubkey}.txt"
 done
-
-echo "Starting lighthouse validator client for node"""
-        + str(node_index)
-        + """"
-# Stage 2: Run the validator client
-exec lighthouse validator \\
-  --beacon-nodes ${LIGHTHOUSE_BEACON_NODE_ADDRESS} \\
-  --suggested-fee-recipient """
-        + constants.VALIDATING_REWARDS_ACCOUNT
-        + """ \\
-  --metrics \\
-  --metrics-address "0.0.0.0" \\
-  --metrics-allow-origin "*" \\
-  --metrics-port """
-        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
-        + """ \\
-  --use-long-timeouts \\
-  --testnet-dir "/opt/lighthouse/network-configs" \\
-  --builder-proposals \\
-  --distributed \\
-  --debug-level "debug"
 """
-    )
-
-    # Environment variables
-    env_vars = {
-        "LIGHTHOUSE_BEACON_NODE_ADDRESS": charon_validator_api_url,
-        "NODE": "node" + str(node_index),
-        "RUST_BACKTRACE": "full",
-    }
-    if participant.vc_extra_env_vars:
-        env_vars.update(participant.vc_extra_env_vars)
-
-    # Files to mount
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        "/opt/charon/keys": validator_keys_artifact,
-        "/opt/lighthouse/network-configs": launcher.el_cl_genesis_data.files_artifact_uuid,
-    }
-
-    # Ports configuration
-    ports = {
-        constants.METRICS_PORT_ID: PortSpec(
-            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
-            transport_protocol="TCP",
-            application_protocol="http",
-            # Importing 256 keystores sequentially can exceed the default port
-            # readiness timeout; allow plenty of time so the VC isn't rolled back.
-            wait="15m",
-        ),
-    }
-
-    # Create the service with the startup script
-    vc_service = plan.add_service(
-        name=vc_service_name,
-        config=ServiceConfig(
-            image=vc_image,
-            ports=ports,
-            cmd=["bash", "-c", startup_script],
-            env_vars=env_vars,
-            files=files,
-            labels=shared_utils.label_maker(
-                client=constants.VC_TYPE.lighthouse,
-                client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH :],
-                connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels,
-                supernode=participant.supernode,
-            ),
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-        ),
-    )
-
-    return vc_service
-
-
-def launch_lodestar_vc(
-    plan,
-    vc_service_name,
-    charon_validator_api_url,
-    validator_keys_artifact,
-    launcher,
-    participant,
-    tolerations,
-    node_selectors,
-    full_name,
-    vc_index,
-    node_index,
-    vc_image,
-):
-    """
-    Launch a Lodestar validator client that connects to a Charon node
-    Uses Charon-specific key management with standard Lodestar parameters
-    """
-
-    # Create the run.sh script content
-    run_script_content = (
-        """#!/bin/sh
-
-BUILDER_SELECTION="executiononly"
-
-# If the builder API is enabled, override the builder selection to signal Lodestar to always prefer proposing blinded blocks, but fall back on EL blocks if unavailable.
-if [ "$BUILDER_API_ENABLED" = "true" ]; then
-    BUILDER_SELECTION="builderalways"
-fi
-
-DATA_DIR="/opt/data"
-KEYSTORES_DIR="${DATA_DIR}/keystores"
-SECRETS_DIR="${DATA_DIR}/secrets"
-
-mkdir -p "${KEYSTORES_DIR}" "${SECRETS_DIR}"
-
-IMPORTED_COUNT=0
-EXISTING_COUNT=0
-
-for f in /home/charon/validator_keys/keystore-*.json; do
-    echo "Importing key ${f}"
-
-    # Extract pubkey from keystore file
-    PUBKEY="0x$(grep '"pubkey"' "$f" | awk -F'"' '{print $4}')"
-
-    PUBKEY_DIR="${KEYSTORES_DIR}/${PUBKEY}"
-
-    # Skip import if keystore already exists
-    if [ -d "${PUBKEY_DIR}" ]; then
-        EXISTING_COUNT=$((EXISTING_COUNT + 1))
-        continue
-    fi
-
-    mkdir -p "${PUBKEY_DIR}"
-    chown 1000:1000 "${PUBKEY_DIR}"
-
-    # Copy the keystore file to persisted keys backend
-    install -m 600 "$f" "${PUBKEY_DIR}/voting-keystore.json"
-    chown 1000:1000 "${PUBKEY_DIR}/voting-keystore.json"
-
-    # Copy the corresponding password file
-    PASSWORD_FILE="${f%.json}.txt"
-    install -m 600 "${PASSWORD_FILE}" "${SECRETS_DIR}/${PUBKEY}"
-
-    IMPORTED_COUNT=$((IMPORTED_COUNT + 1))
-done
-
-echo "Processed all keys imported=${IMPORTED_COUNT}, existing=${EXISTING_COUNT}, total=$(ls /home/charon/validator_keys/keystore-*.json | wc -l)"
-
-exec node /usr/app/packages/cli/bin/lodestar validator \\
-    --dataDir="$DATA_DIR" \\
-    --keystoresDir="$KEYSTORES_DIR" \\
-    --secretsDir="$SECRETS_DIR" \\
-    --metrics=true \\
-    --metrics.address="0.0.0.0" \\
-    --metrics.port="""
-        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
-        + """ \\
-    --beaconNodes="$BEACON_NODE_ADDRESS" \\
-    --builder="$BUILDER_API_ENABLED" \\
-    --builder.selection="$BUILDER_SELECTION" \\
-    --distributed \\
-    --paramsFile="/opt/lodestar/config.yaml"
-"""
-    )
-
-    # Add extra params if specified
-    if participant.vc_extra_params:
-        extra_params = " \\\n    " + " \\\n    ".join(participant.vc_extra_params)
-        run_script_content += extra_params
-
-    # Create the script file artifact using render_templates
-    script_artifact = plan.render_templates(
-        config={
-            "run.sh": struct(
-                template=run_script_content,
-                data={},
-            ),
-        },
-        name="lodestar-run-script-" + str(node_index) + "-" + str(vc_index),
-    )
-
-    # Environment variables
-    env_vars = {
-        "BEACON_NODE_ADDRESS": charon_validator_api_url,
-        "BUILDER_API_ENABLED": "true",
-        "NODE": "node" + str(node_index),
-    }
-    if participant.vc_extra_env_vars:
-        env_vars.update(participant.vc_extra_env_vars)
-
-    # Files to mount - Charon keys + standard genesis data + run script
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        "/home/charon/validator_keys": validator_keys_artifact,
-        "/opt/lodestar": launcher.el_cl_genesis_data.files_artifact_uuid,
-        "/opt/charon": script_artifact,
-    }
-
-    # Ports configuration
-    ports = {
-        constants.METRICS_PORT_ID: PortSpec(
-            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
-            transport_protocol="TCP",
-            application_protocol="http",
-            # Importing 256 keystores sequentially can exceed the default port
-            # readiness timeout; allow plenty of time so the VC isn't rolled back.
-            wait="15m",
-        ),
-    }
-
-    # Create the service - execute the script file
-    vc_service = plan.add_service(
-        name=vc_service_name,
-        config=ServiceConfig(
-            image=vc_image,
-            ports=ports,
-            cmd=["chmod +x /opt/charon/run.sh && /opt/charon/run.sh"],
-            entrypoint=["sh", "-c"],
-            env_vars=env_vars,
-            files=files,
-            labels=shared_utils.label_maker(
-                client=constants.VC_TYPE.lodestar,
-                client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH :],
-                connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels,
-                supernode=participant.supernode,
-            ),
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-        ),
-    )
-
-    return vc_service
-
-
-def launch_teku_vc(
-    plan,
-    vc_service_name,
-    charon_validator_api_url,
-    validator_keys_artifact,
-    launcher,
-    participant,
-    tolerations,
-    node_selectors,
-    full_name,
-    vc_index,
-    node_index,
-    vc_image,
-):
-    """
-    Launch a Teku validator client that connects to a Charon node
-    Uses config file approach similar to compose.teku.yaml
-    """
-
-    # Create the teku-config.yaml content
-    teku_config_content = (
-        """metrics-enabled: true
-metrics-host-allowlist: "*"
-metrics-interface: "0.0.0.0"
-metrics-port: \""""
-        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
-        + """\"
-validators-keystore-locking-enabled: false
-network: "/opt/teku/network-configs/config.yaml"
-validator-keys: "/opt/charon/validator_keys:/opt/charon/validator_keys"
-validators-proposer-default-fee-recipient: \""""
-        + constants.VALIDATING_REWARDS_ACCOUNT
-        + """\"
-"""
-    )
-
-    # Create the config file artifact using render_templates
-    config_artifact = plan.render_templates(
-        config={
-            "teku-config.yaml": struct(
-                template=teku_config_content,
-                data={},
-            ),
-        },
-        name="teku-config-" + str(node_index) + "-" + str(vc_index),
-    )
-
-    # Teku validator command based on standard teku.star but with Charon-specific flags
-    cmd = [
-        "validator-client",
-        "--network=/opt/teku/network-configs/config.yaml",
-        "--beacon-node-api-endpoint=" + charon_validator_api_url,
-        "--config-file=/opt/charon/teku/teku-config.yaml",
-        "--validators-external-signer-slashing-protection-enabled=true",
-        "--validators-builder-registration-default-enabled=true",
-        "--Xobol-dvt-integration-enabled=true",
-        "--logging=DEBUG",
-        "--metrics-enabled=true",
-        "--metrics-host-allowlist=*",
-        "--metrics-interface=0.0.0.0",
-        "--metrics-port={0}".format(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM),
-    ]
-
-    # Add extra params if specified
-    if participant.vc_extra_params:
-        cmd.extend([param for param in participant.vc_extra_params])
-
-    # Environment variables
-    env_vars = {}
-    if participant.vc_extra_env_vars:
-        env_vars.update(participant.vc_extra_env_vars)
-
-    # Files to mount - Charon keys + standard genesis data + teku config
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        "/opt/charon/validator_keys": validator_keys_artifact,
-        "/opt/charon/teku": config_artifact,
-        "/opt/teku/network-configs": launcher.el_cl_genesis_data.files_artifact_uuid,
-    }
-
-    # Ports configuration
-    ports = {
-        constants.METRICS_PORT_ID: PortSpec(
-            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
-            transport_protocol="TCP",
-            application_protocol="http",
-            # Importing 256 keystores sequentially can exceed the default port
-            # readiness timeout; allow plenty of time so the VC isn't rolled back.
-            wait="15m",
-        ),
-    }
-
-    # Create the service
-    vc_service = plan.add_service(
-        name=vc_service_name,
-        config=ServiceConfig(
-            image=vc_image,
-            ports=ports,
-            cmd=cmd,
-            env_vars=env_vars,
-            files=files,
-            labels=shared_utils.label_maker(
-                client=constants.VC_TYPE.teku,
-                client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH :],
-                connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels,
-                supernode=participant.supernode,
-            ),
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            user=User(uid=0, gid=0),
-        ),
-    )
-
-    return vc_service
-
-
-def launch_nimbus_vc(
-    plan,
-    vc_service_name,
-    charon_validator_api_url,
-    validator_keys_artifact,
-    launcher,
-    participant,
-    tolerations,
-    node_selectors,
-    full_name,
-    vc_index,
-    node_index,
-    vc_image,
-):
-    """
-    Launch a Nimbus validator client that connects to a Charon node
-    Uses a two-service approach:
-    1. Key import service using nimbus-eth2 (beacon node) to import keys
-    2. Validator client service using nimbus-validator-client with imported keys
-    """
-
-    # Step 1: Create key import service using beacon node image
-    key_import_service_name = vc_service_name + "-key-import"
-
-    # Create the key import script
-    key_import_script = """#!/usr/bin/env bash
-
-# Cleanup nimbus directories if they already exist.
-rm -rf /home/user/data/${NODE}
-
-# Refer: https://nimbus.guide/keys.html
-# Running a nimbus VC involves two steps which need to run in order:
-# 1. Importing the validator keys
-# 2. And then actually running the VC
-tmpkeys="/home/validator_keys/tmpkeys"
-mkdir -p ${tmpkeys}
-
-for f in /home/validator_keys/keystore-*.json; do
-  echo "Importing key ${f}"
-
-  # Read password from keystore-*.txt into $password variable.
-  password=$(<"${f//json/txt}")
-  echo "Password length: ${#password}"
-
-  # Copy keystore file to tmpkeys/ directory.
-  cp "${f}" "${tmpkeys}"
-  echo "Copied ${f} to ${tmpkeys}"
-
-  # List files in tmpkeys before import
-  echo "Files in tmpkeys before import:"
-  ls -la "${tmpkeys}"
-
-  # Import keystore with the password.
-  echo "Running nimbus import command..."
-  echo "$password" | \\
-  /home/user/nimbus_beacon_node deposits import \\
-  --data-dir=/home/user/data/${NODE} \\
-  /home/validator_keys/tmpkeys
-
-  IMPORT_RESULT=$?
-  echo "Import command exit code: $IMPORT_RESULT"
-
-  # Check what was created
-  echo "Contents of data directory after import:"
-  ls -la /home/user/data/${NODE}/ || echo "Data directory does not exist"
-  if [ -d "/home/user/data/${NODE}/validators" ]; then
-    echo "Validators directory contents:"
-    ls -la /home/user/data/${NODE}/validators/
-  fi
-
-  # Delete tmpkeys/keystore-*.json file that was copied before.
-  filename="$(basename ${f})"
-  rm "${tmpkeys}/${filename}"
-  echo "Deleted ${tmpkeys}/${filename}"
-done
-
-# Delete the tmpkeys/ directory since it's no longer needed.
-rm -r ${tmpkeys}
-
-echo "Imported all keys successfully"
-echo "Key import process completed"
-
-# Create a completion marker file to signal that import is done
-echo "IMPORT_COMPLETE" > /home/user/data/import_complete.txt
-echo "Created completion marker file"
-
-# Keep the container running so we can extract the data
-tail -f /dev/null
-"""
-
-    # Create the key import script artifact
-    key_import_script_artifact = plan.render_templates(
-        config={
-            "import_keys.sh": struct(
-                template=key_import_script,
-                data={},
-            ),
-        },
-        name="nimbus-key-import-script-" + str(node_index) + "-" + str(vc_index),
-    )
-
-    # Environment variables for key import
-    import_env_vars = {
-        "NODE": "node" + str(node_index),
-    }
-
-    # Files to mount for key import
-    import_files = {
-        "/home/validator_keys": validator_keys_artifact,
-        "/home/user/scripts": key_import_script_artifact,
-    }
-
-    # Create the key import service
-    key_import_service = plan.add_service(
-        name=key_import_service_name,
-        config=ServiceConfig(
-            image="statusim/nimbus-eth2:multiarch-latest",
-            cmd=[
-                "chmod +x /home/user/scripts/import_keys.sh && /home/user/scripts/import_keys.sh"
-            ],
-            entrypoint=["bash", "-c"],
-            env_vars=import_env_vars,
-            files=import_files,
-            user=User(uid=0, gid=0),
-        ),
-    )
-
-    # Step 2: Wait for key import to complete and then extract the keys as an artifact
-    # Wait for the completion marker file to be created
     plan.exec(
-        service_name=key_import_service_name,
-        recipe=ExecRecipe(
-            command=[
-                "bash",
-                "-c",
-                "while [ ! -f /home/user/data/import_complete.txt ]; do echo 'Waiting for import to complete...'; sleep 2; done; echo 'Import completed! Found completion marker.'",
-            ]
-        ),
-        description="Wait for key import completion",
+        service_name=converter.name,
+        recipe=ExecRecipe(command=["sh", "-c", convert_script]),
     )
 
-    # Store the imported keys from the key import service
-    # Note: The beacon node imports to /home/user/data/${NODE}, so we store that specific directory
-    imported_keys_artifact = plan.store_service_files(
-        service_name=key_import_service_name,
-        src="/home/user/data/node" + str(node_index),
-        name="nimbus-imported-keys-" + str(node_index) + "-" + str(vc_index),
-        description="Nimbus imported validator keys for node " + str(node_index),
+    keystore_artifact = plan.store_service_files(
+        service_name=converter.name,
+        src="/out",
+        name="charon-raw-keys-" + str(node_index) + "-" + str(vc_index),
+    )
+    plan.remove_service(name=converter.name)
+
+    return keystore_files_module.new_keystore_files(
+        files_artifact_uuid=keystore_artifact,
+        raw_root_dirpath="",
+        raw_keys_relative_dirpath="keys",
+        raw_secrets_relative_dirpath="secrets",
+        nimbus_keys_relative_dirpath="nimbus-keys",
+        prysm_relative_dirpath="",
+        teku_keys_relative_dirpath="teku-keys",
+        teku_secrets_relative_dirpath="teku-secrets",
+        raw_keys_secrets_relative_dirpath="",
     )
 
-    # Step 3: Create the actual validator client service
-    # Create the VC run script
-    vc_run_script = (
-        """#!/usr/bin/env bash
 
-# Find the nimbus_validator_client binary
-if [ -f "/home/user/nimbus_validator_client" ]; then
-    NIMBUS_VC_PATH="/home/user/nimbus_validator_client"
-elif [ -f "/usr/bin/nimbus_validator_client" ]; then
-    NIMBUS_VC_PATH="/usr/bin/nimbus_validator_client"
-elif [ -f "/usr/local/bin/nimbus_validator_client" ]; then
-    NIMBUS_VC_PATH="/usr/local/bin/nimbus_validator_client"
-else
-    echo "Error: Could not find nimbus_validator_client binary"
-    echo "Available files in /home/user:"
-    ls -la /home/user/
-    exit 1
-fi
-
-echo "Using Nimbus VC binary at: $NIMBUS_VC_PATH"
-echo "Using imported keys from: /home/user/imported_data"
-
-# List what's available in the imported data
-echo "Contents of imported_data:"
-ls -la /home/user/imported_data/
-
-# Run nimbus validator client with imported keys
-exec "$NIMBUS_VC_PATH" \\
-  --data-dir="/home/user/imported_data" \\
-  --beacon-node="$BEACON_NODE_ADDRESS" \\
-  --doppelganger-detection=false \\
-  --metrics \\
-  --metrics-address=0.0.0.0 \\
-  --metrics-port="""
-        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
-        + """ \\
-  --payload-builder=true \\
-  --distributed
-"""
-    )
-
-    # Add extra params if specified
-    if participant.vc_extra_params:
-        extra_params = " \\\n  " + " \\\n  ".join(participant.vc_extra_params)
-        vc_run_script = vc_run_script.replace(
-            "--distributed", "--distributed" + extra_params
-        )
-
-    # Create the VC script artifact
-    vc_script_artifact = plan.render_templates(
-        config={
-            "run_vc.sh": struct(
-                template=vc_run_script,
-                data={},
-            ),
-        },
-        name="nimbus-vc-script-" + str(node_index) + "-" + str(vc_index),
-    )
-
-    # Environment variables for VC
-    vc_env_vars = {
-        "BEACON_NODE_ADDRESS": charon_validator_api_url,
-        "NODE": "node" + str(node_index),
-    }
-    if participant.vc_extra_env_vars:
-        vc_env_vars.update(participant.vc_extra_env_vars)
-
-    # Files to mount for VC - imported keys + VC script
-    vc_files = {
-        "/home/user/imported_data": imported_keys_artifact,
-        "/home/user/scripts": vc_script_artifact,
-    }
-
-    # Ports configuration
-    ports = {
-        constants.METRICS_PORT_ID: PortSpec(
-            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
-            transport_protocol="TCP",
-            application_protocol="http",
-            # Importing 256 keystores sequentially can exceed the default port
-            # readiness timeout; allow plenty of time so the VC isn't rolled back.
-            wait="15m",
-        ),
-    }
-
-    # Create the actual validator client service
-    vc_service = plan.add_service(
-        name=vc_service_name,
-        config=ServiceConfig(
-            image=vc_image,
-            ports=ports,
-            cmd=[
-                "chmod +x /home/user/scripts/run_vc.sh && /home/user/scripts/run_vc.sh"
-            ],
-            entrypoint=["bash", "-c"],
-            env_vars=vc_env_vars,
-            files=vc_files,
-            labels=shared_utils.label_maker(
-                client=constants.VC_TYPE.nimbus,
-                client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH :],
-                connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels,
-                supernode=participant.supernode,
-            ),
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            user=User(uid=0, gid=0),
-        ),
-    )
-
-    return vc_service
-
-
-def launch_prysm_vc(
+def launch_lighthouse(
     plan,
     vc_service_name,
     charon_validator_api_url,
-    validator_keys_artifact,
+    split_keys_artifact,
     launcher,
+    keymanager_file,
     participant,
+    global_log_level,
+    cl_context,
     tolerations,
     node_selectors,
+    network_params,
+    port_publisher,
     full_name,
     vc_index,
     node_index,
     vc_image,
 ):
+    node_keystore_files = _charon_split_keys_to_keystore_files(
+        plan, split_keys_artifact, vc_index, node_index
+    )
+
+    config = lighthouse.get_config(
+        plan=plan,
+        participant=participant,
+        el_cl_genesis_data=launcher.el_cl_genesis_data,
+        image=vc_image,
+        service_name=vc_service_name,
+        global_log_level=global_log_level,
+        beacon_http_urls=[charon_validator_api_url],
+        cl_context=cl_context,
+        el_context=None,  # unused by lighthouse.get_config
+        full_name=full_name,
+        node_keystore_files=node_keystore_files,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        keymanager_enabled=False,
+        network_params=network_params,
+        port_publisher=port_publisher,
+        vc_index=vc_index,
+        extra_files_artifacts=[],
+        distributed=True,
+    )
+
+    return plan.add_service(name=vc_service_name, config=config)
+
+
+def launch_lodestar(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    split_keys_artifact,
+    launcher,
+    keymanager_file,
+    participant,
+    global_log_level,
+    cl_context,
+    tolerations,
+    node_selectors,
+    network_params,
+    port_publisher,
+    full_name,
+    vc_index,
+    node_index,
+    vc_image,
+):
+    node_keystore_files = _charon_split_keys_to_keystore_files(
+        plan, split_keys_artifact, vc_index, node_index
+    )
+
+    config = lodestar.get_config(
+        plan=plan,
+        participant=participant,
+        el_cl_genesis_data=launcher.el_cl_genesis_data,
+        keymanager_file=keymanager_file,
+        image=vc_image,
+        global_log_level=global_log_level,
+        beacon_http_urls=[charon_validator_api_url],
+        cl_context=cl_context,
+        el_context=None,
+        remote_signer_context=None,
+        full_name=full_name,
+        node_keystore_files=node_keystore_files,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        keymanager_enabled=False,
+        network_params=network_params,
+        port_publisher=port_publisher,
+        vc_index=vc_index,
+        extra_files_artifacts=[],
+        distributed=True,
+    )
+
+    return plan.add_service(name=vc_service_name, config=config)
+
+
+def launch_teku(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    split_keys_artifact,
+    launcher,
+    keymanager_file,
+    participant,
+    global_log_level,
+    cl_context,
+    tolerations,
+    node_selectors,
+    network_params,
+    port_publisher,
+    full_name,
+    vc_index,
+    node_index,
+    vc_image,
+):
+    node_keystore_files = _charon_split_keys_to_keystore_files(
+        plan, split_keys_artifact, vc_index, node_index
+    )
+
+    config = teku.get_config(
+        plan=plan,
+        participant=participant,
+        el_cl_genesis_data=launcher.el_cl_genesis_data,
+        keymanager_file=keymanager_file,
+        image=vc_image,
+        beacon_http_urls=[charon_validator_api_url],
+        cl_context=cl_context,
+        el_context=None,
+        remote_signer_context=None,
+        full_name=full_name,
+        node_keystore_files=node_keystore_files,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        keymanager_enabled=False,
+        network_params=network_params,
+        port_publisher=port_publisher,
+        vc_index=vc_index,
+        extra_files_artifacts=[],
+        distributed=True,
+    )
+
+    return plan.add_service(name=vc_service_name, config=config)
+
+
+def launch_nimbus(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    split_keys_artifact,
+    launcher,
+    keymanager_file,
+    participant,
+    global_log_level,
+    cl_context,
+    tolerations,
+    node_selectors,
+    network_params,
+    port_publisher,
+    full_name,
+    vc_index,
+    node_index,
+    vc_image,
+):
+    node_keystore_files = _charon_split_keys_to_keystore_files(
+        plan, split_keys_artifact, vc_index, node_index
+    )
+
+    config = nimbus.get_config(
+        plan=plan,
+        participant=participant,
+        el_cl_genesis_data=launcher.el_cl_genesis_data,
+        image=vc_image,
+        keymanager_file=keymanager_file,
+        beacon_http_urls=[charon_validator_api_url],
+        cl_context=cl_context,
+        el_context=None,
+        remote_signer_context=None,
+        full_name=full_name,
+        node_keystore_files=node_keystore_files,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        keymanager_enabled=False,
+        network_params=network_params,
+        port_publisher=port_publisher,
+        vc_index=vc_index,
+        extra_files_artifacts=[],
+        distributed=True,
+    )
+
+    return plan.add_service(name=vc_service_name, config=config)
+
+
+def _charon_split_keys_to_prysm_wallet(
+    plan, split_keys_artifact, vc_index, node_index, prysm_image
+):
     """
-    Launch a Prysm validator client that connects to a Charon node
-    Uses script approach similar to kurtosis-charon/prysm/run.sh
+    Build a Prysm wallet from a Charon node's split keystores so the stock
+    vc/prysm.star launcher (which expects a wallet, not raw keystores) can run it.
+
+    Returns an artifact containing:
+      prysm/                 the imported direct-keymanager wallet
+      wallet-password.txt    the wallet password
+    plus the node_keystore_files struct that points at them.
     """
+    builder_name = "charon-prysm-wallet-" + str(node_index) + "-" + str(vc_index)
+    builder = plan.add_service(
+        name=builder_name,
+        config=ServiceConfig(
+            image=prysm_image,
+            entrypoint=["bash", "-c"],
+            cmd=["tail -f /dev/null"],
+            files={"/split-keys": split_keys_artifact},
+            user=User(uid=0, gid=0),
+        ),
+    )
 
-    # Create the run.sh script content
-    run_script_content = (
-        """#!/usr/bin/env bash
-
-WALLET_DIR="/prysm-wallet"
-
-# Cleanup wallet directories if already exists.
-rm -rf $WALLET_DIR
-mkdir $WALLET_DIR
-
-# Refer: https://docs.prylabs.network/docs/install/install-with-script#step-5-run-a-validator-using-prysm
-# Running a prysm VC involves two steps which need to run in order:
-# 1. Import validator keys in a prysm wallet account.
-# 2. Run the validator client.
-WALLET_PASSWORD="prysm-validator-secret"
-echo $WALLET_PASSWORD > /wallet-password.txt
-/app/cmd/validator/validator wallet create --accept-terms-of-use --wallet-password-file=wallet-password.txt --keymanager-kind=direct --wallet-dir="$WALLET_DIR"
-
-tmpkeys="/home/validator_keys/tmpkeys"
-mkdir -p ${tmpkeys}
-
-for f in /home/charon/validator_keys/keystore-*.json; do
-    echo "Importing key ${f}"
-
-    # Copy keystore file to tmpkeys/ directory.
-    cp "${f}" "${tmpkeys}"
-
-    # Import keystore with password.
+    build_script = """#!/usr/bin/env bash
+set -e
+mkdir -p /out
+echo "prysm-validator-secret" > /out/wallet-password.txt
+/app/cmd/validator/validator wallet create \\
+    --accept-terms-of-use \\
+    --keymanager-kind=direct \\
+    --wallet-dir=/out/prysm \\
+    --wallet-password-file=/out/wallet-password.txt
+tmpkeys=/tmp/keys
+mkdir -p "$tmpkeys"
+for f in /split-keys/keystore-*.json; do
+    [ -f "$f" ] || continue
+    cp "$f" "$tmpkeys/"
     /app/cmd/validator/validator accounts import \\
         --accept-terms-of-use=true \\
-        --wallet-dir="$WALLET_DIR" \\
-        --keys-dir="${tmpkeys}" \\
-        --account-password-file="${f//json/txt}" \\
-        --wallet-password-file=wallet-password.txt
-
-    # Delete tmpkeys/keystore-*.json file that was copied before.
-    filename="$(basename ${f})"
-    rm "${tmpkeys}/${filename}"
+        --wallet-dir=/out/prysm \\
+        --keys-dir="$tmpkeys" \\
+        --account-password-file="${f%.json}.txt" \\
+        --wallet-password-file=/out/wallet-password.txt
+    rm "$tmpkeys/$(basename "$f")"
 done
-
-# Delete the tmpkeys/ directory since it's no longer needed.
-rm -r ${tmpkeys}
-
-echo "Imported all keys"
-
-# Now run prysm VC
-exec /app/cmd/validator/validator --wallet-dir="$WALLET_DIR" \\
-    --accept-terms-of-use=true \\
-    --datadir="/data/vc" \\
-    --wallet-password-file="/wallet-password.txt" \\
-    --enable-beacon-rest-api \\
-    --beacon-rest-api-provider="$BEACON_NODE_ADDRESS" \\
-    --beacon-rpc-provider="$BEACON_NODE_ADDRESS" \\
-    --chain-config-file="/opt/prysm/config.yaml" \\
-    --monitoring-host=0.0.0.0 \\
-    --monitoring-port="""
-        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
-        + """ \\
-    --distributed
 """
+    plan.exec(
+        service_name=builder.name,
+        recipe=ExecRecipe(command=["bash", "-c", build_script]),
     )
 
-    # Add extra params if specified
-    if participant.vc_extra_params:
-        extra_params = " \\\n    " + " \\\n    ".join(participant.vc_extra_params)
-        run_script_content = run_script_content.replace(
-            "--distributed", "--distributed" + extra_params
-        )
-
-    # Create the script file artifact using render_templates
-    script_artifact = plan.render_templates(
-        config={
-            "run.sh": struct(
-                template=run_script_content,
-                data={},
-            ),
-        },
-        name="prysm-run-script-" + str(node_index) + "-" + str(vc_index),
+    wallet_artifact = plan.store_service_files(
+        service_name=builder.name,
+        src="/out",
+        name="charon-prysm-wallet-files-" + str(node_index) + "-" + str(vc_index),
     )
+    plan.remove_service(name=builder.name)
 
-    # Environment variables
-    env_vars = {
-        "BEACON_NODE_ADDRESS": charon_validator_api_url,
-    }
-    if participant.vc_extra_env_vars:
-        env_vars.update(participant.vc_extra_env_vars)
+    node_keystore_files = keystore_files_module.new_keystore_files(
+        files_artifact_uuid=wallet_artifact,
+        raw_root_dirpath="",
+        raw_keys_relative_dirpath="",
+        raw_secrets_relative_dirpath="",
+        nimbus_keys_relative_dirpath="",
+        prysm_relative_dirpath="prysm",
+        teku_keys_relative_dirpath="",
+        teku_secrets_relative_dirpath="",
+        raw_keys_secrets_relative_dirpath="",
+    )
+    return wallet_artifact, node_keystore_files
 
-    # Files to mount - Charon keys + standard genesis data + run script
-    files = {
-        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        "/home/charon/validator_keys": validator_keys_artifact,
-        "/opt/prysm": launcher.el_cl_genesis_data.files_artifact_uuid,
-        "/opt/charon": script_artifact,
-    }
 
-    # Ports configuration
-    ports = {
-        constants.METRICS_PORT_ID: PortSpec(
-            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
-            transport_protocol="TCP",
-            application_protocol="http",
-            # Importing 256 keystores sequentially can exceed the default port
-            # readiness timeout; allow plenty of time so the VC isn't rolled back.
-            wait="15m",
-        ),
-    }
+def _charon_split_keys_to_vouch_wallet(plan, split_keys_artifact, vc_index, node_index):
+    """
+    Build an ethdo wallet from a Charon node's split keystores by running the
+    official ethdo image, so the Vouch container itself needs no ethdo (and no
+    apt/download) — it just mounts the result.
 
-    # Create the service - execute the script file
-    vc_service = plan.add_service(
-        name=vc_service_name,
+    Returns an artifact containing:
+      wallets/                  the ethdo wallet store
+      accounts.txt              one account path per line (vals/valN)
+      account-passphrase.txt    the account passphrase
+    """
+    builder_name = "charon-vouch-wallet-" + str(node_index) + "-" + str(vc_index)
+    builder = plan.add_service(
+        name=builder_name,
         config=ServiceConfig(
-            image=vc_image,
-            ports=ports,
-            cmd=["chmod +x /opt/charon/run.sh && /opt/charon/run.sh"],
-            entrypoint=["bash", "-c"],
-            env_vars=env_vars,
-            files=files,
-            labels=shared_utils.label_maker(
-                client=constants.VC_TYPE.prysm,
-                client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH :],
-                connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels,
-                supernode=participant.supernode,
-            ),
-            tolerations=tolerations,
-            node_selectors=node_selectors,
+            image=ETHDO_IMAGE,
+            entrypoint=["sh", "-c"],
+            cmd=["tail -f /dev/null"],
+            files={"/split-keys": split_keys_artifact},
             user=User(uid=0, gid=0),
         ),
     )
 
-    return vc_service
+    build_script = """set -e
+mkdir -p /out/wallets
+echo "1234" > /out/account-passphrase.txt
+: > /out/accounts.txt
+/app/ethdo --base-dir=/out/wallets wallet create --wallet=vals --passphrase=""
+index=0
+for f in /split-keys/keystore-*.json; do
+    [ -f "$f" ] || continue
+    /app/ethdo --base-dir=/out/wallets account import \\
+        --account="vals/val${index}" \\
+        --keystore="$f" \\
+        --keystore-passphrase="$(cat "${f%.json}.txt")" \\
+        --passphrase="1234" --allow-weak-passphrases
+    echo "vals/val${index}" >> /out/accounts.txt
+    index=$((index + 1))
+done
+"""
+    plan.exec(
+        service_name=builder.name,
+        recipe=ExecRecipe(command=["sh", "-c", build_script]),
+    )
+
+    wallet_artifact = plan.store_service_files(
+        service_name=builder.name,
+        src="/out",
+        name="charon-vouch-wallet-files-" + str(node_index) + "-" + str(vc_index),
+    )
+    plan.remove_service(name=builder.name)
+    return wallet_artifact
 
 
-def launch_vouch_vc(
+def launch_prysm(
     plan,
     vc_service_name,
     charon_validator_api_url,
-    validator_keys_artifact,
+    split_keys_artifact,
     launcher,
+    keymanager_file,
     participant,
+    global_log_level,
+    cl_context,
     tolerations,
     node_selectors,
+    network_params,
+    port_publisher,
     full_name,
     vc_index,
     node_index,
     vc_image,
 ):
-    """
-    Launch a Vouch validator client that connects to a Charon node.
-
-    Imports the Charon-split keystores into an ethdo wallet,
-    writes ~/.vouch.yml pointing at the Charon validator API, and runs vouch.
-    ethdo is fetched at runtime (the attestant/vouch image doesn't ship it),
-    with arch detection so it works on amd64 and arm64 hosts alike.
-    Prometheus metrics are exposed on the standard VC metrics port so Kurtosis'
-    readiness check passes and the cluster is scraped like every other VC.
-    """
-
-    ETHDO_VERSION = "1.37.3"
-
-    startup_script = (
-        """#!/usr/bin/env bash
-set -e
-
-# Only wget+ca-certificates are needed (for the ethdo download). Installing curl
-# pulls a large dependency chain that pushed startup past Kurtosis' port-readiness
-# window, so keep this minimal.
-apt-get update
-apt-get install -y --no-install-recommends wget ca-certificates
-
-# Match the host architecture so the downloaded ethdo binary actually runs.
-ARCH="$(uname -m)"
-case "${ARCH}" in
-  x86_64) DL_ARCH="amd64" ;;
-  aarch64|arm64) DL_ARCH="arm64" ;;
-  *) echo "Unsupported arch ${ARCH}"; exit 1 ;;
-esac
-
-mkdir -p /opt/vouch
-cd /opt/vouch
-
-# Install ethdo (used to import the Charon keystores into a wallet vouch can read).
-wget -q "https://github.com/wealdtech/ethdo/releases/download/v"""
-        + ETHDO_VERSION
-        + """/ethdo-"""
-        + ETHDO_VERSION
-        + """-linux-${DL_ARCH}.tar.gz" -O ethdo.tar.gz
-tar -xf ethdo.tar.gz
-rm ethdo.tar.gz
-
-# Passphrase protecting every account in the local wallet.
-account_passphrase="1234"
-
-./ethdo wallet create --wallet=vals --passphrase=""
-
-accounts_list=()
-for keystore_file in /home/charon/validator_keys/keystore-*.json; do
-    basename="$(basename "${keystore_file%.json}")"
-    password_file="/home/charon/validator_keys/${basename}.txt"
-    index="${basename##*-}"
-    account_name="vals/val${index}"
-    passphrase_content=$(cat "$password_file")
-
-    echo "Importing account ${account_name} from ${keystore_file}"
-    ./ethdo account import \\
-        --account="$account_name" \\
-        --keystore="$keystore_file" \\
-        --keystore-passphrase="$passphrase_content" \\
-        --passphrase="$account_passphrase" --allow-weak-passphrases
-
-    accounts_list+=("$account_name")
-done
-
-yq_accounts=$(printf "      - %s\\n" "${accounts_list[@]}")
-echo -n "$account_passphrase" > /opt/vouch/account_passphrase.txt
-
-cat > ~/.vouch.yml <<EOF
-beacon-node-address: $BEACON_NODE_ADDRESS
-log-level: "debug"
-accountmanager:
-  wallet:
-    accounts:
-$yq_accounts
-    passphrases:
-      - file:///opt/vouch/account_passphrase.txt
-blockrelay:
-  fallback-fee-recipient: \""""
-        + constants.VALIDATING_REWARDS_ACCOUNT
-        + """\"
-metrics:
-  prometheus:
-    listen-address: "0.0.0.0:"""
-        + str(vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM)
-        + """"
-EOF
-
-echo "Starting vouch for charon node"""
-        + str(node_index)
-        + """"
-# vouch binary lives at /app/vouch in the attestant/vouch image (not on PATH).
-exec /app/vouch
-"""
+    wallet_artifact, node_keystore_files = _charon_split_keys_to_prysm_wallet(
+        plan, split_keys_artifact, vc_index, node_index, vc_image
     )
 
-    env_vars = {
-        "BEACON_NODE_ADDRESS": charon_validator_api_url,
-    }
-    if participant.vc_extra_env_vars:
-        env_vars.update(participant.vc_extra_env_vars)
-
-    # Vouch reads duties from the Charon validator API and signs with the locally
-    # imported wallet, so it needs the Charon keys but not the genesis data.
-    files = {
-        "/home/charon/validator_keys": validator_keys_artifact,
-    }
-
-    ports = {
-        constants.METRICS_PORT_ID: PortSpec(
-            number=vc_shared.VALIDATOR_CLIENT_METRICS_PORT_NUM,
-            transport_protocol="TCP",
-            application_protocol="http",
-            # Importing 256 keystores sequentially can exceed the default port
-            # readiness timeout; allow plenty of time so the VC isn't rolled back.
-            wait="15m",
-        ),
-    }
-
-    vc_service = plan.add_service(
-        name=vc_service_name,
-        config=ServiceConfig(
-            image=vc_image,
-            ports=ports,
-            cmd=[startup_script],
-            entrypoint=["bash", "-c"],
-            env_vars=env_vars,
-            files=files,
-            labels=shared_utils.label_maker(
-                client=constants.VC_TYPE.vouch,
-                client_type=constants.CLIENT_TYPES.validator,
-                image=vc_image[-constants.MAX_LABEL_LENGTH :],
-                connected_client="charon-node-" + str(node_index),
-                extra_labels=participant.vc_extra_labels,
-                supernode=participant.supernode,
-            ),
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            user=User(uid=0, gid=0),
-        ),
+    config = prysm.get_config(
+        plan=plan,
+        participant=participant,
+        el_cl_genesis_data=launcher.el_cl_genesis_data,
+        keymanager_file=keymanager_file,
+        image=vc_image,
+        beacon_http_urls=[charon_validator_api_url],
+        cl_context=cl_context,
+        el_context=None,
+        remote_signer_context=None,
+        full_name=full_name,
+        node_keystore_files=node_keystore_files,
+        prysm_password_relative_filepath="wallet-password.txt",
+        prysm_password_artifact_uuid=wallet_artifact,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        keymanager_enabled=False,
+        network_params=network_params,
+        port_publisher=port_publisher,
+        vc_index=vc_index,
+        extra_files_artifacts=[],
+        distributed=True,
     )
 
-    return vc_service
+    return plan.add_service(name=vc_service_name, config=config)
+
+
+def launch_vouch(
+    plan,
+    vc_service_name,
+    charon_validator_api_url,
+    split_keys_artifact,
+    launcher,
+    keymanager_file,
+    participant,
+    global_log_level,
+    cl_context,
+    tolerations,
+    node_selectors,
+    network_params,
+    port_publisher,
+    full_name,
+    vc_index,
+    node_index,
+    vc_image,
+):
+    vouch_wallet_artifact = _charon_split_keys_to_vouch_wallet(
+        plan, split_keys_artifact, vc_index, node_index
+    )
+
+    config = vouch.get_config(
+        plan=plan,
+        participant=participant,
+        image=vc_image,
+        global_log_level=global_log_level,
+        beacon_http_urls=[charon_validator_api_url],
+        cl_context=cl_context,
+        vouch_wallet_artifact=vouch_wallet_artifact,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+    )
+
+    return plan.add_service(name=vc_service_name, config=config)
 
 
 def new_charon_launcher(el_cl_genesis_data):
