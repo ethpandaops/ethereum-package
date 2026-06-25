@@ -90,128 +90,21 @@ def launch(
     # directly rather than querying the (possibly not-yet-ready) beacon node.
     genesis_time = genesis_timestamp
 
-    # Raw validator key/secret directory paths. node_keystore_files is non-None
-    # here (we returned early above otherwise).
-    validator_keys_dirpath = shared_utils.path_join(
-        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-        node_keystore_files.raw_keys_relative_dirpath,
-    )
-    validator_secrets_dirpath = shared_utils.path_join(
-        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-        node_keystore_files.raw_secrets_relative_dirpath,
-    )
-
-    # Create a temporary service to format the validator keys for Charon
-    # Use busybox as a lightweight image for key formatting
-    key_formatter_service = plan.add_service(
-        name=service_name + "-key-formatter-" + str(vc_index),
-        config=ServiceConfig(
-            image="busybox:latest",
-            cmd=["tail", "-f", "/dev/null"],  # Keep the service running
-            files={
-                constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
-            },
-        ),
-    )
-
-    # Create a directory for Charon-formatted keys
-    plan.exec(
-        service_name=key_formatter_service.name,
-        recipe=ExecRecipe(
-            command=["mkdir", "-p", "/opt/charon/charon-keys"],
-        ),
-    )
-
-    # Create a script to format the validator keys for Charon
-    format_keys_script = """#!/bin/sh
-# Find all directories in the validator keys directory
-keystore_directories="%s/*"
-
-index=0
-echo "Processing keystores from ${keystore_directories}"
-
-# Create directory with proper permissions
-mkdir -p /opt/charon/charon-keys
-chmod 755 /opt/charon/charon-keys
-
-# Iterate over each directory
-for keystore_dir in $keystore_directories; do
-    # Check if it's a directory
-    if [ -d "$keystore_dir" ]; then
-        # Copy 'voting-keystore.json' to 'charon-keys' with an indexed name
-        cp "$keystore_dir/voting-keystore.json" "/opt/charon/charon-keys/keystore-${index}.json"
-        chmod 644 "/opt/charon/charon-keys/keystore-${index}.json"
-
-        # Extract the directory name (pubkey) from the current keystore directory
-        dir_name=$(basename "$keystore_dir")
-
-        # Check if a file with the same name exists in the secrets directory and copy it
-        if [ -f "%s/$dir_name" ]; then
-            cp "%s/$dir_name" "/opt/charon/charon-keys/keystore-${index}.txt"
-            chmod 644 "/opt/charon/charon-keys/keystore-${index}.txt"
-        else
-            echo "No matching file found in secrets directory for '$dir_name'."
-        fi
-
-        # Increment the index for the next iteration (busybox compatible)
-        index=$(($index + 1))
-    fi
-done
-""" % (
-        validator_keys_dirpath,
-        validator_secrets_dirpath,
-        validator_secrets_dirpath,
-    )
-
-    # Save the script to the service
-    plan.exec(
-        service_name=key_formatter_service.name,
-        recipe=ExecRecipe(
-            command=[
-                "sh",
-                "-c",
-                "cat > /opt/charon/format_keys.sh << 'EOL'\n"
-                + format_keys_script
-                + "\nEOL",
-            ],
-        ),
-    )
-
-    # Make the script executable
-    plan.exec(
-        service_name=key_formatter_service.name,
-        recipe=ExecRecipe(
-            command=["chmod", "+x", "/opt/charon/format_keys.sh"],
-        ),
-    )
-
-    # Run the script to format the keys
-    plan.exec(
-        service_name=key_formatter_service.name,
-        recipe=ExecRecipe(
-            command=["/opt/charon/format_keys.sh"],
-        ),
-    )
-
-    # Store the formatted keys
-    charon_keys_artifact = plan.store_service_files(
-        service_name=key_formatter_service.name,
-        src="/opt/charon/charon-keys",
-        name="charon-keys-" + str(vc_index),
-    )
-
-    # The formatter has served its purpose; tear it down so it doesn't linger.
-    plan.remove_service(name=key_formatter_service.name)
-
     charon_service_name = service_name + "-charon-split-keys-" + str(vc_index)
     CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/opt/charon/"
     persistent_key = "data-{0}".format(charon_service_name)
 
-    files = {}
-    files[CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-        persistent_key=persistent_key,
+    charon_keys_dirpath = shared_utils.path_join(
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+        node_keystore_files.charon_keys_relative_dirpath,
     )
-    files["/opt/charon/charon-keys"] = charon_keys_artifact
+
+    files = {
+        CHARON_DATA_DIRPATH_ON_CLIENT_CONTAINER: Directory(
+            persistent_key=persistent_key,
+        ),
+        constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
+    }
 
     # Run the Charon cluster creation (splits the existing keys across nodes).
     plan.add_service(
@@ -228,7 +121,7 @@ done
                 "--fee-recipient-addresses=" + constants.VALIDATING_REWARDS_ACCOUNT,
                 "--withdrawal-addresses=" + constants.CHARON_WITHDRAWAL_ADDRESS,
                 "--split-existing-keys",
-                "--split-keys-dir=/opt/charon/charon-keys",
+                "--split-keys-dir=" + charon_keys_dirpath,
                 "--testnet-chain-id=" + network_params.network_id,
                 "--testnet-fork-version=" + constants.GENESIS_FORK_VERSION,
                 "--testnet-genesis-timestamp=" + str(genesis_time),
@@ -568,7 +461,7 @@ done
         prysm_relative_dirpath="",
         teku_keys_relative_dirpath="teku-keys",
         teku_secrets_relative_dirpath="teku-secrets",
-        raw_keys_secrets_relative_dirpath="",
+        charon_keys_relative_dirpath="",
     )
 
 
@@ -833,7 +726,7 @@ done
         prysm_relative_dirpath="prysm",
         teku_keys_relative_dirpath="",
         teku_secrets_relative_dirpath="",
-        raw_keys_secrets_relative_dirpath="",
+        charon_keys_relative_dirpath="",
     )
     return wallet_artifact, node_keystore_files
 
