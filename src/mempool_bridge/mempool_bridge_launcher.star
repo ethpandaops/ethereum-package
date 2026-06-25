@@ -74,13 +74,18 @@ def launch_mempool_bridge(
                 plan.print(
                     "Fetching enodes for {0} from eth-clients repo".format(network)
                 )
+                enodes_artifact = plan.upload_files(
+                    src=ENODE_URLS[network],
+                    name="mempool-bridge-enodes-{0}".format(network),
+                )
                 for i in range(1, MAX_ENODES_TO_FETCH + 1):
                     enode = plan.run_sh(
-                        name="fetch-enode-{0}".format(i),
-                        description="Fetching enode #{0}".format(i),
-                        run="curl -s {0} | grep -E '^[[:space:]]*-[[:space:]]*enode' | sed -n '{1}p' | sed 's/^[[:space:]]*-[[:space:]]*//; s/[[:space:]]*#.*//' | tr -d '\\n'".format(
-                            ENODE_URLS[network], i
+                        name="read-enode-{0}".format(i),
+                        description="Reading enode #{0}".format(i),
+                        run="grep -E '^[[:space:]]*-[[:space:]]*enode' /enodes/enodes.yaml | sed -n '{0}p' | sed 's/^[[:space:]]*-[[:space:]]*//; s/[[:space:]]*#.*//' | tr -d '\\n'".format(
+                            i
                         ),
+                        files={"/enodes": enodes_artifact},
                         node_selectors=global_node_selectors,
                         tolerations=tolerations,
                         wait=None,

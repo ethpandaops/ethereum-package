@@ -13,11 +13,16 @@ def shadowfork_prep(
     base_network = shared_utils.get_network_name(network_params.network)
     # overload the network name to remove the shadowfork suffix
     if constants.NETWORK_NAME.ephemery in base_network:
+        ephemery_config = plan.upload_files(
+            src="https://ephemery.dev/latest/config.yaml",
+            name="ephemery-config",
+        )
         chain_id = plan.run_sh(
-            name="fetch-chain-id",
-            description="Fetching the chain id",
-            run="curl -s https://ephemery.dev/latest/config.yaml | yq .DEPOSIT_CHAIN_ID | tr -d '\n'",
+            name="read-chain-id",
+            description="Reading the chain id from ephemery config",
+            run="yq .DEPOSIT_CHAIN_ID /ephemery/config.yaml | tr -d '\n'",
             image=constants.DEFAULT_YQ_IMAGE,
+            files={"/ephemery": ephemery_config},
             tolerations=shared_utils.get_tolerations(
                 global_tolerations=global_tolerations
             ),
