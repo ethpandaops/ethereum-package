@@ -63,6 +63,7 @@ get_prefunded_accounts = import_module(
 )
 spamoor = import_module("./src/spamoor/spamoor.star")
 disruptoor = import_module("./src/disruptoor/disruptoor_launcher.star")
+cadvisor = import_module("./src/cadvisor/cadvisor_launcher.star")
 slashoor = import_module("./src/slashoor/slashoor_launcher.star")
 zkboost = import_module("./src/zkboost/zkboost_launcher.star")
 trueblocks = import_module("./src/trueblocks/trueblocks_launcher.star")
@@ -344,6 +345,16 @@ def run(plan, args={}):
     ):
         fail(
             "disruptoor requires Kurtosis' Docker backend because it uses privileged mode, /var/run/docker.sock, and the host PID namespace; detected: {0}".format(
+                detected_backend
+            )
+        )
+
+    if (
+        "cadvisor" in args_with_right_defaults.additional_services
+        and detected_backend != "docker"
+    ):
+        fail(
+            "cadvisor requires Kurtosis' Docker backend because it runs in privileged mode and bind mounts /var/run/docker.sock, /sys, and /var/lib/docker; detected: {0}".format(
                 detected_backend
             )
         )
@@ -1391,6 +1402,19 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched disruptoor")
+        elif additional_service == "cadvisor":
+            plan.print("Launching cadvisor")
+            cadvisor_metrics_job = cadvisor.launch_cadvisor(
+                plan,
+                args_with_right_defaults.cadvisor_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            prometheus_additional_metrics_jobs.append(cadvisor_metrics_job)
+            plan.print("Successfully launched cadvisor")
         elif additional_service == "slashoor":
             plan.print("Launching slashoor")
             slashoor_config_template = read_file(

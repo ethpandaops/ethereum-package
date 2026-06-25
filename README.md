@@ -1068,6 +1068,7 @@ additional_services:
   - blutgang
   - bootnodoor
   - broadcaster
+  - cadvisor
   - checkpointz
   - custom_flood
   - dora
@@ -1750,6 +1751,24 @@ disruptoor_params:
   config: {}
   # A list of optional params that will be passed to disruptoor
   extra_args: []
+
+# Configuration place for cadvisor - https://github.com/google/cadvisor
+# cadvisor exposes per-container resource metrics and is scraped by Prometheus.
+# It is opt-in via `additional_services: [cadvisor]`. Because it runs in
+# privileged mode and bind mounts the host docker socket (/var/run), /sys and
+# /var/lib/docker, it requires Kurtosis' Docker backend and the run must be
+# launched with `--privileged`, e.g.:
+#   kurtosis run . --args-file <args>.yaml --privileged
+cadvisor_params:
+  # The image to use for cadvisor
+  image: gcr.io/cadvisor/cadvisor:v0.52.1
+  # Resource management for cadvisor
+  # CPU is milicores
+  # RAM is in MB
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
 
 # Configuration place for slashoor - https://github.com/ethpandaops/slashoor
 # Slashoor is a lazy slasher that monitors validators for slashing violations
