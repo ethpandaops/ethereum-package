@@ -88,6 +88,21 @@ prometheus_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 2048
+  # remote_write stays off until you set remote_write_url (and, if the endpoint
+  # needs auth, remote_write_token), e.g.:
+  #   remote_write_url: "https://vm.monitoring.gcp.obol.tech/write"
+  #   remote_write_token: "<token>"
+  # The relabel rules below only ship Charon node/VC jobs and rewrite their job
+  # label to "charon" so Obol dashboards (which query job="charon") line up.
+  remote_write_relabel_configs:
+    - SourceLabels: ["job"]
+      Regex: ".*charon.*"
+      Action: keep
+    - SourceLabels: ["client_name"]
+      Regex: "charon"
+      TargetLabel: job
+      Replacement: charon
+      Action: replace
 grafana_params:
   additional_dashboards: []
   min_cpu: 10
