@@ -891,6 +891,7 @@ def run(plan, args={}):
                 instance_builder_key_index,
                 ranges,
                 buildoor_service_name,
+                image=buildoor_instance.image,
             )
             buildoor_api_urls.append(buildoor_endpoints["api_url"])
 
