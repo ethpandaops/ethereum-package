@@ -439,6 +439,9 @@ for f in /split-keys/keystore-*.json; do
     cp "$f" "/out/teku-keys/${pubkey}.json"
     cp "$pw" "/out/teku-secrets/${pubkey}.txt"
 done
+# charon writes password files as 0400/root; make them readable by non-root VC
+# images (teku, lodestar), and make dirs writable so teku can create its .lock files
+chmod -R a+rwX /out
 """
     plan.exec(
         service_name=converter.name,
