@@ -365,6 +365,18 @@ def input_parser(plan, input_args):
                         instance["count"],
                     )
                 )
+            # Optional per-instance image override (A/B testing). When omitted the
+            # instance falls back to buildoor_params.image.
+            if (
+                instance.get("image", None) != None
+                and type(instance["image"]) != "string"
+            ):
+                fail(
+                    "buildoor_params.instances image for participant {0} must be a string, got {1}.".format(
+                        participant_num,
+                        instance["image"],
+                    )
+                )
         # Each buildoor instance is its own builder, onboarded after genesis via
         # its lifecycle deposit (buildoor_params.lifecycle) rather than registered
         # at genesis. So no genesis builder registration is needed and gloas does
@@ -1277,6 +1289,9 @@ def input_parser(plan, input_args):
                 struct(
                     participant=instance["participant"],
                     count=instance["count"],
+                    # Optional per-instance image override (A/B testing). None =>
+                    # fall back to buildoor_params.image at launch time.
+                    image=instance.get("image", None),
                 )
                 for instance in result["buildoor_params"]["instances"]
             ],

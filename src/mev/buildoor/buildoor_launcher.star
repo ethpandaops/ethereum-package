@@ -30,8 +30,14 @@ def launch_buildoor(
     validator_ranges_artifact=None,
     service_name=BUILDOOR_SERVICE_NAME,
     extra_data=None,
+    image=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
+    # Per-instance image override (A/B testing): an instance may pin its own
+    # buildoor image. When unset it falls back to buildoor_params.image (which
+    # itself defaults to DEFAULT_BUILDOOR_IMAGE).
+    image = image if image != None else buildoor_params.image
 
     # Strip 0x prefix if present since keys are expected as hex-only
     wallet_key = prefunded_key
@@ -101,7 +107,7 @@ def launch_buildoor(
     buildoor_service = plan.add_service(
         name=service_name,
         config=ServiceConfig(
-            image=buildoor_params.image,
+            image=image,
             ports={
                 "api": PortSpec(
                     number=BUILDOOR_API_PORT,

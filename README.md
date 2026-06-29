@@ -1612,6 +1612,8 @@ buildoor_params:
   # Each instance is its own builder; with lifecycle enabled (default) it onboards
   # itself after genesis, so genesis builder registration is not required and gloas
   # may activate at any epoch.
+  # Each entry may set an optional `image` to override buildoor_params.image for
+  # just that instance (A/B testing).
   # Defaults to [] (no per-participant buildoors).
   # Example:
   # instances:
@@ -1619,6 +1621,7 @@ buildoor_params:
   #     count: 1
   #   - participant: 3
   #     count: 2
+  #     image: ethpandaops/buildoor:my-fix   # per-instance override (optional)
   instances: []
 
 # Enables Xatu Sentry for all participants
