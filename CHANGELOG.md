@@ -1,5 +1,69 @@
 # Changelog
 
+## [6.2.0](https://github.com/ethpandaops/ethereum-package/compare/6.1.0...6.2.0) (2026-06-29)
+
+
+### Features
+
+* add confirmation_byzantine_threshold, bump genesis-generator to 5.3.6, tempo in zkvm tests ([#1359](https://github.com/ethpandaops/ethereum-package/issues/1359)) ([7a3c999](https://github.com/ethpandaops/ethereum-package/commit/7a3c9991f081803182bb8aecbfb000f2c7b8f14d))
+* add disruptoor support ([#1398](https://github.com/ethpandaops/ethereum-package/issues/1398)) ([76fea83](https://github.com/ethpandaops/ethereum-package/commit/76fea835fa18046fdaa7ca4a21184d19220d0626))
+* add ethrex natip ([#1436](https://github.com/ethpandaops/ethereum-package/issues/1436)) ([3de6d13](https://github.com/ethpandaops/ethereum-package/commit/3de6d135af40d1cc13f2d80c3152b91ebd1d3554))
+* add FOCIL dashboard ([#986](https://github.com/ethpandaops/ethereum-package/issues/986)) ([67fd55e](https://github.com/ethpandaops/ethereum-package/commit/67fd55e05f6b25af42d43312fe62134db1c49362))
+* add grafloki ([#1328](https://github.com/ethpandaops/ethereum-package/issues/1328)) ([3b8b912](https://github.com/ethpandaops/ethereum-package/commit/3b8b912ab27ca00123717308eaa63d50b487dd64))
+* add img override for buildoor instances ([#1441](https://github.com/ethpandaops/ethereum-package/issues/1441)) ([f0caa44](https://github.com/ethpandaops/ethereum-package/commit/f0caa4477890d6e393ed4b61c012a67e89587c2c))
+* add native ePBS builder support via network_params ([#1348](https://github.com/ethpandaops/ethereum-package/issues/1348)) ([8ef4f0f](https://github.com/ethpandaops/ethereum-package/commit/8ef4f0fc3328d3c29a5e1ffd5ecee906ef37517a))
+* Add syncmode option to ethrex_launcher ([#1374](https://github.com/ethpandaops/ethereum-package/issues/1374)) ([8fe091e](https://github.com/ethpandaops/ethereum-package/commit/8fe091e3bfe225dc2f4792c65cede953e110ce3a))
+* add trueblocks support ([#1404](https://github.com/ethpandaops/ethereum-package/issues/1404)) ([b9231ac](https://github.com/ethpandaops/ethereum-package/commit/b9231ac0a016851c69936425ea77c51d72beb175))
+* add validator ranges support for buildoor ([#1410](https://github.com/ethpandaops/ethereum-package/issues/1410)) ([48e4eec](https://github.com/ethpandaops/ethereum-package/commit/48e4eec5a66cf8cc57e7762d02379ec316965eed))
+* **buildoor:** auto-add payload-attributes flag to first participant ([#1429](https://github.com/ethpandaops/ethereum-package/issues/1429)) ([12da7b4](https://github.com/ethpandaops/ethereum-package/commit/12da7b48278435bee8bfe0f8cb0ffbbc8c8c7e64))
+* **buildoor:** support multiple per-participant buildoor instances ([#1432](https://github.com/ethpandaops/ethereum-package/issues/1432)) ([f70e5cf](https://github.com/ethpandaops/ethereum-package/commit/f70e5cf12a151ed99d89f4a8a0fb17d13aa480a6))
+* **buildoor:** support teku as first participant ([#1430](https://github.com/ethpandaops/ethereum-package/issues/1430)) ([a996aa2](https://github.com/ethpandaops/ethereum-package/commit/a996aa29580e94727c2042333d682da4e2952bc7))
+* bump default genesis gas limit from 60M to 200M ([#1391](https://github.com/ethpandaops/ethereum-package/issues/1391)) ([309c67b](https://github.com/ethpandaops/ethereum-package/commit/309c67b50939ad5c8578a270a3a1d1d3848a61a5))
+* cross-enclave sync via `kt-<host>:<port>` network ([#1378](https://github.com/ethpandaops/ethereum-package/issues/1378)) ([87b5084](https://github.com/ethpandaops/ethereum-package/commit/87b50842fa66e40d88dc2892b9438ea8aecebda0))
+* derive and inject builder BLS key into buildoor ([#1349](https://github.com/ethpandaops/ethereum-package/issues/1349)) ([b7ca0aa](https://github.com/ethpandaops/ethereum-package/commit/b7ca0aa4131ec8f6fc2d5f26430100c2a1b0f307))
+* **dora:** auto-configure buildoor inventory when mev_type: buildoor ([#1413](https://github.com/ethpandaops/ethereum-package/issues/1413)) ([fc3bba8](https://github.com/ethpandaops/ethereum-package/commit/fc3bba8e1d65d28c7edd13cd3b73dc59d72138ea))
+* enable genesis validator shuffling & add proper name mapping ([#1414](https://github.com/ethpandaops/ethereum-package/issues/1414)) ([0c38a64](https://github.com/ethpandaops/ethereum-package/commit/0c38a6443f9623e99681fed0400a72fc3e1a11f2))
+* **ethrex:** set default --http.api namespaces ([#1392](https://github.com/ethpandaops/ethereum-package/issues/1392)) ([cb83373](https://github.com/ethpandaops/ethereum-package/commit/cb83373b6c7a943f813fd7369faaab16438864b0))
+* **mev:** add commit_boost_config param for custom CB config templates ([#1355](https://github.com/ethpandaops/ethereum-package/issues/1355)) ([efaf138](https://github.com/ethpandaops/ethereum-package/commit/efaf138eba93c3ef4f2a801086550b90df6d3810))
+* **otel:** opt-in tracing to the engine OTel stack ([#1405](https://github.com/ethpandaops/ethereum-package/issues/1405)) ([fe4c129](https://github.com/ethpandaops/ethereum-package/commit/fe4c129dcbb4cac0bbe540a42533de2d735caaf2))
+* replace dummy EL with el_type: None ([#1358](https://github.com/ethpandaops/ethereum-package/issues/1358)) ([69d7125](https://github.com/ethpandaops/ethereum-package/commit/69d7125607b3b17dee0134acee295afe24d433e3))
+* **spamoor:** expose full participant name as a client_group ([#1389](https://github.com/ethpandaops/ethereum-package/issues/1389)) ([71b02f6](https://github.com/ethpandaops/ethereum-package/commit/71b02f6e4a57ad19629c729cb2989e7f868866d2))
+* support gpu ere prover in zkboost ([#1353](https://github.com/ethpandaops/ethereum-package/issues/1353)) ([835dd9b](https://github.com/ethpandaops/ethereum-package/commit/835dd9b69913af76920768c019a6ad988bf1b42a))
+* support remote_signer in participants_matrix ([#1424](https://github.com/ethpandaops/ethereum-package/issues/1424)) ([4a82a91](https://github.com/ethpandaops/ethereum-package/commit/4a82a91d4452217c764653442ec058c4e80c3f9e))
+* sync CL config with consensus-specs v1.7.0-alpha.8 ([#1397](https://github.com/ethpandaops/ethereum-package/issues/1397)) ([1a4049d](https://github.com/ethpandaops/ethereum-package/commit/1a4049d6252d464240682946517395dfbd097121))
+* **teku:** enable QUIC transport for Teku beacon nodes ([#1417](https://github.com/ethpandaops/ethereum-package/issues/1417)) ([5a6616e](https://github.com/ethpandaops/ethereum-package/commit/5a6616e624d0d2e70457ff1f321adf3ee2dc3a44))
+* update `zkboost` to `v0.5.0` config and image ([#1354](https://github.com/ethpandaops/ethereum-package/issues/1354)) ([e07503d](https://github.com/ethpandaops/ethereum-package/commit/e07503d16b292a4a0d0dde267b461c22eb394852))
+* update `zkboost` usage to `v0.6.0` ([#1368](https://github.com/ethpandaops/ethereum-package/issues/1368)) ([c0aaa60](https://github.com/ethpandaops/ethereum-package/commit/c0aaa60fd761cb3198e5215cd03004acab8cdf7a))
+* verifier mode support with validation ([#1396](https://github.com/ethpandaops/ethereum-package/issues/1396)) ([55c8875](https://github.com/ethpandaops/ethereum-package/commit/55c8875d2ee7f5b395d7829ab35d9b2336bf5dab))
+* zkboost prom ([#1345](https://github.com/ethpandaops/ethereum-package/issues/1345)) ([6efe92e](https://github.com/ethpandaops/ethereum-package/commit/6efe92e5ccb5706753cffea40c5054f0cf87219a))
+* **zkboost:** set default proof_timeout_secs to seconds_per_slot ([#1394](https://github.com/ethpandaops/ethereum-package/issues/1394)) ([85b6725](https://github.com/ethpandaops/ethereum-package/commit/85b67257da406a69ede3931f17ab8b32c451e6e8))
+
+
+### Bug Fixes
+
+* add --rpc.eth-proof-window flag to reth  ([#1390](https://github.com/ethpandaops/ethereum-package/issues/1390)) ([3f9aa2f](https://github.com/ethpandaops/ethereum-package/commit/3f9aa2f040ffa22e20a4047f904ab0c63621088b))
+* Add p2p colocation whitelist option to launcher ([#1387](https://github.com/ethpandaops/ethereum-package/issues/1387)) ([252f0ee](https://github.com/ethpandaops/ethereum-package/commit/252f0eef16924ef12a226ebd17f2ca34e052d6e1))
+* Add temporary fix to cmd for spamoor - temp fix ([#1371](https://github.com/ethpandaops/ethereum-package/issues/1371)) ([7b41814](https://github.com/ethpandaops/ethereum-package/commit/7b41814b10e3260b1f162a3d0c4ed8b250ccab3d))
+* **buildoor:** correct teku payload-attributes flag to double-dash --X ([#1433](https://github.com/ethpandaops/ethereum-package/issues/1433)) ([02675ab](https://github.com/ethpandaops/ethereum-package/commit/02675ab41b2e8c69bfeddcc28f84610d6a1bc6cf))
+* consensoor devnet setup ([#1418](https://github.com/ethpandaops/ethereum-package/issues/1418)) ([3a434cf](https://github.com/ethpandaops/ethereum-package/commit/3a434cf7f3d0f2f2d49985a42c0f4bc472b32920))
+* **consensoor:** drop hardcoded --graffiti=consensoor ([#1403](https://github.com/ethpandaops/ethereum-package/issues/1403)) ([35b770d](https://github.com/ethpandaops/ethereum-package/commit/35b770d5cddb5c356fd0e9157b8db8acf5809365))
+* disable blob tx by default temp ([#1373](https://github.com/ethpandaops/ethereum-package/issues/1373)) ([a046489](https://github.com/ethpandaops/ethereum-package/commit/a046489b94f38f81ca029e1ff82d5067da3dd9d4))
+* drop gloas-support and heze-support image overrides ([#1357](https://github.com/ethpandaops/ethereum-package/issues/1357)) ([c2f6028](https://github.com/ethpandaops/ethereum-package/commit/c2f602863236967327cc0e416fcba7b2763cd0c6))
+* fix buildoor wiring (skip mev-boost) ([#1422](https://github.com/ethpandaops/ethereum-package/issues/1422)) ([abe80af](https://github.com/ethpandaops/ethereum-package/commit/abe80af51137618705b77e73f997d9e53421ebcb))
+* pin tempo image to 2.10.4 ([#1362](https://github.com/ethpandaops/ethereum-package/issues/1362)) ([bc233e7](https://github.com/ethpandaops/ethereum-package/commit/bc233e7548a9013e4f1aa1687125eb761533cb60))
+* publish remote signer HTTP port on deterministic public port ([#1423](https://github.com/ethpandaops/ethereum-package/issues/1423)) ([275045c](https://github.com/ethpandaops/ethereum-package/commit/275045cc9eaad819f1273738fbe68dc80e5a6910))
+* re-enable blob spamming ([#1380](https://github.com/ethpandaops/ethereum-package/issues/1380)) ([3400c65](https://github.com/ethpandaops/ethereum-package/commit/3400c655a19e9ba3bea5e288d594f48faae81a05))
+* remove deprecated builder api port from buildoor ([#1419](https://github.com/ethpandaops/ethereum-package/issues/1419)) ([608794f](https://github.com/ethpandaops/ethereum-package/commit/608794fc2f7ed49f766eeaf30f2c5038f0843423))
+* remove gitpod references as the service has been deprecated ([#1364](https://github.com/ethpandaops/ethereum-package/issues/1364)) ([51e1ddc](https://github.com/ethpandaops/ethereum-package/commit/51e1ddc1d10624dcadb2fa3027f8d6c7bc1739cf))
+* remove temporary batcher fix from command list ([#1377](https://github.com/ethpandaops/ethereum-package/issues/1377)) ([304f1c3](https://github.com/ethpandaops/ethereum-package/commit/304f1c304e341fa3093176762f0f9c3ea572cd17))
+* request both(reth-zisk and ethrex-zisk) configured proof types ([#1375](https://github.com/ethpandaops/ethereum-package/issues/1375)) ([4320b6b](https://github.com/ethpandaops/ethereum-package/commit/4320b6b27a7fea715625b94db2f8f5296d29cacf))
+* **stability-check:** set maxForkDistance to 3 to tolerate transient head disagreements ([#1360](https://github.com/ethpandaops/ethereum-package/issues/1360)) ([874371c](https://github.com/ethpandaops/ethereum-package/commit/874371c3b5bf4f2c1cf963f646a6b30763ee1867))
+* Update Teku p2p-quic-port ([#1442](https://github.com/ethpandaops/ethereum-package/issues/1442)) ([ea5e33c](https://github.com/ethpandaops/ethereum-package/commit/ea5e33cd4311a8503ab3ea0dbc0305d09d593a10))
+* Use beacon service name instead of ip_address to set cl-client url for buildoor ([#1346](https://github.com/ethpandaops/ethereum-package/issues/1346)) ([b2921f9](https://github.com/ethpandaops/ethereum-package/commit/b2921f99bd9cda1f3507195e1505fa3624d37504))
+* validate per-instance zkvm configs ([#1407](https://github.com/ethpandaops/ethereum-package/issues/1407)) ([d714bce](https://github.com/ethpandaops/ethereum-package/commit/d714bce25fa1bd09c6c6e8cfe66dfac16d40069e))
+* **zkboost:** config file fixes and mock proving time default ([#1402](https://github.com/ethpandaops/ethereum-package/issues/1402)) ([994a63d](https://github.com/ethpandaops/ethereum-package/commit/994a63d39f35648eebb7bd255e6690a144842af3))
+* **zkboost:** fill mock_proving_time defaults from slot duration ([#1401](https://github.com/ethpandaops/ethereum-package/issues/1401)) ([22685bd](https://github.com/ethpandaops/ethereum-package/commit/22685bdf0d2f47943ff8126793073d002af33d54))
+
 ## [6.1.0](https://github.com/ethpandaops/ethereum-package/compare/6.0.0...6.1.0) (2026-04-01)
 
 
