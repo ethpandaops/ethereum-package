@@ -55,6 +55,9 @@ PARTICIPANT_CATEGORIES = {
         "remote_signer_type",
         "remote_signer_image",
         "remote_signer_extra_env_vars",
+        # Charon-specific parameters
+        "charon_node_count",
+        "charon_params",
         "remote_signer_extra_labels",
         "remote_signer_extra_params",
         "remote_signer_tolerations",
@@ -156,6 +159,9 @@ PARTICIPANT_MATRIX_PARAMS = {
             "vc_max_mem",
             "vc_force_restart",
             "validator_count",
+            # Charon-specific parameters
+            "charon_node_count",
+            "charon_params",
         ],
         "remote_signer": [
             "remote_signer_type",
@@ -333,6 +339,9 @@ SUBCATEGORY_PARAMS = {
         "storage_tsdb_retention_time",
         "storage_tsdb_retention_size",
         "image",
+        "remote_write_url",
+        "remote_write_token",
+        "remote_write_relabel_configs",
     ],
     "grafana_params": [
         "additional_dashboards",

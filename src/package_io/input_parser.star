@@ -48,6 +48,7 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "charon": "obolnetwork/charon:latest",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -59,6 +60,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "charon": "obolnetwork/charon:latest",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -880,6 +882,9 @@ def input_parser(plan, input_args):
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
                 checkpoint_sync_enabled=participant["checkpoint_sync_enabled"],
                 skip_start=participant["skip_start"],
+                # Charon-specific parameters
+                charon_node_count=participant["charon_node_count"],
+                charon_params=participant["charon_params"],
             )
             for participant in result["participants"]
         ],
@@ -1106,6 +1111,11 @@ def input_parser(plan, input_args):
             min_mem=result["prometheus_params"]["min_mem"],
             max_mem=result["prometheus_params"]["max_mem"],
             image=result["prometheus_params"]["image"],
+            remote_write_url=result["prometheus_params"]["remote_write_url"],
+            remote_write_token=result["prometheus_params"]["remote_write_token"],
+            remote_write_relabel_configs=result["prometheus_params"][
+                "remote_write_relabel_configs"
+            ],
         ),
         grafana_params=struct(
             additional_dashboards=result["grafana_params"]["additional_dashboards"],
@@ -2114,6 +2124,12 @@ def default_participant():
         "vc_min_cpu": 0,
         "vc_max_cpu": 0,
         "vc_min_mem": 0,
+        # Charon-specific parameters
+        "charon_node_count": 4,
+        "charon_params": {
+            "charon_vc": "lighthouse",
+            "charon_vc_image": DEFAULT_CL_IMAGES[constants.CL_TYPE.lighthouse],
+        },
         "vc_max_mem": 0,
         "vc_force_restart": False,
         "use_remote_signer": None,
@@ -2336,6 +2352,15 @@ def get_default_prometheus_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "prom/prometheus:v3.2.1",
+        # remote_write: ship scraped metrics to an external endpoint. Disabled
+        # unless remote_write_url is set. remote_write_token is sent as a bearer
+        # credential (optional). remote_write_relabel_configs is an optional list
+        # of Prometheus write_relabel_configs (each a dict with SourceLabels and
+        # optionally Regex/Action/TargetLabel/Replacement) to filter/rewrite what
+        # is shipped. All are intended to be supplied at runtime via Kurtosis args.
+        "remote_write_url": "",
+        "remote_write_token": "",
+        "remote_write_relabel_configs": [],
     }
 
 
@@ -2742,6 +2767,10 @@ def enrich_mev_extra_params(parsed_arguments_dict, mev_prefix, mev_port, mev_typ
         # SSE stream, so that CL must emit them on every slot.
         if mev_type == constants.BUILDOOR_MEV_TYPE and index == 0:
             apply_buildoor_payload_attributes_flags(participant)
+
+        # Note: Charon enables the builder API via the CHARON_BUILDER_API env var
+        # set in charon_launcher.star, not through vc_extra_params (those flow into
+        # the inner validator client, where "--builder-api" is not a valid flag).
 
     num_participants = len(parsed_arguments_dict["participants"])
     index_str = shared_utils.zfill_custom(
