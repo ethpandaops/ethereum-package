@@ -224,7 +224,6 @@ def get_beacon_config(
         ),
         "--p2p-discovery-site-local-addresses-enabled=true",
         "--p2p-port={0}".format(discovery_port_tcp),
-        "--p2p-quic-port={0}".format(discovery_port_quic),
         "--rest-api-enabled=true",
         "--rest-api-docs-enabled=true",
         "--rest-api-interface=0.0.0.0",
