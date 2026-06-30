@@ -6,6 +6,5 @@ mev_type: mock
 additional_services:
   - dora
   - spamoor
-  - tx_fuzz
 mev_params:
   mock_mev_image: "ethpandaops/rustic-builder:main"

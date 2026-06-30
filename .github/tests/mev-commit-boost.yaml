@@ -3,9 +3,7 @@ participants:
     cl_type: lighthouse
 mev_type: commit-boost
 additional_services:
-  - tx_fuzz
   - spamoor
-  - custom_flood
   - forkmon
   - dora
   - prometheus

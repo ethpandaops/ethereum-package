@@ -82,9 +82,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "prometheus_params",
     "grafana_params",
     "tempo_params",
-    "tx_fuzz_params",
     "rakoon_params",
-    "custom_flood_params",
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
@@ -132,9 +130,7 @@ def input_parser(plan, input_args):
         result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     else:
         result["additional_services"] = []
-    result["tx_fuzz_params"] = get_default_tx_fuzz_params()
     result["rakoon_params"] = get_default_rakoon_params()
-    result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
     result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
@@ -189,18 +185,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
                 result["mev_params"][sub_attr] = sub_value
-        elif attr == "tx_fuzz_params":
-            for sub_attr in input_args["tx_fuzz_params"]:
-                sub_value = input_args["tx_fuzz_params"][sub_attr]
-                result["tx_fuzz_params"][sub_attr] = sub_value
         elif attr == "rakoon_params":
             for sub_attr in input_args["rakoon_params"]:
                 sub_value = input_args["rakoon_params"][sub_attr]
                 result["rakoon_params"][sub_attr] = sub_value
-        elif attr == "custom_flood_params":
-            for sub_attr in input_args["custom_flood_params"]:
-                sub_value = input_args["custom_flood_params"][sub_attr]
-                result["custom_flood_params"][sub_attr] = sub_value
         elif attr == "assertoor_params":
             for sub_attr in input_args["assertoor_params"]:
                 sub_value = input_args["assertoor_params"][sub_attr]
@@ -1080,10 +1068,6 @@ def input_parser(plan, input_args):
             github_prefix=result["docker_cache_params"]["github_prefix"],
             google_prefix=result["docker_cache_params"]["google_prefix"],
         ),
-        tx_fuzz_params=struct(
-            image=result["tx_fuzz_params"]["image"],
-            tx_fuzz_extra_args=result["tx_fuzz_params"]["tx_fuzz_extra_args"],
-        ),
         rakoon_params=struct(
             image=result["rakoon_params"]["image"],
             tx_type=result["rakoon_params"]["tx_type"],
@@ -1138,11 +1122,6 @@ def input_parser(plan, input_args):
                 "run_opcodes_transaction_test"
             ],
             tests=result["assertoor_params"]["tests"],
-        ),
-        custom_flood_params=struct(
-            interval_between_transactions=result["custom_flood_params"][
-                "interval_between_transactions"
-            ],
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
@@ -2294,13 +2273,6 @@ def get_default_mev_params(mev_type, preset):
     }
 
 
-def get_default_tx_fuzz_params():
-    return {
-        "image": "ethpandaops/tx-fuzz:master",
-        "tx_fuzz_extra_args": [],
-    }
-
-
 def get_default_rakoon_params():
     return {
         "image": "ethpandaops/fuzztools:main",
@@ -2465,11 +2437,6 @@ def get_default_slashoor_params():
         "dora_scan_on_startup": True,
         "backfill_slots": 64,
     }
-
-
-def get_default_custom_flood_params():
-    # this is a simple script that increases the balance of the coinbase address at a cadence
-    return {"interval_between_transactions": 1}
 
 
 def get_default_mempool_bridge_params():
@@ -2847,7 +2814,6 @@ def docker_cache_image_override(plan, result):
         "mev_params.mev_boost_image",
         "mev_params.mock_mev_image",
         "xatu_sentry_params.xatu_sentry_image",
-        "tx_fuzz_params.image",
         "rakoon_params.image",
         "prometheus_params.image",
         "grafana_params.image",

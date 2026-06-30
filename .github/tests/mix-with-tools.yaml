@@ -20,7 +20,6 @@ participants:
     use_separate_vc: true
     vc_type: lighthouse
 additional_services:
-  - tx_fuzz
   - forkmon
   - dora
   - checkpointz
