@@ -1200,7 +1200,13 @@ prometheus_params:
 
 # Configuration place for grafana
 grafana_params:
-  # A list of locators for grafana dashboards to be loaded be the grafana service
+  # A list of locators for grafana dashboards to be loaded by the grafana service.
+  # Each entry must be a Kurtosis locator: a GitHub locator (e.g.
+  # "github.com/<org>/<repo>/path/to/dashboards") or an absolute http(s) URL.
+  # When inheriting this package from your own, a local/relative path will NOT
+  # work: upload_files runs inside the ethereum-package and resolves relative
+  # paths against it, not against your package. Use a github.com/... locator
+  # pointing at your own repo instead.
   additional_dashboards: []
   # Resource management for grafana container
   # CPU is milicores
