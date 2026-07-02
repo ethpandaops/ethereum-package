@@ -760,8 +760,8 @@ network_params:
   contribution_due_bps_gloas: 5000
 
   # Payload availability deadline for Gloas fork
-  # Defaults to 7500 basis points (75% of slot duration)
-  payload_due_bps: 7500
+  # Defaults to 5000 basis points (50% of slot duration)
+  payload_due_bps: 5000
 
   # Payload attestation due timing for Gloas fork
   # Defaults to 7500 basis points (75% of slot duration)
