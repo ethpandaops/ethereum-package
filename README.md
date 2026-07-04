@@ -1706,6 +1706,17 @@ spamoor_params:
   #   config:
   #     throughput: 10  # 10 tx per block
   spammers: []
+  # Start spamoor's built-in "Regular Chain Load" default group on first launch
+  # (a balanced mix of everyday transaction types sharing a global throughput budget)
+  start_chainload: false
+  # Start spamoor's built-in "Fuzzing" default group on first launch
+  # (EVM execution and transaction-layer fuzzing under a shared throughput budget)
+  start_fuzzing: false
+  # A list of additional built-in spamoor defaults (by technical key) to start on first launch
+  # example:
+  # - eoatx-heavy
+  # - blob-average
+  defaults: []
   # A list of optional params that will be passed to the spamoor command for modifying its behaviour
   extra_args: []
 

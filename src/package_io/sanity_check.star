@@ -403,6 +403,9 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "extra_args",
         "spammers",
+        "start_chainload",
+        "start_fuzzing",
+        "defaults",
     ],
     "disruptoor_params": [
         "image",

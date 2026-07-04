@@ -1152,6 +1152,9 @@ def input_parser(plan, input_args):
             max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
+            start_chainload=result["spamoor_params"]["start_chainload"],
+            start_fuzzing=result["spamoor_params"]["start_fuzzing"],
+            defaults=result["spamoor_params"]["defaults"],
         ),
         disruptoor_params=struct(
             image=result["disruptoor_params"]["image"],
@@ -2399,6 +2402,12 @@ def get_default_spamoor_params():
         "min_mem": 100,
         "max_mem": 800,
         "extra_args": [],
+        # start spamoor's built-in "Regular Chain Load" default group on first launch
+        "start_chainload": False,
+        # start spamoor's built-in "Fuzzing" default group on first launch
+        "start_fuzzing": False,
+        # additional built-in defaults (by technical key) to start on first launch
+        "defaults": [],
         "spammers": [
             # default spammers
             {
