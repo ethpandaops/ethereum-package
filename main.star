@@ -565,7 +565,7 @@ def run(plan, args={}):
 
     if network_params.builder_count > 0:
         plan.print(
-            "Builder configuration: {0} builder(s) registered at genesis with 0x03 credentials".format(
+            "Builder configuration: {0} builder(s) registered at genesis with 0xB0 credentials".format(
                 network_params.builder_count
             )
         )
