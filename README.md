@@ -867,8 +867,8 @@ network_params:
   min_validator_withdrawability_delay: 256
 
   # The minimum number of epochs for builder withdrawability delay
-  # Defaults to 8192, 2 for minimal preset
-  min_builder_withdrawability_delay: 8192
+  # Defaults to 64, 2 for minimal preset
+  min_builder_withdrawability_delay: 64
 
   # The period of the shard committee
   # Defaults to 256 epoch ~27 hours
