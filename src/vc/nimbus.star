@@ -1,17 +1,18 @@
 constants = import_module("../package_io/constants.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
-vc_shared = import_module("./shared.star")
+vc_shared = import_module("./vc_shared.star")
 
 
 def get_config(
     plan,
     participant,
     el_cl_genesis_data,
-    image,
     keymanager_file,
+    image,
+    service_name,
+    global_log_level,
     beacon_http_urls,
     cl_context,
-    el_context,
     remote_signer_context,
     full_name,
     node_keystore_files,
@@ -22,6 +23,9 @@ def get_config(
     port_publisher,
     vc_index,
     extra_files_artifacts,
+    prysm_password_relative_filepath=None,
+    prysm_password_artifact_uuid=None,
+    tempo_otlp_grpc_url=None,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
 ):
@@ -83,43 +87,24 @@ def get_config(
 
     files = {
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
-        constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS: keymanager_file,
     }
 
-    public_ports = {}
-    public_keymanager_port_assignment = {}
-    if port_publisher.vc_enabled:
-        public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "vc", port_publisher, vc_index
-        )
-        public_port_assignments = {
-            constants.METRICS_PORT_ID: public_ports_for_component[0]
-        }
-        public_keymanager_port_assignment = {
-            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]
-        }
-        public_ports = shared_utils.get_port_specs(public_port_assignments)
+    public_ports, public_keymanager_port_assignment = vc_shared.get_public_ports(
+        port_publisher, vc_index
+    )
 
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
 
     if keymanager_enabled:
+        files[constants.KEYMANAGER_MOUNT_PATH_ON_CLIENTS] = keymanager_file
         cmd.extend(keymanager_api_cmd)
         ports.update(vc_shared.VALIDATOR_KEYMANAGER_USED_PORTS)
         public_ports.update(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
 
-    # Add extra mounts - automatically handle file uploads
-    processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.vc_extra_mounts, extra_files_artifacts
-    )
-    for mount_path, artifact in processed_mounts.items():
-        files[mount_path] = artifact
-
-    # Binary injection - mount custom binary directory if provided
-    if vc_binary_artifact != None:
-        files["/opt/bin"] = vc_binary_artifact.artifact
+    vc_shared.apply_extra_mounts(plan, participant, extra_files_artifacts, files)
 
     config_args = {
         "image": image,
@@ -133,38 +118,21 @@ def get_config(
             otel_otlp_grpc_url,
             full_name,
         ),
-        "labels": shared_utils.label_maker(
-            client=constants.VC_TYPE.nimbus,
-            client_type=constants.CLIENT_TYPES.validator,
-            image=image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels
-            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
-            supernode=participant.supernode,
+        "labels": vc_shared.get_labels(
+            constants.VC_TYPE.nimbus, participant, image, cl_context, vc_index
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
         "user": User(uid=0, gid=0),
     }
 
-    # Binary injection - override entrypoint and cmd only when binary is provided
-    if vc_binary_artifact != None:
-        config_args["entrypoint"] = ["sh", "-c"]
-        config_args["cmd"] = [
-            "cp /opt/bin/{0} /usr/bin/nimbus_validator_client && /usr/bin/nimbus_validator_client ".format(
-                vc_binary_artifact.filename
-            )
-            + " ".join(cmd)
-        ]
+    vc_shared.apply_binary_override(
+        config_args,
+        cmd,
+        vc_binary_artifact,
+        "/usr/bin/nimbus_validator_client",
+        "/usr/bin/nimbus_validator_client",
+    )
 
-    if participant.vc_min_cpu > 0:
-        config_args["min_cpu"] = participant.vc_min_cpu
-    if participant.vc_max_cpu > 0:
-        config_args["max_cpu"] = participant.vc_max_cpu
-    if participant.vc_min_mem > 0:
-        config_args["min_memory"] = participant.vc_min_mem
-    if participant.vc_max_mem > 0:
-        config_args["max_memory"] = participant.vc_max_mem
-    if len(participant.vc_devices) > 0:
-        config_args["devices"] = participant.vc_devices
+    vc_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)

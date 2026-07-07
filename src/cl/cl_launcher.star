@@ -9,6 +9,7 @@ grandine = import_module("./grandine/grandine_launcher.star")
 consensoor = import_module("./consensoor/consensoor_launcher.star")
 caplin = import_module("./caplin/caplin_launcher.star")
 
+cl_shared = import_module("./cl_shared.star")
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
@@ -47,17 +48,15 @@ def launch(
     cl_launchers = {
         constants.CL_TYPE.lighthouse: {
             "launcher": lighthouse.new_lighthouse_launcher(el_cl_data, jwt_file),
-            "launch_method": lighthouse.launch,
             "get_beacon_config": lighthouse.get_beacon_config,
             "get_cl_context": lighthouse.get_cl_context,
-            "get_blobber_config": lighthouse.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config,
         },
         constants.CL_TYPE.lodestar: {
             "launcher": lodestar.new_lodestar_launcher(el_cl_data, jwt_file),
-            "launch_method": lodestar.launch,
             "get_beacon_config": lodestar.get_beacon_config,
             "get_cl_context": lodestar.get_cl_context,
-            "get_blobber_config": lodestar.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config,
         },
         constants.CL_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(
@@ -65,10 +64,9 @@ def launch(
                 jwt_file,
                 keymanager_file,
             ),
-            "launch_method": nimbus.launch,
             "get_beacon_config": nimbus.get_beacon_config,
             "get_cl_context": nimbus.get_cl_context,
-            "get_blobber_config": nimbus.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
         constants.CL_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
@@ -76,10 +74,9 @@ def launch(
                 jwt_file,
                 otel_otlp_http_traces_url,
             ),
-            "launch_method": prysm.launch,
             "get_beacon_config": prysm.get_beacon_config,
             "get_cl_context": prysm.get_cl_context,
-            "get_blobber_config": prysm.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config,
         },
         constants.CL_TYPE.teku: {
             "launcher": teku.new_teku_launcher(
@@ -87,40 +84,36 @@ def launch(
                 jwt_file,
                 keymanager_file,
             ),
-            "launch_method": teku.launch,
             "get_beacon_config": teku.get_beacon_config,
             "get_cl_context": teku.get_cl_context,
-            "get_blobber_config": teku.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
         constants.CL_TYPE.grandine: {
             "launcher": grandine.new_grandine_launcher(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": grandine.launch,
             "get_beacon_config": grandine.get_beacon_config,
             "get_cl_context": grandine.get_cl_context,
-            "get_blobber_config": grandine.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
         constants.CL_TYPE.consensoor: {
             "launcher": consensoor.new_consensoor_launcher(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": consensoor.launch,
             "get_beacon_config": consensoor.get_beacon_config,
             "get_cl_context": consensoor.get_cl_context,
-            "get_blobber_config": consensoor.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
         constants.CL_TYPE.caplin: {
             "launcher": caplin.new_caplin_launcher(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": caplin.launch,
             "get_beacon_config": caplin.get_beacon_config,
             "get_cl_context": caplin.get_cl_context,
-            "get_blobber_config": caplin.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
     }
 
@@ -170,13 +163,11 @@ def launch(
 
         (
             cl_launcher,
-            launch_method,
             get_beacon_config,
             get_cl_context,
             get_blobber_config,
         ) = (
             cl_launchers[cl_type]["launcher"],
-            cl_launchers[cl_type]["launch_method"],
             cl_launchers[cl_type]["get_beacon_config"],
             cl_launchers[cl_type]["get_cl_context"],
             cl_launchers[cl_type]["get_blobber_config"],
@@ -259,7 +250,7 @@ def launch(
         cl_binary_artifact = binary_artifacts.get(index, {}).get("cl", None)
 
         if index == 0:
-            cl_context = launch_method(
+            beacon_config = get_beacon_config(
                 plan,
                 cl_launcher,
                 cl_service_name,
@@ -284,6 +275,22 @@ def launch(
                 otel_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
+            )
+
+            beacon_service = plan.add_service(
+                cl_service_name,
+                beacon_config,
+                force_update=participant.cl_force_restart,
+            )
+
+            cl_context = get_cl_context(
+                plan,
+                cl_service_name,
+                beacon_service,
+                participant,
+                snooper_el_engine_context,
+                new_cl_node_validator_keystores,
+                node_selectors,
             )
 
             blobber_config = get_blobber_config(

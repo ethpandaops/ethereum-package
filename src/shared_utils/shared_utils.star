@@ -56,14 +56,6 @@ def path_base(path):
     return split_path[-1]
 
 
-def path_dir(path):
-    split_path = path.split("/")
-    if len(split_path) <= 1:
-        return "."
-    split_path = split_path[:-1]
-    return "/".join(split_path) or "/"
-
-
 def new_port_spec(
     number,
     transport_protocol,
@@ -83,17 +75,6 @@ def new_port_spec(
         application_protocol=application_protocol,
         wait=wait,
     )
-
-
-def read_file_from_service(plan, service_name, filename):
-    output = plan.exec(
-        service_name=service_name,
-        description="Reading {} from {}".format(filename, service_name),
-        recipe=ExecRecipe(
-            command=["/bin/sh", "-c", "cat {} | tr -d '\n'".format(filename)]
-        ),
-    )
-    return output["output"]
 
 
 def zfill_custom(value, width):
@@ -422,21 +403,6 @@ def get_other_public_port(
         )
         public_ports = get_port_specs({port_id: public_ports_for_component[port_index]})
     return public_ports
-
-
-def get_cpu_mem_resource_limits(
-    min_cpu, max_cpu, min_mem, max_mem, volume_size, network_name, client_type
-):
-    min_cpu = int(min_cpu) if int(min_cpu) > 0 else 0
-    max_cpu = int(max_cpu) if int(max_cpu) > 0 else 0
-    min_mem = int(min_mem) if int(min_mem) > 0 else 0
-    max_mem = int(max_mem) if int(max_mem) > 0 else 0
-    volume_size = (
-        int(volume_size)
-        if int(volume_size) > 0
-        else constants.VOLUME_SIZE[network_name][client_type + "_volume_size"]
-    )
-    return min_cpu, max_cpu, min_mem, max_mem, volume_size
 
 
 def docker_cache_image_calc(docker_cache_params, image):
