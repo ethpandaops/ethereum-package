@@ -380,7 +380,7 @@ participants:
     # Defaults by client:
     # - lighthouse: ethpandaops/lighthouse:unstable
     # - teku: ethpandaops/teku:master
-    # - nimbus: statusim/nimbus-eth2:multiarch-latest
+    # - nimbus: ethpandaops/nimbus-eth2:unstable
     # - prysm: ethpandaops/prysm-beacon-chain:develop
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
@@ -485,7 +485,7 @@ participants:
     # Defaults by client:
     # - lighthouse: sigp/lighthouse:latest
     # - lodestar: chainsafe/lodestar:latest
-    # - nimbus: statusim/nimbus-validator-client:multiarch-latest
+    # - nimbus: ethpandaops/nimbus-validator-client:unstable
     # - prysm: ethpandaops/prysm-validator:develop
     # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
