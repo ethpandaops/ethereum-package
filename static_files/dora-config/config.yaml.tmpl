@@ -121,6 +121,13 @@ executionIndexer:
   tracesEnabled: true
   detailsMaxSize: "10GB"
 
+ensResolver:
+  enabled: true
+  registryAddresses:
+    - "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e" # official address
+    # devnet ens registry from spamoor (address is deterministic based on spamoor root wallet)
+    - "0xf7CFC9E18166c1BBae0749373C5fC80CabCaDD25"
+
 database:
   engine: "sqlite"
   sqlite:
