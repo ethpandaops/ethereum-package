@@ -926,6 +926,9 @@ def input_parser(plan, input_args):
             min_builder_withdrawability_delay=result["network_params"][
                 "min_builder_withdrawability_delay"
             ],
+            deploy_eip8282_contracts=result["network_params"][
+                "deploy_eip8282_contracts"
+            ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             attestation_due_bps_gloas=result["network_params"][
                 "attestation_due_bps_gloas"
@@ -1914,6 +1917,7 @@ def default_network_params():
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
         "min_builder_withdrawability_delay": 64,
+        "deploy_eip8282_contracts": True,
         "shard_committee_period": 256,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
@@ -1999,6 +2003,7 @@ def default_minimal_network_params():
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
         "min_builder_withdrawability_delay": 2,
+        "deploy_eip8282_contracts": True,
         "shard_committee_period": 64,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,

@@ -870,6 +870,11 @@ network_params:
   # Defaults to 64, 2 for minimal preset
   min_builder_withdrawability_delay: 64
 
+  # Whether to include the EIP-8282 builder deposit/exit predeploys in genesis
+  # when Gloas is scheduled (requires ethereum-genesis-generator >= 6.1.3)
+  # Defaults to true
+  deploy_eip8282_contracts: true
+
   # The period of the shard committee
   # Defaults to 256 epoch ~27 hours
   shard_committee_period: 256

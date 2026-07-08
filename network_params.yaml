@@ -108,6 +108,7 @@ network_params:
   view_freeze_cutoff_bps: 7500
   inclusion_list_submission_due_bps: 6667
   proposer_inclusion_list_cutoff_bps: 9167
+  deploy_eip8282_contracts: true
   deneb_fork_epoch: 0
   electra_fork_epoch: 0
   fulu_fork_epoch: 0
