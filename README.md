@@ -1616,8 +1616,9 @@ buildoor_params:
   # participants (a builder is independent of the network: it reads one
   # participant's CL payload_attributes stream and, under ePBS, gossips bids to
   # the whole network). Each entry spins up `count` buildoor builder instances
-  # wired to the named participant's CL/EL. Services are named
-  # `buildoor-<cl>-<el>-<participant>` (with a `-<n>` suffix when count > 1).
+  # (optional, defaults to 1) wired to the named participant's CL/EL. Services
+  # are named `buildoor-<cl>-<el>-<participant>` (with a `-<n>` suffix when
+  # count > 1).
   # Requires "buildoor" in additional_services; no `mev_type` is needed, and it
   # cannot be combined with the (deprecated) network-wide `mev_type: buildoor`.
   # Each instance is its own builder; with lifecycle enabled (default) it onboards
@@ -1628,8 +1629,7 @@ buildoor_params:
   # Defaults to [] (no per-participant buildoors).
   # Example:
   # instances:
-  #   - participant: 1   # 1-based participant index
-  #     count: 1
+  #   - participant: 1   # 1-based participant index (count defaults to 1)
   #   - participant: 3
   #     count: 2
   #     image: ethpandaops/buildoor:my-fix   # per-instance override (optional)
