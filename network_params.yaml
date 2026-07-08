@@ -160,7 +160,7 @@ spamoor_params:
   max_cpu: 1000
   min_mem: 20
   max_mem: 300
-  start_chainload: false
+  start_chainload: true
   start_fuzzing: false
   defaults: []
   extra_args: []

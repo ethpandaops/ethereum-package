@@ -2403,7 +2403,7 @@ def get_default_spamoor_params():
         "max_mem": 800,
         "extra_args": [],
         # start spamoor's built-in "Regular Chain Load" default group on first launch
-        "start_chainload": False,
+        "start_chainload": True,
         # start spamoor's built-in "Fuzzing" default group on first launch
         "start_fuzzing": False,
         # additional built-in defaults (by technical key) to start on first launch

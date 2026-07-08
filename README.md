@@ -1708,7 +1708,7 @@ spamoor_params:
   spammers: []
   # Start spamoor's built-in "Regular Chain Load" default group on first launch
   # (a balanced mix of everyday transaction types sharing a global throughput budget)
-  start_chainload: false
+  start_chainload: true
   # Start spamoor's built-in "Fuzzing" default group on first launch
   # (EVM execution and transaction-layer fuzzing under a shared throughput budget)
   start_fuzzing: false
