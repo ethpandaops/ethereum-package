@@ -631,11 +631,10 @@ def input_parser(plan, input_args):
 
         # Validate zkvm configurations
         valid_proof_types = [
-            "ethrex-risc0",
+            "ethrex-openvm",
             "ethrex-sp1",
             "ethrex-zisk",
             "reth-openvm",
-            "reth-risc0",
             "reth-sp1",
             "reth-zisk",
         ]

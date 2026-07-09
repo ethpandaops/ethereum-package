@@ -1260,7 +1260,7 @@ zkboost_params:
   #     "ere"      - launches a GPU ere-server and connects to it
   #     "external" - connects to an already-deployed prover via HTTP
   #   proof_type (required): identifies the EL client + zkVM combination
-  #     "ethrex-risc0", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-risc0", "reth-sp1", "reth-zisk"
+  #     "ethrex-openvm", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-sp1", "reth-zisk"
   #   proof_timeout_secs: timeout for proof generation in seconds (default: 3/4 of slot duration, must be > 0)
   #
   # Mock-specific fields (only for kind: mock):
@@ -1326,7 +1326,7 @@ zkboost_params:
   # - kind: ere
   #   proof_type: reth-zisk
   #   image: "ghcr.io/eth-act/ere/ere-server-zisk:latest"
-  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.8.0/stateless-validator-reth-zisk.elf"
+  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.13.0/stateless-validator-reth-zisk.elf"
   #   gpu:
   #     count: 1
   #     driver: "nvidia"

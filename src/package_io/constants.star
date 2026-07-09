@@ -129,13 +129,12 @@ DEFAULT_ZKBOOST_IMAGE = "ghcr.io/eth-act/zkboost/zkboost:latest"
 # Mapping from numeric proof-type IDs (used in --proof-types CL/VC flags) to
 # proof_type names (EL + zkVM combination, e.g., "reth-zisk" = Reth + Zisk).
 PROOF_TYPE_ID_TO_NAME = {
-    0: "ethrex-risc0",
+    0: "ethrex-openvm",
     1: "ethrex-sp1",
     2: "ethrex-zisk",
     3: "reth-openvm",
-    4: "reth-risc0",
-    5: "reth-sp1",
-    6: "reth-zisk",
+    4: "reth-sp1",
+    5: "reth-zisk",
 }
 DEFAULT_MEV_PUBKEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
 DEFAULT_MEV_SECRET_KEY = (
