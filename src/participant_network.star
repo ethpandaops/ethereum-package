@@ -27,6 +27,7 @@ vc = import_module("./vc/vc_launcher.star")
 vc_shared = import_module("./vc/shared.star")
 vc_context_l = import_module("./vc/vc_context.star")
 node_metrics = import_module("./node_metrics_info.star")
+charon_launcher = import_module("./vc/charon_launcher.star")
 remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
 
 beacon_snooper = import_module("./snooper/snooper_beacon_launcher.star")
@@ -345,6 +346,13 @@ def launch_participant_network(
 
     vc_service_configs = {}
     vc_service_info = {}
+    # Charon launches its own cluster of services immediately (rather than
+    # deferring to the parallel launch below), so its contexts are collected
+    # here keyed by participant index and merged in afterwards. It also produces
+    # extra Prometheus scrape jobs (one per Charon node and validator client)
+    # that are returned to the caller to register with Prometheus.
+    charon_vc_contexts = {}
+    charon_metrics_jobs = []
     for index, participant in enumerate(args_with_right_defaults.participants):
         el_type = participant.el_type
         cl_type = participant.cl_type
@@ -551,6 +559,36 @@ def launch_participant_network(
             remote_signer_context.metrics_info["config"] = participant.prometheus_config
 
         service_name = "vc-{0}".format(full_name)
+
+        # Charon launches a full distributed-validator cluster (its own Charon
+        # nodes plus their validator clients) immediately and returns a ready
+        # vc_context, so it bypasses the deferred config / parallel-launch path
+        # used by the other validator clients.
+        if vc_type == constants.VC_TYPE.charon:
+            charon_vc_contexts[index], charon_jobs = charon_launcher.launch(
+                plan=plan,
+                launcher=charon_launcher.new_charon_launcher(
+                    el_cl_genesis_data=el_cl_data
+                ),
+                keymanager_file=keymanager_file,
+                service_name=service_name,
+                image=participant.vc_image,
+                global_log_level=args_with_right_defaults.global_log_level,
+                cl_context=cl_context,
+                full_name=full_name,
+                node_keystore_files=vc_keystores,
+                participant=participant,
+                global_tolerations=global_tolerations,
+                node_selectors=node_selectors,
+                network_params=network_params,
+                port_publisher=args_with_right_defaults.port_publisher,
+                vc_index=current_vc_index,
+                genesis_timestamp=final_genesis_timestamp,
+            )
+            charon_metrics_jobs.extend(charon_jobs)
+            current_vc_index += 1
+            continue
+
         vc_binary_artifact = binary_artifacts.get(index, {}).get("vc", None)
         vc_service_config = vc.get_vc_config(
             plan=plan,
@@ -613,6 +651,14 @@ def launch_participant_network(
                 participant_index
             ].prometheus_config
 
+        vc_contexts_temp[participant_index] = vc_context
+
+    # Charon contexts were launched outside the parallel path above; fold them in.
+    for participant_index, vc_context in charon_vc_contexts.items():
+        if vc_context and vc_context.metrics_info:
+            vc_context.metrics_info["config"] = args_with_right_defaults.participants[
+                participant_index
+            ].prometheus_config
         vc_contexts_temp[participant_index] = vc_context
 
     # Convert to ordered list
@@ -697,4 +743,5 @@ def launch_participant_network(
         network_id,
         el_cl_data.osaka_time,
         el_cl_data.shadowfork_block_height,
+        charon_metrics_jobs,
     )

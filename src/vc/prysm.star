@@ -29,6 +29,7 @@ def get_config(
     extra_files_artifacts,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    distributed=False,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
@@ -54,8 +55,11 @@ def get_config(
     ]
 
     # Only add RPC provider if we're not using a blobber (blobber doesn't proxy RPC)
-    # Blobber uses port 5000, so check if that's in the URL
-    if ":5000" not in beacon_http_urls[0]:
+    # Blobber uses port 5000, so check if that's in the URL.
+    # In DV mode the only beacon endpoint is the Charon REST
+    # validator API, so skip the gRPC provider (which would point at the real
+    # beacon and bypass Charon).
+    if not distributed and ":5000" not in beacon_http_urls[0]:
         cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
 
     if remote_signer_context == None:
@@ -78,6 +82,9 @@ def get_config(
     if network_params.gas_limit > 0:
         cmd.append("--suggested-gas-limit={0}".format(network_params.gas_limit))
 
+    if distributed:
+        cmd.append("--distributed")
+
     keymanager_api_cmd = [
         "--rpc",
         "--http-port={0}".format(vc_shared.VALIDATOR_HTTP_PORT_NUM),
@@ -88,10 +95,15 @@ def get_config(
     # Check if we're using a blobber by checking for port 5000
     is_using_blobber = ":5000" in beacon_http_urls[0]
 
-    if cl_context.client_name != constants.CL_TYPE.prysm or is_using_blobber:
+    if (
+        cl_context.client_name != constants.CL_TYPE.prysm
+        or is_using_blobber
+        or distributed
+    ):
         # Use Beacon API if:
         # 1. Prysm VC wants to connect to a non-Prysm BN, OR
         # 2. Blobber is enabled (since blobber only proxies REST, not RPC)
+        # 3. Distributed (Charon) mode — Charon only exposes a REST validator API, OR
         cmd.append("--enable-beacon-rest-api")
 
     if len(participant.vc_extra_params) > 0:

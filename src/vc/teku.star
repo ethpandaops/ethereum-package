@@ -24,6 +24,7 @@ def get_config(
     extra_files_artifacts,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    distributed=False,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -87,6 +88,10 @@ def get_config(
         "--Xvalidator-api-ssl-enabled=false",
         "--Xvalidator-api-unsafe-hosts-enabled=true",
     ]
+
+    if distributed:
+        cmd.append("--Xobol-dvt-integration-enabled=true")
+        cmd.append("--validators-builder-registration-default-enabled=true")
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
