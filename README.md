@@ -1233,6 +1233,9 @@ bootnodoor_params:
   max_cpu: 1000
   min_mem: 128
   max_mem: 512
+  # Use separate randomly-generated EL (discv4) and CL (discv5) identity keys
+  # instead of one shared key
+  separate_keys: false
   # A list of optional extra args the bootnodoor container should spin up with
   extra_args: []
 
