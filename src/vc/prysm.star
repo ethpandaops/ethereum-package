@@ -60,7 +60,6 @@ def get_config(
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--beacon-rest-api-provider=" + ",".join(beacon_http_urls),
         # vvvvvvvvvvvvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -68,9 +67,20 @@ def get_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
-    # Only add RPC provider if we're not using a blobber (blobber doesn't proxy RPC)
-    # Blobber uses port 5000, so check if that's in the URL
-    if ":5000" not in beacon_http_urls[0]:
+    # Setting --beacon-rest-api-provider implicitly enables the REST API (prysm#17159),
+    # so the two providers are mutually exclusive. gRPC is only usable when the VC talks
+    # straight to its own Prysm BN: blobber and snooper proxy the REST API only, and
+    # --beacon-rpc-provider takes a single endpoint so it cannot express multiple BNs.
+    use_beacon_api = (
+        cl_context.client_name != constants.CL_TYPE.prysm
+        or participant.blobber_enabled
+        or beacon_http_urls != [cl_context.beacon_http_url]
+    )
+
+    if use_beacon_api:
+        cmd.append("--beacon-rest-api-provider=" + ",".join(beacon_http_urls))
+        cmd.append("--enable-beacon-rest-api")
+    else:
         cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
 
     if remote_signer_context == None:
@@ -99,15 +109,6 @@ def get_config(
         "--http-host=0.0.0.0",
         "--keymanager-token-file=" + constants.KEYMANAGER_MOUNT_PATH_ON_CONTAINER,
     ]
-
-    # Check if we're using a blobber by checking for port 5000
-    is_using_blobber = ":5000" in beacon_http_urls[0]
-
-    if cl_context.client_name != constants.CL_TYPE.prysm or is_using_blobber:
-        # Use Beacon API if:
-        # 1. Prysm VC wants to connect to a non-Prysm BN, OR
-        # 2. Blobber is enabled (since blobber only proxies REST, not RPC)
-        cmd.append("--enable-beacon-rest-api")
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
