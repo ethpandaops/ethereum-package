@@ -1474,6 +1474,46 @@ docker_cache_params:
   google_prefix: "/gcr/"
 
 
+# Pre-populate EL client databases with state-actor (https://github.com/ethereum/state-actor)
+# before the EL clients launch. When enabled, one state-actor run happens per unique
+# el_type among the participants, driven by the network's own genesis.json
+# (state-actor --genesis), so the produced database's genesis hash matches the hash the
+# CL genesis was built against. Each run's output is stored as a files artifact named
+# "state-actor-<el_type>-data"; participants opt in by mounting it at their execution
+# data directory via el_extra_mounts:
+#
+#   participants:
+#     - el_type: geth
+#       el_extra_mounts:
+#         /data/geth/execution-data: state-actor-geth-data
+#
+# nethermind participants additionally need:
+#   el_extra_params:
+#     - "--Init.BaseDbPath=/data/nethermind/execution-data"
+#     - "--FlatDb.Enabled=true"
+#
+# Supported el_types: geth, reth, besu, nethermind, ethrex, erigon
+# Requires state-actor images with --genesis support.
+state_actor_params:
+  # Whether to run state-actor pre-population
+  enabled: false
+  # Random seed passed to state-actor (deterministic output for a given genesis + seed)
+  seed: 1
+  # Optional DB-size budget (e.g. "1GB") for synthetic state on top of the genesis alloc.
+  # NOTE: any non-empty value changes the EL state root and therefore the genesis hash;
+  # the CL genesis must then be anchored to the state-actor output, which this
+  # integration does not do yet. Leave empty for alloc-verbatim databases.
+  target_size: ""
+  # Per-client state-actor images
+  images:
+    geth: ghcr.io/ethereum/state-actor-geth:main
+    reth: ghcr.io/ethereum/state-actor-reth:main
+    besu: ghcr.io/ethereum/state-actor-besu:main
+    nethermind: ghcr.io/ethereum/state-actor-nethermind:main
+    ethrex: ghcr.io/ethereum/state-actor-ethrex:main
+    erigon: ghcr.io/ethereum/state-actor-erigon:main
+
+
 # Configuration place for mempool bridge (https://github.com/ethpandaops/mempool-bridge)
 mempool_bridge_params:
   # The image to use for mempool bridge
