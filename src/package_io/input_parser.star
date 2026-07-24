@@ -96,6 +96,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "buildoor_params",
     "ethereum_genesis_generator_params",
     "trueblocks_params",
+    "state_actor_params",
 )
 
 
@@ -138,6 +139,7 @@ def input_parser(plan, input_args):
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
     result["trueblocks_params"] = get_default_trueblocks_params()
+    result["state_actor_params"] = get_default_state_actor_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -163,6 +165,16 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["docker_cache_params"]:
                 sub_value = input_args["docker_cache_params"][sub_attr]
                 result["docker_cache_params"][sub_attr] = sub_value
+        elif attr == "state_actor_params":
+            for sub_attr in input_args["state_actor_params"]:
+                sub_value = input_args["state_actor_params"][sub_attr]
+                if sub_attr == "images":
+                    # Merge per-client so a partial images override keeps the
+                    # defaults for the other clients.
+                    for client, image in sub_value.items():
+                        result["state_actor_params"]["images"][client] = image
+                else:
+                    result["state_actor_params"][sub_attr] = sub_value
         elif attr == "mev_params":
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
@@ -1059,6 +1071,12 @@ def input_parser(plan, input_args):
             dockerhub_prefix=result["docker_cache_params"]["dockerhub_prefix"],
             github_prefix=result["docker_cache_params"]["github_prefix"],
             google_prefix=result["docker_cache_params"]["google_prefix"],
+        ),
+        state_actor_params=struct(
+            enabled=result["state_actor_params"]["enabled"],
+            seed=result["state_actor_params"]["seed"],
+            target_size=result["state_actor_params"]["target_size"],
+            images=result["state_actor_params"]["images"],
         ),
         tx_fuzz_params=struct(
             image=result["tx_fuzz_params"]["image"],
@@ -2182,6 +2200,32 @@ def get_default_docker_cache_params():
         "dockerhub_prefix": "/dh/",
         "github_prefix": "/gh/",
         "google_prefix": "/gcr/",
+    }
+
+
+def get_default_state_actor_params():
+    # Pre-populates EL datadirs with state-actor before launch. The images
+    # must carry a state-actor build with --genesis support; state-actor's
+    # published ghcr images are the default, overridable per client via
+    # `images` (e.g. locally built tags).
+    return {
+        "enabled": False,
+        "seed": 1,
+        # Optional DB-size budget (e.g. "1GB"). Empty = alloc-verbatim: the
+        # generated DB contains exactly the network genesis alloc, so the
+        # genesis hash matches the one the CL genesis was built against.
+        # NOTE: any non-empty value changes the EL state root and therefore
+        # the genesis hash — the CL genesis must then be anchored to the
+        # state-actor output, which this integration does not do yet.
+        "target_size": "",
+        "images": {
+            "geth": "ghcr.io/ethereum/state-actor-geth:main",
+            "reth": "ghcr.io/ethereum/state-actor-reth:main",
+            "besu": "ghcr.io/ethereum/state-actor-besu:main",
+            "nethermind": "ghcr.io/ethereum/state-actor-nethermind:main",
+            "ethrex": "ghcr.io/ethereum/state-actor-ethrex:main",
+            "erigon": "ghcr.io/ethereum/state-actor-erigon:main",
+        },
     }
 
 

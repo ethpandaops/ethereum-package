@@ -312,6 +312,12 @@ SUBCATEGORY_PARAMS = {
         "github_prefix",
         "google_prefix",
     ],
+    "state_actor_params": [
+        "enabled",
+        "seed",
+        "target_size",
+        "images",
+    ],
     "tx_fuzz_params": [
         "image",
         "tx_fuzz_extra_args",

@@ -34,6 +34,7 @@ snooper_el_launcher = import_module("./snooper/snooper_el_launcher.star")
 blobber_launcher = import_module("./blobber/blobber_launcher.star")
 cl_context_module = import_module("./cl/cl_context.star")
 bootnodoor_launcher = import_module("./bootnodoor/bootnodoor_launcher.star")
+state_actor_launcher = import_module("./state_actor/state_actor_launcher.star")
 
 
 def launch_participant_network(
@@ -185,6 +186,22 @@ def launch_participant_network(
         plan.print("Bootnodoor launched with CL ENR: {0}".format(bootnodoor_enr))
         plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
         plan.print("Bootnodoor launched with EL ENR: {0}".format(bootnodoor_el_enr))
+
+    # Pre-populate EL databases with state-actor when enabled. Runs after
+    # genesis generation (it consumes the network's genesis.json) and before
+    # the EL launches; participants opt in by mounting the produced
+    # "state-actor-<el_type>-data" artifact at their execution data dir via
+    # el_extra_mounts.
+    if args_with_right_defaults.state_actor_params.enabled:
+        state_actor_launcher.generate(
+            plan,
+            args_with_right_defaults.state_actor_params,
+            args_with_right_defaults.participants,
+            el_cl_data,
+            extra_files_artifacts,
+            global_tolerations,
+            global_node_selectors,
+        )
 
     # Upload binary artifacts when both binary_path and force_restart are enabled
     binary_artifacts = {}
