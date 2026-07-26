@@ -6,10 +6,11 @@
     "build": "tsc --noEmit",
     "test": "tsx --test test/*.test.ts",
     "launch": "tsx src/launch.ts",
-    "template:build": "e2b template create ethereum-lighthouse-geth -d e2b.Dockerfile --cpu-count 8 --memory-mb 8192"
+    "template:build": "e2b template create ethereum-client-topology -d e2b.Dockerfile --cpu-count 8 --memory-mb 8192"
   },
   "dependencies": {
-    "e2b": "2.35.0"
+    "e2b": "2.35.0",
+    "yaml": "2.8.1"
   },
   "devDependencies": {
     "@e2b/cli": "2.13.3",

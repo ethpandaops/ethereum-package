@@ -1,14 +1,15 @@
 export const networks = ["mainnet", "sepolia", "hoodi"] as const;
 export type Network = (typeof networks)[number];
 
-const defaultCheckpointUrls: Record<Network, string> = {
+export const defaultCheckpointUrls: Record<Network, string> = {
   mainnet: "https://mainnet.checkpoint.sigp.io",
   sepolia: "https://checkpoint-sync.sepolia.ethpandaops.io",
   hoodi: "https://hoodi.checkpoint.sigp.io",
 };
 
 export interface LaunchOptions {
-  network: Network;
+  network?: Network;
+  configPath?: string;
   timeoutMinutes: number;
   checkpointUrl?: string;
 }
@@ -63,9 +64,41 @@ export function lighthouseArgs(
   }
   return args;
 }
+export function prysmArgs(
+  network: Network,
+  jwtPath: string,
+  executionEndpoint: string,
+  checkpointUrl?: string,
+): string[] {
+  const args = [
+    "beacon-chain",
+    `--${network}`,
+    "--accept-terms-of-use=true",
+    "--datadir=/home/user/ethereum/prysm",
+    `--execution-endpoint=${executionEndpoint}`,
+    `--jwt-secret=${jwtPath}`,
+    "--http-host=0.0.0.0",
+    "--http-cors-domain=*",
+    "--http-port=3500",
+    "--rpc-host=127.0.0.1",
+    "--rpc-port=4000",
+    "--disable-monitoring=false",
+    "--monitoring-host=0.0.0.0",
+    "--monitoring-port=8080",
+  ];
+  if (checkpointUrl) {
+    args.push(
+      `--checkpoint-sync-url=${checkpointUrl}`,
+      `--genesis-beacon-api-url=${checkpointUrl}`,
+    );
+  }
+  return args;
+}
+
 
 export function parseOptions(args: string[]): LaunchOptions {
-  let network: Network = "hoodi";
+  let network: Network | undefined;
+  let configPath: string | undefined;
   let timeoutMinutes = 60;
   let checkpointUrl: string | undefined;
 
@@ -80,6 +113,8 @@ export function parseOptions(args: string[]): LaunchOptions {
         throw new Error(`network must be one of: ${networks.join(", ")}`);
       }
       network = value as Network;
+    } else if (option === "--config") {
+      configPath = value;
     } else if (option === "--timeout") {
       timeoutMinutes = Number(value);
       if (!Number.isInteger(timeoutMinutes) || timeoutMinutes < 5 || timeoutMinutes > 1440) {
@@ -96,9 +131,15 @@ export function parseOptions(args: string[]): LaunchOptions {
     }
   }
 
-  return {
-    network,
-    timeoutMinutes,
-    checkpointUrl: checkpointUrl ?? defaultCheckpointUrls[network],
-  };
+  const options: LaunchOptions = { timeoutMinutes };
+  if (network) {
+    options.network = network;
+    options.checkpointUrl = checkpointUrl ?? defaultCheckpointUrls[network];
+  } else if (checkpointUrl) {
+    options.checkpointUrl = checkpointUrl;
+  }
+  if (configPath) {
+    options.configPath = configPath;
+  }
+  return options;
 }

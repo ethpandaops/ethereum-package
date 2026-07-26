@@ -1,20 +1,39 @@
 import { randomBytes } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 
 import { Sandbox, type CommandHandle } from "e2b";
 
-import { gethArgs, lighthouseArgs, parseOptions } from "./config.js";
+import {
+  defaultCheckpointUrls,
+  gethArgs,
+  lighthouseArgs,
+  parseOptions,
+  prysmArgs,
+} from "./config.js";
+import { parseTopology, type ConsensusClient, type NodePair } from "./topology.js";
 
-const template = process.env.E2B_TEMPLATE ?? "ethereum-lighthouse-geth";
+const template = process.env.E2B_TEMPLATE ?? "ethereum-client-topology";
 const jwtPath = "/home/user/ethereum/jwt.hex";
 
-type ClientRole = "geth" | "lighthouse";
 type InterruptSignal = "SIGINT" | "SIGTERM";
+type ClientLayer = "el" | "cl";
 
 interface ManagedSandbox {
-  role: ClientRole;
+  pairId: string;
+  layer: ClientLayer;
+  client: "geth" | ConsensusClient;
   sandbox: Sandbox;
   logPath: string;
+}
+
+interface PairRuntime {
+  plan: NodePair;
+  jwt: string;
+  geth?: ManagedSandbox;
+  consensus?: ManagedSandbox;
+  gethHandle?: CommandHandle;
+  consensusHandle?: CommandHandle;
 }
 
 function command(args: string[], logPath: string): string {
@@ -59,17 +78,37 @@ function failWhenProcessExits(handle: CommandHandle, label: string): Promise<nev
   );
 }
 
-function assertProcessRunning(handle: CommandHandle, label: string): void {
-  if (handle.exitCode !== undefined) {
-    throw new Error(
-      `${label} exited before startup completed (exit code ${handle.exitCode})`,
-    );
+function assertProcessRunning(handle: CommandHandle | undefined, label: string): void {
+  if (!handle || handle.exitCode !== undefined) {
+    const exitCode = handle?.exitCode === undefined ? "" : ` (exit code ${handle.exitCode})`;
+    throw new Error(`${label} exited before startup completed${exitCode}`);
+  }
+}
+
+async function settleAll(tasks: Promise<void>[], label: string): Promise<void> {
+  const results = await Promise.allSettled(tasks);
+  const failures = results
+    .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+    .map(({ reason }) => reason);
+  if (failures.length > 0) {
+    throw new AggregateError(failures, `${label} failed`);
   }
 }
 
 async function main(): Promise<void> {
   const options = parseOptions(process.argv.slice(2));
-  const jwt = randomBytes(32).toString("hex");
+  const source = options.configPath ? await readFile(options.configPath, "utf8") : undefined;
+  const defaultNetwork = options.network ?? "hoodi";
+  const topology = source
+    ? parseTopology(source, options.network)
+    : parseTopology(
+        `network_params:\n  network: ${defaultNetwork}\nparticipants:\n  - el_type: geth\n    cl_type: lighthouse\n`,
+      );
+  const checkpointUrl = options.checkpointUrl ?? defaultCheckpointUrls[topology.network];
+  const runtimes: PairRuntime[] = topology.pairs.map((plan) => ({
+    plan,
+    jwt: randomBytes(32).toString("hex"),
+  }));
   const managedSandboxes: ManagedSandbox[] = [];
   let cleanupPromise: Promise<void> | undefined;
   let cleanupFailureReported = false;
@@ -79,10 +118,10 @@ async function main(): Promise<void> {
 
   const cleanupSandboxes = (): Promise<void> => {
     cleanupPromise ??= Promise.all(
-      managedSandboxes.map(async ({ role, sandbox }) => {
+      managedSandboxes.map(async ({ pairId, layer, sandbox }) => {
         const killed = await Sandbox.kill(sandbox.sandboxId);
         if (!killed) {
-          throw new Error(`${role} sandbox ${sandbox.sandboxId} was not running`);
+          throw new Error(`${pairId} ${layer} sandbox ${sandbox.sandboxId} was not running`);
         }
       }),
     ).then(() => undefined);
@@ -95,7 +134,7 @@ async function main(): Promise<void> {
     }
     cleanupFailureReported = true;
     const sandboxIds = managedSandboxes
-      .map(({ role, sandbox }) => `${role}=${sandbox.sandboxId}`)
+      .map(({ pairId, layer, sandbox }) => `${pairId}/${layer}=${sandbox.sandboxId}`)
       .join(", ");
     console.error(`Failed to clean up sandboxes (${sandboxIds}) ${context}:`, cleanupError);
   };
@@ -104,6 +143,7 @@ async function main(): Promise<void> {
     process.off("SIGINT", handleSigint);
     process.off("SIGTERM", handleSigterm);
   }
+
   function throwIfInterrupted(): void {
     if (interruptedSignal !== undefined) {
       throw new Error(`Startup interrupted by ${interruptedSignal}`);
@@ -115,7 +155,6 @@ async function main(): Promise<void> {
       throw new Error(`Startup interrupted by ${signal}`);
     });
   }
-
 
   function handleSignal(signal: InterruptSignal): void {
     if (interruptedSignal !== undefined) {
@@ -133,110 +172,172 @@ async function main(): Promise<void> {
     handleSignal("SIGTERM");
   }
 
+  async function createSandbox(
+    runtime: PairRuntime,
+    layer: ClientLayer,
+    client: "geth" | ConsensusClient,
+    allowPublicTraffic: boolean,
+  ): Promise<ManagedSandbox> {
+    const sandbox = await Sandbox.create(template, {
+      timeoutMs: options.timeoutMinutes * 60_000,
+      allowInternetAccess: true,
+      network: { allowPublicTraffic },
+      metadata: {
+        application: "ethereum-package",
+        network: topology.network,
+        participant: runtime.plan.id,
+        layer,
+        client,
+      },
+    });
+    const managed = {
+      pairId: runtime.plan.id,
+      layer,
+      client,
+      sandbox,
+      logPath: `/home/user/${runtime.plan.id}-${client}.log`,
+    } satisfies ManagedSandbox;
+    managedSandboxes.push(managed);
+    return managed;
+  }
+
   process.once("SIGINT", handleSigint);
   process.once("SIGTERM", handleSigterm);
 
   try {
-    const gethSandbox = await Sandbox.create(template, {
-      timeoutMs: options.timeoutMinutes * 60_000,
-      allowInternetAccess: true,
-      network: { allowPublicTraffic: true },
-      metadata: {
-        application: "ethereum-package",
-        client: "geth",
-        network: options.network,
-      },
-    });
-    managedSandboxes.push({
-      role: "geth",
-      sandbox: gethSandbox,
-      logPath: "/home/user/geth.log",
-    });
-    throwIfInterrupted();
-
-    await gethSandbox.files.write(jwtPath, jwt);
-    throwIfInterrupted();
-    const gethHandle = await gethSandbox.commands.run(
-      command(gethArgs(options.network, jwtPath), "/home/user/geth.log"),
-      { background: true, timeoutMs: 0 },
+    await settleAll(
+      runtimes.map(async (runtime) => {
+        runtime.geth = await createSandbox(runtime, "el", "geth", true);
+      }),
+      "execution sandbox creation",
     );
-    const gethExit = failWhenProcessExits(gethHandle, "Geth");
-    await Promise.race([
-      waitForHttp(gethSandbox, "http://127.0.0.1:8545", "geth RPC"),
-      gethExit,
-      failOnInterruption(),
-    ]);
-
-    throwIfInterrupted();
-    const executionEndpoint = `https://${gethSandbox.getHost(8551)}`;
-    const lighthouseSandbox = await Sandbox.create(template, {
-      timeoutMs: options.timeoutMinutes * 60_000,
-      allowInternetAccess: true,
-      network: { allowPublicTraffic: false },
-      metadata: {
-        application: "ethereum-package",
-        client: "lighthouse",
-        network: options.network,
-      },
-    });
-    managedSandboxes.push({
-      role: "lighthouse",
-      sandbox: lighthouseSandbox,
-      logPath: "/home/user/lighthouse.log",
-    });
     throwIfInterrupted();
 
-    await lighthouseSandbox.files.write(jwtPath, jwt);
-    throwIfInterrupted();
-    const lighthouseHandle = await lighthouseSandbox.commands.run(
-      command(
-        lighthouseArgs(
-          options.network,
-          jwtPath,
-          executionEndpoint,
-          options.checkpointUrl,
-        ),
-        "/home/user/lighthouse.log",
-      ),
-      { background: true, timeoutMs: 0 },
+    await settleAll(
+      runtimes.map(async (runtime) => {
+        const geth = runtime.geth;
+        if (!geth) {
+          throw new Error(`${runtime.plan.id} has no execution sandbox`);
+        }
+        await geth.sandbox.files.write(jwtPath, runtime.jwt);
+        throwIfInterrupted();
+        runtime.gethHandle = await geth.sandbox.commands.run(
+          command(gethArgs(topology.network, jwtPath), geth.logPath),
+          { background: true, timeoutMs: 0 },
+        );
+        await Promise.race([
+          waitForHttp(
+            geth.sandbox,
+            "http://127.0.0.1:8545",
+            `${runtime.plan.id} geth RPC`,
+          ),
+          failWhenProcessExits(runtime.gethHandle, `${runtime.plan.id} Geth`),
+          failOnInterruption(),
+        ]);
+      }),
+      "execution client startup",
     );
-    const lighthouseExit = failWhenProcessExits(lighthouseHandle, "Lighthouse");
-    await Promise.race([
-      waitForHttp(
-        lighthouseSandbox,
-        "http://127.0.0.1:4000/eth/v1/node/health",
-        "Lighthouse HTTP API",
-      ),
-      gethExit,
-      lighthouseExit,
-      failOnInterruption(),
-    ]);
-
     throwIfInterrupted();
-    assertProcessRunning(gethHandle, "Geth");
-    assertProcessRunning(lighthouseHandle, "Lighthouse");
-    await Promise.all([gethHandle.disconnect(), lighthouseHandle.disconnect()]);
+
+    await settleAll(
+      runtimes.map(async (runtime) => {
+        runtime.consensus = await createSandbox(
+          runtime,
+          "cl",
+          runtime.plan.clType,
+          false,
+        );
+      }),
+      "consensus sandbox creation",
+    );
+    throwIfInterrupted();
+
+    await settleAll(
+      runtimes.map(async (runtime) => {
+        const geth = runtime.geth;
+        const consensus = runtime.consensus;
+        if (!geth || !consensus) {
+          throw new Error(`${runtime.plan.id} is missing a client sandbox`);
+        }
+        const executionEndpoint = `https://${geth.sandbox.getHost(8551)}`;
+        const args =
+          runtime.plan.clType === "lighthouse"
+            ? lighthouseArgs(topology.network, jwtPath, executionEndpoint, checkpointUrl)
+            : prysmArgs(topology.network, jwtPath, executionEndpoint, checkpointUrl);
+        const apiPort = runtime.plan.clType === "lighthouse" ? 4000 : 3500;
+        await consensus.sandbox.files.write(jwtPath, runtime.jwt);
+        throwIfInterrupted();
+        runtime.consensusHandle = await consensus.sandbox.commands.run(
+          command(args, consensus.logPath),
+          { background: true, timeoutMs: 0 },
+        );
+        await Promise.race([
+          waitForHttp(
+            consensus.sandbox,
+            `http://127.0.0.1:${apiPort}/eth/v1/node/health`,
+            `${runtime.plan.id} ${runtime.plan.clType} HTTP API`,
+          ),
+          failWhenProcessExits(runtime.gethHandle!, `${runtime.plan.id} Geth`),
+          failWhenProcessExits(
+            runtime.consensusHandle,
+            `${runtime.plan.id} ${runtime.plan.clType}`,
+          ),
+          failOnInterruption(),
+        ]);
+      }),
+      "consensus client startup",
+    );
+    throwIfInterrupted();
+
+    for (const runtime of runtimes) {
+      assertProcessRunning(runtime.gethHandle, `${runtime.plan.id} Geth`);
+      assertProcessRunning(
+        runtime.consensusHandle,
+        `${runtime.plan.id} ${runtime.plan.clType}`,
+      );
+    }
+    await Promise.all(
+      runtimes.flatMap((runtime) => [
+        runtime.gethHandle!.disconnect(),
+        runtime.consensusHandle!.disconnect(),
+      ]),
+    );
     throwIfInterrupted();
     removeSignalHandlers();
 
     console.log(
       JSON.stringify(
         {
-          network: options.network,
+          network: topology.network,
           configuredTimeoutMinutes: options.timeoutMinutes,
-          geth: {
-            sandboxId: gethSandbox.sandboxId,
-            rpcUrl: "http://127.0.0.1:8545",
-            access: "sandbox-local via the E2B SDK",
-            log: "/home/user/geth.log",
-          },
-          lighthouse: {
-            sandboxId: lighthouseSandbox.sandboxId,
-            trafficAccessToken: lighthouseSandbox.trafficAccessToken,
-            apiUrl: `https://${lighthouseSandbox.getHost(4000)}`,
-            metricsUrl: `https://${lighthouseSandbox.getHost(5054)}/metrics`,
-            log: "/home/user/lighthouse.log",
-          },
+          participantCount: topology.pairs.length,
+          sandboxCount: topology.sandboxCount,
+          nodes: runtimes.map((runtime) => {
+            const geth = runtime.geth!;
+            const consensus = runtime.consensus!;
+            const apiPort = runtime.plan.clType === "lighthouse" ? 4000 : 3500;
+            const metricsPort = runtime.plan.clType === "lighthouse" ? 5054 : 8080;
+            return {
+              id: runtime.plan.id,
+              participantIndex: runtime.plan.participantIndex,
+              instance: runtime.plan.instance,
+              execution: {
+                client: "geth",
+                sandboxId: geth.sandbox.sandboxId,
+                rpcUrl: "http://127.0.0.1:8545",
+                access: "sandbox-local via the E2B SDK",
+                log: geth.logPath,
+              },
+              consensus: {
+                client: runtime.plan.clType,
+                sandboxId: consensus.sandbox.sandboxId,
+                trafficAccessToken: consensus.sandbox.trafficAccessToken,
+                apiUrl: `https://${consensus.sandbox.getHost(apiPort)}`,
+                metricsUrl: `https://${consensus.sandbox.getHost(metricsPort)}/metrics`,
+                log: consensus.logPath,
+              },
+            };
+          }),
         },
         null,
         2,
@@ -255,12 +356,12 @@ async function main(): Promise<void> {
     }
 
     const logTails = await Promise.all(
-      managedSandboxes.map(async ({ role, sandbox, logPath }) => {
+      managedSandboxes.map(async ({ pairId, client, sandbox, logPath }) => {
         const log = await sandbox.commands
           .run(`tail -c 4000 '${logPath}'`)
           .then(({ stdout }) => stdout)
           .catch(() => "");
-        return { role, log };
+        return { label: `${pairId} ${client}`, log };
       }),
     );
     try {
@@ -268,8 +369,8 @@ async function main(): Promise<void> {
     } catch (cleanupError) {
       reportCleanupFailure("after startup failure", cleanupError);
     }
-    for (const { role, log } of logTails) {
-      console.error(`${role} log:\n${log}`);
+    for (const { label, log } of logTails) {
+      console.error(`${label} log:\n${log}`);
     }
     throw error;
   }
