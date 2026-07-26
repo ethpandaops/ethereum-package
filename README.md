@@ -55,6 +55,38 @@ Where `network_params.yaml` contains the parameters for your network in your hom
 
 Kurtosis packages work the same way over Docker or on Kubernetes. Please visit our [Kubernetes docs](https://docs.kurtosis.com/k8s) to learn how to spin up a private testnet on a Kubernetes cluster.
 
+#### Run Lighthouse and Geth on E2B
+
+The `e2b/` bridge runs pinned Lighthouse and Geth binaries in separate E2B
+sandboxes, each provisioned with 8 CPUs and 8 GiB of memory. Lighthouse reaches
+Geth through its JWT-authenticated Engine API over E2B's HTTPS proxy. The bridge
+targets public networks rather than the Kurtosis devnet path, so it does not
+require Docker at runtime.
+
+```bash
+cd e2b
+npm install
+npm run template:build
+npm run launch -- --network hoodi --timeout 60
+```
+
+Set `E2B_API_KEY` before building or launching. Supported networks are
+`mainnet`, `sepolia`, and `hoodi`; pass `--checkpoint-url URL` to override the
+network's default community checkpoint endpoint. The launcher prints both
+sandbox IDs and the Lighthouse API and metrics URLs with its ephemeral E2B
+traffic access token.
+
+The Geth sandbox permits public proxy traffic only so the separate Lighthouse
+sandbox can reach port 8551, which remains protected by their random shared JWT.
+Geth's ordinary JSON-RPC and metrics listeners bind to loopback and are
+accessible only through the E2B SDK. Lighthouse's HTTP endpoints retain E2B
+traffic-token protection.
+
+E2B's HTTPS proxy does not expose the clients' TCP/UDP discovery ports. The
+clients can dial peers over sandbox egress, but the bridge is not a replacement
+for Kurtosis when inbound P2P, custom genesis generation, validators, or a
+multi-node devnet is required.
+
 ### Considerations for Running on a Public Testnet with a Cloud Provider
 
 When running on a public testnet using a cloud provider's Kubernetes cluster, there are a few important factors to consider:
