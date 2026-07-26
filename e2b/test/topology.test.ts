@@ -88,6 +88,59 @@ participants_matrix:
   );
 });
 
+test("parses private devnet and validator settings", () => {
+  const topology = parseTopology(`
+network_params:
+  network: kurtosis
+  network_id: "424242"
+  preset: minimal
+  seconds_per_slot: 6
+  genesis_delay: 30
+  num_validator_keys_per_node: 32
+  genesis_time: 1234567890
+  preregistered_validator_count: 64
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    vc_type: prysm
+    validator_count: 48
+`);
+
+  assert.equal(topology.network, "kurtosis");
+  assert.deepEqual(topology.devnet, {
+    networkId: "424242",
+    preset: "minimal",
+    secondsPerSlot: 6,
+    genesisDelaySeconds: 30,
+    genesisTime: 1234567890,
+    preregisteredValidatorCount: 64,
+    mnemonic:
+      "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete",
+  });
+  assert.deepEqual(
+    topology.pairs.map(({ clType, vcType, validatorCount }) => ({
+      clType,
+      vcType,
+      validatorCount,
+    })),
+    [{ clType: "lighthouse", vcType: "prysm", validatorCount: 48 }],
+  );
+});
+
+test("uses ethereum-package null validator defaults", () => {
+  const topology = parseTopology(`
+network_params:
+  network: kurtosis
+  num_validator_keys_per_node: 32
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    validator_count: null
+`);
+
+  assert.equal(topology.pairs[0]?.validatorCount, 32);
+});
+
 test("rejects topology that E2B cannot reproduce safely", () => {
   assert.throws(
     () =>
@@ -96,18 +149,21 @@ participants:
   - el_type: geth
     cl_type: lighthouse
 `),
-    /public network.*--network/,
+    /network_params.*--network/,
   );
   assert.throws(
     () =>
       parseTopology(`
 network_params:
   network: kurtosis
+  num_validator_keys_per_node: 32
 participants:
   - el_type: geth
     cl_type: lighthouse
+  - el_type: geth
+    cl_type: prysm
 `),
-    /custom Kurtosis networks/,
+    /exactly one EL-CL participant pair/,
   );
   assert.throws(
     () =>
@@ -176,5 +232,46 @@ participant:
     cl_type: lighthouse
 `),
     /unsupported root option.*participant/,
+  );
+  assert.throws(
+    () =>
+      parseTopology(`
+network_params:
+  network: hoodi
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    validator_count: 1
+`),
+    /validator clients are only supported on private/,
+  );
+  for (const unsupported of ["mev_params", "persistent"]) {
+    assert.throws(
+      () =>
+        parseTopology(`
+network_params:
+  network: hoodi
+${unsupported}: {}
+`),
+      new RegExp(`unsupported root option.*${unsupported}`),
+    );
+  }
+  assert.throws(
+    () =>
+      parseTopology(`
+network_params:
+  network: hoodi
+  network_id: "424242"
+`),
+    /unsupported network_params option.*network_id/,
+  );
+  assert.throws(
+    () =>
+      parseTopology(`
+network_params:
+  network: kurtosis
+  terminal_total_difficulty: "0"
+`),
+    /unsupported network_params option.*terminal_total_difficulty/,
   );
 });

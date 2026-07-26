@@ -1,0 +1,13 @@
+network_params:
+  network: kurtosis
+  network_id: "3151908"
+  preset: mainnet
+  seconds_per_slot: 6
+  genesis_delay: 90
+  num_validator_keys_per_node: 32
+
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+    vc_type: lighthouse
+    validator_count: 64

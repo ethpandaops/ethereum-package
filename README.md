@@ -57,23 +57,23 @@ Kurtosis packages work the same way over Docker or on Kubernetes. Please visit o
 
 #### Launch ethereum-package participants on E2B
 
-The `e2b/` bridge reads the same `participants`, `participants_matrix`, and
-`network_params.network` fields as an ethereum-package network parameters YAML
-file. It expands participant counts and matrix combinations, then creates one
-8 CPU, 8 GiB E2B sandbox for every execution and consensus client. Each pair
-gets a unique JWT-authenticated Engine API connection.
+The `e2b/` bridge reads ethereum-package-style `participants`,
+`participants_matrix`, and `network_params` YAML. It expands participant counts
+and matrix combinations, then creates one 8 CPU, 8 GiB E2B sandbox for every
+execution and consensus client. Each pair gets a unique JWT-authenticated
+Engine API connection.
 
 ```bash
 cd e2b
 npm install
 npm run template:build
-npm run launch -- --config ../network_params.yaml --timeout 60
+npm run launch -- --network hoodi --timeout 60
 ```
 
-Set `E2B_API_KEY` before building or launching. The YAML must select `mainnet`,
-`sepolia`, or `hoodi` in `network_params.network`; alternatively pass
-`--network hoodi` to override it. Pass `--checkpoint-url URL` to override the
-network's default community checkpoint endpoint.
+Set `E2B_API_KEY` before building or launching. Public-network YAML may select
+`mainnet`, `sepolia`, or `hoodi` in `network_params.network`; alternatively pass
+`--network hoodi` to override it. Pass an HTTPS `--checkpoint-url URL` to
+override the network's default community checkpoint endpoint.
 
 The native E2B template currently supports Geth execution clients and
 Lighthouse or Prysm consensus clients. `count` has ethereum-package semantics:
@@ -90,20 +90,37 @@ participants:
     count: 2
 ```
 
-This configuration expands to four EL-CL pairs and eight sandboxes. The
-launcher returns a manifest containing every participant, pairing, sandbox ID,
-consensus API and metrics URL, and E2B traffic access token.
+This configuration expands to four EL-CL pairs and eight sandboxes. For public
+networks, the launcher returns a manifest containing every participant,
+pairing, sandbox ID, consensus API and metrics URL, and E2B traffic access
+token. Geth sandboxes permit public proxy traffic only so their paired
+consensus sandboxes can reach port 8551, which remains protected by a random
+per-pair JWT. Geth JSON-RPC and metrics bind to loopback. Consensus HTTP
+endpoints retain E2B traffic-token protection.
 
-The Geth sandboxes permit public proxy traffic only so their paired consensus
-sandboxes can reach port 8551, which remains protected by a random per-pair
-JWT. Geth JSON-RPC and metrics bind to loopback. Consensus HTTP endpoints retain
-E2B traffic-token protection.
+The included `e2b/testnet.yaml` launches a private, post-Fulu testnet with one
+Geth, one Lighthouse beacon node, and 64 Lighthouse validators:
 
-The adapter rejects unsupported client types, Docker image overrides,
-additional services, separate validator clients, and custom `kurtosis`
-networks instead of silently ignoring them. E2B's HTTPS proxy does not expose
-the TCP/UDP discovery ports or provide the genesis services needed for private
-devnets.
+```bash
+cd e2b
+npm run launch -- --config testnet.yaml --timeout 60
+```
+
+For `network: kurtosis`, the adapter supports `network_id`, `preset`,
+`seconds_per_slot`, `genesis_delay`, `genesis_time`,
+`num_validator_keys_per_node`, `preregistered_validator_count`, and
+`preregistered_validator_keys_mnemonic`. The launcher creates genesis and
+validator artifacts with the digest-pinned ethereum-genesis-generator, uploads
+the same artifacts to both client sandboxes, initializes Geth, and starts the
+configured validator client. The cross-sandbox Engine API uses E2B's HTTPS
+proxy and a random JWT; all other private-testnet APIs remain bound to loopback
+and are accessible through the E2B SDK.
+
+Private E2B devnets support exactly one EL-CL pair because E2B's HTTPS proxy
+does not expose the native TCP/UDP ports needed for multi-node Ethereum P2P.
+The adapter rejects unsupported root and `network_params` options, multi-pair
+private networks, public validator counts, unsupported client types, Docker
+image overrides, and additional services rather than silently ignoring them.
 
 ### Considerations for Running on a Public Testnet with a Cloud Provider
 

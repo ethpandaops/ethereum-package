@@ -4,6 +4,7 @@ import { networks, type Network } from "./config.js";
 
 export type ExecutionClient = "geth";
 export type ConsensusClient = "lighthouse" | "prysm";
+export type ValidatorClient = ConsensusClient;
 
 export interface NodePair {
   id: string;
@@ -11,17 +12,32 @@ export interface NodePair {
   instance: number;
   elType: ExecutionClient;
   clType: ConsensusClient;
+  vcType: ValidatorClient;
+  validatorCount: number;
+}
+
+export interface DevnetConfig {
+  networkId: string;
+  preset: "mainnet" | "minimal";
+  secondsPerSlot: number;
+  genesisDelaySeconds: number;
+  genesisTime?: number;
+  preregisteredValidatorCount?: number;
+  mnemonic: string;
 }
 
 export interface Topology {
   network: Network;
   pairs: NodePair[];
   sandboxCount: number;
+  devnet?: DevnetConfig;
 }
 
 interface ParticipantInput {
   el_type?: unknown;
   cl_type?: unknown;
+  vc_type?: unknown;
+  validator_count?: unknown;
   count?: unknown;
   [key: string]: unknown;
 }
@@ -43,6 +59,8 @@ interface ConfigInput {
 const participantKeys: Record<string, true> = {
   el_type: true,
   cl_type: true,
+  vc_type: true,
+  validator_count: true,
   count: true,
 };
 const matrixKeys: Record<string, true> = { el: true, cl: true, count: true };
@@ -52,50 +70,20 @@ const rootKeys: Record<string, true> = {
   participants: true,
   participants_matrix: true,
   network_params: true,
-  port_publisher: true,
   additional_services: true,
-  extra_files: true,
-  blockscout_params: true,
-  dora_params: true,
-  checkpointz_params: true,
-  docker_cache_params: true,
-  tx_fuzz_params: true,
-  rakoon_params: true,
-  custom_flood_params: true,
-  prometheus_params: true,
-  grafana_params: true,
-  tempo_params: true,
-  assertoor_params: true,
-  mev_params: true,
-  xatu_sentry_params: true,
-  snooper_params: true,
-  spamoor_params: true,
-  disruptoor_params: true,
-  slashoor_params: true,
-  mempool_bridge_params: true,
-  ethereum_genesis_generator_params: true,
-  bootnodoor_params: true,
-  zkboost_params: true,
-  buildoor_params: true,
-  trueblocks_params: true,
-  wait_for_finalization: true,
-  global_log_level: true,
-  snooper_enabled: true,
-  ethereum_metrics_exporter_enabled: true,
-  parallel_keystore_generation: true,
-  disable_peer_scoring: true,
-  persistent: true,
-  mev_type: true,
-  xatu_sentry_enabled: true,
-  apache_port: true,
-  nginx_port: true,
-  global_tolerations: true,
-  global_node_selectors: true,
-  use_remote_signer: true,
-  keymanager_enabled: true,
-  checkpoint_sync_enabled: true,
-  checkpoint_sync_url: true,
 };
+const devnetNetworkParameterKeys: Record<string, true> = {
+  network: true,
+  network_id: true,
+  preset: true,
+  seconds_per_slot: true,
+  genesis_delay: true,
+  genesis_time: true,
+  num_validator_keys_per_node: true,
+  preregistered_validator_count: true,
+  preregistered_validator_keys_mnemonic: true,
+};
+const publicNetworkParameterKeys: Record<string, true> = { network: true };
 const maxPairs = 32;
 
 function asRecord(value: unknown, label: string): Record<string, unknown> {
@@ -135,26 +123,37 @@ function parseParticipant(
   input: ParticipantInput,
   participantIndex: number,
   instance: number,
+  defaultValidatorCount: number,
 ): NodePair {
   rejectUnknownKeys(input, participantKeys, `participant ${participantIndex}`);
   const elType = input.el_type ?? "geth";
   const clType = input.cl_type ?? "lighthouse";
+  const vcType = input.vc_type ?? clType;
   if (elType !== "geth") {
     throw new Error(`unsupported EL client in participant ${participantIndex}: ${String(elType)}`);
   }
   if (clType !== "lighthouse" && clType !== "prysm") {
     throw new Error(`unsupported CL client in participant ${participantIndex}: ${String(clType)}`);
   }
+  if (vcType !== "lighthouse" && vcType !== "prysm") {
+    throw new Error(`unsupported VC client in participant ${participantIndex}: ${String(vcType)}`);
+  }
+  const validatorCount =
+    input.validator_count == null
+      ? defaultValidatorCount
+      : countOf(input.validator_count, `participant ${participantIndex}.validator_count`);
   return {
     id: `participant-${participantIndex}-${instance}`,
     participantIndex,
     instance,
     elType,
     clType,
+    vcType,
+    validatorCount,
   };
 }
 
-function expandParticipants(value: unknown): NodePair[] {
+function expandParticipants(value: unknown, defaultValidatorCount: number): NodePair[] {
   if (value === undefined) {
     return [];
   }
@@ -167,13 +166,17 @@ function expandParticipants(value: unknown): NodePair[] {
       throw new Error(`E2B topology is limited to ${maxPairs} participant pairs`);
     }
     for (let instance = 1; instance <= count; instance += 1) {
-      pairs.push(parseParticipant(participant, offset + 1, instance));
+      pairs.push(parseParticipant(participant, offset + 1, instance, defaultValidatorCount));
     }
   }
   return pairs;
 }
 
-function expandMatrix(value: unknown, participantOffset: number): NodePair[] {
+function expandMatrix(
+  value: unknown,
+  participantOffset: number,
+  defaultValidatorCount: number,
+): NodePair[] {
   if (value === undefined) {
     return [];
   }
@@ -208,6 +211,7 @@ function expandMatrix(value: unknown, participantOffset: number): NodePair[] {
             { el_type: el.el_type, cl_type: cl.cl_type },
             participantIndex,
             instance,
+            defaultValidatorCount,
           ),
         );
       }
@@ -226,19 +230,75 @@ function resolveNetwork(config: ConfigInput, override?: Network): Network {
       : asRecord(config.network_params, "network_params");
   const configured = networkParams?.network;
   if (configured === undefined) {
-    throw new Error(
-      "E2B topology requires a public network in network_params.network or --network",
-    );
-  }
-  if (configured === "kurtosis") {
-    throw new Error(
-      "custom Kurtosis networks require inbound P2P and genesis services that E2B does not provide",
-    );
+    throw new Error("E2B topology requires network_params.network or --network");
   }
   if (!networks.includes(configured as Network)) {
     throw new Error(`network must be one of: ${networks.join(", ")}`);
   }
   return configured as Network;
+}
+
+const defaultMnemonic =
+  "giant issue aisle success illegal bike spike question tent bar rely arctic volcano long crawl hungry vocal artwork sniff fantasy very lucky have athlete";
+
+function integerParameter(
+  value: unknown,
+  fallback: number,
+  label: string,
+  minimum: number,
+): number {
+  const result = value ?? fallback;
+  if (!Number.isInteger(result) || (result as number) < minimum) {
+    throw new Error(`${label} must be an integer greater than or equal to ${minimum}`);
+  }
+  return result as number;
+}
+
+function devnetConfig(networkParams: Record<string, unknown>): DevnetConfig {
+  const networkIdValue = networkParams.network_id ?? "3151908";
+  if (
+    (typeof networkIdValue !== "string" && typeof networkIdValue !== "number") ||
+    String(networkIdValue).length === 0
+  ) {
+    throw new Error("network_params.network_id must be a string or number");
+  }
+  const preset = networkParams.preset ?? "mainnet";
+  if (preset !== "mainnet" && preset !== "minimal") {
+    throw new Error("network_params.preset must be mainnet or minimal");
+  }
+  const mnemonic = networkParams.preregistered_validator_keys_mnemonic ?? defaultMnemonic;
+  if (typeof mnemonic !== "string" || mnemonic.trim().length === 0) {
+    throw new Error("network_params.preregistered_validator_keys_mnemonic must be a string");
+  }
+  return {
+    networkId: String(networkIdValue),
+    preset,
+    secondsPerSlot: integerParameter(
+      networkParams.seconds_per_slot,
+      preset === "minimal" ? 6 : 12,
+      "network_params.seconds_per_slot",
+      1,
+    ),
+    genesisDelaySeconds: integerParameter(
+      networkParams.genesis_delay,
+      20,
+      "network_params.genesis_delay",
+      0,
+    ),
+    genesisTime: integerParameter(
+      networkParams.genesis_time,
+      0,
+      "network_params.genesis_time",
+      0,
+    ),
+    preregisteredValidatorCount: integerParameter(
+      networkParams.preregistered_validator_count,
+      0,
+      "network_params.preregistered_validator_count",
+      0,
+    ),
+    mnemonic: mnemonic.trim().replaceAll(/\s+/g, " "),
+  };
 }
 
 export function parseTopology(source: string, networkOverride?: Network): Topology {
@@ -253,26 +313,61 @@ export function parseTopology(source: string, networkOverride?: Network): Topolo
     throw new Error("additional_services are not supported by the E2B topology adapter");
   }
 
+  const network = resolveNetwork(config, networkOverride);
+  const networkParams =
+    config.network_params === undefined
+      ? {}
+      : asRecord(config.network_params, "network_params");
+  rejectUnknownKeys(
+    networkParams,
+    network === "kurtosis" ? devnetNetworkParameterKeys : publicNetworkParameterKeys,
+    "network_params",
+  );
+  const defaultValidatorCount =
+    network === "kurtosis"
+      ? integerParameter(
+          networkParams.num_validator_keys_per_node,
+          128,
+          "network_params.num_validator_keys_per_node",
+          0,
+        )
+      : 0;
   const hasConfiguredParticipants =
     config.participants !== undefined || config.participants_matrix !== undefined;
-  const explicit = expandParticipants(config.participants);
-  const matrix = expandMatrix(config.participants_matrix, explicit.length);
+  const explicit = expandParticipants(config.participants, defaultValidatorCount);
+  const matrix = expandMatrix(
+    config.participants_matrix,
+    explicit.length,
+    defaultValidatorCount,
+  );
   const expandedPairs = [...explicit, ...matrix];
   if (expandedPairs.length === 0 && hasConfiguredParticipants) {
     throw new Error("configuration expands to zero participants");
   }
   if (expandedPairs.length === 0) {
-    expandedPairs.push(parseParticipant({}, 1, 1));
+    expandedPairs.push(parseParticipant({}, 1, 1, defaultValidatorCount));
   }
   const pairs = expandedPairs.map((pair, index) => ({
     ...pair,
     id: `participant-${index + 1}`,
     participantIndex: index + 1,
   }));
-
-  return {
-    network: resolveNetwork(config, networkOverride),
+  const topology: Topology = {
+    network,
     pairs,
     sandboxCount: pairs.length * 2,
   };
+  if (network !== "kurtosis" && pairs.some(({ validatorCount }) => validatorCount > 0)) {
+    throw new Error("validator clients are only supported on private E2B devnets");
+  }
+  if (network === "kurtosis") {
+    if (pairs.length !== 1) {
+      throw new Error("a private E2B devnet supports exactly one EL-CL participant pair");
+    }
+    if (pairs.every(({ validatorCount }) => validatorCount === 0)) {
+      throw new Error("a private devnet requires at least one validator");
+    }
+    topology.devnet = devnetConfig(networkParams);
+  }
+  return topology;
 }

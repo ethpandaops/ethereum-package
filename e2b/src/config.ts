@@ -1,7 +1,9 @@
-export const networks = ["mainnet", "sepolia", "hoodi"] as const;
+export const publicNetworks = ["mainnet", "sepolia", "hoodi"] as const;
+export const networks = [...publicNetworks, "kurtosis"] as const;
+export type PublicNetwork = (typeof publicNetworks)[number];
 export type Network = (typeof networks)[number];
 
-export const defaultCheckpointUrls: Record<Network, string> = {
+export const defaultCheckpointUrls: Record<PublicNetwork, string> = {
   mainnet: "https://mainnet.checkpoint.sigp.io",
   sepolia: "https://checkpoint-sync.sepolia.ethpandaops.io",
   hoodi: "https://hoodi.checkpoint.sigp.io",
@@ -14,7 +16,7 @@ export interface LaunchOptions {
   checkpointUrl?: string;
 }
 
-export function gethArgs(network: Network, jwtPath: string): string[] {
+export function gethArgs(network: PublicNetwork, jwtPath: string): string[] {
   return [
     "geth",
     `--${network}`,
@@ -37,7 +39,7 @@ export function gethArgs(network: Network, jwtPath: string): string[] {
 }
 
 export function lighthouseArgs(
-  network: Network,
+  network: PublicNetwork,
   jwtPath: string,
   executionEndpoint: string,
   checkpointUrl?: string,
@@ -65,7 +67,7 @@ export function lighthouseArgs(
   return args;
 }
 export function prysmArgs(
-  network: Network,
+  network: PublicNetwork,
   jwtPath: string,
   executionEndpoint: string,
   checkpointUrl?: string,
@@ -96,6 +98,16 @@ export function prysmArgs(
 }
 
 
+export function resolveCheckpointUrl(network: Network, checkpointUrl?: string): string | undefined {
+  if (network === "kurtosis") {
+    if (checkpointUrl) {
+      throw new Error("checkpoint URL is only valid for public networks");
+    }
+    return undefined;
+  }
+  return checkpointUrl ?? defaultCheckpointUrls[network];
+}
+
 export function parseOptions(args: string[]): LaunchOptions {
   let network: Network | undefined;
   let configPath: string | undefined;
@@ -122,8 +134,8 @@ export function parseOptions(args: string[]): LaunchOptions {
       }
     } else if (option === "--checkpoint-url") {
       const url = new URL(value);
-      if (url.protocol !== "https:" && url.protocol !== "http:") {
-        throw new Error("checkpoint URL must use HTTP or HTTPS");
+      if (url.protocol !== "https:") {
+        throw new Error("checkpoint URL must use HTTPS");
       }
       checkpointUrl = url.toString().replace(/\/$/, "");
     } else {
@@ -134,7 +146,10 @@ export function parseOptions(args: string[]): LaunchOptions {
   const options: LaunchOptions = { timeoutMinutes };
   if (network) {
     options.network = network;
-    options.checkpointUrl = checkpointUrl ?? defaultCheckpointUrls[network];
+    const resolvedCheckpointUrl = resolveCheckpointUrl(network, checkpointUrl);
+    if (resolvedCheckpointUrl) {
+      options.checkpointUrl = resolvedCheckpointUrl;
+    }
   } else if (checkpointUrl) {
     options.checkpointUrl = checkpointUrl;
   }
