@@ -173,6 +173,7 @@ def get_vc_config(
         config = prysm.get_config(
             plan=plan,
             participant=participant,
+            global_log_level=global_log_level,
             el_cl_genesis_data=launcher.el_cl_genesis_data,
             keymanager_file=keymanager_file,
             image=image,

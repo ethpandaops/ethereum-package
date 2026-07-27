@@ -6,10 +6,10 @@ participants:
     cl_extra_params:
       - --target-peers=3
       - --proof-engine-endpoint=http://zkboost:3000
-      - --proof-types=6
+      - --proof-types=5
     vc_extra_params:
       - --proof-engine-endpoint=http://zkboost:3000
-      - --proof-types=6
+      - --proof-types=5
     count: 2
   - cl_type: lighthouse
     cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
@@ -18,10 +18,10 @@ participants:
     cl_extra_params:
       - --target-peers=3
       - --proof-engine-endpoint=http://zkboost:3000
-      - --proof-types=6
+      - --proof-types=5
     vc_extra_params:
       - --proof-engine-endpoint=http://zkboost:3000
-      - --proof-types=6
+      - --proof-types=5
     count: 2
 
 additional_services:
