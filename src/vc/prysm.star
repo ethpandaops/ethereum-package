@@ -1,14 +1,24 @@
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
 vc_shared = import_module("./shared.star")
 
 PRYSM_PASSWORD_MOUNT_DIRPATH_ON_SERVICE_CONTAINER = "/prysm-password"
 PRYSM_BEACON_RPC_PORT = 4000
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
 
 def get_config(
     plan,
     participant,
+    global_log_level,
     el_cl_genesis_data,
     keymanager_file,
     image,
@@ -39,8 +49,13 @@ def get_config(
         prysm_password_relative_filepath,
     )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     cmd = [
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
+        "--verbosity=" + log_level,
         "--chain-config-file="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/config.yaml",
