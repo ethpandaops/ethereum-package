@@ -358,11 +358,13 @@ def input_parser(plan, input_args):
                     )
                 )
             seen_buildoor_participants[participant_num] = True
-            if type(instance["count"]) != "int" or instance["count"] < 1:
+            # count is optional and defaults to a single builder per entry.
+            instance_count = instance.get("count", 1)
+            if type(instance_count) != "int" or instance_count < 1:
                 fail(
                     "buildoor_params.instances count for participant {0} must be an integer >= 1, got {1}.".format(
                         participant_num,
-                        instance["count"],
+                        instance_count,
                     )
                 )
             # Optional per-instance image override (A/B testing). When omitted the
@@ -1290,7 +1292,7 @@ def input_parser(plan, input_args):
             instances=[
                 struct(
                     participant=instance["participant"],
-                    count=instance["count"],
+                    count=instance.get("count", 1),
                     # Optional per-instance image override (A/B testing). None =>
                     # fall back to buildoor_params.image at launch time.
                     image=instance.get("image", None),
@@ -2683,7 +2685,7 @@ def enrich_buildoor_per_participant(parsed_arguments_dict):
     num_participants = len(participants)
     for instance in parsed_arguments_dict["buildoor_params"]["instances"]:
         index = instance["participant"] - 1
-        count = instance["count"]
+        count = instance.get("count", 1)
         participant = participants[index]
         index_str = shared_utils.zfill_custom(index + 1, len(str(num_participants)))
         # The CL has a single external-builder endpoint, so it is wired to the
