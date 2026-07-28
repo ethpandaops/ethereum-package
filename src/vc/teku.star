@@ -96,6 +96,7 @@ def get_config(
     if distributed:
         cmd.append("--Xobol-dvt-integration-enabled=true")
         cmd.append("--validators-builder-registration-default-enabled=true")
+        cmd.append("--Xvalidator-client-beacon-api-executor-threads=50")
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
