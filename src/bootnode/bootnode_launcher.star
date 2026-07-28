@@ -11,6 +11,70 @@ shared_utils = import_module("../shared_utils/shared_utils.star")
 
 SERVICE_NAME = "bootnode"
 
+# Fixed identity for the devp2p bootnode (deterministic ENR across runs; devnet-only).
+DEVP2P_NODEKEY = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+DEVP2P_DISCOVERY_PORT = 30303
+
+
+# Launch a pure discv5 bootnode using go-ethereum's `devp2p discv5 listen` (no chain,
+# RLPx, RPC or txpool — just discv5). Needs an alltools image (e.g.
+# ethereum/client-go:alltools-latest) set as bootnode_params.image. It has no RPC to
+# query, so its ENR/enode are COMPUTED in-container with `devp2p key to-enr/to-enode`
+# from the fixed nodekey + the container's own IP. Returns (enode, enr).
+def _launch_devp2p_bootnode(plan, bootnode_params, node_selectors, tolerations):
+    config = ServiceConfig(
+        image=bootnode_params.image,
+        ports={
+            constants.UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                DEVP2P_DISCOVERY_PORT,
+                shared_utils.UDP_PROTOCOL,
+            ),
+        },
+        entrypoint=["devp2p"],
+        cmd=[
+            "discv5",
+            "listen",
+            "--nodekey",
+            DEVP2P_NODEKEY,
+            # Explicit empty bootnodes: suppress devp2p's DEFAULT (public mainnet)
+            # bootnodes, so the table isn't polluted with public nodes.
+            "--bootnodes",
+            "",
+            "--addr",
+            "0.0.0.0:{0}".format(DEVP2P_DISCOVERY_PORT),
+            "--extaddr",
+            "{0}:{1}".format(
+                constants.PRIVATE_IP_ADDRESS_PLACEHOLDER, DEVP2P_DISCOVERY_PORT
+            ),
+        ],
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        node_selectors=node_selectors,
+        tolerations=tolerations,
+    )
+    plan.add_service(SERVICE_NAME, config)
+
+    enr = _devp2p_record(plan, "to-enr")
+    enode = _devp2p_record(plan, "to-enode")
+    plan.print("Bootnode (devp2p) ENR: {0}".format(enr))
+    return enode, enr
+
+
+def _devp2p_record(plan, subcmd):
+    # Compute the running node's enode/ENR from the same nodekey + its own IP.
+    result = plan.exec(
+        service_name=SERVICE_NAME,
+        recipe=ExecRecipe(
+            command=[
+                "sh",
+                "-c",
+                "echo -n {key} > /tmp/nk && devp2p key {sub} --ip $(hostname -i | cut -d' ' -f1) --udp {port} --tcp 0 /tmp/nk | tr -d '\\n'".format(
+                    key=DEVP2P_NODEKEY, sub=subcmd, port=DEVP2P_DISCOVERY_PORT
+                ),
+            ],
+        ),
+    )
+    return result["output"]
+
 
 # Launch a standalone EL node whose ONLY job is to be the network's discv5 bootnode.
 # It has no CL (nothing drives it past genesis) and no validators. With a discovery-only
@@ -34,6 +98,17 @@ def launch_bootnode(
     global_node_selectors,
     global_tolerations,
 ):
+    node_selectors = input_parser.get_client_node_selectors(
+        {}, global_node_selectors
+    )
+    tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
+    # Pure discv5 bootnode via go-ethereum's devp2p tool (no chain/RLPx/RPC).
+    if bootnode_params.backend == "devp2p":
+        return _launch_devp2p_bootnode(
+            plan, bootnode_params, node_selectors, tolerations
+        )
+
     el_bootnode_launchers = {
         constants.EL_TYPE.geth: {
             "launcher": geth.new_geth_launcher(el_cl_genesis_data, jwt_file, network_id),
