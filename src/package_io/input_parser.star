@@ -97,6 +97,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "buildoor_params",
     "ethereum_genesis_generator_params",
     "trueblocks_params",
+    "bootnode_params",
 )
 
 
@@ -120,6 +121,7 @@ def input_parser(plan, input_args):
     # add default eth2 input params
     result["blockscout_params"] = get_default_blockscout_params()
     result["dora_params"] = get_default_dora_params()
+    result["bootnode_params"] = get_default_bootnode_params()
     result["checkpointz_params"] = get_default_checkpointz_params()
     result["docker_cache_params"] = get_default_docker_cache_params()
     result["mev_params"] = get_default_mev_params(
@@ -181,6 +183,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["dora_params"]:
                 sub_value = input_args["dora_params"][sub_attr]
                 result["dora_params"][sub_attr] = sub_value
+        elif attr == "bootnode_params":
+            for sub_attr in input_args["bootnode_params"]:
+                sub_value = input_args["bootnode_params"][sub_attr]
+                result["bootnode_params"][sub_attr] = sub_value
         elif attr == "docker_cache_params":
             for sub_attr in input_args["docker_cache_params"]:
                 sub_value = input_args["docker_cache_params"][sub_attr]
@@ -1074,6 +1080,12 @@ def input_parser(plan, input_args):
         dora_params=struct(
             image=result["dora_params"]["image"],
             env=result["dora_params"]["env"],
+        ),
+        bootnode_params=struct(
+            backend=result["bootnode_params"]["backend"],
+            image=result["bootnode_params"]["image"],
+            extra_params=result["bootnode_params"]["extra_params"],
+            record=result["bootnode_params"]["record"],
         ),
         docker_cache_params=struct(
             enabled=result["docker_cache_params"]["enabled"],
@@ -2166,6 +2178,21 @@ def get_default_dora_params():
     return {
         "image": constants.DEFAULT_DORA_IMAGE,
         "env": {},
+    }
+
+
+def get_default_bootnode_params():
+    # Config for the standalone discv5 bootnode (enabled via
+    # `additional_services: [bootnode]`). It seeds both the EL and CL overlays.
+    # `backend` selects the implementation (default geth; an EL client type or a tool).
+    # `extra_params` are backend-specific — the defaults below make geth discovery-only
+    # (no RLPx peers, discv4 off, discv5 on). `record` is the GLOBAL form handed to EL
+    # clients: "enr" (works for geth/nethermind/ethrex/erigon) or "enode" (all but erigon).
+    return {
+        "backend": "geth",
+        "image": "",
+        "extra_params": ["--discovery.v4=false", "--maxpeers=0"],
+        "record": "enr",
     }
 
 
