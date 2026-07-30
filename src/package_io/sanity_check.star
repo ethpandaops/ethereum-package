@@ -456,6 +456,7 @@ SUBCATEGORY_PARAMS = {
         "max_cpu",
         "min_mem",
         "max_mem",
+        "separate_keys",
         "extra_args",
     ],
     "zkboost_params": [

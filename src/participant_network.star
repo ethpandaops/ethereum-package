@@ -172,6 +172,10 @@ def launch_participant_network(
             global_node_selectors,
             global_tolerations,
             args_with_right_defaults.docker_cache_params,
+            args_with_right_defaults.port_publisher,
+            # Index past the remaining additional services so public ports don't collide
+            len(args_with_right_defaults.additional_services),
+            backend,
         )
         plan.print("Bootnodoor launched with ENR: {0}".format(bootnodoor_enr))
         plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
