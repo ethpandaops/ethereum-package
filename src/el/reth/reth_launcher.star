@@ -207,6 +207,7 @@ def get_config(
             "--authrpc.addr=0.0.0.0",
             "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
             "--discovery.port={0}".format(discovery_port_udp),
+            "--discovery.v5.port={0}".format(discovery_port_udp),
             "--port={0}".format(discovery_port_tcp),
             "--disable-discv4-discovery",
         ]
