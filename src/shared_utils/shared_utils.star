@@ -164,6 +164,18 @@ def get_devnet_el_enrs(plan, filename):
     return enr_list.output
 
 
+def get_devnet_el_bootnodes(plan, filename):
+    # EL ENRs (discv5) plus enodes (discv4) in one list, for consumers like
+    # bootnodoor that bridge both protocols; either file may be absent
+    bootnode_list = plan.run_sh(
+        description="Getting devnet EL bootnodes (enrs + enodes)",
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        run="cat /network-configs/el_enrs.txt /network-configs/enodes.txt 2>/dev/null | grep -v '^[[:space:]]*$' | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+    )
+    return bootnode_list.output
+
+
 def get_devnet_enrs_list(plan, filename):
     enr_list = plan.run_sh(
         description="Creating devnet enrs list",

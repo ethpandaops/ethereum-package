@@ -44,7 +44,8 @@ def launch_bootnodoor(
 
     # Fetch external bootnodes for non-kurtosis networks
     # For kurtosis/shadowfork: bootnodoor is the primary bootnode, no external bootnodes needed
-    # For ephemery/devnets: read bootstrap_nodes.txt (CL ENRs) and enodes.txt (EL) from genesis data
+    # For ephemery/devnets: read bootstrap_nodes.txt (CL ENRs) plus el_enrs.txt and
+    # enodes.txt (EL discv5 + discv4) from genesis data
     external_cl_bootnodes = None
     external_el_bootnodes = None
     if network_params.network == constants.NETWORK_NAME.ephemery or (
@@ -60,7 +61,7 @@ def launch_bootnodoor(
         external_cl_bootnodes = shared_utils.get_devnet_enrs_list(
             plan, el_cl_genesis_data.files_artifact_uuid
         )
-        external_el_bootnodes = shared_utils.get_devnet_enodes(
+        external_el_bootnodes = shared_utils.get_devnet_el_bootnodes(
             plan, el_cl_genesis_data.files_artifact_uuid
         )
 
