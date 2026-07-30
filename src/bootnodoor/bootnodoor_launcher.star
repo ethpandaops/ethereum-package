@@ -111,7 +111,22 @@ def launch_bootnodoor(
 
     bootnodoor_enode = enode_response["body"]
 
-    return bootnodoor_enr, bootnodoor_enode
+    # Request the EL ENR for discv5-only EL clients
+    # /el-enr strips the CL-only "eth2" field, which some EL clients reject; with
+    # separate_keys it is a different identity than the CL ENR altogether
+    el_enr_recipe = GetHttpRequestRecipe(
+        endpoint="/el-enr",
+        port_id=constants.HTTP_PORT_ID,
+    )
+
+    el_enr_response = plan.request(
+        recipe=el_enr_recipe,
+        service_name=SERVICE_NAME,
+    )
+
+    bootnodoor_el_enr = el_enr_response["body"]
+
+    return bootnodoor_enr, bootnodoor_enode, bootnodoor_el_enr
 
 
 def get_config(

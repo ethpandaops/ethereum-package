@@ -59,7 +59,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
     otel_otlp_grpc_url=None,
 ):
@@ -80,7 +80,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
-        bootnodoor_enode,
+        bootnodoor_el_enr,
         el_binary_artifact,
         otel_otlp_grpc_url,
     )
@@ -112,7 +112,7 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
     otel_otlp_grpc_url=None,
 ):
@@ -178,9 +178,9 @@ def get_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--nat.extip=" + port_publisher.el_nat_exit_ip,
     ]
-    # Handle bootnode configuration with bootnodoor_enode override
-    if bootnodoor_enode != None:
-        cmd.append("--bootnodes=" + bootnodoor_enode)
+    # Handle bootnode configuration with bootnodoor_el_enr override
+    if bootnodoor_el_enr != None:
+        cmd.append("--bootnodes=" + bootnodoor_el_enr)
     elif network_params.network == constants.NETWORK_NAME.kurtosis:
         el_bootnode_enrs = [
             ctx.enr
