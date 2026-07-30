@@ -171,6 +171,8 @@ def get_config(
         "--authrpc.addr=0.0.0.0",
         "--p2p.port={0}".format(discovery_port_tcp),
         "--discovery.port={0}".format(discovery_port_udp),
+        "--p2p.discv4=false",
+        "--p2p.discv5=true",
         "--metrics",
         "--metrics.addr=0.0.0.0",
         "--metrics.port={0}".format(METRICS_PORT_NUM),
@@ -180,23 +182,20 @@ def get_config(
     if bootnodoor_enode != None:
         cmd.append("--bootnodes=" + bootnodoor_enode)
     elif network_params.network == constants.NETWORK_NAME.kurtosis:
-        if len(existing_el_clients) > 0:
-            cmd.append(
-                "--bootnodes="
-                + ",".join(
-                    [
-                        ctx.enode
-                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                    ]
-                )
-            )
+        el_bootnode_enrs = [
+            ctx.enr
+            for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+            if ctx.enr
+        ]
+        if len(el_bootnode_enrs) > 0:
+            cmd.append("--bootnodes=" + ",".join(el_bootnode_enrs))
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
-            + shared_utils.get_devnet_enodes(
+            + shared_utils.get_devnet_el_enrs(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
         )

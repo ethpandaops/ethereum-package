@@ -154,6 +154,16 @@ def get_devnet_enodes(plan, filename):
     return enode_list.output
 
 
+def get_devnet_el_enrs(plan, filename):
+    enr_list = plan.run_sh(
+        description="Getting devnet EL enrs",
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        run="grep -v '^[[:space:]]*$' /network-configs/el_enrs.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+    )
+    return enr_list.output
+
+
 def get_devnet_enrs_list(plan, filename):
     enr_list = plan.run_sh(
         description="Creating devnet enrs list",
