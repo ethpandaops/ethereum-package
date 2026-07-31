@@ -10,7 +10,7 @@ Specifically, this [package][package-reference] will:
 
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
 2. Configure & bootstrap a network of Ethereum nodes of *n* size using the genesis data generated above
-3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
+3. Spin up a [transaction spammer](https://github.com/ethpandaops/spamoor) to send fake transactions to the network
 4. Spin up a Grafana and Prometheus instance to observe the network
 5. Spin up a Blobscan instance to analyze blob transactions (EIP-4844)
 
@@ -1070,11 +1070,9 @@ additional_services:
   - assertoor
   - blobscan
   - blockscout
-  - blutgang
   - bootnodoor
   - broadcaster
   - checkpointz
-  - custom_flood
   - dora
   - disruptoor
   - dugtrio
@@ -1082,7 +1080,6 @@ additional_services:
   - zkboost
   - forkmon
   - forky
-  - full_beaconchain_explorer
   - grafana
   - mempool_bridge
   - nginx
@@ -1094,7 +1091,6 @@ additional_services:
   - tempo
   - tracoor
   - trueblocks
-  - tx_fuzz
 
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
 blockscout_params:
@@ -1159,14 +1155,6 @@ extra_files: {}
   # my_script.sh: |
   #   #!/bin/bash
   #   echo "Custom script"
-
-# Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
-tx_fuzz_params:
-  # TX Spammer docker image to use
-  # Defaults to the latest master image
-  image: "ethpandaops/tx-fuzz:master"
-  # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
-  tx_fuzz_extra_args: []
 
 # Configuration place for rakoon transaction fuzzer - https://github.com/protocol-security/fuzztools
 rakoon_params:
@@ -2101,7 +2089,7 @@ network_params:
 </details>
 
 <details>
-    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper)</summary>
+    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, spamoor, EngineAPI snooper)</summary>
 
 ```yaml
 participants:
@@ -2113,7 +2101,7 @@ snooper_params:
 additional_services:
   - prometheus
   - grafana
-  - tx_fuzz
+  - spamoor
 ethereum_metrics_exporter_enabled: true
 ```
 
@@ -2299,10 +2287,7 @@ Here's a table of where the keys are used
 | Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                     |
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
-| 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
-| 3             | tx_fuzz | ✅                |                 | To spam transactions with  |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
-| 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
 | 13            | spamoor             | ✅                |                 | Spams transactions         |
 | 14            | rakoon              | ✅                |                 | Protocol fuzzing           |

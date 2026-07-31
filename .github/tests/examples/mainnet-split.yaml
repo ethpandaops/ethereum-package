@@ -49,7 +49,6 @@ mev_type: flashbots
 additional_services:
   - dora
   - spamoor
-  - tx_fuzz
   - assertoor
 
 global_log_level: debug
