@@ -22,4 +22,5 @@ dora_params:
   image: ethpandaops/dora:eip7928-support
 additional_services:
   - dora
+  - tx_fuzz
   - spamoor
