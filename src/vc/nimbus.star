@@ -81,6 +81,13 @@ def get_config(
     if distributed:
         cmd.append("--distributed")
         cmd.append("--payload-builder=true")
+        # Disable doppelganger detection for distributed (Charon) validators. A
+        # Charon cluster legitimately shares the same validator pubkeys across
+        # all nodes (threshold signing), so each Nimbus VC sees "its" validators
+        # already attesting on the network and would self-terminate at the epoch
+        # boundary (FATAL, exit 127), taking down the whole DV. Standalone
+        # (non-distributed) Nimbus VCs keep doppelganger detection enabled.
+        cmd.append("--doppelganger-detection=false")
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
