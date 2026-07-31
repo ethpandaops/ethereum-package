@@ -55,6 +55,7 @@ buildoor = import_module("./src/mev/buildoor/buildoor_launcher.star")
 mev_custom_flood = import_module(
     "./src/mev/flashbots/mev_custom_flood/mev_custom_flood_launcher.star"
 )
+bootnodoor = import_module("./src/bootnodoor/bootnodoor_launcher.star")
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
 mempool_bridge = import_module("./src/mempool_bridge/mempool_bridge_launcher.star")
 assertoor = import_module("./src/assertoor/assertoor_launcher.star")
@@ -522,6 +523,8 @@ def run(plan, args={}):
             num_participants, network_params
         )
     )
+    # launch_participant_network removes bootnodoor from additional_services, so check first
+    bootnodoor_enabled = "bootnodoor" in args_with_right_defaults.additional_services
     (
         all_participants,
         final_genesis_timestamp,
@@ -548,6 +551,9 @@ def run(plan, args={}):
         otel_otlp_http_traces_url,
         detected_backend,
     )
+
+    if bootnodoor_enabled:
+        prometheus_additional_metrics_jobs.append(bootnodoor.get_metrics_job())
 
     for p in all_participants:
         if p.el_context != None:

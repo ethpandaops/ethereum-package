@@ -1273,6 +1273,7 @@ def input_parser(plan, input_args):
             max_cpu=result["bootnodoor_params"]["max_cpu"],
             min_mem=result["bootnodoor_params"]["min_mem"],
             max_mem=result["bootnodoor_params"]["max_mem"],
+            separate_keys=result["bootnodoor_params"]["separate_keys"],
             extra_args=result["bootnodoor_params"]["extra_args"],
         ),
         zkboost_params=struct(
@@ -2497,6 +2498,7 @@ def get_default_bootnodoor_params():
         "max_cpu": 1000,
         "min_mem": 128,
         "max_mem": 512,
+        "separate_keys": False,
         "extra_args": [],
     }
 
