@@ -12,13 +12,11 @@ participants:
   - el_type: ethrex
     cl_type: teku
 additional_services:
-  - tx_fuzz
   - forkmon
   - dora
   - checkpointz
   - prometheus
   - grafana
-  - custom_flood
   - blockscout
   - dugtrio
   - erpc
