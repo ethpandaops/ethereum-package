@@ -20,6 +20,7 @@ participants:
 network_params:
   preset: minimal
 additional_services:
+  - tx_fuzz
   - forkmon
   - dora
   - checkpointz

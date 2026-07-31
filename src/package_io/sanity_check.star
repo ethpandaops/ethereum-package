@@ -312,6 +312,10 @@ SUBCATEGORY_PARAMS = {
         "github_prefix",
         "google_prefix",
     ],
+    "tx_fuzz_params": [
+        "image",
+        "tx_fuzz_extra_args",
+    ],
     "rakoon_params": [
         "image",
         "tx_type",
@@ -482,6 +486,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "bootnodoor",
     "assertoor",
     "broadcaster",
+    "tx_fuzz",
     "forkmon",
     "blockscout",
     "dora",

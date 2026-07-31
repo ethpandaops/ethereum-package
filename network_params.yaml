@@ -154,6 +154,8 @@ network_params:
 additional_services: []
 dora_params:
   image: "ethpandaops/dora:latest"
+tx_fuzz_params:
+  tx_fuzz_extra_args: []
 spamoor_params:
   min_cpu: 100
   max_cpu: 1000

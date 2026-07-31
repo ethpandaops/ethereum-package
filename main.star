@@ -11,6 +11,7 @@ validator_ranges = import_module(
     "./src/prelaunch_data_generator/validator_keystores/validator_ranges_generator.star"
 )
 
+tx_fuzz = import_module("./src/tx_fuzz/tx_fuzz.star")
 rakoon = import_module("./src/rakoon/rakoon.star")
 forkmon = import_module("./src/forkmon/forkmon_launcher.star")
 
@@ -1015,7 +1016,19 @@ def run(plan, args={}):
     for index, additional_service in enumerate(
         args_with_right_defaults.additional_services
     ):
-        if additional_service == "rakoon":
+        if additional_service == "tx_fuzz":
+            plan.print("Launching tx-fuzz")
+            tx_fuzz_params = args_with_right_defaults.tx_fuzz_params
+            tx_fuzz.launch_tx_fuzz(
+                plan,
+                prefunded_accounts,
+                fuzz_target,
+                tx_fuzz_params,
+                global_node_selectors,
+                global_tolerations,
+            )
+            plan.print("Successfully launched tx-fuzz")
+        elif additional_service == "rakoon":
             plan.print("Launching rakoon transaction fuzzer")
             rakoon_params = args_with_right_defaults.rakoon_params
             rakoon.launch_rakoon(

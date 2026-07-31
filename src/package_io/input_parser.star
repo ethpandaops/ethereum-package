@@ -82,6 +82,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "prometheus_params",
     "grafana_params",
     "tempo_params",
+    "tx_fuzz_params",
     "rakoon_params",
     "xatu_sentry_params",
     "port_publisher",
@@ -130,6 +131,7 @@ def input_parser(plan, input_args):
         result["additional_services"] = DEFAULT_ADDITIONAL_SERVICES
     else:
         result["additional_services"] = []
+    result["tx_fuzz_params"] = get_default_tx_fuzz_params()
     result["rakoon_params"] = get_default_rakoon_params()
     result["disable_peer_scoring"] = False
     result["grafana_params"] = get_default_grafana_params()
@@ -185,6 +187,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
                 result["mev_params"][sub_attr] = sub_value
+        elif attr == "tx_fuzz_params":
+            for sub_attr in input_args["tx_fuzz_params"]:
+                sub_value = input_args["tx_fuzz_params"][sub_attr]
+                result["tx_fuzz_params"][sub_attr] = sub_value
         elif attr == "rakoon_params":
             for sub_attr in input_args["rakoon_params"]:
                 sub_value = input_args["rakoon_params"][sub_attr]
@@ -1071,6 +1077,10 @@ def input_parser(plan, input_args):
             dockerhub_prefix=result["docker_cache_params"]["dockerhub_prefix"],
             github_prefix=result["docker_cache_params"]["github_prefix"],
             google_prefix=result["docker_cache_params"]["google_prefix"],
+        ),
+        tx_fuzz_params=struct(
+            image=result["tx_fuzz_params"]["image"],
+            tx_fuzz_extra_args=result["tx_fuzz_params"]["tx_fuzz_extra_args"],
         ),
         rakoon_params=struct(
             image=result["rakoon_params"]["image"],
@@ -2280,6 +2290,13 @@ def get_default_mev_params(mev_type, preset):
     }
 
 
+def get_default_tx_fuzz_params():
+    return {
+        "image": "ethpandaops/tx-fuzz:master",
+        "tx_fuzz_extra_args": [],
+    }
+
+
 def get_default_rakoon_params():
     return {
         "image": "ethpandaops/fuzztools:main",
@@ -2822,6 +2839,7 @@ def docker_cache_image_override(plan, result):
         "mev_params.mev_boost_image",
         "mev_params.mock_mev_image",
         "xatu_sentry_params.xatu_sentry_image",
+        "tx_fuzz_params.image",
         "rakoon_params.image",
         "prometheus_params.image",
         "grafana_params.image",
