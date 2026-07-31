@@ -380,7 +380,7 @@ participants:
     # Defaults by client:
     # - lighthouse: ethpandaops/lighthouse:unstable
     # - teku: ethpandaops/teku:master
-    # - nimbus: statusim/nimbus-eth2:multiarch-latest
+    # - nimbus: ethpandaops/nimbus-eth2:unstable
     # - prysm: ethpandaops/prysm-beacon-chain:develop
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
@@ -485,7 +485,7 @@ participants:
     # Defaults by client:
     # - lighthouse: sigp/lighthouse:latest
     # - lodestar: chainsafe/lodestar:latest
-    # - nimbus: statusim/nimbus-validator-client:multiarch-latest
+    # - nimbus: ethpandaops/nimbus-validator-client:unstable
     # - prysm: ethpandaops/prysm-validator:develop
     # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
@@ -656,6 +656,9 @@ participants:
       # Additional labels to be added. Default to empty
       labels: {}
 
+    # Buildoor (a self-contained block builder) is configured independently of the
+    # participants via `buildoor_params.instances` (see below), not per participant.
+
     # Blobber can be enabled with the `blobber_enabled` flag per client or globally
     # Defaults to false
     blobber_enabled: false
@@ -696,8 +699,9 @@ participants:
     # Defaults to false
     skip_start: false
 
-# Participants matrix creates a participant for each combination of EL, CL and VC clients
-# Each EL/CL/VC item can provide the same parameters as a standard participant
+# Participants matrix creates a participant for each combination of EL, CL, VC
+# and remote signer clients.
+# Each el/cl/vc/remote_signer item can provide the same parameters as a standard participant.
 participants_matrix: {}
   # el:
   #   - el_type: geth
@@ -708,6 +712,11 @@ participants_matrix: {}
   # vc:
   #   - vc_type: prysm
   #   - vc_type: lighthouse
+  # remote_signer:
+  #   - remote_signer_type: web3signer
+  #     remote_signer_image: consensys/web3signer:develop
+  # Defining a remote_signer entry enables it automatically.
+  # NOTE: a remote signer requires `use_separate_vc: true` on the matching cl item.
 
 
 # Default configuration parameters for the network
@@ -751,8 +760,8 @@ network_params:
   contribution_due_bps_gloas: 5000
 
   # Payload availability deadline for Gloas fork
-  # Defaults to 7500 basis points (75% of slot duration)
-  payload_due_bps: 7500
+  # Defaults to 5000 basis points (50% of slot duration)
+  payload_due_bps: 5000
 
   # Payload attestation due timing for Gloas fork
   # Defaults to 7500 basis points (75% of slot duration)
@@ -858,8 +867,13 @@ network_params:
   min_validator_withdrawability_delay: 256
 
   # The minimum number of epochs for builder withdrawability delay
-  # Defaults to 8192, 2 for minimal preset
-  min_builder_withdrawability_delay: 8192
+  # Defaults to 64, 2 for minimal preset
+  min_builder_withdrawability_delay: 64
+
+  # Whether to include the EIP-8282 builder deposit/exit predeploys in genesis
+  # when Gloas is scheduled (requires ethereum-genesis-generator >= 6.1.3)
+  # Defaults to true
+  deploy_eip8282_contracts: true
 
   # The period of the shard committee
   # Defaults to 256 epoch ~27 hours
@@ -1038,7 +1052,7 @@ network_params:
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
-  # Number of ePBS builders to register at genesis with 0x03 withdrawal credentials
+  # Number of ePBS builders to register at genesis with 0xB0 withdrawal credentials
   # Requires gloas_fork_epoch to be 0 (GLOAS at genesis)
   # Default to 0
   builder_count: 0
@@ -1179,7 +1193,13 @@ prometheus_params:
 
 # Configuration place for grafana
 grafana_params:
-  # A list of locators for grafana dashboards to be loaded be the grafana service
+  # A list of locators for grafana dashboards to be loaded by the grafana service.
+  # Each entry must be a Kurtosis locator: a GitHub locator (e.g.
+  # "github.com/<org>/<repo>/path/to/dashboards") or an absolute http(s) URL.
+  # When inheriting this package from your own, a local/relative path will NOT
+  # work: upload_files runs inside the ethereum-package and resolves relative
+  # paths against it, not against your package. Use a github.com/... locator
+  # pointing at your own repo instead.
   additional_dashboards: []
   # Resource management for grafana container
   # CPU is milicores
@@ -1228,7 +1248,7 @@ zkboost_params:
   #     "ere"      - launches a GPU ere-server and connects to it
   #     "external" - connects to an already-deployed prover via HTTP
   #   proof_type (required): identifies the EL client + zkVM combination
-  #     "ethrex-risc0", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-risc0", "reth-sp1", "reth-zisk"
+  #     "ethrex-openvm", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-sp1", "reth-zisk"
   #   proof_timeout_secs: timeout for proof generation in seconds (default: 3/4 of slot duration, must be > 0)
   #
   # Mock-specific fields (only for kind: mock):
@@ -1294,7 +1314,7 @@ zkboost_params:
   # - kind: ere
   #   proof_type: reth-zisk
   #   image: "ghcr.io/eth-act/ere/ere-server-zisk:latest"
-  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.8.0/stateless-validator-reth-zisk.elf"
+  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.13.0/stateless-validator-reth-zisk.elf"
   #   gpu:
   #     count: 1
   #     driver: "nvidia"
@@ -1490,6 +1510,8 @@ mempool_bridge_params:
 #            Note: Helix uses TimescaleDB (PostgreSQL with time-series extension) for data storage
 # "buildoor" - a self-contained builder+relay service & mev-boost are spun up, powered by [buildoor](https://github.com/ethpandaops/buildoor)
 #              Supports both legacy builder API and ePBS bidding. No separate relay infrastructure or builder participant needed.
+#              DEPRECATED: this single shared-builder mode will be dropped after the gloas fork. Use
+#              `buildoor_params.instances` for dedicated per-participant builders instead.
 # We have seen instances of multibuilder instances failing to start mev-relay-api with non zero epochs
 mev_type: null
 
@@ -1559,7 +1581,10 @@ mev_params:
   #     level = "debug"
   commit_boost_config: ""
 
-# Parameters for the buildoor builder+relay service (used when mev_type is "buildoor")
+# Parameters for the buildoor builder service.
+# buildoor is an additional_service: add "buildoor" to additional_services to spin
+# it up, then configure its targeting here. With "buildoor" enabled and no
+# instances set, a single builder is wired to the first participant by default.
 buildoor_params:
   # The image to use for buildoor
   image: ethpandaops/buildoor:main
@@ -1569,6 +1594,34 @@ buildoor_params:
   epbs_builder: true
   # Extra parameters to pass to the buildoor service
   extra_args: []
+  # Enable buildoor's builder lifecycle: each builder deposits/onboards itself
+  # after genesis (and tops itself up) via the EL, so builders work even when
+  # gloas is not at genesis. Built blocks are tagged with the instance's service
+  # name in their extra-data so they can be traced back to the builder.
+  # Defaults to true
+  lifecycle: true
+  # Dedicated per-participant buildoor builders, configured independently of the
+  # participants (a builder is independent of the network: it reads one
+  # participant's CL payload_attributes stream and, under ePBS, gossips bids to
+  # the whole network). Each entry spins up `count` buildoor builder instances
+  # (optional, defaults to 1) wired to the named participant's CL/EL. Services
+  # are named `buildoor-<cl>-<el>-<participant>` (with a `-<n>` suffix when
+  # count > 1).
+  # Requires "buildoor" in additional_services; no `mev_type` is needed, and it
+  # cannot be combined with the (deprecated) network-wide `mev_type: buildoor`.
+  # Each instance is its own builder; with lifecycle enabled (default) it onboards
+  # itself after genesis, so genesis builder registration is not required and gloas
+  # may activate at any epoch.
+  # Each entry may set an optional `image` to override buildoor_params.image for
+  # just that instance (A/B testing).
+  # Defaults to [] (no per-participant buildoors).
+  # Example:
+  # instances:
+  #   - participant: 1   # 1-based participant index (count defaults to 1)
+  #   - participant: 3
+  #     count: 2
+  #     image: ethpandaops/buildoor:my-fix   # per-instance override (optional)
+  instances: []
 
 # Enables Xatu Sentry for all participants
 # Defaults to false
@@ -1741,7 +1794,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.0.8
+  image: ethpandaops/ethereum-genesis-generator:6.1.4
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
@@ -1953,14 +2006,44 @@ network_params:
 </details>
 
 <details>
-    <summary>A 2-node Ethereum network with buildoor (self-contained builder+relay)</summary>
+    <summary>A 2-node Ethereum network with dedicated per-participant buildoor builders</summary>
+
+```yaml
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: reth
+    cl_type: prysm
+buildoor_params:
+  builder_api: true
+  epbs_builder: true
+  # one buildoor wired to participant 1, two wired to participant 2
+  instances:
+    - participant: 1
+      count: 1
+    - participant: 2
+      count: 2
+additional_services:
+  - buildoor
+  - dora
+  - spamoor
+```
+
+</details>
+
+<details>
+    <summary>A 2-node Ethereum network with the (deprecated) shared buildoor builder</summary>
 
 ```yaml
 participants:
   - el_type: geth
     cl_type: lighthouse
     count: 2
+# Deprecated: prefer buildoor_params.instances (see example above).
 mev_type: buildoor
+network_params:
+  builder_count: 1
+  gloas_fork_epoch: 0
 buildoor_params:
   builder_api: true
   epbs_builder: true
@@ -2175,7 +2258,7 @@ The package also supports other MEV implementations:
 - `"mev_type": "helix"` - Uses the high-performance [Helix relay](https://github.com/gattaca-com/helix) with TimescaleDB backend for data storage
 - `"mev_type": "mev-rs"` - Alternative relay implementation powered by [mev-rs](https://github.com/ralexstokes/mev-rs/)
 - `"mev_type": "commit-boost"` - Infrastructure powered by [commit-boost](https://github.com/Commit-Boost/commit-boost-client)
-- `"mev_type": "buildoor"` - A self-contained builder+relay service powered by [buildoor](https://github.com/ethpandaops/buildoor). Supports both legacy builder API and ePBS bidding without requiring separate relay infrastructure or a dedicated builder participant.
+- `"mev_type": "buildoor"` - A self-contained builder+relay service powered by [buildoor](https://github.com/ethpandaops/buildoor). Supports both legacy builder API and ePBS bidding without requiring separate relay infrastructure or a dedicated builder participant. **Deprecated:** this single shared-builder mode will be dropped after the gloas fork - use `buildoor_params.instances` for dedicated per-participant builders instead.
 
 Each implementation provides different features and performance characteristics suitable for various testing and development scenarios.
 

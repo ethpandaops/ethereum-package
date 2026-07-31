@@ -233,6 +233,7 @@ SUBCATEGORY_PARAMS = {
         "eth1_follow_distance",
         "min_validator_withdrawability_delay",
         "min_builder_withdrawability_delay",
+        "deploy_eip8282_contracts",
         "shard_committee_period",
         "attestation_due_bps_gloas",
         "aggregate_due_bps_gloas",
@@ -463,6 +464,8 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "builder_api",
         "epbs_builder",
+        "lifecycle",
+        "instances",
     ],
     "trueblocks_params": [
         "image",
@@ -501,6 +504,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "zkboost",
     "trueblocks",
     "otel",
+    "buildoor",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
