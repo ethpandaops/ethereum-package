@@ -83,6 +83,7 @@ After the Ethereum network is up and running, this package starts several auxili
 - [Prometheus](https://github.com/ethpandaops/ethereum-package/tree/main/src/prometheus) for collecting client node metrics
 - [Grafana](https://github.com/ethpandaops/ethereum-package/tree/main/src/grafana) for visualizing client node metrics
 - [An ETH transaction spammer](https://github.com/ethpandaops/spamoor) ([spamoor](https://github.com/ethpandaops/ethereum-package/tree/main/src/spamoor)) for generating transaction load on the network
+- [tx-fuzz](https://github.com/ethpandaops/ethereum-package/tree/main/src/tx_fuzz), a transaction fuzzer based on [Marius' transaction spammer code](https://github.com/MariusVanDerWijden/tx-fuzz)
 
 ## [Testnet Verifier][testnet-verifier]
 

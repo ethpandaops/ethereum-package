@@ -1091,6 +1091,7 @@ additional_services:
   - tempo
   - tracoor
   - trueblocks
+  - tx_fuzz
 
 # Configuration place for blockscout explorer - https://github.com/blockscout/blockscout
 blockscout_params:
@@ -1155,6 +1156,14 @@ extra_files: {}
   # my_script.sh: |
   #   #!/bin/bash
   #   echo "Custom script"
+
+# Configuration place for transaction spammer - https://github.com/MariusVanDerWijden/tx-fuzz
+tx_fuzz_params:
+  # TX Spammer docker image to use
+  # Defaults to the latest master image
+  image: "ethpandaops/tx-fuzz:master"
+  # A list of optional extra params that will be passed to the TX Spammer container for modifying its behaviour
+  tx_fuzz_extra_args: []
 
 # Configuration place for rakoon transaction fuzzer - https://github.com/protocol-security/fuzztools
 rakoon_params:
@@ -2287,6 +2296,7 @@ Here's a table of where the keys are used
 | Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                     |
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
+| 3             | tx_fuzz | ✅                |                 | To spam transactions with  |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
 | 13            | spamoor             | ✅                |                 | Spams transactions         |

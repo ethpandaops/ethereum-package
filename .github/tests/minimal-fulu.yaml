@@ -37,6 +37,7 @@ participants:
     cl_image: ethpandaops/grandine:develop-minimal
 additional_services:
   - dora
+  - tx_fuzz
   - spamoor
   - assertoor
 

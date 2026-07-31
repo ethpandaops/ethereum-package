@@ -12,6 +12,7 @@ participants:
   - el_type: ethrex
     cl_type: teku
 additional_services:
+  - tx_fuzz
   - forkmon
   - dora
   - checkpointz

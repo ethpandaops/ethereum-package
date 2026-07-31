@@ -35,6 +35,7 @@ port_publisher:
     enabled: true
     public_port_start: 46000
 additional_services:
+  - tx_fuzz
   - forkmon
   - dora
   - checkpointz
