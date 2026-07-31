@@ -305,7 +305,7 @@ def get_el_context(
     service,
     launcher,
 ):
-    enode = el_admin_node_info.get_enode_for_node(
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, constants.RPC_PORT_ID
     )
 
@@ -320,6 +320,7 @@ def get_el_context(
     return el_context.new_el_context(
         client_name="nethermind",
         enode=enode,
+        enr=enr,
         dns_name=service.name,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,
