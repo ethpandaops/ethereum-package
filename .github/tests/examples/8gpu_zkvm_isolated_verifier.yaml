@@ -26,10 +26,10 @@ participants:
     cl_extra_params:
       - --target-peers=3
       - --proof-engine-endpoint=http://zkboost-verifier:3000
-      - --proof-types=6
+      - --proof-types=5
     vc_extra_params:
       - --proof-engine-endpoint=http://zkboost-reth:3000
-      - --proof-types=6
+      - --proof-types=5
     count: 1
 
   # Ethrex full node: requests ethrex-zisk proofs from zkboost-ethrex
@@ -53,7 +53,7 @@ participants:
     cl_extra_params:
       - --target-peers=3
       - --proof-engine-endpoint=http://zkboost-verifier:3000
-      - --proof-types=2,6
+      - --proof-types=2,5
     count: 2
 
 network_params:
@@ -75,7 +75,7 @@ assertoor_params:
     - /tests/zkboost-json-test.yaml
 
 zkboost_params:
-  image: ghcr.io/eth-act/zkboost/zkboost:0.7.0
+  image: ghcr.io/eth-act/zkboost/zkboost:0.9.0
   env:
     RUST_LOG: info,zkboost=debug
   instances:

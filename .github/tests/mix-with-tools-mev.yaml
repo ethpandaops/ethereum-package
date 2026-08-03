@@ -18,7 +18,6 @@ additional_services:
   - checkpointz
   - prometheus
   - grafana
-  - custom_flood
   - blockscout
   - dugtrio
   - erpc

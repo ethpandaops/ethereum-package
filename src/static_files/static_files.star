@@ -24,9 +24,6 @@ DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml
 DUGTRIO_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/dugtrio-config/config.yaml.tmpl"
 )
-BLUTGANG_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/blutgang-config/config.toml.tmpl"
-)
 CHECKPOINTZ_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/checkpointz-config/config.yaml.tmpl"
 )
@@ -34,9 +31,6 @@ ERPC_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/erpc-config/erpc.yaml.t
 FORKY_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/forky-config/config.yaml.tmpl"
 TRACOOR_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/tracoor-config/config.yaml.tmpl"
-)
-FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/full-beaconchain-config/config.yaml.tmpl"
 )
 
 # assertoor config

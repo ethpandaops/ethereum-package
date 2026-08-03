@@ -20,7 +20,7 @@ DEFAULT_EL_IMAGES = {
 DEFAULT_CL_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "teku": "consensys/teku:latest",
-    "nimbus": "statusim/nimbus-eth2:multiarch-latest",
+    "nimbus": "ethpandaops/nimbus-eth2:unstable",
     "prysm": "offchainlabs/prysm-beacon-chain:stable",
     "lodestar": "chainsafe/lodestar:latest",
     "grandine": "sifrai/grandine:stable",
@@ -42,7 +42,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
 DEFAULT_VC_IMAGES = {
     "lighthouse": "sigp/lighthouse:latest",
     "lodestar": "chainsafe/lodestar:latest",
-    "nimbus": "statusim/nimbus-validator-client:multiarch-latest",
+    "nimbus": "ethpandaops/nimbus-validator-client:unstable",
     "prysm": "offchainlabs/prysm-validator:stable",
     "teku": "consensys/teku:latest",
     "grandine": "sifrai/grandine:stable",
@@ -84,7 +84,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "tempo_params",
     "tx_fuzz_params",
     "rakoon_params",
-    "custom_flood_params",
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
@@ -134,7 +133,6 @@ def input_parser(plan, input_args):
         result["additional_services"] = []
     result["tx_fuzz_params"] = get_default_tx_fuzz_params()
     result["rakoon_params"] = get_default_rakoon_params()
-    result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
     result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
@@ -197,10 +195,6 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["rakoon_params"]:
                 sub_value = input_args["rakoon_params"][sub_attr]
                 result["rakoon_params"][sub_attr] = sub_value
-        elif attr == "custom_flood_params":
-            for sub_attr in input_args["custom_flood_params"]:
-                sub_value = input_args["custom_flood_params"][sub_attr]
-                result["custom_flood_params"][sub_attr] = sub_value
         elif attr == "assertoor_params":
             for sub_attr in input_args["assertoor_params"]:
                 sub_value = input_args["assertoor_params"][sub_attr]
@@ -358,11 +352,13 @@ def input_parser(plan, input_args):
                     )
                 )
             seen_buildoor_participants[participant_num] = True
-            if type(instance["count"]) != "int" or instance["count"] < 1:
+            # count is optional and defaults to a single builder per entry.
+            instance_count = instance.get("count", 1)
+            if type(instance_count) != "int" or instance_count < 1:
                 fail(
                     "buildoor_params.instances count for participant {0} must be an integer >= 1, got {1}.".format(
                         participant_num,
-                        instance["count"],
+                        instance_count,
                     )
                 )
             # Optional per-instance image override (A/B testing). When omitted the
@@ -631,11 +627,10 @@ def input_parser(plan, input_args):
 
         # Validate zkvm configurations
         valid_proof_types = [
-            "ethrex-risc0",
+            "ethrex-openvm",
             "ethrex-sp1",
             "ethrex-zisk",
             "reth-openvm",
-            "reth-risc0",
             "reth-sp1",
             "reth-zisk",
         ]
@@ -926,6 +921,9 @@ def input_parser(plan, input_args):
             min_builder_withdrawability_delay=result["network_params"][
                 "min_builder_withdrawability_delay"
             ],
+            deploy_eip8282_contracts=result["network_params"][
+                "deploy_eip8282_contracts"
+            ],
             shard_committee_period=result["network_params"]["shard_committee_period"],
             attestation_due_bps_gloas=result["network_params"][
                 "attestation_due_bps_gloas"
@@ -1139,11 +1137,6 @@ def input_parser(plan, input_args):
             ],
             tests=result["assertoor_params"]["tests"],
         ),
-        custom_flood_params=struct(
-            interval_between_transactions=result["custom_flood_params"][
-                "interval_between_transactions"
-            ],
-        ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
             min_cpu=result["spamoor_params"]["min_cpu"],
@@ -1288,7 +1281,7 @@ def input_parser(plan, input_args):
             instances=[
                 struct(
                     participant=instance["participant"],
-                    count=instance["count"],
+                    count=instance.get("count", 1),
                     # Optional per-instance image override (A/B testing). None =>
                     # fall back to buildoor_params.image at launch time.
                     image=instance.get("image", None),
@@ -1799,7 +1792,7 @@ def parse_network_params(plan, input_args):
             ],
             "start": actual_num_validators,
             "count": result["network_params"]["builder_count"],
-            "wd_prefix": "0x03",
+            "wd_prefix": "0xB0",
             "wd_address": result["network_params"]["withdrawal_address"],
         }
         if result["network_params"]["builder_balance"] > 0:
@@ -1913,13 +1906,14 @@ def default_network_params():
         "ejection_balance": 16000000000,
         "eth1_follow_distance": 2048,
         "min_validator_withdrawability_delay": 256,
-        "min_builder_withdrawability_delay": 8192,
+        "min_builder_withdrawability_delay": 64,
+        "deploy_eip8282_contracts": True,
         "shard_committee_period": 256,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
         "sync_message_due_bps_gloas": 2500,
         "contribution_due_bps_gloas": 5000,
-        "payload_due_bps": 7500,
+        "payload_due_bps": 5000,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
         "inclusion_list_submission_due_bps": 6667,
@@ -1999,12 +1993,13 @@ def default_minimal_network_params():
         "eth1_follow_distance": 16,
         "min_validator_withdrawability_delay": 256,
         "min_builder_withdrawability_delay": 2,
+        "deploy_eip8282_contracts": True,
         "shard_committee_period": 64,
         "attestation_due_bps_gloas": 2500,
         "aggregate_due_bps_gloas": 5000,
         "sync_message_due_bps_gloas": 2500,
         "contribution_due_bps_gloas": 5000,
-        "payload_due_bps": 7500,
+        "payload_due_bps": 5000,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
         "inclusion_list_submission_due_bps": 6667,
@@ -2467,11 +2462,6 @@ def get_default_slashoor_params():
     }
 
 
-def get_default_custom_flood_params():
-    # this is a simple script that increases the balance of the coinbase address at a cadence
-    return {"interval_between_transactions": 1}
-
-
 def get_default_mempool_bridge_params():
     return {
         "image": "ethpandaops/mempool-bridge:latest",
@@ -2679,7 +2669,7 @@ def enrich_buildoor_per_participant(parsed_arguments_dict):
     num_participants = len(participants)
     for instance in parsed_arguments_dict["buildoor_params"]["instances"]:
         index = instance["participant"] - 1
-        count = instance["count"]
+        count = instance.get("count", 1)
         participant = participants[index]
         index_str = shared_utils.zfill_custom(index + 1, len(str(num_participants)))
         # The CL has a single external-builder endpoint, so it is wired to the

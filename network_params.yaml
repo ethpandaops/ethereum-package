@@ -103,11 +103,12 @@ network_params:
   aggregate_due_bps_gloas: 5000
   sync_message_due_bps_gloas: 2500
   contribution_due_bps_gloas: 5000
-  payload_due_bps: 7500
+  payload_due_bps: 5000
   payload_attestation_due_bps: 7500
   view_freeze_cutoff_bps: 7500
   inclusion_list_submission_due_bps: 6667
   proposer_inclusion_list_cutoff_bps: 9167
+  deploy_eip8282_contracts: true
   deneb_fork_epoch: 0
   electra_fork_epoch: 0
   fulu_fork_epoch: 0
@@ -230,8 +231,6 @@ mev_params:
   run_multiple_relays: false
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
   commit_boost_config: ""
-  custom_flood_params:
-    interval_between_transactions: 1
 buildoor_params:
   image: ethpandaops/buildoor:main
   builder_api: true
@@ -269,7 +268,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:6.1.2
+  image: ethpandaops/ethereum-genesis-generator:6.1.4
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
