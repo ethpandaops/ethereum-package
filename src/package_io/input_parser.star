@@ -1739,6 +1739,13 @@ def parse_network_params(plan, input_args):
     if result["network_params"]["seconds_per_slot"] == 0:
         fail("seconds_per_slot is 0 needs to be > 0 ")
 
+    if result["network_params"]["slot_duration_ms"] < 1000:
+        fail(
+            "slot_duration_ms is {0}, it needs to be at least 1000 (sub-second slots are not supported)".format(
+                result["network_params"]["slot_duration_ms"]
+            )
+        )
+
     seconds_per_slot = result["network_params"]["seconds_per_slot"]
     slot_duration_ms = result["network_params"]["slot_duration_ms"]
     preset = result["network_params"]["preset"]
