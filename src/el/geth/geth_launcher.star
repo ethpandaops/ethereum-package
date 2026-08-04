@@ -51,8 +51,9 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -71,8 +72,9 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
-        bootnodoor_enode,
+        bootnodoor_el_enr,
         el_binary_artifact,
+        otel_otlp_grpc_url,
     )
 
     service = plan.add_service(
@@ -102,8 +104,9 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -166,7 +169,7 @@ def get_config(
         ),
         "{0}".format(
             "--override.genesis={0}".format(
-                constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+                constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
             )
             if network_params.network not in constants.PUBLIC_NETWORKS
             else ""
@@ -193,6 +196,7 @@ def get_config(
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full"
         if network_params.network == constants.NETWORK_NAME.kurtosis
+        and not participant.checkpoint_sync_enabled
         and not gcmode_archive
         else "--syncmode=snap"
         if not gcmode_archive
@@ -203,6 +207,8 @@ def get_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
+        "--discovery.v4=false",
+        "--discovery.v5=true",
         "{0}".format(
             "--miner.gasprice=1"
             if network_params.network == constants.NETWORK_NAME.kurtosis
@@ -227,30 +233,36 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"
 
-    # Handle bootnode configuration with bootnodoor_enode override
-    if bootnodoor_enode != None:
-        cmd.append("--bootnodes=" + bootnodoor_enode)
+    # Handle bootnode configuration with bootnodoor_el_enr override
+    if bootnodoor_el_enr != None:
+        cmd.append("--bootnodes=" + bootnodoor_el_enr)
     elif (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
-        cmd.append(
-            "--bootnodes="
-            + ",".join(
-                [
-                    ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
-            )
-        )
+        el_bootnode_enrs = [
+            ctx.enr
+            for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+            if ctx.enr
+        ]
+        if len(el_bootnode_enrs) > 0:
+            cmd.append("--bootnodes=" + ",".join(el_bootnode_enrs))
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
-            + shared_utils.get_devnet_enodes(
+            + shared_utils.get_devnet_el_enrs(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
+            )
+        )
+
+    if otel_otlp_grpc_url != None:
+        cmd.append("--rpc.telemetry")
+        cmd.append(
+            "--rpc.telemetry.endpoint={}".format(
+                otel_otlp_grpc_url.replace("http://", "grpc://")
             )
         )
 
@@ -297,7 +309,11 @@ def get_config(
     else:
         cmd_str = command_str
 
-    env_vars = participant.el_extra_env_vars
+    env_vars = shared_utils.with_otel_env_vars(
+        participant.el_extra_env_vars,
+        otel_otlp_grpc_url,
+        service_name,
+    )
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,

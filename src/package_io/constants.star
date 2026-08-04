@@ -81,6 +81,9 @@ ARCHIVE_MODE = True
 
 GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/network-configs"
 GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+GENESIS_JSON_MOUNT_PATH_ON_CONTAINER = (
+    GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+)
 
 VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
 
@@ -100,6 +103,8 @@ MEV_RS_MEV_TYPE = "mev-rs"
 COMMIT_BOOST_MEV_TYPE = "commit-boost"
 HELIX_MEV_TYPE = "helix"
 BUILDOOR_MEV_TYPE = "buildoor"
+BUILDOOR_SERVICE_NAME = "buildoor"
+BUILDOOR_API_PORT = 8080
 DEFAULT_DORA_IMAGE = "ethpandaops/dora:latest"
 DEFAULT_CHECKPOINTZ_IMAGE = "ethpandaops/checkpointz:latest"
 DEFAULT_SPAMOOR_IMAGE = "ethpandaops/spamoor:latest"
@@ -109,7 +114,7 @@ DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_BOOTNODOOR_IMAGE = "ethpandaops/bootnodoor:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:6.0.7"
+    "ethpandaops/ethereum-genesis-generator:6.1.5"
 )
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"
@@ -120,19 +125,19 @@ DEFAULT_MEV_RS_IMAGE_MINIMAL = "ethpandaops/mev-rs:main-minimal"
 DEFAULT_COMMIT_BOOST_MEV_BOOST_IMAGE = "ghcr.io/commit-boost/pbs:latest"
 DEFAULT_MOCK_MEV_IMAGE = "ethpandaops/rustic-builder:main"
 DEFAULT_BUILDOOR_IMAGE = "ethpandaops/buildoor:main"
+DEFAULT_TRUEBLOCKS_IMAGE = "ethpandaops/trueblocks:v5.9.3"
 DEFAULT_HELIX_RELAY_IMAGE = "ghcr.io/gattaca-com/helix-relay:main"
 DEFAULT_ZKBOOST_IMAGE = "ghcr.io/eth-act/zkboost/zkboost:latest"
 
 # Mapping from numeric proof-type IDs (used in --proof-types CL/VC flags) to
 # proof_type names (EL + zkVM combination, e.g., "reth-zisk" = Reth + Zisk).
 PROOF_TYPE_ID_TO_NAME = {
-    0: "ethrex-risc0",
+    0: "ethrex-openvm",
     1: "ethrex-sp1",
     2: "ethrex-zisk",
     3: "reth-openvm",
-    4: "reth-risc0",
-    5: "reth-sp1",
-    6: "reth-zisk",
+    4: "reth-sp1",
+    5: "reth-zisk",
 }
 DEFAULT_MEV_PUBKEY = "0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5"
 DEFAULT_MEV_SECRET_KEY = (

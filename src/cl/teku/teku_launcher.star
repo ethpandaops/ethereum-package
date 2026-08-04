@@ -16,6 +16,7 @@ BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/teku/teku-beacon-data"
 BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_HTTP_PORT_NUM = 4000
 BEACON_METRICS_PORT_NUM = 8008
+BEACON_QUIC_PORT_NUM = 9001
 
 BEACON_METRICS_PATH = "/metrics"
 
@@ -55,6 +56,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -80,6 +82,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
         bootnode_enr_override,
         cl_binary_artifact,
     )
@@ -121,6 +124,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -165,6 +169,11 @@ def get_beacon_config(
         public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[4]}
+            )
+        )
 
     discovery_port_tcp = (
         public_ports_for_component[0]
@@ -176,10 +185,16 @@ def get_beacon_config(
         if public_ports_for_component
         else BEACON_DISCOVERY_PORT_NUM
     )
+    discovery_port_quic = (
+        public_ports_for_component[4]
+        if public_ports_for_component
+        else BEACON_QUIC_PORT_NUM
+    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -387,7 +402,11 @@ def get_beacon_config(
         "entrypoint": ["sh", "-c"],
         "cmd": [cmd_str],
         "files": files,
-        "env_vars": participant.cl_extra_env_vars,
+        "env_vars": shared_utils.with_otel_env_vars(
+            participant.cl_extra_env_vars,
+            otel_otlp_grpc_url,
+            beacon_service_name,
+        ),
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.teku,

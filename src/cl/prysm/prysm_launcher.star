@@ -53,6 +53,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -78,6 +79,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
         bootnode_enr_override,
         cl_binary_artifact,
     )
@@ -119,6 +121,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -303,6 +306,14 @@ def get_beacon_config(
     else:  # Public network
         cmd.append("--{}".format(network_params.network))
 
+    if otel_otlp_grpc_url != None:
+        otel_otlp_http_traces_url = getattr(launcher, "otel_otlp_http_traces_url", None)
+        if otel_otlp_http_traces_url == None:
+            fail("Prysm tracing requires an OTLP HTTP traces endpoint")
+        cmd.append("--enable-tracing")
+        cmd.append("--tracing-endpoint={}".format(otel_otlp_http_traces_url))
+        cmd.append("--tracing-process-name={}".format(beacon_service_name))
+
     if len(participant.cl_extra_params) > 0:
         # we do the for loop as otherwise its a proto repeated array
         cmd.extend([param for param in participant.cl_extra_params])
@@ -322,11 +333,13 @@ def get_beacon_config(
         )
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.CL_TYPE.prysm + "_volume_size"
-            ],
+            size=(
+                int(participant.cl_volume_size)
+                if int(participant.cl_volume_size) > 0
+                else constants.VOLUME_SIZE[volume_size_key][
+                    constants.CL_TYPE.prysm + "_volume_size"
+                ]
+            ),
         )
 
     # Add extra mounts - automatically handle file uploads
@@ -358,7 +371,11 @@ def get_beacon_config(
         "entrypoint": ["sh", "-c"],
         "cmd": [cmd_str],
         "files": files,
-        "env_vars": participant.cl_extra_env_vars,
+        "env_vars": shared_utils.with_otel_env_vars(
+            participant.cl_extra_env_vars,
+            otel_otlp_grpc_url,
+            beacon_service_name,
+        ),
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.prysm,
@@ -451,9 +468,9 @@ def get_cl_context(
         peer_id=beacon_peer_id,
         snooper_enabled=participant.snooper_enabled,
         snooper_el_engine_context=snooper_el_engine_context,
-        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
-        if node_keystore_files
-        else "",
+        validator_keystore_files_artifact_uuid=(
+            node_keystore_files.files_artifact_uuid if node_keystore_files else ""
+        ),
         supernode=participant.supernode,
     )
 
@@ -461,10 +478,12 @@ def get_cl_context(
 def new_prysm_launcher(
     el_cl_genesis_data,
     jwt_file,
+    otel_otlp_http_traces_url=None,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
+        otel_otlp_http_traces_url=otel_otlp_http_traces_url,
     )
 
 

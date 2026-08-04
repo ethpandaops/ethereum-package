@@ -233,6 +233,7 @@ SUBCATEGORY_PARAMS = {
         "eth1_follow_distance",
         "min_validator_withdrawability_delay",
         "min_builder_withdrawability_delay",
+        "deploy_eip8282_contracts",
         "shard_committee_period",
         "attestation_due_bps_gloas",
         "aggregate_due_bps_gloas",
@@ -263,6 +264,7 @@ SUBCATEGORY_PARAMS = {
         "preset",
         "additional_preloaded_contracts",
         "additional_mnemonics",
+        "shuffle_genesis_validators",
         "devnet_repo",
         "prefunded_accounts",
         "max_payload_size",
@@ -374,7 +376,6 @@ SUBCATEGORY_PARAMS = {
         "mev_relay_website_extra_env_vars",
         "mev_builder_extra_args",
         "mev_builder_prometheus_config",
-        "custom_flood_params",
         "mock_mev_image",
         "launch_adminer",
         "run_multiple_relays",
@@ -454,6 +455,7 @@ SUBCATEGORY_PARAMS = {
         "max_cpu",
         "min_mem",
         "max_mem",
+        "separate_keys",
         "extra_args",
     ],
     "zkboost_params": [
@@ -467,6 +469,16 @@ SUBCATEGORY_PARAMS = {
         "extra_args",
         "builder_api",
         "epbs_builder",
+        "lifecycle",
+        "instances",
+    ],
+    "trueblocks_params": [
+        "image",
+        "config_version",
+        "target_rpc_url",
+        "target_index",
+        "scrape",
+        "env",
     ],
 }
 
@@ -475,19 +487,16 @@ ADDITIONAL_SERVICES_PARAMS = [
     "assertoor",
     "broadcaster",
     "tx_fuzz",
-    "custom_flood",
     "forkmon",
     "blockscout",
     "dora",
     "checkpointz",
-    "full_beaconchain_explorer",
     "prometheus_grafana",
     "prometheus",
     "grafana",
     "tempo",
     "blobscan",
     "dugtrio",
-    "blutgang",
     "erpc",
     "forky",
     "apache",
@@ -499,6 +508,9 @@ ADDITIONAL_SERVICES_PARAMS = [
     "spamoor",
     "disruptoor",
     "zkboost",
+    "trueblocks",
+    "otel",
+    "buildoor",
 ]
 
 ADDITIONAL_CATEGORY_PARAMS = {
@@ -518,6 +530,15 @@ ADDITIONAL_CATEGORY_PARAMS = {
     "keymanager_enabled": "",
     "checkpoint_sync_enabled": "",
     "checkpoint_sync_url": "",
+}
+
+TRUEBLOCKS_NESTED_PARAMS = {
+    "scrape": [
+        "apps_per_chunk",
+        "snap_to_grid",
+        "first_snap",
+        "unripe_dist",
+    ],
 }
 
 
@@ -611,6 +632,13 @@ def sanity_check(plan, input_args):
         "port_publisher",
         PORT_PUBLISHER_PARAMS["port_publisher"],
         ["nat_exit_ip"],
+    )
+    validate_nested_params(
+        plan,
+        input_args,
+        "trueblocks_params",
+        TRUEBLOCKS_NESTED_PARAMS,
+        ["image", "target_rpc_url", "target_index", "env"],
     )
 
     # Checks additional services

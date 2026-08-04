@@ -50,6 +50,8 @@ def launch_grafana(
     port_publisher,
     index,
     tempo_query_url=None,
+    clickhouse_host=None,
+    clickhouse_port=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -63,6 +65,8 @@ def launch_grafana(
         dashboard_providers_config_template,
         prometheus_private_url,
         tempo_query_url,
+        clickhouse_host,
+        clickhouse_port,
         additional_dashboards=grafana_params.additional_dashboards,
     )
 
@@ -88,6 +92,7 @@ def launch_grafana(
         tolerations,
         grafana_params,
         public_ports,
+        clickhouse_host,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -99,10 +104,12 @@ def get_grafana_config_dir_artifact_uuid(
     dashboard_providers_config_template,
     prometheus_private_url,
     tempo_query_url,
+    clickhouse_host,
+    clickhouse_port,
     additional_dashboards=[],
 ):
     datasource_data = new_datasource_config_template_data(
-        prometheus_private_url, tempo_query_url
+        prometheus_private_url, tempo_query_url, clickhouse_host, clickhouse_port
     )
     datasource_template_and_data = shared_utils.new_template_and_data(
         datasource_config_template, datasource_data
@@ -149,17 +156,21 @@ def get_config(
     tolerations,
     grafana_params,
     public_ports,
+    clickhouse_host=None,
 ):
+    env_vars = {
+        CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
+        "GF_AUTH_ANONYMOUS_ENABLED": "true",
+        "GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
+        "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
+        "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
+    }
+    if clickhouse_host != None:
+        env_vars["GF_INSTALL_PLUGINS"] = "grafana-clickhouse-datasource 4.6.0"
     return ServiceConfig(
         image=grafana_params.image,
         ports=USED_PORTS,
-        env_vars={
-            CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
-            "GF_AUTH_ANONYMOUS_ENABLED": "true",
-            "GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
-            "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
-            "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/dashboards/default.json",
-        },
+        env_vars=env_vars,
         files={
             GRAFANA_CONFIG_DIRPATH_ON_SERVICE: grafana_config_artifacts_name,
             GRAFANA_DASHBOARDS_DIRPATH_ON_SERVICE: grafana_dashboards_artifacts_name,
@@ -174,10 +185,15 @@ def get_config(
     )
 
 
-def new_datasource_config_template_data(prometheus_url, tempo_query_url):
+def new_datasource_config_template_data(
+    prometheus_url, tempo_query_url, clickhouse_host, clickhouse_port
+):
     data = {"PrometheusURL": prometheus_url}
     if tempo_query_url != None:
         data["TempoURL"] = tempo_query_url
+    if clickhouse_host != None:
+        data["ClickHouseHost"] = clickhouse_host
+        data["ClickHousePort"] = clickhouse_port
     return data
 
 

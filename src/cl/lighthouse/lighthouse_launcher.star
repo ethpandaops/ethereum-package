@@ -60,6 +60,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -85,6 +86,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
         bootnode_enr_override,
         cl_binary_artifact,
     )
@@ -128,6 +130,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -276,9 +279,11 @@ def get_beacon_config(
     if bootnode_arg != None:
         cmd.append("--boot-nodes=" + bootnode_arg)
 
-    # Add tempo telemetry integration if tempo is enabled
-    if tempo_otlp_grpc_url != None:
-        cmd.append("--telemetry-collector-url={}".format(tempo_otlp_grpc_url))
+    telemetry_url = (
+        otel_otlp_grpc_url if otel_otlp_grpc_url != None else tempo_otlp_grpc_url
+    )
+    if telemetry_url != None:
+        cmd.append("--telemetry-collector-url={}".format(telemetry_url))
         cmd.append("--telemetry-service-name={}".format(beacon_service_name))
 
     if len(participant.cl_extra_params) > 0:
@@ -305,11 +310,13 @@ def get_beacon_config(
         )
         files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(beacon_service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.CL_TYPE.lighthouse + "_volume_size"
-            ],
+            size=(
+                int(participant.cl_volume_size)
+                if int(participant.cl_volume_size) > 0
+                else constants.VOLUME_SIZE[volume_size_key][
+                    constants.CL_TYPE.lighthouse + "_volume_size"
+                ]
+            ),
         )
 
     # Add extra mounts - automatically handle file uploads
@@ -325,7 +332,13 @@ def get_beacon_config(
         files["/opt/bin"] = cl_binary_artifact.artifact
 
     env_vars = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
-    env_vars.update(participant.cl_extra_env_vars)
+    env_vars.update(
+        shared_utils.with_otel_env_vars(
+            participant.cl_extra_env_vars,
+            otel_otlp_grpc_url,
+            beacon_service_name,
+        )
+    )
 
     # Build the command string, copying injected binary if provided
     cmd_str = " ".join(cmd)
@@ -435,9 +448,9 @@ def get_cl_context(
         peer_id=beacon_peer_id,
         snooper_enabled=participant.snooper_enabled,
         snooper_el_engine_context=snooper_el_engine_context,
-        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
-        if node_keystore_files
-        else "",
+        validator_keystore_files_artifact_uuid=(
+            node_keystore_files.files_artifact_uuid if node_keystore_files else ""
+        ),
         supernode=participant.supernode,
     )
 

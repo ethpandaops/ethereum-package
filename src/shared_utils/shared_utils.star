@@ -20,6 +20,32 @@ def new_template_and_data(template, template_data_json):
     return struct(template=template, data=template_data_json)
 
 
+def with_otel_env_vars(env_vars, otel_otlp_grpc_url, service_name):
+    """Merge standard OTel SDK env vars in and append participant resource attrs."""
+    if otel_otlp_grpc_url == None:
+        return env_vars
+    resource_attributes = "service.name={},service.namespace=ethereum-package".format(
+        service_name
+    )
+    participant_resource_attributes = env_vars.get("OTEL_RESOURCE_ATTRIBUTES", "")
+    if participant_resource_attributes != "":
+        resource_attributes = "{},{}".format(
+            resource_attributes,
+            participant_resource_attributes,
+        )
+    merged = {
+        "OTEL_EXPORTER_OTLP_ENDPOINT": otel_otlp_grpc_url,
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+        "OTEL_SERVICE_NAME": service_name,
+        "OTEL_RESOURCE_ATTRIBUTES": resource_attributes,
+    }
+    for k, v in env_vars.items():
+        if k == "OTEL_RESOURCE_ATTRIBUTES":
+            continue
+        merged[k] = v
+    return merged
+
+
 def path_join(*args):
     joined_path = "/".join(args)
     return joined_path.replace("//", "/")
@@ -74,6 +100,18 @@ def zfill_custom(value, width):
     return ("0" * (width - len(str(value)))) + str(value)
 
 
+# Builds the service name for a per-participant buildoor instance, e.g.
+# buildoor-lighthouse-geth-1. When a participant runs more than one buildoor
+# (count > 1) a 1-based instance suffix is appended, e.g.
+# buildoor-lighthouse-geth-1-2. Used by both the input parser (to wire the CL's
+# builder endpoint) and main.star (to add the service), so they never drift.
+def get_buildoor_service_name(prefix, cl_type, el_type, index_str, instance, count):
+    base = "{0}-{1}-{2}-{3}".format(prefix, cl_type, el_type, index_str)
+    if count <= 1:
+        return base
+    return "{0}-{1}".format(base, instance + 1)
+
+
 def label_maker(
     client, client_type, image, connected_client, extra_labels, supernode=False
 ):
@@ -114,6 +152,28 @@ def get_devnet_enodes(plan, filename):
         run="grep -v '^[[:space:]]*$' /network-configs/enodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
     )
     return enode_list.output
+
+
+def get_devnet_el_enrs(plan, filename):
+    enr_list = plan.run_sh(
+        description="Getting devnet EL enrs",
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        run="grep -v '^[[:space:]]*$' /network-configs/el_enrs.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+    )
+    return enr_list.output
+
+
+def get_devnet_el_bootnodes(plan, filename):
+    # EL ENRs (discv5) plus enodes (discv4) in one list, for consumers like
+    # bootnodoor that bridge both protocols; either file may be absent
+    bootnode_list = plan.run_sh(
+        description="Getting devnet EL bootnodes (enrs + enodes)",
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        run="cat /network-configs/el_enrs.txt /network-configs/enodes.txt 2>/dev/null | grep -v '^[[:space:]]*$' | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+    )
+    return bootnode_list.output
 
 
 def get_devnet_enrs_list(plan, filename):

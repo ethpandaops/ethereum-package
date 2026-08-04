@@ -26,7 +26,6 @@ additional_services:
   - checkpointz
   - prometheus
   - grafana
-  - custom_flood
   - blockscout
   - dugtrio
   - erpc
@@ -34,6 +33,7 @@ additional_services:
   - tracoor
   - spamoor
   - bootnodoor
+  - trueblocks
 ethereum_metrics_exporter_enabled: true
 snooper_enabled: true
 keymanager_enabled: true

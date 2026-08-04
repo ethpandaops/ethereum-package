@@ -40,8 +40,9 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     cl_client_name = service_name.split("-")[3]
 
@@ -60,8 +61,9 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
-        bootnodoor_enode,
+        bootnodoor_el_enr,
         el_binary_artifact,
+        otel_otlp_grpc_url,
     )
 
     service = plan.add_service(
@@ -91,8 +93,9 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -150,6 +153,7 @@ def get_config(
         "--Network.ExternalIp={0}".format(port_publisher.el_nat_exit_ip),
         "--Network.DiscoveryPort={0}".format(discovery_port_tcp),
         "--Network.P2PPort={0}".format(discovery_port_tcp),
+        "--Discovery.DiscoveryVersion=V5",
         "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
@@ -159,24 +163,22 @@ def get_config(
     # Configure storage type - nethermind defaults to hybrid pruning, use None mode for archive
     if participant.el_storage_type == "archive":
         cmd.append("--Pruning.Mode=None")
+    elif participant.checkpoint_sync_enabled:
+        cmd.append("--Sync.SnapSync=true")
 
     if network_params.gas_limit > 0:
         cmd.append("--Blocks.TargetBlockGasLimit={0}".format(network_params.gas_limit))
 
     if constants.NETWORK_NAME.shadowfork in network_params.network:
         cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
+            "--Init.ChainSpecPath=" + constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
         )
         cmd.append("--config=" + network_params.network.split("-")[0])
         cmd.append("--Init.BaseDbPath=" + network_params.network.split("-")[0])
     elif network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--config=none")
         cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
+            "--Init.ChainSpecPath=" + constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
         )
 
         # Configure block timing to match consensus layer
@@ -187,30 +189,27 @@ def get_config(
     else:
         cmd.append("--config=" + network_params.network)
 
-    # Handle bootnode configuration with bootnodoor_enode override
-    if bootnodoor_enode != None:
-        cmd.append("--Discovery.Bootnodes=" + bootnodoor_enode)
+    # Handle bootnode configuration with bootnodoor_el_enr override
+    if bootnodoor_el_enr != None:
+        cmd.append("--Discovery.Bootnodes=" + bootnodoor_el_enr)
     elif (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
-        if len(existing_el_clients) > 0:
-            cmd.append(
-                "--Discovery.Bootnodes="
-                + ",".join(
-                    [
-                        ctx.enode
-                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                    ]
-                )
-            )
+        el_bootnode_enrs = [
+            ctx.enr
+            for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+            if ctx.enr
+        ]
+        if len(el_bootnode_enrs) > 0:
+            cmd.append("--Discovery.Bootnodes=" + ",".join(el_bootnode_enrs))
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--Discovery.Bootnodes="
-            + shared_utils.get_devnet_enodes(
+            + shared_utils.get_devnet_el_enrs(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
         )
@@ -248,7 +247,11 @@ def get_config(
     if el_binary_artifact != None:
         files["/opt/bin"] = el_binary_artifact.artifact
 
-    env_vars = participant.el_extra_env_vars
+    env_vars = shared_utils.with_otel_env_vars(
+        participant.el_extra_env_vars,
+        otel_otlp_grpc_url,
+        service_name,
+    )
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
@@ -300,7 +303,7 @@ def get_el_context(
     service,
     launcher,
 ):
-    enode = el_admin_node_info.get_enode_for_node(
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, constants.RPC_PORT_ID
     )
 
@@ -315,6 +318,7 @@ def get_el_context(
     return el_context.new_el_context(
         client_name="nethermind",
         enode=enode,
+        enr=enr,
         dns_name=service.name,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,

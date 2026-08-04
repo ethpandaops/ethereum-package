@@ -45,6 +45,7 @@ def launch(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -70,6 +71,7 @@ def launch(
         extra_files_artifacts,
         backend,
         tempo_otlp_grpc_url,
+        otel_otlp_grpc_url,
         bootnode_enr_override,
         cl_binary_artifact,
     )
@@ -113,6 +115,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
 ):
@@ -167,6 +170,7 @@ def get_beacon_config(
         "--sentinel.tcp.port={0}".format(p2p_port),
         "--discovery.port={0}".format(p2p_port),
         "--discovery.addr=0.0.0.0",
+        "--local-discovery",
         "--pprof",
         "--pprof.addr=0.0.0.0",
         "--pprof.port={0}".format(BEACON_METRICS_PORT_NUM),
@@ -205,7 +209,9 @@ def get_beacon_config(
                     elif ctx.multiaddr:
                         bootnodes.append(ctx.multiaddr)
                 if bootnodes:
-                    cmd.append("--sentinel.bootnodes=" + ",".join(bootnodes))
+                    bootnode_arg = ",".join(bootnodes)
+            if bootnode_arg != None:
+                cmd.append("--sentinel.bootnodes=" + bootnode_arg)
     else:
         cmd.append("--chain=" + network_params.network)
 
@@ -240,7 +246,11 @@ def get_beacon_config(
     if cl_binary_artifact != None:
         files["/opt/bin"] = cl_binary_artifact.artifact
 
-    env_vars = participant.cl_extra_env_vars
+    env_vars = shared_utils.with_otel_env_vars(
+        participant.cl_extra_env_vars,
+        otel_otlp_grpc_url,
+        beacon_service_name,
+    )
 
     cmd_str = " ".join(cmd)
     if cl_binary_artifact != None:

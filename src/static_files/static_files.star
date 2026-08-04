@@ -15,22 +15,15 @@ FORKMON_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/forkmon-config/config.toml.tmpl"
 )
 
-# Validator Ranges config
-VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/validator-ranges/config.yaml.tmpl"
-)
-
 NGINX_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/index.html"
 NGINX_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr.txt.tmpl"
 NGINX_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr_list.txt.tmpl"
 NGINX_ENODE_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enode.txt.tmpl"
+NGINX_EL_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/el_enr_list.txt.tmpl"
 
 DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml.tmpl"
 DUGTRIO_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/dugtrio-config/config.yaml.tmpl"
-)
-BLUTGANG_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/blutgang-config/config.toml.tmpl"
 )
 CHECKPOINTZ_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/checkpointz-config/config.yaml.tmpl"
@@ -39,9 +32,6 @@ ERPC_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/erpc-config/erpc.yaml.t
 FORKY_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/forky-config/config.yaml.tmpl"
 TRACOOR_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/tracoor-config/config.yaml.tmpl"
-)
-FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/full-beaconchain-config/config.yaml.tmpl"
 )
 
 # assertoor config
@@ -139,4 +129,8 @@ HELIX_RELAY_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/mev/helix/config.yaml.tmp
 
 ZKBOOST_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/zkboost-config/config.toml.tmpl"
+)
+
+TRUEBLOCKS_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/trueblocks-config/trueBlocks.toml.tmpl"
 )
