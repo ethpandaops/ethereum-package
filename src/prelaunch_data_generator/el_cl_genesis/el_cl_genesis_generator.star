@@ -144,7 +144,6 @@ def new_env_file_for_el_cl_genesis_data(
         if shadowfork_file
         else network_params.network_id,  # This will override the network_id if shadowfork_file is present. If you want to use the network_id, please ensure that you don't use "shadowfork" in the network name.
         "DepositContractAddress": network_params.deposit_contract_address,
-        "SecondsPerSlot": network_params.seconds_per_slot,
         "SlotDurationMs": network_params.slot_duration_ms,
         "PreregisteredValidatorKeysMnemonic": network_params.preregistered_validator_keys_mnemonic,
         "NumValidatorKeysToPreregister": total_num_validator_keys_to_preregister,
@@ -179,6 +178,7 @@ def new_env_file_for_el_cl_genesis_data(
         "AdditionalValidatorMnemonics": get_additional_mnemonics_json(network_params),
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
         "MinBuilderWithdrawabilityDelay": network_params.min_builder_withdrawability_delay,
+        "DeployEip8282Contracts": network_params.deploy_eip8282_contracts,
         "ShardCommitteePeriod": network_params.shard_committee_period,
         "AttestationDueBpsGloas": network_params.attestation_due_bps_gloas,
         "AggregateDueBpsGloas": network_params.aggregate_due_bps_gloas,

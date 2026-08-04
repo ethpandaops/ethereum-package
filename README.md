@@ -10,7 +10,7 @@ Specifically, this [package][package-reference] will:
 
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
 2. Configure & bootstrap a network of Ethereum nodes of *n* size using the genesis data generated above
-3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
+3. Spin up a [transaction spammer](https://github.com/ethpandaops/spamoor) to send fake transactions to the network
 4. Spin up a Grafana and Prometheus instance to observe the network
 5. Spin up a Blobscan instance to analyze blob transactions (EIP-4844)
 
@@ -380,7 +380,7 @@ participants:
     # Defaults by client:
     # - lighthouse: ethpandaops/lighthouse:unstable
     # - teku: ethpandaops/teku:master
-    # - nimbus: statusim/nimbus-eth2:multiarch-latest
+    # - nimbus: ethpandaops/nimbus-eth2:unstable
     # - prysm: ethpandaops/prysm-beacon-chain:develop
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
@@ -485,7 +485,7 @@ participants:
     # Defaults by client:
     # - lighthouse: sigp/lighthouse:latest
     # - lodestar: chainsafe/lodestar:latest
-    # - nimbus: statusim/nimbus-validator-client:multiarch-latest
+    # - nimbus: ethpandaops/nimbus-validator-client:unstable
     # - prysm: ethpandaops/prysm-validator:develop
     # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
@@ -689,6 +689,7 @@ participants:
     keymanager_enabled: null
 
     # Per-participant override for checkpoint sync. If set, this will override the global checkpoint_sync_enabled flag for this participant.
+    # When enabled, EL clients that support it (geth, besu, nethermind, ethrex) default to snap sync instead of full sync.
     # Defaults to null (uses global checkpoint_sync_enabled setting)
     checkpoint_sync_enabled: null
 
@@ -760,8 +761,8 @@ network_params:
   contribution_due_bps_gloas: 5000
 
   # Payload availability deadline for Gloas fork
-  # Defaults to 7500 basis points (75% of slot duration)
-  payload_due_bps: 7500
+  # Defaults to 5000 basis points (50% of slot duration)
+  payload_due_bps: 5000
 
   # Payload attestation due timing for Gloas fork
   # Defaults to 7500 basis points (75% of slot duration)
@@ -867,8 +868,13 @@ network_params:
   min_validator_withdrawability_delay: 256
 
   # The minimum number of epochs for builder withdrawability delay
-  # Defaults to 8192, 2 for minimal preset
-  min_builder_withdrawability_delay: 8192
+  # Defaults to 64, 2 for minimal preset
+  min_builder_withdrawability_delay: 64
+
+  # Whether to include the EIP-8282 builder deposit/exit predeploys in genesis
+  # when Gloas is scheduled (requires ethereum-genesis-generator >= 6.1.3)
+  # Defaults to true
+  deploy_eip8282_contracts: true
 
   # The period of the shard committee
   # Defaults to 256 epoch ~27 hours
@@ -1047,7 +1053,7 @@ network_params:
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
-  # Number of ePBS builders to register at genesis with 0x03 withdrawal credentials
+  # Number of ePBS builders to register at genesis with 0xB0 withdrawal credentials
   # Requires gloas_fork_epoch to be 0 (GLOAS at genesis)
   # Default to 0
   builder_count: 0
@@ -1065,11 +1071,9 @@ additional_services:
   - assertoor
   - blobscan
   - blockscout
-  - blutgang
   - bootnodoor
   - broadcaster
   - checkpointz
-  - custom_flood
   - dora
   - disruptoor
   - dugtrio
@@ -1077,7 +1081,6 @@ additional_services:
   - zkboost
   - forkmon
   - forky
-  - full_beaconchain_explorer
   - grafana
   - mempool_bridge
   - nginx
@@ -1200,7 +1203,13 @@ prometheus_params:
 
 # Configuration place for grafana
 grafana_params:
-  # A list of locators for grafana dashboards to be loaded be the grafana service
+  # A list of locators for grafana dashboards to be loaded by the grafana service.
+  # Each entry must be a Kurtosis locator: a GitHub locator (e.g.
+  # "github.com/<org>/<repo>/path/to/dashboards") or an absolute http(s) URL.
+  # When inheriting this package from your own, a local/relative path will NOT
+  # work: upload_files runs inside the ethereum-package and resolves relative
+  # paths against it, not against your package. Use a github.com/... locator
+  # pointing at your own repo instead.
   additional_dashboards: []
   # Resource management for grafana container
   # CPU is milicores
@@ -1249,7 +1258,7 @@ zkboost_params:
   #     "ere"      - launches a GPU ere-server and connects to it
   #     "external" - connects to an already-deployed prover via HTTP
   #   proof_type (required): identifies the EL client + zkVM combination
-  #     "ethrex-risc0", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-risc0", "reth-sp1", "reth-zisk"
+  #     "ethrex-openvm", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-sp1", "reth-zisk"
   #   proof_timeout_secs: timeout for proof generation in seconds (default: 3/4 of slot duration, must be > 0)
   #
   # Mock-specific fields (only for kind: mock):
@@ -1315,7 +1324,7 @@ zkboost_params:
   # - kind: ere
   #   proof_type: reth-zisk
   #   image: "ghcr.io/eth-act/ere/ere-server-zisk:latest"
-  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.8.0/stateless-validator-reth-zisk.elf"
+  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.13.0/stateless-validator-reth-zisk.elf"
   #   gpu:
   #     count: 1
   #     driver: "nvidia"
@@ -1605,8 +1614,9 @@ buildoor_params:
   # participants (a builder is independent of the network: it reads one
   # participant's CL payload_attributes stream and, under ePBS, gossips bids to
   # the whole network). Each entry spins up `count` buildoor builder instances
-  # wired to the named participant's CL/EL. Services are named
-  # `buildoor-<cl>-<el>-<participant>` (with a `-<n>` suffix when count > 1).
+  # (optional, defaults to 1) wired to the named participant's CL/EL. Services
+  # are named `buildoor-<cl>-<el>-<participant>` (with a `-<n>` suffix when
+  # count > 1).
   # Requires "buildoor" in additional_services; no `mev_type` is needed, and it
   # cannot be combined with the (deprecated) network-wide `mev_type: buildoor`.
   # Each instance is its own builder; with lifecycle enabled (default) it onboards
@@ -1617,8 +1627,7 @@ buildoor_params:
   # Defaults to [] (no per-participant buildoors).
   # Example:
   # instances:
-  #   - participant: 1   # 1-based participant index
-  #     count: 1
+  #   - participant: 1   # 1-based participant index (count defaults to 1)
   #   - participant: 3
   #     count: 2
   #     image: ethpandaops/buildoor:my-fix   # per-instance override (optional)
@@ -1679,6 +1688,7 @@ global_node_selectors: {}
 keymanager_enabled: false
 
 # Global flag to enable checkpoint sync across the network
+# When enabled, EL clients that support it (geth, besu, nethermind, ethrex) default to snap sync instead of full sync
 # Default to false
 checkpoint_sync_enabled: false
 
@@ -1806,7 +1816,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.1.2
+  image: ethpandaops/ethereum-genesis-generator:6.1.5
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
@@ -2101,7 +2111,7 @@ network_params:
 </details>
 
 <details>
-    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper)</summary>
+    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, spamoor, EngineAPI snooper)</summary>
 
 ```yaml
 participants:
@@ -2113,7 +2123,7 @@ snooper_params:
 additional_services:
   - prometheus
   - grafana
-  - tx_fuzz
+  - spamoor
 ethereum_metrics_exporter_enabled: true
 ```
 
@@ -2299,10 +2309,8 @@ Here's a table of where the keys are used
 | Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                     |
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
-| 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 3             | tx_fuzz | ✅                |                 | To spam transactions with  |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
-| 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
 | 13            | spamoor             | ✅                |                 | Spams transactions         |
 | 14            | rakoon              | ✅                |                 | Protocol fuzzing           |

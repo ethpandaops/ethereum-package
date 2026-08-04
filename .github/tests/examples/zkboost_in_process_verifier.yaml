@@ -21,10 +21,10 @@ participants:
     cl_extra_params:
       - --target-peers=3
       - --proof-engine-endpoint=http://zkboost-prover:3000
-      - --proof-types=6
+      - --proof-types=5
     vc_extra_params:
       - --proof-engine-endpoint=http://zkboost-prover:3000
-      - --proof-types=6
+      - --proof-types=5
     count: 1
   # Verifier-only side: uses zkboost-verifier (no ere-server, in-process
   # verifier). Listens for gossipped proofs and verifies them.
@@ -39,7 +39,7 @@ participants:
     cl_extra_params:
       - --target-peers=3
       - --proof-engine-endpoint=http://zkboost-verifier:3000
-      - --proof-types=6
+      - --proof-types=5
     count: 1
 
 network_params:
@@ -53,7 +53,7 @@ additional_services:
   - tempo
 
 zkboost_params:
-  image: ghcr.io/eth-act/zkboost/zkboost:latest
+  image: ghcr.io/eth-act/zkboost/zkboost:0.9.0
   env:
     RUST_LOG: info,zkboost=debug
   instances:
@@ -62,8 +62,8 @@ zkboost_params:
       zkvms:
         - kind: ere
           proof_type: reth-zisk
-          image: ghcr.io/eth-act/ere/ere-server-zisk:0.9.1-cuda
-          elf_url: https://github.com/eth-act/ere-guests/releases/download/v0.10.0/stateless-validator-reth-zisk.elf
+          image: ghcr.io/eth-act/ere/ere-server-zisk:0.13.0-cuda
+          elf_url: https://github.com/eth-act/ere-guests/releases/download/v0.13.0/stateless-validator-reth-zisk.elf
           gpu:
             device_ids: ["0"]
     - name: zkboost-verifier
@@ -71,4 +71,4 @@ zkboost_params:
       zkvms:
         - kind: verifier
           proof_type: reth-zisk
-          program_vk_url: https://github.com/eth-act/ere-guests/releases/download/v0.10.0/stateless-validator-reth-zisk.vk
+          program_vk_url: https://github.com/eth-act/ere-guests/releases/download/v0.13.0/stateless-validator-reth-zisk.vk

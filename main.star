@@ -18,15 +18,11 @@ forkmon = import_module("./src/forkmon/forkmon_launcher.star")
 dora = import_module("./src/dora/dora_launcher.star")
 checkpointz = import_module("./src/checkpointz/checkpointz_launcher.star")
 dugtrio = import_module("./src/dugtrio/dugtrio_launcher.star")
-blutgang = import_module("./src/blutgang/blutgang_launcher.star")
 erpc = import_module("./src/erpc/erpc_launcher.star")
 blobscan = import_module("./src/blobscan/blobscan_launcher.star")
 forky = import_module("./src/forky/forky_launcher.star")
 tracoor = import_module("./src/tracoor/tracoor_launcher.star")
 nginx = import_module("./src/nginx/nginx_launcher.star")
-full_beaconchain_explorer = import_module(
-    "./src/full_beaconchain/full_beaconchain_launcher.star"
-)
 blockscout = import_module("./src/blockscout/blockscout_launcher.star")
 prometheus = import_module("./src/prometheus/prometheus_launcher.star")
 grafana = import_module("./src/grafana/grafana_launcher.star")
@@ -52,9 +48,6 @@ flashbots_mev_relay = import_module(
 helix_relay = import_module("./src/mev/helix/helix_relay_launcher.star")
 mock_mev = import_module("./src/mev/flashbots/mock_mev/mock_mev_launcher.star")
 buildoor = import_module("./src/mev/buildoor/buildoor_launcher.star")
-mev_custom_flood = import_module(
-    "./src/mev/flashbots/mev_custom_flood/mev_custom_flood_launcher.star"
-)
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
 mempool_bridge = import_module("./src/mempool_bridge/mempool_bridge_launcher.star")
 assertoor = import_module("./src/assertoor/assertoor_launcher.star")
@@ -565,7 +558,7 @@ def run(plan, args={}):
 
     if network_params.builder_count > 0:
         plan.print(
-            "Builder configuration: {0} builder(s) registered at genesis with 0x03 credentials".format(
+            "Builder configuration: {0} builder(s) registered at genesis with 0xB0 credentials".format(
                 network_params.builder_count
             )
         )
@@ -1135,24 +1128,6 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched dugtrio")
-        elif additional_service == "blutgang":
-            plan.print("Launching blutgang")
-            blutgang_config_template = read_file(
-                static_files.BLUTGANG_CONFIG_TEMPLATE_FILEPATH
-            )
-            blutgang.launch_blutgang(
-                plan,
-                blutgang_config_template,
-                all_participants,
-                args_with_right_defaults.participants,
-                network_params,
-                global_node_selectors,
-                global_tolerations,
-                args_with_right_defaults.port_publisher,
-                index,
-                args_with_right_defaults.docker_cache_params,
-            )
-            plan.print("Successfully launched blutgang")
         elif additional_service == "erpc":
             plan.print("Launching erpc")
             erpc_config_template = read_file(static_files.ERPC_CONFIG_TEMPLATE_FILEPATH)
@@ -1240,24 +1215,6 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched nginx")
-        elif additional_service == "full_beaconchain_explorer":
-            plan.print("Launching full-beaconchain-explorer")
-            full_beaconchain_explorer_config_template = read_file(
-                static_files.FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH
-            )
-            full_beaconchain_explorer.launch_full_beacon(
-                plan,
-                full_beaconchain_explorer_config_template,
-                el_cl_data_files_artifact_uuid,
-                all_cl_contexts,
-                all_el_contexts,
-                persistent,
-                global_node_selectors,
-                global_tolerations,
-                args_with_right_defaults.port_publisher,
-                index,
-            )
-            plan.print("Successfully launched full-beaconchain-explorer")
         elif additional_service == "prometheus":
             plan.print("Launching prometheus...")
             prometheus_private_url = prometheus.launch_prometheus(
@@ -1329,17 +1286,6 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
             )
             plan.print("Successfully launched assertoor")
-        elif additional_service == "custom_flood":
-            mev_custom_flood.spam_in_background(
-                plan,
-                prefunded_accounts[-1].private_key,
-                prefunded_accounts[0].address,
-                fuzz_target,
-                args_with_right_defaults.custom_flood_params,
-                global_node_selectors,
-                global_tolerations,
-                args_with_right_defaults.docker_cache_params,
-            )
         elif additional_service == "mempool_bridge":
             plan.print("Launching mempool-bridge")
             mempool_bridge.launch_mempool_bridge(

@@ -170,6 +170,7 @@ def get_beacon_config(
         "--sentinel.tcp.port={0}".format(p2p_port),
         "--discovery.port={0}".format(p2p_port),
         "--discovery.addr=0.0.0.0",
+        "--local-discovery",
         "--pprof",
         "--pprof.addr=0.0.0.0",
         "--pprof.port={0}".format(BEACON_METRICS_PORT_NUM),
@@ -208,7 +209,9 @@ def get_beacon_config(
                     elif ctx.multiaddr:
                         bootnodes.append(ctx.multiaddr)
                 if bootnodes:
-                    cmd.append("--sentinel.bootnodes=" + ",".join(bootnodes))
+                    bootnode_arg = ",".join(bootnodes)
+            if bootnode_arg != None:
+                cmd.append("--sentinel.bootnodes=" + bootnode_arg)
     else:
         cmd.append("--chain=" + network_params.network)
 

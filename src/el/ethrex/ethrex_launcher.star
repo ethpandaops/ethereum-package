@@ -159,9 +159,9 @@ def get_config(
         "--network={0}".format(
             network_params.network
             if network_params.network in constants.PUBLIC_NETWORKS
-            else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+            else constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
         ),
-        "--syncmode=full",
+        "--syncmode=snap" if participant.checkpoint_sync_enabled else "--syncmode=full",
         "--log.level={0}".format(VERBOSITY_LEVELS[global_log_level]),
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
