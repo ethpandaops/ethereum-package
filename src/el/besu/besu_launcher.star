@@ -173,7 +173,10 @@ def get_config(
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "{0}".format(
             "--sync-mode=FULL"
-            if network_params.network in constants.NETWORK_NAME.kurtosis
+            if (
+                network_params.network in constants.NETWORK_NAME.kurtosis
+                and not participant.checkpoint_sync_enabled
+            )
             or participant.el_storage_type == "archive"
             else "--sync-mode=SNAP"
         ),
@@ -191,11 +194,7 @@ def get_config(
         cmd.append("--target-gas-limit={0}".format(network_params.gas_limit))
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
-        cmd.append(
-            "--genesis-file="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/besu.json"
-        )
+        cmd.append("--genesis-file=" + constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER)
     else:
         cmd.append("--network=" + network_params.network)
 

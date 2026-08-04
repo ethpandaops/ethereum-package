@@ -84,7 +84,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "tempo_params",
     "tx_fuzz_params",
     "rakoon_params",
-    "custom_flood_params",
     "xatu_sentry_params",
     "port_publisher",
     "spamoor_params",
@@ -134,7 +133,6 @@ def input_parser(plan, input_args):
         result["additional_services"] = []
     result["tx_fuzz_params"] = get_default_tx_fuzz_params()
     result["rakoon_params"] = get_default_rakoon_params()
-    result["custom_flood_params"] = get_default_custom_flood_params()
     result["disable_peer_scoring"] = False
     result["grafana_params"] = get_default_grafana_params()
     result["assertoor_params"] = get_default_assertoor_params()
@@ -197,10 +195,6 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["rakoon_params"]:
                 sub_value = input_args["rakoon_params"][sub_attr]
                 result["rakoon_params"][sub_attr] = sub_value
-        elif attr == "custom_flood_params":
-            for sub_attr in input_args["custom_flood_params"]:
-                sub_value = input_args["custom_flood_params"][sub_attr]
-                result["custom_flood_params"][sub_attr] = sub_value
         elif attr == "assertoor_params":
             for sub_attr in input_args["assertoor_params"]:
                 sub_value = input_args["assertoor_params"][sub_attr]
@@ -358,11 +352,13 @@ def input_parser(plan, input_args):
                     )
                 )
             seen_buildoor_participants[participant_num] = True
-            if type(instance["count"]) != "int" or instance["count"] < 1:
+            # count is optional and defaults to a single builder per entry.
+            instance_count = instance.get("count", 1)
+            if type(instance_count) != "int" or instance_count < 1:
                 fail(
                     "buildoor_params.instances count for participant {0} must be an integer >= 1, got {1}.".format(
                         participant_num,
-                        instance["count"],
+                        instance_count,
                     )
                 )
             # Optional per-instance image override (A/B testing). When omitted the
@@ -877,7 +873,9 @@ def input_parser(plan, input_args):
                 blobber_image=participant["blobber_image"],
                 keymanager_enabled=participant["keymanager_enabled"],
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
-                checkpoint_sync_enabled=participant["checkpoint_sync_enabled"],
+                checkpoint_sync_enabled=participant["checkpoint_sync_enabled"]
+                if participant["checkpoint_sync_enabled"] != None
+                else result["checkpoint_sync_enabled"],
                 skip_start=participant["skip_start"],
             )
             for participant in result["participants"]
@@ -1141,11 +1139,6 @@ def input_parser(plan, input_args):
             ],
             tests=result["assertoor_params"]["tests"],
         ),
-        custom_flood_params=struct(
-            interval_between_transactions=result["custom_flood_params"][
-                "interval_between_transactions"
-            ],
-        ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
             min_cpu=result["spamoor_params"]["min_cpu"],
@@ -1291,7 +1284,7 @@ def input_parser(plan, input_args):
             instances=[
                 struct(
                     participant=instance["participant"],
-                    count=instance["count"],
+                    count=instance.get("count", 1),
                     # Optional per-instance image override (A/B testing). None =>
                     # fall back to buildoor_params.image at launch time.
                     image=instance.get("image", None),
@@ -2472,11 +2465,6 @@ def get_default_slashoor_params():
     }
 
 
-def get_default_custom_flood_params():
-    # this is a simple script that increases the balance of the coinbase address at a cadence
-    return {"interval_between_transactions": 1}
-
-
 def get_default_mempool_bridge_params():
     return {
         "image": "ethpandaops/mempool-bridge:latest",
@@ -2685,7 +2673,7 @@ def enrich_buildoor_per_participant(parsed_arguments_dict):
     num_participants = len(participants)
     for instance in parsed_arguments_dict["buildoor_params"]["instances"]:
         index = instance["participant"] - 1
-        count = instance["count"]
+        count = instance.get("count", 1)
         participant = participants[index]
         index_str = shared_utils.zfill_custom(index + 1, len(str(num_participants)))
         # The CL has a single external-builder endpoint, so it is wired to the

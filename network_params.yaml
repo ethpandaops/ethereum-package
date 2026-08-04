@@ -231,8 +231,6 @@ mev_params:
   run_multiple_relays: false
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
   commit_boost_config: ""
-  custom_flood_params:
-    interval_between_transactions: 1
 buildoor_params:
   image: ethpandaops/buildoor:main
   builder_api: true
@@ -270,7 +268,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:6.1.3
+  image: ethpandaops/ethereum-genesis-generator:6.1.4
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER

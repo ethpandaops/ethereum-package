@@ -10,7 +10,7 @@ Specifically, this [package][package-reference] will:
 
 1. Generate Execution Layer (EL) & Consensus Layer (CL) genesis information using [the Ethereum genesis generator](https://github.com/ethpandaops/ethereum-genesis-generator).
 2. Configure & bootstrap a network of Ethereum nodes of *n* size using the genesis data generated above
-3. Spin up a [transaction spammer](https://github.com/MariusVanDerWijden/tx-fuzz) to send fake transactions to the network
+3. Spin up a [transaction spammer](https://github.com/ethpandaops/spamoor) to send fake transactions to the network
 4. Spin up a Grafana and Prometheus instance to observe the network
 5. Spin up a Blobscan instance to analyze blob transactions (EIP-4844)
 
@@ -689,6 +689,7 @@ participants:
     keymanager_enabled: null
 
     # Per-participant override for checkpoint sync. If set, this will override the global checkpoint_sync_enabled flag for this participant.
+    # When enabled, EL clients that support it (geth, besu, nethermind, ethrex) default to snap sync instead of full sync.
     # Defaults to null (uses global checkpoint_sync_enabled setting)
     checkpoint_sync_enabled: null
 
@@ -1070,11 +1071,9 @@ additional_services:
   - assertoor
   - blobscan
   - blockscout
-  - blutgang
   - bootnodoor
   - broadcaster
   - checkpointz
-  - custom_flood
   - dora
   - disruptoor
   - dugtrio
@@ -1082,7 +1081,6 @@ additional_services:
   - zkboost
   - forkmon
   - forky
-  - full_beaconchain_explorer
   - grafana
   - mempool_bridge
   - nginx
@@ -1619,8 +1617,9 @@ buildoor_params:
   # participants (a builder is independent of the network: it reads one
   # participant's CL payload_attributes stream and, under ePBS, gossips bids to
   # the whole network). Each entry spins up `count` buildoor builder instances
-  # wired to the named participant's CL/EL. Services are named
-  # `buildoor-<cl>-<el>-<participant>` (with a `-<n>` suffix when count > 1).
+  # (optional, defaults to 1) wired to the named participant's CL/EL. Services
+  # are named `buildoor-<cl>-<el>-<participant>` (with a `-<n>` suffix when
+  # count > 1).
   # Requires "buildoor" in additional_services; no `mev_type` is needed, and it
   # cannot be combined with the (deprecated) network-wide `mev_type: buildoor`.
   # Each instance is its own builder; with lifecycle enabled (default) it onboards
@@ -1631,8 +1630,7 @@ buildoor_params:
   # Defaults to [] (no per-participant buildoors).
   # Example:
   # instances:
-  #   - participant: 1   # 1-based participant index
-  #     count: 1
+  #   - participant: 1   # 1-based participant index (count defaults to 1)
   #   - participant: 3
   #     count: 2
   #     image: ethpandaops/buildoor:my-fix   # per-instance override (optional)
@@ -1693,6 +1691,7 @@ global_node_selectors: {}
 keymanager_enabled: false
 
 # Global flag to enable checkpoint sync across the network
+# When enabled, EL clients that support it (geth, besu, nethermind, ethrex) default to snap sync instead of full sync
 # Default to false
 checkpoint_sync_enabled: false
 
@@ -1809,7 +1808,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.1.3
+  image: ethpandaops/ethereum-genesis-generator:6.1.4
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
@@ -2104,7 +2103,7 @@ network_params:
 </details>
 
 <details>
-    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, tx_fuzz, EngineAPI snooper)</summary>
+    <summary>A 2-node geth/lighthouse network with optional services (Grafana, Prometheus, spamoor, EngineAPI snooper)</summary>
 
 ```yaml
 participants:
@@ -2116,7 +2115,7 @@ snooper_params:
 additional_services:
   - prometheus
   - grafana
-  - tx_fuzz
+  - spamoor
 ethereum_metrics_exporter_enabled: true
 ```
 
@@ -2302,10 +2301,8 @@ Here's a table of where the keys are used
 | Account Index | Component Used In   | Private Key Used | Public Key Used | Comment                     |
 |---------------|---------------------|------------------|-----------------|-----------------------------|
 | 0             | Builder             | ✅                |                 | As coinbase                |
-| 0             | mev_custom_flood    |                   | ✅              | As the receiver of balance |
 | 3             | tx_fuzz | ✅                |                 | To spam transactions with  |
 | 8             | assertoor           | ✅                | ✅              | As the funding for tests   |
-| 11            | mev_custom_flood    | ✅                |                 | As the sender of balance   |
 | 12            | l2_contracts        | ✅                |                 | Contract deployer address  |
 | 13            | spamoor             | ✅                |                 | Spams transactions         |
 | 14            | rakoon              | ✅                |                 | Protocol fuzzing           |

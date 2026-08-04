@@ -162,24 +162,22 @@ def get_config(
     # Configure storage type - nethermind defaults to hybrid pruning, use None mode for archive
     if participant.el_storage_type == "archive":
         cmd.append("--Pruning.Mode=None")
+    elif participant.checkpoint_sync_enabled:
+        cmd.append("--Sync.SnapSync=true")
 
     if network_params.gas_limit > 0:
         cmd.append("--Blocks.TargetBlockGasLimit={0}".format(network_params.gas_limit))
 
     if constants.NETWORK_NAME.shadowfork in network_params.network:
         cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
+            "--Init.ChainSpecPath=" + constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
         )
         cmd.append("--config=" + network_params.network.split("-")[0])
         cmd.append("--Init.BaseDbPath=" + network_params.network.split("-")[0])
     elif network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--config=none")
         cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
+            "--Init.ChainSpecPath=" + constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
         )
 
         # Configure block timing to match consensus layer
