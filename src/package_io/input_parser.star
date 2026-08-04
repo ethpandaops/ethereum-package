@@ -873,7 +873,9 @@ def input_parser(plan, input_args):
                 blobber_image=participant["blobber_image"],
                 keymanager_enabled=participant["keymanager_enabled"],
                 vc_beacon_node_indices=participant["vc_beacon_node_indices"],
-                checkpoint_sync_enabled=participant["checkpoint_sync_enabled"],
+                checkpoint_sync_enabled=participant["checkpoint_sync_enabled"]
+                if participant["checkpoint_sync_enabled"] != None
+                else result["checkpoint_sync_enabled"],
                 skip_start=participant["skip_start"],
             )
             for participant in result["participants"]
