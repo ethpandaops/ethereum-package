@@ -162,6 +162,8 @@ def get_config(
     # Configure storage type - nethermind defaults to hybrid pruning, use None mode for archive
     if participant.el_storage_type == "archive":
         cmd.append("--Pruning.Mode=None")
+    elif participant.checkpoint_sync_enabled:
+        cmd.append("--Sync.SnapSync=true")
 
     if network_params.gas_limit > 0:
         cmd.append("--Blocks.TargetBlockGasLimit={0}".format(network_params.gas_limit))
