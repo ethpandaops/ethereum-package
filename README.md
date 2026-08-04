@@ -689,6 +689,7 @@ participants:
     keymanager_enabled: null
 
     # Per-participant override for checkpoint sync. If set, this will override the global checkpoint_sync_enabled flag for this participant.
+    # When enabled, EL clients that support it (geth, besu, nethermind, ethrex) default to snap sync instead of full sync.
     # Defaults to null (uses global checkpoint_sync_enabled setting)
     checkpoint_sync_enabled: null
 
@@ -1687,6 +1688,7 @@ global_node_selectors: {}
 keymanager_enabled: false
 
 # Global flag to enable checkpoint sync across the network
+# When enabled, EL clients that support it (geth, besu, nethermind, ethrex) default to snap sync instead of full sync
 # Default to false
 checkpoint_sync_enabled: false
 
