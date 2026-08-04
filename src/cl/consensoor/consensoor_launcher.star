@@ -9,6 +9,7 @@ constants = import_module("../../package_io/constants.star")
 BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/consensoor"
 
 BEACON_DISCOVERY_PORT_NUM = 9000
+BEACON_QUIC_PORT_NUM = 9001
 BEACON_HTTP_PORT_NUM = 5052
 BEACON_METRICS_PORT_NUM = 8008
 
@@ -153,6 +154,10 @@ def get_beacon_config(
                 public_ports_for_component[0],
                 shared_utils.UDP_PROTOCOL,
             ),
+            constants.QUIC_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
+                public_ports_for_component[3],
+                shared_utils.UDP_PROTOCOL,
+            ),
             constants.HTTP_PORT_ID: shared_utils.new_port_spec(
                 public_ports_for_component[1],
                 shared_utils.TCP_PROTOCOL,
@@ -170,10 +175,16 @@ def get_beacon_config(
         if public_ports_for_component
         else BEACON_DISCOVERY_PORT_NUM
     )
+    discovery_port_quic = (
+        public_ports_for_component[3]
+        if public_ports_for_component
+        else BEACON_QUIC_PORT_NUM
+    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -194,6 +205,7 @@ def get_beacon_config(
         "--preset=" + network_params.preset,
         "--p2p-port={0}".format(discovery_port),
         "--p2p-host=0.0.0.0",
+        "--quic-port={0}".format(discovery_port_quic),
         "--beacon-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
