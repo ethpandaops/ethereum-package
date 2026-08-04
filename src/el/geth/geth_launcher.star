@@ -169,7 +169,7 @@ def get_config(
         ),
         "{0}".format(
             "--override.genesis={0}".format(
-                constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+                constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
             )
             if network_params.network not in constants.PUBLIC_NETWORKS
             else ""
