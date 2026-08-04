@@ -122,7 +122,7 @@ def new_builder_config_template_data(
     return {
         "Network": network_params.network
         if network_params.network in constants.PUBLIC_NETWORKS
-        else "/network-configs/genesis.json",
+        else constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER,
         "DataDir": "/data/reth/execution-data",
         "CLEndpoint": "http://cl-{0}-{1}-{2}:{3}".format(
             num_of_participants,
