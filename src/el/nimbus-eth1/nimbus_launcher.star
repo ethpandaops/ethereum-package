@@ -164,11 +164,7 @@ def get_config(
         cmd.append("--gas-limit={0}".format(network_params.gas_limit))
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
-        cmd.append(
-            "--network="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/genesis.json"
-        )
+        cmd.append("--network=" + constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER)
     else:
         cmd.append("--network=" + network_params.network)
 

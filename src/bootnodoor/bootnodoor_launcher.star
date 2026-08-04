@@ -176,7 +176,7 @@ def get_config(
         "--genesis-validators-root",
         genesis_validators_root,
         "--el-config",
-        "{0}/genesis.json".format(constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS),
+        constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER,
         "--el-genesis-hash",
         el_genesis_hash,
         "--bind-addr",

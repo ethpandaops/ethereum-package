@@ -81,6 +81,9 @@ ARCHIVE_MODE = True
 
 GENESIS_DATA_MOUNTPOINT_ON_CLIENTS = "/network-configs"
 GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER = GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+GENESIS_JSON_MOUNT_PATH_ON_CONTAINER = (
+    GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+)
 
 VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER = "/validator-keys"
 
@@ -111,7 +114,7 @@ DEFAULT_ASSERTOOR_IMAGE = "ethpandaops/assertoor:latest"
 DEFAULT_SNOOPER_IMAGE = "ethpandaops/rpc-snooper:latest"
 DEFAULT_BOOTNODOOR_IMAGE = "ethpandaops/bootnodoor:latest"
 DEFAULT_ETHEREUM_GENESIS_GENERATOR_IMAGE = (
-    "ethpandaops/ethereum-genesis-generator:6.1.4"
+    "ethpandaops/ethereum-genesis-generator:6.1.5"
 )
 DEFAULT_YQ_IMAGE = "linuxserver/yq"
 DEFAULT_FLASHBOTS_RELAY_IMAGE = "ethpandaops/mev-boost-relay:main"

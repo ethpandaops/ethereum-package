@@ -183,7 +183,7 @@ def get_config(
             "--chain={0}".format(
                 network_params.network
                 if network_params.network in constants.PUBLIC_NETWORKS
-                else constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+                else constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
             ),
             "--http",
             "--http.port={0}".format(RPC_PORT_NUM),

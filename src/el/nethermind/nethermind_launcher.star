@@ -171,18 +171,14 @@ def get_config(
 
     if constants.NETWORK_NAME.shadowfork in network_params.network:
         cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
+            "--Init.ChainSpecPath=" + constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
         )
         cmd.append("--config=" + network_params.network.split("-")[0])
         cmd.append("--Init.BaseDbPath=" + network_params.network.split("-")[0])
     elif network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--config=none")
         cmd.append(
-            "--Init.ChainSpecPath="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/chainspec.json"
+            "--Init.ChainSpecPath=" + constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
         )
 
         # Configure block timing to match consensus layer
