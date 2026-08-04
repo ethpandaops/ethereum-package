@@ -196,6 +196,7 @@ def get_config(
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full"
         if network_params.network == constants.NETWORK_NAME.kurtosis
+        and not participant.checkpoint_sync_enabled
         and not gcmode_archive
         else "--syncmode=snap"
         if not gcmode_archive

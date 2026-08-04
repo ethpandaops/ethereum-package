@@ -173,7 +173,10 @@ def get_config(
         "--engine-rpc-port={0}".format(ENGINE_HTTP_RPC_PORT_NUM),
         "{0}".format(
             "--sync-mode=FULL"
-            if network_params.network in constants.NETWORK_NAME.kurtosis
+            if (
+                network_params.network in constants.NETWORK_NAME.kurtosis
+                and not participant.checkpoint_sync_enabled
+            )
             or participant.el_storage_type == "archive"
             else "--sync-mode=SNAP"
         ),
