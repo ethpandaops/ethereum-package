@@ -34,6 +34,7 @@ snooper_el_launcher = import_module("./snooper/snooper_el_launcher.star")
 blobber_launcher = import_module("./blobber/blobber_launcher.star")
 cl_context_module = import_module("./cl/cl_context.star")
 bootnodoor_launcher = import_module("./bootnodoor/bootnodoor_launcher.star")
+bootnode_launcher = import_module("./bootnode/bootnode_launcher.star")
 
 
 def launch_participant_network(
@@ -176,6 +177,26 @@ def launch_participant_network(
         plan.print("Bootnodoor launched with ENR: {0}".format(bootnodoor_enr))
         plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
 
+    # Launch a standalone geth-backed discv5 bootnode if configured. It seeds BOTH
+    # overlays: its enode/ENR feed the EL override and its ENR the CL override (the
+    # same variables bootnodoor uses), so no separate wiring is needed downstream.
+    if "bootnode" in args_with_right_defaults.additional_services:
+        plan.print("Launching standalone geth discv5 bootnode")
+        args_with_right_defaults.additional_services.remove("bootnode")
+        bootnodoor_enode, bootnodoor_enr = bootnode_launcher.launch_bootnode(
+            plan,
+            args_with_right_defaults.bootnode_params,
+            el_cl_data,
+            jwt_file,
+            network_id,
+            network_params,
+            args_with_right_defaults.global_log_level,
+            persistent,
+            args_with_right_defaults.port_publisher,
+            global_node_selectors,
+            global_tolerations,
+        )
+
     # Upload binary artifacts when both binary_path and force_restart are enabled
     binary_artifacts = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
@@ -216,6 +237,8 @@ def launch_participant_network(
         bootnodoor_enode,
         binary_artifacts,
         otel_otlp_grpc_url,
+        bootnodoor_enr=bootnodoor_enr,
+        bootnode_record=args_with_right_defaults.bootnode_params.record,
     )
 
     # Launch all consensus layer clients

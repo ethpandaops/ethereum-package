@@ -483,6 +483,7 @@ SUBCATEGORY_PARAMS = {
 
 ADDITIONAL_SERVICES_PARAMS = [
     "bootnodoor",
+    "bootnode",
     "assertoor",
     "broadcaster",
     "tx_fuzz",
@@ -666,6 +667,7 @@ def sanity_check(plan, input_args):
         )
         combined_root_params.append("additional_services")
         combined_root_params.append("extra_files")
+        combined_root_params.append("bootnode_params")
 
         if param not in combined_root_params:
             fail(

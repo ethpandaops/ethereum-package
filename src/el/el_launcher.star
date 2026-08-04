@@ -34,7 +34,15 @@ def launch(
     bootnodoor_enode=None,
     binary_artifacts={},
     otel_otlp_grpc_url=None,
+    bootnodoor_enr=None,
+    bootnode_record="enode",
 ):
+    # Global bootnode record format (NOT per-client): "enode" or "enr". Controls the
+    # form in which the single bootnode is handed to every EL client. Clients whose
+    # discv5 can't seed from a bare enode (e.g. erigon) need "enr"; geth/nethermind/
+    # ethrex accept either. reth only accepts "enode" (and can't discv5-bootstrap from
+    # it) so it has no working option here.
+    use_enr = bootnode_record == "enr"
     el_launchers = {
         constants.EL_TYPE.geth: {
             "launcher": geth.new_geth_launcher(
@@ -175,6 +183,23 @@ def launch(
         el_service_name = "el-{0}-{1}-{2}".format(index_str, el_type, cl_type)
         el_binary_artifact = binary_artifacts.get(index, {}).get("el", None)
 
+        # Choose this client's single bootnode, in the form it needs (ENR for clients
+        # whose discv5 can't seed from a bare enode, enode otherwise):
+        #  - bootnodoor enabled -> point at bootnodoor.
+        #  - bootnodoor absent  -> "geth-as-bootnode" strict star: every client except
+        #    participant #0 points ONLY at #0 (which the package treats as the network
+        #    bootnode). #0 itself gets no bootnode. This reuses each launcher's override
+        #    branch, so no per-client launcher changes are needed.
+        if bootnodoor_enode != None:
+            bootnode_override = (
+                bootnodoor_enr if (use_enr and bootnodoor_enr != None) else bootnodoor_enode
+            )
+        elif index > 0 and len(all_el_contexts) > 0:
+            anchor = all_el_contexts[0]
+            bootnode_override = anchor.enr if use_enr else anchor.enode
+        else:
+            bootnode_override = None
+
         if index == 0:
             el_context = launch_method(
                 plan,
@@ -190,7 +215,7 @@ def launch(
                 index,
                 network_params,
                 extra_files_artifacts,
-                bootnodoor_enode,
+                bootnode_override,
                 el_binary_artifact,
                 otel_otlp_grpc_url,
             )
@@ -217,7 +242,7 @@ def launch(
                 index,
                 network_params,
                 extra_files_artifacts,
-                bootnodoor_enode,
+                bootnode_override,
                 el_binary_artifact,
                 otel_otlp_grpc_url,
             )
