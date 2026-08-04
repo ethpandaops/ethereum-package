@@ -40,7 +40,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
     otel_otlp_grpc_url=None,
 ):
@@ -61,7 +61,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
-        bootnodoor_enode,
+        bootnodoor_el_enr,
         el_binary_artifact,
         otel_otlp_grpc_url,
     )
@@ -93,7 +93,7 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
     otel_otlp_grpc_url=None,
 ):
@@ -153,6 +153,7 @@ def get_config(
         "--Network.ExternalIp={0}".format(port_publisher.el_nat_exit_ip),
         "--Network.DiscoveryPort={0}".format(discovery_port_tcp),
         "--Network.P2PPort={0}".format(discovery_port_tcp),
+        "--Discovery.DiscoveryVersion=V5",
         "--JsonRpc.JwtSecretFile=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--Metrics.Enabled=true",
         "--Metrics.ExposePort={0}".format(METRICS_PORT_NUM),
@@ -188,30 +189,27 @@ def get_config(
     else:
         cmd.append("--config=" + network_params.network)
 
-    # Handle bootnode configuration with bootnodoor_enode override
-    if bootnodoor_enode != None:
-        cmd.append("--Discovery.Bootnodes=" + bootnodoor_enode)
+    # Handle bootnode configuration with bootnodoor_el_enr override
+    if bootnodoor_el_enr != None:
+        cmd.append("--Discovery.Bootnodes=" + bootnodoor_el_enr)
     elif (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
-        if len(existing_el_clients) > 0:
-            cmd.append(
-                "--Discovery.Bootnodes="
-                + ",".join(
-                    [
-                        ctx.enode
-                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                    ]
-                )
-            )
+        el_bootnode_enrs = [
+            ctx.enr
+            for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+            if ctx.enr
+        ]
+        if len(el_bootnode_enrs) > 0:
+            cmd.append("--Discovery.Bootnodes=" + ",".join(el_bootnode_enrs))
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--Discovery.Bootnodes="
-            + shared_utils.get_devnet_enodes(
+            + shared_utils.get_devnet_el_enrs(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
         )
@@ -305,7 +303,7 @@ def get_el_context(
     service,
     launcher,
 ):
-    enode = el_admin_node_info.get_enode_for_node(
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, constants.RPC_PORT_ID
     )
 
@@ -320,6 +318,7 @@ def get_el_context(
     return el_context.new_el_context(
         client_name="nethermind",
         enode=enode,
+        enr=enr,
         dns_name=service.name,
         rpc_port_num=RPC_PORT_NUM,
         ws_port_num=WS_PORT_NUM,

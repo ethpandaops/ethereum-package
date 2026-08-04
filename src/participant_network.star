@@ -161,10 +161,15 @@ def launch_participant_network(
     # Launch bootnodoor if configured
     bootnodoor_enr = None
     bootnodoor_enode = None
+    bootnodoor_el_enr = None
     if "bootnodoor" in args_with_right_defaults.additional_services:
         plan.print("Launching bootnodoor as bootnode service")
         args_with_right_defaults.additional_services.remove("bootnodoor")
-        bootnodoor_enr, bootnodoor_enode = bootnodoor_launcher.launch_bootnodoor(
+        (
+            bootnodoor_enr,
+            bootnodoor_enode,
+            bootnodoor_el_enr,
+        ) = bootnodoor_launcher.launch_bootnodoor(
             plan,
             args_with_right_defaults.bootnodoor_params,
             el_cl_data,
@@ -177,8 +182,9 @@ def launch_participant_network(
             len(args_with_right_defaults.additional_services),
             backend,
         )
-        plan.print("Bootnodoor launched with ENR: {0}".format(bootnodoor_enr))
+        plan.print("Bootnodoor launched with CL ENR: {0}".format(bootnodoor_enr))
         plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
+        plan.print("Bootnodoor launched with EL ENR: {0}".format(bootnodoor_el_enr))
 
     # Upload binary artifacts when both binary_path and force_restart are enabled
     binary_artifacts = {}
@@ -218,6 +224,7 @@ def launch_participant_network(
         args_with_right_defaults.mev_params,
         extra_files_artifacts,
         bootnodoor_enode,
+        bootnodoor_el_enr,
         binary_artifacts,
         otel_otlp_grpc_url,
     )
