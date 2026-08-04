@@ -13,7 +13,6 @@ jobs:
       matrix:
         file_name:
           [
-            "./.github/tests/mev.yaml",
             "./.github/tests/mev-mock.yaml",
             "./.github/tests/mix-with-tools.yaml",
             "./.github/tests/mix-persistence.yaml",

@@ -9,6 +9,7 @@ NGINX_CONFIG_FILENAME = "index.html"
 NGINX_ENR_FILENAME = "bootstrap_nodes.yaml"
 NGINX_ENODE_FILENAME = "enodes.txt"
 NGINX_ENR_LIST_FILENAME = "bootstrap_nodes.txt"
+NGINX_EL_ENR_LIST_FILENAME = "el_enrs.txt"
 
 NGINX_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/usr/share/nginx/html/"
 
@@ -55,6 +56,7 @@ def launch_nginx(
 
     all_cl_client_info = []
     all_el_client_info = []
+    all_el_enr_info = []
     for index, participant in enumerate(participant_contexts):
         _, cl_client, el_client, _ = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
@@ -62,10 +64,14 @@ def launch_nginx(
         all_cl_client_info.append(new_cl_client_info(cl_client.enr))
         if el_client != None:
             all_el_client_info.append(new_el_client_info(el_client.enode))
+            # discv4-only clients (ethereumjs, nethermind) leave enr empty
+            if el_client.enr:
+                all_el_enr_info.append(new_el_enr_info(el_client.enr))
 
     template_data = new_config_template_data(
         all_cl_client_info,
         all_el_client_info,
+        all_el_enr_info,
     )
 
     enr_template_and_data = shared_utils.new_template_and_data(
@@ -83,6 +89,11 @@ def launch_nginx(
         template_data,
     )
 
+    el_enr_list_template_and_data = shared_utils.new_template_and_data(
+        read_file(static_files.NGINX_EL_ENR_LIST_FILEPATH),
+        template_data,
+    )
+
     template_and_data_by_rel_dest_filepath = {}
     template_and_data_by_rel_dest_filepath[NGINX_ENR_FILENAME] = enr_template_and_data
     template_and_data_by_rel_dest_filepath[
@@ -91,6 +102,9 @@ def launch_nginx(
     template_and_data_by_rel_dest_filepath[
         NGINX_ENODE_FILENAME
     ] = enode_template_and_data
+    template_and_data_by_rel_dest_filepath[
+        NGINX_EL_ENR_LIST_FILENAME
+    ] = el_enr_list_template_and_data
 
     bootstrap_info_files_artifact_name = plan.render_templates(
         template_and_data_by_rel_dest_filepath, "nginx-bootstrap-info"
@@ -145,6 +159,10 @@ def get_config(
         "/network-configs/boot/" + NGINX_ENR_LIST_FILENAME,
         "/network-configs/" + NGINX_ENR_LIST_FILENAME,
         "&&",
+        "mv",
+        "/network-configs/boot/" + NGINX_EL_ENR_LIST_FILENAME,
+        "/network-configs/" + NGINX_EL_ENR_LIST_FILENAME,
+        "&&",
         "cp -R /network-configs/. /usr/share/nginx/html/",
         "&&",
         "tar",
@@ -178,10 +196,11 @@ def get_config(
     )
 
 
-def new_config_template_data(cl_client, el_client):
+def new_config_template_data(cl_client, el_client, el_enr):
     return {
         "CLClient": cl_client,
         "ELClient": el_client,
+        "ELEnr": el_enr,
     }
 
 
@@ -194,4 +213,10 @@ def new_cl_client_info(enr):
 def new_el_client_info(enode):
     return {
         "Enode": enode,
+    }
+
+
+def new_el_enr_info(enr):
+    return {
+        "Enr": enr,
     }

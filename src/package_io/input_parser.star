@@ -9,9 +9,9 @@ sanity_check = import_module("./sanity_check.star")
 DEFAULT_EL_IMAGES = {
     "geth": "ethereum/client-go:latest",
     "erigon": "erigontech/erigon:latest",
-    "nethermind": "nethermind/nethermind:latest",
-    "besu": "hyperledger/besu:latest",
-    "reth": "ghcr.io/paradigmxyz/reth",
+    "nethermind": "ethpandaops/nethermind:master",
+    "besu": "ethpandaops/besu:main",
+    "reth": "ethpandaops/reth:main",
     "ethereumjs": "ethpandaops/ethereumjs:master",
     "nimbus": "statusim/nimbus-eth1:master",
     "ethrex": "ethpandaops/ethrex:main",
@@ -1264,6 +1264,7 @@ def input_parser(plan, input_args):
             max_cpu=result["bootnodoor_params"]["max_cpu"],
             min_mem=result["bootnodoor_params"]["min_mem"],
             max_mem=result["bootnodoor_params"]["max_mem"],
+            separate_keys=result["bootnodoor_params"]["separate_keys"],
             extra_args=result["bootnodoor_params"]["extra_args"],
         ),
         zkboost_params=struct(
@@ -2490,6 +2491,7 @@ def get_default_bootnodoor_params():
         "max_cpu": 1000,
         "min_mem": 128,
         "max_mem": 512,
+        "separate_keys": False,
         "extra_args": [],
     }
 
