@@ -181,9 +181,7 @@ def get_config(
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
-            "--gethGenesis="
-            + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
-            + "/genesis.json",
+            "--gethGenesis=" + constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER,
         )
     else:
         cmd.append("--network=" + network_params.network)
