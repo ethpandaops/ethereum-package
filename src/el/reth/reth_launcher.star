@@ -49,7 +49,7 @@ def launch(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
     otel_otlp_grpc_url=None,
 ):
@@ -70,7 +70,7 @@ def launch(
         participant_index,
         network_params,
         extra_files_artifacts,
-        bootnodoor_enode,
+        bootnodoor_el_enr,
         el_binary_artifact,
         otel_otlp_grpc_url,
     )
@@ -102,7 +102,7 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
     otel_otlp_grpc_url=None,
 ):
@@ -207,7 +207,9 @@ def get_config(
             "--authrpc.addr=0.0.0.0",
             "--metrics=0.0.0.0:{0}".format(METRICS_PORT_NUM),
             "--discovery.port={0}".format(discovery_port_udp),
+            "--discovery.v5.port={0}".format(discovery_port_udp),
             "--port={0}".format(discovery_port_tcp),
+            "--disable-discv4-discovery",
         ]
     )
 
@@ -218,30 +220,27 @@ def get_config(
     if network_params.gas_limit > 0:
         cmd.append("--builder.gaslimit={0}".format(network_params.gas_limit))
 
-    # Handle bootnode configuration with bootnodoor_enode override
-    if bootnodoor_enode != None:
-        cmd.append("--bootnodes=" + bootnodoor_enode)
+    # Handle bootnode configuration with bootnodoor_el_enr override
+    if bootnodoor_el_enr != None:
+        cmd.append("--bootnodes=" + bootnodoor_el_enr)
     elif (
         network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
     ):
-        if len(existing_el_clients) > 0:
-            cmd.append(
-                "--bootnodes="
-                + ",".join(
-                    [
-                        ctx.enode
-                        for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                    ]
-                )
-            )
+        el_bootnode_enrs = [
+            ctx.enr
+            for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
+            if ctx.enr
+        ]
+        if len(el_bootnode_enrs) > 0:
+            cmd.append("--bootnodes=" + ",".join(el_bootnode_enrs))
     elif (
         network_params.network not in constants.PUBLIC_NETWORKS
         and constants.NETWORK_NAME.shadowfork not in network_params.network
     ):
         cmd.append(
             "--bootnodes="
-            + shared_utils.get_devnet_enodes(
+            + shared_utils.get_devnet_el_enrs(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
         )
@@ -375,7 +374,7 @@ def get_el_context(
     service,
     launcher,
 ):
-    enode = el_admin_node_info.get_enode_for_node(
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, constants.RPC_PORT_ID
     )
 
@@ -399,6 +398,7 @@ def get_el_context(
         service_name=service_name,
         el_metrics_info=[reth_metrics_info],
         ip_addr=service.ip_address,
+        enr=enr,
     )
 
 
