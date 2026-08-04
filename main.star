@@ -48,9 +48,6 @@ flashbots_mev_relay = import_module(
 helix_relay = import_module("./src/mev/helix/helix_relay_launcher.star")
 mock_mev = import_module("./src/mev/flashbots/mock_mev/mock_mev_launcher.star")
 buildoor = import_module("./src/mev/buildoor/buildoor_launcher.star")
-mev_custom_flood = import_module(
-    "./src/mev/flashbots/mev_custom_flood/mev_custom_flood_launcher.star"
-)
 bootnodoor = import_module("./src/bootnodoor/bootnodoor_launcher.star")
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
 mempool_bridge = import_module("./src/mempool_bridge/mempool_bridge_launcher.star")
