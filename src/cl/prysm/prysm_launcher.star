@@ -18,7 +18,7 @@ DISCOVERY_QUIC_PORT_NUM = 13000
 BEACON_HTTP_PORT_NUM = 3500
 RPC_PORT_NUM = 4000
 BEACON_MONITORING_PORT_NUM = 8080
-PROFILING_PORT_NUM = 6060
+PPROF_PORT_NUM = 6060
 
 METRICS_PATH = "/metrics"
 
@@ -170,7 +170,7 @@ def get_beacon_config(
         )
         public_ports.update(
             shared_utils.get_port_specs(
-                {constants.PROFILING_PORT_ID: public_ports_for_component[6]}
+                {constants.PPROF_PORT_ID: public_ports_for_component[6]}
             )
         )
 
@@ -197,7 +197,7 @@ def get_beacon_config(
         constants.METRICS_PORT_ID: BEACON_MONITORING_PORT_NUM,
         constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
         constants.RPC_PORT_ID: RPC_PORT_NUM,
-        constants.PROFILING_PORT_ID: PROFILING_PORT_NUM,
+        constants.PPROF_PORT_ID: PPROF_PORT_NUM,
     }
     # Disable port checks if skip_start is enabled
     if participant.skip_start:
@@ -234,7 +234,7 @@ def get_beacon_config(
         # vvvvvvvvv PROFILING CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--pprof",
         "--pprofaddr=0.0.0.0",
-        "--pprofport={0}".format(PROFILING_PORT_NUM),
+        "--pprofport={0}".format(PPROF_PORT_NUM),
     ]
 
     if el_context != None:

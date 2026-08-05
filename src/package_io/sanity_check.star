@@ -350,6 +350,13 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "image",
     ],
+    "observoor_params": [
+        "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+    ],
     "assertoor_params": [
         "image",
         "run_stability_check",
@@ -495,6 +502,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "prometheus",
     "grafana",
     "tempo",
+    "observoor",
     "blobscan",
     "dugtrio",
     "erpc",
