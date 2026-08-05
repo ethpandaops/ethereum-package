@@ -4,7 +4,6 @@ cl_context = import_module("../../cl/cl_context.star")
 cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star")
 cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
-blobber_launcher = import_module("../../blobber/blobber_launcher.star")
 constants = import_module("../../package_io/constants.star")
 
 LODESTAR_ENTRYPOINT_COMMAND = "node ./packages/cli/bin/lodestar"
@@ -25,75 +24,6 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.debug: "debug",
     constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
-
-
-def launch(
-    plan,
-    launcher,
-    beacon_service_name,
-    participant,
-    global_log_level,
-    bootnode_contexts,
-    el_context,
-    full_name,
-    node_keystore_files,
-    snooper_el_engine_context,
-    persistent,
-    tolerations,
-    node_selectors,
-    checkpoint_sync_enabled,
-    checkpoint_sync_url,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-    backend,
-    tempo_otlp_grpc_url=None,
-    otel_otlp_grpc_url=None,
-    bootnode_enr_override=None,
-    cl_binary_artifact=None,
-):
-    # Launch Beacon node
-    beacon_config = get_beacon_config(
-        plan,
-        launcher,
-        beacon_service_name,
-        participant,
-        global_log_level,
-        bootnode_contexts,
-        el_context,
-        full_name,
-        node_keystore_files,
-        snooper_el_engine_context,
-        persistent,
-        tolerations,
-        node_selectors,
-        checkpoint_sync_enabled,
-        checkpoint_sync_url,
-        port_publisher,
-        participant_index,
-        network_params,
-        extra_files_artifacts,
-        backend,
-        tempo_otlp_grpc_url,
-        otel_otlp_grpc_url,
-        bootnode_enr_override,
-        cl_binary_artifact,
-    )
-
-    beacon_service = plan.add_service(beacon_service_name, beacon_config)
-
-    cl_context_obj = get_cl_context(
-        plan,
-        beacon_service_name,
-        beacon_service,
-        participant,
-        snooper_el_engine_context,
-        node_keystore_files,
-        node_selectors,
-    )
-
-    return cl_context_obj
 
 
 def get_beacon_config(
@@ -127,24 +57,16 @@ def get_beacon_config(
     )
 
     el_client_rpc_url_str = None
-    EXECUTION_ENGINE_ENDPOINT = None
     if el_context != None:
         el_client_rpc_url_str = "http://{0}:{1}".format(
             el_context.dns_name,
             el_context.rpc_port_num,
         )
 
-        # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-        if participant.snooper_enabled:
-            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-                snooper_el_engine_context.ip_addr,
-                snooper_el_engine_context.engine_rpc_port_num,
-            )
-        else:
-            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-                el_context.dns_name,
-                el_context.engine_rpc_port_num,
-            )
+    # If snooper is enabled use the snooper engine context, otherwise use the execution client context
+    EXECUTION_ENGINE_ENDPOINT = cl_shared.get_execution_engine_endpoint(
+        participant, el_context, snooper_el_engine_context
+    )
 
     public_ports = {}
     public_ports_for_component = None
@@ -227,8 +149,6 @@ def get_beacon_config(
     if checkpoint_sync_enabled:
         cmd.append("--checkpointSyncUrl=" + checkpoint_sync_url)
 
-    bootnode_arg = bootnode_enr_override
-
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append(
             "--paramsFile="
@@ -240,29 +160,18 @@ def get_beacon_config(
             + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
             + "/genesis.ssz"
         )
-        if (
-            network_params.network == constants.NETWORK_NAME.kurtosis
-            or constants.NETWORK_NAME.shadowfork in network_params.network
-        ):
-            if bootnode_contexts != None and bootnode_arg == None:
-                bootnode_arg = ",".join(
-                    [ctx.enr for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]]
-                )
-        elif network_params.network == constants.NETWORK_NAME.ephemery:
-            if bootnode_arg == None:
-                bootnode_arg = shared_utils.get_devnet_enrs_list(
-                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
-                )
-        else:  # Devnets
-            if bootnode_arg == None:
-                bootnode_arg = shared_utils.get_devnet_enrs_list(
-                    plan, launcher.el_cl_genesis_data.files_artifact_uuid
-                )
     else:  # Public testnet
         cmd.append("--network=" + network_params.network)
 
-    if bootnode_arg != None:
-        cmd.append("--bootnodes=" + bootnode_arg)
+    cl_shared.append_bootnode_arg(
+        plan,
+        cmd,
+        "--bootnodes=",
+        launcher,
+        network_params,
+        bootnode_contexts,
+        bootnode_enr_override,
+    )
 
     if len(participant.cl_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark
@@ -279,16 +188,10 @@ def get_beacon_config(
         )
 
     if persistent:
-        volume_size_key = (
-            "devnets" if "devnet" in network_params.network else network_params.network
-        )
-        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(beacon_service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.CL_TYPE.lodestar + "_volume_size"
-            ],
+        files[
+            BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER
+        ] = cl_shared.get_beacon_data_directory(
+            beacon_service_name, participant, network_params, constants.CL_TYPE.lodestar
         )
 
     # Add extra mounts - automatically handle file uploads
@@ -354,14 +257,7 @@ def get_beacon_config(
             constants.HTTP_PORT_ID
         )
 
-    if int(participant.cl_min_cpu) > 0:
-        config_args["min_cpu"] = int(participant.cl_min_cpu)
-    if int(participant.cl_max_cpu) > 0:
-        config_args["max_cpu"] = int(participant.cl_max_cpu)
-    if int(participant.cl_min_mem) > 0:
-        config_args["min_memory"] = int(participant.cl_min_mem)
-    if int(participant.cl_max_mem) > 0:
-        config_args["max_memory"] = int(participant.cl_max_mem)
+    cl_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)
 
 
@@ -378,28 +274,17 @@ def get_cl_context(
 
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
 
-    # Skip HTTP requests if skip_start is enabled (service won't be running)
-    if participant.skip_start:
-        beacon_node_enr = ""
-        beacon_multiaddr = ""
-        beacon_peer_id = ""
-    else:
-        # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
-        beacon_node_identity_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v1/node/identity",
-            port_id=constants.HTTP_PORT_ID,
-            extract={
-                "enr": ".data.enr",
-                "multiaddr": ".data.p2p_addresses[-1]",
-                "peer_id": ".data.peer_id",
-            },
-        )
-        response = plan.request(
-            recipe=beacon_node_identity_recipe, service_name=service_name
-        )
-        beacon_node_enr = response["extract.enr"]
-        beacon_multiaddr = response["extract.multiaddr"]
-        beacon_peer_id = response["extract.peer_id"]
+    # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
+    (
+        beacon_node_enr,
+        beacon_multiaddr,
+        beacon_peer_id,
+    ) = cl_shared.get_beacon_node_identity(
+        plan,
+        service_name,
+        participant,
+        multiaddr_index=-1,
+    )
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
@@ -433,22 +318,3 @@ def new_lodestar_launcher(el_cl_genesis_data, jwt_file):
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
     )
-
-
-def get_blobber_config(
-    plan,
-    participant,
-    beacon_service_name,
-    beacon_http_url,
-    node_keystore_files,
-    node_selectors,
-):
-    blobber_config = None
-    if participant.blobber_enabled:
-        blobber_config = struct(
-            service_name="{0}-{1}".format("blobber", beacon_service_name),
-            beacon_http_url=beacon_http_url,
-            node_keystore_files=node_keystore_files,
-            node_selectors=node_selectors,
-        )
-    return blobber_config

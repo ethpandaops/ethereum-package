@@ -6,7 +6,7 @@ cl_node_ready_conditions = import_module("../../cl/cl_node_ready_conditions.star
 cl_shared = import_module("../cl_shared.star")
 node_metrics = import_module("../../node_metrics_info.star")
 constants = import_module("../../package_io/constants.star")
-vc_shared = import_module("../../vc/shared.star")
+vc_shared = import_module("../../vc/vc_shared.star")
 #  ---------------------------------- Beacon client -------------------------------------
 # Nimbus requires that its data directory already exists (because it expects you to bind-mount it), so we
 #  have to to create it
@@ -44,74 +44,6 @@ VERBOSITY_LEVELS = {
 }
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
-
-
-def launch(
-    plan,
-    launcher,
-    beacon_service_name,
-    participant,
-    global_log_level,
-    bootnode_contexts,
-    el_context,
-    full_name,
-    node_keystore_files,
-    snooper_el_engine_context,
-    persistent,
-    tolerations,
-    node_selectors,
-    checkpoint_sync_enabled,
-    checkpoint_sync_url,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-    backend,
-    tempo_otlp_grpc_url=None,
-    otel_otlp_grpc_url=None,
-    bootnode_enr_override=None,
-    cl_binary_artifact=None,
-):
-    beacon_config = get_beacon_config(
-        plan,
-        launcher,
-        beacon_service_name,
-        participant,
-        global_log_level,
-        bootnode_contexts,
-        el_context,
-        full_name,
-        node_keystore_files,
-        snooper_el_engine_context,
-        persistent,
-        tolerations,
-        node_selectors,
-        checkpoint_sync_enabled,
-        checkpoint_sync_url,
-        port_publisher,
-        participant_index,
-        network_params,
-        extra_files_artifacts,
-        backend,
-        tempo_otlp_grpc_url,
-        otel_otlp_grpc_url,
-        bootnode_enr_override,
-        cl_binary_artifact,
-    )
-
-    beacon_service = plan.add_service(beacon_service_name, beacon_config)
-
-    cl_context_obj = get_cl_context(
-        plan,
-        beacon_service_name,
-        beacon_service,
-        participant,
-        snooper_el_engine_context,
-        node_keystore_files,
-        node_selectors,
-    )
-
-    return cl_context_obj
 
 
 def get_beacon_config(
@@ -156,18 +88,9 @@ def get_beacon_config(
             node_keystore_files.raw_secrets_relative_dirpath,
         )
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    EXECUTION_ENGINE_ENDPOINT = None
-    if el_context != None:
-        if participant.snooper_enabled:
-            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-                snooper_el_engine_context.ip_addr,
-                snooper_el_engine_context.engine_rpc_port_num,
-            )
-        else:
-            EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-                el_context.dns_name,
-                el_context.engine_rpc_port_num,
-            )
+    EXECUTION_ENGINE_ENDPOINT = cl_shared.get_execution_engine_endpoint(
+        participant, el_context, snooper_el_engine_context
+    )
 
     public_ports = {}
     validator_public_port_assignment = {}
@@ -334,16 +257,10 @@ def get_beacon_config(
         )
 
     if persistent:
-        volume_size_key = (
-            "devnets" if "devnet" in network_params.network else network_params.network
-        )
-        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(beacon_service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.CL_TYPE.nimbus + "_volume_size"
-            ],
+        files[
+            BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER
+        ] = cl_shared.get_beacon_data_directory(
+            beacon_service_name, participant, network_params, constants.CL_TYPE.nimbus
         )
 
     # Add extra mounts - automatically handle file uploads
@@ -407,14 +324,7 @@ def get_beacon_config(
             constants.HTTP_PORT_ID
         )
 
-    if int(participant.cl_min_cpu) > 0:
-        config_args["min_cpu"] = int(participant.cl_min_cpu)
-    if int(participant.cl_max_cpu) > 0:
-        config_args["max_cpu"] = int(participant.cl_max_cpu)
-    if int(participant.cl_min_mem) > 0:
-        config_args["min_memory"] = int(participant.cl_min_mem)
-    if int(participant.cl_max_mem) > 0:
-        config_args["max_memory"] = int(participant.cl_max_mem)
+    cl_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)
 
 
@@ -432,27 +342,11 @@ def get_cl_context(
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
     beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
 
-    # Skip HTTP requests if skip_start is enabled (service won't be running)
-    if participant.skip_start:
-        beacon_node_enr = ""
-        beacon_multiaddr = ""
-        beacon_peer_id = ""
-    else:
-        beacon_node_identity_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v1/node/identity",
-            port_id=constants.HTTP_PORT_ID,
-            extract={
-                "enr": ".data.enr",
-                "multiaddr": ".data.p2p_addresses[0]",
-                "peer_id": ".data.peer_id",
-            },
-        )
-        response = plan.request(
-            recipe=beacon_node_identity_recipe, service_name=service_name
-        )
-        beacon_node_enr = response["extract.enr"]
-        beacon_multiaddr = response["extract.multiaddr"]
-        beacon_peer_id = response["extract.peer_id"]
+    (
+        beacon_node_enr,
+        beacon_multiaddr,
+        beacon_peer_id,
+    ) = cl_shared.get_beacon_node_identity(plan, service_name, participant)
 
     nimbus_node_metrics_info = node_metrics.new_node_metrics_info(
         service_name, BEACON_METRICS_PATH, beacon_metrics_url
@@ -484,15 +378,3 @@ def new_nimbus_launcher(el_cl_genesis_data, jwt_file, keymanager_file):
         jwt_file=jwt_file,
         keymanager_file=keymanager_file,
     )
-
-
-def get_blobber_config(
-    plan,
-    participant,
-    beacon_service_name,
-    beacon_http_url,
-    node_keystore_files,
-    node_selectors,
-):
-    # Nimbus doesn't support blobbers, return None for blobber config
-    return None
