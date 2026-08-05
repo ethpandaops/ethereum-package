@@ -45,58 +45,6 @@ VERBOSITY_LEVELS = {
 }
 
 
-def launch(
-    plan,
-    launcher,
-    service_name,
-    participant,
-    global_log_level,
-    existing_el_clients,
-    persistent,
-    tolerations,
-    node_selectors,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-    bootnodoor_el_enr=None,
-    el_binary_artifact=None,
-    otel_otlp_grpc_url=None,
-):
-    cl_client_name = service_name.split("-")[3]
-
-    config = get_config(
-        plan,
-        launcher,
-        participant,
-        service_name,
-        existing_el_clients,
-        cl_client_name,
-        global_log_level,
-        persistent,
-        tolerations,
-        node_selectors,
-        port_publisher,
-        participant_index,
-        network_params,
-        extra_files_artifacts,
-        bootnodoor_el_enr,
-        el_binary_artifact,
-        otel_otlp_grpc_url,
-    )
-
-    service = plan.add_service(
-        service_name, config, force_update=participant.el_force_restart
-    )
-
-    return get_el_context(
-        plan,
-        service_name,
-        service,
-        launcher,
-    )
-
-
 def get_config(
     plan,
     launcher,
@@ -133,15 +81,8 @@ def get_config(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
 
-    discovery_port_tcp = (
-        public_ports_for_component[0]
-        if public_ports_for_component
-        else DISCOVERY_PORT_NUM
-    )
-    discovery_port_udp = (
-        public_ports_for_component[0]
-        if public_ports_for_component
-        else DISCOVERY_PORT_NUM
+    discovery_port_tcp, discovery_port_udp = el_shared.get_discovery_ports(
+        public_ports_for_component, DISCOVERY_PORT_NUM
     )
 
     used_port_assignments = {
@@ -154,6 +95,10 @@ def get_config(
     }
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
+    log_level = input_parser.get_client_log_level_or_default(
+        participant.el_log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     cmd = [
         "--datadir=" + EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
         "--network={0}".format(
@@ -162,7 +107,7 @@ def get_config(
             else constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
         ),
         "--syncmode=snap" if participant.checkpoint_sync_enabled else "--syncmode=full",
-        "--log.level={0}".format(VERBOSITY_LEVELS[global_log_level]),
+        "--log.level={0}".format(log_level),
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
         "--http.api=eth,net,web3,debug,admin,txpool",
@@ -179,26 +124,16 @@ def get_config(
         "--nat.extip=" + port_publisher.el_nat_exit_ip,
     ]
     # Handle bootnode configuration with bootnodoor_el_enr override
-    if bootnodoor_el_enr != None:
-        cmd.append("--bootnodes=" + bootnodoor_el_enr)
-    elif network_params.network == constants.NETWORK_NAME.kurtosis:
-        el_bootnode_enrs = [
-            ctx.enr
-            for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-            if ctx.enr
-        ]
-        if len(el_bootnode_enrs) > 0:
-            cmd.append("--bootnodes=" + ",".join(el_bootnode_enrs))
-    elif (
-        network_params.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in network_params.network
-    ):
-        cmd.append(
-            "--bootnodes="
-            + shared_utils.get_devnet_el_enrs(
-                plan, launcher.el_cl_genesis_data.files_artifact_uuid
-            )
-        )
+    bootnode_arg = el_shared.get_bootnode_arg(
+        plan,
+        launcher,
+        network_params.network,
+        existing_el_clients,
+        bootnodoor_el_enr,
+        "--bootnodes=",
+    )
+    if bootnode_arg != None:
+        cmd.append(bootnode_arg)
 
     if network_params.gas_limit > 0:
         cmd.append("--builder.gas-limit={0}".format(network_params.gas_limit))
@@ -207,30 +142,19 @@ def get_config(
         # this is a repeated<proto type>, we convert it into Starlark
         cmd.extend([param for param in participant.el_extra_params])
 
-    cmd_str = " ".join(cmd)
-    if network_params.network not in constants.PUBLIC_NETWORKS:
-        subcommand_strs = [cmd_str]
-    else:
-        subcommand_strs = [cmd_str]
-
-    command_str = " && ".join(subcommand_strs)
-
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
     if persistent:
-        volume_size_key = (
-            "devnets" if "devnet" in network_params.network else network_params.network
-        )
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.EL_TYPE.ethrex + "_volume_size"
-            ],
+        files[
+            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER
+        ] = el_shared.get_persistent_data_directory(
+            participant,
+            service_name,
+            network_params.network,
+            constants.EL_TYPE.ethrex,
         )
 
     # Add extra mounts - automatically handle file uploads
@@ -240,9 +164,7 @@ def get_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
-    # Binary injection - mount custom binary directory if provided
-    if el_binary_artifact != None:
-        files["/opt/bin"] = el_binary_artifact.artifact
+    el_shared.mount_el_binary_artifact(files, el_binary_artifact)
 
     config_args = {
         "image": participant.el_image,
@@ -270,26 +192,11 @@ def get_config(
         "node_selectors": node_selectors,
     }
 
-    # Binary injection - override entrypoint and cmd only when binary is provided
-    if el_binary_artifact != None:
-        config_args["entrypoint"] = ["sh", "-c"]
-        config_args["cmd"] = [
-            "cp /opt/bin/{0} /usr/local/bin/ethrex && ethrex ".format(
-                el_binary_artifact.filename
-            )
-            + " ".join(cmd)
-        ]
+    el_shared.apply_el_binary_override(
+        config_args, el_binary_artifact, "/usr/local/bin/ethrex", "ethrex", cmd
+    )
 
-    if participant.el_min_cpu > 0:
-        config_args["min_cpu"] = participant.el_min_cpu
-    if participant.el_max_cpu > 0:
-        config_args["max_cpu"] = participant.el_max_cpu
-    if participant.el_min_mem > 0:
-        config_args["min_memory"] = participant.el_min_mem
-    if participant.el_max_mem > 0:
-        config_args["max_memory"] = participant.el_max_mem
-    if len(participant.el_devices) > 0:
-        config_args["devices"] = participant.el_devices
+    el_shared.apply_resource_limits(config_args, participant)
 
     return ServiceConfig(**config_args)
 

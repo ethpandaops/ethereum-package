@@ -99,20 +99,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 
-def merge_nested_defaults(result, input_args, category):
-    for sub_attr in input_args[category]:
-        sub_value = input_args[category][sub_attr]
-        if (
-            type(sub_value) == "dict"
-            and sub_attr in result[category]
-            and type(result[category][sub_attr]) == "dict"
-        ):
-            for nested_attr in sub_value:
-                result[category][sub_attr][nested_attr] = sub_value[nested_attr]
-        else:
-            result[category][sub_attr] = sub_value
-
-
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
@@ -152,12 +138,6 @@ def input_parser(plan, input_args):
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
     result["trueblocks_params"] = get_default_trueblocks_params()
-
-    if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
-        shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
-        result["network_params"][
-            "deposit_contract_address"
-        ] = constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]

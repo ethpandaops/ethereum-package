@@ -23,76 +23,6 @@ VERBOSITY_LEVELS = {
 }
 
 
-def launch(
-    plan,
-    launcher,
-    beacon_service_name,
-    participant,
-    global_log_level,
-    bootnode_contexts,
-    el_context,
-    full_name,
-    node_keystore_files,
-    snooper_el_engine_context,
-    persistent,
-    tolerations,
-    node_selectors,
-    checkpoint_sync_enabled,
-    checkpoint_sync_url,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-    backend,
-    tempo_otlp_grpc_url=None,
-    otel_otlp_grpc_url=None,
-    bootnode_enr_override=None,
-    cl_binary_artifact=None,
-):
-    beacon_config = get_beacon_config(
-        plan,
-        launcher,
-        beacon_service_name,
-        participant,
-        global_log_level,
-        bootnode_contexts,
-        el_context,
-        full_name,
-        node_keystore_files,
-        snooper_el_engine_context,
-        persistent,
-        tolerations,
-        node_selectors,
-        checkpoint_sync_enabled,
-        checkpoint_sync_url,
-        port_publisher,
-        participant_index,
-        network_params,
-        extra_files_artifacts,
-        backend,
-        tempo_otlp_grpc_url,
-        otel_otlp_grpc_url,
-        bootnode_enr_override,
-        cl_binary_artifact,
-    )
-
-    beacon_service = plan.add_service(
-        beacon_service_name, beacon_config, force_update=participant.cl_force_restart
-    )
-
-    cl_context_obj = get_cl_context(
-        plan,
-        beacon_service_name,
-        beacon_service,
-        participant,
-        snooper_el_engine_context,
-        node_keystore_files,
-        node_selectors,
-    )
-
-    return cl_context_obj
-
-
 def get_beacon_config(
     plan,
     launcher,
@@ -158,7 +88,11 @@ def get_beacon_config(
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
 
-    used_ports = shared_utils.get_port_specs(used_port_assignments)
+    # Disable port checks if skip_start is enabled
+    if participant.skip_start:
+        used_ports = shared_utils.get_port_specs(used_port_assignments, wait=None)
+    else:
+        used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         "caplin",
@@ -225,16 +159,15 @@ def get_beacon_config(
         files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
     if persistent:
-        volume_size_key = (
-            "devnets" if "devnet" in network_params.network else network_params.network
-        )
-        files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(beacon_service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.CL_TYPE.lighthouse + "_volume_size"
-            ],
+        # Caplin has no volume-size entry of its own in constants.VOLUME_SIZE, so
+        # it reuses the lighthouse key.
+        files[
+            BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER
+        ] = cl_shared.get_beacon_data_directory(
+            beacon_service_name,
+            participant,
+            network_params,
+            constants.CL_TYPE.lighthouse,
         )
 
     processed_mounts = shared_utils.process_extra_mounts(
@@ -291,14 +224,7 @@ def get_beacon_config(
             constants.HTTP_PORT_ID
         )
 
-    if int(participant.cl_min_cpu) > 0:
-        config_args["min_cpu"] = int(participant.cl_min_cpu)
-    if int(participant.cl_max_cpu) > 0:
-        config_args["max_cpu"] = int(participant.cl_max_cpu)
-    if int(participant.cl_min_mem) > 0:
-        config_args["min_memory"] = int(participant.cl_min_mem)
-    if int(participant.cl_max_mem) > 0:
-        config_args["max_memory"] = int(participant.cl_max_mem)
+    cl_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)
 
 
@@ -314,26 +240,11 @@ def get_cl_context(
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
 
-    if participant.skip_start:
-        beacon_node_enr = ""
-        beacon_multiaddr = ""
-        beacon_peer_id = ""
-    else:
-        beacon_node_identity_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v1/node/identity",
-            port_id=constants.HTTP_PORT_ID,
-            extract={
-                "enr": ".data.enr",
-                "multiaddr": ".data.p2p_addresses[0]",
-                "peer_id": ".data.peer_id",
-            },
-        )
-        response = plan.request(
-            recipe=beacon_node_identity_recipe, service_name=service_name
-        )
-        beacon_node_enr = response["extract.enr"]
-        beacon_multiaddr = response["extract.multiaddr"]
-        beacon_peer_id = response["extract.peer_id"]
+    (
+        beacon_node_enr,
+        beacon_multiaddr,
+        beacon_peer_id,
+    ) = cl_shared.get_beacon_node_identity(plan, service_name, participant)
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(
@@ -369,14 +280,3 @@ def new_caplin_launcher(el_cl_genesis_data, jwt_file):
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
     )
-
-
-def get_blobber_config(
-    plan,
-    participant,
-    beacon_service_name,
-    beacon_http_url,
-    node_keystore_files,
-    node_selectors,
-):
-    return None
