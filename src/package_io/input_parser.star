@@ -168,11 +168,10 @@ def input_parser(plan, input_args):
         elif attr == "state_actor_params":
             for sub_attr in input_args["state_actor_params"]:
                 sub_value = input_args["state_actor_params"][sub_attr]
-                if sub_attr == "images":
-                    # Merge per-client so a partial images override keeps the
-                    # defaults for the other clients.
-                    for client, image in sub_value.items():
-                        result["state_actor_params"]["images"][client] = image
+                if sub_attr in ("images", "snapshots"):
+                    # Merge per-client so partial overrides keep defaults.
+                    for client, val in sub_value.items():
+                        result["state_actor_params"][sub_attr][client] = val
                 else:
                     result["state_actor_params"][sub_attr] = sub_value
         elif attr == "mev_params":
@@ -833,6 +832,7 @@ def input_parser(plan, input_args):
                 el_min_mem=participant["el_min_mem"],
                 el_max_mem=participant["el_max_mem"],
                 el_force_restart=participant["el_force_restart"],
+                el_pre_populated_db=participant["el_pre_populated_db"],
                 cl_min_cpu=participant["cl_min_cpu"],
                 cl_max_cpu=participant["cl_max_cpu"],
                 cl_min_mem=participant["cl_min_mem"],
@@ -1076,6 +1076,9 @@ def input_parser(plan, input_args):
             enabled=result["state_actor_params"]["enabled"],
             seed=result["state_actor_params"]["seed"],
             target_size=result["state_actor_params"]["target_size"],
+            spec=result["state_actor_params"]["spec"],
+            extra_args=result["state_actor_params"]["extra_args"],
+            snapshots=result["state_actor_params"]["snapshots"],
             images=result["state_actor_params"]["images"],
         ),
         tx_fuzz_params=struct(
@@ -2086,6 +2089,9 @@ def default_participant():
         "el_min_mem": 0,
         "el_max_mem": 0,
         "el_force_restart": False,
+        # Datadir is pre-populated (e.g. state-actor) with an authoritative
+        # chain config; launchers skip genesis init/override steps.
+        "el_pre_populated_db": False,
         "cl_type": "lighthouse",
         "cl_image": "",
         "cl_binary_path": "",
@@ -2204,20 +2210,24 @@ def get_default_docker_cache_params():
 
 
 def get_default_state_actor_params():
-    # Pre-populates EL datadirs with state-actor before launch. The images
-    # must carry a state-actor build with --genesis support; state-actor's
-    # published ghcr images are the default, overridable per client via
-    # `images` (e.g. locally built tags).
+    # Pre-populates EL datadirs with state-actor before launch; images must
+    # carry a state-actor build with --genesis support.
     return {
         "enabled": False,
         "seed": 1,
-        # Optional DB-size budget (e.g. "1GB"). Empty = alloc-verbatim: the
-        # generated DB contains exactly the network genesis alloc, so the
-        # genesis hash matches the one the CL genesis was built against.
-        # NOTE: any non-empty value changes the EL state root and therefore
-        # the genesis hash — the CL genesis must then be anchored to the
-        # state-actor output, which this integration does not do yet.
+        # DB-size budget (e.g. "1GB"). Empty = alloc-verbatim. Non-empty (or
+        # a spec) changes the genesis hash → CL genesis is re-anchored;
+        # such participants must set el_pre_populated_db.
         "target_size": "",
+        # Inline YAML state-actor spec (--spec); declares concrete entities.
+        # Schema: docs/SPEC.md in the state-actor repo.
+        "spec": "",
+        # Extra raw CLI args appended to every state-actor invocation.
+        "extra_args": [],
+        # Per-client URLs (s3/https) of pre-generated state-actor datadir
+        # tarballs (.tar.zst/.tar.gz); fetched instead of generating. Requires
+        # pinning network_params.genesis_time to the snapshot's genesis time.
+        "snapshots": {},
         "images": {
             "geth": "ghcr.io/ethereum/state-actor-geth:main",
             "reth": "ghcr.io/ethereum/state-actor-reth:main",

@@ -17,6 +17,7 @@ PARTICIPANT_CATEGORIES = {
         "el_min_mem",
         "el_max_mem",
         "el_force_restart",
+        "el_pre_populated_db",
         "cl_type",
         "cl_image",
         "cl_binary_path",
@@ -100,6 +101,7 @@ PARTICIPANT_MATRIX_PARAMS = {
             "el_min_mem",
             "el_max_mem",
             "el_force_restart",
+            "el_pre_populated_db",
         ],
         "cl": [
             "cl_type",
@@ -316,6 +318,9 @@ SUBCATEGORY_PARAMS = {
         "enabled",
         "seed",
         "target_size",
+        "spec",
+        "extra_args",
+        "snapshots",
         "images",
     ],
     "tx_fuzz_params": [

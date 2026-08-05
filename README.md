@@ -1475,17 +1475,23 @@ docker_cache_params:
 
 
 # Pre-populate EL client databases with state-actor (https://github.com/ethereum/state-actor)
-# before the EL clients launch. When enabled, one state-actor run happens per unique
-# el_type among the participants, driven by the network's own genesis.json
-# (state-actor --genesis), so the produced database's genesis hash matches the hash the
-# CL genesis was built against. Each run's output is stored as a files artifact named
-# "state-actor-<el_type>-data"; participants opt in by mounting it at their execution
-# data directory via el_extra_mounts:
+# before the EL clients launch, driven by the network's own genesis.json (state-actor
+# --genesis). Participants opt in with el_pre_populated_db: true, which also makes their
+# launcher skip genesis init/override (the pre-populated DB's chain config is
+# authoritative). When target_size / spec / snapshots add synthetic state, the genesis
+# hash changes and the CL genesis is automatically re-anchored to the state-actor
+# genesis block — no manual steps needed.
 #
-#   participants:
-#     - el_type: geth
-#       el_extra_mounts:
-#         /data/geth/execution-data: state-actor-geth-data
+# Two delivery modes:
+# - persistent: true — generation writes straight into each opted-in participant's
+#   persistent volume (required for multi-GB states; files artifacts can't carry them):
+#     participants:
+#       - el_type: geth
+#         el_pre_populated_db: true
+#     persistent: true
+# - default (non-persistent) — one files artifact per unique el_type, mounted via:
+#         el_extra_mounts:
+#           /data/geth/execution-data: state-actor-geth-data
 #
 # nethermind participants additionally need:
 #   el_extra_params:
@@ -1499,11 +1505,20 @@ state_actor_params:
   enabled: false
   # Random seed passed to state-actor (deterministic output for a given genesis + seed)
   seed: 1
-  # Optional DB-size budget (e.g. "1GB") for synthetic state on top of the genesis alloc.
-  # NOTE: any non-empty value changes the EL state root and therefore the genesis hash;
-  # the CL genesis must then be anchored to the state-actor output, which this
-  # integration does not do yet. Leave empty for alloc-verbatim databases.
+  # Optional DB-size budget (e.g. "5GB") of synthetic state on top of the genesis alloc.
+  # Empty = alloc-verbatim (genesis hash unchanged, no CL re-anchoring needed).
   target_size: ""
+  # Optional inline state-actor spec (YAML): concrete entities to write — ERC-20s, EOAs,
+  # EIP-7702 accounts, raw-bytecode contracts. Schema: docs/SPEC.md in the state-actor
+  # repo. Passed as --spec.
+  spec: ""
+  # Extra raw CLI args appended to every state-actor invocation.
+  extra_args: []
+  # Per-client URLs (s3/https) of pre-generated state-actor datadir tarballs
+  # (.tar.zst/.tar.gz/.tar), fetched instead of generating. Reuse requires launching
+  # with the same network params the snapshot was generated against, with
+  # network_params.genesis_time pinned to the original genesis time.
+  snapshots: {}
   # Per-client state-actor images
   images:
     geth: ghcr.io/ethereum/state-actor-geth:main
