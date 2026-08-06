@@ -24,17 +24,15 @@ def launch(plan, network, global_tolerations=[], global_node_selectors={}):
             base_url
         )
     )
+    remote_tar_artifact = plan.upload_files(
+        src="{0}/network-config.tar".format(base_url),
+        name="remote-enclave-network-config-tar",
+    )
     el_cl_genesis_data_uuid = plan.run_sh(
-        name="fetch-remote-enclave-genesis",
-        description="Fetching network-config.tar from remote enclave",
-        run="sh -c '"
-        + "mkdir -p /network-configs/ && "
-        + "curl -fsSL -o /tmp/network-config.tar "
-        + base_url
-        + "/network-config.tar && "
-        + "tar -xf /tmp/network-config.tar -C /network-configs/ && "
-        + "cat /network-configs/genesis_validators_root.txt"
-        + "'",
+        name="extract-remote-enclave-genesis",
+        description="Extracting network-config.tar from remote enclave",
+        run="mkdir -p /network-configs/ && tar -xf /tar/network-config.tar -C /network-configs/ && cat /network-configs/genesis_validators_root.txt",
+        files={"/tar": remote_tar_artifact},
         store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,

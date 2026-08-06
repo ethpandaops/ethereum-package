@@ -122,24 +122,24 @@ def launch(
                 timeout="6h",  # 6 hours should be enough for the biggest network
             )
 
-    fetch_osaka_time = plan.run_sh(
-        name="fetch-osaka-time",
-        description="Fetching osaka time from genesis",
-        run="mkdir -p /network-configs && \
-            cd /network-configs && \
-            BASE_URL=https://raw.githubusercontent.com/eth-clients/"
-        + network_params.network
-        + "/main/metadata && \
-            curl -fsSL -o genesis.json \"$BASE_URL/genesis.json\" || echo \"genesis.json not found\" && \
-            jq '.config.osakaTime' /network-configs/genesis.json | tr -d '\n'",
-        store=[StoreSpec(src="/network-configs/", name="el_cl_genesis_data")],
+    genesis_artifact = plan.upload_files(
+        src="https://raw.githubusercontent.com/eth-clients/{0}/main/metadata/genesis.json".format(
+            network_params.network
+        ),
+        name="el_cl_genesis_data",
+    )
+    osaka_time = plan.run_sh(
+        name="read-osaka-time",
+        description="Reading osaka time from genesis",
+        run="jq '.config.osakaTime' /network-configs/genesis.json | tr -d '\n'",
+        files={"/network-configs": genesis_artifact},
         tolerations=shared_utils.get_tolerations(global_tolerations=global_tolerations),
         node_selectors=global_node_selectors,
     )
     el_cl_data = el_cl_genesis_data.new_el_cl_genesis_data(
-        fetch_osaka_time.files_artifacts[0],
+        genesis_artifact,
         constants.GENESIS_VALIDATORS_ROOT[network_params.network],
-        fetch_osaka_time.output,
+        osaka_time.output,
     )
     final_genesis_timestamp = constants.GENESIS_TIME[network_params.network]
     network_id = constants.NETWORK_ID[network_params.network]
