@@ -1017,24 +1017,24 @@ network_params:
   # Base fee update fraction for BPO1-5 (default 0)
   bpo_1_base_fee_update_fraction: 8346193
 
-  bpo_2_epoch: 18446744073709551615
+  bpo_2_epoch: 0
   bpo_2_max_blobs: 21
   bpo_2_target_blobs: 14
   bpo_2_base_fee_update_fraction: 11684671
 
   bpo_3_epoch: 18446744073709551615
-  bpo_3_max_blobs: 0
-  bpo_3_target_blobs: 0
+  bpo_3_max_blobs: 33
+  bpo_3_target_blobs: 22
   bpo_3_base_fee_update_fraction: 0
 
   bpo_4_epoch: 18446744073709551615
-  bpo_4_max_blobs: 0
-  bpo_4_target_blobs: 0
+  bpo_4_max_blobs: 48
+  bpo_4_target_blobs: 32
   bpo_4_base_fee_update_fraction: 0
 
   bpo_5_epoch: 18446744073709551615
-  bpo_5_max_blobs: 0
-  bpo_5_target_blobs: 0
+  bpo_5_max_blobs: 72
+  bpo_5_target_blobs: 48
   bpo_5_base_fee_update_fraction: 0
 
   # Withdrawal type - available options (0x00, 0x01, 0x02)
@@ -1808,7 +1808,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.1.5
+  image: ethpandaops/ethereum-genesis-generator:6.1.6
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
