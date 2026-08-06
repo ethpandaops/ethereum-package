@@ -54,6 +54,7 @@ def launch_participant_network(
     otel_otlp_http_traces_url,
     backend,
 ):
+    plan.print("TIMING:participant_network:start")
     network_id = network_params.network_id
     num_participants = len(args_with_right_defaults.participants)
     total_number_of_validator_keys = 0
@@ -92,6 +93,7 @@ def launch_participant_network(
             static_files.EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH
         )
 
+        plan.print("TIMING:genesis_generation:start")
         el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
             plan,
             ethereum_genesis_generator_image,
@@ -105,6 +107,7 @@ def launch_participant_network(
             global_tolerations,
             global_node_selectors,
         )
+        plan.print("TIMING:genesis_generation:end")
     elif network_params.network.startswith(constants.NETWORK_NAME.remote_enclave):
         # We are syncing from another running kurtosis enclave
         (
@@ -207,6 +210,7 @@ def launch_participant_network(
             binary_artifacts[index] = participant_binaries
 
     # Launch all execution layer clients
+    plan.print("TIMING:el_launch:start")
     all_el_contexts = el_client_launcher.launch(
         plan,
         network_params,
@@ -228,6 +232,7 @@ def launch_participant_network(
         binary_artifacts,
         otel_otlp_grpc_url,
     )
+    plan.print("TIMING:el_launch:end")
 
     # Launch all consensus layer clients
     prysm_password_relative_filepath = (
@@ -241,6 +246,7 @@ def launch_participant_network(
         else None
     )
 
+    plan.print("TIMING:cl_launch:start")
     (
         all_cl_contexts,
         all_snooper_el_engine_contexts,
@@ -271,6 +277,7 @@ def launch_participant_network(
         bootnodoor_enr,
         binary_artifacts,
     )
+    plan.print("TIMING:cl_launch:end")
 
     # Stop beacon nodes for participants with skip_start enabled
     for index, participant in enumerate(args_with_right_defaults.participants):
@@ -603,9 +610,19 @@ def launch_participant_network(
         current_vc_index += 1
 
     # add vc's in parallel to speed package execution
+    plan.print("TIMING:vc_launch:start")
     vc_services = shared_utils.add_services_with_force_restart(
         plan, vc_service_configs, vc_service_info, "vc_force_restart"
     )
+    plan.print("TIMING:vc_launch:end")
+
+    # Deferred: collect enodes/identities now that all nodes are warm
+    plan.print("TIMING:deferred_collection:start")
+    all_el_contexts = el_client_launcher.collect_enodes(plan, all_el_contexts)
+    all_cl_contexts = cl_client_launcher.collect_identities(
+        plan, all_cl_contexts, args_with_right_defaults.participants
+    )
+    plan.print("TIMING:deferred_collection:end")
 
     # Create VC contexts ordered by participant index
     vc_contexts_temp = {}
@@ -699,6 +716,7 @@ def launch_participant_network(
 
         all_participants.append(participant_entry)
 
+    plan.print("TIMING:participant_network:end")
     return (
         all_participants,
         final_genesis_timestamp,

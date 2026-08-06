@@ -51,6 +51,7 @@ def get_beacon_config(
     otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
+    skip_ready_conditions=False,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
@@ -252,7 +253,7 @@ def get_beacon_config(
     if len(participant.cl_devices) > 0:
         config_args["devices"] = participant.cl_devices
     # Only add ready_conditions if not skipping start
-    if not participant.skip_start:
+    if not participant.skip_start and not skip_ready_conditions:
         config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         )
@@ -269,6 +270,7 @@ def get_cl_context(
     snooper_el_engine_context,
     node_keystore_files,
     node_selectors,
+    skip_identity=False,
 ):
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
 
@@ -284,6 +286,7 @@ def get_cl_context(
         service_name,
         participant,
         multiaddr_index=-1,
+        skip=skip_identity,
     )
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
