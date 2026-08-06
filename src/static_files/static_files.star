@@ -15,27 +15,15 @@ FORKMON_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/forkmon-config/config.toml.tmpl"
 )
 
-# Validator Ranges config
-VALIDATOR_RANGES_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/validator-ranges/config.yaml.tmpl"
-)
-
-APACHE_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/index.html"
-APACHE_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enr.txt.tmpl"
-APACHE_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enr_list.txt.tmpl"
-APACHE_ENODE_FILEPATH = STATIC_FILES_DIRPATH + "/apache-config/enode.txt.tmpl"
-
 NGINX_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/index.html"
 NGINX_ENR_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr.txt.tmpl"
 NGINX_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enr_list.txt.tmpl"
 NGINX_ENODE_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/enode.txt.tmpl"
+NGINX_EL_ENR_LIST_FILEPATH = STATIC_FILES_DIRPATH + "/nginx-config/el_enr_list.txt.tmpl"
 
 DORA_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/dora-config/config.yaml.tmpl"
 DUGTRIO_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/dugtrio-config/config.yaml.tmpl"
-)
-BLUTGANG_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/blutgang-config/config.toml.tmpl"
 )
 CHECKPOINTZ_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/checkpointz-config/config.yaml.tmpl"
@@ -44,9 +32,6 @@ ERPC_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/erpc-config/erpc.yaml.t
 FORKY_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/forky-config/config.yaml.tmpl"
 TRACOOR_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/tracoor-config/config.yaml.tmpl"
-)
-FULL_BEACONCHAIN_CONFIG_TEMPLATE_FILEPATH = (
-    STATIC_FILES_DIRPATH + "/full-beaconchain-config/config.yaml.tmpl"
 )
 
 # assertoor config
@@ -96,28 +81,10 @@ GRAFANA_DASHBOARDS_CONFIG_DIRPATH = (
 # Tempo config
 TEMPO_CONFIG_TEMPLATE_FILEPATH = STATIC_FILES_DIRPATH + "/tempo-config/tempo.yaml.tmpl"
 
-# Geth + CL genesis generation
-GENESIS_GENERATION_CONFIG_DIRPATH = STATIC_FILES_DIRPATH + "/genesis-generation-config"
-
-EL_GENESIS_GENERATION_CONFIG_DIRPATH = GENESIS_GENERATION_CONFIG_DIRPATH + "/el"
-EL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH = (
-    EL_GENESIS_GENERATION_CONFIG_DIRPATH + "/genesis-config.yaml.tmpl"
-)
-
-CL_GENESIS_GENERATION_CONFIG_DIRPATH = GENESIS_GENERATION_CONFIG_DIRPATH + "/cl"
-CL_GENESIS_GENERATION_CONFIG_TEMPLATE_FILEPATH = (
-    CL_GENESIS_GENERATION_CONFIG_DIRPATH + "/config.yaml.tmpl"
-)
-CL_GENESIS_GENERATION_MNEMONICS_TEMPLATE_FILEPATH = (
-    CL_GENESIS_GENERATION_CONFIG_DIRPATH + "/mnemonics.yaml.tmpl"
-)
-
 JWT_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/jwt/jwtsecret"
 KEYMANAGER_PATH_FILEPATH = STATIC_FILES_DIRPATH + "/keymanager/keymanager.txt"
 
 PEERDAS_NODE_KEY_FILEPATH = STATIC_FILES_DIRPATH + "/peerdas-node-keys/"
-
-SHADOWFORK_FILEPATH = "/network-configs/latest_block.json"
 
 MEV_RS_MEV_BOOST_CONFIG_FILEPATH = (
     STATIC_FILES_DIRPATH + "/mev/mev-rs/mev_boost/config.toml.tmpl"
@@ -144,4 +111,8 @@ HELIX_RELAY_CONFIG_FILEPATH = STATIC_FILES_DIRPATH + "/mev/helix/config.yaml.tmp
 
 ZKBOOST_CONFIG_TEMPLATE_FILEPATH = (
     STATIC_FILES_DIRPATH + "/zkboost-config/config.toml.tmpl"
+)
+
+TRUEBLOCKS_CONFIG_TEMPLATE_FILEPATH = (
+    STATIC_FILES_DIRPATH + "/trueblocks-config/trueBlocks.toml.tmpl"
 )

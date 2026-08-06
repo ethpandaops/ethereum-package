@@ -37,56 +37,6 @@ BUILDER_IMAGE_STR = "builder"
 SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
 
 
-def launch(
-    plan,
-    launcher,
-    service_name,
-    participant,
-    global_log_level,
-    existing_el_clients,
-    persistent,
-    tolerations,
-    node_selectors,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-    bootnodoor_enode=None,
-    el_binary_artifact=None,
-):
-    cl_client_name = service_name.split("-")[3]
-
-    config = get_config(
-        plan,
-        launcher,
-        participant,
-        service_name,
-        existing_el_clients,
-        cl_client_name,
-        global_log_level,
-        persistent,
-        tolerations,
-        node_selectors,
-        port_publisher,
-        participant_index,
-        network_params,
-        extra_files_artifacts,
-        bootnodoor_enode,
-        el_binary_artifact,
-    )
-
-    service = plan.add_service(
-        service_name, config, force_update=participant.el_force_restart
-    )
-
-    return get_el_context(
-        plan,
-        service_name,
-        service,
-        launcher,
-    )
-
-
 def get_config(
     plan,
     launcher,
@@ -102,8 +52,9 @@ def get_config(
     participant_index,
     network_params,
     extra_files_artifacts,
-    bootnodoor_enode=None,
+    bootnodoor_el_enr=None,
     el_binary_artifact=None,
+    otel_otlp_grpc_url=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
@@ -136,15 +87,8 @@ def get_config(
             shared_utils.get_port_specs(additional_public_port_assignments)
         )
 
-    discovery_port_tcp = (
-        public_ports_for_component[0]
-        if public_ports_for_component
-        else DISCOVERY_PORT_NUM
-    )
-    discovery_port_udp = (
-        public_ports_for_component[0]
-        if public_ports_for_component
-        else DISCOVERY_PORT_NUM
+    discovery_port_tcp, discovery_port_udp = el_shared.get_discovery_ports(
+        public_ports_for_component, DISCOVERY_PORT_NUM
     )
 
     used_port_assignments = {
@@ -166,7 +110,7 @@ def get_config(
         ),
         "{0}".format(
             "--override.genesis={0}".format(
-                constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.json"
+                constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
             )
             if network_params.network not in constants.PUBLIC_NETWORKS
             else ""
@@ -193,6 +137,7 @@ def get_config(
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full"
         if network_params.network == constants.NETWORK_NAME.kurtosis
+        and not participant.checkpoint_sync_enabled
         and not gcmode_archive
         else "--syncmode=snap"
         if not gcmode_archive
@@ -203,6 +148,8 @@ def get_config(
         "--metrics.port={0}".format(METRICS_PORT_NUM),
         "--discovery.port={0}".format(discovery_port_tcp),
         "--port={0}".format(discovery_port_tcp),
+        "--discovery.v4=false",
+        "--discovery.v5=true",
         "{0}".format(
             "--miner.gasprice=1"
             if network_params.network == constants.NETWORK_NAME.kurtosis
@@ -227,30 +174,23 @@ def get_config(
             if "--ws.api" in arg:
                 cmd[index] = "--ws.api=admin,engine,net,eth,web3,debug,suavex"
 
-    # Handle bootnode configuration with bootnodoor_enode override
-    if bootnodoor_enode != None:
-        cmd.append("--bootnodes=" + bootnodoor_enode)
-    elif (
-        network_params.network == constants.NETWORK_NAME.kurtosis
-        or constants.NETWORK_NAME.shadowfork in network_params.network
-    ):
+    # Handle bootnode configuration with bootnodoor_el_enr override
+    bootnode_arg = el_shared.get_bootnode_arg(
+        plan,
+        launcher,
+        network_params.network,
+        existing_el_clients,
+        bootnodoor_el_enr,
+        "--bootnodes=",
+    )
+    if bootnode_arg != None:
+        cmd.append(bootnode_arg)
+
+    if otel_otlp_grpc_url != None:
+        cmd.append("--rpc.telemetry")
         cmd.append(
-            "--bootnodes="
-            + ",".join(
-                [
-                    ctx.enode
-                    for ctx in existing_el_clients[: constants.MAX_ENODE_ENTRIES]
-                ]
-            )
-        )
-    elif (
-        network_params.network not in constants.PUBLIC_NETWORKS
-        and constants.NETWORK_NAME.shadowfork not in network_params.network
-    ):
-        cmd.append(
-            "--bootnodes="
-            + shared_utils.get_devnet_enodes(
-                plan, launcher.el_cl_genesis_data.files_artifact_uuid
+            "--rpc.telemetry.endpoint={}".format(
+                otel_otlp_grpc_url.replace("http://", "grpc://")
             )
         )
 
@@ -265,16 +205,13 @@ def get_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
     if persistent:
-        volume_size_key = (
-            "devnets" if "devnet" in network_params.network else network_params.network
-        )
-        files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.EL_TYPE.geth + "_volume_size"
-            ],
+        files[
+            EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER
+        ] = el_shared.get_persistent_data_directory(
+            participant,
+            service_name,
+            network_params.network,
+            constants.EL_TYPE.geth,
         )
 
     # Add extra mounts - automatically handle file uploads
@@ -297,7 +234,11 @@ def get_config(
     else:
         cmd_str = command_str
 
-    env_vars = participant.el_extra_env_vars
+    env_vars = shared_utils.with_otel_env_vars(
+        participant.el_extra_env_vars,
+        otel_otlp_grpc_url,
+        service_name,
+    )
     config_args = {
         "image": participant.el_image,
         "ports": used_ports,
@@ -321,16 +262,7 @@ def get_config(
         "node_selectors": node_selectors,
     }
 
-    if participant.el_min_cpu > 0:
-        config_args["min_cpu"] = participant.el_min_cpu
-    if participant.el_max_cpu > 0:
-        config_args["max_cpu"] = participant.el_max_cpu
-    if participant.el_min_mem > 0:
-        config_args["min_memory"] = participant.el_min_mem
-    if participant.el_max_mem > 0:
-        config_args["max_memory"] = participant.el_max_mem
-    if len(participant.el_devices) > 0:
-        config_args["devices"] = participant.el_devices
+    el_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)
 
 

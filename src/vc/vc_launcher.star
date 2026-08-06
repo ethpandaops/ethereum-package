@@ -10,7 +10,7 @@ nimbus = import_module("./nimbus.star")
 prysm = import_module("./prysm.star")
 teku = import_module("./teku.star")
 vero = import_module("./vero.star")
-vc_shared = import_module("./shared.star")
+vc_shared = import_module("./vc_shared.star")
 
 
 def get_vc_config(
@@ -23,7 +23,6 @@ def get_vc_config(
     global_log_level,
     cl_context,
     all_cl_contexts,
-    el_context,
     remote_signer_context,
     full_name,
     snooper_enabled,
@@ -39,10 +38,32 @@ def get_vc_config(
     vc_index,
     extra_files_artifacts,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
 ):
     if node_keystore_files == None:
         return None
+
+    vc_launchers = {
+        constants.VC_TYPE.lighthouse: {
+            "get_config": lighthouse.get_config,
+        },
+        constants.VC_TYPE.lodestar: {
+            "get_config": lodestar.get_config,
+        },
+        constants.VC_TYPE.teku: {
+            "get_config": teku.get_config,
+        },
+        constants.VC_TYPE.nimbus: {
+            "get_config": nimbus.get_config,
+        },
+        constants.VC_TYPE.prysm: {
+            "get_config": prysm.get_config,
+        },
+        constants.VC_TYPE.vero: {
+            "get_config": vero.get_config,
+        },
+    }
 
     tolerations = shared_utils.get_tolerations(
         specific_container_tolerations=participant.vc_tolerations,
@@ -72,150 +93,55 @@ def get_vc_config(
         beacon_http_url = beacon_http_urls[0]
 
     keymanager_enabled = participant.keymanager_enabled
+
     if vc_type == constants.VC_TYPE.lighthouse:
         if remote_signer_context != None:
             fail("`use_remote_signer` flag not supported for lighthouse VC")
-        config = lighthouse.get_config(
-            plan=plan,
-            participant=participant,
-            el_cl_genesis_data=launcher.el_cl_genesis_data,
-            image=image,
-            service_name=service_name,
-            global_log_level=global_log_level,
-            beacon_http_urls=beacon_http_urls,
-            cl_context=cl_context,
-            el_context=el_context,
-            full_name=full_name,
-            node_keystore_files=node_keystore_files,
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            keymanager_enabled=keymanager_enabled,
-            network_params=network_params,
-            port_publisher=port_publisher,
-            vc_index=vc_index,
-            extra_files_artifacts=extra_files_artifacts,
-            tempo_otlp_grpc_url=tempo_otlp_grpc_url,
-            vc_binary_artifact=vc_binary_artifact,
-        )
-    elif vc_type == constants.VC_TYPE.lodestar:
-        config = lodestar.get_config(
-            plan=plan,
-            participant=participant,
-            el_cl_genesis_data=launcher.el_cl_genesis_data,
-            keymanager_file=keymanager_file,
-            image=image,
-            global_log_level=global_log_level,
-            beacon_http_urls=beacon_http_urls,
-            cl_context=cl_context,
-            el_context=el_context,
-            remote_signer_context=remote_signer_context,
-            full_name=full_name,
-            node_keystore_files=node_keystore_files,
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            keymanager_enabled=keymanager_enabled,
-            network_params=network_params,
-            port_publisher=port_publisher,
-            vc_index=vc_index,
-            extra_files_artifacts=extra_files_artifacts,
-            vc_binary_artifact=vc_binary_artifact,
-        )
-    elif vc_type == constants.VC_TYPE.teku:
-        config = teku.get_config(
-            plan=plan,
-            participant=participant,
-            el_cl_genesis_data=launcher.el_cl_genesis_data,
-            keymanager_file=keymanager_file,
-            image=image,
-            beacon_http_urls=beacon_http_urls,
-            cl_context=cl_context,
-            el_context=el_context,
-            remote_signer_context=remote_signer_context,
-            full_name=full_name,
-            node_keystore_files=node_keystore_files,
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            keymanager_enabled=keymanager_enabled,
-            network_params=network_params,
-            port_publisher=port_publisher,
-            vc_index=vc_index,
-            extra_files_artifacts=extra_files_artifacts,
-            vc_binary_artifact=vc_binary_artifact,
-        )
-    elif vc_type == constants.VC_TYPE.nimbus:
-        config = nimbus.get_config(
-            plan=plan,
-            participant=participant,
-            el_cl_genesis_data=launcher.el_cl_genesis_data,
-            keymanager_file=keymanager_file,
-            image=image,
-            beacon_http_urls=beacon_http_urls,
-            cl_context=cl_context,
-            el_context=el_context,
-            remote_signer_context=remote_signer_context,
-            full_name=full_name,
-            node_keystore_files=node_keystore_files,
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            keymanager_enabled=keymanager_enabled,
-            network_params=network_params,
-            port_publisher=port_publisher,
-            vc_index=vc_index,
-            extra_files_artifacts=extra_files_artifacts,
-            vc_binary_artifact=vc_binary_artifact,
-        )
-    elif vc_type == constants.VC_TYPE.prysm:
-        config = prysm.get_config(
-            plan=plan,
-            participant=participant,
-            el_cl_genesis_data=launcher.el_cl_genesis_data,
-            keymanager_file=keymanager_file,
-            image=image,
-            beacon_http_urls=beacon_http_urls,
-            cl_context=cl_context,
-            el_context=el_context,
-            remote_signer_context=remote_signer_context,
-            full_name=full_name,
-            node_keystore_files=node_keystore_files,
-            prysm_password_relative_filepath=prysm_password_relative_filepath,
-            prysm_password_artifact_uuid=prysm_password_artifact_uuid,
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            keymanager_enabled=keymanager_enabled,
-            network_params=network_params,
-            port_publisher=port_publisher,
-            vc_index=vc_index,
-            extra_files_artifacts=extra_files_artifacts,
-            vc_binary_artifact=vc_binary_artifact,
-        )
     elif vc_type == constants.VC_TYPE.vero:
         if remote_signer_context == None:
             fail("vero VC requires `use_remote_signer` to be true")
         if keymanager_enabled:
             fail("vero VC doesn't support the Keymanager API")
-        config = vero.get_config(
-            plan=plan,
-            participant=participant,
-            el_cl_genesis_data=launcher.el_cl_genesis_data,
-            image=image,
-            global_log_level=global_log_level,
-            beacon_http_urls=beacon_http_urls,
-            cl_context=cl_context,
-            remote_signer_context=remote_signer_context,
-            full_name=full_name,
-            tolerations=tolerations,
-            node_selectors=node_selectors,
-            port_publisher=port_publisher,
-            vc_index=vc_index,
-            extra_files_artifacts=extra_files_artifacts,
-            vc_binary_artifact=vc_binary_artifact,
-        )
     elif vc_type == constants.VC_TYPE.grandine:
         fail("Grandine VC is not yet supported")
     elif vc_type == constants.VC_TYPE.consensoor:
         return None
-    else:
-        fail("Unsupported vc_type: {0}".format(vc_type))
+
+    if vc_type not in vc_launchers:
+        fail(
+            "Unsupported launcher '{0}', need one of '{1}'".format(
+                vc_type, ",".join(vc_launchers.keys())
+            )
+        )
+
+    get_config = vc_launchers[vc_type]["get_config"]
+
+    config = get_config(
+        plan=plan,
+        participant=participant,
+        el_cl_genesis_data=launcher.el_cl_genesis_data,
+        keymanager_file=keymanager_file,
+        image=image,
+        service_name=service_name,
+        global_log_level=global_log_level,
+        beacon_http_urls=beacon_http_urls,
+        cl_context=cl_context,
+        remote_signer_context=remote_signer_context,
+        full_name=full_name,
+        node_keystore_files=node_keystore_files,
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        keymanager_enabled=keymanager_enabled,
+        network_params=network_params,
+        port_publisher=port_publisher,
+        vc_index=vc_index,
+        extra_files_artifacts=extra_files_artifacts,
+        prysm_password_relative_filepath=prysm_password_relative_filepath,
+        prysm_password_artifact_uuid=prysm_password_artifact_uuid,
+        tempo_otlp_grpc_url=tempo_otlp_grpc_url,
+        otel_otlp_grpc_url=otel_otlp_grpc_url,
+        vc_binary_artifact=vc_binary_artifact,
+    )
 
     return config
 

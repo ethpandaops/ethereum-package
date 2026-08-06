@@ -18,11 +18,10 @@ additional_services:
   - checkpointz
   - prometheus
   - grafana
-  - custom_flood
   - blockscout
   - dugtrio
   - erpc
-  - apache
+  - nginx
   - tracoor
   - spamoor
 ethereum_metrics_exporter_enabled: true

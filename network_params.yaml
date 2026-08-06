@@ -88,11 +88,13 @@ network_params:
     very lucky have athlete"
   preregistered_validator_count: 0
   additional_mnemonics: []
+  shuffle_genesis_validators: false
   genesis_delay: 20
   genesis_time: 0
   genesis_gaslimit: 60000000
   max_per_epoch_activation_churn_limit: 8
   churn_limit_quotient: 65536
+  confirmation_byzantine_threshold: 25
   ejection_balance: 16000000000
   eth1_follow_distance: 2048
   min_validator_withdrawability_delay: 256
@@ -101,10 +103,12 @@ network_params:
   aggregate_due_bps_gloas: 5000
   sync_message_due_bps_gloas: 2500
   contribution_due_bps_gloas: 5000
+  payload_due_bps: 5000
   payload_attestation_due_bps: 7500
   view_freeze_cutoff_bps: 7500
   inclusion_list_submission_due_bps: 6667
   proposer_inclusion_list_cutoff_bps: 9167
+  deploy_eip8282_contracts: true
   deneb_fork_epoch: 0
   electra_fork_epoch: 0
   fulu_fork_epoch: 0
@@ -124,21 +128,21 @@ network_params:
   bpo_1_max_blobs: 15
   bpo_1_target_blobs: 10
   bpo_1_base_fee_update_fraction: 8346193
-  bpo_2_epoch: 18446744073709551615
+  bpo_2_epoch: 0
   bpo_2_max_blobs: 21
   bpo_2_target_blobs: 14
   bpo_2_base_fee_update_fraction: 11684671
   bpo_3_epoch: 18446744073709551615
-  bpo_3_max_blobs: 0
-  bpo_3_target_blobs: 0
+  bpo_3_max_blobs: 33
+  bpo_3_target_blobs: 22
   bpo_3_base_fee_update_fraction: 0
   bpo_4_epoch: 18446744073709551615
-  bpo_4_max_blobs: 0
-  bpo_4_target_blobs: 0
+  bpo_4_max_blobs: 48
+  bpo_4_target_blobs: 32
   bpo_4_base_fee_update_fraction: 0
   bpo_5_epoch: 18446744073709551615
-  bpo_5_max_blobs: 0
-  bpo_5_target_blobs: 0
+  bpo_5_max_blobs: 72
+  bpo_5_target_blobs: 48
   bpo_5_base_fee_update_fraction: 0
   withdrawal_type: "0x00"
   withdrawal_address: "0x8943545177806ED17B9F23F0a21ee5948eCaa776"
@@ -157,6 +161,21 @@ spamoor_params:
   max_cpu: 1000
   min_mem: 20
   max_mem: 300
+  start_chainload: true
+  start_fuzzing: false
+  defaults: []
+  extra_args: []
+disruptoor_params:
+  image: ethpandaops/disruptoor:latest
+  min_cpu: 100
+  max_cpu: 1000
+  min_mem: 128
+  max_mem: 512
+  log_level: info
+  log_format: json
+  partitions: []
+  shaping: []
+  config: {}
   extra_args: []
 prometheus_params:
   storage_tsdb_retention_time: "1d"
@@ -214,8 +233,7 @@ mev_params:
     labels: {}
   run_multiple_relays: false
   helix_relay_image: ghcr.io/gattaca-com/helix-relay:main
-  custom_flood_params:
-    interval_between_transactions: 1
+  commit_boost_config: ""
 buildoor_params:
   image: ethpandaops/buildoor:main
   builder_api: true
@@ -246,15 +264,14 @@ xatu_sentry_params:
     - contribution_and_proof
     - blob_sidecar
     - data_column_sidecar
-apache_port: 40000
-nginx_port: 50000
+nginx_port: 9090
 global_tolerations: []
 global_node_selectors: {}
 keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:5.3.3
+  image: ethpandaops/ethereum-genesis-generator:6.1.6
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER

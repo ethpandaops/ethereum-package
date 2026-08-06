@@ -1,0 +1,24 @@
+participants_matrix:
+  el:
+    - el_type: geth
+  cl:
+    - cl_type: lighthouse
+    - cl_type: prysm
+  count: 4
+additional_services:
+  - dora
+  - disruptoor
+disruptoor_params:
+  partitions:
+    - name: split-node-1-node-2
+      groups:
+        - participants: [1]
+        - participants: [2]
+      components: [el, cl]
+  shaping:
+    - name: delay-node-1
+      participants: [1]
+      components: [el, cl]
+      delay: 50ms
+      jitter: 10ms
+      include_control: true

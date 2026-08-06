@@ -6,7 +6,10 @@ def get_enode_enr_for_node(plan, service_name, port_id):
         port_id=port_id,
         extract={
             "enode": """.result.enode | split("?") | .[0]""",
-            "enr": ".result.enr",
+            # `// ""` so clients whose admin_nodeInfo lacks an enr (or returns
+            # null before discovery is up) don't fail the extract and wedge the
+            # readiness wait until it times out
+            "enr": '.result.enr // ""',
         },
     )
     response = plan.wait(

@@ -31,72 +31,6 @@ VERBOSITY_LEVELS = {
 }
 
 
-def launch(
-    plan,
-    launcher,
-    beacon_service_name,
-    participant,
-    global_log_level,
-    bootnode_contexts,
-    el_context,
-    full_name,
-    node_keystore_files,
-    snooper_el_engine_context,
-    persistent,
-    tolerations,
-    node_selectors,
-    checkpoint_sync_enabled,
-    checkpoint_sync_url,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-    backend,
-    tempo_otlp_grpc_url=None,
-    bootnode_enr_override=None,
-    cl_binary_artifact=None,
-):
-    beacon_config = get_beacon_config(
-        plan,
-        launcher,
-        beacon_service_name,
-        participant,
-        global_log_level,
-        bootnode_contexts,
-        el_context,
-        full_name,
-        node_keystore_files,
-        snooper_el_engine_context,
-        persistent,
-        tolerations,
-        node_selectors,
-        checkpoint_sync_enabled,
-        checkpoint_sync_url,
-        port_publisher,
-        participant_index,
-        network_params,
-        extra_files_artifacts,
-        backend,
-        tempo_otlp_grpc_url,
-        bootnode_enr_override,
-        cl_binary_artifact,
-    )
-
-    beacon_service = plan.add_service(beacon_service_name, beacon_config)
-
-    cl_context_obj = get_cl_context(
-        plan,
-        beacon_service_name,
-        beacon_service,
-        participant,
-        snooper_el_engine_context,
-        node_keystore_files,
-        node_selectors,
-    )
-
-    return cl_context_obj
-
-
 def get_beacon_config(
     plan,
     launcher,
@@ -119,6 +53,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
     skip_ready_conditions=False,
@@ -128,16 +63,9 @@ def get_beacon_config(
     )
 
     # If snooper is enabled use the snooper engine context, otherwise use the execution client context
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    EXECUTION_ENGINE_ENDPOINT = cl_shared.get_execution_engine_endpoint(
+        participant, el_context, snooper_el_engine_context
+    )
 
     public_ports = {}
     public_ports_for_component = None
@@ -205,7 +133,6 @@ def get_beacon_config(
         PRYSM_ENTRYPOINT_COMMAND,
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
-        "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
         "--rpc-host=0.0.0.0",
         "--rpc-port={0}".format(RPC_PORT_NUM),
         "--http-host=0.0.0.0",
@@ -219,11 +146,11 @@ def get_beacon_config(
         "--p2p-tcp-port={0}".format(discovery_port_tcp),
         "--p2p-udp-port={0}".format(discovery_port_udp),
         "--p2p-quic-port={0}".format(discovery_port_quic),
+        "--p2p-colocation-whitelist=0.0.0.0/0,::/0",
         "--min-sync-peers={0}".format(constants.MIN_PEERS),
         "--verbosity=" + log_level,
         "--slots-per-archive-point={0}".format(32 if constants.ARCHIVE_MODE else 8192),
         "--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         # vvvvvvvvv METRICS CONFIG vvvvvvvvvvvvvvvvvvvvv
         "--disable-monitoring=false",
         "--monitoring-host=0.0.0.0",
@@ -233,6 +160,10 @@ def get_beacon_config(
         "--pprofaddr=0.0.0.0",
         "--pprofport={0}".format(PROFILING_PORT_NUM),
     ]
+
+    if el_context != None:
+        cmd.append("--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT)
+        cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 
     supernode_cmd = [
         "--subscribe-all-data-subnets=true",
@@ -299,29 +230,32 @@ def get_beacon_config(
     else:  # Public network
         cmd.append("--{}".format(network_params.network))
 
+    if otel_otlp_grpc_url != None:
+        otel_otlp_http_traces_url = getattr(launcher, "otel_otlp_http_traces_url", None)
+        if otel_otlp_http_traces_url == None:
+            fail("Prysm tracing requires an OTLP HTTP traces endpoint")
+        cmd.append("--enable-tracing")
+        cmd.append("--tracing-endpoint={}".format(otel_otlp_http_traces_url))
+        cmd.append("--tracing-process-name={}".format(beacon_service_name))
+
     if len(participant.cl_extra_params) > 0:
         # we do the for loop as otherwise its a proto repeated array
         cmd.extend([param for param in participant.cl_extra_params])
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+    if el_context != None:
+        files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
     if network_params.perfect_peerdas_enabled and participant_index < 16:
         files[constants.NODE_KEY_MOUNTPOINT_ON_CLIENTS] = Directory(
             artifact_names=["node-key-file-{0}".format(participant_index + 1)]
         )
     if persistent:
-        volume_size_key = (
-            "devnets" if "devnet" in network_params.network else network_params.network
-        )
-        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(beacon_service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.CL_TYPE.prysm + "_volume_size"
-            ],
+        files[
+            BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER
+        ] = cl_shared.get_beacon_data_directory(
+            beacon_service_name, participant, network_params, constants.CL_TYPE.prysm
         )
 
     # Add extra mounts - automatically handle file uploads
@@ -353,13 +287,17 @@ def get_beacon_config(
         "entrypoint": ["sh", "-c"],
         "cmd": [cmd_str],
         "files": files,
-        "env_vars": participant.cl_extra_env_vars,
+        "env_vars": shared_utils.with_otel_env_vars(
+            participant.cl_extra_env_vars,
+            otel_otlp_grpc_url,
+            beacon_service_name,
+        ),
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "labels": shared_utils.label_maker(
             client=constants.CL_TYPE.prysm,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=el_context.client_name,
+            connected_client=el_context.client_name if el_context != None else "none",
             extra_labels=participant.cl_extra_labels
             | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
@@ -371,20 +309,13 @@ def get_beacon_config(
 
     if len(participant.cl_devices) > 0:
         config_args["devices"] = participant.cl_devices
-    # Only add ready_conditions if not skipping start and not deferring health checks
+    # Only add ready_conditions if not skipping start (port checks are already disabled via wait="disable")
     if not participant.skip_start and not skip_ready_conditions:
         config_args["ready_conditions"] = cl_node_ready_conditions.get_ready_conditions(
             constants.HTTP_PORT_ID
         )
 
-    if int(participant.cl_min_cpu) > 0:
-        config_args["min_cpu"] = int(participant.cl_min_cpu)
-    if int(participant.cl_max_cpu) > 0:
-        config_args["max_cpu"] = int(participant.cl_max_cpu)
-    if int(participant.cl_min_mem) > 0:
-        config_args["min_memory"] = int(participant.cl_min_mem)
-    if int(participant.cl_max_mem) > 0:
-        config_args["max_memory"] = int(participant.cl_max_mem)
+    cl_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)
 
 
@@ -403,30 +334,18 @@ def get_cl_context(
     beacon_http_url = "http://{0}:{1}".format(service.name, BEACON_HTTP_PORT_NUM)
     beacon_grpc_url = "{0}:{1}".format(service.name, RPC_PORT_NUM)
 
-    # Skip HTTP requests if skip_start is enabled (service won't be running)
-    # or if skip_identity is set (identity will be collected later)
-    if participant.skip_start or skip_identity:
-        beacon_node_enr = ""
-        beacon_multiaddr = ""
-        beacon_peer_id = ""
-    else:
-        # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
-        beacon_node_identity_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v1/node/identity",
-            port_id=constants.HTTP_PORT_ID,
-            extract={
-                "enr": ".data.enr",
-                "multiaddr": ".data.p2p_addresses[0]",
-                "peer_id": ".data.peer_id",
-            },
-            headers={"Accept-Encoding": "identity"},
-        )
-        response = plan.request(
-            recipe=beacon_node_identity_recipe, service_name=service_name
-        )
-        beacon_node_enr = response["extract.enr"]
-        beacon_multiaddr = response["extract.multiaddr"]
-        beacon_peer_id = response["extract.peer_id"]
+    # TODO(old) add validator availability using the validator API: https://ethereum.github.io/beacon-APIs/?urls.primaryName=v1#/ValidatorRequiredApi | from eth2-merge-kurtosis-module
+    (
+        beacon_node_enr,
+        beacon_multiaddr,
+        beacon_peer_id,
+    ) = cl_shared.get_beacon_node_identity(
+        plan,
+        service_name,
+        participant,
+        headers={"Accept-Encoding": "identity"},
+        skip=skip_identity,
+    )
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(service.name, beacon_metrics_port.number)
@@ -448,9 +367,9 @@ def get_cl_context(
         peer_id=beacon_peer_id,
         snooper_enabled=participant.snooper_enabled,
         snooper_el_engine_context=snooper_el_engine_context,
-        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
-        if node_keystore_files
-        else "",
+        validator_keystore_files_artifact_uuid=(
+            node_keystore_files.files_artifact_uuid if node_keystore_files else ""
+        ),
         supernode=participant.supernode,
     )
 
@@ -458,27 +377,10 @@ def get_cl_context(
 def new_prysm_launcher(
     el_cl_genesis_data,
     jwt_file,
+    otel_otlp_http_traces_url=None,
 ):
     return struct(
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
+        otel_otlp_http_traces_url=otel_otlp_http_traces_url,
     )
-
-
-def get_blobber_config(
-    plan,
-    participant,
-    beacon_service_name,
-    beacon_http_url,
-    node_keystore_files,
-    node_selectors,
-):
-    blobber_config = None
-    if participant.blobber_enabled:
-        blobber_config = struct(
-            service_name="{0}-{1}".format("blobber", beacon_service_name),
-            beacon_http_url=beacon_http_url,
-            node_keystore_files=node_keystore_files,
-            node_selectors=node_selectors,
-        )
-    return blobber_config

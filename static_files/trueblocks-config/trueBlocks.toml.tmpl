@@ -1,0 +1,46 @@
+[version]
+  current = "{{ .ConfigVersion }}"
+
+[settings]
+  cachePath = "/cache"
+  defaultChain = "{{ .ChainName }}"
+  indexPath = "/unchained"
+
+[keys]
+  [keys.etherscan]
+    apiKey = ""
+  [keys.infura]
+    apiKey = ""
+    secret = ""
+  [keys.pinata]
+    apiKey = ""
+    jwt = ""
+  [keys.trueblocks]
+    license = ""
+    apiKey = ""
+
+[pinning]
+  gatewayUrl = "https://ipfs.unchainedindex.io/ipfs/"
+  localPinUrl = "http://localhost:5001"
+  remotePinUrl = "https://api.pinata.cloud/pinning/pinFileToIPFS"
+
+[unchained]
+  comment = "Do not edit these values unless instructed to do so."
+
+[chains]
+  [chains.{{ .ChainName }}]
+    chain = "{{ .ChainName }}"
+    chainId = "{{ .ChainId }}"
+    ipfsGateway = "https://ipfs.unchainedindex.io/ipfs/"
+    localExplorer = "http://localhost:1234/"
+    remoteExplorer = ""
+    rpcProviders = ["{{ .RpcProvider }}"]
+    symbol = "ETH"
+    blockTime = {{ .BlockTime }}
+    [chains.{{ .ChainName }}.scrape]
+      appsPerChunk = {{ .AppsPerChunk }}
+      snapToGrid = {{ .SnapToGrid }}
+      firstSnap = {{ .FirstSnap }}
+      unripeDist = {{ .UnripeDist }}
+      allowMissing = false
+      channelCount = 20

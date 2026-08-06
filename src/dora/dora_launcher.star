@@ -42,6 +42,7 @@ def launch_dora(
     additional_service_index,
     docker_cache_params,
     el_cl_data_files_artifact_uuid,
+    buildoor_api_urls=[],
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -58,9 +59,9 @@ def launch_dora(
             )
         )
 
-        # Skip dummy EL clients - they don't have real execution endpoints
+        # Skip participants without an EL client
         el_type = participant_configs[index].el_type
-        if el_type == "dummy":
+        if el_type == constants.EL_TYPE.none or el_client == None:
             continue
 
         snooper_el_engine_context = participant_contexts[
@@ -100,6 +101,7 @@ def launch_dora(
         all_cl_client_info,
         all_el_client_info,
         mev_endpoint_info,
+        buildoor_api_urls,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -151,32 +153,6 @@ def get_config(
 
     IMAGE_NAME = dora_params.image
     env_vars = dora_params.env
-    default_dora_image = (
-        docker_cache_params.url
-        + (docker_cache_params.dockerhub_prefix if docker_cache_params.enabled else "")
-        + constants.DEFAULT_DORA_IMAGE
-    )
-    if dora_params.image == default_dora_image:
-        if network_params.gloas_fork_epoch < constants.FAR_FUTURE_EPOCH:
-            IMAGE_NAME = (
-                docker_cache_params.url
-                + (
-                    docker_cache_params.dockerhub_prefix
-                    if docker_cache_params.enabled
-                    else ""
-                )
-                + "ethpandaops/dora:gloas-support"
-            )
-        if network_params.heze_fork_epoch < constants.FAR_FUTURE_EPOCH:
-            IMAGE_NAME = (
-                docker_cache_params.url
-                + (
-                    docker_cache_params.dockerhub_prefix
-                    if docker_cache_params.enabled
-                    else ""
-                )
-                + "ethpandaops/dora:heze-support"
-            )
 
     return ServiceConfig(
         image=IMAGE_NAME,
@@ -199,7 +175,12 @@ def get_config(
 
 
 def new_config_template_data(
-    network, listen_port_num, cl_client_info, el_client_info, mev_endpoint_info
+    network,
+    listen_port_num,
+    cl_client_info,
+    el_client_info,
+    mev_endpoint_info,
+    buildoor_api_urls,
 ):
     public_rpc = ""
     if len(el_client_info) > 0:
@@ -212,6 +193,7 @@ def new_config_template_data(
         "CLClientInfo": cl_client_info,
         "ELClientInfo": el_client_info,
         "MEVRelayInfo": mev_endpoint_info,
+        "BuildoorAPIURLs": buildoor_api_urls,
         "PublicNetwork": True if network in constants.PUBLIC_NETWORKS else False,
         "IsDevnet": True if "devnet" in network else False,
     }

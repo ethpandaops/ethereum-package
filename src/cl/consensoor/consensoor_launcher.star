@@ -9,6 +9,7 @@ constants = import_module("../../package_io/constants.star")
 BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/data/consensoor"
 
 BEACON_DISCOVERY_PORT_NUM = 9000
+BEACON_QUIC_PORT_NUM = 9001
 BEACON_HTTP_PORT_NUM = 5052
 BEACON_METRICS_PORT_NUM = 8008
 
@@ -21,74 +22,6 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
     constants.GLOBAL_LOG_LEVEL.trace: "DEBUG",
 }
-
-
-def launch(
-    plan,
-    launcher,
-    beacon_service_name,
-    participant,
-    global_log_level,
-    bootnode_contexts,
-    el_context,
-    full_name,
-    node_keystore_files,
-    snooper_el_engine_context,
-    persistent,
-    tolerations,
-    node_selectors,
-    checkpoint_sync_enabled,
-    checkpoint_sync_url,
-    port_publisher,
-    participant_index,
-    network_params,
-    extra_files_artifacts,
-    backend,
-    tempo_otlp_grpc_url=None,
-    bootnode_enr_override=None,
-    cl_binary_artifact=None,
-):
-    beacon_config = get_beacon_config(
-        plan,
-        launcher,
-        beacon_service_name,
-        participant,
-        global_log_level,
-        bootnode_contexts,
-        el_context,
-        full_name,
-        node_keystore_files,
-        snooper_el_engine_context,
-        persistent,
-        tolerations,
-        node_selectors,
-        checkpoint_sync_enabled,
-        checkpoint_sync_url,
-        port_publisher,
-        participant_index,
-        network_params,
-        extra_files_artifacts,
-        backend,
-        tempo_otlp_grpc_url,
-        bootnode_enr_override,
-        cl_binary_artifact,
-    )
-
-    beacon_service = plan.add_service(
-        beacon_service_name, beacon_config, force_update=participant.cl_force_restart
-    )
-
-    cl_context_obj = get_cl_context(
-        plan,
-        beacon_service_name,
-        beacon_service,
-        participant,
-        snooper_el_engine_context,
-        node_keystore_files,
-        node_selectors,
-    )
-
-    return cl_context_obj
 
 
 def get_beacon_config(
@@ -113,6 +46,7 @@ def get_beacon_config(
     extra_files_artifacts,
     backend,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url=None,
     bootnode_enr_override=None,
     cl_binary_artifact=None,
     skip_ready_conditions=False,
@@ -121,16 +55,10 @@ def get_beacon_config(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    if participant.snooper_enabled:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            snooper_el_engine_context.ip_addr,
-            snooper_el_engine_context.engine_rpc_port_num,
-        )
-    else:
-        EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-            el_context.dns_name,
-            el_context.engine_rpc_port_num,
-        )
+    # If snooper is enabled use the snooper engine context, otherwise use the execution client context
+    EXECUTION_ENGINE_ENDPOINT = cl_shared.get_execution_engine_endpoint(
+        participant, el_context, snooper_el_engine_context
+    )
 
     public_ports = {}
     public_ports_for_component = None
@@ -140,49 +68,45 @@ def get_beacon_config(
             port_publisher,
             participant_index,
         )
-        public_ports = {
-            constants.TCP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                public_ports_for_component[0],
-                shared_utils.TCP_PROTOCOL,
-            ),
-            constants.UDP_DISCOVERY_PORT_ID: shared_utils.new_port_spec(
-                public_ports_for_component[0],
-                shared_utils.UDP_PROTOCOL,
-            ),
-            constants.HTTP_PORT_ID: shared_utils.new_port_spec(
-                public_ports_for_component[1],
-                shared_utils.TCP_PROTOCOL,
-                shared_utils.HTTP_APPLICATION_PROTOCOL,
-            ),
-            constants.METRICS_PORT_ID: shared_utils.new_port_spec(
-                public_ports_for_component[2],
-                shared_utils.TCP_PROTOCOL,
-                shared_utils.HTTP_APPLICATION_PROTOCOL,
-            ),
-        }
+        public_ports = cl_shared.get_general_cl_public_port_specs(
+            public_ports_for_component
+        )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[3]}
+            )
+        )
 
     discovery_port = (
         public_ports_for_component[0]
         if public_ports_for_component
         else BEACON_DISCOVERY_PORT_NUM
     )
+    discovery_port_quic = (
+        public_ports_for_component[3]
+        if public_ports_for_component
+        else BEACON_QUIC_PORT_NUM
+    )
 
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port,
+        constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
 
-    used_ports = shared_utils.get_port_specs(used_port_assignments)
+    # Disable port checks if skip_start is enabled
+    if participant.skip_start:
+        used_ports = shared_utils.get_port_specs(used_port_assignments, wait=None)
+    else:
+        used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
         "consensoor",
         "run",
         "--log-level=" + log_level,
         "--data-dir=" + BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER,
-        "--engine-api-url=" + EXECUTION_ENGINE_ENDPOINT,
-        "--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--genesis-state="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
         + "/genesis.ssz",
@@ -192,11 +116,15 @@ def get_beacon_config(
         "--preset=" + network_params.preset,
         "--p2p-port={0}".format(discovery_port),
         "--p2p-host=0.0.0.0",
+        "--quic-port={0}".format(discovery_port_quic),
         "--beacon-api-port={0}".format(BEACON_HTTP_PORT_NUM),
         "--metrics-port={0}".format(BEACON_METRICS_PORT_NUM),
         "--fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT,
-        "--graffiti=consensoor",
     ]
+
+    if el_context != None:
+        cmd.append("--engine-api-url=" + EXECUTION_ENGINE_ENDPOINT)
+        cmd.append("--jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
 
     if checkpoint_sync_enabled and checkpoint_sync_url:
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
@@ -229,6 +157,13 @@ def get_beacon_config(
                         cmd.append("--bootnodes=" + ctx.enr)
                     elif ctx.multiaddr:
                         cmd.append("--bootnodes=" + ctx.multiaddr)
+        elif bootnode_arg == None:  # Ephemery and devnets
+            bootnode_arg = shared_utils.get_devnet_enrs_list(
+                plan, launcher.el_cl_genesis_data.files_artifact_uuid
+            )
+
+    if bootnode_arg != None:
+        cmd.append("--bootnodes=" + bootnode_arg)
 
     if participant.supernode:
         cmd.append("--supernode")
@@ -238,8 +173,9 @@ def get_beacon_config(
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.el_cl_genesis_data.files_artifact_uuid,
-        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
+    if el_context != None:
+        files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
     if node_keystore_files != None:
         files[
@@ -247,16 +183,15 @@ def get_beacon_config(
         ] = node_keystore_files.files_artifact_uuid
 
     if persistent:
-        volume_size_key = (
-            "devnets" if "devnet" in network_params.network else network_params.network
-        )
-        files[BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = Directory(
-            persistent_key="data-{0}".format(beacon_service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[volume_size_key][
-                constants.CL_TYPE.lighthouse + "_volume_size"
-            ],
+        # Consensoor has no volume-size entry of its own in constants.VOLUME_SIZE,
+        # so it reuses the lighthouse key.
+        files[
+            BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER
+        ] = cl_shared.get_beacon_data_directory(
+            beacon_service_name,
+            participant,
+            network_params,
+            constants.CL_TYPE.lighthouse,
         )
 
     processed_mounts = shared_utils.process_extra_mounts(
@@ -265,10 +200,27 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
-    env_vars = participant.cl_extra_env_vars
+    # Binary injection - mount custom binary directory if provided
+    if cl_binary_artifact != None:
+        files["/opt/bin"] = cl_binary_artifact.artifact
 
+    env_vars = shared_utils.with_otel_env_vars(
+        participant.cl_extra_env_vars,
+        otel_otlp_grpc_url,
+        beacon_service_name,
+    )
+
+    # Build the command string, copying injected binary if provided
     cmd_str = " ".join(cmd)
-    cmd_str = "exec " + cmd_str
+    if cl_binary_artifact != None:
+        cmd_str = (
+            "cp /opt/bin/{0} /usr/local/bin/consensoor && exec ".format(
+                cl_binary_artifact.filename
+            )
+            + cmd_str
+        )
+    else:
+        cmd_str = "exec " + cmd_str
 
     config_args = {
         "image": participant.cl_image,
@@ -283,7 +235,7 @@ def get_beacon_config(
             client=constants.CL_TYPE.consensoor,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=el_context.client_name,
+            connected_client=el_context.client_name if el_context != None else "none",
             extra_labels=participant.cl_extra_labels
             | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
             supernode=participant.supernode,
@@ -297,14 +249,7 @@ def get_beacon_config(
             constants.HTTP_PORT_ID
         )
 
-    if int(participant.cl_min_cpu) > 0:
-        config_args["min_cpu"] = int(participant.cl_min_cpu)
-    if int(participant.cl_max_cpu) > 0:
-        config_args["max_cpu"] = int(participant.cl_max_cpu)
-    if int(participant.cl_min_mem) > 0:
-        config_args["min_memory"] = int(participant.cl_min_mem)
-    if int(participant.cl_max_mem) > 0:
-        config_args["max_memory"] = int(participant.cl_max_mem)
+    cl_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)
 
 
@@ -321,28 +266,13 @@ def get_cl_context(
     beacon_http_port = service.ports[constants.HTTP_PORT_ID]
     beacon_http_url = "http://{0}:{1}".format(service.name, beacon_http_port.number)
 
-    # Skip HTTP requests if skip_start is enabled (service won't be running)
-    # or if skip_identity is set (identity will be collected later)
-    if participant.skip_start or skip_identity:
-        beacon_node_enr = ""
-        beacon_multiaddr = ""
-        beacon_peer_id = ""
-    else:
-        beacon_node_identity_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v1/node/identity",
-            port_id=constants.HTTP_PORT_ID,
-            extract={
-                "enr": ".data.enr",
-                "multiaddr": ".data.p2p_addresses[0]",
-                "peer_id": ".data.peer_id",
-            },
-        )
-        response = plan.request(
-            recipe=beacon_node_identity_recipe, service_name=service_name
-        )
-        beacon_node_enr = response["extract.enr"]
-        beacon_multiaddr = response["extract.multiaddr"]
-        beacon_peer_id = response["extract.peer_id"]
+    (
+        beacon_node_enr,
+        beacon_multiaddr,
+        beacon_peer_id,
+    ) = cl_shared.get_beacon_node_identity(
+        plan, service_name, participant, skip=skip_identity
+    )
 
     beacon_metrics_port = service.ports[constants.METRICS_PORT_ID]
     beacon_metrics_url = "{0}:{1}".format(
@@ -378,14 +308,3 @@ def new_consensoor_launcher(el_cl_genesis_data, jwt_file):
         el_cl_genesis_data=el_cl_genesis_data,
         jwt_file=jwt_file,
     )
-
-
-def get_blobber_config(
-    plan,
-    participant,
-    beacon_service_name,
-    beacon_http_url,
-    node_keystore_files,
-    node_selectors,
-):
-    return None

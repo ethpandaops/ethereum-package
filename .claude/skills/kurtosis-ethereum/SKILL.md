@@ -15,6 +15,12 @@ Run Ethereum consensus/execution client devnets via [kurtosis](https://github.co
 ## Quick Start
 
 ```bash
+# ALWAYS start the OTel stack first — runs an OTel collector + ClickHouse on the
+# Docker host for centralized log (and trace) collection while debugging.
+# Docker-only. Logs are stamped with the enclave name; traces require the
+# `otel` additional_service (see below). ClickHouse on :18123, OTLP on :14317/:14318.
+kurtosis otel start
+
 # Write a network_params.yaml, then:
 kurtosis run github.com/ethpandaops/ethereum-package \
   --enclave <name> \
@@ -69,6 +75,8 @@ network_params:
 additional_services:
   - dora                     # block explorer
   - assertoor                # automated testing
+  - otel                     # ship EL/CL/VC traces to the engine OTel/ClickHouse
+                             # stack (Docker-only; requires `kurtosis otel start`)
 ```
 
 ## Reference Tool

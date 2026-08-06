@@ -8,38 +8,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  run_starlark:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: ./.github/actions/docker-login
-        with:
-          username: ethpandaops
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Setup Kurtosis
-        uses: ./.github/actions/kurtosis-install
-      - name: Run Starlark
-        run: |
-          kurtosis run ${{ github.workspace }} --args-file network_params.yaml --verbosity detailed --image-download always
-
   run_with_args:
     strategy:
       matrix:
         file_name:
           [
-            "./.github/tests/mev.yaml",
             "./.github/tests/mev-mock.yaml",
             "./.github/tests/mix-with-tools.yaml",
             "./.github/tests/mix-persistence.yaml",
             "./.github/tests/mix-public.yaml",
             "./.github/tests/minimal.yaml",
-            "./network_params.yaml"
+            "./network_params.yaml",
+            "."
           ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/docker-login
         with:
           username: ethpandaops
@@ -48,13 +33,67 @@ jobs:
         uses: ./.github/actions/kurtosis-install
       - name: Run Starlark
         run: |
-          kurtosis run ${{ github.workspace }} --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
+          if [[ "${{ matrix.file_name }}" == "." ]]; then
+            echo "ENCLAVE=default" >> "$GITHUB_ENV"
+            kurtosis run ${{ github.workspace }} --enclave "default" --verbosity detailed --image-download always
+          else
+            enclave=$(basename "${{ matrix.file_name }}" .yaml | tr '_.' '--')
+            echo "ENCLAVE=$enclave" >> "$GITHUB_ENV"
+            kurtosis run ${{ github.workspace }} --enclave "$enclave" --args-file ${{ matrix.file_name }} --verbosity detailed --image-download always
+          fi
+      - name: Upload genesis config
+        if: matrix.file_name == '.' || matrix.file_name == './network_params.yaml' || matrix.file_name == './.github/tests/minimal.yaml'
+        run: kurtosis files download "$ENCLAVE" el_cl_genesis_data /tmp/genesis-$ENCLAVE
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: matrix.file_name == '.' || matrix.file_name == './network_params.yaml' || matrix.file_name == './.github/tests/minimal.yaml'
+        with:
+          name: genesis-config-${{ env.ENCLAVE }}
+          path: /tmp/genesis-${{ env.ENCLAVE }}/config.yaml
+          retention-days: 1
+
+  check-consensus-spec-values:
+    name: Check consensus spec values (${{ matrix.label }})
+    needs: run_with_args
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: default
+            artifact: genesis-config-default
+            preset: mainnet
+          - label: network-params
+            artifact: genesis-config-network-params
+            preset: mainnet
+          - label: minimal
+            artifact: genesis-config-minimal
+            preset: minimal
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ matrix.artifact }}
+          path: /tmp/genesis
+      - name: Install pyyaml
+        run: pip install pyyaml --quiet
+      - name: Download upstream consensus-specs config
+        run: |
+          curl -fsSL \
+            "https://raw.githubusercontent.com/ethereum/consensus-specs/master/configs/${{ matrix.preset }}.yaml" \
+            -o /tmp/spec.yaml
+      - name: Compare genesis config.yaml against upstream spec
+        run: |
+          python3 .github/check-consensus-spec-values.py \
+            --our-config /tmp/genesis/config.yaml \
+            --spec-config /tmp/spec.yaml
 
   lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Kurtosis
         uses: ./.github/actions/kurtosis-install
       - name: Kurtosis Lint
@@ -65,7 +104,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/docker-login
         with:
           username: ethpandaops
@@ -95,7 +134,7 @@ jobs:
           # Pre-pull images in parallel so kurtosis finds them cached (with --image-download missing)
           docker pull ethereum/client-go:latest &
           docker pull ethpandaops/lighthouse:unstable &
-          docker pull ethpandaops/ethereum-genesis-generator:5.2.4 &
+          docker pull ethpandaops/ethereum-genesis-generator:6.1.6 &
           docker pull protolambda/eth2-val-tools:latest &
           wait
       - name: Run Speed Benchmark
@@ -147,12 +186,12 @@ jobs:
         run: |
           # Pre-pull images in parallel so kurtosis finds them cached (with --image-download missing)
           docker pull ethereum/client-go:latest &
-          docker pull ghcr.io/paradigmxyz/reth &
-          docker pull nethermind/nethermind:latest &
+          docker pull ethpandaops/reth:main &
+          docker pull ethpandaops/nethermind:master &
           docker pull ethpandaops/lighthouse:unstable &
           docker pull ethpandaops/teku:master &
           docker pull ethpandaops/nimbus-eth2:unstable-minimal &
-          docker pull ethpandaops/ethereum-genesis-generator:5.2.4 &
+          docker pull ethpandaops/ethereum-genesis-generator:6.1.6 &
           docker pull protolambda/eth2-val-tools:latest &
           wait
       - name: Run Speed Benchmark 3x3
@@ -192,7 +231,7 @@ jobs:
   #  runs-on: ubuntu-latest
   #  steps:
   #    - name: Check out Repository
-  #      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+  #      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
   #    - name: Setup Kurtosis
   #      uses: ./.github/actions/kurtosis-install
   #    - name: Run L1

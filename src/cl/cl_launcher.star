@@ -9,6 +9,7 @@ grandine = import_module("./grandine/grandine_launcher.star")
 consensoor = import_module("./consensoor/consensoor_launcher.star")
 caplin = import_module("./caplin/caplin_launcher.star")
 
+cl_shared = import_module("./cl_shared.star")
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
@@ -30,6 +31,8 @@ def launch(
     global_tolerations,
     persistent,
     tempo_otlp_grpc_url,
+    otel_otlp_grpc_url,
+    otel_otlp_http_traces_url,
     num_participants,
     validator_data,
     prysm_password_relative_filepath,
@@ -45,17 +48,15 @@ def launch(
     cl_launchers = {
         constants.CL_TYPE.lighthouse: {
             "launcher": lighthouse.new_lighthouse_launcher(el_cl_data, jwt_file),
-            "launch_method": lighthouse.launch,
             "get_beacon_config": lighthouse.get_beacon_config,
             "get_cl_context": lighthouse.get_cl_context,
-            "get_blobber_config": lighthouse.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config,
         },
         constants.CL_TYPE.lodestar: {
             "launcher": lodestar.new_lodestar_launcher(el_cl_data, jwt_file),
-            "launch_method": lodestar.launch,
             "get_beacon_config": lodestar.get_beacon_config,
             "get_cl_context": lodestar.get_cl_context,
-            "get_blobber_config": lodestar.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config,
         },
         constants.CL_TYPE.nimbus: {
             "launcher": nimbus.new_nimbus_launcher(
@@ -63,20 +64,19 @@ def launch(
                 jwt_file,
                 keymanager_file,
             ),
-            "launch_method": nimbus.launch,
             "get_beacon_config": nimbus.get_beacon_config,
             "get_cl_context": nimbus.get_cl_context,
-            "get_blobber_config": nimbus.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
         constants.CL_TYPE.prysm: {
             "launcher": prysm.new_prysm_launcher(
                 el_cl_data,
                 jwt_file,
+                otel_otlp_http_traces_url,
             ),
-            "launch_method": prysm.launch,
             "get_beacon_config": prysm.get_beacon_config,
             "get_cl_context": prysm.get_cl_context,
-            "get_blobber_config": prysm.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config,
         },
         constants.CL_TYPE.teku: {
             "launcher": teku.new_teku_launcher(
@@ -84,40 +84,36 @@ def launch(
                 jwt_file,
                 keymanager_file,
             ),
-            "launch_method": teku.launch,
             "get_beacon_config": teku.get_beacon_config,
             "get_cl_context": teku.get_cl_context,
-            "get_blobber_config": teku.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
         constants.CL_TYPE.grandine: {
             "launcher": grandine.new_grandine_launcher(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": grandine.launch,
             "get_beacon_config": grandine.get_beacon_config,
             "get_cl_context": grandine.get_cl_context,
-            "get_blobber_config": grandine.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
         constants.CL_TYPE.consensoor: {
             "launcher": consensoor.new_consensoor_launcher(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": consensoor.launch,
             "get_beacon_config": consensoor.get_beacon_config,
             "get_cl_context": consensoor.get_cl_context,
-            "get_blobber_config": consensoor.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
         constants.CL_TYPE.caplin: {
             "launcher": caplin.new_caplin_launcher(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": caplin.launch,
             "get_beacon_config": caplin.get_beacon_config,
             "get_cl_context": caplin.get_cl_context,
-            "get_blobber_config": caplin.get_blobber_config,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
         },
     }
 
@@ -167,13 +163,11 @@ def launch(
 
         (
             cl_launcher,
-            launch_method,
             get_beacon_config,
             get_cl_context,
             get_blobber_config,
         ) = (
             cl_launchers[cl_type]["launcher"],
-            cl_launchers[cl_type]["launch_method"],
             cl_launchers[cl_type]["get_beacon_config"],
             cl_launchers[cl_type]["get_cl_context"],
             cl_launchers[cl_type]["get_blobber_config"],
@@ -183,7 +177,10 @@ def launch(
             index + 1, len(str(len(args_with_right_defaults.participants)))
         )
 
-        cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
+        if el_type == constants.EL_TYPE.none:
+            cl_service_name = "cl-{0}-{1}".format(index_str, cl_type)
+        else:
+            cl_service_name = "cl-{0}-{1}-{2}".format(index_str, cl_type, el_type)
         new_cl_node_validator_keystores = None
         if participant.validator_count != 0:
             new_cl_node_validator_keystores = preregistered_validator_keys_for_nodes[
@@ -194,7 +191,7 @@ def launch(
 
         cl_context = None
         snooper_el_engine_context = None
-        if participant.snooper_enabled:
+        if participant.snooper_enabled and el_context != None:
             snooper_service_name = "snooper-engine-{0}-{1}-{2}".format(
                 index_str, cl_type, el_type
             )
@@ -216,10 +213,7 @@ def launch(
                 )
             )
         checkpoint_sync_url = args_with_right_defaults.checkpoint_sync_url
-        # Use participant-level checkpoint_sync_enabled if set, otherwise use global
-        checkpoint_sync_enabled = args_with_right_defaults.checkpoint_sync_enabled
-        if participant.checkpoint_sync_enabled != None:
-            checkpoint_sync_enabled = participant.checkpoint_sync_enabled
+        checkpoint_sync_enabled = participant.checkpoint_sync_enabled
         if checkpoint_sync_enabled:
             if args_with_right_defaults.checkpoint_sync_url == "":
                 if network_params.network == constants.NETWORK_NAME.kurtosis:
@@ -248,12 +242,15 @@ def launch(
                     )
 
         all_snooper_el_engine_contexts.append(snooper_el_engine_context)
-        full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
+        if el_type == constants.EL_TYPE.none:
+            full_name = "{0}-{1}".format(index_str, cl_type)
+        else:
+            full_name = "{0}-{1}-{2}".format(index_str, el_type, cl_type)
 
         cl_binary_artifact = binary_artifacts.get(index, {}).get("cl", None)
 
         if index == 0:
-            cl_context = launch_method(
+            beacon_config = get_beacon_config(
                 plan,
                 cl_launcher,
                 cl_service_name,
@@ -275,8 +272,25 @@ def launch(
                 extra_files_artifacts,
                 backend,
                 tempo_otlp_grpc_url,
+                otel_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
+            )
+
+            beacon_service = plan.add_service(
+                cl_service_name,
+                beacon_config,
+                force_update=participant.cl_force_restart,
+            )
+
+            cl_context = get_cl_context(
+                plan,
+                cl_service_name,
+                beacon_service,
+                participant,
+                snooper_el_engine_context,
+                new_cl_node_validator_keystores,
+                node_selectors,
             )
 
             blobber_config = get_blobber_config(
@@ -327,6 +341,7 @@ def launch(
                 extra_files_artifacts,
                 backend,
                 tempo_otlp_grpc_url,
+                otel_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
                 skip_ready_conditions=True,
@@ -358,6 +373,9 @@ def launch(
         participant = info["participant"]
         participant_index = info["participant_index"]
 
+        # Defer the identity request for parallel nodes; their health checks are
+        # skipped, so collect_identities backfills ENR/multiaddr/peer_id once the
+        # whole network is launched.
         cl_context = get_cl_context(
             plan,
             beacon_service_name,
@@ -415,46 +433,19 @@ def collect_identities(plan, all_cl_contexts, participants):
     for index, ctx in enumerate(all_cl_contexts):
         participant = participants[index] if index < len(participants) else None
         skip_start = participant.skip_start if participant else False
-        if ctx.enr == "" and ctx.beacon_service_name != "" and not skip_start:
-            # Determine multiaddr jq based on client type
-            multiaddr_jq = ".data.p2p_addresses[0]"
-            headers = {}
-            if ctx.client_name == "lodestar":
-                multiaddr_jq = ".data.p2p_addresses[-1]"
-            if ctx.client_name == "prysm":
-                headers = {"Accept-Encoding": "identity"}
-
-            extract = {
-                "enr": ".data.enr",
-                "multiaddr": multiaddr_jq,
-                "peer_id": ".data.peer_id",
-            }
-            if headers:
-                beacon_node_identity_recipe = GetHttpRequestRecipe(
-                    endpoint="/eth/v1/node/identity",
-                    port_id=constants.HTTP_PORT_ID,
-                    extract=extract,
-                    headers=headers,
-                )
-            else:
-                beacon_node_identity_recipe = GetHttpRequestRecipe(
-                    endpoint="/eth/v1/node/identity",
-                    port_id=constants.HTTP_PORT_ID,
-                    extract=extract,
-                )
-            response = plan.wait(
-                recipe=beacon_node_identity_recipe,
-                service_name=ctx.beacon_service_name,
-                field="code",
-                assertion="IN",
-                target_value=[200],
-                interval="1s",
-                timeout="5m",
+        if (
+            ctx != None
+            and ctx.enr == ""
+            and ctx.beacon_service_name != ""
+            and not skip_start
+        ):
+            enr, multiaddr, peer_id = cl_shared.wait_beacon_node_identity(
+                plan, ctx.beacon_service_name, ctx.client_name
             )
             enriched.append(
                 cl_context_l.new_cl_context(
                     client_name=ctx.client_name,
-                    enr=response["extract.enr"],
+                    enr=enr,
                     ip_addr=ctx.ip_addr,
                     ip_address=ctx.ip_address,
                     http_port=ctx.http_port,
@@ -462,8 +453,8 @@ def collect_identities(plan, all_cl_contexts, participants):
                     cl_nodes_metrics_info=ctx.cl_nodes_metrics_info,
                     beacon_service_name=ctx.beacon_service_name,
                     beacon_grpc_url=ctx.beacon_grpc_url,
-                    multiaddr=response["extract.multiaddr"],
-                    peer_id=response["extract.peer_id"],
+                    multiaddr=multiaddr,
+                    peer_id=peer_id,
                     snooper_enabled=ctx.snooper_enabled,
                     snooper_el_engine_context=ctx.snooper_el_engine_context,
                     validator_keystore_files_artifact_uuid=ctx.validator_keystore_files_artifact_uuid,

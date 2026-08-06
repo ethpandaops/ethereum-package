@@ -146,9 +146,4 @@ def new_config_template_data(tempo_params):
         "GRPCPort": GRPC_PORT_NUMBER,
         "OTLPGRPCPort": OTLP_GRPC_PORT_NUMBER,
         "OTLPHTTPPort": OTLP_HTTP_PORT_NUMBER,
-        "RetentionDuration": tempo_params.retention_duration,
-        "IngestionRateLimit": tempo_params.ingestion_rate_limit,
-        "IngestionBurstLimit": tempo_params.ingestion_burst_limit,
-        "MaxSearchDuration": tempo_params.max_search_duration,
-        "MaxBytesPerTrace": tempo_params.max_bytes_per_trace,
     }

@@ -1,30 +1,23 @@
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
 shared_utils = import_module("../shared_utils/shared_utils.star")
-vc_shared = import_module("./shared.star")
+vc_shared = import_module("./vc_shared.star")
 
 RUST_BACKTRACE_ENVVAR_NAME = "RUST_BACKTRACE"
 RUST_FULL_BACKTRACE_KEYWORD = "full"
-
-VERBOSITY_LEVELS = {
-    constants.GLOBAL_LOG_LEVEL.error: "error",
-    constants.GLOBAL_LOG_LEVEL.warn: "warn",
-    constants.GLOBAL_LOG_LEVEL.info: "info",
-    constants.GLOBAL_LOG_LEVEL.debug: "debug",
-    constants.GLOBAL_LOG_LEVEL.trace: "trace",
-}
 
 
 def get_config(
     plan,
     participant,
     el_cl_genesis_data,
+    keymanager_file,
     image,
     service_name,
     global_log_level,
     beacon_http_urls,
     cl_context,
-    el_context,
+    remote_signer_context,
     full_name,
     node_keystore_files,
     tolerations,
@@ -34,11 +27,14 @@ def get_config(
     port_publisher,
     vc_index,
     extra_files_artifacts,
+    prysm_password_relative_filepath=None,
+    prysm_password_artifact_uuid=None,
     tempo_otlp_grpc_url=None,
+    otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
-        participant.vc_log_level, global_log_level, VERBOSITY_LEVELS
+        participant.vc_log_level, global_log_level, vc_shared.VERBOSITY_LEVELS
     )
 
     validator_keys_dirpath = shared_utils.path_join(
@@ -84,9 +80,11 @@ def get_config(
         cmd.append("--gas-limit={0}".format(network_params.gas_limit))
         cmd.append("--builder-proposals")
 
-    # Add tempo telemetry integration if tempo is enabled
-    if tempo_otlp_grpc_url != None:
-        cmd.append("--telemetry-collector-url={}".format(tempo_otlp_grpc_url))
+    telemetry_url = (
+        otel_otlp_grpc_url if otel_otlp_grpc_url != None else tempo_otlp_grpc_url
+    )
+    if telemetry_url != None:
+        cmd.append("--telemetry-collector-url={}".format(telemetry_url))
         cmd.append("--telemetry-service-name={}".format(service_name))
 
     if len(participant.vc_extra_params):
@@ -97,21 +95,17 @@ def get_config(
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER: node_keystore_files.files_artifact_uuid,
     }
     env = {RUST_BACKTRACE_ENVVAR_NAME: RUST_FULL_BACKTRACE_KEYWORD}
-    env.update(participant.vc_extra_env_vars)
-
-    public_ports = {}
-    public_keymanager_port_assignment = {}
-    if port_publisher.vc_enabled:
-        public_ports_for_component = shared_utils.get_public_ports_for_component(
-            "vc", port_publisher, vc_index
+    env.update(
+        shared_utils.with_otel_env_vars(
+            participant.vc_extra_env_vars,
+            otel_otlp_grpc_url,
+            full_name,
         )
-        public_port_assignments = {
-            constants.METRICS_PORT_ID: public_ports_for_component[0]
-        }
-        public_keymanager_port_assignment = {
-            constants.VALIDATOR_HTTP_PORT_ID: public_ports_for_component[1]
-        }
-        public_ports = shared_utils.get_port_specs(public_port_assignments)
+    )
+
+    public_ports, public_keymanager_port_assignment = vc_shared.get_public_ports(
+        port_publisher, vc_index
+    )
 
     ports = {}
     ports.update(vc_shared.VALIDATOR_CLIENT_USED_PORTS)
@@ -123,16 +117,7 @@ def get_config(
             shared_utils.get_port_specs(public_keymanager_port_assignment)
         )
 
-    # Add extra mounts - automatically handle file uploads
-    processed_mounts = shared_utils.process_extra_mounts(
-        plan, participant.vc_extra_mounts, extra_files_artifacts
-    )
-    for mount_path, artifact in processed_mounts.items():
-        files[mount_path] = artifact
-
-    # Binary injection - mount custom binary directory if provided
-    if vc_binary_artifact != None:
-        files["/opt/bin"] = vc_binary_artifact.artifact
+    vc_shared.apply_extra_mounts(plan, participant, extra_files_artifacts, files)
 
     config_args = {
         "image": image,
@@ -142,37 +127,20 @@ def get_config(
         "cmd": cmd,
         "files": files,
         "env_vars": env,
-        "labels": shared_utils.label_maker(
-            client=constants.VC_TYPE.lighthouse,
-            client_type=constants.CLIENT_TYPES.validator,
-            image=image[-constants.MAX_LABEL_LENGTH :],
-            connected_client=cl_context.client_name,
-            extra_labels=participant.vc_extra_labels
-            | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
-            supernode=participant.supernode,
+        "labels": vc_shared.get_labels(
+            constants.VC_TYPE.lighthouse, participant, image, cl_context, vc_index
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
     }
 
-    # Binary injection - override entrypoint and cmd only when binary is provided
-    if vc_binary_artifact != None:
-        config_args["entrypoint"] = ["sh", "-c"]
-        config_args["cmd"] = [
-            "cp /opt/bin/{0} /usr/local/bin/lighthouse && lighthouse ".format(
-                vc_binary_artifact.filename
-            )
-            + " ".join(cmd)
-        ]
+    vc_shared.apply_binary_override(
+        config_args,
+        cmd,
+        vc_binary_artifact,
+        "/usr/local/bin/lighthouse",
+        "lighthouse",
+    )
 
-    if participant.vc_min_cpu > 0:
-        config_args["min_cpu"] = participant.vc_min_cpu
-    if participant.vc_max_cpu > 0:
-        config_args["max_cpu"] = participant.vc_max_cpu
-    if participant.vc_min_mem > 0:
-        config_args["min_memory"] = participant.vc_min_mem
-    if participant.vc_max_mem > 0:
-        config_args["max_memory"] = participant.vc_max_mem
-    if len(participant.vc_devices) > 0:
-        config_args["devices"] = participant.vc_devices
+    vc_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)

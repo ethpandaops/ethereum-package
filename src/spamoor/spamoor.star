@@ -137,6 +137,20 @@ def get_config(
         "--startup-spammer={}".format(config_file_path),
     ]
 
+    # Built-in spamoor defaults (by technical key) to auto-start on first launch.
+    # start_chainload/start_fuzzing map to the built-in default groups; spamoor_params.defaults
+    # can list any other default keys. Deduplicated so overlapping entries don't conflict.
+    startup_defaults = []
+    if spamoor_params.start_chainload:
+        startup_defaults.append("regular-chain-load")
+    if spamoor_params.start_fuzzing:
+        startup_defaults.append("fuzzing")
+    for default_key in spamoor_params.defaults:
+        if default_key not in startup_defaults:
+            startup_defaults.append(default_key)
+    if len(startup_defaults) > 0:
+        cmd.append("--startup-defaults={}".format(",".join(startup_defaults)))
+
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
         constants.HTTP_PORT_ID,
@@ -193,6 +207,8 @@ def new_hosts_template_data(
         ) = shared_utils.get_client_names(
             participant, index, participant_contexts, participant_configs
         )
+        if el_client == None:
+            continue
         if participant.snooper_el_rpc_context:
             rpchost = "http://{0}:{1}".format(
                 participant.snooper_el_rpc_context.ip_addr,
@@ -208,7 +224,7 @@ def new_hosts_template_data(
             index + 1, len(str(len(participant_contexts)))
         )
         rpchost = (
-            "group({0},{1},{2})name({3})".format(
+            "group({0},{1},{2},{1}-{2}-{0},{3})name({3})".format(
                 index_str,
                 cl_client.client_name,
                 el_client.client_name,

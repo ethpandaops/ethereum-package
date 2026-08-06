@@ -20,6 +20,32 @@ def new_template_and_data(template, template_data_json):
     return struct(template=template, data=template_data_json)
 
 
+def with_otel_env_vars(env_vars, otel_otlp_grpc_url, service_name):
+    """Merge standard OTel SDK env vars in and append participant resource attrs."""
+    if otel_otlp_grpc_url == None:
+        return env_vars
+    resource_attributes = "service.name={},service.namespace=ethereum-package".format(
+        service_name
+    )
+    participant_resource_attributes = env_vars.get("OTEL_RESOURCE_ATTRIBUTES", "")
+    if participant_resource_attributes != "":
+        resource_attributes = "{},{}".format(
+            resource_attributes,
+            participant_resource_attributes,
+        )
+    merged = {
+        "OTEL_EXPORTER_OTLP_ENDPOINT": otel_otlp_grpc_url,
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc",
+        "OTEL_SERVICE_NAME": service_name,
+        "OTEL_RESOURCE_ATTRIBUTES": resource_attributes,
+    }
+    for k, v in env_vars.items():
+        if k == "OTEL_RESOURCE_ATTRIBUTES":
+            continue
+        merged[k] = v
+    return merged
+
+
 def path_join(*args):
     joined_path = "/".join(args)
     return joined_path.replace("//", "/")
@@ -28,14 +54,6 @@ def path_join(*args):
 def path_base(path):
     split_path = path.split("/")
     return split_path[-1]
-
-
-def path_dir(path):
-    split_path = path.split("/")
-    if len(split_path) <= 1:
-        return "."
-    split_path = split_path[:-1]
-    return "/".join(split_path) or "/"
 
 
 def new_port_spec(
@@ -59,19 +77,20 @@ def new_port_spec(
     )
 
 
-def read_file_from_service(plan, service_name, filename):
-    output = plan.exec(
-        service_name=service_name,
-        description="Reading {} from {}".format(filename, service_name),
-        recipe=ExecRecipe(
-            command=["/bin/sh", "-c", "cat {} | tr -d '\n'".format(filename)]
-        ),
-    )
-    return output["output"]
-
-
 def zfill_custom(value, width):
     return ("0" * (width - len(str(value)))) + str(value)
+
+
+# Builds the service name for a per-participant buildoor instance, e.g.
+# buildoor-lighthouse-geth-1. When a participant runs more than one buildoor
+# (count > 1) a 1-based instance suffix is appended, e.g.
+# buildoor-lighthouse-geth-1-2. Used by both the input parser (to wire the CL's
+# builder endpoint) and main.star (to add the service), so they never drift.
+def get_buildoor_service_name(prefix, cl_type, el_type, index_str, instance, count):
+    base = "{0}-{1}-{2}-{3}".format(prefix, cl_type, el_type, index_str)
+    if count <= 1:
+        return base
+    return "{0}-{1}".format(base, instance + 1)
 
 
 def label_maker(
@@ -111,9 +130,31 @@ def get_devnet_enodes(plan, filename):
         description="Getting devnet enodes",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="cat /network-configs/enodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+        run="grep -v '^[[:space:]]*$' /network-configs/enodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
     )
     return enode_list.output
+
+
+def get_devnet_el_enrs(plan, filename):
+    enr_list = plan.run_sh(
+        description="Getting devnet EL enrs",
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        run="grep -v '^[[:space:]]*$' /network-configs/el_enrs.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+    )
+    return enr_list.output
+
+
+def get_devnet_el_bootnodes(plan, filename):
+    # EL ENRs (discv5) plus enodes (discv4) in one list, for consumers like
+    # bootnodoor that bridge both protocols; either file may be absent
+    bootnode_list = plan.run_sh(
+        description="Getting devnet EL bootnodes (enrs + enodes)",
+        files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
+        wait=None,
+        run="cat /network-configs/el_enrs.txt /network-configs/enodes.txt 2>/dev/null | grep -v '^[[:space:]]*$' | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+    )
+    return bootnode_list.output
 
 
 def get_devnet_enrs_list(plan, filename):
@@ -121,7 +162,7 @@ def get_devnet_enrs_list(plan, filename):
         description="Creating devnet enrs list",
         files={constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: filename},
         wait=None,
-        run="cat /network-configs/bootstrap_nodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
+        run="grep -v '^[[:space:]]*$' /network-configs/bootstrap_nodes.txt | tr -d ' ' | tr '\n' ',' | sed 's/,$//'",
     )
     return enr_list.output
 
@@ -209,14 +250,16 @@ def get_client_names(participant, index, participant_contexts, participant_confi
     cl_client = participant.cl_context
     el_client = participant.el_context
     vc_client = participant.vc_context
-    full_name = (
-        "{0}-{1}-{2}".format(index_str, el_client.client_name, cl_client.client_name)
-        + "-{0}".format(vc_client.client_name)
-        if vc_client != None and cl_client.client_name != vc_client.client_name
-        else "{0}-{1}-{2}".format(
+    if el_client == None:
+        base_name = "{0}-{1}".format(index_str, cl_client.client_name)
+    else:
+        base_name = "{0}-{1}-{2}".format(
             index_str, el_client.client_name, cl_client.client_name
         )
-    )
+    if vc_client != None and cl_client.client_name != vc_client.client_name:
+        full_name = base_name + "-{0}".format(vc_client.client_name)
+    else:
+        full_name = base_name
     return full_name, cl_client, el_client, participant_config
 
 
@@ -360,21 +403,6 @@ def get_other_public_port(
         )
         public_ports = get_port_specs({port_id: public_ports_for_component[port_index]})
     return public_ports
-
-
-def get_cpu_mem_resource_limits(
-    min_cpu, max_cpu, min_mem, max_mem, volume_size, network_name, client_type
-):
-    min_cpu = int(min_cpu) if int(min_cpu) > 0 else 0
-    max_cpu = int(max_cpu) if int(max_cpu) > 0 else 0
-    min_mem = int(min_mem) if int(min_mem) > 0 else 0
-    max_mem = int(max_mem) if int(max_mem) > 0 else 0
-    volume_size = (
-        int(volume_size)
-        if int(volume_size) > 0
-        else constants.VOLUME_SIZE[network_name][client_type + "_volume_size"]
-    )
-    return min_cpu, max_cpu, min_mem, max_mem, volume_size
 
 
 def docker_cache_image_calc(docker_cache_params, image):

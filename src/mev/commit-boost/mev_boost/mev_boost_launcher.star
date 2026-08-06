@@ -51,11 +51,17 @@ def launch(
     )
 
     image = mev_params.mev_boost_image
+
     template_data = new_config_template_data(
         network, constants.MEV_BOOST_PORT, relays, final_genesis_timestamp
     )
 
-    commit_boost_config_template = read_file(static_files.COMMIT_BOOST_CONFIG_FILEPATH)
+    if mev_params.commit_boost_config:
+        commit_boost_config_template = mev_params.commit_boost_config
+    else:
+        commit_boost_config_template = read_file(
+            static_files.COMMIT_BOOST_CONFIG_FILEPATH
+        )
 
     template_and_data = shared_utils.new_template_and_data(
         commit_boost_config_template, template_data

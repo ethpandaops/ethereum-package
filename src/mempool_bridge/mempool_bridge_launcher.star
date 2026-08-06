@@ -17,7 +17,6 @@ ENODE_URLS = {
     "mainnet": "https://raw.githubusercontent.com/eth-clients/mainnet/refs/heads/main/metadata/enodes.yaml",
     "sepolia": "https://raw.githubusercontent.com/eth-clients/sepolia/refs/heads/main/metadata/enodes.yaml",
     "hoodi": "https://raw.githubusercontent.com/eth-clients/hoodi/refs/heads/main/metadata/enodes.yaml",
-    "holesky": "https://raw.githubusercontent.com/eth-clients/holesky/refs/heads/main/metadata/enodes.yaml",
 }
 
 HTTP_PORT_NUMBER = 9090
@@ -91,6 +90,8 @@ def launch_mempool_bridge(
     # Build target endpoints from all EL contexts based on mode
     target_endpoints = []
     for context in all_el_contexts:
+        if context == None:
+            continue
         if mode == "rpc":
             # For RPC mode, use HTTP RPC endpoint
             rpc_url = "http://{0}:{1}".format(context.dns_name, context.rpc_port_num)

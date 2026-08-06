@@ -49,13 +49,15 @@ def launch_tracoor(
         )
 
         beacon = new_cl_client_info(cl_client.beacon_http_url, full_name)
-        execution = new_el_client_info(
-            "http://{0}:{1}".format(
-                el_client.dns_name,
-                el_client.rpc_port_num,
-            ),
-            full_name,
-        )
+        execution = None
+        if el_client != None:
+            execution = new_el_client_info(
+                "http://{0}:{1}".format(
+                    el_client.dns_name,
+                    el_client.rpc_port_num,
+                ),
+                full_name,
+            )
 
         client_info = {
             "Beacon": beacon,
