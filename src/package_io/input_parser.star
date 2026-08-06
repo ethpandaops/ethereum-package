@@ -99,20 +99,6 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 
-def merge_nested_defaults(result, input_args, category):
-    for sub_attr in input_args[category]:
-        sub_value = input_args[category][sub_attr]
-        if (
-            type(sub_value) == "dict"
-            and sub_attr in result[category]
-            and type(result[category][sub_attr]) == "dict"
-        ):
-            for nested_attr in sub_value:
-                result[category][sub_attr][nested_attr] = sub_value[nested_attr]
-        else:
-            result[category][sub_attr] = sub_value
-
-
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
@@ -152,12 +138,6 @@ def input_parser(plan, input_args):
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
     result["trueblocks_params"] = get_default_trueblocks_params()
-
-    if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
-        shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
-        result["network_params"][
-            "deposit_contract_address"
-        ] = constants.DEPOSIT_CONTRACT_ADDRESS[shadow_base]
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -488,18 +468,26 @@ def input_parser(plan, input_args):
             "Mock mev is only supported if the first participant is lighthouse client, please use a different client or set mev_type to 'flashbots', 'mev-rs' or 'commit-boost' or make the first participant lighthouse"
         )
 
-    if (
-        result["network_params"]["bpo_1_epoch"]
-        < result["network_params"]["fulu_fork_epoch"]
-    ):
-        result["network_params"]["bpo_1_epoch"] = result["network_params"][
-            "fulu_fork_epoch"
-        ]
-        plan.print(
-            "BPO 1 epoch adjusted to Fulu epoch {0}".format(
-                result["network_params"]["fulu_fork_epoch"]
-            )
-        )
+    if result["network_params"]["fulu_fork_epoch"] != 0:
+        for bpo_key in [
+            "bpo_1_epoch",
+            "bpo_2_epoch",
+            "bpo_3_epoch",
+            "bpo_4_epoch",
+            "bpo_5_epoch",
+        ]:
+            if (
+                result["network_params"][bpo_key]
+                < result["network_params"]["fulu_fork_epoch"]
+            ):
+                fail(
+                    "fulu_fork_epoch is not at genesis ({0}), but {1} ({2}) is scheduled before it. BPO forks require Fulu, so when Fulu is not at genesis you must explicitly set every bpo_*_epoch to an epoch >= fulu_fork_epoch, or to {3} to disable the BPO.".format(
+                        result["network_params"]["fulu_fork_epoch"],
+                        bpo_key,
+                        result["network_params"][bpo_key],
+                        constants.FAR_FUTURE_EPOCH,
+                    )
+                )
     if (
         result["network_params"]["bpo_2_epoch"]
         < result["network_params"]["bpo_1_epoch"]
@@ -1147,6 +1135,9 @@ def input_parser(plan, input_args):
             max_mem=result["spamoor_params"]["max_mem"],
             spammers=result["spamoor_params"]["spammers"],
             extra_args=result["spamoor_params"]["extra_args"],
+            start_chainload=result["spamoor_params"]["start_chainload"],
+            start_fuzzing=result["spamoor_params"]["start_fuzzing"],
+            defaults=result["spamoor_params"]["defaults"],
         ),
         disruptoor_params=struct(
             image=result["disruptoor_params"]["image"],
@@ -1958,21 +1949,21 @@ def default_network_params():
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
         "bpo_1_base_fee_update_fraction": 8346193,
-        "bpo_2_epoch": 18446744073709551615,
+        "bpo_2_epoch": 0,
         "bpo_2_max_blobs": 21,
         "bpo_2_target_blobs": 14,
         "bpo_2_base_fee_update_fraction": 11684671,
         "bpo_3_epoch": 18446744073709551615,
-        "bpo_3_max_blobs": 0,
-        "bpo_3_target_blobs": 0,
+        "bpo_3_max_blobs": 33,
+        "bpo_3_target_blobs": 22,
         "bpo_3_base_fee_update_fraction": 0,
         "bpo_4_epoch": 18446744073709551615,
-        "bpo_4_max_blobs": 0,
-        "bpo_4_target_blobs": 0,
+        "bpo_4_max_blobs": 48,
+        "bpo_4_target_blobs": 32,
         "bpo_4_base_fee_update_fraction": 0,
         "bpo_5_epoch": 18446744073709551615,
-        "bpo_5_max_blobs": 0,
-        "bpo_5_target_blobs": 0,
+        "bpo_5_max_blobs": 72,
+        "bpo_5_target_blobs": 48,
         "bpo_5_base_fee_update_fraction": 0,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
@@ -2044,21 +2035,21 @@ def default_minimal_network_params():
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
         "bpo_1_base_fee_update_fraction": 8346193,
-        "bpo_2_epoch": 18446744073709551615,
+        "bpo_2_epoch": 0,
         "bpo_2_max_blobs": 21,
         "bpo_2_target_blobs": 14,
         "bpo_2_base_fee_update_fraction": 11684671,
         "bpo_3_epoch": 18446744073709551615,
-        "bpo_3_max_blobs": 0,
-        "bpo_3_target_blobs": 0,
+        "bpo_3_max_blobs": 33,
+        "bpo_3_target_blobs": 22,
         "bpo_3_base_fee_update_fraction": 0,
         "bpo_4_epoch": 18446744073709551615,
-        "bpo_4_max_blobs": 0,
-        "bpo_4_target_blobs": 0,
+        "bpo_4_max_blobs": 48,
+        "bpo_4_target_blobs": 32,
         "bpo_4_base_fee_update_fraction": 0,
         "bpo_5_epoch": 18446744073709551615,
-        "bpo_5_max_blobs": 0,
-        "bpo_5_target_blobs": 0,
+        "bpo_5_max_blobs": 72,
+        "bpo_5_target_blobs": 48,
         "bpo_5_base_fee_update_fraction": 0,
         "withdrawal_type": "0x00",
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
@@ -2404,6 +2395,12 @@ def get_default_spamoor_params():
         "min_mem": 100,
         "max_mem": 800,
         "extra_args": [],
+        # start spamoor's built-in "Regular Chain Load" default group on first launch
+        "start_chainload": True,
+        # start spamoor's built-in "Fuzzing" default group on first launch
+        "start_fuzzing": False,
+        # additional built-in defaults (by technical key) to start on first launch
+        "defaults": [],
         "spammers": [
             # default spammers
             {

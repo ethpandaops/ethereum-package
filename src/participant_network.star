@@ -24,7 +24,7 @@ launch_remote_enclave = import_module("./network_launcher/remote_enclave.star")
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
 vc = import_module("./vc/vc_launcher.star")
-vc_shared = import_module("./vc/shared.star")
+vc_shared = import_module("./vc/vc_shared.star")
 vc_context_l = import_module("./vc/vc_context.star")
 node_metrics = import_module("./node_metrics_info.star")
 remote_signer = import_module("./remote_signer/remote_signer_launcher.star")
@@ -573,7 +573,6 @@ def launch_participant_network(
             global_log_level=args_with_right_defaults.global_log_level,
             cl_context=get_cl_context_with_blobber_url(cl_context),
             all_cl_contexts=all_cl_contexts,
-            el_context=el_context,
             remote_signer_context=remote_signer_context,
             full_name=full_name,
             snooper_enabled=participant.snooper_enabled,

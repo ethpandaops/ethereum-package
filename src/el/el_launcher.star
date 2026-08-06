@@ -43,7 +43,6 @@ def launch(
                 jwt_file,
                 network_id,
             ),
-            "launch_method": geth.launch,
             "get_config": geth.get_config,
             "get_el_context": geth.get_el_context,
         },
@@ -52,7 +51,6 @@ def launch(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": besu.launch,
             "get_config": besu.get_config,
             "get_el_context": besu.get_el_context,
         },
@@ -62,7 +60,6 @@ def launch(
                 jwt_file,
                 network_id,
             ),
-            "launch_method": erigon.launch,
             "get_config": erigon.get_config,
             "get_el_context": erigon.get_el_context,
         },
@@ -71,7 +68,6 @@ def launch(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": nethermind.launch,
             "get_config": nethermind.get_config,
             "get_el_context": nethermind.get_el_context,
         },
@@ -80,7 +76,6 @@ def launch(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": reth.launch,
             "get_config": reth.get_config,
             "get_el_context": reth.get_el_context,
         },
@@ -91,7 +86,6 @@ def launch(
                 builder_type=mev_builder_type,
                 mev_params=mev_params,
             ),
-            "launch_method": reth.launch,
             "get_config": reth.get_config,
             "get_el_context": reth.get_el_context,
         },
@@ -100,7 +94,6 @@ def launch(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": ethereumjs.launch,
             "get_config": ethereumjs.get_config,
             "get_el_context": ethereumjs.get_el_context,
         },
@@ -109,7 +102,6 @@ def launch(
                 el_cl_data,
                 jwt_file,
             ),
-            "launch_method": nimbus_eth1.launch,
             "get_config": nimbus_eth1.get_config,
             "get_el_context": nimbus_eth1.get_el_context,
         },
@@ -120,7 +112,6 @@ def launch(
             ),
             "get_config": ethrex.get_config,
             "get_el_context": ethrex.get_el_context,
-            "launch_method": ethrex.launch,
         },
     }
 
@@ -165,9 +156,8 @@ def launch(
                 )
             )
 
-        el_launcher, launch_method, get_config = (
+        el_launcher, get_config = (
             el_launchers[el_type]["launcher"],
-            el_launchers[el_type]["launch_method"],
             el_launchers[el_type]["get_config"],
         )
 
@@ -186,13 +176,16 @@ def launch(
         )
 
         if index == 0:
-            el_context = launch_method(
+            # Launch the first participant serially so later participants can
+            # use it as a bootnode.
+            el_config = get_config(
                 plan,
                 el_launcher,
-                el_service_name,
                 participant,
-                global_log_level,
+                el_service_name,
                 all_el_contexts,
+                el_service_name.split("-")[3],
+                global_log_level,
                 persistent,
                 tolerations,
                 node_selectors,
@@ -203,6 +196,17 @@ def launch(
                 el_bootnode_override,
                 el_binary_artifact,
                 otel_otlp_grpc_url,
+            )
+
+            el_service = plan.add_service(
+                el_service_name, el_config, force_update=participant.el_force_restart
+            )
+
+            el_context = el_launchers[el_type]["get_el_context"](
+                plan,
+                el_service_name,
+                el_service,
+                el_launcher,
             )
 
             # Add participant el additional prometheus metrics

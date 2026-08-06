@@ -107,16 +107,22 @@ def shadowfork_prep(
                     "apk add --no-cache curl tar zstd && "
                     + "BLOCK_HEIGHT=$(cat /shared/block_height.txt) && "
                     + 'echo "Using block height: $BLOCK_HEIGHT" && '
-                    + "curl -s -L "
+                    + 'SNAPSHOT_URL="'
                     + network_params.network_sync_base_url
                     + base_network
                     + "/"
                     + el_type
-                    + "/$BLOCK_HEIGHT/snapshot.tar.zst"
-                    + " | tar -I zstd -xvf - -C /data/"
+                    + '/$BLOCK_HEIGHT/snapshot.tar.zst" && '
+                    + "for attempt in 1 2 3; do "
+                    + 'echo "Downloading snapshot (attempt $attempt)" && '
+                    + 'curl -f -s -L "$SNAPSHOT_URL"'
+                    + " | tar -I zstd -xf - -C /data/"
                     + el_type
                     + "/execution-data"
-                    + " && touch /tmp/finished"
+                    + " && touch /tmp/finished && break || "
+                    + '{ echo "snapshot download failed (attempt $attempt)"; sleep 5; }; '
+                    + "done"
+                    + " && test -f /tmp/finished"
                     + " && tail -f /dev/null"
                 ],
                 entrypoint=["/bin/sh", "-c"],

@@ -137,6 +137,20 @@ def get_config(
         "--startup-spammer={}".format(config_file_path),
     ]
 
+    # Built-in spamoor defaults (by technical key) to auto-start on first launch.
+    # start_chainload/start_fuzzing map to the built-in default groups; spamoor_params.defaults
+    # can list any other default keys. Deduplicated so overlapping entries don't conflict.
+    startup_defaults = []
+    if spamoor_params.start_chainload:
+        startup_defaults.append("regular-chain-load")
+    if spamoor_params.start_fuzzing:
+        startup_defaults.append("fuzzing")
+    for default_key in spamoor_params.defaults:
+        if default_key not in startup_defaults:
+            startup_defaults.append(default_key)
+    if len(startup_defaults) > 0:
+        cmd.append("--startup-defaults={}".format(",".join(startup_defaults)))
+
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
         constants.HTTP_PORT_ID,
