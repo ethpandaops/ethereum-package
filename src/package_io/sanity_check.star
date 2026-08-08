@@ -420,6 +420,13 @@ SUBCATEGORY_PARAMS = {
         "shaping",
         "extra_args",
     ],
+    "cadvisor_params": [
+        "image",
+        "min_cpu",
+        "max_cpu",
+        "min_mem",
+        "max_mem",
+    ],
     "slashoor_params": [
         "image",
         "min_cpu",
@@ -510,6 +517,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "slashoor",
     "spamoor",
     "disruptoor",
+    "cadvisor",
     "zkboost",
     "trueblocks",
     "otel",
