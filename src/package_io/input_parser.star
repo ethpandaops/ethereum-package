@@ -96,6 +96,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "buildoor_params",
     "ethereum_genesis_generator_params",
     "trueblocks_params",
+    "state_actor_params",
 )
 
 
@@ -138,6 +139,7 @@ def input_parser(plan, input_args):
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
     result["trueblocks_params"] = get_default_trueblocks_params()
+    result["state_actor_params"] = get_default_state_actor_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -163,6 +165,15 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["docker_cache_params"]:
                 sub_value = input_args["docker_cache_params"][sub_attr]
                 result["docker_cache_params"][sub_attr] = sub_value
+        elif attr == "state_actor_params":
+            for sub_attr in input_args["state_actor_params"]:
+                sub_value = input_args["state_actor_params"][sub_attr]
+                if sub_attr in ("images", "snapshots"):
+                    # Merge per-client so partial overrides keep defaults.
+                    for client, val in sub_value.items():
+                        result["state_actor_params"][sub_attr][client] = val
+                else:
+                    result["state_actor_params"][sub_attr] = sub_value
         elif attr == "mev_params":
             for sub_attr in input_args["mev_params"]:
                 sub_value = input_args["mev_params"][sub_attr]
@@ -829,6 +840,7 @@ def input_parser(plan, input_args):
                 el_min_mem=participant["el_min_mem"],
                 el_max_mem=participant["el_max_mem"],
                 el_force_restart=participant["el_force_restart"],
+                el_pre_populated_db=participant["el_pre_populated_db"],
                 cl_min_cpu=participant["cl_min_cpu"],
                 cl_max_cpu=participant["cl_max_cpu"],
                 cl_min_mem=participant["cl_min_mem"],
@@ -1067,6 +1079,15 @@ def input_parser(plan, input_args):
             dockerhub_prefix=result["docker_cache_params"]["dockerhub_prefix"],
             github_prefix=result["docker_cache_params"]["github_prefix"],
             google_prefix=result["docker_cache_params"]["google_prefix"],
+        ),
+        state_actor_params=struct(
+            enabled=result["state_actor_params"]["enabled"],
+            seed=result["state_actor_params"]["seed"],
+            target_size=result["state_actor_params"]["target_size"],
+            spec=result["state_actor_params"]["spec"],
+            extra_args=result["state_actor_params"]["extra_args"],
+            snapshots=result["state_actor_params"]["snapshots"],
+            images=result["state_actor_params"]["images"],
         ),
         tx_fuzz_params=struct(
             image=result["tx_fuzz_params"]["image"],
@@ -2079,6 +2100,9 @@ def default_participant():
         "el_min_mem": 0,
         "el_max_mem": 0,
         "el_force_restart": False,
+        # Datadir is pre-populated (e.g. state-actor) with an authoritative
+        # chain config; launchers skip genesis init/override steps.
+        "el_pre_populated_db": False,
         "cl_type": "lighthouse",
         "cl_image": "",
         "cl_binary_path": "",
@@ -2193,6 +2217,36 @@ def get_default_docker_cache_params():
         "dockerhub_prefix": "/dh/",
         "github_prefix": "/gh/",
         "google_prefix": "/gcr/",
+    }
+
+
+def get_default_state_actor_params():
+    # Pre-populates EL datadirs with state-actor before launch; images must
+    # carry a state-actor build with --genesis support.
+    return {
+        "enabled": False,
+        "seed": 1,
+        # DB-size budget (e.g. "1GB"). Empty = alloc-verbatim. Non-empty (or
+        # a spec) changes the genesis hash → CL genesis is re-anchored;
+        # such participants must set el_pre_populated_db.
+        "target_size": "",
+        # Inline YAML state-actor spec (--spec); declares concrete entities.
+        # Schema: docs/SPEC.md in the state-actor repo.
+        "spec": "",
+        # Extra raw CLI args appended to every state-actor invocation.
+        "extra_args": [],
+        # Per-client URLs (s3/https) of pre-generated state-actor datadir
+        # tarballs (.tar.zst/.tar.gz); fetched instead of generating. Requires
+        # pinning network_params.genesis_time to the snapshot's genesis time.
+        "snapshots": {},
+        "images": {
+            "geth": "ghcr.io/ethereum/state-actor-geth:main",
+            "reth": "ghcr.io/ethereum/state-actor-reth:main",
+            "besu": "ghcr.io/ethereum/state-actor-besu:main",
+            "nethermind": "ghcr.io/ethereum/state-actor-nethermind:main",
+            "ethrex": "ghcr.io/ethereum/state-actor-ethrex:main",
+            "erigon": "ghcr.io/ethereum/state-actor-erigon:main",
+        },
     }
 
 
