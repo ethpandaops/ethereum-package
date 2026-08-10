@@ -526,6 +526,7 @@ def run(plan, args={}):
         network_id,
         osaka_time,
         shadowfork_block_height,
+        charon_metrics_jobs,
     ) = participant_network.launch_participant_network(
         plan,
         args_with_right_defaults,
@@ -547,6 +548,8 @@ def run(plan, args={}):
 
     if bootnodoor_enabled:
         prometheus_additional_metrics_jobs.append(bootnodoor.get_metrics_job())
+
+    prometheus_additional_metrics_jobs.extend(charon_metrics_jobs)
 
     for p in all_participants:
         if p.el_context != None:

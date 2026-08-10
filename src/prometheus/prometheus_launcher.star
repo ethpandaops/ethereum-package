@@ -1,5 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
-prometheus = import_module("github.com/kurtosis-tech/prometheus-package/main.star")
+prometheus = import_module(
+    "github.com/KaloyanTanev/prometheus-package/main.star@kalo/add-remote-write-kt-package-name"
+)
 constants = import_module("../package_io/constants.star")
 
 EXECUTION_CLIENT_TYPE = "execution"
@@ -48,7 +50,21 @@ def launch_prometheus(
         0,
     )
 
-    prometheus_url = prometheus.run(
+    # remote_write is enabled only when a URL is configured; empty => no
+    # remote_write block, identical to upstream behaviour. The relabel configs are
+    # passed through verbatim, so any filtering/rewriting (e.g. for a Charon
+    # cluster) is supplied via args rather than hardcoded here.
+    remote_write_configs = []
+    if prometheus_params.remote_write_url != "":
+        remote_write_configs = [
+            {
+                "Url": prometheus_params.remote_write_url,
+                "BearerToken": prometheus_params.remote_write_token,
+                "WriteRelabelConfigs": prometheus_params.remote_write_relabel_configs,
+            },
+        ]
+
+    return prometheus.run(
         plan,
         metrics_jobs,
         "prometheus",
@@ -61,9 +77,8 @@ def launch_prometheus(
         storage_tsdb_retention_size=prometheus_params.storage_tsdb_retention_size,
         image=prometheus_params.image,
         public_ports=public_ports,
+        remote_write_configs=remote_write_configs,
     )
-
-    return prometheus_url
 
 
 def get_metrics_jobs(

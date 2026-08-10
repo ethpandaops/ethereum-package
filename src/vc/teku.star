@@ -28,6 +28,7 @@ def get_config(
     tempo_otlp_grpc_url=None,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    distributed=False,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -91,6 +92,11 @@ def get_config(
         "--Xvalidator-api-ssl-enabled=false",
         "--Xvalidator-api-unsafe-hosts-enabled=true",
     ]
+
+    if distributed:
+        cmd.append("--Xobol-dvt-integration-enabled=true")
+        cmd.append("--validators-builder-registration-default-enabled=true")
+        cmd.append("--Xvalidator-client-beacon-api-executor-threads=50")
 
     if len(participant.vc_extra_params) > 0:
         # this is a repeated<proto type>, we convert it into Starlark

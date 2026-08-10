@@ -40,6 +40,7 @@ def get_config(
     tempo_otlp_grpc_url=None,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    distributed=False,
 ):
     validator_keys_dirpath = shared_utils.path_join(
         constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
@@ -68,14 +69,11 @@ def get_config(
         # ^^^^^^^^^^^^^^^^^^^ METRICS CONFIG ^^^^^^^^^^^^^^^^^^^^^
     ]
 
-    # Setting --beacon-rest-api-provider implicitly enables the REST API (prysm#17159),
-    # so the two providers are mutually exclusive. gRPC is only usable when the VC talks
-    # straight to its own Prysm BN: blobber and snooper proxy the REST API only, and
-    # --beacon-rpc-provider takes a single endpoint so it cannot express multiple BNs.
     use_beacon_api = (
         cl_context.client_name != constants.CL_TYPE.prysm
         or participant.blobber_enabled
         or beacon_http_urls != [cl_context.beacon_http_url]
+        or distributed
     )
 
     if use_beacon_api:
@@ -103,6 +101,9 @@ def get_config(
 
     if network_params.gas_limit > 0:
         cmd.append("--suggested-gas-limit={0}".format(network_params.gas_limit))
+
+    if distributed:
+        cmd.append("--distributed")
 
     keymanager_api_cmd = [
         "--rpc",
