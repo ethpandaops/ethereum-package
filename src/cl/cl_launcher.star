@@ -344,6 +344,7 @@ def launch(
                 otel_otlp_grpc_url,
                 bootnode_enr_override,
                 cl_binary_artifact,
+                skip_ready_conditions=True,
             )
 
             cl_participant_info[cl_service_name] = {
@@ -372,6 +373,9 @@ def launch(
         participant = info["participant"]
         participant_index = info["participant_index"]
 
+        # Defer the identity request for parallel nodes; their health checks are
+        # skipped, so collect_identities backfills ENR/multiaddr/peer_id once the
+        # whole network is launched.
         cl_context = get_cl_context(
             plan,
             beacon_service_name,
@@ -380,6 +384,7 @@ def launch(
             info["snooper_el_engine_context"],
             info["new_cl_node_validator_keystores"],
             info["node_selectors"],
+            skip_identity=True,
         )
 
         blobber_config = get_blobber_config(
@@ -418,3 +423,44 @@ def launch(
         global_other_index,
         blobber_configs_with_contexts,
     )
+
+
+def collect_identities(plan, all_cl_contexts, participants):
+    """Fill in missing ENRs/multiaddrs/peer_ids for contexts created with skip_identity=True.
+    Uses plan.wait to retry until CLs are healthy (health checks are deferred for non-boot nodes).
+    """
+    enriched = []
+    for index, ctx in enumerate(all_cl_contexts):
+        participant = participants[index] if index < len(participants) else None
+        skip_start = participant.skip_start if participant else False
+        if (
+            ctx != None
+            and ctx.enr == ""
+            and ctx.beacon_service_name != ""
+            and not skip_start
+        ):
+            enr, multiaddr, peer_id = cl_shared.wait_beacon_node_identity(
+                plan, ctx.beacon_service_name, ctx.client_name
+            )
+            enriched.append(
+                cl_context_l.new_cl_context(
+                    client_name=ctx.client_name,
+                    enr=enr,
+                    ip_addr=ctx.ip_addr,
+                    ip_address=ctx.ip_address,
+                    http_port=ctx.http_port,
+                    beacon_http_url=ctx.beacon_http_url,
+                    cl_nodes_metrics_info=ctx.cl_nodes_metrics_info,
+                    beacon_service_name=ctx.beacon_service_name,
+                    beacon_grpc_url=ctx.beacon_grpc_url,
+                    multiaddr=multiaddr,
+                    peer_id=peer_id,
+                    snooper_enabled=ctx.snooper_enabled,
+                    snooper_el_engine_context=ctx.snooper_el_engine_context,
+                    validator_keystore_files_artifact_uuid=ctx.validator_keystore_files_artifact_uuid,
+                    supernode=ctx.supernode,
+                )
+            )
+        else:
+            enriched.append(ctx)
+    return enriched

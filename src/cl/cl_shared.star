@@ -61,36 +61,63 @@ def apply_resource_limits(config_args, participant):
         config_args["max_memory"] = int(participant.cl_max_mem)
 
 
-# Queries the beacon node's identity endpoint and returns
-# (enr, multiaddr, peer_id).
-# Skips the HTTP request and returns empty strings if skip_start is enabled
-# (the service won't be running).
-def get_beacon_node_identity(
-    plan, service_name, participant, multiaddr_index=0, headers=None
-):
-    if participant.skip_start:
-        return "", "", ""
-
+def get_beacon_node_identity_recipe(multiaddr_index=0, headers=None):
     extract = {
         "enr": ".data.enr",
         "multiaddr": ".data.p2p_addresses[{0}]".format(multiaddr_index),
         "peer_id": ".data.peer_id",
     }
     if headers != None:
-        beacon_node_identity_recipe = GetHttpRequestRecipe(
+        return GetHttpRequestRecipe(
             endpoint="/eth/v1/node/identity",
             port_id=constants.HTTP_PORT_ID,
             extract=extract,
             headers=headers,
         )
-    else:
-        beacon_node_identity_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v1/node/identity",
-            port_id=constants.HTTP_PORT_ID,
-            extract=extract,
-        )
+    return GetHttpRequestRecipe(
+        endpoint="/eth/v1/node/identity",
+        port_id=constants.HTTP_PORT_ID,
+        extract=extract,
+    )
+
+
+# Queries the beacon node's identity endpoint and returns
+# (enr, multiaddr, peer_id).
+# Skips the HTTP request and returns empty strings if skip_start is enabled
+# (the service won't be running) or if skip is set (the identity will be
+# collected later via wait_beacon_node_identity).
+def get_beacon_node_identity(
+    plan, service_name, participant, multiaddr_index=0, headers=None, skip=False
+):
+    if participant.skip_start or skip:
+        return "", "", ""
+
     response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=service_name
+        recipe=get_beacon_node_identity_recipe(multiaddr_index, headers),
+        service_name=service_name,
+    )
+    return (
+        response["extract.enr"],
+        response["extract.multiaddr"],
+        response["extract.peer_id"],
+    )
+
+
+# Waits for the beacon node's identity endpoint to become available and returns
+# (enr, multiaddr, peer_id). Used to backfill identities of nodes launched with
+# skip_identity=True, whose health checks were deferred.
+def wait_beacon_node_identity(plan, service_name, client_name):
+    multiaddr_index = -1 if client_name == "lodestar" else 0
+    headers = {"Accept-Encoding": "identity"} if client_name == "prysm" else None
+
+    response = plan.wait(
+        recipe=get_beacon_node_identity_recipe(multiaddr_index, headers),
+        service_name=service_name,
+        field="code",
+        assertion="IN",
+        target_value=[200],
+        interval="1s",
+        timeout="5m",
     )
     return (
         response["extract.enr"],

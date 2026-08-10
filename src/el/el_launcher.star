@@ -202,11 +202,16 @@ def launch(
                 el_service_name, el_config, force_update=participant.el_force_restart
             )
 
+            # When there's only 1 participant, skip the enode extraction (plan.wait
+            # on admin_nodeInfo) since the enode is only used as a bootnode for
+            # subsequent EL nodes. This avoids a blocking wait and allows the CL
+            # boot node to start sooner.
             el_context = el_launchers[el_type]["get_el_context"](
                 plan,
                 el_service_name,
                 el_service,
                 el_launcher,
+                skip_enode=num_participants == 1,
             )
 
             # Add participant el additional prometheus metrics
@@ -256,11 +261,15 @@ def launch(
         participant = el_participant_info[el_service_name]["participant"]
         get_el_context = el_launchers[el_type]["get_el_context"]
 
+        # Defer the enode extraction (plan.wait on admin_nodeInfo) for parallel
+        # nodes; their enodes are never used as bootnodes for other nodes, so
+        # collect_enodes backfills them once the whole network is launched.
         el_context = get_el_context(
             plan,
             el_service_name,
             el_service,
             el_launchers[el_type]["launcher"],
+            skip_enode=True,
         )
 
         # Add participant el additional prometheus metrics
@@ -297,3 +306,46 @@ def launch(
 
     plan.print("Successfully added {0} EL participants".format(num_participants))
     return all_el_contexts
+
+
+def collect_enodes(plan, all_el_contexts):
+    """Fill in missing enodes for contexts that were created with skip_enode=True."""
+    # Clients that expose admin_nodeInfo on the WS-RPC port instead of the RPC port
+    ws_rpc_clients = ["erigon", "nimbus"]
+
+    enriched = []
+    for ctx in all_el_contexts:
+        if ctx != None and ctx.enode == "":
+            port_id = (
+                constants.WS_RPC_PORT_ID
+                if ctx.client_name in ws_rpc_clients
+                else constants.RPC_PORT_ID
+            )
+            if ctx.client_name == "ethereumjs":
+                enode = el_admin_node_info.get_enode_for_node(
+                    plan, ctx.service_name, port_id
+                )
+                enr = ctx.enr
+            else:
+                enode, enr = el_admin_node_info.get_enode_enr_for_node(
+                    plan, ctx.service_name, port_id
+                )
+            enriched.append(
+                el_context_l.new_el_context(
+                    client_name=ctx.client_name,
+                    enode=enode,
+                    dns_name=ctx.dns_name,
+                    rpc_port_num=ctx.rpc_port_num,
+                    ws_port_num=ctx.ws_port_num,
+                    engine_rpc_port_num=ctx.engine_rpc_port_num,
+                    rpc_http_url=ctx.rpc_http_url,
+                    ws_url=ctx.ws_url,
+                    enr=enr,
+                    service_name=ctx.service_name,
+                    el_metrics_info=ctx.el_metrics_info,
+                    ip_addr=ctx.ip_addr,
+                )
+            )
+        else:
+            enriched.append(ctx)
+    return enriched
