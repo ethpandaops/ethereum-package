@@ -1,7 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 input_parser = import_module("../package_io/input_parser.star")
 constants = import_module("../package_io/constants.star")
-vc_shared = import_module("./shared.star")
+vc_shared = import_module("./vc_shared.star")
 vc_context = import_module("./vc_context.star")
 node_metrics = import_module("../node_metrics_info.star")
 prometheus = import_module("../prometheus/prometheus_launcher.star")

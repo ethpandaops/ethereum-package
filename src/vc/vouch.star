@@ -1,7 +1,7 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
-vc_shared = import_module("./shared.star")
+vc_shared = import_module("./vc_shared.star")
 
 # Where the prebuilt ethdo wallet artifact is mounted in the Vouch container.
 VOUCH_WALLET_DIRPATH = "/vouch-wallet"
