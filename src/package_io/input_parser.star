@@ -875,9 +875,7 @@ def input_parser(plan, input_args):
             preregistered_validator_count=result["network_params"][
                 "preregistered_validator_count"
             ],
-            builder_key_start_index=result["network_params"][
-                "builder_key_start_index"
-            ],
+            builder_key_start_index=result["network_params"]["builder_key_start_index"],
             num_validator_keys_per_node=result["network_params"][
                 "num_validator_keys_per_node"
             ],

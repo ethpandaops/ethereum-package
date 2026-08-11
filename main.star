@@ -558,10 +558,6 @@ def run(plan, args={}):
             )
             break
 
-    total_validator_count = 0
-    for participant in args_with_right_defaults.participants:
-        total_validator_count += participant.validator_count
-
     if network_params.builder_count > 0:
         plan.print(
             "Builder configuration: {0} builder(s) registered at genesis with 0xB0 credentials".format(
@@ -697,7 +693,7 @@ def run(plan, args={}):
             global_node_selectors,
             global_tolerations,
             network_params.preregistered_validator_keys_mnemonic,
-            total_validator_count,
+            network_params.builder_key_start_index,
             ranges,
             constants.BUILDOOR_SERVICE_NAME,
         )
