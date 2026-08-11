@@ -537,6 +537,27 @@ def input_parser(plan, input_args):
             )
         )
 
+    for entry in result["network_params"]["gas_limit_schedule"]:
+        if type(entry) != "dict" or sorted(entry.keys()) != ["epoch", "gas_limit"]:
+            fail(
+                "gas_limit_schedule entries must be objects with exactly 'epoch' and 'gas_limit' keys, got: {0}".format(
+                    entry
+                )
+            )
+        if type(entry["epoch"]) != "int" or type(entry["gas_limit"]) != "int":
+            fail(
+                "gas_limit_schedule 'epoch' and 'gas_limit' must be integers, got: {0}".format(
+                    entry
+                )
+            )
+        if entry["epoch"] < result["network_params"]["gloas_fork_epoch"]:
+            fail(
+                "gas_limit_schedule entry at epoch {0} is scheduled before gloas_fork_epoch ({1}). The gas limit schedule requires Gloas, since the CL only drives the gas limit post-Gloas — schedule every entry at an epoch >= gloas_fork_epoch.".format(
+                    entry["epoch"],
+                    result["network_params"]["gloas_fork_epoch"],
+                )
+            )
+
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
         has_node_with_128_plus_validators = False
@@ -998,6 +1019,7 @@ def input_parser(plan, input_args):
             max_payload_size=result["network_params"]["max_payload_size"],
             perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
             gas_limit=result["network_params"]["gas_limit"],
+            gas_limit_schedule=result["network_params"]["gas_limit_schedule"],
             withdrawal_type=result["network_params"]["withdrawal_type"],
             withdrawal_address=result["network_params"]["withdrawal_address"],
             validator_balance=result["network_params"]["validator_balance"],
@@ -1945,6 +1967,7 @@ def default_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
+        "gas_limit_schedule": [],
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
@@ -2031,6 +2054,7 @@ def default_minimal_network_params():
         "max_payload_size": 10485760,
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
+        "gas_limit_schedule": [],
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
