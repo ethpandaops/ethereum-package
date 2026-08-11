@@ -550,6 +550,13 @@ def input_parser(plan, input_args):
                     entry
                 )
             )
+        if entry["epoch"] < result["network_params"]["gloas_fork_epoch"]:
+            fail(
+                "gas_limit_schedule entry at epoch {0} is scheduled before gloas_fork_epoch ({1}). The gas limit schedule requires Gloas, since the CL only drives the gas limit post-Gloas — schedule every entry at an epoch >= gloas_fork_epoch.".format(
+                    entry["epoch"],
+                    result["network_params"]["gloas_fork_epoch"],
+                )
+            )
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False

@@ -1008,6 +1008,8 @@ network_params:
   # Array of entries written to the CL config.yaml as the optional
   # GAS_LIMIT_SCHEDULE field, giving CL clients a per-fork default and
   # recommended maximum gas limit
+  # Requires Gloas: every epoch must be >= gloas_fork_epoch, since the
+  # CL only drives the gas limit post-Gloas
   # Defaults to [] (field is emitted as GAS_LIMIT_SCHEDULE: [])
   # Example:
   # gas_limit_schedule:
