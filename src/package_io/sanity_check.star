@@ -270,6 +270,7 @@ SUBCATEGORY_PARAMS = {
         "max_payload_size",
         "perfect_peerdas_enabled",
         "gas_limit",
+        "gas_limit_schedule",
         "bpo_1_epoch",
         "bpo_1_max_blobs",
         "bpo_1_target_blobs",

@@ -1004,6 +1004,19 @@ network_params:
   # Do not confuse with genesis_gaslimit which sets the gas limit at the genesis file level
   gas_limit: 0
 
+  # GPO (Gas Parameter Only) schedule per EIP-8261
+  # Array of entries written to the CL config.yaml as the optional
+  # GAS_LIMIT_SCHEDULE field, giving CL clients a per-fork default and
+  # recommended maximum gas limit
+  # Defaults to [] (field is emitted as GAS_LIMIT_SCHEDULE: [])
+  # Example:
+  # gas_limit_schedule:
+  #   - epoch: 256
+  #     gas_limit: 100000000
+  #   - epoch: 512
+  #     gas_limit: 150000000
+  gas_limit_schedule: []
+
 
   # BPO
   # BPO1-5 epoch (default 0/18446744073709551615)
