@@ -896,6 +896,7 @@ def input_parser(plan, input_args):
             preregistered_validator_count=result["network_params"][
                 "preregistered_validator_count"
             ],
+            builder_key_start_index=result["network_params"]["builder_key_start_index"],
             num_validator_keys_per_node=result["network_params"][
                 "num_validator_keys_per_node"
             ],
@@ -1802,6 +1803,16 @@ def parse_network_params(plan, input_args):
             + " is not supported, it can only be mainnet or minimal"
         )
 
+    # Base index for builder keys: the first one no genesis validator has claimed.
+    # preregistered_validator_count can exceed the participants' validator sum, and deriving
+    # builders inside that range duplicates a validator's key, which fails genesis. Computed once
+    # here so genesis, the log line and buildoor cannot drift apart. Unconditional: buildoor
+    # instances derive keys even when builder_count is 0.
+    result["network_params"]["builder_key_start_index"] = max(
+        actual_num_validators,
+        result["network_params"]["preregistered_validator_count"],
+    )
+
     if result["network_params"]["builder_count"] > 0:
         if result["network_params"]["gloas_fork_epoch"] != 0:
             fail(
@@ -1814,7 +1825,7 @@ def parse_network_params(plan, input_args):
             "mnemonic": result["network_params"][
                 "preregistered_validator_keys_mnemonic"
             ],
-            "start": actual_num_validators,
+            "start": result["network_params"]["builder_key_start_index"],
             "count": result["network_params"]["builder_count"],
             "wd_prefix": "0xB0",
             "wd_address": result["network_params"]["withdrawal_address"],
