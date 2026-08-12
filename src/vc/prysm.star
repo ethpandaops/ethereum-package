@@ -72,15 +72,18 @@ def get_config(
     # so the two providers are mutually exclusive. gRPC is only usable when the VC talks
     # straight to its own Prysm BN: blobber and snooper proxy the REST API only, and
     # --beacon-rpc-provider takes a single endpoint so it cannot express multiple BNs.
+    # An explicit REST request also needs the provider URL known by the package.
     use_beacon_api = (
-        cl_context.client_name != constants.CL_TYPE.prysm
+        "--enable-beacon-rest-api" in participant.vc_extra_params
+        or cl_context.client_name != constants.CL_TYPE.prysm
         or participant.blobber_enabled
         or beacon_http_urls != [cl_context.beacon_http_url]
     )
 
     if use_beacon_api:
         cmd.append("--beacon-rest-api-provider=" + ",".join(beacon_http_urls))
-        cmd.append("--enable-beacon-rest-api")
+        if "--enable-beacon-rest-api" not in participant.vc_extra_params:
+            cmd.append("--enable-beacon-rest-api")
     else:
         cmd.append("--beacon-rpc-provider=" + cl_context.beacon_grpc_url)
 

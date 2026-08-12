@@ -559,10 +559,6 @@ def run(plan, args={}):
             )
             break
 
-    total_validator_count = 0
-    for participant in args_with_right_defaults.participants:
-        total_validator_count += participant.validator_count
-
     if network_params.builder_count > 0:
         plan.print(
             "Builder configuration: {0} builder(s) registered at genesis with 0xB0 credentials".format(
@@ -572,8 +568,10 @@ def run(plan, args={}):
         plan.print(
             "Builder mnemonic: '{0}', keys derived at indices {1}..{2}".format(
                 network_params.preregistered_validator_keys_mnemonic,
-                total_validator_count,
-                total_validator_count + network_params.builder_count - 1,
+                network_params.builder_key_start_index,
+                network_params.builder_key_start_index
+                + network_params.builder_count
+                - 1,
             )
         )
 
@@ -696,7 +694,7 @@ def run(plan, args={}):
             global_node_selectors,
             global_tolerations,
             network_params.preregistered_validator_keys_mnemonic,
-            total_validator_count,
+            network_params.builder_key_start_index,
             ranges,
             constants.BUILDOOR_SERVICE_NAME,
         )
@@ -872,7 +870,7 @@ def run(plan, args={}):
             # not collide. The builder is onboarded after genesis via its lifecycle
             # deposit (buildoor_params.lifecycle), not registered at genesis.
             instance_builder_key_index = (
-                total_validator_count
+                network_params.builder_key_start_index
                 + network_params.builder_count
                 + buildoor_builder_index
             )
