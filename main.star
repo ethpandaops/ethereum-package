@@ -1307,7 +1307,7 @@ def run(plan, args={}):
                 args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched mempool-bridge")
-        elif additional_service == "mempool_lens":
+        elif additional_service == "mempool-lens":
             plan.print("Launching mempool-lens")
             mempool_lens.launch_mempool_lens(
                 plan,

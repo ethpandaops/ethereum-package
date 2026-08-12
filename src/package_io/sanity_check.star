@@ -514,7 +514,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "nginx",
     "tracoor",
     "mempool_bridge",
-    "mempool_lens",
+    "mempool-lens",
     "rakoon",
     "slashoor",
     "spamoor",

@@ -1105,7 +1105,7 @@ additional_services:
   - forky
   - grafana
   - mempool_bridge
-  - mempool_lens
+  - mempool-lens
   - nginx
   - otel
   - prometheus

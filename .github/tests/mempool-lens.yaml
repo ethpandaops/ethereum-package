@@ -3,5 +3,5 @@ participants:
     cl_type: teku
 
 additional_services:
-  - mempool_lens
+  - mempool-lens
   - dora
