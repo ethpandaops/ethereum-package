@@ -113,6 +113,7 @@ network_params:
   electra_fork_epoch: 0
   fulu_fork_epoch: 0
   gloas_fork_epoch: 18446744073709551615
+  frames_enabled: false
   network_sync_base_url: https://snapshots.ethpandaops.io/
   force_snapshot_sync: false
   samples_per_slot: 8

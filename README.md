@@ -946,6 +946,13 @@ network_params:
   # Defaults to 18446744073709551615
   heze_fork_epoch: 18446744073709551615
 
+  # Temporary hack while FOCIL is kept separate from frames: disables the Heze
+  # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
+  # while the EL still activates bogota at heze_fork_epoch.
+  # Also auto-enabled when any participant image tag contains "frame".
+  # Defaults to false
+  frames_enabled: false
+
 
   # Preset for the network
   # Default: "mainnet"
