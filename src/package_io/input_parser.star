@@ -2692,8 +2692,10 @@ def apply_buildoor_payload_attributes_flags(participant):
         participant["cl_extra_params"].append(
             "--Xfork-choice-updated-always-send-payload-attributes=true"
         )
+    elif participant["cl_type"] == "nimbus":
+        # nimbus does not require flags to emit payload_attributes.
+        pass
     else:
-        # nimbus has no flag to emit payload_attributes.
         fail(
             "buildoor requires the CL feeding it to be one of "
             + "[lodestar, prysm, lighthouse, grandine, consensoor, teku]: '{0}' has no flag to build a payload on each slot ".format(
