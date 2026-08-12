@@ -92,6 +92,20 @@ def launch_participant_network(
             static_files.EL_CL_GENESIS_ADDITIONAL_CONTRACTS_TEMPLATE_FILEPATH
         )
 
+        # Temporary hack while FOCIL is kept separate from frames: if any
+        # participant runs a "frame" image, disable the Heze fork on the CL
+        # side (FRAMES_ENABLED=true) while the EL still activates bogota at
+        # HEZE_FORK_EPOCH.
+        frames_enabled = False
+        for participant in args_with_right_defaults.participants:
+            if (
+                "frame" in participant.el_image
+                or "frame" in participant.cl_image
+                or "frame" in participant.vc_image
+            ):
+                frames_enabled = True
+                break
+
         el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
             plan,
             ethereum_genesis_generator_image,
@@ -102,6 +116,7 @@ def launch_participant_network(
             network_params,
             total_number_of_validator_keys,
             latest_block.files_artifacts[0] if latest_block != "" else "",
+            frames_enabled,
             global_tolerations,
             global_node_selectors,
         )

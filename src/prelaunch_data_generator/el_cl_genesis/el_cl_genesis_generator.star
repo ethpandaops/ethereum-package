@@ -21,6 +21,7 @@ def generate_el_cl_genesis_data(
     network_params,
     total_num_validator_keys_to_preregister,
     latest_block,
+    frames_enabled=False,
     global_tolerations=[],
     global_node_selectors={},
 ):
@@ -37,6 +38,7 @@ def generate_el_cl_genesis_data(
         shadowfork_file,
         network_params,
         genesis_generator_params.extra_env,
+        frames_enabled,
     )
     genesis_generation_template = shared_utils.new_template_and_data(
         genesis_generation_config_yml_template, template_data
@@ -133,6 +135,7 @@ def new_env_file_for_el_cl_genesis_data(
     shadowfork_file,
     network_params,
     extra_env,
+    frames_enabled=False,
 ):
     extra_env_safe = {}
     for k, v in extra_env.items():
@@ -165,6 +168,7 @@ def new_env_file_for_el_cl_genesis_data(
         "FuluForkEpoch": "{0}".format(network_params.fulu_fork_epoch),
         "GloasForkEpoch": "{0}".format(network_params.gloas_fork_epoch),
         "HezeForkEpoch": "{0}".format(network_params.heze_fork_epoch),
+        "FramesEnabled": "true" if frames_enabled else "false",
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
         "BellatrixForkVersion": constants.BELLATRIX_FORK_VERSION,
