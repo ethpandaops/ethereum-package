@@ -450,6 +450,12 @@ SUBCATEGORY_PARAMS = {
         "polling_interval",
         "retry_interval",
     ],
+    "mempool_lens_params": [
+        "image",
+        "target_rpc_url",
+        "target_index",
+        "extra_args",
+    ],
     "ethereum_genesis_generator_params": [
         "image",
         "extra_env",
@@ -508,6 +514,7 @@ ADDITIONAL_SERVICES_PARAMS = [
     "nginx",
     "tracoor",
     "mempool_bridge",
+    "mempool_lens",
     "rakoon",
     "slashoor",
     "spamoor",
