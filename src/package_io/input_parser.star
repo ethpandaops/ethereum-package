@@ -2695,14 +2695,6 @@ def apply_buildoor_payload_attributes_flags(participant):
     elif participant["cl_type"] == "nimbus":
         # nimbus does not require flags to emit payload_attributes.
         pass
-    else:
-        fail(
-            "buildoor requires the CL feeding it to be one of "
-            + "[lodestar, prysm, lighthouse, grandine, consensoor, teku, nimbus]: '{0}' has no flag to build a payload on each slot ".format(
-                participant["cl_type"]
-            )
-            + "(emit payload_attributes for all slots), which buildoor needs to trigger block building."
-        )
 
 
 # Per-participant buildoor: each buildoor_params.instances entry spins up
