@@ -1105,6 +1105,7 @@ additional_services:
   - forky
   - grafana
   - mempool_bridge
+  - mempool-lens
   - nginx
   - otel
   - prometheus
@@ -1534,6 +1535,28 @@ mempool_bridge_params:
   # The retry interval duration for retrying failed operations
   # Default: "30s"
   retry_interval: "30s"
+
+# Configuration place for mempool-lens - https://github.com/cskiraly/mempool-lens
+# A live transaction-lifecycle viewer for geth's txtracker/peerstats WS
+# namespaces. Note: those namespaces are only available in the instrumented
+# geth build (https://github.com/cskiraly/go-ethereum branch mempool-lens);
+# against a stock geth the UI works but shows no tracker data.
+mempool_lens_params:
+  # The image to use for mempool-lens
+  image: bbusa/mempool-lens:latest
+
+  # Full ws:// URL of the geth node to watch; overrides target_index
+  # Default: "" (auto-select)
+  target_rpc_url: ""
+
+  # Index into the EL clients to watch
+  # Default: -1 - auto-select a geth node exposing a WS endpoint,
+  # falling back to the first EL client with one
+  target_index: -1
+
+  # Extra args to pass to the lens (auth tokens, --geo-db, ...)
+  # Default: []
+  extra_args: []
 
 # Supports seven values
 # Default: "null" - no mev boost, mev builder, mev flood or relays are spun up

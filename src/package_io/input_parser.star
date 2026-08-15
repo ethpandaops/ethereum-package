@@ -92,6 +92,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "slashoor_params",
     "bootnodoor_params",
     "mempool_bridge_params",
+    "mempool_lens_params",
     "zkboost_params",
     "buildoor_params",
     "ethereum_genesis_generator_params",
@@ -135,6 +136,7 @@ def input_parser(plan, input_args):
     result["disruptoor_params"] = get_default_disruptoor_params()
     result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
+    result["mempool_lens_params"] = get_default_mempool_lens_params()
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
     result["trueblocks_params"] = get_default_trueblocks_params()
@@ -217,6 +219,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["mempool_bridge_params"]:
                 sub_value = input_args["mempool_bridge_params"][sub_attr]
                 result["mempool_bridge_params"][sub_attr] = sub_value
+        elif attr == "mempool_lens_params":
+            for sub_attr in input_args["mempool_lens_params"]:
+                sub_value = input_args["mempool_lens_params"][sub_attr]
+                result["mempool_lens_params"][sub_attr] = sub_value
         elif attr == "bootnodoor_params":
             for sub_attr in input_args["bootnodoor_params"]:
                 sub_value = input_args["bootnodoor_params"][sub_attr]
@@ -1203,6 +1209,12 @@ def input_parser(plan, input_args):
             send_concurrency=result["mempool_bridge_params"]["send_concurrency"],
             polling_interval=result["mempool_bridge_params"]["polling_interval"],
             retry_interval=result["mempool_bridge_params"]["retry_interval"],
+        ),
+        mempool_lens_params=struct(
+            image=result["mempool_lens_params"]["image"],
+            target_rpc_url=result["mempool_lens_params"]["target_rpc_url"],
+            target_index=result["mempool_lens_params"]["target_index"],
+            extra_args=result["mempool_lens_params"]["extra_args"],
         ),
         additional_services=result["additional_services"],
         wait_for_finalization=result["wait_for_finalization"],
@@ -2519,6 +2531,20 @@ def get_default_mempool_bridge_params():
     }
 
 
+def get_default_mempool_lens_params():
+    return {
+        # One-off build from https://github.com/cskiraly/mempool-lens (PR #1
+        # adds the Dockerfile); switch to the upstream image once published.
+        "image": "bbusa/mempool-lens:latest",
+        # Full ws:// URL override for the upstream geth node.
+        "target_rpc_url": "",
+        # Index into the EL clients; -1 auto-selects a geth node with a WS
+        # endpoint (the txtracker/peerstats namespaces are a geth patch).
+        "target_index": -1,
+        "extra_args": [],
+    }
+
+
 def get_default_bootnodoor_params():
     return {
         "image": constants.DEFAULT_BOOTNODOOR_IMAGE,
@@ -2884,6 +2910,7 @@ def docker_cache_image_override(plan, result):
         "tempo_params.image",
         "spamoor_params.image",
         "disruptoor_params.image",
+        "mempool_lens_params.image",
         "ethereum_genesis_generator_params.image",
         "trueblocks_params.image",
     ]

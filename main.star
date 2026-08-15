@@ -51,6 +51,7 @@ buildoor = import_module("./src/mev/buildoor/buildoor_launcher.star")
 bootnodoor = import_module("./src/bootnodoor/bootnodoor_launcher.star")
 broadcaster = import_module("./src/broadcaster/broadcaster.star")
 mempool_bridge = import_module("./src/mempool_bridge/mempool_bridge_launcher.star")
+mempool_lens = import_module("./src/mempool_lens/mempool_lens_launcher.star")
 assertoor = import_module("./src/assertoor/assertoor_launcher.star")
 get_prefunded_accounts = import_module(
     "./src/prefunded_accounts/get_prefunded_accounts.star"
@@ -1306,6 +1307,19 @@ def run(plan, args={}):
                 args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched mempool-bridge")
+        elif additional_service == "mempool-lens":
+            plan.print("Launching mempool-lens")
+            mempool_lens.launch_mempool_lens(
+                plan,
+                all_el_contexts,
+                args_with_right_defaults.mempool_lens_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched mempool-lens")
         elif additional_service == "spamoor":
             plan.print("Launching spamoor")
             spamoor_config_template = read_file(
