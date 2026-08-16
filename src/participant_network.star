@@ -34,6 +34,7 @@ snooper_el_launcher = import_module("./snooper/snooper_el_launcher.star")
 blobber_launcher = import_module("./blobber/blobber_launcher.star")
 cl_context_module = import_module("./cl/cl_context.star")
 bootnodoor_launcher = import_module("./bootnodoor/bootnodoor_launcher.star")
+state_actor_launcher = import_module("./state_actor/state_actor_launcher.star")
 
 
 def launch_participant_network(
@@ -201,6 +202,46 @@ def launch_participant_network(
         plan.print("Bootnodoor launched with CL ENR: {0}".format(bootnodoor_enr))
         plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
         plan.print("Bootnodoor launched with EL ENR: {0}".format(bootnodoor_el_enr))
+
+    # Pre-populate EL databases with state-actor: runs between genesis
+    # generation and EL launch; participants opt in via el_extra_mounts on
+    # the "state-actor-<el_type>-data" artifact (+ el_pre_populated_db).
+    if args_with_right_defaults.state_actor_params.enabled:
+        state_actor_anchor_block = state_actor_launcher.generate(
+            plan,
+            args_with_right_defaults.state_actor_params,
+            args_with_right_defaults.participants,
+            el_cl_data,
+            extra_files_artifacts,
+            global_tolerations,
+            global_node_selectors,
+            persistent=persistent,
+            network_params=network_params,
+        )
+        # Synthetic state changes the EL genesis hash, so re-run genesis
+        # generation anchored to state-actor's genesis block — same env
+        # (identical EL genesis.json), only the beacon eth1 anchor changes.
+        if state_actor_anchor_block != "" and (
+            network_params.network == constants.NETWORK_NAME.kurtosis
+        ):
+            plan.print(
+                "state-actor added synthetic state; re-anchoring CL genesis to the state-actor genesis block"
+            )
+            el_cl_data = el_cl_genesis_data_generator.generate_el_cl_genesis_data(
+                plan,
+                ethereum_genesis_generator_image,
+                args_with_right_defaults.ethereum_genesis_generator_params,
+                el_cl_genesis_config_template,
+                el_cl_genesis_additional_contracts_template,
+                final_genesis_timestamp,
+                network_params,
+                total_number_of_validator_keys,
+                "",
+                global_tolerations,
+                global_node_selectors,
+                anchor_block=state_actor_anchor_block,
+                name_suffix="-sa-anchored",
+            )
 
     # Upload binary artifacts when both binary_path and force_restart are enabled
     binary_artifacts = {}

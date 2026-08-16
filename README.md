@@ -1496,6 +1496,61 @@ docker_cache_params:
   google_prefix: "/gcr/"
 
 
+# Pre-populate EL client databases with state-actor (https://github.com/ethereum/state-actor)
+# before the EL clients launch, driven by the network's own genesis.json (state-actor
+# --genesis). Participants opt in with el_pre_populated_db: true, which also makes their
+# launcher skip genesis init/override (the pre-populated DB's chain config is
+# authoritative). When target_size / spec / snapshots add synthetic state, the genesis
+# hash changes and the CL genesis is automatically re-anchored to the state-actor
+# genesis block — no manual steps needed.
+#
+# Two delivery modes:
+# - persistent: true — generation writes straight into each opted-in participant's
+#   persistent volume (required for multi-GB states; files artifacts can't carry them):
+#     participants:
+#       - el_type: geth
+#         el_pre_populated_db: true
+#     persistent: true
+# - default (non-persistent) — one files artifact per unique el_type, mounted via:
+#         el_extra_mounts:
+#           /data/geth/execution-data: state-actor-geth-data
+#
+# nethermind participants additionally need:
+#   el_extra_params:
+#     - "--Init.BaseDbPath=/data/nethermind/execution-data"
+#     - "--FlatDb.Enabled=true"
+#
+# Supported el_types: geth, reth, besu, nethermind, ethrex, erigon
+# Requires state-actor images with --genesis support.
+state_actor_params:
+  # Whether to run state-actor pre-population
+  enabled: false
+  # Random seed passed to state-actor (deterministic output for a given genesis + seed)
+  seed: 1
+  # Optional DB-size budget (e.g. "5GB") of synthetic state on top of the genesis alloc.
+  # Empty = alloc-verbatim (genesis hash unchanged, no CL re-anchoring needed).
+  target_size: ""
+  # Optional inline state-actor spec (YAML): concrete entities to write — ERC-20s, EOAs,
+  # EIP-7702 accounts, raw-bytecode contracts. Schema: docs/SPEC.md in the state-actor
+  # repo. Passed as --spec.
+  spec: ""
+  # Extra raw CLI args appended to every state-actor invocation.
+  extra_args: []
+  # Per-client URLs (s3/https) of pre-generated state-actor datadir tarballs
+  # (.tar.zst/.tar.gz/.tar), fetched instead of generating. Reuse requires launching
+  # with the same network params the snapshot was generated against, with
+  # network_params.genesis_time pinned to the original genesis time.
+  snapshots: {}
+  # Per-client state-actor images
+  images:
+    geth: ghcr.io/ethereum/state-actor-geth:main
+    reth: ghcr.io/ethereum/state-actor-reth:main
+    besu: ghcr.io/ethereum/state-actor-besu:main
+    nethermind: ghcr.io/ethereum/state-actor-nethermind:main
+    ethrex: ghcr.io/ethereum/state-actor-ethrex:main
+    erigon: ghcr.io/ethereum/state-actor-erigon:main
+
+
 # Configuration place for mempool bridge (https://github.com/ethpandaops/mempool-bridge)
 mempool_bridge_params:
   # The image to use for mempool bridge
