@@ -1091,6 +1091,12 @@ def run(plan, args={}):
                 args_with_right_defaults.docker_cache_params,
                 el_cl_data_files_artifact_uuid,
                 buildoor_api_urls,
+                # last prefunded account for dora's devnet faucet - services like
+                # buildoor consume accounts from the low indices, so the tail avoids
+                # nonce collisions
+                prefunded_accounts[len(prefunded_accounts) - 1].private_key
+                if prefunded_accounts
+                else "",
             )
             plan.print("Successfully launched dora")
         elif additional_service == "checkpointz":
