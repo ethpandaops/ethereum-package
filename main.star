@@ -629,6 +629,11 @@ def run(plan, args={}):
     mev_endpoints = []
     mev_endpoint_names = []
     buildoor_api_urls = []
+    # Builder BLS key indices are handed out sequentially after the validators and
+    # any genesis-registered builders. The counter is shared between the mev_type
+    # buildoor and the dedicated buildoor instances so no two buildoors (nor the
+    # genesis builders) ever derive the same key.
+    buildoor_builder_index = 0
     # passed external relays get priority
     # perhaps add mev_type External or remove this
     if (
@@ -682,6 +687,12 @@ def run(plan, args={}):
             all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
+        mev_buildoor_key_index = (
+            network_params.builder_key_start_index
+            + network_params.builder_count
+            + buildoor_builder_index
+        )
+        buildoor_builder_index += 1
         buildoor_endpoints = buildoor.launch_buildoor(
             plan,
             beacon_uri,
@@ -693,7 +704,7 @@ def run(plan, args={}):
             global_node_selectors,
             global_tolerations,
             network_params.preregistered_validator_keys_mnemonic,
-            network_params.builder_key_start_index,
+            mev_buildoor_key_index,
             ranges,
             constants.BUILDOOR_SERVICE_NAME,
         )
@@ -826,7 +837,6 @@ def run(plan, args={}):
         args_with_right_defaults.additional_services.remove(
             constants.BUILDOOR_SERVICE_NAME
         )
-    buildoor_builder_index = 0
     for buildoor_instance in args_with_right_defaults.buildoor_params.instances:
         index = buildoor_instance.participant - 1
         instance_count = buildoor_instance.count
