@@ -1084,6 +1084,12 @@ network_params:
   # Default to 100 ETH
   builder_balance: 100
 
+  # Mnemonic used to derive builder BLS keys. Genesis-registered builders use
+  # indices 0..builder_count-1; buildoor instances use the following indices.
+  # Deliberately distinct from preregistered_validator_keys_mnemonic so builder
+  # keys can never collide with validator keys.
+  builder_keys_mnemonic: "baby envelope toddler valid pottery buddy cash spare such hedgehog ring ramp item seminar rely select advance knife cruel cereal left father model tissue"
+
 
 # Global parameters for the network
 

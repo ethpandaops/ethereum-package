@@ -565,12 +565,9 @@ def run(plan, args={}):
             )
         )
         plan.print(
-            "Builder mnemonic: '{0}', keys derived at indices {1}..{2}".format(
-                network_params.preregistered_validator_keys_mnemonic,
-                network_params.builder_key_start_index,
-                network_params.builder_key_start_index
-                + network_params.builder_count
-                - 1,
+            "Builder mnemonic: '{0}', keys derived at indices 0..{1}".format(
+                network_params.builder_keys_mnemonic,
+                network_params.builder_count - 1,
             )
         )
 
@@ -629,6 +626,13 @@ def run(plan, args={}):
     mev_endpoints = []
     mev_endpoint_names = []
     buildoor_api_urls = []
+    # Builder BLS keys derive from the dedicated builder mnemonic (distinct from
+    # the validator mnemonic, so no validator collision is possible): genesis
+    # builders occupy indices 0..builder_count-1 and every buildoor gets the next
+    # index after them. The counter is shared between the mev_type buildoor and
+    # the dedicated buildoor instances so no two buildoors (nor the genesis
+    # builders) ever derive the same key.
+    buildoor_builder_index = 0
     # passed external relays get priority
     # perhaps add mev_type External or remove this
     if (
@@ -682,6 +686,8 @@ def run(plan, args={}):
             all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
+        mev_buildoor_key_index = network_params.builder_count + buildoor_builder_index
+        buildoor_builder_index += 1
         buildoor_endpoints = buildoor.launch_buildoor(
             plan,
             beacon_uri,
@@ -692,8 +698,8 @@ def run(plan, args={}):
             args_with_right_defaults.buildoor_params,
             global_node_selectors,
             global_tolerations,
-            network_params.preregistered_validator_keys_mnemonic,
-            network_params.builder_key_start_index,
+            network_params.builder_keys_mnemonic,
+            mev_buildoor_key_index,
             ranges,
             constants.BUILDOOR_SERVICE_NAME,
         )
@@ -826,7 +832,6 @@ def run(plan, args={}):
         args_with_right_defaults.additional_services.remove(
             constants.BUILDOOR_SERVICE_NAME
         )
-    buildoor_builder_index = 0
     for buildoor_instance in args_with_right_defaults.buildoor_params.instances:
         index = buildoor_instance.participant - 1
         instance_count = buildoor_instance.count
@@ -864,14 +869,12 @@ def run(plan, args={}):
                 instance_count,
             )
             # Each instance is its own builder with its own builder BLS key,
-            # derived by buildoor from the builder mnemonic at consecutive indices
-            # after the validators and any genesis-registered builders, so they do
-            # not collide. The builder is onboarded after genesis via its lifecycle
+            # derived by buildoor from the builder mnemonic at the next free
+            # index after the genesis-registered builders, so they do not
+            # collide. The builder is onboarded after genesis via its lifecycle
             # deposit (buildoor_params.lifecycle), not registered at genesis.
             instance_builder_key_index = (
-                network_params.builder_key_start_index
-                + network_params.builder_count
-                + buildoor_builder_index
+                network_params.builder_count + buildoor_builder_index
             )
             buildoor_builder_index += 1
             buildoor_endpoints = buildoor.launch_buildoor(
@@ -884,7 +887,7 @@ def run(plan, args={}):
                 args_with_right_defaults.buildoor_params,
                 global_node_selectors,
                 global_tolerations,
-                network_params.preregistered_validator_keys_mnemonic,
+                network_params.builder_keys_mnemonic,
                 instance_builder_key_index,
                 ranges,
                 buildoor_service_name,

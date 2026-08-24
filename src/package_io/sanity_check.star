@@ -298,6 +298,7 @@ SUBCATEGORY_PARAMS = {
         "min_epochs_for_data_column_sidecars_requests",
         "builder_count",
         "builder_balance",
+        "builder_keys_mnemonic",
     ],
     "blockscout_params": ["image", "verif_image", "frontend_image", "env"],
     "dora_params": [

@@ -61,9 +61,9 @@ def launch_buildoor(
         "--builder-api-url={0}".format(api_url),
     ]
 
-    # Builder BLS key: let buildoor derive it from the mnemonic at the given
-    # index (matching the 0xB0 builder keys registered at genesis) when provided,
-    # otherwise fall back to the default static secret key.
+    # Builder BLS key: let buildoor derive it from the builder mnemonic at the
+    # given index (allocated after any genesis-registered 0xB0 builders) when
+    # provided, otherwise fall back to the default static secret key.
     if builder_mnemonic != None:
         cmd.append("--builder-mnemonic={0}".format(builder_mnemonic))
         cmd.append("--builder-key-index={0}".format(builder_key_index))
