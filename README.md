@@ -1265,6 +1265,11 @@ bootnodoor_params:
   # Bootnodoor docker image to use
   # Defaults to the latest image
   image: "ethpandaops/bootnodoor:latest"
+  # The log level for bootnodoor
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
   min_cpu: 100
   max_cpu: 1000
   min_mem: 128
@@ -1281,6 +1286,11 @@ zkboost_params:
   # zkboost docker image to use
   # Defaults to the latest image
   image: "ghcr.io/eth-act/zkboost/zkboost:latest"
+  # The log level for zkboost (sets RUST_LOG unless env.RUST_LOG is given)
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
   # List of zkboost instances, each running a separate zkboost container.
   # Each instance watches one EL participant for new blocks.
   #   name (required): Kurtosis service name, must be unique across instances
@@ -1477,6 +1487,12 @@ global_log_level: "info"
 snooper_params:
   # Enable snooper globally for all participants
   enabled: false
+  # The log level for the snooper
+  # Note: the snooper only has a verbose toggle; "debug"/"trace" set SNOOPER_VERBOSE=true
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
   # The image to use for snooper
   # Defaults to ethpandaops/rpc-snooper:latest
   image: ""
@@ -1751,6 +1767,12 @@ checkpoint_sync_url: ""
 spamoor_params:
   # The image to use for spamoor
   image: ethpandaops/spamoor:latest
+  # The log level for spamoor
+  # Note: spamoor cannot go quieter than info; "debug" enables --verbose and "trace" enables --trace
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
   # Resource management for spamoor
   # CPU is milicores
   # RAM is in MB
@@ -1795,7 +1817,8 @@ disruptoor_params:
   min_mem: 128
   max_mem: 512
   # Log level for disruptoor (error, warn, info, debug)
-  log_level: info
+  # If empty, will use the global_log_level value
+  log_level: ""
   # Log format for disruptoor (json or text)
   log_format: json
   # Optional partitions applied at startup. Leave empty to use the HTTP API only.
@@ -1841,7 +1864,8 @@ slashoor_params:
   min_mem: 128
   max_mem: 512
   # Log level for slashoor (error, warn, info, debug, trace)
-  log_level: info
+  # If empty, will use the global_log_level value
+  log_level: ""
   # Timeout for beacon API requests
   beacon_timeout: 30s
   # Maximum epochs to keep in memory for slashing detection
@@ -2172,6 +2196,12 @@ participants:
     count: 2
 snooper_params:
   enabled: true
+  # The log level for the snooper
+  # Note: the snooper only has a verbose toggle; "debug"/"trace" set SNOOPER_VERBOSE=true
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
 additional_services:
   - prometheus
   - grafana

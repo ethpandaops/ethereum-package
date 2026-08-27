@@ -401,6 +401,7 @@ SUBCATEGORY_PARAMS = {
         "image",
         "extra_args",
         "extra_env_vars",
+        "log_level",
     ],
     "spamoor_params": [
         "image",
@@ -413,6 +414,7 @@ SUBCATEGORY_PARAMS = {
         "start_chainload",
         "start_fuzzing",
         "defaults",
+        "log_level",
     ],
     "disruptoor_params": [
         "image",
@@ -467,12 +469,14 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "separate_keys",
         "extra_args",
+        "log_level",
     ],
     "zkboost_params": [
         "image",
         "instances",
         "zkvms",
         "env",
+        "log_level",
     ],
     "buildoor_params": [
         "image",

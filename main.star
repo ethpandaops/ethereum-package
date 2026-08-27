@@ -1337,6 +1337,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 osaka_time,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched spamoor")
         elif additional_service == "disruptoor":
@@ -1349,6 +1350,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched disruptoor")
         elif additional_service == "slashoor":
@@ -1366,6 +1368,7 @@ def run(plan, args={}):
                 global_tolerations,
                 network_params,
                 args_with_right_defaults.additional_services,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched slashoor")
         elif additional_service == "zkboost":

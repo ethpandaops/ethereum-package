@@ -1,5 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 SERVICE_NAME = "disruptoor"
 HTTP_PORT_NUMBER = 7700
@@ -35,6 +36,15 @@ USED_PORTS = {
 }
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "debug",
+}
+
+
 def launch_disruptoor(
     plan,
     disruptoor_params,
@@ -43,6 +53,7 @@ def launch_disruptoor(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -62,6 +73,10 @@ def launch_disruptoor(
             "disruptoor-config",
         )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        disruptoor_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     config = get_config(
         config_files_artifact_name,
         disruptoor_params,
@@ -70,6 +85,7 @@ def launch_disruptoor(
         port_publisher,
         additional_service_index,
         docker_cache_params,
+        log_level,
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -82,10 +98,11 @@ def get_config(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    log_level,
 ):
     cmd = [
         "--addr=:{0}".format(HTTP_PORT_NUMBER),
-        "--log-level={0}".format(disruptoor_params.log_level),
+        "--log-level={0}".format(log_level),
         "--log-format={0}".format(disruptoor_params.log_format),
     ]
 
