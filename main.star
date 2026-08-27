@@ -1116,6 +1116,7 @@ def run(plan, args={}):
                 index,
                 args_with_right_defaults.docker_cache_params,
                 el_cl_data_files_artifact_uuid,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched checkpointz")
         elif additional_service == "dugtrio":
@@ -1134,6 +1135,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched dugtrio")
         elif additional_service == "erpc":
@@ -1186,6 +1188,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched forky")
         elif additional_service == "tracoor":
@@ -1206,6 +1209,7 @@ def run(plan, args={}):
                 args_with_right_defaults.port_publisher,
                 index,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched tracoor")
         elif additional_service == "nginx" or additional_service == "apache":
@@ -1292,6 +1296,7 @@ def run(plan, args={}):
                 global_node_selectors,
                 global_tolerations,
                 args_with_right_defaults.docker_cache_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print("Successfully launched assertoor")
         elif additional_service == "mempool_bridge":

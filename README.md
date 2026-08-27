@@ -1154,6 +1154,11 @@ checkpointz_params:
   # Checkpointz docker image to use
   # Defaults to the latest image
   image: "ethpandaops/checkpointz:latest"
+  # The log level for checkpointz
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
 
 # Configuration place for trueblocks-core (chifra daemon) - https://github.com/TrueBlocks/trueblocks-core
 trueblocks_params:
@@ -1394,6 +1399,12 @@ assertoor_params:
   # Assertoor docker image to use
   # Defaults to the latest image
   image: "ethpandaops/assertoor:latest"
+  # The log level for assertoor
+  # Note: assertoor only has a verbose toggle, so "debug"/"trace" enable --verbose and other values leave the default
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
 
   # Check chain stability
   # This check monitors the chain and succeeds if:
@@ -1677,6 +1688,11 @@ xatu_sentry_enabled: false
 xatu_sentry_params:
   # The image to use for Xatu Sentry
   xatu_sentry_image: ethpandaops/xatu:latest
+  # The log level for xatu sentry
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
   # GRPC Endpoint of Xatu Server to send events to
   xatu_server_addr: localhost:8080
   # Enables TLS to Xatu Server

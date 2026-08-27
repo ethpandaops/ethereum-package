@@ -308,6 +308,7 @@ SUBCATEGORY_PARAMS = {
     ],
     "checkpointz_params": [
         "image",
+        "log_level",
     ],
     "docker_cache_params": [
         "enabled",
@@ -363,6 +364,7 @@ SUBCATEGORY_PARAMS = {
         "run_opcodes_transaction_test",
         "run_lifecycle_test",
         "tests",
+        "log_level",
     ],
     "mev_params": [
         "mev_relay_image",
@@ -392,6 +394,7 @@ SUBCATEGORY_PARAMS = {
         "xatu_server_tls",
         "xatu_server_headers",
         "beacon_subscriptions",
+        "log_level",
     ],
     "snooper_params": [
         "enabled",

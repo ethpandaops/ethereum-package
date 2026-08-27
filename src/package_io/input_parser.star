@@ -1080,6 +1080,7 @@ def input_parser(plan, input_args):
         ),
         checkpointz_params=struct(
             image=result["checkpointz_params"]["image"],
+            log_level=result["checkpointz_params"]["log_level"],
         ),
         dora_params=struct(
             image=result["dora_params"]["image"],
@@ -1151,6 +1152,7 @@ def input_parser(plan, input_args):
                 "run_opcodes_transaction_test"
             ],
             tests=result["assertoor_params"]["tests"],
+            log_level=result["assertoor_params"]["log_level"],
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
@@ -1227,6 +1229,7 @@ def input_parser(plan, input_args):
             xatu_server_headers=result["xatu_sentry_params"]["xatu_server_headers"],
             beacon_subscriptions=result["xatu_sentry_params"]["beacon_subscriptions"],
             xatu_server_tls=result["xatu_sentry_params"]["xatu_server_tls"],
+            log_level=result["xatu_sentry_params"]["log_level"],
         ),
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
@@ -2213,6 +2216,7 @@ def get_default_trueblocks_params():
 def get_default_checkpointz_params():
     return {
         "image": constants.DEFAULT_CHECKPOINTZ_IMAGE,
+        "log_level": "",
     }
 
 
@@ -2350,6 +2354,7 @@ def get_default_assertoor_params():
         "run_blob_transaction_test": False,
         "run_opcodes_transaction_test": False,
         "tests": [],
+        "log_level": "",
     }
 
 
@@ -2405,6 +2410,7 @@ def get_default_xatu_sentry_params():
             "blob_sidecar",
             "data_column_sidecar",
         ],
+        "log_level": "",
     }
 
 

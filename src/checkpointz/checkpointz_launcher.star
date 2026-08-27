@@ -1,5 +1,6 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 SERVICE_NAME = "checkpointz"
 
@@ -14,6 +15,14 @@ MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 128
 MAX_MEMORY = 1024
+
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
 
 USED_PORTS = {
     constants.HTTP_PORT_ID: shared_utils.new_port_spec(
@@ -42,6 +51,7 @@ def launch_checkpointz(
     additional_service_index,
     docker_cache_params,
     el_cl_data_files_artifact_uuid,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -57,9 +67,14 @@ def launch_checkpointz(
             )
         )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        checkpointz_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     template_data = new_config_template_data(
         network_params.network,
         all_cl_client_info,
+        log_level,
     )
 
     template_and_data = shared_utils.new_template_and_data(
@@ -147,10 +162,11 @@ def get_config(
     )
 
 
-def new_config_template_data(network, cl_client_info):
+def new_config_template_data(network, cl_client_info, log_level):
     return {
         "Network": network,
         "CLClientInfo": cl_client_info,
+        "LogLevel": log_level,
     }
 
 

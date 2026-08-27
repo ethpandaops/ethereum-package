@@ -437,6 +437,7 @@ def launch_participant_network(
                 pair_name,
                 node_selectors,
                 global_tolerations,
+                args_with_right_defaults.global_log_level,
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(

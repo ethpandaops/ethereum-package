@@ -30,7 +30,7 @@ agents:
 
 shared:
   metricsAddr: ":9091"
-  logging: "debug"
+  logging: "{{ .LogLevel }}"
   indexer:
     address: 0.0.0.0:8081
   store:
