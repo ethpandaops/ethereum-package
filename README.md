@@ -1143,6 +1143,11 @@ dora_params:
   image: "ethpandaops/dora:latest"
   # A list of optional extra env_vars the dora container should spin up with
   env: {}
+  # The log level for dora
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
 
 # Configuration place for checkpointz - https://github.com/ethpandaops/checkpointz
 checkpointz_params:

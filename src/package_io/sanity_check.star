@@ -304,6 +304,7 @@ SUBCATEGORY_PARAMS = {
     "dora_params": [
         "image",
         "env",
+        "log_level",
     ],
     "checkpointz_params": [
         "image",

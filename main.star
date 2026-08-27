@@ -1093,6 +1093,7 @@ def run(plan, args={}):
                 index,
                 args_with_right_defaults.docker_cache_params,
                 el_cl_data_files_artifact_uuid,
+                args_with_right_defaults.global_log_level,
                 buildoor_api_urls,
             )
             plan.print("Successfully launched dora")

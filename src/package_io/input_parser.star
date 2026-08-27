@@ -1084,6 +1084,7 @@ def input_parser(plan, input_args):
         dora_params=struct(
             image=result["dora_params"]["image"],
             env=result["dora_params"]["env"],
+            log_level=result["dora_params"]["log_level"],
         ),
         docker_cache_params=struct(
             enabled=result["docker_cache_params"]["enabled"],
@@ -2186,6 +2187,7 @@ def get_default_dora_params():
     return {
         "image": constants.DEFAULT_DORA_IMAGE,
         "env": {},
+        "log_level": "",
     }
 
 
