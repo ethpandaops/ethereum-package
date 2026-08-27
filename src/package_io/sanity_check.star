@@ -347,6 +347,7 @@ SUBCATEGORY_PARAMS = {
         "min_mem",
         "max_mem",
         "image",
+        "log_level",
     ],
     "tempo_params": [
         "min_cpu",
@@ -354,6 +355,7 @@ SUBCATEGORY_PARAMS = {
         "min_mem",
         "max_mem",
         "image",
+        "log_level",
     ],
     "assertoor_params": [
         "image",
@@ -485,6 +487,7 @@ SUBCATEGORY_PARAMS = {
         "epbs_builder",
         "lifecycle",
         "instances",
+        "log_level",
     ],
     "trueblocks_params": [
         "image",

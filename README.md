@@ -1241,6 +1241,11 @@ prometheus_params:
 
 # Configuration place for grafana
 grafana_params:
+  # The log level for grafana (trace maps to debug)
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
   # A list of locators for grafana dashboards to be loaded by the grafana service.
   # Each entry must be a Kurtosis locator: a GitHub locator (e.g.
   # "github.com/<org>/<repo>/path/to/dashboards") or an absolute http(s) URL.
@@ -1393,6 +1398,11 @@ zkboost_params:
 
 # Configuration place for tempo tracing backend
 tempo_params:
+  # The log level for tempo (trace maps to debug)
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
   # Resource management for tempo container
   # CPU is milicores
   # RAM is in MB
@@ -1659,6 +1669,11 @@ mev_params:
 # it up, then configure its targeting here. With "buildoor" enabled and no
 # instances set, a single builder is wired to the first participant by default.
 buildoor_params:
+  # The log level for buildoor (trace maps to debug)
+  # Valid values are "error", "warn", "info", "debug", and "trace"
+  # If empty, will use the global_log_level value
+  # Default: "" (uses global_log_level)
+  log_level: ""
   # The image to use for buildoor
   image: ethpandaops/buildoor:main
   # Enable the legacy builder API (traditional block building via relay)

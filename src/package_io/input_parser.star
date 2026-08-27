@@ -1133,6 +1133,7 @@ def input_parser(plan, input_args):
             min_mem=result["grafana_params"]["min_mem"],
             max_mem=result["grafana_params"]["max_mem"],
             image=result["grafana_params"]["image"],
+            log_level=result["grafana_params"]["log_level"],
         ),
         tempo_params=struct(
             min_cpu=result["tempo_params"]["min_cpu"],
@@ -1140,6 +1141,7 @@ def input_parser(plan, input_args):
             min_mem=result["tempo_params"]["min_mem"],
             max_mem=result["tempo_params"]["max_mem"],
             image=result["tempo_params"]["image"],
+            log_level=result["tempo_params"]["log_level"],
         ),
         nginx_port=result["nginx_port"],
         assertoor_params=struct(
@@ -1319,6 +1321,7 @@ def input_parser(plan, input_args):
                 )
                 for instance in result["buildoor_params"]["instances"]
             ],
+            log_level=result["buildoor_params"]["log_level"],
         ),
         trueblocks_params=struct(
             image=result["trueblocks_params"]["image"],
@@ -2387,6 +2390,7 @@ def get_default_grafana_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "grafana/grafana:latest",
+        "log_level": "",
     }
 
 
@@ -2397,6 +2401,7 @@ def get_default_tempo_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "grafana/tempo:latest",
+        "log_level": "",
     }
 
 
@@ -2576,6 +2581,7 @@ def get_default_buildoor_params():
         # builder reads one CL's payload_attributes stream and (in ePBS) gossips
         # bids to the whole network. Empty => no per-participant buildoors.
         "instances": [],
+        "log_level": "",
     }
 
 
