@@ -21,6 +21,15 @@ MIN_MEMORY = 16
 MAX_MEMORY = 256
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch(
     plan,
     mev_boost_launcher,
@@ -34,6 +43,7 @@ def launch(
     global_node_selectors,
     global_tolerations,
     final_genesis_timestamp,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -52,8 +62,12 @@ def launch(
 
     image = mev_params.mev_boost_image
 
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
+
     template_data = new_config_template_data(
-        network, constants.MEV_BOOST_PORT, relays, final_genesis_timestamp
+        network, constants.MEV_BOOST_PORT, relays, final_genesis_timestamp, log_level
     )
 
     if mev_params.commit_boost_config:
@@ -137,8 +151,9 @@ def new_mev_boost_launcher(should_check_relay, relay_end_points):
     )
 
 
-def new_config_template_data(network, port, relays, final_genesis_timestamp):
+def new_config_template_data(network, port, relays, final_genesis_timestamp, log_level):
     return {
+        "LogLevel": log_level,
         "Network": network,
         "Port": port,
         "Relays": relays,

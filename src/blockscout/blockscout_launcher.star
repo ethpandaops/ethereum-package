@@ -62,6 +62,15 @@ FRONTEND_USED_PORTS = {
 }
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch_blockscout(
     plan,
     el_contexts,
@@ -73,6 +82,7 @@ def launch_blockscout(
     docker_cache_params,
     blockscout_params,
     network_params,
+    global_log_level,
     shadowfork_block_height="",
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
@@ -93,6 +103,10 @@ def launch_blockscout(
     )
     el_client_name = el_context.client_name
 
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
+
     config_verif = get_config_verif(
         global_node_selectors,
         tolerations,
@@ -100,6 +114,7 @@ def launch_blockscout(
         additional_service_index,
         docker_cache_params,
         blockscout_params,
+        log_level,
     )
     verif_service_name = "{}-verif".format(SERVICE_NAME_BLOCKSCOUT)
     verif_service = plan.add_service(verif_service_name, config_verif)
@@ -149,6 +164,7 @@ def get_config_verif(
     additional_service_index,
     docker_cache_params,
     blockscout_params,
+    log_level,
 ):
     public_ports = shared_utils.get_additional_service_standard_public_port(
         port_publisher,
@@ -160,7 +176,8 @@ def get_config_verif(
     env_vars = {
         "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR": "0.0.0.0:{}".format(
             HTTP_PORT_NUMBER_VERIF
-        )
+        ),
+        "RUST_LOG": log_level,
     }
     env_vars.update(blockscout_params.env)
 

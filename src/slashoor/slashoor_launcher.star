@@ -1,10 +1,20 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 SERVICE_NAME = "slashoor"
 
 SLASHOOR_CONFIG_FILENAME = "config.yaml"
 SLASHOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
+
+
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
 
 
 def launch_slashoor(
@@ -17,6 +27,7 @@ def launch_slashoor(
     global_tolerations,
     network_params,
     additional_services,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -44,12 +55,17 @@ def launch_slashoor(
         template_and_data_by_rel_dest_filepath, "slashoor-config"
     )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        slashoor_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     config = get_config(
         plan,
         config_files_artifact_name,
         slashoor_params,
         global_node_selectors,
         tolerations,
+        log_level,
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -60,6 +76,7 @@ def get_config(
     slashoor_params,
     node_selectors,
     tolerations,
+    log_level,
 ):
     config_file_path = shared_utils.path_join(
         SLASHOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -70,8 +87,7 @@ def get_config(
         "--config={}".format(config_file_path),
     ]
 
-    if slashoor_params.log_level:
-        cmd.append("--log-level={}".format(slashoor_params.log_level))
+    cmd.append("--log-level={}".format(log_level))
 
     for extra_arg in slashoor_params.extra_args:
         cmd.append(extra_arg)

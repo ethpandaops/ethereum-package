@@ -205,6 +205,7 @@ def launch(
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
                 args_with_right_defaults.snooper_params,
+                args_with_right_defaults.global_log_level,
             )
             global_other_index += 1
             plan.print(
