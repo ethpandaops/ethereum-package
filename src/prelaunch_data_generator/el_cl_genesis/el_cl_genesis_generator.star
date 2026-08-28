@@ -24,18 +24,29 @@ def generate_el_cl_genesis_data(
     frames_enabled=False,
     global_tolerations=[],
     global_node_selectors={},
+    anchor_block="",
+    name_suffix="",
 ):
+    # anchor_block: artifact with /latest_block.json; anchors the CL genesis
+    # to that eth1 block via SHADOW_FORK_FILE while keeping the network's
+    # own network_id and template EL genesis. name_suffix avoids collisions.
     files = {}
     shadowfork_file = ""
+    is_parent_network_shadowfork = False
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     if latest_block != "":
         files[SHADOWFORK_FILEPATH] = latest_block
+        shadowfork_file = SHADOWFORK_FILEPATH + "/latest_block.json"
+        is_parent_network_shadowfork = True
+    elif anchor_block != "":
+        files[SHADOWFORK_FILEPATH] = anchor_block
         shadowfork_file = SHADOWFORK_FILEPATH + "/latest_block.json"
 
     template_data = new_env_file_for_el_cl_genesis_data(
         genesis_unix_timestamp,
         total_num_validator_keys_to_preregister,
         shadowfork_file,
+        is_parent_network_shadowfork,
         network_params,
         genesis_generator_params.extra_env,
         frames_enabled,
@@ -64,22 +75,22 @@ def generate_el_cl_genesis_data(
     ] = additional_contracts_template
 
     genesis_generation_config_artifact_name = plan.render_templates(
-        genesis_values_and_dest_filepath, "genesis-el-cl-env-file"
+        genesis_values_and_dest_filepath, "genesis-el-cl-env-file" + name_suffix
     )
 
     files[GENESIS_VALUES_PATH] = genesis_generation_config_artifact_name
 
     genesis = plan.run_sh(
-        name="run-generate-genesis",
+        name="run-generate-genesis" + name_suffix,
         description="Creating genesis",
         run="cp /opt/values.env /config/values.env && ./entrypoint.sh all && mkdir /network-configs && mv /data/metadata/* /network-configs/ && mv /data/parsed /network-configs/parsed",
         image=image,
         files=files,
         store=[
-            StoreSpec(src="/network-configs/", name="el_cl_genesis_data"),
+            StoreSpec(src="/network-configs/", name="el_cl_genesis_data" + name_suffix),
             StoreSpec(
                 src="/network-configs/genesis_validators_root.txt",
-                name="genesis_validators_root",
+                name="genesis_validators_root" + name_suffix,
             ),
         ],
         wait=None,
@@ -88,7 +99,7 @@ def generate_el_cl_genesis_data(
     )
 
     genesis_validators_root = plan.run_sh(
-        name="read-genesis-validators-root",
+        name="read-genesis-validators-root" + name_suffix,
         description="Reading genesis validators root",
         run="cat /data/genesis_validators_root.txt",
         files={"/data": genesis.files_artifacts[1]},
@@ -98,7 +109,7 @@ def generate_el_cl_genesis_data(
     )
     osaka_time = ""
     osaka_time = plan.run_sh(
-        name="read-osaka-time",
+        name="read-osaka-time" + name_suffix,
         description="Reading osaka time from genesis",
         run="jq '.config.osakaTime' /data/genesis.json | tr -d '\n'",
         files={"/data": genesis.files_artifacts[0]},
@@ -133,6 +144,7 @@ def new_env_file_for_el_cl_genesis_data(
     genesis_unix_timestamp,
     total_num_validator_keys_to_preregister,
     shadowfork_file,
+    is_parent_network_shadowfork,
     network_params,
     extra_env,
     frames_enabled=False,
@@ -144,8 +156,8 @@ def new_env_file_for_el_cl_genesis_data(
     return {
         "UnixTimestamp": genesis_unix_timestamp,
         "NetworkId": constants.NETWORK_ID[network_params.network.split("-")[0]]
-        if shadowfork_file
-        else network_params.network_id,  # This will override the network_id if shadowfork_file is present. If you want to use the network_id, please ensure that you don't use "shadowfork" in the network name.
+        if is_parent_network_shadowfork
+        else network_params.network_id,  # This will override the network_id if shadowforking a parent network. If you want to use the network_id, please ensure that you don't use "shadowfork" in the network name.
         "DepositContractAddress": network_params.deposit_contract_address,
         "SlotDurationMs": network_params.slot_duration_ms,
         "PreregisteredValidatorKeysMnemonic": network_params.preregistered_validator_keys_mnemonic,
