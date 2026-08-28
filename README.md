@@ -1076,7 +1076,11 @@ network_params:
   min_epochs_for_data_column_sidecars_requests: 4096
 
   # Number of ePBS builders to register at genesis with 0xB0 withdrawal credentials
-  # Requires gloas_fork_epoch to be 0 (GLOAS at genesis)
+  # (written to state.builders). Requires gloas_fork_epoch to be 0 (GLOAS at genesis).
+  # Buildoor instances (buildoor_params.instances / mev_type: buildoor) are handed
+  # these builders first, in launch order, so they skip the lifecycle deposit; note
+  # that per spec (is_active_builder) a genesis builder can only bid once epoch 1 is
+  # finalized (deposit_epoch 0 < finalized_checkpoint.epoch), i.e. from ~epoch 3.
   # Default to 0
   builder_count: 0
 
@@ -1085,7 +1089,9 @@ network_params:
   builder_balance: 100
 
   # Mnemonic used to derive builder BLS keys. Genesis-registered builders use
-  # indices 0..builder_count-1; buildoor instances use the following indices.
+  # indices 0..builder_count-1; buildoor instances are assigned indices in launch
+  # order, so the first builder_count of them run the genesis builders and any
+  # further ones derive the next free index and onboard via lifecycle deposit.
   # Deliberately distinct from preregistered_validator_keys_mnemonic so builder
   # keys can never collide with validator keys.
   builder_keys_mnemonic: "baby envelope toddler valid pottery buddy cash spare such hedgehog ring ramp item seminar rely select advance knife cruel cereal left father model tissue"
@@ -1652,7 +1658,9 @@ buildoor_params:
   # cannot be combined with the (deprecated) network-wide `mev_type: buildoor`.
   # Each instance is its own builder; with lifecycle enabled (default) it onboards
   # itself after genesis, so genesis builder registration is not required and gloas
-  # may activate at any epoch.
+  # may activate at any epoch. With network_params.builder_count > 0 the first
+  # builder_count instances (in launch order) instead run the genesis-registered
+  # builders and need no deposit.
   # Each entry may set an optional `image` to override buildoor_params.image for
   # just that instance (A/B testing).
   # Defaults to [] (no per-participant buildoors).
