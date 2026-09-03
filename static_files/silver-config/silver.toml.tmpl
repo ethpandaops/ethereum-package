@@ -1,0 +1,26 @@
+# Rendered by src/cl/silver/silver_launcher.star.
+#
+# Silver derives fork and genesis values from the network metadata and anchor state.
+# EXTERNAL_IP is substituted from `hostname -i` at start-up, because a
+# rendered artifact predates the service that gets the address.
+network = "{{ .NetworkDir }}"
+# Local devnets start from genesis without a finalized checkpoint.
+disable_weak_subjectivity_check = true
+external_ip_v4 = "EXTERNAL_IP"
+discovery_port = {{ .DiscoveryPort }}
+quic_port = {{ .QuicPort }}
+data_column_custody_group_count = {{ .CustodyGroupCount }}
+data_storage_dir = "{{ .DataDir }}"
+beacon_api_bind = ["0.0.0.0:{{ .HttpPort }}"]
+
+[engine_config]
+execution_endpoint = "{{ .ExecutionEndpoint }}"
+jwt_secret = "{{ .JwtSecret }}"
+unsafe_no_el = {{ .UnsafeNoEl }}
+
+[chain_config]
+bootstrap_enrs = [
+{{- range .BootstrapEnrs }}
+  "{{ . }}",
+{{- end }}
+]

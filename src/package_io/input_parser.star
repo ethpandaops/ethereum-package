@@ -26,6 +26,7 @@ DEFAULT_CL_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "silver": "ghcr.io/gattaca-com/silver:latest",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -37,6 +38,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "silver": "ghcr.io/gattaca-com/silver:latest",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -48,6 +50,7 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "silver": "ghcr.io/gattaca-com/silver:latest",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -59,6 +62,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "silver": "ghcr.io/gattaca-com/silver:latest",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
