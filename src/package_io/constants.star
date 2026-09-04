@@ -20,6 +20,7 @@ CL_TYPE = struct(
     grandine="grandine",
     consensoor="consensoor",
     caplin="caplin",
+    crysm="crysm",
 )
 
 VC_TYPE = struct(
