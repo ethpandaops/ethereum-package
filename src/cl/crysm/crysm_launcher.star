@@ -14,8 +14,7 @@ BEACON_HTTP_PORT_NUM = 4000
 BEACON_METRICS_PORT_NUM = 5054
 METRICS_PATH = "/metrics"
 
-# crysm speaks QUIC only. It answers /eth/v1/node/health but not /eth/v1/node/identity, which is
-# why this launcher takes the package's ready condition and still hands back no ENR.
+# crysm speaks QUIC only, so there is no TCP discovery port to declare.
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
     constants.GLOBAL_LOG_LEVEL.warn: "warn",
@@ -24,28 +23,6 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.trace: "debug",
 }
 
-VALIDATOR_SETTINGS_DIRPATH_ON_BEACON_SERVICE_CONTAINER = "/validator"
-VALIDATOR_SETTINGS_FILENAME = "settings.json"
-
-# crysm's validator client is the same binary behind --validator, and it takes one JSON file rather
-# than a row of flags. Rendered here rather than shipped in the args file because two of its values
-# are only knowable here: the keystore artifact's own directory name carries the participant index.
-VALIDATOR_SETTINGS_TEMPLATE = """{
-  "keystores_dir": "{{.KeysDir}}",
-  "secrets_dir": "{{.SecretsDir}}",
-  "protection_dir": "{{.ProtectionDir}}",
-
-  "beacon": { "host": "127.0.0.1", "port": {{.BeaconPort}} },
-
-  "proposer_settings": {
-    "default_config": {
-      "fee_recipient": "{{.FeeRecipient}}",
-      "gas_limit": "{{.GasLimit}}"
-    },
-    "version": 2
-  }
-}
-"""
 
 # The client takes a host and a port, not a URL.
 def host_port(url):
@@ -184,6 +161,8 @@ def get_beacon_config(
             network_params.network == constants.NETWORK_NAME.kurtosis
             or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
+            # No multiaddr fallback, unlike the clients either side of this one: --bootnode takes a
+            # record and --peer takes host:port/peer-id, and a libp2p multiaddr is neither.
             if bootnode_arg == None and bootnode_contexts != None:
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     if ctx.enr:
@@ -194,47 +173,41 @@ def get_beacon_config(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
 
+    # The flag is repeatable and takes one record, so the comma-joined list the devnet branch
+    # produces has to be handed over an entry at a time rather than whole.
     if bootnode_arg != None:
-        cmd.append("--bootnode")
-        cmd.append(bootnode_arg)
+        for enr in bootnode_arg.split(","):
+            if enr:
+                cmd.append("--bootnode")
+                cmd.append(enr)
 
     # `use_separate_vc: false` for this client means the beacon node runs the validator, not that
     # nothing does: they are one binary talking to itself over the Beacon API on loopback.
-    validator_settings = None
-    if node_keystore_files != None and not participant.use_separate_vc:
-        validator_settings = plan.render_templates(
-            {
-                VALIDATOR_SETTINGS_FILENAME: shared_utils.new_template_and_data(
-                    VALIDATOR_SETTINGS_TEMPLATE,
-                    {
-                        # The raw layout, which is lighthouse's and eth2-val-tools':
-                        # keys/<0xpubkey>/voting-keystore.json beside secrets/<0xpubkey>.
-                        "KeysDir": shared_utils.path_join(
-                            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-                            node_keystore_files.raw_keys_relative_dirpath,
-                        ),
-                        "SecretsDir": shared_utils.path_join(
-                            constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
-                            node_keystore_files.raw_secrets_relative_dirpath,
-                        ),
-                        # Beside the beacon data, so a persistent participant keeps its slashing
-                        # protection across a restart the way it keeps its blocks.
-                        "ProtectionDir": BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER
-                        + "/validator",
-                        "BeaconPort": BEACON_HTTP_PORT_NUM,
-                        "FeeRecipient": constants.VALIDATING_REWARDS_ACCOUNT,
-                        "GasLimit": network_params.gas_limit,
-                    },
-                )
-            },
-            "crysm-validator-settings-{0}".format(beacon_service_name),
-        )
-        cmd.append("--validator")
+    mount_validator_keys = (
+        node_keystore_files != None and not participant.use_separate_vc
+    )
+    if mount_validator_keys:
+        # The raw layout, which is lighthouse's and eth2-val-tools': keys/<0xpubkey>/
+        # voting-keystore.json beside secrets/<0xpubkey>.
+        cmd.append("--keystores-dir")
         cmd.append(
-            VALIDATOR_SETTINGS_DIRPATH_ON_BEACON_SERVICE_CONTAINER
-            + "/"
-            + VALIDATOR_SETTINGS_FILENAME
+            shared_utils.path_join(
+                constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+                node_keystore_files.raw_keys_relative_dirpath,
+            )
         )
+        cmd.append("--secrets-dir")
+        cmd.append(
+            shared_utils.path_join(
+                constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER,
+                node_keystore_files.raw_secrets_relative_dirpath,
+            )
+        )
+        # Both reach the preference the client signs, which is what a Gloas proposal is paid by.
+        cmd.append("--suggested-fee-recipient")
+        cmd.append(constants.VALIDATING_REWARDS_ACCOUNT)
+        cmd.append("--target-gas-limit")
+        cmd.append("{0}".format(network_params.gas_limit))
 
     if len(participant.cl_extra_params) > 0:
         cmd.extend([param for param in participant.cl_extra_params])
@@ -245,11 +218,10 @@ def get_beacon_config(
     if el_context != None:
         files[constants.JWT_MOUNTPOINT_ON_CLIENTS] = launcher.jwt_file
 
-    if validator_settings != None:
+    if mount_validator_keys:
         files[
             constants.VALIDATOR_KEYS_DIRPATH_ON_SERVICE_CONTAINER
         ] = node_keystore_files.files_artifact_uuid
-        files[VALIDATOR_SETTINGS_DIRPATH_ON_BEACON_SERVICE_CONTAINER] = validator_settings
 
     if persistent:
         # crysm has no volume-size entry of its own, so it reuses the lighthouse key, as consensoor
@@ -282,7 +254,9 @@ def get_beacon_config(
     cmd_str = "exec " + " ".join(cmd)
     if cl_binary_artifact != None:
         cmd_str = (
-            "cp /opt/bin/{0} /usr/local/bin/crysm && ".format(cl_binary_artifact.filename)
+            "cp /opt/bin/{0} /usr/local/bin/crysm && ".format(
+                cl_binary_artifact.filename
+            )
             + cmd_str
         )
 
@@ -334,23 +308,28 @@ def get_cl_context(
         "{0}:{1}".format(service.name, beacon_metrics_port.number),
     )
 
-    # No identity request, and so no ENR to hand back: /eth/v1/node/identity is not among the
-    # endpoints this client serves, so nothing else can use it as a bootnode. Dialling out is
-    # unaffected, which is what a follower needs.
+    (
+        beacon_node_enr,
+        beacon_multiaddr,
+        beacon_peer_id,
+    ) = cl_shared.get_beacon_node_identity(plan, service_name, participant)
+
     return cl_context.new_cl_context(
         client_name="crysm",
-        enr="",
+        enr=beacon_node_enr,
         ip_addr=service.name,
         ip_address=service.ip_address,
         http_port=beacon_http_port.number,
         beacon_http_url="http://{0}:{1}".format(service.name, beacon_http_port.number),
         cl_nodes_metrics_info=[beacon_node_metrics_info],
         beacon_service_name=service_name,
-        multiaddr="",
-        peer_id="",
+        multiaddr=beacon_multiaddr,
+        peer_id=beacon_peer_id,
         snooper_enabled=participant.snooper_enabled,
         snooper_el_engine_context=snooper_el_engine_context,
-        validator_keystore_files_artifact_uuid="",
+        validator_keystore_files_artifact_uuid=node_keystore_files.files_artifact_uuid
+        if node_keystore_files
+        else "",
         supernode=participant.supernode,
     )
 
