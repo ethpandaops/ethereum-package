@@ -130,6 +130,10 @@ def get_beacon_config(
         # A supernode custodies every column; anyone else keeps the requirement.
         "--cgc",
         "128" if participant.supernode else "4",
+        # Not confined to the built-in validator: a separate client drives proposals through this
+        # node too, and what it does not name a recipient for is paid to whatever this node holds.
+        "--suggested-fee-recipient",
+        constants.VALIDATING_REWARDS_ACCOUNT,
         "--log-level",
         log_level,
         # A container's stdout is a pipe, so the client would otherwise decide not to colour. Kurtosis
@@ -148,6 +152,10 @@ def get_beacon_config(
     else:
         cmd.append("--genesis")
         cmd.append(constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER + "/genesis.ssz")
+
+    if network_params.gas_limit > 0:
+        cmd.append("--target-gas-limit")
+        cmd.append("{0}".format(network_params.gas_limit))
 
     if el_context != None:
         cmd.append("--engine")
@@ -203,11 +211,6 @@ def get_beacon_config(
                 node_keystore_files.raw_secrets_relative_dirpath,
             )
         )
-        # Both reach the preference the client signs, which is what a Gloas proposal is paid by.
-        cmd.append("--suggested-fee-recipient")
-        cmd.append(constants.VALIDATING_REWARDS_ACCOUNT)
-        cmd.append("--target-gas-limit")
-        cmd.append("{0}".format(network_params.gas_limit))
 
     if len(participant.cl_extra_params) > 0:
         cmd.extend([param for param in participant.cl_extra_params])
