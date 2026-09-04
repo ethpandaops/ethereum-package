@@ -18,6 +18,8 @@ jobs:
             "./.github/tests/mix-persistence.yaml",
             "./.github/tests/mix-public.yaml",
             "./.github/tests/minimal.yaml",
+            # A Gloas-only client cannot join any of the files above, none of which fork to Gloas.
+            "./.github/tests/crysm-basic.yaml",
             "./network_params.yaml",
             "."
           ]
