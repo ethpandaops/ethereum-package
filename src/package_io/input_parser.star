@@ -26,6 +26,7 @@ DEFAULT_CL_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "crysm": "crysm:mainnet",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -37,6 +38,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "crysm": "crysm:mainnet",
 }
 
 DEFAULT_VC_IMAGES = {
