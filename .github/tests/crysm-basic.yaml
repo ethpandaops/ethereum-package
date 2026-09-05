@@ -1,32 +1,22 @@
-# crysm is Gloas-only -- it carries no pre-Gloas containers -- so it can appear only where Gloas is
-# at genesis. That is why this file cannot be folded into one of the mix suites, none of which fork
-# to Gloas at all.
 participants:
-  # devnet-8 rather than a stock geth: Gloas at genesis needs an execution client that speaks ePBS.
   - el_type: geth
     el_image: ethpandaops/geth:glamsterdam-devnet-8
     cl_type: crysm
-    # One binary, no separate VC service, which is also why crysm has no VC_TYPE launcher.
     use_separate_vc: false
     validator_count: 128
 
 network_params:
   gloas_fork_epoch: 0
   preset: mainnet
-  # geth rejects a BPO after amsterdam, which Gloas at genesis puts at genesis too.
   bpo_1_epoch: 0
   bpo_2_epoch: 0
 
 additional_services:
   - dora
 
-# Not dora's `latest`: that one decodes ExecutionRequests as three lists where Gloas has five, so it
-# indexes no block and shows an empty chain.
 dora_params:
   image: ethpandaops/dora:master
 
-# The generator has no glamsterdam-devnet-8 tag -- the series stops at devnet-7 -- so this is the
-# release that was current when devnet-8 was generated.
 ethereum_genesis_generator_params:
   image: ethpandaops/ethereum-genesis-generator:6.2.0
 

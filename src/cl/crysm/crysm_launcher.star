@@ -14,7 +14,6 @@ BEACON_HTTP_PORT_NUM = 4000
 BEACON_METRICS_PORT_NUM = 5054
 METRICS_PATH = "/metrics"
 
-# crysm speaks QUIC only, so there is no TCP discovery port to declare.
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "error",
     constants.GLOBAL_LOG_LEVEL.warn: "warn",
@@ -24,7 +23,6 @@ VERBOSITY_LEVELS = {
 }
 
 
-# The client takes a host and a port, not a URL.
 def host_port(url):
     return url.replace("http://", "").replace("https://", "").rstrip("/")
 
@@ -71,7 +69,6 @@ def get_beacon_config(
             port_publisher,
             participant_index,
         )
-        # The four this client actually listens on.
         public_ports = shared_utils.get_port_specs(
             {
                 constants.UDP_DISCOVERY_PORT_ID: public_ports_for_component[0],
@@ -114,7 +111,6 @@ def get_beacon_config(
         "{0}".format(discovery_port),
         "--quic-port",
         "{0}".format(discovery_port_quic),
-        # A container cannot work out its own reachable address, so it is told.
         "--advertised-ip",
         constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--http",
@@ -127,23 +123,16 @@ def get_beacon_config(
         "0.0.0.0",
         "--metrics-port",
         "{0}".format(BEACON_METRICS_PORT_NUM),
-        # A supernode custodies every column; anyone else keeps the requirement.
         "--cgc",
         "128" if participant.supernode else "4",
-        # Not confined to the built-in validator: a separate client drives proposals through this
-        # node too, and what it does not name a recipient for is paid to whatever this node holds.
         "--suggested-fee-recipient",
         constants.VALIDATING_REWARDS_ACCOUNT,
         "--log-level",
         log_level,
-        # A container's stdout is a pipe, so the client would otherwise decide not to colour. Kurtosis
-        # passes the escapes through to whoever is reading the logs.
         "--log-color",
         "always",
     ]
 
-    # Either anchor, never both: GLOAS at genesis is the only way this client can start from slot 0,
-    # since it has no pre-Gloas containers.
     if checkpoint_sync_enabled and checkpoint_sync_url:
         cmd.append("--checkpoint")
         cmd.append(host_port(checkpoint_sync_url))
@@ -169,8 +158,6 @@ def get_beacon_config(
             network_params.network == constants.NETWORK_NAME.kurtosis
             or constants.NETWORK_NAME.shadowfork in network_params.network
         ):
-            # No multiaddr fallback, unlike the clients either side of this one: --bootnode takes a
-            # record and --peer takes host:port/peer-id, and a libp2p multiaddr is neither.
             if bootnode_arg == None and bootnode_contexts != None:
                 for ctx in bootnode_contexts[: constants.MAX_ENR_ENTRIES]:
                     if ctx.enr:
@@ -181,22 +168,16 @@ def get_beacon_config(
                 plan, launcher.el_cl_genesis_data.files_artifact_uuid
             )
 
-    # The flag is repeatable and takes one record, so the comma-joined list the devnet branch
-    # produces has to be handed over an entry at a time rather than whole.
     if bootnode_arg != None:
         for enr in bootnode_arg.split(","):
             if enr:
                 cmd.append("--bootnode")
                 cmd.append(enr)
 
-    # `use_separate_vc: false` for this client means the beacon node runs the validator, not that
-    # nothing does: they are one binary talking to itself over the Beacon API on loopback.
     mount_validator_keys = (
         node_keystore_files != None and not participant.use_separate_vc
     )
     if mount_validator_keys:
-        # The raw layout, which is lighthouse's and eth2-val-tools': keys/<0xpubkey>/
-        # voting-keystore.json beside secrets/<0xpubkey>.
         cmd.append("--keystores-dir")
         cmd.append(
             shared_utils.path_join(
@@ -227,8 +208,6 @@ def get_beacon_config(
         ] = node_keystore_files.files_artifact_uuid
 
     if persistent:
-        # crysm has no volume-size entry of its own, so it reuses the lighthouse key, as consensoor
-        # does.
         files[
             BEACON_DATA_DIRPATH_ON_BEACON_SERVICE_CONTAINER
         ] = cl_shared.get_beacon_data_directory(
@@ -253,7 +232,6 @@ def get_beacon_config(
         beacon_service_name,
     )
 
-    # exec, so the client is pid 1's process and gets the SIGTERM Kurtosis sends.
     cmd_str = "exec " + " ".join(cmd)
     if cl_binary_artifact != None:
         cmd_str = (
