@@ -26,6 +26,7 @@ DEFAULT_CL_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "crysm": "ghcr.io/offchainlabs/crysm:stable",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -37,6 +38,7 @@ DEFAULT_CL_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "crysm": "ghcr.io/offchainlabs/crysm:stable-minimal",
 }
 
 DEFAULT_VC_IMAGES = {
@@ -1610,6 +1612,7 @@ def parse_network_params(plan, input_args):
                     constants.CL_TYPE.nimbus,
                     constants.CL_TYPE.teku,
                     constants.CL_TYPE.grandine,
+                    constants.CL_TYPE.crysm,
                 )
                 and vc_type == ""
             ):
