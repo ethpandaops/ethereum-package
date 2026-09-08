@@ -11,8 +11,8 @@ input_parser = import_module("../package_io/input_parser.star")
 # each retry continues exactly there. curl -C <offset> exits 33 rather than
 # restarting from zero if the server ignores the Range header, so a
 # non-ranging server fails loudly, not silently. A stream that stalls without
-# closing would hang forever (curl only times out the connect), so under 1 MB/s
-# for 60 s curl exits 28 and the loop resumes.
+# closing would hang forever (curl only times out the connect); under 1 KB/s for
+# 120 s -- zero progress, not a slow link -- curl exits 28 and the loop resumes.
 SNAPSHOT_DOWNLOAD_MAX_ATTEMPTS = 500
 SNAPSHOT_DOWNLOAD_SCRIPT = r"""
 set -e
@@ -31,7 +31,7 @@ stream() {
     [ "$n" -gt __MAX_ATTEMPTS__ ] && { echo "giving up at byte $off after $n attempts" >&2; return 1; }
     echo "fetching from byte $off (attempt $n)" >&2
     rc=0
-    curl -sfL --connect-timeout 20 --speed-limit 1000000 --speed-time 60 -C "$off" -w '%{stderr}%{size_download}' "$SNAPSHOT_URL" 2>/tmp/got || rc=$?
+    curl -sfL --connect-timeout 20 --speed-limit 1024 --speed-time 120 -C "$off" -w '%{stderr}%{size_download}' "$SNAPSHOT_URL" 2>/tmp/got || rc=$?
     off=$((off + $(cat /tmp/got)))
     case "$rc" in
       0) ;;
