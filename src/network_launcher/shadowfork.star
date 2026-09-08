@@ -42,7 +42,6 @@ stream() {
     off=$((off + got))
     case "$rc" in
       0) ;;
-      22|33) echo "fatal curl error $rc at byte $off" >&2; return 1 ;;
       *) echo "stream broke (curl $rc) at byte $off, resuming" >&2; sleep 5 ;;
     esac
   done
