@@ -9,8 +9,10 @@ input_parser = import_module("../package_io/input_parser.star")
 # the download resumes by byte offset instead of restarting: curl reports the
 # bytes it delivered (%{size_download}, on stderr so the stream stays clean) and
 # each retry continues exactly there. curl -C <offset> exits 33 rather than
-# restarting from zero if the server ignores the Range header, so a
-# non-ranging server fails loudly, not silently. A stream that stalls without
+# restarting from zero if the server answers a ranged request with a 200, and
+# writes no body on 33 or on an HTTP error (22), so those retry the SAME offset
+# (the edge in front of snapshots.ethpandaops.io did that once in ~40 resumes);
+# a server that never honours Range ends at the attempt cap. A stream that stalls without
 # closing would hang forever (curl only times out the connect); under 1 KB/s for
 # 120 s -- zero progress, not a slow link -- curl exits 28 and the loop resumes.
 # A missing byte count (curl killed by a signal mid-transfer) is fatal on
