@@ -6,10 +6,11 @@ input_parser = import_module("../package_io/input_parser.star")
 # The snapshot is streamed straight into tar so nothing but the extracted datadir
 # ever touches disk. A single curl cannot survive a dropped connection, and a
 # mainnet snapshot is a multi-hour, hundreds-of-GiB stream (erigon: 370 GB), so
-# the download resumes by byte offset instead of restarting: a FIFO counts the
-# bytes tee handed the extractor and each retry continues exactly there.
-# curl -C <offset> exits 33 rather than restarting from zero if the server
-# ignores the Range header, so a non-ranging server fails loudly, not silently.
+# the download resumes by byte offset instead of restarting: curl reports the
+# bytes it delivered (%{size_download}, on stderr so the stream stays clean) and
+# each retry continues exactly there. curl -C <offset> exits 33 rather than
+# restarting from zero if the server ignores the Range header, so a
+# non-ranging server fails loudly, not silently.
 SNAPSHOT_DOWNLOAD_MAX_ATTEMPTS = 500
 SNAPSHOT_DOWNLOAD_SCRIPT = r"""
 set -e
@@ -20,7 +21,6 @@ SNAPSHOT_URL="__SNAPSHOT_BASE__/$BLOCK_HEIGHT/snapshot.tar.zst"
 TOTAL=$(curl -sfIL "$SNAPSHOT_URL" | tr -d '\r' | awk 'tolower($1)=="content-length:"{n=$2} END{print n}')
 [ -n "$TOTAL" ] || { echo "cannot read the snapshot size from $SNAPSHOT_URL"; exit 1; }
 echo "snapshot is $TOTAL bytes"
-mkfifo /tmp/cnt
 stream() {
   off=0
   n=0
@@ -28,11 +28,9 @@ stream() {
     n=$((n + 1))
     [ "$n" -gt __MAX_ATTEMPTS__ ] && { echo "giving up at byte $off after $n attempts" >&2; return 1; }
     echo "fetching from byte $off (attempt $n)" >&2
-    wc -c < /tmp/cnt > /tmp/n &
-    ( curl -sfL --connect-timeout 20 -C "$off" "$SNAPSHOT_URL"; echo $? > /tmp/rc ) | tee /tmp/cnt || return 1
-    wait
-    rc=$(cat /tmp/rc)
-    off=$((off + $(cat /tmp/n)))
+    rc=0
+    curl -sfL --connect-timeout 20 -C "$off" -w '%{stderr}%{size_download}' "$SNAPSHOT_URL" 2>/tmp/got || rc=$?
+    off=$((off + $(cat /tmp/got)))
     case "$rc" in
       0) ;;
       22|33) echo "fatal curl error $rc at byte $off" >&2; return 1 ;;
