@@ -3,6 +3,49 @@ constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
 
 
+# The snapshot is streamed straight into tar so nothing but the extracted datadir
+# ever touches disk. A single curl cannot survive a dropped connection, and a
+# mainnet snapshot is a multi-hour, hundreds-of-GiB stream (erigon: 370 GB), so
+# the download resumes by byte offset instead of restarting: a FIFO counts the
+# bytes tee handed the extractor and each retry continues exactly there.
+# curl -C <offset> exits 33 rather than restarting from zero if the server
+# ignores the Range header, so a non-ranging server fails loudly, not silently.
+SNAPSHOT_DOWNLOAD_MAX_ATTEMPTS = 500
+SNAPSHOT_DOWNLOAD_SCRIPT = r"""
+set -e
+apk add --no-cache curl tar zstd
+BLOCK_HEIGHT=$(cat /shared/block_height.txt)
+echo "Using block height: $BLOCK_HEIGHT"
+SNAPSHOT_URL="__SNAPSHOT_BASE__/$BLOCK_HEIGHT/snapshot.tar.zst"
+TOTAL=$(curl -sfIL "$SNAPSHOT_URL" | tr -d '\r' | awk 'tolower($1)=="content-length:"{n=$2} END{print n}')
+[ -n "$TOTAL" ] || { echo "cannot read the snapshot size from $SNAPSHOT_URL"; exit 1; }
+echo "snapshot is $TOTAL bytes"
+mkfifo /tmp/cnt
+stream() {
+  off=0
+  n=0
+  while [ "$off" -lt "$TOTAL" ]; do
+    n=$((n + 1))
+    [ "$n" -gt __MAX_ATTEMPTS__ ] && { echo "giving up at byte $off after $n attempts" >&2; return 1; }
+    echo "fetching from byte $off (attempt $n)" >&2
+    wc -c < /tmp/cnt > /tmp/n &
+    ( curl -sfL --connect-timeout 20 -C "$off" "$SNAPSHOT_URL"; echo $? > /tmp/rc ) | tee /tmp/cnt || return 1
+    wait
+    rc=$(cat /tmp/rc)
+    off=$((off + $(cat /tmp/n)))
+    case "$rc" in
+      0) ;;
+      22|33) echo "fatal curl error $rc at byte $off" >&2; return 1 ;;
+      *) echo "stream broke (curl $rc) at byte $off, resuming" >&2; sleep 5 ;;
+    esac
+  done
+}
+stream | tar -I zstd -xf - -C "__DATA_DIR__"
+touch /tmp/finished
+tail -f /dev/null
+"""
+
+
 def shadowfork_prep(
     plan,
     network_params,
@@ -104,26 +147,15 @@ def shadowfork_prep(
             config=ServiceConfig(
                 image="alpine:3.19.1",
                 cmd=[
-                    "apk add --no-cache curl tar zstd && "
-                    + "BLOCK_HEIGHT=$(cat /shared/block_height.txt) && "
-                    + 'echo "Using block height: $BLOCK_HEIGHT" && '
-                    + 'SNAPSHOT_URL="'
-                    + network_params.network_sync_base_url
-                    + base_network
-                    + "/"
-                    + el_type
-                    + '/$BLOCK_HEIGHT/snapshot.tar.zst" && '
-                    + "for attempt in 1 2 3; do "
-                    + 'echo "Downloading snapshot (attempt $attempt)" && '
-                    + 'curl -f -s -L "$SNAPSHOT_URL"'
-                    + " | tar -I zstd -xf - -C /data/"
-                    + el_type
-                    + "/execution-data"
-                    + " && touch /tmp/finished && break || "
-                    + '{ echo "snapshot download failed (attempt $attempt)"; sleep 5; }; '
-                    + "done"
-                    + " && test -f /tmp/finished"
-                    + " && tail -f /dev/null"
+                    SNAPSHOT_DOWNLOAD_SCRIPT.replace(
+                        "__SNAPSHOT_BASE__",
+                        network_params.network_sync_base_url
+                        + base_network
+                        + "/"
+                        + el_type,
+                    )
+                    .replace("__DATA_DIR__", "/data/" + el_type + "/execution-data")
+                    .replace("__MAX_ATTEMPTS__", str(SNAPSHOT_DOWNLOAD_MAX_ATTEMPTS))
                 ],
                 entrypoint=["/bin/sh", "-c"],
                 files={
@@ -156,6 +188,6 @@ def shadowfork_prep(
             assertion="==",
             target_value=0,
             interval="1s",
-            timeout="6h",  # 6 hours should be enough for the biggest network
+            timeout="24h",  # mainnet erigon+reth (370 GB + 815 GB) share one uplink; 6h was not enough
         )
     return latest_block, network_id
