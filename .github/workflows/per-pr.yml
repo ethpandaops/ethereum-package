@@ -18,6 +18,7 @@ jobs:
             "./.github/tests/mix-persistence.yaml",
             "./.github/tests/mix-public.yaml",
             "./.github/tests/minimal.yaml",
+            "./.github/tests/crysm-basic.yaml",
             "./network_params.yaml",
             "."
           ]

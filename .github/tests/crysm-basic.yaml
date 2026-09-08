@@ -1,0 +1,30 @@
+participants:
+  - el_type: geth
+    el_image: ethpandaops/geth:glamsterdam-devnet-8
+    cl_type: crysm
+    use_separate_vc: false
+    validator_count: 128
+
+network_params:
+  gloas_fork_epoch: 0
+  preset: mainnet
+  bpo_1_epoch: 0
+  bpo_2_epoch: 0
+
+additional_services:
+  - dora
+
+dora_params:
+  image: ethpandaops/dora:master
+
+ethereum_genesis_generator_params:
+  image: ethpandaops/ethereum-genesis-generator:6.2.0
+
+global_log_level: debug
+snooper_enabled: true
+
+port_publisher:
+  cl:
+    enabled: true
+  additional_services:
+    enabled: true
