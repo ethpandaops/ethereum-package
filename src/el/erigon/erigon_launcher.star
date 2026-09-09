@@ -176,6 +176,11 @@ def get_config(
 
     el_shared.mount_el_binary_artifact(files, el_binary_artifact)
 
+    # A pre-populated DB already holds the genesis block; `erigon init`
+    # would compute a different hash from alloc and refuse the datadir.
+    if participant.el_pre_populated_db:
+        init_datadir_cmd_str = "true"
+
     # Build command with optional binary copy
     cmd_str = " ".join(cmd)
     if network_params.network not in constants.PUBLIC_NETWORKS:

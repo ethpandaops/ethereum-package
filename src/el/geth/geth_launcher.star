@@ -108,11 +108,15 @@ def get_config(
             if network_params.network in constants.PUBLIC_NETWORKS
             else ""
         ),
+        # A pre-populated DB carries its own chain config; the override would
+        # recompute the genesis from alloc and fail with "database contains
+        # incompatible genesis".
         "{0}".format(
             "--override.genesis={0}".format(
                 constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER
             )
             if network_params.network not in constants.PUBLIC_NETWORKS
+            and not participant.el_pre_populated_db
             else ""
         ),
         "--verbosity=" + log_level,
