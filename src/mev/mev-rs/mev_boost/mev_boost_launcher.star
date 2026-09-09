@@ -21,6 +21,15 @@ MIN_MEMORY = 16
 MAX_MEMORY = 256
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch(
     plan,
     mev_boost_launcher,
@@ -33,6 +42,7 @@ def launch(
     index,
     global_node_selectors,
     global_tolerations,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -77,6 +87,10 @@ def launch(
         MEV_BOOST_MOUNT_DIRPATH_ON_SERVICE, MEV_BOOST_CONFIG_FILENAME
     )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
+
     config = get_config(
         mev_boost_launcher,
         image,
@@ -87,6 +101,7 @@ def launch(
         tolerations,
         public_ports,
         index,
+        log_level,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
@@ -106,11 +121,13 @@ def get_config(
     tolerations,
     public_ports,
     participant_index,
+    log_level,
 ):
     return ServiceConfig(
         image=image,
         ports=USED_PORTS,
         public_ports=public_ports,
+        env_vars={"RUST_LOG": log_level},
         cmd=[
             "boost",
             config_file_path,

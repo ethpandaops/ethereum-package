@@ -11,7 +11,7 @@ url = "{{ $relay }}"
 {{- end }}
 
 [logs.stdout]
-level = "debug"
+level = "{{ .LogLevel }}"
 
 [logs.file]
 enabled=false

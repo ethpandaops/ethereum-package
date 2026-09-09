@@ -197,6 +197,7 @@ def launch_participant_network(
             # Index past the remaining additional services so public ports don't collide
             len(args_with_right_defaults.additional_services),
             backend,
+            args_with_right_defaults.global_log_level,
         )
         plan.print("Bootnodoor launched with CL ENR: {0}".format(bootnodoor_enr))
         plan.print("Bootnodoor launched with ENODE: {0}".format(bootnodoor_enode))
@@ -312,6 +313,7 @@ def launch_participant_network(
                 config.participant,
                 config.blobber_config.node_selectors,
                 global_tolerations,
+                args_with_right_defaults.global_log_level,
             )
 
             # Store the blobber URL mapping
@@ -437,6 +439,7 @@ def launch_participant_network(
                 pair_name,
                 node_selectors,
                 global_tolerations,
+                args_with_right_defaults.global_log_level,
             )
             plan.print(
                 "Successfully added {0} xatu sentry participants".format(
@@ -463,6 +466,7 @@ def launch_participant_network(
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
                 args_with_right_defaults.snooper_params,
+                args_with_right_defaults.global_log_level,
             )
             global_other_index += 1
             plan.print(
@@ -521,6 +525,7 @@ def launch_participant_network(
                 global_other_index,
                 args_with_right_defaults.docker_cache_params,
                 args_with_right_defaults.snooper_params,
+                args_with_right_defaults.global_log_level,
             )
             plan.print(
                 "Successfully added {0} snooper participants".format(
@@ -571,6 +576,7 @@ def launch_participant_network(
                 node_selectors=node_selectors,
                 port_publisher=args_with_right_defaults.port_publisher,
                 remote_signer_index=current_vc_index,
+                global_log_level=args_with_right_defaults.global_log_level,
             )
 
         all_remote_signer_contexts.append(remote_signer_context)

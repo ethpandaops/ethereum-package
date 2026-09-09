@@ -76,6 +76,23 @@ REDIS_MIN_MEMORY = 32
 REDIS_MAX_MEMORY = 1024
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "debug",
+}
+
+INDEXER_VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch_blobscan(
     plan,
     cl_contexts,
@@ -88,6 +105,7 @@ def launch_blobscan(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    global_log_level,
 ):
     node_selectors = global_node_selectors
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
@@ -124,6 +142,13 @@ def launch_blobscan(
         tolerations=tolerations,
     )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
+    indexer_log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, INDEXER_VERBOSITY_LEVELS
+    )
+
     api_config = get_api_config(
         network_id,
         postgres_output.url,
@@ -134,6 +159,7 @@ def launch_blobscan(
         port_publisher,
         additional_service_index,
         docker_cache_params,
+        log_level,
     )
     blobscan_config = plan.add_service(API_SERVICE_NAME, api_config)
 
@@ -152,6 +178,7 @@ def launch_blobscan(
         port_publisher,
         additional_service_index,
         docker_cache_params,
+        log_level,
     )
     plan.add_service(WEB_SERVICE_NAME, web_config)
 
@@ -163,6 +190,7 @@ def launch_blobscan(
         node_selectors,
         tolerations,
         docker_cache_params,
+        indexer_log_level,
     )
     plan.add_service(INDEXER_SERVICE_NAME, indexer_config)
 
@@ -177,6 +205,7 @@ def get_api_config(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    log_level,
 ):
     IMAGE_NAME = "blossomlabs/blobscan-api:latest"
 
@@ -195,6 +224,7 @@ def get_api_config(
         ports=API_PORTS,
         public_ports=public_ports,
         env_vars={
+            "LOG_LEVEL": log_level,
             "CHAIN_ID": network_id,
             "DATABASE_URL": postgres_url,
             "DIRECT_URL": postgres_url,
@@ -236,6 +266,7 @@ def get_web_config(
     port_publisher,
     additional_service_index,
     docker_cache_params,
+    log_level,
 ):
     # TODO: https://github.com/kurtosis-tech/kurtosis/issues/1861
     # Configure NEXT_PUBLIC_BEACON_BASE_URL and NEXT_PUBLIC_EXPLORER_BASE env vars
@@ -257,6 +288,7 @@ def get_web_config(
         ports=WEB_PORTS,
         public_ports=public_ports,
         env_vars={
+            "LOG_LEVEL": log_level,
             "DATABASE_URL": postgres_url,
             "DIRECT_URL": postgres_url,
             "NEXT_PUBLIC_NETWORK_NAME": network_name
@@ -282,6 +314,7 @@ def get_indexer_config(
     node_selectors,
     tolerations,
     docker_cache_params,
+    log_level,
 ):
     IMAGE_NAME = "blossomlabs/blobscan-indexer:master"
 
@@ -291,6 +324,7 @@ def get_indexer_config(
             IMAGE_NAME,
         ),
         env_vars={
+            "RUST_LOG": "blob_indexer={0}".format(log_level),
             "BEACON_NODE_ENDPOINT": beacon_node_rpc,
             "BLOBSCAN_API_ENDPOINT": blobscan_api_url,
             "EXECUTION_NODE_ENDPOINT": execution_node_rpc,

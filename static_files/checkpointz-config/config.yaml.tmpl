@@ -1,6 +1,6 @@
 global:
   listenAddr: ":5555"
-  logging: "info"
+  logging: "{{ .LogLevel }}"
   metricsAddr: ":9090"
 
 checkpointz:

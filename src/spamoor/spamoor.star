@@ -20,6 +20,15 @@ USED_PORTS = {
 }
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "info",
+    constants.GLOBAL_LOG_LEVEL.warn: "info",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch_spamoor(
     plan,
     config_template,
@@ -34,6 +43,7 @@ def launch_spamoor(
     port_publisher,
     additional_service_index,
     osaka_time,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -96,6 +106,10 @@ def launch_spamoor(
         template_and_data_by_rel_dest_filepath, "spamoor-config"
     )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        spamoor_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     config = get_config(
         plan,
         config_files_artifact_name,
@@ -106,6 +120,7 @@ def launch_spamoor(
         network_params,
         port_publisher,
         additional_service_index,
+        log_level,
     )
     plan.add_service(SERVICE_NAME, config)
 
@@ -120,6 +135,7 @@ def get_config(
     network_params,
     port_publisher,
     additional_service_index,
+    log_level,
 ):
     config_file_path = shared_utils.path_join(
         SPAMOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -136,6 +152,11 @@ def get_config(
         "--rpchost-file={}".format(hosts_file_path),
         "--startup-spammer={}".format(config_file_path),
     ]
+
+    if log_level == "debug":
+        cmd.append("--verbose")
+    elif log_level == "trace":
+        cmd.append("--trace")
 
     # Built-in spamoor defaults (by technical key) to auto-start on first launch.
     # start_chainload/start_fuzzing map to the built-in default groups; spamoor_params.defaults

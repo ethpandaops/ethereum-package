@@ -23,6 +23,15 @@ MIN_MEMORY = 16
 MAX_MEMORY = 256
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch_mev_relay(
     plan,
     mev_params,
@@ -33,6 +42,7 @@ def launch_mev_relay(
     index,
     global_node_selectors,
     global_tolerations,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     node_selectors = global_node_selectors
@@ -98,7 +108,12 @@ def launch_mev_relay(
             max_memory=MAX_MEMORY,
             node_selectors=node_selectors,
             tolerations=tolerations,
-            env_vars={"RUST_BACKTRACE": "1"},
+            env_vars={
+                "RUST_BACKTRACE": "1",
+                "RUST_LOG": input_parser.get_client_log_level_or_default(
+                    "", global_log_level, VERBOSITY_LEVELS
+                ),
+            },
         ),
     )
 
