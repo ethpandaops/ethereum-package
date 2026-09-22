@@ -9,10 +9,16 @@ input_parser = import_module("../package_io/input_parser.star")
 # the download resumes by byte offset instead of restarting: curl reports the
 # bytes it delivered (%{size_download}, on stderr so the stream stays clean) and
 # each retry continues exactly there. curl -C <offset> exits 33 rather than
-# restarting from zero if the server ignores the Range header, so a
-# non-ranging server fails loudly, not silently. A stream that stalls without
+# restarting from zero if the server answers a ranged request with a 200, and
+# writes no body on 33 or on an HTTP error (22), so those retry the SAME offset
+# (the edge in front of snapshots.ethpandaops.io did that once in ~40 resumes);
+# a server that never honours Range does it on EVERY resume, so ten in a row
+# ends the download with that reason instead of burning the attempt cap. A stream that stalls without
 # closing would hang forever (curl only times out the connect); under 1 KB/s for
 # 120 s -- zero progress, not a slow link -- curl exits 28 and the loop resumes.
+# A missing byte count (curl killed by a signal mid-transfer) is fatal on
+# purpose: the bytes it already handed to tar are unaccounted for, and resuming
+# at the old offset would replay them into the archive.
 SNAPSHOT_DOWNLOAD_MAX_ATTEMPTS = 500
 SNAPSHOT_DOWNLOAD_SCRIPT = r"""
 set -e
@@ -32,12 +38,21 @@ stream() {
     echo "fetching from byte $off (attempt $n)" >&2
     rc=0
     curl -sfL --connect-timeout 20 --speed-limit 1024 --speed-time 120 -C "$off" -w '%{stderr}%{size_download}' "$SNAPSHOT_URL" 2>/tmp/got || rc=$?
-    off=$((off + $(cat /tmp/got)))
-    case "$rc" in
-      0) ;;
-      22|33) echo "fatal curl error $rc at byte $off" >&2; return 1 ;;
-      *) echo "stream broke (curl $rc) at byte $off, resuming" >&2; sleep 5 ;;
+    got=$(cat /tmp/got)
+    case "$got" in
+      ''|*[!0-9]*) echo "curl exited $rc without a byte count ('$got') -- bytes already handed to tar are unaccounted for, refusing to resume" >&2; return 1 ;;
     esac
+    off=$((off + got))
+    if [ "$rc" -eq 0 ]; then
+      unranged=0
+    elif [ "$rc" -eq 33 ]; then
+      unranged=$((unranged + 1))
+      [ "$unranged" -ge 10 ] && { echo "server answered $unranged ranged requests with 200: no Range support, cannot resume" >&2; return 1; }
+    else
+      unranged=0
+      echo "stream broke (curl $rc) at byte $off, resuming" >&2
+      sleep 5
+    fi
   done
 }
 stream | tar -I zstd -xf - -C "__DATA_DIR__"
