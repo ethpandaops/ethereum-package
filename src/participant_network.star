@@ -364,6 +364,7 @@ def launch_participant_network(
         constants.CL_TYPE.prysm,
         constants.CL_TYPE.lodestar,
         constants.CL_TYPE.lighthouse,
+        constants.CL_TYPE.ethlambda,
     ]
 
     current_vc_index = 0

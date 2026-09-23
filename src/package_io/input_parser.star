@@ -26,6 +26,7 @@ DEFAULT_CL_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "consensoor": "ethpandaops/consensoor:main",
     "caplin": "ethpandaops/caplin:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_CL_IMAGES_MINIMAL = {
@@ -48,6 +49,7 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "ethlambda": "ghcr.io/lambdaclass/ethlambda:unstable",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -770,6 +772,20 @@ def input_parser(plan, input_args):
     ):
         fail(
             "First participant cannot have el_type=None without bootnodoor enabled. The first participant acts as the bootnode for the network. Either enable bootnodoor in additional_services or use a real EL client (geth, reth, nethermind, etc.) for the first participant."
+        )
+
+    # ethlambda does not expose its ENR over the beacon API, so on networks
+    # whose bootnode is the first participant nobody could bootstrap from it.
+    if (
+        "bootnodoor" not in result["additional_services"]
+        and result["participants"][0]["cl_type"] == constants.CL_TYPE.ethlambda
+        and (
+            result["network_params"]["network"] == constants.NETWORK_NAME.kurtosis
+            or constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]
+        )
+    ):
+        fail(
+            "First participant cannot have cl_type=ethlambda without bootnodoor enabled. The first participant acts as the bootnode for the network, and ethlambda does not report its ENR. Either enable bootnodoor in additional_services or move the ethlambda participant after another CL client."
         )
 
     if (
@@ -1541,6 +1557,17 @@ def parse_network_params(plan, input_args):
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
         remote_signer_type = participant["remote_signer_type"]
+
+        if constants.CL_TYPE.ethlambda in (cl_type, vc_type):
+            # The ethlambda binary is built with mainnet SSZ bounds and
+            # 32-slot epochs. An empty vc_type defaults to cl_type below, which
+            # this check already covers.
+            if result["network_params"]["preset"] != "mainnet":
+                fail(
+                    "ethlambda only supports the mainnet preset, got {0}".format(
+                        result["network_params"]["preset"]
+                    )
+                )
 
         if (
             cl_type in (constants.CL_TYPE.nimbus)

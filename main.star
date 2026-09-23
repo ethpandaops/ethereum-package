@@ -461,6 +461,13 @@ def run(plan, args={}):
                     + participant.cl_type
                     + "/node-key-file-{0}.json".format(index + 1)
                 )
+            elif participant.cl_type == constants.CL_TYPE.ethlambda:
+                # ethlambda reads the same plain-hex secp256k1 key as teku
+                raw_node_key = (
+                    static_files.PEERDAS_NODE_KEY_FILEPATH
+                    + constants.CL_TYPE.teku
+                    + "/node-key-file-{0}".format(index + 1)
+                )
             else:
                 raw_node_key = (
                     static_files.PEERDAS_NODE_KEY_FILEPATH

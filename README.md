@@ -373,7 +373,9 @@ participants:
 
   # CL(Consensus Layer) Specific flags
     # The type of CL client that should be started
-    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, and grandine
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, grandine and ethlambda
+    # ethlambda (mainnet preset only) cannot be the first participant unless bootnodoor is enabled,
+    # and its block production supports neither blob transactions nor sync committee aggregates yet
     cl_type: lighthouse
 
     # The Docker image that should be used for the CL client; leave blank to use the default for the client type
@@ -384,6 +386,7 @@ participants:
     # - prysm: ethpandaops/prysm-beacon-chain:develop
     # - lodestar: chainsafe/lodestar:latest
     # - grandine: sifrai/grandine:stable
+    # - ethlambda: ghcr.io/lambdaclass/ethlambda:unstable
     cl_image: ""
 
     # Path to a local CL binary to inject into the container (Docker only)
@@ -476,8 +479,9 @@ participants:
 
   # VC (Validator Client) Specific flags
     # The type of validator client that should be used
-    # Valid values are nimbus, lighthouse, lodestar, teku, prysm and vero
+    # Valid values are nimbus, lighthouse, lodestar, teku, prysm, vero and ethlambda
     # ( The prysm validator only works with a prysm CL client )
+    # ( The ethlambda validator needs the mainnet preset, and performs no sync committee duties )
     # Defaults to matching the chosen CL client (cl_type)
     vc_type: ""
 
@@ -489,6 +493,7 @@ participants:
     # - prysm: ethpandaops/prysm-validator:develop
     # - teku: ethpandaops/teku:master
     # - vero: ghcr.io/serenita-org/vero:latest
+    # - ethlambda: ghcr.io/lambdaclass/ethlambda:unstable
     vc_image: ""
 
     # Path to a local VC binary to inject into the container (Docker only)
@@ -572,7 +577,7 @@ participants:
     validator_count: null
 
     # Whether to use a remote signer instead of the vc directly handling keys
-    # Note Lighthouse VC does not support this flag
+    # Note Lighthouse and ethlambda VCs do not support this flag
     # Defaults to false
     use_remote_signer: false
 
