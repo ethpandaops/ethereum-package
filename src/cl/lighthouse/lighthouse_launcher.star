@@ -154,7 +154,14 @@ def get_beacon_config(
     ]
 
     if el_context != None:
-        cmd.append("--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT)
+        engine_endpoint_configured = any(
+            [
+                param.startswith("--execution-endpoint=")
+                for param in participant.cl_extra_params
+            ]
+        )
+        if not engine_endpoint_configured:
+            cmd.append("--execution-endpoints=" + EXECUTION_ENGINE_ENDPOINT)
         cmd.append("--jwt-secrets=" + constants.JWT_MOUNT_PATH_ON_CONTAINER)
         cmd.append("--suggested-fee-recipient=" + constants.VALIDATING_REWARDS_ACCOUNT)
 

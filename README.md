@@ -1267,38 +1267,34 @@ bootnodoor_params:
 
 # Configuration place for zkboost - https://github.com/eth-act/zkboost
 # The dashboard is automatically enabled when grafana is in additional_services.
+# Participant cl_extra_params:
+#   --execution-endpoint=http://<instance>:3000
+#     Sends the Engine API of the participant through that zkboost instance.
+#     Each instance needs exactly one such participant, which also sets --proof-engine.
+#   --proof-engine
+#     Enables the proof engine with the built-in verifier config of Lighthouse.
+#   --proof-engine=<path>
+#     Uses the verifier config at <path>. Add the file with extra_files and mount it with cl_extra_mounts.
 zkboost_params:
   # zkboost docker image to use
   # Defaults to the latest image
   image: "ghcr.io/eth-act/zkboost/zkboost:latest"
   # List of zkboost instances, each running a separate zkboost container.
-  # Each instance watches one EL participant for new blocks.
   #   name (required): Kurtosis service name, must be unique across instances
-  #   el_participant_index (required): index of the EL participant to connect to (must not be el_type=None)
-  # Defaults to a single instance named "zkboost" connected to the first EL participant.
+  #   zkvms: zkVM backend configurations of this instance (default: zkvms below)
+  # Defaults to a single instance named "zkboost".
   instances:
     - name: zkboost
-      el_participant_index: 0
   # List of zkVM backend configurations.
-  # If empty or not set, a mock reth-zisk zkvm is auto-configured with
-  # random timing scaled to slot duration. Each entry must have a unique proof_type.
+  # Each entry must have a unique proof_type. If empty, zkboost only proxies the Engine API.
   #
   # Common fields for all entries:
   #   kind (required): the zkVM backend type
-  #     "mock"     - in-process mock backend for testing, no real proving
-  #     "ere"      - launches a GPU ere-server and connects to it
-  #     "external" - connects to an already-deployed prover via HTTP
+  #     "ere"      - launches a GPU ere-server, or connects to endpoint if set
+  #     "cluster"  - connects to an already-deployed ZisK or OpenVM proving cluster
   #   proof_type (required): identifies the EL client + zkVM combination
   #     "ethrex-openvm", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-sp1", "reth-zisk"
   #   proof_timeout_secs: timeout for proof generation in seconds (default: 3/4 of slot duration, must be > 0)
-  #
-  # Mock-specific fields (only for kind: mock):
-  #   mock_proving_time: controls simulated proving duration
-  #     { kind: constant, ms: <ms> }                   - fixed duration (default: 2/3 of slot_duration_ms)
-  #     { kind: random, min_ms: <min>, max_ms: <max> } - uniformly random (defaults: min=1/3, max=4/3 of slot)
-  #     { kind: linear, ms_per_mgas: <ms> }            - proportional to block gas (default: 150 ms/Mgas)
-  #   mock_proof_size: simulated proof size in bytes, must be >= 32 (default: 131072 / 128 KiB)
-  #   mock_failure: whether to simulate proving failures (default: false)
   #
   # ere-specific fields (only for kind: ere):
   #   PREREQUISITE: Running an ere-server with GPU support requires the
@@ -1309,16 +1305,12 @@ zkboost_params:
   #     "default-runtime": "nvidia"
   #   and restart Docker.
   #
-  #   image (required): docker image for the ere-server
-  #   program_url: URL to download the EVM program binary (or use program_path for a path
-  #     already present in the image)
-  #   port: port the ere-server listens on (default 3000)
   #   image: docker image for the ere-server (default: resolved from zkboost's
   #     pinned ere version in its Cargo.toml)
   #   elf_url: HTTPS URL of the guest ELF to prove. ere-server fetches it
   #     itself at startup. (default: resolved from zkboost's pinned ere-guests
   #     version).
-  #   gpu: GPU configuration (default: no GPU)
+  #   gpu (required unless endpoint is set): GPU configuration
   #     count: number of GPUs to allocate (default 0)
   #         NOTE: if more than one ere service uses gpu.count, Docker will assign
   #         the same GPU(s) to all of them. Use gpu.device_ids instead when running
@@ -1326,8 +1318,8 @@ zkboost_params:
   #     device_ids: list of specific GPU device IDs to pin to this service (default [])
   #         Use this to assign distinct GPUs across multiple ere services
   #         (e.g. ["0"] for the first service and ["1"] for the second).
-  #     shm_size: shared memory size in MB (default 0)
-  #     ulimits: ulimit overrides as a map (default {})
+  #     shm_size: shared memory size in MB (default 0, or 32768 for ZisK)
+  #     ulimits: ulimit overrides as a map (default {}, or {memlock: -1} for ZisK)
   #     driver: GPU driver to use (default "nvidia")
   #         Accepts a string shorthand or a per-backend dict:
   #         - string: used directly as the Docker DeviceRequest driver; Kubernetes resource
@@ -1337,36 +1329,27 @@ zkboost_params:
   #         - dict: explicit per-backend override
   #           e.g. {docker: "amd", kubernetes: "amd.com/gpu"}
   #   env: extra environment variables as a map (default {})
+  #     Entries override the defaults RUST_LOG=info and, for ZisK, ERE_ZISK_SETUP_ON_INIT=1
+  #     and a RUST_LOG with the ZisK modules at warn.
+  #   endpoint: HTTP URL of a running ere-server. If set, nothing is launched.
   #
-  # external-specific fields (only for kind: external):
-  #   endpoint (required): full HTTP URL of the already-deployed prover
+  # cluster-specific fields (only for kind: cluster):
+  #   endpoint (required): endpoint of the running proving cluster
+  #   elf_url: HTTPS URL of the guest ELF (default: resolved from zkboost's pinned ere-guests version)
   #
   # example:
-  # - kind: mock
-  #   proof_type: ethrex-zisk
-  #   mock_proving_time: { kind: constant, ms: 5000 }
-  #   mock_proof_size: 1024
-  # - kind: mock
-  #   proof_type: reth-zisk
-  #   mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
-  # - kind: mock
-  #   proof_type: reth-sp1
-  #   mock_proving_time: { kind: linear, ms_per_mgas: 150 }
   # - kind: ere
   #   proof_type: reth-zisk
-  #   image: "ghcr.io/eth-act/ere/ere-server-zisk:latest"
-  #   elf_url: "https://github.com/eth-act/ere-guests/releases/download/v0.13.0/stateless-validator-reth-zisk.elf"
   #   gpu:
   #     count: 1
   #     driver: "nvidia"
-  # - kind: external
-  #   proof_type: reth-zisk
+  # - kind: ere
+  #   proof_type: ethrex-zisk
   #   endpoint: "http://my-prover:3000"
-  zkvms:
-    - kind: mock
-      proof_type: reth-zisk
-      mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
-      mock_proof_size: 1024
+  # - kind: cluster
+  #   proof_type: reth-openvm
+  #   endpoint: "http://openvm-cluster:3000"
+  zkvms: []
   # RUST_LOG defaults to "info,zkboost=debug" if not set; other vars pass through unchanged.
   env:
     RUST_LOG: "info,zkboost=debug"
