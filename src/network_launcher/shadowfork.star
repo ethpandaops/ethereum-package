@@ -4,40 +4,57 @@ input_parser = import_module("../package_io/input_parser.star")
 
 
 # The snapshot is streamed straight into tar so nothing but the extracted datadir
-# ever touches disk. A single curl cannot survive a dropped connection, and a
-# mainnet snapshot is a multi-hour, hundreds-of-GiB stream (erigon: 370 GB), so
-# the download resumes by byte offset instead of restarting: curl reports the
-# bytes it delivered (%{size_download}, on stderr so the stream stays clean) and
-# each retry continues exactly there. curl -C <offset> exits 33 rather than
-# restarting from zero if the server ignores the Range header, so a
-# non-ranging server fails loudly, not silently. A stream that stalls without
-# closing would hang forever (curl only times out the connect); under 1 KB/s for
-# 120 s -- zero progress, not a slow link -- curl exits 28 and the loop resumes.
+# ever touches disk. One stream from R2 through Cloudflare tops out ~95 MB/s, so the
+# archive is fetched as parallel ranged GETs and emitted in order (16 workers
+# measured 382 MB/s). At most 2 x workers chunks are staged in /tmp. Each chunk is
+# retried until it holds exactly its range, so a dropped connection costs one chunk,
+# not the stream. --max-filesize refuses a Range answered with 200 and the whole
+# body -- what a cold, cache-eligible object on Cloudflare returns -- before a byte
+# lands. The emitter's progress counter is renamed into place: a torn read is an
+# arithmetic error, which silently exits sh.
 SNAPSHOT_DOWNLOAD_MAX_ATTEMPTS = 500
+SNAPSHOT_DOWNLOAD_WORKERS = 16
+SNAPSHOT_DOWNLOAD_CHUNK_BYTES = 64 * 1024 * 1024
 SNAPSHOT_DOWNLOAD_SCRIPT = r"""
-set -e
+set -eu
 apk add --no-cache curl tar zstd
 BLOCK_HEIGHT=$(cat /shared/block_height.txt)
 echo "Using block height: $BLOCK_HEIGHT"
 SNAPSHOT_URL="__SNAPSHOT_BASE__/$BLOCK_HEIGHT/snapshot.tar.zst"
 TOTAL=$(curl -sfIL "$SNAPSHOT_URL" | tr -d '\r' | awk 'tolower($1)=="content-length:"{n=$2} END{print n}')
 [ -n "$TOTAL" ] || { echo "cannot read the snapshot size from $SNAPSHOT_URL"; exit 1; }
-echo "snapshot is $TOTAL bytes"
+P=__WORKERS__; C=__CHUNK__; N=$(( (TOTAL + C - 1) / C ))
+echo "snapshot is $TOTAL bytes: $N chunks, $P workers"
+T=$(mktemp -d); echo 0 > "$T/emitted"; PIDS=""
+trap 'kill $PIDS 2>/dev/null || true; rm -rf "$T"' EXIT INT TERM
+fetch() {
+  s=$(( $1 * C )); e=$(( s + C - 1 )); [ "$e" -lt "$TOTAL" ] || e=$(( TOTAL - 1 ))
+  want=$(( e - s + 1 )); tries=0
+  while :; do
+    curl -sf --connect-timeout 20 --speed-limit 1024 --speed-time 120 --max-filesize "$want" \
+      -r "$s-$e" -o "$T/$1.part" "$SNAPSHOT_URL" || true
+    [ "$(wc -c 2>/dev/null < "$T/$1.part" || echo 0)" -eq "$want" ] && { mv "$T/$1.part" "$T/$1"; return; }
+    tries=$(( tries + 1 ))
+    [ "$tries" -lt __MAX_ATTEMPTS__ ] || { echo "chunk $1 failed $tries times" >&2; touch "$T/failed"; return 1; }
+    echo "chunk $1 (byte $s) incomplete, retrying ($tries)" >&2; sleep 5
+  done
+}
+k=0
+while [ "$k" -lt "$P" ]; do
+  { ( i=$k
+    while [ "$i" -lt "$N" ]; do
+      while [ $(( i - $(cat "$T/emitted") )) -ge $(( 2 * P )) ]; do sleep 0.1; done
+      fetch "$i" || exit 1
+      i=$(( i + P ))
+    done ) || touch "$T/failed"; } &
+  PIDS="$PIDS $!"; k=$(( k + 1 ))
+done
 stream() {
-  off=0
-  n=0
-  while [ "$off" -lt "$TOTAL" ]; do
-    n=$((n + 1))
-    [ "$n" -gt __MAX_ATTEMPTS__ ] && { echo "giving up at byte $off after $n attempts" >&2; return 1; }
-    echo "fetching from byte $off (attempt $n)" >&2
-    rc=0
-    curl -sfL --connect-timeout 20 --speed-limit 1024 --speed-time 120 -C "$off" -w '%{stderr}%{size_download}' "$SNAPSHOT_URL" 2>/tmp/got || rc=$?
-    off=$((off + $(cat /tmp/got)))
-    case "$rc" in
-      0) ;;
-      22|33) echo "fatal curl error $rc at byte $off" >&2; return 1 ;;
-      *) echo "stream broke (curl $rc) at byte $off, resuming" >&2; sleep 5 ;;
-    esac
+  i=0
+  while [ "$i" -lt "$N" ]; do
+    while [ ! -f "$T/$i" ]; do [ ! -f "$T/failed" ] || return 1; sleep 0.05; done
+    cat "$T/$i"; rm -f "$T/$i"; i=$(( i + 1 ))
+    echo "$i" > "$T/emitted.tmp"; mv "$T/emitted.tmp" "$T/emitted"
   done
 }
 stream | tar -I zstd -xf - -C "__DATA_DIR__"
@@ -156,6 +173,8 @@ def shadowfork_prep(
                     )
                     .replace("__DATA_DIR__", "/data/" + el_type + "/execution-data")
                     .replace("__MAX_ATTEMPTS__", str(SNAPSHOT_DOWNLOAD_MAX_ATTEMPTS))
+                    .replace("__WORKERS__", str(SNAPSHOT_DOWNLOAD_WORKERS))
+                    .replace("__CHUNK__", str(SNAPSHOT_DOWNLOAD_CHUNK_BYTES))
                 ],
                 entrypoint=["/bin/sh", "-c"],
                 files={
