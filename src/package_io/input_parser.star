@@ -100,22 +100,18 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 
 
 def validate_slot_duration_schedule(network_params):
-    # EIP-8198 (quick slots). ethereum-genesis-generator only checks what it
-    # needs to render the config, so the spec rules are enforced here.
     eip8198_fork_epoch = network_params["eip8198_fork_epoch"]
     schedule = network_params["slot_duration_schedule"]
 
     if eip8198_fork_epoch != constants.FAR_FUTURE_EPOCH:
         if network_params["heze_fork_epoch"] > eip8198_fork_epoch:
             fail(
-                "eip8198_fork_epoch ({0}) is before heze_fork_epoch ({1}). EIP-8198 is built on Heze, so schedule it at an epoch >= heze_fork_epoch.".format(
+                "eip8198_fork_epoch ({0}) must be >= heze_fork_epoch ({1})".format(
                     eip8198_fork_epoch, network_params["heze_fork_epoch"]
                 )
             )
         if network_params["frames_enabled"]:
-            fail(
-                "eip8198_fork_epoch is set but frames_enabled disables the Heze fork on the CL side, which EIP-8198 is built on."
-            )
+            fail("eip8198_fork_epoch can't be combined with frames_enabled")
 
     previous_epoch = 0
     for index, entry in enumerate(schedule):
@@ -124,7 +120,7 @@ def validate_slot_duration_schedule(network_params):
             "slot_duration_ms",
         ]:
             fail(
-                "slot_duration_schedule entries must be objects with exactly 'epoch' and 'slot_duration_ms' keys, got: {0}".format(
+                "slot_duration_schedule entries need exactly 'epoch' and 'slot_duration_ms', got: {0}".format(
                     entry
                 )
             )
@@ -136,19 +132,19 @@ def validate_slot_duration_schedule(network_params):
             )
         if entry["slot_duration_ms"] <= 0 or entry["slot_duration_ms"] % 1000 != 0:
             fail(
-                "slot_duration_schedule entry at epoch {0} has slot_duration_ms {1}. EIP-8198 requires a positive multiple of 1000, so every slot starts on a whole second.".format(
+                "slot_duration_schedule: slot_duration_ms must be a positive multiple of 1000, got {1} at epoch {0}".format(
                     entry["epoch"], entry["slot_duration_ms"]
                 )
             )
         if entry["epoch"] <= previous_epoch:
             fail(
-                "slot_duration_schedule epochs must be > 0 and strictly increasing (the genesis entry is derived from slot_duration_ms), got epoch {0} after {1}.".format(
+                "slot_duration_schedule: epochs must be > 0 and strictly increasing, got {0} after {1}".format(
                     entry["epoch"], previous_epoch
                 )
             )
         if index == 0 and entry["epoch"] != eip8198_fork_epoch:
             fail(
-                "The first slot_duration_schedule entry is at epoch {0}, but eip8198_fork_epoch is {1}. EIP-8198 only allows slot duration changes at network upgrades, so the first change must activate with the EIP-8198 fork.".format(
+                "slot_duration_schedule: first entry must be at eip8198_fork_epoch ({1}), got {0}".format(
                     entry["epoch"], eip8198_fork_epoch
                 )
             )

@@ -953,8 +953,7 @@ network_params:
   # Defaults to false
   frames_enabled: false
 
-  # EIP-8198 (quick slots) fork epoch
-  # Built on Heze: must be >= heze_fork_epoch, and can't be combined with frames_enabled
+  # EIP-8198 (quick slots) fork epoch, must be >= heze_fork_epoch
   # Defaults to 18446744073709551615
   eip8198_fork_epoch: 18446744073709551615
 
@@ -1031,16 +1030,9 @@ network_params:
   #     gas_limit: 150000000
   gas_limit_schedule: []
 
-  # Slot duration schedule per EIP-8198 (quick slots)
-  # Slot duration changes after genesis, written to the CL config.yaml as
-  # SLOT_DURATION_SCHEDULE. The genesis entry (epoch 0) is always derived from
-  # slot_duration_ms, so only list later changes here.
-  # Rules:
-  #   - slot_duration_ms must be a positive multiple of 1000
-  #   - epochs must be > 0 and strictly increasing
-  #   - the first entry must be at eip8198_fork_epoch
-  # EL fork and BPO timestamps after a change account for the new slot duration.
-  # Defaults to [] (no slot duration change)
+  # EIP-8198 slot duration changes after genesis (epoch 0 uses slot_duration_ms)
+  # The first entry must be at eip8198_fork_epoch
+  # Defaults to []
   # Example:
   # slot_duration_schedule:
   #   - epoch: 256
