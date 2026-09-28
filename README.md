@@ -1096,12 +1096,6 @@ network_params:
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
 
-  # EIP-8198 blob data retention window in milliseconds. Replaces
-  # min_epochs_for_data_column_sidecars_requests after EIP-8198, keeping the same
-  # wall-clock duration when slots get shorter.
-  # Default to 1572864000 (~18 days) for mainnet preset, 196608000 (~2.3 days) for minimal
-  min_blob_data_retention_ms: 1572864000
-
   # Number of ePBS builders to register at genesis with 0xB0 withdrawal credentials
   # Requires gloas_fork_epoch to be 0 (GLOAS at genesis)
   # Default to 0

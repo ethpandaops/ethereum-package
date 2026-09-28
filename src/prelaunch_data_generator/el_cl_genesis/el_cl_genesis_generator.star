@@ -237,7 +237,6 @@ def new_env_file_for_el_cl_genesis_data(
         if network_params.builder_balance > 0
         else 0,
         "MinEpochsForDataColumnSidecarsRequests": network_params.min_epochs_for_data_column_sidecars_requests,
-        "MinBlobDataRetentionMs": network_params.min_blob_data_retention_ms,
         "ExtraEnvVars": extra_env_safe,
     }
 

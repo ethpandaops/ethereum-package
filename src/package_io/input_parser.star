@@ -1088,9 +1088,6 @@ def input_parser(plan, input_args):
             min_epochs_for_data_column_sidecars_requests=result["network_params"][
                 "min_epochs_for_data_column_sidecars_requests"
             ],
-            min_blob_data_retention_ms=result["network_params"][
-                "min_blob_data_retention_ms"
-            ],
         ),
         mev_params=(
             struct(
@@ -2058,8 +2055,6 @@ def default_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
-        # 2**12 * 32 * 12,000 ms, ~18 days
-        "min_blob_data_retention_ms": 1572864000,
         "builder_count": 0,
         "builder_balance": 100,
         "builder_keys_mnemonic": constants.DEFAULT_BUILDER_MNEMONIC,
@@ -2151,8 +2146,6 @@ def default_minimal_network_params():
         "withdrawal_address": "0x8943545177806ED17B9F23F0a21ee5948eCaa776",
         "validator_balance": 32,
         "min_epochs_for_data_column_sidecars_requests": 4096,
-        # 2**12 * 8 * 6,000 ms, ~2.3 days
-        "min_blob_data_retention_ms": 196608000,
         "builder_count": 0,
         "builder_balance": 100,
         "builder_keys_mnemonic": constants.DEFAULT_BUILDER_MNEMONIC,

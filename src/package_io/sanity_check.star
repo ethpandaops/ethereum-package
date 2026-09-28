@@ -298,7 +298,6 @@ SUBCATEGORY_PARAMS = {
         "withdrawal_address",
         "validator_balance",
         "min_epochs_for_data_column_sidecars_requests",
-        "min_blob_data_retention_ms",
         "builder_count",
         "builder_balance",
         "builder_keys_mnemonic",
