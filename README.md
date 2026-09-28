@@ -953,6 +953,11 @@ network_params:
   # Defaults to false
   frames_enabled: false
 
+  # EIP-8198 (quick slots) fork epoch
+  # Built on Heze: must be >= heze_fork_epoch, and can't be combined with frames_enabled
+  # Defaults to 18446744073709551615
+  eip8198_fork_epoch: 18446744073709551615
+
 
   # Preset for the network
   # Default: "mainnet"
@@ -1026,6 +1031,22 @@ network_params:
   #     gas_limit: 150000000
   gas_limit_schedule: []
 
+  # Slot duration schedule per EIP-8198 (quick slots)
+  # Slot duration changes after genesis, written to the CL config.yaml as
+  # SLOT_DURATION_SCHEDULE. The genesis entry (epoch 0) is always derived from
+  # slot_duration_ms, so only list later changes here.
+  # Rules:
+  #   - slot_duration_ms must be a positive multiple of 1000
+  #   - epochs must be > 0 and strictly increasing
+  #   - the first entry must be at eip8198_fork_epoch
+  # EL fork and BPO timestamps after a change account for the new slot duration.
+  # Defaults to [] (no slot duration change)
+  # Example:
+  # slot_duration_schedule:
+  #   - epoch: 256
+  #     slot_duration_ms: 10000
+  slot_duration_schedule: []
+
 
   # BPO
   # BPO1-5 epoch (default 0/18446744073709551615)
@@ -1074,6 +1095,12 @@ network_params:
   # Minimum number of epochs for data column sidecars requests
   # Default to 4096
   min_epochs_for_data_column_sidecars_requests: 4096
+
+  # EIP-8198 blob data retention window in milliseconds. Replaces
+  # min_epochs_for_data_column_sidecars_requests after EIP-8198, keeping the same
+  # wall-clock duration when slots get shorter.
+  # Default to 1572864000 (~18 days) for mainnet preset, 196608000 (~2.3 days) for minimal
+  min_blob_data_retention_ms: 1572864000
 
   # Number of ePBS builders to register at genesis with 0xB0 withdrawal credentials
   # Requires gloas_fork_epoch to be 0 (GLOAS at genesis)
@@ -1847,7 +1874,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.2.1
+  image: ethpandaops/ethereum-genesis-generator:6.2.2
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
