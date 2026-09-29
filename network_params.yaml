@@ -114,6 +114,8 @@ network_params:
   fulu_fork_epoch: 0
   gloas_fork_epoch: 18446744073709551615
   frames_enabled: false
+  eip8198_fork_epoch: 18446744073709551615
+  slot_duration_schedule: []
   network_sync_base_url: https://snapshots.ethpandaops.io/
   force_snapshot_sync: false
   samples_per_slot: 8
@@ -272,7 +274,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:6.2.1
+  image: ethpandaops/ethereum-genesis-generator:fix-slot-schedule-passthrough
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER
