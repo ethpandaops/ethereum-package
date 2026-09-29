@@ -17,6 +17,15 @@ MIN_MEMORY = 10
 MAX_MEMORY = 600
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "info",
+    constants.GLOBAL_LOG_LEVEL.warn: "info",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "debug",
+}
+
+
 def launch_snooper(
     plan,
     service_name,
@@ -27,6 +36,7 @@ def launch_snooper(
     global_other_index,
     docker_cache_params,
     snooper_params,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -57,6 +67,10 @@ def launch_snooper(
             0,
         )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        snooper_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     snooper_config = get_config(
         service_name,
         el_context,
@@ -66,6 +80,7 @@ def launch_snooper(
         snooper_used_ports,
         public_ports,
         snooper_params,
+        log_level,
     )
 
     snooper_service = plan.add_service(snooper_service_name, snooper_config)
@@ -86,6 +101,7 @@ def get_config(
     snooper_used_ports,
     public_ports,
     snooper_params,
+    log_level,
 ):
     image = (
         snooper_params.image
@@ -115,6 +131,8 @@ def get_config(
     env_vars = (
         dict(snooper_params.extra_env_vars) if snooper_params.extra_env_vars else {}
     )
+    if log_level == "debug" and "SNOOPER_VERBOSE" not in env_vars:
+        env_vars["SNOOPER_VERBOSE"] = "true"
 
     return ServiceConfig(
         image=shared_utils.docker_cache_image_calc(docker_cache_params, image),

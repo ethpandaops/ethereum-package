@@ -1,5 +1,6 @@
 constants = import_module("../../package_io/constants.star")
 shared_utils = import_module("../../shared_utils/shared_utils.star")
+input_parser = import_module("../../package_io/input_parser.star")
 
 BUILDOOR_SERVICE_NAME = constants.BUILDOOR_SERVICE_NAME
 BUILDOOR_API_PORT = constants.BUILDOOR_API_PORT
@@ -13,6 +14,15 @@ MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 128
 MAX_MEMORY = 1024
+
+
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "debug",
+}
 
 
 def launch_buildoor(
@@ -31,6 +41,7 @@ def launch_buildoor(
     service_name=BUILDOOR_SERVICE_NAME,
     extra_data=None,
     image=None,
+    global_log_level=constants.GLOBAL_LOG_LEVEL.info,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -95,6 +106,13 @@ def launch_buildoor(
             )
         )
 
+    cmd.append(
+        "--log-level={0}".format(
+            input_parser.get_client_log_level_or_default(
+                buildoor_params.log_level, global_log_level, VERBOSITY_LEVELS
+            )
+        )
+    )
     cmd += buildoor_params.extra_args
 
     files = {

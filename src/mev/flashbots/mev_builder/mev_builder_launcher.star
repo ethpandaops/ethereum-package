@@ -15,6 +15,15 @@ MEV_FILE_PATH_ON_CONTAINER = (
 )
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info,rbuilder=debug",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def new_builder_config(
     plan,
     mev_type,
@@ -24,6 +33,7 @@ def new_builder_config(
     mev_params,
     participants,
     global_node_selectors,
+    global_log_level,
 ):
     num_of_participants = shared_utils.zfill_custom(
         len(participants), len(str(len(participants)))
@@ -39,6 +49,9 @@ def new_builder_config(
         mev_params.mev_builder_subsidy,
         mev_type,
         mev_params.run_multiple_relays,
+        input_parser.get_client_log_level_or_default(
+            "", global_log_level, VERBOSITY_LEVELS
+        ),
     )
     flashbots_builder_config_template = read_file(
         static_files.FLASHBOTS_RBUILDER_CONFIG_FILEPATH
@@ -75,6 +88,7 @@ def new_builder_config_template_data(
     subsidy,
     mev_type,
     run_multiple_relays=False,
+    log_level="info,rbuilder=debug",
 ):
     # Build the list of relays based on configuration
     relays = []
@@ -120,6 +134,7 @@ def new_builder_config_template_data(
     enabled_relays = ", ".join(['"{}"'.format(r["Name"]) for r in relays])
 
     return {
+        "LogLevel": log_level,
         "Network": network_params.network
         if network_params.network in constants.PUBLIC_NETWORKS
         else constants.GENESIS_JSON_MOUNT_PATH_ON_CONTAINER,

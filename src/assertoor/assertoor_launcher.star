@@ -30,6 +30,15 @@ USED_PORTS = {
 }
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "info",
+    constants.GLOBAL_LOG_LEVEL.warn: "info",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "debug",
+}
+
+
 def launch_assertoor(
     plan,
     config_template,
@@ -42,6 +51,7 @@ def launch_assertoor(
     global_node_selectors,
     global_tolerations,
     docker_cache_params,
+    global_log_level,
 ):
     all_client_info = []
     clients_with_validators = []
@@ -110,6 +120,10 @@ def launch_assertoor(
         static_files.ASSERTOOR_TESTS_CONFIG_DIRPATH, name="assertoor-tests"
     )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        assertoor_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     config = get_config(
         config_files_artifact_name,
         tests_config_artifacts_name,
@@ -119,6 +133,7 @@ def launch_assertoor(
         global_node_selectors,
         tolerations,
         docker_cache_params,
+        log_level,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -133,6 +148,7 @@ def get_config(
     node_selectors,
     tolerations,
     docker_cache_params,
+    log_level,
 ):
     config_file_path = shared_utils.path_join(
         ASSERTOOR_CONFIG_MOUNT_DIRPATH_ON_SERVICE,
@@ -140,6 +156,10 @@ def get_config(
     )
 
     IMAGE_NAME = assertoor_params.image
+
+    cmd = ["--config", config_file_path]
+    if log_level == "debug":
+        cmd.append("--verbose")
 
     return ServiceConfig(
         image=IMAGE_NAME,
@@ -150,7 +170,7 @@ def get_config(
             ASSERTOOR_TESTS_MOUNT_DIRPATH_ON_SERVICE: tests_config_artifacts_name,
             VALIDATOR_RANGES_MOUNT_DIRPATH_ON_SERVICE: VALIDATOR_RANGES_ARTIFACT_NAME,
         },
-        cmd=["--config", config_file_path],
+        cmd=cmd,
         min_cpu=MIN_CPU,
         max_cpu=MAX_CPU,
         min_memory=MIN_MEMORY,

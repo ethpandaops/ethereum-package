@@ -1,4 +1,4 @@
-logging: "debug"
+logging: "{{ .LogLevel }}"
 metricsAddr: ":{{ .MetricsPort }}"
 
 name: "{{ .BeaconNodeName }}"

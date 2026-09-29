@@ -33,6 +33,15 @@ MIN_MEMORY = 128
 MAX_MEMORY = 1024
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_LOG_LEVEL.warn: "WARN",
+    constants.GLOBAL_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+}
+
+
 def launch(
     plan,
     launcher,
@@ -47,7 +56,11 @@ def launch(
     node_selectors,
     port_publisher,
     remote_signer_index,
+    global_log_level,
 ):
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
     tolerations = shared_utils.get_tolerations(
         specific_container_tolerations=participant.remote_signer_tolerations,
         participant_tolerations=participant.tolerations,
@@ -64,6 +77,7 @@ def launch(
         node_selectors=node_selectors,
         port_publisher=port_publisher,
         remote_signer_index=remote_signer_index,
+        log_level=log_level,
     )
 
     remote_signer_service = plan.add_service(service_name, config)
@@ -101,6 +115,7 @@ def get_config(
     node_selectors,
     port_publisher,
     remote_signer_index,
+    log_level,
 ):
     validator_keys_dirpath = ""
     if node_keystore_files != None:
@@ -120,6 +135,7 @@ def get_config(
         "--metrics-host-allowlist=*",
         "--metrics-host=0.0.0.0",
         "--metrics-port={0}".format(REMOTE_SIGNER_METRICS_PORT_NUM),
+        "--logging={0}".format(log_level),
         "eth2",
         "--network="
         + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
