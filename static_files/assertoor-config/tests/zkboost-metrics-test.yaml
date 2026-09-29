@@ -14,6 +14,73 @@ tasks:
     timeout: 2h
     config:
       tasks:
+        - name: check_http_json
+          title: "zkboost-1: health check"
+          timeout: 5m
+          config:
+            url: http://zkboost-1:3000/health
+            pollInterval: 10s
+            assertions: []
+
+        - name: check_http_json
+          title: "zkboost-1: dashboard state"
+          timeout: 5m
+          config:
+            url: http://zkboost-1:3000/dashboard/state
+            pollInterval: 10s
+            assertions:
+              - name: has_build_version
+                query: '.buildVersion'
+                exists: true
+              - name: version_format
+                query: '.buildVersion'
+                operator: contains
+                value: "."
+              - name: has_reth_zisk_configured
+                query: '.proofTypes[] | select(. == "reth-zisk")'
+                exists: true
+              - name: has_ethrex_zisk_configured
+                query: '.proofTypes[] | select(. == "ethrex-zisk")'
+                exists: true
+              - name: retention_configured
+                query: '.retention'
+                operator: gt
+                value: 0
+
+        - name: check_http_json
+          title: "zkboost-1: wait for successful reth-zisk proof"
+          timeout: 2h
+          config:
+            url: http://zkboost-1:3000/dashboard/state
+            pollInterval: 30s
+            assertions:
+              - name: has_blocks
+                query: '.historicalBlocks | length'
+                operator: gte
+                value: 1
+              - name: proof_succeeded
+                query: >-
+                  any(.historicalBlocks[]; .proofs["reth-zisk"].result == "success")
+                operator: eq
+                value: true
+
+        - name: check_http_json
+          title: "zkboost-1: wait for successful ethrex-zisk proof"
+          timeout: 2h
+          config:
+            url: http://zkboost-1:3000/dashboard/state
+            pollInterval: 30s
+            assertions:
+              - name: has_blocks
+                query: '.historicalBlocks | length'
+                operator: gte
+                value: 1
+              - name: proof_succeeded
+                query: >-
+                  any(.historicalBlocks[]; .proofs["ethrex-zisk"].result == "success")
+                operator: eq
+                value: true
+
         - name: check_http_metrics
           title: "Check reth-zisk prover metrics"
           timeout: 2h
@@ -28,6 +95,14 @@ tasks:
             assertions:
               - name: reth-zisk prove success increased
                 metric: zkboost_prove_total
+                labels:
+                  proof_type: reth-zisk
+                  status: success
+                mode: delta
+                operator: gt
+                value: 0
+              - name: reth-zisk submission success increased
+                metric: zkboost_submission_total
                 labels:
                   proof_type: reth-zisk
                   status: success
@@ -52,6 +127,45 @@ tasks:
                 labels:
                   proof_type: ethrex-zisk
                   status: success
+                mode: delta
+                operator: gt
+                value: 0
+              - name: ethrex-zisk submission success increased
+                metric: zkboost_submission_total
+                labels:
+                  proof_type: ethrex-zisk
+                  status: success
+                mode: delta
+                operator: gt
+                value: 0
+
+        - name: check_http_metrics
+          title: "Check proof-only CL verification metrics"
+          timeout: 2h
+          config:
+            url: http://cl-3-lighthouse:5054/metrics
+            pollInterval: 30s
+            requestTimeout: 5s
+            maxResponseSize: 10MB
+            missingMetric: wait
+            missingSeries: wait
+            resetBehavior: fail
+            assertions:
+              - name: reth-zisk verification accepted increased
+                metric: beacon_execution_proof_verification_total
+                labels:
+                  proof_type: RethZisk
+                  outcome: accepted
+                  reason: valid
+                mode: delta
+                operator: gt
+                value: 0
+              - name: ethrex-zisk verification accepted increased
+                metric: beacon_execution_proof_verification_total
+                labels:
+                  proof_type: EthrexZisk
+                  outcome: accepted
+                  reason: valid
                 mode: delta
                 operator: gt
                 value: 0
