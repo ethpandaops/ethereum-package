@@ -1,0 +1,90 @@
+# EIP-8025 testnet with zkboost backed by a single GPU OpenVM prover of the mock guest.
+#
+#
+# Run with:
+#   kurtosis run --enclave eip8025-zkboost-1gpu \
+#       . \
+#       --args-file .github/tests/examples/1gpu_zkvm_with_mock_guest.yaml
+#
+# Prerequisites:
+#   - NVIDIA GPU with drivers installed
+#   - NVIDIA Container Toolkit configured for Docker
+
+participants:
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:unstable-afadb9a
+    el_type: reth
+    el_image: ethpandaops/reth:glamsterdam-devnet-8-7fddea4
+    supernode: true
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: geth
+    el_image: ethpandaops/geth:glamsterdam-devnet-8-aa1f2fc
+    cl_extra_params:
+      - --target-peers=3
+      - --execution-endpoint=http://zkboost-1:3000
+      - --proof-engine=/config/proof-engine.json
+    cl_extra_mounts:
+      /config: proof-engine.json
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: None
+    supernode: false
+    validator_count: 0
+    cl_extra_params:
+      - --target-peers=3
+      - --proof-engine=/config/proof-engine.json
+    cl_extra_mounts:
+      /config: proof-engine.json
+
+network_params:
+  gloas_fork_epoch: 0
+  genesis_delay: 300
+
+extra_files:
+  proof-engine.json: |
+    {
+      "execution_proofs": [
+        { "proof_type": 1, "program_vk": "0x007d459a5d00d50024610006803b44007be4a74b00cf3eb75300f59e9357003507f72600d510c03f06030619068000a2c21b53000a2fee4f0036169c2800aaaa8d6c0087fbce5b00328dc26f009fe7de5a004686562400e77e894500a128f20f00674f7c2400b38df01800309c530900a487cf0400725bac510051af497500e4abff6e00a58ac939000775b41a001a76e84100c5e8944400c94e8e1600330e6b39001cacbc5a00ca47cd51001b418e02000fe02a480009a32070002554164500d7069403007d07bf3000290ccf21008726523b00e5fd1112003d03bd4c001c6831680016a3fe4200ad7ec6300028529e3c005710de1700349b6a77004b13962f00cff00054001483f65100ab05ce6b0034174b6000bc041c0900a9b5a11a00b26f160300615de46100935f922800d39e4a2700596ea87000ca5764770023df7b57000b1ee85e004c456d61000bdad13b003de28a5f008584cc2a00033ab1020025f59e4a00c3a9f64a00b8ef166500" },
+        { "proof_type": 4, "program_vk": "0x007d459a5d00d50024610006803b44007be4a74b00cf3eb75300f59e9357003507f72600d510c03f06030619068000a2c21b53000a2fee4f0036169c2800aaaa8d6c0087fbce5b00328dc26f009fe7de5a004686562400e77e894500a128f20f00674f7c2400b38df01800309c530900a487cf0400725bac510051af497500e4abff6e00a58ac939000775b41a001a76e84100c5e8944400c94e8e1600330e6b39001cacbc5a00ca47cd51001b418e02000fe02a480009a32070002554164500d7069403007d07bf3000290ccf21008726523b00e5fd1112003d03bd4c001c6831680016a3fe4200ad7ec6300028529e3c005710de1700349b6a77004b13962f00cff00054001483f65100ab05ce6b0034174b6000bc041c0900a9b5a11a00b26f160300615de46100935f922800d39e4a2700596ea87000ca5764770023df7b57000b1ee85e004c456d61000bdad13b003de28a5f008584cc2a00033ab1020025f59e4a00c3a9f64a00b8ef166500" }
+      ]
+    }
+
+additional_services:
+  - zkboost
+  - dora
+  - prometheus
+  - grafana
+  - tempo
+  - spamoor
+
+spamoor_params:
+  spammers:
+    - name: "Blob Spammer (Kurtosis Package)"
+      scenario: "blobs"
+      config:
+        throughput: 1
+    - name: "ERC txs"
+      scenario: "erctx"
+      config:
+        throughput: 1
+
+
+zkboost_params:
+  image: ghcr.io/eth-act/zkboost/zkboost:0.11.0
+  env:
+    RUST_LOG: info,zkboost=debug
+  instances:
+    - name: zkboost-1
+  zkvms:
+    - kind: ere
+      proof_type: reth-openvm
+      image: ghcr.io/eth-act/ere/ere-server-openvm:0.17.1-cuda
+      elf_url: https://raw.githubusercontent.com/eth-act/zkboost/v0.11.0/docker/example/mock-beacon-node/mock-guest/openvm.elf
+      proof_timeout_secs: 60
+      gpu:
+        device_ids: ["0"]
+    - kind: ere
+      proof_type: ethrex-openvm
+      endpoint: http://ere-server-reth-openvm:3000
+      proof_timeout_secs: 60

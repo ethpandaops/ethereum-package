@@ -12,38 +12,30 @@
 
 participants:
   - cl_type: lighthouse
-    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    cl_image: ethpandaops/lighthouse:unstable-afadb9a
     el_type: reth
-    el_image: ghcr.io/paradigmxyz/reth
+    el_image: ethpandaops/reth:glamsterdam-devnet-8-7fddea4
     supernode: true
+  - cl_type: lighthouse
+    cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
+    el_type: geth
+    el_image: ethpandaops/geth:glamsterdam-devnet-8-aa1f2fc
     cl_extra_params:
       - --target-peers=3
-      - --proof-engine-endpoint=http://zkboost-1:3000
-      - --proof-types=2,5
-    vc_extra_params:
-      - --proof-engine-endpoint=http://zkboost-1:3000
-      - --proof-types=2,5
-    count: 2
+      - --execution-endpoint=http://zkboost-1:3000
+      - --proof-engine
   - cl_type: lighthouse
     cl_image: ethpandaops/lighthouse:eth-act-optional-proofs
     el_type: None
     supernode: false
+    validator_count: 0
     cl_extra_params:
       - --target-peers=3
-      - --proof-engine-endpoint=http://zkboost-1:3000
-      - --proof-types=5
-    count: 1
-  - cl_type: prysm
-    cl_image: ethpandaops/prysm-beacon-chain:optional-proofs
-    el_type: None
-    supernode: false
-    cl_extra_params:
-      - --enable-zkvm
-      - --verifier-rest-api-provider=http://zkboost-1:3000
-    count: 1
+      - --proof-engine
 
 network_params:
-  seconds_per_slot: 30
+  gloas_fork_epoch: 0
+  genesis_delay: 300
 
 additional_services:
   - zkboost
@@ -51,14 +43,18 @@ additional_services:
   - prometheus
   - grafana
   - tempo
+  - assertoor
+
+assertoor_params:
+  tests:
+    - /tests/zkboost-metrics-test.yaml
 
 zkboost_params:
-  image: ghcr.io/eth-act/zkboost/zkboost:0.9.0
+  image: ghcr.io/eth-act/zkboost/zkboost:0.11.0
   env:
     RUST_LOG: info,zkboost=debug
   instances:
     - name: zkboost-1
-      el_participant_index: 0
   zkvms:
     - kind: ere
       proof_type: reth-zisk

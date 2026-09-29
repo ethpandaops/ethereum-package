@@ -593,46 +593,8 @@ def input_parser(plan, input_args):
             )
 
     if "zkboost" in result["additional_services"]:
-        has_instance_zkvms = False
-        for instance in result["zkboost_params"]["instances"]:
-            if len(instance.get("zkvms", [])) > 0:
-                has_instance_zkvms = True
-
-        # Inject default mock zkvm if none configured globally or per instance.
-        if len(result["zkboost_params"]["zkvms"]) == 0 and not has_instance_zkvms:
-            default_ms = result["network_params"]["slot_duration_ms"] * 2 // 3
-            result["zkboost_params"]["zkvms"] = [
-                {
-                    "kind": "mock",
-                    "proof_type": "reth-zisk",
-                    "mock_proving_time": {
-                        "kind": "random",
-                        "min_ms": default_ms // 2,
-                        "max_ms": default_ms * 2,
-                    },
-                    "mock_proof_size": 128 << 10,
-                },
-            ]
         if "RUST_LOG" not in result["zkboost_params"]["env"]:
             result["zkboost_params"]["env"]["RUST_LOG"] = "info,zkboost=debug"
-
-        has_real_el = False
-        for participant in result["participants"]:
-            if participant["el_type"] != constants.EL_TYPE.none:
-                has_real_el = True
-        if not has_real_el:
-            fail(
-                "zkboost requires at least one participant with a real EL client (geth, reth, nethermind, etc.) to connect to, but all participants have el_type=None."
-            )
-
-        for idx, instance in enumerate(result["zkboost_params"]["instances"]):
-            el_idx = instance.get("el_participant_index", 0)
-            if el_idx >= len(result["participants"]):
-                fail(
-                    "zkboost_params.instances[{0}]: el_participant_index {1} is out of range, only {2} participants exist".format(
-                        idx, el_idx, len(result["participants"])
-                    )
-                )
 
         # Validate zkvm configurations
         valid_proof_types = [
@@ -643,7 +605,6 @@ def input_parser(plan, input_args):
             "reth-sp1",
             "reth-zisk",
         ]
-        configured_proof_types = []
         effective_zkvms = []
         effective_ere_zkvms_by_proof_type = {}
         for instance_idx, instance in enumerate(result["zkboost_params"]["instances"]):
@@ -664,6 +625,7 @@ def input_parser(plan, input_args):
                 effective_zkvms.append((instance_idx, zkvm_idx, zkvm))
                 if (
                     zkvm.get("kind") == "ere"
+                    and "endpoint" not in zkvm
                     and proof_type not in effective_ere_zkvms_by_proof_type
                 ):
                     effective_ere_zkvms_by_proof_type[proof_type] = zkvm
@@ -675,9 +637,9 @@ def input_parser(plan, input_args):
                 inst_idx, zkvm_idx
             )
 
-            if kind not in ["mock", "ere", "external", "verifier"]:
+            if kind not in ["ere", "cluster"]:
                 fail(
-                    "{0}: unsupported kind '{1}', please use 'mock', 'ere', 'external', or 'verifier'".format(
+                    "{0}: unsupported kind '{1}', please use 'ere' or 'cluster'".format(
                         zkvm_path, kind
                     )
                 )
@@ -688,9 +650,6 @@ def input_parser(plan, input_args):
                         zkvm_path, proof_type, ", ".join(valid_proof_types)
                     )
                 )
-
-            if proof_type not in configured_proof_types:
-                configured_proof_types.append(proof_type)
 
             # Default proof_timeout_secs to 3/4 of slot duration (minimum 1 second)
             default_proof_timeout = max(
@@ -706,63 +665,17 @@ def input_parser(plan, input_args):
                     )
                 )
 
-            if kind == "external":
+            if kind == "cluster":
                 if zkvm.get("endpoint", "") == "":
-                    fail("{0}: external zkvm requires 'endpoint'".format(zkvm_path))
-
-            if kind == "mock":
-                # Normalize mock_proving_time - handle omitted, null, and partial cases
-                mock_proving_time = zkvm.get("mock_proving_time")
-                if mock_proving_time == None:
-                    mock_proving_time = {}
-                pt_kind = mock_proving_time.get("kind", "constant")
-                if pt_kind not in ["constant", "random", "linear"]:
+                    fail("{0}: cluster zkvm requires 'endpoint'".format(zkvm_path))
+                if proof_type.split("-")[-1] not in ["zisk", "openvm"]:
                     fail(
-                        "{0}: unsupported mock_proving_time kind '{1}', please use 'constant', 'random' or 'linear'".format(
-                            zkvm_path, pt_kind
+                        "{0}: cluster zkvm supports only zisk and openvm proof types".format(
+                            zkvm_path
                         )
                     )
-                # Fill in kind-appropriate defaults so partial or omitted
-                # mock_proving_time doesn't silently become 0ms.
-                # Duration defaults scale with slot duration (2/3 of slot).
-                default_ms = result["network_params"]["slot_duration_ms"] * 2 // 3
-                mock_proving_time["kind"] = pt_kind
-                if pt_kind == "constant":
-                    mock_proving_time["ms"] = mock_proving_time.get("ms", default_ms)
-                elif pt_kind == "random":
-                    mock_proving_time["min_ms"] = mock_proving_time.get(
-                        "min_ms", default_ms // 2
-                    )
-                    mock_proving_time["max_ms"] = mock_proving_time.get(
-                        "max_ms", default_ms * 2
-                    )
-                    if mock_proving_time["min_ms"] > mock_proving_time["max_ms"]:
-                        fail(
-                            "{0}: mock_proving_time random min_ms ({1}) must be <= max_ms ({2})".format(
-                                zkvm_path,
-                                mock_proving_time["min_ms"],
-                                mock_proving_time["max_ms"],
-                            )
-                        )
-                elif pt_kind == "linear":
-                    # ms_per_mgas is a rate (ms per mega-gas), not a duration
-                    mock_proving_time["ms_per_mgas"] = mock_proving_time.get(
-                        "ms_per_mgas", 150
-                    )
-                zkvm["mock_proving_time"] = mock_proving_time
-
-                # Set mock_proof_size and mock_failure defaults
-                zkvm["mock_proof_size"] = zkvm.get("mock_proof_size", 128 << 10)
-                if zkvm["mock_proof_size"] < 32:
-                    fail(
-                        "{0}: mock_proof_size must be >= 32, got {1}".format(
-                            zkvm_path, zkvm["mock_proof_size"]
-                        )
-                    )
-                zkvm["mock_failure"] = zkvm.get("mock_failure", False)
 
         _validate_ere_gpu_config(effective_ere_zkvms_by_proof_type.values())
-        _validate_requested_proof_types(result["participants"], configured_proof_types)
 
     if (
         "bootnodoor" not in result["additional_services"]
@@ -1345,8 +1258,7 @@ def _validate_ere_gpu_config(zkvms):
                     proof_type
                 )
                 + "ere-server requires GPU for proving. "
-                + "Either add gpu.device_ids or gpu.count, or use 'kind: mock' for testing. "
-                + "For verification-only use cases, use 'kind: verifier' instead."
+                + "Either add gpu.device_ids or gpu.count, or set endpoint to connect to a running ere-server."
             )
 
         # Check: GPU device_id overlap
@@ -1374,58 +1286,6 @@ def _validate_ere_gpu_config(zkvms):
             + "Use gpu.device_ids to explicitly assign distinct GPU(s) to each service instead "
             + '(e.g. gpu: {{device_ids: ["0"]}} and gpu: {{device_ids: ["1"]}}).'
         )
-
-
-def _validate_requested_proof_types(participants, configured_proof_types):
-    """Validate that proof types requested by participants have zkvms configured.
-
-    Parses --proof-types flags from cl_extra_params and vc_extra_params to find
-    which proof types participants need, then checks each is in configured_proof_types.
-    """
-    for idx, participant in enumerate(participants):
-        cl_extra_params = participant.get("cl_extra_params", [])
-        vc_extra_params = participant.get("vc_extra_params", [])
-        all_params = list(cl_extra_params) + list(vc_extra_params)
-
-        for param in all_params:
-            if not param.startswith("--proof-types="):
-                continue
-            ids_str = param.split("=", 1)[1]
-            for id_str in ids_str.split(","):
-                id_str = id_str.strip()
-                if not id_str:
-                    continue
-                proof_type_id = int(id_str)
-                if proof_type_id not in constants.PROOF_TYPE_ID_TO_NAME:
-                    fail(
-                        "participants[{0}]: unknown proof-type ID '{1}' in --proof-types flag. ".format(
-                            idx, proof_type_id
-                        )
-                        + "Valid IDs are: {0}.".format(
-                            ", ".join(
-                                [
-                                    "{0}={1}".format(k, v)
-                                    for k, v in constants.PROOF_TYPE_ID_TO_NAME.items()
-                                ]
-                            )
-                        )
-                    )
-                proof_type = constants.PROOF_TYPE_ID_TO_NAME[proof_type_id]
-                if proof_type not in configured_proof_types:
-                    fail(
-                        "participants[{0}] requests proof_type '{1}' (ID {2}) via --proof-types flag, ".format(
-                            idx, proof_type, proof_type_id
-                        )
-                        + "but no zkvm is configured for it in zkboost_params.instances[*].zkvms. "
-                        + "Either add a zkvm entry for '{0}' or remove ID {1} from --proof-types. ".format(
-                            proof_type, proof_type_id
-                        )
-                        + "Configured proof_types: {0}.".format(
-                            ", ".join(configured_proof_types)
-                            if configured_proof_types
-                            else "(none)"
-                        )
-                    )
 
 
 def parse_network_params(plan, input_args):
@@ -2524,7 +2384,7 @@ def get_default_bootnodoor_params():
 def get_default_zkboost_params():
     return {
         "image": constants.DEFAULT_ZKBOOST_IMAGE,
-        "instances": [{"name": "zkboost", "el_participant_index": 0}],
+        "instances": [{"name": "zkboost"}],
         "zkvms": [],
         "env": {},
     }

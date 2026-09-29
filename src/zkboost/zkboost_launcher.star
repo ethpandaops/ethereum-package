@@ -9,6 +9,10 @@ ZKBOOST_CONFIG_FILENAME = "config.toml"
 
 ZKBOOST_CONFIG_MOUNT_DIRPATH_ON_SERVICE = "/config"
 
+VALIDATOR_KEYSTORE_DIRPATH = "/validator-keystore"
+VALIDATOR_KEYSTORE_FILENAME = "voting-keystore.json"
+VALIDATOR_KEYSTORE_PASSWORD_FILENAME = "password"
+
 MIN_CPU = 100
 MAX_CPU = 1000
 MIN_MEMORY = 256
@@ -30,13 +34,13 @@ ERE_SERVER_READY_INTERVAL = "10s"
 # Templates for auto-resolving ere-server image and ere-guests ELF URL from the
 # Cargo.toml in zkboost repo, that pins ere and ere-guests version.
 ZKBOOST_CARGO_TOML_FILEPATH = "github.com/eth-act/zkboost/Cargo.toml@{ref}"
+ZKBOOST_ZKVM_VERSION_FILEPATH = "github.com/eth-act/zkboost/zkvm-version.json@{ref}"
 ERE_SERVER_IMAGE_TEMPLATE = (
     "ghcr.io/eth-act/ere/ere-server-{zkvm_kind}:{version}{suffix}"
 )
-ERE_GUESTS_ELF_URL_TEMPLATE = "https://github.com/eth-act/ere-guests/releases/download/v{version}/stateless-validator-{proof_type}.elf"
-ERE_GUESTS_VK_URL_TEMPLATE = "https://github.com/eth-act/ere-guests/releases/download/v{version}/stateless-validator-{proof_type}.vk"
+ERE_GUESTS_ELF_URL_TEMPLATE = "https://github.com/eth-act/ere-guests/releases/download/v{version}/stateless-validator-{proof_type}-{zkvm_version}.elf"
 ERE_DEP_NAME = "ere-server-client"
-ERE_GUESTS_DEP_NAME = "ere-guests-stateless-validator-common"
+ERE_GUESTS_DEP_NAME = "stateless-validator-common"
 
 # Default env applied to every `kind: ere` entry.
 ERE_SERVER_DEFAULT_ENV = {"RUST_LOG": "info"}
@@ -53,6 +57,7 @@ ZISK_DEFAULT_ENV = {
 def launch_zkboost(
     plan,
     config_template,
+    participants,
     participant_contexts,
     zkboost_params,
     global_node_selectors,
@@ -64,13 +69,13 @@ def launch_zkboost(
     tempo_otlp_grpc_url=None,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+    participant_index_by_instance_name = _get_participant_index_by_instance_name(
+        zkboost_params.instances, participants
+    )
 
-    # Per-instance zkvms: each instance falls back to the global
-    # `zkboost_params.zkvms` if no per-instance list is set. Resolve artifacts
-    # (ere image/elf_url, verifier program_vk_url) for each, then collect every
-    # `kind: ere` entry across instances so we launch each ere-server once.
-    # `verifier` entries get no ere-server — zkboost links the in-process
-    # `ere-verifier-*` crate and only needs the .vk URL downloaded at startup.
+    # An instance without its own `zkvms` uses `zkboost_params.zkvms`. The
+    # `kind: ere` entries without `endpoint` get one ere-server per proof type,
+    # which all instances share.
     instance_zkvms = []
     for instance in zkboost_params.instances:
         raw = instance.get("zkvms", zkboost_params.zkvms)
@@ -80,7 +85,7 @@ def launch_zkboost(
     metrics_jobs = []
     for resolved in instance_zkvms:
         for zkvm in resolved:
-            if zkvm["kind"] != "ere":
+            if zkvm["kind"] != "ere" or "endpoint" in zkvm:
                 continue
 
             proof_type = zkvm["proof_type"]
@@ -95,24 +100,12 @@ def launch_zkboost(
 
     for instance_index, instance in enumerate(zkboost_params.instances):
         name = instance["name"]
-        el_participant_index = instance["el_participant_index"]
-
-        if el_participant_index >= len(participant_contexts):
-            fail(
-                "zkboost instance '{0}' references el_participant_index {1} but only {2} participants exist".format(
-                    name, el_participant_index, len(participant_contexts)
-                )
-            )
-
-        el_client = participant_contexts[el_participant_index].el_context
-        if el_client == None:
-            fail(
-                "zkboost instance '{0}' references el_participant_index {1} which has el_type=None".format(
-                    name, el_participant_index
-                )
-            )
-        el_endpoint = "http://{0}:{1}".format(
-            el_client.dns_name, el_client.rpc_port_num
+        participant = participant_contexts[participant_index_by_instance_name[name]]
+        el_engine_endpoint = "http://{0}:{1}".format(
+            participant.el_context.dns_name, participant.el_context.engine_rpc_port_num
+        )
+        validator_keystore_artifact_name = _select_validator_keystore(
+            plan, name, participant.cl_context, global_node_selectors, tolerations
         )
 
         zkvms = []
@@ -122,38 +115,26 @@ def launch_zkboost(
                 "ProofType": zkvm["proof_type"],
                 "ProofTimeoutSecs": zkvm["proof_timeout_secs"],
             }
-            if zkvm["kind"] == "ere":
-                entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
-            elif zkvm["kind"] == "external":
-                entry[
-                    "Kind"
-                ] = "ere"  # zkboost config kind for any external prover connection
+            if "endpoint" in zkvm:
                 entry["Endpoint"] = zkvm["endpoint"]
-            elif zkvm["kind"] == "verifier":
-                # zkboost loads ere-verifier-* in-process; only the .vk URL is needed.
-                entry["ProgramVkUrl"] = zkvm["program_vk_url"]
-            elif zkvm["kind"] == "mock":
-                mock_proving_time = zkvm["mock_proving_time"]
-                entry["MockProvingTimeKind"] = mock_proving_time["kind"]
-                if mock_proving_time["kind"] == "constant":
-                    entry["MockProvingTimeConstantMs"] = mock_proving_time["ms"]
-                elif mock_proving_time["kind"] == "random":
-                    entry["MockProvingTimeRandomMinMs"] = mock_proving_time["min_ms"]
-                    entry["MockProvingTimeRandomMaxMs"] = mock_proving_time["max_ms"]
-                elif mock_proving_time["kind"] == "linear":
-                    entry["MockProvingTimeLinearMsPerMgas"] = mock_proving_time[
-                        "ms_per_mgas"
-                    ]
-                entry["MockProofSize"] = zkvm["mock_proof_size"]
-                entry["MockFailure"] = zkvm["mock_failure"]
+            else:
+                entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
+            if zkvm["kind"] == "cluster":
+                entry["ElfUrl"] = zkvm["elf_url"]
             zkvms.append(entry)
 
         template_data = {
             "Port": HTTP_PORT_NUMBER,
-            "ELEndpoint": el_endpoint,
-            "WitnessTimeoutSecs": 12,
-            "WitnessCacheSize": 128,
-            "ProofCacheSize": 128,
+            "ELEngineEndpoint": el_engine_endpoint,
+            "CLBeaconEndpoint": participant.cl_context.beacon_http_url,
+            "ValidatorKeystorePath": shared_utils.path_join(
+                VALIDATOR_KEYSTORE_DIRPATH,
+                VALIDATOR_KEYSTORE_FILENAME,
+            ),
+            "ValidatorKeystorePasswordPath": shared_utils.path_join(
+                VALIDATOR_KEYSTORE_DIRPATH,
+                VALIDATOR_KEYSTORE_PASSWORD_FILENAME,
+            ),
             "DashboardEnabled": zkboost_params.dashboard_enabled,
             "DashboardRetention": 256,
             "Zkvms": zkvms,
@@ -173,6 +154,7 @@ def launch_zkboost(
         config = get_config(
             name,
             config_files_artifact_name,
+            validator_keystore_artifact_name,
             zkboost_params,
             global_node_selectors,
             tolerations,
@@ -204,6 +186,7 @@ def get_metrics_job(service_name):
 def get_config(
     service_name,
     config_files_artifact_name,
+    validator_keystore_artifact_name,
     zkboost_params,
     node_selectors,
     tolerations,
@@ -238,6 +221,7 @@ def get_config(
         public_ports=public_ports,
         files={
             ZKBOOST_CONFIG_MOUNT_DIRPATH_ON_SERVICE: config_files_artifact_name,
+            VALIDATOR_KEYSTORE_DIRPATH: validator_keystore_artifact_name,
         },
         entrypoint=["/usr/local/bin/zkboost"],
         cmd=["--config", config_file_path],
@@ -258,6 +242,81 @@ def get_config(
             target_value=200,
         ),
     )
+
+
+def _get_participant_index_by_instance_name(instances, participants):
+    participant_indexes_by_instance_name = {
+        instance["name"]: [] for instance in instances
+    }
+    for index, participant in enumerate(participants):
+        execution_endpoint = None
+        has_proof_engine = False
+        for param in participant.cl_extra_params:
+            if param.startswith("--execution-endpoint="):
+                execution_endpoint = param.split("=", 1)[1]
+            elif param == "--proof-engine" or param.startswith("--proof-engine="):
+                has_proof_engine = True
+        if execution_endpoint == None or not has_proof_engine:
+            continue
+        instance_name = execution_endpoint.split("://")[-1].split("/")[0].split(":")[0]
+        if instance_name not in participant_indexes_by_instance_name:
+            fail(
+                "participants[{0}]: --execution-endpoint '{1}' does not point to a zkboost instance".format(
+                    index, execution_endpoint
+                )
+            )
+        participant_indexes_by_instance_name[instance_name].append(index)
+
+    participant_index_by_instance_name = {}
+    for (
+        instance_name,
+        participant_indexes,
+    ) in participant_indexes_by_instance_name.items():
+        if len(participant_indexes) != 1:
+            fail(
+                "zkboost instance '{0}' requires exactly one participant that sets --execution-endpoint to it and --proof-engine in cl_extra_params, found {1}".format(
+                    instance_name, len(participant_indexes)
+                )
+            )
+        participant = participants[participant_indexes[0]]
+        if participant.el_type == constants.EL_TYPE.none:
+            fail(
+                "zkboost instance '{0}': participant {1} must have an EL client".format(
+                    instance_name, participant_indexes[0]
+                )
+            )
+        if participant.validator_count == 0:
+            fail(
+                "zkboost instance '{0}': participant {1} must have validators".format(
+                    instance_name, participant_indexes[0]
+                )
+            )
+        participant_index_by_instance_name[instance_name] = participant_indexes[0]
+    return participant_index_by_instance_name
+
+
+def _select_validator_keystore(
+    plan, service_name, cl_context, node_selectors, tolerations
+):
+    result = plan.run_sh(
+        name=service_name + "-validator-keystore",
+        description="Selecting the validator keystore of " + service_name,
+        run="set -- /keystores/keys/* && mkdir -p {0} && cp $1/voting-keystore.json {0}/{1} && cp /keystores/secrets/${{1##*/}} {0}/{2}".format(
+            VALIDATOR_KEYSTORE_DIRPATH,
+            VALIDATOR_KEYSTORE_FILENAME,
+            VALIDATOR_KEYSTORE_PASSWORD_FILENAME,
+        ),
+        files={"/keystores": cl_context.validator_keystore_files_artifact_uuid},
+        store=[
+            StoreSpec(
+                src=VALIDATOR_KEYSTORE_DIRPATH + "/*",
+                name=service_name + "-validator-keystore",
+            ),
+        ],
+        node_selectors=node_selectors,
+        tolerations=tolerations,
+    )
+    return result.files_artifacts[0]
 
 
 def _launch_ere_server(
@@ -347,77 +406,67 @@ def _zkvm_kind_from_proof_type(proof_type):
 
 
 def _resolve_zkvm_artifacts(zkvms, zkboost_image):
-    """Return a new zkvms list with auto-resolved artifact URLs:
-
-    - `kind: ere` entries get `image` + `elf_url`.
-    - `kind: verifier` entries get `program_vk_url`.
-
-    All resolved from zkboost's Cargo.toml pinned ere/ere-guests versions when
-    the user didn't provide them.
-
-    Fails when an auto-resolve is required but the corresponding dep isn't
-    tag-pinned in zkboost (uses branch or rev), in which case the user must set
-    the field explicitly.
+    """Return zkvms with default artifacts for the fields that are not set.
+    A `kind: ere` entry without `endpoint` gets `image` and `elf_url`, and a
+    `kind: cluster` entry gets `elf_url`. The defaults come from the versions
+    that zkboost pins at the git ref of its image. When a default is necessary,
+    the image must be the official zkboost image, and zkboost must pin the
+    dependency to a tag.
     """
     needs_resolution = any(
         [
-            (zkvm["kind"] == "ere" and ("image" not in zkvm or "elf_url" not in zkvm))
-            or (zkvm["kind"] == "verifier" and "program_vk_url" not in zkvm)
+            (
+                zkvm["kind"] == "ere"
+                and "endpoint" not in zkvm
+                and ("image" not in zkvm or "elf_url" not in zkvm)
+            )
+            or (zkvm["kind"] == "cluster" and "elf_url" not in zkvm)
             for zkvm in zkvms
         ]
     )
     if not needs_resolution:
         return zkvms
 
-    ere_version, ere_guests_version = _resolve_ere_versions(zkboost_image)
+    ere_version, ere_guests_version, zkvm_versions = _resolve_ere_versions(
+        zkboost_image
+    )
 
     resolved = []
     for zkvm in zkvms:
-        if zkvm["kind"] not in ["ere", "verifier"]:
+        if zkvm["kind"] == "ere" and "endpoint" in zkvm:
             resolved.append(zkvm)
             continue
         zkvm = dict(zkvm)
         proof_type = zkvm["proof_type"]
         zkvm_kind = _zkvm_kind_from_proof_type(proof_type)
 
-        if zkvm["kind"] == "ere":
-            if "image" not in zkvm:
-                zkvm["image"] = ERE_SERVER_IMAGE_TEMPLATE.format(
-                    zkvm_kind=zkvm_kind,
-                    version=ere_version,
-                    suffix="-cuda" if _zkvm_has_gpu(zkvm) else "",
-                )
-            if "elf_url" not in zkvm:
-                zkvm["elf_url"] = ERE_GUESTS_ELF_URL_TEMPLATE.format(
-                    version=ere_guests_version,
-                    proof_type=proof_type,
-                )
-        elif zkvm["kind"] == "verifier":
-            if "program_vk_url" not in zkvm:
-                zkvm["program_vk_url"] = ERE_GUESTS_VK_URL_TEMPLATE.format(
-                    version=ere_guests_version,
-                    proof_type=proof_type,
-                )
+        if zkvm["kind"] == "ere" and "image" not in zkvm:
+            zkvm["image"] = ERE_SERVER_IMAGE_TEMPLATE.format(
+                zkvm_kind=zkvm_kind,
+                version=ere_version,
+                suffix="-cuda" if _zkvm_has_gpu(zkvm) else "",
+            )
+        if "elf_url" not in zkvm:
+            zkvm["elf_url"] = ERE_GUESTS_ELF_URL_TEMPLATE.format(
+                version=ere_guests_version,
+                proof_type=proof_type,
+                zkvm_version=zkvm_versions[zkvm_kind],
+            )
         resolved.append(zkvm)
     return resolved
 
 
-def _resolve_ere_versions(zkboost_image):
-    """Resolve ere and ere-guests versions from zkboost's Cargo.toml at the git
-    ref matching the zkboost image tag.
+def _resolve_zkboost_ref(zkboost_image):
+    """Return the zkboost git ref that matches the tag of the official zkboost
+    image.
 
-    Auto-resolution is supported for the zkboost image:
-      - `ghcr.io/eth-act/zkboost/zkboost` and
-        `ghcr.io/eth-act/zkboost/zkboost:latest` -> `Cargo.toml@vX.Y.Z`
-          where `X.Y.Z` is resolved from `workspace.package.version` of
-          `Cargo.toml@master`.
-      - `ghcr.io/eth-act/zkboost/zkboost:X.Y.Z` -> `Cargo.toml@vX.Y.Z`
-      - `ghcr.io/eth-act/zkboost/zkboost:<sha:7>` -> `Cargo.toml@<sha:7>`
-          where `<sha:7>` is the 7 characters lowercase hex git commit SHA.
+    - No tag or the `latest` tag gives `vX.Y.Z`, where `X.Y.Z` is
+      `workspace.package.version` in `Cargo.toml@master`.
+    - The `X.Y.Z` tag gives `vX.Y.Z`.
+    - A tag of 40 lowercase hex characters is a git commit SHA and gives itself.
 
-    Any other image (different registry, fork, pre-release tag, etc.) cannot
-    be guaranteed to match a specific Cargo.toml revision, so the user must
-    set `image` and `elf_url` explicitly on each ere zkvm entry.
+    Any other image or tag fails, because it does not identify a zkboost
+    revision.
     """
     image_base = constants.DEFAULT_ZKBOOST_IMAGE.split(":")[0]
     if zkboost_image == image_base:
@@ -426,7 +475,7 @@ def _resolve_ere_versions(zkboost_image):
         image_tag = zkboost_image[len(image_base) + 1 :]
     else:
         _fail_resolve_ere_versions(
-            "zkboost_params.image '{image}' is not the official zkboost image. Auto-resolution is only supported for `{official}` with no tag, `:latest`, `:X.Y.Z`, or `:<sha:7>`".format(
+            "zkboost_params.image '{image}' is not the official zkboost image. Auto-resolution is only supported for `{official}` with no tag, `:latest`, `:X.Y.Z`, or `:<sha:40>`".format(
                 image=zkboost_image,
                 official=image_base,
             )
@@ -439,18 +488,25 @@ def _resolve_ere_versions(zkboost_image):
             _fail_resolve_ere_versions(
                 "cannot locate `workspace.package.version` in zkboost's master Cargo.toml to resolve `:latest`",
             )
-        ref = "v" + version
+        return "v" + version
     elif _is_semver(image_tag):
-        ref = "v" + image_tag
+        return "v" + image_tag
     elif _is_git_sha(image_tag):
-        ref = image_tag
+        return image_tag
     else:
         _fail_resolve_ere_versions(
-            "zkboost_params.image tag '{image_tag}' is not `latest`, `X.Y.Z`, or a git commit SHA (7 lowercase hex chars)".format(
+            "zkboost_params.image tag '{image_tag}' is not `latest`, `X.Y.Z`, or a git commit SHA (40 lowercase hex chars)".format(
                 image_tag=image_tag,
             ),
         )
 
+
+def _resolve_ere_versions(zkboost_image):
+    """Return the ere and ere-guests versions from zkboost's Cargo.toml, and the
+    zkVM versions of the ere-guests ELFs from zkboost's zkvm-version.json. The
+    function reads both files at the git ref of the zkboost image.
+    """
+    ref = _resolve_zkboost_ref(zkboost_image)
     cargo_toml = read_file(ZKBOOST_CARGO_TOML_FILEPATH.format(ref=ref))
     ere_version = _parse_cargo_dependency_version(cargo_toml, ERE_DEP_NAME)
     if ere_version == None:
@@ -470,13 +526,16 @@ def _resolve_ere_versions(zkboost_image):
                 ref=ref,
             ),
         )
-    return ere_version, ere_guests_version
+    zkvm_versions = json.decode(
+        read_file(ZKBOOST_ZKVM_VERSION_FILEPATH.format(ref=ref))
+    )
+    return ere_version, ere_guests_version, zkvm_versions
 
 
 def _fail_resolve_ere_versions(reason):
     fail(
         reason
-        + ". Set `image` and `elf_url` explicitly on each `kind: ere` zkvm entry to skip auto-resolution."
+        + ". Set `image` and `elf_url` explicitly on each `kind: ere` zkvm entry, and `elf_url` on each `kind: cluster` zkvm entry to skip auto-resolution."
     )
 
 
@@ -486,7 +545,7 @@ def _is_semver(image_tag):
 
 
 def _is_git_sha(image_tag):
-    return len(image_tag) >= 7 and all(
+    return len(image_tag) == 40 and all(
         [char in "0123456789abcdef" for char in image_tag.elems()]
     )
 
