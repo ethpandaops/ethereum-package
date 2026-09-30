@@ -31,7 +31,7 @@ fetch() {
   s=$(( $1 * C )); e=$(( s + C - 1 )); [ "$e" -lt "$TOTAL" ] || e=$(( TOTAL - 1 ))
   want=$(( e - s + 1 )); tries=0
   while :; do
-    curl -sf --connect-timeout 20 --speed-limit 1024 --speed-time 120 --max-filesize "$want" \
+    curl -sfL --connect-timeout 20 --speed-limit 1024 --speed-time 120 --max-filesize "$want" \
       -r "$s-$e" -o "$T/$1.part" "$SNAPSHOT_URL" || true
     [ "$(wc -c 2>/dev/null < "$T/$1.part" || echo 0)" -eq "$want" ] && { mv "$T/$1.part" "$T/$1"; return; }
     tries=$(( tries + 1 ))
