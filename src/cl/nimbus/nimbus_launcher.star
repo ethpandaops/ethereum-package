@@ -16,6 +16,7 @@ BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/nimbus/beacon-data"
 BEACON_DISCOVERY_PORT_NUM = 9000
 BEACON_HTTP_PORT_NUM = 4000
 BEACON_METRICS_PORT_NUM = 8008
+BEACON_QUIC_PORT_NUM = 9001
 
 # The min/max CPU/memory that the beacon node can use
 BEACON_MIN_CPU = 50
@@ -105,6 +106,11 @@ def get_beacon_config(
         public_ports = cl_shared.get_general_cl_public_port_specs(
             public_ports_for_component
         )
+        public_ports.update(
+            shared_utils.get_port_specs(
+                {constants.QUIC_DISCOVERY_PORT_ID: public_ports_for_component[4]}
+            )
+        )
 
     discovery_port_tcp = (
         public_ports_for_component[0]
@@ -117,9 +123,16 @@ def get_beacon_config(
         else BEACON_DISCOVERY_PORT_NUM
     )
 
+    discovery_port_quic = (
+        public_ports_for_component[4]
+        if public_ports_for_component
+        else BEACON_QUIC_PORT_NUM
+    )
+
     used_port_assignments = {
         constants.TCP_DISCOVERY_PORT_ID: discovery_port_tcp,
         constants.UDP_DISCOVERY_PORT_ID: discovery_port_udp,
+        constants.QUIC_DISCOVERY_PORT_ID: discovery_port_quic,
         constants.HTTP_PORT_ID: BEACON_HTTP_PORT_NUM,
         constants.METRICS_PORT_ID: BEACON_METRICS_PORT_NUM,
     }
@@ -145,6 +158,7 @@ def get_beacon_config(
         "--log-level=" + log_level,
         "--udp-port={0}".format(discovery_port_udp),
         "--tcp-port={0}".format(discovery_port_tcp),
+        "--quic-port={0}".format(discovery_port_quic),
         "--network={0}".format(
             network_params.network
             if network_params.network in constants.PUBLIC_NETWORKS
