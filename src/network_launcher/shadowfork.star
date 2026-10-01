@@ -26,7 +26,9 @@ TOTAL=$(curl -sfIL "$SNAPSHOT_URL" | tr -d '\r' | awk 'tolower($1)=="content-len
 P=__WORKERS__; C=__CHUNK__; N=$(( (TOTAL + C - 1) / C ))
 echo "snapshot is $TOTAL bytes: $N chunks, $P workers"
 T=$(mktemp -d); echo 0 > "$T/emitted"; PIDS=""
-trap 'kill $PIDS 2>/dev/null || true; rm -rf "$T"' EXIT INT TERM
+trap 'kill $PIDS 2>/dev/null || true; rm -rf "$T"' EXIT
+# INT/TERM must exit (running the EXIT cleanup), not just clean up and carry on
+trap 'exit 143' INT TERM
 fetch() {
   s=$(( $1 * C )); e=$(( s + C - 1 )); [ "$e" -lt "$TOTAL" ] || e=$(( TOTAL - 1 ))
   want=$(( e - s + 1 )); tries=0
@@ -57,9 +59,16 @@ stream() {
     echo "$i" > "$T/emitted.tmp"; mv "$T/emitted.tmp" "$T/emitted"
   done
 }
-stream | tar -I zstd -xf - -C "__DATA_DIR__"
+# Backgrounded + wait: sh defers traps while a foreground pipeline runs, but `wait`
+# returns as soon as a trapped signal arrives (a stop would otherwise SIGKILL).
+stream | tar -I zstd -xf - -C "__DATA_DIR__" &
+wait $!
+# sh has no pipefail: tar exits 0 if a failed stream happens to stop on a frame boundary
+[ ! -f "$T/failed" ] || { echo "download failed, datadir is incomplete" >&2; exit 1; }
 touch /tmp/finished
-tail -f /dev/null
+# keep the service up for plan.wait, still stoppable by TERM
+tail -f /dev/null &
+wait $!
 """
 
 
