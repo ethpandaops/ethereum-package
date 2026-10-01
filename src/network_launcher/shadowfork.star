@@ -33,7 +33,9 @@ fetch() {
   s=$(( $1 * C )); e=$(( s + C - 1 )); [ "$e" -lt "$TOTAL" ] || e=$(( TOTAL - 1 ))
   want=$(( e - s + 1 )); tries=0
   while :; do
-    curl -sfL --connect-timeout 20 --speed-limit 1024 --speed-time 120 --max-filesize "$want" \
+    # Abort below 1 MB/s for 30s (a healthy connection runs ~6 MB/s): chunks are
+    # emitted in order, so one connection trickling at a few KB/s stalls the stream.
+    curl -sfL --connect-timeout 20 --speed-limit 1048576 --speed-time 30 --max-filesize "$want" \
       -r "$s-$e" -o "$T/$1.part" "$SNAPSHOT_URL" || true
     [ "$(wc -c 2>/dev/null < "$T/$1.part" || echo 0)" -eq "$want" ] && { mv "$T/$1.part" "$T/$1"; return; }
     tries=$(( tries + 1 ))
