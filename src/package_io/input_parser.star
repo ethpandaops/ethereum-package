@@ -50,6 +50,7 @@ DEFAULT_VC_IMAGES = {
     "grandine": "sifrai/grandine:stable",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "crysm": "ghcr.io/offchainlabs/crysm:stable",
 }
 
 DEFAULT_VC_IMAGES_MINIMAL = {
@@ -61,6 +62,7 @@ DEFAULT_VC_IMAGES_MINIMAL = {
     "grandine": "ethpandaops/grandine:develop-minimal",
     "vero": "ghcr.io/serenita-org/vero:latest",
     "consensoor": "ethpandaops/consensoor:main",
+    "crysm": "ghcr.io/offchainlabs/crysm:stable-minimal",
 }
 
 DEFAULT_REMOTE_SIGNER_IMAGES = {
@@ -1619,6 +1621,14 @@ def parse_network_params(plan, input_args):
                 participant["use_separate_vc"] = False
             else:
                 participant["use_separate_vc"] = True
+
+        if cl_type == constants.CL_TYPE.crysm:
+            if participant["use_separate_vc"]:
+                fail("crysm does not support `use_separate_vc`")
+            if result["network_params"]["gloas_fork_epoch"] != 0:
+                fail("crysm requires `gloas_fork_epoch: 0`")
+        elif vc_type == constants.VC_TYPE.crysm:
+            fail("crysm VC can only be used with crysm CL")
 
         if participant["use_remote_signer"] and not participant["use_separate_vc"]:
             fail("`use_remote_signer` requires `use_separate_vc`")
