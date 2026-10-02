@@ -1,0 +1,21 @@
+participants:
+  - el_type: geth
+    el_image: ethereum/client-go:latest
+    cl_type: crysm
+  - el_type: reth
+    el_image: ghcr.io/paradigmxyz/reth:latest
+    cl_type: crysm
+  - el_type: geth
+    el_image: ethereum/client-go:latest
+    cl_type: prysm
+  - el_type: reth
+    el_image: ghcr.io/paradigmxyz/reth:latest
+    cl_type: lodestar
+
+network_params:
+  gloas_fork_epoch: 0
+  bpo_1_epoch: 0
+  bpo_2_epoch: 0
+
+additional_services:
+  - dora

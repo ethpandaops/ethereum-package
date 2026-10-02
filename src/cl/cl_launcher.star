@@ -8,6 +8,7 @@ teku = import_module("./teku/teku_launcher.star")
 grandine = import_module("./grandine/grandine_launcher.star")
 consensoor = import_module("./consensoor/consensoor_launcher.star")
 caplin = import_module("./caplin/caplin_launcher.star")
+crysm = import_module("./crysm/crysm_launcher.star")
 
 cl_shared = import_module("./cl_shared.star")
 constants = import_module("../package_io/constants.star")
@@ -113,6 +114,15 @@ def launch(
             ),
             "get_beacon_config": caplin.get_beacon_config,
             "get_cl_context": caplin.get_cl_context,
+            "get_blobber_config": cl_shared.get_blobber_config_none,
+        },
+        constants.CL_TYPE.crysm: {
+            "launcher": crysm.new_crysm_launcher(
+                el_cl_data,
+                jwt_file,
+            ),
+            "get_beacon_config": crysm.get_beacon_config,
+            "get_cl_context": crysm.get_cl_context,
             "get_blobber_config": cl_shared.get_blobber_config_none,
         },
     }
