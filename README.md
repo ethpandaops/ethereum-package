@@ -953,6 +953,10 @@ network_params:
   # Defaults to false
   frames_enabled: false
 
+  # EIP-8198 (quick slots) fork epoch, must be >= heze_fork_epoch
+  # Defaults to 18446744073709551615
+  eip8198_fork_epoch: 18446744073709551615
+
 
   # Preset for the network
   # Default: "mainnet"
@@ -1025,6 +1029,15 @@ network_params:
   #   - epoch: 512
   #     gas_limit: 150000000
   gas_limit_schedule: []
+
+  # EIP-8198 slot duration changes after genesis (epoch 0 uses slot_duration_ms)
+  # The first entry must be at eip8198_fork_epoch
+  # Defaults to []
+  # Example:
+  # slot_duration_schedule:
+  #   - epoch: 256
+  #     slot_duration_ms: 10000
+  slot_duration_schedule: []
 
 
   # BPO
@@ -1855,7 +1868,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.2.1
+  image: ethpandaops/ethereum-genesis-generator:6.2.3
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
