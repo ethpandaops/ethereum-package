@@ -1017,6 +1017,9 @@ def input_parser(plan, input_args):
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
             force_snapshot_sync=result["network_params"]["force_snapshot_sync"],
             shadowfork_block_height=result["network_params"]["shadowfork_block_height"],
+            shadowfork_download_timeout=result["network_params"][
+                "shadowfork_download_timeout"
+            ],
             samples_per_slot=result["network_params"]["samples_per_slot"],
             custody_requirement=result["network_params"]["custody_requirement"],
             max_blobs_per_block_electra=result["network_params"][
@@ -2010,6 +2013,7 @@ def default_network_params():
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
         "shadowfork_block_height": "latest",
+        "shadowfork_download_timeout": "72h",
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,
@@ -2101,6 +2105,7 @@ def default_minimal_network_params():
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
         "shadowfork_block_height": "latest",
+        "shadowfork_download_timeout": "72h",
         "samples_per_slot": 8,
         "custody_requirement": 4,
         "max_blobs_per_block_electra": 9,

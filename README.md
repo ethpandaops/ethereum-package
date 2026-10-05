@@ -928,6 +928,12 @@ network_params:
   # Example: shadowfork_block_height: 340000 for hoodi
   shadowfork_block_height: "latest"
 
+  # Maximum time to download and extract each shadowfork snapshot.
+  # Increase for slower links or several participants sharing one uplink.
+  # A 1.16 TB snapshot needs at least 26 hours on a 100 Mbit/s link.
+  # Defaults to "72h"
+  shadowfork_download_timeout: "72h"
+
   # Number of DataColumn random samples a node queries per slot
   samples_per_slot: 8
 

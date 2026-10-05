@@ -3,15 +3,15 @@ constants = import_module("../package_io/constants.star")
 input_parser = import_module("../package_io/input_parser.star")
 
 
-# The snapshot is streamed straight into tar so nothing but the extracted datadir
-# ever touches disk. One stream from R2 through Cloudflare tops out ~95 MB/s, so the
+# The snapshot is emitted in order into tar, with bounded chunk staging in /tmp.
+# One stream from R2 through Cloudflare tops out ~95 MB/s, so the
 # archive is fetched as parallel ranged GETs and emitted in order (16 workers
 # measured 382 MB/s). At most 2 x workers chunks are staged in /tmp. Each chunk is
-# retried until it holds exactly its range, so a dropped connection costs one chunk,
-# not the stream. --max-filesize refuses a Range answered with 200 and the whole
-# body -- what a cold, cache-eligible object on Cloudflare returns -- before a byte
-# lands. The emitter's progress counter is renamed into place: a torn read is an
-# arithmetic error, which silently exits sh.
+# resumed using absolute archive offsets. Only matching 206 responses are kept;
+# --max-filesize bounds each response, including bodies without Content-Length
+# (curl >= 8.4, provided by Alpine 3.19). The emitter's progress counter is renamed
+# into place: a torn read is an arithmetic error, which silently exits sh.
+# Limit consecutive attempts without validated progress, not resumptions.
 SNAPSHOT_DOWNLOAD_MAX_ATTEMPTS = 500
 SNAPSHOT_DOWNLOAD_WORKERS = 16
 SNAPSHOT_DOWNLOAD_CHUNK_BYTES = 64 * 1024 * 1024
@@ -21,8 +21,9 @@ apk add --no-cache curl tar zstd
 BLOCK_HEIGHT=$(cat /shared/block_height.txt)
 echo "Using block height: $BLOCK_HEIGHT"
 SNAPSHOT_URL="__SNAPSHOT_BASE__/$BLOCK_HEIGHT/snapshot.tar.zst"
-TOTAL=$(curl -sfIL "$SNAPSHOT_URL" | tr -d '\r' | awk 'tolower($1)=="content-length:"{n=$2} END{print n}')
-[ -n "$TOTAL" ] || { echo "cannot read the snapshot size from $SNAPSHOT_URL"; exit 1; }
+TOTAL=$(curl -sfIL --connect-timeout 20 --max-time 60 "$SNAPSHOT_URL" | tr -d '\r' | awk '/^HTTP\//{n=""} tolower($1)=="content-length:"{n=$2} END{print n}')
+case "$TOTAL" in ''|*[!0-9]*) echo "cannot read the snapshot size from $SNAPSHOT_URL" >&2; exit 1;; esac
+[ "$TOTAL" -gt 0 ] || { echo "snapshot is empty" >&2; exit 1; }
 P=__WORKERS__; C=__CHUNK__; N=$(( (TOTAL + C - 1) / C ))
 echo "snapshot is $TOTAL bytes: $N chunks, $P workers"
 T=$(mktemp -d); echo 0 > "$T/emitted"; PIDS=""
@@ -31,21 +32,44 @@ trap 'kill $PIDS 2>/dev/null || true; rm -rf "$T"' EXIT
 trap 'exit 143' INT TERM
 fetch() {
   s=$(( $1 * C )); e=$(( s + C - 1 )); [ "$e" -lt "$TOTAL" ] || e=$(( TOTAL - 1 ))
-  want=$(( e - s + 1 )); tries=0
+  want=$(( e - s + 1 )); have=0; tries=0
+  : > "$T/$1.part"
   while :; do
-    # Abort below 1 MB/s for 30s (a healthy connection runs ~6 MB/s): chunks are
-    # emitted in order, so one connection trickling at a few KB/s stalls the stream.
-    curl -sfL --connect-timeout 20 --speed-limit 1048576 --speed-time 30 --max-filesize "$want" \
-      -r "$s-$e" -o "$T/$1.part" "$SNAPSHOT_URL" || true
-    [ "$(wc -c 2>/dev/null < "$T/$1.part" || echo 0)" -eq "$want" ] && { mv "$T/$1.part" "$T/$1"; return; }
-    tries=$(( tries + 1 ))
-    [ "$tries" -lt __MAX_ATTEMPTS__ ] || { echo "chunk $1 failed $tries times" >&2; touch "$T/failed"; return 1; }
-    echo "chunk $1 (byte $s) incomplete, retrying ($tries)" >&2; sleep 5
+    start=$(( s + have )); remaining=$(( want - have )); rc=0
+    speed_time=30; [ "$SPEED" -gt 1024 ] || speed_time=120
+    # Start aggressively to recover stragglers. If a timeout made valid progress,
+    # halve this worker's threshold (down to 1 KiB/s), retaining it across chunks.
+    # This adapts to shared slow links without discarding bytes or limiting speed.
+    curl -sfL --connect-timeout 20 --speed-limit "$SPEED" --speed-time "$speed_time" \
+      --max-filesize "$remaining" -D "$T/$1.headers" -r "$start-$e" "$SNAPSHOT_URL" >> "$T/$1.part" || rc=$?
+    [ "$rc" -ne 23 ] || { echo "cannot write chunk $1" >&2; return 1; }
+    got=$(wc -c < "$T/$1.part") || return 1
+    range=$(tr -d '\r' < "$T/$1.headers" | awk '
+      /^HTTP\//{status=$2; r=""}
+      tolower($1)=="content-range:"{r=$2 " " $3}
+      END{if (status==206) print r}')
+    # A 200, wrong range, or oversized body must never contaminate saved progress.
+    if [ "$rc" -eq 63 ] || [ "$range" != "bytes $start-$e/$TOTAL" ] || [ "$got" -gt "$want" ]; then
+      truncate -s "$have" "$T/$1.part" || return 1
+      got=$have
+    fi
+    rm -f "$T/$1.headers"
+    [ "$got" -eq "$want" ] && { mv "$T/$1.part" "$T/$1"; return; }
+    if [ "$got" -gt "$have" ]; then
+      tries=0
+      if [ "$rc" -eq 28 ] && [ "$SPEED" -gt 1024 ]; then SPEED=$(( SPEED / 2 )); fi
+      have=$got
+    else
+      tries=$(( tries + 1 ))
+      [ "$tries" -lt __MAX_ATTEMPTS__ ] || { echo "chunk $1 made no progress $tries times" >&2; return 1; }
+      sleep 5
+    fi
+    echo "chunk $1: resuming at byte $(( s + have )), speed threshold $SPEED B/s" >&2
   done
 }
 k=0
 while [ "$k" -lt "$P" ]; do
-  { ( i=$k
+  { ( i=$k; SPEED=1048576
     while [ "$i" -lt "$N" ]; do
       while [ $(( i - $(cat "$T/emitted") )) -ge $(( 2 * P )) ]; do sleep 0.1; done
       fetch "$i" || exit 1
@@ -218,6 +242,6 @@ def shadowfork_prep(
             assertion="==",
             target_value=0,
             interval="1s",
-            timeout="24h",  # mainnet erigon+reth (370 GB + 815 GB) share one uplink; 6h was not enough
+            timeout=network_params.shadowfork_download_timeout,
         )
     return latest_block, network_id

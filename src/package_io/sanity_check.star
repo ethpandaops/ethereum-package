@@ -257,6 +257,7 @@ SUBCATEGORY_PARAMS = {
         "network_sync_base_url",
         "force_snapshot_sync",
         "shadowfork_block_height",
+        "shadowfork_download_timeout",
         "samples_per_slot",
         "custody_requirement",
         "max_blobs_per_block_electra",
