@@ -27,7 +27,7 @@ case "$TOTAL" in ''|*[!0-9]*) echo "cannot read the snapshot size from $SNAPSHOT
 P=__WORKERS__; C=__CHUNK__; N=$(( (TOTAL + C - 1) / C ))
 echo "snapshot is $TOTAL bytes: $N chunks, $P workers"
 T=$(mktemp -d); echo 0 > "$T/emitted"; PIDS=""
-trap 'kill $PIDS 2>/dev/null || true; rm -rf "$T"' EXIT
+trap 'kill $PIDS 2>/dev/null || true; wait $PIDS 2>/dev/null || true; rm -rf "$T"' EXIT
 # INT/TERM must exit (running the EXIT cleanup), not just clean up and carry on
 trap 'exit 143' INT TERM
 fetch() {
@@ -41,7 +41,8 @@ fetch() {
     # halve this worker's threshold (down to 1 KiB/s), retaining it across chunks.
     # This adapts to shared slow links without discarding bytes or limiting speed.
     curl -sfL --connect-timeout 20 --speed-limit "$SPEED" --speed-time "$speed_time" \
-      --max-filesize "$remaining" -D "$T/$1.headers" -r "$start-$e" "$SNAPSHOT_URL" >> "$T/$1.part" || rc=$?
+      --max-filesize "$remaining" -D "$T/$1.headers" -r "$start-$e" "$SNAPSHOT_URL" >> "$T/$1.part" &
+    CURL_PID=$!; wait "$CURL_PID" || rc=$?; CURL_PID=""
     [ "$rc" -ne 23 ] || { echo "cannot write chunk $1" >&2; return 1; }
     got=$(wc -c < "$T/$1.part") || return 1
     range=$(tr -d '\r' < "$T/$1.headers" | awk '
@@ -69,12 +70,26 @@ fetch() {
 }
 k=0
 while [ "$k" -lt "$P" ]; do
-  { ( i=$k; SPEED=1048576
+  (
+    # $! must identify the worker itself, not a shell wrapping another subshell.
+    # Report unexpected exits as well as fetch failures to the emitter.
+    CURL_PID=""
+    trap '
+      status=$?
+      if [ -n "$CURL_PID" ]; then
+        kill "$CURL_PID" 2>/dev/null || true
+        wait "$CURL_PID" 2>/dev/null || true
+      fi
+      [ "$status" -eq 0 ] || touch "$T/failed"
+    ' EXIT
+    trap 'exit 143' INT TERM
+    i=$k; SPEED=1048576
     while [ "$i" -lt "$N" ]; do
       while [ $(( i - $(cat "$T/emitted") )) -ge $(( 2 * P )) ]; do sleep 0.1; done
       fetch "$i" || exit 1
       i=$(( i + P ))
-    done ) || touch "$T/failed"; } &
+    done
+  ) &
   PIDS="$PIDS $!"; k=$(( k + 1 ))
 done
 stream() {
