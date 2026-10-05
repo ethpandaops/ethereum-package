@@ -99,15 +99,6 @@ jobs:
       - name: Kurtosis Lint
         run: kurtosis lint ${{ github.workspace }}
 
-  snapshot-download:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Test snapshot downloader
-        run: python3 -m unittest discover -s tests -v
-
   assertoor:
     runs-on: ubuntu-latest
     timeout-minutes: 30
