@@ -228,13 +228,7 @@ def new_env_file_for_el_cl_genesis_data(
         "Bpo5TargetBlobs": network_params.bpo_5_target_blobs,
         "Bpo5BaseFeeUpdateFraction": network_params.bpo_5_base_fee_update_fraction,
         "GasLimitSchedule": json.encode(network_params.gas_limit_schedule),
-        # egg >= #322 renders SLOT_DURATION_SCHEDULE as given and expects the
-        # full schedule starting at genesis; the user param lists only later
-        # changes, so prepend the genesis entry here.
-        "SlotDurationSchedule": json.encode(
-            [{"epoch": 0, "slot_duration_ms": network_params.slot_duration_ms}]
-            + list(network_params.slot_duration_schedule)
-        ),
+        "SlotDurationSchedule": json.encode(network_params.slot_duration_schedule),
         "WithdrawalType": "{0}".format(network_params.withdrawal_type),
         "WithdrawalAddress": network_params.withdrawal_address,
         "ValidatorBalance": int(network_params.validator_balance * 1000000000),
