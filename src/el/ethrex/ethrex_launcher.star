@@ -110,7 +110,7 @@ def get_config(
         "--log.level={0}".format(log_level),
         "--http.port={0}".format(RPC_PORT_NUM),
         "--http.addr=0.0.0.0",
-        "--http.api=eth,net,web3,debug,admin,txpool",
+        "--http.api=eth,net,web3,debug,admin,txpool,testing",
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--authrpc.addr=0.0.0.0",
