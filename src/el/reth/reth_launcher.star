@@ -130,7 +130,7 @@ def get_config(
             "--http.port={0}".format(RPC_PORT_NUM),
             "--http.addr=0.0.0.0",
             "--http.corsdomain=*",
-            "--http.api=admin,net,eth,web3,debug,txpool,trace{0}".format(
+            "--http.api=admin,net,eth,web3,debug,txpool,trace,testing{0}".format(
                 ",flashbots"
                 if launcher.builder_type == constants.FLASHBOTS_MEV_TYPE
                 or launcher.builder_type == constants.COMMIT_BOOST_MEV_TYPE

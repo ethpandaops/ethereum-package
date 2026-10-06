@@ -100,7 +100,7 @@ def get_config(
         "--port={0}".format(discovery_port_tcp),
         "--discovery.v4=false",
         "--discovery.v5=true",
-        "--http.api=eth,erigon,engine,web3,net,debug,trace,txpool,admin",
+        "--http.api=eth,erigon,engine,web3,net,debug,trace,txpool,admin,testing",
         "--http.vhosts=*",
         "--ws",
         "--allow-insecure-unlock",
