@@ -71,7 +71,7 @@ spamoor_params:
 
 
 zkboost_params:
-  image: ghcr.io/eth-act/zkboost/zkboost:0.11.0
+  image: ghcr.io/eth-act/zkboost/zkboost:0.12.0
   env:
     RUST_LOG: info,zkboost=debug
   instances:
@@ -80,7 +80,7 @@ zkboost_params:
     - kind: ere
       proof_type: reth-openvm
       image: ghcr.io/eth-act/ere/ere-server-openvm:0.17.1-cuda
-      elf_url: https://raw.githubusercontent.com/eth-act/zkboost/v0.11.0/docker/example/mock-beacon-node/mock-guest/openvm.elf
+      elf_url: https://raw.githubusercontent.com/eth-act/zkboost/v0.12.0/docker/example/mock-beacon-node/mock-guest/openvm.elf
       proof_timeout_secs: 60
       gpu:
         device_ids: ["0"]

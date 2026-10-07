@@ -50,7 +50,7 @@ assertoor_params:
     - /tests/zkboost-metrics-test.yaml
 
 zkboost_params:
-  image: ghcr.io/eth-act/zkboost/zkboost:0.11.0
+  image: ghcr.io/eth-act/zkboost/zkboost:0.12.0
   env:
     RUST_LOG: info,zkboost=debug
   instances:

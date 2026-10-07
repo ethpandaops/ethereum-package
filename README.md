@@ -1292,6 +1292,8 @@ zkboost_params:
   #   kind (required): the zkVM backend type
   #     "ere"      - launches a GPU ere-server, or connects to endpoint if set
   #     "cluster"  - connects to an already-deployed ZisK or OpenVM proving cluster
+  #     "mock"     - proves nothing, and submits a mock proof with the public values of the payload
+  #                  and random proof bytes, which a CL without a mock proof verifier rejects
   #   proof_type (required): identifies the EL client + zkVM combination
   #     "ethrex-openvm", "ethrex-sp1", "ethrex-zisk", "reth-openvm", "reth-sp1", "reth-zisk"
   #   proof_timeout_secs: timeout for proof generation in seconds (default: 3/4 of slot duration, must be > 0)
@@ -1333,6 +1335,13 @@ zkboost_params:
   #     and a RUST_LOG with the ZisK modules at warn.
   #   endpoint: HTTP URL of a running ere-server. If set, nothing is launched.
   #
+  # mock-specific fields (only for kind: mock):
+  #   mock_proving_time: simulated proving time (default: { kind: constant, ms: <1/2 of slot duration> })
+  #     { kind: constant, ms: <ms> }, { kind: random, min_ms: <ms>, max_ms: <ms> },
+  #     or { kind: linear, ms_per_mgas: <ms> }
+  #   mock_proof_size: size of the proof data in bytes (default 262144, min 128)
+  #   mock_failure: always fails the proof if true (default false)
+  #
   # cluster-specific fields (only for kind: cluster):
   #   endpoint (required): endpoint of the running proving cluster
   #   elf_url: HTTPS URL of the guest ELF (default: resolved from zkboost's pinned ere-guests version)
@@ -1349,6 +1358,9 @@ zkboost_params:
   # - kind: cluster
   #   proof_type: reth-openvm
   #   endpoint: "http://openvm-cluster:3000"
+  # - kind: mock
+  #   proof_type: reth-sp1
+  #   mock_proving_time: { kind: random, min_ms: 2000, max_ms: 8000 }
   zkvms: []
   # RUST_LOG defaults to "info,zkboost=debug" if not set; other vars pass through unchanged.
   env:

@@ -637,9 +637,9 @@ def input_parser(plan, input_args):
                 inst_idx, zkvm_idx
             )
 
-            if kind not in ["ere", "cluster"]:
+            if kind not in ["ere", "cluster", "mock"]:
                 fail(
-                    "{0}: unsupported kind '{1}', please use 'ere' or 'cluster'".format(
+                    "{0}: unsupported kind '{1}', please use 'ere', 'cluster', or 'mock'".format(
                         zkvm_path, kind
                     )
                 )
@@ -664,6 +664,13 @@ def input_parser(plan, input_args):
                         zkvm_path, zkvm["proof_timeout_secs"]
                     )
                 )
+
+            # Default mock proving time to 1/2 of slot duration, below the default proof timeout
+            if kind == "mock" and "mock_proving_time" not in zkvm:
+                zkvm["mock_proving_time"] = {
+                    "kind": "constant",
+                    "ms": result["network_params"]["slot_duration_ms"] // 2,
+                }
 
             if kind == "cluster":
                 if zkvm.get("endpoint", "") == "":

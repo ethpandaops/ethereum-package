@@ -115,7 +115,16 @@ def launch_zkboost(
                 "ProofType": zkvm["proof_type"],
                 "ProofTimeoutSecs": zkvm["proof_timeout_secs"],
             }
-            if "endpoint" in zkvm:
+            if zkvm["kind"] == "mock":
+                if "mock_proving_time" in zkvm:
+                    entry["MockProvingTime"] = _toml_inline_table(
+                        zkvm["mock_proving_time"]
+                    )
+                if "mock_proof_size" in zkvm:
+                    entry["MockProofSize"] = zkvm["mock_proof_size"]
+                if "mock_failure" in zkvm:
+                    entry["MockFailure"] = zkvm["mock_failure"]
+            elif "endpoint" in zkvm:
                 entry["Endpoint"] = zkvm["endpoint"]
             else:
                 entry["Endpoint"] = ere_server_endpoints[zkvm["proof_type"]]
@@ -433,7 +442,7 @@ def _resolve_zkvm_artifacts(zkvms, zkboost_image):
 
     resolved = []
     for zkvm in zkvms:
-        if zkvm["kind"] == "ere" and "endpoint" in zkvm:
+        if zkvm["kind"] == "mock" or (zkvm["kind"] == "ere" and "endpoint" in zkvm):
             resolved.append(zkvm)
             continue
         zkvm = dict(zkvm)
@@ -609,3 +618,14 @@ def _get_ere_server_metrics_job(proof_type):
         },
         "ScrapeInterval": "15s",
     }
+
+
+def _toml_inline_table(table):
+    """Return `table` as a TOML inline table."""
+    fields = []
+    for key, value in table.items():
+        if type(value) == "string":
+            fields.append('{0} = "{1}"'.format(key, value))
+        else:
+            fields.append("{0} = {1}".format(key, value))
+    return "{ " + ", ".join(fields) + " }"
