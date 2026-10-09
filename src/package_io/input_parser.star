@@ -99,9 +99,9 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 
-def validate_slot_duration_schedule(network_params):
+def validate_slot_duration_eip8198(network_params):
     eip8198_fork_epoch = network_params["eip8198_fork_epoch"]
-    schedule = network_params["slot_duration_schedule"]
+    slot_duration_ms_eip8198 = network_params["slot_duration_ms_eip8198"]
 
     if eip8198_fork_epoch != constants.FAR_FUTURE_EPOCH:
         if network_params["heze_fork_epoch"] > eip8198_fork_epoch:
@@ -113,42 +113,16 @@ def validate_slot_duration_schedule(network_params):
         if network_params["frames_enabled"]:
             fail("eip8198_fork_epoch can't be combined with frames_enabled")
 
-    previous_epoch = 0
-    for index, entry in enumerate(schedule):
-        if type(entry) != "dict" or sorted(entry.keys()) != [
-            "epoch",
-            "slot_duration_ms",
-        ]:
-            fail(
-                "slot_duration_schedule entries need exactly 'epoch' and 'slot_duration_ms', got: {0}".format(
-                    entry
-                )
+    if (
+        type(slot_duration_ms_eip8198) != "int"
+        or slot_duration_ms_eip8198 <= 0
+        or slot_duration_ms_eip8198 % 1000 != 0
+    ):
+        fail(
+            "slot_duration_ms_eip8198 must be a positive multiple of 1000, got {0}".format(
+                slot_duration_ms_eip8198
             )
-        if type(entry["epoch"]) != "int" or type(entry["slot_duration_ms"]) != "int":
-            fail(
-                "slot_duration_schedule 'epoch' and 'slot_duration_ms' must be integers, got: {0}".format(
-                    entry
-                )
-            )
-        if entry["slot_duration_ms"] <= 0 or entry["slot_duration_ms"] % 1000 != 0:
-            fail(
-                "slot_duration_schedule: slot_duration_ms must be a positive multiple of 1000, got {1} at epoch {0}".format(
-                    entry["epoch"], entry["slot_duration_ms"]
-                )
-            )
-        if entry["epoch"] <= previous_epoch:
-            fail(
-                "slot_duration_schedule: epochs must be > 0 and strictly increasing, got {0} after {1}".format(
-                    entry["epoch"], previous_epoch
-                )
-            )
-        if index == 0 and entry["epoch"] != eip8198_fork_epoch:
-            fail(
-                "slot_duration_schedule: first entry must be at eip8198_fork_epoch ({1}), got {0}".format(
-                    entry["epoch"], eip8198_fork_epoch
-                )
-            )
-        previous_epoch = entry["epoch"]
+        )
 
 
 def input_parser(plan, input_args):
@@ -610,7 +584,7 @@ def input_parser(plan, input_args):
                 )
             )
 
-    validate_slot_duration_schedule(result["network_params"])
+    validate_slot_duration_eip8198(result["network_params"])
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
@@ -997,7 +971,9 @@ def input_parser(plan, input_args):
             perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
             gas_limit=result["network_params"]["gas_limit"],
             gas_limit_schedule=result["network_params"]["gas_limit_schedule"],
-            slot_duration_schedule=result["network_params"]["slot_duration_schedule"],
+            slot_duration_ms_eip8198=result["network_params"][
+                "slot_duration_ms_eip8198"
+            ],
             withdrawal_type=result["network_params"]["withdrawal_type"],
             withdrawal_address=result["network_params"]["withdrawal_address"],
             validator_balance=result["network_params"]["validator_balance"],
@@ -1893,7 +1869,7 @@ def default_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "gas_limit_schedule": [],
-        "slot_duration_schedule": [],
+        "slot_duration_ms_eip8198": 10000,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
@@ -1984,7 +1960,7 @@ def default_minimal_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "gas_limit_schedule": [],
-        "slot_duration_schedule": [],
+        "slot_duration_ms_eip8198": 5000,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,

@@ -180,6 +180,7 @@ def new_env_file_for_el_cl_genesis_data(
         "GloasForkVersion": constants.GLOAS_FORK_VERSION,
         "HezeForkVersion": constants.HEZE_FORK_VERSION,
         "Eip8198ForkVersion": constants.EIP8198_FORK_VERSION,
+        "SlotDurationMsEip8198": network_params.slot_duration_ms_eip8198,
         "ShadowForkFile": shadowfork_file,
         "AdditionalValidatorMnemonics": get_additional_mnemonics_json(network_params),
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
@@ -228,10 +229,6 @@ def new_env_file_for_el_cl_genesis_data(
         "Bpo5TargetBlobs": network_params.bpo_5_target_blobs,
         "Bpo5BaseFeeUpdateFraction": network_params.bpo_5_base_fee_update_fraction,
         "GasLimitSchedule": json.encode(network_params.gas_limit_schedule),
-        "SlotDurationSchedule": json.encode(
-            [{"epoch": 0, "slot_duration_ms": network_params.slot_duration_ms}]
-            + list(network_params.slot_duration_schedule)
-        ),
         "WithdrawalType": "{0}".format(network_params.withdrawal_type),
         "WithdrawalAddress": network_params.withdrawal_address,
         "ValidatorBalance": int(network_params.validator_balance * 1000000000),
