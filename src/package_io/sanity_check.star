@@ -273,7 +273,7 @@ SUBCATEGORY_PARAMS = {
         "perfect_peerdas_enabled",
         "gas_limit",
         "gas_limit_schedule",
-        "slot_duration_schedule",
+        "slot_duration_ms_eip8198",
         "bpo_1_epoch",
         "bpo_1_max_blobs",
         "bpo_1_target_blobs",
