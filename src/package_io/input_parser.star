@@ -99,28 +99,17 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
 )
 
 
-def validate_slot_duration_eip8198(network_params):
-    eip8198_fork_epoch = network_params["eip8198_fork_epoch"]
-    slot_duration_ms_eip8198 = network_params["slot_duration_ms_eip8198"]
-
-    if eip8198_fork_epoch != constants.FAR_FUTURE_EPOCH:
-        if network_params["heze_fork_epoch"] > eip8198_fork_epoch:
-            fail(
-                "eip8198_fork_epoch ({0}) must be >= heze_fork_epoch ({1})".format(
-                    eip8198_fork_epoch, network_params["heze_fork_epoch"]
-                )
-            )
-        if network_params["frames_enabled"]:
-            fail("eip8198_fork_epoch can't be combined with frames_enabled")
+def validate_slot_duration_heze(network_params):
+    slot_duration_ms_heze = network_params["slot_duration_ms_heze"]
 
     if (
-        type(slot_duration_ms_eip8198) != "int"
-        or slot_duration_ms_eip8198 <= 0
-        or slot_duration_ms_eip8198 % 1000 != 0
+        type(slot_duration_ms_heze) != "int"
+        or slot_duration_ms_heze <= 0
+        or slot_duration_ms_heze % 1000 != 0
     ):
         fail(
-            "slot_duration_ms_eip8198 must be a positive multiple of 1000, got {0}".format(
-                slot_duration_ms_eip8198
+            "slot_duration_ms_heze must be a positive multiple of 1000, got {0}".format(
+                slot_duration_ms_heze
             )
         )
 
@@ -584,7 +573,7 @@ def input_parser(plan, input_args):
                 )
             )
 
-    validate_slot_duration_eip8198(result["network_params"])
+    validate_slot_duration_heze(result["network_params"])
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
@@ -874,7 +863,6 @@ def input_parser(plan, input_args):
             fulu_fork_epoch=result["network_params"]["fulu_fork_epoch"],
             gloas_fork_epoch=result["network_params"]["gloas_fork_epoch"],
             heze_fork_epoch=result["network_params"]["heze_fork_epoch"],
-            eip8198_fork_epoch=result["network_params"]["eip8198_fork_epoch"],
             frames_enabled=result["network_params"]["frames_enabled"],
             network=result["network_params"]["network"],
             min_validator_withdrawability_delay=result["network_params"][
@@ -971,9 +959,7 @@ def input_parser(plan, input_args):
             perfect_peerdas_enabled=result["network_params"]["perfect_peerdas_enabled"],
             gas_limit=result["network_params"]["gas_limit"],
             gas_limit_schedule=result["network_params"]["gas_limit_schedule"],
-            slot_duration_ms_eip8198=result["network_params"][
-                "slot_duration_ms_eip8198"
-            ],
+            slot_duration_ms_heze=result["network_params"]["slot_duration_ms_heze"],
             withdrawal_type=result["network_params"]["withdrawal_type"],
             withdrawal_address=result["network_params"]["withdrawal_address"],
             validator_balance=result["network_params"]["validator_balance"],
@@ -1848,7 +1834,6 @@ def default_network_params():
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip8198_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "frames_enabled": False,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1869,7 +1854,7 @@ def default_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "gas_limit_schedule": [],
-        "slot_duration_ms_eip8198": 10000,
+        "slot_duration_ms_heze": 10000,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,
@@ -1939,7 +1924,6 @@ def default_minimal_network_params():
         "fulu_fork_epoch": 0,
         "gloas_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "heze_fork_epoch": constants.FAR_FUTURE_EPOCH,
-        "eip8198_fork_epoch": constants.FAR_FUTURE_EPOCH,
         "frames_enabled": False,
         "network_sync_base_url": "https://snapshots.ethpandaops.io/",
         "force_snapshot_sync": False,
@@ -1960,7 +1944,7 @@ def default_minimal_network_params():
         "perfect_peerdas_enabled": False,
         "gas_limit": 0,
         "gas_limit_schedule": [],
-        "slot_duration_ms_eip8198": 5000,
+        "slot_duration_ms_heze": 5000,
         "bpo_1_epoch": 0,
         "bpo_1_max_blobs": 15,
         "bpo_1_target_blobs": 10,

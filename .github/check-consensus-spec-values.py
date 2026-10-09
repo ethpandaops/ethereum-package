@@ -35,7 +35,6 @@ EXCLUDED_FIELDS = {
     "HEZE_FORK_VERSION",
     "EIP7928_FORK_VERSION",
     "EIP8321_FORK_VERSION",
-    "EIP8198_FORK_VERSION",
     # Fork activation epochs - testnets activate all forks at epoch 0
     "ALTAIR_FORK_EPOCH",
     "BELLATRIX_FORK_EPOCH",
@@ -47,7 +46,6 @@ EXCLUDED_FIELDS = {
     "HEZE_FORK_EPOCH",
     "EIP7928_FORK_EPOCH",
     "EIP8321_FORK_EPOCH",
-    "EIP8198_FORK_EPOCH",
     # Deposit contract - testnet-configurable
     "DEPOSIT_CHAIN_ID",
     "DEPOSIT_NETWORK_ID",
