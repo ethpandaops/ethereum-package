@@ -946,21 +946,18 @@ network_params:
   # Defaults to 18446744073709551615
   heze_fork_epoch: 18446744073709551615
 
+  # Slot duration in milliseconds from heze_fork_epoch onwards (EIP-8198)
+  # Must be a positive multiple of 1000
+  # Ignored while frames_enabled is true, since the CL Heze fork is disabled
+  # Defaults to 10000 for mainnet and 5000 for minimal preset
+  slot_duration_ms_heze: 10000
+
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
   # while the EL still activates bogota at heze_fork_epoch.
   # Also auto-enabled when any participant image tag contains "frame".
   # Defaults to false
   frames_enabled: false
-
-  # EIP-8198 (quick slots) fork epoch, must be >= heze_fork_epoch
-  # Defaults to 18446744073709551615
-  eip8198_fork_epoch: 18446744073709551615
-
-  # Slot duration in milliseconds from eip8198_fork_epoch onwards
-  # Must be a positive multiple of 1000
-  # Defaults to 10000 for mainnet and 5000 for minimal preset
-  slot_duration_ms_eip8198: 10000
 
 
   # Preset for the network
@@ -1851,7 +1848,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.2.4
+  image: ethpandaops/ethereum-genesis-generator:6.2.5
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
