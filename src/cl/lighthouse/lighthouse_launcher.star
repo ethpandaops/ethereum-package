@@ -176,6 +176,7 @@ def get_beacon_config(
         cmd.append("--checkpoint-sync-url=" + checkpoint_sync_url)
     else:
         cmd.append("--allow-insecure-genesis-sync")
+        cmd.append("--ignore-ws-check")
 
     if network_params.network not in constants.PUBLIC_NETWORKS:
         cmd.append("--testnet-dir=" + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER)
