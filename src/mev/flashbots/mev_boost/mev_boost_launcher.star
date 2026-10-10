@@ -24,6 +24,15 @@ MIN_MEMORY = 16
 MAX_MEMORY = 256
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch(
     plan,
     mev_boost_launcher,
@@ -37,6 +46,7 @@ def launch(
     index,
     global_node_selectors,
     global_tolerations,
+    global_log_level,
 ):
     public_ports = shared_utils.get_mev_public_port(
         port_publisher,
@@ -46,6 +56,10 @@ def launch(
     )
 
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
 
     config = get_config(
         mev_boost_launcher,
@@ -58,6 +72,7 @@ def launch(
         seconds_per_slot,
         public_ports,
         index,
+        log_level,
     )
 
     mev_boost_service = plan.add_service(service_name, config)
@@ -80,6 +95,7 @@ def get_config(
     seconds_per_slot,
     public_ports,
     participant_index,
+    log_level,
 ):
     command = mev_boost_args
 
@@ -102,6 +118,7 @@ def get_config(
         public_ports=public_ports,
         cmd=command,
         env_vars={
+            "LOG_LEVEL": log_level,
             "GENESIS_FORK_VERSION": constants.GENESIS_FORK_VERSION,
             "GENESIS_TIMESTAMP": "{0}".format(genesis_timestamp),
             "BOOST_LISTEN_ADDR": "0.0.0.0:{0}".format(constants.MEV_BOOST_PORT),

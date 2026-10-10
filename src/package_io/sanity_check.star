@@ -306,9 +306,11 @@ SUBCATEGORY_PARAMS = {
     "dora_params": [
         "image",
         "env",
+        "log_level",
     ],
     "checkpointz_params": [
         "image",
+        "log_level",
     ],
     "docker_cache_params": [
         "enabled",
@@ -347,6 +349,7 @@ SUBCATEGORY_PARAMS = {
         "min_mem",
         "max_mem",
         "image",
+        "log_level",
     ],
     "tempo_params": [
         "min_cpu",
@@ -354,6 +357,7 @@ SUBCATEGORY_PARAMS = {
         "min_mem",
         "max_mem",
         "image",
+        "log_level",
     ],
     "assertoor_params": [
         "image",
@@ -364,6 +368,7 @@ SUBCATEGORY_PARAMS = {
         "run_opcodes_transaction_test",
         "run_lifecycle_test",
         "tests",
+        "log_level",
     ],
     "mev_params": [
         "mev_relay_image",
@@ -393,12 +398,14 @@ SUBCATEGORY_PARAMS = {
         "xatu_server_tls",
         "xatu_server_headers",
         "beacon_subscriptions",
+        "log_level",
     ],
     "snooper_params": [
         "enabled",
         "image",
         "extra_args",
         "extra_env_vars",
+        "log_level",
     ],
     "spamoor_params": [
         "image",
@@ -411,6 +418,7 @@ SUBCATEGORY_PARAMS = {
         "start_chainload",
         "start_fuzzing",
         "defaults",
+        "log_level",
     ],
     "disruptoor_params": [
         "image",
@@ -465,12 +473,14 @@ SUBCATEGORY_PARAMS = {
         "max_mem",
         "separate_keys",
         "extra_args",
+        "log_level",
     ],
     "zkboost_params": [
         "image",
         "instances",
         "zkvms",
         "env",
+        "log_level",
     ],
     "buildoor_params": [
         "image",
@@ -479,6 +489,7 @@ SUBCATEGORY_PARAMS = {
         "epbs_builder",
         "lifecycle",
         "instances",
+        "log_level",
     ],
     "trueblocks_params": [
         "image",

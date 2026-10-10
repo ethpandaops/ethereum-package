@@ -622,7 +622,12 @@ def input_parser(plan, input_args):
 
     if "zkboost" in result["additional_services"]:
         if "RUST_LOG" not in result["zkboost_params"]["env"]:
-            result["zkboost_params"]["env"]["RUST_LOG"] = "info,zkboost=debug"
+            zkboost_log_level = (
+                result["zkboost_params"]["log_level"] or result["global_log_level"]
+            )
+            result["zkboost_params"]["env"]["RUST_LOG"] = ZKBOOST_RUST_LOG_LEVELS.get(
+                zkboost_log_level, "info,zkboost=debug"
+            )
 
         # Validate zkvm configurations
         valid_proof_types = [
@@ -1032,10 +1037,12 @@ def input_parser(plan, input_args):
         ),
         checkpointz_params=struct(
             image=result["checkpointz_params"]["image"],
+            log_level=result["checkpointz_params"]["log_level"],
         ),
         dora_params=struct(
             image=result["dora_params"]["image"],
             env=result["dora_params"]["env"],
+            log_level=result["dora_params"]["log_level"],
         ),
         docker_cache_params=struct(
             enabled=result["docker_cache_params"]["enabled"],
@@ -1078,6 +1085,7 @@ def input_parser(plan, input_args):
             min_mem=result["grafana_params"]["min_mem"],
             max_mem=result["grafana_params"]["max_mem"],
             image=result["grafana_params"]["image"],
+            log_level=result["grafana_params"]["log_level"],
         ),
         tempo_params=struct(
             min_cpu=result["tempo_params"]["min_cpu"],
@@ -1085,6 +1093,7 @@ def input_parser(plan, input_args):
             min_mem=result["tempo_params"]["min_mem"],
             max_mem=result["tempo_params"]["max_mem"],
             image=result["tempo_params"]["image"],
+            log_level=result["tempo_params"]["log_level"],
         ),
         nginx_port=result["nginx_port"],
         assertoor_params=struct(
@@ -1102,6 +1111,7 @@ def input_parser(plan, input_args):
                 "run_opcodes_transaction_test"
             ],
             tests=result["assertoor_params"]["tests"],
+            log_level=result["assertoor_params"]["log_level"],
         ),
         spamoor_params=struct(
             image=result["spamoor_params"]["image"],
@@ -1114,6 +1124,7 @@ def input_parser(plan, input_args):
             start_chainload=result["spamoor_params"]["start_chainload"],
             start_fuzzing=result["spamoor_params"]["start_fuzzing"],
             defaults=result["spamoor_params"]["defaults"],
+            log_level=result["spamoor_params"]["log_level"],
         ),
         disruptoor_params=struct(
             image=result["disruptoor_params"]["image"],
@@ -1166,6 +1177,7 @@ def input_parser(plan, input_args):
             image=result["snooper_params"]["image"],
             extra_args=result["snooper_params"]["extra_args"],
             extra_env_vars=result["snooper_params"]["extra_env_vars"],
+            log_level=result["snooper_params"]["log_level"],
         ),
         ethereum_metrics_exporter_enabled=result["ethereum_metrics_exporter_enabled"],
         xatu_sentry_enabled=result["xatu_sentry_enabled"],
@@ -1178,6 +1190,7 @@ def input_parser(plan, input_args):
             xatu_server_headers=result["xatu_sentry_params"]["xatu_server_headers"],
             beacon_subscriptions=result["xatu_sentry_params"]["beacon_subscriptions"],
             xatu_server_tls=result["xatu_sentry_params"]["xatu_server_tls"],
+            log_level=result["xatu_sentry_params"]["log_level"],
         ),
         global_tolerations=result["global_tolerations"],
         global_node_selectors=result["global_node_selectors"],
@@ -1233,6 +1246,7 @@ def input_parser(plan, input_args):
             max_mem=result["bootnodoor_params"]["max_mem"],
             separate_keys=result["bootnodoor_params"]["separate_keys"],
             extra_args=result["bootnodoor_params"]["extra_args"],
+            log_level=result["bootnodoor_params"]["log_level"],
         ),
         zkboost_params=struct(
             image=result["zkboost_params"]["image"],
@@ -1241,6 +1255,7 @@ def input_parser(plan, input_args):
             instances=result["zkboost_params"]["instances"],
             zkvms=result["zkboost_params"]["zkvms"],
             env=result["zkboost_params"]["env"],
+            log_level=result["zkboost_params"]["log_level"],
         ),
         buildoor_params=struct(
             image=result["buildoor_params"]["image"],
@@ -1258,6 +1273,7 @@ def input_parser(plan, input_args):
                 )
                 for instance in result["buildoor_params"]["instances"]
             ],
+            log_level=result["buildoor_params"]["log_level"],
         ),
         trueblocks_params=struct(
             image=result["trueblocks_params"]["image"],
@@ -2089,6 +2105,7 @@ def get_default_dora_params():
     return {
         "image": constants.DEFAULT_DORA_IMAGE,
         "env": {},
+        "log_level": "",
     }
 
 
@@ -2114,6 +2131,7 @@ def get_default_trueblocks_params():
 def get_default_checkpointz_params():
     return {
         "image": constants.DEFAULT_CHECKPOINTZ_IMAGE,
+        "log_level": "",
     }
 
 
@@ -2251,6 +2269,7 @@ def get_default_assertoor_params():
         "run_blob_transaction_test": False,
         "run_opcodes_transaction_test": False,
         "tests": [],
+        "log_level": "",
     }
 
 
@@ -2274,6 +2293,7 @@ def get_default_grafana_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "grafana/grafana:latest",
+        "log_level": "",
     }
 
 
@@ -2284,6 +2304,7 @@ def get_default_tempo_params():
         "min_mem": 128,
         "max_mem": 2048,
         "image": "grafana/tempo:latest",
+        "log_level": "",
     }
 
 
@@ -2306,6 +2327,7 @@ def get_default_xatu_sentry_params():
             "blob_sidecar",
             "data_column_sidecar",
         ],
+        "log_level": "",
     }
 
 
@@ -2315,6 +2337,7 @@ def get_default_snooper_params():
         "image": constants.DEFAULT_SNOOPER_IMAGE,
         "extra_args": [],
         "extra_env_vars": {},
+        "log_level": "",
     }
 
 
@@ -2359,6 +2382,7 @@ def get_default_spamoor_params():
                 },
             },
         ],
+        "log_level": "",
     }
 
 
@@ -2369,7 +2393,7 @@ def get_default_disruptoor_params():
         "max_cpu": 1000,
         "min_mem": 128,
         "max_mem": 512,
-        "log_level": "info",
+        "log_level": "",
         "log_format": "json",
         "config": {},
         "partitions": [],
@@ -2386,7 +2410,7 @@ def get_default_slashoor_params():
         "min_mem": 128,
         "max_mem": 512,
         "extra_args": [],
-        "log_level": "info",
+        "log_level": "",
         "beacon_timeout": "30s",
         "max_epochs_to_keep": 54000,
         "detector_enabled": True,
@@ -2421,7 +2445,17 @@ def get_default_bootnodoor_params():
         "max_mem": 512,
         "separate_keys": False,
         "extra_args": [],
+        "log_level": "",
     }
+
+
+ZKBOOST_RUST_LOG_LEVELS = {
+    "error": "error",
+    "warn": "warn",
+    "info": "info,zkboost=debug",
+    "debug": "debug",
+    "trace": "trace",
+}
 
 
 def get_default_zkboost_params():
@@ -2430,6 +2464,7 @@ def get_default_zkboost_params():
         "instances": [{"name": "zkboost"}],
         "zkvms": [],
         "env": {},
+        "log_level": "",
     }
 
 
@@ -2449,6 +2484,7 @@ def get_default_buildoor_params():
         # builder reads one CL's payload_attributes stream and (in ePBS) gossips
         # bids to the whole network. Empty => no per-participant buildoors.
         "instances": [],
+        "log_level": "",
     }
 
 

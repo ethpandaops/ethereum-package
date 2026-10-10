@@ -39,6 +39,15 @@ USED_PORTS = {
 }
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "debug",
+}
+
+
 def launch_grafana(
     plan,
     datasource_config_template,
@@ -52,6 +61,7 @@ def launch_grafana(
     tempo_query_url=None,
     clickhouse_host=None,
     clickhouse_port=None,
+    global_log_level=constants.GLOBAL_LOG_LEVEL.info,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -85,6 +95,10 @@ def launch_grafana(
         1,
     )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        grafana_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     config = get_config(
         grafana_config_artifacts_uuid,
         merged_dashboards_artifact_name,
@@ -92,6 +106,7 @@ def launch_grafana(
         tolerations,
         grafana_params,
         public_ports,
+        log_level,
         clickhouse_host,
     )
 
@@ -156,10 +171,12 @@ def get_config(
     tolerations,
     grafana_params,
     public_ports,
+    log_level,
     clickhouse_host=None,
 ):
     env_vars = {
         CONFIG_DIRPATH_ENV_VAR: GRAFANA_CONFIG_DIRPATH_ON_SERVICE,
+        "GF_LOG_LEVEL": log_level,
         "GF_AUTH_ANONYMOUS_ENABLED": "true",
         "GF_AUTH_ANONYMOUS_ORG_ROLE": "Admin",
         "GF_AUTH_ANONYMOUS_ORG_NAME": "Main Org.",
