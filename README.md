@@ -235,10 +235,10 @@ Copy any of them to your local working directory and run with `kurtosis run --en
 
 ### Disruptoor example
 
-Use [`.github/tests/examples/disruptoor.yaml`](.github/tests/examples/disruptoor.yaml) to launch a small two-node network with Disruptoor and Dora. The example applies a CL partition between node 1 and node 2 at startup, then adds latency and jitter to every component on node 1.
+Use [`.github/tests/disruptoor.yaml`](.github/tests/disruptoor.yaml) to launch a small two-node network with Disruptoor and Dora. The example applies a CL partition between node 1 and node 2 at startup, then adds latency and jitter to every component on node 1.
 
 ```bash
-kurtosis run --enclave disruptoor-example . --args-file .github/tests/examples/disruptoor.yaml --privileged --verbosity detailed
+kurtosis run --enclave disruptoor-example . --args-file .github/tests/disruptoor.yaml --privileged --verbosity detailed
 ```
 
 Disruptoor is Docker-only. The package fails early on Kubernetes because Disruptoor needs privileged mode, `/var/run/docker.sock`, and the host PID namespace to shape peer traffic. The `--privileged` run flag is required so Kurtosis allows those Docker-only service settings.
