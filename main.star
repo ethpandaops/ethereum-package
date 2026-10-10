@@ -627,11 +627,13 @@ def run(plan, args={}):
     mev_endpoint_names = []
     buildoor_api_urls = []
     # Builder BLS keys derive from the dedicated builder mnemonic (distinct from
-    # the validator mnemonic, so no validator collision is possible): genesis
-    # builders occupy indices 0..builder_count-1 and every buildoor gets the next
-    # index after them. The counter is shared between the mev_type buildoor and
-    # the dedicated buildoor instances so no two buildoors (nor the genesis
-    # builders) ever derive the same key.
+    # the validator mnemonic, so no validator collision is possible). Buildoors
+    # are handed indices in launch order: the first builder_count of them get
+    # the genesis-registered builders (indices 0..builder_count-1, already in
+    # state.builders so no lifecycle deposit is needed) and every further one
+    # gets the next free index and onboards itself via its lifecycle deposit.
+    # The counter is shared between the mev_type buildoor and the dedicated
+    # buildoor instances so no two buildoors ever derive the same key.
     buildoor_builder_index = 0
     # passed external relays get priority
     # perhaps add mev_type External or remove this
@@ -686,7 +688,7 @@ def run(plan, args={}):
             all_el_contexts[0].dns_name,
             all_el_contexts[0].engine_rpc_port_num,
         )
-        mev_buildoor_key_index = network_params.builder_count + buildoor_builder_index
+        mev_buildoor_key_index = buildoor_builder_index
         buildoor_builder_index += 1
         buildoor_endpoints = buildoor.launch_buildoor(
             plan,
@@ -870,12 +872,12 @@ def run(plan, args={}):
             )
             # Each instance is its own builder with its own builder BLS key,
             # derived by buildoor from the builder mnemonic at the next free
-            # index after the genesis-registered builders, so they do not
-            # collide. The builder is onboarded after genesis via its lifecycle
-            # deposit (buildoor_params.lifecycle), not registered at genesis.
-            instance_builder_key_index = (
-                network_params.builder_count + buildoor_builder_index
-            )
+            # index, so they do not collide. Indices below builder_count are
+            # genesis-registered builders (already in state.builders, active as
+            # soon as their deposit_epoch 0 is finalized); any further index is
+            # onboarded after genesis via its lifecycle deposit
+            # (buildoor_params.lifecycle).
+            instance_builder_key_index = buildoor_builder_index
             buildoor_builder_index += 1
             buildoor_endpoints = buildoor.launch_buildoor(
                 plan,
