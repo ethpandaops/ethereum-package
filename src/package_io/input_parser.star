@@ -890,12 +890,7 @@ def input_parser(plan, input_args):
                 "payload_attestation_due_bps"
             ],
             view_freeze_cutoff_bps=result["network_params"]["view_freeze_cutoff_bps"],
-            inclusion_list_submission_due_bps=result["network_params"][
-                "inclusion_list_submission_due_bps"
-            ],
-            proposer_inclusion_list_cutoff_bps=result["network_params"][
-                "proposer_inclusion_list_cutoff_bps"
-            ],
+            inclusion_list_due_bps=result["network_params"]["inclusion_list_due_bps"],
             network_sync_base_url=result["network_params"]["network_sync_base_url"],
             force_snapshot_sync=result["network_params"]["force_snapshot_sync"],
             shadowfork_block_height=result["network_params"]["shadowfork_block_height"],
@@ -1824,8 +1819,7 @@ def default_network_params():
         "payload_due_bps": 5000,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
-        "inclusion_list_submission_due_bps": 6667,
-        "proposer_inclusion_list_cutoff_bps": 9167,
+        "inclusion_list_due_bps": 7500,
         "altair_fork_epoch": 0,
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,
@@ -1914,8 +1908,7 @@ def default_minimal_network_params():
         "payload_due_bps": 5000,
         "payload_attestation_due_bps": 7500,
         "view_freeze_cutoff_bps": 7500,
-        "inclusion_list_submission_due_bps": 6667,
-        "proposer_inclusion_list_cutoff_bps": 9167,
+        "inclusion_list_due_bps": 7500,
         "altair_fork_epoch": 0,
         "bellatrix_fork_epoch": 0,
         "capella_fork_epoch": 0,

@@ -773,13 +773,9 @@ network_params:
   # Defaults to 7500 basis points (75% of slot duration)
   view_freeze_cutoff_bps: 7500
 
-  # Inclusion list submission due timing
-  # Defaults to 6667 basis points (~67% of slot duration)
-  inclusion_list_submission_due_bps: 6667
-
-  # Proposer inclusion list cutoff timing
-  # Defaults to 9167 basis points (~92% of slot duration)
-  proposer_inclusion_list_cutoff_bps: 9167
+  # Inclusion list due timing
+  # Defaults to 7500 basis points (75% of slot duration)
+  inclusion_list_due_bps: 7500
 
   # Maximum request blocks for Deneb fork
   # Defaults to 128
