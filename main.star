@@ -59,6 +59,9 @@ spamoor = import_module("./src/spamoor/spamoor.star")
 disruptoor = import_module("./src/disruptoor/disruptoor_launcher.star")
 slashoor = import_module("./src/slashoor/slashoor_launcher.star")
 zkboost = import_module("./src/zkboost/zkboost_launcher.star")
+eth_proof_verifier = import_module(
+    "./src/eth_proof_verifier/eth_proof_verifier_launcher.star"
+)
 trueblocks = import_module("./src/trueblocks/trueblocks_launcher.star")
 
 GRAFANA_USER = "admin"
@@ -1383,6 +1386,18 @@ def run(plan, args={}):
             )
             prometheus_additional_metrics_jobs.extend(zkboost_metrics_jobs)
             plan.print("Successfully launched zkboost")
+        elif additional_service == "eth_proof_verifier":
+            plan.print("Launching eth_proof_verifier")
+            eth_proof_verifier.launch_eth_proof_verifier(
+                plan,
+                args_with_right_defaults.eth_proof_verifier_params,
+                global_node_selectors,
+                global_tolerations,
+                args_with_right_defaults.port_publisher,
+                index,
+                args_with_right_defaults.docker_cache_params,
+            )
+            plan.print("Successfully launched eth_proof_verifier")
         elif additional_service == "trueblocks":
             plan.print("Launching trueblocks")
             trueblocks_config_template = read_file(

@@ -93,6 +93,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "bootnodoor_params",
     "mempool_bridge_params",
     "zkboost_params",
+    "eth_proof_verifier_params",
     "buildoor_params",
     "ethereum_genesis_generator_params",
     "trueblocks_params",
@@ -162,6 +163,7 @@ def input_parser(plan, input_args):
     result["slashoor_params"] = get_default_slashoor_params()
     result["mempool_bridge_params"] = get_default_mempool_bridge_params()
     result["zkboost_params"] = get_default_zkboost_params()
+    result["eth_proof_verifier_params"] = get_default_eth_proof_verifier_params()
     result["buildoor_params"] = get_default_buildoor_params()
     result["trueblocks_params"] = get_default_trueblocks_params()
 
@@ -259,6 +261,10 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["zkboost_params"]:
                 sub_value = input_args["zkboost_params"][sub_attr]
                 result["zkboost_params"][sub_attr] = sub_value
+        elif attr == "eth_proof_verifier_params":
+            for sub_attr in input_args["eth_proof_verifier_params"]:
+                sub_value = input_args["eth_proof_verifier_params"][sub_attr]
+                result["eth_proof_verifier_params"][sub_attr] = sub_value
         elif attr == "buildoor_params":
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
@@ -1241,6 +1247,11 @@ def input_parser(plan, input_args):
             instances=result["zkboost_params"]["instances"],
             zkvms=result["zkboost_params"]["zkvms"],
             env=result["zkboost_params"]["env"],
+        ),
+        eth_proof_verifier_params=struct(
+            image=result["eth_proof_verifier_params"]["image"],
+            extra_args=result["eth_proof_verifier_params"]["extra_args"],
+            env=result["eth_proof_verifier_params"]["env"],
         ),
         buildoor_params=struct(
             image=result["buildoor_params"]["image"],
@@ -2429,6 +2440,14 @@ def get_default_zkboost_params():
         "image": constants.DEFAULT_ZKBOOST_IMAGE,
         "instances": [{"name": "zkboost"}],
         "zkvms": [],
+        "env": {},
+    }
+
+
+def get_default_eth_proof_verifier_params():
+    return {
+        "image": constants.DEFAULT_ETH_PROOF_VERIFIER_IMAGE,
+        "extra_args": [],
         "env": {},
     }
 

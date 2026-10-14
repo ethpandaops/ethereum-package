@@ -1116,6 +1116,7 @@ additional_services:
   - dugtrio
   - erpc
   - zkboost
+  - eth_proof_verifier
   - forkmon
   - forky
   - grafana
@@ -1374,6 +1375,19 @@ zkboost_params:
   # RUST_LOG defaults to "info,zkboost=debug" if not set; other vars pass through unchanged.
   env:
     RUST_LOG: "info,zkboost=debug"
+
+# Configuration place for eth_proof_verifier - https://github.com/dapplion/eth_proof_verifier
+# A stateless EIP-8025 proof verifier, launched as a single service named eth-proof-verifier.
+# Point a beacon node at it with cl_extra_params:
+#   --proof-engine-endpoint=http://eth-proof-verifier:8025
+eth_proof_verifier_params:
+  # eth_proof_verifier docker image to use
+  # Defaults to the latest image
+  image: "ghcr.io/dapplion/eth_proof_verifier:latest"
+  # A list of optional extra args, e.g. --proof-types <file>
+  extra_args: []
+  # A list of optional extra env_vars, e.g. RUST_LOG
+  env: {}
 
 # Configuration place for tempo tracing backend
 tempo_params:
