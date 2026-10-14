@@ -1280,11 +1280,14 @@ bootnodoor_params:
 # Participant cl_extra_params:
 #   --execution-endpoint=http://<instance>:3000
 #     Sends the Engine API of the participant through that zkboost instance.
-#     Each instance needs exactly one such participant, which also sets --proof-engine.
+#     Each instance needs exactly one such participant, which also sets --proof-engine or
+#     --proof-engine-endpoint.
 #   --proof-engine
 #     Enables the proof engine with the built-in verifier config of Lighthouse.
 #   --proof-engine=<path>
 #     Uses the verifier config at <path>. Add the file with extra_files and mount it with cl_extra_mounts.
+#   --proof-engine-endpoint=http://eth-proof-verifier:8025
+#     Verifies proofs with the eth_proof_verifier service (Lighthouse unstable).
 zkboost_params:
   # zkboost docker image to use
   # Defaults to the latest image
