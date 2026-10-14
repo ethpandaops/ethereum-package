@@ -1,0 +1,31 @@
+# Opt-in Disruptoor walkthrough example (not run by CI).
+# Two participants: CL partition between node 1 and node 2, then delay/jitter
+# on every component of node 1. Pair with:
+#   kurtosis run --enclave disruptoor-example . \
+#     --args-file .github/tests/examples/disruptoor.yaml \
+#     --privileged --verbosity detailed
+participants:
+  - el_type: geth
+    cl_type: lighthouse
+  - el_type: geth
+    cl_type: lighthouse
+additional_services:
+  - dora
+  - disruptoor
+port_publisher:
+  additional_services:
+    enabled: true
+disruptoor_params:
+  partitions:
+    - name: split-node-1-node-2
+      groups:
+        - participants: [1]
+        - participants: [2]
+      components: [cl]
+  shaping:
+    - name: delay-node-1
+      participants: [1]
+      components: all
+      delay: 50ms
+      jitter: 10ms
+      include_control: true
