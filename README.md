@@ -773,13 +773,9 @@ network_params:
   # Defaults to 7500 basis points (75% of slot duration)
   view_freeze_cutoff_bps: 7500
 
-  # Inclusion list submission due timing
-  # Defaults to 6667 basis points (~67% of slot duration)
-  inclusion_list_submission_due_bps: 6667
-
-  # Proposer inclusion list cutoff timing
-  # Defaults to 9167 basis points (~92% of slot duration)
-  proposer_inclusion_list_cutoff_bps: 9167
+  # Inclusion list due timing
+  # Defaults to 7500 basis points (75% of slot duration)
+  inclusion_list_due_bps: 7500
 
   # Maximum request blocks for Deneb fork
   # Defaults to 128
@@ -946,21 +942,18 @@ network_params:
   # Defaults to 18446744073709551615
   heze_fork_epoch: 18446744073709551615
 
+  # Slot duration in milliseconds from heze_fork_epoch onwards (EIP-8198)
+  # Must be a positive multiple of 1000
+  # Ignored while frames_enabled is true, since the CL Heze fork is disabled
+  # Defaults to 12000 for mainnet and 6000 for minimal preset
+  slot_duration_ms_heze: 12000
+
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
   # while the EL still activates bogota at heze_fork_epoch.
   # Also auto-enabled when any participant image tag contains "frame".
   # Defaults to false
   frames_enabled: false
-
-  # EIP-8198 (quick slots) fork epoch, must be >= heze_fork_epoch
-  # Defaults to 18446744073709551615
-  eip8198_fork_epoch: 18446744073709551615
-
-  # Slot duration in milliseconds from eip8198_fork_epoch onwards
-  # Must be a positive multiple of 1000
-  # Defaults to 10000 for mainnet and 5000 for minimal preset
-  slot_duration_ms_eip8198: 10000
 
 
   # Preset for the network
@@ -1851,7 +1844,7 @@ slashoor_params:
 # Ethereum genesis generator params
 ethereum_genesis_generator_params:
   # The image to use for ethereum genesis generator
-  image: ethpandaops/ethereum-genesis-generator:6.2.4
+  image: ethpandaops/ethereum-genesis-generator:6.2.6
   # Pass custom environment variables to the genesis generator (e.g. MY_VAR: my_value)
   extra_env: {}
 
