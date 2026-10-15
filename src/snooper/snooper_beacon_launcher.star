@@ -6,11 +6,16 @@ snooper_beacon_context = import_module("../snooper/snooper_beacon_context.star")
 
 SNOOPER_BEACON_RPC_PORT_NUM = 8562
 SNOOPER_BEACON_RPC_PORT_ID = "http"
+SNOOPER_METRICS_PORT_NUM = 9090
+SNOOPER_METRICS_PORT_ID = "metrics"
 SNOOPER_BINARY_COMMAND = "./json_rpc_snoop"
 
 SNOOPER_USED_PORTS = {
     SNOOPER_BEACON_RPC_PORT_ID: shared_utils.new_port_spec(
         SNOOPER_BEACON_RPC_PORT_NUM, shared_utils.TCP_PROTOCOL, wait="5s"
+    ),
+    SNOOPER_METRICS_PORT_ID: shared_utils.new_port_spec(
+        SNOOPER_METRICS_PORT_NUM, shared_utils.TCP_PROTOCOL, wait=None
     ),
 }
 
@@ -58,6 +63,7 @@ def launch(
     return snooper_beacon_context.new_snooper_beacon_client_context(
         snooper_service.ip_address,
         SNOOPER_BEACON_RPC_PORT_NUM,
+        SNOOPER_METRICS_PORT_NUM,
         snooper_service.name,
     )
 
@@ -84,6 +90,8 @@ def get_config(
         SNOOPER_BINARY_COMMAND,
         "-b=0.0.0.0",
         "-p={0}".format(SNOOPER_BEACON_RPC_PORT_NUM),
+        "--metrics-bind=0.0.0.0",
+        "--metrics-port={0}".format(SNOOPER_METRICS_PORT_NUM),
         "{0}".format(beacon_rpc_port_num),
     ] + snooper_params.extra_args
 
