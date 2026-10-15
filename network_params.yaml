@@ -113,7 +113,7 @@ network_params:
   fulu_fork_epoch: 0
   gloas_fork_epoch: 18446744073709551615
   frames_enabled: false
-  slot_duration_ms_heze: 10000
+  slot_duration_ms_heze: 12000
   network_sync_base_url: https://snapshots.ethpandaops.io/
   force_snapshot_sync: false
   samples_per_slot: 8

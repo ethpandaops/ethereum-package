@@ -945,8 +945,8 @@ network_params:
   # Slot duration in milliseconds from heze_fork_epoch onwards (EIP-8198)
   # Must be a positive multiple of 1000
   # Ignored while frames_enabled is true, since the CL Heze fork is disabled
-  # Defaults to 10000 for mainnet and 5000 for minimal preset
-  slot_duration_ms_heze: 10000
+  # Defaults to 12000 for mainnet and 6000 for minimal preset
+  slot_duration_ms_heze: 12000
 
   # Temporary hack while FOCIL is kept separate from frames: disables the Heze
   # fork on the CL side (HEZE_FORK_EPOCH pinned to max uint64 in the CL config)
