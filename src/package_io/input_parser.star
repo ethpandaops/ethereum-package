@@ -1475,21 +1475,16 @@ def parse_network_params(plan, input_args):
                 max_key = "bpo_{}_max_blobs".format(bpo_num)
                 target_key = "bpo_{}_target_blobs".format(bpo_num)
 
-                # If only max is set (non-zero), calculate target as 2/3 of max (rounded)
-                if result["network_params"].get(max_key) and not result[
-                    "network_params"
-                ].get(target_key):
+                max_set = bool(input_args["network_params"].get(max_key))
+                target_set = bool(input_args["network_params"].get(target_key))
+                if max_set and not target_set:
                     result["network_params"][target_key] = int(
                         result["network_params"][max_key] * 2.0 / 3.0 + 0.5
                     )
-                # If only target is set (non-zero), calculate max as target * 3/2 (rounded)
-                elif result["network_params"].get(target_key) and not result[
-                    "network_params"
-                ].get(max_key):
+                elif target_set and not max_set:
                     result["network_params"][max_key] = int(
                         result["network_params"][target_key] * 3.0 / 2.0 + 0.5
                     )
-                # If both are set or both are 0, don't override
 
         elif attr == "participants":
             participants = []
