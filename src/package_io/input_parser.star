@@ -114,6 +114,73 @@ def validate_slot_duration_heze(network_params):
         )
 
 
+def schedule_heze_slot_duration_bpo(plan, network_params):
+    heze_epoch = network_params["heze_fork_epoch"]
+    old_ms = network_params["slot_duration_ms"]
+    new_ms = network_params["slot_duration_ms_heze"]
+    if (
+        heze_epoch == constants.FAR_FUTURE_EPOCH
+        or heze_epoch == 0
+        or new_ms == old_ms
+        or network_params["frames_enabled"]
+    ):
+        return
+
+    prev_target = network_params["target_blobs_per_block_electra"]
+    prev_max = network_params["max_blobs_per_block_electra"]
+    prev_fraction = network_params["base_fee_update_fraction_electra"]
+    free_index = None
+    for i in range(1, 6):
+        epoch = network_params["bpo_{0}_epoch".format(i)]
+        if epoch == heze_epoch:
+            return
+        if epoch < heze_epoch:
+            prev_target = network_params["bpo_{0}_target_blobs".format(i)]
+            prev_max = network_params["bpo_{0}_max_blobs".format(i)]
+            prev_fraction = network_params["bpo_{0}_base_fee_update_fraction".format(i)]
+        elif free_index == None:
+            free_index = i
+
+    if free_index == None or (
+        network_params["bpo_{0}_epoch".format(free_index)] != constants.FAR_FUTURE_EPOCH
+    ):
+        fail(
+            "slot_duration_ms_heze ({0}) differs from slot_duration_ms ({1}), so a BPO must be scheduled at heze_fork_epoch ({2}) to keep blob throughput per second, but no BPO slot is free in order. Set a bpo_*_epoch to {2} explicitly.".format(
+                new_ms, old_ms, heze_epoch
+            )
+        )
+
+    if prev_fraction == 0:
+        prev_fraction = int(prev_max * 131072 / 0.23556607131276688 + 0.5)
+
+    target = (2 * prev_target * new_ms + old_ms) // (2 * old_ms)
+    if target < 1:
+        target = 1
+    max_blobs = (2 * prev_max * target + prev_target) // (2 * prev_target)
+    fraction = (2 * prev_fraction * target * old_ms + prev_target * new_ms) // (
+        2 * prev_target * new_ms
+    )
+
+    network_params["bpo_{0}_epoch".format(free_index)] = heze_epoch
+    network_params["bpo_{0}_target_blobs".format(free_index)] = target
+    network_params["bpo_{0}_max_blobs".format(free_index)] = max_blobs
+    network_params["bpo_{0}_base_fee_update_fraction".format(free_index)] = fraction
+    plan.print(
+        "Scheduled BPO {0} at heze_fork_epoch {1} for {2}ms -> {3}ms slots: target {4} -> {5}, max {6} -> {7}, base fee update fraction {8} -> {9}".format(
+            free_index,
+            heze_epoch,
+            old_ms,
+            new_ms,
+            prev_target,
+            target,
+            prev_max,
+            max_blobs,
+            prev_fraction,
+            fraction,
+        )
+    )
+
+
 def input_parser(plan, input_args):
     sanity_check.sanity_check(plan, input_args)
     result = parse_network_params(plan, input_args)
@@ -574,6 +641,7 @@ def input_parser(plan, input_args):
             )
 
     validate_slot_duration_heze(result["network_params"])
+    schedule_heze_slot_duration_bpo(plan, result["network_params"])
 
     if result["network_params"]["fulu_fork_epoch"] != constants.FAR_FUTURE_EPOCH:
         has_supernodes = False
