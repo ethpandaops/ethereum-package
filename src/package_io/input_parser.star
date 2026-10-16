@@ -654,6 +654,17 @@ def input_parser(plan, input_args):
             )
         )
 
+    if (
+        "gas_limit_schedule" not in input_args.get("network_params", {})
+        and result["network_params"]["gloas_fork_epoch"] != constants.FAR_FUTURE_EPOCH
+    ):
+        result["network_params"]["gas_limit_schedule"] = [
+            {
+                "epoch": result["network_params"]["gloas_fork_epoch"],
+                "gas_limit": 200000000,
+            }
+        ]
+
     for entry in result["network_params"]["gas_limit_schedule"]:
         if type(entry) != "dict" or sorted(entry.keys()) != ["epoch", "gas_limit"]:
             fail(

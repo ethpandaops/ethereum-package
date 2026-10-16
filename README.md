@@ -1028,7 +1028,9 @@ network_params:
   # recommended maximum gas limit
   # Requires Gloas: every epoch must be >= gloas_fork_epoch, since the
   # CL only drives the gas limit post-Gloas
-  # Defaults to [] (field is emitted as GAS_LIMIT_SCHEDULE: [])
+  # Defaults to a single 200000000 entry at gloas_fork_epoch when Gloas is
+  # scheduled, otherwise [] (field is emitted as GAS_LIMIT_SCHEDULE: [])
+  # Set it explicitly (including []) to override
   # Example:
   # gas_limit_schedule:
   #   - epoch: 256
