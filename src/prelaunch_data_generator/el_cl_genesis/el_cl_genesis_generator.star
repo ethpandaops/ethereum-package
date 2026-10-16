@@ -168,7 +168,6 @@ def new_env_file_for_el_cl_genesis_data(
         "FuluForkEpoch": "{0}".format(network_params.fulu_fork_epoch),
         "GloasForkEpoch": "{0}".format(network_params.gloas_fork_epoch),
         "HezeForkEpoch": "{0}".format(network_params.heze_fork_epoch),
-        "Eip8198ForkEpoch": "{0}".format(network_params.eip8198_fork_epoch),
         "FramesEnabled": "true" if frames_enabled else "false",
         "GenesisForkVersion": constants.GENESIS_FORK_VERSION,
         "AltairForkVersion": constants.ALTAIR_FORK_VERSION,
@@ -179,7 +178,7 @@ def new_env_file_for_el_cl_genesis_data(
         "FuluForkVersion": constants.FULU_FORK_VERSION,
         "GloasForkVersion": constants.GLOAS_FORK_VERSION,
         "HezeForkVersion": constants.HEZE_FORK_VERSION,
-        "Eip8198ForkVersion": constants.EIP8198_FORK_VERSION,
+        "SlotDurationMsHeze": network_params.slot_duration_ms_heze,
         "ShadowForkFile": shadowfork_file,
         "AdditionalValidatorMnemonics": get_additional_mnemonics_json(network_params),
         "MinValidatorWithdrawabilityDelay": network_params.min_validator_withdrawability_delay,
@@ -193,8 +192,7 @@ def new_env_file_for_el_cl_genesis_data(
         "PayloadDueBps": network_params.payload_due_bps,
         "PayloadAttestationDueBps": network_params.payload_attestation_due_bps,
         "ViewFreezeCutoffBps": network_params.view_freeze_cutoff_bps,
-        "InclusionListSubmissionDueBps": network_params.inclusion_list_submission_due_bps,
-        "ProposerInclusionListCutoffBps": network_params.proposer_inclusion_list_cutoff_bps,
+        "InclusionListDueBps": network_params.inclusion_list_due_bps,
         "SamplesPerSlot": network_params.samples_per_slot,
         "CustodyRequirement": network_params.custody_requirement,
         "MaxBlobsPerBlockElectra": network_params.max_blobs_per_block_electra,
@@ -228,10 +226,6 @@ def new_env_file_for_el_cl_genesis_data(
         "Bpo5TargetBlobs": network_params.bpo_5_target_blobs,
         "Bpo5BaseFeeUpdateFraction": network_params.bpo_5_base_fee_update_fraction,
         "GasLimitSchedule": json.encode(network_params.gas_limit_schedule),
-        "SlotDurationSchedule": json.encode(
-            [{"epoch": 0, "slot_duration_ms": network_params.slot_duration_ms}]
-            + list(network_params.slot_duration_schedule)
-        ),
         "WithdrawalType": "{0}".format(network_params.withdrawal_type),
         "WithdrawalAddress": network_params.withdrawal_address,
         "ValidatorBalance": int(network_params.validator_balance * 1000000000),

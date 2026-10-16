@@ -209,6 +209,7 @@ def new_client_info(
     el_snooper_url = ""
     cl_snooper_enabled = False
     cl_snooper_url = ""
+    cl_snooper_metrics_url = ""
 
     if el_snooper_context != None:
         el_snooper_enabled = True
@@ -222,6 +223,10 @@ def new_client_info(
             cl_snooper_context.dns_name,
             cl_snooper_context.beacon_rpc_port_num,
         )
+        cl_snooper_metrics_url = "http://{0}:{1}/metrics".format(
+            cl_snooper_context.dns_name,
+            cl_snooper_context.metrics_port_num,
+        )
 
     return {
         "CL_HTTP_URL": beacon_http_url,
@@ -231,5 +236,6 @@ def new_client_info(
         "ELSnooperUrl": el_snooper_url,
         "CLSnooperEnabled": cl_snooper_enabled,
         "CLSnooperUrl": cl_snooper_url,
+        "CLSnooperMetricsUrl": cl_snooper_metrics_url,
         "Name": full_name,
     }

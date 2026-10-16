@@ -1372,6 +1372,7 @@ def run(plan, args={}):
             zkboost_metrics_jobs = zkboost.launch_zkboost(
                 plan,
                 zkboost_config_template,
+                args_with_right_defaults.participants,
                 all_participants,
                 args_with_right_defaults.zkboost_params,
                 global_node_selectors,

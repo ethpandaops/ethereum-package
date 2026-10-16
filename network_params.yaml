@@ -106,16 +106,14 @@ network_params:
   payload_due_bps: 5000
   payload_attestation_due_bps: 7500
   view_freeze_cutoff_bps: 7500
-  inclusion_list_submission_due_bps: 6667
-  proposer_inclusion_list_cutoff_bps: 9167
+  inclusion_list_due_bps: 7500
   deploy_eip8282_contracts: true
   deneb_fork_epoch: 0
   electra_fork_epoch: 0
   fulu_fork_epoch: 0
   gloas_fork_epoch: 18446744073709551615
   frames_enabled: false
-  eip8198_fork_epoch: 18446744073709551615
-  slot_duration_schedule: []
+  slot_duration_ms_heze: 12000
   network_sync_base_url: https://snapshots.ethpandaops.io/
   force_snapshot_sync: false
   samples_per_slot: 8
@@ -274,7 +272,7 @@ keymanager_enabled: false
 checkpoint_sync_enabled: false
 checkpoint_sync_url: ""
 ethereum_genesis_generator_params:
-  image: ethpandaops/ethereum-genesis-generator:6.2.3
+  image: ethpandaops/ethereum-genesis-generator:6.2.6
   extra_env: {}
 port_publisher:
   nat_exit_ip: KURTOSIS_IP_ADDR_PLACEHOLDER

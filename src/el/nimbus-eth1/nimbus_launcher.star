@@ -174,6 +174,7 @@ def get_config(
         ),
         "tolerations": tolerations,
         "node_selectors": node_selectors,
+        "user": User(uid=0, gid=0),
     }
 
     el_shared.apply_el_binary_override(

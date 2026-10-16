@@ -60,6 +60,11 @@ globalVars:
 {{- range $client := .ClSnooperClientInfo }}
   - "{{ $client.Name }}"
 {{- end }}
+  clSnooperMetrics: {{ if eq (len .ClSnooperClientInfo) 0 }}[]{{ end }}
+{{- range $client := .ClSnooperClientInfo }}
+  - name: "{{ $client.Name }}"
+    url: "{{ $client.CLSnooperMetricsUrl }}"
+{{- end }}
 
 externalTests:
 {{- if .RunStabilityCheck }}
