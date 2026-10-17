@@ -42,6 +42,15 @@ POSTGRES_MIN_MEMORY = 32
 POSTGRES_MAX_MEMORY = 1024
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch_helix_relay(
     plan,
     network_params,
@@ -57,6 +66,7 @@ def launch_helix_relay(
     global_tolerations,
     el_cl_genesis_data,
     relay_image=None,
+    global_log_level=constants.GLOBAL_LOG_LEVEL.info,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
     public_ports = {}
@@ -128,6 +138,9 @@ def launch_helix_relay(
 
     env_vars = {
         "RELAY_KEY": constants.DEFAULT_MEV_SECRET_KEY,
+        "RUST_LOG": input_parser.get_client_log_level_or_default(
+            "", global_log_level, VERBOSITY_LEVELS
+        ),
     }
 
     # Use provided relay_image if available, otherwise use mev_params.mev_relay_image

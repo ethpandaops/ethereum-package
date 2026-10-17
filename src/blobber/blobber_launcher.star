@@ -34,6 +34,15 @@ MIN_MEMORY = 10
 MAX_MEMORY = 300
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch(
     plan,
     service_name,
@@ -42,8 +51,12 @@ def launch(
     participant,
     node_selectors,
     global_tolerations,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
+    log_level = input_parser.get_client_log_level_or_default(
+        "", global_log_level, VERBOSITY_LEVELS
+    )
 
     blobber_service_name = "{0}".format(service_name)
 
@@ -54,6 +67,7 @@ def launch(
         participant,
         node_selectors,
         tolerations,
+        log_level,
     )
 
     blobber_service = plan.add_service(blobber_service_name, blobber_config)
@@ -70,6 +84,7 @@ def get_config(
     participant,
     node_selectors,
     tolerations,
+    log_level,
 ):
     validator_root_dirpath = shared_utils.path_join(
         VALIDATOR_KEYS_MOUNTPOINT_ON_CLIENTS,
@@ -82,6 +97,7 @@ def get_config(
         "--enable-unsafe-mode",
         "--external-ip={0}".format(constants.PRIVATE_IP_ADDRESS_PLACEHOLDER),
         "--validator-proxy-port-start={0}".format(BLOBBER_VALIDATOR_PROXY_PORT_NUM),
+        "--log-level={0}".format(log_level),
     ]
 
     if len(participant.blobber_extra_params) > 0:

@@ -1,9 +1,19 @@
 shared_utils = import_module("../shared_utils/shared_utils.star")
 constants = import_module("../package_io/constants.star")
+input_parser = import_module("../package_io/input_parser.star")
 
 SERVICE_NAME = "bootnodoor"
 HTTP_PORT_NUMBER = 8080
 DISCOVERY_PORT_NUMBER = 9000
+
+
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
 
 
 def launch_bootnodoor(
@@ -17,6 +27,7 @@ def launch_bootnodoor(
     port_publisher,
     additional_service_index,
     backend,
+    global_log_level,
 ):
     tolerations = shared_utils.get_tolerations(global_tolerations=global_tolerations)
 
@@ -65,6 +76,10 @@ def launch_bootnodoor(
             plan, el_cl_genesis_data.files_artifact_uuid
         )
 
+    log_level = input_parser.get_client_log_level_or_default(
+        bootnodoor_params.log_level, global_log_level, VERBOSITY_LEVELS
+    )
+
     config = get_config(
         bootnodoor_params,
         el_cl_genesis_data,
@@ -81,6 +96,7 @@ def launch_bootnodoor(
         port_publisher,
         additional_service_index,
         backend,
+        log_level,
     )
 
     plan.add_service(SERVICE_NAME, config)
@@ -146,6 +162,7 @@ def get_config(
     port_publisher,
     additional_service_index,
     backend,
+    log_level,
 ):
     # Bind the published port number itself so the ENR (ip, port) is valid both
     # in-enclave (private IP) and externally (nat_exit_ip)
@@ -171,6 +188,8 @@ def get_config(
     )
 
     cmd = [
+        "--log-level",
+        log_level,
         "--cl-config",
         "{0}/config.yaml".format(constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS),
         "--genesis-validators-root",

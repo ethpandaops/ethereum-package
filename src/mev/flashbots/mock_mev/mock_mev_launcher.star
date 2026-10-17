@@ -13,6 +13,15 @@ MIN_MEMORY = 128
 MAX_MEMORY = 1024
 
 
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "error",
+    constants.GLOBAL_LOG_LEVEL.warn: "warn",
+    constants.GLOBAL_LOG_LEVEL.info: "info",
+    constants.GLOBAL_LOG_LEVEL.debug: "debug",
+    constants.GLOBAL_LOG_LEVEL.trace: "trace",
+}
+
+
 def launch_mock_mev(
     plan,
     el_uri,
@@ -40,7 +49,11 @@ def launch_mock_mev(
                 "--port={0}".format(MOCK_MEV_BUILDER_PORT),
                 "--address=0.0.0.0",
                 "--set-max-bid-value",
-                "--log-level={0}".format(global_log_level),
+                "--log-level={0}".format(
+                    input_parser.get_client_log_level_or_default(
+                        "", global_log_level, VERBOSITY_LEVELS
+                    )
+                ),
                 "--builder-secret-key=" + constants.DEFAULT_MEV_SECRET_KEY[2:],
             ],
             files={
