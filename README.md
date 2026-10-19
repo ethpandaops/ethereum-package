@@ -945,6 +945,15 @@ network_params:
   # Slot duration in milliseconds from heze_fork_epoch onwards (EIP-8198)
   # Must be a positive multiple of 1000
   # Ignored while frames_enabled is true, since the CL Heze fork is disabled
+  # When it differs from slot_duration_ms and heze_fork_epoch is not at genesis,
+  # a BPO is scheduled at heze_fork_epoch with the target blobs, max blobs and
+  # base fee update fraction of the preceding blob schedule entry scaled to keep
+  # blob throughput and blob base fee responsiveness per second
+  # (e.g. 14/21/11684671 at 12000 -> 12/18/12018519 at 10000).
+  # BPOs scheduled after heze_fork_epoch move up one slot. If that BPO slot has
+  # user-provided blob values but no epoch, those values are used instead.
+  # Skipped when a bpo_*_epoch is already set to heze_fork_epoch or all five
+  # BPOs are in use.
   # Defaults to 12000 for mainnet and 6000 for minimal preset
   slot_duration_ms_heze: 12000
 
@@ -1019,7 +1028,9 @@ network_params:
   # recommended maximum gas limit
   # Requires Gloas: every epoch must be >= gloas_fork_epoch, since the
   # CL only drives the gas limit post-Gloas
-  # Defaults to [] (field is emitted as GAS_LIMIT_SCHEDULE: [])
+  # Defaults to a single 200000000 entry at gloas_fork_epoch when Gloas is
+  # scheduled, otherwise [] (field is emitted as GAS_LIMIT_SCHEDULE: [])
+  # Set it explicitly (including []) to override
   # Example:
   # gas_limit_schedule:
   #   - epoch: 256
