@@ -12,16 +12,41 @@ HANDOVER_DIR = "/ff/handover"
 SCRIPTS_DIR = "/ff-scripts"
 
 
-# With a later fork scheduled, stop at the wall-clock slot or the slot before that fork, whichever is first.
-def until_slot_arg(fast_forward, network_params, final_genesis_timestamp):
+# Generate up to the wall slot; with a later fork meant to activate live, refuse to cross into it.
+def generate_command(fast_forward, network_params, final_genesis_timestamp):
     if fast_forward.cutoff_epoch == None:
-        return ""
+        return "ff-gen"
     slots_per_epoch = 8 if network_params.preset == "minimal" else 32
-    last_slot = fast_forward.cutoff_epoch * slots_per_epoch - 1
-    wall_slot = "(($(date +%s) - {0}) / {1})".format(
-        final_genesis_timestamp, network_params.seconds_per_slot
+    cutoff_slot = fast_forward.cutoff_epoch * slots_per_epoch
+    return (
+        "wall=$(( ($(date +%s) - {0}) / {1} )); ".format(
+            final_genesis_timestamp, network_params.seconds_per_slot
+        )
+        + 'if [ "$wall" -ge {0} ]; then echo "fast_forward: launch overran, wall slot $wall is already past the start of epoch {1}, where {2} should activate live" >&2; exit 1; fi; '.format(
+            cutoff_slot, fast_forward.cutoff_epoch, fast_forward.cutoff_fork
+        )
+        + "ff-gen --until-slot=$wall"
     )
-    return " --until-slot=$(( {0} < {1} ? {0} : {1} ))".format(wall_slot, last_slot)
+
+
+# Fails unless ff-gen's summary shows the target state requested by fast_forward.until.
+def assert_target_command(fast_forward, summary_path):
+    checks = {
+        "activated": "s['head_slot'] >= {0}".format(fast_forward.target_slot),
+        "justified": "int(s['finality_checkpoints']['current_justified']['epoch']) >= {0}".format(
+            fast_forward.target_epoch
+        ),
+        "finalized": "int(s['finality_checkpoints']['finalized']['epoch']) >= {0}".format(
+            fast_forward.target_epoch
+        ),
+    }
+    script = "import json,sys; s=json.load(open('{0}')); ok={1}; print('ff-gen target {2} {3}:', 'met' if ok else 'NOT met', 'head', s['head_slot'], s['finality_checkpoints']); sys.exit(0 if ok else 1)".format(
+        summary_path,
+        checks[fast_forward.state],
+        fast_forward.state,
+        fast_forward.target_epoch,
+    )
+    return 'python3 -c "{0}"'.format(script)
 
 
 def new_handover(participants):
@@ -101,8 +126,8 @@ def launch(
         [
             "mkdir -p " + HANDOVER_DIR,
             "echo gen_start=$(date +%s.%N) > " + HANDOVER_DIR + "/timing.txt",
-            "ff-gen"
-            + until_slot_arg(fast_forward, network_params, final_genesis_timestamp)
+            "("
+            + generate_command(fast_forward, network_params, final_genesis_timestamp)
             + " --testnet-dir="
             + constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
             + " --validator-count={0}".format(validator_count)
@@ -111,7 +136,8 @@ def launch(
             + constants.JWT_MOUNT_PATH_ON_CONTAINER
             + " --output-dir="
             + CHAIN_DIR
-            + " --no-json",
+            + " --no-json)",
+            assert_target_command(fast_forward, CHAIN_DIR + "/summary.json"),
             "echo gen_end=$(date +%s.%N) >> " + HANDOVER_DIR + "/timing.txt",
             "cp {0}/interchange.json {0}/summary.json {1}/".format(
                 CHAIN_DIR, HANDOVER_DIR

@@ -256,7 +256,6 @@ def input_parser(plan, input_args):
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
     result["trueblocks_params"] = get_default_trueblocks_params()
-    result["fast_forward"] = get_default_fast_forward_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -356,9 +355,6 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
                 result["buildoor_params"][sub_attr] = sub_value
-        elif attr == "fast_forward":
-            for sub_attr in input_args["fast_forward"]:
-                result["fast_forward"][sub_attr] = input_args["fast_forward"][sub_attr]
         elif attr == "trueblocks_params":
             for sub_attr in input_args["trueblocks_params"]:
                 sub_value = input_args["trueblocks_params"][sub_attr]
@@ -1361,9 +1357,7 @@ def input_parser(plan, input_args):
                 for instance in result["buildoor_params"]["instances"]
             ],
         ),
-        fast_forward=resolve_fast_forward(
-            result["fast_forward"], result["network_params"]
-        ),
+        fast_forward=result["fast_forward"],
         trueblocks_params=struct(
             image=result["trueblocks_params"]["image"],
             config_version=result["trueblocks_params"]["config_version"],
@@ -1529,6 +1523,13 @@ def parse_network_params(plan, input_args):
         for sub_attr in input_args["snooper_params"]:
             result["snooper_params"][sub_attr] = input_args["snooper_params"][sub_attr]
 
+    fast_forward_params = get_default_fast_forward_params()
+    for key, value in input_args.get("fast_forward", {}).items():
+        fast_forward_params[key] = value
+    result["fast_forward"] = resolve_fast_forward(
+        fast_forward_params, result["network_params"]
+    )
+
     total_participant_count = 0
     actual_num_validators = 0
     # validation of the above defaults
@@ -1537,7 +1538,7 @@ def parse_network_params(plan, input_args):
         if el_type == None or el_type in ("None", "null", "Null"):
             participant["el_type"] = constants.EL_TYPE.none
             el_type = constants.EL_TYPE.none
-        if input_args.get("fast_forward", {}).get("enabled", False):
+        if result["fast_forward"].enabled:
             apply_fast_forward_participant_defaults(participant)
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
@@ -2202,7 +2203,10 @@ def get_default_fast_forward_params():
     }
 
 
-FAST_FORWARD_MIN_FINALIZED_EPOCH = 2
+FAST_FORWARD_MIN_CHECKPOINT_EPOCH = 2
+
+# Epochs of history past the target epoch before the head state shows each target state.
+FAST_FORWARD_STATES = {"activated": 0, "justified": 1, "finalized": 2}
 
 # Scheduled forks the generator can build through; anything else has to activate live, after the cut-off.
 FAST_FORWARD_GENERATED_FORKS = (
@@ -2236,8 +2240,27 @@ FAST_FORWARD_SCHEDULE_KEYS = (
 )
 
 
-# Finalizing epoch T needs epoch T+1 fully attested, so generated history runs to about epoch T+2; later forks activate live.
+def fast_forward_disabled(fast_forward):
+    return struct(
+        enabled=False,
+        state=None,
+        target_epoch=None,
+        target_slot=None,
+        end_epoch=None,
+        cutoff_epoch=None,
+        cutoff_fork=None,
+        image=fast_forward["image"],
+        el_image=fast_forward["el_image"],
+    )
+
+
+# Resolve `until` into the target state and the generated-history end; later scheduled forks activate live.
 def resolve_fast_forward(fast_forward, network_params):
+    if not fast_forward["enabled"]:
+        return fast_forward_disabled(fast_forward)
+    if network_params["network"] != constants.NETWORK_NAME.kurtosis:
+        fail("fast_forward only works on a fresh kurtosis network")
+
     schedule = []
     epochs = {}
     for name, key in FAST_FORWARD_SCHEDULE_KEYS:
@@ -2246,78 +2269,104 @@ def resolve_fast_forward(fast_forward, network_params):
         if epoch != constants.FAR_FUTURE_EPOCH:
             schedule.append((name, epoch))
 
-    if not fast_forward["enabled"]:
-        return struct(
-            enabled=False,
-            until=fast_forward["until"],
-            finalized_epoch=None,
-            cutoff_epoch=None,
-            image=fast_forward["image"],
-            el_image=fast_forward["el_image"],
-        )
-    if network_params["network"] != constants.NETWORK_NAME.kurtosis:
-        fail("fast_forward only works on a fresh kurtosis network")
-
-    until = fast_forward["until"]
-    until_fork = None
-    if until == None:
-        for name, epoch in schedule:
-            if until_fork == None or epoch >= epochs[until_fork]:
-                until_fork = name
-        until_epoch = epochs[until_fork] if until_fork != None else 0
-    elif type(until) == "int":
-        until_epoch = until
-    elif type(until) == "string":
-        if until not in epochs:
-            fail(
-                "fast_forward.until: unknown fork '{0}', expected one of {1} or an epoch".format(
-                    until, [name for name, _ in FAST_FORWARD_SCHEDULE_KEYS]
-                )
-            )
-        if epochs[until] == constants.FAR_FUTURE_EPOCH:
-            fail(
-                "fast_forward.until: {0} is not scheduled in network_params".format(
-                    until
-                )
-            )
-        until_fork = until
-        until_epoch = epochs[until]
-    else:
+    until = fast_forward["until"] if fast_forward["until"] != None else {}
+    if type(until) != "dict":
         fail(
-            "fast_forward.until must be a fork name or an epoch, got {0}".format(until)
+            "fast_forward.until must be a map with fork or epoch, and state, got {0}".format(
+                until
+            )
+        )
+    for key in until:
+        if key not in ("fork", "epoch", "state"):
+            fail(
+                "fast_forward.until: unknown key '{0}', expected fork, epoch or state".format(
+                    key
+                )
+            )
+    if "fork" in until and "epoch" in until:
+        fail("fast_forward.until: set fork or epoch, not both")
+    state = until.get("state", "finalized")
+    if state not in FAST_FORWARD_STATES:
+        fail(
+            "fast_forward.until.state must be one of {0}, got '{1}'".format(
+                FAST_FORWARD_STATES.keys(), state
+            )
         )
 
-    finalized_epoch = max(FAST_FORWARD_MIN_FINALIZED_EPOCH, until_epoch)
-    last_generated_epoch = finalized_epoch + 2
+    until_fork = None
+    if "epoch" in until:
+        if type(until["epoch"]) != "int" or until["epoch"] < 0:
+            fail(
+                "fast_forward.until.epoch must be a non-negative integer, got {0}".format(
+                    until["epoch"]
+                )
+            )
+        until_epoch = until["epoch"]
+    else:
+        until_fork = until.get("fork")
+        if until_fork == None:
+            for name, epoch in schedule:
+                if until_fork == None or epoch >= epochs[until_fork]:
+                    until_fork = name
+        if until_fork not in epochs:
+            fail(
+                "fast_forward.until.fork: unknown fork '{0}', expected one of {1}".format(
+                    until_fork, [name for name, _ in FAST_FORWARD_SCHEDULE_KEYS]
+                )
+            )
+        if epochs[until_fork] == constants.FAR_FUTURE_EPOCH:
+            fail(
+                "fast_forward.until.fork: {0} is not scheduled in network_params".format(
+                    until_fork
+                )
+            )
+        until_epoch = epochs[until_fork]
+
+    target_epoch = until_epoch
+    if state != "activated":
+        target_epoch = max(FAST_FORWARD_MIN_CHECKPOINT_EPOCH, until_epoch)
+    end_epoch = target_epoch + FAST_FORWARD_STATES[state]
+    slots_per_epoch = 8 if network_params["preset"] == "minimal" else 32
+    target_slot = end_epoch * slots_per_epoch
+    if target_slot == 0:
+        return fast_forward_disabled(fast_forward)
+
+    until_name = until_fork if until_fork != None else "epoch {0}".format(until_epoch)
     cutoff_epoch = None
+    cutoff_fork = None
     for name, epoch in schedule:
-        if epoch > last_generated_epoch:
+        if epoch > end_epoch:
             if cutoff_epoch == None or epoch < cutoff_epoch:
                 cutoff_epoch = epoch
+                cutoff_fork = name
             continue
-        if until_fork != None and epoch > epochs[until_fork]:
+        if epoch > until_epoch:
             fail(
-                "fast_forward: {0} activates at epoch {1}, before a chain generated until {2} can finalize epoch {3} (generated history runs to epoch {4}); use until: {0}, or schedule {0} at epoch >= {5}".format(
+                "fast_forward: {0} activates at epoch {1}, before a chain generated until {2} is {3} at epoch {4} (generated history runs to the start of epoch {5}); use until.fork: {0}, or schedule {0} at epoch >= {6}".format(
                     name,
                     epoch,
-                    until_fork,
-                    finalized_epoch,
-                    last_generated_epoch,
-                    last_generated_epoch + 1,
+                    until_name,
+                    state,
+                    target_epoch,
+                    end_epoch,
+                    end_epoch + 1,
                 )
             )
         if name not in FAST_FORWARD_GENERATED_FORKS:
             fail(
-                "fast_forward: ff-gen cannot generate {0} yet (scheduled at epoch {1}, inside the generated history up to epoch {2}); set until to an earlier fork and schedule {0} at epoch >= {3}, or use an ff-gen image that supports {0}".format(
-                    name, epoch, last_generated_epoch, last_generated_epoch + 1
+                "fast_forward: ff-gen cannot generate {0} yet (scheduled at epoch {1}, inside the generated history up to the start of epoch {2}); stop before it with until, or use an ff-gen image that supports {0}".format(
+                    name, epoch, end_epoch
                 )
             )
 
     return struct(
         enabled=True,
-        until=until,
-        finalized_epoch=finalized_epoch,
+        state=state,
+        target_epoch=target_epoch,
+        target_slot=target_slot,
+        end_epoch=end_epoch,
         cutoff_epoch=cutoff_epoch,
+        cutoff_fork=cutoff_fork,
         image=fast_forward["image"],
         el_image=fast_forward["el_image"],
     )

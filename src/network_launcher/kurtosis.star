@@ -79,8 +79,6 @@ def launch(
     )
 
 
-# Seconds of chain that must exist before the generator runs: finalizing epoch N needs a block in epoch N+2, plus one slot of slack.
+# Genesis goes far enough back that the target slot has passed by the time the generator runs.
 def fast_forward_genesis_age(network_params, fast_forward):
-    slots_per_epoch = 8 if network_params.preset == "minimal" else 32
-    slots = (fast_forward.finalized_epoch + 2) * slots_per_epoch + 1
-    return slots * network_params.seconds_per_slot
+    return (fast_forward.target_slot + 1) * network_params.seconds_per_slot

@@ -1446,26 +1446,45 @@ def run(plan, args={}):
 
     if args_with_right_defaults.wait_for_finalization:
         if args_with_right_defaults.fast_forward.enabled:
-            target_epoch = args_with_right_defaults.fast_forward.finalized_epoch
+            fast_forward = args_with_right_defaults.fast_forward
+            endpoint, extract, target = {
+                "activated": (
+                    "/eth/v1/beacon/headers/head",
+                    ".data.header.message.slot | tonumber",
+                    fast_forward.target_slot,
+                ),
+                "justified": (
+                    "/eth/v1/beacon/states/head/finality_checkpoints",
+                    ".data.current_justified.epoch | tonumber",
+                    fast_forward.target_epoch,
+                ),
+                "finalized": (
+                    "/eth/v1/beacon/states/head/finality_checkpoints",
+                    ".data.finalized.epoch | tonumber",
+                    fast_forward.target_epoch,
+                ),
+            }[fast_forward.state]
             plan.print(
-                "Waiting for every beacon node to finalize epoch {0}".format(
-                    target_epoch
+                "Waiting for every beacon node to reach {0} {1}".format(
+                    fast_forward.state, target
                 )
             )
             for cl_context in all_cl_contexts:
                 plan.wait(
                     recipe=GetHttpRequestRecipe(
-                        endpoint="/eth/v1/beacon/states/head/finality_checkpoints",
+                        endpoint=endpoint,
                         port_id=HTTP_PORT_ID_FOR_FACT,
-                        extract={"finalized_epoch": ".data.finalized.epoch | tonumber"},
+                        extract={"value": extract},
                     ),
-                    field="extract.finalized_epoch",
+                    field="extract.value",
                     assertion=">=",
-                    target_value=target_epoch,
+                    target_value=target,
                     timeout="40m",
                     service_name=cl_context.beacon_service_name,
                 )
-            plan.print("Every beacon node finalized epoch {0}".format(target_epoch))
+            plan.print(
+                "Every beacon node reached {0} {1}".format(fast_forward.state, target)
+            )
         else:
             plan.print("Waiting for the first finalized epoch")
             first_cl_client = all_cl_contexts[0]
