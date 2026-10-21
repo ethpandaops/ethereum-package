@@ -185,7 +185,7 @@ def launch(
             description="Building the Nimbus slashing-protection database from the fast-forward watermark",
             image=nimbus_image,
             files={"/ff": HANDOVER_ARTIFACT},
-            run="mkdir -p /tmp/ff-nimbus && nimbus_beacon_node slashingdb import --validators-dir=/tmp/ff-nimbus /ff/handover/interchange.json",
+            run="mkdir -p /tmp/ff-nimbus && nimbus_beacon_node slashingdb import --validators-dir=/tmp/ff-nimbus /ff/interchange.json",
             store=[StoreSpec(src="/tmp/ff-nimbus", name=NIMBUS_HANDOVER_ARTIFACT)],
             wait="2m",
         )
