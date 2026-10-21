@@ -200,3 +200,43 @@ def launch(
             store=[StoreSpec(src="/tmp/ff-nimbus", name=NIMBUS_HANDOVER_ARTIFACT)],
             wait="2m",
         )
+
+
+# Fails unless every beacon node shows the target state requested by fast_forward.until.
+def wait_for_target(plan, fast_forward, all_cl_contexts, port_id):
+    endpoint, extract, target = {
+        "activated": (
+            "/eth/v1/beacon/headers/head",
+            ".data.header.message.slot | tonumber",
+            fast_forward.target_slot,
+        ),
+        "justified": (
+            "/eth/v1/beacon/states/head/finality_checkpoints",
+            ".data.current_justified.epoch | tonumber",
+            fast_forward.target_epoch,
+        ),
+        "finalized": (
+            "/eth/v1/beacon/states/head/finality_checkpoints",
+            ".data.finalized.epoch | tonumber",
+            fast_forward.target_epoch,
+        ),
+    }[fast_forward.state]
+    plan.print(
+        "Waiting for every beacon node to reach {0} {1}".format(
+            fast_forward.state, target
+        )
+    )
+    for cl_context in all_cl_contexts:
+        plan.wait(
+            recipe=GetHttpRequestRecipe(
+                endpoint=endpoint,
+                port_id=port_id,
+                extract={"value": extract},
+            ),
+            field="extract.value",
+            assertion=">=",
+            target_value=target,
+            timeout="40m",
+            service_name=cl_context.beacon_service_name,
+        )
+    plan.print("Every beacon node reached {0} {1}".format(fast_forward.state, target))
