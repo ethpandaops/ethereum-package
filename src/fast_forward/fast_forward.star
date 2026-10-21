@@ -142,8 +142,12 @@ def launch(
             "cp {0}/interchange.json {0}/summary.json {1}/".format(
                 CHAIN_DIR, HANDOVER_DIR
             ),
-            "python3 {0}/insert.py --chain {1} --report {2}/insert.json {3}".format(
-                SCRIPTS_DIR, CHAIN_DIR, HANDOVER_DIR, nodes
+            "python3 {0}/insert.py --chain {1} --report {2}/insert.json --seconds-per-slot {3} {4}".format(
+                SCRIPTS_DIR,
+                CHAIN_DIR,
+                HANDOVER_DIR,
+                network_params.seconds_per_slot,
+                nodes,
             ),
             "echo insert_end=$(date +%s.%N) >> " + HANDOVER_DIR + "/timing.txt",
         ]

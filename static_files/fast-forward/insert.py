@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Publish an ff-gen chain into every beacon node, in slot order, until each one's head is the generated head.
 
-usage: insert.py --chain DIR --report FILE [--timeout S] name=http://beacon:port [...]
+usage: insert.py --chain DIR --report FILE --seconds-per-slot N [--timeout S] name=http://beacon:port [...]
 
 A block counts as imported once the node's head slot reaches it. A 503 means the node is syncing
 from a peer that is already ahead, so that node only gets polled from then on.
@@ -19,6 +19,7 @@ import urllib.request
 CONFIRM_TIMEOUT = 15
 RESENDS = 2
 POLL = 0.02
+MAX_GAP_SLOTS = 32
 
 
 def http(method, url, body=None, headers=None, timeout=30):
@@ -120,6 +121,7 @@ def main():
     ap.add_argument("--chain", required=True)
     ap.add_argument("--report", required=True)
     ap.add_argument("--timeout", type=float, default=300)
+    ap.add_argument("--seconds-per-slot", type=int, required=True)
     ap.add_argument("nodes", nargs="+")
     args = ap.parse_args()
 
@@ -158,8 +160,12 @@ def main():
         }
         print(f"ff-insert {n.name}: {json.dumps(report['nodes'][n.name])}", flush=True)
     report["finished"] = time.time()
+    genesis = int(summary["genesis"]["genesis_time"])
+    report["gap_slots"] = int((report["finished"] - genesis) // args.seconds_per_slot) - summary["head_slot"]
     with open(args.report, "w") as f:
         json.dump(report, f, indent=1)
+    if report["gap_slots"] >= MAX_GAP_SLOTS:
+        raise SystemExit(f"ff-insert: handover gap is {report['gap_slots']} slots, at or over {MAX_GAP_SLOTS}; validators would start too far behind the head")
     missing = [n.name for n in nodes if n.at_head is None]
     if missing:
         raise SystemExit(f"ff-insert: {missing} did not reach head {target} within {args.timeout}s")
