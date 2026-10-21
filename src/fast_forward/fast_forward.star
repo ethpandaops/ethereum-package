@@ -63,8 +63,7 @@ def new_handover(participants):
     )
 
 
-# Generates a finalized chain up to the wall-clock slot against a private reth, publishes it into every
-# beacon node, and stores the per-key slashing-protection watermark the validator clients import at start.
+# Generates the chain to the wall slot on a private reth, publishes it to every beacon node, and stores the VC watermark.
 def launch(
     plan,
     fast_forward,
