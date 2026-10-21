@@ -169,5 +169,18 @@ def get_config(
         "/app/cmd/validator/validator",
     )
 
+    cmd.append("--datadir=" + vc_shared.FF_VC_DATA_DIR)
+    vc_shared.apply_ff_gate(
+        config_args,
+        cmd,
+        "/app/cmd/validator/validator",
+        "touch "
+        + vc_shared.FF_VC_DATA_DIR
+        + "/validator.db && /app/cmd/validator/validator slashing-protection-history import --accept-terms-of-use --datadir="
+        + vc_shared.FF_VC_DATA_DIR
+        + " --slashing-protection-json-file="
+        + vc_shared.FF_INTERCHANGE_FILE,
+    )
+
     vc_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)

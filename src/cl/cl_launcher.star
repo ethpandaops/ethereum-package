@@ -134,6 +134,10 @@ def launch(
         validator_data.per_node_keystores
         if network_params.network == constants.NETWORK_NAME.kurtosis
         or constants.NETWORK_NAME.shadowfork in network_params.network
+        or (
+            network_params.network.startswith(constants.NETWORK_NAME.remote_enclave)
+            and validator_data != None
+        )
         else None
     )
     network_name = shared_utils.get_network_name(network_params.network)

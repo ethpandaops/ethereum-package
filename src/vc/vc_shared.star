@@ -10,6 +10,7 @@ VALIDATOR_CLIENT_USED_PORTS = {
         VALIDATOR_CLIENT_METRICS_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        wait=None,
     ),
 }
 
@@ -18,6 +19,7 @@ VALIDATOR_KEYMANAGER_USED_PORTS = {
         VALIDATOR_HTTP_PORT_NUM,
         shared_utils.TCP_PROTOCOL,
         shared_utils.HTTP_APPLICATION_PROTOCOL,
+        wait=None,
     )
 }
 
@@ -101,3 +103,32 @@ def get_labels(client, participant, image, cl_context, vc_index):
         | {constants.NODE_INDEX_LABEL_KEY: str(vc_index + 1)},
         supernode=participant.supernode,
     )
+
+
+FF_GATE_FILE = "/tmp/ffgo"
+FF_INTERCHANGE_FILE = "/tmp/ff-interchange.json"
+FF_VC_DATA_DIR = "/tmp/ff-vc-data"
+
+
+# Hold the VC process until FF_GATE_FILE exists, then import FF_INTERCHANGE_FILE (if present) and exec the VC.
+def apply_ff_gate(config_args, cmd, exec_command, import_command):
+    if config_args.get("entrypoint") != None:
+        return
+    script = (
+        "echo ff-gate: waiting for "
+        + FF_GATE_FILE
+        + "; while [ ! -f "
+        + FF_GATE_FILE
+        + " ]; do sleep 0.2; done; echo ff-gate: open at $(date -u +%H:%M:%S); mkdir -p "
+        + FF_VC_DATA_DIR
+        + "; if [ -f "
+        + FF_INTERCHANGE_FILE
+        + " ]; then if "
+        + import_command
+        + "; then echo ff-gate: import ok; else echo ff-gate: import FAILED; fi; else echo ff-gate: no interchange; fi; exec "
+        + exec_command
+        + " "
+        + " ".join(cmd)
+    )
+    config_args["entrypoint"] = ["sh", "-c"]
+    config_args["cmd"] = [script]

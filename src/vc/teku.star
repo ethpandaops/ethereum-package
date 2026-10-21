@@ -145,5 +145,16 @@ def get_config(
         "/opt/teku/bin/teku",
     )
 
+    cmd.append("--data-path=" + vc_shared.FF_VC_DATA_DIR)
+    vc_shared.apply_ff_gate(
+        config_args,
+        cmd,
+        "/opt/teku/bin/teku",
+        "/opt/teku/bin/teku slashing-protection import --data-path="
+        + vc_shared.FF_VC_DATA_DIR
+        + " --from="
+        + vc_shared.FF_INTERCHANGE_FILE,
+    )
+
     vc_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)

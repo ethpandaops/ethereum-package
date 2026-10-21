@@ -133,7 +133,12 @@ def launch_participant_network(
             network_params.network,
             global_tolerations,
             global_node_selectors,
+            network_params.preregistered_validator_keys_mnemonic,
+            args_with_right_defaults.participants,
+            args_with_right_defaults.docker_cache_params,
         )
+        for participant in args_with_right_defaults.participants:
+            total_number_of_validator_keys += participant.validator_count
     elif network_params.network == constants.NETWORK_NAME.ephemery:
         # We are running an ephemery network
         (
@@ -244,6 +249,22 @@ def launch_participant_network(
         binary_artifacts,
         otel_otlp_grpc_url,
     )
+
+    # Optional pause so ELs can be fed over the Engine API before any CL boots from a remote checkpoint.
+    if network_params.network.startswith(
+        constants.NETWORK_NAME.remote_enclave
+    ) and args_with_right_defaults.checkpoint_sync_url.startswith("http"):
+        plan.run_sh(
+            name="ff-el-feed-gate",
+            description="Waiting for {0}/ff/ready before launching CLs".format(
+                args_with_right_defaults.checkpoint_sync_url
+            ),
+            run="until wget -qO- {0}/ff/ready; do sleep 1; done".format(
+                args_with_right_defaults.checkpoint_sync_url
+            ),
+            image="alpine:3.20",
+            wait="20m",
+        )
 
     # Launch all consensus layer clients
     prysm_password_relative_filepath = (

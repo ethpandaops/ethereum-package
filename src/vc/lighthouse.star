@@ -142,5 +142,17 @@ def get_config(
         "lighthouse",
     )
 
+    vc_shared.apply_ff_gate(
+        config_args,
+        cmd,
+        "",
+        "lighthouse --testnet-dir="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + " account validator --validators-dir="
+        + validator_keys_dirpath
+        + " slashing-protection import "
+        + vc_shared.FF_INTERCHANGE_FILE,
+    )
+
     vc_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)

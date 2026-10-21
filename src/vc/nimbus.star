@@ -134,5 +134,12 @@ def get_config(
         "/usr/bin/nimbus_validator_client",
     )
 
+    vc_shared.apply_ff_gate(
+        config_args,
+        cmd,
+        "nimbus_validator_client",
+        "test -f " + validator_keys_dirpath + "/slashing_protection.sqlite3",
+    )
+
     vc_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)

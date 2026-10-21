@@ -145,5 +145,20 @@ def get_config(
         "node /usr/app/packages/cli/bin/lodestar",
     )
 
+    cmd.append("--dataDir=" + vc_shared.FF_VC_DATA_DIR)
+    vc_shared.apply_ff_gate(
+        config_args,
+        cmd,
+        "node /usr/app/packages/cli/bin/lodestar",
+        "node /usr/app/packages/cli/bin/lodestar validator slashing-protection import --file="
+        + vc_shared.FF_INTERCHANGE_FILE
+        + " --dataDir="
+        + vc_shared.FF_VC_DATA_DIR
+        + " --paramsFile="
+        + constants.GENESIS_CONFIG_MOUNT_PATH_ON_CONTAINER
+        + "/config.yaml --beaconNodes="
+        + beacon_http_urls[0],
+    )
+
     vc_shared.apply_resource_limits(config_args, participant)
     return ServiceConfig(**config_args)
