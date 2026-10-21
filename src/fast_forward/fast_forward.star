@@ -165,6 +165,12 @@ def launch(
         wait="10m",
     )
 
+    # Teku starts gossip only on a sync-state change or a new peer while near the head; API import triggers neither.
+    for ctx in all_cl_contexts:
+        if ctx.client_name == constants.CL_TYPE.teku:
+            plan.stop_service(name=ctx.beacon_service_name)
+            plan.start_service(name=ctx.beacon_service_name)
+
     if handover.nimbus_artifact != None:
         nimbus_image = DEFAULT_NIMBUS_IMAGE
         for participant in participants:
