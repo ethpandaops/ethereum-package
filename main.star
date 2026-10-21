@@ -1445,23 +1445,45 @@ def run(plan, args={}):
         plan.print("Successfully launched grafana")
 
     if args_with_right_defaults.wait_for_finalization:
-        plan.print("Waiting for the first finalized epoch")
-        first_cl_client = all_cl_contexts[0]
-        first_client_beacon_name = first_cl_client.beacon_service_name
-        epoch_recipe = GetHttpRequestRecipe(
-            endpoint="/eth/v1/beacon/states/head/finality_checkpoints",
-            port_id=HTTP_PORT_ID_FOR_FACT,
-            extract={"finalized_epoch": ".data.finalized.epoch"},
-        )
-        plan.wait(
-            recipe=epoch_recipe,
-            field="extract.finalized_epoch",
-            assertion="!=",
-            target_value="0",
-            timeout="40m",
-            service_name=first_client_beacon_name,
-        )
-        plan.print("First finalized epoch occurred successfully")
+        if args_with_right_defaults.fast_forward.enabled:
+            target_epoch = args_with_right_defaults.fast_forward.finalized_epoch
+            plan.print(
+                "Waiting for every beacon node to finalize epoch {0}".format(
+                    target_epoch
+                )
+            )
+            for cl_context in all_cl_contexts:
+                plan.wait(
+                    recipe=GetHttpRequestRecipe(
+                        endpoint="/eth/v1/beacon/states/head/finality_checkpoints",
+                        port_id=HTTP_PORT_ID_FOR_FACT,
+                        extract={"finalized_epoch": ".data.finalized.epoch | tonumber"},
+                    ),
+                    field="extract.finalized_epoch",
+                    assertion=">=",
+                    target_value=target_epoch,
+                    timeout="40m",
+                    service_name=cl_context.beacon_service_name,
+                )
+            plan.print("Every beacon node finalized epoch {0}".format(target_epoch))
+        else:
+            plan.print("Waiting for the first finalized epoch")
+            first_cl_client = all_cl_contexts[0]
+            first_client_beacon_name = first_cl_client.beacon_service_name
+            epoch_recipe = GetHttpRequestRecipe(
+                endpoint="/eth/v1/beacon/states/head/finality_checkpoints",
+                port_id=HTTP_PORT_ID_FOR_FACT,
+                extract={"finalized_epoch": ".data.finalized.epoch"},
+            )
+            plan.wait(
+                recipe=epoch_recipe,
+                field="extract.finalized_epoch",
+                assertion="!=",
+                target_value="0",
+                timeout="40m",
+                service_name=first_client_beacon_name,
+            )
+            plan.print("First finalized epoch occurred successfully")
 
     grafana_info = struct(
         dashboard_path=GRAFANA_DASHBOARD_PATH_URL,

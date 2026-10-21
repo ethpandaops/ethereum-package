@@ -28,6 +28,7 @@ def get_config(
     tempo_otlp_grpc_url=None,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    ff_handover=None,
 ):
     validator_keys_dirpath = ""
     validator_secrets_dirpath = ""
@@ -145,8 +146,9 @@ def get_config(
         "/opt/teku/bin/teku",
     )
 
-    cmd.append("--data-path=" + vc_shared.FF_VC_DATA_DIR)
-    vc_shared.apply_ff_gate(
+    if ff_handover != None:
+        cmd.append("--data-path=" + vc_shared.FF_VC_DATA_DIR)
+    vc_shared.apply_ff_handover(
         config_args,
         cmd,
         "/opt/teku/bin/teku",
@@ -154,6 +156,7 @@ def get_config(
         + vc_shared.FF_VC_DATA_DIR
         + " --from="
         + vc_shared.FF_INTERCHANGE_FILE,
+        ff_handover,
     )
 
     vc_shared.apply_resource_limits(config_args, participant)

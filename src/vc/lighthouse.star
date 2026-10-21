@@ -32,6 +32,7 @@ def get_config(
     tempo_otlp_grpc_url=None,
     otel_otlp_grpc_url=None,
     vc_binary_artifact=None,
+    ff_handover=None,
 ):
     log_level = input_parser.get_client_log_level_or_default(
         participant.vc_log_level, global_log_level, vc_shared.VERBOSITY_LEVELS
@@ -142,7 +143,7 @@ def get_config(
         "lighthouse",
     )
 
-    vc_shared.apply_ff_gate(
+    vc_shared.apply_ff_handover(
         config_args,
         cmd,
         "",
@@ -152,6 +153,7 @@ def get_config(
         + validator_keys_dirpath
         + " slashing-protection import "
         + vc_shared.FF_INTERCHANGE_FILE,
+        ff_handover,
     )
 
     vc_shared.apply_resource_limits(config_args, participant)

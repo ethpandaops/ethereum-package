@@ -24,6 +24,7 @@ launch_remote_enclave = import_module("./network_launcher/remote_enclave.star")
 el_client_launcher = import_module("./el/el_launcher.star")
 cl_client_launcher = import_module("./cl/cl_launcher.star")
 vc = import_module("./vc/vc_launcher.star")
+fast_forward = import_module("./fast_forward/fast_forward.star")
 vc_shared = import_module("./vc/vc_shared.star")
 vc_context_l = import_module("./vc/vc_context.star")
 node_metrics = import_module("./node_metrics_info.star")
@@ -391,6 +392,10 @@ def launch_participant_network(
     if not args_with_right_defaults.participants:
         fail("No participants configured")
 
+    ff_handover = None
+    if args_with_right_defaults.fast_forward.enabled:
+        ff_handover = fast_forward.new_handover(args_with_right_defaults.participants)
+
     vc_service_configs = {}
     vc_service_info = {}
     for index, participant in enumerate(args_with_right_defaults.participants):
@@ -627,6 +632,7 @@ def launch_participant_network(
             tempo_otlp_grpc_url=tempo_otlp_grpc_url,
             otel_otlp_grpc_url=otel_otlp_grpc_url,
             vc_binary_artifact=vc_binary_artifact,
+            ff_handover=ff_handover,
         )
         if vc_service_config == None:
             continue
@@ -638,6 +644,20 @@ def launch_participant_network(
             "participant": participant,
         }
         current_vc_index += 1
+
+    if ff_handover != None:
+        fast_forward.launch(
+            plan,
+            args_with_right_defaults.fast_forward,
+            ff_handover,
+            network_params,
+            el_cl_data,
+            jwt_file,
+            all_cl_contexts,
+            args_with_right_defaults.participants,
+            total_number_of_validator_keys,
+            final_genesis_timestamp,
+        )
 
     # add vc's in parallel to speed package execution
     vc_services = shared_utils.add_services_with_force_restart(

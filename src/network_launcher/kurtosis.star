@@ -42,15 +42,19 @@ def launch(
 
     # We need to send the same genesis time to both the EL and the CL to ensure that timestamp based forking works as expected
     # If genesis_time is specified (non-zero), use it; otherwise, derive it from genesis_delay
+    padding = (
+        network_params.genesis_delay
+        + CL_GENESIS_DATA_GENERATION_TIME
+        + num_participants * CL_NODE_STARTUP_TIME
+    )
+    if args_with_right_defaults.fast_forward.enabled:
+        padding = -fast_forward_genesis_age(
+            network_params, args_with_right_defaults.fast_forward
+        )
     final_genesis_timestamp = (
         str(network_params.genesis_time)
         if network_params.genesis_time > 0
-        else shared_utils.get_final_genesis_timestamp(
-            plan,
-            network_params.genesis_delay
-            + CL_GENESIS_DATA_GENERATION_TIME
-            + num_participants * CL_NODE_STARTUP_TIME,
-        )
+        else shared_utils.get_final_genesis_timestamp(plan, padding)
     )
 
     # if preregistered validator count is 0 (default) then calculate the total number of validators from the participants
@@ -73,3 +77,10 @@ def launch(
         final_genesis_timestamp,
         validator_data,
     )
+
+
+# Seconds of chain that must exist before the generator runs: finalizing epoch N needs a block in epoch N+2, plus one slot of slack.
+def fast_forward_genesis_age(network_params, fast_forward):
+    slots_per_epoch = 8 if network_params.preset == "minimal" else 32
+    slots = (fast_forward.finalized_epoch + 2) * slots_per_epoch + 1
+    return slots * network_params.seconds_per_slot

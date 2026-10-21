@@ -105,27 +105,25 @@ def get_labels(client, participant, image, cl_context, vc_index):
     )
 
 
-FF_GATE_FILE = "/tmp/ffgo"
-FF_INTERCHANGE_FILE = "/tmp/ff-interchange.json"
+FF_HANDOVER_MOUNT = "/ff"
+FF_NIMBUS_MOUNT = "/ff-nimbus"
+FF_INTERCHANGE_FILE = FF_HANDOVER_MOUNT + "/interchange.json"
 FF_VC_DATA_DIR = "/tmp/ff-vc-data"
 
 
-# Hold the VC process until FF_GATE_FILE exists, then import FF_INTERCHANGE_FILE (if present) and exec the VC.
-def apply_ff_gate(config_args, cmd, exec_command, import_command):
-    if config_args.get("entrypoint") != None:
+# Import the fast-forward slashing-protection watermark, then exec the VC; a failed import keeps the VC down.
+def apply_ff_handover(config_args, cmd, exec_command, import_command, ff_handover):
+    if ff_handover == None:
         return
+    if config_args.get("entrypoint") != None:
+        fail("fast_forward cannot wrap a validator client that sets its own entrypoint")
+    config_args["files"][FF_HANDOVER_MOUNT] = ff_handover.handover_artifact
     script = (
-        "echo ff-gate: waiting for "
-        + FF_GATE_FILE
-        + "; while [ ! -f "
-        + FF_GATE_FILE
-        + " ]; do sleep 0.2; done; echo ff-gate: open at $(date -u +%H:%M:%S); mkdir -p "
+        "set -e; mkdir -p "
         + FF_VC_DATA_DIR
-        + "; if [ -f "
-        + FF_INTERCHANGE_FILE
-        + " ]; then if "
+        + "; "
         + import_command
-        + "; then echo ff-gate: import ok; else echo ff-gate: import FAILED; fi; else echo ff-gate: no interchange; fi; exec "
+        + "; echo ff: slashing protection imported at $(date -u +%H:%M:%S.%N); exec "
         + exec_command
         + " "
         + " ".join(cmd)

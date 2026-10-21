@@ -96,6 +96,7 @@ ATTR_TO_BE_SKIPPED_AT_ROOT = (
     "buildoor_params",
     "ethereum_genesis_generator_params",
     "trueblocks_params",
+    "fast_forward",
 )
 
 
@@ -255,6 +256,7 @@ def input_parser(plan, input_args):
     result["zkboost_params"] = get_default_zkboost_params()
     result["buildoor_params"] = get_default_buildoor_params()
     result["trueblocks_params"] = get_default_trueblocks_params()
+    result["fast_forward"] = get_default_fast_forward_params()
 
     if constants.NETWORK_NAME.shadowfork in result["network_params"]["network"]:
         shadow_base = result["network_params"]["network"].split("-shadowfork")[0]
@@ -354,6 +356,9 @@ def input_parser(plan, input_args):
             for sub_attr in input_args["buildoor_params"]:
                 sub_value = input_args["buildoor_params"][sub_attr]
                 result["buildoor_params"][sub_attr] = sub_value
+        elif attr == "fast_forward":
+            for sub_attr in input_args["fast_forward"]:
+                result["fast_forward"][sub_attr] = input_args["fast_forward"][sub_attr]
         elif attr == "trueblocks_params":
             for sub_attr in input_args["trueblocks_params"]:
                 sub_value = input_args["trueblocks_params"][sub_attr]
@@ -1356,6 +1361,9 @@ def input_parser(plan, input_args):
                 for instance in result["buildoor_params"]["instances"]
             ],
         ),
+        fast_forward=resolve_fast_forward(
+            result["fast_forward"], result["network_params"]
+        ),
         trueblocks_params=struct(
             image=result["trueblocks_params"]["image"],
             config_version=result["trueblocks_params"]["config_version"],
@@ -1529,6 +1537,8 @@ def parse_network_params(plan, input_args):
         if el_type == None or el_type in ("None", "null", "Null"):
             participant["el_type"] = constants.EL_TYPE.none
             el_type = constants.EL_TYPE.none
+        if input_args.get("fast_forward", {}).get("enabled", False):
+            apply_fast_forward_participant_defaults(participant)
         cl_type = participant["cl_type"]
         vc_type = participant["vc_type"]
         remote_signer_type = participant["remote_signer_type"]
@@ -2181,6 +2191,161 @@ def get_default_dora_params():
         "image": constants.DEFAULT_DORA_IMAGE,
         "env": {},
     }
+
+
+def get_default_fast_forward_params():
+    return {
+        "enabled": False,
+        "until": None,
+        "image": "ff-gen:local",
+        "el_image": "ghcr.io/paradigmxyz/reth:latest",
+    }
+
+
+FAST_FORWARD_MIN_FINALIZED_EPOCH = 2
+
+# Scheduled forks the generator can build through; anything else has to activate live, after the cut-off.
+FAST_FORWARD_GENERATED_FORKS = (
+    "altair",
+    "bellatrix",
+    "capella",
+    "deneb",
+    "electra",
+    "fulu",
+    "bpo_1",
+    "bpo_2",
+    "bpo_3",
+    "bpo_4",
+    "bpo_5",
+)
+
+FAST_FORWARD_SCHEDULE_KEYS = (
+    ("altair", "altair_fork_epoch"),
+    ("bellatrix", "bellatrix_fork_epoch"),
+    ("capella", "capella_fork_epoch"),
+    ("deneb", "deneb_fork_epoch"),
+    ("electra", "electra_fork_epoch"),
+    ("fulu", "fulu_fork_epoch"),
+    ("gloas", "gloas_fork_epoch"),
+    ("heze", "heze_fork_epoch"),
+    ("bpo_1", "bpo_1_epoch"),
+    ("bpo_2", "bpo_2_epoch"),
+    ("bpo_3", "bpo_3_epoch"),
+    ("bpo_4", "bpo_4_epoch"),
+    ("bpo_5", "bpo_5_epoch"),
+)
+
+
+# Finalizing epoch T needs epoch T+1 fully attested, so generated history runs to about epoch T+2; later forks activate live.
+def resolve_fast_forward(fast_forward, network_params):
+    schedule = []
+    epochs = {}
+    for name, key in FAST_FORWARD_SCHEDULE_KEYS:
+        epoch = network_params.get(key, constants.FAR_FUTURE_EPOCH)
+        epochs[name] = epoch
+        if epoch != constants.FAR_FUTURE_EPOCH:
+            schedule.append((name, epoch))
+
+    if not fast_forward["enabled"]:
+        return struct(
+            enabled=False,
+            until=fast_forward["until"],
+            finalized_epoch=None,
+            cutoff_epoch=None,
+            image=fast_forward["image"],
+            el_image=fast_forward["el_image"],
+        )
+    if network_params["network"] != constants.NETWORK_NAME.kurtosis:
+        fail("fast_forward only works on a fresh kurtosis network")
+
+    until = fast_forward["until"]
+    until_fork = None
+    if until == None:
+        for name, epoch in schedule:
+            if until_fork == None or epoch >= epochs[until_fork]:
+                until_fork = name
+        until_epoch = epochs[until_fork] if until_fork != None else 0
+    elif type(until) == "int":
+        until_epoch = until
+    elif type(until) == "string":
+        if until not in epochs:
+            fail(
+                "fast_forward.until: unknown fork '{0}', expected one of {1} or an epoch".format(
+                    until, [name for name, _ in FAST_FORWARD_SCHEDULE_KEYS]
+                )
+            )
+        if epochs[until] == constants.FAR_FUTURE_EPOCH:
+            fail(
+                "fast_forward.until: {0} is not scheduled in network_params".format(
+                    until
+                )
+            )
+        until_fork = until
+        until_epoch = epochs[until]
+    else:
+        fail(
+            "fast_forward.until must be a fork name or an epoch, got {0}".format(until)
+        )
+
+    finalized_epoch = max(FAST_FORWARD_MIN_FINALIZED_EPOCH, until_epoch)
+    last_generated_epoch = finalized_epoch + 2
+    cutoff_epoch = None
+    for name, epoch in schedule:
+        if epoch > last_generated_epoch:
+            if cutoff_epoch == None or epoch < cutoff_epoch:
+                cutoff_epoch = epoch
+            continue
+        if until_fork != None and epoch > epochs[until_fork]:
+            fail(
+                "fast_forward: {0} activates at epoch {1}, before a chain generated until {2} can finalize epoch {3} (generated history runs to epoch {4}); use until: {0}, or schedule {0} at epoch >= {5}".format(
+                    name,
+                    epoch,
+                    until_fork,
+                    finalized_epoch,
+                    last_generated_epoch,
+                    last_generated_epoch + 1,
+                )
+            )
+        if name not in FAST_FORWARD_GENERATED_FORKS:
+            fail(
+                "fast_forward: ff-gen cannot generate {0} yet (scheduled at epoch {1}, inside the generated history up to epoch {2}); set until to an earlier fork and schedule {0} at epoch >= {3}, or use an ff-gen image that supports {0}".format(
+                    name, epoch, last_generated_epoch, last_generated_epoch + 1
+                )
+            )
+
+    return struct(
+        enabled=True,
+        until=until,
+        finalized_epoch=finalized_epoch,
+        cutoff_epoch=cutoff_epoch,
+        image=fast_forward["image"],
+        el_image=fast_forward["el_image"],
+    )
+
+
+# Fast-forward needs separate VCs, plus flags that let nodes take blocks over the API without peers and start duties at once.
+def apply_fast_forward_participant_defaults(participant):
+    cl_type = participant["cl_type"]
+    if cl_type in (constants.CL_TYPE.grandine,) and participant["vc_type"] == "":
+        participant["vc_type"] = constants.VC_TYPE.lighthouse
+    participant["use_separate_vc"] = True
+    extra = {
+        "el_extra_params": {constants.EL_TYPE.geth: ["--syncmode=full"]},
+        "cl_extra_params": {
+            constants.CL_TYPE.teku: ["--Xstartup-target-peer-count=0"],
+            constants.CL_TYPE.lodestar: ["--network.allowPublishToZeroPeers"],
+        },
+    }
+    for key, by_type in extra.items():
+        client = participant["el_type"] if key == "el_extra_params" else cl_type
+        for flag in by_type.get(client, []):
+            if flag not in participant[key]:
+                participant[key] = participant[key] + [flag]
+    vc_type = participant["vc_type"] if participant["vc_type"] != "" else cl_type
+    if vc_type == constants.VC_TYPE.nimbus:
+        flag = "--doppelganger-detection=false"
+        if flag not in participant["vc_extra_params"]:
+            participant["vc_extra_params"] = participant["vc_extra_params"] + [flag]
 
 
 def get_default_trueblocks_params():

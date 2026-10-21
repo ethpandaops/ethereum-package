@@ -486,6 +486,12 @@ SUBCATEGORY_PARAMS = {
         "scrape",
         "env",
     ],
+    "fast_forward": [
+        "enabled",
+        "until",
+        "image",
+        "el_image",
+    ],
 }
 
 ADDITIONAL_SERVICES_PARAMS = [
