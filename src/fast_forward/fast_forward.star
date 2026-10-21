@@ -81,6 +81,19 @@ def launch(
         if participant.use_separate_vc != True:
             fail("fast_forward needs a separate validator client for every participant")
 
+    plan.print(
+        "fast_forward: generating until {0} at epoch {1}; history runs to the start of epoch {2}{3}".format(
+            fast_forward.state,
+            fast_forward.target_epoch,
+            fast_forward.end_epoch,
+            ""
+            if fast_forward.cutoff_fork == None
+            else ", {0} activates live at epoch {1}".format(
+                fast_forward.cutoff_fork, fast_forward.cutoff_epoch
+            ),
+        )
+    )
+
     reth = plan.add_service(
         name=RETH_SERVICE_NAME,
         config=ServiceConfig(

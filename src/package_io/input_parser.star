@@ -2271,9 +2271,22 @@ def resolve_fast_forward(fast_forward, network_params):
             schedule.append((name, epoch))
 
     until = fast_forward["until"] if fast_forward["until"] != None else {}
+    if type(until) == "string":
+        if until in FAST_FORWARD_STATES:
+            until = {"state": until}
+        elif until in epochs:
+            until = {"fork": until}
+        else:
+            fail(
+                "fast_forward.until: '{0}' is neither a state {1} nor a fork {2}".format(
+                    until,
+                    FAST_FORWARD_STATES.keys(),
+                    [name for name, _ in FAST_FORWARD_SCHEDULE_KEYS],
+                )
+            )
     if type(until) != "dict":
         fail(
-            "fast_forward.until must be a map with fork or epoch, and state, got {0}".format(
+            "fast_forward.until must be a state, a fork name, or a map with fork or epoch, and state, got {0}".format(
                 until
             )
         )
