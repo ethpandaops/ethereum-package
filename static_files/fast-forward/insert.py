@@ -5,7 +5,9 @@ usage: insert.py --chain DIR --report FILE --seconds-per-slot N [--timeout S] [-
                  name=http://beacon:port[@http://el:port] [...]
 
 A block counts as imported once the node's head slot reaches it. A 503 means the node is syncing
-from a peer that is already ahead, so that node only gets polled from then on.
+from a peer that is already ahead, so that node only gets polled from then on. No node runs more than
+WINDOW blocks ahead of the slowest one still being published to, so none sees a peer far enough ahead
+to fall back to range sync (Prysm then answers 503, Lighthouse stays in head-chain sync).
 A Gloas block's payload envelope (envelopes/<slot>.ssz) is posted right after the block, with empty
 blobs under `Eth-Blob-Data-Included: true` and `broadcast_validation=consensus`, and counts as imported
 once the node serves it back. Nodes in --el-confirm wait for their EL head to reach the payload
@@ -23,6 +25,7 @@ CONFIRM_TIMEOUT = 15
 RESENDS = 2
 POLL = 0.02
 MAX_GAP_SLOTS = 32
+WINDOW = 16
 BARE_BLOCK_FORKS = ("gloas", "heze")
 
 
@@ -68,6 +71,26 @@ def with_empty_blobs(ssz):
     # Container of the object plus empty kzg_proofs and blobs: three offsets, then the object.
     end = 12 + len(ssz)
     return struct.pack("<III", 12, end, end) + ssz
+
+
+class Pace:
+    def __init__(self, nodes):
+        self.cond = threading.Condition()
+        self.done = {n.name: -1 for n in nodes}
+
+    def wait_turn(self, index):
+        with self.cond:
+            self.cond.wait_for(lambda: index - min(self.done.values(), default=index) <= WINDOW)
+
+    def confirmed(self, node, index):
+        with self.cond:
+            self.done[node.name] = index
+            self.cond.notify_all()
+
+    def leave(self, node):
+        with self.cond:
+            self.done.pop(node.name, None)
+            self.cond.notify_all()
 
 
 class Node:
@@ -123,10 +146,19 @@ def post(node, url, body, headers, codes, confirm, slot):
     return False
 
 
-def publish(node, chain, blocks):
+def publish(node, chain, blocks, pace):
+    try:
+        publish_blocks(node, chain, blocks, pace)
+    finally:
+        pace.leave(node)
+        node.publish_done = time.time()
+
+
+def publish_blocks(node, chain, blocks, pace):
     block_url = node.url + "/eth/v2/beacon/blocks"
     envelope_url = node.url + "/eth/v1/beacon/execution_payload_envelopes?broadcast_validation=consensus"
-    for b in blocks:
+    for i, b in enumerate(blocks):
+        pace.wait_turn(i)
         slot, version = b["slot"], b["version"]
         with open(f"{chain}/blocks/{slot}.ssz", "rb") as f:
             block = f.read()
@@ -135,8 +167,9 @@ def publish(node, chain, blocks):
         if not post(node, block_url, body, headers, node.codes, lambda: block_imported(node, slot), slot):
             if node.stopped_at is None:
                 node.unconfirmed.append(slot)
-            break
+            return
         if b.get("envelope_ssz_bytes") is None:
+            pace.confirmed(node, i)
             continue
         with open(f"{chain}/envelopes/{slot}.ssz", "rb") as f:
             body = with_empty_blobs(f.read())
@@ -148,8 +181,8 @@ def publish(node, chain, blocks):
         if not ok:
             if node.stopped_at is None:
                 node.unconfirmed_envelopes.append(slot)
-            break
-    node.publish_done = time.time()
+            return
+        pace.confirmed(node, i)
 
 
 def main():
@@ -169,8 +202,9 @@ def main():
     el_confirm = set(filter(None, args.el_confirm.split(",")))
     nodes = [Node(spec, el_confirm) for spec in args.nodes]
 
+    pace = Pace(nodes)
     started = time.time()
-    threads = [threading.Thread(target=publish, args=(n, args.chain, blocks), daemon=True) for n in nodes]
+    threads = [threading.Thread(target=publish, args=(n, args.chain, blocks, pace), daemon=True) for n in nodes]
     for t in threads:
         t.start()
 
